@@ -1,13 +1,13 @@
 const oracledb = require('oracledb');
 const should   = require('should');
-const sodaUtil = require('./sodaUtil.js');
+const testsUtil = require('./testsUtil.js');
 const dbconfig = require('./dbconfig.js');
 
 describe('deferLibInit3.js', () => {
   
   it('child process #3 of test/deferLibInit.js', async () => {
     let conn;
-    await sodaUtil.assertThrowsAsync(
+    await testsUtil.assertThrowsAsync(
       async () => conn = await oracledb.getConnection(dbconfig),
       /DPI-1047:/
     );

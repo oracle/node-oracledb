@@ -27,17 +27,18 @@
  *****************************************************************************/
 'use strict';
 
-const oracledb = require('oracledb');
-const should   = require('should');
-const dbconfig = require('./dbconfig.js');
-const sodaUtil = require('./sodaUtil.js');
+const oracledb  = require('oracledb');
+const should    = require('should');
+const dbconfig  = require('./dbconfig.js');
+const sodaUtil  = require('./sodaUtil.js');
+const testsUtil = require('./testsUtil.js');
 
 const t_contents = sodaUtil.t_contents;
 
 describe('176. soda8.js', () => {
   
   before(async function() {
-    const runnable = await sodaUtil.checkPrerequisites();
+    const runnable = await testsUtil.checkPrerequisites();
     if (!runnable) {
       this.skip();
       return;
@@ -213,7 +214,7 @@ describe('176. soda8.js', () => {
       }
 
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await collection.find().replaceOne(inContent),
         /ORA-40734:/
       );

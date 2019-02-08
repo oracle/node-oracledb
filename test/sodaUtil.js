@@ -29,7 +29,6 @@
 
 const oracledb = require('oracledb');
 const dbconfig = require('./dbconfig.js');
-const assert   = require('assert');
 
 let sodaUtil = exports;
 module.exports = sodaUtil;
@@ -70,32 +69,6 @@ sodaUtil.cleanup = async function() {
 
 }; // cleanup()
 
-sodaUtil.checkPrerequisites = async function() {
-
-  if (oracledb.oracleClientVersion < 1803000000) return false;
-
-  try {
-    let connection = await oracledb.getConnection(dbconfig);
-    if (connection.oracleServerVersion < 1803000000) return false;
-
-    await connection.close();
-
-    return true;
-  } catch(err) {
-    console.log('Error in checking prerequistes:\n', err);
-  }
-};
-
-sodaUtil.assertThrowsAsync = async function(fn, RegExp) {
-  let f = () => {};
-  try {
-    await fn();
-  } catch(e) {
-    f = () => { throw e; };
-  } finally {
-    assert.throws(f, RegExp);
-  }
-};
 
 sodaUtil.t_contents = [
   { id: 1001, name: "Gillian",  office: "Shenzhen" },
@@ -128,4 +101,4 @@ sodaUtil.versionStringCompare = function(version1, version2) {
     return 0;
   }
   return undefined;
-}
+};

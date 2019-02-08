@@ -30,7 +30,7 @@
 const oracledb = require('oracledb');
 const should   = require('should');
 const dbconfig = require('./dbconfig.js');
-const sodaUtil = require('./sodaUtil.js')
+const testsUtil = require('./testsUtil.js')
 
 const tag1 = "LANGUAGE=FRENCH";
 const tag2 = "LANGUAGE=GERMAN";
@@ -364,7 +364,7 @@ describe('184. sessionTag.js', function () {
           ...dbconfig,
           sessionCallback: "plsql_fixup_test.set_tag_callback",
         });
-        await sodaUtil.assertThrowsAsync(
+        await testsUtil.assertThrowsAsync(
           async () => {
             conn = await pool.getConnection({tag: tagBad});
           },
@@ -866,7 +866,7 @@ describe('184. sessionTag.js', function () {
           ...dbconfig,
           sessionCallback: asyncTagFixup,
         });
-        await sodaUtil.assertThrowsAsync(
+        await testsUtil.assertThrowsAsync(
           async () => {
             conn = await pool.getConnection({tag: tagBad});
           },
@@ -903,7 +903,7 @@ describe('184. sessionTag.js', function () {
           ...dbconfig,
           sessionCallback: tagFixup,
         });
-        await sodaUtil.assertThrowsAsync(
+        await testsUtil.assertThrowsAsync(
           async () => {
             conn = await pool.getConnection({tag: tagBad});
           },
@@ -1177,7 +1177,7 @@ describe('184. sessionTag.js', function () {
           sessionCallback: tagFixup,
         });
         conn = await pool.getConnection({tag: tag1});
-        await sodaUtil.assertThrowsAsync(() => {
+        await testsUtil.assertThrowsAsync(() => {
             conn.tag = undefined;
           },
           /NJS-004/ //NJS-004: invalid value for property
@@ -1210,7 +1210,7 @@ describe('184. sessionTag.js', function () {
           sessionCallback: tagFixup,
         });
         conn = await pool.getConnection({tag: tag1});
-        await sodaUtil.assertThrowsAsync(() => {
+        await testsUtil.assertThrowsAsync(() => {
             conn.tag = {data: ["doesn't matter"], status: "SUCC"};
           },
           /NJS-004/ //NJS-004: invalid value for property
@@ -1244,7 +1244,7 @@ describe('184. sessionTag.js', function () {
         });
         conn = await pool.getConnection({tag: tag1});
         conn.tag = "it doesn't matter";
-        await sodaUtil.assertThrowsAsync(async () => {
+        await testsUtil.assertThrowsAsync(async () => {
             await conn.close();
           },
           /ORA-24488/ //ORA-24488: Invalid properties or values provided for OCISessionRelease
@@ -1576,7 +1576,7 @@ describe('184. sessionTag.js', function () {
       } finally {
         if (conn) {
           try {
-            await sodaUtil.assertThrowsAsync(
+            await testsUtil.assertThrowsAsync(
               async () => {
                 await conn.close({drop: {data: ["doesn't matter"], status: "SUCC"}});
               },
@@ -1612,7 +1612,7 @@ describe('184. sessionTag.js', function () {
       } finally {
         if (conn) {
           try {
-            await sodaUtil.assertThrowsAsync(
+            await testsUtil.assertThrowsAsync(
               async () => {
                 await conn.close({drop: 0});
               },
@@ -1648,7 +1648,7 @@ describe('184. sessionTag.js', function () {
       } finally {
         if (conn) {
           try {
-            await sodaUtil.assertThrowsAsync(
+            await testsUtil.assertThrowsAsync(
             async () => {
               await conn.close({drop: {}});
               },
@@ -1683,7 +1683,7 @@ describe('184. sessionTag.js', function () {
       } finally {
         if (conn) {
           try {
-            await sodaUtil.assertThrowsAsync(
+            await testsUtil.assertThrowsAsync(
               async () => {
                 await conn.close({drop: "it doesn't matter"});
               },

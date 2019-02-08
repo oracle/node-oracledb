@@ -27,15 +27,16 @@
  *****************************************************************************/
 'use strict';
 
-const oracledb = require('oracledb');
-const should   = require('should');
-const dbconfig = require('./dbconfig.js');
-const sodaUtil = require('./sodaUtil.js');
+const oracledb  = require('oracledb');
+const should    = require('should');
+const dbconfig  = require('./dbconfig.js');
+const sodaUtil  = require('./sodaUtil.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('164. soda1.js', () => {
 
   before(async function() {
-    const runnable = await sodaUtil.checkPrerequisites();
+    const runnable = await testsUtil.checkPrerequisites();
     if (!runnable) {
       this.skip();
       return;
@@ -431,7 +432,7 @@ describe('164. soda1.js', () => {
       let t_collname = "soda_test_164_11";
       let options = { metaData: "metaData" };
 
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await sd.createCollection(t_collname, options),
         /NJS-006:/
       );

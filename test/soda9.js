@@ -31,11 +31,12 @@ const oracledb = require('oracledb');
 const should   = require('should');
 const dbconfig = require('./dbconfig.js');
 const sodaUtil = require('./sodaUtil.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('177. soda9.js', () => {
   
   before(async function() {
-    const runnable = await sodaUtil.checkPrerequisites();
+    const runnable = await testsUtil.checkPrerequisites();
     if (!runnable) {
       this.skip();
       return;

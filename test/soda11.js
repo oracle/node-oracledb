@@ -29,15 +29,16 @@
  *****************************************************************************/
 'use strict';
 
-const oracledb = require('oracledb');
-const should   = require('should');
-const dbconfig = require('./dbconfig.js');
-const sodaUtil = require('./sodaUtil.js');
+const oracledb  = require('oracledb');
+const should    = require('should');
+const dbconfig  = require('./dbconfig.js');
+const sodaUtil  = require('./sodaUtil.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('179. soda11.js', () => {
 
   before(async function() {
-    const runnable = await sodaUtil.checkPrerequisites();
+    const runnable = await testsUtil.checkPrerequisites();
     if (!runnable) {
       this.skip();
       return;
@@ -162,7 +163,7 @@ describe('179. soda11.js', () => {
 
       let t_collname = "soda_test_179_2";
       let options = { metaData: t_metadata };
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await sd.createCollection(t_collname, options),
         /ORA-01918:/
       );
@@ -272,7 +273,7 @@ describe('179. soda11.js', () => {
 
       let options2 = { metaData: t_metadata2 };
 
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await sd.createCollection(t_collname, options2),
         /ORA-40669:/
       );
@@ -431,7 +432,7 @@ describe('179. soda11.js', () => {
       /* The key must always be a string and is always returned a string as 
          well -- even if the "type" in the database is numeric. */
       let testKey = 86755;
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await sd.createDocument(testContent, { key: testKey } ),
         /NJS-008: invalid type for "key" in parameter 2/
       );
@@ -600,7 +601,7 @@ describe('179. soda11.js', () => {
       /* Negative value */
       let testMediaType = 65432;
       let testKey = '86755';
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await sd.createDocument(
           testContent, 
           { mediaType: testMediaType, key: testKey }

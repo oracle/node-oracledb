@@ -30,7 +30,7 @@
 const oracledb = require('oracledb');
 const should   = require('should');
 const dbconfig = require('./dbconfig.js');
-const sodaUtil = require('./sodaUtil.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('181. dataTypeXML.js', () => {
 
@@ -179,7 +179,7 @@ describe('181. dataTypeXML.js', () => {
 
       let sql = "insert into " + tableName + " ( num, content ) values ( :id, XMLType(:bv) )";
       let bindValues = { id: ID, bv: XML };
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await conn.execute(sql, bindValues),
         /ORA-01400:/
       );

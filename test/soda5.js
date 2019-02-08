@@ -27,17 +27,18 @@
  *****************************************************************************/
 'use strict';
 
-const oracledb = require('oracledb');
-const should   = require('should');
-const dbconfig = require('./dbconfig.js');
-const sodaUtil = require('./sodaUtil.js');
+const oracledb  = require('oracledb');
+const should    = require('should');
+const dbconfig  = require('./dbconfig.js');
+const sodaUtil  = require('./sodaUtil.js');
+const testsUtil = require('./testsUtil.js');
 
 const t_contents = sodaUtil.t_contents;
 
 describe('173. soda5.js', () => {
 
   before(async function() {
-    const runnable = await sodaUtil.checkPrerequisites();
+    const runnable = await testsUtil.checkPrerequisites();
     if (!runnable) {
       this.skip();
       return;
@@ -170,7 +171,7 @@ describe('173. soda5.js', () => {
     }
     
     let indexSpec = { "foo": "bar" };
-    await sodaUtil.assertThrowsAsync(
+    await testsUtil.assertThrowsAsync(
       async () => await collection.createIndex(indexSpec),
       // {
       //   errorNum: 40719,
@@ -542,7 +543,7 @@ describe('173. soda5.js', () => {
         let outDocument = await collection.getDataGuide();
         should.exist(outDocument);
       } else if(isCreateIndexEnabled < 0){
-        await sodaUtil.assertThrowsAsync(async () => {await collection.createIndex(indexSpec);}, /ORA-00406:/);
+        await testsUtil.assertThrowsAsync(async () => {await collection.createIndex(indexSpec);}, /ORA-00406:/);
       }
     } catch(err) {
       should.not.exist(err);

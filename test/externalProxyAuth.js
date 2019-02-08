@@ -35,7 +35,7 @@
 const oracledb = require('oracledb');
 const should   = require('should');
 const dbconfig = require('./dbconfig.js');
-const sodaUtil = require('./sodaUtil.js')
+const testsUtil = require('./testsUtil.js')
 
 async function ShowUserInfo(conn) {
   let result = await conn.execute(`
@@ -49,10 +49,10 @@ async function ShowUserInfo(conn) {
 
 describe('180. externalProxyAuth.js', function () {
 
-  before('Check version greater than 1803000000', async function () {
-    let preReqSucc = await sodaUtil.checkPrerequisites();
+  before('Check version greater than 1202000000', async function () {
+    let preReqSucc = await testsUtil.checkPrerequisites(1202000000, 1202000000);
     if (!preReqSucc) {
-      console.log("    Version less than 1803000000, Aborting.");
+      console.log("    Version less than 1202000000, Aborting.");
       this.skip();
     }
   });
@@ -164,7 +164,7 @@ describe('180. externalProxyAuth.js', function () {
       }
       let conn;
       try {
-        await sodaUtil.assertThrowsAsync(
+        await testsUtil.assertThrowsAsync(
           async () => {
             conn = await oracledb.getConnection({
               connectString: dbconfig.connectString,
@@ -327,7 +327,7 @@ describe('180. externalProxyAuth.js', function () {
       }
       let conn, pool;
       try {
-        await sodaUtil.assertThrowsAsync(
+        await testsUtil.assertThrowsAsync(
           async () => {
             pool = await oracledb.createPool({
               ...dbconfig,
@@ -364,7 +364,7 @@ describe('180. externalProxyAuth.js', function () {
       }
       let conn, pool;
       try {
-        await sodaUtil.assertThrowsAsync(
+        await testsUtil.assertThrowsAsync(
           async () => {
             pool = await oracledb.createPool({
               connectString: dbconfig.connectString,
@@ -402,7 +402,7 @@ describe('180. externalProxyAuth.js', function () {
       }
       let conn, pool;
       try {
-        await sodaUtil.assertThrowsAsync(
+        await testsUtil.assertThrowsAsync(
           async () => {
             pool = await oracledb.createPool({
               connectString: dbconfig.connectString,
@@ -474,7 +474,7 @@ describe('180. externalProxyAuth.js', function () {
       }
       let conn, pool;
       try {
-        await sodaUtil.assertThrowsAsync(
+        await testsUtil.assertThrowsAsync(
           async () => {
             pool = await oracledb.createPool({
               connectString: dbconfig.connectString,

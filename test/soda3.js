@@ -27,10 +27,11 @@
  *****************************************************************************/
 'use strict';
 
-const oracledb = require('oracledb');
-const should   = require('should');
-const dbconfig = require('./dbconfig.js');
-const sodaUtil = require('./sodaUtil.js');
+const oracledb  = require('oracledb');
+const should    = require('should');
+const dbconfig  = require('./dbconfig.js');
+const sodaUtil  = require('./sodaUtil.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('167. soda3.js', () => {
 
@@ -43,7 +44,7 @@ describe('167. soda3.js', () => {
   ];
 
   before('create collections', async function() {
-    isRunnable = await sodaUtil.checkPrerequisites();
+    isRunnable = await testsUtil.checkPrerequisites();
     if (!isRunnable) {
       this.skip();
       return;
@@ -128,7 +129,7 @@ describe('167. soda3.js', () => {
   it('167.5 getCollectionNames() - limit is null', async () => {
     try {
       let options = { limit: null };
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await sd.getCollectionNames(options),
         /NJS-007: invalid value for "limit" in parameter 2/
       );
@@ -140,7 +141,7 @@ describe('167. soda3.js', () => {
   it('167.6 getCollectionNames() - limit is an empty string', async () => {
     try {
       let options = { limit: '' };
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await sd.getCollectionNames(options),
         /NJS-008: invalid type for "limit" in parameter 2/
       );
@@ -195,7 +196,7 @@ describe('167. soda3.js', () => {
   it('167.11 startsWith is null', async () => {
     try {
       let options = { startsWith: null };
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await sd.getCollectionNames(options),
         /NJS-007: invalid value for "startsWith" in parameter 2/
       );
@@ -207,7 +208,7 @@ describe('167. soda3.js', () => {
   it('167.12 Negative - startsWith has invalid type, a Number', async () => {
     try {
       let options = { startsWith: 7 };
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await sd.getCollectionNames(options),
         /NJS-008: invalid type for "startsWith" in parameter 2/
       );

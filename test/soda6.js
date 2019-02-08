@@ -27,17 +27,18 @@
  *****************************************************************************/
 'use strict';
 
-const oracledb = require('oracledb');
-const should   = require('should');
-const dbconfig = require('./dbconfig.js');
-const sodaUtil = require('./sodaUtil.js');
+const oracledb  = require('oracledb');
+const should    = require('should');
+const dbconfig  = require('./dbconfig.js');
+const sodaUtil  = require('./sodaUtil.js');
+const testsUtil = require('./testsUtil.js');
 
 const t_contents = sodaUtil.t_contents;
 
 describe('174. soda6.js', () => {
   
   before(async function() {
-    const runnable = await sodaUtil.checkPrerequisites();
+    const runnable = await testsUtil.checkPrerequisites();
     if (!runnable) {
       this.skip();
       return;
@@ -100,7 +101,7 @@ describe('174. soda6.js', () => {
       );
 
       // Fetch back
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await collection.find().filter(),
         /NJS-009: invalid number of parameters/
       );
@@ -263,7 +264,7 @@ describe('174. soda6.js', () => {
         })
       );
 
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await collection.find().key().getOne(),
         /NJS-009: invalid number of parameters/
       );
@@ -302,7 +303,7 @@ describe('174. soda6.js', () => {
 
       // Fetch it back
       let key1 = {};
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await collection.find().key(key1).getOne(),
         /NJS-006: invalid type for parameter 1/
       );
@@ -427,7 +428,7 @@ describe('174. soda6.js', () => {
         })
       );
 
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await collection.find().keys().getDocuments(),
         /NJS-009: invalid number of parameters/
       );
@@ -466,7 +467,7 @@ describe('174. soda6.js', () => {
       );
 
       // Fetch back
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await collection.find().keys(null).getDocuments(),
         /NJS-006: invalid type for parameter 1/
       );

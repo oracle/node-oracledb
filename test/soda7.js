@@ -27,17 +27,18 @@
  *****************************************************************************/
 'use strict';
 
-const oracledb = require('oracledb');
-const should   = require('should');
-const dbconfig = require('./dbconfig.js');
-const sodaUtil = require('./sodaUtil.js');
+const oracledb  = require('oracledb');
+const should    = require('should');
+const dbconfig  = require('./dbconfig.js');
+const sodaUtil  = require('./sodaUtil.js');
+const testsUtil = require('./testsUtil.js');
 
 const t_contents = sodaUtil.t_contents;
 
 describe('175. soda7.js', () => {
   
   before(async function() {
-    const runnable = await sodaUtil.checkPrerequisites();
+    const runnable = await testsUtil.checkPrerequisites();
     if (!runnable) {
       this.skip();
       return;
@@ -99,7 +100,7 @@ describe('175. soda7.js', () => {
 
       // Fetch back  
       let numberToSkip = 3;
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await collection.find().skip(numberToSkip).count(),
         /ORA-40748:/
       );
@@ -139,7 +140,7 @@ describe('175. soda7.js', () => {
 
       // Fetch back  
       let numberToLimit = 5;
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await collection.find().skip(numberToLimit).count(),
         /ORA-40748:/
       );
@@ -384,7 +385,7 @@ describe('175. soda7.js', () => {
       should.strictEqual(myContents.length, t_contents.length);
 
       await docCursor.close();
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => await docCursor.close(),
         /NJS-066: invalid SODA document cursor/
       );
