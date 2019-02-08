@@ -511,29 +511,52 @@ describe('173. soda5.js', () => {
       should.not.exist(err);
     }
 
+    let compatibleVersion;
+    if (dbconfig.test.DBA_PRIVILEGE) {
+      try {
+        const connectionDetails = {
+          user          : dbconfig.test.DBA_user,
+          password      : dbconfig.test.DBA_password,
+          connectString : dbconfig.connectString,
+          privilege     : oracledb.SYSDBA,
+        };
+        let conn = await oracledb.getConnection(connectionDetails);
+        let res = await conn.execute("select name, value from v$parameter where name like lower('%'||:x||'%')", ['COMPATIBLE']);
+        if(res.rows.length > 0) {
+          compatibleVersion = res.rows[0][1];
+        }
+        await conn.close();
+      } catch (err) {
+        should.not.exist(err);
+      }
+    }
+    const isCreateIndexEnabled = sodaUtil.versionStringCompare(compatibleVersion, '12.2.0.0.0');
     try {
       let indexSpec = {
         "name": "TEST_IDX",
         "search_on": "none",
         "dataguide": "on"
       };
-      await collection.createIndex(indexSpec);
-
-      let outDocument = await collection.getDataGuide();
-      should.exist(outDocument);
-    
+      if (isCreateIndexEnabled >= 0) {
+        await collection.createIndex(indexSpec);
+        let outDocument = await collection.getDataGuide();
+        should.exist(outDocument);
+      } else if(isCreateIndexEnabled < 0){
+        await sodaUtil.assertThrowsAsync(async () => {await collection.createIndex(indexSpec);}, /ORA-00406:/);
+      }
     } catch(err) {
       should.not.exist(err);
     }
-
-    try {
-      let result = await collection.dropIndex('TEST_IDX');
-      should.strictEqual(result.dropped, true);
-      await conn.commit();
-      await collection.drop();
-      await conn.close();
-    } catch(err) {
-      should.not.exist(err);
+    if (isCreateIndexEnabled >= 0) {
+      try {
+        let result = await collection.dropIndex('TEST_IDX');
+        should.strictEqual(result.dropped, true);
+        await conn.commit();
+        await collection.drop();
+        await conn.close();
+      } catch(err) {
+        should.not.exist(err);
+      }
     }
 
   }); // 173.12
