@@ -1,5 +1,19 @@
 # Change Log
 
+## node-oracledb v3.1.2 (DD Mon YYYY)
+
+This release is under development.
+
+- Fixed a bug that caused random CQN crashes ([ODPI-C change](https://github.com/oracle/odpi/issues/96)).
+
+- Improve validation of `executeMany()` arguments to prevent a crash.
+
+- Use a relative URL for the ODPI-C submodule to make cloning from
+  oss.oracle.com also use ODPI-C from oss.oracle.com
+
+- Allow `npm run buildbinary` to succeed even if `git` is not
+  available.
+
 ## node-oracledb v3.1.1 (25 Jan 2019)
 
 - Rebuild npm package to resolve Linux binary build issue.
