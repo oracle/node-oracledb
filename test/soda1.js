@@ -433,7 +433,7 @@ describe('164. soda1.js', () => {
 
       await sodaUtil.assertThrowsAsync(
         async () => await sd.createCollection(t_collname, options),
-        /NJS-006: invalid type for parameter 3/
+        /NJS-006:/
       );
 
     } catch(err) {
