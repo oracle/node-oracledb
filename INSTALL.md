@@ -1305,9 +1305,11 @@ error like **'dpi.h' file not found**.
 separately download the ODPI-C submodule code and extract it into the
 `odpi` directory.
 
-- If you clone the GitHub repository, you need to additionally run:
+- To clone the GitHub repository run:
 
   ```
+  git clone https://github.com/oracle/node-oracledb.git
+  cd node-oracledb
   git submodule init
   git submodule update
   ```
@@ -1328,6 +1330,9 @@ cloned with:
 
 ```
 git clone git://oss.oracle.com/git/oracle/node-oracledb.git/
+cd node-oracledb
+git submodule init
+git submodule update
 ```
 
 Follow the general instructions in [Node-oracledb Installation from
