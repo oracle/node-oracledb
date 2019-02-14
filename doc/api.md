@@ -1165,7 +1165,7 @@ This property may be overridden in an [`execute()`](#executeoptions)
 call.
 
 To improve database efficiency, SQL queries should use a row limiting
-clause like [OFFSET / FETCH](#pagingdata) or equivalent. The `maxRows`
+clause like [`OFFSET` / `FETCH`](#pagingdata) or equivalent. The `maxRows`
 property can be used to stop badly coded queries from returning
 unexpectedly large numbers of rows.
 
@@ -7461,7 +7461,7 @@ Any rows beyond the `maxRows` limit are not returned.  If `maxRows` is
 0, then the number of rows is only limited by Node.js memory.
 
 To improve database efficiency, SQL queries should use a row limiting
-clause like [OFFSET / FETCH](#pagingdata) or equivalent. The `maxRows`
+clause like [`OFFSET` / `FETCH`](#pagingdata) or equivalent. The `maxRows`
 property can be used to stop badly coded queries from returning
 unexpectedly large numbers of rows.
 
@@ -8138,9 +8138,9 @@ How to do 'web pagination' is discussed in this section.  For each
 of rows from a table.  Since the query will be executed more than
 once, make sure to use bind variables for row numbers and row limits.
 
-Oracle Database 12c SQL has an `OFFSET` / `FETCH` clause (See [Row
-Limiting: Examples][5], which is similar to the LIMIT keyword of
-MySQL.
+Oracle Database 12c SQL introduced an `OFFSET` / `FETCH` clause which
+is similar to the LIMIT keyword of MySQL.  See [Row Limiting:
+Examples][5] in the Oracle documentation.  A node-oracledb example is:
 
 ```javascript
 var myoffset = 0;       // do not skip any rows (start at row 1)
@@ -8155,7 +8155,7 @@ connection.execute(
 . . .
 ```
 
-See [rowlimit.js][84].
+A runnable example is in [rowlimit.js][84].
 
 You can use a basic [`execute()`](#execute) or a
 [ResultSet](#resultsetclass), or [`queryStream()`](#querystream) with
@@ -8173,10 +8173,8 @@ efficient to let Oracle Database do the row selection in the SQL query
 and only return the exact number of rows required to node-oracledb.
 
 For Oracle Database 11g and earlier there are several alternative ways
-to limit the number of rows returned.  Refer to [Oracle Magazine][85]
-for details.
-
-The old, canonical paging query is:
+to limit the number of rows returned.  The old, canonical paging query
+is:
 
 ```SQL
 SELECT *
@@ -8210,6 +8208,9 @@ SELECT last_name FROM
         FROM employees)
 WHERE myr BETWEEN 1 and 20
 ```
+
+Refer to [On Top-n and Pagination Queries][85] in Oracle Magazine for
+details.
 
 #### <a name="autoincrement"></a> 13.1.8 Auto-Increment Columns
 
@@ -11979,8 +11980,8 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
 
 - For [direct fetches](#fetchingrows) that relied on the version 1
   default value of [`maxRows`](#propdbmaxrows) to limit the number of
-  returned rows to 100, it is recommended to use an [OFFSET /
-  FETCH](#pagingdata) query clause.  Alternatively explicitly set
+  returned rows to 100, it is recommended to use an [`OFFSET` /
+  `FETCH`](#pagingdata) query clause.  Alternatively explicitly set
   `maxRows` to 100.
 
 - Review and update code that checks for specific *NJS-XXX* or
