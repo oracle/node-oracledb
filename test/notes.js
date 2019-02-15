@@ -30,7 +30,7 @@ const configList = [
       "\t* NODE_ORACLEDB_PASSWORD\n" +
       "\t* NODE_ORACLEDB_CONNECTIONSTRING\n",
   }
-]
+];
 
 if (dbconfig.test.DBA_PRIVILEGE) {
   configList.push({
@@ -86,7 +86,7 @@ before(function(done) {
       conn.execute(
         "select * from dual",
         function(err, result) {
-          if (!Boolean(err) && Boolean(result.rows) && (result.rows[0][0]==="X")) {
+          if (!err && result.rows && (result.rows[0][0]==="X")) {
             cb(null, index);
           } else {
             cb(new Error("Query test failed"), index);
@@ -95,7 +95,7 @@ before(function(done) {
       );
     });
     seriesList.push(function (cb) {
-      conn.close(function (err) {cb(err, index)});
+      conn.close(function (err) {cb(err, index);});
     });
   });
   async.series(seriesList, function(err, results) {

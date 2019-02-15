@@ -30,6 +30,7 @@
 const oracledb = require('oracledb');
 const dbconfig = require('./dbconfig.js');
 const assert = require('assert');
+const should = require('should');
 
 let testsUtil = exports;
 module.exports = testsUtil;
@@ -64,4 +65,49 @@ testsUtil.generateRandomPassword = function(length=6) {
     result += choices.charAt(Math.floor(Math.random() * choices.length));
   }
   return result;
+};
+
+testsUtil.getDBCompatibleVersion = async function() {
+  let compatibleVersion;
+  if (dbconfig.test.DBA_PRIVILEGE) {
+    try {
+      const connectionDetails = {
+        user          : dbconfig.test.DBA_user,
+        password      : dbconfig.test.DBA_password,
+        connectString : dbconfig.connectString,
+        privilege     : oracledb.SYSDBA,
+      };
+      let conn = await oracledb.getConnection(connectionDetails);
+      let res = await conn.execute("select name, value from v$parameter where name = 'compatible'");
+      if(res.rows.length > 0) {
+        compatibleVersion = res.rows[0][1];
+      }
+      await conn.close();
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }
+  return compatibleVersion;
+};
+
+// Function versionStringCompare returns:
+// * 1 if version1 is greater than version2
+// * -1 if version1 is smaller than version2
+// * 0 if version1 is equal to version2
+// * undefined if eigher version1 or version2 is not string
+testsUtil.versionStringCompare = function(version1, version2) {
+  if (typeof version1 === 'string' && typeof version2 === 'string') {
+    let tokens1 = version1.split('.');
+    let tokens2 = version2.split('.');
+    let len = Math.min(tokens1.length, tokens2.length);
+    for (let i = 0; i < len; i++) {
+      const t1 = parseInt(tokens1[i]), t2 = parseInt(tokens2[i]);
+      if (t1 > t2) return 1;
+      if (t1 < t2) return -1;
+    }
+    if (tokens1.length < tokens2.length) return 1;
+    if (tokens1.length > tokens2.length) return -1;
+    return 0;
+  }
+  return undefined;
 };

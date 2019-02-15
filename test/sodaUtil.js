@@ -79,26 +79,3 @@ sodaUtil.t_contents = [
   { id: 1006, name: "Joe",      office: "San Francisco" },
   { id: 1007, name: "Gavin",    office: "New York" }
 ];
-
-
-// Function versionStringCompare returns:
-// * 1 if version1 is greater than version2
-// * -1 if version1 is smaller than version2
-// * 0 if version1 is equal to version2
-// * undefined if eigher version1 or version2 is not string
-sodaUtil.versionStringCompare = function(version1, version2) {
-  if (typeof version1 === 'string' && typeof version2 === 'string') {
-    let tokens1 = version1.split('.');
-    let tokens2 = version2.split('.');
-    let len = Math.min(tokens1.length, tokens2.length);
-    for (let i = 0; i < len; i++) {
-      const t1 = parseInt(tokens1[i]), t2 = parseInt(tokens2[i]);
-      if (t1 > t2) return 1;
-      if (t1 < t2) return -1;
-    }
-    if (tokens1.length < tokens2.length) return 1;
-    if (tokens1.length > tokens2.length) return -1;
-    return 0;
-  }
-  return undefined;
-};

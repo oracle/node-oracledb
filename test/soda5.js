@@ -487,7 +487,7 @@ describe('173. soda5.js', () => {
     await dropIdxOpt(options);
   }); // 173.11
 
-  it('173.12 getDataGiuide(), basic case', async () => {
+  it('173.12 getDataGuide(), basic case', async () => {
   
     let conn, collection;
 
@@ -512,52 +512,48 @@ describe('173. soda5.js', () => {
       should.not.exist(err);
     }
 
-    let compatibleVersion;
-    if (dbconfig.test.DBA_PRIVILEGE) {
-      try {
-        const connectionDetails = {
-          user          : dbconfig.test.DBA_user,
-          password      : dbconfig.test.DBA_password,
-          connectString : dbconfig.connectString,
-          privilege     : oracledb.SYSDBA,
-        };
-        let conn = await oracledb.getConnection(connectionDetails);
-        let res = await conn.execute("select name, value from v$parameter where name like lower('%'||:x||'%')", ['COMPATIBLE']);
-        if(res.rows.length > 0) {
-          compatibleVersion = res.rows[0][1];
-        }
-        await conn.close();
-      } catch (err) {
-        should.not.exist(err);
-      }
-    }
-    const isCreateIndexEnabled = sodaUtil.versionStringCompare(compatibleVersion, '12.2.0.0.0');
+    /*
+     * if isCreateIndexEligible >= 0: Can Create Index without error
+     * if isCreateIndexEligible < 0: Create Index will throw error ORA-00406
+     * if isCreateIndexEligible = undefined: Getting COMPATIBLE VERSION string failed, the following part is skipped
+     */
+    const isCreateIndexEligible = testsUtil.versionStringCompare(await testsUtil.getDBCompatibleVersion(), '12.2.0.0.0');
     try {
       let indexSpec = {
         "name": "TEST_IDX",
         "search_on": "none",
         "dataguide": "on"
       };
-      if (isCreateIndexEnabled >= 0) {
+      if (isCreateIndexEligible >= 0) {
         await collection.createIndex(indexSpec);
         let outDocument = await collection.getDataGuide();
         should.exist(outDocument);
-      } else if(isCreateIndexEnabled < 0){
+      } else if(isCreateIndexEligible < 0){
         await testsUtil.assertThrowsAsync(async () => {await collection.createIndex(indexSpec);}, /ORA-00406:/);
       }
     } catch(err) {
       should.not.exist(err);
     }
-    if (isCreateIndexEnabled >= 0) {
+
+    if (isCreateIndexEligible >= 0) {
       try {
         let result = await collection.dropIndex('TEST_IDX');
         should.strictEqual(result.dropped, true);
         await conn.commit();
-        await collection.drop();
-        await conn.close();
       } catch(err) {
         should.not.exist(err);
       }
+    }
+
+    try {
+      if (collection) await collection.drop();
+    } catch (err) {
+      should.not.exist(err);
+    }
+    try {
+      if (conn) await conn.close();
+    } catch (err) {
+      should.not.exist(err);
     }
 
   }); // 173.12
