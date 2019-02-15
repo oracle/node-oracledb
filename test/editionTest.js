@@ -31,13 +31,21 @@ var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
-var testsUtil = require('./testsUtil.js');
+
+function generateRandomPassword(length) {
+  let result = "";
+  const choices = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  for (let i = 0; i < length; i++) {
+    result += choices.charAt(Math.floor(Math.random() * choices.length));
+  }
+  return result;
+}
 
 describe('160. editionTest.js', function() {
 
   var dbaConn;
   var isRunnable;
-  var nodbSchemaEditionPassword = testsUtil.generateRandomPassword();
+  var nodbSchemaEditionPassword = generateRandomPassword(6);
 
   before(function(done) {
     var conn;
