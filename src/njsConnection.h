@@ -143,6 +143,7 @@ private:
     // Unsubscribe Method on Connection class
     static NAN_METHOD(Unsubscribe);
     static void Async_Unsubscribe(njsBaton *baton);
+    static void Async_AfterUnsubscribe(njsBaton *baton, Local<Value> argv[]);
 
     // GetSodaDatabase Method on Connection class
     static NAN_METHOD(GetSodaDatabase);

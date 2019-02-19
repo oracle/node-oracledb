@@ -6,6 +6,9 @@ This release is under development.
 
 - Fixed a bug that caused random CQN crashes ([ODPI-C change](https://github.com/oracle/odpi/issues/96)).
 
+- Fixed a CQN race condition to prevent a crash when a multiple
+  `conn.unsubscribe()` calls are made on the same subscription.
+
 - Improve validation of `executeMany()` arguments to prevent a crash.
 
 - Use a relative URL for the ODPI-C submodule to make cloning from

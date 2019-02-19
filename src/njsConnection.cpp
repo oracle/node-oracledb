@@ -2752,7 +2752,8 @@ NAN_METHOD(njsConnection::Unsubscribe)
     } else {
         baton->error = njsMessages::Get(errInvalidSubscription);
     }
-    baton->QueueWork("Unsubscribe", Async_Unsubscribe, NULL, 1);
+    baton->QueueWork("Unsubscribe", Async_Unsubscribe, Async_AfterUnsubscribe,
+            1);
 }
 
 
@@ -2770,6 +2771,17 @@ void njsConnection::Async_Unsubscribe(njsBaton *baton)
         baton->subscription->StopNotifications();
     }
     baton->subscription = NULL;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Async_AfterUnsubscribe()
+//   Returns result to JS by invoking JS callback.
+//-----------------------------------------------------------------------------
+void njsConnection::Async_AfterUnsubscribe(njsBaton *baton,
+        Local<Value> argv[])
+{
+    njsOracledb::ClearSubscription(baton->name);
 }
 
 
