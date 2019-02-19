@@ -772,7 +772,9 @@ node example.js
 
 ### <a name="instwin"></a> 3.6 Node-oracledb Installation on Windows with Instant Client ZIP files
 
-Follow these steps if your database is on a remote machine.
+Follow these steps if your database is on a remote machine, or if you
+already have Oracle software installed but you want node-oracledb to
+use a different version of the libraries.
 
 Questions and issues can be posted as [GitHub Issues][10].
 
@@ -822,24 +824,42 @@ Source Code](#github).
 #### 3.6.4 Install the free Oracle Instant Client ZIP
 
 Download the free 64-bit Instant Client **Basic** ZIP file from
-[Oracle Technology Network][25].  (The 32-bit Instant Client is
-[here][26]).
+[Oracle Technology Network][25].  If your Node.js architecture is
+32-bit, then use the [32-bit Instant Client][26] instead.
 
-- Extract `instantclient-basic-windows.x64-18.3.0.0.0dbru.zip`
+- Unzip the ZIP file into a directory that is accessible to your
+  application.  For example unzip
+  `instantclient-basic-windows.x64-18.3.0.0.0dbru.zip` to
+  `C:\oracle\instantclient_18_3`.
 
-- Add its directory to `PATH`.  For example on Windows 7, update
-  `PATH` in Control Panel -> System -> Advanced System Settings ->
-  Advanced -> Environment Variables -> System variables -> `PATH` and
-  add your path, such as `C:\oracle\instantclient_18_3`.
+- Add this directory to the `PATH` environment variable.  For example
+  on Windows 7, update `PATH` in Control Panel -> System -> Advanced
+  System Settings -> Advanced -> Environment Variables -> System
+  variables -> `PATH`.  The Instant Client directory must occur in
+  `PATH` before any other Oracle directories.
 
-  If you have multiple versions of Oracle libraries installed, make
-  sure the desired version occurs first in `PATH` before you run
-  Node.js.
+  Restart any open command prompt windows.
 
-  Alternatively move the unzipped Instant Client files to
+  To avoid interfering with existing tools that require other Oracle
+  Client versions then, instead of updating the system-wide `PATH`
+  variable, you may prefer to write a batch file that sets `PATH`, for
+  example:
+
+  ```
+  REM mynode.bat
+  SET PATH=C:\oracle\instantclient_18_3;%PATH%
+  node %*
+  ```
+
+  Invoke this batch file everytime you want to run Node.js.
+
+  Alternatively use `SET` to change your `PATH` in each command prompt
+  window before you run node.
+
+  Another option is to move the unzipped Instant Client files to
   `node_modules\oracledb\build\Release` so the DLLs and other files
-  are in the same directory as the `oracledb.node` binary.  If you do
-  this, then `PATH` does not need to be set.
+  are in the same directory as the `oracledb*.node` binaries.  If you
+  do this, then `PATH` does not need to be set.
 
 #### 3.6.5 Optionally create the default Oracle Client configuration directory
 
