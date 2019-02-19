@@ -624,7 +624,7 @@ Set required Oracle environment variables, such as `ORACLE_HOME` and
 source /usr/local/bin/oraenv
 ```
 
-Or, if you are using Oracle XE, by executing:
+Or, if you are using Oracle XE 11.2, by executing:
 
 ```
 source /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh
