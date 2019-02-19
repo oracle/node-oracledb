@@ -148,8 +148,8 @@ version 2.0.
         - Install a C Compiler with support for C++ 11 (such as Xcode,
           GCC 4.8, Visual Studio 2015, or similar)
 
-        - Run `npm install oracle/node-oracledb.git#v3.1.1`, or add
-          `oracle/node-oracledb.git#v3.1.1` to your `package.json`
+        - Run `npm install oracle/node-oracledb.git#v3.1.2`, or add
+          `oracle/node-oracledb.git#v3.1.2` to your `package.json`
           dependencies.  Substitute your desired [GitHub tag][40].
 
 - Add Oracle 18, 12, or 11.2 client libraries to your operating
@@ -394,7 +394,7 @@ environment, for example:
 ```
 module.exports = {
   user          : "hr",
-  password      : "welcome",
+  password      : process.env.NODE_ORACLEDB_PASSWORD,
   connectString : "localhost/XEPDB1"
 };
 ```
@@ -529,7 +529,7 @@ environment, for example:
 ```
 module.exports = {
   user          : "hr",
-  password      : "welcome",
+  password      : process.env.NODE_ORACLEDB_PASSWORD,
   connectString : "localhost/XEPDB1"
 };
 ```
@@ -622,7 +622,7 @@ Set required Oracle environment variables, such as `ORACLE_HOME` and
 source /usr/local/bin/oraenv
 ```
 
-Or, if you are using Oracle XE, by executing:
+Or, if you are using Oracle XE 11.2, by executing:
 
 ```
 source /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh
@@ -641,7 +641,7 @@ environment, for example:
 ```
 module.exports = {
   user          : "hr",
-  password      : "welcome",
+  password      : process.env.NODE_ORACLEDB_PASSWORD,
   connectString : "localhost/XEPDB1"
 };
 ```
@@ -757,7 +757,7 @@ environment, for example:
 ```
 module.exports = {
   user          : "hr",
-  password      : "welcome",
+  password      : process.env.NODE_ORACLEDB_PASSWORD,
   connectString : "localhost/XEPDB1"
 };
 ```
@@ -770,7 +770,9 @@ node example.js
 
 ### <a name="instwin"></a> 3.6 Node-oracledb Installation on Windows with Instant Client ZIP files
 
-Follow these steps if your database is on a remote machine.
+Follow these steps if your database is on a remote machine, or if you
+already have Oracle software installed but you want node-oracledb to
+use a different version of the libraries.
 
 Questions and issues can be posted as [GitHub Issues][10].
 
@@ -820,24 +822,42 @@ Source Code](#github).
 #### 3.6.4 Install the free Oracle Instant Client ZIP
 
 Download the free 64-bit Instant Client **Basic** ZIP file from
-[Oracle Technology Network][25].  (The 32-bit Instant Client is
-[here][26]).
+[Oracle Technology Network][25].  If your Node.js architecture is
+32-bit, then use the [32-bit Instant Client][26] instead.
 
-- Extract `instantclient-basic-windows.x64-18.3.0.0.0dbru.zip`
+- Unzip the ZIP file into a directory that is accessible to your
+  application.  For example unzip
+  `instantclient-basic-windows.x64-18.3.0.0.0dbru.zip` to
+  `C:\oracle\instantclient_18_3`.
 
-- Add its directory to `PATH`.  For example on Windows 7, update
-  `PATH` in Control Panel -> System -> Advanced System Settings ->
-  Advanced -> Environment Variables -> System variables -> `PATH` and
-  add your path, such as `C:\oracle\instantclient_18_3`.
+- Add this directory to the `PATH` environment variable.  For example
+  on Windows 7, update `PATH` in Control Panel -> System -> Advanced
+  System Settings -> Advanced -> Environment Variables -> System
+  variables -> `PATH`.  The Instant Client directory must occur in
+  `PATH` before any other Oracle directories.
 
-  If you have multiple versions of Oracle libraries installed, make
-  sure the desired version occurs first in `PATH` before you run
-  Node.js.
+  Restart any open command prompt windows.
 
-  Alternatively move the unzipped Instant Client files to
+  To avoid interfering with existing tools that require other Oracle
+  Client versions then, instead of updating the system-wide `PATH`
+  variable, you may prefer to write a batch file that sets `PATH`, for
+  example:
+
+  ```
+  REM mynode.bat
+  SET PATH=C:\oracle\instantclient_18_3;%PATH%
+  node %*
+  ```
+
+  Invoke this batch file everytime you want to run Node.js.
+
+  Alternatively use `SET` to change your `PATH` in each command prompt
+  window before you run node.
+
+  Another option is to move the unzipped Instant Client files to
   `node_modules\oracledb\build\Release` so the DLLs and other files
-  are in the same directory as the `oracledb.node` binary.  If you do
-  this, then `PATH` does not need to be set.
+  are in the same directory as the `oracledb*.node` binaries.  If you
+  do this, then `PATH` does not need to be set.
 
 #### 3.6.5 Optionally create the default Oracle Client configuration directory
 
@@ -881,7 +901,7 @@ environment, for example:
 ```
 module.exports = {
   user          : "hr",
-  password      : "welcome",
+  password      : process.env.NODE_ORACLEDB_PASSWORD,
   connectString : "localhost/XEPDB1"
 };
 ```
@@ -967,7 +987,7 @@ environment, for example:
 ```
 module.exports = {
   user          : "hr",
-  password      : "welcome",
+  password      : process.env.NODE_ORACLEDB_PASSWORD,
   connectString : "localhost/XEPDB1"
 };
 ```
@@ -1028,19 +1048,19 @@ export CC=gcc
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v3.1.1`, and use the `npm` package manager (which is
+example `v3.1.2`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v3.1.1
+npm install oracle/node-oracledb.git#v3.1.2
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v3.1.1/oracledb-src-3.1.1.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v3.1.2/oracledb-src-3.1.2.tgz
 ```
 
 #### 3.9.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1089,7 +1109,7 @@ environment, for example:
 ```
 module.exports = {
   user          : "hr",
-  password      : "welcome",
+  password      : process.env.NODE_ORACLEDB_PASSWORD,
   connectString : "localhost/XEPDB1"
 };
 ```
@@ -1148,19 +1168,19 @@ export MAKE=gmake
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v3.1.1`, and use the `npm` package manager (which is
+example `v3.1.2`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v3.1.1
+npm install oracle/node-oracledb.git#v3.1.2
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v3.1.1/oracledb-src-3.1.1.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v3.1.2/oracledb-src-3.1.2.tgz
 ```
 
 #### 3.9.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1208,7 +1228,7 @@ environment, for example:
 ```
 module.exports = {
   user          : "hr",
-  password      : "welcome",
+  password      : process.env.NODE_ORACLEDB_PASSWORD,
   connectString : "localhost/XEPDB1"
 };
 ```
@@ -1267,12 +1287,12 @@ The `git` utility is required for this method.
 
 Build node-oracledb from source code by changing the package specifier
 so that `npm` downloads from GitHub instead of from npmjs.com.  For
-example, to install the code from the GitHub tag 'v3.1.1', add
-`oracle/node-oracledb#v3.1.1` to your `package.json` dependencies, or
+example, to install the code from the GitHub tag 'v3.1.2', add
+`oracle/node-oracledb#v3.1.2` to your `package.json` dependencies, or
 use the command:
 
 ```
-npm install oracle/node-oracledb#v3.1.1
+npm install oracle/node-oracledb#v3.1.2
 ```
 
 This will download, compile and install node-oracledb.
@@ -1286,7 +1306,7 @@ Users without `git`, or with older versions of `npm` such as included in
 Node.js 6, may alternatively need to use pre-bundled source code:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v3.1.1/oracledb-src-3.1.1.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v3.1.2/oracledb-src-3.1.2.tgz
 ```
 
 Note it may take some time before compilation begins due to the slow
@@ -1303,9 +1323,11 @@ error like **'dpi.h' file not found**.
 separately download the ODPI-C submodule code and extract it into the
 `odpi` directory.
 
-- If you clone the GitHub repository, you need to additionally run:
+- To clone the GitHub repository run:
 
   ```
+  git clone https://github.com/oracle/node-oracledb.git
+  cd node-oracledb
   git submodule init
   git submodule update
   ```
@@ -1318,7 +1340,7 @@ installing.
 #### <a name="nogithubaccess"></a> 3.10.3 Compiling node-oracledb without GitHub Access
 
 Some companies block access to github.com so compiling source code
-from GitHub with `npm install oracle/node-oracledb.git#v3.1.1` will
+from GitHub with `npm install oracle/node-oracledb.git#v3.1.2` will
 fail.
 
 Oracle has a mirror of the GitHub repository source code that can be
@@ -1326,6 +1348,9 @@ cloned with:
 
 ```
 git clone git://oss.oracle.com/git/oracle/node-oracledb.git/
+cd node-oracledb
+git submodule init
+git submodule update
 ```
 
 Follow the general instructions in [Node-oracledb Installation from
@@ -1416,7 +1441,7 @@ See [Node.js for Oracle Linux][46] for details.
 You can host node-oracledb packages locally.
 
 Download the node-oracledb package from npm, for example from
-`https://registry.npmjs.com/oracledb/-/oracledb-3.1.1.tgz`
+`https://registry.npmjs.com/oracledb/-/oracledb-3.1.2.tgz`
 Alternatively, if you want to build your own binaries and
 node-oracledb package, the maintainer scripts in
 [/package](https://github.com/oracle/node-oracledb/tree/master/package)
@@ -1425,11 +1450,11 @@ can be used.  See
 for details.
 
 If you make the package accessible on your local web server, for
-example at https://www.example.com/oracledb-3.1.1.tgz, then your
+example at https://www.example.com/oracledb-3.1.2.tgz, then your
 install command would be:
 
 ```
-npm install https://www.example.com/oracledb-3.1.1.tgz
+npm install https://www.example.com/oracledb-3.1.2.tgz
 ```
 
 or your `package.json` would contain:
@@ -1437,7 +1462,7 @@ or your `package.json` would contain:
 ```
 . . .
    "dependencies": {
-      "oracledb": "https://www.example.com/oracledb-3.1.1.tgz"
+      "oracledb": "https://www.example.com/oracledb-3.1.2.tgz"
    },
 . . .
 ```
