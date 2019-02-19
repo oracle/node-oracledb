@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -169,7 +169,7 @@ describe('173. soda5.js', () => {
     } catch(err) {
       should.not.exist(err);
     }
-    
+
     let indexSpec = { "foo": "bar" };
     await testsUtil.assertThrowsAsync(
       async () => await collection.createIndex(indexSpec),
@@ -488,7 +488,7 @@ describe('173. soda5.js', () => {
   }); // 173.11
 
   it('173.12 getDataGuide(), basic case', async () => {
-  
+
     let conn, collection;
 
     try {

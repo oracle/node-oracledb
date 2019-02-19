@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -37,7 +37,7 @@ describe('182. deferLibInit.js', () => {
   before('it only works on Linux', function() {
     if (process.platform !== 'linux') this.skip();
   });
-  
+
   it('182.1 defers initializatiion of ODPI-C', async () => {
     try {
       delete process.env.LD_LIBRARY_PATH;
@@ -64,7 +64,7 @@ describe('182. deferLibInit.js', () => {
       should.not.exist(err);
     }
   });
-  
+
 });
 
 async function positiveCase() {

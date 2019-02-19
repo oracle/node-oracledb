@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019,Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -36,7 +36,7 @@ const testsUtil = require('./testsUtil.js');
 const t_contents = sodaUtil.t_contents;
 
 describe('176. soda8.js', () => {
-  
+
   before(async function() {
     const runnable = await testsUtil.checkPrerequisites();
     if (!runnable) {
@@ -222,7 +222,7 @@ describe('176. soda8.js', () => {
 
       // Fetch all back
       let outDocuments = await collection.find().keys([myKeys[0]]).getDocuments();
-      
+
       let contents = [];
       for(let i = 0; i < outDocuments.length; i++) {
         contents[i] = await outDocuments[i].getContent();

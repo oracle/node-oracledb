@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -22,7 +22,7 @@
  *   171. jsObjectGetter2.js
  *
  * DESCRIPTION
- *   It checks the safe use of the Maybe value returned by 
+ *   It checks the safe use of the Maybe value returned by
  *   JS Object Set methods.
  *
  *****************************************************************************/
@@ -101,7 +101,7 @@ describe('171. jsObjectGetter2.js', () => {
         }
       });
       await conn.execute(sqlInsert, bindVar);
-      
+
       let sqlDrop = "DROP TABLE " + tableName + " PURGE";
       await conn.execute(sqlDrop);
 

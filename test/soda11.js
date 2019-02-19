@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -52,7 +52,7 @@ describe('179. soda11.js', () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
       let sd = conn.getSodaDatabase();
-      
+
       let t_tablename = "myTableName";
       let t_metadata = {
         "schemaName" : dbconfig.user.toUpperCase(),
@@ -346,8 +346,8 @@ describe('179. soda11.js', () => {
         name:    "Shelly",
         address: {city: "Shenzhen", country: "China"}
       };
-      
-      /* The key must always be a string and is always returned a string as 
+
+      /* The key must always be a string and is always returned a string as
          well -- even if the "type" in the database is numeric. */
       let testKey = '86755';
       let testDoc = sd.createDocument(testContent, { key: testKey } );
@@ -359,7 +359,7 @@ describe('179. soda11.js', () => {
       let contentGot = docGot.getContent();
       should.strictEqual(contentGot.name, testContent.name);
       should.strictEqual(
-        contentGot.address.country, 
+        contentGot.address.country,
         testContent.address.country
       );
 
@@ -428,8 +428,8 @@ describe('179. soda11.js', () => {
         name:    "Shelly",
         address: {city: "Shenzhen", country: "China"}
       };
-      
-      /* The key must always be a string and is always returned a string as 
+
+      /* The key must always be a string and is always returned a string as
          well -- even if the "type" in the database is numeric. */
       let testKey = 86755;
       await testsUtil.assertThrowsAsync(
@@ -511,8 +511,8 @@ describe('179. soda11.js', () => {
       let testMediaType = 'image/png';
       let testKey = '86755';
       let testDoc = sd.createDocument(
-        testContent, 
-        { mediaType: testMediaType, key: testKey } 
+        testContent,
+        { mediaType: testMediaType, key: testKey }
       );
       should.strictEqual(testDoc.mediaType, testMediaType);
 
@@ -597,13 +597,13 @@ describe('179. soda11.js', () => {
 
       // Insert a new document
       let testContent = {};
-      
+
       /* Negative value */
       let testMediaType = 65432;
       let testKey = '86755';
       await testsUtil.assertThrowsAsync(
         async () => await sd.createDocument(
-          testContent, 
+          testContent,
           { mediaType: testMediaType, key: testKey }
         ),
         /NJS-008: invalid type for "mediaType" in parameter 2/

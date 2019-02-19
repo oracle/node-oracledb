@@ -4208,7 +4208,7 @@ Overview of node-oracledb functional tests
 168. soda4.js
     168.1 insertOneAndGet() fetches attributes without content
     168.2 content is null
-    168.3 get mediaType 
+    168.3 get mediaType
 
 170. poolDrain.js
     170.1 close pool with force flag, and prevent new connection

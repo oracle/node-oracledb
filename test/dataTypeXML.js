@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -36,26 +36,26 @@ describe('181. dataTypeXML.js', () => {
 
   const tableName = "nodb_tab_xml";
   const testRowID = 1;
-  const testXMLData = 
-    '<Warehouse>\n  ' + 
+  const testXMLData =
+    '<Warehouse>\n  ' +
     '<WarehouseId>1</WarehouseId>\n  ' +
-    '<WarehouseName>Melbourne, Australia</WarehouseName>\n  ' + 
+    '<WarehouseName>Melbourne, Australia</WarehouseName>\n  ' +
     '<Building>Owned</Building>\n  ' +
-    '<Area>2020</Area>\n  ' + 
-    '<Docks>1</Docks>\n  ' + 
+    '<Area>2020</Area>\n  ' +
+    '<Docks>1</Docks>\n  ' +
     '<DockType>Rear load</DockType>\n  ' +
-    '<WaterAccess>false</WaterAccess>\n  ' + 
-    '<RailAccess>N</RailAccess>\n  ' + 
+    '<WaterAccess>false</WaterAccess>\n  ' +
+    '<RailAccess>N</RailAccess>\n  ' +
     '<Parking>Garage</Parking>\n  ' +
-    '<VClearance>20</VClearance>\n' + 
+    '<VClearance>20</VClearance>\n' +
     '</Warehouse>\n';
 
   before('create table and insert a row', async () => {
 
     try {
       const connection = await oracledb.getConnection(dbconfig);
-      
-      const sql = 
+
+      const sql =
         "BEGIN \n" +
         "    DECLARE \n" +
         "        e_table_missing EXCEPTION; \n" +
@@ -79,7 +79,7 @@ describe('181. dataTypeXML.js', () => {
     } catch(err) {
       should.not.exist(err);
     }
-    
+
     try {
       const conn = await oracledb.getConnection(dbconfig);
 
@@ -134,7 +134,7 @@ describe('181. dataTypeXML.js', () => {
 
       let sql = "select xmltype.getclobval(content) as mycontent from " + tableName + " where num = :id";
       let bindVar = { id: testRowID };
-      let options = { 
+      let options = {
         outFormat: oracledb.OBJECT,
         fetchInfo: { "MYCONTENT": { type: oracledb.STRING } }
       };
@@ -157,7 +157,7 @@ describe('181. dataTypeXML.js', () => {
       let sql = "select extract(content, '/').getclobval() as mycontent " +
                 "from " + tableName + " where num = :id";
       let bindVar = { id: testRowID };
-      let options = { 
+      let options = {
         outFormat: oracledb.OBJECT,
         fetchInfo: { "MYCONTENT": { type: oracledb.STRING } }
       };
@@ -196,7 +196,7 @@ describe('181. dataTypeXML.js', () => {
 
   // ORA-19011: Character string buffer too small
   it.skip('181.5 inserts data that larger than 4K', async () => {
-    
+
     let ID = 50;
     let str = 'a'.repeat(31*1024);
     let head = '<data>', tail = '</data>\n';
@@ -222,5 +222,5 @@ describe('181. dataTypeXML.js', () => {
       should.not.exist(err);
     }
   }); // 181.5
-  
+
 });

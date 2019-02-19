@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -34,7 +34,7 @@ const sodaUtil = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('177. soda9.js', () => {
-  
+
   before(async function() {
     const runnable = await testsUtil.checkPrerequisites();
     if (!runnable) {
@@ -197,13 +197,13 @@ describe('177. soda9.js', () => {
   }); // 177.4
 
   it('177.5 createDocument() followd by getContent() i.e. without being inserted', async () => {
-    
+
     let conn;
 
     try {
       conn = await oracledb.getConnection(dbconfig);
       let soda = conn.getSodaDatabase();
-      
+
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
       let inDocument = soda.createDocument(inContent);
 
@@ -223,6 +223,6 @@ describe('177. soda9.js', () => {
         }
       }
     }
- 
+
   }); // 177.5
 });

@@ -23,9 +23,9 @@
  *
  * DESCRIPTION
  *   This is a negative test of executeMany().
- * 
+ *
  *   The executeMany(): Binds section of the doc says:
- *   The first data record determines the number of bind variables, 
+ *   The first data record determines the number of bind variables,
  *   each bind variable's data type, and its name (when binding by name).
  *
  *****************************************************************************/
@@ -37,9 +37,9 @@ const dbconfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('172. executeMany2.js', function() {
-  
+
   it('172.1 Negative - incorrect parameters', async () => {
-    
+
     let conn;
     let schema = dbconfig.user.toUpperCase();
 
@@ -54,7 +54,7 @@ describe('172. executeMany2.js', function() {
 
     } catch(err) {
       should.not.exist(err);
-    } 
+    }
 
     await testsUtil.assertThrowsAsync(
       async () => {

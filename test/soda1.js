@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -423,7 +423,7 @@ describe('164. soda1.js', () => {
   }); // 164.10
 
   it('164.11 Negative: create collection with invalid metaData value', async () => {
-    
+
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);

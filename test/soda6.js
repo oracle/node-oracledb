@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -36,7 +36,7 @@ const testsUtil = require('./testsUtil.js');
 const t_contents = sodaUtil.t_contents;
 
 describe('174. soda6.js', () => {
-  
+
   before(async function() {
     const runnable = await testsUtil.checkPrerequisites();
     if (!runnable) {
@@ -235,7 +235,7 @@ describe('174. soda6.js', () => {
     } catch(err) {
       should.not.exist(err);
     } finally {
-      
+
       if (collection) {
         let res = await collection.drop();
         should.strictEqual(res.dropped, true);
@@ -343,7 +343,7 @@ describe('174. soda6.js', () => {
 
       // Fetch back
       let documents = await collection.find().keys(myKeys).getDocuments();
-      
+
       // Get contents
       let myContents = [];
       for (let i = 0; i < documents.length; i++ ) {
@@ -386,14 +386,14 @@ describe('174. soda6.js', () => {
 
       // Fetch back
       let documents = await collection.find().keys([]).getDocuments();
-      
+
       // Get contents
       let myContents = [];
       for (let i = 0; i < documents.length; i++ ) {
         myContents[i] = await documents[i].getContent();
         (myContents[i]).should.be.oneOf(t_contents);
       }
-      
+
 
     } catch(err) {
       should.not.exist(err);
@@ -513,7 +513,7 @@ describe('174. soda6.js', () => {
         .keys(nonexistentKeys)
         .count();
 
-      should.strictEqual(result.count, 0);    
+      should.strictEqual(result.count, 0);
 
     } catch(err) {
       should.not.exist(err);

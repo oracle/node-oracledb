@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -170,7 +170,7 @@ describe('165. soda2.js', () => {
 
   // This is a variation of 173.1
   it('165.5 connections from a pool concurrently insert documents into the same collection', async () => {
-    
+
     const collectionName = "soda_test_165.5";
 
     try {
@@ -224,7 +224,7 @@ describe('165. soda2.js', () => {
       } catch(err) {
         should.not.exist(err);
       }
-      
+
     } // prepareCollection()
 
     async function insertDocument(pool, collName, content) {

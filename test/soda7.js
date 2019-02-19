@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -36,7 +36,7 @@ const testsUtil = require('./testsUtil.js');
 const t_contents = sodaUtil.t_contents;
 
 describe('175. soda7.js', () => {
-  
+
   before(async function() {
     const runnable = await testsUtil.checkPrerequisites();
     if (!runnable) {
@@ -98,7 +98,7 @@ describe('175. soda7.js', () => {
         })
       );
 
-      // Fetch back  
+      // Fetch back
       let numberToSkip = 3;
       await testsUtil.assertThrowsAsync(
         async () => await collection.find().skip(numberToSkip).count(),
@@ -138,7 +138,7 @@ describe('175. soda7.js', () => {
         })
       );
 
-      // Fetch back  
+      // Fetch back
       let numberToLimit = 5;
       await testsUtil.assertThrowsAsync(
         async () => await collection.find().skip(numberToLimit).count(),
@@ -221,7 +221,7 @@ describe('175. soda7.js', () => {
 
       // Fetch back
       let docCursor = await collection.find().getCursor();
-      
+
       let myContents = [];
       let hasNext = true;
       let myDocument;
@@ -275,7 +275,7 @@ describe('175. soda7.js', () => {
       // Fetch back
       let numberToSkip = 3;
       let docCursor = await collection.find().skip(numberToSkip).getCursor();
-      
+
       let myContents = [];
       let hasNext = true;
       let myDocument;
@@ -368,7 +368,7 @@ describe('175. soda7.js', () => {
 
       // Fetch back
       let docCursor = await collection.find().getCursor();
-      
+
       let myContents = [];
       let hasNext = true;
       let myDocument;
@@ -425,7 +425,7 @@ describe('175. soda7.js', () => {
 
       // Fetch back
       let documents = await collection.find().getDocuments();
-      
+
       // Get contents
       let myContents = [];
       for (let i = 0; i < documents.length; i++ ) {
