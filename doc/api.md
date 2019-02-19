@@ -300,21 +300,25 @@ limitations under the License.
         - 11.1.1 [`close()`](#sodadoccursorclose)
         - 11.1.2 [`getNext()`](#sodadoccursorgetnext)
 12. [Connection Handling](#connectionhandling)
-    - 12.1 [Connection Strings](#connectionstrings)
-        - 12.1.1 [Easy Connect Syntax for Connection Strings](#easyconnect)
-        - 12.1.2 [Net Service Names for Connection Strings](#tnsnames)
-        - 12.1.3 [Embedded Connection Strings](#embedtns)
-        - 12.1.4 [JDBC and Node-oracledb Connection Strings Compared](#notjdbc)
-    - 12.2 [Connections and Number of Threads](#numberofthreads)
-    - 12.3 [Connection Pooling](#connpooling)
-        - 12.3.1 [Connection Pool Sizing](#conpoolsizing)
-        - 12.3.2 [Connection Pool Closing and Draining](#conpooldraining)
-        - 12.3.3 [Connection Pool Cache](#connpoolcache)
-        - 12.3.4 [Connection Pool Queue](#connpoolqueue)
-        - 12.3.5 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
-        - 12.3.6 [Connection Pool Pinging](#connpoolpinging)
-        - 12.3.7 [Connection Tagging and Session State](#connpooltagging)
-        - 12.3.8 [Heterogeneous Connection Pools and Pool Proxy Authentication](#connpoolproxy)
+    - 12.1 [Configuring Connections and Node-oracledb](#configureconnections)
+        - 12.1.1 [Oracle Environment Variables](#environmentvariables)
+        - 12.1.2 [Optional Oracle Net Configuration](#tnsadmin)
+        - 12.1.3 [Optional Oracle Client Configuration](#oraaccess)
+    - 12.2 [Connection Strings](#connectionstrings)
+        - 12.2.1 [Easy Connect Syntax for Connection Strings](#easyconnect)
+        - 12.2.2 [Net Service Names for Connection Strings](#tnsnames)
+        - 12.2.3 [Embedded Connection Strings](#embedtns)
+        - 12.2.4 [JDBC and Node-oracledb Connection Strings Compared](#notjdbc)
+    - 12.3 [Connections and Number of Threads](#numberofthreads)
+    - 12.4 [Connection Pooling](#connpooling)
+        - 12.4.1 [Connection Pool Sizing](#conpoolsizing)
+        - 12.4.2 [Connection Pool Closing and Draining](#conpooldraining)
+        - 12.4.3 [Connection Pool Cache](#connpoolcache)
+        - 12.4.4 [Connection Pool Queue](#connpoolqueue)
+        - 12.4.5 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
+        - 12.4.6 [Connection Pool Pinging](#connpoolpinging)
+        - 12.4.7 [Connection Tagging and Session State](#connpooltagging)
+        - 12.4.8 [Heterogeneous Connection Pools and Pool Proxy Authentication](#connpoolproxy)
     - 12.4 [External Authentication](#extauth)
     - 12.5 [Database Resident Connection Pooling (DRCP)](#drcp)
     - 12.6 [Privileged Connections](#privconn)
@@ -324,7 +328,6 @@ limitations under the License.
         - 12.9.1 [Fast Application Notification (FAN)](#connectionfan)
         - 12.9.2 [Runtime Load Balancing (RLB)](#connectionrlb)
         - 12.9.3 [Database Call Timeouts](#dbcalltimeouts)
-    - 12.10 [Optional Client Configuration Files](#tnsadmin)
 13. [SQL Execution](#sqlexecution)
     - 13.1 [SELECT Statements](#select)
         - 13.1.1 [Fetching Rows with Direct Fetches](#fetchingrows)
@@ -376,25 +379,24 @@ limitations under the License.
 21. [Statement Caching](#stmtcache)
 22. [Continuous Query Notification (CQN)](#cqn)
 23. [Advanced Queuing (AQ)](#aq)
-24. [External Configuration](#oraaccess)
-25. [Globalization and National Language Support (NLS)](#nls)
-26. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
-27. [Simple Oracle Document Access (SODA)](#sodaoverview)
-    - 27.1 [Node-oracledb SODA Requirements](#sodarequirements)
-    - 27.2 [Creating SODA Collections](#creatingsodacollections)
-    - 27.3 [Creating and Accessing SODA documents](#accessingsodadocuments)
-    - 27.4 [SODA Query-by-Example Searches for JSON Documents](#sodaqbesearches)
-    - 27.5 [SODA Client-Assigned Keys and Collection Metadata](#sodaclientkeys)
-    - 27.6 [JSON Data Guides in SODA](#sodajsondataguide)
-28. [Promises and node-oracledb](#promiseoverview)
-    - 28.1 [Custom Promise Libraries](#custompromises)
-29. [Async/Await and node-oracledb](#asyncawaitoverview)
-30. [Tracing SQL and PL/SQL Statements](#tracingsql)
-31. [Migrating from Previous node-oracledb Releases](#migrate)
-    - 31.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
-    - 31.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
-    - 31.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
-    - 31.3 [Migrating from node-oracledb 3.0 to node-oracledb 3.1](#migratev30v31)
+24. [Globalization and National Language Support (NLS)](#nls)
+25. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
+26. [Simple Oracle Document Access (SODA)](#sodaoverview)
+    - 26.1 [Node-oracledb SODA Requirements](#sodarequirements)
+    - 26.2 [Creating SODA Collections](#creatingsodacollections)
+    - 26.3 [Creating and Accessing SODA documents](#accessingsodadocuments)
+    - 26.4 [SODA Query-by-Example Searches for JSON Documents](#sodaqbesearches)
+    - 26.5 [SODA Client-Assigned Keys and Collection Metadata](#sodaclientkeys)
+    - 26.6 [JSON Data Guides in SODA](#sodajsondataguide)
+27. [Promises and node-oracledb](#promiseoverview)
+    - 27.1 [Custom Promise Libraries](#custompromises)
+28. [Async/Await and node-oracledb](#asyncawaitoverview)
+29. [Tracing SQL and PL/SQL Statements](#tracingsql)
+30. [Migrating from Previous node-oracledb Releases](#migrate)
+    - 30.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
+    - 30.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
+    - 30.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
+    - 30.4 [Migrating from node-oracledb 3.0 to node-oracledb 3.1](#migratev30v31)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
 
@@ -2414,8 +2416,7 @@ will return an error.
 
 In network configurations that drop (or in-line) out-of-band breaks,
 `break()` may hang unless you have [`DISABLE_OOB=ON`][122] in a
-`sqlnet.ora` file, see [Optional Client Configuration
-Files](#tnsadmin).
+`sqlnet.ora` file, see [Optional Oracle Net Configuration](#tnsadmin).
 
 If you use use `break()` with [DRCP connections](#drcp), it is
 currently recommended to drop the connection when releasing it back to
@@ -3972,8 +3973,8 @@ immediately.
 
 In network configurations that drop (or in-line) out-of-band breaks,
 forced pool termination may hang unless you have
-[`DISABLE_OOB=ON`][122] in a `sqlnet.ora` file, see [Optional Client
-Configuration Files](#tnsadmin).
+[`DISABLE_OOB=ON`][122] in a `sqlnet.ora` file, see [Optional Oracle
+Net Configuration](#tnsadmin).
 
 When the pool is closed, it will be removed from the [connection pool
 cache](#connpoolcache).
@@ -5757,6 +5758,10 @@ This method was added in node-oracledb 3.0.
 
 ## <a name="connectionhandling"></a> 12. Connection Handling
 
+Connections may be standalone or pooled.
+
+##### Standalone Connections
+
 In applications which use connections infrequently, create a
 connection with [`oracledb.getConnection()`](#getconnectiondb).
 Connections should be released with
@@ -5767,35 +5772,190 @@ var oracledb = require('oracledb');
 
 var mypw = ...  // set mypw to the hr schema password
 
-oracledb.getConnection(
-  {
-    user          : "hr",
-    password      : mypw,
-    connectString : "localhost/XEPDB1"
-  },
-  function(err, connection) {
-    if (err) { console.error(err.message); return; }
+(async function() {
+  try {
+    connection = await oracledb.getConnection({
+      user          : "hr",
+      password      : mypw,
+      connectString : "localhost/XEPDB1"
+    });
 
-    . . .  // use connection
+    result = await connection.execute("select last_name from employees");
+    console.log("Result is:", result);
 
-    connection.close(
-      function(err) {
-        if (err) { console.error(err.message); }
-      });
-  });
+  } catch (err) {
+    console.error(err.message);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();   // Always close connections
+      } catch (err) {
+        console.error(err.message);
+      }
+    }
+  }
+})();
 ```
 
-Applications which are heavy users of connections should create and
-use a [Connection Pool](#connpooling).
+##### Pooled Connections
 
-### <a name="connectionstrings"></a> 12.1 Connection Strings
+Applications which frequently create and close connections should use
+a Connection Pool.  Since pools provide Oracle high availability
+features, using one is also recommended if you have a long running
+application, particularly if connections are released to the pool
+while no database work is being done.
+
+```javascript
+var oracledb = require('oracledb');
+
+var mypw = ...  // set mypw to the hr schema password
+
+(async function() {
+ let pool;
+ try {
+   pool = await oracledb.createPool({
+     user          : "hr"
+     password      : mypw,  // mypw contains the hr schema password
+     connectString : "localhost/XEPDB1"
+   });
+
+   let connection = await pool.getConnection();
+
+   result = await connection.execute("select last_name from employees");
+   console.log("Result is:", result);
+
+   await connection.close();  // return connection to the pool
+
+ } catch (err) {
+   console.error(err.message);
+ } finally {
+   await pool.close();
+ }
+})();
+```
+
+See [Connection Pooling](#connpooling) for more information.
+
+### <a name="configureconnections"></a> 12.1 Configuring Connections and Node-oracledb
+
+Connections to Oracle Database are influenced by optional Oracle
+environment variables and configuration files.
+
+#### <a name="environmentvariables"></a> 12.1.1 Oracle Environment Variables
+
+Some Oracle environment variables that can influence node-oracledb include:
+
+Name  |  Description
+------|-------------
+`LD_LIBRARY_PATH` | Used on Linux and some UNIX platforms.  Set this to include the Oracle libraries, for example `$ORACLE_HOME/lib` or `/opt/oracle/instantclient_18_3`. Not needed if the libraries are located by an alternative method, such as from running `ldconfig`. On other UNIX platforms you will need to set the OS specific equivalent, such as `LIBPATH` or `SHLIB_PATH`.
+`ORACLE_HOME` | The directory containing the Oracle Database software. This directory must be accessible by the Node.js process. This variable should *not* be set if node-oracledb uses Oracle Instant Client.
+`NLS_DATE_FORMAT`, `NLS_TIMESTAMP_FORMAT` | See [Fetching Numbers and Dates as String](#fetchasstringhandling).  The variables are ignored if `NLS_LANG` is not set.
+`NLS_LANG` | Determines the globalization options for node-oracledb.  If not set, a default value will be chosen by Oracle. Note that node-oracledb will always uses the AL32UTF8 character set.  See [Globalization and National Language Support (NLS)](#nls).
+`NLS_NUMERIC_CHARACTERS` | See [Fetching Numbers and Dates as String](#fetchasstringhandling).  The variable is ignored if `NLS_LANG` is not
+`TNS_ADMIN` | The location of the optional [Oracle Net configuration files](#tnsadmin) and [Oracle Client configuration files](#oraaccess), including `tnsnames.ora`, `sqlnet.ora`, and `oraaccess.xml`, if they are not in a default location.
+
+It is recommended to set variables in the environment before invoking
+Node.js, however they may also be set in application code as long as
+they are set before node-oracledb is first used.
+
+If you are using Linux and node-oracledb is being run on the same
+computer as the database, you can set required Oracle environment
+variables, such as `ORACLE_HOME` and `LD_LIBRARY_PATH` in your shell
+by executing:
+
+```
+source /usr/local/bin/oraenv
+```
+
+Or, if you are using [Oracle Database XE 11.2][130], by executing:
+
+```
+source /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh
+```
+
+Make sure the Node.js process has directory and file access
+permissions for the Oracle libraries and other files.  Typically the
+home directory of the Oracle software owner will need permissions
+relaxed.
+
+#### <a name="tnsadmin"></a> 12.1.2 Optional Oracle Net Configuration
+
+Optional Oracle Net configuration files are read when node-oracledb
+is loaded.  These files affect connections and applications.  The common
+files are:
+
+Name | Description
+-----|------------
+`tnsnames.ora` | Contains net service names and Oracle Net options for databases that can be connected to, see [Net Service Names for Connection Strings](#tnsnames). This file is only needed for advanced configuration.  Not needed if connection strings use the [Easy Connect syntax](#easyconnect). The [Oracle Net documentation on `tnsnames.ora`][18] has more information.
+`sqlnet.ora` | A configuration file controlling the network transport behavior.  For example it can set call timeouts for [high availability](#connectionha), or be used to [encrypt network traffic](#securenetwork), or be used to configure logging and tracing.  The [Oracle Net documentation on `sqlnet.ora`][132] has more information.
+
+The files should be in a directory accessible to Node.js, not the
+database server.  Default locations include:
+
+- `/opt/oracle/instantclient_18_3/network/admin` if Instant Client is in `/opt/oracle/instantclient_18_3`.
+- `/usr/lib/oracle/18.3/client64/lib/network/admin` if Oracle 18.3 Instant Client RPMs are used on Linux.
+- `$ORACLE_HOME/network/admin` if node-oracledb is using libraries from the database installation.
+
+Alternatively, the files can be put in another, accessible directory.
+Then set the environment variable [`TNS_ADMIN`][8] to that directory
+name.  For example, if the file `/etc/my-oracle-config/tnsnames.ora`
+is being used, set `TNS_ADMIN` to `/etc/my-oracle-config`.
+
+#### <a name="oraaccess"></a> 12.1.3. Optional Oracle Client Configuration
+
+If the Oracle Client Libraries used by node-oracledb are version 12,
+or later, then an optional [`oraaccess.xml`][63] file can be used to
+configure some behaviors of those libraries.  The file is read when
+node-oracledb starts.  The directory it should be in is determined
+using a similar heuristic to the [Optional Oracle Net
+Configuration](#tnsadmin) file directory.
+
+Refer to the [`oraaccess.xml` documentation][63] for more information.
+
+The following `oraaccess.xml` file sets the Oracle client
+['prefetch'][79] value to 100 rows.  This value affects every SQL
+query in the application:
+
+```
+<?xml version="1.0"?>
+ <oraaccess xmlns="http://xmlns.oracle.com/oci/oraaccess"
+  xmlns:oci="http://xmlns.oracle.com/oci/oraaccess"
+  schemaLocation="http://xmlns.oracle.com/oci/oraaccess
+  http://xmlns.oracle.com/oci/oraaccess.xsd">
+  <default_parameters>
+    <prefetch>
+      <rows>100</rows>
+    </prefetch>
+  </default_parameters>
+</oraaccess>
+```
+
+Prefetching is the number of additional rows the underlying Oracle
+client library fetches whenever node-oracledb requests query data from
+the database.  Prefetching is a tuning option to maximize data
+transfer efficiency and minimize [round-trips][124] to the database.  The
+prefetch size does not affect when, or how many, rows are returned by
+node-oracledb to the application.  The cache management is
+transparently handled by the Oracle client libraries. Note, standard
+node-oracledb fetch tuning is via
+[`fetchArraySize`](#propdbfetcharraysize), but changing the prefetch
+value can be useful in some cases such as when modifying the
+application is not feasible.
+
+The `oraaccess.xml` file has other uses including:
+
+- Turning on [Fast Application Notification (FAN)](#connectionfan) events to enable FAN notifications and [Runtime Load Balancing (RLB)](#connectionrlb).
+- Configuring [Client Result Caching][66] parameters
+- Turning on [Client Statement Cache Auto-tuning][67]
+
+### <a name="connectionstrings"></a> 12.2 Connection Strings
 
 The `connectString` parameter for
 [`oracledb.getConnection()`](#getconnectiondb) and
-[`pool.getConnection()`](#getconnectionpool) can be an [Easy
-Connect](#easyconnect) string, or a Net Service Name from a local
-[`tnsnames.ora`](#tnsnames) file or external naming service, or it can
-be the SID of a local Oracle database instance.
+[`oracledb.createPool()`](#createpool) can be an
+[Easy Connect](#easyconnect) string, or a Net Service Name from a
+local [`tnsnames.ora`](#tnsnames) file or external naming service, or
+it can be the SID of a local Oracle database instance.
 
 The `connectionString` property is an alias for `connectString`.
 Use only one of the properties.
@@ -5803,7 +5963,7 @@ Use only one of the properties.
 If a connect string is not specified, the empty string "" is used
 which indicates to connect to the local, default database.
 
-#### <a name="easyconnect"></a> 12.1.1 Easy Connect Syntax for Connection Strings
+#### <a name="easyconnect"></a> 12.2.1 Easy Connect Syntax for Connection Strings
 
 An Easy Connect string is often the simplest to use.  With Oracle Database 12 or later
 the syntax is:
@@ -5831,7 +5991,7 @@ oracledb.getConnection(
 For more information on Easy Connect strings see [Understanding the
 Easy Connect Naming Method][17] in the Oracle documentation.
 
-#### <a name="tnsnames"></a> 12.1.2 Net Service Names for Connection Strings
+#### <a name="tnsnames"></a> 12.2.2 Net Service Names for Connection Strings
 
 A Net Service Name, such as `sales` in the example below, can be used
 to connect:
@@ -5876,13 +6036,13 @@ sales =
   )
 ```
 
-See [Optional Client Configuration Files](#tnsadmin) for where
+See [Optional Oracle Net Configuration](#tnsadmin) for where
 `tnsnames.ora` files can be located.
 
-For more information on `tnsnames.ora` files and contents see [General
-Syntax of tnsnames.ora][18] in the Oracle documentation.
+For more information on `tnsnames.ora` files, see the [Oracle Net
+documentation on `tnsnames.ora`][18].
 
-#### <a name="embedtns"></a> 12.1.3 Embedded Connection Strings
+#### <a name="embedtns"></a> 12.2.3 Embedded Connection Strings
 
 Full connection strings can be embedded in applications:
 
@@ -5898,7 +6058,7 @@ oracledb.getConnection(
   . . .
 ```
 
-#### <a name="notjdbc"></a> 12.1.4 JDBC and Node-oracledb Connection Strings Compared
+#### <a name="notjdbc"></a> 12.2.4 JDBC and Node-oracledb Connection Strings Compared
 
 Developers familiar with Java connection strings that reference a
 service name like:
@@ -5954,7 +6114,9 @@ oracledb.getConnection(
   . . .
 ```
 
-### <a name="numberofthreads"></a> 12.2 Connections and Number of Threads
+Alternatively the connection string can be [embedded](#embedtns) in the application.
+
+### <a name="numberofthreads"></a> 12.3 Connections and Number of Threads
 
 If you open more than four connections, such as via
 increasing [`poolMax`](#proppoolpoolmax), you should increase the
@@ -6007,7 +6169,7 @@ that time either.  When you use methods like `async.series` or
 `async.eachSeries()`, the queuing is instead done in the main
 JavaScript thread.
 
-### <a name="connpooling"></a> 12.3 Connection Pooling
+### <a name="connpooling"></a> 12.4 Connection Pooling
 
 When applications use a lot of connections for short periods, Oracle
 recommends using a connection pool for efficiency.  Each node-oracledb
@@ -6020,6 +6182,11 @@ events](#connectionha).  This helps shield applications during planned
 maintenance and from unplanned failures.  Internally [Oracle Call
 Interface Session Pooling][6] is used, which provides many of these
 features.
+
+Since pools provide Oracle high availability features, using one is
+also recommended if you have a long running application, particularly
+if connections are released to the pool while no database work is
+being done.
 
 Pools are created by calling [`oracledb.createPool()`](#createpool).
 Generally applications will create a pool once as part of
@@ -6045,27 +6212,37 @@ Connections can also be [dropped from the pool](#connectionclose).
 
 In the async/await style:
 
+
 ```javascript
-let pool;
-try {
-  pool = await oracledb.createPool({
-    user          : "hr"
-    password      : mypw,  // mypw contains the hr schema password
-    connectString : "localhost/XEPDB1"
-  });
+var oracledb = require('oracledb');
 
-  let connection = await pool.getConnection();
-  . . .  // use connection
-  await connection.close();  // return connection to the pool
+var mypw = ...  // set mypw to the hr schema password
 
-} catch (err) {
-  console.error(err.message);
-} finally {
-  await pool.close();
-}
+(async function() {
+ let pool;
+ try {
+   pool = await oracledb.createPool({
+     user          : "hr"
+     password      : mypw,  // mypw contains the hr schema password
+     connectString : "localhost/XEPDB1"
+   });
+
+   let connection = await pool.getConnection();
+
+   result = await connection.execute("select last_name from employees");
+   console.log("Result is:", result);
+
+   await connection.close();  // return connection to the pool
+
+ } catch (err) {
+   console.error(err.message);
+ } finally {
+   await pool.close();
+ }
+})();
 ```
 
-#### <a name="conpoolsizing"></a> 12.3.1 Connection Pool Sizing
+#### <a name="conpoolsizing"></a> 12.4.1 Connection Pool Sizing
 
 The [`poolMax`](#propdbpoolmax), [`poolMin`](#propdbpoolmin) and
 [`poolPingInterval`](#propdbpoolpinginterval) attributes should be
@@ -6078,7 +6255,9 @@ should be [executed sequentially, not in parallel](#numberofthreads)
 on each connection.
 
 If you increase the size of the pool, you must [increase the number of
-threads](#numberofthreads) used by Node.js.
+threads](#numberofthreads) used by Node.js.  Since the number of
+threads available to Node.js is at most 128, this implies that
+`poolMax` should be less than 128.
 
 The growth characteristics of a connection pool are determined by the
 Pool attributes [`poolIncrement`](#proppoolpoolincrement),
@@ -6097,19 +6276,17 @@ and (iii) the number of those connections is less than the pool's
 The Oracle Real-World Performance Group's general recommendation for
 client connection pools is for the pool to have a fixed sized.  The
 values of `poolMin` and `poolMax` should be the same (and
-`poolIncrement` equal to zero), and the [resource manager][101] or
-user profile [`IDLE_TIME`][100] should not expire idle sessions.  This
-avoids connection storms which can decrease throughput.  They also
-recommend sizing connection pools so that the sum of all connections
-from all applications accessing a database gives 1-10 connections per
-database server CPU core.  See [About Optimizing Real-World
-Performance with Static Connection Pools][23].
+`poolIncrement` equal to zero), and the firewall, [resource
+manager][101] or user profile [`IDLE_TIME`][100] should not expire
+idle sessions.  This avoids connection storms which can decrease
+throughput.  See [About Optimizing Real-World Performance with Static
+Connection Pools][23], which contains details about sizing of pools.
 
 The Pool attribute [`stmtCacheSize`](#propconnstmtcachesize) can be
 used to set the statement cache size used by connections in the pool,
 see [Statement Caching](#stmtcache).
 
-#### <a name="conpooldraining"></a> 12.3.2 Connection Pool Closing and Draining
+#### <a name="conpooldraining"></a> 12.4.2 Connection Pool Closing and Draining
 
 Closing a connection pool allows database resources to be freed.  If
 Node.js is killed without [`pool.close()`](#poolclose) being called,
@@ -6142,8 +6319,8 @@ closed.
 
 In network configurations that drop (or in-line) out-of-band breaks,
 forced pool termination may hang unless you have
-[`DISABLE_OOB=ON`][122] in a `sqlnet.ora` file, see [Optional Client
-Configuration Files](#tnsadmin).
+[`DISABLE_OOB=ON`][122] in a `sqlnet.ora` file, see [Optional Oracle
+Net Configuration](#tnsadmin).
 
 Non-zero `drainTime` values are recommended so applications
 have the opportunity to gracefully finish database operations, however
@@ -6180,7 +6357,7 @@ process
   .once('SIGINT',  closePoolAndExit);
 ```
 
-#### <a name="connpoolcache"></a> 12.3.3 Connection Pool Cache
+#### <a name="connpoolcache"></a> 12.4.3 Connection Pool Cache
 
 When pools are created, they can be given a named alias.  The alias
 can later be used to retrieve the related pool object for use.  This
@@ -6345,7 +6522,7 @@ oracledb.getConnection({ poolAlias: 'default' tag: 'loc=cn;p=1' }, function(err,
 });
 ```
 
-#### <a name="connpoolqueue"></a> 12.3.4 Connection Pool Queue
+#### <a name="connpoolqueue"></a> 12.4.4 Connection Pool Queue
 
 If the application has called `getConnection()` so that all
 connections in the pool are in use, and
@@ -6368,7 +6545,7 @@ connection is [released](#connectionclose), and the number of
 connections in use drops below the value of
 [`poolMax`](#proppoolpoolmax).
 
-#### <a name="connpoolmonitor"></a> 12.3.5 Connection Pool Monitoring and Throughput
+#### <a name="connpoolmonitor"></a> 12.4.5 Connection Pool Monitoring and Throughput
 
 Connection pool usage should be monitored to choose the appropriate
 connection pool settings for your workload.
@@ -6465,7 +6642,7 @@ Environment Variable                                 | Description
 -----------------------------------------------------|-------------
 [`process.env.UV_THREADPOOL_SIZE`](#numberofthreads) | The number of worker threads for this process.  Note this shows the value of the variable, however if this variable was set after the thread pool starts, the thread pool will actually be the default size of 4.
 
-#### <a name="connpoolpinging"></a> 12.3.6 Connection Pool Pinging
+#### <a name="connpoolpinging"></a> 12.4.6 Connection Pool Pinging
 
 Connection pool pinging is a way for node-oracledb to identify
 unusable pooled connections and replace them with usable ones before
@@ -6539,7 +6716,7 @@ database to be opened by some subsequent `getConnection()` call.
 Explicit pings can be performed at any time with
 [`connection.ping()`](#connectionping).
 
-#### <a name="connpooltagging"></a> 12.3.7 Connection Tagging and Session State
+#### <a name="connpooltagging"></a> 12.4.7 Connection Tagging and Session State
 
 Applications can set "session" state in each connection, such as
 [NLS](#nls) settings from ALTER SESSION statements.  Pooled
@@ -6834,7 +7011,7 @@ try {
 }
 ```
 
-#### <a name="connpoolproxy"></a> 12.3.8 Heterogeneous Connection Pools and Pool Proxy Authentication
+#### <a name="connpoolproxy"></a> 12.4.8 Heterogeneous Connection Pools and Pool Proxy Authentication
 
 By default, connection pools are 'homogeneous' meaning that all
 connections use the same database credentials.  However, if the pool
@@ -7170,8 +7347,8 @@ SQLNET.ENCRYPTION_TYPES_SERVER = (AES256)
 If you definitely know that the database server enforces integrity and
 encryption, then you do not need to configure Node.js separately.
 However you can also, or alternatively, do so depending on your
-business needs.  Create a `sqlnet.ora` and locate it with other
-[Optional Client Configuration Files](#tnsadmin):
+business needs.  Create a files `sqlnet.ora` (see [Optional Oracle Net
+Configuration](#tnsadmin)):
 
 ```
 SQLNET.CRYPTO_CHECKSUM_CLIENT = required
@@ -7279,26 +7456,47 @@ oracledb.getConnection(
 
 ### <a name="connectionha"></a> 12.9 Connections and High Availability
 
-For applications that need to be highly available, you may want to
-configure your OS network settings and Oracle Net (which handles
-communication between node-oracledb and the database).
+For applications that need to be highly available, use the latest
+versions of Oracle Client and Database, and use the latest
+node-oracledb driver.
 
-For Oracle Net configuration, create a `sqlnet.ora` file.  See
-[Optional Client Configuration Files](#tnsadmin) for where to place
-this.  In this file you can configure settings like
+The immediate usability of connections from a connection pool can be
+aided by tuning
+[`oracledb.poolPingInterval`](#propdbpoolpinginterval).  However note
+this can mask scalability-reducing issues such as firewalls
+terminating idle connections.
+
+You can configure your OS network settings and Oracle Net (which
+handles communication between node-oracledb and the database).
+
+For Oracle Net configuration, a [`tnsnames.ora`](#tnsnames) file can
+be used to configure the database service settings such as for
+failover using Oracle RAC or a standby database.  A
+[`ENABLE=BROKEN`][36] option can be used to aid detection of a
+terminated remote server.
+
+A `sqlnet.ora` file can be used to configure settings like
 [`SQLNET.OUTBOUND_CONNECT_TIMEOUT`][33], [`SQLNET.RECV_TIMEOUT`][34]
-and [`SQLNET.SEND_TIMEOUT`][35].  You may also want to use a
-[`tnsnames.ora`](#tnsnames) file to configure the database service
-setting [`ENABLE=BROKEN`][36].
+and [`SQLNET.SEND_TIMEOUT`][35] to bound the amount of time the
+application will wait for responses from the database service.  Note
+that [`connection.callTimeout`](#dbcalltimeouts) is a newer
+alternative to the latter two options.  On systems that drop (or
+in-line) out-of-band breaks, you may want to add
+[`DISABLE_OOB=ON`][122] to your `sqlnet.ora` file.
 
-Other [Oracle Net Services][37] options may also be useful for
-high availability and performance tuning.
+See [Optional Oracle Net Configuration](#tnsadmin) for where to place
+`tnsnames.ora` and `sqlnet.ora`.
+
+Other [Oracle Net Services][37] options may also be useful for high
+availability and performance tuning.  For example the database's
+`listener.ora` file can have [`RATE_LIMIT`][133] and
+[`QUEUESIZE`][134] parameters that can help handle connection storms.
 
 #### <a name="connectionfan"></a> 12.9.1 Fast Application Notification (FAN)
 
 Users of [Oracle Database FAN][64] should set
 [`oracledb.events`](#propdbevents) to *true*.  This can also be
-enabled via [External Configuration](#oraaccess).
+enabled via [Oracle Client Configuration](#oraaccess).
 
 FAN support gives fast connection failover, an Oracle Database high
 availability feature.  This allows applications to be notified when a
@@ -7333,7 +7531,7 @@ Notification][97].
 [Oracle Database RAC][93] users with [Oracle Database (RLB)][65]
 advisory events configured should use node-oracledb [Connection
 Pooling](#connpooling) and set [`oracledb.events`](#propdbevents) to
-*true*.  The events mode can also be enabled via [External
+*true*.  The events mode can also be enabled via [Oracle Client
 Configuration](#oraaccess).
 
 RLB allows optimal use of database resources by balancing database
@@ -7379,25 +7577,9 @@ complete successfully within the additional `callTimeout` period.  In
 this case an *ORA-3114* is returned and the connection will no longer
 be usable.  It should be released.
 
-### <a name="tnsadmin"></a> 12.10 Optional Client Configuration Files
-
-Optional Oracle Client configuration files are read when node-oracledb
-is loaded.  These files affect connections and applications.  Common
-files include `tnsnames.ora`, `sqlnet.ora`, `ldap.ora`, and
-[`oraaccess.xml`](#oraaccess).
-
-The files should be accessible to the node-oracledb binary, not the
-database server.  Default locations include:
-
-- `/opt/oracle/instantclient_18_3/network/admin` if Instant Client is in `/opt/oracle/instantclient_18_3`.
-- `/usr/lib/oracle/12.2/client64/lib/network/admin` if Oracle 18.3 Instant Client RPMs are used on Linux.
-- `$ORACLE_HOME/network/admin` if node-oracledb is using libraries from the database installation.
-
-Alternatively, Oracle Client configuration files can be put in
-another, accessible directory.  Then set the environment variable
-[`TNS_ADMIN`][8] to that directory name.  For example, if the file
-`/etc/my-oracle-config/tnsnames.ora` is being used, set `TNS_ADMIN` to
-`/etc/my-oracle-config`.
+Users of pre-Oracle 18c client libraries can set call timeouts by
+setting [`SQLNET.RECV_TIMEOUT`][34] and [`SQLNET.SEND_TIMEOUT`][35] in
+a [`sqlnet.ora` file](#tnsadmin).
 
 ## <a name="sqlexecution"></a> 13. SQL Execution
 
@@ -8335,7 +8517,7 @@ Here are things to do when you see an *ORA-1000*:
   efficiency.
 
   To help set the cache size, you can turn on auto-tuning with Oracle
-  12.1, or later, using an [*oraaccess.xml*](#oraaccess) file.
+  12.1, or later, using an [`oraaccess.xml`](#oraaccess) file.
 
   For more information, see the [Statement Caching](#stmtcache) documentation.
 
@@ -10583,8 +10765,9 @@ oracledb.getConnection(
 The value can also be overridden in the `poolAttrs` parameter to
 the [`createPool()`](#createpool) method.
 
-With Oracle Database 12c, or later, the statement cache size can be automatically tuned with the
-[External Configuration](#oraaccess) *oraaccess.xml* file.
+With Oracle Database 12c, or later, the statement cache size can be
+automatically tuned with the [Oracle Client Configuration](#oraaccess)
+`oraaccess.xml` file.
 
 To manually tune the statement cache size, monitor general application
 load and the [Automatic Workload Repository][62] (AWR) "bytes sent via SQL*Net to client" values.  The
@@ -10924,55 +11107,7 @@ Queuing is highly configurable and scalable, providing a great way to
 distribute workload for a web application.  Oracle AQ is available in
 all editions of the database.
 
-## <a name="oraaccess"></a> 24. External Configuration
-
-The optional Oracle client-side configuration file [oraaccess.xml][63]
-can be used to configure some behaviors of node-oracledb.  See
-[Optional Client Configuration Files](#tnsadmin) for information about
-file creation..
-
-An oraaccess.xml file is only used when node-oracledb is linked with
-Oracle Database 12c, or later, client libraries.
-
-The following oraaccess.xml file sets the Oracle client
-['prefetch'][79] value to 100 rows.  This value affects every SQL
-query in the application:
-
-```
-<?xml version="1.0"?>
- <oraaccess xmlns="http://xmlns.oracle.com/oci/oraaccess"
-  xmlns:oci="http://xmlns.oracle.com/oci/oraaccess"
-  schemaLocation="http://xmlns.oracle.com/oci/oraaccess
-  http://xmlns.oracle.com/oci/oraaccess.xsd">
-  <default_parameters>
-    <prefetch>
-      <rows>100</rows>
-    </prefetch>
-  </default_parameters>
-</oraaccess>
-```
-
-Prefetching is the number of additional rows the underlying Oracle
-client library fetches whenever node-oracledb requests query data from
-the database.  Prefetching is a tuning option to maximize data
-transfer efficiency and minimize [round-trips][124] to the database.  The
-prefetch size does not affect when, or how many, rows are returned by
-node-oracledb to the application.  The cache management is
-transparently handled by the Oracle client libraries. Note, standard
-node-oracledb fetch tuning is via
-[`fetchArraySize`](#propdbfetcharraysize), but changing the prefetch
-value can be useful in some cases such as when modifying the
-application is not feasible.
-
-The oraaccess.xml file has other uses including:
-
-- Turning on [Fast Application Notification (FAN)](#connectionfan) events to enable FAN notifications and [Runtime Load Balancing (RLB)](#connectionrlb).
-- Configuring [Client Result Caching][66] parameters
-- Turning on [Client Statement Cache Auto-tuning][67]
-
-Refer to the [oraaccess.xml documentation][63].
-
-## <a name="nls"></a> 25. Globalization and National Language Support (NLS)
+## <a name="nls"></a> 24. Globalization and National Language Support (NLS)
 
 Node-oracledb can use Oracle's [National Language Support (NLS)][68]
 to assist in globalizing applications.
@@ -10998,7 +11133,7 @@ FROM nls_database_parameters
 WHERE parameter = 'NLS_CHARACTERSET'
 ```
 
-The general Oracle statement  to find the 'client' character set is:
+The general Oracle statement to find the 'client' character set is:
 
 ```sql
 SELECT DISTINCT client_charset AS client_charset
@@ -11008,7 +11143,7 @@ WHERE sid = SYS_CONTEXT('USERENV', 'SID');
 
 In node-oracledb this will always show AL32UTF8.
 
-## <a name="endtoend"></a> 26. End-to-end Tracing, Mid-tier Authentication, and Auditing
+## <a name="endtoend"></a> 25. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
 The Connection properties [action](#propconnaction),
 [module](#propconnmodule), and [clientId](#propconnclientid) set
@@ -11117,7 +11252,7 @@ Note if [`oracledb.connectionClass`](#propdbconclass) is set for a
 non-pooled connection, the `CLIENT_DRIVER` value will not be set for
 that connection.
 
-## <a name="sodaoverview"></a> 27. Simple Oracle Document Access (SODA)
+## <a name="sodaoverview"></a> 26. Simple Oracle Document Access (SODA)
 
 Oracle Database Simple Oracle Document Access (SODA) access is
 available in node-oracledb version 3 through a set of NoSQL-style
@@ -11193,7 +11328,7 @@ Node-oracledb uses the following objects for SODA:
   remove documents.  This is an internal object that should not be
   directly accessed.
 
-### <a name="sodarequirements"></a> 27.1 Node-oracledb SODA Requirements
+### <a name="sodarequirements"></a> 26.1 Node-oracledb SODA Requirements
 
 SODA is available to Node.js applications when the node-oracledb
 driver uses Oracle Database and Client 18.3, or higher.
@@ -11236,7 +11371,7 @@ Note:
 - When [`oracledb.autoCommit`](#propdbisautocommit) is *true*, most SODA methods will issue a commit before successful return.
 - SODA provide optimistic locking, see [`sodaOperation.version()`](#sodaoperationclassversion).
 
-### <a name="creatingsodacollections"></a> 27.2 Creating SODA Collections
+### <a name="creatingsodacollections"></a> 26.2 Creating SODA Collections
 
 The following examples use Node.js 8's
 [async/await](#asyncawaitoverview) syntax, however callbacks can also
@@ -11284,7 +11419,7 @@ See [SODA Client-Assigned Keys and Collection
 Metadata](#sodaclientkeys) for how to create a collection with custom
 metadata.
 
-### <a name="accessingsodadocuments"></a> 27.3 Creating and Accessing SODA documents
+### <a name="accessingsodadocuments"></a> 26.3 Creating and Accessing SODA documents
 
 To insert a document into an opened collection, a JavaScript object
 that is the document content can be used directly.  In the following
@@ -11437,7 +11572,7 @@ However note that for efficiency the SodaDocuments returned from
 do not contain document content.  These SodaDocuments are useful for
 getting other document components such as the key and version.
 
-### <a name="sodaqbesearches"></a> 27.4 SODA Query-by-Example Searches for JSON Documents
+### <a name="sodaqbesearches"></a> 26.4 SODA Query-by-Example Searches for JSON Documents
 
 JSON documents stored in SODA can easily be searched using
 query-by-example (QBE) syntax with
@@ -11529,7 +11664,7 @@ Some QBE examples are:
 
     See [Overview of QBE Spatial Operators][111].
 
-### <a name="sodaclientkeys"></a> 27.5 SODA Client-Assigned Keys and Collection Metadata
+### <a name="sodaclientkeys"></a> 26.5 SODA Client-Assigned Keys and Collection Metadata
 
 Default collections support JSON documents and use system generated
 document keys. Various storage options are also configured which
@@ -11656,7 +11791,7 @@ try {
 }
 ```
 
-### <a name="sodajsondataguide"></a> 27.6 JSON Data Guides in SODA
+### <a name="sodajsondataguide"></a> 26.6 JSON Data Guides in SODA
 
 SODA exposes Oracle Database's [JSON data guide][116] feature.  This
 lets you discover information about the structure and content of JSON
@@ -11708,7 +11843,7 @@ this case) and lengths of the values of these fields are listed.  The
 want to define SQL views over JSON data. They suggest how to name the
 columns of a view.
 
-## <a name="promiseoverview"></a> 28. Promises and node-oracledb
+## <a name="promiseoverview"></a> 27. Promises and node-oracledb
 
 Node-oracledb supports Promises with all asynchronous methods.  The native Promise
 implementation is used.
@@ -11806,7 +11941,7 @@ Unhandled Rejection at:  Promise {
 For more information, see [How to get, use, and close a DB connection
 using promises][73].
 
-### <a name="custompromises"></a> 28.1 Custom Promise Libraries
+### <a name="custompromises"></a> 27.1 Custom Promise Libraries
 
 The Promise implementation is designed to be overridden, allowing a
 custom Promise library to be used.
@@ -11822,7 +11957,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-## <a name="asyncawaitoverview"></a> 29. Async/Await and node-oracledb
+## <a name="asyncawaitoverview"></a> 28. Async/Await and node-oracledb
 
 Node.js 7.6 supports async functions, also known as Async/Await.  These
 can be used with node-oracledb.  For example:
@@ -11883,7 +12018,7 @@ Buffers.
 For more information, see [How to get, use, and close a DB connection
 using async functions][74].
 
-## <a name="bindtrace"></a> <a name="tracingsql"></a> 30. Tracing SQL and PL/SQL Statements
+## <a name="bindtrace"></a> <a name="tracingsql"></a> 29. Tracing SQL and PL/SQL Statements
 
 ####  End-to-End Tracing
 
@@ -11940,9 +12075,9 @@ parameters.
 
 PL/SQL users may be interested in using [PL/Scope][78].
 
-## <a name="migrate"></a> 31. Migrating from Previous node-oracledb Releases
+## <a name="migrate"></a> 30. Migrating from Previous node-oracledb Releases
 
-### <a name="migratev1v2"></a> 31.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
+### <a name="migratev1v2"></a> 30.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
 
 When upgrading from node-oracledb version 1.13 to version 2.0:
 
@@ -11996,7 +12131,7 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
 - Test applications to check if changes such as the improved property
   validation uncover latent problems in your code.
 
-### <a name="migratev20v21"></a> 31.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
+### <a name="migratev20v21"></a> 30.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
 
 When upgrading from node-oracledb version 2.0 to version 2.1:
 
@@ -12007,7 +12142,7 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
     - Stop passing a callback.
     - Optionally pass an error.
 
-### <a name="migratev23v30"></a> 31.3 Migrating from node-oracledb 2.3 to node-oracledb 3.0
+### <a name="migratev23v30"></a> 30.3 Migrating from node-oracledb 2.3 to node-oracledb 3.0
 
 When upgrading from node-oracledb version 2.3 to version 3.0:
 
@@ -12028,7 +12163,7 @@ When upgrading from node-oracledb version 2.3 to version 3.0:
   `execute()` result being set to `undefined`.  These properties are
   no longer set in node-oracledb 3.
 
-### <a name="migratev30v31"></a> 31.4 Migrating from node-oracledb 3.0 to node-oracledb 3.1
+### <a name="migratev30v31"></a> 30.4 Migrating from node-oracledb 3.0 to node-oracledb 3.1
 
 When upgrading from node-oracledb version 3.0 to version 3.1:
 
@@ -12064,7 +12199,7 @@ When upgrading from node-oracledb version 3.0 to version 3.1:
 [15]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FD9A8CB4-6B9A-44E5-B114-EFB8DA76FC88
 [16]: https://nodejs.org/api/stream.html
 [17]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-B0437826-43C1-49EC-A94D-B650B6A4A6EE
-[18]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-47DAB4DF-1D35-46E5-B227-339FF912E058
+[18]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A3F9D023-9CC4-445D-8921-6E40BD900EAD
 [19]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-BADFDC72-0F1D-47FA-8857-EC15DC8ACFBB
 [20]: http://docs.libuv.org/en/v1.x/threadpool.html
 [21]: https://github.com/libuv/libuv
@@ -12175,3 +12310,7 @@ When upgrading from node-oracledb version 3.0 to version 3.1:
 [127]: https://github.com/oracle/node-oracledb/tree/master/examples/sessiontagging1.js
 [128]: https://github.com/oracle/node-oracledb/tree/master/examples/sessiontagging2.js
 [129]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=ADQUE
+[130]: https://www.oracle.com/database/technologies/appdev/xe.html
+[132]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-19423B71-3F6C-430F-84CC-18145CC2A818
+[133]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F302BF91-64F2-4CE8-A3C7-9FDB5BA6DCF8
+[134]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FF87387C-1779-4CC3-932A-79BB01391C28
