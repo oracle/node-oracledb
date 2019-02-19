@@ -20,8 +20,7 @@ node_modules
 /examples/lobselectout.jpg
 /examples/lobbindsout1.txt
 /examples/lobbindsout2.txt
-/package/SHASUMS256.txt
-/package/*.gz
+/package/Staging/*
 package-lock.json
 
 # Oracle Ignores
