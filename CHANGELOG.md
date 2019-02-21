@@ -1,21 +1,26 @@
 # Change Log
 
-## node-oracledb v3.1.2 (DD Mon YYYY)
+## node-oracledb v3.1.2 (22 Feb 2019)
 
-This release is under development.
-
-- Fixed a bug that caused random CQN crashes ([ODPI-C change](https://github.com/oracle/odpi/issues/96)).
+- Fixed a bug causing CQN crashes when multiple queries are registered
+  ([ODPI-C change](https://github.com/oracle/odpi/issues/96)).
 
 - Fixed a CQN race condition to prevent a crash when a multiple
   `conn.unsubscribe()` calls are made on the same subscription.
 
-- Improve validation of `executeMany()` arguments to prevent a crash.
+- Improved validation of `executeMany()` arguments to prevent a crash.
 
-- Use a relative URL for the ODPI-C submodule to make cloning from
-  oss.oracle.com also use ODPI-C from oss.oracle.com
+- Standardized error message for SODA `createCollection()` with
+  invalid metadata.
+
+- Corrected the DPI-1050 error text displayed when the Oracle Client
+  libraries are too old ([ODPI-C change](https://github.com/oracle/odpi/commit/d2fea3801286d054e18b0102e60a69907b7faa9a)).
 
 - Allow `npm run buildbinary` to succeed even if `git` is not
   available.
+
+- Use a relative URL for the ODPI-C submodule to make cloning from
+  oss.oracle.com also use ODPI-C from oss.oracle.com
 
 ## node-oracledb v3.1.1 (25 Jan 2019)
 
