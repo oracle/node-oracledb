@@ -1,57 +1,197 @@
-body {
-    font-family: -apple-system, BlinkMacSystemFont,
-            "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji",
-            "Segoe UI Emoji", "Segoe UI Symbol";
-    font-size: 16px;
-    line-height: 1.5;
-    color: #333;
-    background-color: #ff;
+* {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
-#container {
-    border: 2px solid #c6051f;
-    min-height: 103%;
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+a {
+  color: #006ed0;
+  text-decoration: none;
+}
+
+a:hover,
+a:focus {
+  text-decoration: underline;
 }
 
 h1 {
-    background-color: #c6051f;
-    color: white;
-    font-size: 2.45em;
-    margin: 0;
-    padding: .3em;
+  font-size: 24px;
+  margin: 0;
+  padding: 0;
 }
 
-h2 {
-    margin-bottom: .5em;
+h2,
+h3 {
+  margin-bottom: 8px;
+}
+
+h4 {
+  margin-bottom: 4px;
+}
+
+p {
+  margin: 0 0 24px;
+}
+
+ul,
+ol {
+  margin: 0 0 24px;
 }
 
 hr {
-    color: #c6051f;
+  margin: 24px 0;
+  border: 0;
+  border-top: 1px solid rgba(0, 0, 0, .15);
+  padding: 0;
+  background-color: transparent;
 }
 
-#menu {
-    background-color: #d11b33;
-    padding: .5em;
-    margin-bottom: .5em;
+.container {
+  max-width: 998px;
+  padding-left: 16px;
+  padding-right: 16px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-#menu a {
-    text-decoration: none;
-    color: white
+.oracleHeader {
+  background-color: #fff;
+  -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .1);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .1);
 }
 
-#menu a:hover {
-    text-decoration: underline
+.oracleLogo {
+  width: 160px;
+  height: 64px;
+  padding-left: 160px;
+  color: #fff;
+  background-color: #f80000;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center center;
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTgwIDY4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0xNTIuMjExIDI5LjYzYTEuNzg2IDEuNzg2IDAgMCAxLTEuNzg4LTEuNzgzYzAtLjk4NS44LTEuNzg0IDEuNzg4LTEuNzg0YTEuNzg2IDEuNzg2IDAgMCAxIDEuMjY3IDMuMDQ2IDEuNzg2IDEuNzg2IDAgMCAxLTEuMjY3LjUyMXptMC0zLjE4N2ExLjQwMiAxLjQwMiAwIDAgMC0xLjI5Ljg2OCAxLjM5NSAxLjM5NSAwIDAgMCAuMzEgMS41MjIgMS40MDUgMS40MDUgMCAwIDAgMS41MjkuMjk3IDEuNCAxLjQgMCAwIDAgLjg2LTEuMjk2IDEuMzg1IDEuMzg1IDAgMCAwLTEuNDA5LTEuMzkxem0uNDgyIDEuNDY3Yy0uMDI1LjAxMy0uMDM3LjAyNS0uMDg4LjA1bC40NTUuODIzaC0uNDQ0bC0uNDA2LS43NmgtLjI3OXYuNzZoLS4zOTN2LTEuOTk5aC41MDdhMS4yOSAxLjI5IDAgMCAxIC41Mi4wNjQuNTU4LjU1OCAwIDAgMSAuMzk1LjU1Ni41MDMuNTAzIDAgMCAxLS4wMjYuMTY1LjUxNC41MTQgMCAwIDEtLjI0Mi4zNDFoLjAwMXptLS4yNzktLjc1OWEuOTIuOTIgMCAwIDAtLjM2Ny0uMDM4aC0uMTE1di41ODJoLjI1NGEuMzkuMzkgMCAwIDAgLjMzLS4xMjYuMjY2LjI2NiAwIDAgMCAuMDUtLjE3Ny4yODQuMjg0IDAgMCAwLS4xNTItLjI0ek0xMzguNCAzOS4yMDVoMTEuMDIyTDE0Ny42MiA0MmgtOS40MjRjLTQuMzg5IDAtNy45NDYtMy41NDgtNy45NDYtNy45MjRzMy41NTctNy45MjQgNy45NDYtNy45MjRoMTAuOTg1bC0xLjgxMyAyLjc5NWgtOC45NjlhNS4xNSA1LjE1IDAgMCAwLTQuOTQ3IDMuNzMxaDE0Ljg2NWwtMS44IDIuNzk1aC0xMy4wNjVhNS4xMzQgNS4xMzQgMCAwIDAgNC45NDcgMy43MzJ6TTEyOS4xNCA0MkgxMTUuMmMtLjQxNy4wMDMtLjgyLS4xNi0xLjExNS0uNDU1YTEuNDkxIDEuNDkxIDAgMCAxLS40NDQtMS4wNjN2LTE0LjMzaDMuMDU2djEzLjA1M2gxNC4yNDRsLTEuOCAyLjc5NXptLTI3LjkxNy0yLjc5NWgxMS4wMjJsLTEuOCAyLjc5NWgtOS40MjRjLTQuMzkgMC03Ljk0Ny0zLjU0OC03Ljk0Ny03LjkyNHMzLjU1OC03LjkyNCA3Ljk0Ny03LjkyNGgxMC45NzFsLTEuNzg5IDIuNzk1aC04Ljk4Yy0yLjg0IDAtNS4xNDMgMi4yOTYtNS4xNDMgNS4xMjkgMCAyLjgzMyAyLjMwMyA1LjEyOSA1LjE0MyA1LjEyOXpNOTEuMDQgNDJsLTEuNy0yLjc5NWgtOC4yNTdsLTEuODAxLTIuNzk1aDguMTU1bC00LjMxMy02LjkxOUw3NS4yMSA0MmgtMy42bDkuNjI1LTE1LjAyNmEyLjI3NiAyLjI3NiAwIDAgMSAxLjg5LS45NzQgMi4yMzUgMi4yMzUgMCAwIDEgMS44NTIuOTQ5bDkuNjY1IDE1LjA1SDkxLjA0em0tMjQuOTEtNS4xMzVoLTEuMzk1TDcwLjg3MyA0MmgtNC40NGwtOS4xMjUtNy45MyA4LjYxNy4wMTJhMi41NzEgMi41NzEgMCAwIDAgMi41NzUtMi41NjcgMi41NzEgMi41NzEgMCAwIDAtMi41NzUtMi41NjdINTUuODExVjQyaC0zLjA1NVYyNi4xNTJoMTMuMzcyYzEuOTIgMCAzLjY5MiAxLjAyIDQuNjUyIDIuNjc4Ljk2IDEuNjU3Ljk2IDMuNyAwIDUuMzU3YTUuMzc0IDUuMzc0IDAgMCAxLTQuNjUyIDIuNjc4ek00My4xODQgNDJoLTkuMjM4QzI5LjU1OCA0MiAyNiAzOC40NTIgMjYgMzQuMDc2czMuNTU4LTcuOTI0IDcuOTQ2LTcuOTI0aDkuMjM4YzQuMzg4IDAgNy45NDYgMy41NDggNy45NDYgNy45MjRTNDcuNTcyIDQyIDQzLjE4NCA0MnptLS4yMDYtMTMuMDUzaC04LjgyN2MtMi44NCAwLTUuMTQ0IDIuMjk3LTUuMTQ0IDUuMTMgMCAyLjgzMiAyLjMwMyA1LjEyOCA1LjE0NCA1LjEyOGg4LjgyN2MyLjg0IDAgNS4xNDMtMi4yOTYgNS4xNDMtNS4xMjlhNS4xMzYgNS4xMzYgMCAwIDAtNS4xNDMtNS4xMjl6IiBmaWxsPSIjRkZGIi8+PC9zdmc+');
+  white-space: nowrap;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: top;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
-#menu a:visited {
-    color: white
+.header {
+  background-color: #f9f9f9;
+  -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .1);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .1);
 }
 
-#content {
-    margin: 1em;
+.header > .container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
-.logo {
-    float: right;
+@media (max-width: 767px) {
+  .header > .container {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-align: start;
+    -ms-flex-align: start;
+    align-items: flex-start;
+  }
+}
+
+.headerLogoContainer {
+  -webkit-box-flex: 0;
+  -ms-flex-positive: 0;
+  flex-grow: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  -ms-flex-preferred-size: auto;
+  flex-basis: auto;
+  margin-right: 16px;
+}
+
+.headerLogo {
+  max-width: 128px;
+  display: block;
+  height: auto;
+  width: 100%;
+  margin-right: auto;
+}
+
+@media (max-width: 767px) {
+  .headerLogoContainer {
+    margin-right: 0;
+  }
+
+  .headerLogo {
+    max-width: 100%;
+  }
+}
+
+.headerTitle {
+  font-size: 40px;
+  line-height: 1.2;
+  font-weight: 700;
+  margin: 16px 0;
+}
+
+.headerNav {
+  margin: 16px 0;
+}
+
+.headerNav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.headerNav li {
+  margin: 0;
+  padding: 0;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+}
+
+.headerNav li + li {
+  margin-left: 20px;
+}
+
+@media (max-width: 767px) {
+  .headerNav ul {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+  }
+
+  .headerNav li + li {
+    margin-left: 0;
+    margin-top: 8px;
+  }
+}
+
+.mainContent {
+  padding-top: 16px;
+  padding-bottom: 16px;
 }
