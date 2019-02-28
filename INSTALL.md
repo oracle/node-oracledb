@@ -1618,9 +1618,9 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [12]: http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html
 [13]: http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html#ic_x64_inst
 [14]: https://linux.oracle.com
-[15]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A3F9D023-9CC4-445D-8921-6E40BD900EAD
-[16]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-28040885-6832-4FFC-9258-0EF19FE9A3AC
-[17]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E72B32D3-4343-475F-9CB4-CE28FF8EFD29
+[15]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7F967CE5-5498-427C-9390-4A5C6767ADAA
+[16]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2041545B-58D4-48DC-986F-DCC9D0DEC642
+[17]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-04F09076-1D04-46DC-BA8C-1B67C1A464FD
 [18]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-9D12F489-EC02-46BE-8CD4-5AECED0E2BA2
 [19]: https://github.com/oracle/node-oracledb/tree/master/examples
 [20]: https://www.oracle.com/database/technologies/appdev/xe.html
