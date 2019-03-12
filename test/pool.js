@@ -239,6 +239,87 @@ describe('2. pool.js', function() {
       );
     });
 
+    it('2.3.4 poolMax and poolMin actually limit the pool size', function (done) {
+      var conns=[], pool, isPoolClosed=false;
+      async.series([
+        function (cb) {
+          oracledb.createPool({
+            ...dbConfig,
+            poolMax: 2,
+            poolMin: 1,
+            poolTimeout: 1,
+            queueTimeout: 1,
+          }, function (err, newPool) {
+            pool = newPool;
+            cb(err);
+          });
+        },
+        function (cb) {
+          pool.getConnection(function (err, newConn) {
+            if (!newConn) {
+              cb(new Error("Failed to create connection"));
+              return;
+            }
+            conns.push(newConn);
+            cb(err);
+          });
+        },
+        function (cb) {
+          pool.getConnection(function (err, newConn) {
+            if (!newConn) {
+              cb(new Error("Failed to create connection"));
+              return;
+            }
+            conns.push(newConn);
+            cb(err);
+          });
+        },
+        // The third connection should throw NJS-040 error within queueTimeout ms,
+        // No NJS-040 error means poolMax parameter failed to limit connection number
+        function (cb) {
+          pool.getConnection(function (err, newConn) {
+            if (err && err.message.startsWith("NJS-040")) {
+              cb();
+            } else {
+              cb(new Error("PoolMax failed to limit connection numbers"));
+            }
+          });
+        },
+        function (cb) {
+          conns[0].close(function (err) {
+            cb(err);
+          });
+        },
+        function (cb) {
+          conns[1].close(function (err) {
+            cb(err);
+          });
+        },
+        function (cb) {
+          setTimeout(function() {
+            // The number of remaining connections after poolTimeout seconds should >= poolMin.
+            // The number of remaining connections < poolMin means poolMin parameter failed to limit connection number
+            if (pool.connectionsOpen < 1) {
+              cb(new Error("PoolMin failed to limit connection numbers"));
+              return;
+            }
+            pool.close(function (err) {
+              if (!err) isPoolClosed=true;
+              cb(err);
+            });
+          }, 2000);
+        },
+      ], function (err) {
+        if (!isPoolClosed) {
+          pool.close(0, function (err) {
+            done(err);
+          });
+        } else {
+          done(err);
+        }
+      });
+    });
+
   }); // 2.3
 
   describe('2.4 poolIncrement', function(){
