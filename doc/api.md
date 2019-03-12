@@ -22,7 +22,7 @@ limitations under the License.
 
 1. [Introduction](#intro)
     - 1.1 [Getting Started with Node-oracledb](#getstarted)
-        - 1.1.1 [Example: Simple SQL SELECT statement in Node.js with Callbacks](#examplequerycb)
+        - 1.1.1 [Example: A SQL SELECT statement in Node.js](#examplequery)
         - 1.1.2 [Example: Simple Oracle Document Access (SODA) in Node.js](#examplesodaawait)
 2. [Errors](#errorobj)
     - 2.1 [Error Properties](#properror)
@@ -388,15 +388,18 @@ limitations under the License.
     - 26.4 [SODA Query-by-Example Searches for JSON Documents](#sodaqbesearches)
     - 26.5 [SODA Client-Assigned Keys and Collection Metadata](#sodaclientkeys)
     - 26.6 [JSON Data Guides in SODA](#sodajsondataguide)
-27. [Promises and node-oracledb](#promiseoverview)
-    - 27.1 [Custom Promise Libraries](#custompromises)
-28. [Async/Await and node-oracledb](#asyncawaitoverview)
-29. [Tracing SQL and PL/SQL Statements](#tracingsql)
-30. [Migrating from Previous node-oracledb Releases](#migrate)
-    - 30.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
-    - 30.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
-    - 30.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
-    - 30.4 [Migrating from node-oracledb 3.0 to node-oracledb 3.1](#migratev30v31)
+27. [Tracing SQL and PL/SQL Statements](#tracingsql)
+28. [Node.js Programming Styles and node-oracledb](#programstyles)
+    - 28.1 [Callbacks and node-oracledb](#callbackoverview)
+    - 28.2 [Promises and node-oracledb](#promiseoverview)
+        - 28.2.1 [Custom Promise Libraries](#custompromises)
+    - 28.3 [Async/Await and node-oracledb](#asyncawaitoverview)
+29. [Migrating from Previous node-oracledb Releases](#migrate)
+    - 29.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
+    - 29.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
+    - 29.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
+    - 29.4 [Migrating from node-oracledb 3.0 to node-oracledb 3.1](#migratev30v31)
+    - 29.5 [Migrating from node-oracledb 3.1 to node-oracledb 4.0](#migratev31v40)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
 
@@ -404,12 +407,11 @@ limitations under the License.
 
 The [*node-oracledb*][1] add-on for Node.js powers high performance Oracle Database applications.
 
-This document shows how to use node-oracledb version 3.  The API
+This document shows how to use node-oracledb version 4.  The API
 reference is in sections 2 - 11 and the user guide in subsequent
-sections.
-
-Documentation about node-oracledb version 1 is [here][94].
+sections.  Documentation about node-oracledb version 1 is [here][94].
 Documentation about node-oracledb version 2 is [here][121].
+Documentation about node-oracledb version 3 is [here][135].
 
 The node-oracledb API is a generic Oracle Database access layer.
 Almost all the functionality described here is common across all
@@ -425,9 +427,9 @@ Install node-oracledb using the [Quick Start Node-oracledb
 Installation][87] steps.
 
 Download node-oracledb [examples][3] or create a script like the one
-below.  As well as callbacks, node-oracledb can also use
-[Promises](#promiseoverview) and [Async/Await](#asyncawaitoverview)
-functions.
+below.  As well as [Async/Await](#asyncawaitoverview) functions,
+node-oracledb can also use [Callbacks](#callbackoverview), and
+[Promises](#promiseoverview).
 
 Scripts to create Oracle's sample schemas can be found at
 [github.com/oracle/db-sample-schemas][4].
@@ -447,49 +449,49 @@ Run the script, for example:
 node myscript.js
 ```
 
-####  <a name="examplequerycb"></a> 1.1.1 Example: Simple SQL SELECT statement in Node.js with Callbacks
+####  <a name="examplequery"></a> 1.1.1 Example: A SQL SELECT statement in Node.js
 
 ```javascript
 // myscript.js
+// This example uses Node 8's async/await syntax.
 
 var oracledb = require('oracledb');
 
 var mypw = ...  // set mypw to the hr schema password
 
-oracledb.getConnection(
-  {
-    user          : "hr",
-    password      : mypw
-    connectString : "localhost/XEPDB1"
-  },
-  function(err, connection) {
-    if (err) {
-      console.error(err.message);
-      return;
-    }
-    connection.execute(
+async function run() {
+
+  let connection;
+
+  try {
+    connection = await oracledb.getConnection(  {
+      user          : "hr",
+      password      : mypw
+      connectString : "localhost/XEPDB1"
+    });
+
+    let result = await connection.execute(
       `SELECT manager_id, department_id, department_name
        FROM departments
        WHERE manager_id = :id`,
       [103],  // bind value for :id
-      function(err, result) {
-        if (err) {
-          console.error(err.message);
-          doRelease(connection);
-          return;
-        }
-        console.log(result.rows);
-        doRelease(connection);
-      });
-  });
+    );
+    console.log(result.rows);
 
-function doRelease(connection) {
-  connection.close(
-    function(err) {
-      if (err)
-        console.error(err.message);
-    });
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
 }
+
+run();
 ```
 
 With Oracle's sample HR schema, the output is:
@@ -501,7 +503,7 @@ With Oracle's sample HR schema, the output is:
 #### <a name="examplesodaawait"></a> 1.1.2 Example: Simple Oracle Document Access (SODA) in Node.js
 
 Oracle Database 18c users who have been granted the SODA_APP role can
-use [node-oracledb 3's SODA API](#sodaoverview) to store content such
+use [node-oracledb's SODA API](#sodaoverview) to store content such
 as JSON.  SODA support in node-oracledb is in Preview status and
 should not be used in production.  It will be supported with a future
 version of Oracle Client libraries.
@@ -557,12 +559,13 @@ oracledb.autoCommit = true;
 ## <a name="errorobj"></a> 2. Errors
 
 The last parameter of each method is a callback, unless
-[Promises](#promiseoverview) are being used.  The first parameter of
-the callback is an *Error* object that contains error information if
-the call fails.  If the call succeeds, then the object is null.
+[Promises](#promiseoverview) or [Async/Await](#asyncawaitoverview) are
+being used.  The first parameter of the callback is an *Error* object
+that contains error information if the call fails.  If the call
+succeeds, then the object is null.
 
-When using Promises, the `catch()` callback's error object will
-contain error information when the Promise chain fails.
+When using Promises or Async/Await, the `catch()` error object will
+contain error information when a failure occurs.
 
 If an invalid value is set for a property, then an error occurs.  The
 same is true for invalid operations on read-only or write-only
@@ -11843,7 +11846,186 @@ this case) and lengths of the values of these fields are listed.  The
 want to define SQL views over JSON data. They suggest how to name the
 columns of a view.
 
-## <a name="promiseoverview"></a> 27. Promises and node-oracledb
+## <a name="bindtrace"></a> <a name="tracingsql"></a> 27. Tracing SQL and PL/SQL Statements
+
+####  End-to-End Tracing
+
+Applications that have implemented [End-to-end Tracing](#endtoend)
+calls such as [action](#propconnaction) and [module](#propconnmodule),
+will make it easier in database monitoring tools to identify SQL
+statement execution.
+
+#### Tracing Executed Statements
+
+Database statement tracing is commonly used to identify performance
+issues.  Oracle Database trace files can be analyzed after statements
+are executed.  Tracing can be enabled in various ways at a database
+system or individal session level.  Refer to [Oracle Database Tuning
+documentation][95].  Setting a customer identifier is recommended to
+make searching for relevant log files easier:
+
+```
+ALTER SESSION SET tracefile_identifier='My-identifier' SQL_TRACE=TRUE
+```
+
+In node-oracledb itself, the [ODPI-C tracing capability][75] can be
+used to log executed statements to the standard error stream.  Before
+executing Node.js, set the environment variable `DPI_DEBUG_LEVEL`
+to 16.  At a Windows command prompt, this could be done with `set
+DPI_DEBUG_LEVEL=16`.  On Linux, you might use:
+
+```
+export DPI_DEBUG_LEVEL=16
+node myapp.js 2> log.txt
+```
+
+For an application that does a single query, the log file might
+contain a tracing line consisting of the prefix 'ODPI', a thread
+identifier, a timestamp, and the SQL statement executed:
+
+```
+ODPI [6905309] 2017-09-13 09:02:46.140: SQL select sysdate from dual where :b = 1
+```
+
+#### Tracing Bind Values
+
+Sometimes it is useful to trace the bind data values that have been
+used when executing statements.  Several methods are available.
+
+In the Oracle Database, the view [`V$SQL_BIND_CAPTURE`][76] can
+capture bind information.  Tracing with Oracle Database's
+[`DBMS_MONITOR.SESSION_TRACE_ENABLE()`][77] may also be useful.
+
+You can also write your own wrapper around `execute()` and log any
+parameters.
+
+#### Other Tracing Utilities
+
+PL/SQL users may be interested in using [PL/Scope][78].
+
+## <a name="migrate"></a> 29. Migrating from Previous node-oracledb Releases
+
+Documentation about node-oracledb version 1 is [here][94].
+
+Documentation about node-oracledb version 2 is [here][121].
+
+Documentation about node-oracledb version 3 is [here][135].
+
+### <a name="migratev1v2"></a> 29.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
+
+When upgrading from node-oracledb version 1.13 to version 2.0:
+
+- Review the [CHANGELOG][83].
+
+- Installation has changed.  Pre-built binaries are available for
+  common platforms.  To build from source code, change your
+  package.json dependency to install from GitHub.  Refer to
+  [INSTALL][80].
+
+- Users of Instant Client RPMs must now always have the Instant Client
+  libraries in the library search path.  Refer to [INSTALL][81].
+
+- Users of macOS must now always have the Instant Client
+  libraries in `~/lib` or `/usr/local/lib`.  Refer to [INSTALL][82].
+
+- For queries and REF CURSORS, the internal buffer sizing and tuning
+  of round-trips to Oracle Database is now done with
+  [`fetchArraySize`](#propdbfetcharraysize).  This replaces
+  [`prefetchRows`](#propdbprefetchrows), which is no longer used.  It
+  also replaces the overloaded use of `maxRows` for
+  [`queryStream()`](#querystream).  To upgrade scripts:
+
+    - Replace the property `prefetchRows` with `fetchArraySize` and make
+      sure all values are greater than 0.
+
+    - Tune `fetchArraySize` instead of `maxRows` for `queryStream()`.
+
+    - For [direct fetches](#fetchingrows), optionally tune
+      `fetchArraySize`.
+
+    - For [direct fetches](#fetchingrows), optionally replace enormously
+      over-sized `maxRows` values with 0, meaning an unlimited number of
+      rows can be returned.
+
+- For [direct fetches](#fetchingrows) that relied on the version 1
+  default value of [`maxRows`](#propdbmaxrows) to limit the number of
+  returned rows to 100, it is recommended to use an [`OFFSET` /
+  `FETCH`](#pagingdata) query clause.  Alternatively explicitly set
+  `maxRows` to 100.
+
+- Review and update code that checks for specific *NJS-XXX* or
+  *DPI-XXX* error messages.
+
+- Ensure that all [ResultSets](#resultsetclass) and [LOBs](#lobclass)
+  are closed prior to calling
+  [`connection.close()`](#connectionclose). Otherwise you will get the
+  error *DPI-1054: connection cannot be closed when open statements or
+  LOBs exist*.  (*Note*: this limitation was removed in node-oracledb 2.1)
+
+- Test applications to check if changes such as the improved property
+  validation uncover latent problems in your code.
+
+## <a name="programstyles"></a> 28 Node.js Programming Styles and node-oracledb
+
+Node.oracle supports [callbacks](#callbackoverview),
+[Promises](#promiseoverview), and Node.js 8's
+[async/await](#asyncawaitoverview) styles of programming.  The latter
+is recommended.
+
+### <a name="callbackoverview"></a> <a name="examplequerycb"></a> 28.1 Callbacks and node-oracledb
+
+Node-oracledb supports callbacks.
+
+```javascript
+// myscript.js
+
+var oracledb = require('oracledb');
+
+var mypw = ...  // set mypw to the hr schema password
+
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : mypw
+    connectString : "localhost/XEPDB1"
+  },
+  function(err, connection) {
+    if (err) {
+      console.error(err.message);
+      return;
+    }
+    connection.execute(
+      `SELECT manager_id, department_id, department_name
+       FROM departments
+       WHERE manager_id = :id`,
+      [103],  // bind value for :id
+      function(err, result) {
+        if (err) {
+          console.error(err.message);
+          doRelease(connection);
+          return;
+        }
+        console.log(result.rows);
+        doRelease(connection);
+      });
+  });
+
+function doRelease(connection) {
+  connection.close(
+    function(err) {
+      if (err)
+        console.error(err.message);
+    });
+}
+```
+
+With Oracle's sample HR schema, the output is:
+
+```
+[ [ 103, 60, 'IT' ] ]
+```
+
+### <a name="promiseoverview"></a> 28.2 Promises and node-oracledb
 
 Node-oracledb supports Promises with all asynchronous methods.  The native Promise
 implementation is used.
@@ -11941,7 +12123,7 @@ Unhandled Rejection at:  Promise {
 For more information, see [How to get, use, and close a DB connection
 using promises][73].
 
-### <a name="custompromises"></a> 27.1 Custom Promise Libraries
+#### <a name="custompromises"></a> 28.2.1 Custom Promise Libraries
 
 The Promise implementation is designed to be overridden, allowing a
 custom Promise library to be used.
@@ -11957,7 +12139,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-## <a name="asyncawaitoverview"></a> 28. Async/Await and node-oracledb
+### <a name="asyncawaitoverview"></a> 28.3. Async/Await and node-oracledb
 
 Node.js 7.6 supports async functions, also known as Async/Await.  These
 can be used with node-oracledb.  For example:
@@ -12018,66 +12200,15 @@ Buffers.
 For more information, see [How to get, use, and close a DB connection
 using async functions][74].
 
-## <a name="bindtrace"></a> <a name="tracingsql"></a> 29. Tracing SQL and PL/SQL Statements
+## <a name="migrate"></a> 29. Migrating from Previous node-oracledb Releases
 
-####  End-to-End Tracing
+Documentation about node-oracledb version 1 is [here][94].
 
-Applications that have implemented [End-to-end Tracing](#endtoend)
-calls such as [action](#propconnaction) and [module](#propconnmodule),
-will make it easier in database monitoring tools to identify SQL
-statement execution.
+Documentation about node-oracledb version 2 is [here][121].
 
-#### Tracing Executed Statements
+Documentation about node-oracledb version 3 is [here][135].
 
-Database statement tracing is commonly used to identify performance
-issues.  Oracle Database trace files can be analyzed after statements
-are executed.  Tracing can be enabled in various ways at a database
-system or individal session level.  Refer to [Oracle Database Tuning
-documentation][95].  Setting a customer identifier is recommended to
-make searching for relevant log files easier:
-
-```
-ALTER SESSION SET tracefile_identifier='My-identifier' SQL_TRACE=TRUE
-```
-
-In node-oracledb itself, the [ODPI-C tracing capability][75] can be
-used to log executed statements to the standard error stream.  Before
-executing Node.js, set the environment variable `DPI_DEBUG_LEVEL`
-to 16.  At a Windows command prompt, this could be done with `set
-DPI_DEBUG_LEVEL=16`.  On Linux, you might use:
-
-```
-export DPI_DEBUG_LEVEL=16
-node myapp.js 2> log.txt
-```
-
-For an application that does a single query, the log file might
-contain a tracing line consisting of the prefix 'ODPI', a thread
-identifier, a timestamp, and the SQL statement executed:
-
-```
-ODPI [6905309] 2017-09-13 09:02:46.140: SQL select sysdate from dual where :b = 1
-```
-
-#### Tracing Bind Values
-
-Sometimes it is useful to trace the bind data values that have been
-used when executing statements.  Several methods are available.
-
-In the Oracle Database, the view [`V$SQL_BIND_CAPTURE`][76] can
-capture bind information.  Tracing with Oracle Database's
-[`DBMS_MONITOR.SESSION_TRACE_ENABLE()`][77] may also be useful.
-
-You can also write your own wrapper around `execute()` and log any
-parameters.
-
-#### Other Tracing Utilities
-
-PL/SQL users may be interested in using [PL/Scope][78].
-
-## <a name="migrate"></a> 30. Migrating from Previous node-oracledb Releases
-
-### <a name="migratev1v2"></a> 30.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
+### <a name="migratev1v2"></a> 29.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
 
 When upgrading from node-oracledb version 1.13 to version 2.0:
 
@@ -12131,7 +12262,7 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
 - Test applications to check if changes such as the improved property
   validation uncover latent problems in your code.
 
-### <a name="migratev20v21"></a> 30.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
+### <a name="migratev20v21"></a> 29.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
 
 When upgrading from node-oracledb version 2.0 to version 2.1:
 
@@ -12142,7 +12273,7 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
     - Stop passing a callback.
     - Optionally pass an error.
 
-### <a name="migratev23v30"></a> 30.3 Migrating from node-oracledb 2.3 to node-oracledb 3.0
+### <a name="migratev23v30"></a> 29.3 Migrating from node-oracledb 2.3 to node-oracledb 3.0
 
 When upgrading from node-oracledb version 2.3 to version 3.0:
 
@@ -12163,7 +12294,7 @@ When upgrading from node-oracledb version 2.3 to version 3.0:
   `execute()` result being set to `undefined`.  These properties are
   no longer set in node-oracledb 3.
 
-### <a name="migratev30v31"></a> 30.4 Migrating from node-oracledb 3.0 to node-oracledb 3.1
+### <a name="migratev30v31"></a> 29.4 Migrating from node-oracledb 3.0 to node-oracledb 3.1
 
 When upgrading from node-oracledb version 3.0 to version 3.1:
 
@@ -12181,6 +12312,10 @@ When upgrading from node-oracledb version 3.0 to version 3.1:
   [`oracledb.oracleClientVersion`](#propdboracleclientversion) or
   [`oracledb.oracleClientVersionString`](#propdboracleclientversionstring),
   or try opening a connection.
+
+### <a name="migratev31v40"></a> 29.5 Migrating from node-oracledb 3.1 to node-oracledb 4.0
+
+This section will contain information about migrating from node-oracledb 3.1 to node-oracledb 4.0
 
 [1]: https://www.npmjs.com/package/oracledb
 [2]: https://oracle.github.io/node-oracledb/INSTALL.html
@@ -12314,3 +12449,4 @@ When upgrading from node-oracledb version 3.0 to version 3.1:
 [132]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-19423B71-3F6C-430F-84CC-18145CC2A818
 [133]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F302BF91-64F2-4CE8-A3C7-9FDB5BA6DCF8
 [134]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FF87387C-1779-4CC3-932A-79BB01391C28
+[135]: https://github.com/oracle/node-oracledb/blob/v3.1.0/doc/api.md
