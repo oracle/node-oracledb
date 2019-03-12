@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -24,29 +24,40 @@
  *
  *   For a connection pool example see connectionpool.js
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
+
+'use strict';
 
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-oracledb.getConnection(
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString
-  },
-  function(err, connection) {
-    if (err) {
-      console.error(err.message);
-      return;
-    }
+async function run() {
+
+  let connection;
+
+  try {
+    // Get a non-pooled connection
+    connection = await oracledb.getConnection(  {
+      user         : dbConfig.user,
+      password     : dbConfig.password,
+      connectString: dbConfig.connectString
+    });
+
     console.log('Connection was successful!');
 
-    connection.close(
-      function(err) {
-        if (err) {
-          console.error(err.message);
-          return;
-        }
-      });
-  });
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+}
+
+run();

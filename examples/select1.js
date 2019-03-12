@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -25,30 +25,34 @@
  *   Scripts to create the HR schema can be found at:
  *   https://github.com/oracle/db-sample-schemas
  *
- *   For an async/await example see selectawait.js
  *   For a connection pool example see connectionpool.js
  *   For a ResultSet example see resultset2.js
  *   For a query stream example see selectstream.js
  *   For a Promise example see promises.js
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
+
+'use strict';
 
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-// Get a non-pooled connection
-oracledb.getConnection(
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString
-  },
-  function(err, connection) {
-    if (err) {
-      console.error(err.message);
-      return;
-    }
-    connection.execute(
+async function run() {
+
+  let connection;
+
+  try {
+    // Get a non-pooled connection
+
+    connection = await oracledb.getConnection(  {
+      user         : dbConfig.user,
+      password     : dbConfig.password,
+      connectString: dbConfig.connectString
+    });
+
+    let result = await connection.execute(
       // The statement to execute
       `SELECT department_id, department_name
        FROM departments
@@ -57,35 +61,32 @@ oracledb.getConnection(
       // The "bind value" 180 for the bind variable ":id"
       [180],
 
-      // execute() options argument.  Since the query only returns one
+      // Options argument.  Since the query only returns one
       // row, we can optimize memory usage by reducing the default
       // maxRows value.  For the complete list of other options see
       // the documentation.
-      { maxRows: 1
+      {
+        maxRows: 1
         //, outFormat: oracledb.OBJECT  // query result format
         //, extendedMetaData: true      // get extra metadata
         //, fetchArraySize: 100         // internal buffer allocation size for tuning
-      },
-
-      // The callback function handles the SQL execution results
-      function(err, result) {
-        if (err) {
-          console.error(err.message);
-          doRelease(connection);
-          return;
-        }
-        console.log(result.metaData); // [ { name: 'DEPARTMENT_ID' }, { name: 'DEPARTMENT_NAME' } ]
-        console.log(result.rows);     // [ [ 180, 'Construction' ] ]
-        doRelease(connection);
       });
-  });
 
-// Note: connections should always be released when not needed
-function doRelease(connection) {
-  connection.close(
-    function(err) {
-      if (err) {
-        console.error(err.message);
+    console.log(result.metaData); // [ { name: 'DEPARTMENT_ID' }, { name: 'DEPARTMENT_NAME' } ]
+    console.log(result.rows);     // [ [ 180, 'Construction' ] ]
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        // Note: connections should always be released when not needed
+        await connection.close();
+      } catch (err) {
+        console.error(err);
       }
-    });
+    }
+  }
 }
+
+run();
