@@ -23,69 +23,67 @@
  *   autoCommit flag, no commit occurs because of data errors. However
  *   valid rows are part of a transaction that can be committed if
  *   desired.
+ *   This example also uses Async/Await of Node 8.
  *   Use demo.sql to create the required schema.
  *
  *   This example requires node-oracledb 2.2 or later.
  *
  *****************************************************************************/
 
-var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-var doconnect = function(cb) {
-  oracledb.getConnection(dbConfig, cb);
+const sql = "INSERT INTO em_childtab VALUES (:1, :2, :3)";
+
+const binds = [
+  [1016, 10, "Child 2 of Parent A"],
+  [1017, 10, "Child 3 of Parent A"],
+  [1018, 20, "Child 4 of Parent B"],
+  [1018, 20, "Child 4 of Parent B"],   // duplicate key
+  [1019, 30, "Child 3 of Parent C"],
+  [1020, 40, "Child 4 of Parent D"],
+  [1021, 75, "Child 1 of Parent F"],   // parent does not exist
+  [1022, 40, "Child 6 of Parent D"]
+];
+
+const options = {
+  autoCommit: true,
+  batchErrors: true,
+  dmlRowCounts: true,
+  bindDefs: [
+    { type: oracledb.NUMBER },
+    { type: oracledb.NUMBER },
+    { type: oracledb.STRING, maxSize: 20 }
+  ]
 };
 
-var dorelease = function(conn) {
-  conn.close(function (err) {
-    if (err)
-      console.error(err.message);
-  });
-};
+async function run() {
+  let conn;
+  let result;
 
-var doinsert = function(conn, cb) {
-  var sql = "INSERT INTO em_childtab VALUES (:1, :2, :3)";
+  try {
+    conn = await oracledb.getConnection(
+      {
+        user          : dbConfig.user,
+        password      : dbConfig.password,
+        connectString : dbConfig.connectString
+      });
 
-  var binds = [
-    [1016, 10, "Child 2 of Parent A"],
-    [1017, 10, "Child 3 of Parent A"],
-    [1018, 20, "Child 4 of Parent B"],
-    [1018, 20, "Child 4 of Parent B"],   // duplicate key
-    [1019, 30, "Child 3 of Parent C"],
-    [1020, 40, "Child 4 of Parent D"],
-    [1021, 75, "Child 1 of Parent F"],   // parent does not exist
-    [1022, 40, "Child 6 of Parent D"]
-  ];
+    result = await conn.executeMany(sql, binds, options);
 
-  var options = {
-    autoCommit: true,
-    batchErrors: true,
-    dmlRowCounts: true,
-    bindDefs: [
-      { type: oracledb.NUMBER },
-      { type: oracledb.NUMBER },
-      { type: oracledb.STRING, maxSize: 20 }
-    ]
-  };
+    console.log("Result is:", result);
 
-  conn.executeMany(sql, binds, options, function (err, result) {
-    if (err)
-      return cb(err, conn);
-    else {
-      console.log("Result is:", result);
-      return cb(null, conn);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error(err);
+      }
     }
-  });
-};
+  }
+}
 
-async.waterfall(
-  [
-    doconnect,
-    doinsert
-  ],
-  function (err, conn) {
-    if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-    if (conn)
-      dorelease(conn);
-  });
+run();

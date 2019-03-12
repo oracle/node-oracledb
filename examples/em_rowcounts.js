@@ -28,49 +28,41 @@
  *
  *****************************************************************************/
 
-var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-var doconnect = function(cb) {
-  oracledb.getConnection(dbConfig, cb);
-};
+const sql = "DELETE FROM em_childtab WHERE parentid = :1";
 
-var dorelease = function(conn) {
-  conn.close(function (err) {
-    if (err)
-      console.error(err.message);
-  });
-};
+const binds = [
+  [20],
+  [30],
+  [50]
+];
 
-var dodelete = function(conn, cb) {
-  var sql = "DELETE FROM em_childtab WHERE parentid = :1";
+const options = { dmlRowCounts: true };
 
-  var binds = [
-    [20],
-    [30],
-    [50]
-  ];
+async function run() {
+  let conn;
+  let result;
 
-  var options = { dmlRowCounts: true };
+  try {
+    conn = await oracledb.getConnection(dbConfig);
 
-  conn.executeMany(sql, binds, options, function (err, result) {
-    if (err)
-      return cb(err, conn);
-    else {
-      console.log("Result is:", result);
-      return cb(null, conn);
+    result = await conn.executeMany(sql, binds, options);
+
+    console.log("Result is:", result);
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error(err);
+      }
     }
-  });
-};
+  }
+}
 
-async.waterfall(
-  [
-    doconnect,
-    dodelete
-  ],
-  function (err, conn) {
-    if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-    if (conn)
-      dorelease(conn);
-  });
+run();

@@ -20,71 +20,61 @@
  *
  * DESCRIPTION
  *   Array DML example using executeMany() with bind-by-name syntax.
+ *   This example also uses Async/Await of Node 8.
  *   Use demo.sql to create the required schema.
  *
  *   This example requires node-oracledb 2.2 or later.
  *
  *****************************************************************************/
 
-var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-var doconnect = function(cb) {
-  oracledb.getConnection(dbConfig, cb);
+const truncateSql = "TRUNCATE TABLE em_tab";
+const insertSql = "INSERT INTO em_tab values (:a, :b)";
+
+const binds = [
+  { a: 1, b: "Test 1 (One)" },
+  { a: 2, b: "Test 2 (Two)" },
+  { a: 3, b: "Test 3 (Three)" },
+  { a: 4 },
+  { a: 5, b: "Test 5 (Five)" }
+];
+
+// bindDefs is optional for IN binds but it is generally recommended.
+// Without it the data must be scanned to find sizes and types.
+const options = {
+  autoCommit: true,
+  bindDefs: {
+    a: { type: oracledb.NUMBER },
+    b: { type: oracledb.STRING, maxSize: 15 }
+  }
 };
 
-var dorelease = function(conn) {
-  conn.close(function (err) {
-    if (err)
-      console.error(err.message);
-  });
-};
+async function run() {
+  let conn;
+  let result;
 
-var dotruncate = function(conn, cb) {
-  conn.execute("TRUNCATE TABLE em_tab", function (err) {
-    return cb(err, conn);
-  });
-};
+  try {
+    conn = await oracledb.getConnection(dbConfig);
 
-var doinsert = function(conn, cb) {
-  var sql = "INSERT INTO em_tab VALUES (:a, :b)";
+    await conn.execute(truncateSql);
 
-  var binds = [
-    { a: 1, b: "Test 1 (One)" },
-    { a: 2, b: "Test 2 (Two)" },
-    { a: 3, b: "Test 3 (Three)" },
-    { a: 4 },
-    { a: 5, b: "Test 5 (Five)" }
-  ];
+    result = await conn.executeMany(insertSql, binds, options);
 
-  // bindDefs is optional for IN binds but it is generally recommended.
-  // Without it the data must be scanned to find sizes and types.
-  var options = {
-    autoCommit: true,
-    bindDefs: {
-      a: { type: oracledb.NUMBER },
-      b: { type: oracledb.STRING, maxSize: 15 }
-    } };
+    console.log("Result is:", result);
 
-  conn.executeMany(sql, binds, options, function (err, result) {
-    if (err)
-      return cb(err, conn);
-    else {
-      console.log("Result is:", result);
-      return cb(null, conn);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error(err);
+      }
     }
-  });
-};
+  }
+}
 
-async.waterfall(
-  [
-    doconnect,
-    dotruncate,
-    doinsert
-  ],
-  function (err, conn) {
-    if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-    if (conn)
-      dorelease(conn);
-  });
+run();

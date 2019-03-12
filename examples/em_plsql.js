@@ -20,63 +20,56 @@
  *
  * DESCRIPTION
  *   executeMany() example calling PL/SQL.
+ *   This example also uses Async/Await of Node 8.
  *   Use demo.sql to create the required schema.
  *
  *   This example requires node-oracledb 2.2 or later.
  *
  *****************************************************************************/
 
-var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-var doconnect = function(cb) {
-  oracledb.getConnection(dbConfig, cb);
+const sql = "BEGIN em_testproc(:1, :2, :3); END;";
+
+const binds = [
+  [1],
+  [2],
+  [3],
+  [4],
+  [6]
+];
+
+const options = {
+  bindDefs: [
+    { type: oracledb.NUMBER },
+    { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+    { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 20 }
+  ]
 };
 
-var dorelease = function(conn) {
-  conn.close(function (err) {
-    if (err)
-      console.error(err.message);
-  });
-};
+async function run() {
+  let conn;
+  let result;
 
-var doplsql = function(conn, cb) {
-  var plsql = "BEGIN em_testproc(:1, :2, :3); END;";
+  try {
+    conn = await oracledb.getConnection(dbConfig);
 
-  var binds = [
-    [1],
-    [2],
-    [3],
-    [4],
-    [6]
-  ];
+    result = await conn.executeMany(sql, binds, options);
 
-  var options = {
-    bindDefs: [
-      { type: oracledb.NUMBER },
-      { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-      { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 20 }
-    ]
-  };
+    console.log("Result is:", result);
 
-  conn.executeMany(plsql, binds, options, function (err, result) {
-    if (err)
-      return cb(err, conn);
-    else {
-      console.log("Result is:", result);
-      return cb(null, conn);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error(err);
+      }
     }
-  });
-};
+  }
+}
 
-async.waterfall(
-  [
-    doconnect,
-    doplsql
-  ],
-  function (err, conn) {
-    if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-    if (conn)
-      dorelease(conn);
-  });
+run();
