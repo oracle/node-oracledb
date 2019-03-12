@@ -1,5 +1,9 @@
 # Change Log
 
+## node-oracledb v4.0.0 (DD Mon YYYY)
+
+This release is under development
+
 ## node-oracledb v3.1.2 (22 Feb 2019)
 
 - Fixed a bug causing CQN crashes when multiple queries are registered
