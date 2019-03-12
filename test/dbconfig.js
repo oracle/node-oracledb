@@ -38,6 +38,7 @@ var config = {
   test: {
     externalAuth: false,
     DBA_PRIVILEGE: false,
+    printDebugMsg: false,
   }
 };
 
@@ -91,6 +92,23 @@ if (process.env.NODE_ORACLEDB_DBA_PASSWORD) {
 
 if (process.env.NODE_ORACLEDB_PROXY_SESSION_USER) {
   config.test.proxySessionUser = process.env.NODE_ORACLEDB_PROXY_SESSION_USER;
+}
+
+if (process.env.NODE_PRINT_DEBUG_MESSAGE) {
+  var printDebugMsg = process.env.NODE_PRINT_DEBUG_MESSAGE;
+  printDebugMsg = String(printDebugMsg);
+  printDebugMsg = printDebugMsg.toLowerCase();
+  if (printDebugMsg == 'true') {
+    config.test.printDebugMsg = true;
+  }
+}
+
+if (process.platform.startsWith("win")) { // win32
+  config.test.platform = "windows";
+} else if (process.platform.startsWith("darwin")) { // darwin
+  config.test.platform = "osx";
+} else { // linux, sunos
+  config.test.platform = "linux";
 }
 
 module.exports = config;

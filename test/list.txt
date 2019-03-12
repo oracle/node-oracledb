@@ -4382,3 +4382,23 @@ Overview of node-oracledb functional tests
         184.4.9 Close connection from pool with {drop: 0}
         184.4.10 Close connection from pool with empty dict
         184.4.11 Close connection from pool with {drop: random string}
+185. cqn.js
+    185.1 Positive Cases
+        185.1.1 Register simple callback and unsubscribe
+        185.1.2 Register callback then insert using the same connection
+        185.1.3 Register callback then insert using different connection
+        185.1.4 Register callback specifiing local IP address and port number
+        185.1.5 Register callback specifiing timeout
+        185.1.6 Register callback limiting operation
+        185.1.7 Register callback using summary grouping
+        185.1.8 Register callback using last grouping
+        185.1.9 Update table subscribed on object level when query result does not change
+        185.1.10 Update table subscribed on query level when query result does not change
+        185.1.11 Subscription with multiple queries on single table
+        185.1.12 Subscription with single query on multiple tables
+        185.1.13 Two connections subscribe the same table using the same callback
+        185.1.14 Two connections subscribe different tables using the same callback
+        185.1.15 Unsubscribe upon first notification received
+    185.2 Negative Cases
+        185.2.1 Does not throw error when trying to unsubscribe twice
+        185.2.2 Throw error ORA-29972 if CHANGE NOTIFICATION is revoked from the user
