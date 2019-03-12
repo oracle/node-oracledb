@@ -6322,7 +6322,7 @@ closed.
 
 In network configurations that drop (or in-line) out-of-band breaks,
 forced pool termination may hang unless you have
-[`DISABLE_OOB=ON`][122] in a `sqlnet.ora` file, see [Optional Oracle
+[`DISABLE_OOB=ON`][122] in a [`sqlnet.ora`][136] file, see [Optional Oracle
 Net Configuration](#tnsadmin).
 
 Non-zero `drainTime` values are recommended so applications
@@ -7327,10 +7327,11 @@ negotiate a key using Diffie-Hellman key exchange.  There is
 protection against man-in-the-middle attacks.
 
 Native network encryption can be configured by editing Oracle Net's
-optional `sqlnet.ora` configuration files, on either the database server
-and/or on each node-oracledb 'client'.  Parameters control whether
-data integrity checking and encryption is required or just allowed,
-and which algorithms the client and server should consider for use.
+optional [`sqlnet.ora`][136] configuration files, on either the
+database server and/or on each node-oracledb 'client'.  Parameters
+control whether data integrity checking and encryption is required or
+just allowed, and which algorithms the client and server should
+consider for use.
 
 As an example, to ensure all connections to the database are checked
 for integrity and are also encrypted, create or edit the Oracle
@@ -7350,7 +7351,7 @@ SQLNET.ENCRYPTION_TYPES_SERVER = (AES256)
 If you definitely know that the database server enforces integrity and
 encryption, then you do not need to configure Node.js separately.
 However you can also, or alternatively, do so depending on your
-business needs.  Create a files `sqlnet.ora` (see [Optional Oracle Net
+business needs.  Create a file `sqlnet.ora` (see [Optional Oracle Net
 Configuration](#tnsadmin)):
 
 ```
@@ -7478,7 +7479,7 @@ failover using Oracle RAC or a standby database.  A
 [`ENABLE=BROKEN`][36] option can be used to aid detection of a
 terminated remote server.
 
-A `sqlnet.ora` file can be used to configure settings like
+A [`sqlnet.ora`][136] file can be used to configure settings like
 [`SQLNET.OUTBOUND_CONNECT_TIMEOUT`][33], [`SQLNET.RECV_TIMEOUT`][34]
 and [`SQLNET.SEND_TIMEOUT`][35] to bound the amount of time the
 application will wait for responses from the database service.  Note
@@ -12334,7 +12335,7 @@ This section will contain information about migrating from node-oracledb 3.1 to 
 [15]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FD9A8CB4-6B9A-44E5-B114-EFB8DA76FC88
 [16]: https://nodejs.org/api/stream.html
 [17]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-B0437826-43C1-49EC-A94D-B650B6A4A6EE
-[18]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A3F9D023-9CC4-445D-8921-6E40BD900EAD
+[18]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7F967CE5-5498-427C-9390-4A5C6767ADAA
 [19]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-BADFDC72-0F1D-47FA-8857-EC15DC8ACFBB
 [20]: http://docs.libuv.org/en/v1.x/threadpool.html
 [21]: https://github.com/libuv/libuv
@@ -12437,7 +12438,7 @@ This section will contain information about migrating from node-oracledb 3.1 to 
 [119]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-00C06941-6FFD-4CEB-81B6-9A7FBD577A2C
 [120]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F60F75DF-2866-4F93-BB7F-8FCE64BF67B6
 [121]: https://github.com/oracle/node-oracledb/blob/v2.3.0/doc/api.md
-[122]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4DD81A76-8D7D-4DEF-9DC1-77212C657AAF
+[122]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-42E939DC-EF37-49A0-B4F0-14158F0E55FD
 [123]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8DDB51EB-D80F-4476-9ABF-D6860C6214D1
 [124]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-9B2F05F9-D841-4493-A42D-A7D89694A2D1
 [125]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-DFA21225-E83C-4177-A79A-B8BA29DC662C
@@ -12450,3 +12451,4 @@ This section will contain information about migrating from node-oracledb 3.1 to 
 [133]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F302BF91-64F2-4CE8-A3C7-9FDB5BA6DCF8
 [134]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FF87387C-1779-4CC3-932A-79BB01391C28
 [135]: https://github.com/oracle/node-oracledb/blob/v3.1.0/doc/api.md
+[136]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2041545B-58D4-48DC-986F-DCC9D0DEC642
