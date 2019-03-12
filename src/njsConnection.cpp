@@ -733,7 +733,7 @@ bool njsConnection::ScanExecuteBinds(Local<Object> binds,
                 return false;
         }
         if (bindUnit->IsObject() && !bindUnit->IsDate() &&
-                !Buffer::HasInstance(bindUnit) &&
+                !bindUnit->IsArray() && !Buffer::HasInstance(bindUnit) &&
                 !njsILob::HasInstance(bindUnit)) {
             if (!ScanExecuteBindUnit(bindUnit.As<Object>(), var, false, baton))
                 return false;

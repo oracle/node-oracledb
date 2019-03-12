@@ -4,6 +4,10 @@
 
 This release is under development
 
+- Enhance BIND_IN of PL/SQL Collection Associative Arrays (Index-by)
+  so a bind definition object can be omitted
+  [#1039](https://github.com/oracle/node-oracledb/issues/1039).
+
 ## node-oracledb v3.1.2 (22 Feb 2019)
 
 - Fixed a bug causing CQN crashes when multiple queries are registered
