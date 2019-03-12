@@ -48,6 +48,7 @@ Overview of node-oracledb functional tests
         2.3.2 poolMax cannot be 0
         2.3.3 poolMax must be a number
         2.3.4 poolMax limits the pool capacity
+        2.3.4 poolMax and poolMin actually limit the pool size
     2.4 poolIncrement
         2.4.1 poolIncrement cannot be a negative value
         2.4.2 poolIncrement must be a Number
