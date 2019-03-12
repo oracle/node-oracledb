@@ -31,6 +31,7 @@ const oracledb = require('oracledb');
 const dbconfig = require('./dbconfig.js');
 const assert = require('assert');
 const should = require('should');
+const os = require('os');
 
 let testsUtil = exports;
 module.exports = testsUtil;
@@ -110,4 +111,34 @@ testsUtil.versionStringCompare = function(version1, version2) {
     return 0;
   }
   return undefined;
+};
+
+testsUtil.getLocalIPAddress = function() {
+  const ifaces = os.networkInterfaces();
+  let result = [];
+  Object.keys(ifaces).forEach(function (ifname) {
+    var alias = 0;
+    ifaces[ifname].forEach(function (iface) {
+      if ('IPv4' !== iface.family || iface.internal !== false) return undefined;
+      if (alias >= 1) {
+        result.push({"name": `${ifname}:${alias}`, "address": iface.address});
+      } else {
+        result.push({"name": ifname, "address": iface.address});
+      }
+      ++alias;
+    });
+  });
+  return result;
+};
+
+testsUtil.measureNetworkRoundTripTime = async function() {
+  const startTime = + new Date();
+  try {
+    let conn = await oracledb.getConnection(dbconfig);
+    await conn.execute("select * from dual");
+    await conn.close();
+  } catch(err) {
+    should.not.exist(err);
+  }
+  return new Date() - startTime;
 };
