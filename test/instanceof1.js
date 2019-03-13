@@ -16,7 +16,7 @@
  * limitations under the License.
  *
  * NAME
- *   45. instanceof.js
+ *   45. instanceof1.js
  *
  * DESCRIPTION
  *   Testing JS instanceof.
@@ -28,10 +28,10 @@ var oracledb = require('oracledb');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
 
-describe('45. instanceof.js', function() {
+describe('45. instanceof1.js', function() {
 
   it('45.1 instanceof works for the oracledb instance', function(done) {
-    (oracledb instanceof oracledb.Oracledb).should.be.true();
+    (oracledb instanceof oracledb.OracleDb).should.be.true();
 
     done();
   });

@@ -20,9 +20,10 @@ limitations under the License.
 ## ===> *** Note: Go to [https://oracle.github.io/node-oracledb/INSTALL.html](https://oracle.github.io/node-oracledb/INSTALL.html) for production documentation ***
 
 1. [Node-oracledb Overview](#overview)
-    - 1.1 [Changes in node-oracledb version 3.1](#mig31)
-    - 1.2 [Changes in node-oracledb version 3.0](#mig30)
-    - 1.3 [Changes in node-oracledb version 2.0](#mig20)
+    - 1.1 [Changes in node-oracledb version 4.0](#mig40)
+    - 1.2 [Changes in node-oracledb version 3.1](#mig31)
+    - 1.3 [Changes in node-oracledb version 3.0](#mig30)
+    - 1.4 [Changes in node-oracledb version 2.0](#mig20)
 2. [Quick Start Node-oracledb Installation](#quickstart)
 3. [Node-oracledb Installation Instructions](#instructions)
     - 3.1 [Prerequisites](#prerequisites)
@@ -53,11 +54,12 @@ The [*node-oracledb*][1] add-on for Node.js powers high performance Oracle Datab
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
-This node-oracledb release has been tested with Node.js 6, 8, 10 and
-11 on 64-bit Oracle Linux, Windows and macOS.  The add-on can also
-build on some 32-bit Linux, 32-bit Windows, Solaris and AIX
-environments, but these architectures have not been fully tested.
-Older versions of node-oracledb may work with older versions of Node.js.
+This node-oracledb release has been tested with Node.js 8, 10 and 11
+on 64-bit Oracle Linux, Windows and macOS.  Note Node.js 8.12 or later
+is required.  The add-on can also build on some 32-bit Linux, 32-bit
+Windows, Solaris and AIX environments, but these architectures have
+not been fully tested.  Older versions of node-oracledb may work with
+older versions of Node.js.
 
 Node-oracledb is an [add-on](https://nodejs.org/api/addons.html)
 available as C++ and C source code.  Pre-built binaries are available
@@ -65,6 +67,13 @@ as a convenience for common architectures.  Note the operating systems
 and versions of Node.js that the pre-built binaries are compatible
 with will change as the Node.js project evolves.  The binaries are not
 guaranteed to be available or usable in your environment.
+
+#### <a name="mig40"></a> 1.1 Changes in node-oracledb version 4.0
+
+Node-oracledn 4.0 was refactored to use [N-API][53] version 2.  On
+each operating system, a node-oracledb binary will work with a number
+of Node.js versions from Node.js 8.12 onwards, dependent on N-API
+compatibility.
 
 #### <a name="mig31"></a> 1.1 Changes in node-oracledb version 3.1
 
@@ -108,7 +117,7 @@ In node-oracledb version 2.0, pre-built binaries are now available for
 some environments.
 
 Building from source code has improved significantly in node-oracledb
-version 2.0 The Oracle header files, and the node-oracledb environment
+version 2.0.  The Oracle header files, and the node-oracledb environment
 variables `OCI_INC_DIR` and `OCI_LIB_DIR` are no longer required.
 
 The Oracle client libraries must now always be in the default library
@@ -1657,3 +1666,4 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [50]: http://yum.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/x86_64/index.html
 [51]: http://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html
 [52]: https://github.com/oracle/node-oracledb/blob/v2.3.0/INSTALL.md
+[53]: https://nodejs.org/api/n-api.html

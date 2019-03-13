@@ -78,49 +78,169 @@ describe('172. executeMany2.js', function() {
     }
   }); // 172.1
 
-  it('172.2 binding by position and by name cannot be mixed', async () => {
-    let conn;
-    try {
-      conn = await oracledb.getConnection(dbconfig);
+  describe("172.2 Binding tests for invalid binding variables", function() {
 
-      await conn.execute(
-        `BEGIN EXECUTE IMMEDIATE 'DROP TABLE nodb_tab_emp'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END; `
-      );
-      await conn.execute(
-        `create table nodb_tab_emp (id NUMBER, name VARCHAR2(100))`
-      );
+    beforeEach(async function() {
+      let conn;
+      try {
+        conn = await oracledb.getConnection(dbconfig);
+        await conn.execute(
+          `BEGIN EXECUTE IMMEDIATE 'DROP TABLE nodb_tab_emp'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END; `
+        );
+        await conn.execute(
+          `create table nodb_tab_emp (id NUMBER, name VARCHAR2(100))`
+        );
+      } catch(err) {
+        should.not.exist(err);
+      } finally {
+        if (conn) {
+          try {
+            await conn.close();
+          } catch (err) {
+            should.not.exist(err);
+          }
+        }
+      }
+    });
 
-    } catch(err) {
-      should.not.exist(err);
-    }
+    afterEach(async function() {
+      let conn;
+      try {
+        conn = await oracledb.getConnection(dbconfig);
+        await conn.execute(
+          `BEGIN EXECUTE IMMEDIATE 'DROP TABLE nodb_tab_emp'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END; `
+        );
+        await conn.commit();
+      } catch(err) {
+        should.not.exist(err);
+      } finally {
+        if (conn) {
+          try {
+            await conn.close();
+          } catch (err) {
+            should.not.exist(err);
+          }
+        }
+      }
+    });
 
-    try {
-      const bindVars = [
-        [1, "John Smith"],
-        { a: 2, b: "Changjie" },
-      ];
-      await testsUtil.assertThrowsAsync(
-        async () => {
-          await conn.executeMany(
-            `insert into nodb_tab_emp values (:a, :b)`,
-            bindVars
-          );
-        },
-        /NJS-055:/
-      );
-      // NJS-055: binding by position and name cannot be mixed
-    } catch(err) {
-      should.not.exist(err);
-    }
+    it('172.2.1 binding by position and by name cannot be mixed', async () => {
+      let conn;
+      try {
+        conn = await oracledb.getConnection(dbconfig);
+        const bindVars = [
+          [1, "John Smith"],
+          { a: 2, b: "Changjie" },
+        ];
+        await testsUtil.assertThrowsAsync(
+          async () => {
+            await conn.executeMany(
+              `insert into nodb_tab_emp values (:a, :b)`,
+              bindVars
+            );
+          },
+          /NJS-055:/
+        );
+        // NJS-055: binding by position and name cannot be mixed
+      } catch(err) {
+        should.not.exist(err);
+      } finally {
+        if (conn) {
+          try {
+            await conn.close();
+          } catch (err) {
+            should.not.exist(err);
+          }
+        }
+      }
+    });
 
-    try {
-      await conn.execute(
-        `BEGIN EXECUTE IMMEDIATE 'DROP TABLE nodb_tab_emp'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END; `
-      );
-      await conn.commit();
-      await conn.close();
-    } catch(err) {
-      should.not.exist(err);
-    }
-  }); // 172.2
+    it('172.2.2 Binding an array which values are undefined will throw ORA-01008', async function() {
+      let conn;
+      try {
+        conn = await oracledb.getConnection(dbconfig);
+        await testsUtil.assertThrowsAsync(
+          async () => {
+            await conn.executeMany(
+              "insert into nodb_tab_emp values (:a, :b)",
+              [undefined, undefined, undefined, undefined, undefined]
+            );
+          },
+          /ORA-01008/ //ORA-01008: not all variables bound
+        );
+      } catch(err) {
+        should.not.exist(err);
+      } finally {
+        if (conn) {
+          try {
+            await conn.close();
+          } catch (err) {
+            should.not.exist(err);
+          }
+        }
+      }
+    });
+
+    it('172.2.3 Binding an array starts with undefined will throw ORA-01008', async function() {
+      let conn;
+      try {
+        conn = await oracledb.getConnection(dbconfig);
+        await testsUtil.assertThrowsAsync(
+          async () => {
+            await conn.executeMany(
+              "insert into nodb_tab_emp values (:a, :b)",
+              [
+                undefined,
+                { a: 2, b: "foobar2" },
+                { a: 3, b: "foobar3" },
+                { a: 4, b: "foobar4" }
+              ]
+            );
+          },
+          /ORA-01008/ //ORA-01008: not all variables bound
+        );
+      } catch(err) {
+        should.not.exist(err);
+      } finally {
+        if (conn) {
+          try {
+            await conn.close();
+          } catch (err) {
+            should.not.exist(err);
+          }
+        }
+      }
+    });
+
+    it('172.2.4 Binding an array contains undefined will throw JS TypeError', async function() {
+      let conn;
+      try {
+        conn = await oracledb.getConnection(dbconfig);
+        await testsUtil.assertThrowsAsync(
+          async () => {
+            await conn.executeMany(
+              "insert into nodb_tab_emp values (:a, :b)",
+              [
+                { a: 1, b: "foobar1" },
+                undefined,
+                { a: 3, b: "foobar3" },
+                { a: 4, b: "foobar4" }
+              ]
+            );
+          },
+          /TypeError: Cannot convert undefined or null to object/
+        );
+      } catch(err) {
+        should.not.exist(err);
+      } finally {
+        if (conn) {
+          try {
+            await conn.close();
+          } catch (err) {
+            should.not.exist(err);
+          }
+        }
+      }
+    });
+  });
 });

@@ -378,23 +378,40 @@ describe('67. poolCache.js', function() {
       });
     });
 
-    it('67.1.14 a named pool does not also create a default pool', function(done) {
-      var poolAlias = "named-pool";
+    it('67.1.14 Creating a named pool will not create a default pool at the same time', function(done) {
+      var poolAlias = "namedPool";
       dbConfig.poolAlias = poolAlias;
       oracledb.createPool(dbConfig, function(err, pool) {
         should.not.exist(err);
-        pool.should.be.ok();
-        (pool.poolAlias).should.eql('named-pool');
+        should.exist(pool);
+        (pool.poolAlias).should.eql('namedPool');
 
+        /* Note that getPool() is a synchronous method. Thus we could assert in this way. */
         (function() {
           oracledb.getPool();
-        }).should.throw(/^NJS-047:/);
+        }).should.throw(/NJS-047/); // NJS-047: poolAlias "default" not found in the connection pool cache
 
-        (function() {
-          oracledb.getPool('named-pool');
-        }).should.be.ok();
+        /*
+          https://nodejs.org/api/assert.html#assert_assert_doesnotthrow_fn_error_message
+          Using assert.doesNotThrow() is actually not useful because there is no benefit
+          in catching an error and then rethrowing it. Instead, consider adding a comment
+          next to the specific code path that should not throw and keep error messages
+          as expressive as possible.
+        */
+        should.doesNotThrow(
+          function() {
+            var poolInst = oracledb.getPool('namedPool');
+            should.exist(poolInst);
+          },
+          /NJS-047/,
+          'Could not found "namedPool" in the connection pool cache'
+        );
 
-        done();
+        pool.close(function(err) {
+          should.not.exist(err);
+          done();
+        });
+
       });
     });
   });

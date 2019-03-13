@@ -1581,15 +1581,15 @@ describe('184. sessionTag.js', function () {
               async () => {
                 await conn.close({drop: {data: ["doesn't matter"], status: "SUCC"}});
               },
-              /NJS-007/ //NJS-007: invalid value for %s in parameter
+              /NJS-008/ //NJS-007: invalid type for %s in parameter
             );
           } catch(err) {
             should.not.exist(err);
           } finally {
-            // conn.close();
             should.strictEqual(pool.connectionsOpen, 1);
-            should.strictEqual(pool.connectionsInUse, 0);
+            should.strictEqual(pool.connectionsInUse, 1);
           }
+          await conn.close();
         }
         if (pool) {
           try {
@@ -1617,15 +1617,15 @@ describe('184. sessionTag.js', function () {
               async () => {
                 await conn.close({drop: 0});
               },
-              /NJS-007/ //NJS-007: invalid value for %s in parameter
+              /NJS-008/ //NJS-008: invalid type for %s in parameter
             );
           } catch(err) {
             should.not.exist(err);
           } finally {
-            // conn.close();
             should.strictEqual(pool.connectionsOpen, 1);
-            should.strictEqual(pool.connectionsInUse, 0);
+            should.strictEqual(pool.connectionsInUse, 1);
           }
+          await conn.close();
         }
         if (pool) {
           try {
@@ -1653,14 +1653,15 @@ describe('184. sessionTag.js', function () {
             async () => {
               await conn.close({drop: {}});
               },
-              /NJS-007/ //NJS-007: invalid value for %s in parameter
+              /NJS-008/ //NJS-008: invalid type for %s in parameter
             );
           } catch(err) {
             should.not.exist(err);
           } finally {
             should.strictEqual(pool.connectionsOpen, 1);
-            should.strictEqual(pool.connectionsInUse, 0);
+            should.strictEqual(pool.connectionsInUse, 1);
           }
+          await conn.close();
         }
         if (pool) {
           try {
@@ -1688,15 +1689,15 @@ describe('184. sessionTag.js', function () {
               async () => {
                 await conn.close({drop: "it doesn't matter"});
               },
-              /NJS-007/ //NJS-007: invalid value for %s in parameter
+              /NJS-008/ //NJS-008: invalid type for %s in parameter
             );
           } catch(err) {
             should.not.exist(err);
           } finally {
-            // conn.close();
             should.strictEqual(pool.connectionsOpen, 1);
-            should.strictEqual(pool.connectionsInUse, 0);
+            should.strictEqual(pool.connectionsInUse, 1);
           }
+          await conn.close();
         }
         if (pool) {
           try {

@@ -1,40 +1,31 @@
-/* Copyright (c) 2015, 2019, Oracle and/or its affiliates.
-   All rights reserved. */
+// Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.
 
-/******************************************************************************
- *
- * You may not use the identified files except in compliance with the Apache
- * License, Version 2.0 (the "License.")
- *
- * You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * NAME
- *  njsMessages.cpp
- *
- * DESCRIPTION
- *  Static function composes a displayable (error) string with replacements
- *
- *****************************************************************************/
+//-----------------------------------------------------------------------------
+//
+// You may not use the identified files except in compliance with the Apache
+// License, Version 2.0 (the "License.")
+//
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// NAME
+//   njsErrors.c
+//
+// DESCRIPTION
+//   All error messages and the functions for getting them.
+//
+//-----------------------------------------------------------------------------
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <string>
-using namespace std;
+#include "njsModule.h"
 
-#include "njsMessages.h"
-
-// Maximum buffer size to compose error message
-#define NJS_MAX_ERROR_MSG_LEN 256
-
-static const char *errMsg[] = {
+static const char *njsErrorMessages[] = {
     "NJS-000: success",                              // errSuccess
     "NJS-001: expected callback as last parameter",  // errMissingCallback
     "NJS-002: invalid pool",                         // errInvalidPool
@@ -70,7 +61,7 @@ static const char *errMsg[] = {
     "NJS-034: data type is unsupported for array bind", // errInvalidTypeForArrayBind
     "NJS-035: maxArraySize is required for IN OUT array bind", // errReqdMaxArraySize
     "NJS-036: given array is of size greater than maxArraySize", // errInvalidArraySize
-    "NJS-037: invalid data type at array index %d for bind \"%s\"", // errIncompatibleTypeArrayBind
+    "NJS-037: invalid data type at array index %d for bind \":%.*s\"", // errIncompatibleTypeArrayBind
     "NJS-038: maxArraySize value should be greater than zero", // errInvalidValueArrayBind
     "NJS-040: connection request timeout",  // errConnRequestTimeout
     "NJS-041: cannot convert ResultSet to QueryStream after invoking methods", // errCannotConvertRsToStream
@@ -85,38 +76,50 @@ static const char *errMsg[] = {
     "NJS-054: binary build/Release/oracledb.node was not installed", // errNoBinaryInstalled
     "NJS-055: binding by position and name cannot be mixed", // errMixedBind
     "NJS-056: maxSize must be specified and not zero for bind position %u", // errMissingMaxSizeByPos
-    "NJS-057: maxSize must be specified and not zero for bind \"%s\"", // errMissingMaxSizeByName
+    "NJS-057: maxSize must be specified and not zero for bind \"%.*s\"", // errMissingMaxSizeByName
     "NJS-058: maxSize of %u is too small for value of length %u in row %u", // errMaxSizeTooSmall
     "NJS-059: type must be specified for bind position %u", // errMissingTypeByPos
-    "NJS-060: type must be specified for bind \"%s\"", // errMissingTypeByName
+    "NJS-060: type must be specified for bind \"%.*s\"", // errMissingTypeByName
     "NJS-061: invalid subscription", // errInvalidSubscription
     "NJS-062: subscription notification callback missing", // errMissingSubscrCallback
     "NJS-063: subscription notification SQL missing", // errMissingSubscrSql
     "NJS-064: connection pool is closing", // errPoolClosing
     "NJS-065: connection pool was closed", // errPoolClosed
     "NJS-066: invalid SODA document cursor", // errInvalidSodaDocCursor
-    "NJS-067: a pre-built node-oracledb binary was not found for Node.js %s", // errNoBinaryAvailable
+    "NJS-067: a pre-built node-oracledb binary was not found for %s", // errNoBinaryAvailable
+    "NJS-068: invalid error number %d supplied", // errInvalidErrNum
+    "NJS-069: node-oracledb %s requires Node.js %s or later", // errNodeTooOld
 };
 
 
 //-----------------------------------------------------------------------------
-// njsMessages::Get()
-//   Get a message given the error number and any number of arguments. If the
-// error number doesn't fall within the valid error number range, an empty
-// string is returned.
+// njsErrors_getMessage()
+//   Get the error message given the error number and any number of arguments.
+// If the error number is invalid, the error message is changed to indicate as
+// much.
 //-----------------------------------------------------------------------------
-string njsMessages::Get(int err, ...)
+void njsErrors_getMessage(char *buffer, int errNum, ...)
 {
-    char msg[NJS_MAX_ERROR_MSG_LEN + 1];
-    va_list vlist;
-    std::string str;
+    va_list vaList;
 
-    if ( err > 0 && err < errMaxErrors ) {
-        va_start (vlist, err);
-        if (vsnprintf(msg, NJS_MAX_ERROR_MSG_LEN, errMsg[err], vlist) <= 0)
-            msg[0] = '\0';
-        va_end (vlist);
-        str = msg;
+    va_start(vaList, errNum);
+    njsErrors_getMessageVaList(buffer, errNum, vaList);
+    va_end(vaList);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsErrors_getMessageVaList()
+//   Get the error message given the error number and a variable list of
+// arguments. If the error number is invalid, the error message is changed to
+// indicate as much.
+//-----------------------------------------------------------------------------
+void njsErrors_getMessageVaList(char *buffer, int errNum, va_list vaList)
+{
+    if (errNum > 0 && errNum < errMaxErrors) {
+        (void) vsnprintf(buffer, NJS_MAX_ERROR_MSG_LEN + 1,
+                njsErrorMessages[errNum], vaList);
+    } else {
+        njsErrors_getMessage(buffer, errInvalidErrNum, errNum);
     }
-    return str;
 }

@@ -1,12 +1,36 @@
 # Change Log
 
-## node-oracledb v4.0.0 (DD Mon YYYY)
+## node-oracledb v4.0.0-dev (DD Mon YYYY)
 
-This release is under development
+**This release is under development**
 
-- Enhance BIND_IN of PL/SQL Collection Associative Arrays (Index-by)
+- Refactored the node-oracledb implementation to use
+  [N-API](https://nodejs.org/api/n-api.html) in place of
+  [NAN](https://github.com/nodejs/nan).
+    - Node.js 8.12, or higher, is required by this version of node-oracledb.
+    - N-API allows node-oracledb binaries to be portable between Node.js versions on a given operating system, subject to N-API compatibility.
+    - Oracle Client libraries are still required.
+    - The string representation of classes has changed to `[Object Object]` as a consequence of using N-API.
+
+- Enhanced BIND_IN of PL/SQL Collection Associative Arrays (Index-by)
   so a bind definition object can be omitted
   [#1039](https://github.com/oracle/node-oracledb/issues/1039).
+
+- CQN support and message type constants were added for database
+  startup and shutdown events.
+
+- Improved the performance of `oracledb.outFormat = oracledb.OBJECT`.
+
+- Corrected processing of the `force` option in SODA `dropIndex()`.
+
+- Corrected the error message parameter number for SODA
+  `getCollectionNames()`.
+
+- Corrected the error message returned when invalid types are used for
+  boolean options.
+
+- Exceptions from user getters for parameter object attribute access
+  are now passed through the error callback.
 
 ## node-oracledb v3.1.2 (22 Feb 2019)
 

@@ -53,7 +53,7 @@ test/dataTypeRaw.js
 
 test/plsqlBindIndexedTable1.js
 test/plsqlBindIndexedTable2.js
-test/instanceof.js
+test/instanceof1.js
 test/poolClose.js
 test/connClose.js
 
@@ -66,7 +66,6 @@ test/nestedCursor.js
 test/properties.js
 test/lobResultSet.js
 test/clobPlsqlString.js
-test/checkClassesTypes.js
 test/lobProperties1.js
 
 test/autoCommit4nestedExecutes.js
@@ -214,5 +213,7 @@ test/deferLibInit.js
 test/sessionTag.js
 
 test/cqn.js
+
+test/instanceof2.js
 
 test/plsqlBindList.js
