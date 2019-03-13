@@ -62,7 +62,7 @@ not been fully tested.  Older versions of node-oracledb may work with
 older versions of Node.js.
 
 Node-oracledb is an [add-on](https://nodejs.org/api/addons.html)
-available as C++ and C source code.  Pre-built binaries are available
+available as C source code.  Pre-built binaries are available
 as a convenience for common architectures.  Note the operating systems
 and versions of Node.js that the pre-built binaries are compatible
 with will change as the Node.js project evolves.  The binaries are not
@@ -152,18 +152,18 @@ version 2.0.
           Redistributable][27].
 
     - If a binary is not available, you will need to compile node-oracledb
-    from source code:
+      from source code:
 
         - Install [Python 2.7][2]
 
-        - Install a C Compiler with support for C++ 11 (such as Xcode,
-          GCC 4.8, Visual Studio 2015, or similar)
+        - Install a C Compiler such as Xcode, GCC, Visual Studio
+          2015, or similar.
 
         - Run `npm install oracle/node-oracledb.git#v4.0.0`, or add
           `oracle/node-oracledb.git#v4.0.0` to your `package.json`
           dependencies.  Substitute your desired [GitHub tag][40].
 
-- Add Oracle 18, 12, or 11.2 client libraries to your operating
+- Add Oracle 19, 18, 12, or 11.2 client libraries to your operating
   system library search path such as `PATH` on Windows or
   `LD_LIBRARY_PATH` on Linux.  On macOS move the libraries to `~/lib`
   or `/usr/local/lib`.
@@ -181,10 +181,10 @@ version 2.0.
       in `$ORACLE_HOME/lib` from a locally installed database such as
       the free [Oracle XE][20] release.
 
-  Oracle Client libraries 18 and 12.2 can connect to Oracle Database 11.2 or
-  greater. Version 12.1 client libraries can connect to Oracle
-  Database 10.2 or greater. Version 11.2 client libraries can connect
-  to Oracle Database 9.2 or greater.
+  Oracle Client libraries 19, 18 and 12.2 can connect to Oracle
+  Database 11.2 or greater. Version 12.1 client libraries can connect
+  to Oracle Database 10.2 or greater. Version 11.2 client libraries
+  can connect to Oracle Database 9.2 or greater.
 
 - Your Node.js applications can now connect to your database.  The
   database can be on the same machine as Node.js, or on a remote
@@ -224,7 +224,7 @@ I don't have internet access | [Node-oracledb Installation Without Internet Acce
 
 All installations need:
 
-- Oracle 18, 12.2, 12.1 or 11.2 client libraries on the machine Node.js is installed on.
+- Oracle 19, 18, 12.2, 12.1 or 11.2 client libraries on the machine Node.js is installed on.
 
   Run `node -p "process.arch"` and make sure to use 64-bit or 32-bit
   Oracle client libraries to match the Node.js architecture.
@@ -236,12 +236,12 @@ All installations need:
   Oracle's standard client-server network interoperability allows
   connections between different versions of Oracle Client and Oracle
   Database.  For certified configurations see Oracle Support's [Doc ID
-  207303.1][6].  In summary, Oracle Client 18 and 12.2 can connect to Oracle
-  Database 11.2 or greater. Oracle Client 12.1 can connect to Oracle
-  Database 10.2 or greater. Oracle Client 11.2 can connect to Oracle
-  Database 9.2 or greater.  The technical restrictions on creating
-  connections may be more flexible.  For example Oracle Client 12.2
-  can successfully connect to Oracle Database 10.2.
+  207303.1][6].  In summary, Oracle Client 19, 18 and 12.2 can connect
+  to Oracle Database 11.2 or greater. Oracle Client 12.1 can connect
+  to Oracle Database 10.2 or greater. Oracle Client 11.2 can connect
+  to Oracle Database 9.2 or greater.  The technical restrictions on
+  creating connections may be more flexible.  For example Oracle
+  Client 12.2 can successfully connect to Oracle Database 10.2.
 
 - An Oracle Database to test node-oracledb.
 
@@ -259,10 +259,6 @@ additional tools to build from source code:
 - A compiler.
 
   Use Visual Studio on Windows, GCC on Linux or Xcode on macOS.
-  **When building with Node.js 6 onward, the compiler must support
-  C++11.** Note the default compiler on Oracle Linux 6 and RHEL 6 does
-  not have the required support.  Install [GCC 4.8 or later][5] or
-  upgrade to Oracle Linux 7.
 
 - Python 2.7.
 
@@ -947,7 +943,7 @@ install software.
 
 #### 3.7.2 Install Node.js
 
-Install the 64-bit Node.js MSI (e.g. node-v6.11.0-x64.msi) from
+Install the 64-bit Node.js MSI (e.g. node-v10.15.3-x64.msi) from
 [nodejs.org][11].  Make sure the option to add the Node and npm
 directories to the path is selected.
 
@@ -1017,9 +1013,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The GCC compiler is needed.  GCC 4.8 (or later) is needed to install
-because compiling for Node.js 6 (or later) requires a C++11 compatible
-compiler.
+The GCC compiler is needed.
 
 Use GNU Make 4.1-1 or above.
 
@@ -1265,17 +1259,13 @@ Install [Python 2.7][2], which is required for the node-gyp utility:
 - On Windows, install the Python 2.7 MSI and select the customization
   option to "Add python.exe to Path".
 
-Install a C++11 compatible compiler:
+Install a C compiler:
 
-- On Linux you need GCC 4.8 (or later) because compiling for Node.js 6
-  (or later) requires a C++11 compatible compiler.  The default
-  compiler on Oracle Linux 6 and RHEL 6 does not have the required
-  C++11 support. Install [GCC 4.8 or later][5] or upgrade to Oracle
-  Linux 7.
+- On Linux, GCC 4.4.7 (the default on Oracle Linux 6) is known to work.
 
 - On macOS install Xcode from the Mac App store.
 
-- On Windows, install a C/C++ build environment such as Microsoft
+- On Windows, install a C build environment such as Microsoft
   Visual Studio 2015.  Compilers supported by Oracle libraries are
   found in [Oracle documentation][23] for each version, for example
   [Oracle Database Client Installation Guide for
@@ -1561,9 +1551,6 @@ If `npm install oracledb` fails:
 - Use `npm install --verbose oracledb`.  Review your output and logs.
   Try to install in a different way.  Try some potential solutions.
 
-- When compiling node-oracledb from source, does your compiler have
-  C++11 support, e.g. use VS 2015 or GCC 4.8.
-
 - When compiling node-oracledb from source, do you have Python 2.7?
   Run `python --version`.
 
@@ -1585,7 +1572,7 @@ If `require('oracledb')` fails:
 
 If creating a connection fails:
 
-- If you got *DPI-1047: Oracle Client library cannot be loaded*,
+- If you got *DPI-1047: Cannot locate an Oracle Client library*,
   then review any messages and the installation instructions.
 
 - Does your Node.js architecture (32-bit or 64-bit) match the Oracle

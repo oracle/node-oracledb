@@ -9,8 +9,9 @@
   [NAN](https://github.com/nodejs/nan).
     - Node.js 8.12, or higher, is required by this version of node-oracledb.
     - N-API allows node-oracledb binaries to be portable between Node.js versions on a given operating system, subject to N-API compatibility.
-    - Oracle Client libraries are still required.
+    - Oracle Client libraries are still required at runtime.
     - The string representation of classes has changed to `[Object Object]` as a consequence of using N-API.
+    - A C++11 compiler is no longer required when building from source code.  The node-oracledb source code is now pure C.
 
 - Enhanced BIND_IN of PL/SQL Collection Associative Arrays (Index-by)
   so a bind definition object can be omitted
