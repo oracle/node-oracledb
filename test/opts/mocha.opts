@@ -214,3 +214,5 @@ test/deferLibInit.js
 test/sessionTag.js
 
 test/cqn.js
+
+test/plsqlBindList.js
