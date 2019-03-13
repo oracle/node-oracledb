@@ -117,7 +117,7 @@ describe('140. jsObjectGetter1.js', function() {
           should.exist(err);
           should.strictEqual(
             err.message,
-            "Uncaught Nope"
+            "Nope"
           );
           should.not.exist(result);
           done();
@@ -187,7 +187,7 @@ describe('140. jsObjectGetter1.js', function() {
               should.exist(err);
               should.strictEqual(
                 err.message,
-                "Uncaught No Dir"
+                "No Dir"
               );
               should.not.exist(result);
               cb();
@@ -314,7 +314,7 @@ describe('140. jsObjectGetter1.js', function() {
           should.exist(err);
           should.strictEqual(
             err.message,
-            "Uncaught No type"
+            "No type"
           );
           done();
         }
@@ -341,7 +341,7 @@ describe('140. jsObjectGetter1.js', function() {
           should.exist(err);
           should.strictEqual(
             err.message,
-            "Uncaught No type"
+            "No type"
           );
           should.not.exist(result);
           done();
@@ -371,7 +371,7 @@ describe('140. jsObjectGetter1.js', function() {
           should.exist(err);
           should.strictEqual(
             err.message,
-            "Uncaught No fetchInfo"
+            "No fetchInfo"
           );
           should.not.exist(result);
           done();
@@ -402,7 +402,7 @@ describe('140. jsObjectGetter1.js', function() {
           should.exist(err);
           should.strictEqual(
             err.message,
-            "Uncaught No type"
+            "No type"
           );
           should.not.exist(result);
           done();
@@ -423,7 +423,7 @@ describe('140. jsObjectGetter1.js', function() {
           should.exist(err);
           should.strictEqual(
             err.message,
-            "Uncaught Wrong boolean value"
+            "Wrong boolean value"
           );
           should.not.exist(result);
           cb();
@@ -475,7 +475,7 @@ describe('140. jsObjectGetter1.js', function() {
           should.exist(err);
           should.strictEqual(
             err.message,
-            "Uncaught No value"
+            "No value"
           );
           should.not.exist(result);
           done();
@@ -487,25 +487,11 @@ describe('140. jsObjectGetter1.js', function() {
   describe('140.7 Negative: Pool object', function() {
 
     var dotest = function(opt, cb) {
-
-      should.throws(
-        function() {
-          oracledb.createPool(
-            opt,
-            function(err, pool) {
-              should.not.exist(err);
-              should.exist(pool);
-
-              pool.close(function(err) {
-
-                should.not.exist(err);
-                cb();
-              });
-            }
-          );
-        },
-        /Nope/
-      );
+      oracledb.createPool(opt, function(err, pool) {
+        should.not.exist(pool);
+        should.exist(err);
+        cb();
+      });
     };
 
     it('140.7.1 String type - user', function(done) {
@@ -538,14 +524,7 @@ describe('140. jsObjectGetter1.js', function() {
           throw 'Nope';
         }
       });
-
-      should.throws(
-        function() {
-          oracledb.createPool(cred, function() {});
-        },
-        /Nope/
-      );
-      done();
+      dotest(cred, done);
     });
 
     it('140.7.4 poolMin', function(done) {
@@ -683,13 +662,11 @@ describe('140. jsObjectGetter1.js', function() {
         }
       });
 
-      should.throws(
-        function() {
-          oracledb.getConnection(cred, function(){ });
-        },
-        /Nope/
-      );
-      done();
+      oracledb.getConnection(cred, function(err, conn) {
+        should.not.exist(conn);
+        should.exist(err);
+        done();
+      });
     });
 
     it('140.8.2 String type: password', function(done) {
@@ -701,13 +678,11 @@ describe('140. jsObjectGetter1.js', function() {
         }
       });
 
-      should.throws(
-        function() {
-          oracledb.getConnection(cred, function(){ });
-        },
-        /Nope/
-      );
-      done();
+      oracledb.getConnection(cred, function(err, conn) {
+        should.not.exist(conn);
+        should.exist(err);
+        done();
+      });
     });
 
     it('140.8.3 String type: connectionString', function(done) {
@@ -719,13 +694,11 @@ describe('140. jsObjectGetter1.js', function() {
         }
       });
 
-      should.throws(
-        function() {
-          oracledb.getConnection(cred, function(){ });
-        },
-        /Nope/
-      );
-      done();
+      oracledb.getConnection(cred, function(err, conn) {
+        should.not.exist(conn);
+        should.exist(err);
+        done();
+      });
     });
 
     it('140.8.4 Constant type: privilege', function(done) {
@@ -736,14 +709,11 @@ describe('140. jsObjectGetter1.js', function() {
           throw 'Nope';
         }
       });
-
-      should.throws(
-        function() {
-          oracledb.getConnection(cred, function(){ });
-        },
-        /Nope/
-      );
-      done();
+      oracledb.getConnection(cred, function(err, conn) {
+        should.not.exist(conn);
+        should.exist(err);
+        done();
+      });
     });
 
   }); // 140.8

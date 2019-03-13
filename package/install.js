@@ -36,14 +36,6 @@
 const fs = require('fs');
 const nodbUtil = require('../lib/util.js');
 
-let packageJSON;
-try {
-  packageJSON = require('../package.json');
-} catch(err) {
-  throw new Error('package.json is missing');
-}
-const PACKAGE_JSON_VERSION = packageJSON.version;
-
 // Log standard output with an 'oracledb' prefix
 function log(message) { // eslint-disable-line
   const args = Array.from(arguments);
@@ -64,7 +56,11 @@ function done(err) {
 
   if (err) { // Couldn't install the binary
     error(err.message);
-    error('Try compiling node-oracledb source code using ' + installUrl + '#github');
+    if (err.message.match(/^NJS-067/)) {
+      error('Try compiling node-oracledb source code using ' + installUrl + '#github');
+    } else if (err.message.match(/^NJS-069/)) {
+      error('An older node-oracledb version may work with Node.js ' + process.version);
+    }
     process.exit(87);
   } else { // Successfully installed
     let arch;
@@ -78,7 +74,7 @@ function done(err) {
 
     log('********************************************************************************');
 
-    log('** Node-oracledb ' + PACKAGE_JSON_VERSION + ' installed for Node.js ' + process.versions.node + ' (' + process.platform + ', ' + process.arch +')');
+    log('** Node-oracledb ' + nodbUtil.PACKAGE_JSON_VERSION + ' installed for Node.js ' + process.versions.node + ' (' + process.platform + ', ' + process.arch +')');
 
     log('**');
     log('** To use node-oracledb:');
@@ -126,13 +122,16 @@ function done(err) {
 
 // Check there is a usable binary file for the node-oracledb module
 function checkAvailable(cb) {
-  const binaryFile = nodbUtil.RELEASE_DIR + '/' + nodbUtil.BINARY_FILE;
-  try {
-    fs.statSync(binaryFile);
-    cb();
-  } catch (err) {
-    let m = process.version + ' (NODE_MODULE_VERSION=' + process.versions.modules + ') on ' + process.platform + ' ' + process.arch;
-    cb(new Error(nodbUtil.getErrorMessage('NJS-067', m)));
+  let vs = process.version.substring(1).split(".").map(Number);
+  if (vs[0] < 8 || (vs[0] === 8 && vs[1] < 12)) {
+    cb(new Error(nodbUtil.getErrorMessage('NJS-069', nodbUtil.PACKAGE_JSON_VERSION, "8.12")));
+  } else {
+    try {
+      fs.statSync(nodbUtil.RELEASE_DIR + '/' + nodbUtil.BINARY_FILE);
+      cb();
+    } catch (err) {
+      cb(new Error(nodbUtil.getErrorMessage('NJS-067', process.platform + ' ' + process.arch)));
+    }
   }
 }
 

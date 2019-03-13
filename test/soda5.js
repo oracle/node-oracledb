@@ -478,13 +478,97 @@ describe('173. soda5.js', () => {
   }); // 173.9
 
   it('173.10 option object of dropIndex(), basic case', async () => {
-    let options = { "force" : true };
-    await dropIdxOpt(options);
+    let conn, collection;
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_173_10");
+
+      await collection.createIndex({
+        "name": "OFFICE_IDX_SP",
+        "spatial": "geometry",
+      });
+
+      await Promise.all(
+        sodaUtil.t_contents_spatial.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
+
+      // Fetch back
+      let empInShenzhen = await collection.find()
+        .filter({ "office": {"$like": "Shenzhen"} })
+        .count();
+      should.strictEqual(empInShenzhen.count, 2);
+
+      // drop index
+      await collection.dropIndex("OFFICE_IDX_SP", { "force" : true });
+      await conn.commit();
+    } catch(err) {
+      should.not.exist(err);
+    } finally {
+      if (collection) {
+        let res = await collection.drop();
+        should.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+    }
   }); // 173.10
 
   it('173.11 option object of dropIndex(), boolean value is false', async () => {
-    let options = { "force" : false };
-    await dropIdxOpt(options);
+    let conn, collection;
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_173_11");
+
+      await collection.createIndex({
+        "name": "OFFICE_IDX",
+        "fields": [
+          {
+            "path": "office",
+            "datatype": "string",
+            "order": "asc"
+          }
+        ]
+      });
+
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
+
+      // Fetch back
+      let empInShenzhen = await collection.find()
+        .filter({ "office": {"$like": "Shenzhen"} })
+        .count();
+      should.strictEqual(empInShenzhen.count, 2);
+
+      // drop index
+      await collection.dropIndex("OFFICE_IDX", { "force" : false });
+      await conn.commit();
+    } catch(err) {
+      should.not.exist(err);
+    } finally {
+      if (collection) {
+        let res = await collection.drop();
+        should.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+    }
   }); // 173.11
 
   it('173.12 getDataGuide(), basic case', async () => {
@@ -559,58 +643,3 @@ describe('173. soda5.js', () => {
   }); // 173.12
 
 });
-
-const dropIdxOpt = async function(opts) {
-  let conn, collection;
-  try {
-    conn = await oracledb.getConnection(dbconfig);
-
-    let soda = conn.getSodaDatabase();
-    collection = await soda.createCollection("soda_test_173_10");
-
-    let indexSpec = {
-      "name": "OFFICE_IDX",
-      "fields": [
-        {
-          "path": "office",
-          "datatype": "string",
-          "order": "asc"
-        }
-      ]
-    };
-    await collection.createIndex(indexSpec);
-
-    await Promise.all(
-      t_contents.map(function(content) {
-        return collection.insertOne(content);
-      })
-    );
-
-    // Fetch back
-    let empInShenzhen = await collection.find()
-      .filter({ "office": {"$like": "Shenzhen"} })
-      .count();
-    should.strictEqual(empInShenzhen.count, 2);
-
-    // drop index
-    let indexName = indexSpec.name;
-    await collection.dropIndex(indexName, opts);
-
-    await conn.commit();
-
-  } catch(err) {
-    should.not.exist(err);
-  } finally {
-    if (collection) {
-      let res = await collection.drop();
-      should.strictEqual(res.dropped, true);
-    }
-    if (conn) {
-      try {
-        await conn.close();
-      } catch(err) {
-        should.not.exist(err);
-      }
-    }
-  }
-};

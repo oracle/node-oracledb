@@ -467,7 +467,7 @@ describe('7. autoCommit.js', function() {
         function(err, result) {
           should.not.exist(result);
           should.exist(err);
-          should.strictEqual(err.message, "NJS-007: invalid value for \"autoCommit\" in parameter 3");
+          should.strictEqual(err.message, "NJS-008: invalid type for \"autoCommit\" in parameter 3");
           callback();
         });
     };

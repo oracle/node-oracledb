@@ -71,11 +71,77 @@ sodaUtil.cleanup = async function() {
 
 
 sodaUtil.t_contents = [
-  { id: 1001, name: "Gillian",  office: "Shenzhen" },
+  { id: 1001, name: "Gillian", office: "Shenzhen" },
   { id: 1002, name: "Chris",    office: "Melbourne" },
   { id: 1003, name: "Changjie", office: "Shenzhen" },
   { id: 1004, name: "Venkat",   office: "Bangalore" },
   { id: 1005, name: "May",      office: "London" },
   { id: 1006, name: "Joe",      office: "San Francisco" },
   { id: 1007, name: "Gavin",    office: "New York" }
+];
+
+sodaUtil.t_contents_spatial = [
+  {
+    id: 1001,
+    name: "Gillian",
+    office: "Shenzhen",
+    geometry: {
+      "type": "Point",
+      "coordinates": [125.6, 10.1]
+    }
+  },
+  {
+    id: 1002,
+    name: "Chris",
+    office: "Melbourne",
+    geometry: {
+      "type": "Point",
+      "coordinates": [125.6, 20.1]
+    }
+  },
+  {
+    id: 1003,
+    name: "Changjie",
+    office: "Shenzhen",
+    geometry: {
+      "type": "Point",
+      "coordinates": [125.6, 30.1]
+    }
+  },
+  {
+    id: 1004,
+    name: "Venkat",
+    office: "Bangalore",
+    geometry: {
+      "type": "Point",
+      "coordinates": [135.6, 10.1]
+    }
+  },
+  {
+    id: 1005,
+    name: "May",
+    office: "London",
+    geometry: {
+      "type": "Point",
+      "coordinates": [145.6, 10.1]
+    }
+  },
+  {
+    id: 1006,
+    name: "Joe",
+    office: "San Francisco",
+    geometry: {
+      "type": "Point",
+      "coordinates": [155.6, 10.1]
+    }
+  },
+  {
+    id: 1007,
+    name: "Gavin",
+    office: "New York",
+    geometry: {
+      "type": "Point",
+      "coordinates": [165.6, 10.1]
+    }
+  }
 ];

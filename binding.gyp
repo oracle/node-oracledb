@@ -3,20 +3,22 @@
   {
     "target_name" : "oracledb",
     "sources" : [
-             "src/njsCommon.cpp",
-             "src/njsOracle.cpp",
-             "src/njsPool.cpp",
-             "src/njsConnection.cpp",
-             "src/njsResultSet.cpp",
-             "src/njsSubscription.cpp",
-             "src/njsMessages.cpp",
-             "src/njsIntLob.cpp",
-             "src/njsSodaDatabase.cpp",
-             "src/njsSodaCollection.cpp",
-             "src/njsSodaDocument.cpp",
-             "src/njsSodaOperation.cpp",
-             "src/njsSodaDocCursor.cpp",
-             "src/njsUtils.cpp",
+             "src/njsBaton.c",
+             "src/njsConnection.c",
+             "src/njsErrors.c",
+             "src/njsLob.c",
+             "src/njsModule.c",
+             "src/njsOracleDb.c",
+             "src/njsPool.c",
+             "src/njsResultSet.c",
+             "src/njsSodaCollection.c",
+             "src/njsSodaDatabase.c",
+             "src/njsSodaDocCursor.c",
+             "src/njsSodaDocument.c",
+             "src/njsSodaOperation.c",
+             "src/njsSubscription.c",
+             "src/njsUtils.c",
+             "src/njsVariable.c",
              "odpi/src/dpiConn.c",
              "odpi/src/dpiContext.c",
              "odpi/src/dpiData.c",
@@ -55,7 +57,6 @@
           "dpi_check%"    : "<!(INSTURL=\"https://oracle.github.io/node-oracledb/INSTALL.html#github\"; ERR=\"oracledb ERR! Error:\"; if [ -f odpi/include/dpi.h ]; then echo \"Has dpi.h\"; else echo \"$ERR Cannot find odpi/include/dpi.h.  For GitHub ZIP downloads you must separately download the odpi subdirectory from GitHub.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi;)"
         },
         "cflags"        : ['-fexceptions'],
-        "cflags_cc"     : ['-fexceptions'],
         "libraries"     : ['-ldl', '-lpthread'],
       }
     ],
@@ -77,7 +78,6 @@
           "dpi_check%"    : "<!(INSTURL=\"https://oracle.github.io/node-oracledb/INSTALL.html#github\"; ERR=\"oracledb ERR! Error:\"; if [ -f odpi/include/dpi.h ]; then echo \"Has dpi.h\"; else echo \"$ERR Cannot find odpi/include/dpi.h.  For GitHub ZIP downloads you must separately download the odpi subdirectory from GitHub.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi;)"
         },
         "cflags"        : ['-fexceptions', '-fsigned-char'],
-        "cflags_cc"     : ['-fexceptions', '-fsigned-char'],
         "libraries"     : ['-ldl', '-lpthread'],
       }
     ],
@@ -87,7 +87,6 @@
           "dpi_check%"    : "<!(INSTURL=\"https://oracle.github.io/node-oracledb/INSTALL.html#github\"; ERR=\"oracledb ERR! Error:\"; if [ -f odpi/include/dpi.h ]; then echo \"Has dpi.h\"; else echo \"$ERR Cannot find odpi/include/dpi.h.  For GitHub ZIP downloads you must separately download the odpi subdirectory from GitHub.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi;)"
         },
         "cflags"        : ['-fexceptions'],
-        "cflags_cc"     : ['-fexceptions'],
         "libraries"     : ['-ldl', '-lpthread'],
       }
     ],
@@ -154,8 +153,7 @@
     ],
   ],
   "include_dirs"  : [ "odpi/src/",
-                      "odpi/include/",
-                      "<!(node -e \"require('nan')\")"
+                      "odpi/include/"
     ],
   }
   ]

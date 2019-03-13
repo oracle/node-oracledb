@@ -335,13 +335,14 @@ describe('86. fetchClobAsString3.js', function() {
       done();
     }); // 86.2.3
 
-    it('86.2.4 Buffer not supported in fetchAsString', function(done) {
-      should.throws(
+    it('86.2.4 Buffer supported in fetchAsString', function(done) {
+      should.doesNotThrow(
         function() {
-          oracledb.fetchAsString = [ oracledb.Buffer ];
-        },
-        /NJS-021: invalid type for conversion specified/
+          oracledb.fetchAsString = [ oracledb.BUFFER ];
+        }
       );
+      should.strictEqual(oracledb.fetchAsString.length, 1);
+      should.strictEqual(oracledb.fetchAsString[0], oracledb.BUFFER);
       done();
     }); // 86.2.4
 
@@ -377,6 +378,78 @@ describe('86. fetchClobAsString3.js', function() {
       should.strictEqual(oracledb.fetchAsString[0], oracledb.CLOB);
       done();
     }); // 86.2.7
+
+    it('86.2.8 undefined in fetchAsString will throw NJS-004', function() {
+      should.throws(
+        function() {
+          oracledb.fetchAsString = [ undefined ];
+        },
+        /NJS-004:/
+      );
+    }); // 86.2.8
+
+    it('86.2.9 Random string in fetchAsString will throw NJS-004', function() {
+      should.throws(
+        function() {
+          oracledb.fetchAsString = [ "foobar" ];
+        },
+        /NJS-004:/
+      );
+    }); // 86.2.9
+
+    it('86.2.10 Random integer in fetchAsString will throw NJS-021', function() {
+      should.throws(
+        function() {
+          oracledb.fetchAsString = [ 31415 ];
+        },
+        /NJS-021:/ // NJS-021: invalid type for conversion specified
+      );
+    }); // 86.2.10
+
+    it('86.2.11 Negative integer in fetchAsString will throw NJS-004', function() {
+      should.throws(
+        function() {
+          oracledb.fetchAsString = [ -1 ];
+        },
+        /NJS-004:/
+      );
+    }); // 86.2.11
+
+    it('86.2.12 Random float in fetchAsString will throw NJS-004', function() {
+      should.throws(
+        function() {
+          oracledb.fetchAsString = [ 3.1415 ];
+        },
+        /NJS-004:/
+      );
+    }); // 86.2.12
+
+    it('86.2.13 Array in fetchAsString will throw NJS-004', function() {
+      should.throws(
+        function() {
+          oracledb.fetchAsString = [ [3] ];
+        },
+        /NJS-004:/
+      );
+    }); // 86.2.13
+
+    it('86.2.14 Object in fetchAsString will throw NJS-004', function() {
+      should.throws(
+        function() {
+          oracledb.fetchAsString = [ {1:1} ];
+        },
+        /NJS-004:/
+      );
+    }); // 86.2.14
+
+    it('86.2.15 Non-Array as fetchAsString will throw NJS-004', function() {
+      should.throws(
+        function() {
+          oracledb.fetchAsString = 1;
+        },
+        /NJS-004:/
+      );
+    }); // 86.2.15
 
   }); // 86.2
 

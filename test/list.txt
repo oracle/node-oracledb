@@ -789,7 +789,7 @@ Overview of node-oracledb functional tests
     44.7 empty array for BIND_OUT
     44.8 maxSize option applies to each elements of an array
 
-45. instanceof.js
+45. instanceof1.js
     45.1 instanceof works for the oracledb instance
     45.2 instanceof works for pool instances
     45.3 instanceof works for connection instances
@@ -1017,7 +1017,7 @@ Overview of node-oracledb functional tests
         67.1.11 does not throw an error if multiple pools are created without a poolAlias in the same call stack
         67.1.12 uses callback syntax function(err) instead of function(err,pool)
         67.1.13 Negative: callback is called with function(err)
-        67.1.14 a named pool does not also create a default pool
+        67.1.14 Creating a named pool will not create a default pool at the same time
     67.2 oracledb.getConnection functional tests
         67.2.1 gets a connection from the default pool
         67.2.2 gets a connection from the pool with the specified alias when no alias is specified
@@ -1916,10 +1916,18 @@ Overview of node-oracledb functional tests
         86.2.1 String not supported in fetchAsString
         86.2.2 BLOB not supported in fetchAsString
         86.2.3 Cursor not supported in fetchAsString
-        86.2.4 Buffer not supported in fetchAsString
+        86.2.4 Buffer supported in fetchAsString
         86.2.5 Number supported in fetchAsString
         86.2.6 Date supported in fetchAsString
         86.2.7 CLOB supported in fetchAsString
+        86.2.8 undefined in fetchAsString will throw NJS-004
+        86.2.9 Random string in fetchAsString will throw NJS-004
+        86.2.10 Random integer in fetchAsString will throw NJS-021
+        86.2.11 Negative integer in fetchAsString will throw NJS-004
+        86.2.12 Random float in fetchAsString will throw NJS-004
+        86.2.13 Array in fetchAsString will throw NJS-004
+        86.2.14 Object in fetchAsString will throw NJS-004
+        86.2.15 Non-Array as fetchAsString will throw NJS-004
 
 87. fetchBlobAsBuffer1.js
     87.1 fetch BLOB columns by setting oracledb.fetchAsBuffer
@@ -4237,6 +4245,14 @@ Overview of node-oracledb functional tests
     172.1 Negative - incorrect parameters
     172.2 binding by position and by name cannot be mixed
 
+172. executeMany2.js
+    172.1 Negative - incorrect parameters
+    172.2 Binding tests for invalid binding variables
+        172.2.1 binding by position and by name cannot be mixed
+        172.2.2 Binding an array which values are undefined will throw ORA-01008
+        172.2.3 Binding an array starts with undefined will throw ORA-01008
+        172.2.4 Binding an array contains undefined will throw JS TypeError
+
 173. soda5.js
     173.1 create index, basic case
     173.2 query row not via indexSpec
@@ -4402,7 +4418,8 @@ Overview of node-oracledb functional tests
     185.2 Negative Cases
         185.2.1 Does not throw error when trying to unsubscribe twice
         185.2.2 Throw error ORA-29972 if CHANGE NOTIFICATION is revoked from the user
-
+186. instanceof2.js
+    186.1 instanceof checks for SODA classes
 187. plsqlBindList.js
     187.1 Positive Cases
         187.1.1 Bind Object of List by position with type specified

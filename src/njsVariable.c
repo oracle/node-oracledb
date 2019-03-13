@@ -1,0 +1,1017 @@
+// Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved.
+
+//-----------------------------------------------------------------------------
+//
+// You may not use the identified files except in compliance with the Apache
+// License, Version 2.0 (the "License.")
+//
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// NAME
+//   njsVariable.c
+//
+// DESCRIPTION
+//   Implementation of methods for variables.
+//
+//-----------------------------------------------------------------------------
+
+#include "njsModule.h"
+
+// forward declarations for functions only used in this file
+static void njsVariable_freeBuffer(njsVariableBuffer *buffer);
+static bool njsVariable_setFromString(njsVariable *var, uint32_t pos,
+        napi_env env, napi_value value, bool checkSize, njsBaton *baton);
+static bool njsVariable_setInvalidBind(njsVariable *var, uint32_t pos,
+        njsBaton *baton);
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_createBuffer()
+//   Creates the buffer and ODPI-C variable used for binding data.
+//-----------------------------------------------------------------------------
+bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
+        njsBaton *baton)
+{
+    // if the variable is not an array use the bind array size
+    if (!var->isArray)
+        var->maxArraySize = baton->bindArraySize;
+
+    // if the variable has no data type assume string of size 1
+    if (var->bindDataType == NJS_DATATYPE_DEFAULT) {
+        var->bindDataType = NJS_DATATYPE_STR;
+        var->maxSize = 1;
+    }
+
+    // REF cursors are only supported as out binds currently
+    if (var->bindDataType == NJS_DATATYPE_CURSOR &&
+            var->bindDir != NJS_BIND_OUT)
+        return njsBaton_setError(baton, errInvalidPropertyValueInParam, "type",
+                1);
+
+    // max size must be specified for in/out and out binds
+    if (!var->maxSize && var->bindDir != NJS_BIND_IN)
+        return njsBaton_setError(baton, errInvalidPropertyValueInParam,
+                "maxSize", 1);
+
+    // determine ODPI-C Oracle type and native type to use
+    switch (var->bindDataType) {
+        case NJS_DATATYPE_STR:
+            var->varTypeNum = DPI_ORACLE_TYPE_VARCHAR;
+            var->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
+            break;
+        case NJS_DATATYPE_NUM:
+            var->varTypeNum = DPI_ORACLE_TYPE_NUMBER;
+            var->nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
+            break;
+        case NJS_DATATYPE_DATE:
+            var->varTypeNum = DPI_ORACLE_TYPE_TIMESTAMP_LTZ;
+            var->nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
+            break;
+        case NJS_DATATYPE_CURSOR:
+            var->varTypeNum = DPI_ORACLE_TYPE_STMT;
+            var->nativeTypeNum = DPI_NATIVE_TYPE_STMT;
+            break;
+        case NJS_DATATYPE_BUFFER:
+            var->varTypeNum = DPI_ORACLE_TYPE_RAW;
+            var->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
+            break;
+        case NJS_DATATYPE_CLOB:
+            var->varTypeNum = DPI_ORACLE_TYPE_CLOB;
+            var->nativeTypeNum = DPI_NATIVE_TYPE_LOB;
+            break;
+        case NJS_DATATYPE_BLOB:
+            var->varTypeNum = DPI_ORACLE_TYPE_BLOB;
+            var->nativeTypeNum = DPI_NATIVE_TYPE_LOB;
+            break;
+        default:
+            return njsBaton_setError(baton, errInvalidBindDataType, 2);
+    }
+
+    // allocate buffer
+    var->buffer = calloc(1, sizeof(njsVariableBuffer));
+    if (!var->buffer)
+        return njsBaton_setError(baton, errInsufficientMemory);
+
+    // create ODPI-C variable
+    if (dpiConn_newVar(conn->handle, var->varTypeNum, var->nativeTypeNum,
+            var->maxArraySize, var->maxSize, 1, var->isArray, NULL,
+            &var->dpiVarHandle, &var->buffer->dpiVarData) < 0)
+        return njsBaton_setErrorDPI(baton);
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_free()
+//   Frees the contents of the variable.
+//-----------------------------------------------------------------------------
+void njsVariable_free(njsVariable *var)
+{
+    uint32_t i;
+
+    NJS_FREE_AND_CLEAR(var->name);
+    if (var->dpiVarHandle) {
+        dpiVar_release(var->dpiVarHandle);
+        var->dpiVarHandle = NULL;
+    }
+    if (var->buffer) {
+        njsVariable_freeBuffer(var->buffer);
+        free(var->buffer);
+        var->buffer = NULL;
+    }
+    if (var->dmlReturningBuffers) {
+        for (i = 0; i < var->numDmlReturningBuffers; i++)
+            njsVariable_freeBuffer(&var->dmlReturningBuffers[i]);
+        free(var->dmlReturningBuffers);
+        var->dmlReturningBuffers = NULL;
+    }
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_freeBuffer()
+//   Frees the contents of the variable buffer.
+//-----------------------------------------------------------------------------
+static void njsVariable_freeBuffer(njsVariableBuffer *buffer)
+{
+    uint32_t i;
+
+    if (buffer->lobs) {
+        for (i = 0; i < buffer->numLobs; i++) {
+            if (buffer->lobs[i].handle) {
+                dpiLob_release(buffer->lobs[i].handle);
+                buffer->lobs[i].handle = NULL;
+            }
+        }
+        free(buffer->lobs);
+        buffer->lobs = NULL;
+    }
+
+    if (buffer->queryVars) {
+        for (i = 0; i < buffer->numQueryVars; i++)
+            njsVariable_free(&buffer->queryVars[i]);
+        free(buffer->queryVars);
+        buffer->queryVars = NULL;
+    }
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_getArrayValue()
+//   Get the value from the variable as an array.
+//-----------------------------------------------------------------------------
+bool njsVariable_getArrayValue(njsVariable *var, uint32_t pos, njsBaton *baton,
+        napi_env env, napi_value *value)
+{
+    njsVariableBuffer *buffer = var->buffer;
+    napi_value element;
+    uint32_t i;
+
+    // create array of the required length
+    if (var->dmlReturningBuffers)
+        buffer = &var->dmlReturningBuffers[pos];
+    NJS_CHECK_NAPI(env, napi_create_array_with_length(env, buffer->numElements,
+            value))
+
+    // populate array
+    for (i = 0; i < buffer->numElements; i++) {
+        if (!njsVariable_getScalarValue(var, buffer, i, baton, env, &element))
+            return false;
+        NJS_CHECK_NAPI(env, napi_set_element(env, *value, i, element))
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_getDataType()
+//   Return the data type that is being used by the variable. This is an
+// enumeration that is publicly available in the oracledb module.
+//-----------------------------------------------------------------------------
+uint32_t njsVariable_getDataType(njsVariable *var)
+{
+    switch (var->varTypeNum) {
+        case DPI_ORACLE_TYPE_VARCHAR:
+        case DPI_ORACLE_TYPE_NVARCHAR:
+        case DPI_ORACLE_TYPE_CHAR:
+        case DPI_ORACLE_TYPE_NCHAR:
+        case DPI_ORACLE_TYPE_ROWID:
+        case DPI_ORACLE_TYPE_LONG_VARCHAR:
+            return NJS_DATATYPE_STR;
+        case DPI_ORACLE_TYPE_RAW:
+        case DPI_ORACLE_TYPE_LONG_RAW:
+            return NJS_DATATYPE_BUFFER;
+        case DPI_ORACLE_TYPE_NATIVE_FLOAT:
+        case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
+        case DPI_ORACLE_TYPE_NATIVE_INT:
+        case DPI_ORACLE_TYPE_NUMBER:
+            return NJS_DATATYPE_NUM;
+        case DPI_ORACLE_TYPE_DATE:
+        case DPI_ORACLE_TYPE_TIMESTAMP:
+        case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
+        case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
+            return NJS_DATATYPE_DATE;
+        case DPI_ORACLE_TYPE_CLOB:
+        case DPI_ORACLE_TYPE_NCLOB:
+            return NJS_DATATYPE_CLOB;
+        case DPI_ORACLE_TYPE_BLOB:
+            return NJS_DATATYPE_BLOB;
+        default:
+            break;
+    }
+    return NJS_DATATYPE_DEFAULT;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_getDBType()
+//   Return the database data type that the variable represents. This is an
+// enumeration that is publicly available in the oracledb module.
+//-----------------------------------------------------------------------------
+uint32_t njsVariable_getDBType(njsVariable *var)
+{
+    switch (var->dbTypeNum) {
+        case DPI_ORACLE_TYPE_VARCHAR:
+            return NJS_DB_TYPE_VARCHAR;
+        case DPI_ORACLE_TYPE_NVARCHAR:
+            return NJS_DB_TYPE_NVARCHAR;
+        case DPI_ORACLE_TYPE_CHAR:
+            return NJS_DB_TYPE_CHAR;
+        case DPI_ORACLE_TYPE_NCHAR:
+          return NJS_DB_TYPE_NCHAR;
+        case DPI_ORACLE_TYPE_ROWID:
+            return NJS_DB_TYPE_ROWID;
+        case DPI_ORACLE_TYPE_RAW:
+            return NJS_DB_TYPE_RAW;
+        case DPI_ORACLE_TYPE_NATIVE_FLOAT:
+            return NJS_DB_TYPE_BINARY_FLOAT;
+        case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
+            return NJS_DB_TYPE_BINARY_DOUBLE;
+        case DPI_ORACLE_TYPE_NATIVE_INT:
+        case DPI_ORACLE_TYPE_NUMBER:
+            return NJS_DB_TYPE_NUMBER;
+        case DPI_ORACLE_TYPE_DATE:
+            return NJS_DB_TYPE_DATE;
+        case DPI_ORACLE_TYPE_TIMESTAMP:
+            return NJS_DB_TYPE_TIMESTAMP;
+        case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
+            return NJS_DB_TYPE_TIMESTAMP_TZ;
+        case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
+            return NJS_DB_TYPE_TIMESTAMP_LTZ;
+        case DPI_ORACLE_TYPE_CLOB:
+            return NJS_DB_TYPE_CLOB;
+        case DPI_ORACLE_TYPE_NCLOB:
+          return NJS_DB_TYPE_NCLOB;
+        case DPI_ORACLE_TYPE_BLOB:
+            return NJS_DB_TYPE_BLOB;
+        case DPI_ORACLE_TYPE_LONG_VARCHAR:
+            return NJS_DB_TYPE_LONG;
+        case DPI_ORACLE_TYPE_LONG_RAW:
+            return NJS_DB_TYPE_LONG_RAW;
+        default:
+            break;
+    }
+    return NJS_DB_TYPE_DEFAULT;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_getMetadataMany()
+//   Return metadata about many variables.
+//-----------------------------------------------------------------------------
+bool njsVariable_getMetadataMany(njsVariable *vars, uint32_t numVars,
+        napi_env env, bool extended, napi_value *metadata)
+{
+    napi_value column;
+    uint32_t i;
+
+    // create array of the specified length
+    NJS_CHECK_NAPI(env, napi_create_array_with_length(env, numVars, metadata))
+
+    // process each of the variables in the array
+    for (i = 0; i < numVars; i++) {
+        if (!njsVariable_getMetadataOne(&vars[i], env, extended, &column))
+            return false;
+        NJS_CHECK_NAPI(env, napi_set_element(env, *metadata, i, column))
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_getMetadataOne()
+//   Return metadata about a particular variable.
+//-----------------------------------------------------------------------------
+bool njsVariable_getMetadataOne(njsVariable *var, napi_env env, bool extended,
+        napi_value *metadata)
+{
+    uint32_t dbType;
+    napi_value temp;
+
+    // create object to store metadata on
+    NJS_CHECK_NAPI(env, napi_create_object(env, metadata))
+
+    // store name
+    NJS_CHECK_NAPI(env, napi_create_string_utf8(env, var->name,
+            var->nameLength, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "name", temp))
+
+    // nothing more to do if extended metadata is not desired
+    if (!extended)
+        return true;
+
+    // store data type
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, njsVariable_getDataType(var),
+            &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "fetchType",
+            temp))
+
+    // store database type
+    dbType = njsVariable_getDBType(var);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, dbType, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "dbType",
+            temp))
+
+    // store nullable
+    NJS_CHECK_NAPI(env, napi_get_boolean(env, var->isNullable, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "nullable",
+            temp))
+
+    // store size in bytes, if applicable
+    switch (dbType) {
+        case NJS_DB_TYPE_VARCHAR:
+        case NJS_DB_TYPE_NVARCHAR:
+        case NJS_DB_TYPE_CHAR:
+        case NJS_DB_TYPE_NCHAR:
+        case NJS_DB_TYPE_RAW:
+            NJS_CHECK_NAPI(env, napi_create_uint32(env, var->dbSizeInBytes,
+                    &temp))
+            NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata,
+                    "byteSize", temp))
+            break;
+        default:
+            break;
+    }
+
+    // store precision, if applicable
+    switch (dbType) {
+        case NJS_DB_TYPE_NUMBER:
+        case NJS_DB_TYPE_TIMESTAMP:
+        case NJS_DB_TYPE_TIMESTAMP_TZ:
+        case NJS_DB_TYPE_TIMESTAMP_LTZ:
+            NJS_CHECK_NAPI(env, napi_create_int32(env, var->precision, &temp))
+            NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata,
+                    "precision", temp))
+            break;
+        default:
+            break;
+    }
+
+    // store scale, if applicable
+    if (dbType == NJS_DB_TYPE_NUMBER) {
+        NJS_CHECK_NAPI(env, napi_create_int32(env, var->scale, &temp))
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "scale",
+                temp))
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_getScalarValue()
+//   Get the value from the variable at the specified position in the variable.
+//-----------------------------------------------------------------------------
+bool njsVariable_getScalarValue(njsVariable *var, njsVariableBuffer *buffer,
+        uint32_t pos, njsBaton *baton, napi_env env, napi_value *value)
+{
+    uint32_t bufferRowIndex, rowidValueLength;
+    const char *rowidValue;
+    dpiData *data;
+
+    // get the value from ODPI-C
+    bufferRowIndex = baton->bufferRowIndex + pos;
+    data = &buffer->dpiVarData[bufferRowIndex];
+
+    // handle null values
+    if (data->isNull) {
+        NJS_CHECK_NAPI(env, napi_get_null(env, value))
+        return true;
+    }
+
+    // handle all other values
+    switch (var->nativeTypeNum) {
+        case DPI_NATIVE_TYPE_INT64:
+            NJS_CHECK_NAPI(env, napi_create_int64(env, data->value.asInt64,
+                    value))
+            break;
+        case DPI_NATIVE_TYPE_FLOAT:
+            NJS_CHECK_NAPI(env, napi_create_double(env, data->value.asFloat,
+                    value))
+            break;
+        case DPI_NATIVE_TYPE_DOUBLE:
+            if (var->varTypeNum == DPI_ORACLE_TYPE_TIMESTAMP_LTZ)
+                return njsBaton_createDate(baton, env, data->value.asDouble,
+                        value);
+            NJS_CHECK_NAPI(env, napi_create_double(env, data->value.asDouble,
+                    value))
+            break;
+        case DPI_NATIVE_TYPE_BYTES:
+            if (data->value.asBytes.length > var->maxSize)
+                return njsBaton_setError(baton, errInsufficientBufferForBinds);
+            if (data->value.asBytes.length == 0) {
+                NJS_CHECK_NAPI(env, napi_get_null(env, value))
+            } else if (var->varTypeNum == DPI_ORACLE_TYPE_RAW ||
+                    var->varTypeNum == DPI_ORACLE_TYPE_LONG_RAW) {
+                NJS_CHECK_NAPI(env, napi_create_buffer_copy(env,
+                        data->value.asBytes.length, data->value.asBytes.ptr,
+                        NULL, value))
+            } else {
+                NJS_CHECK_NAPI(env, napi_create_string_utf8(env,
+                        data->value.asBytes.ptr, data->value.asBytes.length,
+                        value))
+            }
+            break;
+        case DPI_NATIVE_TYPE_LOB:
+            return njsLob_new(baton, &buffer->lobs[pos], env, value);
+        case DPI_NATIVE_TYPE_STMT:
+            if (dpiStmt_addRef(data->value.asStmt) < 0)
+                return njsBaton_setErrorDPI(baton);
+            if (!njsResultSet_new(baton, env, data->value.asStmt,
+                    buffer->queryVars, buffer->numQueryVars, false, value)) {
+                dpiStmt_release(data->value.asStmt);
+                return false;
+            }
+            buffer->queryVars = NULL;
+            buffer->numQueryVars = 0;
+            return true;
+        case DPI_NATIVE_TYPE_ROWID:
+            if (dpiRowid_getStringValue(data->value.asRowid, &rowidValue,
+                    &rowidValueLength) < 0)
+                return njsBaton_setErrorDPI(baton);
+            NJS_CHECK_NAPI(env, napi_create_string_utf8(env, rowidValue,
+                    rowidValueLength, value))
+            break;
+        default:
+            break;
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_initForQuery()
+//   Initialize query variables using the metadata from the query as a
+// template.
+//-----------------------------------------------------------------------------
+bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
+        dpiStmt *handle, njsBaton *baton)
+{
+    dpiQueryInfo queryInfo;
+    uint32_t i;
+
+    // populate variables with query metadata
+    for (i = 0; i < numVars; i++) {
+
+        // allocate buffer
+        vars[i].buffer = calloc(1, sizeof(njsVariable));
+        if (!vars[i].buffer)
+            return njsBaton_setError(baton, errInsufficientMemory);
+
+        // get query information for the specified column
+        vars[i].pos = i + 1;
+        vars[i].isArray = false;
+        vars[i].bindDir = NJS_BIND_OUT;
+        if (dpiStmt_getQueryInfo(handle, vars[i].pos, &queryInfo) < 0)
+            return njsBaton_setErrorDPI(baton);
+        vars[i].name = malloc(queryInfo.nameLength);
+        if (!vars[i].name)
+            return njsBaton_setError(baton, errInsufficientMemory);
+        memcpy(vars[i].name, queryInfo.name, queryInfo.nameLength);
+        vars[i].nameLength = queryInfo.nameLength;
+        vars[i].maxArraySize = baton->fetchArraySize;
+        vars[i].dbSizeInBytes = queryInfo.typeInfo.dbSizeInBytes;
+        vars[i].precision = queryInfo.typeInfo.precision +
+                queryInfo.typeInfo.fsPrecision;
+        vars[i].scale = queryInfo.typeInfo.scale;
+        vars[i].isNullable = queryInfo.nullOk;
+
+        // determine the type of data
+        vars[i].dbTypeNum = queryInfo.typeInfo.oracleTypeNum;
+        vars[i].varTypeNum = queryInfo.typeInfo.oracleTypeNum;
+        vars[i].nativeTypeNum = queryInfo.typeInfo.defaultNativeTypeNum;
+        if (queryInfo.typeInfo.oracleTypeNum != DPI_ORACLE_TYPE_VARCHAR &&
+                queryInfo.typeInfo.oracleTypeNum != DPI_ORACLE_TYPE_NVARCHAR &&
+                queryInfo.typeInfo.oracleTypeNum != DPI_ORACLE_TYPE_CHAR &&
+                queryInfo.typeInfo.oracleTypeNum != DPI_ORACLE_TYPE_NCHAR &&
+                queryInfo.typeInfo.oracleTypeNum != DPI_ORACLE_TYPE_ROWID) {
+            if (!njsVariable_performMapping(&vars[i], &queryInfo, baton))
+                return false;
+        }
+
+        // validate data type and determine size
+        if (vars[i].varTypeNum == DPI_ORACLE_TYPE_VARCHAR ||
+                vars[i].varTypeNum == DPI_ORACLE_TYPE_RAW) {
+            vars[i].maxSize = NJS_MAX_FETCH_AS_STRING_SIZE;
+            vars[i].nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
+        } else {
+            vars[i].maxSize = 0;
+        }
+        switch (queryInfo.typeInfo.oracleTypeNum) {
+            case DPI_ORACLE_TYPE_VARCHAR:
+            case DPI_ORACLE_TYPE_NVARCHAR:
+            case DPI_ORACLE_TYPE_CHAR:
+            case DPI_ORACLE_TYPE_NCHAR:
+            case DPI_ORACLE_TYPE_RAW:
+                vars[i].maxSize = queryInfo.typeInfo.clientSizeInBytes;
+                if (queryInfo.typeInfo.oracleTypeNum == DPI_ORACLE_TYPE_RAW &&
+                        vars[i].varTypeNum == DPI_ORACLE_TYPE_VARCHAR)
+                    vars[i].maxSize *= 2;
+                break;
+            case DPI_ORACLE_TYPE_DATE:
+            case DPI_ORACLE_TYPE_TIMESTAMP:
+            case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
+            case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
+                if (vars[i].varTypeNum != DPI_ORACLE_TYPE_VARCHAR) {
+                    vars[i].varTypeNum = DPI_ORACLE_TYPE_TIMESTAMP_LTZ;
+                    vars[i].nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
+                }
+                break;
+            case DPI_ORACLE_TYPE_CLOB:
+            case DPI_ORACLE_TYPE_NCLOB:
+                if (vars[i].varTypeNum == DPI_ORACLE_TYPE_VARCHAR)
+                    vars[i].maxSize = (uint32_t) -1;
+                break;
+            case DPI_ORACLE_TYPE_BLOB:
+                if (vars[i].varTypeNum == DPI_ORACLE_TYPE_RAW)
+                    vars[i].maxSize = (uint32_t) -1;
+                break;
+            case DPI_ORACLE_TYPE_LONG_VARCHAR:
+            case DPI_ORACLE_TYPE_LONG_RAW:
+                vars[i].maxSize = (uint32_t) -1;
+                break;
+            case DPI_ORACLE_TYPE_NUMBER:
+            case DPI_ORACLE_TYPE_NATIVE_INT:
+            case DPI_ORACLE_TYPE_NATIVE_FLOAT:
+            case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
+            case DPI_ORACLE_TYPE_ROWID:
+                break;
+            default:
+                return njsBaton_setError(baton, errUnsupportedDataType,
+                        queryInfo.typeInfo.oracleTypeNum, i + 1);
+        }
+
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_performMapping()
+//   Apply any mapping rules that have been specified.
+//-----------------------------------------------------------------------------
+bool njsVariable_performMapping(njsVariable *var, dpiQueryInfo *queryInfo,
+        njsBaton *baton)
+{
+    uint32_t i;
+
+    // apply "by-name" rules
+    for (i = 0; i < baton->numFetchInfo; i++) {
+
+        // ignore rule if the name does not match
+        if (queryInfo->nameLength != baton->fetchInfo[i].nameLength)
+            continue;
+        if (strncmp(queryInfo->name, baton->fetchInfo[i].name,
+                queryInfo->nameLength) != 0)
+            continue;
+
+        // perform any mapping specified
+        if (baton->fetchInfo[i].type == NJS_DATATYPE_STR) {
+            var->varTypeNum = DPI_ORACLE_TYPE_VARCHAR;
+        } else if (baton->fetchInfo[i].type == NJS_DATATYPE_BUFFER) {
+            var->varTypeNum = DPI_ORACLE_TYPE_RAW;
+        } else if (baton->fetchInfo[i].type == NJS_DATATYPE_DEFAULT) {
+            var->varTypeNum = queryInfo->typeInfo.oracleTypeNum;
+        }
+        return true;
+
+    }
+
+    // apply fetchAsString rules
+    for (i = 0; i < baton->numFetchAsStringTypes; i++) {
+        switch (queryInfo->typeInfo.oracleTypeNum) {
+            case DPI_ORACLE_TYPE_NUMBER:
+            case DPI_ORACLE_TYPE_NATIVE_FLOAT:
+            case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
+            case DPI_ORACLE_TYPE_NATIVE_INT:
+                if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_NUM) {
+                    var->varTypeNum = DPI_ORACLE_TYPE_VARCHAR;
+                    return true;
+                }
+                break;
+            case DPI_ORACLE_TYPE_DATE:
+            case DPI_ORACLE_TYPE_TIMESTAMP:
+            case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
+            case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
+                if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_DATE) {
+                    var->varTypeNum = DPI_ORACLE_TYPE_VARCHAR;
+                    return true;
+                }
+                break;
+            case DPI_ORACLE_TYPE_CLOB:
+            case DPI_ORACLE_TYPE_NCLOB:
+                if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_CLOB) {
+                    var->varTypeNum = DPI_ORACLE_TYPE_VARCHAR;
+                    return true;
+                }
+                break;
+            case DPI_ORACLE_TYPE_RAW:
+                if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_BUFFER) {
+                    var->varTypeNum = DPI_ORACLE_TYPE_VARCHAR;
+                    return true;
+                }
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    // apply fetchAsBuffer rules
+    for (i = 0; i < baton->numFetchAsBufferTypes; i++) {
+        if (queryInfo->typeInfo.oracleTypeNum == DPI_ORACLE_TYPE_BLOB &&
+                baton->fetchAsBufferTypes[i] == NJS_DATATYPE_BLOB) {
+            var->varTypeNum = DPI_ORACLE_TYPE_RAW;
+            return true;
+        }
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_process()
+//   Process variables used during binding or fetching. REF cursors must have
+// their query variables defined and LOBs must be initially processed in order
+// to have as much work as possible done in the worker thread and to avoid any
+// round trips.
+//-----------------------------------------------------------------------------
+bool njsVariable_process(njsVariable *vars, uint32_t numVars, uint32_t numRows,
+        njsBaton *baton)
+{
+    njsVariableBuffer *buffer;
+    uint32_t col, row, i;
+    njsVariable *var;
+
+    for (col = 0; col < numVars; col++) {
+        var = &vars[col];
+        var->buffer->numElements = numRows;
+        if (var->bindDir == NJS_BIND_IN)
+            continue;
+
+        // clear DML returning buffers if any exist
+        if (var->dmlReturningBuffers) {
+            for (i = 0; i < var->numDmlReturningBuffers; i++)
+                njsVariable_freeBuffer(&var->dmlReturningBuffers[i]);
+            free(var->dmlReturningBuffers);
+            var->dmlReturningBuffers = NULL;
+        }
+
+        // for arrays, determine the number of elements in the array
+        if (var->isArray) {
+            if (dpiVar_getNumElementsInArray(var->dpiVarHandle,
+                    &var->buffer->numElements) < 0)
+                return njsBaton_setErrorDPI(baton);
+
+        // for DML returning statements, each row has its own set of rows, so
+        // acquire those from ODPI-C and store them in variable buffers for
+        // later processing
+        } else if (baton->stmtInfo.isReturning &&
+                var->bindDir == NJS_BIND_OUT) {
+            var->numDmlReturningBuffers = numRows;
+            var->dmlReturningBuffers = calloc(numRows,
+                    sizeof(njsVariableBuffer));
+            if (!var->dmlReturningBuffers)
+                return njsBaton_setError(baton, errInsufficientMemory);
+            for (row = 0; row < numRows; row++) {
+                buffer = &var->dmlReturningBuffers[row];
+                if (dpiVar_getReturnedData(var->dpiVarHandle, row,
+                        &buffer->numElements, &buffer->dpiVarData) < 0)
+                    return njsBaton_setErrorDPI(baton);
+                if (!njsVariable_processBuffer(var, buffer, baton))
+                    return false;
+            }
+        }
+
+        // process the main buffer if DML returning is not in effect
+        if (!var->dmlReturningBuffers &&
+                !njsVariable_processBuffer(var, var->buffer, baton))
+            return false;
+
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_processBuffer()
+//   Process a variable buffer. REF cursors must have their query variables
+// defined and LOBs must be initially processed in order to have as much work
+// as possible done in the worker thread and avoid any round trips.
+//-----------------------------------------------------------------------------
+bool njsVariable_processBuffer(njsVariable *var, njsVariableBuffer *buffer,
+        njsBaton *baton)
+{
+    uint32_t i, elementIndex;
+    njsLobBuffer *lob;
+    dpiStmt *stmt;
+    dpiData *data;
+
+    switch (var->varTypeNum) {
+        case DPI_ORACLE_TYPE_CLOB:
+        case DPI_ORACLE_TYPE_NCLOB:
+        case DPI_ORACLE_TYPE_BLOB:
+            NJS_FREE_AND_CLEAR(buffer->lobs);
+            buffer->lobs = calloc(buffer->numElements, sizeof(njsLobBuffer));
+            if (!buffer->lobs)
+                return njsBaton_setError(baton, errInsufficientMemory);
+            for (i = 0; i < buffer->numElements; i++) {
+                lob = &buffer->lobs[i];
+                lob->dataType = (var->varTypeNum == DPI_ORACLE_TYPE_BLOB) ?
+                        NJS_DATATYPE_BLOB : NJS_DATATYPE_CLOB;
+                lob->isAutoClose = true;
+                elementIndex = baton->bufferRowIndex + i;
+                data = &buffer->dpiVarData[elementIndex];
+                if (data->isNull)
+                    continue;
+                if (dpiLob_addRef(data->value.asLOB) < 0)
+                    return njsBaton_setErrorDPI(baton);
+                lob->handle = data->value.asLOB;
+                if (!njsLob_populateBuffer(baton, lob))
+                    return false;
+            }
+            break;
+        case DPI_ORACLE_TYPE_STMT:
+            stmt = buffer->dpiVarData->value.asStmt;
+            if (dpiStmt_getNumQueryColumns(stmt, &buffer->numQueryVars) < 0)
+                return njsBaton_setErrorDPI(baton);
+            buffer->queryVars = calloc(buffer->numQueryVars,
+                    sizeof(njsVariable));
+            if (!buffer->queryVars)
+                return njsBaton_setError(baton, errInsufficientMemory);
+            if (!njsVariable_initForQuery(buffer->queryVars,
+                    buffer->numQueryVars, stmt, baton))
+                return false;
+            break;
+        default:
+            break;
+    }
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_setFromString()
+//   Set the value of the variable from the specified Javascript string. At
+// this point it is known that the Javascript value is indeed a string and that
+// the variable can support it.
+//-----------------------------------------------------------------------------
+static bool njsVariable_setFromString(njsVariable *var, uint32_t pos,
+        napi_env env, napi_value value, bool checkSize, njsBaton *baton)
+{
+    size_t bufferLength;
+    char *buffer;
+
+    // determine length of string
+    NJS_CHECK_NAPI(env, napi_get_value_string_utf8(env, value, NULL, 0,
+            &bufferLength))
+
+    // check size, if applicable
+    if (checkSize && bufferLength > var->maxSize)
+        return njsBaton_setError(baton, errMaxSizeTooSmall, var->maxSize,
+                bufferLength, pos);
+
+    // allocate memory for the buffer
+    buffer = malloc(bufferLength + 1);
+    if (!buffer)
+        return njsBaton_setError(baton, errInsufficientMemory);
+
+    // get the string value
+    if (napi_get_value_string_utf8(env, value, buffer, bufferLength + 1,
+            &bufferLength) != napi_ok) {
+        free(buffer);
+        return njsUtils_genericThrowError(env);
+    }
+
+    // write it to the variable
+    if (dpiVar_setFromBytes(var->dpiVarHandle, pos, buffer,
+            bufferLength) < 0) {
+        free(buffer);
+        return njsBaton_setErrorDPI(baton);
+    }
+
+    free(buffer);
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_setInvalidBind()
+//   Raises an exception indicating that the specified bind value is not
+// acceptable. The value false is returned as a convenience to the caller.
+//-----------------------------------------------------------------------------
+static bool njsVariable_setInvalidBind(njsVariable *var, uint32_t pos,
+        njsBaton *baton)
+{
+    if (var->isArray && var->name)
+        return njsBaton_setError(baton, errIncompatibleTypeArrayBind,
+                pos, var->nameLength, var->name);
+    if (var->isArray)
+        return njsBaton_setError(baton, errIncompatibleTypeArrayIndexBind, pos,
+                var->pos);
+    return njsBaton_setError(baton, errBindValueAndTypeMismatch);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_setScalarValue()
+//   Set the value of the variable from the specified Javascript object at the
+// given position.
+//-----------------------------------------------------------------------------
+bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
+        napi_value value, bool checkSize, njsBaton *baton)
+{
+    napi_valuetype valueType;
+    dpiLob *tempLobHandle;
+    size_t bufferLength;
+    napi_value asNumber;
+    dpiData *data;
+    void *buffer;
+    njsLob *lob;
+    bool check;
+
+    // initialization
+    data = &var->buffer->dpiVarData[pos];
+    data->isNull = 0;
+
+    // determine type of object
+    NJS_CHECK_NAPI(env, napi_typeof(env, value, &valueType))
+
+    // nulls and undefined in JS are mapped to NULL in Oracle; no checks needed
+    if (valueType == napi_undefined || valueType == napi_null) {
+        data->isNull = 1;
+        return true;
+    }
+
+    // handle binding strings
+    if (valueType == napi_string) {
+        if (var->varTypeNum != DPI_ORACLE_TYPE_VARCHAR &&
+                var->varTypeNum != DPI_ORACLE_TYPE_CLOB)
+            return njsVariable_setInvalidBind(var, pos, baton);
+        return njsVariable_setFromString(var, pos, env, value, checkSize,
+                baton);
+    }
+
+    // handle binding numbers
+    if (valueType == napi_number) {
+        if (var->varTypeNum != DPI_ORACLE_TYPE_NUMBER)
+            return njsVariable_setInvalidBind(var, pos, baton);
+        NJS_CHECK_NAPI(env, napi_get_value_double(env, value,
+                &data->value.asDouble))
+        return true;
+    }
+
+    // handle binding objects
+    if (valueType == napi_object) {
+
+        // handle binding dates
+        NJS_CHECK_NAPI(env, napi_instanceof(env, value,
+                baton->jsDateConstructor, &check))
+        if (check) {
+            if (var->varTypeNum != DPI_ORACLE_TYPE_TIMESTAMP_LTZ)
+                return njsVariable_setInvalidBind(var, pos, baton);
+            NJS_CHECK_NAPI(env, napi_coerce_to_number(env, value, &asNumber))
+            NJS_CHECK_NAPI(env, napi_get_value_double(env, asNumber,
+                    &data->value.asDouble))
+            return true;
+        }
+
+        // handle binding buffers
+        NJS_CHECK_NAPI(env, napi_is_buffer(env, value, &check))
+        if (check) {
+            if (var->varTypeNum != DPI_ORACLE_TYPE_RAW &&
+                    var->varTypeNum != DPI_ORACLE_TYPE_BLOB)
+                return njsVariable_setInvalidBind(var, pos, baton);
+            NJS_CHECK_NAPI(env, napi_get_buffer_info(env, value, &buffer,
+                    &bufferLength))
+            if (checkSize && bufferLength > var->maxSize)
+                return njsBaton_setError(baton, errMaxSizeTooSmall,
+                        var->maxSize, bufferLength, pos);
+            if (dpiVar_setFromBytes(var->dpiVarHandle, pos, buffer,
+                    (uint32_t) bufferLength) < 0)
+                return njsBaton_setErrorDPI(baton);
+            return true;
+        }
+
+        // handle binding LOBs
+        NJS_CHECK_NAPI(env, napi_instanceof(env, value,
+                baton->jsLobConstructor, &check))
+        if (check) {
+            if (var->varTypeNum != DPI_ORACLE_TYPE_CLOB &&
+                    var->varTypeNum != DPI_ORACLE_TYPE_BLOB)
+                return njsVariable_setInvalidBind(var, pos, baton);
+
+            // get LOB instance
+            NJS_CHECK_NAPI(env, napi_unwrap(env, value, (void**) &lob))
+            if (!lob->handle)
+                return njsBaton_setError(baton, errInvalidLob);
+            if (lob->activeBaton && lob->activeBaton != baton)
+                return njsBaton_setError(baton, errBusyLob);
+            tempLobHandle = lob->handle;
+
+            // for INOUT binds a copy of the LOB is made and the copy bound
+            // the original IN value is also closed
+            if (var->bindDir == NJS_BIND_INOUT) {
+                if (dpiLob_copy(lob->handle, &tempLobHandle) < 0)
+                    return njsBaton_setErrorDPI(baton);
+                if (dpiLob_release(lob->handle) < 0)
+                    return njsBaton_setErrorDPI(baton);
+                lob->handle = NULL;
+            }
+
+            // perform the bind
+            if (dpiVar_setFromLob(var->dpiVarHandle, pos, tempLobHandle) < 0) {
+                njsBaton_setErrorDPI(baton);
+                if (!lob->handle)
+                    dpiLob_release(tempLobHandle);
+                return false;
+            }
+            if (!lob->handle)
+                dpiLob_release(tempLobHandle);
+            return true;
+
+        }
+
+    }
+
+    return njsVariable_setInvalidBind(var, pos, baton);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_setValue()
+//   Set the value of the variable from the specified Javascript object at the
+// given position.
+//-----------------------------------------------------------------------------
+bool njsVariable_setValue(njsVariable *var, napi_env env, napi_value value,
+        njsBaton *baton)
+{
+    uint32_t arrayLength, i;
+    napi_value element;
+    bool check;
+
+    // scalar values are handled directly
+    if (!var->isArray)
+        return njsVariable_setScalarValue(var, 0, env, value, false, baton);
+
+    // only strings and numbers are currently allowed in arrays
+    if (var->varTypeNum != DPI_ORACLE_TYPE_VARCHAR &&
+            var->varTypeNum != DPI_ORACLE_TYPE_NUMBER &&
+            var->varTypeNum != DPI_ORACLE_TYPE_NATIVE_INT) {
+        return njsBaton_setError(baton, errInvalidTypeForArrayBind);
+    }
+
+    // verify we have an array
+    NJS_CHECK_NAPI(env, napi_is_array(env, value, &check))
+    if (!check)
+        return njsBaton_setError(baton, errNonArrayProvided);
+
+    // set the number of actual elements in the variable
+    NJS_CHECK_NAPI(env, napi_get_array_length(env, value, &arrayLength))
+    if (dpiVar_setNumElementsInArray(var->dpiVarHandle, arrayLength) < 0)
+        return njsBaton_setErrorDPI(baton);
+
+    // process each element in the array
+    for (i = 0; i < arrayLength; i++) {
+        NJS_CHECK_NAPI(env, napi_get_element(env, value, i, &element))
+        if (!njsVariable_setScalarValue(var, i, env, element, false, baton))
+            return false;
+    }
+
+    return true;
+}

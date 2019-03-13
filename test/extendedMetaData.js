@@ -170,7 +170,7 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           should.not.exist(result);
           should.exist(err);
-          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
+          should.strictEqual(err.message, "NJS-008: invalid type for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
@@ -214,7 +214,7 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           should.not.exist(result);
           should.exist(err);
-          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
+          should.strictEqual(err.message, "NJS-008: invalid type for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
@@ -229,7 +229,7 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           should.not.exist(result);
           should.exist(err);
-          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
+          should.strictEqual(err.message, "NJS-008: invalid type for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
@@ -244,7 +244,7 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           should.not.exist(result);
           should.exist(err);
-          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
+          should.strictEqual(err.message, "NJS-008: invalid type for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
@@ -259,7 +259,7 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           should.not.exist(result);
           should.exist(err);
-          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
+          should.strictEqual(err.message, "NJS-008: invalid type for \"extendedMetaData\" in parameter 3");
           done();
         }
       );

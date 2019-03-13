@@ -43,7 +43,7 @@ limitations under the License.
         - 3.1.6 [SQL Statement Type Constants](#oracledbconstantsstmttype)
             - [`STMT_TYPE_UNKNOWN`](#oracledbconstantsstmttype), [`STMT_TYPE_SELECT`](#oracledbconstantsstmttype), [`STMT_TYPE_UPDATE`](#oracledbconstantsstmttype), [`STMT_TYPE_DELETE`](#oracledbconstantsstmttype), [`STMT_TYPE_INSERT`](#oracledbconstantsstmttype), [`STMT_TYPE_CREATE`](#oracledbconstantsstmttype), [`STMT_TYPE_DROP`](#oracledbconstantsstmttype), [`STMT_TYPE_ALTER`](#oracledbconstantsstmttype), [`STMT_TYPE_BEGIN`](#oracledbconstantsstmttype), [`STMT_TYPE_DECLARE`](#oracledbconstantsstmttype), [`STMT_TYPE_CALL`](#oracledbconstantsstmttype), [`STMT_TYPE_EXPLAIN_PLAN`](#oracledbconstantsstmttype), [`STMT_TYPE_MERGE`](#oracledbconstantsstmttype), [`STMT_TYPE_ROLLBACK`](#oracledbconstantsstmttype), [`STMT_TYPE_COMMIT`](#oracledbconstantsstmttype)
         - 3.1.7 [Subscription Constants](#oracledbconstantssubscription)
-            - [`SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_AQ`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_CLASS_TIME`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_TYPE_SUMMARY`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_TYPE_LAST`](#oracledbconstantssubscription), [`SUBSCR_QOS_BEST_EFFORT`](#oracledbconstantssubscription), [`SUBSCR_QOS_DEREG_NFY`](#oracledbconstantssubscription), [`SUBSCR_QOS_QUERY`](#oracledbconstantssubscription), [`SUBSCR_QOS_RELIABLE`](#oracledbconstantssubscription), [`SUBSCR_QOS_ROWIDS`](#oracledbconstantssubscription)
+            - [`SUBSCR_EVENT_TYPE_SHUTDOWN`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_SHUTDOWN_ANY`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_STARTUP`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_AQ`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_CLASS_TIME`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_TYPE_SUMMARY`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_TYPE_LAST`](#oracledbconstantssubscription), [`SUBSCR_QOS_BEST_EFFORT`](#oracledbconstantssubscription), [`SUBSCR_QOS_DEREG_NFY`](#oracledbconstantssubscription), [`SUBSCR_QOS_QUERY`](#oracledbconstantssubscription), [`SUBSCR_QOS_RELIABLE`](#oracledbconstantssubscription), [`SUBSCR_QOS_ROWIDS`](#oracledbconstantssubscription)
         - 3.1.8 [Continuous Query Notification Constants](#oracledbconstantscqn)
             - [`CQN_OPCODE_ALL_OPS`](#oracledbconstantscqn), [`CQN_OPCODE_ALL_ROWS`](#oracledbconstantscqn), [`CQN_OPCODE_ALTER`](#oracledbconstantscqn), [`CQN_OPCODE_DELETE`](#oracledbconstantscqn), [`CQN_OPCODE_DROP`](#oracledbconstantscqn), [`CQN_OPCODE_INSERT`](#oracledbconstantscqn), [`CQN_OPCODE_UPDATE`](#oracledbconstantscqn)
         - 3.1.9 [Pool Status Constants](#oracledbconstantspool)
@@ -772,6 +772,9 @@ Constant Name                               | Value |Description
 `oracledb.SUBSCR_EVENT_TYPE_DEREG`          | 5     | A subscription has been closed or the timeout value has been reached
 `oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`     | 6     | Object-level notications are being used (Database Change Notification)
 `oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`   | 7     | Query-level notifications are being used (Continuous Query Notification)
+`oracledb.SUBSCR_EVENT_TYPE_SHUTDOWN`       | 2     | The database is being shut down
+`oracledb.SUBSCR_EVENT_TYPE_SHUTDOWN_ANY`   | 3     | An instance of Oracle Real Application Clusters (RAC) is being shut down
+`oracledb.SUBSCR_EVENT_TYPE_STARTUP`        | 1     | The database is being started up
 
 Constant for the Continuous Query Notification [`groupingClass`](#consubscribeoptgroupingclass).
 
@@ -12316,7 +12319,9 @@ When upgrading from node-oracledb version 3.0 to version 3.1:
 
 ### <a name="migratev31v40"></a> 29.5 Migrating from node-oracledb 3.1 to node-oracledb 4.0
 
-This section will contain information about migrating from node-oracledb 3.1 to node-oracledb 4.0
+- Review the [CHANGELOG][83].
+
+All exceptions are now passed through the error callback.
 
 [1]: https://www.npmjs.com/package/oracledb
 [2]: https://oracle.github.io/node-oracledb/INSTALL.html

@@ -131,7 +131,7 @@ describe('167. soda3.js', () => {
       let options = { limit: null };
       await testsUtil.assertThrowsAsync(
         async () => await sd.getCollectionNames(options),
-        /NJS-007: invalid value for "limit" in parameter 2/
+        /NJS-007: invalid value for "limit" in parameter 1/
       );
     } catch(err) {
       should.not.exist(err);
@@ -143,7 +143,7 @@ describe('167. soda3.js', () => {
       let options = { limit: '' };
       await testsUtil.assertThrowsAsync(
         async () => await sd.getCollectionNames(options),
-        /NJS-008: invalid type for "limit" in parameter 2/
+        /NJS-008: invalid type for "limit" in parameter 1/
       );
     } catch(err) {
       should.not.exist(err);
@@ -198,7 +198,7 @@ describe('167. soda3.js', () => {
       let options = { startsWith: null };
       await testsUtil.assertThrowsAsync(
         async () => await sd.getCollectionNames(options),
-        /NJS-007: invalid value for "startsWith" in parameter 2/
+        /NJS-007: invalid value for "startsWith" in parameter 1/
       );
     } catch(err) {
       should.not.exist(err);
@@ -210,7 +210,7 @@ describe('167. soda3.js', () => {
       let options = { startsWith: 7 };
       await testsUtil.assertThrowsAsync(
         async () => await sd.getCollectionNames(options),
-        /NJS-008: invalid type for "startsWith" in parameter 2/
+        /NJS-008: invalid type for "startsWith" in parameter 1/
       );
     } catch(err) {
       should.not.exist(err);
