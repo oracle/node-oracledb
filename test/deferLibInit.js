@@ -41,7 +41,6 @@ describe('182. deferLibInit.js', () => {
   it('182.1 defers initializatiion of ODPI-C', async () => {
     try {
       delete process.env.LD_LIBRARY_PATH;
-      delete process.env.ORACLE_HOME;
       await positiveCase();
     } catch(err) {
       should.not.exist(err);
@@ -51,7 +50,6 @@ describe('182. deferLibInit.js', () => {
   it('182.2 Negative: throws error when asking for ODPI-C attributes', async () => {
     try {
       delete process.env.LD_LIBRARY_PATH;
-      delete process.env.ORACLE_HOME;
       await negativeCase();
     } catch(err) {
       should.not.exist(err);
@@ -61,7 +59,6 @@ describe('182. deferLibInit.js', () => {
   it('183.3 Negative: call oracledb method', async () => {
     try {
       delete process.env.LD_LIBRARY_PATH;
-      delete process.env.ORACLE_HOME;
       await callMethodCase();
     } catch(err) {
       should.not.exist(err);
