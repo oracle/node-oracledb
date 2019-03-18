@@ -87,7 +87,7 @@ bool njsSodaDatabase_createBaton(napi_env env, napi_callback_info info,
     if (!njsUtils_createBaton(env, info, numArgs, args, &tempBaton))
         return false;
     db = (njsSodaDatabase*) tempBaton->callingInstance;
-    tempBaton->oracleDb = db->conn->oracleDb;
+    tempBaton->oracleDb = db->oracleDb;
 
     *baton = tempBaton;
     return true;
@@ -131,7 +131,7 @@ static bool njsSodaDatabase_createCollectionAsync(njsBaton *baton)
     njsSodaDatabase *db = (njsSodaDatabase*) baton->callingInstance;
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
 
-    if (db->conn->oracleDb->autoCommit)
+    if (db->oracleDb->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (baton->createCollectionMode == NJS_SODA_COLL_CREATE_MODE_MAP)
         flags |= DPI_SODA_FLAGS_CREATE_COLL_MAP;
@@ -230,12 +230,12 @@ static napi_value njsSodaDatabase_createDocument(napi_env env,
     if (mediaType)
         free(mediaType);
     if (dpiStatus < 0) {
-        njsUtils_throwErrorDPI(env, db->conn->oracleDb);
+        njsUtils_throwErrorDPI(env, db->oracleDb);
         return NULL;
     }
 
     // return wrapped document
-    if (!njsSodaDocument_createFromHandle(env, docHandle, db->conn->oracleDb,
+    if (!njsSodaDocument_createFromHandle(env, docHandle, db->oracleDb,
             &docObj)) {
         dpiSodaDoc_release(docHandle);
         return NULL;
@@ -388,7 +388,7 @@ bool njsSodaDatabase_createFromHandle(napi_env env, njsConnection *conn,
 
     // perform some initializations
     db->handle = handle;
-    db->conn = conn;
+    db->oracleDb = conn->oracleDb;
 
     return true;
 }
@@ -430,7 +430,7 @@ static bool njsSodaDatabase_openCollectionAsync(njsBaton *baton)
     njsSodaDatabase *db = (njsSodaDatabase*) baton->callingInstance;
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
 
-    if (db->conn->oracleDb->autoCommit)
+    if (db->oracleDb->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaDb_openCollection(db->handle, baton->name, baton->nameLength,
             flags, &baton->dpiSodaCollHandle) < 0)
