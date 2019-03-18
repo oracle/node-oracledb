@@ -60,7 +60,7 @@ const buildInfo = nodbUtil.BINARY_FILE + ' ' + nodeVersion + ' ' + njsGitSha + '
 
 // Build a binary for the current version of Node.js and move it to the Staging directory
 function buildBinary() {
-  console.log('Building binary ' + nodbUtil.BINARY_FILE + ' for Node.js ' + nodeVersion);
+  console.log('Building binary ' + nodbUtil.BINARY_FILE + ' using Node.js ' + nodeVersion);
   try {
     fs.mkdir(nodbUtil.STAGING_DIR, function(err) {if (err && !err.message.match(/EEXIST/)) throw(err);} );
     fs.unlink(buildBinaryFile, function(err) {if (err && !err.message.match(/ENOENT/)) throw(err);});
