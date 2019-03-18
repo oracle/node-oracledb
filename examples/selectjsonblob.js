@@ -27,97 +27,67 @@
  *
  *   This example requires node-oracledb 1.13 or later.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-var doconnect = function(cb) {
-  oracledb.getConnection(dbConfig, cb);
-};
+async function run() {
 
-var dorelease = function(conn) {
-  conn.close(function (err) {
-    if (err)
-      console.error(err.message);
-  });
-};
+  let connection;
 
-var checkver = function (conn, cb) {
-  if (conn.oracleServerVersion < 1201000200) {
-    return cb(new Error('This example only works with Oracle Database 12.1.0.2 or greater'), conn);
-  } else {
-    return cb(null, conn);
-  }
-};
+  try {
+    let result;
 
-// Insert some JSON data
+    connection = await oracledb.getConnection(dbConfig);
 
-var doinsert = function (conn, cb) {
-  var data = { "userId": 2, "userName": "Bob", "location": "USA" };
-  var s = JSON.stringify(data);
-  var b = Buffer.from(s, 'utf8');
-  conn.execute(
-    "INSERT INTO j_purchaseorder_b (po_document) VALUES (:lobbv)",
-    { lobbv: b },
-    // { autoCommit: true }, // uncomment if you want data to persist
-    function(err) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        console.log("Data inserted successfully.");
-        return cb(null, conn);
+    if (connection.oracleServerVersion < 1201000200) {
+      throw new Error('This example only works with Oracle Database 12.1.0.2 or greater');
+    }
+
+    console.log('Inserting Data');
+    let data = { "userId": 2, "userName": "Bob", "location": "USA" };
+    let s = JSON.stringify(data);
+    let b = Buffer.from(s, 'utf8');
+    await connection.execute(
+      `INSERT INTO j_purchaseorder_b (po_document) VALUES (:lobbv)`,
+      { lobbv: b });
+
+    console.log('Selecting JSON stored in a BLOB column:');
+    result = await connection.execute(
+      `SELECT po_document
+       FROM j_purchaseorder_b
+       WHERE JSON_EXISTS (po_document, '$.location')`,
+      [],
+      { fetchInfo: { "PO_DOCUMENT": { type: oracledb.BUFFER } } });  // Fetch as a Buffer instead of a Stream
+    if (result.rows.length === 0)
+      throw new Error('No results');
+    console.log(result.rows[0][0].toString('utf8'));
+
+    console.log('Selecting a JSON value using "dotted" notation:');
+    if (connection.oracleServerVersion < 1202000000) {
+      throw new Error('This example only works with Oracle Database 12.2 or greater');
+    }
+    result = await connection.execute(
+      `SELECT pob.po_document.location
+       FROM j_purchaseorder_b pob`);
+    if (result.rows.length === 0)
+      throw new Error('No results');
+    console.log(result.rows[0][0]);
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
       }
-    });
-};
+    }
+  }
+}
 
-// Select JSON with JSON_EXISTS
-
-var dojsonquery = function (conn, cb) {
-  console.log('Selecting JSON stored in a BLOB column:');
-  conn.execute(
-    "SELECT po_document FROM j_purchaseorder_b WHERE JSON_EXISTS (po_document, '$.location')",
-    [],
-    { fetchInfo: { "PO_DOCUMENT": { type: oracledb.BUFFER } } },  // Fetch as a Buffer instead of a Stream
-    function(err, result) {
-      if (err)
-        return cb(err, conn);
-      if (result.rows.length === 0)
-        return cb(new Error('No results'), conn);
-
-      console.log(result.rows[0][0].toString('utf8'));
-      return cb(null, conn);
-    });
-};
-
-// Select a JSON value using dot-notation.  This syntax requires Oracle Database 12.2
-
-var dojsonquerydot = function (conn, cb) {
-  console.log('Selecting a JSON value:');
-  conn.execute(
-    "SELECT pob.po_document.location FROM j_purchaseorder_b pob",
-    function(err, result) {
-      if (err)
-        return cb(err, conn);
-      if (result.rows.length === 0)
-        return cb(new Error('No results'), conn);
-
-      console.log(result.rows[0][0]);
-      return cb(null, conn);
-    });
-};
-
-async.waterfall(
-  [
-    doconnect,
-    checkver,
-    doinsert,
-    dojsonquery,
-    dojsonquerydot
-  ],
-  function (err, conn) {
-    if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-    if (conn)
-      dorelease(conn);
-  });
+run();

@@ -25,131 +25,105 @@
  *   TIMESTAMP WITH LOCAL TIMEZONE.  Similarly for queries, TIMESTAMP
  *   and DATE columns are fetched as TIMESTAMP WITH LOCAL TIMEZONE.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************///
 
 // Using a fixed Oracle time zone helps avoid machine and deployment differences
 process.env.ORA_SDTZ = 'UTC';
 
-var async = require('async');
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
 oracledb.outFormat = oracledb.OBJECT;
 
-var doconnect = function(cb) {
-  oracledb.getConnection(
-    {
-      user          : dbConfig.user,
-      password      : dbConfig.password,
-      connectString : dbConfig.connectString
-    },
-    cb);
-};
+async function run() {
 
-var dorelease = function(conn) {
-  conn.close(function (err) {
-    if (err)
-      console.error(err.message);
-  });
-};
+  let connection;
 
-var docleanup = function (conn, cb) {
-  conn.execute(
-    `BEGIN
-       DECLARE
-         e_table_exists EXCEPTION;
-         PRAGMA EXCEPTION_INIT(e_table_exists, -00942);
-       BEGIN
-         EXECUTE IMMEDIATE ('DROP TABLE datetest');
-       EXCEPTION
-         WHEN e_table_exists
-         THEN NULL;
-       END;
-     END;`,
-    function(err) {
-      return cb(err, conn);
+  try {
+    let result, date;
+
+    connection = await oracledb.getConnection(  {
+      user         : dbConfig.user,
+      password     : dbConfig.password,
+      connectString: dbConfig.connectString
     });
-};
 
-var docreate = function(conn, cb) {
-  conn.execute(
-    `CREATE TABLE datetest(
-       timestampcol TIMESTAMP,
-       timestamptz TIMESTAMP WITH TIME ZONE,
-       timestampltz TIMESTAMP WITH LOCAL TIME ZONE,
-       datecol DATE)`,
-    function(err) {
-      return cb(err, conn);
-    });
-};
+    console.log('Creating table');
+    await connection.execute(
+      `BEGIN
+         DECLARE
+           e_table_exists EXCEPTION;
+           PRAGMA EXCEPTION_INIT(e_table_exists, -00942);
+         BEGIN
+           EXECUTE IMMEDIATE ('DROP TABLE datetest');
+         EXCEPTION
+           WHEN e_table_exists
+           THEN NULL;
+         END;
+       END;`);
 
-var doalter = function(conn, cb) {
-  console.log('Altering session time zone');
-  conn.execute(
-    "ALTER SESSION SET TIME_ZONE='+5:00'",  // resets ORA_SDTZ value
-    function(err) {
-      return cb(err, conn);
-    });
-};
+    await connection.execute(
+      `CREATE TABLE datetest(
+         id NUMBER,
+         timestampcol TIMESTAMP,
+         timestamptz  TIMESTAMP WITH TIME ZONE,
+         timestampltz TIMESTAMP WITH LOCAL TIME ZONE,
+         datecol DATE)`);
 
-// When bound, JavaScript Dates are inserted using TIMESTAMP WITH LOCAL TIMEZONE
-var doinsert = function(conn, cb) {
-  var date = new Date();
+    // When bound, JavaScript Dates are inserted using TIMESTAMP WITH LOCAL TIMEZONE
+    date = new Date();
+    console.log('Inserting JavaScript date: ' + date);
+    result = await connection.execute(
+      `INSERT INTO datetest (id, timestampcol, timestamptz, timestampltz, datecol)
+       VALUES (1, :ts, :tstz, :tsltz, :td)`,
+      { ts: date, tstz: date, tsltz: date, td: date });
+    console.log('Rows inserted: ' + result.rowsAffected );
 
-  console.log("Inserting JavaScript date: " + date);
+    console.log('Query Results:');
+    result = await connection.execute(
+      `SELECT id, timestampcol, timestamptz, timestampltz, datecol,
+              TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') AS CD
+       FROM datetest
+       ORDER BY id`);
+    console.log(result.rows);
 
-  conn.execute(
-    `INSERT INTO datetest (timestampcol, timestamptz, timestampltz, datecol)
-     VALUES (:ts, :tstz, :tsltz, :td)`,
-    { ts: date, tstz: date, tsltz: date, td: date },
-    function(err, result) {
-      if (err)
-        return cb(err, conn);
+    console.log('Altering session time zone');
+    await connection.execute(`ALTER SESSION SET TIME_ZONE='+5:00'`);  // resets ORA_SDTZ value
 
-      console.log('Rows inserted: ' + result.rowsAffected );
-      return cb(null, conn);
-    });
-};
+    date = new Date();
+    console.log('Inserting JavaScript date: ' + date);
+    result = await connection.execute(
+      `INSERT INTO datetest (id, timestampcol, timestamptz, timestampltz, datecol)
+       VALUES (2, :ts, :tstz, :tsltz, :td)`,
+      { ts: date, tstz: date, tsltz: date, td: date });
+    console.log('Rows inserted: ' + result.rowsAffected );
 
+    console.log('Query Results:');
+    result = await connection.execute(
+      `SELECT id, timestampcol, timestamptz, timestampltz, datecol,
+              TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') AS CD
+       FROM datetest
+       ORDER BY id`);
+    console.log(result.rows);
 
-// Fetch the dates
-var doselect = function(conn, cb) {
-  conn.execute(
-    `SELECT timestampcol, timestamptz, timestampltz, datecol,
-            TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') AS CD
-     FROM datetest`,
-    function(err, result) {
-      if (err) {
-        return cb(err, conn);
+    // Show the queried dates are of type Date
+    var ts = result.rows[0]['TIMESTAMPCOL'];
+    ts.setDate(ts.getDate() + 5);
+    console.log('TIMESTAMP manipulation in JavaScript:', ts);
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
       }
+    }
+  }
+}
 
-      console.log("Query Results:");
-      console.log(result.rows[0]);
-
-      // Show the queried dates are of type Date
-      var ts = result.rows[0]['TIMESTAMPCOL'];
-      ts.setDate(ts.getDate() + 5);
-      console.log("TIMESTAMP manipulation in JavaScript:", ts);
-
-      return cb(null, conn);
-    });
-};
-
-// Main routine
-async.waterfall([
-  doconnect,
-  docleanup,
-  docreate,
-  doinsert,
-
-  doselect,
-  doalter,
-  doselect,
-
-  docleanup
-],
-function (err, conn) {
-  if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-  if (conn)
-    dorelease(conn);
-});
+run();
