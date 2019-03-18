@@ -50,19 +50,10 @@ static const char *njsErrorMessages[] = {
     "NJS-022: invalid Lob",                           // errInvalidLob
     "NJS-023: concurrent operations on LOB are not allowed",  // errBusyLob
     "NJS-024: memory allocation failed",  // errInsufficientMemory
-    "NJS-025: overflow when calculating results area size", // errResultsTooLarge
-    "NJS-026: maxRows must be greater than zero",   // errInvalidmaxRows
-    "NJS-027: unexpected SQL parsing error",        // errSQLSyntaxError
-    "NJS-029: invalid object from JavaScript",      // errInvalidJSObject
-    "NJS-030: connection cannot be released because Lob operations are in progress",  // errBusyConnLOB
-    "NJS-031: connection cannot be released because ResultSet operations are in progress", // errBusyConnRS
-    "NJS-032: connection cannot be released because a database call is in progress", // errBusyConnDB
-    "NJS-033: an internal error occurred. [%s][%s]", // errInternalError
     "NJS-034: data type is unsupported for array bind", // errInvalidTypeForArrayBind
     "NJS-035: maxArraySize is required for IN OUT array bind", // errReqdMaxArraySize
     "NJS-036: given array is of size greater than maxArraySize", // errInvalidArraySize
     "NJS-037: invalid data type at array index %d for bind \":%.*s\"", // errIncompatibleTypeArrayBind
-    "NJS-038: maxArraySize value should be greater than zero", // errInvalidValueArrayBind
     "NJS-040: connection request timeout",  // errConnRequestTimeout
     "NJS-041: cannot convert ResultSet to QueryStream after invoking methods", // errCannotConvertRsToStream
     "NJS-042: cannot invoke ResultSet methods after converting to QueryStream", // errCannotInvokeRsMethods
@@ -73,7 +64,6 @@ static const char *njsErrorMessages[] = {
     "NJS-047: pool alias \"%s\" not found in connection pool cache", // errPoolWithAliasNotFound
     "NJS-052: invalid data type at array index %d for bind position %d", // errIncompatibleTypeArrayIndexBind
     "NJS-053: array value expected, a non-array value provided", //errNonArrayProvided
-    "NJS-054: binary build/Release/oracledb.node was not installed", // errNoBinaryInstalled
     "NJS-055: binding by position and name cannot be mixed", // errMixedBind
     "NJS-056: maxSize must be specified and not zero for bind position %u", // errMissingMaxSizeByPos
     "NJS-057: maxSize must be specified and not zero for bind \"%.*s\"", // errMissingMaxSizeByName
