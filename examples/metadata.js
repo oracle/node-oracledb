@@ -27,67 +27,45 @@
  *
  *   This example requires node-oracledb 1.10 or later.
  *
- *  *****************************************************************************/
+ *   This example uses Node 8's async/await syntax.
+ *
+ *****************************************************************************/
 
-var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-var doconnect = function(cb) {
-  oracledb.getConnection(
-    {
-      user          : dbConfig.user,
-      password      : dbConfig.password,
-      connectString : dbConfig.connectString
-    },
-    cb);
-};
+async function run() {
 
-var dorelease = function(conn) {
-  conn.close(function (err) {
-    if (err)
-      console.error(err.message);
-  });
-};
+  let connection;
 
-// Default metadata available
-var basic = function (conn, cb) {
-  conn.execute(
-    "SELECT location_id, city FROM locations",
-    function(err, result) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        console.log(result.metaData);
-        return cb(null, conn);
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+
+    console.log('Default query metadata');
+    let result = await connection.execute(
+      `SELECT location_id, city
+       FROM locations`);
+    console.log(result.metaData);
+
+    console.log('Extended query metadata');
+    result = await connection.execute(
+      `SELECT location_id, city
+       FROM locations`,
+      {},  // no binds
+      { extendedMetaData: true });  // enable the extra metadata
+    console.log(result.metaData);
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
       }
-    });
-};
+    }
+  }
+}
 
-// Extended metadata available
-var extended = function (conn, cb) {
-  conn.execute(
-    "SELECT location_id, city FROM locations",
-    {},  // no binds
-    { extendedMetaData: true },  // enable the extra metadata
-    function(err, result) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        console.log(result.metaData);
-        return cb(null, conn);
-      }
-    });
-};
-
-async.waterfall(
-  [
-    doconnect,
-    basic,
-    extended
-  ],
-  function (err, conn) {
-    if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-    if (conn)
-      dorelease(conn);
-  });
+run();
