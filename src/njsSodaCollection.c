@@ -111,7 +111,7 @@ bool njsSodaCollection_createBaton(napi_env env, napi_callback_info info,
     if (!njsUtils_createBaton(env, info, numArgs, args, &tempBaton))
         return false;
     coll = (njsSodaCollection*) tempBaton->callingInstance;
-    tempBaton->oracleDb = coll->db->conn->oracleDb;
+    tempBaton->oracleDb = coll->db->oracleDb;
 
     *baton = tempBaton;
     return true;
@@ -193,7 +193,7 @@ static bool njsSodaCollection_dropAsync(njsBaton *baton)
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
     int isDropped;
 
-    if (coll->db->conn->oracleDb->autoCommit)
+    if (coll->db->oracleDb->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_drop(coll->handle, flags, &isDropped) < 0)
         return njsBaton_setErrorDPI(baton);
@@ -259,7 +259,7 @@ static bool njsSodaCollection_dropIndexAsync(njsBaton *baton)
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
     int isDropped;
 
-    if (coll->db->conn->oracleDb->autoCommit)
+    if (coll->db->oracleDb->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (baton->force)
         flags |= DPI_SODA_FLAGS_INDEX_DROP_FORCE;
@@ -410,7 +410,7 @@ static napi_value njsSodaCollection_getMetaData(napi_env env,
         return NULL;
     if (dpiSodaColl_getMetadata(coll->handle, &metadata,
             &metadataLength) < 0) {
-        njsUtils_throwErrorDPI(env, coll->db->conn->oracleDb);
+        njsUtils_throwErrorDPI(env, coll->db->oracleDb);
         return NULL;
     }
 
@@ -432,7 +432,7 @@ static napi_value njsSodaCollection_getName(napi_env env,
     if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &coll))
         return NULL;
     if (dpiSodaColl_getName(coll->handle, &name, &nameLength) < 0) {
-        njsUtils_throwErrorDPI(env, coll->db->conn->oracleDb);
+        njsUtils_throwErrorDPI(env, coll->db->oracleDb);
         return NULL;
     }
 

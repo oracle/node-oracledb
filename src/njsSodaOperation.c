@@ -163,7 +163,7 @@ static bool njsSodaOperation_createBaton(napi_env env, napi_callback_info info,
     if (!njsUtils_createBaton(env, info, numArgs, args, &tempBaton))
         return false;
     op = (njsSodaOperation*) tempBaton->callingInstance;
-    tempBaton->oracleDb = op->coll->db->conn->oracleDb;
+    tempBaton->oracleDb = op->coll->db->oracleDb;
 
     *baton = tempBaton;
     return true;
@@ -181,7 +181,7 @@ bool njsSodaOperation_createFromCollection(napi_env env,
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefSodaOperation,
-            coll->db->conn->oracleDb->jsSodaOperationConstructor, opObj,
+            coll->db->oracleDb->jsSodaOperationConstructor, opObj,
             (njsBaseInstance**) &op))
         return false;
 

@@ -581,7 +581,7 @@ struct njsSodaCollection {
 struct njsSodaDatabase {
     NJS_INSTANCE_HEAD
     dpiSodaDb *handle;
-    njsConnection *conn;
+    njsOracleDb *oracleDb;
 };
 
 // data for class SodaDocCursor exposed to JS.
