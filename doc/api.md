@@ -448,45 +448,45 @@ node myscript.js
 
 ```javascript
 // myscript.js
+// This example uses Node 8's async/await syntax.
 
 var oracledb = require('oracledb');
 
 var mypw = ...  // set mypw to the hr schema password
 
-oracledb.getConnection(
-  {
-    user          : "hr",
-    password      : mypw
-    connectString : "localhost/XEPDB1"
-  },
-  function(err, connection) {
-    if (err) {
-      console.error(err.message);
-      return;
-    }
-    connection.execute(
+async function run() {
+
+  let connection;
+
+  try {
+    connection = await oracledb.getConnection(  {
+      user          : "hr",
+      password      : mypw,
+      connectString : "localhost/XEPDB1"
+    });
+
+    let result = await connection.execute(
       `SELECT manager_id, department_id, department_name
        FROM departments
        WHERE manager_id = :id`,
       [103],  // bind value for :id
-      function(err, result) {
-        if (err) {
-          console.error(err.message);
-          doRelease(connection);
-          return;
-        }
-        console.log(result.rows);
-        doRelease(connection);
-      });
-  });
+    );
+    console.log(result.rows);
 
-function doRelease(connection) {
-  connection.close(
-    function(err) {
-      if (err)
-        console.error(err.message);
-    });
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
 }
+
+run();
 ```
 
 With Oracle's sample HR schema, the output is:
@@ -505,50 +505,55 @@ version of Oracle Client libraries.
 
 ```javascript
 // mysoda.js
+// This example uses Node 8's async/await syntax.
 
 const oracledb = require('oracledb');
 
-let  mypw = ...  // set mypw to the hr schema password
-
-const dbconfig = { user: 'hr', password: mypw, connectString: 'localhost/orclpdb' };
+let mypw = ...  // set mypw to the hr schema password
 
 oracledb.autoCommit = true;
 
-(async function() {
-  let conn;
+async function run() {
+
+  let connection;
 
   try {
-    conn = await oracledb.getConnection(dbconfig);
-    console.log('Connected to database...');
+    connection = await oracledb.getConnection(  {
+      user          : "hr",
+      password      : mypw,
+      connectString : "localhost/orclpdb"
+    });
 
     // Create a new (or open an existing) document collection
-    let sd = conn.getSodaDatabase();
+    let soda = connection.getSodaDatabase();
     let collectionName = 'nodb_soda_collection';
-    let myCollection = await sd.createCollection(collectionName);
+    let myCollection = await soda.createCollection(collectionName);
 
     // Insert a new document
     let myContent = { name: "Sally", address: {city: "Melbourne"} };
-    await myCollection.insertOne(JSON.stringify(myContent));
+    await myCollection.insertOne(myContent);
 
     // Print names of people living in Melbourne
     let filterSpec = { "address.city": "Melbourne" };
     let myDocuments = await myCollection.find().filter(filterSpec).getDocuments();
     myDocuments.forEach(function(element) {
       let content = element.getContent();
-      console.log(content.name, ' lives in Melbourne.');
+      console.log(content.name + ' lives in Melbourne.');
     });
   } catch(err) {
     console.log('Error in processing:\n', err);
   } finally {
-    if (conn) {
+    if (connection) {
       try {
-        await conn.close();
+        await connection.close();
       } catch(err) {
         console.log('Error in closing connection:\n', err);
       }
     }
   }
-})();
+}
+
+run();
 ```
 
 ## <a name="errorobj"></a> 2. Errors
