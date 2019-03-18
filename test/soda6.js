@@ -305,7 +305,7 @@ describe('174. soda6.js', () => {
       let key1 = {};
       await testsUtil.assertThrowsAsync(
         async () => await collection.find().key(key1).getOne(),
-        /NJS-006: invalid type for parameter 1/
+        /NJS-005: invalid value for parameter 1/
       );
 
     } catch(err) {
@@ -469,7 +469,7 @@ describe('174. soda6.js', () => {
       // Fetch back
       await testsUtil.assertThrowsAsync(
         async () => await collection.find().keys(null).getDocuments(),
-        /NJS-006: invalid type for parameter 1/
+        /NJS-005: invalid value for parameter 1/
       );
 
     } catch(err) {

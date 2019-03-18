@@ -646,7 +646,7 @@ describe('163. executeMany1.js', function() {
           function() {
             conn.executeMany(sql, numIterations, function() {} );
           },
-          /NJS-006: invalid type for parameter 2/
+          /NJS-005: invalid value for parameter 2/
         );
         cb();
       },

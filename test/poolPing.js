@@ -475,8 +475,8 @@ describe("73. poolPing.js", function() {
       },
       function(err, pool) {
         should.exist(err);
-        (err.message).should.startWith("NJS-008:");
-        // NJS-008: invalid type for "poolPingInterval" in parameter 1
+        (err.message).should.startWith("NJS-007:");
+        // NJS-007: invalid value for "poolPingInterval" in parameter 1
 
         should.not.exist(pool);
         done();

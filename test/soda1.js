@@ -434,7 +434,7 @@ describe('164. soda1.js', () => {
 
       await testsUtil.assertThrowsAsync(
         async () => await sd.createCollection(t_collname, options),
-        /NJS-006:/
+        /NJS-005:/
       );
 
     } catch(err) {

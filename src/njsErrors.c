@@ -32,9 +32,7 @@ static const char *njsErrorMessages[] = {
     "NJS-003: invalid connection",                   // errInvalidConnection
     "NJS-004: invalid value for property %s",        // errInvalidPropertyValue
     "NJS-005: invalid value for parameter %d",       // errInvalidParameterValue
-    "NJS-006: invalid type for parameter %d",        // errInvalidParameterType
     "NJS-007: invalid value for \"%s\" in parameter %d", // errInvalidPropertyValueInParam
-    "NJS-008: invalid type for \"%s\" in parameter %d",  // errInvalidPropertyTypeInParam
     "NJS-009: invalid number of parameters",         // errInvalidNumberOfParameters
     "NJS-010: unsupported data type %d in column %u", // errUnsupportedDataType
     "NJS-011: encountered bind value and type mismatch", // errBindValueAndTypeMismatch

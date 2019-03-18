@@ -673,7 +673,7 @@ describe('161. changePassword.js', function() {
               console.log(err);
             });
           },
-          /NJS-006: invalid type for parameter 3/
+          /NJS-005: invalid value for parameter 3/
         );
         cb();
       },
@@ -807,7 +807,7 @@ describe('161. changePassword.js', function() {
         should.not.exist(connection);
         should.strictEqual(
           err.message,
-          'NJS-008: invalid type for "newPassword" in parameter 1'
+          'NJS-007: invalid value for "newPassword" in parameter 1'
         );
         done();
       }

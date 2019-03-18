@@ -150,7 +150,7 @@ describe('12. resultSet1.js', function() {
         function(err, result) {
           should.not.exist(result);
           should.exist(err);
-          should.strictEqual(err.message, "NJS-008: invalid type for \"resultSet\" in parameter 3");
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
           done();
         }
       );
@@ -200,7 +200,7 @@ describe('12. resultSet1.js', function() {
         function(err, result) {
           should.not.exist(result);
           should.exist(err);
-          should.strictEqual(err.message, "NJS-008: invalid type for \"resultSet\" in parameter 3");
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
           done();
         }
       );
@@ -216,7 +216,7 @@ describe('12. resultSet1.js', function() {
         function(err, result) {
           should.not.exist(result);
           should.exist(err);
-          should.strictEqual(err.message, "NJS-008: invalid type for \"resultSet\" in parameter 3");
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
           done();
         }
       );
@@ -232,7 +232,7 @@ describe('12. resultSet1.js', function() {
         function(err, result) {
           should.not.exist(result);
           should.exist(err);
-          should.strictEqual(err.message, "NJS-008: invalid type for \"resultSet\" in parameter 3");
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
           done();
         }
       );
@@ -248,7 +248,7 @@ describe('12. resultSet1.js', function() {
         function(err, result) {
           should.not.exist(result);
           should.exist(err);
-          should.strictEqual(err.message, "NJS-008: invalid type for \"resultSet\" in parameter 3");
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
           done();
         }
       );
@@ -282,8 +282,8 @@ describe('12. resultSet1.js', function() {
         { resultSet: true, fetchArraySize: 'bar', maxRows: 1000 },
         function(err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-008:');
-          // NJS-008: invalid type for "fetchArraySize"
+          (err.message).should.startWith('NJS-007:');
+          // NJS-007: invalid value for "fetchArraySize"
           done();
         }
       );
@@ -715,8 +715,8 @@ describe('12. resultSet1.js', function() {
           rs.getRows(numRows, function() {});
         } catch (err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-006:');
-          // NJS-006: invalid type for parameter 1
+          (err.message).should.startWith('NJS-005:');
+          // NJS-005: invalid value for parameter 1
           rs.close(function(err) {
             should.not.exist(err);
             done();

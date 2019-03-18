@@ -33,6 +33,10 @@
 - Exceptions from user getters for parameter object attribute access
   are now passed through the error callback.
 
+- Standardized error messages for incorrect function parameters.  Now
+  NJS-005 and NJS-007 are used in place of NJS-006 and NJS-008,
+  respectively.
+
 ## node-oracledb v3.1.2 (22 Feb 2019)
 
 - Fixed a bug causing CQN crashes when multiple queries are registered

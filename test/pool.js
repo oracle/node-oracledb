@@ -231,7 +231,7 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.exist(err);
-          (err.message).should.startWith('NJS-008:');
+          (err.message).should.startWith('NJS-007:');
 
           should.not.exist(pool);
           done();
@@ -360,7 +360,7 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.exist(err);
-          (err.message).should.startWith('NJS-008:');
+          (err.message).should.startWith('NJS-007:');
 
           should.not.exist(pool);
           done();

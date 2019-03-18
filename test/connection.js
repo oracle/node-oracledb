@@ -577,7 +577,7 @@ describe('1. connection.js', function(){
       // to a catch handler. In the case of an "accidental promise" the error
       // could go undetected. Because of this, the promisify function in util.js
       // uses process.nextTick to throw invalid number or type of params (NJS-009
-      // and NJS-006). This test has been updated to account for this behavior.
+      // and NJS-005). This test has been updated to account for this behavior.
       var promiseSupportEnabled = oracledb.Promise !== undefined;
       var listeners = process.listeners('uncaughtException');
 
@@ -618,7 +618,7 @@ describe('1. connection.js', function(){
       // to a catch handler. In the case of an "accidental promise" the error
       // could go undetected. Because of this, the promisify function in util.js
       // uses process.nextTick to throw invalid number or type of params (NJS-009
-      // and NJS-006). This test has been updated to account for this behavior.
+      // and NJS-005). This test has been updated to account for this behavior.
       var promiseSupportEnabled = oracledb.Promise !== undefined;
       var listeners = process.listeners('uncaughtException');
 
@@ -669,7 +669,7 @@ describe('1. connection.js', function(){
       // to a catch handler. In the case of an "accidental promise" the error
       // could go undetected. Because of this, the promisify function in util.js
       // uses process.nextTick to throw invalid number or type of params (NJS-009
-      // and NJS-006). This test has been updated to account for this behavior.
+      // and NJS-005). This test has been updated to account for this behavior.
       var promiseSupportEnabled = oracledb.Promise !== undefined;
       var listeners = process.listeners('uncaughtException');
 
@@ -801,7 +801,7 @@ describe('1. connection.js', function(){
           should.not.exist(connection);
           should.strictEqual(
             err.message,
-            'NJS-008: invalid type for "privilege" in parameter 1'
+            'NJS-007: invalid value for "privilege" in parameter 1'
           );
           done();
         }
