@@ -268,8 +268,8 @@ describe("72. lobBind2.js", function() {
         });
       } catch (err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-006:');
-        // NJS-006: invalid type for parameter 1
+        (err.message).should.startWith('NJS-005:');
+        // NJS-005: invalid value for parameter 1
         done();
       }
     }); // 72.1.3

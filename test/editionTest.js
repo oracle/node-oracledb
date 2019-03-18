@@ -1367,7 +1367,7 @@ describe('160. editionTest.js', function() {
           should.not.exist(conn);
           should.strictEqual(
             err.message,
-            'NJS-008: invalid type for "edition" in parameter 1'
+            'NJS-007: invalid value for "edition" in parameter 1'
           );
           done();
         }
@@ -1392,7 +1392,7 @@ describe('160. editionTest.js', function() {
           should.exist(err);
           should.strictEqual(
             err.message,
-            'NJS-008: invalid type for "edition" in parameter 1'
+            'NJS-007: invalid value for "edition" in parameter 1'
           );
           should.not.exist(pool);
           done();

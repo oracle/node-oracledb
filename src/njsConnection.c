@@ -1732,7 +1732,7 @@ static bool njsConnection_processExecuteManyBinds(njsBaton *baton,
             &bindDefs))
     NJS_CHECK_NAPI(env, napi_typeof(env, bindDefs, &valueType))
     if (valueType != napi_object && valueType != napi_undefined)
-        return njsBaton_setError(baton, errInvalidPropertyTypeInParam,
+        return njsBaton_setError(baton, errInvalidPropertyValueInParam,
                 "bindDefs", 2);
     scanRequired = (valueType == napi_undefined);
 

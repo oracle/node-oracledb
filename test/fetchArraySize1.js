@@ -179,11 +179,7 @@ describe("148. fetchArraySize1.js", function() {
       function(err, result) {
         should.exist(err);
         should.not.exist(result);
-        if( values === "random string" || values === false ) {
-          should.strictEqual(err.message, "NJS-008: invalid type for \"fetchArraySize\" in parameter 3");
-        } else {
-          should.strictEqual(err.message, "NJS-007: invalid value for \"fetchArraySize\" in parameter 3");
-        }
+        should.strictEqual(err.message, "NJS-007: invalid value for \"fetchArraySize\" in parameter 3");
         cb();
       }
     );

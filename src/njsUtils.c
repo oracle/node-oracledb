@@ -423,7 +423,7 @@ bool njsUtils_getUnsignedIntArg(napi_env env, napi_value *args, int index,
     // if the value is not an integer, return an error
     *result = (uint32_t) doubleValue;
     if (doubleValue < 0 || (double) *result != doubleValue)
-        return njsUtils_throwError(env, errInvalidParameterType, index + 1);
+        return njsUtils_throwError(env, errInvalidParameterValue, index + 1);
 
     return true;
 }
@@ -456,15 +456,9 @@ bool njsUtils_getValueFromArg(napi_env env, napi_value *args,
         *value = NULL;
         return true;
 
-    // a null value generates a "value" error
-    } else if (actualType == napi_null) {
-        njsErrors_getMessage(errorBuffer, errInvalidPropertyValueInParam,
-                propertyName, argIndex + 1);
-        return false;
-
-    // other types other than the expected type generate a "type" error
+    // other types other than the expected type generate an error
     } else if (actualType != expectedType) {
-        njsErrors_getMessage(errorBuffer, errInvalidPropertyTypeInParam,
+        njsErrors_getMessage(errorBuffer, errInvalidPropertyValueInParam,
                 propertyName, argIndex + 1);
         return false;
     }
@@ -741,7 +735,7 @@ bool njsUtils_validateArgType(napi_env env, napi_value *args,
 
     NJS_CHECK_NAPI(env, napi_typeof(env, args[index], &actualType))
     if (actualType != expectedType)
-        return njsUtils_throwError(env, errInvalidParameterType, index + 1);
+        return njsUtils_throwError(env, errInvalidParameterValue, index + 1);
     return true;
 }
 

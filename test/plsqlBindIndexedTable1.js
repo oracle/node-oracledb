@@ -1087,8 +1087,8 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         bindvars,
         function(err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-008:');
-          // NJS-008: invalid type for "maxArraySize"
+          (err.message).should.startWith('NJS-007:');
+          // NJS-007: invalid value for "maxArraySize"
           done();
         }
       );

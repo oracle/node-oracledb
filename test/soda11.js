@@ -434,7 +434,7 @@ describe('179. soda11.js', () => {
       let testKey = 86755;
       await testsUtil.assertThrowsAsync(
         async () => await sd.createDocument(testContent, { key: testKey } ),
-        /NJS-008: invalid type for "key" in parameter 2/
+        /NJS-007: invalid value for "key" in parameter 2/
       );
 
     } catch(err) {
@@ -606,7 +606,7 @@ describe('179. soda11.js', () => {
           testContent,
           { mediaType: testMediaType, key: testKey }
         ),
-        /NJS-008: invalid type for "mediaType" in parameter 2/
+        /NJS-007: invalid value for "mediaType" in parameter 2/
       );
 
     } catch(err) {
