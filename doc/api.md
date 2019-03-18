@@ -5391,7 +5391,7 @@ This method was added in node-oracledb 3.0.
 ##### Example
 
 ```javascript
-myDoc = database.createDocument({name: "Chris", city: "Melbourne"}, {key: 123}); // assuming client-assigned keys
+myDoc = soda.createDocument({name: "Chris", city: "Melbourne"}, {key: "123"}); // assuming client-assigned keys
 newDoc = await collection.insertOneAndGet(myDoc);
 console.log("The key of the new document is: ", newDoc.key);  // 123
 ```
@@ -11451,7 +11451,7 @@ method and pass its result to methods like `insertOne()`:
 ```javascript
 try {
   myContent = {name: "Sally", address: {city: "Melbourne"}};
-  newDoc = database.createDocument(myContent, {key: 123});
+  newDoc = soda.createDocument(myContent, {key: "123"});
   await collection.insertOne(myContent);
 } catch(err) {
   console.error(err);
@@ -11776,13 +11776,13 @@ try {
 ```
 
 To insert a document into the collection, a key must be supplied by
-the application:
+the application.  Note it is set to a string:
 
 ```javascript
 try {
   myContent = {name: "Sally", address: {city: "Melbourne"}};
-  newDoc = database.createDocument(myContent, {key: 123});
-  await collection.insertOne(myContent);
+  newDoc = soda.createDocument(myContent, {key: "123"});
+  await collection.insertOne(newDoc);
 } catch(err) {
   console.error(err);
 }
