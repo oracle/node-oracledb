@@ -75,7 +75,7 @@
 // define macros for clearing memory
 #define NJS_FREE_AND_CLEAR(var) \
     if (var) { \
-        free(var); \
+        free((void*) var); \
         var = NULL; \
     }
 #define NJS_DELETE_REF_AND_CLEAR(var) \
