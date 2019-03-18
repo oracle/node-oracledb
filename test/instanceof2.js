@@ -42,8 +42,7 @@ describe('186. instanceof2.js', function() {
     await sodaUtil.cleanup();
   });
 
-  // Skipping this test as it may generate segfault at createCollection, bug 29447121
-  it.skip('186.1 instanceof checks for SODA classes', async function() {
+  it('186.1 instanceof checks for SODA classes', async function() {
     let conn, coll, cursor;
     try {
       conn = await oracledb.getConnection(dbConfig);
