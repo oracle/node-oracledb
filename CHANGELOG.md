@@ -13,6 +13,9 @@
     - The string representation of classes has changed to `[Object Object]` as a consequence of using N-API.
     - A C++11 compiler is no longer required when building from source code.  The node-oracledb source code is now pure C.
 
+- Class methods are now configurable.  For example via
+  `Object.defineProperty`.
+
 - Enhanced BIND_IN of PL/SQL Collection Associative Arrays (Index-by)
   so a bind definition object can be omitted
   [#1039](https://github.com/oracle/node-oracledb/issues/1039).
@@ -22,20 +25,24 @@
 
 - Improved the performance of `oracledb.outFormat = oracledb.OBJECT`.
 
+- Updated the JavaScript syntax in class implementations.
+
 - Corrected processing of the `force` option in SODA `dropIndex()`.
 
-- Corrected the error message parameter number for SODA
-  `getCollectionNames()`.
+- Error handling changes:
 
-- Corrected the error message returned when invalid types are used for
-  boolean options.
+    - Corrected the error message parameter number for SODA
+      `getCollectionNames()`.
 
-- Exceptions from user getters for parameter object attribute access
-  are now passed through the error callback.
+    - Corrected the error message returned when invalid types are used for
+      boolean options.
 
-- Standardized error messages for incorrect function parameters.  Now
-  NJS-005 and NJS-007 are used in place of NJS-006 and NJS-008,
-  respectively.
+    - Standardized error messages for incorrect function parameters.  Now
+      NJS-005 and NJS-007 are used in place of NJS-006 and NJS-008,
+      respectively.
+
+    - Exceptions from user getters for parameter object attribute access
+      are now passed through the error callback.
 
 ## node-oracledb v3.1.2 (22 Feb 2019)
 
