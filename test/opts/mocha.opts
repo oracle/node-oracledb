@@ -218,4 +218,6 @@ test/instanceof2.js
 
 test/plsqlBindList.js
 
+test/fetchRawAsString.js
+
 test/writableProperties2.js

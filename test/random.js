@@ -51,12 +51,12 @@ random.getRandomLengthString = function (length) {
 random.getRandomNumArray = function(size) {
   var numbers = new Array(size);
   for (var i = 0; i < numbers.length; i++) {
-    numbers[i] = getRandomInt(1,9999999);
+    numbers[i] = this.getRandomInt(1,9999999);
   }
   return numbers;
 };
 
-function getRandomInt(min, max) {
+random.getRandomInt = function(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min)) + min;
