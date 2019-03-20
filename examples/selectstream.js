@@ -27,56 +27,67 @@
  *
  *   This example requires node-oracledb 1.8 or later.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
-var rowcount = 0;
+async function run() {
+  let connection;
 
-oracledb.getConnection(
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString
-  },
-  function(err, connection) {
-    if (err) {
-      console.error(err.message);
-      return;
-    }
+  try {
+    connection = await oracledb.getConnection(dbConfig);
 
-    var stream = connection.queryStream(
-      'SELECT first_name, last_name FROM employees ORDER BY employee_id',
+    const stream = await connection.queryStream(
+      `SELECT first_name, last_name
+       FROM employees
+       ORDER BY employee_id`,
       [],  // no binds
-      { fetchArraySize: 150 }  // internal buffer size for performance tuning
+      {
+        fetchArraySize: 150 // internal buffer size used for performance tuning
+      }
     );
 
-    stream.on('error', function (error) {
-      // console.log("stream 'error' event");
-      console.error(error);
-      return;
+    const consumeStream = new Promise(function(resolve, reject) {
+      let rowcount = 0;
+
+      stream.on('error', function(error) {
+        // console.log("stream 'error' event");
+        reject(error);
+      });
+
+      stream.on('metadata', function(metadata) {
+        // console.log("stream 'metadata' event");
+        console.log(metadata);
+      });
+
+      stream.on('data', function(data) {
+        // console.log("stream 'data' event");
+        console.log(data);
+        rowcount++;
+      });
+
+      stream.on('end', function() {
+        // console.log("stream 'end' event");
+        resolve(rowcount);
+      });
     });
 
-    stream.on('metadata', function (metadata) {
-      // console.log("stream 'metadata' event");
-      console.log(metadata);
-    });
+    const numrows = await consumeStream;
+    console.log('Rows selected: ' + numrows);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+}
 
-    stream.on('data', function (data) {
-      // console.log("stream 'data' event");
-      console.log(data);
-      rowcount++;
-    });
-
-    stream.on('end', function () {
-      // console.log("stream 'end' event");
-      console.log('Rows selected: ' + rowcount);
-      connection.close(
-        function(err) {
-          if (err) {
-            console.error(err.message);
-          }
-        });
-    });
-  });
+run();

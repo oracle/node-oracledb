@@ -23,7 +23,7 @@
  *
  *   Creates and uses a SODA collection.
  *   Requires Oracle Database and Client 18.3, or higher.
- *   The user must have been granted the SODA_APP privilege.
+ *   The user must have been granted the SODA_APP and CREATE TABLE privileges.
  *   See https://oracle.github.io/node-oracledb/doc/api.html#sodaoverview
  *
  *   This uses Node 8's async/await syntax but could be rewritten to
@@ -33,27 +33,34 @@
  *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
 // The general recommendation for simple SODA usage is to enable autocommit
 oracledb.autoCommit = true;
 
 async function run() {
-  let conn, collection;
+  let connection, collection;
 
   try {
-    let soda, indexSpec, content, doc, key, documents, res;
+    let content, doc, res;
 
-    conn = await oracledb.getConnection(dbConfig);
+    connection = await oracledb.getConnection(dbConfig);
+    if (oracledb.oracleClientVersion < 1803000000) {
+      throw new Error('node-oracledb SODA requires Oracle Client libaries 18.3 or greater');
+    }
+
+    if (connection.oracleServerVersion < 1803000000) {
+      throw new Error('node-oracledb SODA requires Oracle Database 18.3 or greater');
+    }
 
     // Create the parent object for SODA
-    soda = conn.getSodaDatabase();
+    const soda = connection.getSodaDatabase();
 
     // Create a new SODA collection and index
     // This will open an existing collection, if the name is already in use.
     collection = await soda.createCollection("mycollection");
-    indexSpec = { "name": "CITY_IDX",
+    const indexSpec = { "name": "CITY_IDX",
       "fields": [ {
         "path": "address.city",
         "datatype": "string",
@@ -64,7 +71,7 @@ async function run() {
     // A system generated key is created by default.
     content = {name: "Matilda", address: {city: "Melbourne"}};
     doc = await collection.insertOneAndGet(content);
-    key = doc.key;
+    const key = doc.key;
     console.log("The key of the new SODA document is: ", key);
 
     // Fetch the document back
@@ -90,7 +97,7 @@ async function run() {
 
     // Find all documents with city names starting with 'S'
     console.log('Cities starting with S');
-    documents = await collection.find()
+    const documents = await collection.find()
       .filter({"address.city": {"$like": "S%"}})
       .getDocuments();
 
@@ -122,9 +129,9 @@ async function run() {
         console.log('Collection was dropped');
       }
     }
-    if (conn) {
+    if (connection) {
       try {
-        await conn.close();
+        await connection.close();
       } catch (err) {
         console.error(err);
       }

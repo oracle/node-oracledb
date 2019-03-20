@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -26,27 +26,27 @@
  *   Scripts to create the HR schema can be found at:
  *   https://github.com/oracle/db-sample-schemas
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
 oracledb.fetchAsString = [ oracledb.NUMBER ];  // any number queried will be returned as a string
 //oracledb.fetchAsString = [ oracledb.NUMBER, oracledb.DATE ]; // both date and number can be used
 
-oracledb.getConnection(
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString
-  },
-  function(err, connection) {
-    if (err) {
-      console.error(err.message);
-      return;
-    }
-    connection.execute(
-      "SELECT last_name, hire_date, salary, commission_pct FROM employees WHERE employee_id = :id",
+async function run() {
+
+  let connection;
+
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+
+    const result = await connection.execute(
+      `SELECT last_name, hire_date, salary, commission_pct
+       FROM employees
+       WHERE employee_id = :id`,
       [178],
       {
         fetchInfo :
@@ -54,23 +54,21 @@ oracledb.getConnection(
           "HIRE_DATE":      { type : oracledb.STRING },  // return the date as a string
           "COMMISSION_PCT": { type : oracledb.DEFAULT }  // override oracledb.fetchAsString
         }
-      },
-      function(err, result) {
-        if (err) {
-          console.error(err.message);
-          doRelease(connection);
-          return;
-        }
-        console.log(result.rows);
-        doRelease(connection);
       });
-  });
 
-function doRelease(connection) {
-  connection.close(
-    function(err) {
-      if (err) {
-        console.error(err.message);
+    console.log(result.rows);
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
       }
-    });
+    }
+  }
 }
+
+run();

@@ -31,8 +31,8 @@
  *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
 async function run() {
 
@@ -48,9 +48,9 @@ async function run() {
     }
 
     console.log('Inserting Data');
-    let data = { "userId": 2, "userName": "Bob", "location": "USA" };
-    let s = JSON.stringify(data);
-    let b = Buffer.from(s, 'utf8');
+    const data = { "userId": 2, "userName": "Bob", "location": "USA" };
+    const s = JSON.stringify(data);
+    const b = Buffer.from(s, 'utf8');
     await connection.execute(
       `INSERT INTO j_purchaseorder_b (po_document) VALUES (:lobbv)`,
       { lobbv: b });

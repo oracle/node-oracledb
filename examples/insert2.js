@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -27,142 +27,71 @@
  *   Note: regardless of the auto commit mode, any open transaction
  *   will be rolled back when a connection is closed.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var async = require('async');
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
-var doconnect = function(cb) {
-  oracledb.getConnection(
-    {
-      user          : dbConfig.user,
-      password      : dbConfig.password,
-      connectString : dbConfig.connectString
-    },
-    cb);
-};
+async function run() {
 
-var dorelease = function(conn) {
-  conn.close(function (err) {
-    if (err)
-      console.error(err.message);
-  });
-};
+  let connection1, connection2;
 
-var dodrop = function (conn, cb) {
-  conn.execute(
-    `BEGIN
-       EXECUTE IMMEDIATE 'DROP TABLE test';
-       EXCEPTION WHEN OTHERS THEN
-       IF SQLCODE <> -942 THEN
-         RAISE;
-       END IF;
-     END;`,
-    function(err) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        console.log("Table dropped");
-        return cb(null, conn);
-      }
-    });
-};
+  try {
+    connection1 = await oracledb.getConnection(dbConfig);
+    connection2 = await oracledb.getConnection(dbConfig);
 
-var docreate = function (conn, cb) {
-  conn.execute(
-    "CREATE TABLE test (id NUMBER, name VARCHAR2(20))",
-    function(err) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        console.log("Table created");
-        return cb(null, conn);
-      }
-    });
-};
+    let result;
 
-// Insert with autoCommit enabled
-var doinsert_autocommit = function (conn, cb) {
-  conn.execute(
-    "INSERT INTO test VALUES (:id, :nm)",
-    [1, 'Chris'],  // Bind values
-    { autoCommit: true},  // Override the default non-autocommit behavior
-    function(err, result) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        console.log("Rows inserted: " + result.rowsAffected);  // 1
-        return cb(null, conn);
-      }
-    });
-};
+    await connection1.execute(
+      `BEGIN
+	 EXECUTE IMMEDIATE 'DROP TABLE test';
+	 EXCEPTION WHEN OTHERS THEN
+	 IF SQLCODE <> -942 THEN
+	   RAISE;
+	 END IF;
+       END;`);
+    console.log("Table dropped");
 
-// Insert without committing
-var doinsert_nocommit = function (conn, cb) {
-  conn.execute(
-    "INSERT INTO test VALUES (:id, :nm)",
-    [2, 'Alison'],  // Bind values
-    // { autoCommit: true},  // Since this isn't set, operations using a second connection won't see this row
-    function(err, result) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        console.log("Rows inserted: " + result.rowsAffected);  // 1
-        return cb(null, conn);
-      }
-    });
-};
+    await connection1.execute(
+      `CREATE TABLE test (id NUMBER, name VARCHAR2(20))`);
+    console.log("Table created");
 
-// Query on a second connection
-var doquery = function (conn, cb) {
-  oracledb.getConnection(
-    {
-      user          : dbConfig.user,
-      password      : dbConfig.password,
-      connectString : dbConfig.connectString
-    },
-    function(err, connection2) {
-      if (err) {
-        console.error(err.message);
-        return cb(err, conn);
-      }
-      connection2.execute(
-        "SELECT * FROM test",
-        function(err, result) {
-          if (err) {
-            console.error(err.message);
-            return cb(err, conn);
-          }
+    // Insert with autoCommit enabled
+    result = await connection1.execute(
+      `INSERT INTO test VALUES (:id, :nm)`,
+      [1, 'Chris'],  // Bind values
+      { autoCommit: true});  // Override the default, non-autocommit behavior
+    console.log("Rows inserted: " + result.rowsAffected);  // 1
 
-          // This will only show 'Chris' because inserting 'Alison' is not commited by default.
-          // Uncomment the autoCommit option above and you will see both rows
-          console.log(result.rows);
+    // Insert without committing
+    result = await connection1.execute(
+      `INSERT INTO test VALUES (:id, :nm)`,
+      [2, 'Alison'],  // Bind values
+      // { autoCommit: true},  // Since this isn't set, operations using a second connection won't see this row
+    );
+    console.log("Rows inserted: " + result.rowsAffected);  // 1
 
-          connection2.close(
-            function(err) {
-              if (err) {
-                console.error(err.message);
-                return cb(err, conn);
-              } else
-                return cb(null, conn);
-            });
-        });
-    });
-};
+    // A query on the second connection will only show 'Chris' because
+    // inserting 'Alison' is not commited by default.  Uncomment the
+    // autoCommit option above and you will see both rows
+    result = await connection2.execute(
+      `SELECT * FROM test`);
+    console.log(result.rows);
 
-async.waterfall(
-  [
-    doconnect,
-    dodrop,
-    docreate,
-    doinsert_autocommit,
-    doinsert_nocommit,
-    doquery,
-    dodrop
-  ],
-  function (err, conn) {
-    if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-    if (conn)
-      dorelease(conn);
-  });
+  } catch (err) {
+    console.error(err);
+  } finally {
+    try {
+      if (connection1)
+        await connection1.close();
+      if (connection2)
+        await connection2.close();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+}
+
+run();

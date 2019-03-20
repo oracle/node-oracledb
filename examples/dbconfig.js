@@ -31,12 +31,16 @@
  *   database instance.
  *
  *   If node-oracledb is linked with Instant Client, then an Easy
- *   Connect string is generally appropriate.  The syntax is:
+ *   Connect string is generally appropriate.  The basic syntax is:
  *
  *     [//]host_name[:port][/service_name][:server_type][/instance_name]
  *
  *   Commonly just the host_name and service_name are needed
- *   e.g. "localhost/orclpdb" or "localhost/XEPDB1"
+ *   e.g. "localhost/orclpdb" or "example.com/XEPDB1"
+ *
+ *   The Easy Connect syntax was enhanced in Oracle Database 19c to
+ *   allow more options, refer to the documentation:
+ *   https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-B0437826-43C1-49EC-A94D-B650B6A4A6EE
  *
  *   If using a tnsnames.ora file, the file can be in a default
  *   location such as $ORACLE_HOME/network/admin/tnsnames.ora or
@@ -71,9 +75,11 @@
 module.exports = {
   user          : process.env.NODE_ORACLEDB_USER || "hr",
 
-  // Instead of hard coding the password, consider prompting for it,
-  // passing it in an environment variable via process.env, or using
-  // External Authentication.
+  // Get the password from the environment variable
+  // NODE_ORACLEDB_PASSWORD.  The password could also be a hard coded
+  // string (not recommended), or it could be prompted for.
+  // Alternatively use External Authentication so that no password is
+  // needed.
   password      : process.env.NODE_ORACLEDB_PASSWORD,
 
   // For information on connection strings see:

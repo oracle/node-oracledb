@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -31,36 +31,45 @@
  *     INSERT INTO dmlrupdtab VALUES (1002, 'Neeharika');
  *     COMMIT;
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var oracledb = require( 'oracledb' );
-var dbConfig = require('./dbconfig.js');
+const oracledb = require( 'oracledb' );
+const dbConfig = require('./dbconfig.js');
 
-oracledb.getConnection(
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString
-  },
-  function(err, connection) {
-    if (err) {
-      console.error(err);
-      return;
-    }
+async function run() {
 
-    connection.execute(
-      "UPDATE dmlrupdtab SET name = :name WHERE id = :id RETURNING ROWID INTO :rid",
+  let connection;
+
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+
+    const result = await connection.execute(
+      `UPDATE dmlrupdtab
+       SET name = :name
+       WHERE id = :id
+       RETURNING ROWID INTO :rid`,
       {
         id:    1001,
         name:  "Krishna",
         rid:   { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       },
-      { autoCommit: true },
-      function(err, result) {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        console.log(result.outBinds);
-      });
-  });
+      { autoCommit: true });
+
+    console.log(result.outBinds);
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+}
+
+run();

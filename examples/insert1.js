@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -21,118 +21,65 @@
  * DESCRIPTION
  *   Creates a table and inserts data.  Shows DDL and DML
  *
- *   (To insert many records at a time see em_insert1.js)
+ *   To insert many records at a time see em_insert1.js
+ *
+ *   This example uses Node 8's async/await syntax.
  *
  *****************************************************************************/
 
-var async = require('async');
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
-var doconnect = function(cb) {
-  oracledb.getConnection(
-    {
-      user          : dbConfig.user,
-      password      : dbConfig.password,
-      connectString : dbConfig.connectString
-    },
-    cb);
-};
+async function run() {
 
-var dorelease = function(conn) {
-  conn.close(function (err) {
-    if (err)
-      console.error(err.message);
-  });
-};
+  let connection;
 
-var dodrop = function (conn, cb) {
-  conn.execute(
-    `BEGIN
-       EXECUTE IMMEDIATE 'DROP TABLE test';
-       EXCEPTION WHEN OTHERS THEN
-       IF SQLCODE <> -942 THEN
-         RAISE;
-       END IF;
-     END;`,
-    function(err) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        console.log("Table dropped");
-        return cb(null, conn);
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+
+    await connection.execute(
+      `BEGIN
+         EXECUTE IMMEDIATE 'DROP TABLE test';
+         EXCEPTION WHEN OTHERS THEN
+         IF SQLCODE <> -942 THEN
+           RAISE;
+         END IF;
+       END;`);
+    console.log("Table dropped");
+
+    await connection.execute(
+      `CREATE TABLE test (id NUMBER, name VARCHAR2(20))`);
+    console.log("Table created");
+
+    // 'bind by name' syntax
+    let result = await connection.execute(
+      `INSERT INTO test VALUES (:id, :nm)`,
+      { id : {val: 1 }, nm : {val: 'Chris'} });
+    console.log("Rows inserted: " + result.rowsAffected);  // 1
+
+    // 'bind by position' syntax
+    result = await connection.execute(
+      `INSERT INTO test VALUES (:id, :nm)`,
+      [2, 'Alison']);
+    console.log("Rows inserted: " + result.rowsAffected);  // 1
+
+    result = await connection.execute(
+      `UPDATE test SET name = :nm`,
+      ['Bambi'],
+      { autoCommit: true });  // commit once for all DML in the script
+    console.log("Rows updated: " + result.rowsAffected); // 2
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
       }
-    });
-};
+    }
+  }
+}
 
-var docreate = function (conn, cb) {
-  conn.execute(
-    "CREATE TABLE test (id NUMBER, name VARCHAR2(20))",
-    function(err) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        console.log("Table created");
-        return cb(null, conn);
-      }
-    });
-};
-
-var doinsert1 = function (conn, cb) {
-  conn.execute(
-    "INSERT INTO test VALUES (:id, :nm)",
-    { id : {val: 1 }, nm : {val: 'Chris'} },  // 'bind by name' syntax
-    function(err, result) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        console.log("Rows inserted: " + result.rowsAffected);  // 1
-        return cb(null, conn);
-      }
-    });
-};
-
-var doinsert2 = function (conn, cb) {
-  conn.execute(
-    "INSERT INTO test VALUES (:id, :nm)",
-    [2, 'Alison'],  // 'bind by position' syntax
-    function(err, result) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        console.log("Rows inserted: " + result.rowsAffected);  // 1
-        return cb(null, conn);
-      }
-    });
-};
-
-var doupdate = function (conn, cb) {
-  conn.execute(
-    "UPDATE test SET name = :nm",
-    ['Bambi'],
-    { autoCommit: true },  // commit once for all DML in the script
-    function(err, result) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        console.log("Rows updated: " + result.rowsAffected); // 2
-        return cb(null, conn);
-      }
-    });
-};
-
-async.waterfall(
-  [
-    doconnect,
-    dodrop,
-    docreate,
-    doinsert1,
-    doinsert2,
-    doupdate,
-    dodrop  // comment this out if you want to verify the data later
-  ],
-  function (err, conn) {
-    if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-    if (conn)
-      dorelease(conn);
-  });
+run();

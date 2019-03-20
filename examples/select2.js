@@ -32,8 +32,8 @@
 
 'use strict';
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
 // Oracledb properties are applicable to all connections and SQL
 // executions.  They can also be set or overridden at the individual
@@ -65,7 +65,7 @@ async function run() {
     });
 
     // The statement to execute
-    let sql =
+    const sql =
         `SELECT location_id, city
          FROM locations
          WHERE city LIKE 'S%'

@@ -77,10 +77,10 @@ async function dostuff() {
   try {
     // Get a connection from the default pool
     connection = await oracledb.getConnection();
-    let sql = `SELECT sysdate FROM dual WHERE :b = 1`;
-    let binds = [1];
-    let options = { outFormat: oracledb.OBJECT };
-    let result = await connection.execute(sql, binds, options);
+    const sql = `SELECT sysdate FROM dual WHERE :b = 1`;
+    const binds = [1];
+    const options = { outFormat: oracledb.OBJECT };
+    const result = await connection.execute(sql, binds, options);
     console.log(result);
   } catch (err) {
     console.error(err);

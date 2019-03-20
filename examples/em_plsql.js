@@ -27,8 +27,8 @@
  *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
 const sql = "BEGIN em_testproc(:1, :2, :3); END;";
 
@@ -49,22 +49,20 @@ const options = {
 };
 
 async function run() {
-  let conn;
-  let result;
+  let connection;
 
   try {
-    conn = await oracledb.getConnection(dbConfig);
+    connection = await oracledb.getConnection(dbConfig);
 
-    result = await conn.executeMany(sql, binds, options);
-
+    const result = await connection.executeMany(sql, binds, options);
     console.log("Result is:", result);
 
   } catch (err) {
     console.error(err);
   } finally {
-    if (conn) {
+    if (connection) {
       try {
-        await conn.close();
+        await connection.close();
       } catch (err) {
         console.error(err);
       }

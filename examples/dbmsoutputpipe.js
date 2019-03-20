@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -38,99 +38,46 @@
  *   /
  *   SHOW ERRORS
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var async = require('async');
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
-var numRows = 100;  // fetch this many records at a time
+async function run() {
 
-oracledb.createPool(
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString
-  },
-  function(err, pool) {
-    if (err)
-      console.error(err.message);
-    else
-      doit(pool);
-  });
+  let connection;
 
-var doit = function(pool) {
-  async.waterfall(
-    [
-      function(cb) {
-        pool.getConnection(cb);
-      },
-      enableDbmsOutput,
-      createDbmsOutput,
-      fetchDbmsOutput,
-      printDbmsOutput,
-      closeRS
-    ],
-    function (err, conn) {
-      if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-      conn.close(function (err) { if (err) console.error(err.message); });
-    });
-};
+  try {
+    connection = await oracledb.getConnection(dbConfig);
 
-var enableDbmsOutput = function (conn, cb) {
-  conn.execute(
-    "BEGIN DBMS_OUTPUT.ENABLE(NULL); END;",
-    function(err) { return cb(err, conn); });
-};
+    await connection.execute(
+      `BEGIN
+         DBMS_OUTPUT.ENABLE(NULL);
+       END;`);
 
-var createDbmsOutput = function (conn, cb) {
-  conn.execute(
-    `BEGIN
-       DBMS_OUTPUT.PUT_LINE('Hello, Oracle!');
-       DBMS_OUTPUT.PUT_LINE('Hello, Node!');
-     END;`,
-    function(err) { return cb(err, conn); });
-};
+    await connection.execute(
+      `BEGIN
+         DBMS_OUTPUT.PUT_LINE('Hello, Oracle!');
+         DBMS_OUTPUT.PUT_LINE('Hello, Node!');
+       END;`);
 
-var fetchDbmsOutput = function (conn, cb) {
-  conn.execute(
-    "SELECT * FROM TABLE(mydofetch())",
-    [],
-    { resultSet: true },
-    function (err, result) {
-      if (err)
-        return cb(err, conn);
-      else
-        return cb(null, conn, result);
-    });
-};
+    const result = await connection.execute(
+      `SELECT * FROM TABLE(mydofetch())`);
+    console.log(result.rows);
 
-var printDbmsOutput = function(conn, result, cb) {
-  if (result.resultSet) {
-    return fetchRowsFromRS(conn, result.resultSet, numRows, cb);
-  } else {
-    console.log("No results");
-    return cb(null, conn);
-  }
-};
-
-var fetchRowsFromRS = function(conn, resultSet, numRows, cb) {
-  resultSet.getRows(
-    numRows,
-    function (err, rows) {
-      if (err) {
-        return cb(err, conn, resultSet);
-      } else if (rows.length > 0) {
-        console.log(rows);
-        return fetchRowsFromRS(conn, resultSet, numRows, cb);
-      } else {
-        return cb(null, conn, resultSet);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
       }
-    });
-};
+    }
+  }
+}
 
-var closeRS = function(conn, resultSet, cb) {
-  resultSet.close(function(err) {
-    return cb(err, conn);
-  });
-};
+run();

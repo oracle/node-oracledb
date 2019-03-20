@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -30,46 +30,50 @@
  *   END;
  *   /
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
-oracledb.getConnection(
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString
-  },
-  function (err, connection) {
-    if (err) { console.error(err.message); return; }
+async function run() {
 
-    var bindvars = {
-      i:  'Chris',  // Bind type is determined from the data.  Default direction is BIND_IN
-      io: { val: 'Jones', dir: oracledb.BIND_INOUT },
-      o:  { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
-    };
-    connection.execute(
-      "BEGIN testproc(:i, :io, :o); END;",
-      // The equivalent call with PL/SQL named parameter syntax is:
-      // "BEGIN testproc(p_in => :i, p_inout => :io, p_out => :o); END;",
-      bindvars,
-      function (err, result) {
-        if (err) {
-          console.error(err.message);
-          doRelease(connection);
-          return;
-        }
-        console.log(result.outBinds);
-        doRelease(connection);
+  let connection;
+
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+
+    // Invoke the Pl/SQL stored procedure.
+    //
+    // The equivalent call with PL/SQL named parameter syntax is:
+    // `BEGIN
+    //    testproc(p_in => :i, p_inout => :io, p_out => :o);
+    //  END;`
+
+    const result = await connection.execute(
+      `BEGIN
+         testproc(:i, :io, :o);
+       END;`,
+      {
+        i:  'Chris',  // Bind type is determined from the data.  Default direction is BIND_IN
+        io: { val: 'Jones', dir: oracledb.BIND_INOUT },
+        o:  { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
       });
-  });
 
-function doRelease(connection) {
-  connection.close(
-    function(err) {
-      if (err) {
-        console.error(err.message);
+    console.log(result.outBinds);
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
       }
-    });
+    }
+  }
 }
+
+run();

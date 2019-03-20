@@ -42,6 +42,7 @@
 const http = require('http');
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+
 const httpPort = 7000;
 
 // Main entry point.  Creates a connection pool and an HTTP server
@@ -69,7 +70,7 @@ async function init() {
     });
 
     // Create HTTP server and listen on port httpPort
-    let server = http.createServer();
+    const server = http.createServer();
     server.on('error', (err) => {
       console.log('HTTP server problem: ' + err);
     });
@@ -112,7 +113,7 @@ async function handleRequest(request, response) {
     // Checkout a connection from the default pool
     let connection = await oracledb.getConnection();
 
-    let result = await connection.execute(
+    const result = await connection.execute(
       `SELECT employee_id, first_name, last_name
          FROM employees
          WHERE department_id = :id`,
