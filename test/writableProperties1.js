@@ -16,7 +16,7 @@
  * limitations under the License.
  **
  * NAME
- *   66. writableProperties.js
+ *   66. writableProperties1.js
  *
  * DESCRIPTION
  *   Testing writable properties.
@@ -28,7 +28,7 @@ var oracledb = require('oracledb');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
 
-describe('66. writableProperties.js', function() {
+describe('66. writableProperties1.js', function() {
 
   it('66.1 allows overwriting of public methods on pool instances', function(done) {
     oracledb.createPool(
