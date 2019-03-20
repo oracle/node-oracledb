@@ -4459,3 +4459,16 @@ Overview of node-oracledb functional tests
     189.3 Allows overwriting of public methods on SodaCollection instance
     189.4 Allows overwriting of public methods on SodaOperation instance
     189.5 Allows overwriting of public methods on SodaDocCursor instance
+190. fetchBinaryTypesAsString.js
+    190.1 Fetch binary double
+        190.1.1 Fetch binary double should return JS number
+        190.1.2 Fetch binary double as string using fetchAsString
+        190.1.3 Fetch binary double as string using fetchInfo
+        190.1.4 Fetch other types as string do not affect binary double
+        190.1.5 Fetch binary double in multiple rows
+    190.2 Fetch binary float
+        190.2.1 Fetch binary float should return JS number
+        190.2.2 Fetch binary float as string using fetchAsString
+        190.2.3 Fetch binary float as string using fetchInfo
+        190.2.4 Fetch other types as string do not affect binary float
+        190.2.5 Fetch binary float in multiple rows
