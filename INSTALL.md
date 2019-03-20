@@ -210,7 +210,8 @@ I have ... | Follow this ...
 Windows.  My database is on another machine | [Node-oracledb Installation on Windows with Instant Client ZIP files](#instwin)
 Windows.  My database is on the same machine as Node.js | [Node-oracledb Installation on Windows with a Local Database or Full Client](#instwinoh)
 Apple macOS | [Node-oracledb Installation on macOS](#instosx)
-Linux.  My database is on another machine | [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm) or [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
+Linux that uses RPM packages.  My database is on another machine | [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
+Linux that uses Debian packages.   My database is on another machine | [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
 Linux.  My database is on the same machine as Node.js | [Node-oracledb Installation on Linux with a Local Database or Full Client](#instoh)
 Linux. I have the full Oracle client (installed via `runInstaller`) on the same machine as Node.js | [Node-oracledb Installation on Linux with a Local Database or Full Client](#instoh)
 Linux.  I want to install Node.js and node-oracledb RPM packages | [Installing Node.js and Node-oracledb RPMs from yum.oracle.com](#instnoderpms)
@@ -273,9 +274,9 @@ additional tools to build from source code:
 
 ### <a name="instrpm"></a> 3.2 Node-oracledb Installation on Linux with Instant Client RPMs
 
-Follow these steps if your database is on a remote machine.  Also see
-[Installing Node.js and Node-oracledb RPMs from
-yum.oracle.com](#instnoderpms).
+Follow these steps if your database is on a remote machine and your
+Linux distribution uses RPM packages.  Also see [Installing Node.js and
+Node-oracledb RPMs from yum.oracle.com](#instnoderpms).
 
 Questions and issues can be posted as [GitHub Issues][10].
 
@@ -417,7 +418,10 @@ node example.js
 
 ### <a name="instzip"></a> 3.3 Node-oracledb Installation on Linux with Instant Client ZIP files
 
-Follow these steps if your database is on a remote machine.
+Follow these steps if your database is on a remote machine and your
+Linux distribution uses the Debian package format, for example if you
+are using Ubuntu.  These steps can also be used if you prefer not to
+install RPMs.
 
 Questions and issues can be posted as [GitHub Issues][10].
 
