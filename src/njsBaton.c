@@ -226,6 +226,9 @@ void njsBaton_free(njsBaton *baton, napi_env env)
         baton->lob = NULL;
     }
     NJS_FREE_AND_CLEAR(baton->sodaCollNames);
+    if (!baton->jsBuffer) {
+        NJS_FREE_AND_CLEAR(baton->bufferPtr);
+    }
 
     // release references to ODPI-C handles
     if (baton->dpiConnHandle) {

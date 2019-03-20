@@ -27,6 +27,9 @@
 
 - Updated the JavaScript syntax in class implementations.
 
+- Fixed writing of multi-byte characters to CLOBs when multiple writes
+  are required.
+
 - Corrected processing of the `force` option in SODA `dropIndex()`.
 
 - Error handling changes:
