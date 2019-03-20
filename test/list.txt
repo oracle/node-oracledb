@@ -996,7 +996,7 @@ Overview of node-oracledb functional tests
 65. uninitializedLob.js
     65.1 an uninitialized Lob is returned from a PL/SQL block
 
-66. writableProperties.js
+66. writableProperties1.js
     66.1 allows overwriting of public methods on pool instances
     66.2 allows overwriting of public methods on connection instances
     66.3 allows overwriting of public methods on resultset instances
@@ -4439,3 +4439,10 @@ Overview of node-oracledb functional tests
         187.2.8 Bind STRING List by position while required type is NUMBER
         187.2.9 Bind NUMBER List by name while required type is STRING
         187.2.10 Bind NUMBER List by position while required type is STRING
+
+189. writableProperties2.js
+    189.1 Allows overwriting of public methods on SodaDatabase instance
+    189.2 Allows overwriting of public methods on SodaDocument instance
+    189.3 Allows overwriting of public methods on SodaCollection instance
+    189.4 Allows overwriting of public methods on SodaOperation instance
+    189.5 Allows overwriting of public methods on SodaDocCursor instance

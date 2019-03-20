@@ -71,7 +71,7 @@ test/lobProperties1.js
 test/autoCommit4nestedExecutes.js
 test/sqlWithWarnings.js
 test/uninitializedLob.js
-test/writableProperties.js
+test/writableProperties1.js
 test/poolCache.js
 
 test/multipleLobInsertion.js
@@ -217,3 +217,5 @@ test/cqn.js
 test/instanceof2.js
 
 test/plsqlBindList.js
+
+test/writableProperties2.js
