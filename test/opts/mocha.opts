@@ -221,3 +221,5 @@ test/plsqlBindList.js
 test/fetchRawAsString.js
 
 test/writableProperties2.js
+
+test/fetchBinaryTypesAsString.js
