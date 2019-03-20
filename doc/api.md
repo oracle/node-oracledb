@@ -457,6 +457,8 @@ node myscript.js
 
 var oracledb = require('oracledb');
 
+oracledb.outFormat = oracledb.OBJECT;
+
 var mypw = ...  // set mypw to the hr schema password
 
 async function run() {
@@ -466,7 +468,7 @@ async function run() {
   try {
     connection = await oracledb.getConnection(  {
       user          : "hr",
-      password      : mypw
+      password      : mypw,
       connectString : "localhost/XEPDB1"
     });
 
@@ -497,7 +499,7 @@ run();
 With Oracle's sample HR schema, the output is:
 
 ```
-[ [ 103, 60, 'IT' ] ]
+[ { MANAGER_ID: 103, DEPARTMENT_ID: 60, DEPARTMENT_NAME: 'IT' } ]
 ```
 
 #### <a name="examplesodaawait"></a> 1.1.2 Example: Simple Oracle Document Access (SODA) in Node.js
@@ -510,50 +512,55 @@ version of Oracle Client libraries.
 
 ```javascript
 // mysoda.js
+// This example uses Node 8's async/await syntax.
 
 const oracledb = require('oracledb');
 
-let  mypw = ...  // set mypw to the hr schema password
-
-const dbconfig = { user: 'hr', password: mypw, connectString: 'localhost/orclpdb' };
+let mypw = ...  // set mypw to the hr schema password
 
 oracledb.autoCommit = true;
 
-(async function() {
-  let conn;
+async function run() {
+
+  let connection;
 
   try {
-    conn = await oracledb.getConnection(dbconfig);
-    console.log('Connected to database...');
+    connection = await oracledb.getConnection(  {
+      user          : "hr",
+      password      : mypw,
+      connectString : "localhost/orclpdb"
+    });
 
     // Create a new (or open an existing) document collection
-    let sd = conn.getSodaDatabase();
+    let soda = connection.getSodaDatabase();
     let collectionName = 'nodb_soda_collection';
-    let myCollection = await sd.createCollection(collectionName);
+    let myCollection = await soda.createCollection(collectionName);
 
     // Insert a new document
     let myContent = { name: "Sally", address: {city: "Melbourne"} };
-    await myCollection.insertOne(JSON.stringify(myContent));
+    await myCollection.insertOne(myContent);
 
     // Print names of people living in Melbourne
     let filterSpec = { "address.city": "Melbourne" };
     let myDocuments = await myCollection.find().filter(filterSpec).getDocuments();
     myDocuments.forEach(function(element) {
       let content = element.getContent();
-      console.log(content.name, ' lives in Melbourne.');
+      console.log(content.name + ' lives in Melbourne.');
     });
   } catch(err) {
     console.log('Error in processing:\n', err);
   } finally {
-    if (conn) {
+    if (connection) {
       try {
-        await conn.close();
+        await connection.close();
       } catch(err) {
         console.log('Error in closing connection:\n', err);
       }
     }
   }
-})();
+}
+
+run();
 ```
 
 ## <a name="errorobj"></a> 2. Errors
