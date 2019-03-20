@@ -29,37 +29,30 @@
  *
  *****************************************************************************/
 
-let oracledb = require("oracledb");
-let dbConfig = require('./dbconfig.js');
+const oracledb = require("oracledb");
+const dbConfig = require('./dbconfig.js');
 
-// "Sleep" in the database for a number of seconds.
-// This uses an inefficent sleep implementation instead of
-// dbms_lock.sleep() which not all users can use.
-const sql = `
-  DECLARE
-     t DATE := SYSDATE + (:sleepsec * (1/86400));
-  BEGIN
-    LOOP
-      EXIT WHEN t <= SYSDATE;
-    END LOOP;
-  END;`;
+const dboptime = 4; // seconds the simulated database operation will take
+const timeout  = 2; // seconds the application will wait for the database operation
 
-let dboptime = 4; // seconds the DB operation will take
-let timeout  = 2; // seconds the application will wait for the DB operation
+async function run() {
 
-async function runTest() {
   let connection;
 
   try {
     connection = await oracledb.getConnection(dbConfig);
+
     connection.callTimeout = timeout * 1000;  // milliseconds
     console.log("Database call timeout set to " + connection.callTimeout / 1000 + " seconds");
+
     console.log("Executing a " + dboptime + " second DB operation");
-    await connection.execute(sql, [dboptime]);
-    console.log("DB operation successfully completed");
+    await connection.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [dboptime]);
+
+    console.log("Database operation successfully completed");
+
   } catch (err) {
     if (err.message.startsWith('DPI-1067:') || err.errorNum === 3114)
-      console.log('DB operation was stopped after exceeding the call timeout');
+      console.log('Database operation was stopped after exceeding the call timeout');
     else
       console.error(err);
   } finally {
@@ -73,4 +66,4 @@ async function runTest() {
   }
 }
 
-runTest();
+run();

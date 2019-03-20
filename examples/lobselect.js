@@ -32,91 +32,74 @@
  *
  *   This example requires node-oracledb 1.13 or later.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var fs = require('fs');
-var async = require('async');
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const fs = require('fs');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
-// force all CLOBs to be returned as Strings
+const blobOutFileName = 'lobselectout.jpg';  // file to write the BLOB to
+
+// force all queried CLOBs to be returned as Strings
 oracledb.fetchAsString = [ oracledb.CLOB ];
 
-// force all BLOBs to be returned as Buffers
+// force all queried BLOBs to be returned as Buffers
 oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 
-var doconnect = function(cb) {
-  oracledb.getConnection(
-    {
-      user          : dbConfig.user,
-      password      : dbConfig.password,
-      connectString : dbConfig.connectString
-    },
-    function(err, conn) {
-      if (err)
-        return cb(err);
-      else {
-        return cb(null, conn);
-      }
-    });
-};
+async function run() {
 
-var dorelease = function(conn) {
-  conn.close(function (err) {
-    if (err)
-      console.error(err.message);
-  });
-};
+  let connection;
 
-var doclobquery = function(conn, cb) {
-  conn.execute(
-    "SELECT c FROM mylobs WHERE id = :idbv",
-    [1],
-    // An alternative to oracledb.fetchAsString is to use fetchInfo on the column:
-    // { fetchInfo: {"C": {type: oracledb.STRING}} },
-    function(err, result) {
-      if (err) {
-        return cb(err, conn);
-      }
-      if (result.rows.length === 0) {
-        return cb(new Error("No results.  Did you run lobinsert1.js?"), conn);
-      }
-      var clob = result.rows[0][0];
-      console.log('The CLOB was: ');
-      console.log(clob);
-      return cb(null, conn);
-    });
-};
+  try {
+    connection = await oracledb.getConnection(dbConfig);
 
-var doblobquery = function(conn, cb) {
-  conn.execute(
-    "SELECT b FROM mylobs WHERE id = :idbv",
-    [2],
-    // An alternative to oracledb.fetchAsBuffer is to use fetchInfo on the column:
-    // { fetchInfo: {"B": {type: oracledb.BUFFER}} },
-    function(err, result) {
-      if (err) {
-        return cb(err, conn);
-      }
-      if (result.rows.length === 0) {
-        return cb(new Error("No results.  Did you run lobinsert1.js?"), conn);
-      }
-      var blob = result.rows[0][0];
-      console.log('Writing BLOB to lobselectout.jpg');
-      fs.writeFile('lobselectout.jpg', blob, "binary", function(err) {
-        return cb(err, conn);
-      });
-    });
-};
+    let result;
 
-// Connect and call the CLOB example
-async.waterfall([
-  doconnect,
-  doclobquery,
-  doblobquery
-],
-function (err, conn) {
-  if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-  if (conn)
-    dorelease(conn);
-});
+    // Fetch a CLOB
+    result = await connection.execute(
+      `SELECT c FROM mylobs WHERE id = :idbv`,
+      [1]
+      // An alternative to oracledb.fetchAsString is to pass execute()
+      // options and use fetchInfo on the column:
+      //, { fetchInfo: {"C": {type: oracledb.STRING}} }
+    );
+
+    if (result.rows.length === 0)
+      throw new Error("No results.  Did you run lobinsert1.js?");
+
+    const clob = result.rows[0][0];
+    console.log('The CLOB was: ');
+    console.log(clob);
+
+
+    // Fetch a BLOB
+    result = await connection.execute(
+      `SELECT b FROM mylobs WHERE id = :idbv`,
+      [2]
+      // An alternative to oracledb.fetchAsBuffer is to use fetchInfo on the column:
+      // , { fetchInfo: {"B": {type: oracledb.BUFFER}} }
+    );
+
+    if (result.rows.length === 0)
+      throw new Error("No results.  Did you run lobinsert1.js?");
+
+    const blob = result.rows[0][0];
+    console.log('Writing BLOB to lobselectout.jpg');
+    fs.writeFileSync(blobOutFileName, blob);
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+}
+
+run();

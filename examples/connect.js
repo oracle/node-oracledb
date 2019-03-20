@@ -30,8 +30,8 @@
 
 'use strict';
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
 async function run() {
 
@@ -39,11 +39,7 @@ async function run() {
 
   try {
     // Get a non-pooled connection
-    connection = await oracledb.getConnection(  {
-      user         : dbConfig.user,
-      password     : dbConfig.password,
-      connectString: dbConfig.connectString
-    });
+    connection = await oracledb.getConnection(dbConfig);
 
     console.log('Connection was successful!');
 

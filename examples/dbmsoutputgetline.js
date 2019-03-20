@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -21,70 +21,56 @@
  * DESCRIPTION
  *   Displays PL/SQL DBMS_OUTPUT in node-oracledb, fetching one record at a time.
  *
+ *   The alternate method shown in dbmsoutputpipe.js is more efficient.
+ *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var async = require('async');
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
-oracledb.createPool(
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString
-  },
-  function(err, pool) {
-    if (err)
-      console.error(err.message);
-    else
-      doit(pool);
-  });
+async function run() {
 
-var doit = function(pool) {
-  async.waterfall(
-    [
-      function(cb) {
-        pool.getConnection(cb);
-      },
-      enableDbmsOutput,
-      createDbmsOutput,
-      fetchDbmsOutputLine
-    ],
-    function (err, conn) {
-      if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-      conn.close(function (err) { if (err) console.error(err.message); });
-    }
-  );
-};
+  let connection;
 
-var enableDbmsOutput = function (conn, cb) {
-  conn.execute(
-    "BEGIN DBMS_OUTPUT.ENABLE(NULL); END;",
-    function(err) { return cb(err, conn); });
-};
+  try {
+    connection = await oracledb.getConnection(dbConfig);
 
-var createDbmsOutput = function (conn, cb) {
-  conn.execute(
-    `BEGIN
-       DBMS_OUTPUT.PUT_LINE('Hello, Oracle!');
-       DBMS_OUTPUT.PUT_LINE('Hello, Node!');
-     END;`,
-    function(err) { return cb(err, conn); });
-};
+    await connection.execute(
+      `BEGIN
+         DBMS_OUTPUT.ENABLE(NULL);
+       END;`);
 
-var fetchDbmsOutputLine = function (conn, cb) {
-  conn.execute(
-    "BEGIN DBMS_OUTPUT.GET_LINE(:ln, :st); END;",
-    { ln: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 32767 },
-      st: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER } },
-    function(err, result) {
-      if (err) {
-        return cb(err, conn);
-      } else if (result.outBinds.st == 1) {
-        return cb(null, conn);  // no more output
-      } else {
+    await connection.execute(
+      `BEGIN
+         DBMS_OUTPUT.PUT_LINE('Hello, Oracle!');
+         DBMS_OUTPUT.PUT_LINE('Hello, Node!');
+       END;`);
+
+    let result;
+    do {
+      result = await connection.execute(
+        `BEGIN
+           DBMS_OUTPUT.GET_LINE(:ln, :st);
+         END;`,
+        { ln: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 32767 },
+          st: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER } });
+      if (result.outBinds.st === 0)
         console.log(result.outBinds.ln);
-        return fetchDbmsOutputLine(conn, cb);
+    } while (result.outBinds.st === 0);
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
       }
-    });
-};
+    }
+  }
+}
+
+run();

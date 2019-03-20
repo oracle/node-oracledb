@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -29,46 +29,50 @@
  *   END;
  *   /
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
-oracledb.getConnection(
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString
-  },
-  function (err, connection) {
-    if (err) { console.error(err.message); return; }
+async function run() {
 
-    var bindvars = {
-      p1:  'Chris', // Bind type is determined from the data.  Default direction is BIND_IN
-      p2:  'Jones',
-      ret:  { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 40 }
-    };
-    connection.execute(
-      "BEGIN :ret := testfunc(:p1, :p2); END;",
-      // The equivalent call with PL/SQL named parameter syntax is:
-      // "BEGIN :ret := testfunc(p1_in => :p1, p2_in => :p2); END;",
-      bindvars,
-      function (err, result) {
-        if (err) {
-          console.error(err.message);
-          doRelease(connection);
-          return;
-        }
-        console.log(result.outBinds);
-        doRelease(connection);
+  let connection;
+
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+
+    // Invoke the PL/SQL function.
+    //
+    // The equivalent call with PL/SQL named parameter syntax is:
+    // `BEGIN
+    //    :ret := testfunc(p1_in => :p1, p2_in => :p2);
+    //  END;`
+
+    const result = await connection.execute(
+      `BEGIN
+         :ret := testfunc(:p1, :p2);
+       END;`,
+      {
+        p1:  'Chris', // Bind type is determined from the data.  Default direction is BIND_IN
+        p2:  'Jones',
+        ret:  { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 40 }
       });
-  });
 
-function doRelease(connection) {
-  connection.close(
-    function(err) {
-      if (err) {
-        console.error(err.message);
+    console.log(result.outBinds);
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
       }
-    });
+    }
+  }
 }
+
+run();

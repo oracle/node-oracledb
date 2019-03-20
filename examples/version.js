@@ -23,33 +23,44 @@
  *
  *   This example requires node-oracledb 2.2 or later.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
 console.log("Run at: " + new Date());
 console.log("Node.js version: " + process.version + " (" + process.platform, process.arch + ")");
 
+console.log("Node-oracledb version:", oracledb.versionString); // version (including the suffix)
 // console.log("Node-oracledb version:", oracledb.version); // numeric version format is useful for comparisons
 // console.log("Node-oracledb version suffix:", oracledb.versionSuffix); // e.g. "-beta.1", or empty for production releases
-console.log("Node-oracledb version:", oracledb.versionString); // version (including the suffix)
 
-//console.log("Oracle Client library version:", oracledb.oracleClientVersion); // numeric version format
 console.log("Oracle Client library version:", oracledb.oracleClientVersionString);
+//console.log("Oracle Client library version:", oracledb.oracleClientVersion); // numeric version format
 
-oracledb.getConnection(
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString
-  },
-  function(err, connection) {
-    if (err) {
-      console.error(err.message);
-      return;
-    }
+async function run() {
 
-    // console.log("Oracle Database version:", connection.oracleServerVersion); // numeric version format
+  let connection;
+
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+
     console.log("Oracle Database version:", connection.oracleServerVersionString);
-  });
+    // console.log("Oracle Database version:", connection.oracleServerVersion); // numeric version format
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+}
+
+run();

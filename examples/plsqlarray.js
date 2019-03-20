@@ -29,120 +29,91 @@
  *
  *   This example requires node-oracledb 1.6 or later.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var async = require('async');
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
-var doconnect = function(cb) {
-  oracledb.getConnection(dbConfig, cb);
-};
+async function run() {
 
-var dorelease = function(conn) {
-  conn.close(function (err) {
-    if (err)
-      console.error(err.message);
-  });
-};
+  let connection;
 
-var dorollback = function(conn, cb) {
-  conn.rollback(function (err) {
-    if (err)
-      return cb(err, conn);
-    else
-      return cb(null, conn);
-  });
-};
+  try {
+    connection = await oracledb.getConnection(dbConfig);
 
-// PL/SQL array bind IN parameters:
-//   Pass arrays of values to a PL/SQL procedure
-var doin = function (conn, cb) {
-  conn.execute(
-    "BEGIN beachpkg.array_in(:beach_in, :depth_in); END;",
-    {
-      beach_in:
-      { type : oracledb.STRING,
-        dir: oracledb.BIND_IN,
-        val: ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
-      depth_in:
-      { type : oracledb.NUMBER,
-        dir: oracledb.BIND_IN,
-        val: [45, 30, 67] }
-    },
-    function(err) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        return cb(null, conn);
+    let result;
+
+    // PL/SQL array bind IN parameters:
+    // Pass arrays of values to a PL/SQL procedure
+    await connection.execute(
+      `BEGIN
+         beachpkg.array_in(:beach_in, :depth_in);
+       END;`,
+      {
+        beach_in:
+        { type : oracledb.STRING,
+          dir: oracledb.BIND_IN,
+          val: ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+        depth_in:
+        { type : oracledb.NUMBER,
+          dir: oracledb.BIND_IN,
+          val: [45, 30, 67] }
+      });
+    console.log('Data was bound in successfully');
+
+    // PL/SQL array bind OUT parameters:
+    // Fetch arrays of values from a PL/SQL procedure
+    result = await connection.execute(
+      `BEGIN
+         beachpkg.array_out(:beach_out, :depth_out);
+       END;`,
+      {
+        beach_out:
+        { type: oracledb.STRING,
+          dir: oracledb.BIND_OUT,
+          maxArraySize: 3 },
+        depth_out:
+        { type: oracledb.NUMBER,
+          dir: oracledb.BIND_OUT,
+          maxArraySize: 3 }
+      });
+    console.log("Binds returned:");
+    console.log(result.outBinds);
+
+    // PL/SQL array bind IN OUT parameters:
+    // Return input arrays sorted by beach name
+    result = await connection.execute(
+      `BEGIN
+         beachpkg.array_inout(:beach_inout, :depth_inout);
+       END;`,
+      {
+        beach_inout:
+        { type: oracledb.STRING,
+          dir: oracledb.BIND_INOUT,
+          val: ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+          maxArraySize: 6 },
+        depth_inout:
+        { type: oracledb.NUMBER,
+          dir: oracledb.BIND_INOUT,
+          val: [8, 3, 70],
+          maxArraySize: 6 }
+      });
+    console.log("Binds returned:");
+    console.log(result.outBinds);
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
       }
-    });
-};
+    }
+  }
+}
 
-// PL/SQL array bind OUT parameters:
-//    Fetch arrays of values from a PL/SQL procedure
-var doout = function (conn, cb) {
-  conn.execute(
-    "BEGIN beachpkg.array_out(:beach_out, :depth_out); END;",
-    {
-      beach_out:
-      { type: oracledb.STRING,
-        dir: oracledb.BIND_OUT,
-        maxArraySize: 3 },
-      depth_out:
-      { type: oracledb.NUMBER,
-        dir: oracledb.BIND_OUT,
-        maxArraySize: 3 }
-    },
-    function (err, result) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        console.log("Binds returned:");
-        console.log(result.outBinds);
-        return cb(null, conn);
-      }
-    });
-};
-
-// PL/SQL array bind IN OUT parameters:
-//   Return input arrays sorted by beach name
-var doinout = function (conn, cb) {
-  conn.execute(
-    "BEGIN beachpkg.array_inout(:beach_inout, :depth_inout); END;",
-    {
-      beach_inout:
-      { type: oracledb.STRING,
-        dir: oracledb.BIND_INOUT,
-        val: ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
-        maxArraySize: 3 },
-      depth_inout:
-      { type: oracledb.NUMBER,
-        dir: oracledb.BIND_INOUT,
-        val: [8, 3, 70],
-        maxArraySize: 3 }
-    },
-    function (err, result) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        console.log("Binds returned:");
-        console.log(result.outBinds);
-        return cb(null, conn);
-      }
-    });
-};
-
-async.waterfall(
-  [
-    doconnect,
-    doin,
-    doout,
-    dorollback,
-    doinout
-  ],
-  function (err, conn) {
-    if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-    if (conn)
-      dorelease(conn);
-  });
+run();

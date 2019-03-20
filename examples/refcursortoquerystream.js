@@ -19,74 +19,65 @@
  *   refcursortoquerystream.js
  *
  * DESCRIPTION
- *   Converts a refcursor (returned from execute) to a query stream for an
- *   alternative means of processing instead of using resultSet.getRows().
+ *   Converts a refcursor returned from execute() to a query stream.
+ *   This is an alternative means of processing instead of using
+ *   resultSet.getRows().
  *
  *   Scripts to create the HR schema can be found at:
  *   https://github.com/oracle/db-sample-schemas
  *
  *   This example requires node-oracledb 1.9 or later.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
-oracledb.getConnection(
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString
-  },
-  function(err, connection) {
-    if (err) {
-      console.error(err.message);
-      return;
-    }
+async function run() {
+  let connection;
 
-    connection.execute(
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+
+    const result = await connection.execute(
       `BEGIN
-         OPEN :cursor FOR SELECT department_id, department_name FROM departments;
+         OPEN :cursor FOR
+           SELECT department_id, department_name
+           FROM departments;
        END;`,
-      {
-        cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
-      },
-      function(err, result) {
-        var cursor;
-        var queryStream;
-
-        if (err) {
-          console.error(err.message);
-          doRelease(connection);
-          return;
+      { 
+        cursor: {
+          type: oracledb.CURSOR,
+          dir: oracledb.BIND_OUT
         }
-
-        cursor = result.outBinds.cursor;
-        queryStream = cursor.toQueryStream();
-
-        queryStream.on('data', function (row) {
-          console.log(row);
-        });
-
-        queryStream.on('error', function (err) {
-          console.error(err.message);
-          doRelease(connection);
-        });
-
-        queryStream.on('close', function () {
-          doRelease(connection);
-        });
       }
     );
-  }
-);
 
-function doRelease(connection) {
-  connection.close(
-    function(err) {
-      if (err) {
-        console.error(err.message);
+    const cursor = result.outBinds.cursor;
+    const queryStream = cursor.toQueryStream();
+
+    const consumeStream = new Promise(function(resolve, reject) {
+      queryStream.on('data', function(row) {
+        console.log(row);
+      });
+      queryStream.on('error', reject);
+      queryStream.on('close', resolve);
+    });
+
+    await consumeStream;
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
       }
     }
-  );
+  }
 }
+
+run();

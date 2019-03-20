@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -20,58 +20,56 @@
  *
  * DESCRIPTION
  *   Converts a ResultSet returned from execute() into a Readable Stream.
- *   This is an alternative instead of using resultset.getRows().
- *   Note: using connection.queryStream() is recommended for top level
- *   queries because it avoids having to duplicate error handling in the
- *   callback and event.
+ *   This is an alternative to using resultset.getRows().
  *
  *   Scripts to create the HR schema can be found at:
  *   https://github.com/oracle/db-sample-schemas
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
-oracledb.getConnection(
-  dbConfig,
-  function(err, connection) {
-    if (err) { console.error(err.message); return; }
-    var sql = "SELECT employee_id, last_name FROM employees WHERE ROWNUM < 25 ORDER BY employee_id";
-    connection.execute(
-      sql,
+async function run() {
+  let connection;
+
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+
+    const result = await connection.execute(
+      `SELECT employee_id, last_name
+       FROM employees WHERE ROWNUM < 25
+       ORDER BY employee_id`,
       [],
       {
         resultSet: true
-      },
-      function(err, result) {
-        if (err) {
-          console.error(err.message);
-          doRelease(connection);
-          return;
-        }
-        var queryStream = result.resultSet.toQueryStream();
-
-        queryStream.on('data', function(row) {
-          console.log(row);
-        });
-
-        queryStream.on('error', function(err) {
-          console.error(err.message);
-          doRelease(connection);
-        });
-
-        queryStream.on('close', function() {
-          doRelease(connection);
-        });
       }
     );
-  }
-);
 
-function doRelease(connection) {
-  connection.close(
-    function(err) {
-      if (err) { console.error(err.message); }
+    const queryStream = result.resultSet.toQueryStream();
+
+    const consumeStream = new Promise(function(resolve, reject) {
+      queryStream.on('data', function(row) {
+        console.log(row);
+      });
+      queryStream.on('error', reject);
+      queryStream.on('close', resolve);
     });
+
+    await consumeStream;
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
 }
+
+run();

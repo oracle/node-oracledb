@@ -132,7 +132,7 @@ async function handleRequest(request, response) {
     //   will be invoked before getConnection() returns.  This lets
     //   the desired session state be set.
     connection = await oracledb.getConnection({poolAlias: 'default', tag: sessionTagNeeded /*, matchAnyTag: true */});
-    let result = await connection.execute(`SELECT TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') FROM DUAL`);
+    const result = await connection.execute(`SELECT TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') FROM DUAL`);
     console.log( `getConnection() tag needed was ${sessionTagNeeded}\n  ${result.rows[0][0]}`);
   } catch (err) {
     console.error(err.message);

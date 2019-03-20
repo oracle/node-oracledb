@@ -34,8 +34,8 @@
  *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
 async function run() {
 
@@ -51,8 +51,8 @@ async function run() {
     let result;
 
     console.log('Inserting Data');
-    let data = { "userId": 1, "userName": "Chris", "location": "Australia" };
-    let s = JSON.stringify(data);
+    const data = { "userId": 1, "userName": "Chris", "location": "Australia" };
+    const s = JSON.stringify(data);
     await connection.execute(
       `INSERT INTO j_purchaseorder (po_document) VALUES (:bv)`,
       [s], // bind the JSON string for inserting into the JSON column.
@@ -63,7 +63,7 @@ async function run() {
       `SELECT po_document
        FROM j_purchaseorder
        WHERE JSON_EXISTS (po_document, '$.location')`);
-    let js = JSON.parse(result.rows[0][0]);  // just show first record
+    const js = JSON.parse(result.rows[0][0]);  // just show first record
     console.log('Query results: ', js);
 
     console.log('2. Using JSON_VALUE to extract a value from a JSON column');

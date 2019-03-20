@@ -93,7 +93,7 @@ async function handleRequest(request, response) {
   try {
     // Get a connection from the default connection pool
     connection = await oracledb.getConnection();
-    let result = await connection.execute(`SELECT TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') FROM DUAL`);
+    const result = await connection.execute(`SELECT TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') FROM DUAL`);
     console.log(result.rows[0][0]);
   } catch (err) {
     console.error(err.message);

@@ -30,8 +30,8 @@
  *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
 const sql = "INSERT INTO em_childtab VALUES (:1, :2, :3)";
 
@@ -58,27 +58,25 @@ const options = {
 };
 
 async function run() {
-  let conn;
-  let result;
+  let connection;
 
   try {
-    conn = await oracledb.getConnection(
+    connection = await oracledb.getConnection(
       {
         user          : dbConfig.user,
         password      : dbConfig.password,
         connectString : dbConfig.connectString
       });
 
-    result = await conn.executeMany(sql, binds, options);
-
+    const result = await connection.executeMany(sql, binds, options);
     console.log("Result is:", result);
 
   } catch (err) {
     console.error(err);
   } finally {
-    if (conn) {
+    if (connection) {
       try {
-        await conn.close();
+        await connection.close();
       } catch (err) {
         console.error(err);
       }

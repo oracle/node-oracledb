@@ -27,76 +27,61 @@
  *
  *   This example requires node-oracledb 2.0.15 or later.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
 // For getRow(), the fetchArraySize property can be adjusted to tune
 // data transfer from the Oracle Database to node-oracledb.  The value
 // of fetchArraySize does not affect how, or when, rows are returned
 // by node-oracledb to the application.  Buffering is handled by
-// node-oracledb.  Benchmark to choose the optimal size for each
-// application or query.
+// internally in node-oracledb.  Benchmark to choose the optimal size
+// for each application or query.
 //
 // oracledb.fetchArraySize = 100;  // default value is 100
 
-var rowCount = 0;
+async function run() {
+  let connection;
 
-oracledb.getConnection(
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString
-  },
-  function(err, connection) {
-    if (err) { console.error(err.message); return; }
-    connection.execute(
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+
+    const result = await connection.execute(
       `SELECT employee_id, last_name
-       FROM   employees
-       WHERE ROWNUM < 11
+       FROM employees
+       WHERE ROWNUM < 5
        ORDER BY employee_id`,
       [], // no bind variables
-      { resultSet: true }, // return a ResultSet.  Default is false
-      function(err, result) {
-        if (err) {
-          console.error(err.message);
-          doRelease(connection);
-          return;
-        }
-        // console.log(result);
-        fetchOneRowFromRS(connection, result.resultSet);
-      });
-  });
-
-function fetchOneRowFromRS(connection, resultSet) {
-  resultSet.getRow( // get one row
-    function (err, row) {
-      if (err) {
-        console.error(err.message);
-        doClose(connection, resultSet); // always close the ResultSet
-      } else if (!row) {                // no rows, or no more rows
-        doClose(connection, resultSet); // always close the ResultSet
-      } else {
-        rowCount++;
-        console.log("fetchOneRowFromRS(): row " + rowCount);
-        console.log(row);
-        fetchOneRowFromRS(connection, resultSet);
+      {
+        resultSet: true // return a ResultSet (default is false)
       }
-    });
+    );
+
+    const rs = result.resultSet;
+    let row;
+    let i = 1;
+
+    while ((row = await rs.getRow())) {
+      console.log("getRow(): row " + i++);
+      console.log(row);
+    }
+
+    // always close the ResultSet
+    await rs.close();
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
 }
 
-function doRelease(connection) {
-  connection.close(
-    function(err) {
-      if (err) { console.error(err.message); }
-    });
-}
-
-function doClose(connection, resultSet) {
-  resultSet.close(
-    function(err) {
-      if (err) { console.error(err.message); }
-      doRelease(connection);
-    });
-}
+run();

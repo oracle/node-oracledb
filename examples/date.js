@@ -109,7 +109,7 @@ async function run() {
     console.log(result.rows);
 
     // Show the queried dates are of type Date
-    var ts = result.rows[0]['TIMESTAMPCOL'];
+    let ts = result.rows[0]['TIMESTAMPCOL'];
     ts.setDate(ts.getDate() + 5);
     console.log('TIMESTAMP manipulation in JavaScript:', ts);
 

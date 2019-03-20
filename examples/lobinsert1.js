@@ -21,6 +21,7 @@
  * DESCRIPTION
  *   Reads text from clobexample.txt and INSERTs it into a CLOB column.
  *   Reads binary data from fuzzydinosaur.jpg and INSERTs it into a BLOB column.
+ *   Run lobselect.js to query the inserted data.
  *
  *   "Small" amounts of data can be bound directly for INSERT into LOB
  *   columns.  Larger amounts should be streamed, see lobinssert2.js.
@@ -35,87 +36,62 @@
  *
  *   This example requires node-oracledb 1.12 or later.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var fs = require('fs');
-var async = require('async');
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const fs = require('fs');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
 oracledb.autoCommit = true;  // for ease of demonstration only
 
-var clobInFileName = 'clobexample.txt';    // the file with text to be inserted into the database
-var blobInFileName = 'fuzzydinosaur.jpg';  // contains the image to be inserted into the database
+const clobInFileName = 'clobexample.txt';    // the file with text to be inserted into the database
+const blobInFileName = 'fuzzydinosaur.jpg';  // contains the image to be inserted into the database
 
-var doconnect = function(cb) {
-  oracledb.getConnection(
-    {
-      user          : dbConfig.user,
-      password      : dbConfig.password,
-      connectString : dbConfig.connectString
-    },
-    cb);
-};
+async function run() {
 
-var dorelease = function(conn) {
-  conn.close(function (err) {
-    if (err)
-      console.error(err.message);
-  });
-};
+  let connection;
 
-var docleanup = function (conn, cb) {
-  conn.execute(
-    'DELETE FROM mylobs',
-    function(err) {
-      return cb(err, conn);
-    });
-};
+  try {
+    connection = await oracledb.getConnection(dbConfig);
 
-var doclobinsert = function(conn, cb) {
-  var str = fs.readFileSync(clobInFileName, 'utf8');
-  conn.execute(
-    "INSERT INTO mylobs (id, c) VALUES (:id, :c)",
-    { id: 1, c: str },
-    function(err, result) {
-      if (err) {
-        return cb(err, conn);
-      }
-      if (result.rowsAffected != 1) {
-        return cb(new Error('Error inserting CLOB'), conn);
-      }
+    let result;
+
+    // Clean up the table
+    await connection.execute(`DELETE FROM mylobs`);
+
+    // Insert a CLOB
+    const str = fs.readFileSync(clobInFileName, 'utf8');
+    result = await connection.execute(
+      `INSERT INTO mylobs (id, c) VALUES (:id, :c)`,
+      { id: 1, c: str });
+    if (result.rowsAffected != 1)
+      throw new Error('CLOB was not inserted');
+    else
       console.log('CLOB inserted from ' + clobInFileName);
-      return cb(null, conn);
-    });
-};
 
-var doblobinsert = function(conn, cb) {
-  var buf = fs.readFileSync(blobInFileName);
-  conn.execute(
-    "INSERT INTO mylobs (id, b) VALUES (:id, :b)",
-    { id: 2, b: buf },
-    function(err, result) {
-      if (err) {
-        return cb(err, conn);
-      }
-      if (result.rowsAffected != 1) {
-        return cb(new Error('Error inserting BLOB'), conn);
-      }
+    // Insert a BLOB
+    const buf = fs.readFileSync(blobInFileName);
+    result = await connection.execute(
+      `INSERT INTO mylobs (id, b) VALUES (:id, :b)`,
+      { id: 2, b: buf });
+    if (result.rowsAffected != 1)
+      throw new Error('BLOB was not inserted');
+    else
       console.log('BLOB inserted from ' + blobInFileName);
-      return cb(null, conn);
-    });
-};
 
-// Main routine
-// Connect and call the CLOB and BLOB insertion examples
-async.waterfall([
-  doconnect,
-  docleanup,
-  doclobinsert,
-  doblobinsert
-],
-function (err, conn) {
-  if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-  if (conn)
-    dorelease(conn);
-});
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+}
+
+run();

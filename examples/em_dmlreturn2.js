@@ -27,11 +27,10 @@
  *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
 const truncateSql = "TRUNCATE TABLE em_tab";
-
 const insertSql = "INSERT INTO em_tab VALUES (:1, :2)";
 
 const insertData = [
@@ -69,17 +68,16 @@ const deleteOptions = {
 };
 
 async function run() {
-  let conn;
-  let result;
+  let connection;
 
   try {
-    conn = await oracledb.getConnection(dbConfig);
+    connection = await oracledb.getConnection(dbConfig);
 
-    await conn.execute(truncateSql);
+    await connection.execute(truncateSql);
 
-    await conn.executeMany(insertSql, insertData, insertOptions);
+    await connection.executeMany(insertSql, insertData, insertOptions);
 
-    result = await conn.executeMany(deleteSql, deleteData, deleteOptions);
+    const result = await connection.executeMany(deleteSql, deleteData, deleteOptions);
 
     console.log("rowsAffected is:", result.rowsAffected);
     console.log("Out binds:");
@@ -90,9 +88,9 @@ async function run() {
   } catch (err) {
     console.error(err);
   } finally {
-    if (conn) {
+    if (connection) {
       try {
-        await conn.close();
+        await connection.close();
       } catch (err) {
         console.error(err);
       }

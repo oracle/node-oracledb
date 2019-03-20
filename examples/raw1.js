@@ -27,61 +27,44 @@
  *
  *   This example requires node-oracledb 1.2 or later.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
-var async = require('async');
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
-var data = [0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x4f, 0x72, 0x61, 0x63, 0x6c, 0x65, 0x21];
-var buf;
-if (Number(process.version.match(/^v(\d+\.\d+)/)[1]) < 4)
-  buf = new Buffer(data, 'hex');  // deprecated usage
-else
-  buf = Buffer.from(data);
+async function run() {
 
-var insertRaw = function (conn, cb) {
-  conn.execute(
-    "INSERT INTO myraw VALUES (:r)",
-    { r : { val: buf, type: oracledb.BUFFER, dir:oracledb.BIND_IN }},
-    function(err, result) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        console.log(result.rowsAffected + " row(s) inserted.");
-        return cb(null, conn);
+  let connection;
+
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+
+    const data = [0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x4f, 0x72, 0x61, 0x63, 0x6c, 0x65, 0x21];
+    const inBuf = Buffer.from(data);
+    let result = await connection.execute(
+      `INSERT INTO myraw VALUES (:r)`,
+      { r : { val: inBuf, type: oracledb.BUFFER, dir:oracledb.BIND_IN }});
+    console.log(result.rowsAffected + " row(s) inserted.");
+
+    result = await connection.execute(`SELECT r FROM myraw`);
+    const outBuf = result.rows[0];
+    console.log("Buffer queried:");
+    console.log(outBuf);
+    console.log(outBuf.toString('utf8'));
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
       }
-    });
-};
+    }
+  }
+}
 
-var queryRaw = function (conn, cb) {
-  conn.execute(
-    "SELECT r FROM myraw",
-    function (err, result) {
-      if (err) {
-        return cb(err, conn);
-      } else {
-        var buf = result.rows[0];
-        console.log("Buffer queried:");
-        console.log(buf);
-        console.log(buf.toString('utf8'));
-        return cb(null, conn);
-      }
-    });
-};
-
-// Insert and query the RAW data
-async.waterfall(
-  [
-    function(cb) {
-      oracledb.getConnection(dbConfig, cb);
-    },
-    insertRaw,
-    queryRaw
-  ],
-  function (err, conn) {
-    if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-    if (conn)
-      conn.close(function (err) { if (err) console.error(err.message); });
-  });
-
+run();

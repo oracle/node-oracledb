@@ -36,8 +36,8 @@
 
 'use strict';
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
 
 async function run() {
 
@@ -52,7 +52,7 @@ async function run() {
       connectString: dbConfig.connectString
     });
 
-    let result = await connection.execute(
+    const result = await connection.execute(
       // The statement to execute
       `SELECT department_id, department_name
        FROM departments
