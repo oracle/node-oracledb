@@ -19,8 +19,7 @@
  *   webappawait.js
  *
  * DESCRIPTION
- *   Shows a web based query using connections from connection pool. This is
- *   similar to webapp.js but uses Node 8's async/await syntax.
+ *   Shows a web based query using connections from connection pool.
  *
  *   This displays a table of employees in the specified department.
  *
@@ -36,6 +35,8 @@
  *   can be found at: https://github.com/oracle/db-sample-schemas
  *
  *   This example requires node-oracledb 3 or later.
+ *
+ *   This example uses Node 8's async/await syntax.
  *
  *****************************************************************************/
 
