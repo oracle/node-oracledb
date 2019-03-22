@@ -265,7 +265,7 @@ Overview of node-oracledb functional tests
         12.3.11 Negative - set the 1st parameter of getRows() to be -5
         12.3.12 Negative - set the 1st parameter of getRows() to be null
     12.4 Testing function getRow()
-        12.4.1 works well with all correct setting (39ms)
+        12.4.1 works well with all correct setting
         12.4.2 data in resultSet is array when setting outFormat ARRAY
         12.4.3 data in resultSet is object when setting outFormat OBJECT
         12.4.4 query 0 row
@@ -2027,7 +2027,7 @@ Overview of node-oracledb functional tests
         88.1.3 works with small value
         88.1.4 works with (64K - 1) value
         88.1.5 works with (64K + 1) value
-        88.1.6 works with (1MB + 1) value (121ms)
+        88.1.6 works with (1MB + 1) value
         88.1.7 works with dbms_lob.substr()
         88.1.8 works with EMPTY_BLOB()
         88.1.9 fetch multiple BLOB rows as Buffer
@@ -4398,6 +4398,7 @@ Overview of node-oracledb functional tests
         184.4.9 Close connection from pool with {drop: 0}
         184.4.10 Close connection from pool with empty dict
         184.4.11 Close connection from pool with {drop: random string}
+
 185. cqn.js
     185.1 Positive Cases
         185.1.1 Register simple callback and unsubscribe
@@ -4418,8 +4419,10 @@ Overview of node-oracledb functional tests
     185.2 Negative Cases
         185.2.1 Does not throw error when trying to unsubscribe twice
         185.2.2 Throw error ORA-29972 if CHANGE NOTIFICATION is revoked from the user
+
 186. instanceof2.js
     186.1 instanceof checks for SODA classes
+
 187. plsqlBindList.js
     187.1 Positive Cases
         187.1.1 Bind Object of List by position with type specified
@@ -4439,26 +4442,26 @@ Overview of node-oracledb functional tests
         187.2.8 Bind STRING List by position while required type is NUMBER
         187.2.9 Bind NUMBER List by name while required type is STRING
         187.2.10 Bind NUMBER List by position while required type is STRING
+
 188. fetchRowidAsString.js
-    188.1 Normal Use Cases
-        188.1.1 Fetch RAW by default should be oracledb.BUFFER type
-        188.1.2 Fetch RAW as string by defining fetchAsString
-        188.1.3 Fetch RAW as string by defining fetchInfo
-        188.1.4 Fetch number converted RAW as string
-        188.1.5 Fetch binary double converted RAW as string
-        188.1.6 Fetch binary float converted RAW as string
-        188.1.7 Fetch binary integer converted RAW as string
-        188.1.8 Insert a string of maximum lenght of RAW then fetch it as string
-        188.1.9 Insert a string exceeds maximum lenght of RAW
-        188.1.10 Insert null to RAW column then fetch it as string
-    188.2 Boundary Cases
-        188.2.1 Creating table specifing length greater than RAW max limit
+    188.1 Fetch RAW by default should be oracledb.BUFFER type
+    188.2 Fetch RAW as string by defining fetchAsString
+    188.3 Fetch RAW as string by defining fetchInfo
+    188.4 Fetch number converted RAW as string
+    188.5 Fetch binary double converted RAW as string
+    188.6 Fetch binary float converted RAW as string
+    188.7 Fetch binary integer converted RAW as string
+    188.8 Insert a string of maximum lenght of RAW then fetch it as string
+    188.9 Insert a string exceeds maximum lenght of RAW
+    188.10 Insert null to RAW column then fetch it as string
+
 189. writableProperties2.js
     189.1 Allows overwriting of public methods on SodaDatabase instance
     189.2 Allows overwriting of public methods on SodaDocument instance
     189.3 Allows overwriting of public methods on SodaCollection instance
     189.4 Allows overwriting of public methods on SodaOperation instance
     189.5 Allows overwriting of public methods on SodaDocCursor instance
+
 190. fetchBinaryTypesAsString.js
     190.1 Fetch binary double
         190.1.1 Fetch binary double should return JS number
