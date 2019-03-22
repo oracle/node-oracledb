@@ -28,7 +28,6 @@
  *   For a connection pool example see connectionpool.js
  *   For a ResultSet example see resultset2.js
  *   For a query stream example see selectstream.js
- *   For a Promise example see promises.js
  *
  *   This example uses Node 8's async/await syntax.
  *

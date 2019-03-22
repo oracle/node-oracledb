@@ -78,7 +78,7 @@ insert2.js                  | Basic example showing auto commit behavior
 lobbinds.js                 | Demonstrates how to bind and query LOBs
 lobinsert1.js               | Shows inserting a file into a CLOB column
 lobinsert2.js               | Inserts text into a CLOB column using the RETURNING INTO method.
-lobinserttemp.js            | Streams data into a Temporary CLOB and then inserts the CLOB
+lobinserttemp.js            | Writes data to a Temporary CLOB and then inserts it into the database
 lobplsqltemp.js             | Streams data into a Temporary CLOB and then passes it to PL/SQL
 lobselect.js                | Shows basic, non-streaming CLOB and BLOB queries
 lobstream1.js               | Shows how to stream LOBs to files
