@@ -24,7 +24,6 @@
  *   For a connection pool example see connectionpool.js
  *   For a ResultSet example see resultset2.js
  *   For a query stream example see selectstream.js
- *   For a Promise example see promises.js
  *   For a callback example see select1.js
  *
  *   This example requires node-oracledb 2.2 or later.

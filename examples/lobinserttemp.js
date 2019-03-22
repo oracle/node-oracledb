@@ -19,7 +19,7 @@
  *   lobinserttemp.js
  *
  * DESCRIPTION
- *   Creates a 'temporary CLOB', streams data into it from clobexample.txt, and
+ *   Creates a 'temporary CLOB', loads clobexample.txt into it, and
  *   then INSERTs it into a CLOB column.
  *
  *   You may prefer the method shown in lobinsert2.js, which inserts
@@ -30,137 +30,82 @@
  *
  *   This example requires node-oracledb 1.12 or later.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
 var fs = require('fs');
-var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
 var inFileName = 'clobexample.txt';  // the file with text to be inserted into the database
 
-var doconnect = function(cb) {
-  oracledb.getConnection(
-    {
-      user          : dbConfig.user,
-      password      : dbConfig.password,
-      connectString : dbConfig.connectString
-    },
-    cb);
-};
+async function run() {
 
-var dorelease = function(conn) {
-  conn.close(function (err) {
-    if (err)
-      console.error(err.message);
-  });
-};
+  let connection;
 
-// Cleanup anything other than lobinsert1.js demo data
-var docleanup = function (conn, cb) {
-  conn.execute(
-    'DELETE FROM mylobs WHERE id > 2',
-    function(err) {
-      return cb(err, conn);
-    });
-};
+  try {
+    connection = await oracledb.getConnection(dbConfig);
 
-var docreatetemplob = function (conn, cb) {
-  conn.createLob(oracledb.CLOB, function(err, templob) {
-    if (err) {
-      return cb(err);
+    // Cleanup anything other than lobinsert1.js demo data
+    await connection.execute(`DELETE FROM mylobs WHERE id > 2`);
+
+    // Write into a temporary LOB.
+    // An alternative would be to stream into it.
+    let tempLob = await connection.createLob(oracledb.CLOB);
+    const data = fs.readFileSync(inFileName, 'utf8');
+    tempLob.write(data);
+    tempLob.write("That's all!");
+    await tempLob.end();  //  indicate the app has no more data to insert
+
+    const doInsert = new Promise(function(resolve, reject) {
+
+      // The 'finish' event is emitted when node-oracledb has
+      // processed all data for the Temporary LOB
+      tempLob.on('finish', async () => {
+        try {
+          console.log('Inserting the temporary LOB into the database');
+          const result = await connection.execute(
+            `INSERT INTO mylobs (id, c) VALUES (:idbv, :lobbv)`,
+            {
+              idbv: 3,
+              lobbv: tempLob
+            },
+            {
+              autoCommit: true
+            });
+          console.log("Rows inserted: " + result.rowsAffected);
+
+        } catch (err) {
+          reject(err);
+        } finally {
+          if (tempLob) {
+            try {
+              // Applications should close LOBs that were created using createLob()
+              console.log('Closing the temporary LOB');
+              await tempLob.close();
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
+          }
+        }
+      }); // end 'finish'
+    });   // end Promise
+
+    await doInsert;
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
+      }
     }
-    console.log("Temporary LOB created with createLob()");
-    return cb(null, conn, templob);
-  });
-};
+  }
+}
 
-var doloadtemplob = function (conn, templob, cb) {
-  console.log('Streaming from the text file into the temporary LOB');
-
-  var errorHandled = false;
-
-  templob.on(
-    'close',
-    function() {
-      console.log("templob.on 'close' event");
-    });
-
-  templob.on(
-    'error',
-    function(err) {
-      console.log("templob.on 'error' event");
-      if (!errorHandled) {
-        errorHandled = true;
-        return cb(err);
-      }
-    });
-
-  templob.on(
-    'finish',
-    function() {
-      console.log("templob.on 'finish' event");
-      // The data was loaded into the temporary LOB
-      if (!errorHandled) {
-        return cb(null, conn, templob);
-      }
-    });
-
-  console.log('Reading from ' + inFileName);
-  var inStream = fs.createReadStream(inFileName);
-  inStream.on(
-    'error',
-    function(err) {
-      console.log("inStream.on 'error' event");
-      if (!errorHandled) {
-        errorHandled = true;
-        return cb(err);
-      }
-    });
-
-  inStream.pipe(templob);  // copies the text to the temporary LOB
-};
-
-var doinsert = function (conn, templob, cb) {
-  console.log('Inserting the temporary LOB into the database');
-  conn.execute(
-    "INSERT INTO mylobs (id, c) VALUES (:idbv, :lobbv)",
-    { idbv: 3,
-      lobbv: templob }, // type and direction are optional for IN binds
-    { autoCommit: true },
-    function(err, result) {
-      if (err) {
-        return cb(err);
-      }
-      console.log("Rows inserted: " + result.rowsAffected);
-      return cb(null, conn, templob);
-    });
-};
-
-// Applications should close LOBs that were created using createLob()
-var doclosetemplob = function (conn, templob, cb) {
-  console.log('Closing the temporary LOB');
-  templob.close(function (err) {
-    if (err)
-      return cb(err);
-    else
-      return cb(null, conn);
-  });
-};
-
-async.waterfall(
-  [
-    doconnect,
-    docleanup,
-    docreatetemplob,
-    doloadtemplob,
-    doinsert,
-    doclosetemplob
-  ],
-  function (err, conn) {
-    if (err) {
-      console.error("In waterfall error cb: ==>", err, "<==");
-    }
-    if (conn)
-      dorelease(conn);
-  });
+run();
