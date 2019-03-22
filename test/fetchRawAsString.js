@@ -76,6 +76,38 @@ describe('188. fetchRowidAsString.js', function() {
   before(async function() {
     try {
       conn = await oracledb.getConnection(dbConfig);
+      const sqlCreateTable = `BEGIN \n` +
+        `  DECLARE \n` +
+        `    e_table_missing EXCEPTION; \n` +
+        `    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n` +
+        `    BEGIN \n` +
+        `      EXECUTE IMMEDIATE ('DROP TABLE ${tableName} PURGE' ); \n` +
+        `    EXCEPTION \n` +
+        `      WHEN e_table_missing \n` +
+        `      THEN NULL; \n` +
+        `    END; \n` +
+        `    EXECUTE IMMEDIATE ( ' \n` +
+        `      CREATE TABLE ${tableName} ( \n` +
+        `        raw_content    RAW(${rawMaxLength})  NULL, \n` +
+        `        content_type   VARCHAR(20) \n` +
+        `      ) \n` +
+        `    '); \n` +
+        `END;  `;
+      await conn.execute(sqlCreateTable);
+
+      let sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_to_raw('${rawContentString}'), 'string')`;
+      await conn.execute(sql);
+      sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_from_number(${rawContentNumber}), 'number')`;
+      await conn.execute(sql);
+      sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_from_binary_double(${rawContentFloat}), 'binary_double')`;
+      await conn.execute(sql);
+      sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_from_binary_float(${rawContentFloat}), 'binary_float')`;
+      await conn.execute(sql);
+      sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_from_binary_integer(${rawContentNumber}), 'binary_integer')`;
+      await conn.execute(sql);
+      sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_to_raw('${rawMaxLengthString}'), 'max_length_string')`;
+      await conn.execute(sql);
+      await conn.commit();
     } catch (err) {
       should.not.exist(err);
     }
@@ -105,219 +137,146 @@ describe('188. fetchRowidAsString.js', function() {
     oracledb.fetchAsString = [];
   });
 
-  describe("188.1 Normal Use Cases", function() {
-
-    before(async function() {
-      try {
-        const sqlCreateTable = `BEGIN \n` +
-          `  DECLARE \n` +
-          `    e_table_missing EXCEPTION; \n` +
-          `    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n` +
-          `    BEGIN \n` +
-          `      EXECUTE IMMEDIATE ('DROP TABLE ${tableName} PURGE' ); \n` +
-          `    EXCEPTION \n` +
-          `      WHEN e_table_missing \n` +
-          `      THEN NULL; \n` +
-          `    END; \n` +
-          `    EXECUTE IMMEDIATE ( ' \n` +
-          `      CREATE TABLE ${tableName} ( \n` +
-          `        raw_content    RAW(${rawMaxLength})  NULL, \n` +
-          `        content_type   VARCHAR(20) \n` +
-          `      ) \n` +
-          `    '); \n` +
-          `END;  `;
-        await conn.execute(sqlCreateTable);
-
-        let sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_to_raw('${rawContentString}'), 'string')`;
-        await conn.execute(sql);
-        sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_from_number(${rawContentNumber}), 'number')`;
-        await conn.execute(sql);
-        sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_from_binary_double(${rawContentFloat}), 'binary_double')`;
-        await conn.execute(sql);
-        sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_from_binary_float(${rawContentFloat}), 'binary_float')`;
-        await conn.execute(sql);
-        sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_from_binary_integer(${rawContentNumber}), 'binary_integer')`;
-        await conn.execute(sql);
-        sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_to_raw('${rawMaxLengthString}'), 'max_length_string')`;
-        await conn.execute(sql);
-        await conn.commit();
-      } catch (err) {
-        should.not.exist(err);
-      }
-    });
-
-    it("188.1.1 Fetch RAW by default should be oracledb.BUFFER type", async function() {
-      try {
-        let res = await conn.execute(`select raw_content from ${tableName} where content_type='string'`);
-        should.exist(res.rows);
-        should.strictEqual(res.rows.length, 1);
-        let fetchedContent = res.rows[0][0];
-        fetchedContent.should.be.type("object");
-        should.strictEqual(fetchedContent.toString("hex"), Buffer.from(rawContentString).toString("hex"));
-      } catch (err) {
-        should.not.exist(err);
-      }
-    });
-
-    it("188.1.2 Fetch RAW as string by defining fetchAsString", async function() {
-      try {
-        oracledb.fetchAsString = [oracledb.BUFFER];
-        let res = await conn.execute(`select raw_content from ${tableName} where content_type='string'`);
-        should.exist(res.rows);
-        should.strictEqual(res.rows.length, 1);
-        let fetchedContent = res.rows[0][0];
-        fetchedContent.should.be.type("string");
-        should.strictEqual(fetchedContent.toLowerCase(), Buffer.from(rawContentString).toString("hex"));
-      } catch (err) {
-        should.not.exist(err);
-      }
-    });
-
-    it("188.1.3 Fetch RAW as string by defining fetchInfo", async function() {
-      try {
-        oracledb.fetchAsString = [];
-        let res = await conn.execute(
-          `select raw_content from ${tableName} where content_type='string'`, [],
-          { fetchInfo: {"RAW_CONTENT": {type: oracledb.STRING}} }
-        );
-        should.exist(res.rows);
-        should.strictEqual(res.rows.length, 1);
-        let fetchedContent = res.rows[0][0];
-        fetchedContent.should.be.type("string");
-        should.strictEqual(fetchedContent.toLowerCase(), Buffer.from(rawContentString).toString("hex"));
-      } catch (err) {
-        should.not.exist(err);
-      }
-    });
-
-    it("188.1.4 Fetch number converted RAW as string", async function() {
-      try {
-        oracledb.fetchAsString = [oracledb.BUFFER];
-        let res = await conn.execute(`select raw_content from ${tableName} where content_type='number'`);
-        should.exist(res.rows);
-        should.strictEqual(res.rows.length, 1);
-        let fetchedContent = res.rows[0][0];
-        fetchedContent.should.be.type("string");
-        should.strictEqual(fetchedContent.toLowerCase(), getHex(rawContentNumber, "number"));
-      } catch (err) {
-        should.not.exist(err);
-      }
-    });
-
-    it("188.1.5 Fetch binary double converted RAW as string", async function() {
-      try {
-        oracledb.fetchAsString = [oracledb.BUFFER];
-        let res = await conn.execute(`select raw_content from ${tableName} where content_type='binary_double'`);
-        should.exist(res.rows);
-        should.strictEqual(res.rows.length, 1);
-        let fetchedContent = res.rows[0][0];
-        fetchedContent.should.be.type("string");
-        should.strictEqual(fetchedContent.toLowerCase(), getHex(rawContentFloat, "double"));
-      } catch (err) {
-        should.not.exist(err);
-      }
-    });
-
-    it("188.1.6 Fetch binary float converted RAW as string", async function() {
-      try {
-        oracledb.fetchAsString = [oracledb.BUFFER];
-        let res = await conn.execute(`select raw_content from ${tableName} where content_type='binary_float'`);
-        should.exist(res.rows);
-        should.strictEqual(res.rows.length, 1);
-        let fetchedContent = res.rows[0][0];
-        fetchedContent.should.be.type("string");
-        should.strictEqual(fetchedContent.toLowerCase(), getHex(rawContentFloat, "float"));
-      } catch (err) {
-        should.not.exist(err);
-      }
-    });
-
-    it("188.1.7 Fetch binary integer converted RAW as string", async function() {
-      try {
-        oracledb.fetchAsString = [oracledb.BUFFER];
-        let res = await conn.execute(`select raw_content from ${tableName} where content_type='binary_integer'`);
-        should.exist(res.rows);
-        should.strictEqual(res.rows.length, 1);
-        let fetchedContent = res.rows[0][0];
-        fetchedContent.should.be.type("string");
-        should.strictEqual(fetchedContent.toLowerCase(), getHex(rawContentNumber, "integer"));
-      } catch (err) {
-        should.not.exist(err);
-      }
-    });
-
-    it("188.1.8 Insert a string of maximum lenght of RAW then fetch it as string", async function() {
-      try {
-        oracledb.fetchAsString = [oracledb.BUFFER];
-        let res = await conn.execute(`select raw_content from ${tableName} where content_type='max_length_string'`);
-        should.exist(res.rows);
-        should.strictEqual(res.rows.length, 1);
-        let fetchedContent = res.rows[0][0];
-        fetchedContent.should.be.type("string");
-        should.strictEqual(fetchedContent.toLowerCase(), Buffer.from(rawMaxLengthString).toString("hex"));
-      } catch (err) {
-        should.not.exist(err);
-      }
-    });
-
-    it("188.1.9 Insert a string exceeds maximum lenght of RAW", async function() {
-      try {
-        let contentString = random.getRandomLengthString(rawMaxLength+1);
-        const sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_to_raw('${contentString}'), 'string')`;
-        await testUtil.assertThrowsAsync(async () => {
-          await conn.execute(sql);
-          await conn.commit();
-        }, /ORA-12899:/); // ORA-12899: value too large for column "HR"."NODB_RAWTOSTRING"."RAW_CONTENT" (actual: 21, maximum: 20)
-      } catch (err) {
-        should.not.exist(err);
-      }
-    });
-
-    it("188.1.10 Insert null to RAW column then fetch it as string", async function() {
-      try {
-        const sql = `INSERT INTO ${tableName} VALUES(null, 'null')`;
-        await conn.execute(sql);
-        await conn.commit();
-        oracledb.fetchAsString = [oracledb.BUFFER];
-        let res = await conn.execute(`select raw_content from ${tableName} where content_type='null'`);
-        should.exist(res.rows);
-        should.strictEqual(res.rows.length, 1);
-        should.strictEqual(res.rows[0][0], null);
-      } catch (err) {
-        should.not.exist(err);
-      }
-    });
+  it("188.1 Fetch RAW by default should be oracledb.BUFFER type", async function() {
+    try {
+      let res = await conn.execute(`select raw_content from ${tableName} where content_type='string'`);
+      should.exist(res.rows);
+      should.strictEqual(res.rows.length, 1);
+      let fetchedContent = res.rows[0][0];
+      fetchedContent.should.be.type("object");
+      should.strictEqual(fetchedContent.toString("hex"), Buffer.from(rawContentString).toString("hex"));
+    } catch (err) {
+      should.not.exist(err);
+    }
   });
 
-  describe("188.2 Boundary Cases", function() {
+  it("188.2 Fetch RAW as string by defining fetchAsString", async function() {
+    try {
+      oracledb.fetchAsString = [oracledb.BUFFER];
+      let res = await conn.execute(`select raw_content from ${tableName} where content_type='string'`);
+      should.exist(res.rows);
+      should.strictEqual(res.rows.length, 1);
+      let fetchedContent = res.rows[0][0];
+      fetchedContent.should.be.type("string");
+      should.strictEqual(fetchedContent.toLowerCase(), Buffer.from(rawContentString).toString("hex"));
+    } catch (err) {
+      should.not.exist(err);
+    }
+  });
 
-    it("188.2.1 Creating table specifing length greater than RAW max limit", async function() {
-      try {
-        const sql_create_table = `BEGIN \n` +
-          `  DECLARE \n` +
-          `    e_table_missing EXCEPTION; \n` +
-          `    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n` +
-          `    BEGIN \n` +
-          `      EXECUTE IMMEDIATE ('DROP TABLE ${tableName} PURGE' ); \n` +
-          `    EXCEPTION \n` +
-          `      WHEN e_table_missing \n` +
-          `      THEN NULL; \n` +
-          `    END; \n` +
-          `    EXECUTE IMMEDIATE ( ' \n` +
-          `      CREATE TABLE ${tableName} ( \n` +
-          `        raw_content    RAW(2001), \n` +
-          `        content_type   VARCHAR(20) \n` +
-          `      ) \n` +
-          `    '); \n` +
-          `END;  `;
-        await testUtil.assertThrowsAsync(async () => {
-          await conn.execute(sql_create_table);
-        }, /ORA-00910:/); // ORA-00910: specified length too long for its datatype
-      } catch (err) {
-        should.not.exist(err);
-      }
-    });
+  it("188.3 Fetch RAW as string by defining fetchInfo", async function() {
+    try {
+      oracledb.fetchAsString = [];
+      let res = await conn.execute(
+        `select raw_content from ${tableName} where content_type='string'`, [],
+        { fetchInfo: {"RAW_CONTENT": {type: oracledb.STRING}} }
+      );
+      should.exist(res.rows);
+      should.strictEqual(res.rows.length, 1);
+      let fetchedContent = res.rows[0][0];
+      fetchedContent.should.be.type("string");
+      should.strictEqual(fetchedContent.toLowerCase(), Buffer.from(rawContentString).toString("hex"));
+    } catch (err) {
+      should.not.exist(err);
+    }
+  });
 
+  it("188.4 Fetch number converted RAW as string", async function() {
+    try {
+      oracledb.fetchAsString = [oracledb.BUFFER];
+      let res = await conn.execute(`select raw_content from ${tableName} where content_type='number'`);
+      should.exist(res.rows);
+      should.strictEqual(res.rows.length, 1);
+      let fetchedContent = res.rows[0][0];
+      fetchedContent.should.be.type("string");
+      should.strictEqual(fetchedContent.toLowerCase(), getHex(rawContentNumber, "number"));
+    } catch (err) {
+      should.not.exist(err);
+    }
+  });
+
+  it("188.5 Fetch binary double converted RAW as string", async function() {
+    try {
+      oracledb.fetchAsString = [oracledb.BUFFER];
+      let res = await conn.execute(`select raw_content from ${tableName} where content_type='binary_double'`);
+      should.exist(res.rows);
+      should.strictEqual(res.rows.length, 1);
+      let fetchedContent = res.rows[0][0];
+      fetchedContent.should.be.type("string");
+      should.strictEqual(fetchedContent.toLowerCase(), getHex(rawContentFloat, "double"));
+    } catch (err) {
+      should.not.exist(err);
+    }
+  });
+
+  it("188.6 Fetch binary float converted RAW as string", async function() {
+    try {
+      oracledb.fetchAsString = [oracledb.BUFFER];
+      let res = await conn.execute(`select raw_content from ${tableName} where content_type='binary_float'`);
+      should.exist(res.rows);
+      should.strictEqual(res.rows.length, 1);
+      let fetchedContent = res.rows[0][0];
+      fetchedContent.should.be.type("string");
+      should.strictEqual(fetchedContent.toLowerCase(), getHex(rawContentFloat, "float"));
+    } catch (err) {
+      should.not.exist(err);
+    }
+  });
+
+  it("188.7 Fetch binary integer converted RAW as string", async function() {
+    try {
+      oracledb.fetchAsString = [oracledb.BUFFER];
+      let res = await conn.execute(`select raw_content from ${tableName} where content_type='binary_integer'`);
+      should.exist(res.rows);
+      should.strictEqual(res.rows.length, 1);
+      let fetchedContent = res.rows[0][0];
+      fetchedContent.should.be.type("string");
+      should.strictEqual(fetchedContent.toLowerCase(), getHex(rawContentNumber, "integer"));
+    } catch (err) {
+      should.not.exist(err);
+    }
+  });
+
+  it("188.8 Insert a string of maximum lenght of RAW then fetch it as string", async function() {
+    try {
+      oracledb.fetchAsString = [oracledb.BUFFER];
+      let res = await conn.execute(`select raw_content from ${tableName} where content_type='max_length_string'`);
+      should.exist(res.rows);
+      should.strictEqual(res.rows.length, 1);
+      let fetchedContent = res.rows[0][0];
+      fetchedContent.should.be.type("string");
+      should.strictEqual(fetchedContent.toLowerCase(), Buffer.from(rawMaxLengthString).toString("hex"));
+    } catch (err) {
+      should.not.exist(err);
+    }
+  });
+
+  it("188.9 Insert a string exceeds maximum lenght of RAW", async function() {
+    try {
+      let contentString = random.getRandomLengthString(rawMaxLength+1);
+      const sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_to_raw('${contentString}'), 'string')`;
+      await testUtil.assertThrowsAsync(async () => {
+        await conn.execute(sql);
+        await conn.commit();
+      }, /ORA-12899:/); // ORA-12899: value too large for column "HR"."NODB_RAWTOSTRING"."RAW_CONTENT" (actual: 21, maximum: 20)
+    } catch (err) {
+      should.not.exist(err);
+    }
+  });
+
+  it("188.10 Insert null to RAW column then fetch it as string", async function() {
+    try {
+      const sql = `INSERT INTO ${tableName} VALUES(null, 'null')`;
+      await conn.execute(sql);
+      await conn.commit();
+      oracledb.fetchAsString = [oracledb.BUFFER];
+      let res = await conn.execute(`select raw_content from ${tableName} where content_type='null'`);
+      should.exist(res.rows);
+      should.strictEqual(res.rows.length, 1);
+      should.strictEqual(res.rows[0][0], null);
+    } catch (err) {
+      should.not.exist(err);
+    }
   });
 
 });
