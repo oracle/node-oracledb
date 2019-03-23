@@ -617,10 +617,17 @@ PL/SQL: Statement ignored
 Number offset
 ```
 
-The character offset into the SQL text that resulted in the Oracle
-error.  The value may be `0` in non-SQL contexts.  This value is
-undefined for non-Oracle errors and for messages prefixed with NJS or
-DPI.
+Generally `offset` is the character offset into the SQL text that
+resulted in the Oracle error.  The value may be `0` in non-SQL
+contexts.  This value is undefined for non-Oracle errors and for
+messages prefixed with NJS or DPI.
+
+When [`batchErrors`](#executemanyoptbatcherrors) mode in
+[`executeMany()`](#executemany) returns an array of Error objects in
+the callback result parameter, each `offset` property is a 0-based
+index corresponding to the `executeMany()` [binds
+parameter](#executemanybinds) array, indicating which record could not
+be processed. See [Handling Data Errors](#handlingbatcherrors).
 
 ## <a name="oracledbclass"></a> 3. Oracledb Class
 
