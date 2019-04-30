@@ -261,14 +261,16 @@ limitations under the License.
                     - 8.2.4.1.2.6 [`replaceOne()`](#sodaoperationclassreplaceone)
                     - 8.2.4.1.2.7 [`replaceOneAndGet()`](#sodaoperationclassreplaceoneandget)
         - 8.2.5 [`getDataGuide()`](#sodacollgetdataguide)
-        - 8.2.6 [`insertOne()`](#sodacollinsertone)
-            - 8.2.6.1 [`insertOne()`: Parameters](#sodacollinsertoneparams)
-                - 8.2.6.1.1 [`newDocumentContent`](#sodacollinsertoneparamsdoc), [`newDocument`](#sodacollinsertoneparamsdoc)
-            - 8.2.6.2 [`insertOne()`: Callback Function](#sodacollinsertonecb)
-        - 8.2.7 [`insertOneAndGet()`](#sodacollinsertoneandget)
-            - 8.2.7.1 [`insertOneAndGet()`: Parameters](#sodacollinsertoneandgetparams)
-                - 8.2.7.1.1 [`newDocumentContent`](#sodacollinsertoneandgetparamsdoc), [`newDocument`](#sodacollinsertoneandgetparamsdoc)
-            - 8.2.7.2 [`insertOneAndGet()`: Callback Function](#sodacollinsertoneandgetcb)
+        - 8.2.6 [`insertMany()`](#sodacollinsertmany)
+        - 8.2.7 [`insertManyAndGet()`](#sodacollinsertmanyandget)
+        - 8.2.8 [`insertOne()`](#sodacollinsertone)
+            - 8.2.8.1 [`insertOne()`: Parameters](#sodacollinsertoneparams)
+                - 8.2.8.1.1 [`newDocumentContent`](#sodacollinsertoneparamsdoc), [`newDocument`](#sodacollinsertoneparamsdoc)
+            - 8.2.8.2 [`insertOne()`: Callback Function](#sodacollinsertonecb)
+        - 8.2.9 [`insertOneAndGet()`](#sodacollinsertoneandget)
+            - 8.2.9.1 [`insertOneAndGet()`: Parameters](#sodacollinsertoneandgetparams)
+                - 8.2.9.1.1 [`newDocumentContent`](#sodacollinsertoneandgetparamsdoc), [`newDocument`](#sodacollinsertoneandgetparamsdoc)
+            - 8.2.9.2 [`insertOneAndGet()`: Callback Function](#sodacollinsertoneandgetcb)
 9. [SodaDatabase Class](#sodadatabaseclass)
     - 9.1 [SodaDatabase Methods](#sodadatabasemethods)
         - 9.1.1 [`createCollection()`](#sodadbcreatecollection)
@@ -5125,7 +5127,59 @@ This method was added in node-oracledb 3.0.
     *Error error* | If `getDataGuide()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
     *SodaDocument document* | The SodaDocument containining JSON content which can be accessed from the document as normal with [`sodaDocument.getContent()`](#sodadocgetcontent), [`sodaDocument.getContentAsString()`](#sodadocgetcontentasstring) or [`sodaDocument.getContentAsBuffer()`](#sodadocgetcontentasbuffer).
 
-#### <a name="sodacollinsertone"></a> 8.2.6 `sodaCollection.insertOne()`
+#### <a name="sodacollinsertmany"></a> 8.2.6 `sodaCollection.insertMany()`
+
+##### Prototype
+
+Callback:
+```
+insertMany(Array newDocumentArray, function(Error error){});
+```
+
+Promise:
+```
+promise = insertMany(Array newDocumentArray);
+```
+
+##### Description
+
+This is similar to [`insertOne()`](#sodacollinsertone) however it
+accepts an array of the Objects or SodaDocuments that `insertOne()`
+accepts.  When inserting multiple documents, using `insertMany()` is
+recommended in preference to `insertOne()`.
+
+If an error occurs, the offset attribute on the [Error
+objects](#errorobj) will contain the number of documents that were
+successfully inserted.  Subsequent documents in the input array will
+not be inserted.
+
+This method was added in node-oracledb 4.0.  It requires Oracle Client 18.5 or higher.
+
+#### <a name="sodacollinsertmanyandget"></a> 8.2.7 `sodaCollection.insertManyAndGet()`
+
+##### Prototype
+
+Callback
+```
+insertManyAndGet(Array newDocumentArray, function(Error error, Array SodaDocuments){});
+```
+
+Promise
+```
+promise = insertManyAndGet(Array newDocumentArray);
+```
+
+##### Description
+
+Similar to [sodaCollection.insertMany()](#sodacollinsertmany) but also
+returns an array of the inserted documents so system managed
+properties, such as the keys (in default collections), can be found.
+When inserting multiple documents, using `insertManyAndGet()` is
+recommended in preference to `insertOneAndGet()`.
+
+This method was added in node-oracledb 4.0.  It requires Oracle Client 18.5 or higher.
+
+#### <a name="sodacollinsertone"></a> 8.2.8 `sodaCollection.insertOne()`
 
 ##### Prototype
 
@@ -5178,9 +5232,9 @@ doc = sodaDatabase.createDocument(newDocumentContent);
 await sodaCollection.insertOne(doc);
 ```
 
-##### <a name="sodacollinsertoneparams"></a> 8.2.6.1 `insertOne()`: Parameters
+##### <a name="sodacollinsertoneparams"></a> 8.2.8.1 `insertOne()`: Parameters
 
-###### <a name="sodacollinsertoneparamsdoc"></a> 8.2.6.1.1 `newDocumentContent`,  `newDocument`
+###### <a name="sodacollinsertoneparamsdoc"></a> 8.2.8.1.1 `newDocumentContent`,  `newDocument`
 
 ```
 Object newDocumentContent
@@ -5201,7 +5255,7 @@ client-assigned keys.  Other components in the input SodaDocument,
 such as version and last-modified, will be ignored and auto-generated
 values will be used instead.
 
-##### <a name="sodacollinsertonecb"></a> 8.2.6.2 `insertOne()` Callback Function
+##### <a name="sodacollinsertonecb"></a> 8.2.8.2 `insertOne()` Callback Function
 
 ##### Prototype
 
@@ -5215,7 +5269,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `insertOne()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
 
-#### <a name="sodacollinsertoneandget"></a> 8.2.7 `sodaCollection.insertOneAndGet()`
+#### <a name="sodacollinsertoneandget"></a> 8.2.9 `sodaCollection.insertOneAndGet()`
 
 ##### Prototype
 
@@ -5255,9 +5309,9 @@ connection is committed.
 
 This method was added in node-oracledb 3.0.
 
-##### <a name="sodacollinsertoneandgetparams"></a> 8.2.7.1 `insertOneAndGet()`: Parameters
+##### <a name="sodacollinsertoneandgetparams"></a> 8.2.9.1 `insertOneAndGet()`: Parameters
 
-###### <a name="sodacollinsertoneandgetparamsdoc"></a> 8.2.7.1.1 `newDocumentContent`,  `newDocument`
+###### <a name="sodacollinsertoneandgetparamsdoc"></a> 8.2.9.1.1 `newDocumentContent`,  `newDocument`
 
 ```
 Object newDocumentContent
@@ -5268,7 +5322,7 @@ The document to insert.
 
 For related documentation, see [`sodaCollection.insertOne()`](#sodacollinsertoneparamsdoc)
 
-##### <a name="sodacollinsertoneandgetcb"></a> 8.2.7.2 `insertOneAndGet()` Callback Function
+##### <a name="sodacollinsertoneandgetcb"></a> 8.2.9.2 `insertOneAndGet()` Callback Function
 
 ##### Prototype
 
