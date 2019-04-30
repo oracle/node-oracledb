@@ -23,6 +23,9 @@
 - CQN support and message type constants were added for database
   startup and shutdown events.
 
+- Added SODA bulk insert methods `sodaCollection.insertMany()` and
+  `sodaCollection.insertManyAndGet()`.
+
 - Improved the performance of `oracledb.outFormat = oracledb.OBJECT`.
 
 - Updated the JavaScript syntax in class implementations.
