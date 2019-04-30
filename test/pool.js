@@ -732,7 +732,7 @@ describe('2. pool.js', function() {
                 setTimeout(function() {
                   pool.getConnection(function(err, conn) {
                     should.exist(err);
-                    (err.message).should.equal('NJS-040: connection request timeout');
+                    (err.message.startsWith("NJS-040:")).should.be.true();
 
                     should.not.exist(conn);
                     cb();
