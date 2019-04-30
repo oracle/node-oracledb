@@ -1002,6 +1002,7 @@ Overview of node-oracledb functional tests
     66.2 allows overwriting of public methods on connection instances
     66.3 allows overwriting of public methods on resultset instances
     66.4 allows overwriting of public methods on lob instances
+    66.5 allows overwriting of public methods on oracledb instances
 
 67. poolCache.js
     67.1 basic functional tests
