@@ -575,7 +575,8 @@ static napi_value njsSodaOperation_replaceOne(napi_env env,
         return NULL;
     }
     op = (njsSodaOperation*) baton->callingInstance;
-    if (!njsBaton_getSodaDocument(baton, op->coll->db, env, args[1])) {
+    if (!njsBaton_getSodaDocument(baton, op->coll->db, env, args[1],
+            &baton->dpiSodaDocHandle)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
@@ -649,7 +650,8 @@ static napi_value njsSodaOperation_replaceOneAndGet(napi_env env,
         return NULL;
     }
     op = (njsSodaOperation*) baton->callingInstance;
-    if (!njsBaton_getSodaDocument(baton, op->coll->db, env, args[1])) {
+    if (!njsBaton_getSodaDocument(baton, op->coll->db, env, args[1],
+            &baton->dpiSodaDocHandle)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }

@@ -680,7 +680,7 @@ bool njsBaton_getIntFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, int32_t *result, bool *found);
 uint32_t njsBaton_getNumOutBinds(njsBaton *baton);
 bool njsBaton_getSodaDocument(njsBaton *baton, njsSodaDatabase *db,
-        napi_env env, napi_value obj);
+        napi_env env, napi_value obj, dpiSodaDoc **handle);
 bool njsBaton_getStringFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, char **result,
         size_t *resultLength, bool *found);
