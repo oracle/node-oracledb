@@ -503,11 +503,11 @@ uint32_t njsBaton_getNumOutBinds(njsBaton *baton)
 //-----------------------------------------------------------------------------
 // njsBaton_getSodaDocument()
 //   Examines the passed object. If it is a SODA document object, a reference
-// to it is retained on the baton; otherwise, a buffer is assumed to be passed
-// and a new SODA document is created and retained on the baton.
+// to it is retained; otherwise, a buffer is assumed to be passed and a new
+// SODA document is created and retained.
 //-----------------------------------------------------------------------------
 bool njsBaton_getSodaDocument(njsBaton *baton, njsSodaDatabase *db,
-        napi_env env, napi_value obj)
+        napi_env env, napi_value obj, dpiSodaDoc **handle)
 {
     napi_value constructor;
     njsSodaDocument *doc;
@@ -528,7 +528,7 @@ bool njsBaton_getSodaDocument(njsBaton *baton, njsSodaDatabase *db,
         NJS_CHECK_NAPI(env, napi_unwrap(env, obj, (void**) &doc))
         if (dpiSodaDoc_addRef(doc->handle) < 0)
             return njsBaton_setErrorDPI(baton);
-        baton->dpiSodaDocHandle = doc->handle;
+        *handle = doc->handle;
 
     // otherwise, create a new SODA document from the value (which is assumed
     // to be a buffer)
@@ -536,8 +536,7 @@ bool njsBaton_getSodaDocument(njsBaton *baton, njsSodaDatabase *db,
         NJS_CHECK_NAPI(env, napi_get_buffer_info(env, obj, &content,
                 &contentLength))
         if (dpiSodaDb_createDocument(db->handle, NULL, 0, content,
-                contentLength, NULL, 0, DPI_SODA_FLAGS_DEFAULT,
-                &baton->dpiSodaDocHandle) < 0)
+                contentLength, NULL, 0, DPI_SODA_FLAGS_DEFAULT, handle) < 0)
             return njsBaton_setErrorDPI(baton);
     }
 
