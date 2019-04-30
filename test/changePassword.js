@@ -35,7 +35,7 @@ var dbconfig = require('./dbconfig.js');
 describe('161. changePassword.js', function() {
 
   var DBA_config;
-  var myUser = "nodb_schema_changepw";
+  var myUser = dbconfig.user + "_cpw";
   if (dbconfig.test.DBA_PRIVILEGE == true) {
     DBA_config = {
       user:          dbconfig.test.DBA_user,
@@ -688,7 +688,7 @@ describe('161. changePassword.js', function() {
 
   it('161.8 Negative: non-DBA tries to change the password', function(done) {
 
-    var tUser = "nodb_schema_temp";
+    var tUser = dbconfig.user + "_st";
     var dbaConn, tConn;
     var tpass = 'secret';
 
