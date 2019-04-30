@@ -97,8 +97,8 @@ describe('179. soda11.js', () => {
 
       should.strictEqual(collection.name, t_collname);
 
-      // Note: according to specification, it should be an object.
-      (typeof collection.metaData).should.be.a.String();
+      should.strictEqual(typeof(collection.metaData), "object");
+      should.deepEqual(collection.metaData, t_metadata);
 
     } catch(err) {
       should.not.exist(err);
