@@ -2316,7 +2316,7 @@ privileges for the session.
 The value of `currentSchema` will be empty until it has been
 explicitly set.
 
-This property is an efficient alternative to [`ALTER USER SET
+This property is an efficient alternative to [`ALTER SESSION SET
 CURRENT_SCHEMA`][137].
 
 This property was added in node-oracledb 4.0.
