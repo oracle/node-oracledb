@@ -51,6 +51,7 @@ describe('160. editionTest.js', function() {
   var dbaConn;
   var isRunnable;
   var nodbSchemaEditionPassword = generateRandomPassword(6);
+  var editionList = [];
 
   before(function(done) {
     var conn;
@@ -146,6 +147,28 @@ describe('160. editionTest.js', function() {
               sql,
               function(err) {
                 should.not.exist(err);
+                cb();
+              }
+            );
+          },
+          function(cb) {
+            var sql = `SELECT EDITION_NAME, PARENT_EDITION_NAME FROM ALL_EDITIONS`;
+            dbaConn.execute(
+              sql,
+              function(err, result) {
+                should.not.exist(err);
+                if (result && result.rows) {
+                  var parentEdition = "ORA$BASE";
+                  for (var i = 1; i < result.rows.length; i++) {
+                    for (var j = 0; j < result.rows.length; j++) {
+                      if (result.rows[j][1] === parentEdition) {
+                        editionList.push(result.rows[j][0]);
+                        parentEdition = result.rows[j][0];
+                        break;
+                      }
+                    }
+                  }
+                }
                 cb();
               }
             );
@@ -311,53 +334,21 @@ describe('160. editionTest.js', function() {
 
   }); // before()
 
-  after(function(done) {
-
-    if (!isRunnable) {
-      done();
-    } else {
-      async.series([
-        function(cb) {
-          if (!dbConfig.test.DBA_PRIVILEGE) { done(); }
-          else { cb(); }
-        },
-        function(cb) {
-          var sql = `DROP EDITION ${edition2} CASCADE`;
-          dbaConn.execute(
-            sql,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var sql = `DROP EDITION ${edition1} CASCADE`;
-          dbaConn.execute(
-            sql,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var sql = `DROP USER ${schemaEdition} CASCADE`;
-          dbaConn.execute(
-            sql,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          dbaConn.close(function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        },
-      ], done);
+  after(async function() {
+    if (isRunnable && dbConfig.test.DBA_PRIVILEGE) {
+      try {
+        for (var i = editionList.length - 1; i >= 0 ; i--) {
+          await dbaConn.execute(`DROP EDITION ${editionList[i]} CASCADE`);
+        }
+      } catch (err) {
+        // ORA-38810: Implementation restriction: cannot drop edition that has a parent and a child
+        if (err && !err.message.startsWith("ORA-38810")) {
+          should.not.exist(err);
+        }
+      } finally {
+        await dbaConn.execute(`DROP USER ${schemaEdition} CASCADE`);
+        await dbaConn.close();
+      }
     }
 
   }); // after()
