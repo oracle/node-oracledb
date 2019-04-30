@@ -204,22 +204,16 @@ test/soda7.js
 test/soda8.js
 test/soda9.js
 test/soda11.js
-
 test/externalProxyAuth.js
 
 test/dataTypeXML.js
 test/deferLibInit.js
-
 test/sessionTag.js
-
 test/cqn.js
-
 test/instanceof2.js
 
 test/plsqlBindList.js
-
 test/fetchRawAsString.js
-
 test/writableProperties2.js
-
 test/fetchBinaryTypesAsString.js
+test/currentSchema.js
