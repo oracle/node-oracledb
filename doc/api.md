@@ -4304,7 +4304,8 @@ readonly Object metaData
 Metadata of the current collection.  See [SODA Client-Assigned Keys
 and Collection Metadata](#sodaclientkeys).
 
-This property was added in node-oracledb 3.0.
+This property was added in node-oracledb 3.0. Its type was changed to Object in
+node-oracledb 4.0.
 
 #### <a name="sodacollectionpropname"></a> 8.1.2 `sodaCollection.name`
 

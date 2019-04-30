@@ -24,9 +24,9 @@
   startup and shutdown events.
 
 - Added SODA bulk insert methods
-  [`sodaCollection.insertMany()`](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#sodacollinsertmany)
+  [`sodaCollection.insertMany()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollinsertmany)
   and
-  [`sodaCollection.insertManyAndGet()`](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#sodacollinsertmanyandget).
+  [`sodaCollection.insertManyAndGet()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollinsertmanyandget).
 
 - Added a `connection.currentSchema` attribute for setting the schema
   qualifier to be used when a qualifier is omitted in SQL statements.
@@ -44,6 +44,10 @@
   notifications were ongoing ([ODPI-C change](https://github.com/oracle/odpi/commit/b96b11b7fe58f32f011c7f7419555e40268d5bf4)).
 
 - Corrected processing of the `force` option in SODA `dropIndex()`.
+
+- Corrected the type of
+  [`sodaCollection.metaData`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollectionpropmetadata).
+  It is now an Object, as was documented.
 
 - Error handling changes:
 

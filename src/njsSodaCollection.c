@@ -62,7 +62,6 @@ static NJS_NAPI_GETTER(njsSodaCollection_getMetaData);
 static NJS_NAPI_GETTER(njsSodaCollection_getName);
 
 // setters
-static NJS_NAPI_SETTER(njsSodaCollection_setMetaData);
 static NJS_NAPI_SETTER(njsSodaCollection_setName);
 
 // finalize
@@ -88,8 +87,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             napi_default, NULL },
     { "_insertManyAndGet", NULL, njsSodaCollection_insertManyAndGet, NULL,
             NULL, NULL, napi_default, NULL },
-    { "metaData", NULL, NULL, njsSodaCollection_getMetaData,
-            njsSodaCollection_setMetaData, NULL, napi_default, NULL },
+    { "_metaData", NULL, NULL, njsSodaCollection_getMetaData, NULL, NULL,
+            napi_default, NULL },
     { "name", NULL, NULL, njsSodaCollection_getName,
             njsSodaCollection_setName, NULL, napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
@@ -751,18 +750,6 @@ bool njsSodaCollection_newFromBaton(njsBaton *baton, napi_env env,
     coll->db = (njsSodaDatabase*) baton->callingInstance;
 
     return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsSodaCollection_setMetaData()
-//   Set accessor of "metaData" property.
-//-----------------------------------------------------------------------------
-static napi_value njsSodaCollection_setMetaData(napi_env env,
-        napi_callback_info info)
-{
-    njsUtils_throwError(env, errReadOnly, "metaData");
-    return NULL;
 }
 
 
