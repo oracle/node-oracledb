@@ -4477,3 +4477,8 @@ Overview of node-oracledb functional tests
         190.2.3 Fetch binary float as string using fetchInfo
         190.2.4 Fetch other types as string do not affect binary float
         190.2.5 Fetch binary float in multiple rows
+
+191. currentSchema.js
+    191.1 the value will be empty until it has been explicitly set
+    191.2 SQL alternative
+    191.3 Negative - can not set inexistent schema
