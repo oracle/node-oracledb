@@ -39,7 +39,7 @@
   are required.
 
 - Fixed a crash that occurred when unsubscribing from CQN while
-  notifications werre ongoing ([ODPI-C change](https://github.com/oracle/odpi/commit/b96b11b7fe58f32f011c7f7419555e40268d5bf4)).
+  notifications were ongoing ([ODPI-C change](https://github.com/oracle/odpi/commit/b96b11b7fe58f32f011c7f7419555e40268d5bf4)).
 
 - Corrected processing of the `force` option in SODA `dropIndex()`.
 
