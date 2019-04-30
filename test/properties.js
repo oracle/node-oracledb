@@ -606,6 +606,24 @@ describe('58. properties.js', function() {
       );
     });
 
+    it('58.3.8 currentSchema', function() {
+      var t = connection.currentSchema;
+      should.strictEqual(t, '');
+
+      should.throws(
+        function() {
+          connection.currentSchema = 4;
+        },
+        /NJS-004: invalid value for property [\w]/
+      );
+
+      should.doesNotThrow(
+        function() {
+          connection.currentSchema = dbConfig.user;
+        }
+      );
+    });
+
   }); // 58.3
 
   describe('58.4 ResultSet Class', function() {
