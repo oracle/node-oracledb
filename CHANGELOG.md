@@ -26,6 +26,11 @@
 - Added SODA bulk insert methods `sodaCollection.insertMany()` and
   `sodaCollection.insertManyAndGet()`.
 
+- Added a `connection.currentSchema` attribute for setting the schema
+  qualifier to be used when a qualifier is omitted in SQL statements.
+  This is an efficient alternative to `ALTER SESSION SET
+  CURRENT_SCHEMA`.
+
 - Improved the performance of `oracledb.outFormat = oracledb.OBJECT`.
 
 - Updated the JavaScript syntax in class implementations.
