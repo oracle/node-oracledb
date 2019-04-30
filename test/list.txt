@@ -943,6 +943,7 @@ Overview of node-oracledb functional tests
         58.3.5 module (write-only)
         58.3.6 oracleServerVersion (read-only)
         58.3.7 oracleServerVersionString (read-only)
+        58.3.8 currentSchema
     58.4 ResultSet Class
         58.4.1 metaData (read-only)
 

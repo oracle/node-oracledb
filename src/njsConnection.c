@@ -73,6 +73,7 @@ static NJS_PROCESS_ARGS_METHOD(njsConnection_subscribeProcessArgs);
 static NJS_NAPI_GETTER(njsConnection_getAction);
 static NJS_NAPI_GETTER(njsConnection_getCallTimeout);
 static NJS_NAPI_GETTER(njsConnection_getClientId);
+static NJS_NAPI_GETTER(njsConnection_getCurrentSchema);
 static NJS_NAPI_GETTER(njsConnection_getModule);
 static NJS_NAPI_GETTER(njsConnection_getOracleServerVersion);
 static NJS_NAPI_GETTER(njsConnection_getOracleServerVersionString);
@@ -83,6 +84,7 @@ static NJS_NAPI_GETTER(njsConnection_getTag);
 static NJS_NAPI_SETTER(njsConnection_setAction);
 static NJS_NAPI_SETTER(njsConnection_setCallTimeout);
 static NJS_NAPI_SETTER(njsConnection_setClientId);
+static NJS_NAPI_SETTER(njsConnection_setCurrentSchema);
 static NJS_NAPI_SETTER(njsConnection_setOracleServerVersion);
 static NJS_NAPI_SETTER(njsConnection_setOracleServerVersionString);
 static NJS_NAPI_SETTER(njsConnection_setModule);
@@ -126,6 +128,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             njsConnection_setCallTimeout, NULL, napi_default, NULL },
     { "clientId", NULL, NULL, njsConnection_getClientId,
             njsConnection_setClientId, NULL, napi_default, NULL },
+    { "currentSchema", NULL, NULL, njsConnection_getCurrentSchema,
+            njsConnection_setCurrentSchema, NULL, napi_default, NULL },
     { "module", NULL, NULL, njsConnection_getModule, njsConnection_setModule,
             NULL, napi_default, NULL },
     { "oracleServerVersion", NULL, NULL, njsConnection_getOracleServerVersion,
@@ -1111,6 +1115,32 @@ static napi_value njsConnection_getClientId(napi_env env,
         napi_callback_info info)
 {
     return njsUtils_getNull(env);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getCurrentSchema()
+//   Get accessor of "currentSchema" property.
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_getCurrentSchema(napi_env env,
+        napi_callback_info info)
+{
+    uint32_t valueLength;
+    njsConnection *conn;
+    const char *value;
+
+    // return undefined for an invalid connection
+    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &conn))
+        return NULL;
+    if (!conn->handle)
+        return NULL;
+
+    // get value and return it
+    if (dpiConn_getCurrentSchema(conn->handle, &value, &valueLength) < 0) {
+        njsUtils_throwErrorDPI(env, conn->oracleDb);
+        return NULL;
+    }
+    return njsUtils_convertToString(env, value, valueLength);
 }
 
 
@@ -2130,6 +2160,18 @@ static napi_value njsConnection_setClientId(napi_env env,
 {
     return njsConnection_setTextAttribute(env, info, "clientId",
             dpiConn_setClientIdentifier);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_setCurrentSchema()
+//   Set accessor of "clientId" property.
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_setCurrentSchema(napi_env env,
+        napi_callback_info info)
+{
+    return njsConnection_setTextAttribute(env, info, "currentSchema",
+            dpiConn_setCurrentSchema);
 }
 
 
