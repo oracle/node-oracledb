@@ -7,7 +7,7 @@
 - Refactored the node-oracledb implementation to use
   [N-API](https://nodejs.org/api/n-api.html) in place of
   [NAN](https://github.com/nodejs/nan).
-    - Node.js 8.12, or higher, is required by this version of node-oracledb.
+    - Node.js 8.12, or higher, is required by this version of node-oracledb.  Note Node.js 8.16, 11.12 and 12 contain an important performance fix.
     - N-API allows node-oracledb binaries to be portable between Node.js versions on a given operating system, subject to N-API compatibility.
     - Oracle Client libraries are still required at runtime.
     - The string representation of classes has changed to `[Object Object]` as a consequence of using N-API.
@@ -29,6 +29,9 @@
 
 - Fixed writing of multi-byte characters to CLOBs when multiple writes
   are required.
+
+- Fixed a crash that occurred when unsubscribing from CQN while
+  notifications werre ongoing ([ODPI-C change](https://github.com/oracle/odpi/commit/b96b11b7fe58f32f011c7f7419555e40268d5bf4)).
 
 - Corrected processing of the `force` option in SODA `dropIndex()`.
 
