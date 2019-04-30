@@ -52,7 +52,7 @@ static const char *njsErrorMessages[] = {
     "NJS-035: maxArraySize is required for IN OUT array bind", // errReqdMaxArraySize
     "NJS-036: given array is of size greater than maxArraySize", // errInvalidArraySize
     "NJS-037: invalid data type at array index %d for bind \":%.*s\"", // errIncompatibleTypeArrayBind
-    "NJS-040: connection request timeout",  // errConnRequestTimeout
+    "NJS-040: connection request timeout. Request exceeded queueTimeout of %d",  // errConnRequestTimeout
     "NJS-041: cannot convert ResultSet to QueryStream after invoking methods", // errCannotConvertRsToStream
     "NJS-042: cannot invoke ResultSet methods after converting to QueryStream", // errCannotInvokeRsMethods
     "NJS-043: ResultSet already converted to QueryStream", // errResultSetAlreadyConverted
