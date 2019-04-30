@@ -23,8 +23,10 @@
 - CQN support and message type constants were added for database
   startup and shutdown events.
 
-- Added SODA bulk insert methods `sodaCollection.insertMany()` and
-  `sodaCollection.insertManyAndGet()`.
+- Added SODA bulk insert methods
+  [`sodaCollection.insertMany()`](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#sodacollinsertmany)
+  and
+  [`sodaCollection.insertManyAndGet()`](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#sodacollinsertmanyandget).
 
 - Added a `connection.currentSchema` attribute for setting the schema
   qualifier to be used when a qualifier is omitted in SQL statements.
