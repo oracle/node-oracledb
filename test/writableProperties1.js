@@ -209,4 +209,20 @@ describe('66. writableProperties1.js', function() {
     });
   }); // 66.4
 
+  it('66.5 allows overwriting of public methods on oracledb instances', function(done) {
+    var keys = Object.keys(oracledb);
+    for (var keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
+      if (typeof oracledb[keys[keysIdx]] === 'function') {
+        try {
+          var originalFunction = oracledb[keys[keysIdx]];
+          oracledb[keys[keysIdx]] = function() {};
+          oracledb[keys[keysIdx]] = originalFunction;
+        } catch (err) {
+          should.not.exist(err);
+        }
+      }
+    }
+    done();
+  }); // 66.5
+
 });
