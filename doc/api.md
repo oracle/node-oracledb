@@ -124,11 +124,12 @@ limitations under the License.
         - 4.1.1 [`action`](#propconnaction)
         - 4.1.2 [`callTimeout`](#propconncalltimeout)
         - 4.1.3 [`clientId`](#propconnclientid)
-        - 4.1.4 [`module`](#propconnmodule)
-        - 4.1.5 [`oracleServerVersion`](#propconnoracleserverversion)
-        - 4.1.6 [`oracleServerVersionString`](#propconnoracleserverversionstring)
-        - 4.1.7 [`stmtCacheSize`](#propconnstmtcachesize)
-        - 4.1.8 [`tag`](#propconntag)
+        - 4.1.4 [`currentSchema`](#propconncurrentschema)
+        - 4.1.5 [`module`](#propconnmodule)
+        - 4.1.6 [`oracleServerVersion`](#propconnoracleserverversion)
+        - 4.1.7 [`oracleServerVersionString`](#propconnoracleserverversionstring)
+        - 4.1.8 [`stmtCacheSize`](#propconnstmtcachesize)
+        - 4.1.9 [`tag`](#propconntag)
     - 4.2 [Connection Methods](#connectionmethods)
         - 4.2.1 [`break()`](#break)
         - 4.2.2 [`changePassword()`](#changepassword)
@@ -2296,7 +2297,29 @@ This is a write-only property.  Displaying a Connection object will
 show a value of `null` for this attribute.  See
 [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
-#### <a name="propconnmodule"></a> 4.1.4 `connection.module`
+#### <a name="propconncurrentschema"></a> 4.1.4 `connection.currentSchema`
+
+```
+String currentSchema
+```
+
+After setting `currentSchema`, SQL statements using unqualified
+references to schema objects will resolve to objects in the specified
+schema.
+
+This setting does not change the session user or the current user, nor
+does it give the session user any additional system or object
+privileges for the session.
+
+The value of `currentSchema` will be empty until it has been
+explicitly set.
+
+This property is an efficient alternative to [`ALTER USER SET
+CURRENT_SCHEMA`][137].
+
+This property was added in node-oracledb 4.0.
+
+#### <a name="propconnmodule"></a> 4.1.5 `connection.module`
 
 ```
 writeonly String module
@@ -2308,7 +2331,7 @@ This is a write-only property.  Displaying a Connection object will
 show a value of `null` for this attribute.  See
 [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
-#### <a name="propconnoracleserverversion"></a> 4.1.5 `connection.oracleServerVersion`
+#### <a name="propconnoracleserverversion"></a> 4.1.6 `connection.oracleServerVersion`
 
 ```
 readonly Number oracleServerVersion
@@ -2324,7 +2347,7 @@ instead of 1803000000.
 
 This property was added in node-oracledb 1.3.
 
-#### <a name="propconnoracleserverversionstring"></a> 4.1.6 `connection.oracleServerVersionString`
+#### <a name="propconnoracleserverversionstring"></a> 4.1.7 `connection.oracleServerVersionString`
 
 ```
 readonly String oracleServerVersionString
@@ -2339,7 +2362,7 @@ libraries.  Otherwise it will show the base release such as
 
 This property was added in node-oracledb 2.2.
 
-#### <a name="propconnstmtcachesize"></a> 4.1.7 `connection.stmtCacheSize`
+#### <a name="propconnstmtcachesize"></a> 4.1.8 `connection.stmtCacheSize`
 
 ```
 readonly Number stmtCacheSize
@@ -2350,7 +2373,7 @@ The number of statements to be cached in the
 the `stmtCacheSize` property in effect in the *Pool* object when the
 connection is created in the pool.
 
-#### <a name="propconntag"></a> 4.1.8 `connection.tag`
+#### <a name="propconntag"></a> 4.1.9 `connection.tag`
 
 ```
 String tag
@@ -12471,3 +12494,4 @@ All exceptions are now passed through the error callback.
 [134]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FF87387C-1779-4CC3-932A-79BB01391C28
 [135]: https://github.com/oracle/node-oracledb/blob/v3.1.0/doc/api.md
 [136]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2041545B-58D4-48DC-986F-DCC9D0DEC642
+[137]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-DC7B8CDD-4F89-40CC-875F-F70F673711D4
