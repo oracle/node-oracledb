@@ -36,6 +36,7 @@ static NJS_NAPI_METHOD(njsConnection_executeMany);
 static NJS_NAPI_METHOD(njsConnection_getSodaDatabase);
 static NJS_NAPI_METHOD(njsConnection_getStatementInfo);
 static NJS_NAPI_METHOD(njsConnection_ping);
+static NJS_NAPI_METHOD(njsConnection_queue);
 static NJS_NAPI_METHOD(njsConnection_rollback);
 static NJS_NAPI_METHOD(njsConnection_subscribe);
 static NJS_NAPI_METHOD(njsConnection_unsubscribe);
@@ -113,6 +114,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             NULL, NULL, napi_default, NULL },
     { "_ping", NULL, njsConnection_ping, NULL, NULL, NULL, napi_default,
             NULL },
+    { "_queue", NULL, njsConnection_queue, NULL, NULL, NULL, napi_default,
+            NULL },
     { "_rollback", NULL, njsConnection_rollback, NULL, NULL, NULL,
             napi_default, NULL },
     { "_subscribe", NULL, njsConnection_subscribe, NULL, NULL, NULL,
@@ -144,7 +147,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefConnection = {
     "Connection", sizeof(njsConnection), njsConnection_finalize,
-    njsClassProperties, NULL
+    njsClassProperties, NULL, false
 };
 
 // other methods used internally
@@ -1838,6 +1841,48 @@ static bool njsConnection_processExecuteManyBinds(njsBaton *baton,
         return false;
 
     return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_queue()
+//   Creates an AQ queue associated with the connection.
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_queue(napi_env env, napi_callback_info info)
+{
+    napi_value connObj, nameObj, queueObj;
+    dpiQueue *queueHandle;
+    njsConnection *conn;
+    size_t nameLength;
+    char *name = NULL;
+    int status;
+
+    // validate args
+    if (!njsUtils_validateArgs(env, info, 1, &nameObj, &connObj,
+            (njsBaseInstance**) &conn))
+        return NULL;
+    if (!conn->handle) {
+        njsUtils_throwError(env, errInvalidConnection);
+        return NULL;
+    }
+    if (!njsUtils_validateArgType(env, &nameObj, napi_string, 0))
+        return NULL;
+
+    // create queue
+    if (!njsUtils_copyStringFromJS(env, nameObj, &name, &nameLength))
+        return NULL;
+    status = dpiConn_newQueue(conn->handle, name, nameLength, NULL,
+            &queueHandle);
+    free(name);
+    if (status < 0) {
+        njsUtils_throwErrorDPI(env, conn->oracleDb);
+        return NULL;
+    }
+    if (!njsAqQueue_createFromHandle(env, conn, connObj, queueHandle,
+            &queueObj))
+        return NULL;
+
+    return queueObj;
 }
 
 

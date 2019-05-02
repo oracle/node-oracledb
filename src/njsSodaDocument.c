@@ -61,7 +61,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefSodaDocument = {
     "SodaDocument", sizeof(njsSodaDocument), njsSodaDocument_finalize,
-    njsClassProperties, NULL
+    njsClassProperties, NULL, false
 };
 
 // other methods used internally

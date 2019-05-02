@@ -207,6 +207,37 @@ static njsConstant njsClassConstants[] = {
     { "POOL_STATUS_DRAINING", NJS_POOL_STATUS_DRAINING },
     { "POOL_STATUS_CLOSED", NJS_POOL_STATUS_CLOSED },
 
+    // AQ dequeue wait options
+    { "AQ_DEQ_NO_WAIT", DPI_DEQ_WAIT_NO_WAIT },
+    { "AQ_DEQ_WAIT_FOREVER", DPI_DEQ_WAIT_FOREVER },
+
+    // AQ dequeue modes
+    { "AQ_DEQ_MODE_BROWSE", DPI_MODE_DEQ_BROWSE },
+    { "AQ_DEQ_MODE_LOCKED", DPI_MODE_DEQ_LOCKED },
+    { "AQ_DEQ_MODE_REMOVE", DPI_MODE_DEQ_REMOVE },
+    { "AQ_DEQ_MODE_REMOVE_NO_DATA", DPI_MODE_DEQ_REMOVE_NO_DATA },
+
+    // AQ dequeue navigation flags
+    { "AQ_DEQ_NAV_FIRST_MSG", DPI_DEQ_NAV_FIRST_MSG },
+    { "AQ_DEQ_NAV_NEXT_TRANSACTION", DPI_DEQ_NAV_NEXT_TRANSACTION },
+    { "AQ_DEQ_NAV_NEXT_MSG", DPI_DEQ_NAV_NEXT_MSG },
+
+    // AQ message delivery modes
+    { "AQ_MSG_DELIV_MODE_PERSISTENT", DPI_MODE_MSG_PERSISTENT },
+    { "AQ_MSG_DELIV_MODE_BUFFERED", DPI_MODE_MSG_BUFFERED },
+    { "AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED",
+            DPI_MODE_MSG_PERSISTENT_OR_BUFFERED },
+
+    // AQ message states
+    { "AQ_MSG_STATE_READY", DPI_MSG_STATE_READY },
+    { "AQ_MSG_STATE_WAITING", DPI_MSG_STATE_WAITING },
+    { "AQ_MSG_STATE_PROCESSED", DPI_MSG_STATE_PROCESSED },
+    { "AQ_MSG_STATE_EXPIRED", DPI_MSG_STATE_EXPIRED },
+
+    // AQ visibility flags
+    { "AQ_VISIBILITY_IMMEDIATE", DPI_VISIBILITY_IMMEDIATE },
+    { "AQ_VISIBILITY_ON_COMMIT", DPI_VISIBILITY_ON_COMMIT },
+
     // terminal
     { NULL, 0 }
 };
@@ -270,7 +301,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefOracleDb = {
     "OracleDb", sizeof(njsOracleDb), NULL, njsClassProperties,
-    njsClassConstants
+    njsClassConstants, false
 };
 
 
@@ -1116,41 +1147,49 @@ bool njsOracleDb_prepareClass(njsOracleDb *oracleDb, napi_env env,
     // scan each of the class properties and constants to get the total number
     // of properties to define
     numProperties = 0;
-    for (i = 0; classDef->properties[i].utf8name; i++, numProperties++);
+    if (!classDef->propertiesOnInstance) {
+        for (i = 0; classDef->properties[i].utf8name; i++, numProperties++);
+    }
     numBaseProperties = numProperties;
     if (classDef->constants)
         for (i = 0; njsClassConstants[i].name; i++, numProperties++);
 
-    // allocate memory for all of the properties
-    allProperties = calloc(numProperties, sizeof(napi_property_descriptor));
-    if (!allProperties) {
-        njsUtils_throwError(env, errInsufficientMemory);
-        return false;
-    }
+    // perform define if any properties are present
+    if (numProperties > 0) {
 
-    // populate the properties
-    memcpy(allProperties, classDef->properties,
-            sizeof(napi_property_descriptor) * numBaseProperties);
-    if (classDef->constants) {
-        for (i = 0; classDef->constants[i].name; i++) {
-            tempProperty = &allProperties[numBaseProperties + i];
-            tempProperty->utf8name = classDef->constants[i].name;
-            if (napi_create_uint32(env, classDef->constants[i].value,
-                    &tempProperty->value) != napi_ok) {
-                free(allProperties);
-                return njsUtils_genericThrowError(env);
-            }
-            tempProperty->attributes = napi_enumerable;
+        // allocate memory for all of the properties
+        allProperties = calloc(numProperties,
+                sizeof(napi_property_descriptor));
+        if (!allProperties) {
+            njsUtils_throwError(env, errInsufficientMemory);
+            return false;
         }
-    }
 
-    // define the properties on the prototype
-    if (napi_define_properties(env, prototype, numProperties,
-            allProperties) != napi_ok) {
+        // populate the properties
+        memcpy(allProperties, classDef->properties,
+                sizeof(napi_property_descriptor) * numBaseProperties);
+        if (classDef->constants) {
+            for (i = 0; classDef->constants[i].name; i++) {
+                tempProperty = &allProperties[numBaseProperties + i];
+                tempProperty->utf8name = classDef->constants[i].name;
+                if (napi_create_uint32(env, classDef->constants[i].value,
+                        &tempProperty->value) != napi_ok) {
+                    free(allProperties);
+                    return njsUtils_genericThrowError(env);
+                }
+                tempProperty->attributes = napi_enumerable;
+            }
+        }
+
+        // define the properties on the prototype
+        if (napi_define_properties(env, prototype, numProperties,
+                allProperties) != napi_ok) {
+            free(allProperties);
+            return njsUtils_genericThrowError(env);
+        }
         free(allProperties);
-        return njsUtils_genericThrowError(env);
+
     }
-    free(allProperties);
 
     // and call the _extend function defined in JavaScript
     NJS_CHECK_NAPI(env, napi_get_named_property(env, prototype, "_extend",

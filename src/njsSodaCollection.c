@@ -94,7 +94,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefSodaCollection = {
     "SodaCollection", sizeof(njsSodaCollection), njsSodaCollection_finalize,
-    njsClassProperties, NULL
+    njsClassProperties, NULL, false
 };
 
 // other methods used internally

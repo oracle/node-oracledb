@@ -207,6 +207,7 @@ typedef enum {
     errNoBinaryAvailable,
     errInvalidErrNum,
     errNodeTooOld,
+    errInvalidAqMessage,
 
     // New ones should be added here
 
@@ -231,6 +232,10 @@ typedef enum {
 // forward declarations
 //-----------------------------------------------------------------------------
 
+typedef struct njsAqDeqOptions njsAqDeqOptions;
+typedef struct njsAqEnqOptions njsAqEnqOptions;
+typedef struct njsAqMessage njsAqMessage;
+typedef struct njsAqQueue njsAqQueue;
 typedef struct njsBaseInstance njsBaseInstance;
 typedef struct njsBaton njsBaton;
 typedef struct njsClassDef njsClassDef;
@@ -256,6 +261,10 @@ typedef struct njsVariableBuffer njsVariableBuffer;
 // class definitions (defined in class implementation files)
 //-----------------------------------------------------------------------------
 
+extern const njsClassDef njsClassDefAqDeqOptions;
+extern const njsClassDef njsClassDefAqEnqOptions;
+extern const njsClassDef njsClassDefAqMessage;
+extern const njsClassDef njsClassDefAqQueue;
 extern const njsClassDef njsClassDefConnection;
 extern const njsClassDef njsClassDefLob;
 extern const njsClassDef njsClassDefOracleDb;
@@ -275,6 +284,35 @@ extern const njsClassDef njsClassDefSodaOperation;
 // all structures exposed publicly have these members
 #define NJS_INSTANCE_HEAD \
     njsBaton *activeBaton;
+
+// data for class AqDeqOptions exposed to JS.
+struct njsAqDeqOptions {
+    NJS_INSTANCE_HEAD
+    dpiDeqOptions *handle;
+    njsOracleDb *oracleDb;
+};
+
+// data for class AqEnqOptions exposed to JS.
+struct njsAqEnqOptions {
+    NJS_INSTANCE_HEAD
+    dpiEnqOptions *handle;
+    njsOracleDb *oracleDb;
+    uint16_t deliveryMode;
+};
+
+// data for class AqMessage exposed to JS.
+struct njsAqMessage {
+    NJS_INSTANCE_HEAD
+    dpiMsgProps *handle;
+    njsOracleDb *oracleDb;
+};
+
+// data for class AqQueue exposed to JS.
+struct njsAqQueue {
+    NJS_INSTANCE_HEAD
+    dpiQueue *handle;
+    njsConnection *conn;
+};
 
 // base instance (used for commonly held attributes)
 struct njsBaseInstance {
@@ -341,6 +379,7 @@ struct njsBaton {
     // ODPI-C handles (requires release)
     dpiConn *dpiConnHandle;
     dpiLob *dpiLobHandle;
+    dpiMsgProps *dpiMsgPropsHandle;
     dpiPool *dpiPoolHandle;
     dpiStmt *dpiStmtHandle;
     dpiSodaColl *dpiSodaCollHandle;
@@ -348,6 +387,8 @@ struct njsBaton {
     dpiSodaDocCursor *dpiSodaDocCursorHandle;
     uint32_t numSodaDocs;
     dpiSodaDoc **sodaDocs;
+    uint32_t numMsgProps;
+    dpiMsgProps **msgProps;
 
     // SODA operation keys (requires free)
     uint32_t numKeys;
@@ -456,6 +497,7 @@ struct njsClassDef {
     napi_finalize finalizeFn;
     const napi_property_descriptor *properties;
     const njsConstant *constants;
+    bool propertiesOnInstance;
 };
 
 // data for class Connection exposed to JS.
@@ -530,8 +572,12 @@ struct njsOracleDb {
     bool extendedMetaData;
     bool externalAuth;
     bool events;
-    napi_ref jsDateConstructor;
+    napi_ref jsAqDeqOptionsConstructor;
+    napi_ref jsAqEnqOptionsConstructor;
+    napi_ref jsAqMessageConstructor;
+    napi_ref jsAqQueueConstructor;
     napi_ref jsConnectionConstructor;
+    napi_ref jsDateConstructor;
     napi_ref jsLobConstructor;
     napi_ref jsPoolConstructor;
     napi_ref jsResultSetConstructor;
@@ -714,6 +760,20 @@ bool njsOracleDb_new(napi_env env, napi_value instanceObj,
         njsOracleDb **instance);
 bool njsOracleDb_prepareClass(njsOracleDb *oracleDb, napi_env env,
         napi_value instance, const njsClassDef *classDef, napi_ref *clsRef);
+
+
+//-----------------------------------------------------------------------------
+// definition of functions for njsAqMessage class
+//-----------------------------------------------------------------------------
+bool njsAqMessage_createFromHandle(njsBaton *baton, dpiMsgProps *handle,
+        napi_env env, napi_value *messageObj);
+
+
+//-----------------------------------------------------------------------------
+// definition of functions for njsAqQueue class
+//-----------------------------------------------------------------------------
+bool njsAqQueue_createFromHandle(napi_env env, njsConnection *conn,
+        napi_value connObj, dpiQueue *handle, napi_value *obj);
 
 
 //-----------------------------------------------------------------------------

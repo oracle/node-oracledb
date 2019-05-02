@@ -3,6 +3,10 @@
   {
     "target_name" : "oracledb",
     "sources" : [
+             "src/njsAqDeqOptions.c",
+             "src/njsAqEnqOptions.c",
+             "src/njsAqMessage.c",
+             "src/njsAqQueue.c",
              "src/njsBaton.c",
              "src/njsConnection.c",
              "src/njsErrors.c",

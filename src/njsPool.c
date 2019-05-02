@@ -79,7 +79,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 
 // class definition
 const njsClassDef njsClassDefPool = {
-    "Pool", sizeof(njsPool), njsPool_finalize, njsClassProperties, NULL
+    "Pool", sizeof(njsPool), njsPool_finalize, njsClassProperties, NULL, false
 };
 
 // other methods used internally

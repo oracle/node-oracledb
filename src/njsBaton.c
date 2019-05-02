@@ -239,6 +239,10 @@ void njsBaton_free(njsBaton *baton, napi_env env)
         dpiLob_release(baton->dpiLobHandle);
         baton->dpiLobHandle = NULL;
     }
+    if (baton->dpiMsgPropsHandle) {
+        dpiMsgProps_release(baton->dpiMsgPropsHandle);
+        baton->dpiMsgPropsHandle = NULL;
+    }
     if (baton->dpiPoolHandle) {
         dpiPool_release(baton->dpiPoolHandle);
         baton->dpiPoolHandle = NULL;
@@ -268,6 +272,16 @@ void njsBaton_free(njsBaton *baton, napi_env env)
         }
         free(baton->sodaDocs);
         baton->sodaDocs = NULL;
+    }
+    if (baton->msgProps) {
+        for (i = 0; i < baton->numMsgProps; i++) {
+            if (baton->msgProps[i]) {
+                dpiMsgProps_release(baton->msgProps[i]);
+                baton->msgProps[i] = NULL;
+            }
+        }
+        free(baton->msgProps);
+        baton->msgProps = NULL;
     }
 
     // free SODA operation keys, if applicable
