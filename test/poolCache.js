@@ -189,7 +189,7 @@ describe('67. poolCache.js', function() {
 
         (function() {
           pool.poolAlias = 'some-new-value';
-        }).should.throw(/^NJS-014:/);
+        }).should.throw('Cannot set property poolAlias of #<Pool> which has only a getter');
 
         (pool.poolAlias).should.equal(dbConfig.poolAlias);
 

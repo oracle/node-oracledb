@@ -51,12 +51,7 @@ static NJS_NAPI_GETTER(njsLob_getType);
 static NJS_NAPI_GETTER(njsLob_getValid);
 
 // setters
-static NJS_NAPI_SETTER(njsLob_setAutoCloseLob);
-static NJS_NAPI_SETTER(njsLob_setChunkSize);
-static NJS_NAPI_SETTER(njsLob_setLength);
 static NJS_NAPI_SETTER(njsLob_setPieceSize);
-static NJS_NAPI_SETTER(njsLob_setType);
-static NJS_NAPI_SETTER(njsLob_setValid);
 
 // finalize
 static NJS_NAPI_FINALIZE(njsLob_finalize);
@@ -66,18 +61,15 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "_close", NULL, njsLob_close, NULL, NULL, NULL, napi_default, NULL },
     { "__read", NULL, njsLob_read, NULL, NULL, NULL, napi_default, NULL },
     { "__write", NULL, njsLob_write, NULL, NULL, NULL, napi_default, NULL },
-    { "_autoCloseLob", NULL, NULL, njsLob_getAutoCloseLob,
-            njsLob_setAutoCloseLob, NULL, napi_default, NULL },
-    { "chunkSize", NULL, NULL, njsLob_getChunkSize, njsLob_setChunkSize, NULL,
+    { "_autoCloseLob", NULL, NULL, njsLob_getAutoCloseLob, NULL, NULL,
             napi_default, NULL },
-    { "length", NULL, NULL, njsLob_getLength, njsLob_setLength, NULL,
-            napi_default, NULL },
+    { "chunkSize", NULL, NULL, njsLob_getChunkSize, NULL, NULL, napi_default,
+            NULL },
+    { "length", NULL, NULL, njsLob_getLength, NULL, NULL, napi_default, NULL },
     { "pieceSize", NULL, NULL, njsLob_getPieceSize, njsLob_setPieceSize, NULL,
             napi_default, NULL },
-    { "type", NULL, NULL, njsLob_getType, njsLob_setType, NULL, napi_default,
-            NULL },
-    { "valid", NULL, NULL, njsLob_getValid, njsLob_setValid, NULL,
-            napi_default, NULL },
+    { "type", NULL, NULL, njsLob_getType, NULL, NULL, napi_default, NULL },
+    { "valid", NULL, NULL, njsLob_getValid, NULL, NULL, napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
@@ -424,36 +416,6 @@ static bool njsLob_readProcessArgs(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsLob_setAutoCloseLob()
-//   Set accessor of "autoCloseLob" property.
-//-----------------------------------------------------------------------------
-static napi_value njsLob_setAutoCloseLob(napi_env env, napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "autoCloseLob");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsLob_setChunkSize()
-//   Set accessor of "chunkSize" property.
-//-----------------------------------------------------------------------------
-static napi_value njsLob_setChunkSize(napi_env env, napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "chunkSize");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsLob_setLength()
-//   Set accessor of "length" property.
-//-----------------------------------------------------------------------------
-static napi_value njsLob_setLength(napi_env env, napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "length");
-}
-
-
-//-----------------------------------------------------------------------------
 // njsLob_setPieceSize()
 //   Set accessor of "pieceSize" property.
 //-----------------------------------------------------------------------------
@@ -469,26 +431,6 @@ static napi_value njsLob_setPieceSize(napi_env env, napi_callback_info info)
         return NULL;
 
     return NULL;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsLob_setType()
-//   Set accessor of "type" property.
-//-----------------------------------------------------------------------------
-static napi_value njsLob_setType(napi_env env, napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "type");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsLob_setValid()
-//   Set accessor of "valid" property.
-//-----------------------------------------------------------------------------
-static napi_value njsLob_setValid(napi_env env, napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "valid");
 }
 
 

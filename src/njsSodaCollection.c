@@ -61,9 +61,6 @@ static NJS_PROCESS_ARGS_METHOD(njsSodaCollection_insertManyProcessArgs);
 static NJS_NAPI_GETTER(njsSodaCollection_getMetaData);
 static NJS_NAPI_GETTER(njsSodaCollection_getName);
 
-// setters
-static NJS_NAPI_SETTER(njsSodaCollection_setName);
-
 // finalize
 static NJS_NAPI_FINALIZE(njsSodaCollection_finalize);
 
@@ -89,8 +86,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             NULL, NULL, napi_default, NULL },
     { "_metaData", NULL, NULL, njsSodaCollection_getMetaData, NULL, NULL,
             napi_default, NULL },
-    { "name", NULL, NULL, njsSodaCollection_getName,
-            njsSodaCollection_setName, NULL, napi_default, NULL },
+    { "name", NULL, NULL, njsSodaCollection_getName, NULL, NULL, napi_default,
+            NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
@@ -750,16 +747,4 @@ bool njsSodaCollection_newFromBaton(njsBaton *baton, napi_env env,
     coll->db = (njsSodaDatabase*) baton->callingInstance;
 
     return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsSodaCollection_setName()
-//   Set accessor of "name" property.
-//-----------------------------------------------------------------------------
-static napi_value njsSodaCollection_setName(napi_env env,
-        napi_callback_info info)
-{
-    njsUtils_throwError(env, errReadOnly, "name");
-    return NULL;
 }

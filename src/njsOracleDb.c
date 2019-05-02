@@ -78,8 +78,6 @@ static NJS_NAPI_SETTER(njsOracleDb_setFetchAsBuffer);
 static NJS_NAPI_SETTER(njsOracleDb_setFetchAsString);
 static NJS_NAPI_SETTER(njsOracleDb_setLobPrefetchSize);
 static NJS_NAPI_SETTER(njsOracleDb_setMaxRows);
-static NJS_NAPI_SETTER(njsOracleDb_setOracleClientVersion);
-static NJS_NAPI_SETTER(njsOracleDb_setOracleClientVersionString);
 static NJS_NAPI_SETTER(njsOracleDb_setOutFormat);
 static NJS_NAPI_SETTER(njsOracleDb_setPoolIncrement);
 static NJS_NAPI_SETTER(njsOracleDb_setPoolMax);
@@ -87,9 +85,6 @@ static NJS_NAPI_SETTER(njsOracleDb_setPoolMin);
 static NJS_NAPI_SETTER(njsOracleDb_setPoolPingInterval);
 static NJS_NAPI_SETTER(njsOracleDb_setPoolTimeout);
 static NJS_NAPI_SETTER(njsOracleDb_setStmtCacheSize);
-static NJS_NAPI_SETTER(njsOracleDb_setVersion);
-static NJS_NAPI_SETTER(njsOracleDb_setVersionString);
-static NJS_NAPI_SETTER(njsOracleDb_setVersionSuffix);
 
 // finalize
 static NJS_NAPI_FINALIZE(njsOracleDb_finalize);
@@ -241,10 +236,9 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "maxRows", NULL, NULL, njsOracleDb_getMaxRows, njsOracleDb_setMaxRows,
             NULL, napi_default, NULL },
     { "oracleClientVersion", NULL, NULL, njsOracleDb_getOracleClientVersion,
-            njsOracleDb_setOracleClientVersion, NULL, napi_default, NULL },
+            NULL, NULL, napi_default, NULL },
     { "oracleClientVersionString", NULL, NULL,
-            njsOracleDb_getOracleClientVersionString,
-            njsOracleDb_setOracleClientVersionString, NULL, napi_default,
+            njsOracleDb_getOracleClientVersionString, NULL, NULL, napi_default,
             NULL },
     { "outFormat", NULL, NULL, njsOracleDb_getOutFormat,
             njsOracleDb_setOutFormat, NULL, napi_default, NULL },
@@ -260,12 +254,12 @@ static const napi_property_descriptor njsClassProperties[] = {
             njsOracleDb_setPoolTimeout, NULL, napi_default, NULL },
     { "stmtCacheSize", NULL, NULL, njsOracleDb_getStmtCacheSize,
             njsOracleDb_setStmtCacheSize, NULL, napi_default, NULL },
-    { "version", NULL, NULL, njsOracleDb_getVersion, njsOracleDb_setVersion,
-            NULL, napi_default, NULL },
-    { "versionString", NULL, NULL, njsOracleDb_getVersionString,
-            njsOracleDb_setVersionString, NULL, napi_default, NULL },
-    { "versionSuffix", NULL, NULL, njsOracleDb_getVersionSuffix,
-            njsOracleDb_setVersionSuffix, NULL, napi_default, NULL },
+    { "version", NULL, NULL, njsOracleDb_getVersion, NULL, NULL, napi_default,
+            NULL },
+    { "versionString", NULL, NULL, njsOracleDb_getVersionString, NULL, NULL,
+            napi_default, NULL },
+    { "versionSuffix", NULL, NULL, njsOracleDb_getVersionSuffix, NULL, NULL,
+            napi_default, NULL },
     { "_createPool", NULL, njsOracleDb_createPool, NULL, NULL, NULL,
             napi_default, NULL },
     { "_getConnection", NULL, njsOracleDb_getConnection, NULL, NULL, NULL,
@@ -1405,28 +1399,6 @@ static napi_value njsOracleDb_setMaxRows(napi_env env, napi_callback_info info)
 
 
 //-----------------------------------------------------------------------------
-// njsOracleDb_setOracleClientVersion()
-//   Set accessor of "oracleClientVersion" property.
-//-----------------------------------------------------------------------------
-static napi_value njsOracleDb_setOracleClientVersion(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "oracleClientVersion");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsOracleDb_setOracleClientVersionString()
-//   Set accessor of "oracleClientVersionString" property.
-//-----------------------------------------------------------------------------
-static napi_value njsOracleDb_setOracleClientVersionString(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "oracleClientVersionString");
-}
-
-
-//-----------------------------------------------------------------------------
 // njsOracleDb_setOutFormat()
 //   Set accessor of "outFormat" property.
 //-----------------------------------------------------------------------------
@@ -1568,37 +1540,4 @@ static napi_value njsOracleDb_setStmtCacheSize(napi_env env,
         return NULL;
 
     return NULL;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsOracleDb_setVersion()
-//   Set accessor of "version" property.
-//-----------------------------------------------------------------------------
-static napi_value njsOracleDb_setVersion(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "version");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsOracleDb_setVersionString()
-//   Set accessor of "versionString" property.
-//-----------------------------------------------------------------------------
-static napi_value njsOracleDb_setVersionString(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "versionString");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsOracleDb_setVersionSuffix()
-//   Set accessor of "versionSuffix" property.
-//-----------------------------------------------------------------------------
-static napi_value njsOracleDb_setVersionSuffix(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "versionSuffix");
 }

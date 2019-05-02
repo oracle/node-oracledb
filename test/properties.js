@@ -145,7 +145,7 @@ describe('58. properties.js', function() {
         function() {
           oracledb.version = 5;
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'version' of object '#<OracleDb>"
       );
     });
 
@@ -198,7 +198,7 @@ describe('58. properties.js', function() {
         function() {
           oracledb.oracleClientVersion = t + 1;
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'oracleClientVersion' of object '#<OracleDb>"
       );
     });
 
@@ -278,7 +278,7 @@ describe('58. properties.js', function() {
         function() {
           oracledb.versionString = t + "foobar";
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'versionString' of object '#<OracleDb>"
       );
     });
 
@@ -292,7 +292,7 @@ describe('58. properties.js', function() {
         function() {
           oracledb.versionSuffix = t + "foobar";
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'versionSuffix' of object '#<OracleDb>"
       );
     });
 
@@ -304,7 +304,7 @@ describe('58. properties.js', function() {
         function() {
           oracledb.oracleClientVersion = t + "foobar";
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'oracleClientVersionString' of object '#<OracleDb>"
       );
     });
 
@@ -378,7 +378,7 @@ describe('58. properties.js', function() {
         function() {
           pool.poolMin = t + 1;
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'poolMin' of object '#<Pool>"
       );
     });
 
@@ -390,7 +390,7 @@ describe('58. properties.js', function() {
         function() {
           pool.poolMax = t + 1;
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'poolMax' of object '#<Pool>"
       );
     });
 
@@ -402,7 +402,7 @@ describe('58. properties.js', function() {
         function() {
           pool.poolIncrement = t + 1;
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'poolIncrement' of object '#<Pool>"
       );
     });
 
@@ -414,7 +414,7 @@ describe('58. properties.js', function() {
         function() {
           pool.poolTimeout = t + 1;
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'poolTimeout' of object '#<Pool>"
       );
     });
 
@@ -426,7 +426,7 @@ describe('58. properties.js', function() {
         function() {
           pool.stmtCacheSize = t + 1;
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'stmtCacheSize' of object '#<Pool>"
       );
     });
 
@@ -438,7 +438,7 @@ describe('58. properties.js', function() {
         function() {
           pool.connectionsInUse = t + 1;
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'connectionsInUse' of object '#<Pool>"
       );
     });
 
@@ -450,7 +450,7 @@ describe('58. properties.js', function() {
         function() {
           pool.connectionsOpen = t + 1;
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'connectionsOpen' of object '#<Pool>"
       );
     });
 
@@ -462,7 +462,7 @@ describe('58. properties.js', function() {
         function() {
           pool.queueTimeout = t + 1000;
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'queueTimeout' of object '#<Pool>"
       );
     });
 
@@ -474,7 +474,7 @@ describe('58. properties.js', function() {
         function() {
           pool.poolPingInterval = t + 100;
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'poolPingInterval' of object '#<Pool>"
       );
     });
 
@@ -524,7 +524,7 @@ describe('58. properties.js', function() {
         function() {
           connection.stmtCacheSize = t + 1;
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'stmtCacheSize' of object '#<Connection>"
       );
     });
 
@@ -590,7 +590,7 @@ describe('58. properties.js', function() {
         function() {
           connection.oracleServerVersion = t + 1;
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'oracleServerVersion' of object '#<Connection>"
       );
     });
 
@@ -602,7 +602,7 @@ describe('58. properties.js', function() {
         function() {
           connection.oracleServerVersion = t + "foobar";
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'oracleServerVersion' of object '#<Connection>"
       );
     });
 
@@ -690,7 +690,7 @@ describe('58. properties.js', function() {
         function() {
           resultSet.metaData = {"foo": "bar"};
         },
-        /NJS-014: [\w]+ is a read-only property/
+        "TypeError: Cannot assign to read only property 'metaData' of object '#<ResultSet>"
       );
       resultSet.close(done);
     });

@@ -221,7 +221,7 @@ describe('51. poolClose.js', function(){
           function() {
             pool.poolMin = 20;
           },
-          /NJS-014: poolMin is a read-only property/
+          "TypeError: Cannot assign to read only property 'poolMin' of object '#<Pool>'"
         );
 
         pool.terminate(function(err) {
@@ -232,7 +232,7 @@ describe('51. poolClose.js', function(){
             function() {
               pool.poolMin = 20;
             },
-            /NJS-014: poolMin is a read-only property/
+            "TypeError: Cannot assign to read only property 'poolMin' of object '#<Pool>'"
           );
 
           pool.terminate(function(err) {

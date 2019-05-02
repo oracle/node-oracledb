@@ -38,7 +38,6 @@ static const char *njsErrorMessages[] = {
     "NJS-011: encountered bind value and type mismatch", // errBindValueAndTypeMismatch
     "NJS-012: encountered invalid bind data type in parameter %d", // errInvalidBindDataType
     "NJS-013: invalid bind direction",               // errInvalidBindDirection
-    "NJS-014: %s is a read-only property",           // errReadOnly
     "NJS-015: type was not specified for conversion", // errNoTypeForConversion
     "NJS-016: buffer is too small for OUT binds",    // errInsufficientBufferForBinds
     "NJS-017: concurrent operations on ResultSet are not allowed", // errBusyResultSet

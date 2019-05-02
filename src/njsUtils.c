@@ -486,17 +486,6 @@ bool njsUtils_isBuffer(napi_env env, napi_value value)
 
 
 //-----------------------------------------------------------------------------
-// njsUtils_readOnlySetter()
-//   Throws an exception that the property is read-only.
-//-----------------------------------------------------------------------------
-napi_value njsUtils_readOnlySetter(napi_env env, const char *name)
-{
-    njsUtils_throwError(env, errReadOnly, name);
-    return NULL;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsUtils_setPropBool()
 //   Sets a property to a boolean value. If the value is not a boolean, an
 // error is raised and false is returned.
