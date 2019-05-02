@@ -39,6 +39,7 @@
              "odpi/src/dpiOci.c",
              "odpi/src/dpiOracleType.c",
              "odpi/src/dpiPool.c",
+             "odpi/src/dpiQueue.c",
              "odpi/src/dpiRowid.c",
              "odpi/src/dpiSodaColl.c",
              "odpi/src/dpiSodaCollCursor.c",
