@@ -235,6 +235,7 @@ bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
         njsBaseInstance **instance)
 {
     napi_value constructor;
+    size_t numProperties;
     void *data;
 
     // acquire a reference to the constructor
@@ -257,6 +258,14 @@ bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
             NULL) != napi_ok) {
         free(data);
         return njsUtils_genericThrowError(env);
+    }
+
+    // define properties on instance, if applicable
+    if (classDef->propertiesOnInstance) {
+        for (numProperties = 0; classDef->properties[numProperties].utf8name;
+                numProperties++);
+        NJS_CHECK_NAPI(env, napi_define_properties(env, *instanceObj,
+                numProperties, classDef->properties))
     }
 
     *instance = (njsBaseInstance*) data;

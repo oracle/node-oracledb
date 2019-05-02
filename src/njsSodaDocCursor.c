@@ -51,7 +51,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefSodaDocCursor = {
     "SodaDocCursor", sizeof(njsSodaDocCursor), njsSodaDocCursor_finalize,
-    njsClassProperties, NULL
+    njsClassProperties, NULL, false
 };
 
 // other methods used internally

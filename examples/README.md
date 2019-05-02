@@ -48,12 +48,15 @@ If this is your first time with node-oracledb, start with
 [`example.js`](example.js).
 
 File Name                   | Description
-----------------------------|------------
-blobhttp.js                 | A simple web app that streams an image
+----------------------------|----------------------------------------------------------------------------------
+aqoptions.js                | Oracle Advanced Queuing (AQ) example setting options and message attributes
+aqmulti.js                  | Oracle Advanced Queuing (AQ) example passing multiple messages
+aqraw.js                    | Basic Oracle Advanced Queuing (AQ) example passing text messages
+blobhttp.js                 | Simple web app that streams an image
 calltimeout.js              | Shows how to cancel a SQL statement if it doesn't complete in a specified time
 connect.js                  | Basic example for creating a standalone (non-pooled) connection
 connectionpool.js           | Basic example creating a pool of connections
-cqn1.js                     | Basic Continuous Query Notification example
+cqn1.js                     | Basic Continuous Query Notification (CQN) example
 cqn2.js                     | Continuous Query Notification with notification grouping
 date.js                     | Show some DATE and TIMESTAMP behaviors
 dbconfig.js                 | Common file used by examples for setting connection credentials

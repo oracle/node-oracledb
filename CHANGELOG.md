@@ -13,6 +13,9 @@
     - The string representation of classes has changed to `[Object Object]` as a consequence of using N-API.
     - A C++11 compiler is no longer required when building from source code.  The node-oracledb source code is now pure C.
 
+- Added support for Oracle Advanced Queuing (AQ) RAW queues, allowing
+  String and Buffer messages to be used.
+
 - Class methods are now configurable.  For example via
   `Object.defineProperty`.
 

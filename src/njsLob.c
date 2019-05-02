@@ -75,7 +75,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 
 // class definition
 const njsClassDef njsClassDefLob = {
-    "Lob", sizeof(njsLob), njsLob_finalize, njsClassProperties, NULL
+    "Lob", sizeof(njsLob), njsLob_finalize, njsClassProperties, NULL, false
 };
 
 // other methods used internally

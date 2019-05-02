@@ -59,7 +59,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefResultSet = {
     "ResultSet", sizeof(njsResultSet), njsResultSet_finalize,
-    njsClassProperties, NULL
+    njsClassProperties, NULL, false
 };
 
 // other methods used internally
