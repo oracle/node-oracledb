@@ -36,13 +36,6 @@ static NJS_NAPI_GETTER(njsSodaDocument_getLastModified);
 static NJS_NAPI_GETTER(njsSodaDocument_getMediaType);
 static NJS_NAPI_GETTER(njsSodaDocument_getVersion);
 
-// setters
-static NJS_NAPI_SETTER(njsSodaDocument_setCreatedOn);
-static NJS_NAPI_SETTER(njsSodaDocument_setKey);
-static NJS_NAPI_SETTER(njsSodaDocument_setLastModified);
-static NJS_NAPI_SETTER(njsSodaDocument_setMediaType);
-static NJS_NAPI_SETTER(njsSodaDocument_setVersion);
-
 // finalize
 static NJS_NAPI_FINALIZE(njsSodaDocument_finalize);
 
@@ -52,16 +45,16 @@ static const napi_property_descriptor njsClassProperties[] = {
             NULL, NULL, NULL, napi_default, NULL },
     { "_getContentAsString", NULL, njsSodaDocument_getContentAsString,
             NULL, NULL, NULL, napi_default, NULL },
-    { "createdOn", NULL, NULL, njsSodaDocument_getCreatedOn,
-            njsSodaDocument_setCreatedOn, NULL, napi_default, NULL },
-    { "key", NULL, NULL, njsSodaDocument_getKey, njsSodaDocument_setKey,
-            NULL, napi_default, NULL },
-    { "lastModified", NULL, NULL, njsSodaDocument_getLastModified,
-            njsSodaDocument_setLastModified, NULL, napi_default, NULL },
-    { "mediaType", NULL, NULL, njsSodaDocument_getMediaType,
-            njsSodaDocument_setMediaType, NULL, napi_default, NULL },
-    { "version", NULL, NULL, njsSodaDocument_getVersion,
-            njsSodaDocument_setVersion, NULL, napi_default, NULL },
+    { "createdOn", NULL, NULL, njsSodaDocument_getCreatedOn, NULL, NULL,
+            napi_default, NULL },
+    { "key", NULL, NULL, njsSodaDocument_getKey, NULL, NULL, napi_default,
+            NULL },
+    { "lastModified", NULL, NULL, njsSodaDocument_getLastModified, NULL, NULL,
+            napi_default, NULL },
+    { "mediaType", NULL, NULL, njsSodaDocument_getMediaType, NULL, NULL,
+            napi_default, NULL },
+    { "version", NULL, NULL, njsSodaDocument_getVersion, NULL, NULL,
+            napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
@@ -273,59 +266,4 @@ static napi_value njsSodaDocument_getVersion(napi_env env,
         napi_callback_info info)
 {
     return njsSodaDocument_genericGetter(env, info, dpiSodaDoc_getVersion);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsSodaDocument_setCreatedOn()
-//   Set accessor of "createdOn" property.
-//-----------------------------------------------------------------------------
-static napi_value njsSodaDocument_setCreatedOn(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "createdOn");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsSodaDocument_setKey()
-//   Set accessor of "key" property.
-//-----------------------------------------------------------------------------
-static napi_value njsSodaDocument_setKey(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "key");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsSodaDocument_setLastModified()
-//   Set accessor of "lastModified" property.
-//-----------------------------------------------------------------------------
-static napi_value njsSodaDocument_setLastModified(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "lastModified");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsSodaDocument_setMediaType()
-//   Set accessor of "mediaType" property.
-//-----------------------------------------------------------------------------
-static napi_value njsSodaDocument_setMediaType(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "mediaType");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsSodaDocument_setVersion()
-//   Set accessor of "version" property.
-//-----------------------------------------------------------------------------
-static napi_value njsSodaDocument_setVersion(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "version");
 }

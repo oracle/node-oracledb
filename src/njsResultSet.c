@@ -42,9 +42,6 @@ static NJS_PROCESS_ARGS_METHOD(njsResultSet_getRowsProcessArgs);
 // getters
 static NJS_NAPI_GETTER(njsResultSet_getMetaData);
 
-// setters
-static NJS_NAPI_SETTER(njsResultSet_setMetaData);
-
 // finalize
 static NJS_NAPI_FINALIZE(njsResultSet_finalize);
 
@@ -54,8 +51,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             napi_default, NULL },
     { "_getRows", NULL, njsResultSet_getRows, NULL, NULL, NULL,
             napi_default, NULL },
-    { "metaData", NULL, NULL, njsResultSet_getMetaData,
-            njsResultSet_setMetaData, NULL, napi_default, NULL },
+    { "metaData", NULL, NULL, njsResultSet_getMetaData, NULL, NULL,
+            napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
@@ -422,15 +419,4 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, dpiStmt *handle,
     }
 
     return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsResultSet_setMetaData()
-//   Set accessor of "metaData" property.
-//-----------------------------------------------------------------------------
-static napi_value njsResultSet_setMetaData(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "metaData");
 }

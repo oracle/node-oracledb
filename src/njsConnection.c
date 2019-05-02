@@ -85,10 +85,7 @@ static NJS_NAPI_SETTER(njsConnection_setAction);
 static NJS_NAPI_SETTER(njsConnection_setCallTimeout);
 static NJS_NAPI_SETTER(njsConnection_setClientId);
 static NJS_NAPI_SETTER(njsConnection_setCurrentSchema);
-static NJS_NAPI_SETTER(njsConnection_setOracleServerVersion);
-static NJS_NAPI_SETTER(njsConnection_setOracleServerVersionString);
 static NJS_NAPI_SETTER(njsConnection_setModule);
-static NJS_NAPI_SETTER(njsConnection_setStmtCacheSize);
 static NJS_NAPI_SETTER(njsConnection_setTag);
 
 // finalize
@@ -133,13 +130,12 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "module", NULL, NULL, njsConnection_getModule, njsConnection_setModule,
             NULL, napi_default, NULL },
     { "oracleServerVersion", NULL, NULL, njsConnection_getOracleServerVersion,
-            njsConnection_setOracleServerVersion, NULL, napi_default, NULL },
+            NULL, NULL, napi_default, NULL },
     { "oracleServerVersionString", NULL, NULL,
-            njsConnection_getOracleServerVersionString,
-            njsConnection_setOracleServerVersionString, NULL, napi_default,
-            NULL },
-    { "stmtCacheSize", NULL, NULL, njsConnection_getStmtCacheSize,
-            njsConnection_setStmtCacheSize, NULL, napi_default, NULL },
+            njsConnection_getOracleServerVersionString, NULL, NULL,
+            napi_default, NULL },
+    { "stmtCacheSize", NULL, NULL, njsConnection_getStmtCacheSize, NULL, NULL,
+            napi_default, NULL },
     { "tag", NULL, NULL, njsConnection_getTag, njsConnection_setTag, NULL,
             napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
@@ -2184,39 +2180,6 @@ static napi_value njsConnection_setModule(napi_env env,
 {
     return njsConnection_setTextAttribute(env, info, "module",
             dpiConn_setModule);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_setOracleServerVersion()
-//   Set accessor of "oracleServerVersion" property.
-//-----------------------------------------------------------------------------
-static napi_value njsConnection_setOracleServerVersion(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "oracleServerVersion");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_setOracleServerVersionString()
-//   Set accessor of "oracleServerVersionString" property.
-//-----------------------------------------------------------------------------
-static napi_value njsConnection_setOracleServerVersionString(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "oracleServerVersionString");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_setStmtCacheSize()
-//   Set accessor of "stmtCacheSize" property.
-//-----------------------------------------------------------------------------
-static napi_value njsConnection_setStmtCacheSize(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "stmtCacheSize");
 }
 
 

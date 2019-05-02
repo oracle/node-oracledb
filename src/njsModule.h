@@ -169,7 +169,6 @@ typedef enum {
     errBindValueAndTypeMismatch,
     errInvalidBindDataType,
     errInvalidBindDirection,
-    errReadOnly,
     errNoTypeForConversion,
     errInsufficientBufferForBinds,
     errBusyResultSet,
@@ -829,7 +828,6 @@ bool njsUtils_getValueFromArg(napi_env env, napi_value *args,
         napi_value *value, bool *found, char *errorBuffer);
 bool njsUtils_isBuffer(napi_env env, napi_value value);
 bool njsUtils_isInstance(napi_env env, napi_value value, const char *name);
-napi_value njsUtils_readOnlySetter(napi_env env, const char *name);
 bool njsUtils_setPropBool(napi_env env, napi_value value, const char *name,
         bool *result);
 bool njsUtils_setPropInt(napi_env env, napi_value value, const char *name,

@@ -50,16 +50,6 @@ static NJS_NAPI_GETTER(njsPool_getPoolPingInterval);
 static NJS_NAPI_GETTER(njsPool_getPoolTimeout);
 static NJS_NAPI_GETTER(njsPool_getStmtCacheSize);
 
-// setters
-static NJS_NAPI_SETTER(njsPool_setConnectionsInUse);
-static NJS_NAPI_SETTER(njsPool_setConnectionsOpen);
-static NJS_NAPI_SETTER(njsPool_setPoolIncrement);
-static NJS_NAPI_SETTER(njsPool_setPoolMax);
-static NJS_NAPI_SETTER(njsPool_setPoolMin);
-static NJS_NAPI_SETTER(njsPool_setPoolPingInterval);
-static NJS_NAPI_SETTER(njsPool_setPoolTimeout);
-static NJS_NAPI_SETTER(njsPool_setStmtCacheSize);
-
 // finalize
 static NJS_NAPI_FINALIZE(njsPool_finalize);
 
@@ -68,22 +58,22 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "_close", NULL, njsPool_close, NULL, NULL, NULL, napi_default, NULL },
     { "_getConnection", NULL, njsPool_getConnection, NULL, NULL, NULL,
             napi_default, NULL },
-    { "connectionsInUse", NULL, NULL, njsPool_getConnectionsInUse,
-            njsPool_setConnectionsInUse, NULL, napi_default, NULL },
-    { "connectionsOpen", NULL, NULL, njsPool_getConnectionsOpen,
-            njsPool_setConnectionsOpen, NULL, napi_default, NULL },
-    { "poolIncrement", NULL, NULL, njsPool_getPoolIncrement,
-            njsPool_setPoolIncrement, NULL, napi_default, NULL },
-    { "poolMax", NULL, NULL, njsPool_getPoolMax, njsPool_setPoolMax, NULL,
+    { "connectionsInUse", NULL, NULL, njsPool_getConnectionsInUse, NULL, NULL,
             napi_default, NULL },
-    { "poolMin", NULL, NULL, njsPool_getPoolMin, njsPool_setPoolMin, NULL,
+    { "connectionsOpen", NULL, NULL, njsPool_getConnectionsOpen, NULL, NULL,
             napi_default, NULL },
-    { "poolPingInterval", NULL, NULL, njsPool_getPoolPingInterval,
-            njsPool_setPoolPingInterval, NULL, napi_default, NULL },
-    { "poolTimeout", NULL, NULL, njsPool_getPoolTimeout,
-            njsPool_setPoolTimeout, NULL, napi_default, NULL },
-    { "stmtCacheSize", NULL, NULL, njsPool_getStmtCacheSize,
-            njsPool_setStmtCacheSize, NULL, napi_default, NULL },
+    { "poolIncrement", NULL, NULL, njsPool_getPoolIncrement, NULL, NULL,
+            napi_default, NULL },
+    { "poolMax", NULL, NULL, njsPool_getPoolMax, NULL, NULL, napi_default,
+            NULL },
+    { "poolMin", NULL, NULL, njsPool_getPoolMin, NULL, NULL, napi_default,
+            NULL },
+    { "poolPingInterval", NULL, NULL, njsPool_getPoolPingInterval, NULL, NULL,
+            napi_default, NULL },
+    { "poolTimeout", NULL, NULL, njsPool_getPoolTimeout, NULL, NULL,
+            napi_default, NULL },
+    { "stmtCacheSize", NULL, NULL, njsPool_getStmtCacheSize, NULL, NULL,
+            napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
@@ -495,89 +485,4 @@ bool njsPool_newFromBaton(njsBaton *baton, napi_env env, napi_value *poolObj)
     pool->stmtCacheSize = baton->stmtCacheSize;
 
     return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsPool_setConnectionsOpen()
-//   Set accessor of "connectionsOpen" property.
-//-----------------------------------------------------------------------------
-static napi_value njsPool_setConnectionsOpen(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "connectionsOpen");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsPool_setConnectionsInUse()
-//   Set accessor of "connectionsInUse" property.
-//-----------------------------------------------------------------------------
-static napi_value njsPool_setConnectionsInUse(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "connectionsInUse");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsPool_setPoolIncrement()
-//   Set accessor of "poolIncrement" property.
-//-----------------------------------------------------------------------------
-static napi_value njsPool_setPoolIncrement(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "poolIncrement");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsPool_setPoolMax()
-//   Set accessor of "poolMax" property.
-//-----------------------------------------------------------------------------
-static napi_value njsPool_setPoolMax(napi_env env, napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "poolMax");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsPool_setPoolMin()
-//   Set accessor of "poolMin" property.
-//-----------------------------------------------------------------------------
-static napi_value njsPool_setPoolMin(napi_env env, napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "poolMin");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsPool_setPoolPingInterval()
-//   Set accessor of "poolPingInterval" property.
-//-----------------------------------------------------------------------------
-static napi_value njsPool_setPoolPingInterval(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "poolPingInterval");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsPool_setPoolTimeout()
-//   Set accessor of "poolTimeout" property.
-//-----------------------------------------------------------------------------
-static napi_value njsPool_setPoolTimeout(napi_env env, napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "poolTimeout");
-}
-
-
-//-----------------------------------------------------------------------------
-// njsPool_setStmtCacheSize()
-//   Set accessor of "stmtCacheSize" property.
-//-----------------------------------------------------------------------------
-static napi_value njsPool_setStmtCacheSize(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_readOnlySetter(env, "stmtCacheSize");
 }

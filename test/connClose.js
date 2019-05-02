@@ -47,7 +47,7 @@ describe('52. connClose.js', function() {
             function() {
               connection.stmtCacheSize = 10;
             },
-            /NJS-014: stmtCacheSize is a read-only property/
+            "TypeError: Cannot assign to read only property 'stmtCacheSize' of object '#<Connection>'"
           );
           done();
         });
