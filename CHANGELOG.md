@@ -49,6 +49,8 @@
   [`sodaCollection.metaData`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollectionpropmetadata).
   It is now an Object, as was documented.
 
+- Corrected `pool.status` to be read-only, as was documented.
+
 - Error handling changes:
 
     - Corrected the error message parameter number for SODA

@@ -194,7 +194,7 @@ describe('170. poolDrain.js', () => {
     }
   }); // 170.9
 
-  it.skip('170.10 Negative - try to modify read-only property pool.status', async () => {
+  it('170.10 Negative - try to modify read-only property pool.status', async () => {
     try {
       let pool = await oracledb.createPool(settings);
       should.strictEqual(pool.status, oracledb.POOL_STATUS_OPEN);
@@ -203,7 +203,7 @@ describe('170. poolDrain.js', () => {
         () => {
           pool.status = random_num;
         },
-        /NJS-014: [\w]+ is a read-only property/
+        'Cannot set property status of #<Pool> which has only a getter'
       );
       await pool.close();
     } catch(err) {
