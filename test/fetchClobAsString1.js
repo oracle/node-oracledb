@@ -1545,7 +1545,7 @@ describe('84. fetchClobAsString1.js', function() {
       ], done);
     }); // 84.3.11
 
-    it('84.3.12 works with REF CURSOR', function(done) {
+    it.skip('84.3.12 works with REF CURSOR', function(done) {
       var id = insertID++;
       var specialStr = '84.3.12';
       var contentLength = 100;
@@ -2553,7 +2553,7 @@ describe('84. fetchClobAsString1.js', function() {
       ], done);
     }); // 84.5.11
 
-    it('84.5.12 works with REF CURSOR', function(done) {
+    it.skip('84.5.12 works with REF CURSOR', function(done) {
       var id = insertID++;
       var specialStr = '84.5.12';
       var contentLength = 100;

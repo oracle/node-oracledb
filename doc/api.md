@@ -152,12 +152,13 @@ limitations under the License.
                 - 4.2.6.3.7 [`prefetchRows`](#propexecprefetchrows)
                 - 4.2.6.3.8 [`resultSet`](#propexecresultset)
             - 4.2.6.4 [`execute()`: Callback Function](#executecallback)
-                - 4.2.6.4.1 [`metaData`](#execmetadata)
+                - 4.2.6.4.1 [`implicitResults`](#execimplicitresults)
+                - 4.2.6.4.2 [`metaData`](#execmetadata)
                     - [`name`](#execmetadata), [`fetchType`](#execmetadata), [`dbType`](#execmetadata), [`byteSize`](#execmetadata), [`precision`](#execmetadata), [`scale`](#execmetadata), [`nullable`](#execmetadata)
-                - 4.2.6.4.2 [`outBinds`](#execoutbinds)
-                - 4.2.6.4.3 [`resultSet`](#execresultset)
-                - 4.2.6.4.4 [`rows`](#execrows)
-                - 4.2.6.4.5 [`rowsAffected`](#execrowsaffected)
+                - 4.2.6.4.3 [`outBinds`](#execoutbinds)
+                - 4.2.6.4.4 [`resultSet`](#execresultset)
+                - 4.2.6.4.5 [`rows`](#execrows)
+                - 4.2.6.4.6 [`rowsAffected`](#execrowsaffected)
         - 4.2.7 [`executeMany()`](#executemany)
             - 4.2.7.1 [`executeMany()`: SQL Statement](#executemanysqlparam)
             - 4.2.7.2 [`executeMany()`: Binds](#executemanybinds)
@@ -374,6 +375,7 @@ limitations under the License.
     - 15.3 [Anonymous PL/SQL blocks](#plsqlanon)
     - 15.4 [Using DBMS_OUTPUT](#dbmsoutput)
     - 15.5 [Edition-Based Redefinition](#ebr)
+    - 15.6 [Implicit Results](#implicitresults)
 16. [Working with CLOB and BLOB Data](#lobhandling)
     - 16.1 [Simple Insertion of LOBs](#basiclobinsert)
     - 16.2 [Simple LOB Queries and PL/SQL OUT Binds](#queryinglobs)
@@ -2947,7 +2949,8 @@ has no effect on applications.  Use
 Boolean resultSet
 ```
 
-Determines whether query results should be returned as a
+Determines whether query results and [Implicit
+Results](#implicitresults) should be returned as a
 [ResultSet](#resultsetclass) object or directly.  The default is
 *false*.
 
@@ -2968,7 +2971,21 @@ Callback function parameter | Description
 
 The properties of `result` object from the `execute()` callback are described below.
 
-###### <a name="execmetadata"></a> 4.2.6.4.1 `metaData`
+###### <a name="execimplicitresults"></a> 4.2.6.4.1 `implicitResults`
+
+This property will be defined if the executed statement returned
+Implicit Results.  Depending on the value of
+[`resultSet`](#propexecresultset) it will either be an array, each
+element containing an array of rows from one query, or an array of
+[ResultSets](#resultsethandling) each corresponding to a query.
+
+See [Implicit Results](#implicitresults) for examples.
+
+This property was added in node-oracledb 4.0. Implicit Results
+requires Oracle Database 12.1 or later, and Oracle Client 12.1 or
+later.
+
+###### <a name="execmetadata"></a> 4.2.6.4.2 `metaData`
 
 ```
 readonly Array metaData
@@ -3008,7 +3025,7 @@ such as `WHERE 1 = 0` so the database does minimal work.
 
 See [Query Column Metadata](#querymeta) for examples.
 
-###### <a name="execoutbinds"></a> 4.2.6.4.2 `outBinds`
+###### <a name="execoutbinds"></a> 4.2.6.4.3 `outBinds`
 
 ```
 Array/object outBinds
@@ -3020,7 +3037,7 @@ If [`bindParams`](#executebindParams) is passed as an array, then
 object, then `outBinds` is returned as an object. If there are no OUT
 or IN OUT binds, the value is undefined.
 
-###### <a name="execresultset"></a> 4.2.6.4.3 `resultSet`
+###### <a name="execresultset"></a> 4.2.6.4.4 `resultSet`
 
 ```
 Object resultSet
@@ -3035,7 +3052,7 @@ When using this option, [`resultSet.close()`](#close) must be called
 when the ResultSet is no longer needed.  This is true whether or not
 rows have been fetched from the ResultSet.
 
-###### <a name="execrows"></a> 4.2.6.4.4 `rows`
+###### <a name="execrows"></a> 4.2.6.4.5 `rows`
 
 ```
 Array rows
@@ -3055,7 +3072,7 @@ The number of rows returned is limited by
 `maxRows` is 0, then the number of rows is limited by Node.js memory
 constraints.
 
-###### <a name="execrowsaffected"></a> 4.2.6.4.5 `rowsAffected`
+###### <a name="execrowsaffected"></a> 4.2.6.4.6 `rowsAffected`
 
 ```
 Number rowsAffected
@@ -8137,7 +8154,7 @@ continue getting more rows, then the ResultSet should be freed using
 [`close()`](#close).  The ResultSet should also be explicitly closed
 in the cases where no rows will be fetched from it.
 
-REF CURSORS returned from a PL/SQL block via an `oracledb.CURSOR` OUT
+REF CURSORS returned from a PL/SQL block via an [`oracledb.CURSOR`](#oracledbconstants) OUT
 binds are also available as a ResultSet. See
 [REF CURSOR Bind Parameters](#refcursors).
 
@@ -8150,64 +8167,61 @@ for full examples.
 To fetch one row at a time use getRow() :
 
 ```javascript
-connection.execute(
-  `SELECT employee_id, last_name FROM employees ORDER BY employee_id`,
+const result = await connection.execute(
+  `SELECT employee_id, last_name
+   FROM employees
+   WHERE ROWNUM < 5
+   ORDER BY employee_id`,
   [], // no bind variables
-  { resultSet: true }, // return a Result Set.  Default is false
-  function(err, result) {
-    if (err) { . . . }
-    fetchOneRowFromRS(connection, result.resultSet);
-  });
-});
+  {
+    resultSet: true // return a ResultSet (default is false)
+  }
+);
 
-function fetchOneRowFromRS(connection, resultSet) {
-  resultSet.getRow( // get one row
-    function (err, row) {
-      if (err) {
-         . . .           // close the Result Set and release the connection
-      } else if (!row) { // no rows, or no more rows
-        . . .            // close the Result Set and release the connection
-      } else {
-        console.log(row);
-        fetchOneRowFromRS(connection, resultSet);  // get next row
-      }
-    });
+const rs = result.resultSet;
+let row;
+let i = 1;
+
+while ((row = await rs.getRow())) {
+  console.log("getRow(): row " + i++);
+  console.log(row);
 }
+// always close the ResultSet
+await rs.close();
 ```
 
 To fetch multiple rows at a time, use `getRows()`:
 
 
 ```javascript
-var numRows = 10;  // number of rows to return from each call to getRows()
+const numRows = 10;
 
-connection.execute(
-  `SELECT employee_id, last_name FROM employees ORDER BY employee_id`,
+const result = await connection.execute(
+  `SELECT employee_id, last_name
+   FROM   employees
+   WHERE ROWNUM < 25
+   ORDER BY employee_id`,
   [], // no bind variables
-  { resultSet: true }, // return a ResultSet.  Default is false
-  function(err, result) {
-    if (err) { . . . }
-    fetchRowsFromRS(connection, result.resultSet, numRows);
-  });
-});
+  {
+    resultSet: true // return a ResultSet (default is false)
+  }
+);
 
-function fetchRowsFromRS(connection, resultSet, numRows) {
-  resultSet.getRows( // get numRows rows
-    numRows,
-    function (err, rows) {
-      if (err) {
-         . . .                        // close the ResultSet and release the connection
-      } else if (rows.length > 0) {   // got some rows
-        console.log(rows);            // process rows
-        if (rows.length === numRows)  // might be more rows
-          fetchRowsFromRS(connection, resultSet, numRows);
-        else                          // got fewer rows than requested so must be at end
-          . . .                       // close the ResultSet and release the connection
-      } else {                        // else no rows
-          . . .                       // close the ResultSet and release the connection
-      }
-    });
-}
+// Fetch rows from the ResultSet.
+
+const rs = result.resultSet;
+let rows;
+
+do {
+  rows = await rs.getRows(numRows); // get numRows rows at a time
+  if (rows.length > 0) {
+    console.log("getRows(): Got " + rows.length + " rows");
+    console.log(rows);
+  }
+} while (rows.length === numRows);
+
+// always close the ResultSet
+await rs.close();
 ```
 
 #### <a name="streamingresults"></a> 14.1.3 Query Streaming
@@ -8219,8 +8233,8 @@ Use [`connection.queryStream()`](#querystream) to create a stream from
 a top level query and listen for events.  You can also call
 [`connection.execute()`](#execute) and use
 [`toQueryStream()`](#toquerystream) to return a stream from the
-returned [ResultSet](#resultsetclass) or OUT bind REF CURSOR
-ResultSet.
+returned [ResultSet](#resultsetclass), an OUT bind REF CURSOR
+ResultSet, or [Implicit Results](#implicitresults) ResultSet.
 
 With streaming, each row is returned as a `data` event.  Query
 metadata is available via a `metadata` event.  The `end` event
@@ -9314,6 +9328,88 @@ The output might be like:
 See the Database Development Guide chapter [Using Edition-Based
 Redefinition][98] for more information about EBR.
 
+### <a name="implicitresults"></a> 15.6 Implicit Results
+
+Oracle Implicit Results allow queries in PL/SQL to be returned to
+Node.js without requiring REF CURSORS or bind variables.  Implicit
+Results requires node-oracledb 4.0, Oracle Database 12.1 or later, and
+Oracle Client 12.1 or later.
+
+PL/SQL code uses `DBMS_SQL.RETURN_RESULT()` to return query results.
+These are accessible in the `execute()` callback
+[`implicitResults`](#execimplicitresults) attribute.
+
+For example:
+
+```
+const plsql = `
+  DECLARE
+    c1 SYS_REFCURSOR;
+    c2 SYS_REFCURSOR;
+  BEGIN
+    OPEN c1 FOR SELECT city, postal_code
+                FROM locations
+                WHERE location_id < 1200;
+    DBMS_SQL.RETURN_RESULT(c1);
+
+    OPEN C2 FOR SELECT job_id, employee_id, last_name
+                FROM employees
+                WHERE employee_id < 103;
+    DBMS_SQL.RETURN_RESULT(c2);
+  END;`;
+
+result = await connection.execute(plsql);
+console.log(result.implicitResults);
+```
+
+will display:
+
+```
+[
+  [
+    [ 'Roma', '00989' ],
+    [ 'Venice', '10934' ],
+  ],
+  [
+    [ 'AD_PRES', 100, 'King' ],
+    [ 'AD_VP', 101, 'Kochhar' ],
+    [ 'AD_VP', 102, 'De Haan' ],
+  ]
+]
+```
+
+For larger query results, fetching [ResultSets](#resultsethandling) is
+recommended:
+
+```
+result = await connection.execute(plsql, [], { resultSet: true });
+for (let i = 0; i < result.implicitResults.length; i++) {
+  console.log(" Implicit Result Set", i + 1);
+  const rs = result.implicitResults[i];  // get the next ResultSet
+  while ((row = await rs.getRow())) {
+    console.log("  ", row);
+  }
+  console.log();
+  await rs.close();
+}
+```
+
+This displays:
+
+```
+Implicit Result Set 1
+  [ 'Roma', '00989' ]
+  [ 'Venice', '10934' ]
+
+Implicit Result Set 2
+  [ 'AD_PRES', 100, 'King' ]
+  [ 'AD_VP', 101, 'Kochhar' ]
+  [ 'AD_VP', 102, 'De Haan' ]
+```
+
+
+A runnable example is in [impres.js][138].
+
 ## <a name="lobhandling"></a> 16. Working with CLOB and BLOB Data
 
 Oracle Database uses LOB data types to store long objects. The CLOB
@@ -10399,12 +10495,14 @@ Oracle REF CURSORS can be fetched in node-oracledb by binding a
 [ResultSet](#resultsetclass), allowing rows to be fetched using
 [`getRow()`](#getrow) or [`getRows()`](#getrows).  The ResultSet can
 also be converted to a Readable Stream by using
-[`toQueryStream()`](#toquerystream).
+[`toQueryStream()`](#toquerystream).  Oracle [Implicit
+Results](#implicitresults) are an alternative way to return query
+results from PL/SQL.
 
 If using `getRow()` or `getRows()` the ResultSet must be freed using
 [`close()`](#close) when all rows have been fetched, or when the
 application does not want to continue getting more rows.  If the REF
-CURSOR is set to NULL or is not set in the PL/SQL procedure then the
+CURSOR is set to NULL or is not set in the PL/SQL procedure, then the
 returned ResultSet is invalid and methods like `getRows()` will
 return an error when invoked.
 
@@ -13068,3 +13166,4 @@ All exceptions are now passed through the error callback.
 [135]: https://github.com/oracle/node-oracledb/blob/v3.1.0/doc/api.md
 [136]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2041545B-58D4-48DC-986F-DCC9D0DEC642
 [137]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-DC7B8CDD-4F89-40CC-875F-F70F673711D4
+[138]: https://github.com/oracle/node-oracledb/tree/master/examples/impres.js

@@ -242,6 +242,7 @@ typedef struct njsClassDef njsClassDef;
 typedef struct njsConnection njsConnection;
 typedef struct njsConstant njsConstant;
 typedef struct njsFetchInfo njsFetchInfo;
+typedef struct njsImplicitResult njsImplicitResult;
 typedef struct njsLob njsLob;
 typedef struct njsLobBuffer njsLobBuffer;
 typedef struct njsOracleDb njsOracleDb;
@@ -417,6 +418,9 @@ struct njsBaton {
     uint32_t numFetchAsBufferTypes;
     uint32_t *fetchAsBufferTypes;
 
+    // implicit results (requires free)
+    njsImplicitResult *implicitResults;
+
     // other structures (no free required)
     dpiStmtInfo stmtInfo;
 
@@ -523,6 +527,14 @@ struct njsFetchInfo {
     uint32_t type;
 };
 
+// data for acquiring implicit results
+struct njsImplicitResult {
+    dpiStmt *stmt;
+    uint32_t numQueryVars;
+    njsVariable *queryVars;
+    njsImplicitResult *next;
+};
+
 // data for class Lob exposed to JS.
 struct njsLob {
     NJS_INSTANCE_HEAD
@@ -606,6 +618,7 @@ struct njsPool {
 struct njsResultSet {
     NJS_INSTANCE_HEAD
     dpiStmt *handle;
+    dpiStmt *dependsOnHandle;
     njsConnection *conn;
     uint32_t numQueryVars;
     njsVariable *queryVars;
@@ -800,8 +813,8 @@ bool njsPool_newFromBaton(njsBaton *baton, napi_env env, napi_value *poolObj);
 // definition of functions for njsResultSet class
 //-----------------------------------------------------------------------------
 bool njsResultSet_new(njsBaton *baton, napi_env env, dpiStmt *handle,
-        njsVariable *vars, uint32_t numVars, bool autoClose,
-        napi_value *rsObj);
+        dpiStmt *dependsOnHandle, njsVariable *vars, uint32_t numVars,
+        bool autoClose, napi_value *rsObj);
 
 
 //-----------------------------------------------------------------------------

@@ -76,6 +76,7 @@ em_rowcounts.js             | `executeMany()` example showing how to find the nu
 endtoend.js                 | Example showing setting tracing attributes
 example.js                  | Basic example showing creating a table, inserting multiple rows, and querying rows
 fetchinfo.js                | Show how numbers and dates can be returned as strings using `fetchAsString` and `fetchInfo`
+impres.js                   | Shows PL/SQL 'Implict Results' returning multiple query results from PL/SQL code.
 insert1.js                  | Basic example creating a table and inserting data.  Shows DDL and DML
 insert2.js                  | Basic example showing auto commit behavior
 lobbinds.js                 | Demonstrates how to bind and query LOBs

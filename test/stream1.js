@@ -255,9 +255,8 @@ describe('13. stream1.js', function () {
 
     it('13.1.7 invalid SQL', function (done) {
       var stream = connection.queryStream(
-        'UPDATE nodb_stream1 SET employee_name = :name WHERE employee_id = :id',
+        'UPDATE nodb_stream1 SET employee_name = :name WHERE rownum < 1',
         {
-          id: 10,
           name: 'test_update'
         },
         {

@@ -448,7 +448,7 @@ bool njsVariable_getScalarValue(njsVariable *var, njsVariableBuffer *buffer,
         case DPI_NATIVE_TYPE_STMT:
             if (dpiStmt_addRef(data->value.asStmt) < 0)
                 return njsBaton_setErrorDPI(baton);
-            if (!njsResultSet_new(baton, env, data->value.asStmt,
+            if (!njsResultSet_new(baton, env, data->value.asStmt, NULL,
                     buffer->queryVars, buffer->numQueryVars, false, value)) {
                 dpiStmt_release(data->value.asStmt);
                 return false;

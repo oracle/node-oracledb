@@ -164,6 +164,8 @@ static bool njsConnection_getExecuteManyOutBinds(njsBaton *baton, napi_env env,
         uint32_t numOutBinds, napi_value *outBinds);
 static bool njsConnection_getExecuteOutBinds(njsBaton *baton,
         napi_env env, napi_value *outBinds);
+static bool njsConnection_getImplicitResults(njsBaton *baton,
+        napi_env env, napi_value *implicitResults);
 static bool njsConnection_getOutBinds(njsBaton *baton, napi_env env,
         uint32_t numOutBinds, uint32_t pos, napi_value *outBinds);
 static bool njsConnection_getRowCounts(njsBaton *baton, napi_env env,
@@ -175,6 +177,7 @@ static bool njsConnection_processExecuteBinds(njsBaton *baton,
         napi_env env, napi_value binds);
 static bool njsConnection_processExecuteManyBinds(njsBaton *baton,
         napi_env env, napi_value binds, napi_value options);
+static bool njsConnection_processImplicitResults(njsBaton *baton);
 static bool njsConnection_scanExecuteBinds(njsBaton *baton, napi_env env,
         napi_value binds, napi_value bindNames);
 static bool njsConnection_scanExecuteBindUnit(njsBaton *baton,
@@ -549,8 +552,9 @@ static bool njsConnection_executeAsync(njsBaton *baton)
                 baton->dpiStmtHandle, baton))
             return false;
 
-    // for all other statements, determine the number of rows affected
-    // and process any LOBS for out binds, as needed
+    // for all other statements, determine the number of rows affected, process
+    // variables (to manage LOBs, REF cursors, PL/SQL arrays, etc.) and process
+    // implicit results
     } else {
         if (dpiStmt_getRowCount(baton->dpiStmtHandle,
                 &baton->rowsAffected) < 0)
@@ -558,6 +562,8 @@ static bool njsConnection_executeAsync(njsBaton *baton)
         baton->bufferRowIndex = 0;
         if (!njsVariable_process(baton->bindVars, baton->numBindVars, 1,
                 baton))
+            return false;
+        if (!njsConnection_processImplicitResults(baton))
             return false;
     }
 
@@ -573,6 +579,7 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
         napi_value *args)
 {
     napi_value result, metadata, resultSet, rowsAffected, outBinds;
+    napi_value implicitResults;
 
     // create constructors used for various types that might be returned
     if (!njsBaton_setConstructors(baton, env))
@@ -592,7 +599,7 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
                 metadata))
 
         // return result set
-        if (!njsResultSet_new(baton, env, baton->dpiStmtHandle,
+        if (!njsResultSet_new(baton, env, baton->dpiStmtHandle, NULL,
                 baton->queryVars, baton->numQueryVars, !baton->getRS,
                 &resultSet))
             return false;
@@ -613,8 +620,19 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
                     "outBinds", outBinds))
         }
 
+        // check for implicit results when executing PL/SQL
+        if (baton->stmtInfo.isPLSQL) {
+            implicitResults = NULL;
+            if (!njsConnection_getImplicitResults(baton, env,
+                    &implicitResults))
+                return false;
+            if (implicitResults) {
+                NJS_CHECK_NAPI(env, napi_set_named_property(env, result,
+                        "implicitResults", implicitResults))
+            }
+
         // set rows affected if not executing PL/SQL
-        if (!baton->stmtInfo.isPLSQL) {
+        } else {
             NJS_CHECK_NAPI(env, napi_create_uint32(env,
                     (uint32_t) baton->rowsAffected, &rowsAffected))
             NJS_CHECK_NAPI(env, napi_set_named_property(env, result,
@@ -1182,6 +1200,48 @@ static bool njsConnection_getExecuteOutBinds(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
+// njsConnection_getImplicitResults()
+//   Return any implicit results that were returned by a PL/SQL block.
+//-----------------------------------------------------------------------------
+static bool njsConnection_getImplicitResults(njsBaton *baton,
+        napi_env env, napi_value *implicitResultsObj)
+{
+    njsImplicitResult *implicitResult;
+    uint32_t i, numImplicitResults;
+    napi_value resultSet;
+
+    // determine the number of implicit results
+    numImplicitResults = 0;
+    implicitResult = baton->implicitResults;
+    while (implicitResult) {
+        numImplicitResults++;
+        implicitResult = implicitResult->next;
+    }
+    if (numImplicitResults == 0)
+        return true;
+
+    // create an array to contain the implicit results
+    NJS_CHECK_NAPI(env, napi_create_array_with_length(env, numImplicitResults,
+            implicitResultsObj))
+    implicitResult = baton->implicitResults;
+    for (i = 0; i < numImplicitResults; i++) {
+        if (!njsResultSet_new(baton, env, implicitResult->stmt,
+                baton->dpiStmtHandle, implicitResult->queryVars,
+                implicitResult->numQueryVars, !baton->getRS, &resultSet))
+            return false;
+        implicitResult->stmt = NULL;
+        implicitResult->queryVars = NULL;
+        implicitResult->numQueryVars = 0;
+        NJS_CHECK_NAPI(env, napi_set_element(env, *implicitResultsObj, i,
+                resultSet))
+        implicitResult = implicitResult->next;
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsConnection_getOutBinds()
 //   Get the out binds as an object/array.
 //-----------------------------------------------------------------------------
@@ -1674,10 +1734,6 @@ static bool njsConnection_prepareAndBind(njsConnection *conn, njsBaton *baton)
     if (dpiStmt_getInfo(baton->dpiStmtHandle, &baton->stmtInfo) < 0)
         return njsBaton_setErrorDPI(baton);
 
-    // result sets are incompatible with non-queries
-    if (!baton->stmtInfo.isQuery && baton->getRS)
-        return njsBaton_setError(baton, errInvalidNonQueryExecution);
-
     // perform any binds necessary
     for (i = 0; i < baton->numBindVars; i++) {
         var = &baton->bindVars[i];
@@ -1839,6 +1895,64 @@ static bool njsConnection_processExecuteManyBinds(njsBaton *baton,
     if (hasBinds && !njsConnection_transferExecuteManyBinds(baton, env, binds,
             bindNames))
         return false;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_processImplicitResults()
+//   Process implicit results.
+//-----------------------------------------------------------------------------
+static bool njsConnection_processImplicitResults(njsBaton *baton)
+{
+    njsImplicitResult *implicitResult = NULL, *tempImplicitResult;
+    dpiVersionInfo versionInfo;
+    dpiStmt *stmt;
+
+    // clients earlier than 12.1 do not support implicit results
+    if (dpiContext_getClientVersion(baton->oracleDb->context,
+            &versionInfo) < 0)
+        return njsBaton_setErrorDPI(baton);
+    if (versionInfo.versionNum < 12)
+        return true;
+
+    // process all implicit results returned
+    while (1) {
+
+        // get next implicit result
+        if (dpiStmt_getImplicitResult(baton->dpiStmtHandle, &stmt) < 0)
+            return njsBaton_setErrorDPI(baton);
+        if (!stmt)
+            break;
+
+        // allocate memory and inject new structure into linked list
+        tempImplicitResult = calloc(1, sizeof(njsImplicitResult));
+        if (!tempImplicitResult) {
+            dpiStmt_release(stmt);
+            return njsBaton_setError(baton, errInsufficientMemory);
+        }
+        tempImplicitResult->stmt = stmt;
+        if (implicitResult) {
+            implicitResult->next = tempImplicitResult;
+        } else {
+            baton->implicitResults = implicitResult = tempImplicitResult;
+        }
+        implicitResult = tempImplicitResult;
+
+        // prepare statement for query
+        if (dpiStmt_getNumQueryColumns(stmt,
+                &implicitResult->numQueryVars) < 0)
+            return njsBaton_setErrorDPI(baton);
+        implicitResult->queryVars = calloc(implicitResult->numQueryVars,
+                sizeof(njsVariable));
+        if (!implicitResult->queryVars)
+            return njsBaton_setError(baton, errInsufficientMemory);
+        if (!njsVariable_initForQuery(implicitResult->queryVars,
+                implicitResult->numQueryVars, implicitResult->stmt, baton))
+            return false;
+
+    }
 
     return true;
 }

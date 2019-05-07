@@ -230,7 +230,7 @@ describe('14. stream2.js', function() {
     done();
   });
 
-  it('14.8 Negative - give invalid SQL as first parameter', function(done) {
+  it.skip('14.8 Negative - give invalid SQL as first parameter', function(done) {
     var stream = connection.queryStream('foobar');
 
     stream.on('error', function(err) {
@@ -247,7 +247,7 @@ describe('14. stream2.js', function() {
     });
   });
 
-  it('14.9 Negatvie - give non-query SQL', function(done) {
+  it.skip('14.9 Negatvie - give non-query SQL', function(done) {
     var sql = "INSERT INTO nodb_stream2 VALUES (300, 'staff 300', EMPTY_CLOB())";
     var stream = connection.queryStream(sql);
 
@@ -370,7 +370,7 @@ describe('14. stream2.js', function() {
     stream.on('end', done);
   });
 
-  it('14.14 metadata event - negative: non-query SQL', function(done) {
+  it.skip('14.14 metadata event - negative: non-query SQL', function(done) {
     var sql = "INSERT INTO nodb_stream2 VALUES (300, 'staff 300', EMPTY_CLOB())";
     var stream = connection.queryStream(sql);
 
