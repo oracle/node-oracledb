@@ -1389,7 +1389,7 @@ describe('12. resultSet1.js', function() {
       }
     });
   });
-  describe('12.8 Testing errInvalidResultSet', function() {
+  describe.skip('12.8 Testing errInvalidResultSet', function() {
     it('12.8.1 Negative: UPDATE BIND out with oracledb.CURSOR - bind by name', function(done) {
       var sql = "update nodb_rs1_emp set employees_name = 'abc' where employees_id = 1 RETURNING employees_name INTO :name";
       connection.execute(

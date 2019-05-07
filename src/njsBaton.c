@@ -311,6 +311,22 @@ void njsBaton_free(njsBaton *baton, napi_env env)
     // free batch errors
     NJS_FREE_AND_CLEAR(baton->batchErrorInfos);
 
+    // free implicit results
+    while (baton->implicitResults) {
+        if (baton->implicitResults->stmt) {
+            dpiStmt_release(baton->implicitResults->stmt);
+            baton->implicitResults->stmt = NULL;
+        }
+        if (baton->implicitResults->queryVars) {
+            for (i = 0; i < baton->implicitResults->numQueryVars; i++)
+                njsVariable_free(&baton->implicitResults->queryVars[i]);
+            free(baton->implicitResults->queryVars);
+            baton->implicitResults->queryVars = NULL;
+        }
+        free(baton->implicitResults);
+        baton->implicitResults = baton->implicitResults->next;
+    }
+
     // free mapping type arrays
     if (baton->fetchInfo) {
         for (i = 0; i < baton->numFetchInfo; i++) {

@@ -600,7 +600,7 @@ describe('55. resultSet2.js', function() {
     });
   });
 
-  describe('55.8 Negative - resultSet is only for query statement', function() {
+  describe.skip('55.8 Negative - resultSet is only for query statement', function() {
     before(function(done){
       setUp(connection, tableName, done);
     });
