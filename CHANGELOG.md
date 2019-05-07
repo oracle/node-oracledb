@@ -211,12 +211,12 @@
 ## node-oracledb v3.0.0 (1 Oct 2018)
 
 - Added new APIs for Simple Oracle Document Access
-  ([SODA](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#sodaoverview)),
+  ([SODA](https://oracle.github.io/node-oracledb/doc/api.html#sodaoverview)),
   available when using Oracle Database 18.3 and Oracle client
   libraries version 18.3, or later.
 
 - Added a `drainTime` argument to
-  [`pool.close()`](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#poolclose),
+  [`pool.close()`](https://oracle.github.io/node-oracledb/doc/api.html#poolclose),
   allowing pools to be force-closed after a specified number of
   seconds.  PR #950 (Danilo Silva).
 
