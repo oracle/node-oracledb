@@ -529,11 +529,12 @@ With Oracle's sample HR schema, the output is:
 
 #### <a name="examplesodaawait"></a> 1.1.2 Example: Simple Oracle Document Access (SODA) in Node.js
 
-Oracle Database 18c users who have been granted the SODA_APP role can
-use [node-oracledb's SODA API](#sodaoverview) to store content such
-as JSON.  SODA support in node-oracledb is in Preview status and
-should not be used in production.  It will be supported with a future
-version of Oracle Client libraries.
+Oracle Database 18c or 19c users who have been granted the SODA_APP
+role can use [node-oracledb's SODA API](#sodaoverview) to store
+content such as JSON.
+
+SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
+later.
 
 ```javascript
 // mysoda.js
@@ -3323,9 +3324,11 @@ This synchronous method returns a [SodaDatabase](#sodadatabaseclass).
 Returns a parent SodaDatabase object for use with Simple Oracle
 Document Access (SODA).
 
-SODA support in node-oracledb is in Preview status and should not be
-used in production.  It will be supported with a future version of
-Oracle Client libraries.
+SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
+later.  The SODA bulk insert methods
+[`sodaCollection.insertMany()`](#sodacollinsertmany) and
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget)
+remain in Preview status.
 
 See [Simple Oracle Document Access (SODA)](#sodaoverview) for more
 information about using SODA in node-oracledb.
@@ -4649,9 +4652,11 @@ for Node.js version 8 Stream `destroy()` method was added in node-oracledb 2.1.
 
 ## <a name="sodacollectionclass"></a> 9. SodaCollection Class
 
-SODA support in node-oracledb is in Preview status and should not be
-used in production.  It will be supported with a future version of
-Oracle Client libraries.
+SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
+later.  The SODA bulk insert methods
+[`sodaCollection.insertMany()`](#sodacollinsertmany) and
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget)
+remain in Preview status.
 
 #### <a name="sodacollectionproperties"></a> 9.1 SodaCollection Properties
 
@@ -5516,6 +5521,8 @@ objects](#errorobj) will contain the number of documents that were
 successfully inserted.  Subsequent documents in the input array will
 not be inserted.
 
+This method is in Preview status and should not be used in production.
+
 This method was added in node-oracledb 4.0.  It requires Oracle Client 18.5 or higher.
 
 #### <a name="sodacollinsertmanyandget"></a> 9.2.7 `sodaCollection.insertManyAndGet()`
@@ -5539,6 +5546,8 @@ returns an array of the inserted documents so system managed
 properties, such as the keys (in default collections), can be found.
 When inserting multiple documents, using `insertManyAndGet()` is
 recommended in preference to `insertOneAndGet()`.
+
+This method is in Preview status and should not be used in production.
 
 This method was added in node-oracledb 4.0.  It requires Oracle Client 18.5 or higher.
 
@@ -5702,14 +5711,16 @@ Callback function parameter | Description
 
 ## <a name="sodadatabaseclass"></a> 10. SodaDatabase Class
 
-SODA support in node-oracledb is in Preview status and should not be
-used in production.  It will be supported with a future version of
-Oracle Client libraries.
-
 The SodaDatabase class is the top level object for node-oracledb SODA
 operations. A 'SODA database' is an abstraction, allowing access to
 SODA collections in that 'SODA database', which then allow access to
 documents in those collections.
+
+SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
+later.  The SODA bulk insert methods
+[`sodaCollection.insertMany()`](#sodacollinsertmany) and
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget)
+remain in Preview status.
 
 A SODA database is equivalent to an Oracle Database user, see
 [Overview of SODA][117] in the Introduction to SODA manual.
@@ -6012,12 +6023,14 @@ Callback function parameter | Description
 
 ## <a name="sodadocumentclass"></a> 11. SodaDocument Class
 
-Note SODA support in node-oracledb is in Preview status and should not
-be used in production.  It will be supported with a future version of
-Oracle Client libraries.
-
 SodaDocuments represents the document for SODA read and write
 operations.
+
+SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
+later.  The SODA bulk insert methods
+[`sodaCollection.insertMany()`](#sodacollinsertmany) and
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget)
+remain in Preview status.
 
 SodaDocument objects can be created in three ways:
 
@@ -11970,14 +11983,15 @@ that connection.
 ## <a name="sodaoverview"></a> 27. Simple Oracle Document Access (SODA)
 
 Oracle Database Simple Oracle Document Access (SODA) access is
-available in node-oracledb version 3 through a set of NoSQL-style
-APIs.  Documents can be inserted, queried, and retrieved from Oracle
-Database using node-oracledb methods.  By default, documents are JSON
-strings.
+available in node-oracledb through a set of NoSQL-style APIs.
+Documents can be inserted, queried, and retrieved from Oracle Database
+using node-oracledb methods.  By default, documents are JSON strings.
 
-SODA support in node-oracledb is in Preview status and should not be
-used in production.  It will be supported with a future version of
-Oracle Client libraries.
+SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
+later.  The SODA bulk insert methods
+[`sodaCollection.insertMany()`](#sodacollinsertmany) and
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget)
+remain in Preview status.
 
 The [Oracle Database Introduction to SODA][103] manual contains much
 information relevant to using SODA.  You can use Oracle SODA
