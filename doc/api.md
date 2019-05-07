@@ -497,11 +497,10 @@ With Oracle's sample HR schema, the output is:
 
 #### <a name="examplesodaawait"></a> 1.1.2 Example: Simple Oracle Document Access (SODA) in Node.js
 
-Oracle Database 18c users who have been granted the SODA_APP role can
-use [node-oracledb 3's SODA API](#sodaoverview) to store content such
-as JSON.  SODA support in node-oracledb is in Preview status and
-should not be used in production.  It will be supported with a future
-version of Oracle Client libraries.
+Oracle Database 18c or 19c users who have been granted the SODA_APP
+role can use [node-oracledb 3's SODA API](#sodaoverview) to store
+content such as JSON.  SODA can be used with Oracle Client 18.5 and
+Oracle Client 19.3, or later.
 
 ```javascript
 // mysoda.js
@@ -3225,9 +3224,8 @@ This synchronous method returns a [SodaDatabase](#sodadatabaseclass).
 Returns a parent SodaDatabase object for use with Simple Oracle
 Document Access (SODA).
 
-SODA support in node-oracledb is in Preview status and should not be
-used in production.  It will be supported with a future version of
-Oracle Client libraries.
+SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
+later.
 
 See [Simple Oracle Document Access (SODA)](#sodaoverview) for more
 information about using SODA in node-oracledb.
@@ -4251,9 +4249,8 @@ for Node.js version 8 Stream `destroy()` method was added in node-oracledb 2.1.
 
 ## <a name="sodacollectionclass"></a> 8. SodaCollection Class
 
-SODA support in node-oracledb is in Preview status and should not be
-used in production.  It will be supported with a future version of
-Oracle Client libraries.
+SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
+later.
 
 #### <a name="sodacollectionproperties"></a> 8.1 SodaCollection Properties
 
@@ -5253,10 +5250,6 @@ Callback function parameter | Description
 
 ## <a name="sodadatabaseclass"></a> 9. SodaDatabase Class
 
-SODA support in node-oracledb is in Preview status and should not be
-used in production.  It will be supported with a future version of
-Oracle Client libraries.
-
 The SodaDatabase class is the top level object for node-oracledb SODA
 operations. A 'SODA database' is an abstraction, allowing access to
 SODA collections in that 'SODA database', which then allow access to
@@ -5267,6 +5260,9 @@ A SODA database is equivalent to an Oracle Database user, see
 
 A SODA database object is created by calling
 [`connection.getSodaDatabase()`](#getsodadatabase).
+
+SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
+later.
 
 See [Simple Oracle Document Access (SODA)](#sodaoverview) for more
 information.
@@ -5563,12 +5559,11 @@ Callback function parameter | Description
 
 ## <a name="sodadocumentclass"></a> 10. SodaDocument Class
 
-Note SODA support in node-oracledb is in Preview status and should not
-be used in production.  It will be supported with a future version of
-Oracle Client libraries.
-
 SodaDocuments represents the document for SODA read and write
 operations.
+
+SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
+later.
 
 SodaDocument objects can be created in three ways:
 
@@ -11271,9 +11266,8 @@ APIs.  Documents can be inserted, queried, and retrieved from Oracle
 Database using node-oracledb methods.  By default, documents are JSON
 strings.
 
-SODA support in node-oracledb is in Preview status and should not be
-used in production.  It will be supported with a future version of
-Oracle Client libraries.
+SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
+later.
 
 The [Oracle Database Introduction to SODA][103] manual contains much
 information relevant to using SODA.  You can use Oracle SODA
