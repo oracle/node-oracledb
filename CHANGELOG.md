@@ -49,6 +49,9 @@
 - Fixed a crash that occurred when unsubscribing from CQN while
   notifications were ongoing ([ODPI-C change](https://github.com/oracle/odpi/commit/b96b11b7fe58f32f011c7f7419555e40268d5bf4)).
 
+- Fixed a crash occuring when draining the connection pool ([ODPI-C
+  change](https://github.com/oracle/odpi/commit/https://github.com/oracle/odpi/commit/7666dc3208087383f7f0f5e49c1ee423cb154997))
+
 - Corrected processing of the `force` option in SODA `dropIndex()`.
 
 - Corrected the type of
@@ -74,6 +77,12 @@
 
     - The NJS-014 error when setting a read-only property was replaced
       with a standard JavaScript message.
+
+- Updated documentation.
+
+- Added new tests.
+
+- Added new examples.
 
 ## node-oracledb v3.1.2 (22 Feb 2019)
 
