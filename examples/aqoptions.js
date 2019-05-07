@@ -73,7 +73,7 @@ async function deq() {
     const queue = connection.queue(queueName);
     Object.assign(queue.deqOptions,
                   {
-                    visibility: oracledb.AQ_VISIBILITY_IMMEDIATE, // Change the visibility so no explict commit is required
+                    visibility: oracledb.AQ_VISIBILITY_IMMEDIATE, // Change the visibility so no explicit commit is required
                     wait: 5                                       // Only wait 5 seconds if there are no messages
                   });
 
