@@ -29,11 +29,6 @@
 - CQN support and message type constants were added for database
   startup and shutdown events.
 
-- Added SODA bulk insert methods
-  [`sodaCollection.insertMany()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollinsertmany)
-  and
-  [`sodaCollection.insertManyAndGet()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollinsertmanyandget).
-
 - Added a `connection.currentSchema` attribute for setting the schema
   qualifier to be used when a qualifier is omitted in SQL statements.
   This is an efficient alternative to `ALTER SESSION SET
@@ -52,18 +47,9 @@
 - Fixed a crash occuring when draining the connection pool ([ODPI-C
   change](https://github.com/oracle/odpi/commit/https://github.com/oracle/odpi/commit/7666dc3208087383f7f0f5e49c1ee423cb154997))
 
-- Corrected processing of the `force` option in SODA `dropIndex()`.
-
-- Corrected the type of
-  [`sodaCollection.metaData`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollectionpropmetadata).
-  It is now an Object, as was documented.
-
 - Corrected `pool.status` to be read-only, as was documented.
 
 - Error handling changes:
-
-    - Corrected the error message parameter number for SODA
-      `getCollectionNames()`.
 
     - Corrected the error message returned when invalid types are used for
       boolean options.
@@ -77,6 +63,28 @@
 
     - The NJS-014 error when setting a read-only property was replaced
       with a standard JavaScript message.
+
+- SODA changes:
+
+    - Added SODA bulk insert methods
+      [`sodaCollection.insertMany()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollinsertmany)
+      and
+      [`sodaCollection.insertManyAndGet()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollinsertmanyandget).
+
+    - Document that the general SODA API is out of Preview status when
+      using Oracle Client 18.5 or Oracle Client 19.3, or later. The
+      new node-oracledb 4.0 methods `sodaCollection.insertMany()` and
+      `sodaCollection.insertManyAndGet()` are in Preview status and
+      should not be used in production
+
+    - Corrected the type of
+      [`sodaCollection.metaData`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollectionpropmetadata).
+      It is now an Object, as was documented.
+
+    - Corrected processing of the `force` option in SODA [`sodaCollection.dropIndex()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacolldropindex).
+
+    - Corrected the error message parameter number for SODA
+      [`sodaDatabase.getCollectionNames()`](https://oracle.github.io/node-oracledb/doc/api.html#sodadbgetcollectionnames).
 
 - Updated documentation.
 
