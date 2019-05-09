@@ -25,6 +25,11 @@
  *   The user must have been granted CHANGE NOTIFICATION.
  *   The node-oracledb host must be resolvable by the database host.
  *
+ *   Run this script and when the subscription has been created, run
+ *   these statements in a SQL*Plus session:
+ *      INSERT INTO CQNTABLE VALUES (101);
+ *      COMMIT;
+ *
  *   This example uses Node 8 syntax, but could be written to use callbacks.
  *
  *   This example requires node-oracledb 2.3 or later.

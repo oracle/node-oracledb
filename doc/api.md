@@ -403,7 +403,8 @@ limitations under the License.
     - 24.1 [Sending Simple AQ Messages](#aqexample)
     - 24.2 [Changing AQ options](#aqoptions)
     - 24.3 [Enqueuing and Dequeuing Multiple Messages](#aqmultiplemessages)
-    - 24.4 [Using the AQ PL/SQL interface](#aqplsql)
+    - 24.4 [Advanced Queuing Notifications](#aqnotifications)
+    - 24.5 [Using the AQ PL/SQL interface](#aqplsql)
 25. [Globalization and National Language Support (NLS)](#nls)
 26. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
 27. [Simple Oracle Document Access (SODA)](#sodaoverview)
@@ -843,7 +844,7 @@ Constants for the Continuous Query Notification [`namespace`](#consubscribeoptna
 
 Constant Name                        | Value |Description
 -------------------------------------|-------|---------------------------------------------------
-`oracledb.SUBSCR_NAMESPACE_AQ`       | 1     | For Advanced Queuing notifications.  Note AQ enqueue and dequeue methods are not supported in node-oracledb.
+`oracledb.SUBSCR_NAMESPACE_AQ`       | 1     | For Advanced Queuing notifications.
 `oracledb.SUBSCR_NAMESPACE_DBCHANGE` | 2     | For Continuous Query Notifications.
 
 #### <a name="oracledbconstantsaq"></a> 3.1.8 Advanced Queuing Constants
@@ -3550,7 +3551,7 @@ connection.
 
 Callback:
 ```
-subscribe(String name, Object options, function(Error error){});
+subscribe(String name, Object options, function(Error error, Object result){});
 ```
 Promise:
 ```
@@ -3560,7 +3561,8 @@ promise = subscribe(String name, Object options);
 ##### Description
 
 Register a JavaScript callback method to be invoked when data is
-changed in the database by any committed transaction.
+changed in the database by any committed transaction, or when there
+are Advanced Queuing messages to be dequeued.
 
 For notification to work, the connection must be created with
 [`events`](#propdbevents) mode *true*.
@@ -3580,9 +3582,13 @@ and the same JavaScript notification callback is used.  For
 performance reasons this can be preferable to creating a new
 subscription for each query.
 
-See [Continuous Query Notification (CQN)](#cqn) for more information.
+See [Continuous Query Notification (CQN)](#cqn) and
+[Advanced Queuing Notifications](#aqnotifications) for more information.
 
-This method was added in node-oracledb 2.3.
+This method was added in node-oracledb 2.3.  AQ notifications were
+added in node-oracledb 4.0
+
+The [`result`](#consubscribecallback) callback parameter was added in node-oracledb 4.0.
 
 ##### <a name="consubscribename"></a> 4.2.15.1 `subscribe()`: Name
 
@@ -3591,7 +3597,7 @@ String name
 ```
 
 For Continuous Query Notification this is an arbitrary name given to
-the subscription.  For Advanced Queue notifications this must be the
+the subscription.  For Advanced Queuing notifications this must be the
 queue name.
 
 ##### <a name="consubscribeoptions"></a> 4.2.15.2 `subscribe()`: Options
@@ -3628,6 +3634,7 @@ Callback function parameter | Description
 The `message` parameter in the notification callback is an object containing the following properties:
 
 - `dbName` - the name of the database which sent a notification. This property is only defined for CQN. It is not defined when `type` is [`oracledb.SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription).
+- `queueName` - the name of the Advanced Queue.  Undefined for CQN.  This was added in node-oracledb 4.0.
 - `queries` - an array of objects specifying the queries which were affected by the Query Change notification. This is only defined if the `type` key is the value [`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription). It contains the following key:
     - `tables` - an array of objects identical to the objects created for Database Change Notification (see the `tables` property below).
 - `registered` - a boolean indicating whether the subscription is registerd with the database.  Will be *false* if `type` is [`oracledb.SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription) or if the subscription was created with the [`qos`](#consubscribeoptqos) property set to [`oracledb.SUBSCR_QOS_DEREG_NFY`](#oracledbconstantssubscription).
@@ -3643,9 +3650,9 @@ The `message` parameter in the notification callback is an object containing the
     - `rows` - an array of objects specifying the rows which were changed. This will only be defined if the [`qos`](#consubscribeoptqos) quality of service used when creating the subscription indicated the desire for ROWIDs and no summary grouping took place. It contains the following properties:
         - `operation` - an integer which is one of [`oracledb.CQN_OPCODE_INSERT`](#oracledbconstantscqn), [`oracledb.CQN_OPCODE_UPDATE`](#oracledbconstantscqn), [`oracledb.CQN_OPCODE_DELETE`](#oracledbconstantscqn) as described earlier
         - `rowid` - a string containing the ROWID of the row that was affected
-- `txId` - a buffer containing the identifier of the transaction which spawned the notification.
+- `txId` - a buffer containing the identifier of the CQN transaction which spawned the notification.
 - `type` - the type of notification sent. This will be the value of one of the following constants:
-    - [`oracledb.SUBSCR_EVENT_TYPE_AQ`](#oracledbconstantssubscription) - One or more Advanced Queuing messages are available to be dequeued (Note AQ enqueue and dequeue methods are not supported)
+    - [`oracledb.SUBSCR_EVENT_TYPE_AQ`](#oracledbconstantssubscription) - One or more Advanced Queuing messages are available to be dequeued.
     - [`oracledb.SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription) - the subscription has been closed or the timeout value has been reached.
     - [`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription) - object-level notications are being used (Database Change Notification).
     - [`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription) - query-level notifications are being used (Continuous Query Notification).
@@ -3708,8 +3715,8 @@ One of the
 (the default) constants.
 
 You can use `oracledb.SUBSCR_NAMESPACE_AQ` to get notifications that
-Advanced Queuing messages are available to be dequeued.  Note Advanced
-Queuing enqueue and dequeue methods are not supported yet.
+Advanced Queuing messages are available to be dequeued, see
+[Advanced Queuing Notifications](#aqnotifications).
 
 ###### <a name="consubscribeoptoperations"></a> 4.2.15.2.8 `operations`
 
@@ -3759,7 +3766,7 @@ automatically unregistered and a deregistration notification is sent.
 ##### Prototype
 
 ```
-function(Error error)
+function(Error error, Object result)
 ```
 
 ##### Parameters
@@ -3767,6 +3774,9 @@ function(Error error)
 Callback function parameter | Description
 ----------------------------|-------------
 *Error error*               | If `subscribe()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+*Object result*             | For [CQN](#cqn) `oracledb.SUBSCR_NAMESPACE_DBCHANGE` subscriptions this contains a single property `regId` corresponding the value of `REGID` in the database view `USER_CHANGE_NOTIFICATION_REGS` or the value of `REG_ID` in `USER_SUBSCR_REGISTRATIONS`.  For [AQ](#aq) `oracledb.SUBSCR_NAMESPACE_AQ` subscriptions, `regId`is undefined.
+
+The `result` callback parameter was added in node-oracledb 4.0.
 
 #### <a name="conunsubscribe"></a> 4.2.15 `connection.unsubscribe()`
 
@@ -11395,8 +11405,11 @@ and the same JavaScript notification callback is used.  For
 performance reasons this can be preferable to creating a new
 subscription for each query.
 
-You can view information about registrations by querying
-`USER_CHANGE_NOTIFICATION_REGS` table.
+You can view information about registrations by querying views such
+`USER_CHANGE_NOTIFICATION_REGS` table.  The `REGID` column can be
+matched with the value contained in [`regid`](#consubscribecallback)
+from the `connection.subscribe()` callback parameter.  In the database
+view `USER_SUBSCR_REGISTRATIONS`, the `REG_ID` column can be matched.
 
 When notifications are no longer required, the subscription name can
 be passed to [`connection.unsubscribe()`](#conunsubscribe).
@@ -11722,7 +11735,42 @@ Each element of the `messages` array is an [AqMessage
 object](#aqmessageclass), the same as returned by
 [`queue.deqOne()`](#aqqueuemethoddeqone).
 
-### <a name="aqplsql"></a> 24.4 Using the AQ PL/SQL interface
+### <a name="aqnotifications"></a> 24.4 Advanced Queuing Notifications
+
+The [`connection.subscribe()`](#consubscribe) method can be used to
+register interest in a queue, allowing a callback to be invoked when
+there are messages to dequeue.  To subscribe to a queue, pass its name
+to `subscribe()` and set the [`namespace`](#consubscribeoptnamespace)
+option to `oracledb.SUBSCR_NAMESPACE_AQ`:
+
+For example:
+
+```
+const queueName = "DEMO_RAW_QUEUE";
+
+const subscrOptions = {
+  namespace: oracledb.SUBSCR_NAMESPACE_AQ,
+  callback: ProcessAqMessages
+};
+
+async function ProcessAqMessages() {
+  connection = await oracledb.getConnection();
+  const queue = connection.queue(queueName);
+  const msg = await queue.deqOne();
+  console.log(msg.payload.toString()
+  await connection.close();
+}
+
+connection = await oracledb.getConnection();
+await connection.subscribe(queueName, subscrOptions);
+await connection.close();
+
+```
+
+See [Continuous Query Notification (CQN)](#cqn) for more information
+about subscriptions and notifications.
+
+### <a name="aqplsql"></a> 24.5 Using the AQ PL/SQL interface
 
 To enqueue and dequeue PL/SQL objects, use the PL/SQL AQ interface.
 

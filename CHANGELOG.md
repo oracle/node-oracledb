@@ -16,6 +16,8 @@
 - Added support for Oracle Advanced Queuing (AQ) RAW queues, allowing
   String and Buffer messages to be used.
 
+- Added support for AQ notifications with `oracledb.SUBSCR_NAMESPACE_AQ`.
+
 - Added support for Implicit Results, allowing query results to be
   returned from PL/SQL without needing parameters or bind variables.
 
