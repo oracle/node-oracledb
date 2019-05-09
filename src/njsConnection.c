@@ -2427,7 +2427,7 @@ static napi_value njsConnection_subscribe(napi_env env,
         return NULL;
     }
     njsBaton_queueWork(baton, env, "Subscribe", njsConnection_subscribeAsync,
-            njsConnection_subscribePostAsync, 1);
+            njsConnection_subscribePostAsync, 2);
     return NULL;
 }
 
@@ -2467,6 +2467,7 @@ static bool njsConnection_subscribeAsync(njsBaton *baton)
         if (dpiConn_subscribe(conn->handle, &params,
                 &baton->subscription->handle) < 0)
             return njsBaton_setErrorDPI(baton);
+        baton->subscription->regId = params.outRegId;
     }
 
     // register query if applicable
@@ -2510,8 +2511,26 @@ static bool njsConnection_subscribeAsync(njsBaton *baton)
 static bool njsConnection_subscribePostAsync(njsBaton *baton, napi_env env,
         napi_value *args)
 {
-    return njsSubscription_startNotifications(baton->subscription, env,
-            baton);
+    napi_value result, regId;
+
+    // start notifications
+    if (!njsSubscription_startNotifications(baton->subscription, env,
+            baton))
+        return false;
+
+    // create result object for CQN only; AQ notifications do not produce a
+    // meaningful value
+    if (baton->subscription->subscrNamespace ==
+            DPI_SUBSCR_NAMESPACE_DBCHANGE) {
+        NJS_CHECK_NAPI(env, napi_create_object(env, &result))
+        NJS_CHECK_NAPI(env, napi_create_uint32(env,
+                (uint32_t) baton->subscription->regId, &regId))
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, result, "regId",
+                regId))
+        args[1] = result;
+    }
+
+    return true;
 }
 
 

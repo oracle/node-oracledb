@@ -670,6 +670,7 @@ struct njsSubscription {
     uv_barrier_t barrier;
     dpiSubscrMessage *message;
     uint32_t subscrNamespace;
+    uint64_t regId;
     njsOracleDb *oracleDb;
     char *name;
     size_t nameLength;
