@@ -16,6 +16,10 @@
 - Added support for Oracle Advanced Queuing (AQ) RAW queues, allowing
   String and Buffer messages to be used.
 
+- Added support for getting the [registration
+  id](https://oracle.github.io/node-oracledb/doc/api.html#consubscribecallback)
+  for CQN subscriptions.
+
 - Added support for AQ notifications with `oracledb.SUBSCR_NAMESPACE_AQ`.
 
 - Added support for Implicit Results, allowing query results to be
