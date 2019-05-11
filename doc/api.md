@@ -338,6 +338,10 @@ limitations under the License.
         - 13.4.5 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
         - 13.4.6 [Connection Pool Pinging](#connpoolpinging)
         - 13.4.7 [Connection Tagging and Session State](#connpooltagging)
+            - 13.4.7.1 [Node.js Session Callback](#sessionfixupnode)
+            - 13.4.7.2 [Connection Tagging](#sessionfixuptagging)
+            - 13.4.7.3 [Node.js Session Tagging Callback](#sessiontaggingnode)
+            - 13.4.7.4 [PL/SQL Session Tagging Callback](#sessiontaggingplsql)
         - 13.4.8 [Heterogeneous Connection Pools and Pool Proxy Authentication](#connpoolproxy)
     - 13.4 [External Authentication](#extauth)
     - 13.5 [Database Resident Connection Pooling (DRCP)](#drcp)
@@ -1704,7 +1708,7 @@ The two properties are aliases for each other.  Use only one of the properties.
 
 The Oracle database instance used by connections in the pool.  The
 string can be an Easy Connect string, or a Net Service Name from a
-`tnsnames.ora` file, or the name of a local Oracle database instance.
+`tnsnames.ora` file, or the name of a local Oracle Database instance.
 See [Connection Strings](#connectionstrings) for examples.
 
 The alias `connectionString` was added in node-oracledb 2.1.
@@ -2000,7 +2004,7 @@ users supplied in subsequent `pool.getConnection()` calls.
 ##### Prototype
 
 ```
-function(Error error [, Pool pool])
+function(Error error, Pool pool)
 ```
 
 ##### Parameters
@@ -2406,10 +2410,10 @@ readonly String oracleServerVersionString
 
 This readonly property gives a string representation of the Oracle database version which is useful for display.
 
-Note if you connect to Oracle Database 18, the version will only be
-accurate if node-oracledb is also using Oracle Database 18 client
-libraries.  Otherwise it will show the base release such as
-"18.0.0.0.0" instead of "18.3.0.0.0".
+Note if you connect to Oracle Database 18, or later, then the version
+will only be accurate if node-oracledb is also using Oracle Database
+18, or later, client libraries.  Otherwise it will show the base
+release such as "18.0.0.0.0" instead of "18.3.0.0.0".
 
 This property was added in node-oracledb 2.2.
 
@@ -2736,11 +2740,11 @@ See [Working with CLOB and BLOB Data](#lobhandling) and [LOB Bind Parameters](#l
 
 Callback:
 ```
-execute(String sql, [Object bindParams, [Object options,]] function(Error error, [Object result]){});
+execute(String sql [, Object bindParams [, Object options]], function(Error error, Object result){});
 ```
 Promise:
 ```
-promise = execute(String sql, [Object bindParams, [Object options]]);
+promise = execute(String sql [, Object bindParams [, Object options]]);
 ```
 
 ##### Description
@@ -2767,7 +2771,7 @@ Parameter | Description
 [`String sql`](#executesqlparam) | The SQL statement that is executed. The statement may contain bind parameters.
 [`Object bindParams`](#executebindParams) | This function parameter is needed if there are bind parameters in the SQL statement.
 [`Object options`](#executeoptions) | This is an optional parameter to `execute()` that may be used to control statement execution.
-[`function(Error error, [Object result])`](#executecallback) | Callback function with the execution results.
+[`function(Error error, Object result)`](#executecallback) | Callback function with the execution results.
 
 The parameters are discussed in the next sections.
 
@@ -2959,7 +2963,7 @@ Results](#implicitresults) should be returned as a
 ##### <a name="executecallback"></a> 4.2.6.4 `execute()`: Callback Function
 
 ```
-function(Error error, [Object result])
+function(Error error, Object result)
 ```
 
 The parameters of the `execute()` callback function are:
@@ -3091,13 +3095,13 @@ inserted. For non-DML statements such as queries and PL/SQL statements,
 
 Callback:
 ```
-executeMany(String sql, Array binds, [Object options], function(Error error, [Object result]) {});
-executeMany(String sql, Number numIterations, [Object options], function(Error error, [Object result]) {});
+executeMany(String sql, Array binds [, Object options], function(Error error, Object result) {});
+executeMany(String sql, Number numIterations [, Object options], function(Error error, Object result) {});
 ```
 Promise:
 ```
-promise = executeMany(String sql, Array binds, [Object options]);
-promise = executeMany(String sql, Number numIterations, [Object options]);
+promise = executeMany(String sql, Array binds [, Object options]);
+promise = executeMany(String sql, Number numIterations [, Object options]);
 ```
 
 ##### Description
@@ -3246,7 +3250,7 @@ of the Oracle client library.
 ##### <a name="executemanycallback"></a> 4.2.7.4 `executeMany()`: Callback Function
 
 ```
-function(Error error, [Object result])
+function(Error error, Object result)
 ```
 
 If `executeMany()` succeeds, `error` is NULL.  If an error occurs,
@@ -3342,7 +3346,7 @@ This method was added in node-oracledb 3.0.
 
 Callback:
 ```
-getStatementInfo(String sql, function(Error error, [Object information]){});
+getStatementInfo(String sql, function(Error error, Object information){});
 ```
 Promise:
 ```
@@ -3375,7 +3379,7 @@ This method was added in node-oracledb 2.2.
     The SQL statement to parse.
 
 -   ```
-    function(Error error, [Object information])
+    function(Error error, Object information)
     ```
 
     The parameters of the callback function are:
@@ -3447,7 +3451,7 @@ This method was added in node-oracledb 2.2.
 ##### Prototype
 
 ```
-queryStream(String sql, [Object bindParams, [Object options]]);
+queryStream(String sql [, Object bindParams, [Object options]]);
 ```
 
 ##### Return Value
@@ -4248,13 +4252,13 @@ readonly Number connectionsOpen
 The number of currently open connections in the underlying connection
 pool.
 
-#### <a name="proppoolpoolalia6.s">a> 7.1.3 `pool.poolAlias`
+#### <a name="proppoolpoolalias">a> 7.1.3 `pool.poolAlias`
 
 ```
 readonly Number poolAlias
 ```
 
-The alias of this pool in the [connection pool cache](#connpoolcache).  An alias cannot be changed once the pool has been created.
+The alias of this pool in the [connection pool cache](#connpoolcache).  An alias cannot be changed once the pool has been created.  This property will be undefined for the second and subsequent pools that were created without an explicit alias specified.
 
 #### <a name="proppoolpoolincrement"></a> 7.1.4 `pool.poolIncrement`
 
@@ -4658,7 +4662,7 @@ for performance, adjust global attributes such as
 See [Query Streaming](#streamingresults) for more information.
 
 The `toQueryStream()` method was added in node-oracledb 1.9.  Support
-for Node.js version 8 Stream `destroy()` method was added in node-oracledb 2.1.
+for Node.js 8's Stream `destroy()` method was added in node-oracledb 2.1.
 
 ## <a name="sodacollectionclass"></a> 9. SodaCollection Class
 
@@ -4851,12 +4855,12 @@ collection was found, `dropped` will be *false*.
 
 Callback:
 ```
-dropIndex(String indexName, [Object options,] function(Error error, Object result){});
+dropIndex(String indexName [, Object options], function(Error error, Object result){});
 ```
 
 Promise:
 ```
-promise = dropIndex(String indexName, [Object options]);
+promise = dropIndex(String indexName [, Object options]);
 ```
 
 ##### Description
@@ -5749,7 +5753,7 @@ information.
 
 Callback:
 ```
-createCollection(String collectionName, [Object options,] function(Error error, SodaCollection collection){});
+createCollection(String collectionName [, Object options], function(Error error, SodaCollection collection){});
 ```
 
 Promise:
@@ -6330,7 +6334,7 @@ Some Oracle environment variables that can influence node-oracledb include:
 
 Name  |  Description
 ------|-------------
-`LD_LIBRARY_PATH` | Used on Linux and some UNIX platforms.  Set this to include the Oracle libraries, for example `$ORACLE_HOME/lib` or `/opt/oracle/instantclient_18_3`. Not needed if the libraries are located by an alternative method, such as from running `ldconfig`. On other UNIX platforms you will need to set the OS specific equivalent, such as `LIBPATH` or `SHLIB_PATH`.
+`LD_LIBRARY_PATH` | Used on Linux and some UNIX platforms.  Set this to include the Oracle libraries, for example `$ORACLE_HOME/lib` or `/opt/oracle/instantclient_19_3`. Not needed if the libraries are located by an alternative method, such as from running `ldconfig`. On other UNIX platforms you will need to set the OS specific equivalent, such as `LIBPATH` or `SHLIB_PATH`.
 `ORACLE_HOME` | The directory containing the Oracle Database software. This directory must be accessible by the Node.js process. This variable should *not* be set if node-oracledb uses Oracle Instant Client.
 `NLS_DATE_FORMAT`, `NLS_TIMESTAMP_FORMAT` | See [Fetching Numbers and Dates as String](#fetchasstringhandling).  The variables are ignored if `NLS_LANG` is not set.
 `NLS_LANG` | Determines the globalization options for node-oracledb.  If not set, a default value will be chosen by Oracle. Note that node-oracledb will always uses the AL32UTF8 character set.  See [Globalization and National Language Support (NLS)](#nls).
@@ -6375,8 +6379,8 @@ Name | Description
 The files should be in a directory accessible to Node.js, not the
 database server.  Default locations include:
 
-- `/opt/oracle/instantclient_18_3/network/admin` if Instant Client is in `/opt/oracle/instantclient_18_3`.
-- `/usr/lib/oracle/18.3/client64/lib/network/admin` if Oracle 18.3 Instant Client RPMs are used on Linux.
+- `/opt/oracle/instantclient_19_3/network/admin` if Instant Client is in `/opt/oracle/instantclient_19_3`.
+- `/usr/lib/oracle/19.3/client64/lib/network/admin` if Oracle 19.3 Instant Client RPMs are used on Linux.
 - `$ORACLE_HOME/network/admin` if node-oracledb is using libraries from the database installation.
 
 Alternatively, the files can be put in another, accessible directory.
@@ -6852,17 +6856,22 @@ Pools are added to the cache by using a
 [`poolAttrs`](#createpoolpoolattrs) object::
 
 ```javascript
-oracledb.createPool (
-  {
-    user: 'hr',
-    password: mypw,  // mypw contains the hr schema password
-    connectString: 'localhost/XEPDB1',
-    poolAlias: 'hrpool'
-  },
-  function(err) {  // callback 'pool' parameter can be omitted
-    . . . // get the pool from the cache and use it
-  }
-);
+async function init() {
+  try {
+    await oracledb.createPool({ // no need to store the returned pool
+      user: 'hr',
+      password: mypw,  // mypw contains the hr schema password
+      connectString: 'localhost/XEPDB1',
+      poolAlias: 'hrpool'
+    });
+
+    // do stuff
+    . . .
+
+    // get the pool from the cache and use it
+    const pool = oracledb.getPool('hrpool');
+    . . .
+}
 ```
 
 There can be multiple pools in the cache if each pool is created with
@@ -6887,30 +6896,27 @@ Assuming the connection pool cache is empty, the following will create a new poo
 and cache it using the pool alias 'default':
 
 ```javascript
-oracledb.createPool (
-  {
-    user: 'hr',
-    password: mypw,  // mypw contains the hr schema password
-    connectString: 'localhost/XEPDB1'
-  },
-  function(err, pool) {
+async function init() {
+  try {
+    const pool = await oracledb.createPool({
+      user: 'hr',
+      password: mypw,  // mypw contains the hr schema password
+      connectString: 'localhost/XEPDB1'
+    });
+
     console.log(pool.poolAlias); // 'default'
-    . . . // Use pool
-  }
-);
+    . . .
+}
 ```
 
-Note that `createPool()` is not synchronous.
+If you are using callbacks, note that `createPool()` is not synchronous.
 
 Once cached, the default pool can be retrieved using [oracledb.getPool()](#getpool) without
 passing the `poolAlias` parameter:
 
 ```javascript
-var pool = oracledb.getPool();
-
-pool.getConnection(function(err, conn) {
-  . . . // Use connection from the pool and then release it
-});
+const pool = oracledb.getPool();
+const connection = await pool.getConnection();
 ```
 
 This specific sequence can be simplified by using the shortcut to
@@ -6918,9 +6924,8 @@ This specific sequence can be simplified by using the shortcut to
 from a pool:
 
 ```javascript
-oracledb.getConnection(function(err, conn) {
-  . . . // Use connection from the previously created 'default' pool and then release it
-});
+const connection = await oracledb.getConnection();
+. . . // Use connection from the previously created 'default' pool and then release it
 ```
 
 ##### Using Multiple Pools
@@ -6929,58 +6934,46 @@ If the application needs to use more than one pool at a time, unique pool aliase
 can be used when creating the pools:
 
 ```javascript
-var oracledb = require('oracledb');
-
-var hrPoolPromise = oracledb.createPool({
-  poolAlias: 'hrpool',
-  users: 'hr',
-  password: mypw,  // mypw contains the hr schema password
-  connectString: 'localhost/XEPDB1'
+await oracledb.createPool({
+  user: 'hr',
+  password: myhrpw,  // myhrpw contains the hr schema password
+  connectString: 'localhost/XEPDB1',
+  poolAlias: 'hrpool'
 });
 
-var shPoolPromise = oracledb.createPool({
-  poolAlias: 'shpool',
+await oracledb.createPool({
   user: 'sh',
-  password: mypw,  // mypw contains the sh schema password
-  connectString: 'localhost/XEPDB1'
+  password: myshpw,  // myshpw contains the sh schema password
+  connectString: 'localhost/XEPDB1',
+  poolAlias: 'shpool'
 });
 
-Promise.all([hrPoolPromise, shPoolPromise])
-  .then(function(pools) {
-    console.log(pools[0].poolAlias); // 'hrpool'
-    console.log(pools[1].poolAlias); // 'shpool'
-  })
-  .catch(function(err) {
-    . . . // handle error
-  })
+. . .
 ```
 
 To use the methods or attributes of a pool in the cache, a pool can be retrieved
 from the cache by passing its pool alias to [oracledb.getPool()](#getpool):
 
 ```javascript
-var pool = oracledb.getPool('hrpool'); // or 'shpool'
+const pool = oracledb.getPool('hrpool'); // or 'shpool'
+const connection = await pool.getConnection();
 
-pool.getConnection(function(err, conn) {
-  . . . // Use connection from the pool and then release it
-});
+. . . // Use connection from the pool and then release it
 ```
 
 The [oracledb.getConnection()](#getconnectiondb) shortcut can also be used with a pool alias:
 
 ```javascript
-oracledb.getConnection('hrpool', function(err, conn) { // or 'shpool'
-  . . . // Use connection from the pool and then release it
-});
+const connection = await oracledb.getConnection('hrpool');
+. . . // Use connection from the pool and then release it
 ```
 
 From node-oracledb 3.1.0 you can pass the alias as an attribute of the
 options:
 
 ```javascript
-oracledb.getConnection({ poolAlias: 'hrpool' }, function(err, conn) {
-  . . . // Use connection from the pool and then release it
-});
+const connection = await oracledb.getConnection({ poolAlias: 'hrpool' });
+ . . . // Use connection from the pool and then release it
 ```
 
 The presence of the `poolAlias` attribute indicates the previously
@@ -6991,18 +6984,16 @@ other attributes to a pooled `getConnection()` call, such as for
 tagging](#connpooltagging):
 
 ```javascript
-oracledb.getConnection({ poolAlias: 'hrpool', tag: 'loc=au' }, function(err, conn) {
-  . . . // Use connection from the pool and then release it
-});
+const connection = await oracledb.getConnection({ poolAlias: 'hrpool', tag: 'loc=cn;p=1 });
+ . . . // Use connection from the pool and then release it
 ```
 
 To use the default pool in this way you must explicitly pass the alias
 `default`:
 
 ```javascript
-oracledb.getConnection({ poolAlias: 'default' tag: 'loc=cn;p=1' }, function(err, conn) {
-  . . . // Use connection from the pool and then release it
-});
+const connection = await oracledb.getConnection({ poolAlias: 'default', tag: 'loc=cn;p=1 });
+. . . // Use connection from the pool and then release it
 ```
 
 #### <a name="connpoolqueue"></a> 13.4.4 Connection Pool Queue
@@ -7023,7 +7014,7 @@ error *NJS-040: connection request timeout* to the application.
 
 Internally the queue is implemented in node-oracledb's JavaScript top
 level.  A queued connection request is dequeued and passed down to
-node-oracledb's underlying C++ connection pool when an active
+node-oracledb's underlying C API connection pool when an active
 connection is [released](#connectionclose), and the number of
 connections in use drops below the value of
 [`poolMax`](#proppoolpoolmax).
@@ -7078,7 +7069,7 @@ total up time             | The number of milliseconds this pool has been runnin
 total connection requests | Number of `getConnection()` requests made by the application to this pool.
 total requests enqueued   | Number of `getConnection()` requests that could not be immediately satisfied because every connection in this pool was already being used, and so they had to be queued waiting for the application to return an in-use connection to the pool.
 total requests dequeued   | Number of `getConnection()` requests that were dequeued when a connection in this pool became available for use.
-total requests failed     | Number of `getConnection()` requests that invoked the underlying C++ `getConnection()` callback with an error state. Does not include queue request timeout errors.
+total requests failed     | Number of `getConnection()` requests that invoked the underlying C API `getConnection()` callback with an error state. Does not include queue request timeout errors.
 total request timeouts    | Number of queued `getConnection()` requests that were timed out after they had spent [queueTimeout](#propdbqueuetimeout) or longer in this pool's queue.
 max queue length          | Maximum number of `getConnection()` requests that were ever waiting at one time.
 sum of time in queue      | The sum of the time (milliseconds) that dequeued requests spent in the queue.
@@ -7201,13 +7192,14 @@ Explicit pings can be performed at any time with
 
 #### <a name="connpooltagging"></a> 13.4.7 Connection Tagging and Session State
 
-Applications can set "session" state in each connection, such as
-[NLS](#nls) settings from ALTER SESSION statements.  Pooled
-connections will retain this session state after they have been
-released back to the pool with `connection.close()`.  However, because
-pools can grow, or connections in the pool can be recreated, there is
-no guarantee a subsequent `pool.getConnection()` call will return a
-database connection that has any particular state.
+Applications can set "session" state in each connection.  For all
+practical purposes, connections are synonymous with sessions.
+Examples of session state are [NLS](#nls) settings from ALTER SESSION
+statements.  Pooled connections will retain their session state after
+they have been released back to the pool with `connection.close()`.
+However, because pools can grow, or connections in the pool can be
+recreated, there is no guarantee a subsequent `pool.getConnection()`
+call will return a database connection that has any particular state.
 
 The [`oracledb.createPool()`](#createpool) option attribute
 [`sessionCallback`](#createpoolpoolattrssessioncallback) can be used
@@ -7221,9 +7213,22 @@ is called before `pool.getConnection()` returns in these two cases.
 It will not be called in other cases.  Using a callback saves the cost
 of setting session state if a previous user of a connection has
 already set it.  The caller of `pool.getConnection()` can always
-assume the correct state is set.
+assume the correct state is set.  The `sessionCallback` can also be a
+PL/SQL procedure, described in [PL/SQL Session Tagging
+Callback](#sessiontaggingplsql).
 
-###### <a name="sessionfixupnode"></a> Node.js Callback
+There are three common scenarios for `sessionCallback`:
+
+- When all connections in the pool should have the same state: use a
+  [Node.js callback without tagging](#sessionfixupnode).
+
+- When connections in the pool require different state for different
+  users: use a [Node.js callback with tagging](#sessiontaggingnode).
+
+- When using [DRCP](#drcp): use a [PL/SQL callback and
+  tagging](#sessiontaggingplsql).
+
+###### <a name="sessionfixupnode"></a> 13.4.7.1 Node.js Session Callback
 
 This example sets two NLS settings in each pooled connection.  They
 are only set the very first time connections are established to the
@@ -7267,7 +7272,7 @@ See [`sessionfixup.js`][126] for a runnable example.
 Connection tagging and `sessionCallback` are new features in
 node-oracledb 3.1.
 
-##### Connection Tagging
+###### <a name="sessionfixuptagging"></a> 13.4.7.2 Connection Tagging
 
 Pooled connections can be tagged to record their session state by
 setting the property [`connection.tag`](#propconntag) to a string.  A
@@ -7313,7 +7318,7 @@ connection's actual properties in [`connection.tag`](#propconntag) to
 determine what exact state to set and what value to update
 `connection.tag` to.
 
-###### <a name="sessiontaggingnode"></a> Node.js Session Tagging Callback
+###### <a name="sessiontaggingnode"></a> 13.4.7.3 Node.js Session Tagging Callback
 
 This example Node.js callback function ensures the connection contains
 valid settings for an application-specific "location=USA" property and
@@ -7369,7 +7374,7 @@ try {
 
 For runnable examples, see [`sessiontagging1.js`][127] and [`sessiontagging2.js`][128].
 
-###### <a name="sessiontaggingplsql"></a> PL/SQL Session Tagging Callback
+###### <a name="sessiontaggingplsql"></a> 13.4.7.4 PL/SQL Session Tagging Callback
 
 When node-oracledb is using Oracle Client libraries 12.2 or later,
 `sessionCallback` can be a string containing the name of a PL/SQL
@@ -8802,7 +8807,7 @@ of rows from a table.  Since the query will be executed more than
 once, make sure to use bind variables for row numbers and row limits.
 
 Oracle Database 12c SQL introduced an `OFFSET` / `FETCH` clause which
-is similar to the LIMIT keyword of MySQL.  See [Row Limiting:
+is similar to the `LIMIT` keyword of MySQL.  See [Row Limiting:
 Examples][5] in the Oracle documentation.  A node-oracledb example is:
 
 ```javascript
@@ -10049,7 +10054,7 @@ This query would display:
 { userId: 1, userName: 'Chris', location: 'Australia' }
 ```
 
-In Oracle Database 13.2, or later, the [`JSON_OBJECT` ][54] function is a great
+In Oracle Database 12.2, or later, the [`JSON_OBJECT` ][54] function is a great
 way to convert relational table data to JSON:
 
 ```javascript
@@ -10082,7 +10087,8 @@ For more information about using JSON in Oracle Database see the
 
 ## <a name="xmltype"></a> 18. Working with XMLType
 
-`XMLType` columns queried will returns as Strings by default.
+`XMLType` columns queried will returns as Strings by default, limited
+to the size of a VARCHAR2.
 
 However, if desired, the SQL query could be changed to return a CLOB,
 for example:
@@ -12035,12 +12041,6 @@ available in node-oracledb through a set of NoSQL-style APIs.
 Documents can be inserted, queried, and retrieved from Oracle Database
 using node-oracledb methods.  By default, documents are JSON strings.
 
-SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
-later.  The SODA bulk insert methods
-[`sodaCollection.insertMany()`](#sodacollinsertmany) and
-[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget)
-remain in Preview status.
-
 The [Oracle Database Introduction to SODA][103] manual contains much
 information relevant to using SODA.  You can use Oracle SODA
 implementations in Node.js, [Python][106], [Java][105], [PL/SQL][104]
@@ -12108,7 +12108,13 @@ Node-oracledb uses the following objects for SODA:
 ### <a name="sodarequirements"></a> 27.1 Node-oracledb SODA Requirements
 
 SODA is available to Node.js applications when the node-oracledb
-driver uses Oracle Database and Client 18.3, or higher.
+driver uses Oracle Database 18.3, or later, and also Oracle Client
+18.5 or Oracle Client 19.3, or later.
+
+The SODA bulk insert methods
+[`sodaCollection.insertMany()`](#sodacollinsertmany) and
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) are
+in Preview status.
 
 To execute SODA operations, Oracle Database users require the SODA_APP
 role granted to them by a DBA:
@@ -12146,7 +12152,7 @@ Note:
 
 - SODA DDL operations do not commit an open transaction the way that SQL always does for DDL statements.
 - When [`oracledb.autoCommit`](#propdbisautocommit) is *true*, most SODA methods will issue a commit before successful return.
-- SODA provide optimistic locking, see [`sodaOperation.version()`](#sodaoperationclassversion).
+- SODA provides optimistic locking, see [`sodaOperation.version()`](#sodaoperationclassversion).
 
 ### <a name="creatingsodacollections"></a> 27.2 Creating SODA Collections
 
@@ -12913,7 +12919,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-### <a name="asyncawaitoverview"></a> 29.. Async/Await and node-oracledb
+### <a name="asyncawaitoverview"></a> 29.3 Async/Await and node-oracledb
 
 Node.js 7.6 supports async functions, also known as Async/Await.  These
 can be used with node-oracledb.  For example:

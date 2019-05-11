@@ -346,7 +346,7 @@ Technology Network][12].
 [Install Instant Client Basic][13] with sudo or as the root user:
 
 ```
-sudo yum install oracle-instantclient18.3-basic-18.3.0.0.0-2.x86_64.rpm
+sudo yum install oracle-instantclient19.3-basic-19.3.0.0.0-1.x86_64.rpm
 ```
 
 This will install the required `libaio` package, if it is not already
@@ -357,17 +357,20 @@ to install the Basic package after enabling the
 ol7_x86_64_instantclient or ol6_x86_64_instantclient channel,
 depending on your version of Linux.
 
-If there is no other Oracle software on the machine
-that will be impacted, then permanently add Instant Client to the
-run-time link path.  For example, with sudo or as the root user:
+For Instant Client 19, the system library search path is automatically
+configured during installation.
+
+For older versions, if there is no other Oracle software on the
+machine that will be impacted, then permanently add Instant Client to
+the run-time link path.  For example, with sudo or as the root user:
 
 ```
 sudo sh -c "echo /usr/lib/oracle/18.3/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf"
 sudo ldconfig
 ```
 
-Alternatively, every shell running Node.js will need to have the link
-path set:
+Alternatively, for version 18 and earlier, every shell running Node.js
+will need to have the link path set:
 
 ```
 export LD_LIBRARY_PATH=/usr/lib/oracle/18.3/client64/lib
@@ -487,20 +490,20 @@ and [unzip it][13] into a directory accessible to your application,
 for example:
 
 ```
-unzip instantclient-basic-linux.x64-18.3.0.0.0dbru.zip
+unzip instantclient-basic-linux.x64-19.3.0.0.0dbru.zip
 mkdir -p /opt/oracle
-mv instantclient_18_3 /opt/oracle
+mv instantclient_19_3 /opt/oracle
 ```
 
 You will need the operating system `libaio` package installed.  On
 some platforms the package is called `libaio1`.
 
-if there is no other Oracle software on the machine
+If there is no other Oracle software on the machine
 that will be impacted, then permanently add Instant Client to the
 run-time link path.  For example, with sudo or as the root user:
 
 ```
-sudo sh -c "echo /opt/oracle/instantclient_18_3 > /etc/ld.so.conf.d/oracle-instantclient.conf"
+sudo sh -c "echo /opt/oracle/instantclient_19_3 > /etc/ld.so.conf.d/oracle-instantclient.conf"
 sudo ldconfig
 ```
 
@@ -508,7 +511,7 @@ Alternatively, every shell running Node.js will need to have the link
 path set:
 
 ```
-export LD_LIBRARY_PATH=/opt/oracle/instantclient_18_3:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_19_3:$LD_LIBRARY_PATH
 ```
 
 #### 3.3.5 Optionally create the default Oracle Client configuration directory
@@ -1422,9 +1425,12 @@ sudo yum install -y oracle-nodejs-release-el7 oracle-release-el7
 sudo yum install nodejs node-oracledb-node10
 ```
 
-This will also install Oracle Instant Client, which needs to be
-configures.  As the root user, add Instant Client to the library
-search path:
+For Instant Client 19, the system library search path is automatically
+configured during installation.
+
+For older versions, if there is no other Oracle software on the
+machine that will be impacted, then permanently add Instant Client to
+the run-time link path.  For example, with sudo or as the root user:
 
 ```
 sudo sh -c "echo /usr/lib/oracle/18.3/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf"
