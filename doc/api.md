@@ -11266,9 +11266,6 @@ APIs.  Documents can be inserted, queried, and retrieved from Oracle
 Database using node-oracledb methods.  By default, documents are JSON
 strings.
 
-SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
-later.
-
 The [Oracle Database Introduction to SODA][103] manual contains much
 information relevant to using SODA.  You can use Oracle SODA
 implementations in Node.js, [Python][106], [Java][105], [PL/SQL][104]
@@ -11336,7 +11333,8 @@ Node-oracledb uses the following objects for SODA:
 ### <a name="sodarequirements"></a> 26.1 Node-oracledb SODA Requirements
 
 SODA is available to Node.js applications when the node-oracledb
-driver uses Oracle Database and Client 18.3, or higher.
+driver uses Oracle Database 18.3, or later, and also Oracle Client
+18.5 or Oracle Client 19.3, or later.
 
 To execute SODA operations, Oracle Database users require the SODA_APP
 role granted to them by a DBA:
