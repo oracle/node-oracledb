@@ -82,7 +82,7 @@ void njsSodaDatabase::Init(Local<Object> target)
 
     sodaDBTemplate_s.Reset(tpl);
     Nan::Set(target, Nan::New<v8::String>("SodaDB").ToLocalChecked(),
-            tpl->GetFunction());
+            Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 

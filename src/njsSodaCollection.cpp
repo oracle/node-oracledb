@@ -92,7 +92,7 @@ void njsSodaCollection::Init(Local<Object> target)
 
     sodaCollTemplate_s.Reset(tpl);
     Nan::Set(target, Nan::New<v8::String>("Collection").ToLocalChecked(),
-            tpl->GetFunction());
+            Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 

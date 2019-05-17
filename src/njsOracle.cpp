@@ -191,7 +191,7 @@ void njsOracledb::Init(Local<Object> target)
 
     oracledbTemplate_s.Reset(temp);
     Nan::Set(target, Nan::New<v8::String>("Oracledb").ToLocalChecked(),
-            temp->GetFunction());
+            Nan::GetFunction(temp).ToLocalChecked());
 
     Local<Object> obj = Nan::New<v8::Object>();
     subscriptions.Reset(obj);

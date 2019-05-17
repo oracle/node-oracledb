@@ -73,7 +73,7 @@ void njsSodaDocCursor::Init(Local<Object> target)
 
     sodaDocCursorTemplate_s.Reset(tpl);
     Nan::Set(target, Nan::New<v8::String>("SodaDocCursor").ToLocalChecked(),
-            tpl->GetFunction());
+            Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 

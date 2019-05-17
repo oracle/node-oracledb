@@ -102,7 +102,7 @@ void njsResultSet::Init(Local<Object> target)
 
     resultSetTemplate_s.Reset(temp);
     Nan::Set(target, Nan::New<v8::String>("ResultSet").ToLocalChecked(),
-            temp->GetFunction());
+            Nan::GetFunction(temp).ToLocalChecked());
 }
 
 

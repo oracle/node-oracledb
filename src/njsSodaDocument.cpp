@@ -99,7 +99,7 @@ void njsSodaDocument::Init(Local<Object> target)
 
     sodaDocTemplate_s.Reset(tpl);
     Nan::Set(target, Nan::New<v8::String>("Document").ToLocalChecked(),
-             tpl->GetFunction ());
+             Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 

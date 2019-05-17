@@ -126,7 +126,7 @@ void njsSubscription::Init(Local<Object> target)
 
     subscriptionTemplate_s.Reset(temp);
     Nan::Set(target, Nan::New<v8::String>("Subscription").ToLocalChecked(),
-            temp->GetFunction());
+            Nan::GetFunction(temp).ToLocalChecked());
 }
 
 

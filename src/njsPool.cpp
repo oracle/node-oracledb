@@ -107,7 +107,7 @@ void njsPool::Init(Local<Object> target)
 
     poolTemplate_s.Reset(temp);
     Nan::Set(target, Nan::New<v8::String>("Pool").ToLocalChecked(),
-            temp->GetFunction());
+            Nan::GetFunction(temp).ToLocalChecked());
 }
 
 

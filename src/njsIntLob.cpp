@@ -112,7 +112,7 @@ void njsILob::Init(Local<Object> target)
 
     iLobTemplate_s.Reset(tpl);
     Nan::Set(target, Nan::New<v8::String>("ILob").ToLocalChecked(),
-            tpl->GetFunction());
+            Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 

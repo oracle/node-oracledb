@@ -87,7 +87,7 @@ void njsSodaOperation::Init(Local<Object> target)
 
     sodaOperationTemplate_s.Reset(tpl);
     Nan::Set(target, Nan::New<v8::String>("SodaOperation").ToLocalChecked(),
-            tpl->GetFunction());
+            Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 

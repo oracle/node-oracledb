@@ -124,7 +124,7 @@ void njsConnection::Init(Local<Object> target)
 
     connectionTemplate_s.Reset(tpl);
     Nan::Set(target, Nan::New<v8::String>("Connection").ToLocalChecked(),
-            tpl->GetFunction());
+            Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 
@@ -683,7 +683,7 @@ bool njsConnection::ProcessExecuteBinds(Local<Object> binds, njsBaton *baton)
     // determine bind names (if binding by name)
     baton->bindArraySize = 1;
     if (!binds->IsUndefined() && !binds->IsArray())
-        bindNames = binds->GetOwnPropertyNames();
+        bindNames = Nan::GetOwnPropertyNames(binds).ToLocalChecked();
 
     // initialize variables; if there are no variables, nothing further to do!
     if (!InitBindVars(binds, bindNames, baton))
@@ -808,7 +808,7 @@ bool njsConnection::ScanExecuteBindUnit(Local<Object> bindUnit,
 
     // scan all keys and verify that one of "dir", "type", "maxSize" or "val"
     // is found; if not, the bind information is considered invalid
-    Local<Array> keys = bindUnit->GetOwnPropertyNames();
+    Local<Array> keys = Nan::GetOwnPropertyNames(bindUnit).ToLocalChecked();
     bool valid = false;
     for (uint32_t i = 0; i < keys->Length(); i++) {
         MaybeLocal<Value> mval = Nan::Get(keys, i );
@@ -927,7 +927,8 @@ bool njsConnection::ProcessExecuteManyBinds(Local<Array> binds,
             baton->error = njsMessages::Get(errInvalidParameterValue, 2);
             return false;
         }
-        bindNames = bindDefs.As<Object>()->GetOwnPropertyNames();
+        bindNames = Nan::GetOwnPropertyNames(bindDefs.As<Object>()).
+                ToLocalChecked();
     }
 
     // initialize variables; if there are no variables, nothing further to do!
@@ -1440,7 +1441,8 @@ bool njsConnection::ProcessExecuteOptions(Local<Object> options,
         return false;
     if (!val->IsUndefined() && !val->IsNull()) {
         Local<Object> jsFetchInfo = val.As<Object>();
-        Local<Array> keys = jsFetchInfo->GetOwnPropertyNames();
+        Local<Array> keys =
+                Nan::GetOwnPropertyNames(jsFetchInfo).ToLocalChecked();
         baton->numFetchInfo = keys->Length();
         if (baton->numFetchInfo > 0)
             baton->fetchInfo = new njsFetchInfo[baton->numFetchInfo];
@@ -1594,7 +1596,7 @@ bool njsConnection::GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
             if (!Nan::Get(jsOracledb, key).ToLocal(&temp))
                 return false;
             Local<Function> fn = Local<Function>::Cast(temp);
-            temp = fn->Call(jsOracledb, 1, argv);
+            temp = Nan::Call(fn, jsOracledb, 1, argv).ToLocalChecked();
         }
         value = scope.Escape(temp);
         return true;
@@ -2510,7 +2512,7 @@ void njsConnection::Async_AfterCreateLob(njsBaton *baton, Local<Value> argv[])
     if(!mval.ToLocal(&temp))
         return;
     Local<Function> fn = Local<Function>::Cast(temp);
-    temp = fn->Call(jsOracledb, 1, tempArgv);
+    temp = Nan::Call(fn, jsOracledb, 1, tempArgv).ToLocalChecked();
     argv[1] = scope.Escape(temp);
 }
 
