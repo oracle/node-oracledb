@@ -76,7 +76,7 @@ describe('189. writableProperties2.js', function() {
         should.not.exist(err);
       }
     }
-  })
+  });
 
   it('189.1 Allows overwriting of public methods on SodaDatabase instance', async function() {
     try {

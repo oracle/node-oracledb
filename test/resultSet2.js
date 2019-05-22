@@ -600,32 +600,6 @@ describe('55. resultSet2.js', function() {
     });
   });
 
-  describe.skip('55.8 Negative - resultSet is only for query statement', function() {
-    before(function(done){
-      setUp(connection, tableName, done);
-    });
-
-    after(function(done) {
-      clearUp(connection, tableName, done);
-    });
-
-    it('55.8.1 resultSet cannot be returned for non-query statements', function(done) {
-      connection.should.be.ok();
-      connection.execute(
-        "UPDATE nodb_rs2_emp SET employees_name = 'Alan' WHERE employees_id = 100",
-        [],
-        { resultSet: true },
-        function(err) {
-          should.exist(err);
-          // console.log(err);
-          err.message.should.startWith('NJS-019:');
-          done();
-        }
-      );
-
-    });
-  });
-
   describe('55.9 test querying a PL/SQL function', function() {
     before(function(done){
       setUp(connection, tableName, done);

@@ -230,41 +230,6 @@ describe('14. stream2.js', function() {
     done();
   });
 
-  it.skip('14.8 Negative - give invalid SQL as first parameter', function(done) {
-    var stream = connection.queryStream('foobar');
-
-    stream.on('error', function(err) {
-      should.exist(err);
-      should.strictEqual(
-        err.message,
-        "NJS-019: ResultSet cannot be returned for non-query statements"
-      );
-      done();
-    });
-
-    stream.on('data', function(data) {
-      should.not.exist(data);
-    });
-  });
-
-  it.skip('14.9 Negatvie - give non-query SQL', function(done) {
-    var sql = "INSERT INTO nodb_stream2 VALUES (300, 'staff 300', EMPTY_CLOB())";
-    var stream = connection.queryStream(sql);
-
-    stream.on('error', function(err) {
-      should.exist(err);
-      should.strictEqual(
-        err.message,
-        "NJS-019: ResultSet cannot be returned for non-query statements"
-      );
-      done();
-    });
-
-    stream.on('data', function(data) {
-      should.not.exist(data);
-    });
-  });
-
   it('14.10 metadata event - single column', function(done) {
     var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
     var stream = connection.queryStream(sql, { id: 40 });
@@ -368,30 +333,6 @@ describe('14. stream2.js', function() {
     });
 
     stream.on('end', done);
-  });
-
-  it.skip('14.14 metadata event - negative: non-query SQL', function(done) {
-    var sql = "INSERT INTO nodb_stream2 VALUES (300, 'staff 300', EMPTY_CLOB())";
-    var stream = connection.queryStream(sql);
-
-    var metaDataRead = false;
-    stream.on('metadata', function() {
-      metaDataRead = true;
-    });
-
-    stream.on('error', function(err) {
-      should.exist(err);
-      should.strictEqual(
-        err.message,
-        "NJS-019: ResultSet cannot be returned for non-query statements"
-      );
-      should.strictEqual(metaDataRead, false);
-      done();
-    });
-
-    stream.on('data', function(data) {
-      should.not.exist(data);
-    });
   });
 
   it('14.15 metadata event - case sensitive columns', function(done) {
