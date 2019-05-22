@@ -3020,7 +3020,7 @@ See [Batch Statement Execution](#batchexecution) for more information.
 
 This method was added in node-oracledb 2.2.
 
-##### <a name="executemanysqlparam"></a> 4.2.6.1 `executeMany()`: SQL Statement
+##### <a name="executemanysqlparam"></a> 4.2.7.1 `executeMany()`: SQL Statement
 
 ```
 String sql
