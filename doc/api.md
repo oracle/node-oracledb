@@ -438,10 +438,11 @@ limitations under the License.
 The [*node-oracledb*][1] add-on for Node.js powers high performance Oracle Database applications.
 
 This document shows how to use node-oracledb version 4.  The API
-reference is in sections 2 - 11 and the user guide in subsequent
-sections.  Documentation about node-oracledb version 1 is [here][94].
-Documentation about node-oracledb version 2 is [here][121].
-Documentation about node-oracledb version 3 is [here][135].
+reference is in the first sections of this document and the [user
+manual](#usermanual) in subsequent sections.  Documentation about
+node-oracledb version 1 is [here][94].  Documentation about
+node-oracledb version 2 is [here][121].  Documentation about
+node-oracledb version 3 is [here][135].
 
 The node-oracledb API is a generic Oracle Database access layer.
 Almost all the functionality described here is common across all
