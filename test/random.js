@@ -60,7 +60,7 @@ random.getRandomInt = function(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min)) + min;
-}
+};
 
 random.getIntArray = function(N) {
   var arr = Array.apply(null, Array(N));

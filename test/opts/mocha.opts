@@ -217,3 +217,5 @@ test/fetchRawAsString.js
 test/writableProperties2.js
 test/fetchBinaryTypesAsString.js
 test/currentSchema.js
+
+test/implicitResults.js

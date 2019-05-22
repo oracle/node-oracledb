@@ -1545,64 +1545,6 @@ describe('84. fetchClobAsString1.js', function() {
       ], done);
     }); // 84.3.11
 
-    it.skip('84.3.12 works with REF CURSOR', function(done) {
-      var id = insertID++;
-      var specialStr = '84.3.12';
-      var contentLength = 100;
-      var content = random.getRandomString(contentLength, specialStr);
-
-      async.series([
-        function(cb) {
-          insertIntoClobTable1(id, content, cb);
-        },
-        function(cb) {
-          var ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(clob_cursor OUT SYS_REFCURSOR)\n" +
-                         "AS \n" +
-                         "BEGIN \n" +
-                         "    OPEN clob_cursor FOR \n" +
-                         "        SELECT C from nodb_clob1 WHERE ID = " + id + "; \n" +
-                         "END;";
-          connection.execute(
-            ref_proc,
-            function(err){
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var sql = "BEGIN nodb_ref(:c); END;";
-          var bindVar = {
-            c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-          };
-          connection.execute(
-            sql,
-            bindVar,
-            {
-              outFormat : oracledb.OBJECT,
-              resultSet : true
-            },
-            function(err) {
-              // NJS-019: ResultSet cannot be returned for non-query statements
-              should.exist(err);
-              (err.message).should.startWith("NJS-019:");
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var ref_proc_drop = "DROP PROCEDURE nodb_ref";
-          connection.execute(
-            ref_proc_drop,
-            function(err){
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
-    }); // 84.3.12
-
     it('84.3.13 fetch CLOB with stream', function(done) {
       var id = insertID++;
       var specialStr = '84.3.13';
@@ -2552,64 +2494,6 @@ describe('84. fetchClobAsString1.js', function() {
         }
       ], done);
     }); // 84.5.11
-
-    it.skip('84.5.12 works with REF CURSOR', function(done) {
-      var id = insertID++;
-      var specialStr = '84.5.12';
-      var contentLength = 100;
-      var content = random.getRandomString(contentLength, specialStr);
-
-      async.series([
-        function(cb) {
-          insertIntoClobTable1(id, content, cb);
-        },
-        function(cb) {
-          var ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(clob_cursor OUT SYS_REFCURSOR)\n" +
-                         "AS \n" +
-                         "BEGIN \n" +
-                         "    OPEN clob_cursor FOR \n" +
-                         "        SELECT C from nodb_clob1 WHERE ID = " + id + "; \n" +
-                         "END;";
-          connection.execute(
-            ref_proc,
-            function(err){
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var sql = "BEGIN nodb_ref(:c); END;";
-          var bindVar = {
-            c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-          };
-          connection.execute(
-            sql,
-            bindVar,
-            {
-              outFormat : oracledb.ARRAY,
-              resultSet : true
-            },
-            function(err) {
-              // NJS-019: ResultSet cannot be returned for non-query statements
-              should.exist(err);
-              (err.message).should.startWith("NJS-019:");
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var ref_proc_drop = "DROP PROCEDURE nodb_ref";
-          connection.execute(
-            ref_proc_drop,
-            function(err){
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
-    }); // 84.5.12
 
     it('84.5.13 fetch CLOB with stream', function(done) {
       var id = insertID++;

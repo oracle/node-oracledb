@@ -1492,65 +1492,6 @@ describe('85. fetchClobAsString2.js', function() {
       ], done);
     }); // 85.3.13
 
-    it.skip('85.3.14 works with REF CURSOR', function(done) {
-      var id = insertID++;
-      var specialStr = '85.3.14';
-      var contentLength = 100;
-      var content = random.getRandomString(contentLength, specialStr);
-
-      async.series([
-        function(cb) {
-          insertIntoClobTable1(id, content, cb);
-        },
-        function(cb) {
-          var ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(clob_cursor OUT SYS_REFCURSOR)\n" +
-                         "AS \n" +
-                         "BEGIN \n" +
-                         "    OPEN clob_cursor FOR \n" +
-                         "        SELECT C from nodb_clob1 WHERE ID = " + id + "; \n" +
-                         "END;";
-          connection.execute(
-            ref_proc,
-            function(err){
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var sql = "BEGIN nodb_ref(:c); END;";
-          var bindVar = {
-            c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-          };
-          connection.execute(
-            sql,
-            bindVar,
-            {
-              outFormat : oracledb.OBJECT,
-              fetchInfo : { C : { type : oracledb.STRING } },
-              resultSet : true
-            },
-            function(err) {
-              // NJS-019: ResultSet cannot be returned for non-query statements
-              should.exist(err);
-              (err.message).should.startWith("NJS-019:");
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var ref_proc_drop = "DROP PROCEDURE nodb_ref";
-          connection.execute(
-            ref_proc_drop,
-            function(err){
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
-    });
-
   }); // 85.3
 
   describe('85.4 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY', function() {
@@ -2337,65 +2278,6 @@ describe('85. fetchClobAsString2.js', function() {
         }
       ], done);
     }); // 85.5.13
-
-    it.skip('85.5.14 works with REF CURSOR', function(done) {
-      var id = insertID++;
-      var specialStr = '85.5.14';
-      var contentLength = 100;
-      var content = random.getRandomString(contentLength, specialStr);
-
-      async.series([
-        function(cb) {
-          insertIntoClobTable1(id, content, cb);
-        },
-        function(cb) {
-          var ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(clob_cursor OUT SYS_REFCURSOR)\n" +
-                         "AS \n" +
-                         "BEGIN \n" +
-                         "    OPEN clob_cursor FOR \n" +
-                         "        SELECT C from nodb_clob1 WHERE ID = " + id + "; \n" +
-                         "END;";
-          connection.execute(
-            ref_proc,
-            function(err){
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var sql = "BEGIN nodb_ref(:c); END;";
-          var bindVar = {
-            c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-          };
-          connection.execute(
-            sql,
-            bindVar,
-            {
-              outFormat : oracledb.ARRAY,
-              fetchInfo : { C : { type : oracledb.STRING } },
-              resultSet : true
-            },
-            function(err) {
-              // NJS-019: ResultSet cannot be returned for non-query statements
-              should.exist(err);
-              (err.message).should.startWith("NJS-019:");
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var ref_proc_drop = "DROP PROCEDURE nodb_ref";
-          connection.execute(
-            ref_proc_drop,
-            function(err){
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
-    });
 
   }); // 85.5
 });

@@ -283,11 +283,6 @@ Overview of node-oracledb functional tests
     12.7 Testing maxRows
         12.7.1 maxRows option is ignored when resultSet option is true
         12.7.2 maxRows option is ignored with REF Cursor
-    12.8 Testing errInvalidResultSet
-        12.8.1 Negative: UPDATE BIND out with oracledb.CURSOR - bind by name
-        12.8.2 Negative: UPDATE BIND out with oracledb.CURSOR - bind by position
-        12.8.3 Negative: INSERT BIND out with oracledb.CURSOR - bind by name
-        12.8.4 Negative: INSERT BIND out with oracledb.CURSOR - bind by position
 
 13. stream1.js
     13.1 Testing QueryStream
@@ -324,13 +319,10 @@ Overview of node-oracledb functional tests
     14.5 explicitly setting resultSet option to be false takes no effect
     14.6 maxRows option is ignored as expect
     14.7 Negative - queryStream() has no parameters
-    14.8 Negative - give invalid SQL as first parameter
-    14.9 Negatvie - give non-query SQL
     14.10 metadata event - single column
     14.11 metadata event - multiple columns
     14.12 metadata event - all column names occurring
     14.13 metadata event - no return rows
-    14.14 metadata event - negative: non-query SQL
     14.15 metadata event - case sensitive columns
     14.16 metadata event - large number of columns
     14.17 metadata event - single character column
@@ -853,8 +845,6 @@ Overview of node-oracledb functional tests
     55.7 getting multiple resultSets
         55.7.1 can access multiple resultSet on one connection
         55.7.2 can access multiple REF Cursor
-    55.8 Negative - resultSet is only for query statement
-        55.8.1 resultSet cannot be returned for non-query statements
     55.9 test querying a PL/SQL function
         55.9.1
     55.10 calls getRows() once and then close RS before getting more rows
@@ -1788,7 +1778,6 @@ Overview of node-oracledb functional tests
         84.3.9 fetch multiple CLOB rows as String
         84.3.10 fetch the same CLOB column multiple times
         84.3.11 works with update statement
-        84.3.12 works with REF CURSOR
         84.3.13 fetch CLOB with stream
         84.3.14 works with setting oracledb.maxRows < actual number of rows in the table
         84.3.15 works with setting oracledb.maxRows > actual number of rows in the table
@@ -1822,7 +1811,6 @@ Overview of node-oracledb functional tests
         84.5.9 fetch multiple CLOB rows as String
         84.5.10 fetch the same CLOB column multiple times
         84.5.11 works with update statement
-        84.5.12 works with REF CURSOR
         84.5.13 fetch CLOB with stream
         84.5.14 works with setting oracledb.maxRows < actual number of rows in the table
         84.5.15 works with setting oracledb.maxRows > actual number of rows in the table
@@ -1877,7 +1865,6 @@ Overview of node-oracledb functional tests
         85.3.11 works with update statement
         85.3.12 works with setting oracledb.maxRows < actual number of rows in the table
         85.3.13 works with setting oracledb.maxRows > actual number of rows in the table
-        85.3.14 works with REF CURSOR
     85.4 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY
         85.4.1 works with NULL value
         85.4.2 works with empty String
@@ -1907,7 +1894,6 @@ Overview of node-oracledb functional tests
         85.5.11 works with update statement
         85.5.12 works with setting oracledb.maxRows < actual number of rows in the table
         85.5.13 works with setting oracledb.maxRows > actual number of rows in the table
-        85.5.14 works with REF CURSOR
 
 86. fetchClobAsString3.js
     86.1 fetch multiple CLOBs
@@ -4482,3 +4468,8 @@ Overview of node-oracledb functional tests
     191.1 the value will be empty until it has been explicitly set
     191.2 SQL alternative
     191.3 Negative - can not set inexistent schema
+
+192. implicitResults.js
+    192.1 implicit results with rows fetched
+    192.2 implicit Results with Result Sets
+    192.3 multiple options, outFormat is OBJECT

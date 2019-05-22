@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -47,7 +47,7 @@ testsUtil.assertThrowsAsync = async function(fn, RegExp) {
   }
 };
 
-testsUtil.createTable = async function(tableName, sql) {
+testsUtil.sqlCreateTable = function(tableName, sql) {
   let sqlCreateTab =
     `BEGIN \n` +
     `    DECLARE \n` +
@@ -61,10 +61,25 @@ testsUtil.createTable = async function(tableName, sql) {
     `    END; \n` +
     `    EXECUTE IMMEDIATE (' ${sql} '); \n` +
     `END;  `;
+  return sqlCreateTab;
+};
 
+testsUtil.createTable = async function(tableName, sql) {
+  let plsql = testsUtil.sqlCreateTable(tableName, sql);
   try {
     const conn = await oracledb.getConnection(dbconfig);
-    await conn.execute(sqlCreateTab);
+    await conn.execute(plsql);
+    await conn.close();
+  } catch(err) {
+    console.log('Error in creating table:\n', err);
+  }
+};
+
+testsUtil.dropTable = async function(tableName) {
+  let sql = `DROP TABLE ${tableName} PURGE`;
+  try {
+    const conn = await oracledb.getConnection(dbconfig);
+    await conn.execute(sql);
     await conn.close();
   } catch(err) {
     console.log('Error in creating table:\n', err);
