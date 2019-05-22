@@ -47,6 +47,30 @@ testsUtil.assertThrowsAsync = async function(fn, RegExp) {
   }
 };
 
+testsUtil.createTable = async function(tableName, sql) {
+  let sqlCreateTab =
+    `BEGIN \n` +
+    `    DECLARE \n` +
+    `        e_table_missing EXCEPTION; \n` +
+    `        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n` +
+    `    BEGIN \n` +
+    `        EXECUTE IMMEDIATE ('DROP TABLE ${tableName} PURGE' ); \n` +
+    `    EXCEPTION \n` +
+    `        WHEN e_table_missing \n` +
+    `        THEN NULL; \n` +
+    `    END; \n` +
+    `    EXECUTE IMMEDIATE (' ${sql} '); \n` +
+    `END;  `;
+
+  try {
+    const conn = await oracledb.getConnection(dbconfig);
+    await conn.execute(sqlCreateTab);
+    await conn.close();
+  } catch(err) {
+    console.log('Error in creating table:\n', err);
+  }
+};
+
 testsUtil.checkPrerequisites = async function(clientVersion=1803000000, serverVersion=1803000000) {
   if (oracledb.oracleClientVersion < clientVersion) return false;
   try {
