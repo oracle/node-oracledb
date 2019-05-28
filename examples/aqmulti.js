@@ -79,8 +79,8 @@ async function deq() {
 
     const messages = await queue.deqMany(5);  // get at most 5 messages
     console.log("Dequeued " + messages.length + " messages");
-    for (let i = 0; i < messages.length; i++) {
-      console.log(messages[i].payload.toString());
+    for (let msg of messages) {
+      console.log(msg.payload.toString());
     }
 
   } catch (err) {
