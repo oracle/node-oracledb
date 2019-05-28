@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -31,6 +31,8 @@
  *   Start the listener with 'node blobhttp.js' and then use a browser
  *   to load http://localhost:7000/getimage
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
 var url = require('url');
@@ -41,92 +43,89 @@ var dbConfig = require('./dbconfig.js');
 var httpPort = 7000;
 
 // Main entry point.  Creates a connection pool which becomes the
-// 'default' pool.  The callback creates an HTTP server.
-function init() {
-  oracledb.createPool(
-    {
-      user: dbConfig.user,
-      password: dbConfig.password,
-      connectString: dbConfig.connectString
-    },
-    function(err) {
-      if (err) {
-        console.error("createPool() error: " + err.message);
-        return;
-      }
+// 'default' pool, and then creates an HTTP server.
+async function init() {
+  try {
+    await oracledb.createPool(
+      {
+        user: dbConfig.user,
+        password: dbConfig.password,
+        connectString: dbConfig.connectString
+      });
+    console.log('Connection pool started');
 
-      // Create HTTP server and listen on port 'httpPort'
-      http
-        .createServer(function(request, response) {
-          handleRequest(request, response);
-        })
-        .listen(httpPort);
-
-      console.log("Server running.  Try requesting: http://localhost:" + httpPort + "/getimage");
+    // Create HTTP server and listen on port httpPort
+    const server = http.createServer();
+    server.on('error', (err) => {
+      throw err;
     });
+    server.on('request', (request, response) => {
+      handleRequest(request, response);
+    });
+    await server.listen(httpPort);
+    console.log("Server running.  Try requesting: http://localhost:" + httpPort + "/getimage");
+
+  } catch (err) {
+    console.error('init() error: ' + err.message);
+  }
 }
 
 // Handles each web request
-function handleRequest(request, response) {
+async function handleRequest(request, response) {
 
-  var requrl = url.parse(request.url, true);
-  var action = requrl.pathname;
+  const requrl = url.parse(request.url, true);
+  const action = requrl.pathname;
 
   if (action == '/getimage') {
-    oracledb.getConnection(  // gets a connection from the 'default' connection pool
-      function(err, connection) {
-        if (err) {
-          console.error(err.message);
-          return;
-        }
 
-        connection.execute(
-          "SELECT b FROM mylobs WHERE id = :id",  // get the image
-          { id: 2 },
-          function(err, result) {
-            if (err) {
-              console.error(err.message);
-              return;
-            }
+    let connection;
 
-            if (result.rows.length === 0) {
-              console.error("No results.  Did you run lobinsert1.js?");
-              return;
-            }
+    try {
+      connection = await oracledb.getConnection();  // gets a connection from the 'default' connection pool
 
-            var lob = result.rows[0][0];
-            if (lob === null) {
-              console.log("BLOB was NULL");
-              return;
-            }
+      const result = await connection.execute(
+        "SELECT b FROM mylobs WHERE id = :id",  // get the image
+        { id: 2 }
+      );
+      if (result.rows.length === 0) {
+        throw new Error("No results.  Did you run lobinsert1.js?");
+      }
 
-            lob.on(
-              'end',
-              function() {
-                console.log("lob.on 'end' event");
-                response.end();
-              });
-            lob.on(
-              'close',
-              function() {
-                console.log("lob.on 'close' event");
-                connection.close(function(err) {
-                  if (err) console.error(err);
-                });
-              });
-            lob.on(
-              'error',
-              function(err) {
-                console.log("lob.on 'error' event");
-                console.error(err);
-                connection.close(function(err) {
-                  if (err) console.error(err);
-                });
-              });
-            response.writeHead(200, {'Content-Type': 'image/jpeg' });
-            lob.pipe(response);  // write the image out
-          });
+      var lob = result.rows[0][0];
+      if (lob === null) {
+        throw new Error("BLOB was NULL");
+      }
+
+      const doStream = new Promise((resolve, reject) => {
+        lob.on('end', () => {
+          // console.log("lob.on 'end' event");
+          response.end();
+        });
+        lob.on('close', () => {
+          // console.log("lob.on 'close' event");
+          resolve();
+        });
+        lob.on('error', (err) => {
+          // console.log("lob.on 'error' event");
+          reject(err);
+        });
+        response.writeHead(200, {'Content-Type': 'image/jpeg' });
+        lob.pipe(response);  // write the image out
       });
+
+      await doStream;
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      if (connection) {
+        try {
+          await connection.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
 
   } else {
     response.writeHead(200, {'Content-Type': 'text/plain' });
@@ -134,14 +133,23 @@ function handleRequest(request, response) {
   }
 }
 
+async function closePoolAndExit() {
+  console.log('\nTerminating');
+  try {
+    // Get the pool from the pool cache and close it when no
+    // connections are in use, or force it closed after 10 seconds
+    // If this hangs, you may need DISABLE_OOB=ON in a sqlnet.ora file
+    await oracledb.getPool().close(10);
+    console.log('Pool closed');
+    process.exit(0);
+  } catch(err) {
+    console.error(err.message);
+    process.exit(1);
+  }
+}
+
 process
-  .on('SIGTERM', function() {
-    console.log("\nTerminating");
-    process.exit(0);
-  })
-  .on('SIGINT', function() {
-    console.log("\nTerminating");
-    process.exit(0);
-  });
+  .once('SIGTERM', closePoolAndExit)
+  .once('SIGINT',  closePoolAndExit);
 
 init();

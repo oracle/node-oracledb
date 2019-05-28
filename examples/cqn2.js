@@ -31,9 +31,9 @@
  *      INSERT INTO CQNTABLE VALUES (1);
  *      COMMIT;
  *
- *   This example uses Node 8 syntax, but could be written to use callbacks.
- *
  *   This example requires node-oracledb 2.3 or later.
+ *
+ *   This example uses Node 8's async/await syntax.
  *
  *****************************************************************************/
 

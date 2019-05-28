@@ -71,11 +71,13 @@ async function deq() {
     connection = await oracledb.getConnection(dbConfig);
 
     const queue = connection.queue(queueName);
-    Object.assign(queue.deqOptions,
-                  {
-                    visibility: oracledb.AQ_VISIBILITY_IMMEDIATE, // Change the visibility so no explicit commit is required
-                    wait: 5                                       // Only wait 5 seconds if there are no messages
-                  });
+    Object.assign(
+      queue.deqOptions,
+      {
+        visibility: oracledb.AQ_VISIBILITY_IMMEDIATE, // Change the visibility so no explicit commit is required
+        wait: 5                                       // Only wait 5 seconds if there are no messages
+      }
+    );
 
     const msg = await queue.deqOne();
     if (msg) {

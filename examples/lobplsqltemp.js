@@ -30,137 +30,98 @@
  *
  *   This example requires node-oracledb 1.12.1 or later.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
 var fs = require('fs');
-var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
 var inFileName = 'clobexample.txt';  // the file with text to be inserted into the database
 
-var doconnect = function(cb) {
-  oracledb.getConnection(
-    {
-      user          : dbConfig.user,
-      password      : dbConfig.password,
-      connectString : dbConfig.connectString
-    },
-    cb);
-};
+async function run() {
 
-var dorelease = function(conn) {
-  conn.close(function (err) {
-    if (err)
-      console.error(err.message);
-  });
-};
+  let connection;
 
-// Cleanup anything other than lobinsert1.js demo data
-var cleanup = function (conn, cb) {
-  conn.execute(
-    'DELETE FROM mylobs WHERE id > 2',
-    function(err) {
-      return cb(err, conn);
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+
+    // Cleanup anything other than lobinsert1.js demonstration data
+    await connection.execute(`DELETE FROM mylobs WHERE id > 2`);
+
+    // Create an empty Temporary Lob
+    const tempLob = await connection.createLob(oracledb.CLOB);
+
+    // Helper function for loading data to the Temporary Lob
+    const doStream = new Promise((resolve, reject) => {
+
+      let errorHandled = false;
+
+      tempLob.on('close', () => {
+        // console.log("templob.on 'close' event");
+      });
+
+      tempLob.on('error', (err) => {
+        // console.log("templob.on 'error' event");
+        if (!errorHandled) {
+          errorHandled = true;
+          reject(err);
+        }
+      });
+
+      tempLob.on('finish', () => {
+        // console.log("templob.on 'finish' event");
+        // The data was loaded into the temporary LOB
+        if (!errorHandled) {
+          resolve();
+        }
+      });
+
+      console.log('Reading from ' + inFileName);
+      var inStream = fs.createReadStream(inFileName);
+      inStream.on('error', (err) => {
+        // console.log("inStream.on 'error' event");
+        if (!errorHandled) {
+          errorHandled = true;
+          reject(err);
+        }
+      });
+
+      inStream.pipe(tempLob);  // copies the text to the temporary LOB
     });
-};
 
-var createtemplob = function (conn, cb) {
-  conn.createLob(oracledb.CLOB, function(err, templob) {
-    if (err) {
-      return cb(err);
+    // Load the data into the Temporary LOB
+    await doStream;
+
+    // Call PL/SQL to insert into the DB
+    console.log('Calling PL/SQL to insert the temporary LOB into the database');
+    await connection.execute(
+      `BEGIN
+         lobs_in(:id, :c, null);
+       END;`,
+      {
+        id: 3,
+        c: tempLob // type and direction are optional for IN binds
+      },
+      { autoCommit: true }
+    );
+    console.log("Call completed");
+
+    // Applications should close LOBs that were created using createLob()
+    await tempLob.close();
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
+      }
     }
-    console.log("Temporary LOB created with createLob()");
-    return cb(null, conn, templob);
-  });
-};
+  }
+}
 
-var loadtemplob = function (conn, templob, cb) {
-  console.log('Streaming from the text file into the temporary LOB');
-
-  var errorHandled = false;
-
-  templob.on(
-    'close',
-    function() {
-      console.log("templob.on 'close' event");
-    });
-
-  templob.on(
-    'error',
-    function(err) {
-      console.log("templob.on 'error' event");
-      if (!errorHandled) {
-        errorHandled = true;
-        return cb(err);
-      }
-    });
-
-  templob.on(
-    'finish',
-    function() {
-      console.log("templob.on 'finish' event");
-      // The data was loaded into the temporary LOB
-      if (!errorHandled) {
-        return cb(null, conn, templob);
-      }
-    });
-
-  console.log('Reading from ' + inFileName);
-  var inStream = fs.createReadStream(inFileName);
-  inStream.on(
-    'error',
-    function(err) {
-      console.log("inStream.on 'error' event");
-      if (!errorHandled) {
-        errorHandled = true;
-        return cb(err);
-      }
-    });
-
-  inStream.pipe(templob);  // copies the text to the temporary LOB
-};
-
-var doinsert = function (conn, templob, cb) {
-  console.log('Calling PL/SQL to insert the temporary LOB into the database');
-  conn.execute(
-    "BEGIN lobs_in(:id, :c, null); END;",
-    { id: 3,
-      c: templob }, // type and direction are optional for IN binds
-    { autoCommit: true },
-    function(err) {
-      if (err) {
-        return cb(err);
-      }
-      console.log("Call completed");
-      return cb(null, conn, templob);
-    });
-};
-
-// Applications should close LOBs that were created using createLob()
-var closetemplob = function (conn, templob, cb) {
-  console.log('Closing the temporary LOB');
-  templob.close(function (err) {
-    if (err)
-      return cb(err);
-    else
-      return cb(null, conn);
-  });
-};
-
-async.waterfall(
-  [
-    doconnect,
-    cleanup,
-    createtemplob,
-    loadtemplob,
-    doinsert,
-    closetemplob
-  ],
-  function (err, conn) {
-    if (err) {
-      console.error("In waterfall error cb: ==>", err, "<==");
-    }
-    if (conn)
-      dorelease(conn);
-  });
+run();

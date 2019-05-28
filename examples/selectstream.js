@@ -50,7 +50,7 @@ async function run() {
       }
     );
 
-    const consumeStream = new Promise(function(resolve, reject) {
+    const consumeStream = new Promise((resolve, reject) => {
       let rowcount = 0;
 
       stream.on('error', function(error) {

@@ -29,135 +29,108 @@
  *
  *   This example requires node-oracledb 1.12 or later.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
 var fs = require('fs');
-var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-var conn;
-var sql;
-var outFileName;
-
-var doconnect = function(cb) {
-  oracledb.getConnection(
-    {
-      user          : dbConfig.user,
-      password      : dbConfig.password,
-      connectString : dbConfig.connectString
-    },
-    function(err, connection) {
-      if (err)
-        return cb(err);
-      else {
-        conn = connection;
-        return cb(null);
-      }
-    });
-};
-
-var dorelease = function() {
-  conn.close(function (err) {
-    if (err)
-      console.error(err.message);
-  });
-};
-
 // Stream a LOB to a file
-var  dostream = function(lob, cb) {
-  if (lob.type === oracledb.CLOB) {
-    console.log('Writing a CLOB to ' + outFileName);
-    lob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
-  } else {
-    console.log('Writing a BLOB to ' + outFileName);
-  }
+async function doStream(lob, outFileName) {
 
-  var errorHandled = false;
+  const doStreamHelper = new Promise((resolve, reject) => {
 
-  lob.on(
-    'error',
-    function(err) {
-      console.log("lob.on 'error' event");
+    if (lob.type === oracledb.CLOB) {
+      console.log('Writing a CLOB to ' + outFileName);
+      lob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
+    } else {
+      console.log('Writing a BLOB to ' + outFileName);
+    }
+
+    let errorHandled = false;
+
+    lob.on('error', (err) => {
+      // console.log("lob.on 'error' event");
       if (!errorHandled) {
         errorHandled = true;
-        lob.close(function() {
-          return cb(err);
+        lob.close(() => {
+          reject(err);
         });
       }
     });
-  lob.on(
-    'end',
-    function() {
-      console.log("lob.on 'end' event");
+    lob.on('end', () => {
+      // console.log("lob.on 'end' event");
     });
-  lob.on(
-    'close',
-    function() {
+    lob.on('close', () => {
       // console.log("lob.on 'close' event");
       if (!errorHandled) {
-        return cb(null);
+        resolve();
       }
     });
 
-  var outStream = fs.createWriteStream(outFileName);
-  outStream.on(
-    'error',
-    function(err) {
-      console.log("outStream.on 'error' event");
+    const outStream = fs.createWriteStream(outFileName);
+    outStream.on('error', (err) => {
+      // console.log("outStream.on 'error' event");
       if (!errorHandled) {
         errorHandled = true;
-        lob.close(function() {
-          return cb(err);
+        lob.close(() => {
+          reject(err);
         });
       }
     });
 
-  // Switch into flowing mode and push the LOB to the file
-  lob.pipe(outStream);
-};
+    // Switch into flowing mode and push the LOB to the file
+    lob.pipe(outStream);
+  });
 
-var doquery = function(cb) {
-  conn.execute(
-    sql,
-    function(err, result) {
-      if (err) {
-        return cb(err);
+  await doStreamHelper;
+}
+
+async function run() {
+  let connection;
+
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+
+    //
+    // Fetch a CLOB and stream it
+    //
+    let result = await connection.execute(`SELECT c FROM mylobs WHERE id = 1`);
+    if (result.rows.length === 0) {
+      throw new Error("No results.  Did you run lobinsert1.js?");
+    }
+    let lob = result.rows[0][0];
+    if (lob === null) {
+      throw new Error("LOB was NULL");
+    }
+    await doStream(lob, 'clobstream1out.txt');
+
+    //
+    // Fetch a BLOB and stream it
+    //
+    result = await connection.execute(`SELECT b FROM mylobs WHERE id = 2`);
+    if (result.rows.length === 0) {
+      throw new Error("No results.  Did you run lobinsert1.js?");
+    }
+    lob = result.rows[0][0];
+    if (lob === null) {
+      throw new Error("LOB was NULL");
+    }
+    await doStream(lob, 'blobstream1out.jpg');
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
       }
-      if (result.rows.length === 0) {
-        return cb(new Error("No results.  Did you run lobinsert1.js?"));
-      }
-      var lob = result.rows[0][0];
-      if (lob === null) {
-        return cb(new Error("LOB was NULL"));
-      }
-      return cb(null, lob);
-    });
-};
+    }
+  }
+}
 
-// Top level method to query and stream a CLOB
-var doclob = function(cb) {
-  sql = "SELECT c FROM mylobs WHERE id = 1";
-  outFileName = 'clobstream1out.txt';
-  async.waterfall([doquery, dostream], cb);
-};
-
-// Top level method to query and stream a BLOB
-var doblob = function(cb) {
-  sql = "SELECT b FROM mylobs WHERE id = 2";
-  outFileName = 'blobstream1out.jpg';
-  async.waterfall([doquery, dostream], cb);
-};
-
-// Main routine
-// Connect and call the CLOB and BLOB examples
-async.waterfall([
-  doconnect,
-  doclob,
-  doblob
-],
-function (err) {
-  if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-  if (conn)
-    dorelease(conn);
-});
+run();

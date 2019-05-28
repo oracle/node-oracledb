@@ -31,6 +31,8 @@
  *     INSERT INTO dmlrupdtab VALUES (1002, 'Neeharika');
  *     COMMIT;
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
 const oracledb = require( 'oracledb' );

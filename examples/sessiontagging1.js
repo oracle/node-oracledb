@@ -43,6 +43,8 @@
  *
  *   This example requires node-oracledb 3.1 or later.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *   Also see sessionfixup.js and sessiontagging2.js
  *
  *****************************************************************************/
