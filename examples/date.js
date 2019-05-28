@@ -44,11 +44,7 @@ async function run() {
   try {
     let result, date;
 
-    connection = await oracledb.getConnection(  {
-      user         : dbConfig.user,
-      password     : dbConfig.password,
-      connectString: dbConfig.connectString
-    });
+    connection = await oracledb.getConnection(dbConfig);
 
     console.log('Creating table');
     await connection.execute(
