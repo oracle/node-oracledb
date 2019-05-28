@@ -38,76 +38,91 @@ var dbConfig = require('./dbconfig.js');
 
 var inFileName = 'clobexample.txt';  // the file with text to be inserted into the database
 
-oracledb.getConnection(
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString
-  },
-  function(err, connection) {
-    if (err) { console.error(err.message); return; }
+async function run() {
 
-    connection.execute(
-      "INSERT INTO mylobs (id, c) VALUES (:id, EMPTY_CLOB()) RETURNING c INTO :lobbv",
-      { id: 4, lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
-      { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
-      function(err, result) {
-        if (err) { console.error(err.message); return; }
-        if (result.rowsAffected != 1 || result.outBinds.lobbv.length != 1) {
-          console.error('Error getting a LOB locator');
-          return;
-        }
+  let connection;
 
-        var errorHandled = false;
+  try {
+    const connection = await oracledb.getConnection(
+      {
+        user          : dbConfig.user,
+        password      : dbConfig.password,
+        connectString : dbConfig.connectString
+      }
+    );
 
-        var lob = result.outBinds.lobbv[0];
-        lob.on(
-          'close',
-          function() {
-            console.log("lob.on 'close' event");
-            connection.commit(
-              function(err) {
-                if (!errorHandled) {
-                  errorHandled = true;
-                  if (err) {
-                    console.error(err);
-                  } else {
-                    console.log("Text inserted successfully.");
-                  }
-                  connection.close(function(err) {
-                    if (err)
-                      console.error(err);
-                  });
-                }
-              });
-          });
-        lob.on(
-          'error',
-          function(err) {
-            console.log("lob.on 'error' event");
+    const result = await connection.execute(
+      `INSERT INTO mylobs (id, c) VALUES (:id, EMPTY_CLOB()) RETURNING c INTO :lobbv`,
+      {
+        id: 4,
+        lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT}
+      },
+      { autoCommit: false }  // a transaction needs to span the INSERT and pipe()
+    );
+
+    if (result.rowsAffected != 1 || result.outBinds.lobbv.length != 1) {
+      throw new Error('Error getting a LOB locator');
+    }
+
+    const lob = result.outBinds.lobbv[0];
+    if (lob === null) {
+      throw new Error('NULL lob found');
+    }
+
+    const doStream = new Promise((resolve, reject) => {
+
+      let errorHandled = false;
+
+      lob.on('close', () => {
+        // console.log("lob.on 'close' event");
+        connection.commit((err) => {
+          if (err) {
             if (!errorHandled) {
               errorHandled = true;
-              console.error(err);
-              lob.close(function(err) {
-                if (err) {
-                  console.error(err.message);
-                }
-              });
+              reject(err);
             }
-          });
-
-        console.log('Reading from ' + inFileName);
-        var inStream = fs.createReadStream(inFileName);
-        inStream.on(
-          'error',
-          function(err) {
-            console.log("inStream.on 'error' event");
-            if (!errorHandled) {
-              errorHandled = true;
-              console.error(err);
-            }
-          });
-
-        inStream.pipe(lob);  // copies the text to the LOB
+          } else {
+            console.log("Text inserted successfully.");
+            resolve();
+          }
+        });
       });
-  });
+      lob.on('error', (err) => {
+        // console.log("lob.on 'error' event");
+        if (!errorHandled) {
+          errorHandled = true;
+          lob.close(() => {
+            reject(err);
+          });
+        }
+      });
+
+      console.log('Reading from ' + inFileName);
+      var inStream = fs.createReadStream(inFileName);
+      inStream.on('error', (err) => {
+        // console.log("inStream.on 'error' event");
+        if (!errorHandled) {
+          errorHandled = true;
+          reject(err);
+        }
+      });
+
+      inStream.pipe(lob);  // copies the text to the LOB
+    });
+
+    await doStream;
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+}
+
+run();

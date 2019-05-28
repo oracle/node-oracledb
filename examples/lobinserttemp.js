@@ -58,7 +58,7 @@ async function run() {
     tempLob.write("That's all!");
     await tempLob.end();  //  indicate the app has no more data to insert
 
-    const doInsert = new Promise(function(resolve, reject) {
+    const doInsert = new Promise((resolve, reject) => {
 
       // The 'finish' event is emitted when node-oracledb has
       // processed all data for the Temporary LOB

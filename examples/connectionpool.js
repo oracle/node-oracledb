@@ -22,14 +22,14 @@
  *   Shows connection pool usage.  Connection pools are recommended
  *   for applications that use a lot of connections for short periods.
  *
- *   This example uses Node 8's async/await syntax.
- *
  *   Other connection pool examples are in sessionfixup.js and webappawait.js.
  *   For a standalone connection example, see connect.js
  *
  *   In some networks forced pool termination may hang unless you have
  *   'disable_oob=on' in sqlnet.ora, see
  *   https://oracle.github.io/node-oracledb/doc/api.html#tnsadmin
+ *
+ *   This example uses Node 8's async/await syntax.
  *
  *****************************************************************************/
 

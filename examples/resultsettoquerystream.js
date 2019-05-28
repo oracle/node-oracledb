@@ -50,7 +50,7 @@ async function run() {
 
     const queryStream = result.resultSet.toQueryStream();
 
-    const consumeStream = new Promise(function(resolve, reject) {
+    const consumeStream = new Promise((resolve, reject) => {
       queryStream.on('data', function(row) {
         console.log(row);
       });

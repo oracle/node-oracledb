@@ -58,7 +58,7 @@ async function run() {
     const cursor = result.outBinds.cursor;
     const queryStream = cursor.toQueryStream();
 
-    const consumeStream = new Promise(function(resolve, reject) {
+    const consumeStream = new Promise((resolve, reject) => {
       queryStream.on('data', function(row) {
         console.log(row);
       });

@@ -9726,7 +9726,7 @@ if (result.rowsAffected != 1 || result.outBinds.lobbv.length != 1) {
   throw new Error('Error getting a LOB locator');
 }
 
-const doInsert = new Promise(function(resolve, reject) {
+const doInsert = new Promise((resolve, reject) => {
   const lob = result.outBinds.lobbv[0];
   lob.on('close', async () => {
     await connection.commit();  // all data is loaded so we can commit it
@@ -10556,7 +10556,7 @@ const result = await connection.execute(
 const cursor = result.outBinds.cursor;
 const queryStream = cursor.toQueryStream();
 
-const consumeStream = new Promise(function(resolve, reject) {
+const consumeStream = new Promise((resolve, reject) => {
   queryStream.on('data', function(row) {
     console.log(row);
   });

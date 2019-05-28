@@ -28,6 +28,8 @@
  *
  *   This example requires node-oracledb 2.2 or later.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  *****************************************************************************/
 
 const oracledb = require('oracledb');

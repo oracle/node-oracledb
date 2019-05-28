@@ -25,7 +25,9 @@
  *
  *   This example requires node-oracledb 2.2 or later.
  *
- *****************************************************************************/
+ *   This example uses Node 8's async/await syntax.
+ *
+x *****************************************************************************/
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');

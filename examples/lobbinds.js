@@ -31,6 +31,8 @@
  *
  *   This example requires node-oracledb 1.13 or later.
  *
+ *   This example uses Node 8's async/await syntax.
+ *
  ******************************************************************************/
 
 const fs = require('fs');
@@ -156,7 +158,7 @@ async function query_plsql_inout(connection) {
   }
 
   // Stream the returned LOB to a file
-  const doStream = new Promise(function(resolve, reject) {
+  const doStream = new Promise((resolve, reject) => {
 
     let errorHandled = false;
 
@@ -233,7 +235,7 @@ async function plsql_out_inout(connection) {
     }
   );
 
-  const doStream = new Promise(function(resolve, reject) {
+  const doStream = new Promise((resolve, reject) => {
 
     let errorHandled = false;
 
