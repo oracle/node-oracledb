@@ -43,11 +43,7 @@ async function run() {
 
     let sql, binds, options, result;
 
-    connection = await oracledb.getConnection(  {
-      user          : dbConfig.user,
-      password      : dbConfig.password,
-      connectString : dbConfig.connectString
-    });
+    connection = await oracledb.getConnection(dbConfig);
 
     // Create a table
 

@@ -43,13 +43,7 @@ async function run() {
   let connection;
 
   try {
-    const connection = await oracledb.getConnection(
-      {
-        user          : dbConfig.user,
-        password      : dbConfig.password,
-        connectString : dbConfig.connectString
-      }
-    );
+    const connection = await oracledb.getConnection(dbConfig);
 
     const result = await connection.execute(
       `INSERT INTO mylobs (id, c) VALUES (:id, EMPTY_CLOB()) RETURNING c INTO :lobbv`,
