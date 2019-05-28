@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -229,6 +229,69 @@ describe('40. dataTypeClob.js', function() {
       ], done);  // async
 
     }); // 40.1.1
+
+
+    it('40.1.2 CLOB getValue()', function(done) {
+      connection.should.be.ok();
+      async.series([
+        function clobinsert1(callback) {
+
+          connection.execute(
+            "INSERT INTO nodb_myclobs (num, content) VALUES (:n, EMPTY_CLOB()) RETURNING content INTO :lobbv",
+            { n: 2, lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
+            { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
+            function(err, result) {
+              should.not.exist(err);
+              (result.rowsAffected).should.be.exactly(1);
+              (result.outBinds.lobbv.length).should.be.exactly(1);
+
+              var inStream = fs.createReadStream(inFileName);
+              var lob = result.outBinds.lobbv[0];
+
+              lob.on('error', function(err) {
+                should.not.exist(err, "lob.on 'error' event");
+              });
+
+              inStream.on('error', function(err) {
+                should.not.exist(err, "inStream.on 'error' event");
+              });
+
+              lob.on('close', function() {
+                // now commit updates
+                connection.commit( function(err) {
+                  should.not.exist(err);
+                  callback();
+                });
+              });
+
+              inStream.pipe(lob); // copies the text to the CLOB
+            }
+          );
+        },
+        function clobgetval(callback) {
+          connection.execute(
+            "SELECT content FROM nodb_myclobs WHERE num = :n",
+            { n: 2 },
+            function(err, result) {
+              should.not.exist(err);
+
+              var lob = result.rows[0][0];
+              should.exist(lob);
+
+              fs.readFile( inFileName, { encoding: 'utf8' }, function(err, data) {
+                should.not.exist(err);
+                lob.getValue(function(err, clob) {
+                  should.not.exist(err);
+                  data.length.should.be.exactly(clob.length);
+                  data.should.equal(clob);
+                  callback();
+                });
+              });
+            });
+        }
+      ], done);  // async
+
+    }); // 40.1.2
 
   }); // 40.1
 
