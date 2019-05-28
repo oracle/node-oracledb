@@ -27,15 +27,18 @@
 
 // class methods
 static NJS_NAPI_METHOD(njsLob_close);
+static NJS_NAPI_METHOD(njsLob_getValue);
 static NJS_NAPI_METHOD(njsLob_read);
 static NJS_NAPI_METHOD(njsLob_write);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsLob_closeAsync);
+static NJS_ASYNC_METHOD(njsLob_getValueAsync);
 static NJS_ASYNC_METHOD(njsLob_readAsync);
 static NJS_ASYNC_METHOD(njsLob_writeAsync);
 
 // post asynchronous methods
+static NJS_ASYNC_POST_METHOD(njsLob_getValuePostAsync);
 static NJS_ASYNC_POST_METHOD(njsLob_readPostAsync);
 
 // processing arguments methods
@@ -59,6 +62,8 @@ static NJS_NAPI_FINALIZE(njsLob_finalize);
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
     { "_close", NULL, njsLob_close, NULL, NULL, NULL, napi_default, NULL },
+    { "_getValue", NULL, njsLob_getValue, NULL, NULL, NULL, napi_default,
+            NULL },
     { "__read", NULL, njsLob_read, NULL, NULL, NULL, napi_default, NULL },
     { "__write", NULL, njsLob_write, NULL, NULL, NULL, napi_default, NULL },
     { "_autoCloseLob", NULL, NULL, njsLob_getAutoCloseLob, NULL, NULL,
@@ -255,6 +260,94 @@ static napi_value njsLob_getValid(napi_env env, napi_callback_info info)
     if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &lob))
         return NULL;
     return njsUtils_convertToBoolean(env, (lob->handle) ? true : false);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsLob_getValue()
+//   Read all of the data from the LOB and return it as a single string or
+// buffer.
+//
+// PARAMETERS
+//   - JS callback which will receive (error, data)
+//-----------------------------------------------------------------------------
+static napi_value njsLob_getValue(napi_env env, napi_callback_info info)
+{
+    njsBaton *baton;
+
+    if (!njsLob_createBaton(env, info, 1, NULL, &baton))
+        return NULL;
+    njsBaton_queueWork(baton, env, "GetValue", njsLob_getValueAsync,
+            njsLob_getValuePostAsync, 2);
+    return NULL;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsLob_getValueAsync()
+//   Worker function for njsLob_getValue().
+//-----------------------------------------------------------------------------
+static bool njsLob_getValueAsync(njsBaton *baton)
+{
+    njsLob *lob = (njsLob*) baton->callingInstance;
+    bool ok = true;
+
+    // determine size of buffer that is required
+    if (lob->dataType == NJS_DATATYPE_BLOB) {
+        baton->bufferSize = lob->length;
+    } else if (dpiLob_getBufferSize(lob->handle, lob->length,
+            &baton->bufferSize) < 0) {
+        ok = njsBaton_setErrorDPI(baton);
+    }
+
+    // allocate memory for the buffer
+    if (ok && baton->bufferSize > 0) {
+        baton->bufferPtr = malloc(baton->bufferSize);
+        if (!baton->bufferPtr)
+            ok = njsBaton_setError(baton, errInsufficientMemory);
+    }
+
+    // read from the LOB into the provided buffer
+    if (ok && baton->bufferSize > 0 && dpiLob_readBytes(lob->handle, 1,
+            lob->length, baton->bufferPtr, &baton->bufferSize) < 0)
+        ok = njsBaton_setErrorDPI(baton);
+
+    // if an error occurs or the end of the LOB has been reached, and the LOB
+    // is marked as one that should be automatically closed, close and release
+    // it, ignoring any further errors that occur during the attempt to close
+    if (lob->isAutoClose && (!baton->bufferSize || !ok)) {
+        NJS_FREE_AND_CLEAR(lob->bufferPtr);
+        dpiLob_close(lob->handle);
+        dpiLob_release(lob->handle);
+        lob->handle = NULL;
+    }
+
+    return ok;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsLob_getValuePostAsync()
+//   Generates return values for njsLob_getValue().
+//-----------------------------------------------------------------------------
+static bool njsLob_getValuePostAsync(njsBaton *baton, napi_env env,
+        napi_value *args)
+{
+    njsLob *lob = (njsLob*) baton->callingInstance;
+    napi_value result;
+
+    if (!baton->bufferSize) {
+        NJS_CHECK_NAPI(env, napi_get_null(env, &result))
+    } else if (lob->dataType == NJS_DATATYPE_CLOB) {
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, baton->bufferPtr,
+                baton->bufferSize, &result))
+    } else {
+        NJS_CHECK_NAPI(env, napi_create_buffer_copy(env, baton->bufferSize,
+                baton->bufferPtr, NULL, &result))
+    }
+
+    args[1] = result;
+    return true;
 }
 
 

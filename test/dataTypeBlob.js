@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -201,6 +201,68 @@ describe('41. dataTypeBlob.js', function() {
         }
       ], done);
     }); // 41.1.1
+
+    it('41.1.2 BLOB getValue()', function(done) {
+      connection.should.be.ok();
+      async.series([
+        function blobinsert1(callback) {
+
+          connection.execute(
+            "INSERT INTO nodb_myblobs (num, content) VALUES (:n, EMPTY_BLOB()) RETURNING content INTO :lobbv",
+            { n: 3, lobbv: {type: oracledb.BLOB, dir: oracledb.BIND_OUT} },
+            { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
+            function(err, result) {
+              should.not.exist(err);
+              (result.rowsAffected).should.be.exactly(1);
+              (result.outBinds.lobbv.length).should.be.exactly(1);
+
+              var inStream = fs.createReadStream(inFileName);
+              inStream.on('error', function(err) {
+                should.not.exist(err, "inStream.on 'end' event");
+              });
+
+              var lob = result.outBinds.lobbv[0];
+
+              lob.on('error', function(err) {
+                should.not.exist(err, "lob.on 'error' event");
+              });
+
+              inStream.pipe(lob);  // pipes the data to the BLOB
+
+              lob.on('close', function() {
+                connection.commit(function(err) {
+                  should.not.exist(err);
+                  callback();
+                });
+              });
+
+            }
+          );
+        },
+        function blobstream2(callback) {
+
+          connection.execute(
+            "SELECT content FROM nodb_myblobs WHERE num = :n",
+            { n: 3 },
+            function(err, result) {
+              should.not.exist(err);
+
+              var lob = result.rows[0][0];
+              should.exist(lob);
+
+              fs.readFile( inFileName, function(err, data) {
+                should.not.exist(err);
+                lob.getValue(function(err, blob) {
+                  data.length.should.be.exactly(blob.length);
+                  data.should.eql(blob);
+                  callback();
+                });
+              });
+            });
+        }
+      ], done);
+    }); // 41.1.2
+
   }); //41.1
 
   describe('41.2 stores null value correctly', function() {

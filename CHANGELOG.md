@@ -25,6 +25,10 @@
 - Added support for Implicit Results, allowing query results to be
   returned from PL/SQL without needing parameters or bind variables.
 
+- Added
+  [`lob.getValue()`](https://oracle.github.io/node-oracledb/doc/api.html#lobgetvalue)
+  to return a LOBs value from a Lob instance.
+
 - Class methods are now configurable.  For example via
   `Object.defineProperty`.
 
