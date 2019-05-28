@@ -487,11 +487,11 @@ node myscript.js
 // myscript.js
 // This example uses Node 8's async/await syntax.
 
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 
 oracledb.outFormat = oracledb.OBJECT;
 
-var mypw = ...  // set mypw to the hr schema password
+const mypw = ...  // set mypw to the hr schema password
 
 async function run() {
 
@@ -504,7 +504,7 @@ async function run() {
       connectString : "localhost/XEPDB1"
     });
 
-    let result = await connection.execute(
+    const result = await connection.execute(
       `SELECT manager_id, department_id, department_name
        FROM departments
        WHERE manager_id = :id`,
@@ -549,7 +549,7 @@ later.
 
 const oracledb = require('oracledb');
 
-let mypw = ...  // set mypw to the hr schema password
+const mypw = ...  // set mypw to the hr schema password
 
 oracledb.autoCommit = true;
 
@@ -565,19 +565,19 @@ async function run() {
     });
 
     // Create a new (or open an existing) document collection
-    let soda = connection.getSodaDatabase();
-    let collectionName = 'nodb_soda_collection';
-    let myCollection = await soda.createCollection(collectionName);
+    const soda = connection.getSodaDatabase();
+    const collectionName = 'nodb_soda_collection';
+    const myCollection = await soda.createCollection(collectionName);
 
     // Insert a new document
-    let myContent = { name: "Sally", address: {city: "Melbourne"} };
+    const myContent = { name: "Sally", address: {city: "Melbourne"} };
     await myCollection.insertOne(myContent);
 
     // Print names of people living in Melbourne
-    let filterSpec = { "address.city": "Melbourne" };
-    let myDocuments = await myCollection.find().filter(filterSpec).getDocuments();
+    const filterSpec = { "address.city": "Melbourne" };
+    const myDocuments = await myCollection.find().filter(filterSpec).getDocuments();
     myDocuments.forEach(function(element) {
-      let content = element.getContent();
+      const content = element.getContent();
       console.log(content.name + ' lives in Melbourne.');
     });
   } catch(err) {
@@ -677,7 +677,7 @@ The *Oracledb* object is the factory class for *Pool* and *Connection* objects.
 The *Oracledb* object is instantiated by loading node-oracledb:
 
 ```javascript
-var oracledb = require("oracledb");
+const oracledb = require("oracledb");
 ```
 
 Internally, the add-on creates the *Oracledb* object as a singleton.
@@ -949,7 +949,7 @@ Note prior to node-oracledb 0.5 this property was called
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.autoCommit = false;
 ```
 
@@ -985,7 +985,7 @@ See
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.connectionClass = 'HRPOOL';
 ```
 
@@ -1004,7 +1004,7 @@ This property was added in node-oracledb 2.2.
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.edition = 'ed_2';
 ```
 
@@ -1033,7 +1033,7 @@ This property was added in node-oracledb 2.2.
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.events = true;
 ```
 
@@ -1085,7 +1085,7 @@ Note prior to node-oracledb 0.5 this property was called
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.externalAuth = false;
 ```
 
@@ -1126,7 +1126,7 @@ The property was introduced in node-oracledb version 2.0.  It replaces
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.fetchArraySize = 100;
 ```
 
@@ -1155,7 +1155,7 @@ This property was added in node-oracledb 1.13.
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 ```
 
@@ -1198,7 +1198,7 @@ type.
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 ```
 
@@ -1224,7 +1224,7 @@ The default size is 16384.
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.lobPrefetchSize = 16384;
 ```
 
@@ -1261,7 +1261,7 @@ In version 1, the default value was 100.
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.maxRows = 0;
 ```
 
@@ -1284,7 +1284,7 @@ libraries.  Previous versions threw this error from
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 console.log("Oracle client library version number is " + oracledb.oracleClientVersion);
 ```
 
@@ -1306,7 +1306,7 @@ Client libraries.  Previous versions threw this error from
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 console.log("Oracle client library version is " + oracledb.oracleClientVersionString);
 ```
 
@@ -1345,7 +1345,7 @@ See [Query Output Formats](#queryoutputformats) for more information.
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.outFormat = oracledb.ARRAY;
 ```
 
@@ -1365,7 +1365,7 @@ This property may be overridden when [creating a connection pool](#createpool).
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.poolIncrement = 1;
 ```
 
@@ -1391,7 +1391,7 @@ See [Connection Pooling](#connpooling) for other pool sizing guidelines.
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.poolMax = 4;
 ```
 
@@ -1421,7 +1421,7 @@ number of open connections does not fall below `poolMin`.
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.poolMin = 0;
 ```
 
@@ -1459,7 +1459,7 @@ using Oracle Client 12.2 (and later) until node-oracledb 3.0.
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.poolPingInterval = 60;     // seconds
 ```
 
@@ -1481,7 +1481,7 @@ This property may be overridden when [creating a connection pool](#createpool).
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.poolTimeout = 60;
 ```
 
@@ -1498,7 +1498,7 @@ effect on applications.  Use
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.prefetchRows = 100;
 ```
 
@@ -1520,7 +1520,7 @@ implementation.
 ##### Example
 
 ```javascript
-var mylib = require('myfavpromiseimplementation');
+const mylib = require('myfavpromiseimplementation');
 oracledb.Promise = mylib;
 ```
 
@@ -1557,7 +1557,7 @@ This property was added in node-oracledb 1.7.
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.queueTimeout = 3000; // 3 seconds
 ```
 
@@ -1584,7 +1584,7 @@ See [Statement Caching](#stmtcache) for examples.
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
@@ -1599,7 +1599,7 @@ For version *x.y.z*, this property gives the number: `(10000 * x) + (100 * y) + 
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 console.log("Driver version number is " + oracledb.version);
 ```
 
@@ -1615,7 +1615,7 @@ This property was added in node-oracledb 2.1.
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 console.log("Driver version is " + oracledb.versionString);
 ```
 
@@ -1631,7 +1631,7 @@ This property was added in node-oracledb 2.1.
 ##### Example
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 console.log("Driver version suffix is " + oracledb.versionSuffix);
 ```
 
@@ -6298,11 +6298,11 @@ Connections should be released with
 [`connection.close()`](#connectionclose) when no longer needed:
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 
-var mypw = ...  // set mypw to the hr schema password
+const mypw = ...  // set mypw to the hr schema password
 
-(async function() {
+async function run() {
   try {
     connection = await oracledb.getConnection({
       user          : "hr",
@@ -6310,7 +6310,7 @@ var mypw = ...  // set mypw to the hr schema password
       connectString : "localhost/XEPDB1"
     });
 
-    result = await connection.execute("select last_name from employees");
+    result = await connection.execute(`SELECT last_name FROM employees`);
     console.log("Result is:", result);
 
   } catch (err) {
@@ -6324,7 +6324,9 @@ var mypw = ...  // set mypw to the hr schema password
       }
     }
   }
-})();
+}
+
+run();
 ```
 
 ##### Pooled Connections
@@ -6336,32 +6338,44 @@ application, particularly if connections are released to the pool
 while no database work is being done.
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 
-var mypw = ...  // set mypw to the hr schema password
+const mypw = ...  // set mypw to the hr schema password
 
-(async function() {
- let pool;
- try {
-   pool = await oracledb.createPool({
-     user          : "hr"
-     password      : mypw,  // mypw contains the hr schema password
-     connectString : "localhost/XEPDB1"
-   });
+async function run() {
+  let pool;
 
-   let connection = await pool.getConnection();
+  try {
+    pool = await oracledb.createPool({
+      user          : "hr",
+      password      : mypw  // mypw contains the hr schema password
+      connectString : "localhost/XEPDB1"
+    });
 
-   result = await connection.execute("select last_name from employees");
-   console.log("Result is:", result);
+    let connection;
+    try {
+      connection = await pool.getConnection();
+      result = await connection.execute(`SELECT last_name FROM employees`);
+      console.log("Result is:", result);
+    } catch (err) {
+      throw (err);
+    } finally {
+      if (connection) {
+        try {
+          await connection.close(); // Put the connection back in the pool
+        } catch (err) {
+          throw (err);
+        }
+      }
+    }
+  } catch (err) {
+    console.error(err.message);
+  } finally {
+    await pool.close();
+  }
+}
 
-   await connection.close();  // return connection to the pool
-
- } catch (err) {
-   console.error(err.message);
- } finally {
-   await pool.close();
- }
-})();
+run();
 ```
 
 See [Connection Pooling](#connpooling) for more information.
@@ -6507,7 +6521,7 @@ Note that old-school connection SIDs are not supported: only service names can b
 For example, use *"localhost/XEPDB1"* to connect to the database *XE* on the local machine:
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 
 oracledb.getConnection(
   {
@@ -6527,7 +6541,7 @@ A Net Service Name, such as `sales` in the example below, can be used
 to connect:
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 
 oracledb.getConnection(
   {
@@ -6577,7 +6591,7 @@ documentation on `tnsnames.ora`][18].
 Full connection strings can be embedded in applications:
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 
 oracledb.getConnection(
   {
@@ -6600,7 +6614,7 @@ jdbc:oracle:thin:@hostname:port/service_name
 can use Oracle's Easy Connect syntax in node-oracledb:
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 
 oracledb.getConnection(
   {
@@ -6633,7 +6647,7 @@ finance =
 This can be referenced in node-oracledb:
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 
 oracledb.getConnection(
   {
@@ -6738,38 +6752,49 @@ retain session state, such as [NLS](#nls) settings from ALTER SESSION
 statements. See [Connection Tagging and Session
 State](#connpooltagging) for more information.
 
-Connections can also be [dropped from the pool](#connectionclose).
+Connections can also be [dropped completely from the pool](#connectionclose).
 
-In the async/await style:
-
+A connection pool can be used like:
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 
-var mypw = ...  // set mypw to the hr schema password
+const mypw = ...  // set mypw to the hr schema password
 
-(async function() {
- let pool;
- try {
-   pool = await oracledb.createPool({
-     user          : "hr"
-     password      : mypw,  // mypw contains the hr schema password
-     connectString : "localhost/XEPDB1"
-   });
+async function run() {
+  let pool;
 
-   let connection = await pool.getConnection();
+  try {
+    pool = await oracledb.createPool({
+      user          : "hr",
+      password      : mypw  // mypw contains the hr schema password
+      connectString : "localhost/XEPDB1"
+    });
 
-   result = await connection.execute("select last_name from employees");
-   console.log("Result is:", result);
+    let connection;
+    try {
+      connection = await pool.getConnection();
+      result = await connection.execute(`SELECT last_name FROM employees`);
+      console.log("Result is:", result);
+    } catch (err) {
+      throw (err);
+    } finally {
+      if (connection) {
+        try {
+          await connection.close(); // Put the connection back in the pool
+        } catch (err) {
+          throw (err);
+        }
+      }
+    }
+  } catch (err) {
+    console.error(err.message);
+  } finally {
+    await pool.close();
+  }
+}
 
-   await connection.close();  // return connection to the pool
-
- } catch (err) {
-   console.error(err.message);
- } finally {
-   await pool.close();
- }
-})();
+run();
 ```
 
 #### <a name="conpoolsizing"></a> 13.4.1 Connection Pool Sizing
@@ -7081,14 +7106,13 @@ altered or enhanced in the future**.
 To enable recording of queue statistics:
 
 ```javascript
-oracledb.createPool (
+const pool = await oracledb.createPool (
   {
     _enableStats  : true,   // default is false
     user          : "hr",
     password      : mypw,   // mypw contains the hr schema password
     connectString : "localhost/XEPDB1"
-  },
-  function(err, pool) {
+  });
   . . .
 ```
 
@@ -7286,7 +7310,7 @@ function initSession(connection, requestedTag, cb) {
 }
 
 try {
-  let pool = await oracledb.createPool({
+  const pool = await oracledb.createPool({
                user: 'hr',
                password: mypw,  // mypw contains the hr schema password
                connectString: 'localhost/XEPDB1',
@@ -7374,7 +7398,7 @@ const sessionTag = "location=USA";
 
 function initSession(connection, requestedTag, cb) {
   connection.tag = "LOCATION=GB";
-  let seen = connection.tag ? connection.tag.split(";").includes(requestedTag) : false;
+  const seen = connection.tag ? connection.tag.split(";").includes(requestedTag) : false;
   if (seen) {
     cb()
   } else {
@@ -7382,10 +7406,10 @@ function initSession(connection, requestedTag, cb) {
       `ALTER SESSION SET NLS_DATE_FORMAT = 'MM/DD/YY' NLS_LANGUAGE = AMERICAN`,
       (err) => {
         // Update the tag the record the connection's new state
-        let k = requestedTag.substr(0, requestedTag.indexOf('=')+1);
+        const k = requestedTag.substr(0, requestedTag.indexOf('=')+1);
         if (connection.tag.indexOf(k) >= 0) {
           // Update value of an existing, matching property in the tag
-          let re = new RegExp(k + "[^;]*");
+          const re = new RegExp(k + "[^;]*");
           connection.tag = connection.tag.replace(re, requestedTag);
         } else {
           // the requested property was not previously set in the tag
@@ -7405,7 +7429,7 @@ try {
              });
 
   // Request a connection with a given tag from the pool cache, but accept any tag being returned.
-  let connection = await oracledb.getConnection({poolAlias: 'default', tag: sessionTag, matchAnyTag: true});
+  const connection = await oracledb.getConnection({poolAlias: 'default', tag: sessionTag, matchAnyTag: true});
 
   . . . // Use the connection
 
@@ -7525,7 +7549,7 @@ This could be used in your application like:
 const sessionTag = "SDTZ=UTC";
 
 try {
-  let pool = await oracledb.createPool({
+  const pool = await oracledb.createPool({
                user: 'hr',
                password: mypw,  // mypw contains the hr schema password
                connectString: 'localhost/XEPDB1',
@@ -7533,7 +7557,7 @@ try {
              });
   . . .
 
-  let connection = await pool.getConnection({tag: sessionTag});
+  const connection = await pool.getConnection({tag: sessionTag});
 
   . . . // The value of connection.tag will be sessionTag
         // Use connection.
@@ -7560,28 +7584,22 @@ credentials supplied during pool creation, then a user name and
 password may be passed to `pool.getConnection()`:
 
 ```javascript
-oracledb.createPool(
+const pool = await oracledb.createPool(
   {
     connectString : "localhost/XEPDB1",  // no user name or password
     homogeneous   : false,
-    . . .  // other pool options such as poolMax can be used
-  },
-  function(err, pool) {
-    pool.getConnection(
-      {
-        user     : 'hr',
-        password : mypw,  // mypw contains the hr schema password
-      },
-      function (err, conn) {
-
-      . . . // use connection
-
-        conn.close(
-          function(err) {
-            if (err) { console.error(err.message); }
-          });
-      });
+    . . .  // other pool options such as poolMax
   });
+
+const connection = await pool.getConnection(
+  {
+    user     : 'hr',
+    password : mypw,  // mypw contains the hr schema password
+  });
+
+. . . // use connection
+
+await connection.close();
 ```
 
 The `connectString` is required during pool creation since the pool is
@@ -7651,22 +7669,22 @@ To use the proxy user with a node-oracledb heterogeneous connection
 pool you could do:
 
 ```javascript
-let myproxyuserpw = ... // the password of the 'myproxyuser' proxy user
+const myproxyuserpw = ... // the password of the 'myproxyuser' proxy user
 
-let pool = await oracledb.createPool({ connectString: "localhost/orclpdb", homogeneous: false });
-let conn = await pool.getConnection({ user: 'myproxyuser[hr]', password: myproxyuserpw});
+const pool = await oracledb.createPool({ connectString: "localhost/orclpdb", homogeneous: false });
+const connection = await pool.getConnection({ user: 'myproxyuser[hr]', password: myproxyuserpw});
 
 . . . // connection has access to the HR schema objects
 
-await conn.close();
+await connection.close();
 ```
 
 Other proxy cases are supported such as:
 
 ```javascript
-let myproxyuserpw = ... // the password of the 'myproxyuser' proxy user
+const myproxyuserpw = ... // the password of the 'myproxyuser' proxy user
 
-let pool = await oracledb.createPool(
+const pool = await oracledb.createPool(
   {
     user          : 'myproxyuser',
     password      : myproxyuserpw,
@@ -7675,11 +7693,11 @@ let pool = await oracledb.createPool(
     . . .  // other pool options such as poolMax can be used
   });
 
-let conn = pool.getConnection({ user : 'hr' });  // the session user
+const connection = await pool.getConnection({ user : 'hr' });  // the session user
 
 . . . // connection has access to the HR schema objects
 
-await conn.close();
+await connection.close();
 ```
 
 ### <a name="extauth"></a> 13.4 External Authentication
@@ -7705,8 +7723,8 @@ of existing connections or pools.
 For a standalone connection:
 
 ```javascript
-let config = { connectString: "localhost/orclpdb", externalAuth: true };
-let conn = await oracledb.getConnection(config);
+const config = { connectString: "localhost/orclpdb", externalAuth: true };
+const connection = await oracledb.getConnection(config);
 
 . . . // connection has access to the schema objects of the externally identified user
 ```
@@ -7722,8 +7740,8 @@ then to specify that the session user of the connection should be
 `HR`, use:
 
 ```javascript
-let config = { connectString: "localhost/orclpdb", user: "[hr]", externalAuth: true };
-let conn = await oracledb.getConnection(config);
+const config = { connectString: "localhost/orclpdb", user: "[hr]", externalAuth: true };
+const connection = await oracledb.getConnection(config);
 
 . . . // connection has access to the HR schema objects
 ```
@@ -7731,13 +7749,13 @@ let conn = await oracledb.getConnection(config);
 For a *Pool*, you can authenticate as an externally identified user like:
 
 ```javascript
-let config = { connectString: "localhost/orclpdb", externalAuth: true };
-let pool = await oracledb.createPool(config);
-let conn = await pool.getConnection();
+const config = { connectString: "localhost/orclpdb", externalAuth: true };
+const pool = await oracledb.createPool(config);
+const connection = await pool.getConnection();
 
 . . . // connection has access to the schema objects of the externally identified user
 
-await conn.close();
+await connection.close();
 ```
 
 If a user `HR` has been given the `CONNECT THROUGH` grant from the
@@ -7745,13 +7763,13 @@ externally identified user, then to specify that the session user of
 the connection should be `HR`, use:
 
 ```javascript
-let config = { connectString: "localhost/orclpdb", externalAuth: true };
-let pool = await oracledb.createPool(config);
-let conn = await pool.getConnection({ user: "[hr]" });
+const config = { connectString: "localhost/orclpdb", externalAuth: true };
+const pool = await oracledb.createPool(config);
+const connection = await pool.getConnection({ user: "[hr]" });
 
 . . . // connection has access to the HR schema objects
 
-await conn.close();
+await connection.close();
 ```
 
 Note this last case needs Oracle Client libraries version 18 or later.
@@ -7812,20 +7830,32 @@ Constants](#oracledbconstantsprivilege) with the connection
 [`privilege`](#getconnectiondbattrsprivilege) property, for example:
 
 ```
-oracledb.getConnection(
-  {
-    user          : 'sys',
-    password      : 'secret',
-    connectString : 'localhost/orclpdb',
-    privilege     : oracledb.SYSDBA
-  },
-  function(err, connection) {
-    if (err)
+let connection;
+
+try {
+  connection = await oracledb.getConnection(
+    {
+      user          : 'sys',
+      password      : 'secret',
+      connectString : 'localhost/orclpdb',
+      privilege     : oracledb.SYSDBA
+    });
+
+  console.log('I have power');
+
+  . . .  // use connection
+
+} catch (err) {
+  console.error(err);
+} finally {
+  if (connection) {
+    try {
+      await connection.close();
+    } catch (err) {
       console.error(err);
-    else
-      console.log('I have power');
+    }
   }
-);
+}
 ```
 
 Note that if node-oracledb is using the Oracle client libraries
@@ -7916,24 +7946,17 @@ Database passwords can be changed with
 [`connection.changePassword()`](#changepassword).  For example:
 
 ```javascript
-let currentpw = ...  // the current password for the hr schema
-let newpw = ...      // the new hr schema password
+const currentpw = ...  // the current password for the hr schema
+const newpw = ...      // the new hr schema password
 
-oracledb.getConnection(
+const connection = await oracledb.getConnection(
   {
     user          : "hr",
     password      : currentpw,
     connectString : "localhost/orclpdb"
-  },
-  function(err, connection) {
-    if (err) { console.error(err.message); return; }
+  });
 
-    connection.changePassword(
-        'hr', currentpw, newpw,
-        function(err) {
-        . . .
-        });
-    . . .
+await connection.changePassword('hr', currentpw, newpw);
 ```
 
 Only DBAs, or users with the ALTER USER privilege, can change the
@@ -7941,23 +7964,16 @@ password of another user.  In this case, the old password value is
 ignored and can be an empty string:
 
 ```javascript
-oracledb.getConnection(
+const newpw = ... // the new password
+
+const connection = await oracledb.getConnection(
   {
-    user          : "system",   // a privileged user
-    password      : mypw,  // mypw contains the hr schema password
+    user          : "system",  // a privileged user
+    password      : mypw,      // mypw contains the hr schema password
     connectString : "localhost/orclpdb"
-  },
-  function(err, connection) {
-    if (err) { console.error(err.message); return; }
+  });
 
-    let newpw = ... // the new password
-
-    connection.changePassword(
-        'hr', '', newpw,
-        function(err) {
-        . . .
-        });
-    . . .
+await connection.changePassword('hr', '', newpw);
 ```
 
 #### Connecting with an Expired Password
@@ -7971,19 +7987,16 @@ Both the current and new passwords must be given when connecting.  For
 example:
 
 ```javascript
-var oldpw = ...  // the hr schema's old password
-var newpw = ...  // the new password
+const oldpw = ...  // the hr schema's old password
+const newpw = ...  // the new password
 
-oracledb.getConnection(
+const connection = await oracledb.getConnection(
   {
     user          : "hr",
     password      : oldpw,
     newPassword   : newpw,
     connectString : "localhost/orclpdb"
-  },
-  function(err, connection) {
-    if (err) { console.error(err.message); return; }
-  . . .
+  });
 ```
 
 ### <a name="connectionha"></a> 13.9 Connections and High Availability
@@ -8159,20 +8172,19 @@ results are returned in the callback [`result.rows`](#execrows)
 property:
 
 ```javascript
-    connection.execute(
-      `SELECT department_id, department_name
-       FROM departments
-       WHERE department_id = :did`,
-      [180],
-      { maxRows: 10 },  // a maximum of 10 rows will be returned
-      function(err, result) {
-        if (err) { console.error(err.message); return; }
-        console.log(result.rows);  // print all returned rows
-      });
+const result = await connection.execute(
+  `SELECT department_id, department_name
+   FROM departments
+   WHERE department_id = :did`,
+  [180],
+  { maxRows: 10 }  // a maximum of 10 rows will be returned
+);
+
+console.log(result.rows);  // print all returned rows
 ```
 
 Any rows beyond the `maxRows` limit are not returned.  If `maxRows` is
-0, then the number of rows is only limited by Node.js memory.
+0 (the default), then the number of rows is only limited by Node.js memory.
 
 To improve database efficiency, SQL queries should use a row limiting
 clause like [`OFFSET` / `FETCH`](#pagingdata) or equivalent. The `maxRows`
@@ -8331,7 +8343,7 @@ option [`fetchArraySize`](#propexecfetcharraysize).
 An example of streaming query results is:
 
 ```javascript
-var stream = connection.queryStream('SELECT employees_name FROM employees');
+const stream = await connection.queryStream(`SELECT employees_name FROM employees`);
 
 stream.on('error', function (error) {
   // handle any error...
@@ -8368,18 +8380,14 @@ The default format for each row is an array of column values.
 For example:
 
 ```javascript
-var oracledb = require('oracledb');
-. . .
-
-connection.execute(
+const result = await connection.execute(
   `SELECT department_id, department_name
    FROM departments
    WHERE manager_id < :id`,
-  [110],  // bind value for :id
-  function(err, result) {
-    if (err) { console.error(err.message); return; }
-    console.log(result.rows);
-  });
+  [110]  // bind value for :id
+);
+
+console.log(result.rows);
 ```
 
 If run with Oracle's sample HR schema, the output is:
@@ -8400,16 +8408,15 @@ oracledb.outFormat = oracledb.OBJECT;
 The value can also be set as an `execute()` option:
 
 ```javascript
-connection.execute(
+const result = await connection.execute(
   `SELECT department_id, department_name
    FROM departments
    WHERE manager_id < :id`,
   [110],  // bind value for :id
-  { outFormat: oracledb.OBJECT },
-  function(err, result) {
-    if (err) { console.error(err.message); return; }
-    console.log(result.rows);
-  });
+  { outFormat: oracledb.OBJECT }
+);
+
+console.log(result.rows);
 ```
 
 The output is:
@@ -8432,15 +8439,14 @@ The column names of a query are returned in the `execute()` callback's
 [`result.metaData`](#execmetadata) attribute:
 
 ```javascript
-connection.execute(
+const result = await connection.execute(
   `SELECT department_id, department_name
    FROM departments
    WHERE manager_id < :id`,
-  [110],  // bind value for :id
-  function(err, result) {
-    if (err) { console.error(err.message); return; }
-    console.log(result.metaData);  // show the metadata
-  });
+  [110]  // bind value for :id
+);
+
+console.log(result.metaData);  // show the metadata
 ```
 
 When using a [ResultSet](#resultsetclass), metadata is also
@@ -8467,16 +8473,15 @@ More metadata is included when the
 example:
 
 ```javascript
-connection.execute(
+const result = await connection.execute(
   `SELECT department_id, department_name
    FROM departments
    WHERE manager_id < :id`,
   [110],  // bind value for :id
-  { extendedMetaData: true },
-  function(err, result) {
-    if (err) { console.error(err.message); return; }
-    console.log(result.metaData);  // show the extended metadata
-  });
+  { extendedMetaData: true }
+);
+
+console.log(result.metaData);  // show the extended metadata
 ```
 
 The output is:
@@ -8538,14 +8543,8 @@ less precise binary number format can result in "unexpected"
 representations.  For example:
 
 ```javascript
-conn.execute(
-`SELECT 38.73 FROM dual`,
-function (err, result) {
-  if (err)
-    . . .
-  else
-    console.log(result.rows[0]); // gives 38.730000000000004
-});
+const result = await connection.execute(`SELECT 38.73 FROM dual`);
+console.log(result.rows[0]); // gives 38.730000000000004
 ```
 
 Similar issues can occur with binary floating-point arithmetic
@@ -8593,10 +8592,7 @@ The session time zone can also be changed at runtime for each connection by
 executing:
 
 ```javascript
-connection.execute(
-  `ALTER SESSION SET TIME_ZONE='UTC'`,
-  function(err) { ... }
-);
+await connection.execute(`ALTER SESSION SET TIME_ZONE='UTC'`);
 ```
 
 With pooled connections, you could make use of a
@@ -8633,7 +8629,7 @@ For example, to force all dates and numbers used by queries in an
 application to be fetched as strings:
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 ```
 
@@ -8647,35 +8643,33 @@ global `fetchAsString` setting can be overridden to allow specific
 columns to have data returned in native format:
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 
-var mypw = ...  // set mypw to the hr schema password
+const mypw = ...  // set mypw to the hr schema password
 
 oracledb.fetchAsString = [ oracledb.NUMBER ];  // any number queried will be returned as a string
 
-oracledb.getConnection(
+const connection = await oracledb.getConnection(
   {
     user          : "hr",
     password      : mypw,
     connectString : "localhost/XEPDB1"
-  },
-  function(err, connection) {
-    if (err) { console.error(err.message); return; }
-    connection.execute(
-      `SELECT last_name, hire_date, salary, commission_pct FROM employees WHERE employee_id = :id`,
-      [178],
-      {
-        fetchInfo :
-        {
-          "HIRE_DATE":      { type : oracledb.STRING },  // return the date as a string
-          "COMMISSION_PCT": { type : oracledb.DEFAULT }  // override oracledb.fetchAsString and fetch as native type
-        }
-      },
-      function(err, result) {
-        if (err) { console.error(err.message); return; }
-        console.log(result.rows);
-      });
-  });
+  }
+);
+
+const result = await connection.execute(
+  `SELECT last_name, hire_date, salary, commission_pct FROM employees WHERE employee_id = :id`,
+  [178],
+  {
+    fetchInfo :
+    {
+      "HIRE_DATE":      { type : oracledb.STRING },  // return the date as a string
+      "COMMISSION_PCT": { type : oracledb.DEFAULT }  // override oracledb.fetchAsString and fetch as native type
+    }
+  }
+);
+
+console.log(result.rows);
 ```
 
 The output is:
@@ -8709,10 +8703,7 @@ and force the decimal separator to be a period.  This can be done for
 each connection by executing the statement:
 
 ```javascript
-connection.execute(
-  `ALTER SESSION SET NLS_NUMERIC_CHARACTERS = '.,'`,
-  function(err) { ... }
-);
+await connection.execute(`ALTER SESSION SET NLS_NUMERIC_CHARACTERS = '.,'`);
 ```
 
 Alternatively you can set the equivalent environment variable prior
@@ -8794,26 +8785,23 @@ instead get the scalar coordinates by using an intermediary PL/SQL
 block that decomposes the geometry:
 
 ```javascript
-    . . .
-    var sql =
-      `BEGIN
-         SELECT t.x, t.y
-         INTO :x, :y
-         FROM customers, TABLE(sdo_util.getvertices(customers.cust_geo_location)) t
-         WHERE customer_id = :id;
-       END;`;
-    var bindvars = {
-      id: 1001,
-      x: { type: oracledb.NUMBER, dir : oracledb.BIND_OUT },
-      y: { type: oracledb.NUMBER, dir : oracledb.BIND_OUT }
-    }
-    connection.execute(
-      sql,
-      bindvars,
-      function (err, result) {
-        if (err) { console.error(err.message); return; }
-        console.log(result.outBinds);
-      });
+. . .
+const sql =
+  `BEGIN
+     SELECT t.x, t.y
+     INTO :x, :y
+     FROM customers, TABLE(sdo_util.getvertices(customers.cust_geo_location)) t
+     WHERE customer_id = :id;
+   END;`;
+
+const bindvars = {
+  id: 1001,
+  x: { type: oracledb.NUMBER, dir : oracledb.BIND_OUT },
+  y: { type: oracledb.NUMBER, dir : oracledb.BIND_OUT }
+}
+
+const result = await connection.execute(sql, bindvars);
+console.log(result.outBinds);
 ```
 
 The output is:
@@ -8854,16 +8842,15 @@ is similar to the `LIMIT` keyword of MySQL.  See [Row Limiting:
 Examples][5] in the Oracle documentation.  A node-oracledb example is:
 
 ```javascript
-var myoffset = 0;       // do not skip any rows (start at row 1)
-var mymaxnumrows = 20;  // get 20 rows
+const myoffset = 0;       // do not skip any rows (start at row 1)
+const mymaxnumrows = 20;  // get 20 rows
 
-connection.execute(
+const result = await connection.execute(
   `SELECT last_name
    FROM employees
    ORDER BY last_name
    OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`,
-  {offset: myoffset, maxnumrows: mymaxnumrows},
-. . .
+  {offset: myoffset, maxnumrows: mymaxnumrows});
 ```
 
 A runnable example is in [rowlimit.js][84].
@@ -8994,13 +8981,12 @@ To get the automatically inserted identifier in node-oracledb, use a
 
 ```javascript
 . . .
-connection.execute(
+const result = await connection.execute(
   `INSERT INTO mytable (mydata) VALUES ('Hello') RETURN myid INTO :id`,
-  {id : {type: oracledb.NUMBER, dir: oracledb.BIND_OUT } },
-  function (err, result) {
-    if (err) { console.error(err.message); return; }
-    console.log(result.outBinds.id);  // print the ID of the inserted row
-  });
+  {id : {type: oracledb.NUMBER, dir: oracledb.BIND_OUT } }
+);
+
+console.log(result.outBinds.id);  // print the ID of the inserted row
 ```
 
 ### <a name="cursors1000"></a> 14.2 Cursor Management
@@ -9097,17 +9083,17 @@ END;
 can be called:
 
 ```javascript
-. . .
-connection.execute(
-  `BEGIN myproc(:id, :name); END;`,
+const result = await connection.execute(
+  `BEGIN
+     myproc(:id, :name);
+   END;`,
   {  // bind variables
     id:   159,
     name: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 40 },
-  },
-  function (err, result) {
-    if (err) { console.error(err.message); return; }
-    console.log(result.outBinds);
-  });
+  }
+);
+
+console.log(result.outBinds);
 ```
 
 The output is:
@@ -9134,14 +9120,16 @@ END;
 can be called by using an OUT bind variable for the function return value:
 
 ```javascript
-. . .
-connection.execute(
-  `BEGIN :ret := myfunc(); END;`,
-  { ret: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 40 } },
-  function (err, result) {
-    if (err) { console.error(err.message); return; }
-    console.log(result.outBinds);
-  });
+const result = await connection.execute(
+  `BEGIN
+     :ret := myfunc();
+   END;`,
+  {
+    ret: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 40 }
+  }
+);
+
+console.log(result.outBinds);
 ```
 
 The output is:
@@ -9157,17 +9145,17 @@ See [Bind Parameters for Prepared Statements](#bind) for information on binding.
 Anonymous PL/SQL blocks can be called from node-oracledb like:
 
 ```javascript
-. . .
-connection.execute(
-  `BEGIN SELECT last_name INTO :name FROM employees WHERE employee_id = :id; END;`,
+const result = await connection.execute(
+  `BEGIN
+     SELECT last_name INTO :name FROM employees WHERE employee_id = :id;
+   END;`,
   {  // bind variables
     id:   134,
     name: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 40 },
-  },
-  function (err, result) {
-    if (err) { console.error(err.message); return; }
-    console.log(result.outBinds);
-  });
+  }
+);
+
+console.log(result.outBinds);
 ```
 
 The output is:
@@ -9198,22 +9186,19 @@ data.  The following snippet is based on the example
 [dbmsoutputgetline.js][49]:
 
 ```javascript
-function fetchDbmsOutputLine(connection, cb) {
-  connection.execute(
-    `BEGIN DBMS_OUTPUT.GET_LINE(:ln, :st); END;`,
+let result;
+do {
+  result = await connection.execute(
+    `BEGIN
+       DBMS_OUTPUT.GET_LINE(:ln, :st);
+     END;`,
     { ln: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 32767 },
-      st: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER } },
-    function(err, result) {
-      if (err) {
-        return cb(err, connection);
-      } else if (result.outBinds.st == 1) { // no more output
-        return cb(null, connection);
-      } else {
-        console.log(result.outBinds.ln);
-        return fetchDbmsOutputLine(connection, cb);
-      }
-    });
-  }
+      st: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
+    }
+  );
+  if (result.outBinds.st === 0)
+    console.log(result.outBinds.ln);
+} while (result.outBinds.st === 0);
 ```
 
 Another way is to wrap the `DBMS_OUTPUT.GET_LINE()` call into a
@@ -9238,19 +9223,24 @@ END;
 /
 ```
 
-To get DBMS_OUTPUT that has been created, simply execute the query
-using the same connection:
+To get DBMS_OUTPUT, simply query this function using the same
+connection that created the output:
 
 ```sql
-connection.execute(
+const result = await connection.execute(
   `SELECT * FROM TABLE(mydofetch())`,
   [],
-  { resultSet: true },
-  function (err, result) {
-  . . .
+  { resultSet: true }
+);
+
+const rs = result.resultSet;
+let row;
+while ((row = await rs.getRow())) {
+  console.log(row);
+}
 ```
 
-The query rows can be handled using a [ResultSet](#resultsethandling).
+The query rows in this example are handled using a [ResultSet](#resultsethandling).
 
 Remember to first enable output using `DBMS_OUTPUT.ENABLE(NULL)`.
 
@@ -9331,36 +9321,25 @@ with the same prototype.  Applications can choose at runtime which
 implementation to use.  Here is a script that calls `DISCOUNT`:
 
 ```javascript
-var oracledb = require('oracledb');
+const mypw = ...  // set mypw to the nodedemo schema password
 
-var mypw = ...  // set mypw to the nodedemo schema password
-
-oracledb.getConnection(
+const connection = await oracledb.getConnection(
   {
     user: 'nodedemo',
     password: mypw,
     connectString: 'localhost/orclpdb'
-  },
-  function (err, connection) {
-    if (err) {
-      console.error(err.message);
-      return;
-    }
-    connection.execute(
-      `SELECT name, price, DISCOUNT(price) AS discountprice
-       FROM parts
-       ORDER BY id`,
-      [],
-      { outFormat: oracledb.OBJECT },
-      function(err, result) {
-        if (err) {
-          console.error(err.message);
-        } else {
-          console.log(result.rows);
-        }
-      });
   }
 );
+
+const result = await connection.execute(
+  `SELECT name, price, DISCOUNT(price) AS discountprice
+   FROM parts
+   ORDER BY id`,
+  [],
+  { outFormat: oracledb.OBJECT }
+);
+
+console.log(result.rows);
 ```
 
 Since the code does not explicitly set `oracledb.edition` (or
@@ -9377,14 +9356,15 @@ If the connection uses edition `e2`, then the second implementation of
 `DISCOUNT` will be used:
 
 ```javascript
-oracledb.getConnection(
+const connection = await oracledb.getConnection(
   {
     user: 'nodedemo',
     password: mypw,  // mypw contains the nodedemo schema password
     connectString: 'localhost/orclpdb',
     edition: 'e2'
-  },
-  . . . // same code as before
+  }
+);
+. . . // same query code as before
 ```
 
 The output might be like:
@@ -9454,9 +9434,10 @@ recommended:
 
 ```
 result = await connection.execute(plsql, [], { resultSet: true });
-for (let i = 0; i < result.implicitResults.length; i++) {
+for (const i = 0; i < result.implicitResults.length; i++) {
   console.log(" Implicit Result Set", i + 1);
   const rs = result.implicitResults[i];  // get the next ResultSet
+  let row;
   while ((row = await rs.getRow())) {
     console.log("  ", row);
   }
@@ -9477,7 +9458,6 @@ Implicit Result Set 2
   [ 'AD_VP', 101, 'Kochhar' ]
   [ 'AD_VP', 102, 'De Haan' ]
 ```
-
 
 A runnable example is in [impres.js][138].
 
@@ -9511,29 +9491,26 @@ CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
 an `INSERT` example is:
 
 ```javascript
-var fs = require('fs');
-var str = fs.readFileSync('example.txt', 'utf8');
+const fs = require('fs');
+const str = fs.readFileSync('example.txt', 'utf8');
 . . .
 
-conn.execute(
+const result = await connection.execute(
   `INSERT INTO mylobs (id, myclobcol) VALUES (:idbv, :cbv)`,
-  { idbv: 1,
-    cbv: str },  // type and direction are optional for IN binds
-  function(err, result) {
-    if (err)
-      console.error(err.message);
-    else
-      console.log('CLOB inserted from example.txt');
+  { idbv: 1, cbv: str }  // type and direction are optional for IN binds
+);
+
+console.log('CLOB inserted from example.txt');
 . . .
 ```
 
 Updating LOBs is similar to insertion:
 
 ```javascript
-conn.execute(
+const result = await connection.execute(
   `UPDATE mylobs SET myclobcol = :cbv WHERE id = :idbv`,
-  { idbv: 1, cbv: str },
-. . .
+  { idbv: 1, cbv: str }
+);
 ```
 
 Buffers can similarly be bound for inserting into, or updating, BLOB columns.
@@ -9547,18 +9524,14 @@ PROCEDURE lobs_in (p_id IN NUMBER, c_in IN CLOB, b_in IN BLOB) . . .
 can be called like:
 
 ```javascript
-bigStr = 'My string to insert';
-bigBuf = Buffer.from([. . .]);
+const bigStr = 'My string to insert';
+const bigBuf = Buffer.from([. . .]);
 
-conn.execute(
+const result = await connection.execute(
   `BEGIN lobs_in(:id, :c, :b); END;`,
   { id: 20,
     c: bigStr,    // type and direction are optional for IN binds
-    b: bigBuf } },
-  function (err) {
-    if (err) { return cb(err, conn); }
-    console.log("Completed");
-    return cb(null, conn);
+    b: bigBuf }
   }
 );
 ```
@@ -9580,36 +9553,32 @@ as a string:
 ```javascript
 oracledb.fetchAsString = [ oracledb.CLOB ];
 
-conn.execute(
-  `SELECT c FROM mylobs WHERE id = 1`,
-  function(err, result) {
-    if (err) { console.error(err.message); return; }
-    if (result.rows.length === 0)
-      console.error("No results");
-    else {
-      var clob = result.rows[0][0];
-      console.log(clob);
-    }
-  });
+const result = await connection.execute(`SELECT c FROM mylobs WHERE id = 1`);
+
+if (result.rows.length === 0)
+  console.error("No results");
+else {
+  const clob = result.rows[0][0];
+  console.log(clob);
+}
 ```
 
 CLOB columns in individual queries can be fetched as strings using `fetchInfo`:
 
 ```javascript
-conn.execute(
+const result = await connection.execute(
   `SELECT c FROM mylobs WHERE id = 1`,
-  [ ], // no binds
-  { fetchInfo: {"C": {type: oracledb.STRING}} },
-  function(err, result) {
-    if (err) { console.error(err.message); return; }
-    if (result.rows.length === 0) {
-      console.error("No results");
-    }
-    else {
-      var clob = result.rows[0][0];
-      console.log(clob);
-    }
-  });
+  [], // no binds
+  { fetchInfo: {"C": {type: oracledb.STRING}} }
+);
+
+if (result.rows.length === 0) {
+  console.error("No results");
+}
+else {
+  const clob = result.rows[0][0];
+  console.log(clob);
+}
 ```
 
 BLOB query examples are very similar.  To force every BLOB in the
@@ -9618,35 +9587,31 @@ application to be returned as a buffer:
 ```javascript
 oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 
-conn.execute(
-  `SELECT b FROM mylobs WHERE id = 2`,
-  function(err, result) {
-    if (err) { console.error(err.message); return; }
-    if (result.rows.length === 0)
-      console.error("No results");
-    else {
-      var blob = result.rows[0][0];
-      console.log(blob.toString());  // assuming printable characters
-    }
-  });
+const result = await connection.execute(`SELECT b FROM mylobs WHERE id = 2`);
+
+if (result.rows.length === 0)
+  console.error("No results");
+else {
+  const blob = result.rows[0][0];
+  console.log(blob.toString());  // assuming printable characters
+}
 ```
 
 BLOB columns in individual queries can be fetched as buffers using `fetchInfo`:
 
 ```javascript
-conn.execute(
+const result = await connection.execute(
   `SELECT b FROM mylobs WHERE id = 2`,
   [ ], // no binds
-  { fetchInfo: {"B": {type: oracledb.BUFFER}} },
-  function(err, result) {
-    if (err) { console.error(err.message); return; }
-    if (result.rows.length === 0) {
-      console.error("No results");
-    } else {
-      var blob = result.rows[0][0];
-      console.log(blob.toString());  // assuming printable characters
-    }
-  });
+  { fetchInfo: {"B": {type: oracledb.BUFFER}} }
+);
+
+if (result.rows.length === 0) {
+  console.error("No results");
+} else {
+  const blob = result.rows[0][0];
+  console.log(blob.toString());  // assuming printable characters
+}
 ```
 
 #### Getting LOBs as String or Buffer from PL/SQL
@@ -9656,18 +9621,18 @@ PL/SQL LOB OUT parameters can be bound as `oracledb.STRING` or
 considerations regarding LOB binds.
 
 ```javascript
-conn.execute(
+const result = await connection.execute(
   `BEGIN lobs_out(:id, :c, :b); END;`,
   { id: 20,
     c: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 50000},
-    b: {type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 50000} },
-  function (err, result) {
-    if (err) { return cb(err, conn); }
+    b: {type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 50000}
+  }
+);
 
-    var str = result.outBinds.c;  // a String
-    var buf = result.outBinds.b;  // a Buffer
-    return cb(null, str, buf); // do something with str and buf
-  });
+const str = result.outBinds.c;  // a String
+const buf = result.outBinds.b;  // a Buffer
+
+. . . // do something with str and buf
 ```
 
 The fetched String and Buffer can be used directly in Node.js.
@@ -9750,37 +9715,36 @@ item.  Data can then be streamed into the Lob and committed directly
 to the table:
 
 ```javascript
-connection.execute(
+const result = await connection.execute(
   `INSERT INTO mylobs (id, c) VALUES (:id, EMPTY_CLOB()) RETURNING c INTO :lobbv`,
   { id: 4,
     lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
-  { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
-  function(err, result) {
-    if (err) { console.error(err.message); return; }
-    if (result.rowsAffected != 1 || result.outBinds.lobbv.length != 1) {
-      console.error('Error getting a LOB locator');
-      return;
-    }
+  { autoCommit: false }  // a transaction needs to span the INSERT and pipe()
+);
 
-    var lob = result.outBinds.lobbv[0];
-    lob.on('close', function() {
-        connection.commit(  // all data is loaded so we can commit it
-          function(err) {
-            if (err) console.error(err.message);
-            connection.close(function(err) { if (err) console.error(err); });
-          });
-      });
-    lob.on('error', function(err) {
-        console.error(err);
-        connection.close(function(err) {
-          if (err) console.error(err.message);
-        });
-      });
+if (result.rowsAffected != 1 || result.outBinds.lobbv.length != 1) {
+  throw new Error('Error getting a LOB locator');
+}
 
-    var inStream = fs.createReadStream('example.txt'); // open the file to read from
-    inStream.on('error', function(err) { if (err) console.error(err); });
-    inStream.pipe(lob);  // copies the text to the LOB
+const doInsert = new Promise(function(resolve, reject) {
+  const lob = result.outBinds.lobbv[0];
+  lob.on('close', async () => {
+    await connection.commit();  // all data is loaded so we can commit it
   });
+  lob.on('error', async (err) => {
+    await connection.close();
+    reject(err);
+  });
+
+  const inStream = fs.createReadStream('example.txt'); // open the file to read from
+  inStream.on('error', (err) => {
+    reject(err);
+  });
+
+  inStream.pipe(lob);  // copies the text to the LOB
+});
+
+await doInsert;
 ```
 
 This example streams from a file into the table.  When the data has
@@ -9823,19 +9787,13 @@ CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
 can be called to get a Lob `clob` like:
 
 ```javascript
-conn.execute(
-  `SELECT c FROM mylobs WHERE id = 1`,
-  function(err, result) {
-    if (err) {
-      return cb(err);
-    }
-    if (result.rows.length === 0) {
-      return cb(new Error("whoops"));
-    }
-    var clob = result.rows[0][0]; // Instance of a node-oracledb Lob
-    // console.log(clob.type);    // -> 2006 aka oracledb.CLOB
-    cb(null, clob);               // do something with the Lob
-  });
+const result = await connection.execute(`SELECT c FROM mylobs WHERE id = 1`);
+
+if (result.rows.length === 1) {
+  const clob = result.rows[0][0]; // Instance of a node-oracledb Lob
+  // console.log(clob.type);      // -> 2006 aka oracledb.CLOB
+  . . .                           // do something with the Lob
+}
 ```
 
 #### PL/SQL LOB Parameter Fetch Example
@@ -9849,20 +9807,18 @@ PROCEDURE lobs_out (id IN NUMBER, clob_out OUT CLOB, blob_out OUT BLOB) . . .
 can be called to get the [Lobs](#lobclass) `clob` and `blob`:
 
 ```javascript
-conn.execute(
+const result = await connection.execute(
   `BEGIN lobs_out(:id, :c, :b); END;`,
   { id: 1,
     c: {type: oracledb.CLOB, dir: oracledb.BIND_OUT},
-    b: {type: oracledb.BLOB, dir: oracledb.BIND_OUT} },
-  function(err, result) {
-    if (err) {
-      return cb(err, conn);
-    }
+    b: {type: oracledb.BLOB, dir: oracledb.BIND_OUT}
+  }
+);
 
-    var clob = result.outBinds.c;
-    var blob = result.outBinds.b;
-    cb(null, clob, blob);         // do something with the Lobs
-  });
+const clob = result.outBinds.c;
+const blob = result.outBinds.b;
+
+. . . // do something with the Lobs
 ```
 
 #### Streaming Out a Lob
@@ -9872,7 +9828,7 @@ streamed out:
 
 ```javascript
 if (lob === null) {
-    // . . . do special handling such as create an empty file or throw an error
+  // . . . do special handling such as create an empty file or throw an error
 }
 
 if (lob.type === oracledb.CLOB) {
@@ -9882,7 +9838,7 @@ if (lob.type === oracledb.CLOB) {
 lob.on('error', function(err) { cb(err); });
 lob.on('close', function() { cb(null); });   // all done.  The Lob is automatically closed.
 
-var outStream = fs.createWriteStream('myoutput.txt');
+const outStream = fs.createWriteStream('myoutput.txt');
 outStream.on('error', function(err) { cb(err); });
 
 // switch into flowing mode and push the LOB to myoutput.txt
@@ -9898,19 +9854,19 @@ chunk can be written to another Stream or to a file:
 
 ```javascript
 if (lob === null) {
-    // . . . do special handling such as create an empty file or throw an error
+  // . . . do special handling such as create an empty file or throw an error
 }
 
-var str = "";
+let str = "";
 
 lob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
 lob.on('error', function(err) { cb(err); });
 lob.on('close', function() { cb(null); });   // all done.  The Lob is automatically closed.
 lob.on('data', function(chunk) {
-    str += chunk; // or use Buffer.concat() for BLOBS
+  str += chunk; // or use Buffer.concat() for BLOBS
 });
 lob.on('end', function() {
-    fs.writeFile(..., str, ...);
+  fs.writeFile(..., str, ...);
 });
 
 ```
@@ -9948,11 +9904,7 @@ A temporary LOB can be created
 with [`connection.createLob()`](#connectioncreatelob):
 
 ```javascript
-conn.createLob(oracledb.CLOB, function(err, templob) {
-  if (err) { . . . }
-
-  // ... else use templob
-});
+const templob = await connection.createLob(oracledb.CLOB);
 ```
 
 Once created, data can be inserted into it.  For example to read a
@@ -9965,7 +9917,7 @@ templob.on('error', function(err) { somecallback(err); });
 templob.on('finish', function() { somecallback(null, templob); });
 
 // copies the text from 'example.txt' to the temporary LOB
-var inStream = fs.createReadStream('example.txt');
+const inStream = fs.createReadStream('example.txt');
 inStream.on('error', function(err) { . . . });
 inStream.pipe(templob);
 ```
@@ -9975,27 +9927,19 @@ a PL/SQL IN parameter:
 
 ```javascript
 // For PROCEDURE lobs_in (p_id IN NUMBER, c_in IN CLOB, b_in IN BLOB)
-conn.execute(
+const result = await connection.execute(
   `BEGIN lobs_in(:id, :c, null); END;`,
   { id: 3,
-    c: templob }, // type and direction are optional for IN binds
-  function(err) {
-    if (err) { return cb(err); }
-    console.log("Call completed");
-    return cb(null, conn, templob);
-  });
+    c: templob  // type and direction are optional for IN binds
+  }
+);
 ```
 
-When the LOB is no longer needed, it must be closed
+When the temporty LOB is no longer needed, it must be closed
 with [`lob.close()`](#lobclose):
 
 ```javascript
-templob.close(function (err) {
-  if (err)
-    . . .
-  else
-    // success
-});
+await templob.close();
 ```
 
 ### <a name="closinglobs"></a> 16.7 Closing Lobs
@@ -10045,15 +9989,13 @@ CREATE TABLE j_purchaseorder (po_document VARCHAR2(4000) CHECK (po_document IS J
 To insert data using node-oracledb:
 
 ```javascript
-var data = { "userId": 1, "userName": "Chris", "location": "Australia" };
-var s = JSON.stringify(data);  // change JavaScript value to a JSON string
+const data = { "userId": 1, "userName": "Chris", "location": "Australia" };
+const s = JSON.stringify(data);  // change JavaScript value to a JSON string
 
-connection.execute(
+const result = await connection.execute(
   `INSERT INTO j_purchaseorder (po_document) VALUES (:bv)`,
   [s]  // bind the JSON string
-  function (err) {
-  . . .
-  });
+);
 ```
 
 Queries can access JSON with Oracle JSON path expressions.  These
@@ -10079,16 +10021,11 @@ some JSON data.  To look for JSON entries that have a `quantity`
 field:
 
 ```JavaScript
-conn.execute(
-  `SELECT po_document FROM j_purchaseorder WHERE JSON_EXISTS (po_document, '$.location')`,
-  function(err, result) {
-    if (err) {
-      . . .
-    } else {
-      var js = JSON.parse(result.rows[0][0]);  // show only first record in this example
-      console.log('Query results: ', js);
-    }
-  });
+const result = await connection.execute(
+  `SELECT po_document FROM j_purchaseorder WHERE JSON_EXISTS (po_document, '$.location')`
+);
+const js = JSON.parse(result.rows[0][0]);  // show only first record in this example
+console.log('Query results: ', js);
 ```
 
 This query would display:
@@ -10101,16 +10038,16 @@ In Oracle Database 12.2, or later, the [`JSON_OBJECT` ][54] function is a great
 way to convert relational table data to JSON:
 
 ```javascript
-conn.execute(
+const result = await connection.execute(
   `SELECT JSON_OBJECT ('deptId' IS d.department_id, 'name' IS d.department_name) department
-  FROM departments d
-  WHERE department_id < :did`,
-  [50],
-  function(err, result) {
-    if (err) { console.error(err.message); return; }
-    for (var i = 0; i < result.rows.length; i++)
-      console.log(result.rows[i][0]);
-  });
+   FROM departments d
+   WHERE department_id < :did`
+   ORDER BY d.department_id`,
+  [50]
+);
+
+for (const row of result.rows)
+  console.log(row[0]);
 ```
 
 This produces:
@@ -10137,7 +10074,7 @@ However, if desired, the SQL query could be changed to return a CLOB,
 for example:
 
 ```sql
-var sql = 'SELECT XMLTYPE.GETCLOBVAL(res) FROM resource_view';
+const sql = `SELECT XMLTYPE.GETCLOBVAL(res) FROM resource_view`;
 ```
 
 The CLOB can be fetched in node-oracledb as a String
@@ -10148,7 +10085,7 @@ containing the XML, or use a temporary LOB, depending on the data
 length.
 
 ```javascript
-var myxml =
+const myxml =
     `<Warehouse>
     <WarehouseId>1</WarehouseId>
     <WarehouseName>Melbourne, Australia</WarehouseName>
@@ -10162,10 +10099,10 @@ var myxml =
     <VClearance>20</VClearance>
     </Warehouse>`;
 
-    connection.execute(
-      `INSERT INTO xwarehouses (warehouse_id, warehouse_spec) VALUES (:id, XMLType(:bv))`,
-      { id: 1, bv: myxml },
-      . . .
+const result = await connection.execute(
+  `INSERT INTO xwarehouses (warehouse_id, warehouse_spec) VALUES (:id, XMLType(:bv))`,
+  { id: 1, bv: myxml }
+);
 ```
 
 LOB handling as discussed in the
@@ -10223,20 +10160,17 @@ Each bind variable object name must match the statement's bind
 parameter name:
 
 ```javascript
-var oracledb = require('oracledb');
-. . .
-connection.execute(
+const oracledb = require('oracledb');
+
+const result = await connection.execute(
   `INSERT INTO countries VALUES (:country_id, :country_name)`,
   {
     country_id: { dir: oracledb.BIND_IN, val: 90, type: oracledb.NUMBER },
     country_name: { dir: oracledb.BIND_IN, val: "Tonga", type:oracledb.STRING }
-  },
-  function(err, result) {
-    if (err)
-      console.error(err.message);
-    else
-      console.log("Rows inserted " + result.rowsAffected);
-  });
+  }
+);
+
+console.log("Rows inserted " + result.rowsAffected);
 ```
 
 For IN binds:
@@ -10258,26 +10192,22 @@ Since `dir` and `type` have defaults, these attributes are sometimes
 omitted for IN binds.  Binds can be like:
 
 ```javascript
-connection.execute(
+const result = await connection.execute(
   `INSERT INTO countries VALUES (:country_id, :country_name)`,
-  {country_id: 90, country_name: "Tonga"},
-  function(err, result) {
-    if (err)
-      console.error(err.message);
-    else
-      console.log("Rows inserted " + result.rowsAffected);
-  });
+  {country_id: 90, country_name: "Tonga"}
+);
+
+console.log("Rows inserted " + result.rowsAffected);
 ```
 
 When a bind parameter name is used more than once in the SQL statement,
 it should only occur once in the bind object:
 
 ```javascript
-connection.execute(
+const result = await connection.execute(
   `SELECT first_name, last_name FROM employees WHERE first_name = :nmbv OR last_name = :nmbv`,
-  {nmbv: 'Christopher'},
-  function(err, result)
-  . . .
+  {nmbv: 'Christopher'}
+);
 ```
 
 #### <a name="bindbypos"></a> Bind by Position
@@ -10287,11 +10217,10 @@ in an array.  In this example, values are bound to the SQL bind
 parameters `:country_id` and `:country_name`:
 
 ```javascript
-connection.execute(
+const result = await connection.execute(
   `INSERT INTO countries VALUES (:country_id, :country_name)`,
-  [90, "Tonga"],
-  function(err, result)
-  . . .
+  [90, "Tonga"]
+);
 ```
 
 The position of the array values corresponds to the position of the
@@ -10302,10 +10231,10 @@ name needs to be the second entry of the array so it becomes the
 second value in the `INSERT` statement
 
 ```javascript
-connection.execute(
+const result = await connection.execute(
   `INSERT INTO countries (country_id, country_name) VALUES (:1, :0)`,
-  ["Tonga", 90],  // fail
-  . . .
+  ["Tonga", 90]  // fail
+);
 ```
 
 In the context of SQL statements, the input array position 'n'
@@ -10428,20 +10357,18 @@ show errors
 The procedure `TESTPROC` can be called with:
 
 ```javascript
-var oracledb = require('oracledb');
-. . .
-var bindVars = {
+const bindVars = {
   i:  'Chris', // default direction is BIND_IN. Data type is inferred from the data
   io: { val: 'Jones', dir: oracledb.BIND_INOUT },
   o:  { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
-}
-connection.execute(
+};
+
+const result = await connection.execute(
   `BEGIN testproc(:i, :io, :o); END;`,
-  bindVars,
-  function (err, result) {
-    if (err) { console.error(err.message); return; }
-    console.log(result.outBinds);
-  });
+  bindVars
+);
+
+console.log(result.outBinds);
 ```
 
 Since `bindParams` is passed as an object, the `outBinds` property is
@@ -10461,7 +10388,7 @@ can be used in `execute()` like:
 An alternative to node-oracledb's 'bind by name' syntax is 'bind by array' syntax:
 
 ```javascript
-var bindVars = [
+const bindVars = [
   'Chris',
   { val: 'Jones', dir: oracledb.BIND_INOUT },
   { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
@@ -10480,7 +10407,7 @@ Mixing positional and named syntax is not supported.  The following
 will throw an error:
 
 ```javascript
-var bindVars = [
+const bindVars = [
   'Chris',                                                  // valid
   { val: 'Jones', dir: oracledb.BIND_INOUT },               // valid
   { o: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } }  // invalid
@@ -10523,22 +10450,19 @@ One common use case is to return an 'auto incremented' key values, see
 An example of DML RETURNING binds is:
 
 ```javascript
-var oracledb = require('oracledb');
-. . .
-connection.execute(
-   `UPDATE mytab SET name = :name
-    WHERE id = :id
-    RETURNING id, ROWID INTO :ids, :rids`,
+const result = await connection.execute(
+  `UPDATE mytab SET name = :name
+   WHERE id = :id
+   RETURNING id, ROWID INTO :ids, :rids`,
   {
     id:    1001,
     name:  "Krishna",
     ids:   { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
     rids:  { type: oracledb.STRING, dir: oracledb.BIND_OUT }
-  },
-  function(err, result) {
-    if (err) { console.error(err); return; }
-    console.log(result.outBinds);
-  });
+  }
+);
+
+console.log(result.outBinds);
 ```
 
 If the `WHERE` clause matches one record, the output would be like:
@@ -10596,87 +10520,51 @@ END;
 This PL/SQL procedure can be called in node-oracledb using:
 
 ```javascript
-var oracledb = require('oracledb');
+const result = await connection.execute(
+  `"BEGIN get_emp_rs(:sal, :cursor); END;`,
+  {
+    sal: 6000,
+    cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+  }
+);
 
-var numRows = 10;  // number of rows to return from each call to getRows()
-
-var plsql = "BEGIN get_emp_rs(:sal, :cursor); END;";
-var bindvars = {
-  sal:  6000,
-  cursor:  { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+const resultSet = result.outBinds.cursor;
+let row;
+while ((row = await resultSet.getRow())) {
+  console.log(row);
 }
 
-connection.execute(
-  plsql,
-  bindvars,
-  function(err, result) {
-    if (err) { . . . }
-    fetchRowsFromRS(connection, result.outBinds.cursor, numRows);
-  });
+// always close the ResultSet
+await resultSet.close();
 
-function fetchRowsFromRS(connection, resultSet, numRows) {
-  resultSet.getRows( // get numRows rows
-    numRows,
-    function (err, rows) {
-      if (err) {
-         . . .                        // close the ResultSet and release the connection
-      } else if (rows.length > 0) {   // got some rows
-        console.log(rows);            // process rows
-        if (rows.length === numRows)  // might be more rows
-          fetchRowsFromRS(connection, resultSet, numRows);
-        else                          // got fewer rows than requested so must be at end
-          . . .                       // close the ResultSet and release the connection
-      } else {                        // else no rows
-          . . .                       // close the ResultSet and release the connection
-      }
-    });
-}
 ```
 
 See [refcursor.js][40] for a complete example.
 
 To convert the REF CURSOR ResultSet to a stream, use
-[`toQueryStream()`](#toquerystream).  With the PL/SQL and bind values
-from the previous examples, the code would become:
+[`toQueryStream()`](#toquerystream):
 
 ```javascript
-connection.execute(
-  plsql,
-  bindvars,
-  function(err, result) {
-    if (err) { . . . }
-    fetchRCFromStream(connection, result.outBinds.cursor);
-  });
+const result = await connection.execute(
+  `"BEGIN get_emp_rs(:sal, :cursor); END;`,
+  {
+    sal: 6000,
+    cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+  }
+);
 
-function fetchRCFromStream(connection, cursor) {
-  var stream = cursor.toQueryStream();
+const cursor = result.outBinds.cursor;
+const queryStream = cursor.toQueryStream();
 
-  stream.on('error', function (error) {
-    // console.log("stream 'error' event");
-    console.error(error);
-    return;
+const consumeStream = new Promise(function(resolve, reject) {
+  queryStream.on('data', function(row) {
+    console.log(row);
   });
+  queryStream.on('error', reject);
+  queryStream.on('close', resolve);
+});
 
-  stream.on('metadata', function (metadata) {
-    // console.log("stream 'metadata' event");
-    console.log(metadata);
-  });
-
-  stream.on('data', function (data) {
-    // console.log("stream 'data' event");
-    console.log(data);
-  });
-
-  stream.on('end', function () {
-    // console.log("stream 'end' event");
-    connection.release(
-      function(err) {
-        if (err) {
-          console.error(err.message);
-        }
-      });
-  });
-}
+await consumeStream;
 ```
 
 The connection must remain open until the stream is completely read.
@@ -10774,7 +10662,7 @@ END;
 To bind an array in node-oracledb using "bind by name" syntax for insertion into `mytab` use:
 
 ```javascript
-connection.execute(
+const result = await connection.execute(
   `BEGIN mypkg.myinproc(:id, :vals); END;`,
   {
     id: 1234,
@@ -10782,13 +10670,13 @@ connection.execute(
              dir: oracledb.BIND_IN,
              val: [1, 2, 23, 4, 10]
           }
-  }, . . .
+  });
 ```
 
 Alternatively, "bind by position" syntax can be used:
 
  ```javascript
-connection.execute(
+const result = await connection.execute(
   `BEGIN mypkg.myinproc(:id, :vals); END;`,
   [
     1234,
@@ -10796,9 +10684,7 @@ connection.execute(
        dir: oracledb.BIND_IN,
        val: [1, 2, 23, 4, 10]
     }
-  ],
-
-  function (err) { . . . });
+  ]);
 ```
 
 After executing either of these `mytab` will contain:
@@ -10852,7 +10738,7 @@ With these values, the following node-oracledb code will print
 `[ 10, 25, 50 ]`.
 
 ```javascript
-connection.execute(
+const result = await connection.execute(
   `BEGIN mypkg.myoutproc(:id, :vals); END;`,
   {
     id: 99,
@@ -10860,11 +10746,10 @@ connection.execute(
             dir:  oracledb.BIND_OUT,
             maxArraySize: 10          // allocate memory to hold 10 numbers
         }
-  },
-  function (err, result) {
-    if (err) { console.error(err.message); return; }
-    console.log(result.outBinds.vals);
-  });
+  }
+);
+
+console.log(result.outBinds.vals);
 ```
 
 If `maxArraySize` was reduced to `2`, the script would fail with:
@@ -10884,9 +10769,9 @@ See [plsqlarray.js][58] for a runnable example.
 Binding a single JavaScript value into a SQL `WHERE IN` clause is easy:
 
 ```javascript
-sql = 'SELECT last_name FROM employees WHERE first_name IN (:bv)';
+sql = `SELECT last_name FROM employees WHERE first_name IN (:bv)`;
 binds = ['Christopher'];
-connection.execute(sql, binds, function(...));
+await connection.execute(sql, binds, function(...));
 ```
 
 But a common use case for a query `WHERE IN` clause is for multiple
@@ -10899,17 +10784,16 @@ bind clause, the SQL query should have individual bind parameters, for
 example:
 
 ```javascript
-sql = 'SELECT last_name FROM employees WHERE first_name IN (:bv1, :bv2, :bv3, :bv4)';
-binds = ['Alyssa', 'Christopher', 'Hazel', 'Samuel'];
-connection.execute(sql, binds, function(...));
+const sql = `SELECT last_name FROM employees WHERE first_name IN (:bv1, :bv2, :bv3, :bv4)`;
+const binds = ['Alyssa', 'Christopher', 'Hazel', 'Samuel'];
+const result = await connection.execute(sql, binds);
 ```
-
 
 If you sometimes execute the query with a smaller number of items, a
 null can be bound for the 'missing' values:
 
 ```javascript
-binds = ['Alyssa', 'Christopher', 'Hazel', null];
+const binds = ['Alyssa', 'Christopher', 'Hazel', null];
 ```
 
 When the exact same statement text is re-executed many times
@@ -10921,9 +10805,9 @@ Another solution when the number of data items is only known at
 runtime is to build up an exact SQL string like:
 
 ```javascript
-binds = ['Christopher', 'Hazel', 'Samuel'];
-sql = "SELECT first_name, last_name FROM employees WHERE first_name IN (";
-for (var i=0; i < binds.length; i++)
+const binds = ['Christopher', 'Hazel', 'Samuel'];
+let sql = `SELECT first_name, last_name FROM employees WHERE first_name IN (`;
+for (const i = 0; i < binds.length; i++)
    sql += (i > 0) ? ", :" + i : ":" + i;
 sql += ")";
 ```
@@ -10969,7 +10853,7 @@ if (!validTables.includes(tableName)) {
   throw new Error('Invalid table name');
 }
 
-const query = 'SELECT * FROM ' + tableName;
+const query = `SELECT * FROM ` + tableName;
 ```
 
 The same technique can be used to construct the list of selected
@@ -10990,10 +10874,10 @@ const sql = `SELECT first_name, last_name
                  ELSE last_name
                END`;
 
-const columnName = getColumnNameFromEndUser();
+const columnName = getColumnNameFromEndUser();  // your function
 const binds = [columnName];
 
-let result = await conn.execute(sql, binds);
+const result = await connection.execute(sql, binds);
 ```
 
 In this example, when `columnName` is 'FIRST_NAME' then the result set
@@ -11022,28 +10906,25 @@ There are runnable examples in the GitHub [examples][3] directory.
 For example, to insert three records into the database:
 
 ```javascript
-var sql = "INSERT INTO mytab VALUES (:a, :b)";
+const sql = `INSERT INTO mytab VALUES (:a, :b)`;
 
-var binds = [
+const binds = [
   { a: 1, b: "One" },
   { a: 2, b: "Two" },
   { a: 3, b: "Three" }
 ];
 
-var options = {
+const options = {
   autoCommit: true,
   bindDefs: {
     a: { type: oracledb.NUMBER },
     b: { type: oracledb.STRING, maxSize: 5 }
-  } };
-
-connection.executeMany(sql, binds, options, function (err, result) {
-  if (err) {
-    console.error(err)
-  } else {
-    console.log(result);  // { rowsAffected: 3 }
   }
-});
+};
+
+const result = await connection.executeMany(sql, binds, options);
+
+console.log(result.rowsAffected);  // 3
 ```
 
 Strings and Buffers require a `maxSize` value in `bindDefs`.  It must
@@ -11069,7 +10950,7 @@ for each input record can be shown by setting
 rows:
 
 ```javascript
-const sql = "DELETE FROM tab WHERE id = :1";
+const sql = `DELETE FROM tab WHERE id = :1`;
 
 const binds = [
   [20],
@@ -11079,13 +10960,9 @@ const binds = [
 
 const options = { dmlRowCounts: true };
 
-connection.executeMany(sql, binds, options, function (err, result) {
-  if (err) {
-    console.error(err)
-  } else {
-    console.log(result.dmlRowCounts);
-  }
-});
+const result = await connection.executeMany(sql, binds, options);
+
+console.log(result.dmlRowCounts);
 ```
 
 If the table originally contained three rows with id of 20, five rows
@@ -11094,7 +10971,6 @@ with id of 30 and six rows with id of 40, then the output would be:
 ```
 [ 3, 5, 6 ]
 ```
-
 
 #### <a name="handlingbatcherrors"></a> Handling Data Errors
 
@@ -11114,9 +10990,9 @@ commit or rollback, as desired.
 For example:
 
 ```
-var sql = "INSERT INTO childtab VALUES (:1, :2, :3)";
+const sql = `INSERT INTO childtab VALUES (:1, :2, :3)`;
 
-var binds = [
+const binds = [
   [1016, 10, "Child 2 of Parent A"],
   [1017, 10, "Child 3 of Parent A"],
   [1018, 20, "Child 4 of Parent B"],
@@ -11127,7 +11003,7 @@ var binds = [
   [1022, 40, "Child 6 of Parent D"]
 ];
 
-var options = {
+const options = {
   autoCommit: true,
   batchErrors: true,
   bindDefs: [
@@ -11137,13 +11013,9 @@ var options = {
   ]
 };
 
-connection.executeMany(sql, binds, options, function (err, result) {
-  if (err) {
-    console.error(err)
-  } else {
-    console.log(result.batchErrors);
-  }
-});
+const result = await connection.executeMany(sql, binds, options);
+
+console.log(result.batchErrors);
 ```
 
 The output is an array of [error objects](#errorobj) that were
@@ -11153,8 +11025,8 @@ parameter](#executemanybinds) array, indicating which record could
 not be processed:
 
 ```
-   [ { Error: ORA-00001: unique constraint (HR.CHILDTAB_PK) violated errorNum: 1, offset: 3 },
-     { Error: ORA-02291: integrity constraint (HR.CHILDTAB_FK) violated - parent key not found errorNum: 2291, offset: 6 } ]
+[ { Error: ORA-00001: unique constraint (HR.CHILDTAB_PK) violated errorNum: 1, offset: 3 },
+  { Error: ORA-02291: integrity constraint (HR.CHILDTAB_FK) violated - parent key not found errorNum: 2291, offset: 6 } ]
 ```
 
 Note that some classes of error will always return via the
@@ -11168,28 +11040,24 @@ string or buffer data is larger than the specified
 Values can be returned with DML RETURNING syntax:
 
 ```
-var sql = "INSERT INTO tab VALUES (:1) RETURNING ROWID INTO :2";
+const sql = `INSERT INTO tab VALUES (:1) RETURNING ROWID INTO :2`;
 
-var binds = [
+const binds = [
   ["One"],
   ["Two"],
   ["Three"]
 ];
 
-var options = {
+const options = {
   bindDefs: [
     { type: oracledb.STRING, maxSize: 5 },
     { type: oracledb.STRING, maxSize: 18, dir: oracledb.BIND_OUT  },
   ]
 };
 
-connection.executeMany(sql, binds, options, function (err, result) {
-  if (err) {
-    console.error(err)
-  } else {
-    console.log(result.outBinds);
-  }
-});
+const result = await connection.executeMany(sql, binds, options);
+
+console.log(result.outBinds);
 ```
 
 Output is:
@@ -11224,17 +11092,17 @@ END;
 can be called like:
 
 ```javascript
-var sql = "BEGIN testproc(:1, :2, :3); END;";
+const sql = `BEGIN testproc(:1, :2, :3); END;`;
 
 // IN binds
-var binds = [
+const binds = [
   [1],
   [2],
   [3],
   [4]
 ];
 
-var options = {
+const options = {
   bindDefs: [
     { type: oracledb.NUMBER },
     { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
@@ -11242,13 +11110,9 @@ var options = {
   ]
 };
 
-connection.executeMany(sql, binds, options, function (err, result) {
-  if (err) {
-    console.error(err)
-  } else {
-    console.log(result.outBinds);
-  }
-});
+const result = await connection.executeMany(sql, binds, options);
+
+console.log(result.outBinds);
 ```
 
 The returned bind values are:
@@ -11265,29 +11129,25 @@ useful when there no bind values, or only OUT bind values.  This
 example calls a PL/SQL block eight times:
 
 ```javascript
-var sql = `DECLARE
-             t_id NUMBER;
-           BEGIN
-             SELECT NVL(COUNT(*), 0) + 1 INTO t_id FROM testtable;
-             INSERT INTO testtable VALUES (t_id, 'Test String ' || t_id);
-             SELECT SUM(id) INTO :1 FROM testtable;
-           END;`
+const sql = `DECLARE
+               t_id NUMBER;
+             BEGIN
+               SELECT NVL(COUNT(*), 0) + 1 INTO t_id FROM testtable;
+               INSERT INTO testtable VALUES (t_id, 'Test String ' || t_id);
+               SELECT SUM(id) INTO :1 FROM testtable;
+             END;`
 
-var options = {
+const options = {
   bindDefs: [
     { type : oracledb.NUMBER, dir : oracledb.BIND_OUT }
   ]
 };
 
-var numIterations = 8;
+const numIterations = 8;
 
-connection.executeMany(sql, numIterations, options, function (err, result) {
-  if (err) {
-    console.error(err)
-  } else {
-    console.log(result.outBinds);
-  }
-});
+const result = await connection.executeMany(sql, numIterations, options);
+
+console.log(result.outBinds);
 ```
 
 Output would be an array of eight values such as:
@@ -11353,27 +11213,22 @@ be flushed from the cache before the statements are re-executed.
 The statement cache size can be set globally with [stmtCacheSize](#propdbstmtcachesize):
 
 ```javascript
-var oracledb = require('oracledb');
 oracledb.stmtCacheSize = 40;
 ```
 
 The value can be overridden in an `oracledb.getConnection()` call:
 
 ```javascript
-var oracledb = require('oracledb');
+const mypw = ... // the hr schema password
 
-var mypw = ... // the hr schema password
-
-oracledb.getConnection(
+const connection = await oracledb.getConnection(
   {
     user          : "hr",
     password      : mypw,
     connectString : "localhost/XEPDB1",
     stmtCacheSize : 40
-  },
-  function(err, connection) {
-    . . .
-  });
+  }
+);
 ```
 
 The value can also be overridden in the `poolAttrs` parameter to
@@ -11425,12 +11280,12 @@ function myCallback(message) {
     console.log(message);
 }
 
-options = {
-    sql      : "select * from mytable",  // query of interest
+const options = {
+    sql      : `SELECT * FROM mytable`,  // query of interest
     callback : myCallback                // method called by notifications
 };
 
-connection.subscribe('mysub', options, function(err) { ... } );
+await connection.subscribe('mysub', options);
 ```
 
 In this example, whenever a change to `mytable` is committed then
@@ -11475,8 +11330,8 @@ the application whenever a transaction changes the result of the
 registered query and commits.  For example:
 
 ```javascript
-options = {
-    sql      : "select * from mytable where key > 100",  // query of interest
+const options = {
+    sql      : `SELECT * FROM mytable WHERE key > 100`,  // query of interest
     callback : myCallback,                               // method called by notifications
     qos      : oracledb.SUBSCR_QOS_QUERY                 // CQN
 };
@@ -11516,13 +11371,11 @@ function myCallback(message)
     }
     console.log("Message database name:", message.dbName);
     console.log("Message transaction id:", message.txId);
-    for (let i = 0; i < message.tables.length; i++) {
-        let table = message.tables[i];
+    for (const table of message.tables) {
         console.log("--> Table Name:", table.name);
         console.log("--> Table Operation:", table.operation);
         if (table.rows) {
-            for (j = 0; j < table.rows.length; j++) {
-                let row = table.rows[j];
+            for (const row of table.rows) {
                 console.log("--> --> Row Rowid:", row.rowid);
                 console.log("--> --> Row Operation:", row.operation);
                 console.log(Array(61).join("-"));
@@ -11533,7 +11386,7 @@ function myCallback(message)
 }
 
 const options = {
-    sql           : "SELECT * FROM MY mytable",
+    sql           : `SELECT * FROM mytable`,
     callback      : myCallback,
     timeout       : 60,
     qos           : oracledb.SUBSCR_QOS_ROWIDS,
@@ -11545,7 +11398,7 @@ const options = {
 try {
     // This is Node 8 syntax, but can be changed to callbacks
 
-    let conn = await oracledb.getConnection({
+    const connection = await oracledb.getConnection({
       user          : "hr",
       password      : mypw,  // mypw contains the hr schema password
       connectString : "localhost/XEPDB1",
@@ -11767,8 +11620,8 @@ or more messages up to the limit will be dequeued:
 const queue = connection.queue(queueName);
 const messages = await queue.deqMany(5);
 console.log("Dequeued " + messages.length + " messages");
-for (let i = 0; i < messages.length; i++) {
-  console.log(messages[i].payload.toString());
+for (const msg of messages) {
+  console.log(msg.payload.toString());
 }
 await connection.commit();
 ```
@@ -11803,7 +11656,7 @@ async function ProcessAqMessages() {
   await connection.close();
 }
 
-connection = await oracledb.getConnection();
+const connection = await oracledb.getConnection();
 await connection.subscribe(queueName, subscrOptions);
 await connection.close();
 
@@ -11898,24 +11751,30 @@ blocks to enqueue and dequeue messages:
 
 ```javascript
 // Enqueue a message
-username = 'scott';
-address  = 'The Kennel';
-sql = `BEGIN
-         my_enq(user_address_type(:un, :ad));
-       END;`;
-binds = {un: username, ad: address};
+const username = 'scott';
+const address  = 'The Kennel';
+const sql = `BEGIN
+               my_enq(user_address_type(:un, :ad));
+             END;`;
+const binds = {
+  un: username,
+  ad: address
+};
 await connection.execute(sql, binds);
 
 // Dequeue a message
-sql = `DECLARE
-         ua user_address_type;
-       BEGIN
-         my_deq(ua);
-         :un := ua.name;
-         :ad := ua.address;
-       END;`;
-binds = {un: {dir: oracledb.BIND_OUT}, ad: {dir: oracledb.BIND_OUT}};
-result = await connection.execute(sql, binds);
+const sql = `DECLARE
+               ua user_address_type;
+             BEGIN
+               my_deq(ua);
+               :un := ua.name;
+               :ad := ua.address;
+             END;`;
+const binds = {
+  un: {dir: oracledb.BIND_OUT},
+  ad: {dir: oracledb.BIND_OUT}
+};
+const result = await connection.execute(sql, binds);
 console.log(result.outBinds);
 ```
 
@@ -11986,22 +11845,19 @@ sent to the database on the next [round-trip][124] from node-oracledb, for
 example, with `execute()`:
 
 ```javascript
-oracledb.getConnection(
+const connection = await oracledb.getConnection(
   {
     user          : "hr",
     password      : mypw,  // mypw contains the hr schema password
     connectString : "localhost/orclpdb"
-  },
-  function(err, connection) {
-    if (err) { console.error(err.message); return;    }
+  }
+);
 
-    connection.clientId = "Chris";
-    connection.module = "End-to-end example";
-    connection.action = "Query departments";
+connection.clientId = "Chris";
+connection.module = "End-to-end example";
+connection.action = "Query departments";
 
-    connection.execute(`SELECT . . .`,
-      function(err, result) {
-        . . .
+const result = await connection.execute(`SELECT . . .`);
 ```
 
 While the connection is open the attribute values can be seen, for example with SQL*Plus:
@@ -12203,13 +12059,13 @@ Collections can be created like:
 oracledb.autoCommit = true;
 
 try {
-  soda = connection.getSodaDatabase();
-  collection = await soda.createCollection("mycollection");
-  indexSpec = { "name": "CITY_IDX",
-                "fields": [ {
-                    "path": "address.city",
-                    "datatype": "string",
-                    "order": "asc" } ] };
+  const soda = connection.getSodaDatabase();
+  const collection = await soda.createCollection("mycollection");
+  const indexSpec = { "name": "CITY_IDX",
+                      "fields": [ {
+                          "path": "address.city",
+                          "datatype": "string",
+                          "order": "asc" } ] };
   await collection.createIndex(indexSpec);
 } catch(err) {
   console.error(err);
@@ -12246,8 +12102,8 @@ example, it is the object myContent:
 
 ```javascript
 try {
-  myContent = {name: "Sally", address: {city: "Melbourne"}};
-  newDoc = await collection.insertOneAndGet(myContent);
+  const myContent = {name: "Sally", address: {city: "Melbourne"}};
+  const newDoc = await collection.insertOneAndGet(myContent);
   // a system generated key is created by default
   console.log("The key of the new SODA document is: ", newDoc.key);
 } catch(err) {
@@ -12292,12 +12148,12 @@ Each document has a unique key. If the key for a document is "k1", the
 document can be fetched like:
 
 ```javascript
-myKey = "k1";
+const myKey = "k1";
 try {
-  soda = connection.getSodaDatabase();
-  collection = await soda.openCollection("mycollection");
-  doc = await collection.find().key(myKey).getOne(); // A SodaDocument
-  content = doc.getContent();  // A JavaScript object
+  const soda = connection.getSodaDatabase();
+  const collection = await soda.openCollection("mycollection");
+  const doc = await collection.find().key(myKey).getOne(); // A SodaDocument
+  const content = doc.getContent();  // A JavaScript object
   console.log("Name: " + content.name); // Sally
   console.log("Lives in: " + content.address.city);  // Melbourne
 } catch(err) {
@@ -12366,15 +12222,15 @@ Other examples of chained read and write operations include:
 - To find the new version of an updated document:
 
     ```javascript
-    newContent = {name: "Fred", address: {city: "Melbourne"}};
-    updatedDoc = await collection.find().key("k1").version("v1").replaceOneAndGet(newContent);
+    const newContent = {name: "Fred", address: {city: "Melbourne"}};
+    const updatedDoc = await collection.find().key("k1").version("v1").replaceOneAndGet(newContent);
     console.log('New version is: ' + updatedDoc.version);
     ```
 
 - To count all documents, no keys are needed:
 
     ```javascript
-    n = collection.find().count();
+    const n = collection.find().count();
     ```
 
 The [`sodaCollection.find()`](#sodacollfind) operators that return
@@ -12407,27 +12263,27 @@ Some QBE examples are:
   city is San Francisco and the salary is greater than 500000:
 
     ```javascript
-    n = await collection.find().filter({"age": {"$lt": 30},
-                                        "address.city": "San Francisco",
-                                        "salary": {"$gt": 500000}}).count();
+    const n = await collection.find().filter({"age": {"$lt": 30},
+                                              "address.city": "San Francisco",
+                                              "salary": {"$gt": 500000}}).count();
     ```
 
 - To return all documents that have an age less than 30, an address in
   San Francisco, and a salary greater than 500000:
 
     ```javascript
-    docCursor = await collection.find().filter({"age": {"$lt": 30},
-                                                "address.city": "San Francisco",
-                                                "salary": {"$gt": 500000}}).getCursor();
+    const docCursor = await collection.find().filter({"age": {"$lt": 30},
+                                                      "address.city": "San Francisco",
+                                                      "salary": {"$gt": 500000}}).getCursor();
     ```
 
 - Same as the previous example, but allowing for pagination of results
   by only getting 10 documents:
 
     ```javascript
-    docCursor = await collection.find().filter({"age": {"$lt": 30},
-                                                "address.city": "San Francisco",
-                                                "salary": {"$gt": 500000}}).skip(0).limit(10).getCursor();
+    const docCursor = await collection.find().filter({"age": {"$lt": 30},
+                                                      "address.city": "San Francisco",
+                                                      "salary": {"$gt": 500000}}).skip(0).limit(10).getCursor();
     ```
 
     To get the next 10 documents, the QBE could be repeated with the
@@ -12438,18 +12294,18 @@ Some QBE examples are:
   is drunk.
 
     ```javascript
-    filterSpec = {"$and": [{"age": {"$gt": 60} },
-                    {"$or": [{"name": "Max"},
-                             {"drinks": {"$in": ["tea", "coffee"]}}]}]; };
-    docCursor = await collection.find().filter(filterSpec).getCursor();
+    const filterSpec = {"$and": [{"age": {"$gt": 60} },
+                          {"$or": [{"name": "Max"},
+                                   {"drinks": {"$in": ["tea", "coffee"]}}]}]; };
+    const docCursor = await collection.find().filter(filterSpec).getCursor();
     ```
 
 - The `$orderby` specification can be used to order any returned documents:
 
     ```javascript
-    filterSpec = {"$query": {"salary": {$between [10000, 20000]}},
-                  "$orderby": {"age": -1, "name": 2}};
-    docCursor = await collection.find().filter(filterSpec).getCursor();
+    const filterSpec = {"$query": {"salary": {$between [10000, 20000]}},
+                        "$orderby": {"age": -1, "name": 2}};
+    const docCursor = await collection.find().filter(filterSpec).getCursor();
     ```
 
     This 'orderby abbreviated syntax' returns documents within a
@@ -12473,12 +12329,12 @@ Some QBE examples are:
     Then a Spatial QBE like the following could be used to find documents within a 50 km range of a specified point:
 
     ```javascript
-    filterSpec = {"location" :
+    const filterSpec = {"location" :
       {"$near" :
         {"$geometry": {"type": "Point", "coordinates": [34.0162, -118.2019]},
           "$distance" : 50,
           "$unit"     : "KM"}}};
-    docCursor = await collection.find().filter(filterSpec).getCursor();
+    const docCursor = await collection.find().filter(filterSpec).getCursor();
     ```
 
     See [Overview of QBE Spatial Operators][111].
@@ -12564,7 +12420,7 @@ with the [keyColumn][114] object changed.  Here the type becomes
 NUMBER and the [assignment method][115] is noted as client-assigned:
 
 ```javascript
-mymetadata = { . . . };   // the default metadata shown above
+const mymetadata = { . . . };   // the default metadata shown above
 
 // update the keyColumn info
 mymetadata.keyColumn =
@@ -12584,13 +12440,13 @@ This custom metadata is then used when creating the collection:
 oracledb.autoCommit = true;
 
 try {
-  soda = connection.getSodaDatabase();
-  collection = await soda.createCollection("mycollection", { metaData: mymetadata});
-  indexSpec = { "name": "CITY_IDX",
-                "fields": [ {
-                    "path": "address.city",
-                    "datatype": "string",
-                    "order": "asc" } ] };
+  const soda = connection.getSodaDatabase();
+  const collection = await soda.createCollection("mycollection", { metaData: mymetadata});
+  const indexSpec = { "name": "CITY_IDX",
+                      "fields": [ {
+                          "path": "address.city",
+                          "datatype": "string",
+                          "order": "asc" } ] };
   await collection.createIndex(indexSpec);
 } catch(err) {
   console.error(err);
@@ -12602,8 +12458,8 @@ the application.  Note it is set to a string:
 
 ```javascript
 try {
-  myContent = {name: "Sally", address: {city: "Melbourne"}};
-  newDoc = soda.createDocument(myContent, {key: "123"});
+  const myContent = {name: "Sally", address: {city: "Melbourne"}};
+  const newDoc = soda.createDocument(myContent, {key: "123"});
   await collection.insertOne(newDoc);
 } catch(err) {
   console.error(err);
@@ -12641,9 +12497,9 @@ documents:
 Then the following code:
 
 ```javascript
-await createIndex({"name": "myIndex"});  // dataguide is "on" by default
-doc = await sodaCollection.getDataGuide();
-dg = doc.getContentAsString();
+const await createIndex({"name": "myIndex"});  // dataguide is "on" by default
+const doc = await sodaCollection.getDataGuide();
+const dg = doc.getContentAsString();
 console.log(dg);
 ```
 
@@ -12795,9 +12651,9 @@ Node-oracledb supports callbacks.
 ```javascript
 // myscript.js
 
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 
-var mypw = ...  // set mypw to the hr schema password
+const mypw = ...  // set mypw to the hr schema password
 
 oracledb.getConnection(
   {
@@ -12850,9 +12706,9 @@ If an asynchronous method is invoked without a callback, it returns a
 Promise:
 
 ```javascript
-var oracledb = require('oracledb');
+const oracledb = require('oracledb');
 
-var mypw = ... // the user password
+const mypw = ... // the user password
 
 oracledb.getConnection(
   {
@@ -12860,8 +12716,8 @@ oracledb.getConnection(
     password      : mypw,
     connectString : "localhost/XEPDB1"
   })
-  .then(function(conn) {
-    return conn.execute(
+  .then(function(connection) {
+    return connection.execute(
       `SELECT department_id, department_name
        FROM departments
        WHERE manager_id < :id`,
@@ -12869,11 +12725,11 @@ oracledb.getConnection(
     )
       .then(function(result) {
         console.log(result.rows);
-        return conn.close();
+        return connection.close();
       })
       .catch(function(err) {
         console.error(err);
-        return conn.close();
+        return connection.close();
       });
   })
   .catch(function(err) {
@@ -12945,7 +12801,7 @@ The Promise implementation is designed to be overridden, allowing a
 custom Promise library to be used.
 
 ```javascript
-var mylib = require('myfavpromiseimplementation');
+const mylib = require('myfavpromiseimplementation');
 oracledb.Promise = mylib;
 ```
 
@@ -12963,20 +12819,20 @@ can be used with node-oracledb.  For example:
 ```javascript
 const oracledb = require('oracledb');
 
-let mypw = ... // the hr schema password
+const mypw = ... // the hr schema password
 
 function getEmployee(empid) {
   return new Promise(async function(resolve, reject) {
-    let conn;
+    let connection;
 
     try {
-      conn = await oracledb.getConnection({
+      connection = await oracledb.getConnection({
         user          : "hr",
         password      : mypw,
         connectString : "localhost/XEPDB1"
       });
 
-      let result = await conn.execute(
+      const result = await connection.execute(
         `SELECT * FROM employees WHERE employee_id = :bv`,
         [empid]
       );
@@ -12985,9 +12841,9 @@ function getEmployee(empid) {
     } catch (err) { // catches errors in getConnection and the query
       reject(err);
     } finally {
-      if (conn) {   // the conn assignment worked, must release
+      if (connection) {   // the connection assignment worked, must release
         try {
-          await conn.release();
+          await connection.release();
         } catch (e) {
           console.error(e);
         }
@@ -12998,7 +12854,7 @@ function getEmployee(empid) {
 
 async function run() {
   try {
-    let res = await getEmployee(101);
+    const res = await getEmployee(101);
     console.log(res);
   } catch (err) {
     console.error(err);
