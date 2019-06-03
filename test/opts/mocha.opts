@@ -219,3 +219,4 @@ test/fetchBinaryTypesAsString.js
 test/currentSchema.js
 
 test/implicitResults.js
+test/getDataOfLob.js
