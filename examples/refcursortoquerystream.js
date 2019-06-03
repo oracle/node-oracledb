@@ -47,7 +47,7 @@ async function run() {
            SELECT department_id, department_name
            FROM departments;
        END;`,
-      { 
+      {
         cursor: {
           type: oracledb.CURSOR,
           dir: oracledb.BIND_OUT

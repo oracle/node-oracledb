@@ -46,11 +46,11 @@ async function run() {
 
     await connection1.execute(
       `BEGIN
-	 EXECUTE IMMEDIATE 'DROP TABLE test';
-	 EXCEPTION WHEN OTHERS THEN
-	 IF SQLCODE <> -942 THEN
-	   RAISE;
-	 END IF;
+         EXECUTE IMMEDIATE 'DROP TABLE test';
+         EXCEPTION WHEN OTHERS THEN
+         IF SQLCODE <> -942 THEN
+           RAISE;
+         END IF;
        END;`);
     console.log("Table dropped");
 
