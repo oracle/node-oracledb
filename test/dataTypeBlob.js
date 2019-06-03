@@ -202,7 +202,7 @@ describe('41. dataTypeBlob.js', function() {
       ], done);
     }); // 41.1.1
 
-    it('41.1.2 BLOB getValue()', function(done) {
+    it('41.1.2 BLOB getData()', function(done) {
       connection.should.be.ok();
       async.series([
         function blobinsert1(callback) {
@@ -252,7 +252,7 @@ describe('41. dataTypeBlob.js', function() {
 
               fs.readFile( inFileName, function(err, data) {
                 should.not.exist(err);
-                lob.getValue(function(err, blob) {
+                lob.getData(function(err, blob) {
                   data.length.should.be.exactly(blob.length);
                   data.should.eql(blob);
                   callback();
