@@ -4475,3 +4475,11 @@ Overview of node-oracledb functional tests
     192.1 implicit results with rows fetched
     192.2 implicit Results with Result Sets
     192.3 multiple options, outFormat is OBJECT
+
+196. getDataOfLob.js
+    196.1 getData() works on CLOB
+    196.2 getData() returns CLOB as Strings
+    196.3 getData() on BLOB
+    196.4 getData() returns BLOB as Buffer
+    196.5 getData() on empty LOB returns null
+    196.6 works with temp LOB

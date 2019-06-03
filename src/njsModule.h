@@ -547,6 +547,7 @@ struct njsLob {
     uint32_t chunkSize;
     uint64_t length;
     bool isAutoClose;
+    bool dirtyLength;
 };
 
 // data for keeping track of LOBs in the worker thread

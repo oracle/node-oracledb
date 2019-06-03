@@ -291,6 +291,13 @@ static bool njsLob_getDataAsync(njsBaton *baton)
     njsLob *lob = (njsLob*) baton->callingInstance;
     bool ok = true;
 
+    // if the length is marked dirty, acquire it at this time
+    if (lob->dirtyLength) {
+        if (dpiLob_getSize(lob->handle, &lob->length) < 0)
+            return njsBaton_setErrorDPI(baton);
+        lob->dirtyLength = false;
+    }
+
     // determine size of buffer that is required
     if (lob->dataType == NJS_DATATYPE_BLOB) {
         baton->bufferSize = lob->length;
@@ -572,6 +579,7 @@ static bool njsLob_writeAsync(njsBaton *baton)
         }
         return false;
     }
+    lob->dirtyLength = true;
     return true;
 }
 
