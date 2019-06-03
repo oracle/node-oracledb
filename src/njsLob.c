@@ -27,18 +27,18 @@
 
 // class methods
 static NJS_NAPI_METHOD(njsLob_close);
-static NJS_NAPI_METHOD(njsLob_getValue);
+static NJS_NAPI_METHOD(njsLob_getData);
 static NJS_NAPI_METHOD(njsLob_read);
 static NJS_NAPI_METHOD(njsLob_write);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsLob_closeAsync);
-static NJS_ASYNC_METHOD(njsLob_getValueAsync);
+static NJS_ASYNC_METHOD(njsLob_getDataAsync);
 static NJS_ASYNC_METHOD(njsLob_readAsync);
 static NJS_ASYNC_METHOD(njsLob_writeAsync);
 
 // post asynchronous methods
-static NJS_ASYNC_POST_METHOD(njsLob_getValuePostAsync);
+static NJS_ASYNC_POST_METHOD(njsLob_getDataPostAsync);
 static NJS_ASYNC_POST_METHOD(njsLob_readPostAsync);
 
 // processing arguments methods
@@ -62,8 +62,7 @@ static NJS_NAPI_FINALIZE(njsLob_finalize);
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
     { "_close", NULL, njsLob_close, NULL, NULL, NULL, napi_default, NULL },
-    { "_getValue", NULL, njsLob_getValue, NULL, NULL, NULL, napi_default,
-            NULL },
+    { "_getData", NULL, njsLob_getData, NULL, NULL, NULL, napi_default, NULL },
     { "__read", NULL, njsLob_read, NULL, NULL, NULL, napi_default, NULL },
     { "__write", NULL, njsLob_write, NULL, NULL, NULL, napi_default, NULL },
     { "_autoCloseLob", NULL, NULL, njsLob_getAutoCloseLob, NULL, NULL,
@@ -264,30 +263,30 @@ static napi_value njsLob_getValid(napi_env env, napi_callback_info info)
 
 
 //-----------------------------------------------------------------------------
-// njsLob_getValue()
+// njsLob_getData()
 //   Read all of the data from the LOB and return it as a single string or
 // buffer.
 //
 // PARAMETERS
 //   - JS callback which will receive (error, data)
 //-----------------------------------------------------------------------------
-static napi_value njsLob_getValue(napi_env env, napi_callback_info info)
+static napi_value njsLob_getData(napi_env env, napi_callback_info info)
 {
     njsBaton *baton;
 
     if (!njsLob_createBaton(env, info, 1, NULL, &baton))
         return NULL;
-    njsBaton_queueWork(baton, env, "GetValue", njsLob_getValueAsync,
-            njsLob_getValuePostAsync, 2);
+    njsBaton_queueWork(baton, env, "GetData", njsLob_getDataAsync,
+            njsLob_getDataPostAsync, 2);
     return NULL;
 }
 
 
 //-----------------------------------------------------------------------------
-// njsLob_getValueAsync()
-//   Worker function for njsLob_getValue().
+// njsLob_getDataAsync()
+//   Worker function for njsLob_getData().
 //-----------------------------------------------------------------------------
-static bool njsLob_getValueAsync(njsBaton *baton)
+static bool njsLob_getDataAsync(njsBaton *baton)
 {
     njsLob *lob = (njsLob*) baton->callingInstance;
     bool ok = true;
@@ -327,10 +326,10 @@ static bool njsLob_getValueAsync(njsBaton *baton)
 
 
 //-----------------------------------------------------------------------------
-// njsLob_getValuePostAsync()
-//   Generates return values for njsLob_getValue().
+// njsLob_getDataPostAsync()
+//   Generates return values for njsLob_getData().
 //-----------------------------------------------------------------------------
-static bool njsLob_getValuePostAsync(njsBaton *baton, napi_env env,
+static bool njsLob_getDataPostAsync(njsBaton *baton, napi_env env,
         napi_value *args)
 {
     njsLob *lob = (njsLob*) baton->callingInstance;

@@ -231,7 +231,7 @@ describe('40. dataTypeClob.js', function() {
     }); // 40.1.1
 
 
-    it('40.1.2 CLOB getValue()', function(done) {
+    it('40.1.2 CLOB getData()', function(done) {
       connection.should.be.ok();
       async.series([
         function clobinsert1(callback) {
@@ -280,7 +280,7 @@ describe('40. dataTypeClob.js', function() {
 
               fs.readFile( inFileName, { encoding: 'utf8' }, function(err, data) {
                 should.not.exist(err);
-                lob.getValue(function(err, clob) {
+                lob.getData(function(err, clob) {
                   should.not.exist(err);
                   data.length.should.be.exactly(clob.length);
                   data.should.equal(clob);

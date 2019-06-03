@@ -218,7 +218,7 @@ limitations under the License.
         - 6.1.4 [`type`](#proplobtype)
     - 6.2 [Lob Methods](#lobmethods)
         - 6.2.1 [`close()`](#lobclose)
-        - 6.2.2 [`getValue()`](#lobgetvalue)
+        - 6.2.2 [`getData()`](#lobgetdata)
 7. [Pool Class](#poolclass)
     - 7.1 [Pool Properties](#poolproperties)
         - 7.1.1 [`connectionsInUse`](#proppoolconnectionsinuse)
@@ -4216,18 +4216,18 @@ See [Closing Lobs](#closinglobs) for more discussion.
     *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 
-#### <a name="lobgetvalue"></a> 6.2.2 `lob.getValue()`
+#### <a name="lobgetdata"></a> 6.2.2 `lob.getData()`
 
 ##### Prototype
 
 Callback:
 ```
-getValue(function(Error error, String data));
-getValue(function(Error error, Buffer data));
+getData(function(Error error, String data));
+getData(function(Error error, Buffer data));
 ```
 Promise:
 ```
-promise = getValue();
+promise = getData();
 ```
 
 ##### Description
@@ -4239,7 +4239,7 @@ to 1 GB in length.
 For queries returning LOB columns, it can be more efficient to use
 [`fetchAsString`](#propdbfetchasstring),
 [`fetchAsBuffer`](#propdbfetchasbuffer), or
-[`fetchInfo`](#executeoptions) instead of `lob.getValue()`.
+[`fetchInfo`](#executeoptions) instead of `lob.getData()`.
 
 This method was added in node-oracledb 4.0.
 
@@ -4253,7 +4253,7 @@ This method was added in node-oracledb 4.0.
 
     Callback function parameter | Description
     ----------------------------|-------------
-    *Error error* | If `getValue()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    *Error error* | If `getData()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
     *String data* or *Buffer data* | The value of the LOB.
 
 ## <a name="poolclass"></a> 7. Pool Class

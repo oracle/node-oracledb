@@ -26,8 +26,8 @@
   returned from PL/SQL without needing parameters or bind variables.
 
 - Added
-  [`lob.getValue()`](https://oracle.github.io/node-oracledb/doc/api.html#lobgetvalue)
-  to return a LOBs value from a Lob instance.
+  [`lob.getData()`](https://oracle.github.io/node-oracledb/doc/api.html#lobgetdata)
+  to return a LOBs data from a Lob instance.
 
 - Class methods are now configurable.  For example via
   `Object.defineProperty`.
