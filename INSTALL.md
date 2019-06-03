@@ -54,12 +54,12 @@ The [*node-oracledb*][1] add-on for Node.js powers high performance Oracle Datab
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
-This node-oracledb release has been tested with Node.js 8, 10 and 11
-on 64-bit Oracle Linux, Windows and macOS.  Note Node.js 8.12 or later
-is required.  The add-on can also build on some 32-bit Linux, 32-bit
-Windows, Solaris and AIX environments, but these architectures have
-not been fully tested.  Older versions of node-oracledb may work with
-older versions of Node.js.
+This node-oracledb release has been tested with Node.js 8, 10 and 12
+on 64-bit Oracle Linux, Windows and macOS.  Note Node.js 8.16, Node.js
+10.16, or later is required.  The add-on can also build on some 32-bit
+Linux, 32-bit Windows, Solaris and AIX environments, but these
+architectures have not been fully tested.  Older versions of
+node-oracledb may work with older versions of Node.js.
 
 Node-oracledb is an [add-on](https://nodejs.org/api/addons.html)
 available as C source code.  Pre-built binaries are available
@@ -72,8 +72,8 @@ guaranteed to be available or usable in your environment.
 
 Node-oracledn 4.0 was refactored to use [N-API][53] version 2.  On
 each operating system, a node-oracledb binary will work with a number
-of Node.js versions from Node.js 8.12 onwards, dependent on N-API
-compatibility.
+of Node.js versions from Node.js 8.16 and Node.js 10.16 onwards,
+dependent on N-API compatibility.
 
 #### <a name="mig31"></a> 1.1 Changes in node-oracledb version 3.1
 

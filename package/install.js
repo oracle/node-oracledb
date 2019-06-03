@@ -120,11 +120,18 @@ function done(err) {
   }
 }
 
-// Check there is a usable binary file for the node-oracledb module
+// Check for a usable binary file for the node-oracledb module.
+// Node.js 8.16 and 10.16 (and 12.0) contain an important N-API
+// performance regression fix.  If you're using the obsolete Node.js 9
+// or 11 versions, install will work but you're on your own regarding
+// performance and functionality.
+
 function checkAvailable(cb) {
   let vs = process.version.substring(1).split(".").map(Number);
-  if (vs[0] < 8 || (vs[0] === 8 && vs[1] < 12)) {
-    cb(new Error(nodbUtil.getErrorMessage('NJS-069', nodbUtil.PACKAGE_JSON_VERSION, "8.12")));
+  if (vs[0] < 8 || (vs[0] === 8 && vs[1] < 16)) {
+    cb(new Error(nodbUtil.getErrorMessage('NJS-069', nodbUtil.PACKAGE_JSON_VERSION, "8.16")));
+  } else if (vs[0] === 10 && vs[1] < 16) {
+    cb(new Error(nodbUtil.getErrorMessage('NJS-069', nodbUtil.PACKAGE_JSON_VERSION, "10.16")));
   } else {
     try {
       fs.statSync(nodbUtil.RELEASE_DIR + '/' + nodbUtil.BINARY_FILE);

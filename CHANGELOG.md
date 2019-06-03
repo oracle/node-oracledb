@@ -7,7 +7,7 @@
 - Refactored the node-oracledb implementation to use
   [N-API](https://nodejs.org/api/n-api.html) in place of
   [NAN](https://github.com/nodejs/nan).
-    - Node.js 8.12, or higher, is required by this version of node-oracledb.  Note Node.js 8.16, 11.12 and 12 contain an important performance fix.
+    - Node.js 8.16 or Node.js 10.16, or higher, is required by this version of node-oracledb.  Node.js 8.16, 10.16, 11.12 and 12 contain an important N-API performance fix.
     - N-API allows node-oracledb binaries to be portable between Node.js versions on a given operating system, subject to N-API compatibility.
     - Oracle Client libraries are still required at runtime.
     - The string representation of classes has changed to `[Object Object]` as a consequence of using N-API.
