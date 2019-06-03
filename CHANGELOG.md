@@ -100,7 +100,7 @@
 
 - Added new tests.
 
-- Added new examples.
+- Added new examples.  Updated existing examples to the Node.js 8 Async/Await style of programming.
 
 ## node-oracledb v3.1.2 (22 Feb 2019)
 
