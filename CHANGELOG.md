@@ -9,9 +9,9 @@
   [NAN](https://github.com/nodejs/nan).
     - Node.js 8.16 or Node.js 10.16, or higher, is required by this version of node-oracledb.  Node.js 8.16, 10.16, 11.12 and 12 contain an important N-API performance fix.
     - N-API allows node-oracledb binaries to be portable between Node.js versions on a given operating system, subject to N-API compatibility.
-    - Oracle Client libraries are still required at runtime.
+    - Oracle Client libraries are still required at runtime.  These can be from Oracle Instant Client, the full Oracle Client, or an Oracle Database installation.
     - The string representation of classes has changed to `[Object Object]` as a consequence of using N-API.
-    - A C++11 compiler is no longer required when building from source code.  The node-oracledb source code is now pure C.
+    - The C compiler required for building from source code no longer needs C++11 compatibility.  The node-oracledb source code is now pure C.
 
 - Added support for Oracle Advanced Queuing (AQ) RAW queues, allowing
   String and Buffer messages to be used.
