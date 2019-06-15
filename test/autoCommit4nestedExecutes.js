@@ -228,7 +228,7 @@ describe('63. autoCommit4nestedExecutes.js', function() {
         connection.execute(
           "SELECT count(*) as amount FROM " + tableName,
           [],
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             (result.rows[0].AMOUNT).should.be.exactly(0);

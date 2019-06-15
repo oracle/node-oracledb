@@ -788,7 +788,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
   }); // 87.1
 
-  describe('87.2 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.OBJECT', function() {
+  describe('87.2 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.OUT_FORMAT_OBJECT', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -829,7 +829,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           connection.execute(
             "SELECT ID, B from nodb_blob1 WHERE ID = :id",
             { id : id },
-            { outFormat : oracledb.OBJECT },
+            { outFormat : oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               var resultVal = result.rows[0].B;
               if(specialStr === null) {
@@ -915,7 +915,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           connection.execute(
             "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) AS B1 from nodb_blob1 WHERE ID = :id",
             { id : id },
-            { outFormat : oracledb.OBJECT },
+            { outFormat : oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0].B1;
@@ -958,7 +958,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           connection.execute(
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
             { },
-            { outFormat : oracledb.OBJECT },
+            { outFormat : oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0].B;
@@ -987,7 +987,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           connection.execute(
             "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
             { },
-            { outFormat : oracledb.OBJECT },
+            { outFormat : oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0].B1;
@@ -1023,7 +1023,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           connection.execute(
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
             { },
-            { outFormat : oracledb.OBJECT },
+            { outFormat : oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0].B;
@@ -1157,7 +1157,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           connection.execute(
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
-            { outFormat : oracledb.OBJECT },
+            { outFormat : oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               result.rows.length.should.eql(1);
@@ -1196,7 +1196,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           connection.execute(
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
-            { outFormat : oracledb.OBJECT },
+            { outFormat : oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               result.rows.length.should.eql(2);
@@ -1258,7 +1258,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
   }); // 87.2
 
-  describe('87.3 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.OBJECT and resultSet = true', function() {
+  describe('87.3 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.OUT_FORMAT_OBJECT and resultSet = true', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -1300,7 +1300,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = :id",
             { id : id },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               resultSet : true
             },
             function(err, result) {
@@ -1397,7 +1397,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) AS B1 from nodb_blob1 WHERE ID = :id",
             { id : id },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               resultSet : true
             },
             function(err, result) {
@@ -1452,7 +1452,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               resultSet : true
             },
             function(err, result) {
@@ -1493,7 +1493,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               resultSet : true
             },
             function(err, result) {
@@ -1540,7 +1540,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               resultSet : true
             },
             function(err, result) {
@@ -1686,7 +1686,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               resultSet : true
             },
             function(err, result) {
@@ -1740,7 +1740,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               resultSet : true
             },
             function(err, result) {
@@ -1813,7 +1813,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
   }); // 87.3
 
-  describe('87.4 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.ARRAY', function() {
+  describe('87.4 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.OUT_FORMAT_ARRAY', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -1854,7 +1854,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           connection.execute(
             "SELECT ID, B from nodb_blob1 WHERE ID = :id",
             { id : id },
-            { outFormat : oracledb.ARRAY },
+            { outFormat : oracledb.OUT_FORMAT_ARRAY },
             function(err, result) {
               var resultVal = result.rows[0][1];
               if(specialStr === null) {
@@ -1940,7 +1940,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           connection.execute(
             "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) from nodb_blob1 WHERE ID = :id",
             { id : id },
-            { outFormat : oracledb.ARRAY },
+            { outFormat : oracledb.OUT_FORMAT_ARRAY },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][0];
@@ -1983,7 +1983,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           connection.execute(
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
             { },
-            { outFormat : oracledb.ARRAY },
+            { outFormat : oracledb.OUT_FORMAT_ARRAY },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
@@ -2012,7 +2012,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           connection.execute(
             "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
             { },
-            { outFormat : oracledb.ARRAY },
+            { outFormat : oracledb.OUT_FORMAT_ARRAY },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
@@ -2048,7 +2048,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           connection.execute(
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
             { },
-            { outFormat : oracledb.ARRAY },
+            { outFormat : oracledb.OUT_FORMAT_ARRAY },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
@@ -2182,7 +2182,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           connection.execute(
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
-            { outFormat : oracledb.ARRAY },
+            { outFormat : oracledb.OUT_FORMAT_ARRAY },
             function(err, result) {
               should.not.exist(err);
               result.rows.length.should.eql(1);
@@ -2221,7 +2221,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           connection.execute(
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
-            { outFormat : oracledb.ARRAY },
+            { outFormat : oracledb.OUT_FORMAT_ARRAY },
             function(err, result) {
               should.not.exist(err);
               result.rows.length.should.eql(2);
@@ -2283,7 +2283,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
   }); // 87.4
 
-  describe('87.5 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.ARRAY and resultSet = true', function() {
+  describe('87.5 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.OUT_FORMAT_ARRAY and resultSet = true', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -2325,7 +2325,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = :id",
             { id : id },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               resultSet : true
             },
             function(err, result) {
@@ -2423,7 +2423,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) AS B1 from nodb_blob1 WHERE ID = :id",
             { id : id },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               resultSet : true
             },
             function(err, result) {
@@ -2479,7 +2479,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               resultSet : true
             },
             function(err, result) {
@@ -2520,7 +2520,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               resultSet : true
             },
             function(err, result) {
@@ -2567,7 +2567,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               resultSet : true
             },
             function(err, result) {
@@ -2713,7 +2713,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               resultSet : true
             },
             function(err, result) {
@@ -2767,7 +2767,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               resultSet : true
             },
             function(err, result) {

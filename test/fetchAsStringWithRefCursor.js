@@ -156,7 +156,7 @@ describe('139. fetchAsStringWithRefCursor.js', function() {
         out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       },
       {
-        outFormat: oracledb.OBJECT,
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo:
         {
           "ID": { type: oracledb.STRING },
@@ -196,7 +196,7 @@ describe('139. fetchAsStringWithRefCursor.js', function() {
         in: 295,
         out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       },
-      { outFormat: oracledb.OBJECT },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT },
       function(err, result) {
         should.not.exist(err);
         fetchRowFromRC(result.outBinds.out, done);

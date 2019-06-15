@@ -81,7 +81,7 @@ describe('27. dataTypeNumber2.js', function() {
       connection.execute(
         "SELECT * FROM " + tableName,
         [],
-        { outFormat: oracledb.OBJECT },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT },
         function(err, result) {
           should.not.exist(err);
           // console.log(result);
@@ -102,7 +102,7 @@ describe('27. dataTypeNumber2.js', function() {
       connection.execute(
         "SELECT * FROM " + tableName,
         [],
-        { resultSet: true, outFormat: oracledb.OBJECT },
+        { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT },
         function(err, result) {
           should.not.exist(err);
           (result.resultSet.metaData[0]).name.should.eql('NUM');

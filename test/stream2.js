@@ -153,7 +153,7 @@ describe('14. stream2.js', function() {
 
   it('14.3 Bind by position and return an object', function(done) {
     var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
-    var stream = connection.queryStream(sql, [40], {outFormat: oracledb.OBJECT});
+    var stream = connection.queryStream(sql, [40], {outFormat: oracledb.OUT_FORMAT_OBJECT});
 
     stream.on('error', function(error) {
       should.not.exist(error);
@@ -169,7 +169,7 @@ describe('14. stream2.js', function() {
 
   it('14.4 Bind by name and return an object', function(done) {
     var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
-    var stream = connection.queryStream(sql, {id: 40}, {outFormat: oracledb.OBJECT});
+    var stream = connection.queryStream(sql, {id: 40}, {outFormat: oracledb.OUT_FORMAT_OBJECT});
 
     stream.on('error', function(error) {
       should.not.exist(error);

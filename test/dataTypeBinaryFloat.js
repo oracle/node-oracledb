@@ -134,7 +134,7 @@ describe('30. dataTypeBinaryFloat.js', function() {
       connection.execute(
         "SELECT * FROM " + tableName,
         [],
-        { outFormat: oracledb.OBJECT },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT },
         function(err, result) {
           should.not.exist(err);
 

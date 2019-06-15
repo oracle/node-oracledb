@@ -302,7 +302,7 @@ describe("149. fetchArraySize2.js", function() {
             [
               { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
             ],
-            { outFormat: oracledb.OBJECT },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               var rowCount = 0;

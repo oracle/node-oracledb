@@ -146,11 +146,11 @@ describe('13. stream1.js', function () {
       });
     });
 
-    it('13.1.2 stream results for oracle connection (outFormat: oracledb.OBJECT)', function (done) {
+    it('13.1.2 stream results for oracle connection (outFormat: oracledb.OUT_FORMAT_OBJECT)', function (done) {
       var stream = connection.queryStream(
         'SELECT employee_name FROM nodb_stream1 ORDER BY employee_name',
         {},
-        { outFormat: oracledb.OBJECT }
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
 
       stream.on('error', function (error) {
@@ -231,7 +231,7 @@ describe('13. stream1.js', function () {
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 WHERE employee_id <= :maxId ORDER BY employee_id', {
         maxId: 10
       }, {
-        outFormat: oracledb.OBJECT
+        outFormat: oracledb.OUT_FORMAT_OBJECT
       });
 
       stream.on('error', function (error) {
@@ -260,7 +260,7 @@ describe('13. stream1.js', function () {
           name: 'test_update'
         },
         {
-          outFormat: oracledb.OBJECT
+          outFormat: oracledb.OUT_FORMAT_OBJECT
         }
       );
 
@@ -280,7 +280,7 @@ describe('13. stream1.js', function () {
       var stream = connection.queryStream(
         'SELECT employee_name, employee_history FROM nodb_stream1 where employee_id <= :maxId ORDER BY employee_id',
         { maxId: 10 },
-        { outFormat: oracledb.OBJECT }
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
 
       stream.on('error', function (error) {
@@ -330,7 +330,7 @@ describe('13. stream1.js', function () {
       var stream = connection.queryStream('SELECT employee_name, employee_history FROM nodb_stream1 where employee_id <= :maxId ORDER BY employee_id', {
         maxId: 10
       }, {
-        outFormat: oracledb.OBJECT
+        outFormat: oracledb.OUT_FORMAT_OBJECT
       });
 
       stream.on('error', function (error) {

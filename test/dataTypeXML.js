@@ -117,7 +117,7 @@ describe('181. dataTypeXML.js', () => {
 
       let sql = "select content from " + tableName + " where num = :id";
       let bindVar = { id: testRowID };
-      let options = { outFormat: oracledb.OBJECT };
+      let options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
       let result = await conn.execute(sql, bindVar, options);
       should.strictEqual(result.rows[0].CONTENT, testXMLData);
       await conn.close();
@@ -135,7 +135,7 @@ describe('181. dataTypeXML.js', () => {
       let sql = "select xmltype.getclobval(content) as mycontent from " + tableName + " where num = :id";
       let bindVar = { id: testRowID };
       let options = {
-        outFormat: oracledb.OBJECT,
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo: { "MYCONTENT": { type: oracledb.STRING } }
       };
       let result = await conn.execute(sql, bindVar, options);
@@ -158,7 +158,7 @@ describe('181. dataTypeXML.js', () => {
                 "from " + tableName + " where num = :id";
       let bindVar = { id: testRowID };
       let options = {
-        outFormat: oracledb.OBJECT,
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo: { "MYCONTENT": { type: oracledb.STRING } }
       };
       let result = await conn.execute(sql, bindVar, options);
@@ -212,7 +212,7 @@ describe('181. dataTypeXML.js', () => {
 
       sql = "select content from " + tableName + " where num = :id";
       let bindVar = { id: ID };
-      let options = { outFormat: oracledb.OBJECT };
+      let options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
       result = await conn.execute(sql, bindVar, options);
       should.strictEqual(result.rows[0].CONTENT, xml);
       await conn.commit();

@@ -69,8 +69,8 @@ describe('18. constants.js', function() {
     (oracledb.BIND_IN).should.be.exactly(3001);
     (oracledb.BIND_INOUT).should.be.exactly(3002);
     (oracledb.BIND_OUT).should.be.exactly(3003);
-    (oracledb.ARRAY).should.be.exactly(4001);
-    (oracledb.OBJECT).should.be.exactly(4002);
+    (oracledb.OUT_FORMAT_ARRAY).should.be.exactly(4001);
+    (oracledb.OUT_FORMAT_OBJECT).should.be.exactly(4002);
 
   });
 

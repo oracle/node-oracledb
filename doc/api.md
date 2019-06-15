@@ -489,7 +489,7 @@ node myscript.js
 
 const oracledb = require('oracledb');
 
-oracledb.outFormat = oracledb.OBJECT;
+oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
 const mypw = ...  // set mypw to the hr schema password
 
@@ -699,8 +699,13 @@ Constants for the query result [outFormat](#propdboutformat) option:
 
 Constant Name                        | Value |Description
 -------------------------------------|-------|-----------------------------------------------
-`oracledb.ARRAY`                     | 4001  | Fetch each row as array of column values
-`oracledb.OBJECT`                    | 4002  | Fetch each row as an object
+`oracledb.OUT_FORMAT_ARRAY`          | 4001  | Fetch each row as array of column values
+`oracledb.OUT_FORMAT_OBJECT`         | 4002  | Fetch each row as an object
+
+The `oracledb.OUT_FORMAT_ARRAY` and `oracledb.OUT_FORMAT_OBJECT`
+constants were introduced in node-oracledb 4.0.  The previous
+constants `oracledb.ARRAY` and `oracledb.OBJECT` are deprecated but
+still usable.
 
 #### <a name="oracledbconstantsnodbtype"></a> 3.1.2 Node-oracledb Type Constants
 
@@ -1323,18 +1328,18 @@ both [ResultSet](#propexecresultset) and non-ResultSet queries.  It
 can be used for top level queries and REF CURSOR output.
 
 This can be either of
-the [Oracledb constants](#oracledbconstantsoutformat) `oracledb.ARRAY` or
-`oracledb.OBJECT`.  The default value is `oracledb.ARRAY` which is more efficient.
+the [Oracledb constants](#oracledbconstantsoutformat)
+`oracledb.OUT_FORMAT_ARRAY` or `oracledb.OUT_FORMAT_OBJECT`.  The default value
+is `oracledb.OUT_FORMAT_ARRAY` which is more efficient.
 
-If specified as `oracledb.ARRAY`, each row is fetched as an array of column
-values.
+If specified as `oracledb.OUT_FORMAT_ARRAY`, each row is fetched as an array of
+column values.
 
-If specified as `oracledb.OBJECT`, each row is fetched as a JavaScript object.
-The object has a property for each column name, with the property
-value set to the respective column value.  The property name follows
-Oracle's standard name-casing rules.  It will commonly be uppercase,
-since most applications create tables using unquoted, case-insensitive
-names.
+If specified as `oracledb.OUT_FORMAT_OBJECT`, each row is fetched as a
+JavaScript object.  The object has a property for each column name, with the
+property value set to the respective column value.  The property name follows
+Oracle's standard name-casing rules.  It will commonly be uppercase, since most
+applications create tables using unquoted, case-insensitive names.
 
 This property may be overridden in
 an [`execute()`](#executeoptions)
@@ -1346,7 +1351,7 @@ See [Query Output Formats](#queryoutputformats) for more information.
 
 ```javascript
 const oracledb = require('oracledb');
-oracledb.outFormat = oracledb.ARRAY;
+oracledb.outFormat = oracledb.OUT_FORMAT_ARRAY;
 ```
 
 #### <a name="propdbpoolincrement"></a> 3.2.15 `oracledb.poolIncrement`
@@ -3071,8 +3076,8 @@ contains an array of fetched rows.  It will be NULL if there is an
 error or the SQL statement was not a SELECT statement.  By default,
 the rows are in an array of column value arrays, but this can be
 changed to arrays of objects by setting
-[`outFormat`](#propdboutformat) to `oracledb.OBJECT`.  If a single row
-is fetched, then `rows` is an array that contains one single row.
+[`outFormat`](#propdboutformat) to `oracledb.OUT_FORMAT_OBJECT`.  If a single
+row is fetched, then `rows` is an array that contains one single row.
 
 The number of rows returned is limited by
 [`oracledb.maxRows`](#propdbmaxrows) or the
@@ -8399,10 +8404,10 @@ If run with Oracle's sample HR schema, the output is:
 Using this format is recommended for efficiency.
 
 Alternatively, rows may be fetched as JavaScript objects. To do so,
-specify the `outFormat` option to be `oracledb.OBJECT`:
+specify the `outFormat` option to be `oracledb.OUT_FORMAT_OBJECT`:
 
 ```javascript
-oracledb.outFormat = oracledb.OBJECT;
+oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 ```
 
 The value can also be set as an `execute()` option:
@@ -8413,7 +8418,7 @@ const result = await connection.execute(
    FROM departments
    WHERE manager_id < :id`,
   [110],  // bind value for :id
-  { outFormat: oracledb.OBJECT }
+  { outFormat: oracledb.OUT_FORMAT_OBJECT }
 );
 
 console.log(result.rows);
@@ -9336,7 +9341,7 @@ const result = await connection.execute(
    FROM parts
    ORDER BY id`,
   [],
-  { outFormat: oracledb.OBJECT }
+  { outFormat: oracledb.OUT_FORMAT_OBJECT }
 );
 
 console.log(result.rows);

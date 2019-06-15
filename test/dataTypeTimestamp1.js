@@ -134,7 +134,7 @@ describe('33. dataTypeTimestamp1.js', function() {
         connection.execute(
           "SELECT num, TO_CHAR(content, 'DD-MM-YYYY HH24:MI:SS.FF') AS TS_DATA FROM " + tableName + " WHERE num = :no",
           { no: bv },
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             // console.log(result.rows);
@@ -151,7 +151,7 @@ describe('33. dataTypeTimestamp1.js', function() {
     it('33.3.3 returns scalar types from PL/SQL block', function(done) {
       var sql = "BEGIN SELECT systimestamp into :bv from dual; END;";
       var binds = { bv: { dir: oracledb.BIND_OUT, type: oracledb.STRING } };
-      var options = { outFormat: oracledb.OBJECT };
+      var options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
 
       connection.execute(
         sql,

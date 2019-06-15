@@ -170,7 +170,7 @@ describe('7. autoCommit.js', function() {
         conn2.execute(
           "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
           [],
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             result.rows[0].DEPARTMENT_ID.should.eql(82).and.be.a.Number();
@@ -191,7 +191,7 @@ describe('7. autoCommit.js', function() {
         conn2.execute(
           "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
           [],
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             result.rows[0].DEPARTMENT_ID.should.eql(101).and.be.a.Number();
@@ -251,7 +251,7 @@ describe('7. autoCommit.js', function() {
         conn2.execute(
           "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
           [],
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             result.rows[0].DEPARTMENT_ID.should.eql(82).and.be.a.Number();
@@ -272,7 +272,7 @@ describe('7. autoCommit.js', function() {
         conn2.execute(
           "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
           [],
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             result.rows[0].DEPARTMENT_ID.should.eql(101).and.be.a.Number();
@@ -332,7 +332,7 @@ describe('7. autoCommit.js', function() {
         conn2.execute(
           "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
           [],
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             (result.rows).should.eql([]);
@@ -353,7 +353,7 @@ describe('7. autoCommit.js', function() {
         conn2.execute(
           "SELECT COUNT(*) as amount FROM nodb_commit_dept",
           [],
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             result.rows[0].AMOUNT.should.eql(1);
@@ -365,7 +365,7 @@ describe('7. autoCommit.js', function() {
         conn1.execute(
           "SELECT COUNT(*) as amount FROM nodb_commit_dept",
           [],
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             result.rows[0].AMOUNT.should.eql(2);   // autoCommit for SELECT

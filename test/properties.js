@@ -176,9 +176,9 @@ describe('58. properties.js', function() {
 
     it('58.1.12 outFormat', function() {
       var t = oracledb.outFormat;
-      oracledb.outFormat = oracledb.OBJECT;
+      oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
-      t.should.eql(oracledb.ARRAY);
+      t.should.eql(oracledb.OUT_FORMAT_ARRAY);
       (oracledb.outFormat).should.not.eql(defaultValues.outFormat);
     });
 
@@ -656,7 +656,7 @@ describe('58. properties.js', function() {
           connection.execute(
             "SELECT * FROM " + tableName + " ORDER BY num",
             [],
-            { resultSet: true, outFormat: oracledb.OBJECT },
+            { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               resultSet = result.resultSet;

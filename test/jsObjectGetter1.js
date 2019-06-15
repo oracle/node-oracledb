@@ -353,7 +353,7 @@ describe('140. jsObjectGetter1.js', function() {
   describe('140.4 Negative: fetchInfo', function() {
     it('140.4.1 changes getter() of fetchInfo itself', function(done) {
       var foo = {
-        outFormat: oracledb.OBJECT,
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo : { "TS_DATE": { type : oracledb.STRING } }
       };
 
@@ -390,7 +390,7 @@ describe('140. jsObjectGetter1.js', function() {
       });
 
       var option = {
-        outFormat: oracledb.OBJECT,
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo : { "TS_DATE": foo }
       };
 

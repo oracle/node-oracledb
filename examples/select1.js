@@ -66,7 +66,7 @@ async function run() {
       // the documentation.
       {
         maxRows: 1
-        //, outFormat: oracledb.OBJECT  // query result format
+        //, outFormat: oracledb.OUT_FORMAT_OBJECT  // query result format
         //, extendedMetaData: true      // get extra metadata
         //, fetchArraySize: 100         // internal buffer allocation size for tuning
       });

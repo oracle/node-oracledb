@@ -287,7 +287,7 @@ Overview of node-oracledb functional tests
 13. stream1.js
     13.1 Testing QueryStream
         13.1.1 stream results for oracle connection
-        13.1.2 stream results for oracle connection (outFormat: oracledb.OBJECT)
+        13.1.2 stream results for oracle connection (outFormat: oracledb.OUT_FORMAT_OBJECT)
         13.1.3 errors in query
         13.1.4 no result
         13.1.5 single row
@@ -1751,7 +1751,7 @@ Overview of node-oracledb functional tests
         84.1.18 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
         84.1.19 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
         84.1.20 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
-    84.2 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.OBJECT
+    84.2 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.OUT_FORMAT_OBJECT
         84.2.1 works with NULL value
         84.2.2 works with empty String
         84.2.3 works with small value
@@ -1768,7 +1768,7 @@ Overview of node-oracledb functional tests
         84.2.14 works with setting oracledb.maxRows < actual number of rows in the table
         84.2.15 works with setting oracledb.maxRows > actual number of rows in the table
         84.2.16 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
-    84.3 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.OBJECT and resultSet = true
+    84.3 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.OUT_FORMAT_OBJECT and resultSet = true
         84.3.1 works with NULL value
         84.3.2 works with empty String
         84.3.3 works with small value
@@ -1784,7 +1784,7 @@ Overview of node-oracledb functional tests
         84.3.14 works with setting oracledb.maxRows < actual number of rows in the table
         84.3.15 works with setting oracledb.maxRows > actual number of rows in the table
         84.3.16 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
-    84.4 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.ARRAY
+    84.4 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.OUT_FORMAT_ARRAY
         84.4.1 works with NULL value
         84.4.2 works with empty String
         84.4.3 works with small value
@@ -1801,7 +1801,7 @@ Overview of node-oracledb functional tests
         84.4.14 works with setting oracledb.maxRows < actual number of rows in the table
         84.4.15 works with setting oracledb.maxRows < actual number of rows in the table
         84.4.16 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
-    84.5 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.ARRAY and resultSet = true
+    84.5 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.OUT_FORMAT_ARRAY and resultSet = true
         84.5.1 works with NULL value
         84.5.2 works with empty String
         84.5.3 works with small value
@@ -1838,7 +1838,7 @@ Overview of node-oracledb functional tests
         85.1.16 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
         85.1.17 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
         85.1.18 works with REF CURSOR
-    85.2 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT
+    85.2 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.OUT_FORMAT_OBJECT
         85.2.1 works with NULL value
         85.2.2 works with empty buffer
         85.2.3 works with small value
@@ -1853,7 +1853,7 @@ Overview of node-oracledb functional tests
         85.2.12 works with setting oracledb.maxRows < actual number of rows in the table
         85.2.13 works with setting oracledb.maxRows > actual number of rows in the table
         85.2.14 works with REF CURSOR
-    85.3 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.OBJECT and resultSet = true
+    85.3 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.OUT_FORMAT_OBJECT and resultSet = true
         85.3.1 works with NULL value
         85.3.2 works with empty buffer
         85.3.3 works with small value
@@ -1867,7 +1867,7 @@ Overview of node-oracledb functional tests
         85.3.11 works with update statement
         85.3.12 works with setting oracledb.maxRows < actual number of rows in the table
         85.3.13 works with setting oracledb.maxRows > actual number of rows in the table
-    85.4 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY
+    85.4 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.OUT_FORMAT_ARRAY
         85.4.1 works with NULL value
         85.4.2 works with empty String
         85.4.3 works with small value
@@ -1882,7 +1882,7 @@ Overview of node-oracledb functional tests
         85.4.12 works with setting oracledb.maxRows < actual number of rows in the table
         85.4.13 works with setting oracledb.maxRows > actual number of rows in the table
         85.4.14 works with REF CURSOR
-    85.5 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.ARRAY and resultSet = true
+    85.5 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.OUT_FORMAT_ARRAY and resultSet = true
         85.5.1 works with NULL value
         85.5.2 works with empty String
         85.5.3 works with small value
@@ -1941,7 +1941,8 @@ Overview of node-oracledb functional tests
         87.1.18 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
         87.1.19 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
         87.1.20 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
-    87.2 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.OBJECT
+    87.2 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat =
+oracledb.OUT_FORMAT_OBJECT
         87.2.1 works with NULL value
         87.2.2 works with empty Buffer
         87.2.3 works with small value
@@ -1958,7 +1959,8 @@ Overview of node-oracledb functional tests
         87.2.14 works with setting oracledb.maxRows < actual number of rows in the table
         87.2.15 works with setting oracledb.maxRows > actual number of rows in the table
         87.2.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
-    87.3 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.OBJECT and resultSet = true
+    87.3 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat =
+oracledb.OUT_FORMAT_OBJECT and resultSet = true
         87.3.1 works with NULL value
         87.3.2 works with empty Buffer
         87.3.3 works with small value
@@ -1975,7 +1977,7 @@ Overview of node-oracledb functional tests
         87.3.14 works with setting oracledb.maxRows < actual number of rows in the table
         87.3.15 works with setting oracledb.maxRows > actual number of rows in the table
         87.3.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
-    87.4 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.ARRAY
+    87.4 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.OUT_FORMAT_ARRAY
         87.4.1 works with NULL value
         87.4.2 works with empty Buffer
         87.4.3 works with small value
@@ -1992,7 +1994,7 @@ Overview of node-oracledb functional tests
         87.4.14 works with setting oracledb.maxRows < actual number of rows in the table
         87.4.15 works with setting oracledb.maxRows < actual number of rows in the table
         87.4.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
-    87.5 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.ARRAY and resultSet = true
+    87.5 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.OUT_FORMAT_ARRAY and resultSet = true
         87.5.1 works with NULL value
         87.5.2 works with empty Buffer
         87.5.3 works with small value
@@ -2029,7 +2031,8 @@ Overview of node-oracledb functional tests
         88.1.15 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
         88.1.16 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
         88.1.17 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
-    88.2 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT
+    88.2 fetch BLOB columns by setting fetchInfo option and outFormat =
+oracledb.OUT_FORMAT_OBJECT
         88.2.1 works with NULL value
         88.2.2 works with empty buffer
         88.2.3 works with small value
@@ -2043,7 +2046,8 @@ Overview of node-oracledb functional tests
         88.2.11 works with update statement
         88.2.12 works with setting oracledb.maxRows < actual number of rows in the table
         88.2.13 works with setting oracledb.maxRows > actual number of rows in the table
-    88.3 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.OBJECT and resultSet =  true
+    88.3 fetch BLOB columns by setting fetchInfo option, outFormat =
+oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         88.3.1 works with NULL value
         88.3.2 works with empty buffer
         88.3.3 works with small value
@@ -2057,7 +2061,7 @@ Overview of node-oracledb functional tests
         88.3.11 works with update statement
         88.3.12 works with setting oracledb.maxRows < actual number of rows in the table
         88.3.13 works with setting oracledb.maxRows > actual number of rows in the table
-    88.4 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY
+    88.4 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.OUT_FORMAT_ARRAY
         88.4.1 works with NULL value
         88.4.2 works with empty Buffer
         88.4.3 works with small value
@@ -2071,7 +2075,7 @@ Overview of node-oracledb functional tests
         88.4.11 works with update statement
         88.4.12 works with setting oracledb.maxRows < actual number of rows in the table
         88.4.13 works with setting oracledb.maxRows > actual number of rows in the table
-    88.5 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.ARRAY and resultSet = true
+    88.5 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.OUT_FORMAT_ARRAY and resultSet = true
         88.5.1 works with NULL value
         88.5.2 works with empty Buffer
         88.5.3 works with small value

@@ -221,10 +221,10 @@ describe('3. examples.js', function() {
             {},
             // A bind variable parameter is needed to disambiguate the following options parameter
             // otherwise you will get Error: ORA-01036: illegal variable name/number
-            {outFormat: oracledb.OBJECT}, // outFormat can be OBJECT and ARRAY.  The default is ARRAY
+            {outFormat: oracledb.OUT_FORMAT_OBJECT}, // outFormat can be OUT_FORMAT_OBJECT and OUT_FORMAT_ARRAY.  The default is OUT_FORMAT_ARRAY
             function(err, result){
               should.not.exist(err);
-              // Cities beginning with 'S' (OBJECT output format)
+              // Cities beginning with 'S' (OUT_FORMAT_OBJECT output format)
               // console.log(result);
               (result.rows).should.containEql({ LOCATION_ID: 1500, CITY: 'South San Francisco' });
               callback();

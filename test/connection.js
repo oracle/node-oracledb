@@ -105,7 +105,7 @@ describe('1. connection.js', function(){
 
     it('1.1.1 ARRAY format by default', function(done) {
       var defaultFormat = oracledb.outFormat;
-      defaultFormat.should.be.exactly(oracledb.ARRAY);
+      defaultFormat.should.be.exactly(oracledb.OUT_FORMAT_ARRAY);
 
       connection.should.be.ok();
       connection.execute(query, [40], function(err, result){
@@ -118,7 +118,7 @@ describe('1. connection.js', function(){
     it('1.1.2 ARRAY format explicitly', function(done) {
       connection.should.be.ok();
       connection.execute(
-        query, {id: 20}, {outFormat: oracledb.ARRAY},
+        query, {id: 20}, {outFormat: oracledb.OUT_FORMAT_ARRAY},
         function(err, result){
           should.not.exist(err);
           (result.rows).should.eql([[ 20, 'Marketing' ]]);
@@ -130,7 +130,7 @@ describe('1. connection.js', function(){
     it('1.1.3 OBJECT format', function(done){
       connection.should.be.ok();
       connection.execute(
-        query, {id: 20}, {outFormat: oracledb.OBJECT},
+        query, {id: 20}, {outFormat: oracledb.OUT_FORMAT_OBJECT},
         function(err, result){
           should.not.exist(err);
           (result.rows).should.eql([{ DEPARTMENT_ID: 20, DEPARTMENT_NAME: 'Marketing' }]);

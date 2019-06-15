@@ -2186,7 +2186,7 @@ describe('70. plsqlBindScalar.js', function() {
           connection.execute(
             "select * from nodb_plsqlbindtab where id = :i",
             [rowid],
-            { outFormat: oracledb.OBJECT },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               // console.log(result);
@@ -2253,7 +2253,7 @@ describe('70. plsqlBindScalar.js', function() {
           connection.execute(
             "select * from nodb_plsqlbindtab where id = :i",
             [rowid],
-            { outFormat: oracledb.OBJECT },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               // console.log(result);
@@ -2315,7 +2315,7 @@ describe('70. plsqlBindScalar.js', function() {
           connection.execute(
             "select * from nodb_plsqlbindtab where id = :i",
             [rowid],
-            { outFormat: oracledb.OBJECT },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               // console.log(result);
@@ -2381,7 +2381,7 @@ describe('70. plsqlBindScalar.js', function() {
           connection.execute(
             "select * from nodb_plsqlbindtab where id = :i",
             [rowid],
-            { outFormat: oracledb.OBJECT },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               // console.log(result);
@@ -2442,7 +2442,7 @@ describe('70. plsqlBindScalar.js', function() {
           connection.execute(
             "select * from nodb_plsqlbindtab where id = :i",
             [rowid],
-            { outFormat: oracledb.OBJECT },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               // console.log(result);

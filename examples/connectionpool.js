@@ -77,7 +77,7 @@ async function dostuff() {
     connection = await oracledb.getConnection();
     const sql = `SELECT sysdate FROM dual WHERE :b = 1`;
     const binds = [1];
-    const options = { outFormat: oracledb.OBJECT };
+    const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
     const result = await connection.execute(sql, binds, options);
     console.log(result);
   } catch (err) {

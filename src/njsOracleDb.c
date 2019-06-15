@@ -196,6 +196,8 @@ static njsConstant njsClassConstants[] = {
     { "BIND_OUT", NJS_BIND_OUT },
 
     // outFormat values
+    { "OUT_FORMAT_ARRAY", NJS_ROWS_ARRAY },
+    { "OUT_FORMAT_OBJECT", NJS_ROWS_OBJECT },
     { "ARRAY", NJS_ROWS_ARRAY },
     { "OBJECT", NJS_ROWS_OBJECT },
 

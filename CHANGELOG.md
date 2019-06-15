@@ -44,7 +44,13 @@
   This is an efficient alternative to `ALTER SESSION SET
   CURRENT_SCHEMA`.
 
-- Improved the performance of `oracledb.outFormat = oracledb.OBJECT`.
+- Introduced [Query `outFormat`
+  Constants](https://oracle.github.io/node-oracledb/doc/api.html#oracledbconstantsoutformat)
+  `oracledb.OUT_FORMAT_ARRAY` and `oracledb.OUT_FORMAT_OBJECT`.  The
+  previous constants `oracledb.ARRAY` and `oracledb.OBJECT` are
+  deprecated but still usable.
+
+- Improved the performance of `oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT`.
 
 - Updated the JavaScript syntax in class implementations.
 

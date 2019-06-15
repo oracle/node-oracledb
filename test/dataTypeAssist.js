@@ -654,7 +654,7 @@ assist.dataTypeSupport = function(connection, tableName, array, done) {
   connection.execute(
     "SELECT * FROM " + tableName + " ORDER BY num",
     [],
-    { outFormat: oracledb.OBJECT },
+    { outFormat: oracledb.OUT_FORMAT_OBJECT },
     function(err, result) {
       should.not.exist(err);
       // console.log(result);
@@ -680,7 +680,7 @@ assist.verifyResultSet = function(connection, tableName, array, done)
   connection.execute(
     "SELECT * FROM " + tableName,
     [],
-    { resultSet: true, outFormat: oracledb.OBJECT },
+    { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT },
     function(err, result) {
       should.not.exist(err);
       (result.resultSet.metaData[0]).name.should.eql('NUM');
@@ -715,7 +715,7 @@ assist.verifyRefCursor = function(connection, tableName, array, done)
         [
           { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
         ],
-        { outFormat: oracledb.OBJECT },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT },
         function(err, result) {
           should.not.exist(err);
           fetchRowsFromRS(result.outBinds[0], array, callback);
@@ -934,7 +934,7 @@ assist.verifyRefCursorWithFetchInfo = function(connection, tableName, array, don
           out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
         },
         {
-          outFormat: oracledb.OBJECT,
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
           fetchInfo:
           {
             "CONTENT": { type: oracledb.STRING }
@@ -982,7 +982,7 @@ assist.verifyRefCursorWithFetchAsString = function(connection, tableName, array,
         {
           out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
         },
-        { outFormat: oracledb.OBJECT },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT },
         function(err, result) {
           should.not.exist(err);
           _verifyFetchedValues(connection, result.outBinds.out, array, tableName, callback);

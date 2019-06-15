@@ -295,7 +295,7 @@ describe("152. fetchArraySize5.js", function() {
               { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
             ],
             {
-              outFormat: oracledb.OBJECT,
+              outFormat: oracledb.OUT_FORMAT_OBJECT,
               fetchArraySize: fetchArraySizeVal
             },
             function(err, result) {

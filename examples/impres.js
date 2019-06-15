@@ -32,7 +32,7 @@
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 
-oracledb.outFormat =  oracledb.OBJECT;
+oracledb.outFormat =  oracledb.OUT_FORMAT_OBJECT;
 
 async function run() {
   let connection;

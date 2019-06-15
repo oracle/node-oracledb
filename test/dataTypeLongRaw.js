@@ -101,7 +101,7 @@ describe('104. dataTypeLongRaw.js', function() {
       connection.execute(
         "select * from " + tableName + " order by num",
         [],
-        { outFormat: oracledb.OBJECT },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT },
         function(err, result) {
           should.not.exist(err);
           should.strictEqual(result.rows.length, strs.length);
@@ -117,7 +117,7 @@ describe('104. dataTypeLongRaw.js', function() {
       connection.execute(
         "select * from " + tableName,
         [],
-        { resultSet: true, outFormat: oracledb.OBJECT },
+        { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT },
         function(err, result) {
           should.not.exist(err);
           (result.resultSet.metaData[0]).name.should.eql('NUM');
@@ -151,7 +151,7 @@ describe('104. dataTypeLongRaw.js', function() {
             [
               { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
             ],
-            { outFormat: oracledb.OBJECT },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               fetchRowsFromRS(result.outBinds[0], strs, callback);

@@ -302,7 +302,7 @@ describe('19. fetchTimestampAsString.js', function() {
       "select content from " + table + " order by num",
       [],
       {
-        outFormat: oracledb.OBJECT,
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
       },
       function(err, result) {
@@ -352,7 +352,7 @@ describe('19. fetchTimestampAsString.js', function() {
       "select content from " + table + " order by num",
       [],
       {
-        outFormat: oracledb.OBJECT,
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
         resultSet: true,
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
       },
@@ -396,7 +396,7 @@ describe('19. fetchTimestampAsString.js', function() {
     connection.execute(
       "select content from " + table + " order by num",
       [],
-      { outFormat: oracledb.OBJECT },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT },
       function(err, result) {
         should.not.exist(err);
         should.deepEqual(result.rows, want);
@@ -443,7 +443,7 @@ describe('19. fetchTimestampAsString.js', function() {
       [],
       {
         resultSet: true,
-        outFormat: oracledb.OBJECT
+        outFormat: oracledb.OUT_FORMAT_OBJECT
       },
       function(err, result) {
         should.not.exist(err);
