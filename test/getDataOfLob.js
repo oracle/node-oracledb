@@ -111,8 +111,8 @@ describe('196. getDataOfLob.js', () => {
       inStream.pipe(clob);
 
       let insertionComplete = new Promise((resolve, reject) => {
-        inStream.on('error', (err) => reject(err));
-        clob.on('error', (err) => reject(err));
+        inStream.on('error', reject);
+        clob.on('error', reject);
         clob.on('close', () => resolve(conn.commit()));
       });
 
@@ -171,8 +171,8 @@ describe('196. getDataOfLob.js', () => {
       inStream.pipe(blob);
 
       let insertionComplete = new Promise((resolve, reject) => {
-        inStream.on('error', (err) => reject(err));
-        blob.on('error', (err) => reject(err));
+        inStream.on('error', reject);
+        blob.on('error', reject);
         blob.on('close', () => resolve(conn.commit()));
       });
 
@@ -216,8 +216,8 @@ describe('196. getDataOfLob.js', () => {
       inStream.pipe(tempLob);
 
       let insertionComplete = new Promise((resolve, reject) => {
-        inStream.on('error', (err) => reject(err));
-        tempLob.on('error', (err) => reject(err));
+        inStream.on('error', reject);
+        tempLob.on('error', reject);
         tempLob.on('finish', resolve);
       });
 
