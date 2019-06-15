@@ -20,10 +20,10 @@ limitations under the License.
 ## ===> *** Note: Go to [https://oracle.github.io/node-oracledb/INSTALL.html](https://oracle.github.io/node-oracledb/INSTALL.html) for production documentation ***
 
 1. [Node-oracledb Overview](#overview)
-    - 1.1 [Changes in node-oracledb version 4.0](#mig40)
-    - 1.2 [Changes in node-oracledb version 3.1](#mig31)
-    - 1.3 [Changes in node-oracledb version 3.0](#mig30)
-    - 1.4 [Changes in node-oracledb version 2.0](#mig20)
+    - 1.1 [Installation Changes in node-oracledb version 4.0](#mig40)
+    - 1.2 [Installation Changes in node-oracledb version 3.1](#mig31)
+    - 1.3 [Installation Changes in node-oracledb version 3.0](#mig30)
+    - 1.4 [Installation Changes in node-oracledb version 2.0](#mig20)
 2. [Quick Start Node-oracledb Installation](#quickstart)
 3. [Node-oracledb Installation Instructions](#instructions)
     - 3.1 [Prerequisites](#prerequisites)
@@ -68,14 +68,17 @@ and versions of Node.js that the pre-built binaries are compatible
 with will change as the Node.js project evolves.  The binaries are not
 guaranteed to be available or usable in your environment.
 
-#### <a name="mig40"></a> 1.1 Changes in node-oracledb version 4.0
+#### <a name="mig40"></a> 1.1 Installation Changes in node-oracledb version 4.0
 
 Node-oracledn 4.0 was refactored to use [N-API][53] version 2.  On
 each operating system, a node-oracledb binary will work with a number
 of Node.js versions from Node.js 8.16 and Node.js 10.16 onwards,
 dependent on N-API compatibility.
 
-#### <a name="mig31"></a> 1.1 Changes in node-oracledb version 3.1
+If compiling from source code, the compiler no longer needs C++11
+compatibility.  The node-oracledb source code is now pure C.
+
+#### <a name="mig31"></a> 1.1 Installion Changes in node-oracledb version 3.1
 
 Pre-built binaries are now contained in the package downloaded from
 npm.  This removes the previous internally executed step of
@@ -93,7 +96,7 @@ that `require('oracledb')` can succeed on machines that do not have
 Oracle Client libraries installed.  See the [CHANGELOG][43] for more
 information.
 
-#### <a name="mig30"></a> 1.2 Changes in node-oracledb version 3.0
+#### <a name="mig30"></a> 1.2 Installation Changes in node-oracledb version 3.0
 
 Installation of node-oracledb binaries will now use the `npm config`
 proxy if it is set.  However, due to known npm performance issues, it
