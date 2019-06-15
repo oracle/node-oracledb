@@ -88,7 +88,7 @@ async function run() {
 
     // For a complete list of options see the documentation.
     options = {
-      outFormat: oracledb.OBJECT   // query result format
+      outFormat: oracledb.OUT_FORMAT_OBJECT   // query result format
       // extendedMetaData: true,   // get extra metadata
       // fetchArraySize: 100       // internal buffer allocation size for tuning
     };

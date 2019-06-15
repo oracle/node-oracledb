@@ -49,7 +49,7 @@ const dbConfig = require('./dbconfig.js');
 
 // This script sets outFormat in the execute() call but it could be set here instead:
 //
-// oracledb.outFormat = oracledb.OBJECT;
+// oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
 async function run() {
 
@@ -82,7 +82,7 @@ async function run() {
     result = await connection.execute(
       sql,
       {}, // A bind parameter is needed to disambiguate the following options parameter and avoid ORA-01036
-      { outFormat: oracledb.OBJECT }); // outFormat can be OBJECT or ARRAY.  The default is ARRAY
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }); // outFormat can be OBJECT or ARRAY.  The default is ARRAY
     console.log("----- Cities beginning with 'S' (OBJECT output format) --------");
     console.log(result.rows);
 

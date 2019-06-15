@@ -1512,7 +1512,7 @@ describe('17. extendedMetaData.js', function() {
         "SELECT * FROM nodb_md",
         [],
         {
-          outFormat: oracledb.OBJECT,
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
           fetchInfo: {
             "DT":  { type: oracledb.STRING },
             "NUM": { type: oracledb.STRING }
@@ -1553,7 +1553,7 @@ describe('17. extendedMetaData.js', function() {
           connection.execute(
             "SELECT * FROM nodb_md",
             [],
-            { outFormat: oracledb.OBJECT, extendedMetaData: true },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT, extendedMetaData: true },
             function(err, result) {
               oracledb.fetchAsString = [];
               should.not.exist(err);
@@ -1597,7 +1597,7 @@ describe('17. extendedMetaData.js', function() {
           connection.execute(
             "SELECT * FROM nodb_md",
             [],
-            { outFormat: oracledb.OBJECT, extendedMetaData: true },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT, extendedMetaData: true },
             function(err, result) {
               oracledb.fetchAsString = [];
               should.not.exist(err);

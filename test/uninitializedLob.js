@@ -208,7 +208,7 @@ describe('65. uninitializedLob.js', function() {
           string_1  : string_1,
           spoc_cm_id: 1
         },
-        { outFormat: oracledb.OBJECT, autoCommit: false },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT, autoCommit: false },
         function(err, result) {
           if(err) {
             console.error(err.message);

@@ -183,7 +183,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
 
   describe('117.2 works with fetchInfo and outFormat = OBJECT, urowid length > 200/500', function() {
     var option = {
-      outFormat: oracledb.OBJECT,
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
       fetchInfo: { "content": { type: oracledb.STRING } }
     };
     var maxRowBak;
@@ -241,7 +241,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
 
     it('117.2.5 resultSet = true', function(done) {
       var option_rs = {
-        outFormat: oracledb.OBJECT,
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
         resultSet: true,
         fetchInfo: { "content": { type: oracledb.STRING } }
       };
@@ -267,7 +267,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
 
   describe('117.3 works with fetchInfo and outFormat = ARRAY, urowid length > 200/500', function() {
     var option = {
-      outFormat: oracledb.ARRAY,
+      outFormat: oracledb.OUT_FORMAT_ARRAY,
       fetchInfo: { "content": { type: oracledb.STRING } }
     };
     var maxRowBak;
@@ -325,7 +325,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
 
     it('117.3.5 resultSet = true', function(done) {
       var option_rs = {
-        outFormat: oracledb.ARRAY,
+        outFormat: oracledb.OUT_FORMAT_ARRAY,
         resultSet: true,
         fetchInfo: { "content": { type: oracledb.STRING } }
       };
@@ -429,7 +429,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
   });
 
   describe('117.5 fetch as string by default with outFormat = OBJECT, urowid length > 200/500', function() {
-    var option = { outFormat: oracledb.OBJECT };
+    var option = { outFormat: oracledb.OUT_FORMAT_OBJECT };
     var maxRowBak;
 
     before('get connection and create table', function(done) {
@@ -486,7 +486,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
     it('117.5.5 resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
-        outFormat: oracledb.OBJECT
+        outFormat: oracledb.OUT_FORMAT_OBJECT
       };
       test1(option_rs, true, true, done);
     });
@@ -509,7 +509,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
   });
 
   describe('117.6 fetch as string by default with outFormat = ARRAY, urowid length > 200/500', function() {
-    var option = { outFormat: oracledb.ARRAY  };
+    var option = { outFormat: oracledb.OUT_FORMAT_ARRAY  };
     var maxRowBak;
 
     before('get connection and create table', function(done) {
@@ -566,7 +566,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
     it('117.6.5 resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
-        outFormat: oracledb.ARRAY
+        outFormat: oracledb.OUT_FORMAT_ARRAY
       };
       test1(option_rs, false, true, done);
     });

@@ -291,7 +291,7 @@ async function doshowvtemplob(connection) {
   const result = await connection.execute(
     `SELECT * FROM V$TEMPORARY_LOBS`,
     [],
-    { outFormat: oracledb.OBJECT }
+    { outFormat: oracledb.OUT_FORMAT_OBJECT }
   );
 
   console.log(result.rows[0]);

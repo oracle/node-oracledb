@@ -666,7 +666,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
 
   }); // 88.1
 
-  describe('88.2 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT', function() {
+  describe('88.2 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.OUT_FORMAT_OBJECT', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -699,7 +699,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = :id",
             { id : id },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               fetchInfo : { B : { type : oracledb.BUFFER } }
             },
             function(err, result) {
@@ -789,7 +789,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) AS B1 from nodb_blob1 WHERE ID = :id",
             { id : id },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               fetchInfo : { B1 : { type : oracledb.BUFFER } }
             },
             function(err, result) {
@@ -835,7 +835,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               fetchInfo : { B : { type : oracledb.BUFFER } }
             },
             function(err, result) {
@@ -867,7 +867,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               fetchInfo : {
                 B1 : { type : oracledb.BUFFER },
                 B2 : { type : oracledb.BUFFER } }
@@ -908,7 +908,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               fetchInfo : { B : { type : oracledb.BUFFER } }
             },
             function(err, result) {
@@ -948,7 +948,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               fetchInfo : { B : { type : oracledb.BUFFER } }
             },
             function(err, result) {
@@ -990,7 +990,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               fetchInfo : { B : { type : oracledb.BUFFER } }
             },
             function(err, result) {
@@ -1010,7 +1010,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
 
   }); // 88.2
 
-  describe('88.3 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.OBJECT and resultSet = true', function() {
+  describe('88.3 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.OUT_FORMAT_OBJECT and resultSet = true', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -1043,7 +1043,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = :id",
             { id : id },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               fetchInfo : { B : { type : oracledb.BUFFER } },
               resultSet : true
             },
@@ -1142,7 +1142,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) AS B1 from nodb_blob1 WHERE ID = :id",
             { id : id },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               fetchInfo : { B1 : { type : oracledb.BUFFER } },
               resultSet : true
             },
@@ -1197,7 +1197,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               fetchInfo : { B : { type : oracledb.BUFFER } },
               resultSet : true
             },
@@ -1240,7 +1240,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               fetchInfo : {
                 B1 : { type : oracledb.BUFFER },
                 B2 : { type : oracledb.BUFFER } },
@@ -1290,7 +1290,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               fetchInfo : { B : { type : oracledb.BUFFER } },
               resultSet : true
             },
@@ -1339,7 +1339,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               fetchInfo : { B : { type : oracledb.BUFFER } },
               resultSet : true
             },
@@ -1394,7 +1394,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               fetchInfo : { B : { type : oracledb.BUFFER } },
               resultSet : true
             },
@@ -1425,7 +1425,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
 
   }); // 88.3
 
-  describe('88.4 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY', function() {
+  describe('88.4 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.OUT_FORMAT_ARRAY', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -1458,7 +1458,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = :id",
             { id : id },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               fetchInfo : { B : { type : oracledb.BUFFER } }
             },
             function(err, result) {
@@ -1594,7 +1594,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               fetchInfo : { B : { type : oracledb.BUFFER } }
             },
             function(err, result) {
@@ -1666,7 +1666,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               fetchInfo : { B : { type : oracledb.BUFFER } }
             },
             function(err, result) {
@@ -1706,7 +1706,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               fetchInfo : { B : { type : oracledb.BUFFER } }
             },
             function(err, result) {
@@ -1748,7 +1748,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               fetchInfo : { B : { type : oracledb.BUFFER } }
             },
             function(err, result) {
@@ -1768,7 +1768,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
 
   }); // 88.4
 
-  describe('88.5 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.ARRAY and resultSet = true', function() {
+  describe('88.5 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.OUT_FORMAT_ARRAY and resultSet = true', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -1801,7 +1801,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = :id",
             { id : id },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               fetchInfo : { B : { type : oracledb.BUFFER } },
               resultSet : true
             },
@@ -1900,7 +1900,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) AS B1 from nodb_blob1 WHERE ID = :id",
             { id : id },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               fetchInfo : { B1 : { type : oracledb.BUFFER } },
               resultSet : true
             },
@@ -1955,7 +1955,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               fetchInfo : { B : { type : oracledb.BUFFER } },
               resultSet : true
             },
@@ -1999,7 +1999,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               fetchInfo : {
                 B1 : { type : oracledb.BUFFER },
                 B2 : { type : oracledb.BUFFER } },
@@ -2049,7 +2049,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               fetchInfo : { B : { type : oracledb.BUFFER } },
               resultSet : true
             },
@@ -2098,7 +2098,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               fetchInfo : { B : { type : oracledb.BUFFER } },
               resultSet : true
             },
@@ -2153,7 +2153,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               fetchInfo : { B : { type : oracledb.BUFFER } },
               resultSet : true
             },

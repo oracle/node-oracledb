@@ -141,7 +141,7 @@ describe('10. nullColumnValues.js', function() {
         connection.execute(
           "SELECT * FROM nodb_nullcol_dept WHERE department_id = :did",
           { did: 101 },
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             // console.log(result);

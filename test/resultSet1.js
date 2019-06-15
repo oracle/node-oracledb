@@ -480,7 +480,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, fetchArraySize: 100, outFormat: oracledb.ARRAY },
+        { resultSet: true, fetchArraySize: 100, outFormat: oracledb.OUT_FORMAT_ARRAY },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -516,7 +516,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, fetchArraySize: 100, outFormat: oracledb.OBJECT },
+        { resultSet: true, fetchArraySize: 100, outFormat: oracledb.OUT_FORMAT_OBJECT },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -767,7 +767,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, fetchArraySize: 100, outFormat: oracledb.ARRAY },
+        { resultSet: true, fetchArraySize: 100, outFormat: oracledb.OUT_FORMAT_ARRAY },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet);
@@ -801,7 +801,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, fetchArraySize: 100, outFormat: oracledb.OBJECT },
+        { resultSet: true, fetchArraySize: 100, outFormat: oracledb.OUT_FORMAT_OBJECT },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet);

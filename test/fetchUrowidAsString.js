@@ -189,7 +189,7 @@ describe('116. fetchUrowidAsString.js', function() {
   describe('116.2 works with fetchInfo and outFormat = OBJECT', function() {
     var maxRowBak = oracledb.maxRows;
     var option = {
-      outFormat: oracledb.OBJECT,
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
       fetchInfo: { "CONTENT": { type: oracledb.STRING } }
     };
     before(function(done) {
@@ -229,7 +229,7 @@ describe('116. fetchUrowidAsString.js', function() {
     it('116.2.2 fetchInfo, outFormat = OBJECT, and resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
-        outFormat: oracledb.OBJECT,
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
       };
       test2(option_rs, true, false, done);
@@ -269,7 +269,7 @@ describe('116. fetchUrowidAsString.js', function() {
   describe('116.3 works with fetchInfo and outFormat = ARRAY', function() {
     var maxRowBak = oracledb.maxRows;
     var option = {
-      outFormat: oracledb.ARRAY,
+      outFormat: oracledb.OUT_FORMAT_ARRAY,
       fetchInfo: { "CONTENT": { type: oracledb.STRING } }
     };
     before(function(done) {
@@ -339,7 +339,7 @@ describe('116. fetchUrowidAsString.js', function() {
     it('116.3.8 fetchInfo, resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
-        outFormat: oracledb.ARRAY,
+        outFormat: oracledb.OUT_FORMAT_ARRAY,
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
       };
       test2(option_rs, false, true, done);
@@ -425,7 +425,7 @@ describe('116. fetchUrowidAsString.js', function() {
 
   describe('116.5 fetch as string by default with outFormat = OBJECT', function() {
     var maxRowBak = oracledb.maxRows;
-    var option = { outFormat: oracledb.OBJECT };
+    var option = { outFormat: oracledb.OUT_FORMAT_OBJECT };
     before(function(done) {
       async.series([
         function makeTable(callback) {
@@ -494,7 +494,7 @@ describe('116. fetchUrowidAsString.js', function() {
     it('116.5.8 resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
-        outFormat: oracledb.OBJECT
+        outFormat: oracledb.OUT_FORMAT_OBJECT
       };
       test2(option_rs, true, false, done);
     });
@@ -503,7 +503,7 @@ describe('116. fetchUrowidAsString.js', function() {
 
   describe('116.6 fetch as string by default with outFormat = ARRAY', function() {
     var maxRowBak = oracledb.maxRows;
-    var option = { outFormat: oracledb.ARRAY };
+    var option = { outFormat: oracledb.OUT_FORMAT_ARRAY };
     before(function(done) {
       async.series([
         function makeTable(callback) {
@@ -572,7 +572,7 @@ describe('116. fetchUrowidAsString.js', function() {
     it('116.6.8 resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
-        outFormat: oracledb.ARRAY,
+        outFormat: oracledb.OUT_FORMAT_ARRAY,
       };
       test2(option_rs, false, false, done);
     });

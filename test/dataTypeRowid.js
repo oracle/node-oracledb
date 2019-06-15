@@ -100,7 +100,7 @@ describe('39. dataTypeRowid.js', function() {
       connection.execute(
         "SELECT * FROM " + tableName,
         [],
-        { resultSet: true, outFormat: oracledb.OBJECT },
+        { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT },
         function(err, result) {
           should.not.exist(err);
           (result.resultSet.metaData[0]).name.should.eql('NUM');
@@ -241,7 +241,7 @@ describe('39. dataTypeRowid.js', function() {
           [
             { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
           ],
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             fetchRowsFromRS(result.outBinds[0], callback);
@@ -285,7 +285,7 @@ describe('39. dataTypeRowid.js', function() {
             { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
           ],
           {
-            outFormat: oracledb.OBJECT,
+            outFormat: oracledb.OUT_FORMAT_OBJECT,
             fetchInfo:
             {
               "CONTENT": { type: oracledb.STRING }

@@ -59,7 +59,7 @@ describe('53. resultSetClose.js', function() {
         connection.execute(
           "SELECT * FROM " + tableName + " ORDER BY num",
           [],
-          { resultSet: true, outFormat: oracledb.OBJECT },
+          { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             resultSet = result.resultSet;
@@ -166,7 +166,7 @@ describe('53. resultSetClose.js', function() {
         connection.execute(
           "SELECT * FROM " + tab + " ORDER BY num",
           [],
-          { resultSet: true, outFormat: oracledb.OBJECT },
+          { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             rs2 = result.resultSet;

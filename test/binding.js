@@ -338,7 +338,7 @@ describe('4. binding.js', function() {
     var insert = 'insert into nodb_binding1 (id, name) values (:0, :1) returning id into :2';
     var param1 = [ 1, 'changjie', { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } ];
     var param2 = [ 2, 'changjie', { ignored_name: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } } ];
-    var options = { autoCommit: true, outFormat: oracledb.OBJECT };
+    var options = { autoCommit: true, outFormat: oracledb.OUT_FORMAT_OBJECT };
 
     beforeEach(function(done) {
       oracledb.getConnection(dbConfig, function(err, conn) {

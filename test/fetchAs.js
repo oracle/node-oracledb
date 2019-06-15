@@ -72,7 +72,7 @@ describe('56. fetchAs.js', function() {
       "SELECT TO_DATE('2005-01-06', 'YYYY-DD-MM') AS TS_DATE FROM DUAL",
       [],
       {
-        outFormat: oracledb.OBJECT,
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo : { "TS_DATE": { type : oracledb.STRING } }
       },
       function(err, result) {
@@ -89,7 +89,7 @@ describe('56. fetchAs.js', function() {
       "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
       [],
       {
-        outFormat: oracledb.OBJECT,
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo :
         {
           "TS_DATE" : { type : oracledb.STRING },
@@ -114,7 +114,7 @@ describe('56. fetchAs.js', function() {
       "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
       [],
       {
-        outFormat: oracledb.OBJECT,
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo :
         {
           "TS_DATE" : { type : oracledb.STRING },
@@ -139,7 +139,7 @@ describe('56. fetchAs.js', function() {
       "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
       [],
       {
-        outFormat: oracledb.OBJECT,
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo :
         {
           "TS_DATE" : { type : oracledb.DEFAULT },
@@ -162,7 +162,7 @@ describe('56. fetchAs.js', function() {
       "SELECT ROWID from DUAL",
       [],
       {
-        outFormat : oracledb.OBJECT,
+        outFormat : oracledb.OUT_FORMAT_OBJECT,
         fetchInfo :
         {
           "ROWID" : { type : oracledb.STRING }
@@ -182,7 +182,7 @@ describe('56. fetchAs.js', function() {
       "SELECT ROWID from DUAL",
       [],
       {
-        outFormat : oracledb.OBJECT,
+        outFormat : oracledb.OUT_FORMAT_OBJECT,
         resultSet : true,
         fetchInfo :
         {
@@ -235,7 +235,7 @@ describe('56. fetchAs.js', function() {
         "SELECT TO_NUMBER( " + element + " ) AS TS_NUM FROM DUAL",
         [],
         {
-          outFormat : oracledb.OBJECT,
+          outFormat : oracledb.OUT_FORMAT_OBJECT,
           fetchInfo :
           {
             "TS_NUM"  : { type : oracledb.STRING }
@@ -261,7 +261,7 @@ describe('56. fetchAs.js', function() {
       connection.execute(
         "SELECT TO_NUMBER( " + element + " ) AS TS_NUM FROM DUAL",
         [],
-        { outFormat : oracledb.OBJECT },
+        { outFormat : oracledb.OUT_FORMAT_OBJECT },
         function(err, result) {
           should.not.exist(err);
           // console.log(result.rows[0].TS_NUM);

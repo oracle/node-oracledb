@@ -196,7 +196,7 @@ describe('40. dataTypeClob.js', function() {
           connection.execute(
             "SELECT content FROM nodb_myclobs WHERE num = :n",
             { n: 1 },
-            { outFormat: oracledb.OBJECT },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
 

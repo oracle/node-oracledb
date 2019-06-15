@@ -124,7 +124,7 @@ describe('102. bindTimestamp.js', function() {
         connection.execute(
           "select * from nodb_tab_tsbind where id = :i",
           { i: id },
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             (result.rows[0].TS).should.eql(bv);
@@ -155,7 +155,7 @@ describe('102. bindTimestamp.js', function() {
         connection.execute(
           "select * from nodb_tab_tsbind where id = :i",
           { i: id },
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             (result.rows[0].TS).should.eql(bv);
@@ -192,7 +192,7 @@ describe('102. bindTimestamp.js', function() {
         connection.execute(
           "select * from nodb_tab_tsbind where id = :i",
           { i: id },
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             should.strictEqual(result.rows[0].TS, null);
@@ -232,7 +232,7 @@ describe('102. bindTimestamp.js', function() {
         connection.execute(
           "select * from nodb_tab_tsbind where id = :i",
           { i: id },
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             should.deepEqual(result.rows, []);
@@ -265,7 +265,7 @@ describe('102. bindTimestamp.js', function() {
         connection.execute(
           "select * from nodb_tab_tsbind where id = :i",
           { i: id },
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             (result.rows[0].TS).should.eql(bv);
@@ -304,7 +304,7 @@ describe('102. bindTimestamp.js', function() {
         connection.execute(
           "select * from nodb_tab_tsbind where id = :i",
           { i: id },
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             (result.rows[0].TS).should.eql(bv);
@@ -338,7 +338,7 @@ describe('102. bindTimestamp.js', function() {
         connection.execute(
           "select * from nodb_tab_tsbind where id = :i",
           { i: id },
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             should.deepEqual(result.rows, []);
@@ -371,7 +371,7 @@ describe('102. bindTimestamp.js', function() {
         connection.execute(
           "select * from nodb_tab_tsbind where id = :i",
           { i: id },
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             (result.rows[0].TS).should.eql(bv);
@@ -408,7 +408,7 @@ describe('102. bindTimestamp.js', function() {
         connection.execute(
           "select * from nodb_tab_tsbind where id = :i",
           { i: id },
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             (result.rows[0].TS).should.eql(bv);
@@ -445,7 +445,7 @@ describe('102. bindTimestamp.js', function() {
         connection.execute(
           "select * from nodb_tab_tsbind where id = :i",
           { i: id },
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             should.deepEqual(result.rows, []);
@@ -481,7 +481,7 @@ describe('102. bindTimestamp.js', function() {
         connection.execute(
           "select * from nodb_tab_tsbind where id = :i",
           { i: id },
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             should.deepEqual(result.rows, []);
@@ -518,7 +518,7 @@ describe('102. bindTimestamp.js', function() {
         connection.execute(
           "select * from nodb_tab_tsbind where id = :i",
           { i: id },
-          { outFormat: oracledb.OBJECT },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT },
           function(err, result) {
             should.not.exist(err);
             (result.rows[0].TS).should.eql(bv1);
@@ -571,7 +571,7 @@ describe('102. bindTimestamp.js', function() {
           connection.execute(
             "select * from nodb_tab_tsbind where id = :i",
             { i: id },
-            { outFormat: oracledb.OBJECT },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               (result.rows[0].TS).should.eql(bv1);
@@ -607,7 +607,7 @@ describe('102. bindTimestamp.js', function() {
           connection.execute(
             "select * from nodb_tab_tsbind where id = :i",
             { i: id },
-            { outFormat: oracledb.OBJECT },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               (result.rows[0].TS).should.eql(bv1);
@@ -643,7 +643,7 @@ describe('102. bindTimestamp.js', function() {
           connection.execute(
             "select * from nodb_tab_tsbind where id = :i",
             { i: id },
-            { outFormat: oracledb.OBJECT },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               should.strictEqual(result.rows[0].TS, null);
@@ -681,7 +681,7 @@ describe('102. bindTimestamp.js', function() {
           connection.execute(
             "select * from nodb_tab_tsbind where id = :i",
             { i: id },
-            { outFormat: oracledb.OBJECT },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               should.deepEqual(result.rows, []);
@@ -727,7 +727,7 @@ describe('102. bindTimestamp.js', function() {
           connection.execute(
             "select * from nodb_tab_tsbind where id = :i",
             { i: sequence },
-            { outFormat: oracledb.OBJECT },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               should.deepEqual(result.rows, []);

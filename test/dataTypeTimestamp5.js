@@ -138,7 +138,7 @@ describe('37. dataTypeTimestamp5.js', function() {
           sql,
           { no: bv },
           {
-            outFormat: oracledb.OBJECT
+            outFormat: oracledb.OUT_FORMAT_OBJECT
           },
           function(err, result) {
             should.not.exist(err);

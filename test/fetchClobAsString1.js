@@ -790,7 +790,7 @@ describe('84. fetchClobAsString1.js', function() {
 
   }); // 84.1
 
-  describe('84.2 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.OBJECT', function() {
+  describe('84.2 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.OUT_FORMAT_OBJECT', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -831,7 +831,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             "SELECT ID, C from nodb_clob1 WHERE ID = :id",
             { id : id },
-            { outFormat : oracledb.OBJECT },
+            { outFormat : oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               var resultVal = result.rows[0].C;
               if(specialStr === null) {
@@ -912,7 +912,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             "SELECT dbms_lob.substr(C, " + specialStrLength + ", 1) AS C1 from nodb_clob1 WHERE ID = :id",
             { id : id },
-            { outFormat : oracledb.OBJECT },
+            { outFormat : oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0].C1;
@@ -952,7 +952,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " + id_2,
             { },
-            { outFormat : oracledb.OBJECT },
+            { outFormat : oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0].C;
@@ -980,7 +980,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             "SELECT ID, C AS C1, C AS C2 from nodb_clob1 WHERE ID = " + id,
             { },
-            { outFormat : oracledb.OBJECT },
+            { outFormat : oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0].C1;
@@ -1014,7 +1014,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             "SELECT ID, C from nodb_clob1 WHERE ID = " + id,
             { },
-            { outFormat : oracledb.OBJECT },
+            { outFormat : oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0].C;
@@ -1059,7 +1059,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             sql,
             bindVar,
-            { outFormat : oracledb.OBJECT },
+            { outFormat : oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               result.outBinds.c.getRows(3, function(err, rows) {
                 var resultVal = rows[0].C;
@@ -1151,7 +1151,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
-            { outFormat : oracledb.OBJECT },
+            { outFormat : oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               result.rows.length.should.eql(1);
@@ -1188,7 +1188,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
-            { outFormat : oracledb.OBJECT },
+            { outFormat : oracledb.OUT_FORMAT_OBJECT },
             function(err, result) {
               should.not.exist(err);
               result.rows.length.should.eql(2);
@@ -1252,7 +1252,7 @@ describe('84. fetchClobAsString1.js', function() {
 
   }); // 84.2
 
-  describe('84.3 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.OBJECT and resultSet = true', function() {
+  describe('84.3 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.OUT_FORMAT_OBJECT and resultSet = true', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -1294,7 +1294,7 @@ describe('84. fetchClobAsString1.js', function() {
             "SELECT ID, C from nodb_clob1 WHERE ID = :id",
             { id : id },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               resultSet : true
             },
             function(err, result) {
@@ -1386,7 +1386,7 @@ describe('84. fetchClobAsString1.js', function() {
             "SELECT dbms_lob.substr(C, " + specialStrLength + ", 1) AS C1 from nodb_clob1 WHERE ID = :id",
             { id : id },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               resultSet : true
             },
             function(err, result) {
@@ -1438,7 +1438,7 @@ describe('84. fetchClobAsString1.js', function() {
             "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " + id_2,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               resultSet : true
             },
             function(err, result) {
@@ -1478,7 +1478,7 @@ describe('84. fetchClobAsString1.js', function() {
             "SELECT ID, C AS C1, C AS C2 from nodb_clob1 WHERE ID = " + id,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               resultSet : true
             },
             function(err, result) {
@@ -1523,7 +1523,7 @@ describe('84. fetchClobAsString1.js', function() {
             "SELECT ID, C from nodb_clob1 WHERE ID = " + id,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               resultSet : true
             },
             function(err, result) {
@@ -1613,7 +1613,7 @@ describe('84. fetchClobAsString1.js', function() {
             "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               resultSet : true
             },
             function(err, result) {
@@ -1665,7 +1665,7 @@ describe('84. fetchClobAsString1.js', function() {
             "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.OBJECT,
+              outFormat : oracledb.OUT_FORMAT_OBJECT,
               resultSet : true
             },
             function(err, result) {
@@ -1740,7 +1740,7 @@ describe('84. fetchClobAsString1.js', function() {
 
   }); // 84.3
 
-  describe('84.4 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.ARRAY', function() {
+  describe('84.4 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.OUT_FORMAT_ARRAY', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -1781,7 +1781,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             "SELECT ID, C from nodb_clob1 WHERE ID = :id",
             { id : id },
-            { outFormat : oracledb.ARRAY },
+            { outFormat : oracledb.OUT_FORMAT_ARRAY },
             function(err, result) {
               var resultVal = result.rows[0][1];
               if(specialStr === null) {
@@ -1862,7 +1862,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             "SELECT dbms_lob.substr(C, " + specialStrLength + ", 1) from nodb_clob1 WHERE ID = :id",
             { id : id },
-            { outFormat : oracledb.ARRAY },
+            { outFormat : oracledb.OUT_FORMAT_ARRAY },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][0];
@@ -1902,7 +1902,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " + id_2,
             { },
-            { outFormat : oracledb.ARRAY },
+            { outFormat : oracledb.OUT_FORMAT_ARRAY },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
@@ -1930,7 +1930,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             "SELECT ID, C AS C1, C AS C2 from nodb_clob1 WHERE ID = " + id,
             { },
-            { outFormat : oracledb.ARRAY },
+            { outFormat : oracledb.OUT_FORMAT_ARRAY },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
@@ -1964,7 +1964,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             "SELECT ID, C from nodb_clob1 WHERE ID = " + id,
             { },
-            { outFormat : oracledb.ARRAY },
+            { outFormat : oracledb.OUT_FORMAT_ARRAY },
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
@@ -2009,7 +2009,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             sql,
             bindVar,
-            { outFormat : oracledb.ARRAY },
+            { outFormat : oracledb.OUT_FORMAT_ARRAY },
             function(err, result) {
               result.outBinds.c.getRows(3, function(err, rows) {
                 var resultVal = rows[0][0];
@@ -2100,7 +2100,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
-            { outFormat : oracledb.ARRAY },
+            { outFormat : oracledb.OUT_FORMAT_ARRAY },
             function(err, result) {
               should.not.exist(err);
               result.rows.length.should.eql(1);
@@ -2137,7 +2137,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
-            { outFormat : oracledb.ARRAY },
+            { outFormat : oracledb.OUT_FORMAT_ARRAY },
             function(err, result) {
               should.not.exist(err);
               result.rows.length.should.eql(2);
@@ -2201,7 +2201,7 @@ describe('84. fetchClobAsString1.js', function() {
 
   }); // 84.4
 
-  describe('84.5 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.ARRAY and resultSet = true', function() {
+  describe('84.5 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.OUT_FORMAT_ARRAY and resultSet = true', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -2243,7 +2243,7 @@ describe('84. fetchClobAsString1.js', function() {
             "SELECT ID, C from nodb_clob1 WHERE ID = :id",
             { id : id },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               resultSet : true
             },
             function(err, result) {
@@ -2335,7 +2335,7 @@ describe('84. fetchClobAsString1.js', function() {
             "SELECT dbms_lob.substr(C, " + specialStrLength + ", 1) AS C1 from nodb_clob1 WHERE ID = :id",
             { id : id },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               resultSet : true
             },
             function(err, result) {
@@ -2388,7 +2388,7 @@ describe('84. fetchClobAsString1.js', function() {
             "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " + id_2,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               resultSet : true
             },
             function(err, result) {
@@ -2428,7 +2428,7 @@ describe('84. fetchClobAsString1.js', function() {
             "SELECT ID, C AS C1, C AS C2 from nodb_clob1 WHERE ID = " + id,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               resultSet : true
             },
             function(err, result) {
@@ -2473,7 +2473,7 @@ describe('84. fetchClobAsString1.js', function() {
             "SELECT ID, C from nodb_clob1 WHERE ID = " + id,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               resultSet : true
             },
             function(err, result) {
@@ -2563,7 +2563,7 @@ describe('84. fetchClobAsString1.js', function() {
             "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               resultSet : true
             },
             function(err, result) {
@@ -2615,7 +2615,7 @@ describe('84. fetchClobAsString1.js', function() {
             "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " +id_2,
             { },
             {
-              outFormat : oracledb.ARRAY,
+              outFormat : oracledb.OUT_FORMAT_ARRAY,
               resultSet : true
             },
             function(err, result) {
