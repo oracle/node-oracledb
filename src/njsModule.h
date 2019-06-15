@@ -125,35 +125,34 @@
 
 // data types (loosely based on Javascript types)
 #define NJS_DATATYPE_DEFAULT            0
-#define NJS_DATATYPE_STR                2001
-#define NJS_DATATYPE_NUM                2002
-#define NJS_DATATYPE_DATE               2003
-#define NJS_DATATYPE_CURSOR             2004
-#define NJS_DATATYPE_BUFFER             2005
-#define NJS_DATATYPE_CLOB               2006
-#define NJS_DATATYPE_BLOB               2007
-#define NJS_DATATYPE_INT                2008
+#define NJS_DATATYPE_STR                DPI_ORACLE_TYPE_VARCHAR
+#define NJS_DATATYPE_NUM                DPI_ORACLE_TYPE_NUMBER
+#define NJS_DATATYPE_DATE               DPI_ORACLE_TYPE_TIMESTAMP_LTZ
+#define NJS_DATATYPE_CURSOR             DPI_ORACLE_TYPE_STMT
+#define NJS_DATATYPE_BUFFER             DPI_ORACLE_TYPE_RAW
+#define NJS_DATATYPE_CLOB               DPI_ORACLE_TYPE_CLOB
+#define NJS_DATATYPE_BLOB               DPI_ORACLE_TYPE_BLOB
 
 // database types (used for extended metadata)
 #define NJS_DB_TYPE_DEFAULT             0
-#define NJS_DB_TYPE_VARCHAR             1
-#define NJS_DB_TYPE_NUMBER              2
-#define NJS_DB_TYPE_LONG                8
-#define NJS_DB_TYPE_DATE                12
-#define NJS_DB_TYPE_RAW                 23
-#define NJS_DB_TYPE_LONG_RAW            24
-#define NJS_DB_TYPE_CHAR                96
-#define NJS_DB_TYPE_BINARY_FLOAT        100
-#define NJS_DB_TYPE_BINARY_DOUBLE       101
-#define NJS_DB_TYPE_ROWID               104
-#define NJS_DB_TYPE_CLOB                112
-#define NJS_DB_TYPE_BLOB                113
-#define NJS_DB_TYPE_TIMESTAMP           187
-#define NJS_DB_TYPE_TIMESTAMP_TZ        188
-#define NJS_DB_TYPE_TIMESTAMP_LTZ       232
-#define NJS_DB_TYPE_NCHAR               1096
-#define NJS_DB_TYPE_NVARCHAR            1001
-#define NJS_DB_TYPE_NCLOB               1112
+#define NJS_DB_TYPE_VARCHAR             DPI_ORACLE_TYPE_VARCHAR
+#define NJS_DB_TYPE_NUMBER              DPI_ORACLE_TYPE_NUMBER
+#define NJS_DB_TYPE_LONG                DPI_ORACLE_TYPE_LONG_VARCHAR
+#define NJS_DB_TYPE_DATE                DPI_ORACLE_TYPE_DATE
+#define NJS_DB_TYPE_RAW                 DPI_ORACLE_TYPE_RAW
+#define NJS_DB_TYPE_LONG_RAW            DPI_ORACLE_TYPE_LONG_RAW
+#define NJS_DB_TYPE_CHAR                DPI_ORACLE_TYPE_CHAR
+#define NJS_DB_TYPE_BINARY_FLOAT        DPI_ORACLE_TYPE_NATIVE_FLOAT
+#define NJS_DB_TYPE_BINARY_DOUBLE       DPI_ORACLE_TYPE_NATIVE_DOUBLE
+#define NJS_DB_TYPE_ROWID               DPI_ORACLE_TYPE_ROWID
+#define NJS_DB_TYPE_CLOB                DPI_ORACLE_TYPE_CLOB
+#define NJS_DB_TYPE_BLOB                DPI_ORACLE_TYPE_BLOB
+#define NJS_DB_TYPE_TIMESTAMP           DPI_ORACLE_TYPE_TIMESTAMP
+#define NJS_DB_TYPE_TIMESTAMP_TZ        DPI_ORACLE_TYPE_TIMESTAMP_TZ
+#define NJS_DB_TYPE_TIMESTAMP_LTZ       DPI_ORACLE_TYPE_TIMESTAMP_LTZ
+#define NJS_DB_TYPE_NCHAR               DPI_ORACLE_TYPE_NCHAR
+#define NJS_DB_TYPE_NVARCHAR            DPI_ORACLE_TYPE_NVARCHAR
+#define NJS_DB_TYPE_NCLOB               DPI_ORACLE_TYPE_NCLOB
 
 // error messages used within the driver
 typedef enum {

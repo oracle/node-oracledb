@@ -35,19 +35,19 @@ describe('18. constants.js', function() {
   it('18.1 dbTypes maps correctly between names and numbers', function() {
 
     should.exist(oracledb);
-    (oracledb.DB_TYPE_VARCHAR).should.be.exactly(1);
-    (oracledb.DB_TYPE_NUMBER).should.be.exactly(2);
-    (oracledb.DB_TYPE_DATE).should.be.exactly(12);
-    (oracledb.DB_TYPE_RAW).should.be.exactly(23);
-    (oracledb.DB_TYPE_CHAR).should.be.exactly(96);
-    (oracledb.DB_TYPE_BINARY_FLOAT).should.be.exactly(100);
-    (oracledb.DB_TYPE_BINARY_DOUBLE).should.be.exactly(101);
-    (oracledb.DB_TYPE_ROWID).should.be.exactly(104);
-    (oracledb.DB_TYPE_CLOB).should.be.exactly(112);
-    (oracledb.DB_TYPE_BLOB).should.be.exactly(113);
-    (oracledb.DB_TYPE_TIMESTAMP).should.be.exactly(187);
-    (oracledb.DB_TYPE_TIMESTAMP_TZ).should.be.exactly(188);
-    (oracledb.DB_TYPE_TIMESTAMP_LTZ).should.be.exactly(232);
+    (oracledb.DB_TYPE_VARCHAR).should.be.exactly(2001);
+    (oracledb.DB_TYPE_NUMBER).should.be.exactly(2010);
+    (oracledb.DB_TYPE_DATE).should.be.exactly(2011);
+    (oracledb.DB_TYPE_RAW).should.be.exactly(2006);
+    (oracledb.DB_TYPE_CHAR).should.be.exactly(2003);
+    (oracledb.DB_TYPE_BINARY_FLOAT).should.be.exactly(2007);
+    (oracledb.DB_TYPE_BINARY_DOUBLE).should.be.exactly(2008);
+    (oracledb.DB_TYPE_ROWID).should.be.exactly(2005);
+    (oracledb.DB_TYPE_CLOB).should.be.exactly(2017);
+    (oracledb.DB_TYPE_BLOB).should.be.exactly(2019);
+    (oracledb.DB_TYPE_TIMESTAMP).should.be.exactly(2012);
+    (oracledb.DB_TYPE_TIMESTAMP_TZ).should.be.exactly(2013);
+    (oracledb.DB_TYPE_TIMESTAMP_LTZ).should.be.exactly(2014);
 
   });
 
@@ -55,12 +55,12 @@ describe('18. constants.js', function() {
 
     (oracledb.DEFAULT).should.be.exactly(0);
     (oracledb.STRING).should.be.exactly(2001);
-    (oracledb.NUMBER).should.be.exactly(2002);
-    (oracledb.DATE).should.be.exactly(2003);
-    (oracledb.CURSOR).should.be.exactly(2004);
-    (oracledb.BUFFER).should.be.exactly(2005);
-    (oracledb.CLOB).should.be.exactly(2006);
-    (oracledb.BLOB).should.be.exactly(2007);
+    (oracledb.NUMBER).should.be.exactly(2010);
+    (oracledb.DATE).should.be.exactly(2014);
+    (oracledb.CURSOR).should.be.exactly(2021);
+    (oracledb.BUFFER).should.be.exactly(2006);
+    (oracledb.CLOB).should.be.exactly(2017);
+    (oracledb.BLOB).should.be.exactly(2019);
 
   });
 

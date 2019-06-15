@@ -44,6 +44,12 @@
   This is an efficient alternative to `ALTER SESSION SET
   CURRENT_SCHEMA`.
 
+- Renumbered [node-oracledb Type
+  Constants](https://oracle.github.io/node-oracledb/doc/api.html#oracledbconstantsnodbtype)
+  and [Oracle Database Type
+  Constants](https://oracle.github.io/node-oracledb/doc/api.html#oracledbconstantsdbtype)
+  to allow for future enhancements.
+
 - Introduced [Query `outFormat`
   Constants](https://oracle.github.io/node-oracledb/doc/api.html#oracledbconstantsoutformat)
   `oracledb.OUT_FORMAT_ARRAY` and `oracledb.OUT_FORMAT_OBJECT`.  The
