@@ -58,13 +58,13 @@ describe('56. fetchAs.js', function() {
     (oracledb.fetchAsString).should.eql([]);
 
     oracledb.fetchAsString=[oracledb.DATE];
-    (oracledb.fetchAsString).should.eql( [2003] );
+    (oracledb.fetchAsString).should.eql( [oracledb.DATE] );
 
     oracledb.fetchAsString = [ oracledb.NUMBER ];
-    (oracledb.fetchAsString).should.eql( [2002] );
+    (oracledb.fetchAsString).should.eql( [oracledb.NUMBER] );
 
     oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
-    (oracledb.fetchAsString).should.eql( [2003, 2002] );
+    (oracledb.fetchAsString).should.eql( [oracledb.DATE, oracledb.NUMBER] );
   });
 
   it('56.2 Fetch DATE column values as STRING - by-Column name', function(done) {

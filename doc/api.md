@@ -721,13 +721,13 @@ Not all constants can be used in all places.
 
 Constant Name                        | Value |Description
 -------------------------------------|-------|-----------------------------------------------
-`oracledb.BLOB`                      | 2007  | Bind a BLOB to a Node.js Stream or create a temporary BLOB, or for fetchAsBuffer and fetchInfo
-`oracledb.BUFFER`                    | 2005  | Bind a RAW, LONG RAW or BLOB to a Node.js Buffer
-`oracledb.CLOB`                      | 2006  | Bind a CLOB to a Node.js Stream, create a temporary CLOB, or for fetchAsString and fetchInfo
-`oracledb.CURSOR`                    | 2004  | Bind a REF CURSOR to a node-oracledb ResultSet class
-`oracledb.DATE`                      | 2003  | Bind as JavaScript date type.  Can also be used for fetchAsString and fetchInfo
+`oracledb.BLOB`                      | 2019  | Bind a BLOB to a Node.js Stream or create a temporary BLOB, or for fetchAsBuffer and fetchInfo
+`oracledb.BUFFER`                    | 2006  | Bind a RAW, LONG RAW or BLOB to a Node.js Buffer
+`oracledb.CLOB`                      | 2017  | Bind a CLOB to a Node.js Stream, create a temporary CLOB, or for fetchAsString and fetchInfo
+`oracledb.CURSOR`                    | 2021  | Bind a REF CURSOR to a node-oracledb ResultSet class
+`oracledb.DATE`                      | 2014  | Bind as JavaScript date type.  Can also be used for fetchAsString and fetchInfo
 `oracledb.DEFAULT`                   |    0  | Used with fetchInfo to reset the fetch type to the database type
-`oracledb.NUMBER`                    | 2002  | Bind as JavaScript number type.  Can also be used for fetchAsString and fetchInfo
+`oracledb.NUMBER`                    | 2010  | Bind as JavaScript number type.  Can also be used for fetchAsString and fetchInfo
 `oracledb.STRING`                    | 2001  | Bind as JavaScript String type.  Can be used for most database types.
 
 #### <a name="oracledbconstantsdbtype"></a> 3.1.3 Oracle Database Type Constants
@@ -738,24 +738,24 @@ CURSORS.  They indicate the Oracle Database type.
 
 Constant Name                        | Value |Description
 -------------------------------------|-------|-----------------------------------------------
-`oracledb.DB_TYPE_BINARY_DOUBLE`     |  101  | BINARY_DOUBLE
-`oracledb.DB_TYPE_BINARY_FLOAT`      |  100  | BINARY_FLOAT
-`oracledb.DB_TYPE_BLOB`              |  113  | BLOB
-`oracledb.DB_TYPE_CHAR`              |   96  | CHAR
-`oracledb.DB_TYPE_CLOB`              |  112  | CLOB
-`oracledb.DB_TYPE_DATE`              |   12  | DATE
-`oracledb.DB_TYPE_LONG`              |    8  | LONG
-`oracledb.DB_TYPE_LONG_RAW`          |   24  | LONG RAW
-`oracledb.DB_TYPE_NCHAR`             | 1096  | NCHAR
-`oracledb.DB_TYPE_NCLOB`             | 1112  | NCLOB
-`oracledb.DB_TYPE_NUMBER`            |    2  | NUMBER or FLOAT
-`oracledb.DB_TYPE_NVARCHAR`          | 1001  | NVARCHAR
-`oracledb.DB_TYPE_RAW`               |   23  | RAW
-`oracledb.DB_TYPE_ROWID`             |  104  | ROWID
-`oracledb.DB_TYPE_TIMESTAMP`         |  187  | TIMESTAMP
-`oracledb.DB_TYPE_TIMESTAMP_LTZ`     |  232  | TIMESTAMP WITH LOCAL TIME ZONE
-`oracledb.DB_TYPE_TIMESTAMP_TZ`      |  188  | TIMESTAMP WITH TIME ZONE
-`oracledb.DB_TYPE_VARCHAR`           |    1  | VARCHAR2
+`oracledb.DB_TYPE_BINARY_DOUBLE`     | 2008  | BINARY_DOUBLE
+`oracledb.DB_TYPE_BINARY_FLOAT`      | 2007  | BINARY_FLOAT
+`oracledb.DB_TYPE_BLOB`              | 2019  | BLOB
+`oracledb.DB_TYPE_CHAR`              | 2003  | CHAR
+`oracledb.DB_TYPE_CLOB`              | 2017  | CLOB
+`oracledb.DB_TYPE_DATE`              | 2011  | DATE
+`oracledb.DB_TYPE_LONG`              | 2024  | LONG
+`oracledb.DB_TYPE_LONG_RAW`          | 2025  | LONG RAW
+`oracledb.DB_TYPE_NCHAR`             | 2004  | NCHAR
+`oracledb.DB_TYPE_NCLOB`             | 2018  | NCLOB
+`oracledb.DB_TYPE_NUMBER`            | 2010  | NUMBER or FLOAT
+`oracledb.DB_TYPE_NVARCHAR`          | 2002  | NVARCHAR
+`oracledb.DB_TYPE_RAW`               | 2006  | RAW
+`oracledb.DB_TYPE_ROWID`             | 2005  | ROWID
+`oracledb.DB_TYPE_TIMESTAMP`         | 2012  | TIMESTAMP
+`oracledb.DB_TYPE_TIMESTAMP_LTZ`     | 2014  | TIMESTAMP WITH LOCAL TIME ZONE
+`oracledb.DB_TYPE_TIMESTAMP_TZ`      | 2013  | TIMESTAMP WITH TIME ZONE
+`oracledb.DB_TYPE_VARCHAR`           | 2001  | VARCHAR2
 
 #### <a name="oracledbconstantsbinddir"></a> 3.1.4 Execute Bind Direction Constants
 
