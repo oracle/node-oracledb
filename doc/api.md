@@ -8046,32 +8046,32 @@ availability and performance tuning.  For example the database's
 
 Users of [Oracle Database FAN][64] should set
 [`oracledb.events`](#propdbevents) to *true*.  This can also be
-enabled via [Oracle Client Configuration](#oraaccess).
+enabled via [Oracle Client Configuration](#oraaccess).  Your
+application must connect to a FAN-enabled database service.
 
-FAN support gives fast connection failover, an Oracle Database high
-availability feature.  This allows applications to be notified when a
-database machine becomes unavailable.  Without FAN, node-oracledb can
+FAN support is useful for planned and unplanned outages.  It provides
+immediate notification to node-oracledb following outages related to
+the database, computers, and networks.  Without FAN, node-oracledb can
 hang until a TCP timeout occurs and an error is returned, which might
-be several minutes.  Enabling FAN in node-oracledb can allow
-applications to detect errors, re-connect to an available database
-instance, and replay application logic without the application user
-being aware of an outage.  It is up to the application to handle
-errors and take desired action.
+be several minutes.
+
+FAN allows node-oracledb to provide high availability features without
+the application being aware of an outage.  Unused, idle connections in
+a connection pool will be automatically cleaned up.  A future
+`pool.getConnection()` calls will establish a fresh connection to a
+surviving database instance without the application being aware of any
+service disruption.
+
+To handle errors that affect active connections, you can add
+application logic to re-connect (this will connect to a surviving
+database instance) and replay application logic without having to
+return an error to the application user.
 
 FAN benefits users of Oracle Database's clustering technology ([Oracle
 RAC][93]) because connections to surviving database instances can be
-immediately made.  Users of Oracle's Data Guard with a broker will see
-the FAN events generated when the standby database goes online.
+immediately made.  Users of Oracle's Data Guard with a broker will get
+FAN events generated when the standby database goes online.
 Standalone databases will send FAN events when the database restarts.
-
-For active connections, when a machine or database instance becomes
-unavailable, a connection failure error will be returned by the
-node-oracledb method currently being called.  On a subsequent
-re-connect, a connection to a surviving database instance will be
-established.  Node-oracledb also transparently cleans up any idle
-connections affected by a database machine or instance failure so
-future connect calls will establish a fresh connection without the
-application being aware of any service disruption.
 
 For a more information on FAN see the [whitepaper on Fast Application
 Notification][97].
