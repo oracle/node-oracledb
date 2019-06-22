@@ -32,7 +32,7 @@ limitations under the License.
 3. [Oracledb Class](#oracledbclass)
     - 3.1 [Oracledb Constants](#oracledbconstants)
         - 3.1.1 [Query `outFormat` Constants](#oracledbconstantsoutformat)
-            - [`ARRAY`](#oracledbconstantsoutformat), [`OBJECT`](#oracledbconstantsoutformat)
+            - [`OUT_FORMAT_ARRAY`](#oracledbconstantsoutformat), [`OUT_FORMAT_OBJECT`](#oracledbconstantsoutformat)
         - 3.1.2 [Node-oracledb Type Constants](#oracledbconstantsnodbtype)
             - [`BLOB`](#oracledbconstantsnodbtype), [`BUFFER`](#oracledbconstantsnodbtype), [`CLOB`](#oracledbconstantsnodbtype), [`CURSOR`](#oracledbconstantsnodbtype), [`DATE`](#oracledbconstantsnodbtype), [`DEFAULT`](#oracledbconstantsnodbtype), [`NUMBER`](#oracledbconstantsnodbtype), [`STRING`](#oracledbconstantsnodbtype)
         - 3.1.3 [Oracle Database Type Constants](#oracledbconstantsdbtype)
