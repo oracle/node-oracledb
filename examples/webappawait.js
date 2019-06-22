@@ -110,9 +110,10 @@ async function handleRequest(request, response) {
     return;
   }
 
+  let connection;
   try {
     // Checkout a connection from the default pool
-    let connection = await oracledb.getConnection();
+    connection = await oracledb.getConnection();
 
     const result = await connection.execute(
       `SELECT employee_id, first_name, last_name
@@ -121,14 +122,20 @@ async function handleRequest(request, response) {
       [deptid] // bind variable value
     );
 
-    // Release the connection back to the connection pool
-    await connection.close();
-
     displayResults(response, result, deptid);
+
   } catch (err) {
     handleError(response, "handleRequest() error", err);
+  } finally {
+    if (connection) {
+      try {
+        // Release the connection back to the connection pool
+        await connection.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
   }
-
   htmlFooter(response);
 }
 
