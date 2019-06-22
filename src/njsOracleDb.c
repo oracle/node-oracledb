@@ -108,24 +108,31 @@ static njsConstant njsClassConstants[] = {
     { "CQN_OPCODE_UPDATE", DPI_OPCODE_UPDATE },
 
     // database types
-    { "DB_TYPE_BINARY_DOUBLE", NJS_DB_TYPE_BINARY_DOUBLE },
-    { "DB_TYPE_BINARY_FLOAT", NJS_DB_TYPE_BINARY_FLOAT },
-    { "DB_TYPE_BLOB", NJS_DB_TYPE_BLOB },
-    { "DB_TYPE_CHAR", NJS_DB_TYPE_CHAR },
-    { "DB_TYPE_CLOB", NJS_DB_TYPE_CLOB },
-    { "DB_TYPE_DATE", NJS_DB_TYPE_DATE },
-    { "DB_TYPE_LONG", NJS_DB_TYPE_LONG },
-    { "DB_TYPE_LONG_RAW", NJS_DB_TYPE_LONG_RAW },
-    { "DB_TYPE_NCHAR", NJS_DB_TYPE_NCHAR },
-    { "DB_TYPE_NCLOB", NJS_DB_TYPE_NCLOB },
-    { "DB_TYPE_NUMBER", NJS_DB_TYPE_NUMBER },
-    { "DB_TYPE_NVARCHAR", NJS_DB_TYPE_NVARCHAR },
-    { "DB_TYPE_RAW", NJS_DB_TYPE_RAW },
-    { "DB_TYPE_ROWID", NJS_DB_TYPE_ROWID },
-    { "DB_TYPE_TIMESTAMP", NJS_DB_TYPE_TIMESTAMP },
-    { "DB_TYPE_TIMESTAMP_LTZ", NJS_DB_TYPE_TIMESTAMP_LTZ },
-    { "DB_TYPE_TIMESTAMP_TZ", NJS_DB_TYPE_TIMESTAMP_TZ },
-    { "DB_TYPE_VARCHAR", NJS_DB_TYPE_VARCHAR },
+    { "DB_TYPE_BFILE", DPI_ORACLE_TYPE_BFILE },
+    { "DB_TYPE_BINARY_DOUBLE", DPI_ORACLE_TYPE_NATIVE_DOUBLE },
+    { "DB_TYPE_BINARY_FLOAT", DPI_ORACLE_TYPE_NATIVE_FLOAT },
+    { "DB_TYPE_BINARY_INTEGER", DPI_ORACLE_TYPE_NATIVE_INT },
+    { "DB_TYPE_BLOB", DPI_ORACLE_TYPE_BLOB },
+    { "DB_TYPE_BOOLEAN", DPI_ORACLE_TYPE_BOOLEAN },
+    { "DB_TYPE_CHAR", DPI_ORACLE_TYPE_CHAR },
+    { "DB_TYPE_CLOB", DPI_ORACLE_TYPE_CLOB },
+    { "DB_TYPE_CURSOR", DPI_ORACLE_TYPE_STMT },
+    { "DB_TYPE_DATE", DPI_ORACLE_TYPE_DATE },
+    { "DB_TYPE_INTERVAL_DS", DPI_ORACLE_TYPE_INTERVAL_DS },
+    { "DB_TYPE_INTERVAL_YM", DPI_ORACLE_TYPE_INTERVAL_YM },
+    { "DB_TYPE_LONG", DPI_ORACLE_TYPE_LONG_VARCHAR },
+    { "DB_TYPE_LONG_RAW", DPI_ORACLE_TYPE_LONG_RAW },
+    { "DB_TYPE_NCHAR", DPI_ORACLE_TYPE_NCHAR },
+    { "DB_TYPE_NCLOB", DPI_ORACLE_TYPE_NCLOB },
+    { "DB_TYPE_NUMBER", DPI_ORACLE_TYPE_NUMBER },
+    { "DB_TYPE_NVARCHAR", DPI_ORACLE_TYPE_NVARCHAR },
+    { "DB_TYPE_OBJECT", DPI_ORACLE_TYPE_OBJECT },
+    { "DB_TYPE_RAW", DPI_ORACLE_TYPE_RAW },
+    { "DB_TYPE_ROWID", DPI_ORACLE_TYPE_ROWID },
+    { "DB_TYPE_TIMESTAMP", DPI_ORACLE_TYPE_TIMESTAMP },
+    { "DB_TYPE_TIMESTAMP_LTZ", DPI_ORACLE_TYPE_TIMESTAMP_LTZ },
+    { "DB_TYPE_TIMESTAMP_TZ", DPI_ORACLE_TYPE_TIMESTAMP_TZ },
+    { "DB_TYPE_VARCHAR", DPI_ORACLE_TYPE_VARCHAR },
 
     // statement types
     { "STMT_TYPE_UNKNOWN", DPI_STMT_TYPE_UNKNOWN },
@@ -491,6 +498,7 @@ static void njsOracleDb_finalize(napi_env env, void *finalizeData,
 
     NJS_FREE_AND_CLEAR(oracleDb->connectionClass);
     NJS_FREE_AND_CLEAR(oracleDb->edition);
+    NJS_DELETE_REF_AND_CLEAR(oracleDb->jsBaseDbObjectConstructor);
     NJS_DELETE_REF_AND_CLEAR(oracleDb->jsDateConstructor);
     NJS_DELETE_REF_AND_CLEAR(oracleDb->jsConnectionConstructor);
     NJS_DELETE_REF_AND_CLEAR(oracleDb->jsLobConstructor);
@@ -1115,6 +1123,12 @@ bool njsOracleDb_new(napi_env env, napi_value instanceObj,
         free(oracleDb);
         return njsUtils_genericThrowError(env);
     }
+
+    // keep a reference to the base database object class
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, instanceObj,
+            "BaseDbObject", &temp))
+    NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
+            &oracleDb->jsBaseDbObjectConstructor))
 
     // create object for storing subscriptions
     NJS_CHECK_NAPI(env, napi_create_object(env, &temp))

@@ -4480,6 +4480,37 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     192.2 implicit Results with Result Sets
     192.3 multiple options, outFormat is OBJECT
 
+193. dbObjects.js
+    193.1 Insert an object with normal numeric/string values of attributes
+    193.2 Insert an object with null numeric values of attributes
+    193.3 Insert an object with null string values of attributes
+    193.4 Insert an object with undefined numeric values of attributes
+    193.5 Insert an object with undefined string values of attributes
+    193.6 Insert an empty object - no attributes
+    193.7 Insert normal value for timestamp attribute,
+    193.8 Insert null value for timestamp attribute,
+    193.9 Insert undefined value for timestamp attribute,
+    193.10 Insert empty JSON value for timestamp attribute,
+    193.11 Insert normal value for TSZ type attribute,
+    193.12 Insert null value for TSZ type attribute,
+    193.13 Insert undefined value for TSZ type attribute,
+    193.14 Insert normal value for LTZ type attribute,
+    193.15 Insert null value for LTZ type attribute,
+    193.16 Insert undefined value for LTZ attribute,
+    193.17 Insert normal value for DATE type attribute
+    193.18 Insert null value for DATE type attribute
+    193.19 Insert undefined value for DATE attribute
+    193.20 Insert NULL vaue for OBJECT type (entire object)
+
+194. dbObjectOut.js
+    194.1 OUT bind of objects
+
+195. dbObjectsInOut.js
+    195.1 IN NULL value, OUT valid String for Name
+    195.2 IN Tom value, OUT Dick
+    195.3 IN Dick value, OUT NUL
+    195.4 IN Harry value, OUT obj = NULL
+
 196. getDataOfLob.js
     196.1 getData() works on CLOB
     196.2 getData() returns CLOB as Strings
@@ -4487,3 +4518,46 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     196.4 getData() returns BLOB as Buffer
     196.5 getData() on empty LOB returns null
     196.6 works with temp LOB
+
+  200. dbObject1.js
+    200.1 insert an object with numeric/string values
+    200.2 insert an object with null numeric values
+    200.3 insert an object with null string values
+    200.4 insert an object with undefined numeric values
+    200.5 insert an object with undefined string values
+    200.6 insert an empty object - no attributes
+    200.7 insert data via binding by object
+    200.8 insert multiple rows using executeMany() with inferred data type
+    200.9 insert multiple rows using executeMany() with explicit data type
+
+  201. dbObject2.js
+    - 201.1 insert an object with timestamp attributes
+    - directly insert timestamp data
+    201.2 insert null values for timestamp attribute
+    201.3 insert undefined values for timestamp attribute
+    201.4 insert an empty JSON for timestamp attribute
+
+  202. dbObject3.js
+    - 202.1 insert an object with TSZ type attributes
+    202.2 insert null value for TSZ type attribute
+    202.3 insert undefined value for TSZ type attribute
+    202.4 insert an empty JSON
+
+  203. dbObject4.js
+    203.1 insert an object with LTZ type attribute
+    203.2 insert null value for LTZ type attribute
+    203.3 insert undefined value for LTZ type attribute
+    203.4 insert an empty JSON
+
+  204. dbObject5.js
+    204.1 insert an object with DATE type attribute
+    204.2 insert null value for DATE type attribute
+    204.3 insert undefined value for DATE type attribute
+    204.4 insert an empty JSON
+
+  205. dbObject6.js
+    205.1 Insert and query Oracle Spatial geometries
+
+  206. dbObject7.js
+    206.1 OUT bind DB Object
+    206.2 IN OUT bind DB Object

@@ -13,9 +13,16 @@
     - The string representation of classes has changed to `[Object Object]` as a consequence of using N-API.  Use `Object.getPrototypeOf()` to get class information.
     - The C compiler required for building from source code no longer needs C++11 compatibility.  The node-oracledb source code is now pure C.
 
+- Added support for querying and binding Oracle Database objects and
+  collections, see [Oracle Database Objects and
+  Collections](https://oracle.github.io/node-oracledb/doc/api.html#objects).
+
 - Oracle Advanced Queuing (AQ):
 
     - Added support for "RAW" queues, allowing String and Buffer
+      messages to be used.
+
+    - Added support for object queues, allowing Oracle Database object
       messages to be used.
 
     - Added support for notifications with `oracledb.SUBSCR_NAMESPACE_AQ`.
@@ -23,9 +30,13 @@
 - Added support for Implicit Results, allowing query results to be
   returned from PL/SQL without needing parameters or bind variables.
 
-- Added
+- Added asynchronous method
   [`lob.getData()`](https://oracle.github.io/node-oracledb/doc/api.html#lobgetdata)
-  to return data from a Lob instance.
+  to return all data from a Lob readable stream.
+
+- Added a new `dbTypeName` attribute to `extendedMetaData` output.  It
+  contains the name of the type the column has in the database, such
+  as "VARCHAR2".
 
 - Enhanced BIND_IN of PL/SQL Collection Associative Arrays (Index-by)
   so a bind definition object can be omitted (see

@@ -219,4 +219,19 @@ test/fetchBinaryTypesAsString.js
 test/currentSchema.js
 
 test/implicitResults.js
+
+test/dbObjects.js
+test/dbObjectsOut.js
+test/dbObjectsInOut.js
+
 test/getDataOfLob.js
+
+test/dbObjectsNestTbl.js
+
+test/dbObject1.js
+test/dbObject2.js
+test/dbObject3.js
+test/dbObject4.js
+test/dbObject5.js
+test/dbObject6.js
+test/dbObject7.js

@@ -108,14 +108,15 @@ bool njsAqQueue_createBaton(napi_env env, napi_callback_info info,
 static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
         napi_env env, napi_value value, dpiMsgProps **handle)
 {
+    napi_value payloadObj, constructor;
     napi_valuetype valueType;
     dpiMsgProps *tempHandle;
-    napi_value payloadObj;
+    bool found, isDbObject;
     size_t bufferLength;
+    njsDbObject *obj;
     int32_t intValue;
     char *buffer;
     int status;
-    bool found;
 
     // determine payload exists and is a string or buffer
     NJS_CHECK_NAPI(env, napi_typeof(env, value, &valueType))
@@ -124,14 +125,22 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
             payloadObj = value;
             break;
         case napi_object:
-            if (njsUtils_isBuffer(env, value)) {
+            NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+                    baton->oracleDb->jsBaseDbObjectConstructor, &constructor))
+            NJS_CHECK_NAPI(env, napi_instanceof(env, value, constructor,
+                    &isDbObject))
+            if (isDbObject || njsUtils_isBuffer(env, value)) {
                 payloadObj = value;
             } else {
                 NJS_CHECK_NAPI(env, napi_get_named_property(env, value,
                         "payload", &payloadObj))
                 NJS_CHECK_NAPI(env, napi_typeof(env, payloadObj, &valueType))
+                if (valueType == napi_object) {
+                    NJS_CHECK_NAPI(env, napi_instanceof(env, payloadObj,
+                            constructor, &isDbObject))
+                }
                 if (valueType != napi_string &&
-                        (valueType != napi_object ||
+                        (valueType != napi_object || !isDbObject ||
                                 !njsUtils_isBuffer(env, payloadObj)))
                     return njsBaton_setError(baton, errInvalidAqMessage);
             }
@@ -151,13 +160,17 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
         if (!njsUtils_copyStringFromJS(env, payloadObj, &buffer,
                 &bufferLength))
             return false;
+        status = dpiMsgProps_setPayloadBytes(tempHandle, buffer, bufferLength);
+        free(buffer);
+    } else if (isDbObject) {
+        if (!njsDbObject_getInstance(baton->oracleDb, env, payloadObj, &obj))
+            return false;
+        status = dpiMsgProps_setPayloadObject(tempHandle, obj->handle);
     } else {
         NJS_CHECK_NAPI(env, napi_get_buffer_info(env, payloadObj,
                 (void**) &buffer, &bufferLength))
+        status = dpiMsgProps_setPayloadBytes(tempHandle, buffer, bufferLength);
     }
-    status = dpiMsgProps_setPayloadBytes(tempHandle, buffer, bufferLength);
-    if (valueType == napi_string)
-       free(buffer);
     if (status < 0)
         return njsBaton_setErrorDPI(baton);
 
@@ -218,31 +231,32 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
 // njsAqQueue_createFromHandle()
 //   Creates a new AQ queue object given the ODPI-C handle.
 //-----------------------------------------------------------------------------
-bool njsAqQueue_createFromHandle(napi_env env, njsConnection *conn,
-        napi_value connObj, dpiQueue *handle, napi_value *queueObj)
+bool njsAqQueue_createFromHandle(njsBaton *baton, napi_env env,
+        napi_value *queueObj)
 {
-    napi_value deqOptionsObj, enqOptionsObj;
-    napi_property_descriptor descriptors[3];
+    njsConnection *conn = (njsConnection*) baton->callingInstance;
+    napi_value deqOptionsObj, enqOptionsObj, temp;
+    napi_property_descriptor descriptors[4];
     dpiDeqOptions *deqOptionsHandle;
     dpiEnqOptions *enqOptionsHandle;
     njsAqDeqOptions *deqOptions;
     njsAqEnqOptions *enqOptions;
     njsAqQueue *queue;
+    uint32_t typeNum;
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefAqQueue,
             conn->oracleDb->jsAqQueueConstructor, queueObj,
-            (njsBaseInstance**) &queue)) {
-        dpiQueue_release(handle);
+            (njsBaseInstance**) &queue))
         return false;
-    }
 
     // perform some initializations
-    queue->handle = handle;
+    queue->handle = baton->dpiQueueHandle;
+    baton->dpiQueueHandle = NULL;
     queue->conn = conn;
 
     // create the dequeue options object
-    if (dpiQueue_getDeqOptions(handle, &deqOptionsHandle) < 0)
+    if (dpiQueue_getDeqOptions(queue->handle, &deqOptionsHandle) < 0)
         return njsUtils_throwErrorDPI(env, conn->oracleDb);
     if (!njsUtils_genericNew(env, &njsClassDefAqDeqOptions,
             conn->oracleDb->jsAqDeqOptionsConstructor, &deqOptionsObj,
@@ -254,7 +268,7 @@ bool njsAqQueue_createFromHandle(napi_env env, njsConnection *conn,
     deqOptions->oracleDb = conn->oracleDb;
 
     // create the enqueue options object
-    if (dpiQueue_getEnqOptions(handle, &enqOptionsHandle) < 0)
+    if (dpiQueue_getEnqOptions(queue->handle, &enqOptionsHandle) < 0)
         return njsUtils_throwErrorDPI(env, conn->oracleDb);
     if (!njsUtils_genericNew(env, &njsClassDefAqEnqOptions,
             conn->oracleDb->jsAqEnqOptionsConstructor, &enqOptionsObj,
@@ -269,17 +283,35 @@ bool njsAqQueue_createFromHandle(napi_env env, njsConnection *conn,
     // define properties for the connection (to ensure that it is not garbage
     // collected before the queue itself is) and for the dequeue and enqueue
     // options objects (for convenience)
-    memset(descriptors, 0, sizeof(napi_property_descriptor) * 3);
+    memset(descriptors, 0, sizeof(napi_property_descriptor) * 4);
     descriptors[0].utf8name = "_connection";
-    descriptors[0].value = connObj;
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
+            &descriptors[0].value))
     descriptors[1].utf8name = "deqOptions";
     descriptors[1].value = deqOptionsObj;
     descriptors[1].attributes = napi_enumerable;
     descriptors[2].utf8name = "enqOptions";
     descriptors[2].value = enqOptionsObj;
     descriptors[2].attributes = napi_enumerable;
-    NJS_CHECK_NAPI(env, napi_define_properties(env, *queueObj, 3,
+    descriptors[3].utf8name = "name";
+    descriptors[3].attributes = napi_enumerable;
+    NJS_CHECK_NAPI(env, napi_create_string_utf8(env, baton->name,
+            baton->nameLength, &descriptors[3].value))
+    NJS_CHECK_NAPI(env, napi_define_properties(env, *queueObj, 4,
             descriptors))
+
+    // acquire object type class, if needed
+    if (baton->dpiObjectTypeHandle && !njsDbObject_getSubClass(baton,
+            baton->dpiObjectTypeHandle, env, &temp,
+            &queue->payloadObjectType))
+        return false;
+
+    // add type properties
+    typeNum = (queue->payloadObjectType) ? DPI_ORACLE_TYPE_OBJECT :
+            DPI_ORACLE_TYPE_RAW;
+    if (!njsUtils_addTypeProperties(env, *queueObj, "payloadType",
+            typeNum, queue->payloadObjectType))
+        return false;
 
     return true;
 }
@@ -336,6 +368,7 @@ static bool njsAqQueue_deqManyAsync(njsBaton *baton)
 static bool njsAqQueue_deqManyPostAsync(njsBaton *baton, napi_env env,
         napi_value *args)
 {
+    njsAqQueue *queue = (njsAqQueue*) baton->callingInstance;
     napi_value result, temp;
     uint32_t i;
 
@@ -343,7 +376,7 @@ static bool njsAqQueue_deqManyPostAsync(njsBaton *baton, napi_env env,
             &result))
     for (i = 0; i < baton->numMsgProps; i++) {
         if (!njsAqMessage_createFromHandle(baton, baton->msgProps[i], env,
-                &temp))
+                queue, &temp))
             return false;
         baton->msgProps[i] = NULL;
         NJS_CHECK_NAPI(env, napi_set_element(env, result, i, temp))
@@ -409,9 +442,11 @@ static bool njsAqQueue_deqOneAsync(njsBaton *baton)
 static bool njsAqQueue_deqOnePostAsync(njsBaton *baton, napi_env env,
         napi_value *args)
 {
+    njsAqQueue *queue = (njsAqQueue*) baton->callingInstance;
+
     if (baton->dpiMsgPropsHandle) {
         if (!njsAqMessage_createFromHandle(baton, baton->dpiMsgPropsHandle,
-                env, &args[1]))
+                env, queue, &args[1]))
             return false;
         baton->dpiMsgPropsHandle = NULL;
     }

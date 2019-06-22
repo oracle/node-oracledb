@@ -27,6 +27,10 @@
 
 // forward declarations for functions only used in this file
 static void njsVariable_freeBuffer(njsVariableBuffer *buffer);
+static bool njsVariable_processBuffer(njsVariable *var,
+        njsVariableBuffer *buffer, njsBaton *baton);
+static bool njsVariable_processBufferJS(njsVariable *var,
+        njsVariableBuffer *buffer, napi_env env, njsBaton *baton);
 static bool njsVariable_setFromString(njsVariable *var, uint32_t pos,
         napi_env env, napi_value value, bool checkSize, njsBaton *baton);
 static bool njsVariable_setInvalidBind(njsVariable *var, uint32_t pos,
@@ -91,6 +95,10 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
             var->varTypeNum = DPI_ORACLE_TYPE_BLOB;
             var->nativeTypeNum = DPI_NATIVE_TYPE_LOB;
             break;
+        case NJS_DATATYPE_OBJECT:
+            var->varTypeNum = DPI_ORACLE_TYPE_OBJECT;
+            var->nativeTypeNum = DPI_NATIVE_TYPE_OBJECT;
+            break;
         default:
             return njsBaton_setError(baton, errInvalidBindDataType, 2);
     }
@@ -102,8 +110,9 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
 
     // create ODPI-C variable
     if (dpiConn_newVar(conn->handle, var->varTypeNum, var->nativeTypeNum,
-            var->maxArraySize, var->maxSize, 1, var->isArray, NULL,
-            &var->dpiVarHandle, &var->buffer->dpiVarData) < 0)
+            var->maxArraySize, var->maxSize, 1, var->isArray,
+            var->dpiObjectTypeHandle, &var->dpiVarHandle,
+            &var->buffer->dpiVarData) < 0)
         return njsBaton_setErrorDPI(baton);
 
     return true;
@@ -146,7 +155,7 @@ static void njsVariable_freeBuffer(njsVariableBuffer *buffer)
     uint32_t i;
 
     if (buffer->lobs) {
-        for (i = 0; i < buffer->numLobs; i++) {
+        for (i = 0; i < buffer->numElements; i++) {
             if (buffer->lobs[i].handle) {
                 dpiLob_release(buffer->lobs[i].handle);
                 buffer->lobs[i].handle = NULL;
@@ -226,62 +235,12 @@ uint32_t njsVariable_getDataType(njsVariable *var)
             return NJS_DATATYPE_CLOB;
         case DPI_ORACLE_TYPE_BLOB:
             return NJS_DATATYPE_BLOB;
+        case DPI_ORACLE_TYPE_OBJECT:
+            return NJS_DATATYPE_OBJECT;
         default:
             break;
     }
     return NJS_DATATYPE_DEFAULT;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsVariable_getDBType()
-//   Return the database data type that the variable represents. This is an
-// enumeration that is publicly available in the oracledb module.
-//-----------------------------------------------------------------------------
-uint32_t njsVariable_getDBType(njsVariable *var)
-{
-    switch (var->dbTypeNum) {
-        case DPI_ORACLE_TYPE_VARCHAR:
-            return NJS_DB_TYPE_VARCHAR;
-        case DPI_ORACLE_TYPE_NVARCHAR:
-            return NJS_DB_TYPE_NVARCHAR;
-        case DPI_ORACLE_TYPE_CHAR:
-            return NJS_DB_TYPE_CHAR;
-        case DPI_ORACLE_TYPE_NCHAR:
-          return NJS_DB_TYPE_NCHAR;
-        case DPI_ORACLE_TYPE_ROWID:
-            return NJS_DB_TYPE_ROWID;
-        case DPI_ORACLE_TYPE_RAW:
-            return NJS_DB_TYPE_RAW;
-        case DPI_ORACLE_TYPE_NATIVE_FLOAT:
-            return NJS_DB_TYPE_BINARY_FLOAT;
-        case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
-            return NJS_DB_TYPE_BINARY_DOUBLE;
-        case DPI_ORACLE_TYPE_NATIVE_INT:
-        case DPI_ORACLE_TYPE_NUMBER:
-            return NJS_DB_TYPE_NUMBER;
-        case DPI_ORACLE_TYPE_DATE:
-            return NJS_DB_TYPE_DATE;
-        case DPI_ORACLE_TYPE_TIMESTAMP:
-            return NJS_DB_TYPE_TIMESTAMP;
-        case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
-            return NJS_DB_TYPE_TIMESTAMP_TZ;
-        case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
-            return NJS_DB_TYPE_TIMESTAMP_LTZ;
-        case DPI_ORACLE_TYPE_CLOB:
-            return NJS_DB_TYPE_CLOB;
-        case DPI_ORACLE_TYPE_NCLOB:
-          return NJS_DB_TYPE_NCLOB;
-        case DPI_ORACLE_TYPE_BLOB:
-            return NJS_DB_TYPE_BLOB;
-        case DPI_ORACLE_TYPE_LONG_VARCHAR:
-            return NJS_DB_TYPE_LONG;
-        case DPI_ORACLE_TYPE_LONG_RAW:
-            return NJS_DB_TYPE_LONG_RAW;
-        default:
-            break;
-    }
-    return NJS_DB_TYPE_DEFAULT;
 }
 
 
@@ -300,7 +259,8 @@ bool njsVariable_getMetadataMany(njsVariable *vars, uint32_t numVars,
 
     // process each of the variables in the array
     for (i = 0; i < numVars; i++) {
-        if (!njsVariable_getMetadataOne(&vars[i], env, extended, &column))
+        if (!njsVariable_getMetadataOne(&vars[i], env, extended,
+                &column))
             return false;
         NJS_CHECK_NAPI(env, napi_set_element(env, *metadata, i, column))
     }
@@ -316,7 +276,6 @@ bool njsVariable_getMetadataMany(njsVariable *vars, uint32_t numVars,
 bool njsVariable_getMetadataOne(njsVariable *var, napi_env env, bool extended,
         napi_value *metadata)
 {
-    uint32_t dbType;
     napi_value temp;
 
     // create object to store metadata on
@@ -331,17 +290,16 @@ bool njsVariable_getMetadataOne(njsVariable *var, napi_env env, bool extended,
     if (!extended)
         return true;
 
-    // store data type
+    // store JavaScript fetch type
     NJS_CHECK_NAPI(env, napi_create_uint32(env, njsVariable_getDataType(var),
             &temp))
     NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "fetchType",
             temp))
 
-    // store database type
-    dbType = njsVariable_getDBType(var);
-    NJS_CHECK_NAPI(env, napi_create_uint32(env, dbType, &temp))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "dbType",
-            temp))
+    // store database type, name and class, as needed
+    if (!njsUtils_addTypeProperties(env, *metadata, "dbType",
+            var->dbTypeNum, var->objectType))
+        return false;
 
     // store nullable
     NJS_CHECK_NAPI(env, napi_get_boolean(env, var->isNullable, &temp))
@@ -349,12 +307,12 @@ bool njsVariable_getMetadataOne(njsVariable *var, napi_env env, bool extended,
             temp))
 
     // store size in bytes, if applicable
-    switch (dbType) {
-        case NJS_DB_TYPE_VARCHAR:
-        case NJS_DB_TYPE_NVARCHAR:
-        case NJS_DB_TYPE_CHAR:
-        case NJS_DB_TYPE_NCHAR:
-        case NJS_DB_TYPE_RAW:
+    switch (var->dbTypeNum) {
+        case DPI_ORACLE_TYPE_VARCHAR:
+        case DPI_ORACLE_TYPE_NVARCHAR:
+        case DPI_ORACLE_TYPE_CHAR:
+        case DPI_ORACLE_TYPE_NCHAR:
+        case DPI_ORACLE_TYPE_RAW:
             NJS_CHECK_NAPI(env, napi_create_uint32(env, var->dbSizeInBytes,
                     &temp))
             NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata,
@@ -365,11 +323,11 @@ bool njsVariable_getMetadataOne(njsVariable *var, napi_env env, bool extended,
     }
 
     // store precision, if applicable
-    switch (dbType) {
-        case NJS_DB_TYPE_NUMBER:
-        case NJS_DB_TYPE_TIMESTAMP:
-        case NJS_DB_TYPE_TIMESTAMP_TZ:
-        case NJS_DB_TYPE_TIMESTAMP_LTZ:
+    switch (var->dbTypeNum) {
+        case DPI_ORACLE_TYPE_NUMBER:
+        case DPI_ORACLE_TYPE_TIMESTAMP:
+        case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
+        case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
             NJS_CHECK_NAPI(env, napi_create_int32(env, var->precision, &temp))
             NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata,
                     "precision", temp))
@@ -379,7 +337,7 @@ bool njsVariable_getMetadataOne(njsVariable *var, napi_env env, bool extended,
     }
 
     // store scale, if applicable
-    if (dbType == NJS_DB_TYPE_NUMBER) {
+    if (var->dbTypeNum == DPI_ORACLE_TYPE_NUMBER) {
         NJS_CHECK_NAPI(env, napi_create_int32(env, var->scale, &temp))
         NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "scale",
                 temp))
@@ -444,7 +402,7 @@ bool njsVariable_getScalarValue(njsVariable *var, njsVariableBuffer *buffer,
             }
             break;
         case DPI_NATIVE_TYPE_LOB:
-            return njsLob_new(baton, &buffer->lobs[pos], env, value);
+            return njsLob_new(baton->oracleDb, &buffer->lobs[pos], env, value);
         case DPI_NATIVE_TYPE_STMT:
             if (dpiStmt_addRef(data->value.asStmt) < 0)
                 return njsBaton_setErrorDPI(baton);
@@ -455,13 +413,18 @@ bool njsVariable_getScalarValue(njsVariable *var, njsVariableBuffer *buffer,
             }
             buffer->queryVars = NULL;
             buffer->numQueryVars = 0;
-            return true;
+            break;
         case DPI_NATIVE_TYPE_ROWID:
             if (dpiRowid_getStringValue(data->value.asRowid, &rowidValue,
                     &rowidValueLength) < 0)
                 return njsBaton_setErrorDPI(baton);
             NJS_CHECK_NAPI(env, napi_create_string_utf8(env, rowidValue,
                     rowidValueLength, value))
+            break;
+        case DPI_NATIVE_TYPE_OBJECT:
+            if (!njsDbObject_new(var->objectType, data->value.asObject,
+                    env, value))
+                return false;
             break;
         default:
             break;
@@ -568,11 +531,38 @@ bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
             case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
             case DPI_ORACLE_TYPE_ROWID:
                 break;
+            case DPI_ORACLE_TYPE_OBJECT:
+                vars[i].dpiObjectTypeHandle = queryInfo.typeInfo.objectType;
+                break;
             default:
                 return njsBaton_setError(baton, errUnsupportedDataType,
                         queryInfo.typeInfo.oracleTypeNum, i + 1);
         }
 
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_initForQueryJS()
+//   Perform any further initialization of query variables that needs to be
+// done within JavaScript. This includes acquiring the object type constructors
+// for all object types fetched by this query.
+//-----------------------------------------------------------------------------
+bool njsVariable_initForQueryJS(njsVariable *vars, uint32_t numVars,
+        napi_env env, njsBaton *baton)
+{
+    napi_value temp;
+    uint32_t i;
+
+    for (i = 0; i < numVars; i++) {
+        if (vars[i].dpiObjectTypeHandle) {
+            if (!njsDbObject_getSubClass(baton, vars[i].dpiObjectTypeHandle,
+                    env, &temp, &vars[i].objectType))
+                return false;
+        }
     }
 
     return true;
@@ -729,13 +719,44 @@ bool njsVariable_process(njsVariable *vars, uint32_t numVars, uint32_t numRows,
 
 
 //-----------------------------------------------------------------------------
+// njsVariable_processJS()
+//   Process variables used during binding or fetching in preparation for
+// use in JavaScript. All object types must have their constructors acquired
+// so REF cursors are examined to see if any object types are present.
+//-----------------------------------------------------------------------------
+bool njsVariable_processJS(njsVariable *vars, uint32_t numVars, napi_env env,
+        njsBaton *baton)
+{
+    njsVariableBuffer *buffer;
+    njsVariable *var;
+    uint32_t i, j;
+
+    for (i = 0; i < numVars; i++) {
+        var = &vars[i];
+        if (var->bindDir != NJS_BIND_OUT &&
+                var->varTypeNum != DPI_ORACLE_TYPE_STMT)
+            continue;
+        if (!var->dmlReturningBuffers)
+            return njsVariable_processBufferJS(var, var->buffer, env, baton);
+        for (j = 0; j < var->numDmlReturningBuffers; j++) {
+            buffer = &var->dmlReturningBuffers[j];
+            if (!njsVariable_processBufferJS(var, buffer, env, baton))
+                return false;
+        }
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsVariable_processBuffer()
 //   Process a variable buffer. REF cursors must have their query variables
 // defined and LOBs must be initially processed in order to have as much work
 // as possible done in the worker thread and avoid any round trips.
 //-----------------------------------------------------------------------------
-bool njsVariable_processBuffer(njsVariable *var, njsVariableBuffer *buffer,
-        njsBaton *baton)
+static bool njsVariable_processBuffer(njsVariable *var,
+        njsVariableBuffer *buffer, njsBaton *baton)
 {
     uint32_t i, elementIndex;
     njsLobBuffer *lob;
@@ -781,6 +802,25 @@ bool njsVariable_processBuffer(njsVariable *var, njsVariableBuffer *buffer,
         default:
             break;
     }
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_processBufferJS()
+//   Process a variable buffer in preparation for use in JavaScript. In
+// particular, this acquires object type constructors as required for REF
+// cursors.
+//-----------------------------------------------------------------------------
+static bool njsVariable_processBufferJS(njsVariable *var,
+        njsVariableBuffer *buffer, napi_env env, njsBaton *baton)
+{
+    if (var->varTypeNum == DPI_ORACLE_TYPE_STMT) {
+        if (!njsVariable_initForQueryJS(buffer->queryVars,
+                buffer->numQueryVars, env, baton))
+            return false;
+    }
+
     return true;
 }
 
@@ -856,10 +896,11 @@ static bool njsVariable_setInvalidBind(njsVariable *var, uint32_t pos,
 bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
         napi_value value, bool checkSize, njsBaton *baton)
 {
+    napi_value asNumber, constructor, temp;
     napi_valuetype valueType;
     dpiLob *tempLobHandle;
     size_t bufferLength;
-    napi_value asNumber;
+    njsDbObject *obj;
     dpiData *data;
     void *buffer;
     njsLob *lob;
@@ -965,6 +1006,35 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
                 dpiLob_release(tempLobHandle);
             return true;
 
+        }
+
+        // handle binding database objects
+        NJS_CHECK_NAPI(env, napi_instanceof(env, value,
+                baton->jsBaseDbObjectConstructor, &check))
+        if (check) {
+            if (var->varTypeNum != DPI_ORACLE_TYPE_OBJECT)
+                return njsVariable_setInvalidBind(var, pos, baton);
+
+            // get object instance and bind it
+            if (!njsDbObject_getInstance(baton->oracleDb, env, value, &obj))
+                return false;
+            if (dpiVar_setFromObject(var->dpiVarHandle, pos, obj->handle) < 0)
+                return njsBaton_setErrorDPI(baton);
+            return true;
+        }
+
+        // handle binding plain JavaScript objects to database objects
+        if (var->varTypeNum == DPI_ORACLE_TYPE_OBJECT) {
+            NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+                    var->objectType->jsDbObjectConstructor, &constructor))
+            NJS_CHECK_NAPI(env, napi_new_instance(env, constructor, 1, &value,
+                    &temp))
+            if (!njsDbObject_getInstance(var->objectType->oracleDb, env,
+                    temp, &obj))
+                return false;
+            if (dpiVar_setFromObject(var->dpiVarHandle, pos, obj->handle) < 0)
+                return njsBaton_setErrorDPI(baton);
+            return true;
         }
 
     }

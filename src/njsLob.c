@@ -361,21 +361,20 @@ static bool njsLob_getDataPostAsync(njsBaton *baton, napi_env env,
 // njsLob_new()
 //   Creates a new LOB object.
 //-----------------------------------------------------------------------------
-bool njsLob_new(njsBaton *baton, njsLobBuffer *buffer, napi_env env,
+bool njsLob_new(njsOracleDb *oracleDb, njsLobBuffer *buffer, napi_env env,
         napi_value *lobObj)
 {
     njsLob *lob;
 
     // create new instance
-    if (!njsUtils_genericNew(env, &njsClassDefLob,
-            baton->oracleDb->jsLobConstructor, lobObj,
-            (njsBaseInstance**) &lob))
+    if (!njsUtils_genericNew(env, &njsClassDefLob, oracleDb->jsLobConstructor,
+            lobObj, (njsBaseInstance**) &lob))
         return false;
 
     // transfer data from LOB buffer to instance
     lob->handle = buffer->handle;
     buffer->handle = NULL;
-    lob->oracleDb = baton->oracleDb;
+    lob->oracleDb = oracleDb;
     lob->dataType = buffer->dataType;
     lob->chunkSize = buffer->chunkSize;
     lob->pieceSize = buffer->chunkSize;

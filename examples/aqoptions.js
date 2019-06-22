@@ -41,7 +41,7 @@ async function enq() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
-    let queue = connection.queue(queueName);
+    const queue = await connection.queue(queueName);
     queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE; // Send a message immediately without requiring a commit
 
     const messageString = 'This is my other message';
@@ -70,7 +70,7 @@ async function deq() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
-    const queue = connection.queue(queueName);
+    const queue = await connection.queue(queueName);
     Object.assign(
       queue.deqOptions,
       {
