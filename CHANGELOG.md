@@ -7,42 +7,48 @@
 - Refactored the node-oracledb implementation to use
   [N-API](https://nodejs.org/api/n-api.html) in place of
   [NAN](https://github.com/nodejs/nan).
-    - Node.js 8.16 or Node.js 10.16, or higher, is required by this version of node-oracledb.  Node.js 8.16, 10.16, 11.12 and 12 contain an important N-API performance fix.
+    - Node-oracledb 4 requires Node.js 8.16 or Node.js 10.16, or higher.  Node.js 8.16, 10.16, 11.12 and 12 contain an important N-API performance fix.
     - N-API allows node-oracledb binaries to be portable between Node.js versions on a given operating system, subject to N-API compatibility.  Node-oracledb uses N-API version 2.
     - Oracle Client libraries are still required at runtime.  These can be from Oracle Instant Client, the full Oracle Client, or an Oracle Database installation.
-    - The string representation of classes has changed to `[Object Object]` as a consequence of using N-API.
+    - The string representation of classes has changed to `[Object Object]` as a consequence of using N-API.  Use `Object.getPrototypeOf()` to get class information.
     - The C compiler required for building from source code no longer needs C++11 compatibility.  The node-oracledb source code is now pure C.
 
-- Added support for Oracle Advanced Queuing (AQ) RAW queues, allowing
-  String and Buffer messages to be used.
+- Oracle Advanced Queuing (AQ):
 
-- Added support for getting the [registration
-  id](https://oracle.github.io/node-oracledb/doc/api.html#consubscribecallback)
-  for CQN subscriptions.
+    - Added support for "RAW" queues, allowing String and Buffer
+      messages to be used.
 
-- Added support for AQ notifications with `oracledb.SUBSCR_NAMESPACE_AQ`.
+    - Added support for notifications with `oracledb.SUBSCR_NAMESPACE_AQ`.
 
 - Added support for Implicit Results, allowing query results to be
   returned from PL/SQL without needing parameters or bind variables.
 
 - Added
   [`lob.getData()`](https://oracle.github.io/node-oracledb/doc/api.html#lobgetdata)
-  to return a LOBs data from a Lob instance.
-
-- Class methods are now configurable.  For example via
-  `Object.defineProperty`.
+  to return data from a Lob instance.
 
 - Enhanced BIND_IN of PL/SQL Collection Associative Arrays (Index-by)
-  so a bind definition object can be omitted
-  [#1039](https://github.com/oracle/node-oracledb/issues/1039).
+  so a bind definition object can be omitted (see
+  [#1039](https://github.com/oracle/node-oracledb/issues/1039)).
 
-- CQN support and message type constants were added for database
-  startup and shutdown events.
+- Continuous Query Notification (CQN):
 
-- Added a `connection.currentSchema` attribute for setting the schema
-  qualifier to be used when a qualifier is omitted in SQL statements.
-  This is an efficient alternative to `ALTER SESSION SET
-  CURRENT_SCHEMA`.
+    - Added support for getting the [registration
+      id](https://oracle.github.io/node-oracledb/doc/api.html#consubscribecallback)
+      for CQN subscriptions.
+
+    - Added support and message type constants for database startup
+      and shutdown events.
+
+    - Fixed a crash that occurred when unsubscribing from CQN while
+      notifications were ongoing ([ODPI-C
+      change](https://github.com/oracle/odpi/commit/b96b11b7fe58f32f011c7f7419555e40268d5bf4)).
+
+- Added
+  [`connection.currentSchema`](https://oracle.github.io/node-oracledb/doc/api.html#propconncurrentschema)
+  for setting the schema qualifier to be used when a qualifier is
+  omitted in SQL statements.  This is an efficient alternative to
+  `ALTER SESSION SET CURRENT_SCHEMA`.
 
 - Renumbered [node-oracledb Type
   Constants](https://oracle.github.io/node-oracledb/doc/api.html#oracledbconstantsnodbtype)
@@ -58,18 +64,15 @@
 
 - Improved the performance of `oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT`.
 
+- Improved the fetch performance of LOBs in some cases by reducing the
+  number of round-trips required between node-oracledb and Oracle
+  Database ([ODPI-C
+  change](https://github.com/oracle/odpi/commit/58e6a07ff5bb428a09068456ef5231884fcb77db)).
+
 - Updated the JavaScript syntax in class implementations.
 
-- Fixed writing of multi-byte characters to CLOBs when multiple writes
-  are required.
-
-- Fixed a crash that occurred when unsubscribing from CQN while
-  notifications were ongoing ([ODPI-C change](https://github.com/oracle/odpi/commit/b96b11b7fe58f32f011c7f7419555e40268d5bf4)).
-
-- Fixed a crash occuring when draining the connection pool ([ODPI-C
-  change](https://github.com/oracle/odpi/commit/https://github.com/oracle/odpi/commit/7666dc3208087383f7f0f5e49c1ee423cb154997))
-
-- Corrected `pool.status` to be read-only, as was documented.
+- Class methods are now configurable.  For example via
+  `Object.defineProperty`.
 
 - Error handling changes:
 
@@ -97,7 +100,7 @@
       using Oracle Client 18.5 or Oracle Client 19.3, or later. The
       new node-oracledb 4.0 methods `sodaCollection.insertMany()` and
       `sodaCollection.insertManyAndGet()` are in Preview status and
-      should not be used in production
+      should not be used in production.
 
     - Corrected the type of
       [`sodaCollection.metaData`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollectionpropmetadata).
@@ -107,6 +110,14 @@
 
     - Corrected the error message parameter number for SODA
       [`sodaDatabase.getCollectionNames()`](https://oracle.github.io/node-oracledb/doc/api.html#sodadbgetcollectionnames).
+
+- Fixed writing of multi-byte characters to CLOBs when multiple writes
+  are required.
+
+- Fixed a crash occuring when draining the connection pool ([ODPI-C
+  change](https://github.com/oracle/odpi/commit/https://github.com/oracle/odpi/commit/7666dc3208087383f7f0f5e49c1ee423cb154997)).
+
+- Corrected `pool.status` to be read-only, as was documented.
 
 - Updated documentation.
 
