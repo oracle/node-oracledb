@@ -90,7 +90,7 @@ static napi_value njsAqMessage_getTextAttribute(napi_env env,
 //   Creates a new AQ message object given the ODPI-C handle.
 //-----------------------------------------------------------------------------
 bool njsAqMessage_createFromHandle(njsBaton *baton, dpiMsgProps *handle,
-        napi_env env, napi_value *messageObj)
+        napi_env env, njsAqQueue *queue, napi_value *messageObj)
 {
     njsAqMessage *msg;
 
@@ -103,6 +103,7 @@ bool njsAqMessage_createFromHandle(njsBaton *baton, dpiMsgProps *handle,
     // perform some initializations
     msg->handle = handle;
     msg->oracleDb = baton->oracleDb;
+    msg->objectType = queue->payloadObjectType;
 
     return true;
 }
@@ -280,23 +281,30 @@ static napi_value njsAqMessage_getOriginalMsgId(napi_env env,
 static napi_value njsAqMessage_getPayload(napi_env env,
         napi_callback_info info)
 {
-    napi_value bufferObj;
+    napi_value payloadObj;
     uint32_t valueLength;
+    dpiObject *objHandle;
     const char *value;
     njsAqMessage *msg;
 
     if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &msg))
         return NULL;
-    if (dpiMsgProps_getPayload(msg->handle, NULL, &value, &valueLength) < 0) {
+    if (dpiMsgProps_getPayload(msg->handle, &objHandle, &value,
+            &valueLength) < 0) {
         njsUtils_throwErrorDPI(env, msg->oracleDb);
         return NULL;
     }
-    if (napi_create_buffer_copy(env, valueLength, value, NULL,
-            &bufferObj) != napi_ok) {
-        njsUtils_genericThrowError(env);
-        return NULL;
+    if (objHandle) {
+        if (!njsDbObject_new(msg->objectType, objHandle, env, &payloadObj))
+            return NULL;
+    }  else {
+        if (napi_create_buffer_copy(env, valueLength, value, NULL,
+                &payloadObj) != napi_ok) {
+            njsUtils_genericThrowError(env);
+            return NULL;
+        }
     }
-    return bufferObj;
+    return payloadObj;
 }
 
 

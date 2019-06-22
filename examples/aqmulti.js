@@ -40,7 +40,7 @@ async function enq() {
 
   try {
     connection = await oracledb.getConnection(dbConfig);
-    let queue = connection.queue(queueName);
+    const queue = await connection.queue(queueName);
     queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE; // Send a message without requiring a commit
 
     console.log('Enqueuing messages');
@@ -74,12 +74,12 @@ async function deq() {
 
   try {
     connection = await oracledb.getConnection(dbConfig);
-    const queue = connection.queue(queueName);
+    const queue = await connection.queue(queueName);
     queue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE; // Change the visibility so no explicit commit is required
 
     const messages = await queue.deqMany(5);  // get at most 5 messages
     console.log("Dequeued " + messages.length + " messages");
-    for (let msg of messages) {
+    for (const msg of messages) {
       console.log(msg.payload.toString());
     }
 

@@ -9,6 +9,7 @@
              "src/njsAqQueue.c",
              "src/njsBaton.c",
              "src/njsConnection.c",
+             "src/njsDbObject.c",
              "src/njsErrors.c",
              "src/njsLob.c",
              "src/njsModule.c",

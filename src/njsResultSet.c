@@ -345,8 +345,9 @@ static bool njsResultSet_getRowsHelper(njsResultSet *rs, njsBaton *baton,
             var->dpiVarHandle = NULL;
         }
         if (dpiConn_newVar(rs->conn->handle, var->varTypeNum,
-                var->nativeTypeNum, numRowsToFetch, var->maxSize, 1, 0, NULL,
-                &var->dpiVarHandle, &var->buffer->dpiVarData) < 0)
+                var->nativeTypeNum, numRowsToFetch, var->maxSize, 1, 0,
+                var->dpiObjectTypeHandle, &var->dpiVarHandle,
+                &var->buffer->dpiVarData) < 0)
             return njsBaton_setErrorDPI(baton);
         var->maxArraySize = numRowsToFetch;
         if (dpiStmt_define(rs->handle, i + 1, var->dpiVarHandle) < 0)

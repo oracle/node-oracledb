@@ -155,7 +155,7 @@ describe('17. extendedMetaData.js', function() {
         { extendedMetaData: true },
         function(err, result) {
           should.not.exist(err);
-          (result.metaData).should.deepEqual( [ { name: 'DT', fetchType: oracledb.DATE, dbType: oracledb.DB_TYPE_DATE, nullable: true } ] );
+          (result.metaData).should.deepEqual( [ { name: 'DT', fetchType: oracledb.DATE, dbType: oracledb.DB_TYPE_DATE, dbTypeName: "DATE", nullable: true } ] );
           done();
         }
       );
@@ -337,6 +337,7 @@ describe('17. extendedMetaData.js', function() {
             { name: 'NUM',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 0,
               scale: -127,
               nullable: true }
@@ -345,11 +346,16 @@ describe('17. extendedMetaData.js', function() {
             { name: 'VCH',
               fetchType: oracledb.STRING,
               dbType: oracledb.DB_TYPE_VARCHAR,
+              dbTypeName: "VARCHAR2",
               byteSize: 1000,
               nullable: true }
           );
           (result.metaData[2]).should.deepEqual(
-            { name: 'DT', fetchType: oracledb.DATE, dbType: oracledb.DB_TYPE_DATE, nullable: true }
+            { name: 'DT',
+              fetchType: oracledb.DATE,
+              dbType: oracledb.DB_TYPE_DATE,
+              dbTypeName: "DATE",
+              nullable: true }
           );
           cb();
         }
@@ -523,6 +529,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'VCH',
               fetchType: oracledb.STRING,
               dbType: oracledb.DB_TYPE_VARCHAR,
+              dbTypeName: "VARCHAR2",
               byteSize: 4000,
               nullable: true } ]
           );
@@ -544,6 +551,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'NVCH',
               fetchType: oracledb.STRING,
               dbType: oracledb.DB_TYPE_NVARCHAR,
+              dbTypeName: "NVARCHAR2",
               byteSize: 4000,
               nullable: true } ]
           );
@@ -565,6 +573,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'CH',
               fetchType: oracledb.STRING,
               dbType: oracledb.DB_TYPE_CHAR,
+              dbTypeName: "CHAR",
               byteSize: 2000,
               nullable: true } ]
           );
@@ -586,6 +595,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'NCH',
               fetchType: oracledb.STRING,
               dbType: oracledb.DB_TYPE_NCHAR,
+              dbTypeName: "NCHAR",
               byteSize: 2000,
               nullable: true } ]
           );
@@ -607,6 +617,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'NUM1',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 0,
               scale: -127,
               nullable: true } ]
@@ -629,6 +640,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'NUM2',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 9,
               scale: 0,
               nullable: true } ]
@@ -651,6 +663,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'NUM3',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 15,
               scale: 5,
               nullable: true } ]
@@ -673,6 +686,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'NUM4',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 38,
               scale: 1,
               nullable: true } ]
@@ -695,6 +709,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'NUM5',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 7,
               scale: -2,
               nullable: true } ]
@@ -717,6 +732,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'NUM6',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 23,
               scale: 15,
               nullable: true } ]
@@ -739,6 +755,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'DECI1',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 38,
               scale: 0,
               nullable: true } ]
@@ -761,6 +778,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'DECI2',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 8,
               scale: 18,
               nullable: true } ]
@@ -783,6 +801,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'INTENUM',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 38,
               scale: 0,
               nullable: true } ]
@@ -805,6 +824,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'INTNUM',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 38,
               scale: 0,
               nullable: true } ]
@@ -827,6 +847,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'SINT',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 38,
               scale: 0,
               nullable: true } ]
@@ -849,6 +870,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'FLOAT1',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 126,
               scale: -127,
               nullable: true } ]
@@ -871,6 +893,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'FLOAT2',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 90,
               scale: -127,
               nullable: true } ]
@@ -893,6 +916,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'DOUBLE',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 126,
               scale: -127,
               nullable: true } ]
@@ -915,6 +939,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'RENUM',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 63,
               scale: -127,
               nullable: true } ]
@@ -937,6 +962,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'LN',
               fetchType: oracledb.STRING,
               dbType: oracledb.DB_TYPE_LONG,
+              dbTypeName: "LONG",
               nullable: true } ]
           );
           done();
@@ -957,6 +983,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'BF',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_BINARY_FLOAT,
+              dbTypeName: "BINARY_FLOAT",
               nullable: true } ]
           );
           done();
@@ -977,6 +1004,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'BD',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_BINARY_DOUBLE,
+              dbTypeName: "BINARY_DOUBLE",
               nullable: true } ]
           );
           done();
@@ -997,6 +1025,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'DT',
               fetchType: oracledb.DATE,
               dbType: oracledb.DB_TYPE_DATE,
+              dbTypeName: "DATE",
               nullable: true } ]
           );
           done();
@@ -1017,6 +1046,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'TS1',
               fetchType: oracledb.DATE,
               dbType: oracledb.DB_TYPE_TIMESTAMP,
+              dbTypeName: "TIMESTAMP",
               precision: 6,
               nullable: true } ]
           );
@@ -1038,6 +1068,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'TS2',
               fetchType: oracledb.DATE,
               dbType: oracledb.DB_TYPE_TIMESTAMP,
+              dbTypeName: "TIMESTAMP",
               precision: 5,
               nullable: true } ]
           );
@@ -1059,6 +1090,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'TS3',
               fetchType: oracledb.DATE,
               dbType: oracledb.DB_TYPE_TIMESTAMP_TZ,
+              dbTypeName: "TIMESTAMP WITH TIME ZONE",
               precision: 6,
               nullable: true } ]
           );
@@ -1080,6 +1112,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'TS4',
               fetchType: oracledb.DATE,
               dbType: oracledb.DB_TYPE_TIMESTAMP_TZ,
+              dbTypeName: "TIMESTAMP WITH TIME ZONE",
               precision: 2,
               nullable: true } ]
           );
@@ -1101,6 +1134,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'TS5',
               fetchType: oracledb.DATE,
               dbType: oracledb.DB_TYPE_TIMESTAMP_LTZ,
+              dbTypeName: "TIMESTAMP WITH LOCAL TIME ZONE",
               precision: 6,
               nullable: true } ]
           );
@@ -1122,6 +1156,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'TS6',
               fetchType: oracledb.DATE,
               dbType: oracledb.DB_TYPE_TIMESTAMP_LTZ,
+              dbTypeName: "TIMESTAMP WITH LOCAL TIME ZONE",
               precision: 9,
               nullable: true } ]
           );
@@ -1179,6 +1214,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'RID',
               fetchType: oracledb.STRING,
               dbType: oracledb.DB_TYPE_ROWID,
+              dbTypeName: "ROWID",
               nullable: true } ]
           );
           done();
@@ -1199,6 +1235,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'URID',
               fetchType: oracledb.STRING,
               dbType: oracledb.DB_TYPE_ROWID,
+              dbTypeName: "ROWID",
               nullable: true } ]
           );
           done();
@@ -1219,6 +1256,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'CLB',
               fetchType: oracledb.CLOB,
               dbType: oracledb.DB_TYPE_CLOB,
+              dbTypeName: "CLOB",
               nullable: true } ]
           );
           done();
@@ -1239,6 +1277,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'BLB',
               fetchType: oracledb.BLOB,
               dbType: oracledb.DB_TYPE_BLOB,
+              dbTypeName: "BLOB",
               nullable: true } ]
           );
           done();
@@ -1259,6 +1298,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'NCLB',
               fetchType: oracledb.CLOB,
               dbType: oracledb.DB_TYPE_NCLOB,
+              dbTypeName: "NCLOB",
               nullable: true } ]
           );
           done();
@@ -1297,6 +1337,7 @@ describe('17. extendedMetaData.js', function() {
             [ { name: 'MYRAW',
               fetchType: oracledb.BUFFER,
               dbType: oracledb.DB_TYPE_RAW,
+              dbTypeName: "RAW",
               byteSize: 2000,
               nullable: true } ]
           );
@@ -1345,6 +1386,7 @@ describe('17. extendedMetaData.js', function() {
                 [ { name: 'LRAW',
                   fetchType: oracledb.BUFFER,
                   dbType: oracledb.DB_TYPE_LONG_RAW,
+                  dbTypeName: "LONG RAW",
                   nullable: true } ]
               );
               cb();
@@ -1527,15 +1569,21 @@ describe('17. extendedMetaData.js', function() {
             { name: 'NUM',
               fetchType: oracledb.STRING,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 0,
               scale: -127,
               nullable: true },
             { name: 'VCH',
               fetchType: oracledb.STRING,
               dbType: oracledb.DB_TYPE_VARCHAR,
+              dbTypeName: "VARCHAR2",
               byteSize: 1000,
               nullable: true },
-            { name: 'DT', fetchType: oracledb.STRING, dbType: oracledb.DB_TYPE_DATE, nullable: true }
+            { name: 'DT',
+              fetchType: oracledb.STRING,
+              dbType: oracledb.DB_TYPE_DATE,
+              dbTypeName: "DATE",
+              nullable: true }
           ]);
           done();
         }
@@ -1563,15 +1611,21 @@ describe('17. extendedMetaData.js', function() {
                 { name: 'NUM',
                   fetchType: oracledb.STRING,
                   dbType: oracledb.DB_TYPE_NUMBER,
+                  dbTypeName: "NUMBER",
                   precision: 0,
                   scale: -127,
                   nullable: true },
                 { name: 'VCH',
                   fetchType: oracledb.STRING,
                   dbType: oracledb.DB_TYPE_VARCHAR,
+                  dbTypeName: "VARCHAR2",
                   byteSize: 1000,
                   nullable: true },
-                { name: 'DT', fetchType: oracledb.STRING, dbType: oracledb.DB_TYPE_DATE, nullable: true }
+                { name: 'DT',
+                  fetchType: oracledb.STRING,
+                  dbType: oracledb.DB_TYPE_DATE,
+                  dbTypeName: "DATE",
+                  nullable: true }
               ]);
               cb();
             }
@@ -1607,15 +1661,21 @@ describe('17. extendedMetaData.js', function() {
                 { name: 'NUM',
                   fetchType: oracledb.STRING,
                   dbType: oracledb.DB_TYPE_NUMBER,
+                  dbTypeName: "NUMBER",
                   precision: 0,
                   scale: -127,
                   nullable: true },
                 { name: 'VCH',
                   fetchType: oracledb.STRING,
                   dbType: oracledb.DB_TYPE_VARCHAR,
+                  dbTypeName: "VARCHAR2",
                   byteSize: 1000,
                   nullable: true },
-                { name: 'DT', fetchType: oracledb.STRING, dbType: oracledb.DB_TYPE_DATE, nullable: true }
+                { name: 'DT',
+                  fetchType: oracledb.STRING,
+                  dbType: oracledb.DB_TYPE_DATE,
+                  dbTypeName: "DATE",
+                  nullable: true }
               ]);
               cb();
             }
@@ -1646,7 +1706,11 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
-            [ { name: 'DT', fetchType: oracledb.DATE, dbType: oracledb.DB_TYPE_DATE, nullable: true } ]
+            [ { name: 'DT',
+                fetchType: oracledb.DATE,
+                dbType: oracledb.DB_TYPE_DATE,
+                dbTypeName: "DATE",
+                nullable: true } ]
           );
           done();
         }
@@ -1700,12 +1764,14 @@ describe('17. extendedMetaData.js', function() {
                 { name: 'ID',
                   fetchType: oracledb.NUMBER,
                   dbType: oracledb.DB_TYPE_NUMBER,
+                  dbTypeName: "NUMBER",
                   precision: 0,
                   scale: -127,
                   nullable: true },
                 { name: 'nAme',
                   fetchType: oracledb.STRING,
                   dbType: oracledb.DB_TYPE_VARCHAR,
+                  dbTypeName: "VARCHAR2",
                   byteSize: 20,
                   nullable: true }
               ]);
@@ -1775,11 +1841,13 @@ describe('17. extendedMetaData.js', function() {
                 { name: 'A',
                   fetchType: oracledb.STRING,
                   dbType: oracledb.DB_TYPE_VARCHAR,
+                  dbTypeName: "VARCHAR2",
                   byteSize: 20,
                   nullable: true },
                 { name: 'B',
                   fetchType: oracledb.STRING,
                   dbType: oracledb.DB_TYPE_VARCHAR,
+                  dbTypeName: "VARCHAR2",
                   byteSize: 20,
                   nullable: true }
               ]);
@@ -1816,12 +1884,14 @@ describe('17. extendedMetaData.js', function() {
             { name: 'A',
               fetchType: oracledb.NUMBER,
               dbType: oracledb.DB_TYPE_NUMBER,
+              dbTypeName: "NUMBER",
               precision: 0,
               scale: -127,
               nullable: true },
             { name: 'A',
               fetchType: oracledb.STRING,
               dbType: oracledb.DB_TYPE_CHAR,
+              dbTypeName: "CHAR",
               byteSize: 3,
               nullable: true }
           ]);
@@ -1925,15 +1995,21 @@ describe('17. extendedMetaData.js', function() {
         { name: 'NUM',
           fetchType: oracledb.NUMBER,
           dbType: oracledb.DB_TYPE_NUMBER,
+          dbTypeName: "NUMBER",
           precision: 0,
           scale: -127,
           nullable: true },
         { name: 'VCH',
           fetchType: oracledb.STRING,
           dbType: oracledb.DB_TYPE_VARCHAR,
+          dbTypeName: "VARCHAR2",
           byteSize: 1000,
           nullable: true },
-        { name: 'DT', fetchType: oracledb.DATE, dbType: oracledb.DB_TYPE_DATE, nullable: true }
+        { name: 'DT',
+          fetchType: oracledb.DATE,
+          dbType: oracledb.DB_TYPE_DATE,
+          dbTypeName: "DATE",
+          nullable: true }
       ]);
     }
   };

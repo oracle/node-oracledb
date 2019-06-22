@@ -76,7 +76,11 @@ static const char *njsErrorMessages[] = {
     "NJS-067: a pre-built node-oracledb binary was not found for %s", // errNoBinaryAvailable
     "NJS-068: invalid error number %d supplied", // errInvalidErrNum
     "NJS-069: node-oracledb %s requires Node.js %s or later", // errNodeTooOld
-    "NJS-070: message must be a string, buffer or an object containing a payload property which itself is a string or buffer", // errInvalidAqMessage
+    "NJS-070: message must be a string, buffer, database object or an object containing a payload property which itself is a string, buffer or database object", // errInvalidAqMessage
+    "NJS-071: cannot convert from element of type \"%.*s\" to JavaScript value", // errConvertFromObjElement
+    "NJS-072: cannot convert from attribute \"%.*s\" of type \"%.*s\" to JavaScript value", // errConvertFromObjAttr
+    "NJS-073: cannot convert from JavaScript value to element of type %.*s", // errConvertToObjElement
+    "NJS-074: cannot convert from JavaScript value to attribute \"%.*s\" of type \"%.*s\"", // errConvertToObjAttr
 };
 
 

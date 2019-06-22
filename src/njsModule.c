@@ -97,7 +97,6 @@ static napi_value njsModule_externalInit(napi_env env, napi_callback_info info)
             &njsClassDefSodaOperation, &oracleDb->jsSodaOperationConstructor))
         return NULL;
 
-
     return NULL;
 }
 

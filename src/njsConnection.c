@@ -34,6 +34,7 @@ static NJS_NAPI_METHOD(njsConnection_createLob);
 static NJS_NAPI_METHOD(njsConnection_execute);
 static NJS_NAPI_METHOD(njsConnection_executeMany);
 static NJS_NAPI_METHOD(njsConnection_getSodaDatabase);
+static NJS_NAPI_METHOD(njsConnection_getDbObjectClass);
 static NJS_NAPI_METHOD(njsConnection_getStatementInfo);
 static NJS_NAPI_METHOD(njsConnection_ping);
 static NJS_NAPI_METHOD(njsConnection_queue);
@@ -49,8 +50,10 @@ static NJS_ASYNC_METHOD(njsConnection_commitAsync);
 static NJS_ASYNC_METHOD(njsConnection_createLobAsync);
 static NJS_ASYNC_METHOD(njsConnection_executeAsync);
 static NJS_ASYNC_METHOD(njsConnection_executeManyAsync);
+static NJS_ASYNC_METHOD(njsConnection_getDbObjectClassAsync);
 static NJS_ASYNC_METHOD(njsConnection_getStatementInfoAsync);
 static NJS_ASYNC_METHOD(njsConnection_pingAsync);
+static NJS_ASYNC_METHOD(njsConnection_queueAsync);
 static NJS_ASYNC_METHOD(njsConnection_rollbackAsync);
 static NJS_ASYNC_METHOD(njsConnection_subscribeAsync);
 static NJS_ASYNC_METHOD(njsConnection_unsubscribeAsync);
@@ -59,7 +62,9 @@ static NJS_ASYNC_METHOD(njsConnection_unsubscribeAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_createLobPostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_executePostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_executeManyPostAsync);
+static NJS_ASYNC_POST_METHOD(njsConnection_getDbObjectClassPostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_getStatementInfoPostAsync);
+static NJS_ASYNC_POST_METHOD(njsConnection_queuePostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_subscribePostAsync);
 
 // processing arguments methods
@@ -67,7 +72,9 @@ static NJS_PROCESS_ARGS_METHOD(njsConnection_changePasswordProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_createLobProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_executeProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_executeManyProcessArgs);
+static NJS_PROCESS_ARGS_METHOD(njsConnection_getDbObjectClassProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_getStatementInfoProcessArgs);
+static NJS_PROCESS_ARGS_METHOD(njsConnection_queueProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_subscribeProcessArgs);
 
 // getters
@@ -109,6 +116,8 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "_executeMany", NULL, njsConnection_executeMany, NULL, NULL, NULL,
             napi_default, NULL },
     { "_getSodaDatabase", NULL, njsConnection_getSodaDatabase, NULL, NULL,
+            NULL, napi_default, NULL },
+    { "_getDbObjectClass", NULL, njsConnection_getDbObjectClass, NULL, NULL,
             NULL, napi_default, NULL },
     { "_getStatementInfo", NULL, njsConnection_getStatementInfo, NULL,
             NULL, NULL, napi_default, NULL },
@@ -155,11 +164,12 @@ static bool njsConnection_createBaton(napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, njsBaton **baton);
 static bool njsConnection_getBatchErrors(njsBaton *baton, napi_env env,
         napi_value *batchErrors);
-static bool njsConnection_getBindTypeAndSizeFromArray(njsBaton *baton,
-        napi_env env, napi_value value, uint32_t *bindType, uint32_t *maxSize);
-static bool njsConnection_getBindTypeAndSizeFromValue(njsBaton *baton,
+static bool njsConnection_getBindInfoFromArray(njsBaton *baton,
+        napi_env env, napi_value value, uint32_t *bindType, uint32_t *maxSize,
+        dpiObjectType **objectTypeHandle);
+static bool njsConnection_getBindInfoFromValue(njsBaton *baton,
         bool scalarOnly, napi_env env, napi_value value, uint32_t *bindType,
-        uint32_t *maxSize);
+        uint32_t *maxSize, dpiObjectType **objectTypeHandle);
 static bool njsConnection_getExecuteManyOutBinds(njsBaton *baton, napi_env env,
         uint32_t numOutBinds, napi_value *outBinds);
 static bool njsConnection_getExecuteOutBinds(njsBaton *baton,
@@ -471,7 +481,7 @@ static bool njsConnection_createLobAsync(njsBaton *baton)
 static bool njsConnection_createLobPostAsync(njsBaton *baton, napi_env env,
         napi_value *args)
 {
-    return njsLob_new(baton, baton->lob, env, &args[1]);
+    return njsLob_new(baton->oracleDb, baton->lob, env, &args[1]);
 }
 
 
@@ -590,6 +600,11 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
 
     // handle queries
     if (baton->queryVars) {
+
+        // perform any initialization required within JavaScript
+        if (!njsVariable_initForQueryJS(baton->queryVars, baton->numQueryVars,
+                env, baton))
+            return false;
 
         // set metadata for the query
         if (!njsVariable_getMetadataMany(baton->queryVars, baton->numQueryVars,
@@ -969,13 +984,15 @@ static bool njsConnection_getBatchErrors(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsConnection_getBindTypeAndSizeFromArray()
-//   Get the bind type and maximum size from the array.
+// njsConnection_getBindInfoFromArray()
+//   Get the bind type, maximum size and object type handle from the array.
 //-----------------------------------------------------------------------------
-static bool njsConnection_getBindTypeAndSizeFromArray(njsBaton *baton,
-        napi_env env, napi_value value, uint32_t *bindType, uint32_t *maxSize)
+static bool njsConnection_getBindInfoFromArray(njsBaton *baton,
+        napi_env env, napi_value value, uint32_t *bindType, uint32_t *maxSize,
+        dpiObjectType **objectTypeHandle)
 {
     uint32_t arrayLength, i, elementBindType, elementMaxSize;
+    dpiObjectType *elementObjectTypeHandle;
     napi_valuetype valueType;
     napi_value element;
 
@@ -990,13 +1007,17 @@ static bool njsConnection_getBindTypeAndSizeFromArray(njsBaton *baton,
             continue;
         elementBindType = *bindType;
         elementMaxSize = *maxSize;
-        if (!njsConnection_getBindTypeAndSizeFromValue(baton, true, env,
-                element, &elementBindType, &elementMaxSize))
+        elementObjectTypeHandle = *objectTypeHandle;
+        if (!njsConnection_getBindInfoFromValue(baton, true, env,
+                element, &elementBindType, &elementMaxSize,
+                &elementObjectTypeHandle))
             return false;
         if (*bindType == NJS_DATATYPE_DEFAULT)
             *bindType = elementBindType;
         if (elementMaxSize > *maxSize)
             *maxSize = elementMaxSize;
+        if (!*objectTypeHandle && elementObjectTypeHandle)
+            *objectTypeHandle = elementObjectTypeHandle;
     }
 
     return true;
@@ -1004,15 +1025,17 @@ static bool njsConnection_getBindTypeAndSizeFromArray(njsBaton *baton,
 
 
 //-----------------------------------------------------------------------------
-// njsConnection_getBindTypeAndSizeFromValue()
-//   Get the bind type and maximum size from the specified value.
+// njsConnection_getBindInfoFromValue()
+//   Get the bind type, maximum size and object type handle from the specified
+// value.
 //-----------------------------------------------------------------------------
-static bool njsConnection_getBindTypeAndSizeFromValue(njsBaton *baton,
+static bool njsConnection_getBindInfoFromValue(njsBaton *baton,
         bool scalarOnly, napi_env env, napi_value value, uint32_t *bindType,
-        uint32_t *maxSize)
+        uint32_t *maxSize, dpiObjectType **objectTypeHandle)
 {
     napi_valuetype valueType;
     size_t tempLength;
+    njsDbObject *obj;
     void *buffer;
     njsLob *lob;
     bool check;
@@ -1070,12 +1093,23 @@ static bool njsConnection_getBindTypeAndSizeFromValue(njsBaton *baton,
             return true;
         }
 
+        // database objects can be bound
+        NJS_CHECK_NAPI(env, napi_instanceof(env, value,
+                baton->jsBaseDbObjectConstructor, &check))
+        if (check) {
+            *bindType = NJS_DATATYPE_OBJECT;
+            if (!njsDbObject_getInstance(baton->oracleDb, env, value, &obj))
+                return false;
+            *objectTypeHandle = obj->type->handle;
+            return true;
+        }
+
         // arrays can be bound (if not already processing an array)
         if (!scalarOnly) {
             NJS_CHECK_NAPI(env, napi_is_array(env, value, &check))
             if (check)
-                return njsConnection_getBindTypeAndSizeFromArray(baton, env,
-                        value, bindType, maxSize);
+                return njsConnection_getBindInfoFromArray(baton, env,
+                        value, bindType, maxSize, objectTypeHandle);
         }
 
     }
@@ -1225,6 +1259,9 @@ static bool njsConnection_getImplicitResults(njsBaton *baton,
             implicitResultsObj))
     implicitResult = baton->implicitResults;
     for (i = 0; i < numImplicitResults; i++) {
+        if (!njsVariable_initForQueryJS(implicitResult->queryVars,
+                implicitResult->numQueryVars, env, baton))
+            return false;
         if (!njsResultSet_new(baton, env, implicitResult->stmt,
                 baton->dpiStmtHandle, implicitResult->queryVars,
                 implicitResult->numQueryVars, !baton->getRS, &resultSet))
@@ -1261,6 +1298,11 @@ static bool njsConnection_getOutBinds(njsBaton *baton, napi_env env,
     } else {
         NJS_CHECK_NAPI(env, napi_create_object(env, &tempBinds))
     }
+
+    // perform any processing required for variables
+    if (!njsVariable_processJS(baton->bindVars, baton->numBindVars, env,
+            baton))
+        return false;
 
     // scan bind variables, skipping IN binds
     arrayPos = 0;
@@ -1439,6 +1481,79 @@ static napi_value njsConnection_getStmtCacheSize(napi_env env,
         return NULL;
     }
     return value;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getDbObjectClass()
+//   Looks up a database object type given its name and returns it to the
+// caller.
+//
+// PARAMETERS
+//   - name
+//   - JS callback which will receive (error, cls)
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_getDbObjectClass(napi_env env,
+        napi_callback_info info)
+{
+    napi_value args[2];
+    njsBaton *baton;
+
+    if (!njsConnection_createBaton(env, info, 2, args, &baton))
+        return NULL;
+    if (!njsConnection_getDbObjectClassProcessArgs(baton, env, args)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
+    njsBaton_queueWork(baton, env, "GetDbObjectClass",
+            njsConnection_getDbObjectClassAsync,
+            njsConnection_getDbObjectClassPostAsync, 2);
+    return NULL;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getDbObjectClassAsync()
+//   Worker function for njsConnection_getDbObjectClass().
+//-----------------------------------------------------------------------------
+static bool njsConnection_getDbObjectClassAsync(njsBaton *baton)
+{
+    njsConnection *conn = (njsConnection*) baton->callingInstance;
+
+    if (dpiConn_getObjectType(conn->handle, baton->name, baton->nameLength,
+            &baton->dpiObjectTypeHandle) < 0)
+        return njsBaton_setErrorDPI(baton);
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getDbObjectClassPostAsync()
+//   Sets up the arguments for the callback to JS.
+//-----------------------------------------------------------------------------
+static bool njsConnection_getDbObjectClassPostAsync(njsBaton *baton,
+        napi_env env, napi_value *args)
+{
+    njsDbObjectType *objType;
+
+    return njsDbObject_getSubClass(baton, baton->dpiObjectTypeHandle, env,
+            &args[1], &objType);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getDbObjectClassProcessArgs()
+//   Processes the arguments provided by the caller and place them on the
+// baton.
+//-----------------------------------------------------------------------------
+static bool njsConnection_getDbObjectClassProcessArgs(njsBaton *baton,
+        napi_env env, napi_value *args)
+{
+    if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
+        return false;
+
+    return true;
 }
 
 
@@ -1961,42 +2076,102 @@ static bool njsConnection_processImplicitResults(njsBaton *baton)
 //-----------------------------------------------------------------------------
 // njsConnection_queue()
 //   Creates an AQ queue associated with the connection.
+//
+// PARAMETERS
+//   - JS callback which will receive (error, queue)
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_queue(napi_env env, napi_callback_info info)
+static napi_value njsConnection_queue(napi_env env,
+        napi_callback_info info)
 {
-    napi_value connObj, nameObj, queueObj;
-    dpiQueue *queueHandle;
-    njsConnection *conn;
-    size_t nameLength;
-    char *name = NULL;
-    int status;
+    napi_value args[3];
+    njsBaton *baton;
 
-    // validate args
-    if (!njsUtils_validateArgs(env, info, 1, &nameObj, &connObj,
-            (njsBaseInstance**) &conn))
+    if (!njsConnection_createBaton(env, info, 3, args, &baton))
         return NULL;
-    if (!conn->handle) {
-        njsUtils_throwError(env, errInvalidConnection);
+    if (!njsConnection_queueProcessArgs(baton, env, args)) {
+        njsBaton_reportError(baton, env);
         return NULL;
     }
-    if (!njsUtils_validateArgType(env, &nameObj, napi_string, 0))
-        return NULL;
+    njsBaton_queueWork(baton, env, "Queue", njsConnection_queueAsync,
+            njsConnection_queuePostAsync, 2);
+    return NULL;
+}
 
-    // create queue
-    if (!njsUtils_copyStringFromJS(env, nameObj, &name, &nameLength))
-        return NULL;
-    status = dpiConn_newQueue(conn->handle, name, nameLength, NULL,
-            &queueHandle);
-    free(name);
-    if (status < 0) {
-        njsUtils_throwErrorDPI(env, conn->oracleDb);
-        return NULL;
+
+//-----------------------------------------------------------------------------
+// njsConnection_queueAsync()
+//   Worker function for njsConnection_queue().
+//-----------------------------------------------------------------------------
+static bool njsConnection_queueAsync(njsBaton *baton)
+{
+    njsConnection *conn = (njsConnection*) baton->callingInstance;
+
+    if (baton->typeName && dpiConn_getObjectType(conn->handle, baton->typeName,
+            baton->typeNameLength, &baton->dpiObjectTypeHandle) < 0)
+        return njsBaton_setErrorDPI(baton);
+    if (dpiConn_newQueue(conn->handle, baton->name, baton->nameLength,
+            baton->dpiObjectTypeHandle, &baton->dpiQueueHandle) < 0)
+        return njsBaton_setErrorDPI(baton);
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_queuePostAsync()
+//   Generates return values for njsConnection_queue().
+//-----------------------------------------------------------------------------
+static bool njsConnection_queuePostAsync(njsBaton *baton, napi_env env,
+        napi_value *args)
+{
+    return njsAqQueue_createFromHandle(baton, env, &args[1]);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_queueProcessArgs()
+//   Processes the arguments provided by the caller and place them on the
+// baton.
+//-----------------------------------------------------------------------------
+static bool njsConnection_queueProcessArgs(njsBaton *baton,
+        napi_env env, napi_value *args)
+{
+    napi_value typeObj, prototype;
+    napi_valuetype valueType;
+    njsDbObjectType *objType;
+    bool ok;
+
+    // get name for queue (first argument)
+    if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
+        return false;
+
+    // get payload type for queue (optional second argument)
+    // may be a string (identifying an object type) or an actual class
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, args[1], "payloadType",
+            &typeObj))
+    NJS_CHECK_NAPI(env, napi_typeof(env, typeObj, &valueType))
+    ok = (valueType == napi_undefined || valueType == napi_string);
+    if (valueType == napi_string) {
+        if (!njsUtils_copyStringFromJS(env, typeObj, &baton->typeName,
+                &baton->typeNameLength))
+            return false;
+    } else if (valueType == napi_function) {
+        NJS_CHECK_NAPI(env, napi_get_prototype(env, typeObj, &prototype))
+        NJS_CHECK_NAPI(env, napi_strict_equals(env, prototype,
+                baton->jsBaseDbObjectConstructor, &ok))
+        if (ok) {
+            if (!njsDbObjectType_getFromClass(env, typeObj, &objType))
+                return false;
+            if (dpiObjectType_addRef(objType->handle) < 0)
+                return njsBaton_setErrorDPI(baton);
+            baton->dpiObjectTypeHandle = objType->handle;
+        }
     }
-    if (!njsAqQueue_createFromHandle(env, conn, connObj, queueHandle,
-            &queueObj))
-        return NULL;
+    if (!ok)
+        return njsBaton_setError(baton, errInvalidPropertyValueInParam,
+                "payloadType", 2);
 
-    return queueObj;
+    return true;
 }
 
 
@@ -2043,6 +2218,7 @@ static bool njsConnection_scanExecuteBinds(njsBaton *baton, napi_env env,
 {
     njsConnection *conn = (njsConnection*) baton->callingInstance;
     uint32_t i, defaultBindType, defaultMaxSize, arraySize;
+    dpiObjectType *defaultObjectTypeHandle;
     napi_value name, bindUnit, bindValue;
     njsVariable *var;
     bool check;
@@ -2051,7 +2227,7 @@ static bool njsConnection_scanExecuteBinds(njsBaton *baton, napi_env env,
     for (i = 0; i < baton->numBindVars; i++) {
         var = &baton->bindVars[i];
 
-        // determine bind uint
+        // determine bind unit
         if (!bindNames) {
             NJS_CHECK_NAPI(env, napi_get_element(env, binds, i, &bindUnit))
         } else {
@@ -2073,34 +2249,43 @@ static bool njsConnection_scanExecuteBinds(njsBaton *baton, napi_env env,
                 var->maxSize == NJS_MAX_OUT_BIND_SIZE) {
             defaultBindType = var->bindDataType;
             defaultMaxSize = var->maxSize;
-            if (!njsConnection_getBindTypeAndSizeFromValue(baton, false, env,
-                    bindValue, &defaultBindType, &defaultMaxSize))
+            defaultObjectTypeHandle = var->dpiObjectTypeHandle;
+            if (!njsConnection_getBindInfoFromValue(baton, false, env,
+                    bindValue, &defaultBindType, &defaultMaxSize,
+                    &defaultObjectTypeHandle))
                 return false;
             if (var->bindDataType == NJS_DATATYPE_DEFAULT)
                 var->bindDataType = defaultBindType;
             if (defaultMaxSize > var->maxSize)
                 var->maxSize = defaultMaxSize;
+            if (!var->dpiObjectTypeHandle && defaultObjectTypeHandle)
+                var->dpiObjectTypeHandle = defaultObjectTypeHandle;
         }
 
-        // for IN binds, maxArraySize is ignored and obtained from the actual
-        // array size; for INOUT binds, maxArraySize does need to be specified
-        // by the application; for OUT binds, the value from the application
-        // must be accepted as is as there is no way to validate it
-        NJS_CHECK_NAPI(env, napi_is_array(env, bindValue, &check))
-        if (check) {
-            var->isArray = true;
-            NJS_CHECK_NAPI(env, napi_get_array_length(env, bindValue,
-                    &arraySize))
-            if (var->bindDir == NJS_BIND_IN) {
-                var->maxArraySize = arraySize;
-                if (var->maxArraySize == 0)
-                    var->maxArraySize = 1;
-            } else if (var->maxArraySize == 0) {
-                return njsBaton_setError(baton, errReqdMaxArraySize);
+        // for IN binds, maxArraySize is ignored and obtained from the
+        // actual array size; for INOUT binds, maxArraySize does need to be
+        // specified by the application; for OUT binds, the value from the
+        // application must be accepted as is as there is no way to
+        // validate it
+        if (var->bindDataType != NJS_DATATYPE_OBJECT) {
+
+            NJS_CHECK_NAPI(env, napi_is_array(env, bindValue, &check))
+            if (check) {
+                var->isArray = true;
+                NJS_CHECK_NAPI(env, napi_get_array_length(env, bindValue,
+                        &arraySize))
+                if (var->bindDir == NJS_BIND_IN) {
+                    var->maxArraySize = arraySize;
+                    if (var->maxArraySize == 0)
+                        var->maxArraySize = 1;
+                } else if (var->maxArraySize == 0) {
+                    return njsBaton_setError(baton, errReqdMaxArraySize);
+                }
+                if (var->bindDir == NJS_BIND_INOUT &&
+                        arraySize > var->maxArraySize)
+                    return njsBaton_setError(baton, errInvalidArraySize);
             }
-            if (var->bindDir == NJS_BIND_INOUT &&
-                    arraySize > var->maxArraySize)
-                return njsBaton_setError(baton, errInvalidArraySize);
+
         }
 
         // create buffer for variable
@@ -2129,9 +2314,11 @@ static bool njsConnection_scanExecuteBindUnit(njsBaton *baton,
         njsVariable *var, bool inExecuteMany, napi_env env,
         napi_value bindUnit, napi_value *bindValue)
 {
+    napi_value args[2], value, prototype, temp, connObj, dbObjectClasses, cls;
+    njsConnection *conn = (njsConnection*) baton->callingInstance;
+    bool okBindUnit, found, check;
+    dpiObjectType *objTypeHandle;
     napi_valuetype valueType;
-    bool okBindUnit, found;
-    napi_value args[2];
 
     // initialization
     args[1] = bindUnit;
@@ -2149,16 +2336,66 @@ static bool njsConnection_scanExecuteBindUnit(njsBaton *baton,
     }
 
     // get data type; when calling executeMany(), the data type is mandatory
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1, "type",
-            &var->bindDataType, &found))
-        return false;
-    if (found) {
+    // the data type will either be one of the integer constants identifying
+    // types, a string identifying an object type, or a constructor function
+    // identifying an object type
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, args[1], "type", &value));
+    NJS_CHECK_NAPI(env, napi_typeof(env, value, &valueType));
+    if (valueType == napi_function) {
+        NJS_CHECK_NAPI(env, napi_get_prototype(env, value, &prototype))
+        NJS_CHECK_NAPI(env, napi_strict_equals(env, prototype,
+                baton->jsBaseDbObjectConstructor, &check))
+        if (!check)
+            return njsBaton_setError(baton, errInvalidBindDataType, 2);
+        if (!njsDbObjectType_getFromClass(env, value, &var->objectType))
+            return false;
+        var->dpiObjectTypeHandle = var->objectType->handle;
+        var->bindDataType = NJS_DATATYPE_OBJECT;
         okBindUnit = true;
-    } else if (inExecuteMany) {
-        if (var->pos > 0)
-            return njsBaton_setError(baton, errMissingTypeByPos, var->pos);
-        return njsBaton_setError(baton, errMissingTypeByName, var->nameLength,
-                    var->name);
+    } else if (valueType == napi_string) {
+
+        // first check to see if the name is already cached
+        NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
+                &connObj))
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, connObj,
+                "_dbObjectClasses", &dbObjectClasses))
+        NJS_CHECK_NAPI(env, napi_get_property(env, dbObjectClasses, value,
+                &cls))
+        NJS_CHECK_NAPI(env, napi_typeof(env, cls, &valueType))
+        if (valueType == napi_function) {
+            if (!njsDbObjectType_getFromClass(env, cls, &var->objectType))
+                return false;
+
+        // if not, look up the type by its name
+        } else {
+            if (!njsUtils_copyStringFromJS(env, value, &baton->typeName,
+                    &baton->typeNameLength))
+                return false;
+            if (dpiConn_getObjectType(conn->handle, baton->typeName,
+                    baton->typeNameLength, &objTypeHandle) < 0)
+                return njsBaton_setErrorDPI(baton);
+            if (!njsDbObject_getSubClass(baton, objTypeHandle, env, &temp,
+                    &var->objectType)) {
+                dpiObjectType_release(objTypeHandle);
+                return false;
+            }
+            dpiObjectType_release(objTypeHandle);
+        }
+        var->dpiObjectTypeHandle = var->objectType->handle;
+        var->bindDataType = NJS_DATATYPE_OBJECT;
+        okBindUnit = true;
+    } else {
+        if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1, "type",
+                &var->bindDataType, &found))
+            return false;
+        if (found) {
+            okBindUnit = true;
+        } else if (inExecuteMany) {
+            if (var->pos > 0)
+                return njsBaton_setError(baton, errMissingTypeByPos, var->pos);
+            return njsBaton_setError(baton, errMissingTypeByName,
+                    var->nameLength, var->name);
+        }
     }
 
     // get maximum size for strings/buffers; this value is only used for
@@ -2218,6 +2455,7 @@ static bool njsConnection_scanExecuteManyBinds(njsBaton *baton,
         napi_env env, napi_value binds, napi_value bindNames)
 {
     uint32_t defaultBindType, defaultMaxSize, i, j;
+    dpiObjectType *defaultObjectTypeHandle;
     napi_value row, bindName, value;
     bool byPosition, isArray;
     napi_valuetype valueType;
@@ -2256,13 +2494,17 @@ static bool njsConnection_scanExecuteManyBinds(njsBaton *baton,
             // otherwise, determine bind type and size by examining the value
             defaultBindType = var->bindDataType;
             defaultMaxSize = var->maxSize;
-            if (!njsConnection_getBindTypeAndSizeFromValue(baton, true, env,
-                    value, &defaultBindType, &defaultMaxSize))
+            defaultObjectTypeHandle = var->dpiObjectTypeHandle;
+            if (!njsConnection_getBindInfoFromValue(baton, true, env,
+                    value, &defaultBindType, &defaultMaxSize,
+                    &defaultObjectTypeHandle))
                 return false;
             if (var->bindDataType == NJS_DATATYPE_DEFAULT)
                 var->bindDataType = defaultBindType;
             if (defaultMaxSize > var->maxSize)
                 var->maxSize = defaultMaxSize;
+            if (!var->dpiObjectTypeHandle && defaultObjectTypeHandle)
+                var->dpiObjectTypeHandle = defaultObjectTypeHandle;
 
         }
 

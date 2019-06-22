@@ -132,27 +132,7 @@
 #define NJS_DATATYPE_BUFFER             DPI_ORACLE_TYPE_RAW
 #define NJS_DATATYPE_CLOB               DPI_ORACLE_TYPE_CLOB
 #define NJS_DATATYPE_BLOB               DPI_ORACLE_TYPE_BLOB
-
-// database types (used for extended metadata)
-#define NJS_DB_TYPE_DEFAULT             0
-#define NJS_DB_TYPE_VARCHAR             DPI_ORACLE_TYPE_VARCHAR
-#define NJS_DB_TYPE_NUMBER              DPI_ORACLE_TYPE_NUMBER
-#define NJS_DB_TYPE_LONG                DPI_ORACLE_TYPE_LONG_VARCHAR
-#define NJS_DB_TYPE_DATE                DPI_ORACLE_TYPE_DATE
-#define NJS_DB_TYPE_RAW                 DPI_ORACLE_TYPE_RAW
-#define NJS_DB_TYPE_LONG_RAW            DPI_ORACLE_TYPE_LONG_RAW
-#define NJS_DB_TYPE_CHAR                DPI_ORACLE_TYPE_CHAR
-#define NJS_DB_TYPE_BINARY_FLOAT        DPI_ORACLE_TYPE_NATIVE_FLOAT
-#define NJS_DB_TYPE_BINARY_DOUBLE       DPI_ORACLE_TYPE_NATIVE_DOUBLE
-#define NJS_DB_TYPE_ROWID               DPI_ORACLE_TYPE_ROWID
-#define NJS_DB_TYPE_CLOB                DPI_ORACLE_TYPE_CLOB
-#define NJS_DB_TYPE_BLOB                DPI_ORACLE_TYPE_BLOB
-#define NJS_DB_TYPE_TIMESTAMP           DPI_ORACLE_TYPE_TIMESTAMP
-#define NJS_DB_TYPE_TIMESTAMP_TZ        DPI_ORACLE_TYPE_TIMESTAMP_TZ
-#define NJS_DB_TYPE_TIMESTAMP_LTZ       DPI_ORACLE_TYPE_TIMESTAMP_LTZ
-#define NJS_DB_TYPE_NCHAR               DPI_ORACLE_TYPE_NCHAR
-#define NJS_DB_TYPE_NVARCHAR            DPI_ORACLE_TYPE_NVARCHAR
-#define NJS_DB_TYPE_NCLOB               DPI_ORACLE_TYPE_NCLOB
+#define NJS_DATATYPE_OBJECT             DPI_ORACLE_TYPE_OBJECT
 
 // error messages used within the driver
 typedef enum {
@@ -207,6 +187,10 @@ typedef enum {
     errInvalidErrNum,
     errNodeTooOld,
     errInvalidAqMessage,
+    errConvertFromObjElement,
+    errConvertFromObjAttr,
+    errConvertToObjElement,
+    errConvertToObjAttr,
 
     // New ones should be added here
 
@@ -240,6 +224,7 @@ typedef struct njsBaton njsBaton;
 typedef struct njsClassDef njsClassDef;
 typedef struct njsConnection njsConnection;
 typedef struct njsConstant njsConstant;
+typedef struct njsDataTypeInfo njsDataTypeInfo;
 typedef struct njsFetchInfo njsFetchInfo;
 typedef struct njsImplicitResult njsImplicitResult;
 typedef struct njsLob njsLob;
@@ -255,6 +240,9 @@ typedef struct njsSodaOperation njsSodaOperation;
 typedef struct njsSubscription njsSubscription;
 typedef struct njsVariable njsVariable;
 typedef struct njsVariableBuffer njsVariableBuffer;
+typedef struct njsDbObject njsDbObject;
+typedef struct njsDbObjectType njsDbObjectType;
+typedef struct njsDbObjectAttr njsDbObjectAttr;
 
 
 //-----------------------------------------------------------------------------
@@ -305,6 +293,7 @@ struct njsAqMessage {
     NJS_INSTANCE_HEAD
     dpiMsgProps *handle;
     njsOracleDb *oracleDb;
+    njsDbObjectType *objectType;
 };
 
 // data for class AqQueue exposed to JS.
@@ -312,6 +301,7 @@ struct njsAqQueue {
     NJS_INSTANCE_HEAD
     dpiQueue *handle;
     njsConnection *conn;
+    njsDbObjectType *payloadObjectType;
 };
 
 // base instance (used for commonly held attributes)
@@ -351,6 +341,8 @@ struct njsBaton {
     size_t ipAddressLength;
     char *name;
     size_t nameLength;
+    char *typeName;
+    size_t typeNameLength;
     char *plsqlFixupCallback;
     size_t plsqlFixupCallbackLength;
     char *tag;
@@ -382,6 +374,8 @@ struct njsBaton {
     dpiMsgProps *dpiMsgPropsHandle;
     dpiPool *dpiPoolHandle;
     dpiStmt *dpiStmtHandle;
+    dpiObjectType *dpiObjectTypeHandle;
+    dpiQueue *dpiQueueHandle;
     dpiSodaColl *dpiSodaCollHandle;
     dpiSodaDoc *dpiSodaDocHandle;
     dpiSodaDocCursor *dpiSodaDocCursorHandle;
@@ -484,6 +478,7 @@ struct njsBaton {
     // constructors
     napi_value jsDateConstructor;
     napi_value jsLobConstructor;
+    napi_value jsBaseDbObjectConstructor;
 
     // asynchronous work parameters
     napi_async_work asyncWork;
@@ -588,6 +583,7 @@ struct njsOracleDb {
     napi_ref jsAqEnqOptionsConstructor;
     napi_ref jsAqMessageConstructor;
     napi_ref jsAqQueueConstructor;
+    napi_ref jsBaseDbObjectConstructor;
     napi_ref jsConnectionConstructor;
     napi_ref jsDateConstructor;
     napi_ref jsLobConstructor;
@@ -687,6 +683,8 @@ struct njsVariable {
     dpiOracleTypeNum dbTypeNum;
     dpiOracleTypeNum varTypeNum;
     dpiNativeTypeNum nativeTypeNum;
+    dpiObjectType *dpiObjectTypeHandle;
+    njsDbObjectType *objectType;
     dpiVar *dpiVarHandle;
     uint32_t bindDir;
     uint32_t bindDataType;
@@ -706,10 +704,48 @@ struct njsVariable {
 struct njsVariableBuffer {
     uint32_t numElements;
     dpiData *dpiVarData;
-    uint32_t numLobs;
     njsLobBuffer *lobs;
     uint32_t numQueryVars;
     njsVariable *queryVars;
+};
+
+
+// data for DbObject class exposed to JS
+struct njsDbObject {
+    NJS_INSTANCE_HEAD
+    dpiObject *handle;
+    njsDbObjectType *type;
+};
+
+// data for type information
+struct njsDataTypeInfo {
+    dpiOracleTypeNum oracleTypeNum;
+    dpiNativeTypeNum nativeTypeNum;
+    njsDbObjectType *objectType;
+};
+
+
+// data for DbObjectType class exposed to JS
+struct njsDbObjectType {
+    dpiObjectType *handle;
+    njsOracleDb *oracleDb;
+    uint16_t numAttributes;
+    njsDbObjectAttr *attributes;
+    napi_property_descriptor *descriptors;
+    njsDataTypeInfo elementTypeInfo;
+    napi_ref jsDbObjectConstructor;
+    char *fqn;
+    size_t fqnLength;
+};
+
+
+// data for object type attribute information
+struct njsDbObjectAttr {
+    dpiObjectAttr *handle;
+    njsOracleDb *oracleDb;
+    njsDataTypeInfo typeInfo;
+    const char *name;
+    uint32_t nameLength;
 };
 
 
@@ -768,6 +804,19 @@ bool njsBaton_setErrorDPI(njsBaton *baton);
 
 
 //-----------------------------------------------------------------------------
+// definition of functions for njsDbObject class
+//-----------------------------------------------------------------------------
+bool njsDbObject_getInstance(njsOracleDb *oracleDb, napi_env env,
+        napi_value value, njsDbObject **obj);
+bool njsDbObject_getSubClass(njsBaton *baton, dpiObjectType *objectTypeHandle,
+        napi_env env, napi_value *cls, njsDbObjectType **objectType);
+bool njsDbObject_new(njsDbObjectType *objType, dpiObject *objHandle,
+        napi_env env, napi_value *value);
+bool njsDbObjectType_getFromClass(napi_env env, napi_value cls,
+        njsDbObjectType **objType);
+
+
+//-----------------------------------------------------------------------------
 // definition of functions for njsOracleDb class
 //-----------------------------------------------------------------------------
 bool njsOracleDb_new(napi_env env, napi_value instanceObj,
@@ -780,14 +829,14 @@ bool njsOracleDb_prepareClass(njsOracleDb *oracleDb, napi_env env,
 // definition of functions for njsAqMessage class
 //-----------------------------------------------------------------------------
 bool njsAqMessage_createFromHandle(njsBaton *baton, dpiMsgProps *handle,
-        napi_env env, napi_value *messageObj);
+        napi_env env, njsAqQueue *queue, napi_value *messageObj);
 
 
 //-----------------------------------------------------------------------------
 // definition of functions for njsAqQueue class
 //-----------------------------------------------------------------------------
-bool njsAqQueue_createFromHandle(napi_env env, njsConnection *conn,
-        napi_value connObj, dpiQueue *handle, napi_value *obj);
+bool njsAqQueue_createFromHandle(njsBaton *baton, napi_env env,
+        napi_value *obj);
 
 
 //-----------------------------------------------------------------------------
@@ -801,7 +850,7 @@ bool njsConnection_newFromBaton(njsBaton *baton, napi_env env,
 // definition of functions for njsLob class
 //-----------------------------------------------------------------------------
 bool njsLob_populateBuffer(njsBaton *baton, njsLobBuffer *buffer);
-bool njsLob_new(njsBaton *baton, njsLobBuffer *buffer, napi_env env,
+bool njsLob_new(njsOracleDb *oracleDb, njsLobBuffer *buffer, napi_env env,
         napi_value *lobObj);
 
 //-----------------------------------------------------------------------------
@@ -868,6 +917,9 @@ bool njsSubscription_stopNotifications(njsSubscription *subscr);
 //-----------------------------------------------------------------------------
 // definition of utility functions
 //-----------------------------------------------------------------------------
+bool njsUtils_addTypeProperties(napi_env env, napi_value obj,
+        const char *propertyNamePrefix, uint32_t oracleTypeNum,
+        njsDbObjectType *objType);
 napi_value njsUtils_convertToBoolean(napi_env env, bool value);
 napi_value njsUtils_convertToInt(napi_env env, int32_t value);
 napi_value njsUtils_convertToString(napi_env env, const char *value,
@@ -889,6 +941,8 @@ bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
 bool njsUtils_genericThrowError(napi_env env);
 bool njsUtils_getError(napi_env env, dpiErrorInfo *errorInfo,
         const char *buffer, napi_value *error);
+bool njsUtils_getIntArg(napi_env env, napi_value *args, int index,
+        int32_t *result);
 napi_value njsUtils_getNull(napi_env env);
 bool njsUtils_getStringArg(napi_env env, napi_value *args, int index,
         char **result, size_t *resultLength);
@@ -937,7 +991,6 @@ void njsVariable_free(njsVariable *var);
 bool njsVariable_getArrayValue(njsVariable *var, uint32_t pos, njsBaton *baton,
         napi_env env, napi_value *value);
 uint32_t njsVariable_getDataType(njsVariable *var);
-uint32_t njsVariable_getDBType(njsVariable *var);
 bool njsVariable_getMetadataMany(njsVariable *vars, uint32_t numVars,
         napi_env env, bool extended, napi_value *metadata);
 bool njsVariable_getMetadataOne(njsVariable *var, napi_env env, bool extended,
@@ -946,11 +999,13 @@ bool njsVariable_getScalarValue(njsVariable *var, njsVariableBuffer *buffer,
         uint32_t pos, njsBaton *baton, napi_env env, napi_value *value);
 bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
         dpiStmt *handle, njsBaton *baton);
+bool njsVariable_initForQueryJS(njsVariable *vars, uint32_t numVars,
+        napi_env env, njsBaton *baton);
 bool njsVariable_performMapping(njsVariable *var, dpiQueryInfo *queryInfo,
         njsBaton *baton);
 bool njsVariable_process(njsVariable *vars, uint32_t numVars, uint32_t numRows,
         njsBaton *baton);
-bool njsVariable_processBuffer(njsVariable *var, njsVariableBuffer *buffer,
+bool njsVariable_processJS(njsVariable *vars, uint32_t numVars, napi_env env,
         njsBaton *baton);
 bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
         napi_value value, bool checkSize, njsBaton *baton);

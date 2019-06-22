@@ -51,6 +51,7 @@ File Name                   | Description
 ----------------------------|----------------------------------------------------------------------------------
 aqoptions.js                | Oracle Advanced Queuing (AQ) example setting options and message attributes
 aqmulti.js                  | Oracle Advanced Queuing (AQ) example passing multiple messages
+aqobject.js                 | Oracle Advanced Queuing (AQ) example passing an Oracle Database object
 aqraw.js                    | Basic Oracle Advanced Queuing (AQ) example passing text messages
 blobhttp.js                 | Simple web app that streams an image
 calltimeout.js              | Shows how to cancel a SQL statement if it doesn't complete in a specified time
@@ -66,7 +67,7 @@ demo.sql                    | SQL script to create extra schema objects for the 
 demodrop.sql                | SQL script to drop the extra schema objects for the examples
 dmlrupd1.js                 | Example of DML RETURNING with a single row match
 dmlrupd2.js                 | Example of DML RETURNING where multiple rows are matched
-em_batcherrors.js           | ``executeMany()`` example showing handling data errors
+em_batcherrors.js           | `executeMany()` example showing handling data errors
 em_dmlreturn1.js            | `executeMany()` example of DML RETURNING that returns single values
 em_dmlreturn2.js            | `executeMany()` example of DML RETURNING that returns multiple values
 em_insert1.js               | Array DML example using `executeMany()` with bind-by-name syntax
@@ -91,6 +92,7 @@ metadata.js                 | Shows the metadata available after executing SELEC
 plsqlarray.js               | Examples of binding PL/SQL "INDEX BY" tables
 plsqlfunc.js                | How to call a PL/SQL function
 plsqlproc.js                | How to call a PL/SQL procedure
+plsqlrecord.js              | Shows binding of PL/SQL RECORDS
 raw1.js                     | Shows using a Buffer to insert and select a RAW
 refcursor.js                | Shows using a ResultSet to fetch rows from a REF CURSOR
 refcursortoquerystream.js   | Converts a REF CURSOR returned from `execute()` to a query stream.
@@ -100,9 +102,12 @@ resultsettoquerystream.js   | Converts a ResultSet returned from `execute()` int
 rowlimit.js                 | Shows ways to limit the number of records fetched by queries
 select1.js                  | Executes a basic query without using a connection pool or ResultSet
 select2.js                  | Executes queries to show array and object output formats
+selectgeometry.js           | Insert and query Oracle Spatial geometries
 selectjson.js               | Shows some JSON features of Oracle Database
 selectjsonblob.js           | Shows how to use a BLOB as a JSON column store
+selectobject.js             | Insert and query a named Oracle database object
 selectstream.js             | Executes a basic query using a Readable Stream
+selectvarray.js             | Shows inserting and selecting from a VARRAY column
 sessionfixup.js             | Shows a pooled connection callback to efficiently set session state
 sessiontagging1.js          | Simple pooled connection tagging for setting session state
 sessiontagging2.js          | More complex example of pooled connection tagging for setting session state

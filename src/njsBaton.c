@@ -204,6 +204,7 @@ void njsBaton_free(njsBaton *baton, napi_env env)
     NJS_FREE_AND_CLEAR(baton->edition);
     NJS_FREE_AND_CLEAR(baton->ipAddress);
     NJS_FREE_AND_CLEAR(baton->name);
+    NJS_FREE_AND_CLEAR(baton->typeName);
     NJS_FREE_AND_CLEAR(baton->plsqlFixupCallback);
     NJS_FREE_AND_CLEAR(baton->tag);
     NJS_FREE_AND_CLEAR(baton->sodaMetaData);
@@ -250,6 +251,14 @@ void njsBaton_free(njsBaton *baton, napi_env env)
     if (baton->dpiStmtHandle) {
         dpiStmt_release(baton->dpiStmtHandle);
         baton->dpiStmtHandle = NULL;
+    }
+    if (baton->dpiObjectTypeHandle) {
+        dpiObjectType_release(baton->dpiObjectTypeHandle);
+        baton->dpiObjectTypeHandle = NULL;
+    }
+    if (baton->dpiQueueHandle) {
+        dpiQueue_release(baton->dpiQueueHandle);
+        baton->dpiQueueHandle = NULL;
     }
     if (baton->dpiSodaCollHandle) {
         dpiSodaColl_release(baton->dpiSodaCollHandle);
@@ -799,6 +808,14 @@ bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value)
     if (check)
         return true;
 
+    // database objects can be bound directly
+    status = napi_instanceof(env, value, baton->jsBaseDbObjectConstructor,
+            &check);
+    if (status != napi_ok)
+        return false;
+    if (check)
+        return true;
+
     return false;
 }
 
@@ -906,6 +923,11 @@ bool njsBaton_setConstructors(njsBaton *baton, napi_env env)
     // acquire the LOB constructor
     NJS_CHECK_NAPI(env, napi_get_reference_value(env,
             baton->oracleDb->jsLobConstructor, &baton->jsLobConstructor))
+
+    // acquire the base database object constructor
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            baton->oracleDb->jsBaseDbObjectConstructor,
+            &baton->jsBaseDbObjectConstructor))
 
     return true;
 }
