@@ -439,8 +439,9 @@ limitations under the License.
     - 29.2 [Creating SODA Collections](#creatingsodacollections)
     - 29.3 [Creating and Accessing SODA documents](#accessingsodadocuments)
     - 29.4 [SODA Query-by-Example Searches for JSON Documents](#sodaqbesearches)
-    - 29.5 [SODA Client-Assigned Keys and Collection Metadata](#sodaclientkeys)
-    - 29.6 [JSON Data Guides in SODA](#sodajsondataguide)
+    - 29.5 [SODA Text Searches](#sodatextsearches)
+    - 29.6 [SODA Client-Assigned Keys and Collection Metadata](#sodaclientkeys)
+    - 29.7 [JSON Data Guides in SODA](#sodajsondataguide)
 30. [Tracing SQL and PL/SQL Statements](#tracingsql)
 31. [Node.js Programming Styles and node-oracledb](#programstyles)
     - 31.1 [Callbacks and node-oracledb](#callbackoverview)
@@ -12945,7 +12946,31 @@ Some QBE examples are:
 
     See [Overview of QBE Spatial Operators][111].
 
-### <a name="sodaclientkeys"></a> 29.5 SODA Client-Assigned Keys and Collection Metadata
+### <a name="sodatextsearches"></a> 29.5 SODA Text Searches
+
+To perform text searches through documents, a [JSON search index][149]
+must be defined.  For example::
+
+```javascript
+await collection.createIndex({ name : "mySearchIdx");
+```
+
+See [SODA Index Specifications (Reference)][119] for information on
+SODA indexing.
+
+Documents in the indexed collection can be searched by running a
+filter (QBE) using the [`$contains`][148] operator:
+
+```javascript
+let documents = await collection.find().filter({item : { $contains : "books"}}).getDocuments();
+```
+
+This example will find all documents that have an `item` field
+containing the string "books" (case-insensitive).  For example, a
+document that contained `{item : "Books by Brothers Grimm"}` would be
+returned.
+
+### <a name="sodaclientkeys"></a> 29.6 SODA Client-Assigned Keys and Collection Metadata
 
 Default collections support JSON documents and use system generated
 document keys. Various storage options are also configured which
@@ -13072,7 +13097,7 @@ try {
 }
 ```
 
-### <a name="sodajsondataguide"></a> 29.6 JSON Data Guides in SODA
+### <a name="sodajsondataguide"></a> 29.7 JSON Data Guides in SODA
 
 SODA exposes Oracle Database's [JSON data guide][116] feature.  This
 lets you discover information about the structure and content of JSON
@@ -13680,3 +13705,5 @@ All exceptions are now passed through the error callback.
 [145]: https://github.com/oracle/node-oracledb/tree/master/examples/aqmulti.js
 [146]: https://github.com/oracle/node-oracledb/tree/master/examples/selectvarray.js
 [147]: https://github.com/oracle/node-oracledb/tree/master/examples/plsqlrecord.js
+[148]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C4C426FC-FD23-4B2E-8367-FA5F83F3F23A
+[149]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4848E6A0-58A7-44FD-8D6D-A033D0CCF9CB
