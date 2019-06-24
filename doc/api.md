@@ -18,6 +18,15 @@ limitations under the License.
 ##
 ## ===> *** Note: Go to [https://oracle.github.io/node-oracledb/doc/api.html](https://oracle.github.io/node-oracledb/doc/api.html) for production documentation ***
 
+## Manual Sections
+
+This document contains:
+
+- [Node-oracledb API Manual](#apimanual)
+- [Node-oracledb User Manual](#usermanual)
+
+For installation information, see the [Node-oracledb Installation Instructions][2].
+
 ##  <a name="contents"></a> Contents
 
 1. [Introduction](#intro)
