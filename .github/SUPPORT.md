@@ -4,9 +4,9 @@ Node-oracledb is an Open Source project.
 
 Searching and reading may be the quickest way to resolve a problem.
 
-## Node-oracledb Installation issues
+## Node-oracledb Installation
 
-Read the [Installation instructions](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md) and see [Troubleshooting](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#troubleshooting)
+Read the [Installation instructions](https://oracle.github.io/node-oracledb/INSTALL.html) and see [Troubleshooting](https://oracle.github.io/node-oracledb/INSTALL.html#troubleshooting)
 
 ## SQL and PL/SQL Questions
 
@@ -20,11 +20,11 @@ Ask Database, network connectivity, or other Oracle issues on an [OTN Forum](htt
 
 ## Node-oracledb Documentation
 
-The Node API documentation is divided into [API documentation](https://github.com/oracle/node-oracledb/blob/master/doc/api.md) and a [User Guide](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#connectionhandling)
+The Node API documentation is divided into [API documentation](https://oracle.github.io/node-oracledb/doc/api.html#apimanual) and a [User Guide](https://oracle.github.io/node-oracledb/doc/api.html#usermanual)
 
 ## Got a Node-oracledb question?
 
 Ask at [GitHub](https://github.com/oracle/node-oracledb/issues)
 
-When opening a new issue, fill in the template that will be shown.
+When opening a new issue, fill in an appropriate template.
 Include enough information for people to understand your problem.
