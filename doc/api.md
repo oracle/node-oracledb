@@ -4815,9 +4815,7 @@ time `pool.getConnection()` is called, a connection for that user is
 returned:
 
 ```javascript
-  pool.getConnection(
-    function (err, conn) { ... }
-  );
+const connection = await pool.getConnection();
 ```
 
 If a heterogeneous pool was created by setting
@@ -4826,13 +4824,12 @@ creation and credentials were omitted, then the user name and password
 may be used in `pool.getConnection()` like:
 
 ```javascript
-  pool.getConnection(
-    {
-      user     : 'hr',
-      password : mypw,  // mypw contains the hr schema password
-    },
-    function (err, conn) { ... }
-  );
+const connection = await pool.getConnection(
+  {
+	user     : 'hr',
+	password : mypw,  // mypw contains the hr schema password
+  }
+);,
 ```
 
 In this case, different user names may be used each time
@@ -6835,13 +6832,13 @@ For example, use *"localhost/XEPDB1"* to connect to the database *XE* on the loc
 ```javascript
 const oracledb = require('oracledb');
 
-oracledb.getConnection(
+const connection = await oracledb.getConnection(
   {
     user          : "hr",
     password      : mypw,  // mypw contains the hr schema password
     connectString : "localhost/XEPDB1"
-  },
-  . . .
+  }
+);
 ```
 
 For more information on Easy Connect strings see [Understanding the
@@ -6853,15 +6850,13 @@ A Net Service Name, such as `sales` in the example below, can be used
 to connect:
 
 ```javascript
-const oracledb = require('oracledb');
-
-oracledb.getConnection(
+const connection = await oracledb.getConnection(
   {
     user          : "hr",
     password      : mypw,  // mypw contains the hr schema password
     connectString : "sales"
-  },
-  . . .
+  }
+);
 ```
 
 This could be defined in a directory server, or in a local
@@ -6903,15 +6898,13 @@ documentation on `tnsnames.ora`][18].
 Full connection strings can be embedded in applications:
 
 ```javascript
-const oracledb = require('oracledb');
-
-oracledb.getConnection(
+const connection = await oracledb.getConnection(
   {
     user          : "hr",
     password      : mypw,  // mypw contains the hr schema password
     connectString : "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=mymachine.example.com)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl)))"
-  },
-  . . .
+  }
+);
 ```
 
 #### <a name="notjdbc"></a> 14.2.4 JDBC and Node-oracledb Connection Strings Compared
@@ -6926,15 +6919,13 @@ jdbc:oracle:thin:@hostname:port/service_name
 can use Oracle's Easy Connect syntax in node-oracledb:
 
 ```javascript
-const oracledb = require('oracledb');
-
-oracledb.getConnection(
+const connection = await oracledb.getConnection(
   {
     user          : "hr",
     password      : mypw,  // mypw contains the hr schema password
     connectString : "hostname:port/service_name"
-  },
-  . . .
+  }
+);
 ```
 
 Alternatively, if a JDBC connection string uses an old-style
@@ -6959,15 +6950,13 @@ finance =
 This can be referenced in node-oracledb:
 
 ```javascript
-const oracledb = require('oracledb');
-
-oracledb.getConnection(
+const connection = await oracledb.getConnection(
   {
     user          : "hr",
     password      : mypw,  // mypw contains the hr schema password
     connectString : "finance"
-  },
-  . . .
+  }
+);
 ```
 
 Alternatively the connection string can be [embedded](#embedtns) in the application.
@@ -12385,14 +12374,14 @@ const subscrOptions = {
 };
 
 async function ProcessAqMessages() {
-  connection = await oracledb.getConnection();
+  const connection = await oracledb.getConnection();  // get connection from a pool
   const queue = await connection.queue(queueName);
   const msg = await queue.deqOne();
   console.log(msg.payload.toString()
   await connection.close();
 }
 
-const connection = await oracledb.getConnection();
+const connection = await oracledb.getConnection();  // get connection from a pool
 await connection.subscribe(queueName, subscrOptions);
 await connection.close();
 ```
@@ -13339,8 +13328,8 @@ oracledb.getConnection(
 ```
 
 Since the returned promise will not have a catch block, as the
-developer intended to use the callback programming style, any
-rejections that occur will go unnoticed.  Node.js 4.0 added the
+intention was to use the callback programming style, any rejections
+that occur will go unnoticed.  Node.js 4.0 added the
 `unhandledRejection` event to prevent such rejections from going
 unnoticed:
 
