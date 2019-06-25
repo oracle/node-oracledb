@@ -10190,7 +10190,7 @@ const result = await connection.execute(
 );
 ```
 
-When the temporty LOB is no longer needed, it must be closed
+When the temporary LOB is no longer needed, it must be closed
 with [`lob.close()`](#lobclose):
 
 ```javascript
