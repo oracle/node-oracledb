@@ -4826,8 +4826,8 @@ may be used in `pool.getConnection()` like:
 ```javascript
 const connection = await pool.getConnection(
   {
-	user     : 'hr',
-	password : mypw,  // mypw contains the hr schema password
+        user     : 'hr',
+        password : mypw,  // mypw contains the hr schema password
   }
 );,
 ```
@@ -10664,15 +10664,30 @@ const bindVars = [
 
 ### <a name="dmlreturn"></a> 20.3 DML RETURNING Bind Parameters
 
-[DML][14] statements query or manipulate data in existing schema
-objects.
+"DML RETURNING" statements (such as `INSERT ... RETURNING ... INTO
+...`) are a way information can be returned about row changes from
+[DML][14] statements.  For example you can use DML RETURNING to get
+the ROWIDs of newly inserted rows.  Another common use case is to
+return [auto incremented column values ](#autoincrement).
 
-Bind parameters from "DML RETURNING" statements (such as `INSERT
-... RETURNING ... INTO ...`) can use `oracledb.BLOB`, `oracledb.CLOB`, `oracledb.STRING`,
-`oracledb.NUMBER` or `oracledb.DATE` for the OUT [`type`](#executebindParams).
+Bind parameters for DML RETURNING statements can use `oracledb.BLOB`,
+`oracledb.CLOB`, `oracledb.STRING`, `oracledb.NUMBER` or
+`oracledb.DATE` for the BIND_OUT [`type`](#executebindParams).  To
+bind named Oracle objects use the class name or
+[DbObject](#dbobjectclass) prototype class for the bind type, as shown
+for object binds in [Fetching Oracle Database Objects and
+Collections](#objects).
 
-For `oracledb.STRING` types, an error occurs if [`maxSize`](#executebindParams)
-is not large enough to hold a returned value.
+Oracle Database DATE, TIMESTAMP, TIMESTAMP WITH LOCAL TIME ZONE and
+TIMESTAMP WITH TIME ZONE types can be bound as `oracledb.DATE` for DML
+RETURNING.  These types can also be bound as `oracledb.STRING`, if
+desired.  ROWID and UROWID data to be returned can be bound as
+`oracledb.STRING`.  Note that a string representing a UROWID may be up
+to 5267 bytes long.
+
+For `oracledb.STRING` types, an error occurs if
+[`maxSize`](#executebindParams) is not large enough to hold a returned
+value.
 
 Note each DML RETURNING bind OUT parameter is returned as an array
 containing zero or more elements.  Application code that is designed
@@ -10681,19 +10696,9 @@ returned array length is not greater than one.  This will help identify
 invalid data or an incorrect `WHERE` clause that causes more results
 to be returned.
 
-Oracle Database DATE, TIMESTAMP, TIMESTAMP WITH LOCAL TIME ZONE
-and TIMESTAMP WITH TIME ZONE types can be bound as `oracledb.DATE` for DML
-RETURNING.  These types can also be bound as `oracledb.STRING`, if desired.
-ROWID and UROWID data to be returned can be bound as `oracledb.STRING`.
-Note that a string representing a UROWID may be up to 5267 bytes
-long.
-
 No duplicate binds are allowed in a DML statement with a `RETURNING`
 clause, and no duplication is allowed between bind parameters in the
 DML section and the `RETURNING` section of the statement.
-
-One common use case is to return an 'auto incremented' key values, see
-[Auto-Increment Columns](#autoincrement).
 
 An example of DML RETURNING binds is:
 
