@@ -13559,9 +13559,30 @@ When upgrading from node-oracledb version 3.0 to version 3.1:
 
 ### <a name="migratev31v40"></a> 32.5 Migrating from node-oracledb 3.1 to node-oracledb 4.0
 
-- Review the [CHANGELOG][83].
+When upgrading from node-oracledb version 3.1 to version 4.0:
 
-All exceptions are now passed through the error callback.
+- Review the [CHANGELOG][83] and take advantage of new features.
+
+- Update Node.js, if necessary.  Node-oracledb 4.0 requires
+    - Node.js 8.16 or higher
+    - Node.js 10.16, or higher
+    - Node.js 12
+
+- Review error handling.  Some errors have changed.  All exceptions
+  are now passed through the error callback.
+
+- Code that relied on numeric values for the [node-oracledb Type
+  Constants](#oracledbconstantsnodbtype) and [Oracle Database Type
+  Constants](#oracledbconstantsdbtype) will need updating.  Use the
+  constant names instead of their values.
+
+- To view node-oracledb class information, update code to use `Object.getPrototypeOf()`.
+
+- Optionally migrate [`outFormat`](#propdboutformat) constants to the
+  new, preferred names
+  [`OUT_FORMAT_ARRAY`](#oracledbconstantsoutformat) and
+  [`OUT_FORMAT_OBJECT`](#oracledbconstantsoutformat).
+
 
 [1]: https://www.npmjs.com/package/oracledb
 [2]: https://oracle.github.io/node-oracledb/INSTALL.html
