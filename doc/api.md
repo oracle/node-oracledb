@@ -11187,7 +11187,7 @@ For DbObjects representing Oracle collections, methods such as
 [`dbObject.getValues()`](#dbobjectmethodscolls) can be used:
 
 ```javascript
-console.log(o.SDO_ELEM_INFO.getKeys();    // [ 0, 1, 2 ]
+console.log(o.SDO_ELEM_INFO.getKeys());    // [ 0, 1, 2 ]
 console.log(o.SDO_ELEM_INFO.getValues()); // [ 1, 1003, 3 ]
 ```
 
