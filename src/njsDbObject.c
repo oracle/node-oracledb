@@ -774,8 +774,13 @@ static bool njsDbObject_transformFromOracle(njsDbObject *obj, napi_env env,
                     value))
             return true;
         case DPI_ORACLE_TYPE_NUMBER:
-            NJS_CHECK_NAPI(env, napi_create_double(env, data->value.asDouble,
-                    value))
+            if (typeInfo->nativeTypeNum == DPI_NATIVE_TYPE_INT64) {
+                NJS_CHECK_NAPI(env, napi_create_int64(env, data->value.asInt64,
+                        value))
+            } else {
+                NJS_CHECK_NAPI(env, napi_create_double(env,
+                        data->value.asDouble, value))
+            }
             return true;
         case DPI_ORACLE_TYPE_NATIVE_INT:
             NJS_CHECK_NAPI(env, napi_create_int64(env, data->value.asInt64,
