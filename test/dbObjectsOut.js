@@ -76,12 +76,12 @@ describe('194. dbObjectsOut.js', () => {
     try {
       let typeName = "NODB_TEST194_TYP";
       let cls = await connection.getDbObjectClass( typeName );
-      
+
       let sql = 'begin nodb_test194_proc(:out); end;';
       let bindVar = { out : { type : cls, dir : oracledb.BIND_OUT } };
       let result = await connection.execute(sql, bindVar);
       let obj = result.outBinds.out;
-      
+
       should.equal ( obj.NAME, 'Christopher Jones' );
     } catch(err) {
       should.not.exist(err);

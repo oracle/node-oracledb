@@ -277,7 +277,7 @@ describe('2. pool.js', function() {
         // The third connection should throw NJS-040 error within queueTimeout ms,
         // No NJS-040 error means poolMax parameter failed to limit connection number
         function (cb) {
-          pool.getConnection(function (err, newConn) {
+          pool.getConnection(function (err) {
             if (err && err.message.startsWith("NJS-040")) {
               cb();
             } else {

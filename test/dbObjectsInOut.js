@@ -1,6 +1,6 @@
 /* Copyright (c) 2019. Oracle and/or its affiliates.  All rights reserved. */
 /******************************************************************************
- * 
+ *
  * You may not use the identified files except in compliance with the Apache
  * License, Version 2.0 (the "License.")
  *
@@ -39,7 +39,7 @@ describe ('195. dbObjectsInOut.js', function () {
     try {
       connection = await oracledb.getConnection (dbConfig);
 
-      let sql = 
+      let sql =
         `create type nodb_test195_typ as object (
            id  number,
            name varchar2 (50)
@@ -47,7 +47,7 @@ describe ('195. dbObjectsInOut.js', function () {
       await connection.execute (sql);
       await connection.commit ();
 
-      let proc = 
+      let proc =
         `create or replace procedure nodb_test195_proc
            (a in out nodb_test195_typ) as
          begin
@@ -67,7 +67,7 @@ describe ('195. dbObjectsInOut.js', function () {
       should.not.exist (err);
     }
   });
-  
+
 
   after ( async () => {
     try {
@@ -90,12 +90,12 @@ describe ('195. dbObjectsInOut.js', function () {
       let typeName = "NODB_TEST195_TYP";
       let cls = await connection.getDbObjectClass (typeName);
       let sql = "begin nodb_test195_proc( :a ); end; ";
-      let bindVar = { a : 
-                      { type : cls, 
+      let bindVar = { a :
+                      { type : cls,
                         dir : oracledb.BIND_INOUT,
-                        val : null 
+                        val : null
                       }
-                    };
+      };
       let result = await connection.execute (sql, bindVar);
       let obj = result.outBinds.a;
 
@@ -116,14 +116,14 @@ describe ('195. dbObjectsInOut.js', function () {
         NAME : 'Tom'
       };
       let testObj = new cls (objData);
-         
+
       let sql = "begin nodb_test195_proc( :a ); end; ";
-      let bindVar = { a : 
-                      { type : cls, 
+      let bindVar = { a :
+                      { type : cls,
                         dir : oracledb.BIND_INOUT,
                         val : testObj
                       }
-                    };
+      };
       let result = await connection.execute (sql, bindVar);
       let obj = result.outBinds.a;
 
@@ -144,14 +144,14 @@ describe ('195. dbObjectsInOut.js', function () {
         NAME : 'Dick'
       };
       let testObj = new cls (objData);
-         
+
       let sql = "begin nodb_test195_proc( :a ); end; ";
-      let bindVar = { a : 
-                      { type : cls, 
+      let bindVar = { a :
+                      { type : cls,
                         dir : oracledb.BIND_INOUT,
                         val : testObj
                       }
-                    };
+      };
       let result = await connection.execute (sql, bindVar);
       let obj = result.outBinds.a;
       should.equal ( obj.NAME, null );
@@ -171,14 +171,14 @@ describe ('195. dbObjectsInOut.js', function () {
         NAME : 'Harry'
       };
       let testObj = new cls (objData);
-         
+
       let sql = "begin nodb_test195_proc( :a ); end; ";
-      let bindVar = { a : 
-                      { type : cls, 
+      let bindVar = { a :
+                      { type : cls,
                         dir : oracledb.BIND_INOUT,
                         val : testObj
                       }
-                    };
+      };
       let result = await connection.execute (sql, bindVar);
       let obj = result.outBinds.a;
       should.equal ( obj, null ) ;

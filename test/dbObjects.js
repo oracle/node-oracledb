@@ -1,6 +1,6 @@
 /* Copyright (c) 2019. Oracle and/or its affiliates.  All rights reserved. */
 /******************************************************************************
- * 
+ *
  * You may not use the identified files except in compliance with the Apache
  * License, Version 2.0 (the "License.")
  *
@@ -39,7 +39,7 @@ describe ('193. Database Object type(s)', function () {
     oracledb.getConnection (
       {
         user :  dbConfig.user,
-        password : dbConfig.password, 
+        password : dbConfig.password,
         connectString : dbConfig.connectString
       },
       function (err, conn) {
@@ -57,29 +57,29 @@ describe ('193. Database Object type(s)', function () {
       done();
     });
   });
-  
+
   it('193.1 Insert an object with normal numeric/string values of attributes',
-     function (done) {
-       var doCreateType = function(cb) {
-         var sql =  "  CREATE TYPE NODB_TEST1_TYP AS OBJECT (  \n" +
+    function (done) {
+      var doCreateType = function(cb) {
+        var sql =  "  CREATE TYPE NODB_TEST1_TYP AS OBJECT (  \n" +
                     "    ID  NUMBER, \n" +
                     "    NAME VARCHAR2(30) \n" +
                     "  ); \n" ;
 
-                    
-         connection.execute (
-           sql,
-           { },
-           { autoCommit : true },
-           function (err, result) {
-             should.not.exist (err);
-             cb();
-           }
-         );
-       };
 
-       var doCreateTable = function (cb) {
-         var proc =
+        connection.execute (
+          sql,
+          { },
+          { autoCommit : true },
+          function (err) {
+            should.not.exist (err);
+            cb();
+          }
+        );
+      };
+
+      var doCreateTable = function (cb) {
+        var proc =
            "BEGIN \n" +
            "  DECLARE \n" +
            "  e_table_missing EXCEPTION; \n" +
@@ -96,110 +96,95 @@ describe ('193. Database Object type(s)', function () {
            "    ) \n" +
            "  '); \n" +
            "END; ";
-         connection.execute(
-           proc,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doDropTable = function (cb) {
-         var sql = "DROP TABLE nodb_tab_dbObjattr1 PURGE";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doDropType = function(cb) {
-         var sql = "DROP TYPE NODB_TEST1_TYP";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             connection.commit ( function (err) {
-               should.not.exist (err);
-               cb();
-             });
-           }
-         );
-       };
-       
-       var doInsert = function (cb) {
-         var sql = 'INSERT INTO NODB_TAB_DBOBJATTR1 VALUES (:1)';
-         var objData = {
-           ID : 201,
-           NAME : 'Christopher Jones'
-         };
-         connection.getDbObjectClass (
-           "NODB_TEST1_TYP",
-           function (err, objType) {
-             var testObj = new objType (objData);
-             connection.execute (sql, [testObj], function (err, result) {
-               should.not.exist (err);
-               connection.commit (function (err) {
-                 should.not.exist(err);
-                 cb();
-               });
-             });
-           }
-         );
-       };
+        connection.execute(
+          proc,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
 
-       var doQuery = function (cb) {
-         var sql = "select * from NODB_TAB_DBOBJATTR1";
-         connection.execute(
-           sql,
-           function(err, result) {
-             should.not.exist(err);
-             var count = result.rows.length;
-             for ( var row = 0; row < count; row++) {
-               var obj = result.rows[row][0];
-               should.strictEqual ( obj['ID'], 201);
-             }
-             cb();
-           }
-         );
-       };
+      var doDropTable = function (cb) {
+        var sql = "DROP TABLE nodb_tab_dbObjattr1 PURGE";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
 
-       async.series ([
-         doCreateType,
-         doCreateTable,
-         doInsert,
-         doDropTable,
-         doDropType
-       ], done);
-     }
+      var doDropType = function(cb) {
+        var sql = "DROP TYPE NODB_TEST1_TYP";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            connection.commit ( function (err) {
+              should.not.exist (err);
+              cb();
+            });
+          }
+        );
+      };
+
+      var doInsert = function (cb) {
+        var sql = 'INSERT INTO NODB_TAB_DBOBJATTR1 VALUES (:1)';
+        var objData = {
+          ID : 201,
+          NAME : 'Christopher Jones'
+        };
+        connection.getDbObjectClass (
+          "NODB_TEST1_TYP",
+          function (err, objType) {
+            var testObj = new objType (objData);
+            connection.execute (sql, [testObj], function (err) {
+              should.not.exist (err);
+              connection.commit (function (err) {
+                should.not.exist(err);
+                cb();
+              });
+            });
+          }
+        );
+      };
+
+
+      async.series ([
+        doCreateType,
+        doCreateTable,
+        doInsert,
+        doDropTable,
+        doDropType
+      ], done);
+    }
   );
 
 
   it('193.2 Insert an object with null numeric/string values of attributes',
-     function (done) {
-       var doCreateType = function(cb) {
-         var sql =  "  CREATE TYPE NODB_TEST2_TYP AS OBJECT (  \n" +
+    function (done) {
+      var doCreateType = function(cb) {
+        var sql =  "  CREATE TYPE NODB_TEST2_TYP AS OBJECT (  \n" +
                     "    ID  NUMBER, \n" +
                     "    NAME VARCHAR2(30) \n" +
                     "  ); \n" ;
 
-                    
-         connection.execute (
-           sql,
-           { },
-           { autoCommit : true },
-           function (err, result) {
-             should.not.exist (err);
-             cb();
-           }
-         );
-       };
 
-       var doCreateTable = function (cb) {
-         var proc =
+        connection.execute (
+          sql,
+          { },
+          { autoCommit : true },
+          function (err) {
+            should.not.exist (err);
+            cb();
+          }
+        );
+      };
+
+      var doCreateTable = function (cb) {
+        var proc =
            "BEGIN \n" +
            "  DECLARE \n" +
            "  e_table_missing EXCEPTION; \n" +
@@ -216,110 +201,95 @@ describe ('193. Database Object type(s)', function () {
            "    ) \n" +
            "  '); \n" +
            "END; ";
-         connection.execute(
-           proc,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doDropTable = function (cb) {
-         var sql = "DROP TABLE nodb_tab_dbObjattr2 PURGE";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             connection.commit (function (err) {
-               should.not.exist (err);
-               cb ();
-             });
-           }
-         );
-       };
-       
-       var doDropType = function(cb) {
-         var sql = "DROP TYPE NODB_TEST2_TYP";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doInsert = function (cb) {
-         var sql = 'INSERT INTO NODB_TAB_DBOBJATTR2 VALUES (:1)';
-         var objData = {
-           ID : null,
-           NAME : 'Christopher Jones'
-         };
-         connection.getDbObjectClass (
-           "NODB_TEST2_TYP",
-           function (err, objType) {
-             var testObj = new objType (objData);
-             connection.execute (sql, [testObj], function (err, result) {
-               should.not.exist (err);
-               connection.commit (function (err) {
-                 should.not.exist(err);
-                 cb();
-               });
-             });
-           }
-         );
-       };
+        connection.execute(
+          proc,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
 
-       var doQuery = function (cb) {
-         var sql = "select * from NODB_TAB_DBOBJATTR2";
-         connection.execute(
-           sql,
-           function(err, result) {
-             should.not.exist(err);
-             var count = result.rows.length;
-             for ( var row = 0; row < count; row++) {
-               var obj = result.rows[row][0];
-               should.strictEqual ( obj['ID'], undefined);
-             }
-             cb();
-           }
-         );
-       };
+      var doDropTable = function (cb) {
+        var sql = "DROP TABLE nodb_tab_dbObjattr2 PURGE";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            connection.commit (function (err) {
+              should.not.exist (err);
+              cb ();
+            });
+          }
+        );
+      };
 
-       async.series ([
-         doCreateType,
-         doCreateTable,
-         doInsert,
-         doDropTable,
-         doDropType
-       ], done);
-     }
+      var doDropType = function(cb) {
+        var sql = "DROP TYPE NODB_TEST2_TYP";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
+
+      var doInsert = function (cb) {
+        var sql = 'INSERT INTO NODB_TAB_DBOBJATTR2 VALUES (:1)';
+        var objData = {
+          ID : null,
+          NAME : 'Christopher Jones'
+        };
+        connection.getDbObjectClass (
+          "NODB_TEST2_TYP",
+          function (err, objType) {
+            var testObj = new objType (objData);
+            connection.execute (sql, [testObj], function (err) {
+              should.not.exist (err);
+              connection.commit (function (err) {
+                should.not.exist(err);
+                cb();
+              });
+            });
+          }
+        );
+      };
+
+
+      async.series ([
+        doCreateType,
+        doCreateTable,
+        doInsert,
+        doDropTable,
+        doDropType
+      ], done);
+    }
   );
 
 
   it('193.3 Insert an object with null string values of attributes',
-     function (done) {
-       var doCreateType = function(cb) {
-         var sql =  "  CREATE TYPE NODB_TEST3_TYP AS OBJECT (  \n" +
+    function (done) {
+      var doCreateType = function(cb) {
+        var sql =  "  CREATE TYPE NODB_TEST3_TYP AS OBJECT (  \n" +
                     "    ID  NUMBER, \n" +
                     "    NAME VARCHAR2(30) \n" +
                     "  ); \n" ;
 
-                    
-         connection.execute (
-           sql,
-           { },
-           { autoCommit : true },
-           function (err, result) {
-             should.not.exist (err);
-             cb();
-           }
-         );
-       };
 
-       var doCreateTable = function (cb) {
-         var proc =
+        connection.execute (
+          sql,
+          { },
+          { autoCommit : true },
+          function (err) {
+            should.not.exist (err);
+            cb();
+          }
+        );
+      };
+
+      var doCreateTable = function (cb) {
+        var proc =
            "BEGIN \n" +
            "  DECLARE \n" +
            "  e_table_missing EXCEPTION; \n" +
@@ -336,111 +306,96 @@ describe ('193. Database Object type(s)', function () {
            "    ) \n" +
            "  '); \n" +
            "END; ";
-         connection.execute(
-           proc,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doDropTable = function (cb) {
-         var sql = "DROP TABLE nodb_tab_dbObjattr3 PURGE";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             connection.commit (function (err) {
-               should.not.exist (err);
-               cb ();
-             });
-           }
-         );
-       };
-       
-       var doDropType = function(cb) {
-         var sql = "DROP TYPE NODB_TEST3_TYP";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doInsert = function (cb) {
-         var sql = 'INSERT INTO NODB_TAB_DBOBJATTR3 VALUES (:1)';
-         var objData = {
-           ID :301,
-           NAME : null
-         };
-         connection.getDbObjectClass (
-           "NODB_TEST3_TYP",
-           function (err, objType) {
-             var testObj = new objType (objData);
-             connection.execute (sql, [testObj], function (err, result) {
-               should.not.exist (err);
-               connection.commit (function (err) {
-                 should.not.exist(err);
-                 cb();
-               });
-             });
-           }
-         );
-       };
+        connection.execute(
+          proc,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
 
-       var doQuery = function (cb) {
-         var sql = "select * from NODB_TAB_DBOBJATTR3";
-         connection.execute(
-           sql,
-           function(err, result) {
-             should.not.exist(err);
-             var count = result.rows.length;
-             for ( var row = 0; row < count; row++) {
-               var obj = result.rows[row][0];
-               should.strictEqual ( obj.NAME, undefined);
-             }
-             cb();
-           }
-         );
-       };
+      var doDropTable = function (cb) {
+        var sql = "DROP TABLE nodb_tab_dbObjattr3 PURGE";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            connection.commit (function (err) {
+              should.not.exist (err);
+              cb ();
+            });
+          }
+        );
+      };
 
-       async.series ([
-         doCreateType,
-         doCreateTable,
-         doInsert,
-         doDropTable,
-         doDropType
-       ], done);
-     }
+      var doDropType = function(cb) {
+        var sql = "DROP TYPE NODB_TEST3_TYP";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
+
+      var doInsert = function (cb) {
+        var sql = 'INSERT INTO NODB_TAB_DBOBJATTR3 VALUES (:1)';
+        var objData = {
+          ID :301,
+          NAME : null
+        };
+        connection.getDbObjectClass (
+          "NODB_TEST3_TYP",
+          function (err, objType) {
+            var testObj = new objType (objData);
+            connection.execute (sql, [testObj], function (err) {
+              should.not.exist (err);
+              connection.commit (function (err) {
+                should.not.exist(err);
+                cb();
+              });
+            });
+          }
+        );
+      };
+
+
+      async.series ([
+        doCreateType,
+        doCreateTable,
+        doInsert,
+        doDropTable,
+        doDropType
+      ], done);
+    }
   );
 
 
 
   it('193.4 Insert an object with undefined numeric values of attributes',
-     function (done) {
-       var doCreateType = function(cb) {
-         var sql =  "  CREATE TYPE NODB_TEST4_TYP AS OBJECT (  \n" +
+    function (done) {
+      var doCreateType = function(cb) {
+        var sql =  "  CREATE TYPE NODB_TEST4_TYP AS OBJECT (  \n" +
                     "    ID  NUMBER, \n" +
                     "    NAME VARCHAR2(30) \n" +
                     "  ); \n" ;
 
-                    
-         connection.execute (
-           sql,
-           { },
-           { autoCommit : true },
-           function (err, result) {
-             should.not.exist (err);
-             cb();
-           }
-         );
-       };
 
-       var doCreateTable = function (cb) {
-         var proc =
+        connection.execute (
+          sql,
+          { },
+          { autoCommit : true },
+          function (err) {
+            should.not.exist (err);
+            cb();
+          }
+        );
+      };
+
+      var doCreateTable = function (cb) {
+        var proc =
            "BEGIN \n" +
            "  DECLARE \n" +
            "  e_table_missing EXCEPTION; \n" +
@@ -457,110 +412,95 @@ describe ('193. Database Object type(s)', function () {
            "    ) \n" +
            "  '); \n" +
            "END; ";
-         connection.execute(
-           proc,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doDropTable = function (cb) {
-         var sql = "DROP TABLE nodb_tab_dbObjattr4 PURGE";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             connection.commit (function (err) {
-               should.not.exist (err);
-               cb ();
-             });
-           }
-         );
-       };
-       
-       var doDropType = function(cb) {
-         var sql = "DROP TYPE NODB_TEST4_TYP";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doInsert = function (cb) {
-         var sql = 'INSERT INTO NODB_TAB_DBOBJATTR4 VALUES (:1)';
-         var objData = {
-           ID : undefined,
-           NAME : 'Christopher Jones'
-         };
-         connection.getDbObjectClass (
-           "NODB_TEST4_TYP",
-           function (err, objType) {
-             var testObj = new objType (objData);
-             connection.execute (sql, [testObj], function (err, result) {
-               should.not.exist (err);
-               connection.commit (function (err) {
-                 should.not.exist(err);
-                 cb();
-               });
-             });
-           }
-         );
-       };
+        connection.execute(
+          proc,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
 
-       var doQuery = function (cb) {
-         var sql = "select * from NODB_TAB_DBOBJATTR2";
-         connection.execute(
-           sql,
-           function(err, result) {
-             should.not.exist(err);
-             var count = result.rows.length;
-             for ( var row = 0; row < count; row++) {
-               var obj = result.rows[row][0];
-               should.strictEqual ( obj['ID'], undefined);
-             }
-             cb();
-           }
-         );
-       };
+      var doDropTable = function (cb) {
+        var sql = "DROP TABLE nodb_tab_dbObjattr4 PURGE";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            connection.commit (function (err) {
+              should.not.exist (err);
+              cb ();
+            });
+          }
+        );
+      };
 
-       async.series ([
-         doCreateType,
-         doCreateTable,
-         doInsert,
-         doDropTable,
-         doDropType
-       ], done);
-     }
+      var doDropType = function(cb) {
+        var sql = "DROP TYPE NODB_TEST4_TYP";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
+
+      var doInsert = function (cb) {
+        var sql = 'INSERT INTO NODB_TAB_DBOBJATTR4 VALUES (:1)';
+        var objData = {
+          ID : undefined,
+          NAME : 'Christopher Jones'
+        };
+        connection.getDbObjectClass (
+          "NODB_TEST4_TYP",
+          function (err, objType) {
+            var testObj = new objType (objData);
+            connection.execute (sql, [testObj], function (err) {
+              should.not.exist (err);
+              connection.commit (function (err) {
+                should.not.exist(err);
+                cb();
+              });
+            });
+          }
+        );
+      };
+
+
+      async.series ([
+        doCreateType,
+        doCreateTable,
+        doInsert,
+        doDropTable,
+        doDropType
+      ], done);
+    }
   );
 
 
   it('193.5 Insert an object with undefined string values of attributes',
-     function (done) {
-       var doCreateType = function(cb) {
-         var sql =  "  CREATE TYPE NODB_TEST5_TYP AS OBJECT (  \n" +
+    function (done) {
+      var doCreateType = function(cb) {
+        var sql =  "  CREATE TYPE NODB_TEST5_TYP AS OBJECT (  \n" +
                     "    ID  NUMBER, \n" +
                     "    NAME VARCHAR2(30) \n" +
                     "  ); \n" ;
 
-                    
-         connection.execute (
-           sql,
-           { },
-           { autoCommit : true },
-           function (err, result) {
-             should.not.exist (err);
-             cb();
-           }
-         );
-       };
 
-       var doCreateTable = function (cb) {
-         var proc =
+        connection.execute (
+          sql,
+          { },
+          { autoCommit : true },
+          function (err) {
+            should.not.exist (err);
+            cb();
+          }
+        );
+      };
+
+      var doCreateTable = function (cb) {
+        var proc =
            "BEGIN \n" +
            "  DECLARE \n" +
            "  e_table_missing EXCEPTION; \n" +
@@ -577,110 +517,95 @@ describe ('193. Database Object type(s)', function () {
            "    ) \n" +
            "  '); \n" +
            "END; ";
-         connection.execute(
-           proc,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doDropTable = function (cb) {
-         var sql = "DROP TABLE nodb_tab_dbObjattr5 PURGE";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             connection.commit (function (err) {
-               should.not.exist (err);
-               cb ();
-             });
-           }
-         );
-       };
-       
-       var doDropType = function(cb) {
-         var sql = "DROP TYPE NODB_TEST5_TYP";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doInsert = function (cb) {
-         var sql = 'INSERT INTO NODB_TAB_DBOBJATTR5 VALUES (:1)';
-         var objData = {
-           ID :301,
-           NAME : undefined
-         };
-         connection.getDbObjectClass (
-           "NODB_TEST5_TYP",
-           function (err, objType) {
-             var testObj = new objType (objData);
-             connection.execute (sql, [testObj], function (err, result) {
-               should.not.exist (err);
-               connection.commit (function (err) {
-                 should.not.exist(err);
-                 cb();
-               });
-             });
-           }
-         );
-       };
+        connection.execute(
+          proc,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
 
-       var doQuery = function (cb) {
-         var sql = "select * from NODB_TAB_DBOBJATTR5";
-         connection.execute(
-           sql,
-           function(err, result) {
-             should.not.exist(err);
-             var count = result.rows.length;
-             for ( var row = 0; row < count; row++) {
-               var obj = result.rows[row][0];
-               should.strictEqual ( obj.NAME, undefined);
-             }
-             cb();
-           }
-         );
-       };
+      var doDropTable = function (cb) {
+        var sql = "DROP TABLE nodb_tab_dbObjattr5 PURGE";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            connection.commit (function (err) {
+              should.not.exist (err);
+              cb ();
+            });
+          }
+        );
+      };
 
-       async.series ([
-         doCreateType,
-         doCreateTable,
-         doInsert,
-         doDropTable,
-         doDropType
-       ], done);
-     }
+      var doDropType = function(cb) {
+        var sql = "DROP TYPE NODB_TEST5_TYP";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
+
+      var doInsert = function (cb) {
+        var sql = 'INSERT INTO NODB_TAB_DBOBJATTR5 VALUES (:1)';
+        var objData = {
+          ID :301,
+          NAME : undefined
+        };
+        connection.getDbObjectClass (
+          "NODB_TEST5_TYP",
+          function (err, objType) {
+            var testObj = new objType (objData);
+            connection.execute (sql, [testObj], function (err) {
+              should.not.exist (err);
+              connection.commit (function (err) {
+                should.not.exist(err);
+                cb();
+              });
+            });
+          }
+        );
+      };
+
+
+      async.series ([
+        doCreateType,
+        doCreateTable,
+        doInsert,
+        doDropTable,
+        doDropType
+      ], done);
+    }
   );
 
 
   it('193.6 Insert an empty object - no attributes',
-     function (done) {
-       var doCreateType = function(cb) {
-         var sql =  "  CREATE TYPE NODB_TEST6_TYP AS OBJECT (  \n" +
+    function (done) {
+      var doCreateType = function(cb) {
+        var sql =  "  CREATE TYPE NODB_TEST6_TYP AS OBJECT (  \n" +
                     "    ID  NUMBER, \n" +
                     "    NAME VARCHAR2(30) \n" +
                     "  ); \n" ;
 
-                    
-         connection.execute (
-           sql,
-           { },
-           { autoCommit : true },
-           function (err, result) {
-             should.not.exist (err);
-             cb();
-           }
-         );
-       };
 
-       var doCreateTable = function (cb) {
-         var proc =
+        connection.execute (
+          sql,
+          { },
+          { autoCommit : true },
+          function (err) {
+            should.not.exist (err);
+            cb();
+          }
+        );
+      };
+
+      var doCreateTable = function (cb) {
+        var proc =
            "BEGIN \n" +
            "  DECLARE \n" +
            "  e_table_missing EXCEPTION; \n" +
@@ -697,109 +622,93 @@ describe ('193. Database Object type(s)', function () {
            "    ) \n" +
            "  '); \n" +
            "END; ";
-         connection.execute(
-           proc,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doDropTable = function (cb) {
-         var sql = "DROP TABLE nodb_tab_dbObjattr6 PURGE";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             connection.commit (function (err) {
-               should.not.exist (err);
-               cb ();
-             });
-           }
-         );
-       };
-       
-       var doDropType = function(cb) {
-         var sql = "DROP TYPE NODB_TEST6_TYP";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doInsert = function (cb) {
-         var sql = 'INSERT INTO NODB_TAB_DBOBJATTR6 VALUES (:1)';
-         var objData = {  };    // Empty object
-         connection.getDbObjectClass (
-           "NODB_TEST6_TYP",
-           function (err, objType) {
-             var testObj = new objType (objData);
-             connection.execute (sql, [testObj], function (err, result) {
-               should.not.exist (err);
-               connection.commit (function (err) {
-                 should.not.exist(err);
-                 cb();
-               });
-             });
-           }
-         );
-       };
+        connection.execute(
+          proc,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
 
-       var doQuery = function (cb) {
-         var sql = "select * from NODB_TAB_DBOBJATTR6";
-         connection.execute(
-           sql,
-           function(err, result) {
-             should.not.exist(err);
-             var count = result.rows.length;
-             for ( var row = 0; row < count; row++) {
-               var obj = result.rows[row][0];
-               should.strictEqual ( obj.NAME, undefined);
-               should.strictEqual ( obj['ID'], undefined);
-             }
-             cb();
-           }
-         );
-       };
+      var doDropTable = function (cb) {
+        var sql = "DROP TABLE nodb_tab_dbObjattr6 PURGE";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            connection.commit (function (err) {
+              should.not.exist (err);
+              cb ();
+            });
+          }
+        );
+      };
 
-       async.series ([
-         doCreateType,
-         doCreateTable,
-         doInsert,
-         doDropTable,
-         doDropType
-       ], done);
-     }
+      var doDropType = function(cb) {
+        var sql = "DROP TYPE NODB_TEST6_TYP";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
+
+      var doInsert = function (cb) {
+        var sql = 'INSERT INTO NODB_TAB_DBOBJATTR6 VALUES (:1)';
+        var objData = {  };    // Empty object
+        connection.getDbObjectClass (
+          "NODB_TEST6_TYP",
+          function (err, objType) {
+            var testObj = new objType (objData);
+            connection.execute (sql, [testObj], function (err) {
+              should.not.exist (err);
+              connection.commit (function (err) {
+                should.not.exist(err);
+                cb();
+              });
+            });
+          }
+        );
+      };
+
+
+      async.series ([
+        doCreateType,
+        doCreateTable,
+        doInsert,
+        doDropTable,
+        doDropType
+      ], done);
+    }
   );
 
 
 
   it('193.7 Insert value for timestamp attribute',
-     function (done) {
-       var doCreateType = function(cb) {
-         var sql =  "  CREATE TYPE NODB_TEST7_TYP AS OBJECT (  \n" +
+    function (done) {
+      var doCreateType = function(cb) {
+        var sql =  "  CREATE TYPE NODB_TEST7_TYP AS OBJECT (  \n" +
                     "    ENTRY  TIMESTAMP, \n" +
                     "    EXIT   TIMESTAMP \n" +
                     "  ); \n" ;
 
-                    
-         connection.execute (
-           sql,
-           { },
-           { autoCommit : true },
-           function (err, result) {
-             should.not.exist (err);
-             cb();
-           }
-         );
-       };
 
-       var doCreateTable = function (cb) {
-         var proc =
+        connection.execute (
+          sql,
+          { },
+          { autoCommit : true },
+          function (err) {
+            should.not.exist (err);
+            cb();
+          }
+        );
+      };
+
+      var doCreateTable = function (cb) {
+        var proc =
            "BEGIN \n" +
            "  DECLARE \n" +
            "  e_table_missing EXCEPTION; \n" +
@@ -816,112 +725,96 @@ describe ('193. Database Object type(s)', function () {
            "    ) \n" +
            "  '); \n" +
            "END; ";
-         connection.execute(
-           proc,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doDropTable = function (cb) {
-         var sql = "DROP TABLE nodb_tab_dbObjattr7 PURGE";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             connection.commit (function (err) {
-               should.not.exist (err);
-               cb ();
-             });
-           }
-         );
-       };
-       
-       var doDropType = function(cb) {
-         var sql = "DROP TYPE NODB_TEST7_TYP";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doInsert = function (cb) {
-         var sql = 'INSERT INTO NODB_TAB_DBOBJATTR7 VALUES (:1)';
-         var objData = {
-           ENTRY : new Date (1986, 8, 18, 12, 14, 27, 0).getTime(), 
-           EXIT : new Date (1989, 3, 4, 10, 27, 16, 201).getTime()
-         };
-         connection.getDbObjectClass (
-           "NODB_TEST7_TYP",
-           function (err, objType) {
-             var testObj = new objType (objData);
-             connection.execute (sql, [testObj], function (err, result) {
-               should.not.exist (err);
-               connection.commit (function (err) {
-                 should.not.exist(err);
-                 cb();
-               });
-             });
-           }
-         );
-       };
+        connection.execute(
+          proc,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
 
-       var doQuery = function (cb) {
-         var sql = "select * from NODB_TAB_DBOBJATTR7";
-         connection.execute(
-           sql,
-           function(err, result) {
-             should.not.exist(err);
-             var count = result.rows.length;
-             for ( var row = 0; row < count; row++) {
-               var obj = result.rows[row][0];
-               // should.strictEqual ( obj.ENTRY, undefined);
-               // should.strictEqual ( obj['EXIT'], undefined);
-             }
-             cb();
-           }
-         );
-       };
+      var doDropTable = function (cb) {
+        var sql = "DROP TABLE nodb_tab_dbObjattr7 PURGE";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            connection.commit (function (err) {
+              should.not.exist (err);
+              cb ();
+            });
+          }
+        );
+      };
 
-       async.series ([
-         doCreateType,
-         doCreateTable,
-         doInsert,
-         doDropTable,
-         doDropType
-       ], done);
-     }
+      var doDropType = function(cb) {
+        var sql = "DROP TYPE NODB_TEST7_TYP";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
+
+      var doInsert = function (cb) {
+        var sql = 'INSERT INTO NODB_TAB_DBOBJATTR7 VALUES (:1)';
+        var objData = {
+          ENTRY : new Date (1986, 8, 18, 12, 14, 27, 0).getTime(),
+          EXIT : new Date (1989, 3, 4, 10, 27, 16, 201).getTime()
+        };
+        connection.getDbObjectClass (
+          "NODB_TEST7_TYP",
+          function (err, objType) {
+            var testObj = new objType (objData);
+            connection.execute (sql, [testObj], function (err) {
+              should.not.exist (err);
+              connection.commit (function (err) {
+                should.not.exist(err);
+                cb();
+              });
+            });
+          }
+        );
+      };
+
+
+      async.series ([
+        doCreateType,
+        doCreateTable,
+        doInsert,
+        doDropTable,
+        doDropType
+      ], done);
+    }
   );
 
 
 
   it('193.8 nsert null value for timestamp attribute',
-     function (done) {
-       var doCreateType = function(cb) {
-         var sql =  "  CREATE TYPE NODB_TEST8_TYP AS OBJECT (  \n" +
+    function (done) {
+      var doCreateType = function(cb) {
+        var sql =  "  CREATE TYPE NODB_TEST8_TYP AS OBJECT (  \n" +
                     "    ENTRY  TIMESTAMP, \n" +
                     "    EXIT   TIMESTAMP \n" +
                     "  ); \n" ;
 
-                    
-         connection.execute (
-           sql,
-           { },
-           { autoCommit : true },
-           function (err, result) {
-             should.not.exist (err);
-             cb();
-           }
-         );
-       };
 
-       var doCreateTable = function (cb) {
-         var proc =
+        connection.execute (
+          sql,
+          { },
+          { autoCommit : true },
+          function (err) {
+            should.not.exist (err);
+            cb();
+          }
+        );
+      };
+
+      var doCreateTable = function (cb) {
+        var proc =
            "BEGIN \n" +
            "  DECLARE \n" +
            "  e_table_missing EXCEPTION; \n" +
@@ -938,113 +831,97 @@ describe ('193. Database Object type(s)', function () {
            "    ) \n" +
            "  '); \n" +
            "END; ";
-         connection.execute(
-           proc,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doDropTable = function (cb) {
-         var sql = "DROP TABLE nodb_tab_dbObjattr8 PURGE";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             connection.commit (function (err) {
-               should.not.exist (err);
-               cb ();
-             });
-           }
-         );
-       };
-       
-       var doDropType = function(cb) {
-         var sql = "DROP TYPE NODB_TEST8_TYP";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doInsert = function (cb) {
-         var sql = 'INSERT INTO NODB_TAB_DBOBJATTR8 VALUES (:1)';
-         var objData = {
-           ENTRY : null, 
-           EXIT : null
-         };
-         connection.getDbObjectClass (
-           "NODB_TEST8_TYP",
-           function (err, objType) {
-             var testObj = new objType (objData);
-             connection.execute (sql, [testObj], function (err, result) {
-               should.not.exist (err);
-               connection.commit (function (err) {
-                 should.not.exist(err);
-                 cb();
-               });
-             });
-           }
-         );
-       };
+        connection.execute(
+          proc,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
 
-       var doQuery = function (cb) {
-         var sql = "select * from NODB_TAB_DBOBJATTR8";
-         connection.execute(
-           sql,
-           function(err, result) {
-             should.not.exist(err);
-             var count = result.rows.length;
-             for ( var row = 0; row < count; row++) {
-               var obj = result.rows[row][0];
-               // should.strictEqual ( obj.ENTRY, undefined);
-               // should.strictEqual ( obj['EXIT'], undefined);
-             }
-             cb();
-           }
-         );
-       };
+      var doDropTable = function (cb) {
+        var sql = "DROP TABLE nodb_tab_dbObjattr8 PURGE";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            connection.commit (function (err) {
+              should.not.exist (err);
+              cb ();
+            });
+          }
+        );
+      };
 
-       async.series ([
-         doCreateType,
-         doCreateTable,
-         doInsert,
-         doDropTable,
-         doDropType
-       ], done);
-     }
+      var doDropType = function(cb) {
+        var sql = "DROP TYPE NODB_TEST8_TYP";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
+
+      var doInsert = function (cb) {
+        var sql = 'INSERT INTO NODB_TAB_DBOBJATTR8 VALUES (:1)';
+        var objData = {
+          ENTRY : null,
+          EXIT : null
+        };
+        connection.getDbObjectClass (
+          "NODB_TEST8_TYP",
+          function (err, objType) {
+            var testObj = new objType (objData);
+            connection.execute (sql, [testObj], function (err) {
+              should.not.exist (err);
+              connection.commit (function (err) {
+                should.not.exist(err);
+                cb();
+              });
+            });
+          }
+        );
+      };
+
+
+      async.series ([
+        doCreateType,
+        doCreateTable,
+        doInsert,
+        doDropTable,
+        doDropType
+      ], done);
+    }
   );
 
 
 
 
   it('193.9 Insert null value for timestamp attribute',
-     function (done) {
-       var doCreateType = function(cb) {
-         var sql =  "  CREATE TYPE NODB_TEST9_TYP AS OBJECT (  \n" +
+    function (done) {
+      var doCreateType = function(cb) {
+        var sql =  "  CREATE TYPE NODB_TEST9_TYP AS OBJECT (  \n" +
                     "    ENTRY  TIMESTAMP, \n" +
                     "    EXIT   TIMESTAMP \n" +
                     "  ); \n" ;
 
-                    
-         connection.execute (
-           sql,
-           { },
-           { autoCommit : true },
-           function (err, result) {
-             should.not.exist (err);
-             cb();
-           }
-         );
-       };
 
-       var doCreateTable = function (cb) {
-         var proc =
+        connection.execute (
+          sql,
+          { },
+          { autoCommit : true },
+          function (err) {
+            should.not.exist (err);
+            cb();
+          }
+        );
+      };
+
+      var doCreateTable = function (cb) {
+        var proc =
            "BEGIN \n" +
            "  DECLARE \n" +
            "  e_table_missing EXCEPTION; \n" +
@@ -1061,111 +938,95 @@ describe ('193. Database Object type(s)', function () {
            "    ) \n" +
            "  '); \n" +
            "END; ";
-         connection.execute(
-           proc,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doDropTable = function (cb) {
-         var sql = "DROP TABLE nodb_tab_dbObjattr9 PURGE";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             connection.commit (function (err) {
-               should.not.exist (err);
-               cb ();
-             });
-           }
-         );
-       };
-       
-       var doDropType = function(cb) {
-         var sql = "DROP TYPE NODB_TEST9_TYP";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
-       
-       var doInsert = function (cb) {
-         var sql = 'INSERT INTO NODB_TAB_DBOBJATTR9 VALUES (:1)';
-         var objData = {
-           ENTRY : null,
-           EXIT : null
-         };
-         connection.getDbObjectClass (
-           "NODB_TEST9_TYP",
-           function (err, objType) {
-             var testObj = new objType (objData);
-             connection.execute (sql, [testObj], function (err, result) {
-               should.not.exist (err);
-               connection.commit (function (err) {
-                 should.not.exist(err);
-                 cb();
-               });
-             });
-           }
-         );
-       };
+        connection.execute(
+          proc,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
 
-       var doQuery = function (cb) {
-         var sql = "select * from NODB_TAB_DBOBJATTR9";
-         connection.execute(
-           sql,
-           function(err, result) {
-             should.not.exist(err);
-             var count = result.rows.length;
-             for ( var row = 0; row < count; row++) {
-               var obj = result.rows[row][0];
-               // should.strictEqual ( obj.ENTRY, undefined);
-               // should.strictEqual ( obj['EXIT'], undefined);
-             }
-             cb();
-           }
-         );
-       };
+      var doDropTable = function (cb) {
+        var sql = "DROP TABLE nodb_tab_dbObjattr9 PURGE";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            connection.commit (function (err) {
+              should.not.exist (err);
+              cb ();
+            });
+          }
+        );
+      };
 
-       async.series ([
-         doCreateType,
-         doCreateTable,
-         doInsert,
-         doDropTable,
-         doDropType
-       ], done);
-     }
+      var doDropType = function(cb) {
+        var sql = "DROP TYPE NODB_TEST9_TYP";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
+
+      var doInsert = function (cb) {
+        var sql = 'INSERT INTO NODB_TAB_DBOBJATTR9 VALUES (:1)';
+        var objData = {
+          ENTRY : null,
+          EXIT : null
+        };
+        connection.getDbObjectClass (
+          "NODB_TEST9_TYP",
+          function (err, objType) {
+            var testObj = new objType (objData);
+            connection.execute (sql, [testObj], function (err) {
+              should.not.exist (err);
+              connection.commit (function (err) {
+                should.not.exist(err);
+                cb();
+              });
+            });
+          }
+        );
+      };
+
+
+      async.series ([
+        doCreateType,
+        doCreateTable,
+        doInsert,
+        doDropTable,
+        doDropType
+      ], done);
+    }
   );
 
 
 
   it('193.10 Insert empty JSON value for timestamp attribute',
-     function (done) {
-       var doCreateType = function(cb) {
-         var sql =  "  CREATE TYPE NODB_TEST10_TYP AS OBJECT (  \n" +
+    function (done) {
+      var doCreateType = function(cb) {
+        var sql =  "  CREATE TYPE NODB_TEST10_TYP AS OBJECT (  \n" +
                     "    ENTRY  TIMESTAMP, \n" +
                     "    EXIT   TIMESTAMP \n" +
                     "  ); \n" ;
 
-         connection.execute (
-           sql,
-           { },
-           { autoCommit : true },
-           function (err, result) {
-             should.not.exist (err);
-             cb();
-           }
-         );
-       };
+        connection.execute (
+          sql,
+          { },
+          { autoCommit : true },
+          function (err) {
+            should.not.exist (err);
+            cb();
+          }
+        );
+      };
 
-       var doCreateTable = function (cb) {
-         var proc =
+      var doCreateTable = function (cb) {
+        var proc =
            "BEGIN \n" +
            "  DECLARE \n" +
            "  e_table_missing EXCEPTION; \n" +
@@ -1182,86 +1043,70 @@ describe ('193. Database Object type(s)', function () {
            "    ) \n" +
            "  '); \n" +
            "END; ";
-         connection.execute(
-           proc,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
+        connection.execute(
+          proc,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
 
-       var doDropTable = function (cb) {
-         var sql = "DROP TABLE nodb_tab_dbObjattr10 PURGE";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             connection.commit (function (err) {
-               should.not.exist (err);
-               cb ();
-             });
-           }
-         );
-       };
+      var doDropTable = function (cb) {
+        var sql = "DROP TABLE nodb_tab_dbObjattr10 PURGE";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            connection.commit (function (err) {
+              should.not.exist (err);
+              cb ();
+            });
+          }
+        );
+      };
 
-       var doDropType = function(cb) {
-         var sql = "DROP TYPE NODB_TEST10_TYP";
-         connection.execute(
-           sql,
-           function(err) {
-             should.not.exist(err);
-             cb();
-           }
-         );
-       };
+      var doDropType = function(cb) {
+        var sql = "DROP TYPE NODB_TEST10_TYP";
+        connection.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
 
-       var doInsert = function (cb) {
-         var sql = 'INSERT INTO NODB_TAB_DBOBJATTR10 VALUES (:1)';
+      var doInsert = function (cb) {
+        var sql = 'INSERT INTO NODB_TAB_DBOBJATTR10 VALUES (:1)';
 
-         // empty JSOB object
-         var objData = {
-         };
-         connection.getDbObjectClass (
-           "NODB_TEST10_TYP",
-           function (err, objType) {
-             var testObj = new objType (objData);
-             connection.execute (sql, [testObj], function (err, result) {
-               should.not.exist (err);
-               connection.commit (function (err) {
-                 should.not.exist(err);
-                 cb();
-               });
-             });
-           }
-         );
-       };
+        // empty JSOB object
+        var objData = {
+        };
+        connection.getDbObjectClass (
+          "NODB_TEST10_TYP",
+          function (err, objType) {
+            var testObj = new objType (objData);
+            connection.execute (sql, [testObj], function (err) {
+              should.not.exist (err);
+              connection.commit (function (err) {
+                should.not.exist(err);
+                cb();
+              });
+            });
+          }
+        );
+      };
 
-       var doQuery = function (cb) {
-         var sql = "select * from NODB_TAB_DBOBJATTR10";
-         connection.execute(
-           sql,
-           function(err, result) {
-             should.not.exist(err);
-             var count = result.rows.length;
-             for ( var row = 0; row < count; row++) {
-               var obj = result.rows[row][0];
-               // should.strictEqual ( obj.ENTRY, undefined);
-               // should.strictEqual ( obj['EXIT'], undefined);
-             }
-             cb();
-           }
-         );
-       };
 
-       async.series ([
-         doCreateType,
-         doCreateTable,
-         doInsert,
-         doDropTable,
-         doDropType
-       ], done);
-     }
+      async.series ([
+        doCreateType,
+        doCreateTable,
+        doInsert,
+        doDropTable,
+        doDropType
+      ], done);
+    }
   );
 
 
@@ -1274,12 +1119,12 @@ describe ('193. Database Object type(s)', function () {
                   "  ); \n";
 
         connection.execute (sql,
-                            {},
-                            {autoCommit : true},
-                            function (err, result) {
-          should.not.exist (err);
-          cb();
-        });
+          {},
+          {autoCommit : true},
+          function (err) {
+            should.not.exist (err);
+            cb();
+          });
       };
 
       var doCreateTable = function (cb) {
@@ -1346,7 +1191,7 @@ describe ('193. Database Object type(s)', function () {
           "NODB_TEST11_TYP",
           function (err, objType) {
             var testObj = new objType (objData);
-            connection.execute (sql, [testObj], function (err, result) {
+            connection.execute (sql, [testObj], function (err) {
               should.not.exist (err);
               connection.commit (function (err) {
                 should.not.exist(err);
@@ -1357,22 +1202,6 @@ describe ('193. Database Object type(s)', function () {
         );
       };
 
-      var doQuery = function (cb) {
-        var sql = "select * from NODB_TAB_DBOBJATTR11";
-        connection.execute(
-          sql,
-          function(err, result) {
-            should.not.exist(err);
-            var count = result.rows.length;
-            for ( var row = 0; row < count; row++) {
-              var obj = result.rows[row][0];
-              // should.strictEqual ( obj.ENTRY, undefined);
-              // should.strictEqual ( obj['EXIT'], undefined);
-            }
-            cb();
-          }
-        );
-      };
 
       async.series ([
         doCreateType,
@@ -1395,12 +1224,12 @@ describe ('193. Database Object type(s)', function () {
                   "  ); \n";
 
         connection.execute (sql,
-                            {},
-                            {autoCommit : true},
-                            function (err, result) {
-          should.not.exist (err);
-          cb();
-        });
+          {},
+          {autoCommit : true},
+          function (err) {
+            should.not.exist (err);
+            cb();
+          });
       };
 
       var doCreateTable = function (cb) {
@@ -1466,7 +1295,7 @@ describe ('193. Database Object type(s)', function () {
           "NODB_TEST12_TYP",
           function (err, objType) {
             var testObj = new objType (objData);
-            connection.execute (sql, [testObj], function (err, result) {
+            connection.execute (sql, [testObj], function (err) {
               should.not.exist (err);
               connection.commit (function (err) {
                 should.not.exist(err);
@@ -1477,22 +1306,6 @@ describe ('193. Database Object type(s)', function () {
         );
       };
 
-      var doQuery = function (cb) {
-        var sql = "select * from NODB_TAB_DBOBJATTR12";
-        connection.execute(
-          sql,
-          function(err, result) {
-            should.not.exist(err);
-            var count = result.rows.length;
-            for ( var row = 0; row < count; row++) {
-              var obj = result.rows[row][0];
-              // should.strictEqual ( obj.ENTRY, undefined);
-              // should.strictEqual ( obj['EXIT'], undefined);
-            }
-            cb();
-          }
-        );
-      };
 
       async.series ([
         doCreateType,
@@ -1515,12 +1328,12 @@ describe ('193. Database Object type(s)', function () {
                   "  ); \n";
 
         connection.execute (sql,
-                            {},
-                            {autoCommit : true},
-                            function (err, result) {
-          should.not.exist (err);
-          cb();
-        });
+          {},
+          {autoCommit : true},
+          function (err) {
+            should.not.exist (err);
+            cb();
+          });
       };
 
       var doCreateTable = function (cb) {
@@ -1587,7 +1400,7 @@ describe ('193. Database Object type(s)', function () {
           "NODB_TEST13_TYP",
           function (err, objType) {
             var testObj = new objType (objData);
-            connection.execute (sql, [testObj], function (err, result) {
+            connection.execute (sql, [testObj], function (err) {
               should.not.exist (err);
               connection.commit (function (err) {
                 should.not.exist(err);
@@ -1598,22 +1411,6 @@ describe ('193. Database Object type(s)', function () {
         );
       };
 
-      var doQuery = function (cb) {
-        var sql = "select * from NODB_TAB_DBOBJATTR13";
-        connection.execute(
-          sql,
-          function(err, result) {
-            should.not.exist(err);
-            var count = result.rows.length;
-            for ( var row = 0; row < count; row++) {
-              var obj = result.rows[row][0];
-              // should.strictEqual ( obj.ENTRY, undefined);
-              // should.strictEqual ( obj['EXIT'], undefined);
-            }
-            cb();
-          }
-        );
-      };
 
       async.series ([
         doCreateType,
@@ -1637,12 +1434,12 @@ describe ('193. Database Object type(s)', function () {
                   "  ); \n";
 
         connection.execute (sql,
-                            {},
-                            {autoCommit : true},
-                            function (err, result) {
-          should.not.exist (err);
-          cb();
-        });
+          {},
+          {autoCommit : true},
+          function (err) {
+            should.not.exist (err);
+            cb();
+          });
       };
 
       var doCreateTable = function (cb) {
@@ -1707,7 +1504,7 @@ describe ('193. Database Object type(s)', function () {
           "NODB_TEST14_TYP",
           function (err, objType) {
             var testObj = new objType (objData);
-            connection.execute (sql, [testObj], function (err, result) {
+            connection.execute (sql, [testObj], function (err) {
               should.not.exist (err);
               connection.commit (function (err) {
                 should.not.exist(err);
@@ -1718,22 +1515,6 @@ describe ('193. Database Object type(s)', function () {
         );
       };
 
-      var doQuery = function (cb) {
-        var sql = "select * from NODB_TAB_DBOBJATTR14";
-        connection.execute(
-          sql,
-          function(err, result) {
-            should.not.exist(err);
-            var count = result.rows.length;
-            for ( var row = 0; row < count; row++) {
-              var obj = result.rows[row][0];
-              // should.strictEqual ( obj.ENTRY, undefined);
-              // should.strictEqual ( obj['EXIT'], undefined);
-            }
-            cb();
-          }
-        );
-      };
 
       async.series ([
         doCreateType,
@@ -1756,12 +1537,12 @@ describe ('193. Database Object type(s)', function () {
                   "  ); \n";
 
         connection.execute (sql,
-                            {},
-                            {autoCommit : true},
-                            function (err, result) {
-          should.not.exist (err);
-          cb();
-        });
+          {},
+          {autoCommit : true},
+          function (err) {
+            should.not.exist (err);
+            cb();
+          });
       };
 
       var doCreateTable = function (cb) {
@@ -1826,7 +1607,7 @@ describe ('193. Database Object type(s)', function () {
           "NODB_TEST15_TYP",
           function (err, objType) {
             var testObj = new objType (objData);
-            connection.execute (sql, [testObj], function (err, result) {
+            connection.execute (sql, [testObj], function (err) {
               should.not.exist (err);
               connection.commit (function (err) {
                 should.not.exist(err);
@@ -1837,22 +1618,6 @@ describe ('193. Database Object type(s)', function () {
         );
       };
 
-      var doQuery = function (cb) {
-        var sql = "select * from NODB_TAB_DBOBJATTR15";
-        connection.execute(
-          sql,
-          function(err, result) {
-            should.not.exist(err);
-            var count = result.rows.length;
-            for ( var row = 0; row < count; row++) {
-              var obj = result.rows[row][0];
-              // should.strictEqual ( obj.ENTRY, undefined);
-              // should.strictEqual ( obj['EXIT'], undefined);
-            }
-            cb();
-          }
-        );
-      };
 
       async.series ([
         doCreateType,
@@ -1875,12 +1640,12 @@ describe ('193. Database Object type(s)', function () {
                   "  ); \n";
 
         connection.execute (sql,
-                            {},
-                            {autoCommit : true},
-                            function (err, result) {
-          should.not.exist (err);
-          cb();
-        });
+          {},
+          {autoCommit : true},
+          function (err) {
+            should.not.exist (err);
+            cb();
+          });
       };
 
       var doCreateTable = function (cb) {
@@ -1945,7 +1710,7 @@ describe ('193. Database Object type(s)', function () {
           "NODB_TEST16_TYP",
           function (err, objType) {
             var testObj = new objType (objData);
-            connection.execute (sql, [testObj], function (err, result) {
+            connection.execute (sql, [testObj], function (err) {
               should.not.exist (err);
               connection.commit (function (err) {
                 should.not.exist(err);
@@ -1956,22 +1721,6 @@ describe ('193. Database Object type(s)', function () {
         );
       };
 
-      var doQuery = function (cb) {
-        var sql = "select * from NODB_TAB_DBOBJATTR16";
-        connection.execute(
-          sql,
-          function(err, result) {
-            should.not.exist(err);
-            var count = result.rows.length;
-            for ( var row = 0; row < count; row++) {
-              var obj = result.rows[row][0];
-              // should.strictEqual ( obj.ENTRY, undefined);
-              // should.strictEqual ( obj['EXIT'], undefined);
-            }
-            cb();
-          }
-        );
-      };
 
       async.series ([
         doCreateType,
@@ -1995,12 +1744,12 @@ describe ('193. Database Object type(s)', function () {
                   "  ); \n";
 
         connection.execute (sql,
-                            {},
-                            {autoCommit : true},
-                            function (err, result) {
-          should.not.exist (err);
-          cb();
-        });
+          {},
+          {autoCommit : true},
+          function (err) {
+            should.not.exist (err);
+            cb();
+          });
       };
 
       var doCreateTable = function (cb) {
@@ -2065,7 +1814,7 @@ describe ('193. Database Object type(s)', function () {
           "NODB_TEST17_TYP",
           function (err, objType) {
             var testObj = new objType (objData);
-            connection.execute (sql, [testObj], function (err, result) {
+            connection.execute (sql, [testObj], function (err) {
               should.not.exist (err);
               connection.commit (function (err) {
                 should.not.exist(err);
@@ -2076,22 +1825,6 @@ describe ('193. Database Object type(s)', function () {
         );
       };
 
-      var doQuery = function (cb) {
-        var sql = "select * from NODB_TAB_DBOBJATTR17";
-        connection.execute(
-          sql,
-          function(err, result) {
-            should.not.exist(err);
-            var count = result.rows.length;
-            for ( var row = 0; row < count; row++) {
-              var obj = result.rows[row][0];
-              // should.strictEqual ( obj.ENTRY, undefined);
-              // should.strictEqual ( obj['EXIT'], undefined);
-            }
-            cb();
-          }
-        );
-      };
 
       async.series ([
         doCreateType,
@@ -2114,12 +1847,12 @@ describe ('193. Database Object type(s)', function () {
                   "  ); \n";
 
         connection.execute (sql,
-                            {},
-                            {autoCommit : true},
-                            function (err, result) {
-          should.not.exist (err);
-          cb();
-        });
+          {},
+          {autoCommit : true},
+          function (err) {
+            should.not.exist (err);
+            cb();
+          });
       };
 
       var doCreateTable = function (cb) {
@@ -2184,7 +1917,7 @@ describe ('193. Database Object type(s)', function () {
           "NODB_TEST18_TYP",
           function (err, objType) {
             var testObj = new objType (objData);
-            connection.execute (sql, [testObj], function (err, result) {
+            connection.execute (sql, [testObj], function (err) {
               should.not.exist (err);
               connection.commit (function (err) {
                 should.not.exist(err);
@@ -2195,22 +1928,6 @@ describe ('193. Database Object type(s)', function () {
         );
       };
 
-      var doQuery = function (cb) {
-        var sql = "select * from NODB_TAB_DBOBJATTR18";
-        connection.execute(
-          sql,
-          function(err, result) {
-            should.not.exist(err);
-            var count = result.rows.length;
-            for ( var row = 0; row < count; row++) {
-              var obj = result.rows[row][0];
-              // should.strictEqual ( obj.ENTRY, undefined);
-              // should.strictEqual ( obj['EXIT'], undefined);
-            }
-            cb();
-          }
-        );
-      };
 
       async.series ([
         doCreateType,
@@ -2233,12 +1950,12 @@ describe ('193. Database Object type(s)', function () {
                   "  ); \n";
 
         connection.execute (sql,
-                            {},
-                            {autoCommit : true},
-                            function (err, result) {
-          should.not.exist (err);
-          cb();
-        });
+          {},
+          {autoCommit : true},
+          function (err) {
+            should.not.exist (err);
+            cb();
+          });
       };
 
       var doCreateTable = function (cb) {
@@ -2303,7 +2020,7 @@ describe ('193. Database Object type(s)', function () {
           "NODB_TEST19_TYP",
           function (err, objType) {
             var testObj = new objType (objData);
-            connection.execute (sql, [testObj], function (err, result) {
+            connection.execute (sql, [testObj], function (err) {
               should.not.exist (err);
               connection.commit (function (err) {
                 should.not.exist(err);
@@ -2314,22 +2031,6 @@ describe ('193. Database Object type(s)', function () {
         );
       };
 
-      var doQuery = function (cb) {
-        var sql = "select * from NODB_TAB_DBOBJATTR19";
-        connection.execute(
-          sql,
-          function(err, result) {
-            should.not.exist(err);
-            var count = result.rows.length;
-            for ( var row = 0; row < count; row++) {
-              var obj = result.rows[row][0];
-              // should.strictEqual ( obj.ENTRY, undefined);
-              // should.strictEqual ( obj['EXIT'], undefined);
-            }
-            cb();
-          }
-        );
-      };
 
       async.series ([
         doCreateType,
@@ -2352,12 +2053,12 @@ describe ('193. Database Object type(s)', function () {
                   "  ); \n";
 
         connection.execute (sql,
-                            {},
-                            {autoCommit : true},
-                            function (err, result) {
-          should.not.exist (err);
-          cb();
-        });
+          {},
+          {autoCommit : true},
+          function (err) {
+            should.not.exist (err);
+            cb();
+          });
       };
 
       var doCreateTable = function (cb) {
@@ -2414,22 +2115,18 @@ describe ('193. Database Object type(s)', function () {
 
       var doInsert = function (cb) {
         var sql = 'INSERT INTO NODB_TAB_DBOBJATTR20 VALUES (:1)';
-        var objData = {
-          ENTRY : undefined,
-          EXIT : undefined
-        };
+
         connection.getDbObjectClass (
           "NODB_TEST20_TYP",
           function (err, objType) {
-            var testObj = new objType (objData);
             connection.execute (sql, [{ type : objType, val : null}],
-                 function (err, result) {
-              should.not.exist (err);
-              connection.commit (function (err) {
-                should.not.exist(err);
-                cb();
+              function (err) {
+                should.not.exist (err);
+                connection.commit (function (err) {
+                  should.not.exist(err);
+                  cb();
+                });
               });
-            });
           }
         );
       };
