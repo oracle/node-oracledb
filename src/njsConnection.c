@@ -33,11 +33,11 @@ static NJS_NAPI_METHOD(njsConnection_commit);
 static NJS_NAPI_METHOD(njsConnection_createLob);
 static NJS_NAPI_METHOD(njsConnection_execute);
 static NJS_NAPI_METHOD(njsConnection_executeMany);
-static NJS_NAPI_METHOD(njsConnection_getSodaDatabase);
 static NJS_NAPI_METHOD(njsConnection_getDbObjectClass);
+static NJS_NAPI_METHOD(njsConnection_getQueue);
+static NJS_NAPI_METHOD(njsConnection_getSodaDatabase);
 static NJS_NAPI_METHOD(njsConnection_getStatementInfo);
 static NJS_NAPI_METHOD(njsConnection_ping);
-static NJS_NAPI_METHOD(njsConnection_queue);
 static NJS_NAPI_METHOD(njsConnection_rollback);
 static NJS_NAPI_METHOD(njsConnection_subscribe);
 static NJS_NAPI_METHOD(njsConnection_unsubscribe);
@@ -51,9 +51,9 @@ static NJS_ASYNC_METHOD(njsConnection_createLobAsync);
 static NJS_ASYNC_METHOD(njsConnection_executeAsync);
 static NJS_ASYNC_METHOD(njsConnection_executeManyAsync);
 static NJS_ASYNC_METHOD(njsConnection_getDbObjectClassAsync);
+static NJS_ASYNC_METHOD(njsConnection_getQueueAsync);
 static NJS_ASYNC_METHOD(njsConnection_getStatementInfoAsync);
 static NJS_ASYNC_METHOD(njsConnection_pingAsync);
-static NJS_ASYNC_METHOD(njsConnection_queueAsync);
 static NJS_ASYNC_METHOD(njsConnection_rollbackAsync);
 static NJS_ASYNC_METHOD(njsConnection_subscribeAsync);
 static NJS_ASYNC_METHOD(njsConnection_unsubscribeAsync);
@@ -63,8 +63,8 @@ static NJS_ASYNC_POST_METHOD(njsConnection_createLobPostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_executePostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_executeManyPostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_getDbObjectClassPostAsync);
+static NJS_ASYNC_POST_METHOD(njsConnection_getQueuePostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_getStatementInfoPostAsync);
-static NJS_ASYNC_POST_METHOD(njsConnection_queuePostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_subscribePostAsync);
 
 // processing arguments methods
@@ -73,8 +73,8 @@ static NJS_PROCESS_ARGS_METHOD(njsConnection_createLobProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_executeProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_executeManyProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_getDbObjectClassProcessArgs);
+static NJS_PROCESS_ARGS_METHOD(njsConnection_getQueueProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_getStatementInfoProcessArgs);
-static NJS_PROCESS_ARGS_METHOD(njsConnection_queueProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_subscribeProcessArgs);
 
 // getters
@@ -115,15 +115,15 @@ static const napi_property_descriptor njsClassProperties[] = {
             napi_default, NULL },
     { "_executeMany", NULL, njsConnection_executeMany, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_getSodaDatabase", NULL, njsConnection_getSodaDatabase, NULL, NULL,
-            NULL, napi_default, NULL },
     { "_getDbObjectClass", NULL, njsConnection_getDbObjectClass, NULL, NULL,
+            NULL, napi_default, NULL },
+    { "_getQueue", NULL, njsConnection_getQueue, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "_getSodaDatabase", NULL, njsConnection_getSodaDatabase, NULL, NULL,
             NULL, napi_default, NULL },
     { "_getStatementInfo", NULL, njsConnection_getStatementInfo, NULL,
             NULL, NULL, napi_default, NULL },
     { "_ping", NULL, njsConnection_ping, NULL, NULL, NULL, napi_default,
-            NULL },
-    { "_queue", NULL, njsConnection_queue, NULL, NULL, NULL, napi_default,
             NULL },
     { "_rollback", NULL, njsConnection_rollback, NULL, NULL, NULL,
             napi_default, NULL },
@@ -1196,6 +1196,79 @@ static napi_value njsConnection_getCurrentSchema(napi_env env,
 
 
 //-----------------------------------------------------------------------------
+// njsConnection_getDbObjectClass()
+//   Looks up a database object type given its name and returns it to the
+// caller.
+//
+// PARAMETERS
+//   - name
+//   - JS callback which will receive (error, cls)
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_getDbObjectClass(napi_env env,
+        napi_callback_info info)
+{
+    napi_value args[2];
+    njsBaton *baton;
+
+    if (!njsConnection_createBaton(env, info, 2, args, &baton))
+        return NULL;
+    if (!njsConnection_getDbObjectClassProcessArgs(baton, env, args)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
+    njsBaton_queueWork(baton, env, "GetDbObjectClass",
+            njsConnection_getDbObjectClassAsync,
+            njsConnection_getDbObjectClassPostAsync, 2);
+    return NULL;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getDbObjectClassAsync()
+//   Worker function for njsConnection_getDbObjectClass().
+//-----------------------------------------------------------------------------
+static bool njsConnection_getDbObjectClassAsync(njsBaton *baton)
+{
+    njsConnection *conn = (njsConnection*) baton->callingInstance;
+
+    if (dpiConn_getObjectType(conn->handle, baton->name, baton->nameLength,
+            &baton->dpiObjectTypeHandle) < 0)
+        return njsBaton_setErrorDPI(baton);
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getDbObjectClassPostAsync()
+//   Sets up the arguments for the callback to JS.
+//-----------------------------------------------------------------------------
+static bool njsConnection_getDbObjectClassPostAsync(njsBaton *baton,
+        napi_env env, napi_value *args)
+{
+    njsDbObjectType *objType;
+
+    return njsDbObject_getSubClass(baton, baton->dpiObjectTypeHandle, env,
+            &args[1], &objType);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getDbObjectClassProcessArgs()
+//   Processes the arguments provided by the caller and place them on the
+// baton.
+//-----------------------------------------------------------------------------
+static bool njsConnection_getDbObjectClassProcessArgs(njsBaton *baton,
+        napi_env env, napi_value *args)
+{
+    if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
+        return false;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsConnection_getExecuteManyOutBinds()
 //   Get the out binds as an array of objects/arrays.
 //-----------------------------------------------------------------------------
@@ -1407,6 +1480,108 @@ static napi_value njsConnection_getOracleServerVersionString(napi_env env,
 
 
 //-----------------------------------------------------------------------------
+// njsConnection_getQueue()
+//   Creates an AQ queue associated with the connection.
+//
+// PARAMETERS
+//   - JS callback which will receive (error, queue)
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_getQueue(napi_env env,
+        napi_callback_info info)
+{
+    napi_value args[3];
+    njsBaton *baton;
+
+    if (!njsConnection_createBaton(env, info, 3, args, &baton))
+        return NULL;
+    if (!njsConnection_getQueueProcessArgs(baton, env, args)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
+    njsBaton_queueWork(baton, env, "GetQueue", njsConnection_getQueueAsync,
+            njsConnection_getQueuePostAsync, 2);
+    return NULL;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getQueueAsync()
+//   Worker function for njsConnection_getQueue().
+//-----------------------------------------------------------------------------
+static bool njsConnection_getQueueAsync(njsBaton *baton)
+{
+    njsConnection *conn = (njsConnection*) baton->callingInstance;
+
+    if (baton->typeName && dpiConn_getObjectType(conn->handle, baton->typeName,
+            baton->typeNameLength, &baton->dpiObjectTypeHandle) < 0)
+        return njsBaton_setErrorDPI(baton);
+    if (dpiConn_newQueue(conn->handle, baton->name, baton->nameLength,
+            baton->dpiObjectTypeHandle, &baton->dpiQueueHandle) < 0)
+        return njsBaton_setErrorDPI(baton);
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getQueuePostAsync()
+//   Generates return values for njsConnection_getQueue().
+//-----------------------------------------------------------------------------
+static bool njsConnection_getQueuePostAsync(njsBaton *baton, napi_env env,
+        napi_value *args)
+{
+    return njsAqQueue_createFromHandle(baton, env, &args[1]);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getQueueProcessArgs()
+//   Processes the arguments provided by the caller and place them on the
+// baton.
+//-----------------------------------------------------------------------------
+static bool njsConnection_getQueueProcessArgs(njsBaton *baton,
+        napi_env env, napi_value *args)
+{
+    napi_value typeObj, prototype;
+    napi_valuetype valueType;
+    njsDbObjectType *objType;
+    bool ok;
+
+    // get name for queue (first argument)
+    if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
+        return false;
+
+    // get payload type for queue (optional second argument)
+    // may be a string (identifying an object type) or an actual class
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, args[1], "payloadType",
+            &typeObj))
+    NJS_CHECK_NAPI(env, napi_typeof(env, typeObj, &valueType))
+    ok = (valueType == napi_undefined || valueType == napi_string);
+    if (valueType == napi_string) {
+        if (!njsUtils_copyStringFromJS(env, typeObj, &baton->typeName,
+                &baton->typeNameLength))
+            return false;
+    } else if (valueType == napi_function) {
+        NJS_CHECK_NAPI(env, napi_get_prototype(env, typeObj, &prototype))
+        NJS_CHECK_NAPI(env, napi_strict_equals(env, prototype,
+                baton->jsBaseDbObjectConstructor, &ok))
+        if (ok) {
+            if (!njsDbObjectType_getFromClass(env, typeObj, &objType))
+                return false;
+            if (dpiObjectType_addRef(objType->handle) < 0)
+                return njsBaton_setErrorDPI(baton);
+            baton->dpiObjectTypeHandle = objType->handle;
+        }
+    }
+    if (!ok)
+        return njsBaton_setError(baton, errInvalidPropertyValueInParam,
+                "payloadType", 2);
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsConnection_getRowCounts()
 //   Get the row counts stored on the baton as an array.
 //-----------------------------------------------------------------------------
@@ -1481,79 +1656,6 @@ static napi_value njsConnection_getStmtCacheSize(napi_env env,
         return NULL;
     }
     return value;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_getDbObjectClass()
-//   Looks up a database object type given its name and returns it to the
-// caller.
-//
-// PARAMETERS
-//   - name
-//   - JS callback which will receive (error, cls)
-//-----------------------------------------------------------------------------
-static napi_value njsConnection_getDbObjectClass(napi_env env,
-        napi_callback_info info)
-{
-    napi_value args[2];
-    njsBaton *baton;
-
-    if (!njsConnection_createBaton(env, info, 2, args, &baton))
-        return NULL;
-    if (!njsConnection_getDbObjectClassProcessArgs(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
-    njsBaton_queueWork(baton, env, "GetDbObjectClass",
-            njsConnection_getDbObjectClassAsync,
-            njsConnection_getDbObjectClassPostAsync, 2);
-    return NULL;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_getDbObjectClassAsync()
-//   Worker function for njsConnection_getDbObjectClass().
-//-----------------------------------------------------------------------------
-static bool njsConnection_getDbObjectClassAsync(njsBaton *baton)
-{
-    njsConnection *conn = (njsConnection*) baton->callingInstance;
-
-    if (dpiConn_getObjectType(conn->handle, baton->name, baton->nameLength,
-            &baton->dpiObjectTypeHandle) < 0)
-        return njsBaton_setErrorDPI(baton);
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_getDbObjectClassPostAsync()
-//   Sets up the arguments for the callback to JS.
-//-----------------------------------------------------------------------------
-static bool njsConnection_getDbObjectClassPostAsync(njsBaton *baton,
-        napi_env env, napi_value *args)
-{
-    njsDbObjectType *objType;
-
-    return njsDbObject_getSubClass(baton, baton->dpiObjectTypeHandle, env,
-            &args[1], &objType);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_getDbObjectClassProcessArgs()
-//   Processes the arguments provided by the caller and place them on the
-// baton.
-//-----------------------------------------------------------------------------
-static bool njsConnection_getDbObjectClassProcessArgs(njsBaton *baton,
-        napi_env env, napi_value *args)
-{
-    if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
-        return false;
-
-    return true;
 }
 
 
@@ -2068,108 +2170,6 @@ static bool njsConnection_processImplicitResults(njsBaton *baton)
             return false;
 
     }
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_queue()
-//   Creates an AQ queue associated with the connection.
-//
-// PARAMETERS
-//   - JS callback which will receive (error, queue)
-//-----------------------------------------------------------------------------
-static napi_value njsConnection_queue(napi_env env,
-        napi_callback_info info)
-{
-    napi_value args[3];
-    njsBaton *baton;
-
-    if (!njsConnection_createBaton(env, info, 3, args, &baton))
-        return NULL;
-    if (!njsConnection_queueProcessArgs(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
-    njsBaton_queueWork(baton, env, "Queue", njsConnection_queueAsync,
-            njsConnection_queuePostAsync, 2);
-    return NULL;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_queueAsync()
-//   Worker function for njsConnection_queue().
-//-----------------------------------------------------------------------------
-static bool njsConnection_queueAsync(njsBaton *baton)
-{
-    njsConnection *conn = (njsConnection*) baton->callingInstance;
-
-    if (baton->typeName && dpiConn_getObjectType(conn->handle, baton->typeName,
-            baton->typeNameLength, &baton->dpiObjectTypeHandle) < 0)
-        return njsBaton_setErrorDPI(baton);
-    if (dpiConn_newQueue(conn->handle, baton->name, baton->nameLength,
-            baton->dpiObjectTypeHandle, &baton->dpiQueueHandle) < 0)
-        return njsBaton_setErrorDPI(baton);
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_queuePostAsync()
-//   Generates return values for njsConnection_queue().
-//-----------------------------------------------------------------------------
-static bool njsConnection_queuePostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
-{
-    return njsAqQueue_createFromHandle(baton, env, &args[1]);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_queueProcessArgs()
-//   Processes the arguments provided by the caller and place them on the
-// baton.
-//-----------------------------------------------------------------------------
-static bool njsConnection_queueProcessArgs(njsBaton *baton,
-        napi_env env, napi_value *args)
-{
-    napi_value typeObj, prototype;
-    napi_valuetype valueType;
-    njsDbObjectType *objType;
-    bool ok;
-
-    // get name for queue (first argument)
-    if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
-        return false;
-
-    // get payload type for queue (optional second argument)
-    // may be a string (identifying an object type) or an actual class
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, args[1], "payloadType",
-            &typeObj))
-    NJS_CHECK_NAPI(env, napi_typeof(env, typeObj, &valueType))
-    ok = (valueType == napi_undefined || valueType == napi_string);
-    if (valueType == napi_string) {
-        if (!njsUtils_copyStringFromJS(env, typeObj, &baton->typeName,
-                &baton->typeNameLength))
-            return false;
-    } else if (valueType == napi_function) {
-        NJS_CHECK_NAPI(env, napi_get_prototype(env, typeObj, &prototype))
-        NJS_CHECK_NAPI(env, napi_strict_equals(env, prototype,
-                baton->jsBaseDbObjectConstructor, &ok))
-        if (ok) {
-            if (!njsDbObjectType_getFromClass(env, typeObj, &objType))
-                return false;
-            if (dpiObjectType_addRef(objType->handle) < 0)
-                return njsBaton_setErrorDPI(baton);
-            baton->dpiObjectTypeHandle = objType->handle;
-        }
-    }
-    if (!ok)
-        return njsBaton_setError(baton, errInvalidPropertyValueInParam,
-                "payloadType", 2);
 
     return true;
 }
