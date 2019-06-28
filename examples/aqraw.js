@@ -40,7 +40,7 @@ async function enq() {
 
   try {
     connection = await oracledb.getConnection(dbConfig);
-    const queue = await connection.queue(queueName);
+    const queue = await connection.getQueue(queueName);
     const messageString = 'This is my message';
     console.log('Enqueuing: ' + messageString);
     await queue.enqOne(messageString);
@@ -63,7 +63,7 @@ async function deq() {
 
   try {
     connection = await oracledb.getConnection(dbConfig);
-    const queue = await connection.queue(queueName);
+    const queue = await connection.getQueue(queueName);
     const msg = await queue.deqOne();  // wait for a message
     await connection.commit();
     if (msg) {

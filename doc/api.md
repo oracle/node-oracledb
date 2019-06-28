@@ -189,7 +189,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 4.2.10 [`getStatementInfo()`](#getstmtinfo)
         - 4.2.11 [`ping()`](#connectionping)
         - 4.2.12 [`queryStream()`](#querystream)
-        - 4.2.13 [`queue()`](#queue)
+        - 4.2.13 [`getQueue()`](#getqueue)
         - 4.2.14 [`release()`](#release)
         - 4.2.15 [`rollback()`](#rollback)
         - 4.2.16 [`subscribe()`](#consubscribe)
@@ -3582,18 +3582,18 @@ This method was added in node-oracledb 1.8.
 
 See [execute()](#execute).
 
-#### <a name="queue"></a> 4.2.13 `connection.queue()`
+#### <a name="getQueue"></a> 4.2.13 `connection.getQueue()`
 
 ##### Prototype
 
 Callback:
 ```
-queue(String name, [Object options,] function(Error error, AqQueue queue){})
+getQueue(String name, [Object options,] function(Error error, AqQueue queue){})
 ```
 
 Promise:
 ```
-promise = queue(String name [, Object options])
+promise = getQueue(String name [, Object options])
 ```
 
 ##### Return Value
@@ -3957,7 +3957,7 @@ This method was added in node-oracledb 2.3.
 
 ## <a name="aqqueueclass"></a> 5. AqQueue Class
 
-An AqQueue object is created by [`connection.queue()`](#queue).  It
+An AqQueue object is created by [`connection.getQueue()`](#getqueue).  It
 is used for enqueuing and dequeuing Oracle Advanced Queuing messages.
 Each AqQueue can be used for enqueuing, dequeuing, or for both.
 
@@ -3974,7 +3974,7 @@ readonly String name
 ```
 
 A string containing the name of the queue specified in the
-[`connection.queue()`](#queue) call.
+[`connection.getQueue()`](#getqueue) call.
 
 #### <a name="aqqueuedeqopts"></a> 5.1.2 `aqQueue.deqOptions`
 
@@ -3988,7 +3988,7 @@ dequeuing messages.  Attributes can be set before each
 [`queue.deqMany()`](#aqqueuemethoddeqmany), see [Changing AQ
 options](#aqoptions).
 
-When a [queue is created](#queue), the `queue.deqOptions` property is
+When a [queue is created](#getqueue), the `queue.deqOptions` property is
 an [AqDeqOptions object](#aqdeqoptionsclass).  AqDeqOptions objects
 cannot be created independently.
 
@@ -4020,7 +4020,7 @@ enqueuing messages.  Attributes can be set before each
 [`queue.enqMany()`](#aqqueuemethodenqmany) call to change the behavior
 of message delivery, see [Changing AQ options](#aqoptions).
 
-When a [queue is created](#queue), the `queue.enqOptions` property is
+When a [queue is created](#getqueue), the `queue.enqOptions` property is
 an [AqEnqOptions object](#aqenqoptionsclass).  AqEnqOptions objects
 cannot be created independently.
 
@@ -12138,7 +12138,7 @@ To enqueue a single, simple message, you could run:
 
 ```javascript
 const queueName = "DEMO_RAW_QUEUE";
-const queue = await connection.queue(queueName);
+const queue = await connection.getQueue(queueName);
 await queue.enqOne("This is my message");
 await connection.commit();
 ```
@@ -12147,7 +12147,7 @@ An application could dequeue a message by running:
 
 ```javascript
 const queueName = "DEMO_RAW_QUEUE";
-const queue = await connection.queue(queueName);
+const queue = await connection.getQueue(queueName);
 const msg = await queue.deqOne();
 await connection.commit();
 if (msg) {
@@ -12205,7 +12205,7 @@ In node-oracledb, a queue is initialized for the database object type:
 
 ```javascript
 const queueName = "ADDR_QUEUE";
-const queue = await connection.queue(queueName, {payloadType: "DEMOQUEUE.USER_ADDRESS_TYPE"});
+const queue = await connection.getQueue(queueName, {payloadType: "DEMOQUEUE.USER_ADDRESS_TYPE"});
 ```
 
 For efficiencey, it is recommended to use a fully qualified name for
@@ -12227,7 +12227,7 @@ await connection.commit();
 Dequeuing objects is done with:
 
 ```javascript
-const queue = await connection.queue(queueName, {payloadType: "DEMOQUEUE.USER_ADDRESS_TYPE"});
+const queue = await connection.getQueue(queueName, {payloadType: "DEMOQUEUE.USER_ADDRESS_TYPE"});
 const msg = await queue.deqOne();
 await connection.commit();
 ```
@@ -12248,7 +12248,7 @@ See [`examples/aqobjects.js`][143] for a runnable example.
 ### <a name="aqoptions"></a> 26.3 Changing AQ options
 
 The [AqQueue](#aqqueueclass) object created by calling
-[`connection.queue()`](#queue) contains
+[`connection.getQueue()`](#getqueue) contains
 [`enqOptions`](#aqqueueenqopts) and [`deqOptions`](#aqqueuedeqopts)
 attribute options that can be configured.  These options can be
 changed before each enqueue or dequeue call.
@@ -12269,7 +12269,7 @@ const message = {
 };
 
 const queueName = "DEMO_RAW_QUEUE";
-const queue = await connection.queue(queueName);
+const queue = await connection.getQueue(queueName);
 await queue.enqOne(message);
 await connection.commit();
 ```
@@ -12280,7 +12280,7 @@ message buffered, and not persistent:
 
 ```javascript
 const queueName = "DEMO_RAW_QUEUE";
-const queue = await connection.queue(queueName);
+const queue = await connection.getQueue(queueName);
 queue.enqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_BUFFERED;
 await queue.enqOne(message);
 await connection.commit();
@@ -12291,7 +12291,7 @@ change the queue's message visibility:
 
 ```javascript
 const queueName = "DEMO_RAW_QUEUE";
-const queue = await connection.queue(queueName);
+const queue = await connection.getQueue(queueName);
 queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 await queue.enqOne(message);
 ```
@@ -12304,7 +12304,7 @@ empty:
 
 ```javascript
 const queueName = "DEMO_RAW_QUEUE";
-const queue = await connection.queue(queueName);
+const queue = await connection.getQueue(queueName);
 queue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 queue.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
 await msg = queue.deqOne();
@@ -12333,7 +12333,7 @@ of messages:
 
 ```javascript
 const queueName = "DEMO_RAW_QUEUE";
-const queue = await connection.queue(queueName);
+const queue = await connection.getQueue(queueName);
 const messages = [
     "Message 1",
     "Message 2",
@@ -12354,7 +12354,7 @@ should be dequeued in one call.  Depending on the queue options, zero
 or more messages up to the limit will be dequeued:
 
 ```javascript
-const queue = await connection.queue(queueName);
+const queue = await connection.getQueue(queueName);
 const messages = await queue.deqMany(5);
 console.log("Dequeued " + messages.length + " messages");
 for (const msg of messages) {
@@ -12391,7 +12391,7 @@ const subscrOptions = {
 
 async function ProcessAqMessages() {
   const connection = await oracledb.getConnection();  // get connection from a pool
-  const queue = await connection.queue(queueName);
+  const queue = await connection.getQueue(queueName);
   const msg = await queue.deqOne();
   console.log(msg.payload.toString()
   await connection.close();

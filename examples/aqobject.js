@@ -48,7 +48,7 @@ async function enq() {
 
   try {
     connection = await oracledb.getConnection(dbConfig);
-    const queue = await connection.queue(queueName, {payloadType: "USER_ADDRESS_TYPE"});
+    const queue = await connection.getQueue(queueName, {payloadType: "USER_ADDRESS_TYPE"});
     const message = new queue.payloadTypeClass(addrData);
     console.log('Enqueuing: ', addrData);
     await queue.enqOne(message);
@@ -71,7 +71,7 @@ async function deq() {
 
   try {
     connection = await oracledb.getConnection(dbConfig);
-    const queue = await connection.queue(queueName, {payloadType: "USER_ADDRESS_TYPE"});
+    const queue = await connection.getQueue(queueName, {payloadType: "USER_ADDRESS_TYPE"});
     const msg = await queue.deqOne();  // wait for a message
     await connection.commit();
     if (msg) {
