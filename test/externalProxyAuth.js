@@ -35,7 +35,7 @@
 const oracledb = require('oracledb');
 const should   = require('should');
 const dbconfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js')
+const testsUtil = require('./testsUtil.js');
 
 async function ShowUserInfo(conn) {
   let result = await conn.execute(`
@@ -43,8 +43,8 @@ async function ShowUserInfo(conn) {
       sys_context('USERENV', 'PROXY_USER'),
       sys_context('USERENV', 'SESSION_USER')
     from dual`);
-  return [result.rows[0][0], result.rows[0][1]]
-};
+  return [result.rows[0][0], result.rows[0][1]];
+}
 
 
 describe('180. externalProxyAuth.js', function () {
@@ -171,9 +171,9 @@ describe('180. externalProxyAuth.js', function () {
               user: dbconfig.test.proxySessionUser,
               externalAuth: true,
             });
-            const [proxy_user, session_user] = await ShowUserInfo(conn);
+            await ShowUserInfo(conn);
           },
-         /DPI-1069:/
+          /DPI-1069:/
         );
       } catch (err) {
         should.not.exist(err);
@@ -334,9 +334,9 @@ describe('180. externalProxyAuth.js', function () {
               homogeneous: false,
             });
             conn = await pool.getConnection({ "user": `[${dbconfig.test.proxySessionUser}]` });
-            const [proxy_user, session_user] = await ShowUserInfo(conn);
+            await ShowUserInfo(conn);
           },
-         /ORA-00987:/
+          /ORA-00987:/
         );
       } catch (err) {
         should.not.exist(err);
@@ -372,9 +372,9 @@ describe('180. externalProxyAuth.js', function () {
               externalAuth: true,
             });
             conn = await pool.getConnection();
-            const [proxy_user, session_user] = await ShowUserInfo(conn);
+            await ShowUserInfo(conn);
           },
-         /DPI-1032:/
+          /DPI-1032:/
         );
       } catch (err) {
         should.not.exist(err);
@@ -410,9 +410,9 @@ describe('180. externalProxyAuth.js', function () {
               externalAuth: true,
             });
             conn = await pool.getConnection();
-            const [proxy_user, session_user] = await ShowUserInfo(conn);
+            await ShowUserInfo(conn);
           },
-         /DPI-1032:/
+          /DPI-1032:/
         );
       } catch (err) {
         should.not.exist(err);
@@ -481,9 +481,9 @@ describe('180. externalProxyAuth.js', function () {
               externalAuth: true,
             });
             conn = await pool.getConnection({user: dbconfig.test.proxySessionUser});
-            const [proxy_user, session_user] = await ShowUserInfo(conn);
+            await ShowUserInfo(conn);
           },
-         /DPI-1069:/
+          /DPI-1069:/
         );
       } catch (err) {
         should.not.exist(err);

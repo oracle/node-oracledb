@@ -44,7 +44,6 @@ const should   = require('should');
 const dbconfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-let REGULAR_CALLBACK_TIMEOUT = 10;
 let REGULAR_CALLBACK_TIMEOUT_MS = 10000;
 
 const PACKAGE_USER = dbconfig.user.toUpperCase();
@@ -153,7 +152,7 @@ describe.skip('185. cqn.js', function () {
    * times: Number of times to perform the insert, by default is 1
    */
   async function insertStringIntoTestTable(requestedValue, conn=undefined, tableName="cqn_test_table", isCommitRequired=true, times=1) {
-    let createNewConnection = !Boolean(conn);
+    let createNewConnection = !conn;
     for (let i = 0; i < times; i++) {
       try {
         if (createNewConnection) conn = await oracledb.getConnection(dbconfig);
@@ -174,7 +173,7 @@ describe.skip('185. cqn.js', function () {
   }
 
   async function updateTimestampsOfTestTable(str, conn=undefined, times=1) {
-    let createNewConnection = !Boolean(conn);
+    let createNewConnection = !conn;
     for (let i = 0; i < times; i++) {
       try {
         if (createNewConnection) conn = await oracledb.getConnection(dbconfig);
@@ -300,8 +299,7 @@ describe.skip('185. cqn.js', function () {
         "    '); \n" +
         "END; ";
       await conn.execute(sql);
-      REGULAR_CALLBACK_TIMEOUT_MS = await testsUtil.measureNetworkRoundTripTime() * 2;
-      REGULAR_CALLBACK_TIMEOUT = Math.ceil(REGULAR_CALLBACK_TIMEOUT_MS/1000);
+
     } catch (err) {
       should.not.exist(err);
     } finally {
@@ -336,7 +334,7 @@ describe.skip('185. cqn.js', function () {
         const subscribeOptions = {
           sql: "select * from cqn_test_table",
           callback: cqnEventCallback,
-        }
+        };
         await conn.subscribe('sub1', subscribeOptions);
       } catch (err) {
         should.not.exist(err);
@@ -362,7 +360,7 @@ describe.skip('185. cqn.js', function () {
         const subscribeOptions = {
           sql: "select * from cqn_test_table",
           callback: cqnEventCallback,
-        }
+        };
         await conn.subscribe('sub1', subscribeOptions);
         await insertStringIntoTestTable('testStr1', conn);
         await sleep(REGULAR_CALLBACK_TIMEOUT_MS);
@@ -397,7 +395,7 @@ describe.skip('185. cqn.js', function () {
         const subscribeOptions = {
           sql: "select * from cqn_test_table",
           callback: cqnEventCallback,
-        }
+        };
         await conn.subscribe('sub1', subscribeOptions);
         await insertStringIntoTestTable('testStr1');
         await sleep(REGULAR_CALLBACK_TIMEOUT_MS);
@@ -435,7 +433,7 @@ describe.skip('185. cqn.js', function () {
           ipAddress: localIPAddress[0].address,
           port: 0,  // Assign a random port by OS
           callback: cqnEventCallback,
-        }
+        };
         await conn.subscribe('sub1', subscribeOptions);
         await insertStringIntoTestTable('testStr1', conn);
         await sleep(REGULAR_CALLBACK_TIMEOUT_MS);
@@ -470,7 +468,7 @@ describe.skip('185. cqn.js', function () {
           sql: "select * from cqn_test_table",
           timeout: 1,
           callback: cqnEventCallback,
-        }
+        };
         await conn.subscribe('sub1', subscribeOptions);
         await sleep(REGULAR_CALLBACK_TIMEOUT_MS < 1000? 4000: REGULAR_CALLBACK_TIMEOUT_MS * 4);
         const msg = callbackMsg.pop();
@@ -480,7 +478,7 @@ describe.skip('185. cqn.js', function () {
         unsubscribeFailed = false;
       } catch (err) {
         should.not.exist(err);
-        clearInterval(interval);
+        clearInterval();
       } finally {
         if (conn) {
           try {
@@ -504,7 +502,7 @@ describe.skip('185. cqn.js', function () {
           sql: "select * from cqn_test_table",
           operations: oracledb.CQN_OPCODE_INSERT,
           callback: cqnEventCallback,
-        }
+        };
         await conn.subscribe('sub1', subscribeOptions);
         await insertStringIntoTestTable('testStr1');
         await updateTimestampsOfTestTable('testStr1', conn);
@@ -545,7 +543,7 @@ describe.skip('185. cqn.js', function () {
           groupingClass: oracledb.SUBSCR_GROUPING_CLASS_TIME,
           groupingValue: 2,
           callback: cqnEventCallback,
-        }
+        };
         await conn.subscribe('sub1', subscribeOptions);
         await conn.subscribe('sub1', { sql: "select * from cqn_test_table_2" });
         await insertStringIntoTestTable('testStr1', conn);
@@ -587,7 +585,7 @@ describe.skip('185. cqn.js', function () {
           groupingType: oracledb.SUBSCR_GROUPING_TYPE_LAST,
           groupingValue: 2,
           callback: cqnEventCallback,
-        }
+        };
         await conn.subscribe('sub1', subscribeOptions);
         await conn.subscribe('sub1', { sql: "select * from cqn_test_table_2" });
         await insertStringIntoTestTable('testStr1', conn);
@@ -625,7 +623,7 @@ describe.skip('185. cqn.js', function () {
         const subscribeOptions = {
           sql: "select requested_value from cqn_test_table",
           callback: cqnEventCallback,
-        }
+        };
         await conn.subscribe('sub1', subscribeOptions);
         await updateTimestampsOfTestTable('testStr1', conn);
         await sleep(REGULAR_CALLBACK_TIMEOUT_MS);
@@ -663,7 +661,7 @@ describe.skip('185. cqn.js', function () {
           sql: "select requested_value from cqn_test_table",
           qos: oracledb.SUBSCR_QOS_QUERY,
           callback: cqnEventCallback,
-        }
+        };
         await conn.subscribe('sub1', subscribeOptions);
         await updateTimestampsOfTestTable('testStr1', conn);
         await sleep(REGULAR_CALLBACK_TIMEOUT_MS);
@@ -693,7 +691,7 @@ describe.skip('185. cqn.js', function () {
           sql: "select requested_value from cqn_test_table where requested_value != 'testStr10'",
           qos: oracledb.SUBSCR_QOS_QUERY,
           callback: cqnEventCallback,
-        }
+        };
         await conn.subscribe('sub1', subscribeOptions);
         for (let i = 1; i < 12; i++) {
           await conn.subscribe('sub1', { sql: `select requested_value from cqn_test_table where requested_value != 'testStr1${i}'` });
@@ -735,7 +733,7 @@ describe.skip('185. cqn.js', function () {
           sql: "select n.requested_value from cqn_test_table n, cqn_test_table_2 s where n.requested_value = s.requested_value",
           qos: oracledb.SUBSCR_QOS_QUERY,
           callback: cqnEventCallback,
-        }
+        };
         await conn.subscribe('sub1', subscribeOptions);
         await insertStringIntoTestTable('testStr1', conn, undefined, false);
         await insertStringIntoTestTable('testStr1', conn, 'cqn_test_table_2');
@@ -775,7 +773,7 @@ describe.skip('185. cqn.js', function () {
         const subscribeOptions = {
           sql: "select * from cqn_test_table",
           callback: cqnEventCallback,
-        }
+        };
         await conn.subscribe('sub1', subscribeOptions);
         conn2 = await oracledb.getConnection({
           ...dbconfig,
@@ -881,7 +879,7 @@ describe.skip('185. cqn.js', function () {
           sql: "select requested_value from cqn_test_table",
           qos: oracledb.SUBSCR_QOS_DEREG_NFY,
           callback: cqnEventCallback,
-        }
+        };
         await conn.subscribe('sub1', subscribeOptions);
         await insertStringIntoTestTable('testStr1', conn);
         await sleep(REGULAR_CALLBACK_TIMEOUT_MS);
@@ -918,7 +916,7 @@ describe.skip('185. cqn.js', function () {
         const subscribeOptions = {
           sql: "select * from cqn_test_table",
           callback: cqnEventCallback,
-        }
+        };
         await conn.subscribe('sub1', subscribeOptions);
         await conn.unsubscribe('sub1');
         await testsUtil.assertThrowsAsync(async () => {
@@ -948,7 +946,7 @@ describe.skip('185. cqn.js', function () {
         const subscribeOptions = {
           sql: "select * from cqn_test_table",
           callback: cqnEventCallback,
-        }
+        };
         await testsUtil.assertThrowsAsync(async () => {
           await conn.subscribe('sub1', subscribeOptions);
         }, /ORA-29972:/); // ORA-29972: user does not have privilege to change/ create registration

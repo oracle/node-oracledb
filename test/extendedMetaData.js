@@ -1707,10 +1707,10 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'DT',
-                fetchType: oracledb.DATE,
-                dbType: oracledb.DB_TYPE_DATE,
-                dbTypeName: "DATE",
-                nullable: true } ]
+              fetchType: oracledb.DATE,
+              dbType: oracledb.DB_TYPE_DATE,
+              dbTypeName: "DATE",
+              nullable: true } ]
           );
           done();
         }

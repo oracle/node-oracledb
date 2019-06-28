@@ -30,7 +30,7 @@
 const oracledb = require('oracledb');
 const should   = require('should');
 const dbconfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js')
+const testsUtil = require('./testsUtil.js');
 
 const tag1 = "LANGUAGE=FRENCH";
 const tag2 = "LANGUAGE=GERMAN";
@@ -51,6 +51,7 @@ async function truncateTable() {
   try {
     conn = await oracledb.getConnection(dbconfig);
     result = await conn.execute("truncate table plsql_fixup_calls");
+    return result;
   } catch (err) {
     should.not.exist(err);
   } finally {
@@ -59,8 +60,6 @@ async function truncateTable() {
         await conn.close();
       } catch(err) {
         should.not.exist(err);
-      } finally {
-        return result;
       }
     }
   }
@@ -72,6 +71,7 @@ async function dropTable() {
     conn = await oracledb.getConnection(dbconfig);
     result = await conn.execute("drop table plsql_fixup_calls");
     result = await conn.execute("drop package plsql_fixup_test");
+    return result;
   } catch (err) {
     should.not.exist(err);
   } finally {
@@ -80,16 +80,9 @@ async function dropTable() {
         await conn.close();
       } catch(err) {
         should.not.exist(err);
-      } finally {
-        return result;
       }
     }
   }
-}
-
-async function getSysTime(conn) {
-  const result = await conn.execute('select sysdate from dual');
-  return result[0];
 }
 
 describe('184. sessionTag.js', function () {
@@ -663,8 +656,9 @@ describe('184. sessionTag.js', function () {
       if (requestedTag) {
         const tagParts = requestedTag.split('=');
         try {
-          let res = await conn.execute(`ALTER SESSION SET nls_language = '${tagParts[1]}'`);
           conn.tag = requestedTag;
+          await conn.execute(`ALTER SESSION SET nls_language = '${tagParts[1]}'`);
+
         } catch (err) {
           cb(err);
         }
@@ -1150,24 +1144,11 @@ describe('184. sessionTag.js', function () {
 
   describe('184.3 Change connection\'s tag before the connection is closed', function () {
 
-    let callbackRequestedTag, callbackActualTag;
-
     function tagFixup(conn, requestedTag, cb) {
-      callbackRequestedTag = requestedTag;
-      callbackActualTag = conn.tag;
       if (requestedTag)
         conn.tag = requestedTag;
       cb();
     }
-
-    function resetTag() {
-      callbackRequestedTag = null;
-      callbackActualTag = null;
-    }
-
-    beforeEach(function () {
-      resetTag();
-    });
 
     it('184.3.1 Setting connection\'s tag to undefined triggers error NJS-004', async function () {
       let conn, pool;
@@ -1178,9 +1159,9 @@ describe('184. sessionTag.js', function () {
         });
         conn = await pool.getConnection({tag: tag1});
         await testsUtil.assertThrowsAsync(() => {
-            conn.tag = undefined;
-          },
-          /NJS-004/ //NJS-004: invalid value for property
+          conn.tag = undefined;
+        },
+        /NJS-004/ //NJS-004: invalid value for property
         );
       } catch (err) {
         should.not.exist(err);
@@ -1211,9 +1192,9 @@ describe('184. sessionTag.js', function () {
         });
         conn = await pool.getConnection({tag: tag1});
         await testsUtil.assertThrowsAsync(() => {
-            conn.tag = {data: ["doesn't matter"], status: "SUCC"};
-          },
-          /NJS-004/ //NJS-004: invalid value for property
+          conn.tag = {data: ["doesn't matter"], status: "SUCC"};
+        },
+        /NJS-004/ //NJS-004: invalid value for property
         );
       } catch (err) {
         should.not.exist(err);
@@ -1245,9 +1226,9 @@ describe('184. sessionTag.js', function () {
         conn = await pool.getConnection({tag: tag1});
         conn.tag = "it doesn't matter";
         await testsUtil.assertThrowsAsync(async () => {
-            await conn.close();
-          },
-          /ORA-24488/ //ORA-24488: Invalid properties or values provided for OCISessionRelease
+          await conn.close();
+        },
+        /ORA-24488/ //ORA-24488: Invalid properties or values provided for OCISessionRelease
         );
         conn.tag = tag1;
       } catch (err) {
@@ -1297,7 +1278,7 @@ describe('184. sessionTag.js', function () {
           privilege     : oracledb.SYSDBA,
         };
         let conn = await oracledb.getConnection(connectionDetails);
-        let res = await conn.execute(sql);
+        await conn.execute(sql);
         await conn.close();
       } catch (err) {
         should.not.exist(err);
@@ -1650,8 +1631,8 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await testsUtil.assertThrowsAsync(
-            async () => {
-              await conn.close({drop: {}});
+              async () => {
+                await conn.close({drop: {}});
               },
               /NJS-007/ //NJS-007: invalid value for %s in parameter
             );

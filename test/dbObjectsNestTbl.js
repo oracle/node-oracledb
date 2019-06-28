@@ -1,6 +1,6 @@
 /* Copyright (c) 2019. Oracle and/or its affiliates.  All rights reserved. */
 /******************************************************************************
- * 
+ *
  * You may not use the identified files except in compliance with the Apache
  * License, Version 2.0 (the "License.")
  *
@@ -24,11 +24,10 @@
  *    Testing Oracle Database Nested Table Object Collection type(s)
  *
  *****************************************************************************/
-'use strict'
+'use strict';
 
 var oracledb = require ( 'oracledb' );
 var should   = require ( 'should' );
-var async    = require ( 'async' );
 var dbConfig = require ( './dbconfig.js' );
 
 
@@ -38,7 +37,7 @@ describe ('197. dbObjectsNestedTable.js',  ()  => {
   before (async () => {
     try {
       connection = await oracledb.getConnection (dbConfig);
-      
+
       let sql = `CREATE TYPE nodb_test197_typ IS TABLE OF VARCHAR2(30)`;
       await connection.execute (sql);
       await connection.commit ();
@@ -48,10 +47,7 @@ describe ('197. dbObjectsNestedTable.js',  ()  => {
             NESTED TABLE dept_names store as dnames_nt`;
       await connection.execute (sql);
       await connection.commit ();
-      
-      //sql = `INSERT INTO nodb_test197_tab values
-      //       (nodb_test197_typ ('Sales', 'Finance', 'Shipping' ))`;
-      //connection.execute ( sql ) ;
+
     }
     catch ( err ) {
       should.not.exist (err);
@@ -72,217 +68,217 @@ describe ('197. dbObjectsNestedTable.js',  ()  => {
   });
 
   it ( '197.1 Insert into table with Nested-table + getValues',
-      async () => {
-    var sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id, :v )`;
-    let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
-    let id = 19701;
-    
-    let obj = new objClass ( /* [ "Shipping", "Finance", "Sales" ] */ );
-    obj.append ( "Shipping" );
-    obj.append ( "Finance" );
-    obj.append ( "Sales" ) ;
-    await connection.execute ( sql, { id: id,  v : { val : obj } } );
-    await connection.commit ();
-    
-    sql = `SELECT * FROM NODB_TEST197_TAB`;
-    let result = await connection.execute ( sql );
-    obj = result.rows[0][1];
+    async () => {
+      var sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id, :v )`;
+      let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
+      let id = 19701;
 
-    let arr = obj.getValues ();
-    should.equal ( arr.length, 3 );
-    
-    should.strictEqual (arr[0], "Shipping" );
-    should.strictEqual (arr[1], "Finance" );
-    should.strictEqual (arr[2], "Sales" );
-  });  // 197.1
+      let obj = new objClass ( /* [ "Shipping", "Finance", "Sales" ] */ );
+      obj.append ( "Shipping" );
+      obj.append ( "Finance" );
+      obj.append ( "Sales" ) ;
+      await connection.execute ( sql, { id: id,  v : { val : obj } } );
+      await connection.commit ();
+
+      sql = `SELECT * FROM NODB_TEST197_TAB`;
+      let result = await connection.execute ( sql );
+      obj = result.rows[0][1];
+
+      let arr = obj.getValues ();
+      should.equal ( arr.length, 3 );
+
+      should.strictEqual (arr[0], "Shipping" );
+      should.strictEqual (arr[1], "Finance" );
+      should.strictEqual (arr[2], "Sales" );
+    });  // 197.1
 
 
   it ( '197.2 Insert into table with Nested-table + getKeys',
-      async () => {
-    var sql = `INSERT INTO NODB_TEST197_TAB VALUES (:id,  :v )`;
-    let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
-    let id = 19702
-    
-    let obj = new objClass ( /* [ "Shipping", "Finance", "Sales" ] */ );
-    obj.append ( "Shipping" );
-    obj.append ( "Finance" );
-    obj.append ( "Sales" ) ;
-    await connection.execute ( sql, { id: id,  v : { val : obj } } );
-    await connection.commit ();
-    
-    sql = `SELECT * FROM NODB_TEST197_TAB`;
-    let result = await connection.execute ( sql );
-    obj = result.rows[0][1];
+    async () => {
+      var sql = `INSERT INTO NODB_TEST197_TAB VALUES (:id,  :v )`;
+      let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
+      let id = 19702;
 
-    let arr = obj.getKeys ();
-    should.equal ( arr.length, 3 );
-    should.strictEqual (arr[0], 0 );
-    should.strictEqual (arr[1], 1 );
-    should.strictEqual (arr[2], 2 );
-       });  // 197.2
+      let obj = new objClass ( /* [ "Shipping", "Finance", "Sales" ] */ );
+      obj.append ( "Shipping" );
+      obj.append ( "Finance" );
+      obj.append ( "Sales" ) ;
+      await connection.execute ( sql, { id: id,  v : { val : obj } } );
+      await connection.commit ();
+
+      sql = `SELECT * FROM NODB_TEST197_TAB`;
+      let result = await connection.execute ( sql );
+      obj = result.rows[0][1];
+
+      let arr = obj.getKeys ();
+      should.equal ( arr.length, 3 );
+      should.strictEqual (arr[0], 0 );
+      should.strictEqual (arr[1], 1 );
+      should.strictEqual (arr[2], 2 );
+    });  // 197.2
 
   it ( '197.3 Insert into table with Nested-table + first * next',
-      async () => {
-    var sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id, :v )`;
-    let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
-    let id = 19703;
-    
-    let obj = new objClass ( /* [ "Shipping", "Finance", "Sales" ] */ );
-    obj.append ( "Shipping" );
-    obj.append ( "Finance" );
-    obj.append ( "Sales" ) ;
-    await connection.execute ( sql, { id : id,  v : { val : obj } } );
-    await connection.commit ();
-    
-    sql = `SELECT * FROM NODB_TEST197_TAB`;
-    let result = await connection.execute ( sql );
-    obj = result.rows[0][1];
+    async () => {
+      var sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id, :v )`;
+      let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
+      let id = 19703;
 
-    let index = obj.getFirstIndex ();
-    while (index != null ) {
-      let v = obj.getElement (index);
-      switch ( index ) 
-      {
-      case 0:
-        should.strictEqual (v, "Shipping");
-        break;
-      case 1:
-        should.strictEqual (v, "Finance");
-        break;
-      case 2:
-        should.strictEqual (v, "Sales");
-        break;
+      let obj = new objClass ( /* [ "Shipping", "Finance", "Sales" ] */ );
+      obj.append ( "Shipping" );
+      obj.append ( "Finance" );
+      obj.append ( "Sales" ) ;
+      await connection.execute ( sql, { id : id,  v : { val : obj } } );
+      await connection.commit ();
+
+      sql = `SELECT * FROM NODB_TEST197_TAB`;
+      let result = await connection.execute ( sql );
+      obj = result.rows[0][1];
+
+      let index = obj.getFirstIndex ();
+      while (index != null ) {
+        let v = obj.getElement (index);
+        switch ( index )
+        {
+          case 0:
+            should.strictEqual (v, "Shipping");
+            break;
+          case 1:
+            should.strictEqual (v, "Finance");
+            break;
+          case 2:
+            should.strictEqual (v, "Sales");
+            break;
+        }
+        index = obj.getNextIndex (index);
       }
-      index = obj.getNextIndex (index);
-    }    
-  });  //197.3
+    });  //197.3
 
 
   it ( '197.4 Insert into table with Nested-table + last + prev',
-      async () => {
-    var sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id, :v )`;
-    let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
-    let id = 19704;
-    
-    let obj = new objClass ( /* [ "Shipping", "Finance", "Sales" ] */ );
-    obj.append ( "Shipping" );
-    obj.append ( "Finance" );
-    obj.append ( "Sales" ) ;
-    await connection.execute ( sql, { id : id,  v : { val : obj } } );
-    await connection.commit ();
-    
-    sql = `SELECT * FROM NODB_TEST197_TAB`;
-    let result = await connection.execute ( sql );
-    obj = result.rows[0][1];
+    async () => {
+      var sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id, :v )`;
+      let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
+      let id = 19704;
 
-    let index = obj.getLastIndex ();
-    while (index != null ) {
-      let v = obj.getElement (index);
-      switch ( index ) 
-      {
-      case 0:
-        should.strictEqual (v, "Shipping");
-        break;
-      case 1:
-        should.strictEqual (v, "Finance");
-        break;
-      case 2:
-        should.strictEqual (v, "Sales");
-        break;
+      let obj = new objClass ( /* [ "Shipping", "Finance", "Sales" ] */ );
+      obj.append ( "Shipping" );
+      obj.append ( "Finance" );
+      obj.append ( "Sales" ) ;
+      await connection.execute ( sql, { id : id,  v : { val : obj } } );
+      await connection.commit ();
+
+      sql = `SELECT * FROM NODB_TEST197_TAB`;
+      let result = await connection.execute ( sql );
+      obj = result.rows[0][1];
+
+      let index = obj.getLastIndex ();
+      while (index != null ) {
+        let v = obj.getElement (index);
+        switch ( index )
+        {
+          case 0:
+            should.strictEqual (v, "Shipping");
+            break;
+          case 1:
+            should.strictEqual (v, "Finance");
+            break;
+          case 2:
+            should.strictEqual (v, "Sales");
+            break;
+        }
+        index = obj.getPrevIndex (index);
       }
-      index = obj.getPrevIndex (index);
-    }
-  });  //197.4
+    });  //197.4
 
 
   it ( '197.5 Insert into table with Nested-table + getElement',
-      async () => {
-    var sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id, :v )`;
-    let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
-    let id = 19705;
-    
-    let obj = new objClass ( /* [ "Shipping", "Finance", "Sales" ] */ );
-    obj.append ( "Shipping" );
-    obj.append ( "Finance" );
-    obj.append ( "Sales" ) ;
-    await connection.execute ( sql, { id : id, v : { val : obj } } );
-    await connection.commit ();
-    
-    sql = `SELECT * FROM NODB_TEST197_TAB`;
-    let result = await connection.execute ( sql );
-    obj = result.rows[0][1];
+    async () => {
+      var sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id, :v )`;
+      let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
+      let id = 19705;
 
-    // randomly use getElement ()
-    let v = obj.getElement (1);
-    should.strictEqual (v, "Finance" );
-    v = obj.getElement (0);
-    should.strictEqual (v, "Shipping" );
-  });  //197.5
+      let obj = new objClass ( /* [ "Shipping", "Finance", "Sales" ] */ );
+      obj.append ( "Shipping" );
+      obj.append ( "Finance" );
+      obj.append ( "Sales" ) ;
+      await connection.execute ( sql, { id : id, v : { val : obj } } );
+      await connection.commit ();
 
-  
+      sql = `SELECT * FROM NODB_TEST197_TAB`;
+      let result = await connection.execute ( sql );
+      obj = result.rows[0][1];
+
+      // randomly use getElement ()
+      let v = obj.getElement (1);
+      should.strictEqual (v, "Finance" );
+      v = obj.getElement (0);
+      should.strictEqual (v, "Shipping" );
+    });  //197.5
+
+
   it ( '197.6 Insert into table with Nested-table + hasElement',
-      async () => {
-    var sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id, :v )`;
-    let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
-    let id = 19706;
-    
-    let obj = new objClass ( /* [ "Shipping", "Finance", "Sales" ] */ );
-    obj.append ( "Shipping" );
-    obj.append ( "Finance" );
-    obj.append ( "Sales" ) ;
-    await connection.execute ( sql, { id : id, v : { val : obj } } );
-    await connection.commit ();
-    
-    sql = `SELECT * FROM NODB_TEST197_TAB`;
-    let result = await connection.execute ( sql );
-    obj = result.rows[0][1];
+    async () => {
+      var sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id, :v )`;
+      let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
+      let id = 19706;
 
-    should.strictEqual ( obj.hasElement( 0 ), true );
-    should.strictEqual ( obj.hasElement( 1 ), true );
-    should.strictEqual ( obj.hasElement( 2 ), true );
+      let obj = new objClass ( /* [ "Shipping", "Finance", "Sales" ] */ );
+      obj.append ( "Shipping" );
+      obj.append ( "Finance" );
+      obj.append ( "Sales" ) ;
+      await connection.execute ( sql, { id : id, v : { val : obj } } );
+      await connection.commit ();
 
-  });  //197.6
+      sql = `SELECT * FROM NODB_TEST197_TAB`;
+      let result = await connection.execute ( sql );
+      obj = result.rows[0][1];
+
+      should.strictEqual ( obj.hasElement( 0 ), true );
+      should.strictEqual ( obj.hasElement( 1 ), true );
+      should.strictEqual ( obj.hasElement( 2 ), true );
+
+    });  //197.6
 
   it ( '197.7 Insert into table with Nested-table NULL Value for object',
-      async () => {
-    var sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id,  :v )`;
-    let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
-    let id = 19707;
-    
-    await connection.execute ( sql, { id : id,
-                                   v : { type : objClass, val : null } } );
-    await connection.commit ();
-    
-    sql = `SELECT * FROM NODB_TEST197_TAB WHERE ID = :ID`;
-    let result = await connection.execute ( sql, { ID : 19707} );
-    let obj = result.rows[0][1];
+    async () => {
+      var sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id,  :v )`;
+      let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
+      let id = 19707;
 
-    should.strictEqual ( obj, null );
-    
-  });  // 197.7
+      await connection.execute ( sql, { id : id,
+        v : { type : objClass, val : null } } );
+      await connection.commit ();
+
+      sql = `SELECT * FROM NODB_TEST197_TAB WHERE ID = :ID`;
+      let result = await connection.execute ( sql, { ID : 19707} );
+      let obj = result.rows[0][1];
+
+      should.strictEqual ( obj, null );
+
+    });  // 197.7
 
 
   it ( '197.8 Insert into table with Nested-table NULL Value for object',
-      async () => {
-    var sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id, :v )`;
-    let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
-    let id = 19708;
-    
-    let obj = new objClass ( /* [ "Shipping", "Finance", "Sales" ] */ );
-    obj.append ( null );
-    obj.append ( null );
-    obj.append ( null ) ;
-    
-    await connection.execute ( sql, { id : id, v : { val : obj } } );
-    await connection.commit ();
-    
-    sql = `SELECT * FROM NODB_TEST197_TAB WHERE ID = :ID`;
-    let result = await connection.execute ( sql, { ID : 19708 } );
-    obj = result.rows[0][1];
+    async () => {
+      var sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id, :v )`;
+      let objClass = await connection.getDbObjectClass ( "NODB_TEST197_TYP" );
+      let id = 19708;
 
-    should.strictEqual ( obj.getElement(0), null );
-    
-  });  // 197.8
+      let obj = new objClass ( /* [ "Shipping", "Finance", "Sales" ] */ );
+      obj.append ( null );
+      obj.append ( null );
+      obj.append ( null ) ;
+
+      await connection.execute ( sql, { id : id, v : { val : obj } } );
+      await connection.commit ();
+
+      sql = `SELECT * FROM NODB_TEST197_TAB WHERE ID = :ID`;
+      let result = await connection.execute ( sql, { ID : 19708 } );
+      obj = result.rows[0][1];
+
+      should.strictEqual ( obj.getElement(0), null );
+
+    });  // 197.8
 
   it ('197.9 Insert into table and use deleteElement()', async () => {
     var sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id, :v )`;
