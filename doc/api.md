@@ -4174,6 +4174,12 @@ promise = enqMany();
 
 Enqueues multiple messages to an [Oracle Advanced Queue](#aq).
 
+Warning: calling `enqMany()` in parallel on different connections
+acquired from the same pool may fail due to Oracle bug 29928074.
+Ensure that `enqMany()` is not run in parallel, use [standalone
+connections](#connectionhandling), or make multiple calls to
+`enqOne()`.  The `deqMany()` method is not affected.
+
 ##### Parameters
 
 -   ```
@@ -12335,6 +12341,9 @@ const messages = [
 await queue.enqMany(messages);
 await connection.commit();
 ```
+
+Warning: see the advisory note in [`enqMany()`](#aqqueuemethodenqmany)
+documentation.
 
 Multiple messages can be dequeued in one call with
 [`queue.deqMany()`](#aqqueuemethoddeqmany).  This method takes a
