@@ -80,6 +80,10 @@
   Database ([ODPI-C
   change](https://github.com/oracle/odpi/commit/58e6a07ff5bb428a09068456ef5231884fcb77db)).
 
+- Change the
+  [`events`](https://oracle.github.io/node-oracledb/doc/api.html#propdbevents)
+  default to *true*.
+
 - Updated the JavaScript syntax in class implementations.
 
 - Class methods are now configurable.  For example via

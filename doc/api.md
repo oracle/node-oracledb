@@ -1060,7 +1060,7 @@ Boolean events
 
 Determines whether Oracle Client events mode should be enabled.
 
-The default value for `events` is *false*.
+The default value for `events` is *true*.
 
 This property can be overridden in the
 [`oracledb.createPool()`](#createpoolpoolattrsevents) call and when
@@ -1072,7 +1072,8 @@ Notification](#consubscribe), [Fast Application Notification
 (FAN)](#connectionfan) and [Runtime Load Balancing
 (RLB)](#connectionrlb).
 
-This property was added in node-oracledb 2.2.
+This property was added in node-oracledb 2.2.  Up until node-oracledb
+4.0 the default value for `events` was *false*.
 
 ##### Example
 
@@ -3693,7 +3694,7 @@ changed in the database by any committed transaction, or when there
 are Advanced Queuing messages to be dequeued.
 
 For notification to work, the connection must be created with
-[`events`](#propdbevents) mode *true*.
+[`events`](#propdbevents) mode *true*, which is the default.
 
 The database must be able to connect to the node-oracledb machine for
 notifications to be received.  Typically this means that the machine
@@ -6803,7 +6804,7 @@ application is not feasible.
 
 The `oraaccess.xml` file has other uses including:
 
-- Turning on [Fast Application Notification (FAN)](#connectionfan) events to enable FAN notifications and [Runtime Load Balancing (RLB)](#connectionrlb).
+- Changing the value of [Fast Application Notification (FAN)](#connectionfan) events which affects FAN notifications and [Runtime Load Balancing (RLB)](#connectionrlb).
 - Configuring [Client Result Caching][66] parameters
 - Turning on [Client Statement Cache Auto-tuning][67]
 
@@ -8346,10 +8347,11 @@ availability and performance tuning.  For example the database's
 
 #### <a name="connectionfan"></a> 14.9.1 Fast Application Notification (FAN)
 
-Users of [Oracle Database FAN][64] should set
-[`oracledb.events`](#propdbevents) to *true*.  This can also be
-enabled via [Oracle Client Configuration](#oraaccess).  Your
-application must connect to a FAN-enabled database service.
+Users of [Oracle Database FAN][64] must connect to a FAN-enabled
+database service.  The application should have
+[`oracledb.events`](#propdbevents) is set to *true*, which is the
+default.  This value can also be changed via [Oracle Client
+Configuration](#oraaccess).
 
 FAN support is useful for planned and unplanned outages.  It provides
 immediate notification to node-oracledb following outages related to
@@ -8382,9 +8384,9 @@ Notification][97].
 
 [Oracle Database RAC][93] users with [Oracle Database (RLB)][65]
 advisory events configured should use node-oracledb [Connection
-Pooling](#connpooling) and set [`oracledb.events`](#propdbevents) to
-*true*.  The events mode can also be enabled via [Oracle Client
-Configuration](#oraaccess).
+Pooling](#connpooling) and make sure
+[`oracledb.events`](#propdbevents) is *true*.  The events mode can
+also be changed via [Oracle Client Configuration](#oraaccess).
 
 RLB allows optimal use of database resources by balancing database
 requests across RAC instances.
