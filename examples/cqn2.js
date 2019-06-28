@@ -40,7 +40,7 @@
 const oracledb = require("oracledb");
 const dbConfig = require('./dbconfig.js');
 
-dbConfig.events = true;  // CQN needs events mode
+// dbConfig.events = true;  // CQN needs events mode, which is true by default in 4.0
 
 const interval = setInterval(function() {
   console.log("waiting...");
