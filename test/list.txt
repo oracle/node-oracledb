@@ -4551,6 +4551,10 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     208.1 REF cursors that fetch object
     208.2 Implicit results that fetch objects
     208.3 Implicit results that fetch objects with Result Set
+    208.4 DML RETURNING INTO, explicit bind type
+    208.5 DML RETURNING INTO, implicit bind type
+    208.6 DML RETURNING INTO, bind by named values
+    208.7 DML RETURNING INTO and executeMany()
 
 209. dbObject10.js
     209.1 DB Objects which contain PL/SQL methods

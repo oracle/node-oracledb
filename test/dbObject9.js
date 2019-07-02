@@ -77,7 +77,7 @@ describe('208. dbObject9.js', () => {
         bindArr,
         opts
       );
-      //console.log(result);
+
       should.strictEqual(result.rowsAffected, PEOPLE.length);
 
     } catch (err) {
@@ -169,5 +169,133 @@ describe('208. dbObject9.js', () => {
       should.not.exist(err);
     }
   }); // 208.3
+
+  it('208.4 DML RETURNING INTO, explicit bind type', async () => {
+
+    try {
+      const PersonType = await conn.getDbObjectClass(TYPE);
+
+      const staff = { ID: 1123, NAME: 'Changjie', GENDER: 'Male' };
+      const staffNo = 23;
+      const p = new PersonType(staff);
+      let sql = `INSERT INTO ${TABLE} VALUES (:1, :2) RETURNING empnum, person INTO :3, :4`;
+      let bindVar = [
+        staffNo,
+        { type: PersonType, val: p },
+        { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_NUMBER },
+        { dir: oracledb.BIND_OUT, type: PersonType }
+      ];
+      let result = await conn.execute(sql, bindVar);
+
+      should.strictEqual(result.rowsAffected, 1);
+      should.strictEqual(result.outBinds[0][0], staffNo);
+      should.deepEqual(
+        result.outBinds[1][0]._toPojo(),
+        staff
+      );
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 208.4
+
+  it('208.5 DML RETURNING INTO, implicit bind type', async () => {
+    try {
+      const PersonType = await conn.getDbObjectClass(TYPE);
+
+      const staff = { ID: 23456, NAME: 'Chris', GENDER: 'Male' };
+      const staffNo = 101;
+      const p = new PersonType(staff);
+      let sql = `INSERT INTO ${TABLE} VALUES (:1, :2) RETURNING empnum, person INTO :3, :4`;
+      let bindVar = [
+        staffNo,
+        p,
+        { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_NUMBER },
+        { dir: oracledb.BIND_OUT, type: PersonType }
+      ];
+      let result = await conn.execute(sql, bindVar);
+
+      should.strictEqual(result.rowsAffected, 1);
+      should.strictEqual(result.outBinds[0][0], staffNo);
+      should.deepEqual(
+        result.outBinds[1][0]._toPojo(),
+        staff
+      );
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 208.5
+
+  it('208.6 DML RETURNING INTO, bind by named values', async () => {
+    try {
+      const PersonType = await conn.getDbObjectClass(TYPE);
+
+      const staff = { ID: 789, NAME: 'Shelly', GENDER: 'Female' };
+      const staffNo = 102;
+      const p = new PersonType(staff);
+      let sql = `INSERT INTO ${TABLE} VALUES (:n, :i) RETURNING empnum, person INTO :o1, :o2`;
+      let bindVar = {
+        n: staffNo,
+        i: p,
+        o1: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_NUMBER },
+        o2: { dir: oracledb.BIND_OUT, type: PersonType }
+      };
+      let result = await conn.execute(sql, bindVar);
+
+      should.strictEqual(result.rowsAffected, 1);
+      should.strictEqual(result.outBinds.o1[0], staffNo);
+      should.deepEqual(
+        result.outBinds.o2[0]._toPojo(),
+        staff
+      );
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 208.6
+
+  it.skip('208.7 DML RETURNING INTO and executeMany()', async () => {
+    try {
+      const PersonType = await conn.getDbObjectClass(TYPE);
+
+      const staffs = [
+        { ID: 7001, NAME: 'Emma', GENDER: 'Female' },
+        { ID: 7002, NAME: 'Ashley', GENDER: 'Female' },
+        { ID: 7003, NAME: 'Alexanda', GENDER: 'Male' },
+      ];
+      const staffNo = [201, 202, 203];
+
+      let bindArr = [];
+      for (let i = 0, num, p; i < staffs.length; i++) {
+        num = staffNo[i];
+        p = new PersonType(staffs[i]);
+        bindArr[i] = [num, p];
+      }
+      let opts = {
+        autoCommit: true,
+        bindDefs: [
+          { type: oracledb.NUMBER },
+          { type: PersonType },
+          { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_NUMBER },
+          { dir: oracledb.BIND_OUT, type: PersonType }
+        ]
+      };
+      let result = await conn.executeMany(
+        `INSERT INTO ${TABLE} VALUES (:1, :2) RETURNING empnum, person INTO :3, :4`,
+        bindArr,
+        opts
+      );
+      console.log("==== Result of RETURNING INTO ========");
+      for (let i = 0; i < staffs.length; i++) {
+        console.log(result.outBinds[i]);
+      }
+      console.log();
+
+      console.log("==== Result in table ========");
+      let res = await conn.execute(`SELECT * FROM ${TABLE} WHERE empnum > 200 AND empnum < 205`);
+      console.log(res);
+
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 208.7
 
 });
