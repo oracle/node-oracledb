@@ -4538,8 +4538,19 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     204.4 insert an empty JSON
 
 205. dbObject6.js
-    205.1 Insert and query Oracle Spatial geometries
+    205.1 205.1 examples/selectgeometry.js
 
 206. dbObject7.js
     206.1 OUT bind DB Object
     206.2 IN OUT bind DB Object
+
+207. dbObject8.js
+    207.1 examples/selectobject.js
+
+208. dbObject9.js
+    208.1 REF cursors that fetch object
+    208.2 Implicit results that fetch objects
+    208.3 Implicit results that fetch objects with Result Set
+
+209. dbObject10.js
+    209.1 DB Objects which contain PL/SQL methods
