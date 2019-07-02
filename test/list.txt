@@ -4558,3 +4558,5 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 209. dbObject10.js
     209.1 DB Objects which contain PL/SQL methods
+    209.2 By default, JavaScript Object toString() returns "[object type]"
+    209.3 The Object literal and JSON.stringify()
