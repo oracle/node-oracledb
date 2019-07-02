@@ -13,11 +13,10 @@
     - The string representation of classes has changed to `[Object Object]` as a consequence of using N-API.  Use `Object.getPrototypeOf()` to get class information.
     - The C compiler required for building from source code no longer needs C++11 compatibility.  The node-oracledb source code is now pure C.
 
-- Added support for querying and binding Oracle Database objects and
-  collections, see [Oracle Database Objects and
+- Added support for querying and binding [Oracle Database Objects and
   Collections](https://oracle.github.io/node-oracledb/doc/api.html#objects).
 
-- Oracle Advanced Queuing (AQ):
+- Added support for [Oracle Advanced Queuing (AQ)](https://oracle.github.io/node-oracledb/doc/api.html#aq):
 
     - Added support for "RAW" queues, allowing String and Buffer
       messages to be used.
@@ -27,22 +26,25 @@
 
     - Added support for notifications with `oracledb.SUBSCR_NAMESPACE_AQ`.
 
-- Added support for Implicit Results, allowing query results to be
-  returned from PL/SQL without needing parameters or bind variables.
+- Added support for [Implicit
+  Results](https://oracle.github.io/node-oracledb/doc/api.html#implicitresults),
+  allowing query results to be returned from PL/SQL without needing
+  parameters or bind variables.
 
 - Added asynchronous method
   [`lob.getData()`](https://oracle.github.io/node-oracledb/doc/api.html#lobgetdata)
   to return all data from a Lob readable stream.
 
-- Added a new `dbTypeName` attribute to `extendedMetaData` output.  It
-  contains the name of the type the column has in the database, such
-  as "VARCHAR2".
+- Added a new `dbTypeName` attribute to [`extendedMetaData`
+  output](https://oracle.github.io/node-oracledb/doc/api.html#execmetadata).
+  It contains the name of the type the column has in the database,
+  such as "VARCHAR2".
 
 - Enhanced BIND_IN of PL/SQL Collection Associative Arrays (Index-by)
   so a bind definition object can be omitted (see
   [#1039](https://github.com/oracle/node-oracledb/issues/1039)).
 
-- Continuous Query Notification (CQN):
+- Continuous Query Notification (CQN) Improvements:
 
     - Added support for getting the [registration
       id](https://oracle.github.io/node-oracledb/doc/api.html#consubscribecallback)
@@ -73,7 +75,7 @@
   previous constants `oracledb.ARRAY` and `oracledb.OBJECT` are
   deprecated but still usable.
 
-- Improved the performance of `oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT`.
+- Improved the performance of [`oracledb.outFormat`](#propdboutformat) mode `oracledb.OUT_FORMAT_OBJECT`.
 
 - Improved the fetch performance of LOBs in some cases by reducing the
   number of round-trips required between node-oracledb and Oracle
@@ -104,7 +106,10 @@
     - The NJS-014 error when setting a read-only property was replaced
       with a standard JavaScript message.
 
-- SODA changes:
+    - Some error numbers may have changed due to code refactoring.
+      Some message text was updated.
+
+- [SODA](https://oracle.github.io/node-oracledb/doc/api.html#sodaoverview) changes:
 
     - Added SODA bulk insert methods
       [`sodaCollection.insertMany()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollinsertmany)
