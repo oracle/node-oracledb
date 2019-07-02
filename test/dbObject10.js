@@ -127,8 +127,11 @@ describe('209. dbObject10.js', () => {
       let dbObj = result.rows[0][0];
 
       let schema = dbconfig.user.toUpperCase();
-      let expect = `x[${schema}.NODB_PERSON_TYP] { IDNO: 65,\n  FIRST_NAME: 'Verna',\n  LAST_NAME: 'Mills',\n  EMAIL: 'vmills@example.com',\n  PHONE: '1-650-555-0125' }`;
+      let expect = `x[${schema}.NODB_PERSON_TYP] { IDNO: 65, FIRST_NAME: 'Verna',  LAST_NAME: 'Mills',  EMAIL: 'vmills@example.com', PHONE: '1-650-555-0125' }`;
+      expect = expect.trim().replace(/[\s\n\r]/g, '');
+
       let actual = 'x' + dbObj;
+      actual = actual.trim().replace(/[\s\n\r]/g, '');
       should.strictEqual(actual, expect);
 
       expect = '{"IDNO":65,"FIRST_NAME":"Verna","LAST_NAME":"Mills","EMAIL":"vmills@example.com","PHONE":"1-650-555-0125"}';
