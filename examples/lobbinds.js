@@ -207,7 +207,7 @@ async function plsql_out_inout(connection) {
 
   console.log ("5. plsql_out_inout(): Getting a LOB using a PL/SQL OUT bind and inserting it using a PL/SQL IN OUT LOB bind");
 
-  let result = await connection.execute(
+  const result1 = await connection.execute(
     `BEGIN
        lobs_out(:idbv, :cobv, :bobv);
      END;`,
@@ -218,14 +218,14 @@ async function plsql_out_inout(connection) {
     }
   );
 
-  const clob1 = result.outBinds.cobv;
+  const clob1 = result1.outBinds.cobv;
   if (clob1 === null) {
     throw new Error('plsql_out_inout(): NULL clob1 found');
   }
 
   // Note binding clob1 as IN OUT here causes it be autoclosed by execute().
   // The returned Lob clob2 will be autoclosed because it is streamed to completion.
-  result = await connection.execute(
+  const result2 = await connection.execute(
     `BEGIN
        lob_in_out(:idbv, :ciobv);
      END;`,
@@ -239,7 +239,7 @@ async function plsql_out_inout(connection) {
 
     let errorHandled = false;
 
-    const clob2 = result.outBinds.ciobv;
+    const clob2 = result2.outBinds.ciobv;
     if (clob2 === null) {
       throw new Error('plsql_out_inout(): NULL clob2 found');
     }
