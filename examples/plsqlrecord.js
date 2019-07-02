@@ -91,6 +91,15 @@ async function run() {
     result = await connection.execute(plsql, binds);
     console.log(result.outBinds.outbv);
 
+    // Using the name for the type
+    binds = {
+      inbv: { type: "RECTEST.RECTYPE", val: { NAME: 'Car', POS: 56 } },
+      outbv: { type: RecTypeClass, dir: oracledb.BIND_OUT }
+    };
+
+    result = await connection.execute(plsql, binds);
+    console.log(result.outBinds.outbv);
+
     //
     // executeMany()
     //
@@ -98,7 +107,6 @@ async function run() {
     console.log('\nExample with executeMany():');
 
     binds = [
-      { inbv: { NAME: 'Car', POS: 56 } },
       { inbv: { NAME: 'Train', POS: 78 } },
       { inbv: { NAME: 'Bike', POS: 83 } }
     ];

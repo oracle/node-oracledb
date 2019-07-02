@@ -432,6 +432,15 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 20.6 [Binding Multiple Values to a SQL `WHERE IN` Clause](#sqlwherein)
     - 20.7 [Binding Column and Table Names in Queries](#sqlbindtablename)
 21. [Oracle Database Objects and Collections](#objects)
+    - 21.1 [Inserting Objects](#objectinsert)
+    - 21.2 [Fetching Objects](#objectfetch)
+    - 21.3 [PL/SQL Collection Types](#plsqlcollections)
+        - 21.3.1 [PL/SQL Collection Associative Arrays (Index-by)](#plsqlindexbybinds)
+        - 21.3.2 [PL/SQL Collection VARRAY Types](#plsqlvarray)
+        - 21.3.3 [PL/SQL Collection Nested Tables](#plsqlnestedtables)
+    - 21.4 [PL/SQL RECORD Types](#plsqlrecords)
+    - 21.5 [Inserting or Passing Multiple Objects of the Same Type](#objexecmany)
+    - 21.6 [Oracle Database Object Type Limitations](#objectlimitations)
 22. [Batch Statement Execution with `executeMany()`](#batchexecution)
 23. [Transaction Management](#transactionmgt)
 24. [Statement Caching](#stmtcache)
@@ -11031,7 +11040,7 @@ multiple hard-coded SQL statements, each with a different ORDER BY.
 You can query and insert most Oracle Database objects and collections,
 with some [limitations](#objectlimitations).
 
-### Inserting Objects
+### <a name="objectinsert"></a> 21.1 Inserting Objects
 
 As an example, the Oracle Spatial type [SDO_GEOMETRY][139] can easily
 be used in node-oracledb.  Describing SDO_GEOMETRY in SQL*Plus shows:
@@ -11174,7 +11183,7 @@ connection.close({drop: true})`](#connectionclose), or restart the
 pool.  Then `getDbObjectClass()` can be called again to get the
 updated type information.
 
-### Fetching Objects
+### <a name="objectfetch"></a> 21.2 Fetching Objects
 
 When objects are fetched, they are represented as a
 [DbObject](#dbobjectclass):
@@ -11221,7 +11230,7 @@ For DbObjects representing Oracle collections, methods such as
 
 ```javascript
 console.log(o.SDO_ELEM_INFO.getKeys());    // [ 0, 1, 2 ]
-console.log(o.SDO_ELEM_INFO.getValues()); // [ 1, 1003, 3 ]
+console.log(o.SDO_ELEM_INFO.getValues());  // [ 1, 1003, 3 ]
 ```
 
 The options [`fetchAsBuffer`](#propdbfetchasbuffer) and
@@ -11233,117 +11242,13 @@ LOBs will be fetched as [Lob objects](#lobclass).  The
 the data.  Note it is an asynchronous method and requires a round-trip
 to the database.
 
-### <a name="plsqlrecords"></a> PL/SQL RECORD Types
+### <a name="plsqlcollections"></a> 21.3 PL/SQL Collection Types
 
-PL/SQL RECORDS can be bound for insertion and retrieval.  Given the
-PL/SQL package:
+PL/SQL has three collection types: associative arrays, VARRAY
+(variable-size arrays), and nested tables.  See [Collection
+Types][150] in the Database PL/SQL Language Reference.
 
-```sql
-CREATE OR REPLACE PACKAGE seachange AS
-  TYPE shiptype IS RECORD (shipname VARCHAR2(40), weight NUMBER);
-  PROCEDURE biggership (p_in IN shiptype, p_out OUT shiptype);
-END seachange;
-
-CREATE OR REPLACE PACKAGE BODY seachange AS
-  PROCEDURE biggership (p_in IN shiptype, p_out OUT shiptype) AS
-  BEGIN
-     p_out := p_in;
-     p_out.weight := p_out.weight * 2;
-  END;
-END seachange;
-```
-
-You can get a prototype object for the SHIPTYPE record by calling
-`getDbObjectClass()` and then create a new object `vessel` for a ship.
-This can be bound for input when calling the BIGGERSHIP procedure.  To
-retrieve a SHIPTYPE record back from the database, pass the prototype
-object class for the output bind `type`:
-
-```javascript
-ShipTypeClass = await connection.getDbObjectClass("SEACHANGE.SHIPTYPE");
-
-vessel = new ShipTypeClass({ SHIPNAME: 'BoatFace', WEIGHT: 1200 });
-
-binds = {
-  inbv: vessel,
-  outbv: { type: ShipTypeClass, dir: oracledb.BIND_OUT }
-};
-
-result = await connection.execute(`CALL seachange.biggership(:inbv, :outbv)`, binds);
-console.log(result.outBinds.outbv.SHIPNAME, result.outBinds.outbv.WEIGHT);
-```
-
-The output shows the increased ship size:
-
-```
-BoatFace 2400
-```
-
-See [plsqlrecord.js][147] for a runnable example.
-
-### <a name="objvarray"></a> Working with VARRAY Types
-
-Given a table with a VARRAY column:
-
-```sql
-CREATE TYPE playertype AS OBJECT (
-    shirtnumber  NUMBER,
-    name         VARCHAR2(20));
-
-CREATE TYPE teamtype AS VARRAY(10) OF playertype;
-
-CREATE TABLE sports (sportname VARCHAR2(20), team teamtype);
-```
-
-You can insert values using:
-
-```javascript
-TeamTypeClass = await connection.getDbObjectClass("TEAMTYPE");
-
-hockeyTeam = new TeamTypeClass(
-  [
-    {SHIRTNUMBER: 11, NAME: 'Elizabeth'},
-    {SHIRTNUMBER: 22, NAME: 'Frank'},
-  ]
-);
-
-await connection.execute(
-  `INSERT INTO sports (sportname, team) VALUES (:sn, :t)`,
-  {
-    sn: "Hockey",
-    t: hockeyTeam
-  });
-```
-
-Querying the table could be done like:
-
-```javascript
-result = await connection.execute(
-  `SELECT sportname, team FROM sports`,
-  [],
-  {
-    outFormat: oracledb.OUT_FORMAT_OBJECT
-  }
-);
-for (row of result.rows) {
-  console.log("The " + row.SPORTNAME + " team players are:");
-  for (const player of row.TEAM) {
-    console.log("  " + player.NAME);
-  }
-}
-```
-
-The output would be:
-
-```
-The Hockey team players are:
-  Elizabeth
-  Frank
-```
-
-See [selectvarray.js][146] for a runnable example.
-
-### <a name="plsqlindexbybinds"></a> PL/SQL Collection Associative Arrays (Index-by)
+#### <a name="plsqlindexbybinds"></a> 21.3.1 PL/SQL Collection Associative Arrays (Index-by)
 
 Arrays of strings and numbers can be bound to PL/SQL IN, IN OUT, and
 OUT parameters of PL/SQL INDEX BY associative array types with integer
@@ -11364,6 +11269,7 @@ Given this table and PL/SQL package:
 
 ```sql
 DROP TABLE mytab;
+
 CREATE TABLE mytab (id NUMBER, numcol NUMBER);
 
 CREATE OR REPLACE PACKAGE mypkg IS
@@ -11496,12 +11402,195 @@ Parameters](#executebindParams) for more information about binding.
 
 See [plsqlarray.js][58] for a runnable example.
 
-### Inserting or Passing Multiple Objects of the Same Type
+#### <a name="plsqlvarray"></a> 21.3.2 PL/SQL Collection VARRAY Types
+
+Given a table with a VARRAY column:
+
+```sql
+CREATE TYPE playertype AS OBJECT (
+    shirtnumber  NUMBER,
+    name         VARCHAR2(20));
+/
+
+CREATE TYPE teamtype AS VARRAY(10) OF playertype;
+/
+
+CREATE TABLE sports (sportname VARCHAR2(20), team teamtype);
+```
+
+You can insert values using:
+
+```javascript
+await connection.execute(
+  `INSERT INTO sports (sportname, team) VALUES (:sn, :t)`,
+  {
+    sn: "Hockey",
+    t:
+    {
+      type: "TEAMTYPE",
+      val:
+      [
+        {SHIRTNUMBER: 11, NAME: 'Georgia'},
+        {SHIRTNUMBER: 22, NAME: 'Harriet'}
+      ]
+    }
+  }
+);
+
+// Alternatively:
+
+TeamTypeClass = await connection.getDbObjectClass("TEAMTYPE");
+
+hockeyTeam = new TeamTypeClass(
+  [
+    {SHIRTNUMBER: 22, NAME: 'Elizabeth'},
+    {SHIRTNUMBER: 33, NAME: 'Frank'},
+  ]
+);
+
+await connection.execute(
+  `INSERT INTO sports (sportname, team) VALUES (:sn, :t)`,
+  {
+    sn: "Hockey",
+    t: hockeyTeam
+  });
+
+```
+
+Querying the table could be done like:
+
+```javascript
+result = await connection.execute(
+  `SELECT sportname, team FROM sports`,
+  [],
+  {
+    outFormat: oracledb.OUT_FORMAT_OBJECT
+  }
+);
+for (row of result.rows) {
+  console.log("The " + row.SPORTNAME + " team players are:");
+  for (const player of row.TEAM) {
+    console.log("  " + player.NAME);
+  }
+}
+```
+
+The output would be:
+
+```
+The Hockey team players are:
+  Elizabeth
+  Frank
+```
+
+See [selectvarray.js][146] for a runnable example.
+
+#### <a name="plsqlnestedtables"></a> 21.3.3 PL/SQL Collection Nested Tables
+
+Given a nested table `staffList`:
+
+```sql
+CREATE TABLE bonuses (id NUMBER, name VARCHAR2(20));
+
+CREATE OR REPLACE PACKAGE personnel AS
+  TYPE staffList IS TABLE OF bonuses%ROWTYPE;
+  PROCEDURE awardBonuses (goodStaff staffList);
+END personnel;
+/
+
+CREATE OR REPLACE PACKAGE BODY personnel AS
+  PROCEDURE awardBonuses (goodStaff staffList) IS
+  BEGIN
+    FORALL i IN INDICES OF goodStaff
+      INSERT INTO bonuses (id, name) VALUES (goodStaff(i).id, goodStaff(i).name);
+  END;
+END;
+/
+```
+
+you can call `awardBonuses()` like:
+
+```javascript
+plsql = `CALL personnel.awardBonuses(:gsbv)`;
+
+binds = {
+  gsbv:
+  {
+    type: "PERSONNEL.STAFFLIST",
+    val:
+      [
+        {ID: 1, NAME: 'Chris' },
+        {ID: 2, NAME: 'Sam' }
+      ]
+  }
+};
+
+await connection.execute(plsql, binds);
+```
+
+Similar with other objects, calling
+[`getDbObjectClass()`](#getdbobjectclass) and using a constructor to
+create a `DbObject` for binding can also be used.
+
+### <a name="plsqlrecords"></a> 21.4 PL/SQL RECORD Types
+
+PL/SQL RECORDS can be bound for insertion and retrieval.  This example
+uses the PL/SQL package:
+
+```sql
+CREATE OR REPLACE PACKAGE seachange AS
+  TYPE shiptype IS RECORD (shipname VARCHAR2(40), weight NUMBER);
+  PROCEDURE biggership (p_in IN shiptype, p_out OUT shiptype);
+END seachange;
+/
+
+CREATE OR REPLACE PACKAGE BODY seachange AS
+  PROCEDURE biggership (p_in IN shiptype, p_out OUT shiptype) AS
+  BEGIN
+     p_out := p_in;
+     p_out.weight := p_out.weight * 2;
+  END;
+END seachange;
+/
+```
+
+Similar to previous examples, you can use a prototype DbObject from
+`getdbobjectclass()` for binding, or pass an Oracle type name.
+
+Below a prototype object for the SHIPTYPE record is returned from
+`getDbObjectClass()` and then a new object `vessel` is created for a
+ship.  This is bound for input when calling the BIGGERSHIP procedure.
+To retrieve a SHIPTYPE record back from the the PL/SQL, the prototype
+object class is passed for the output bind `type`:
+
+```javascript
+ShipTypeClass = await connection.getDbObjectClass("SEACHANGE.SHIPTYPE");
+
+vessel = new ShipTypeClass({ SHIPNAME: 'BoatFace', WEIGHT: 1200 });
+
+binds = {
+  inbv: vessel,
+  outbv: { type: ShipTypeClass, dir: oracledb.BIND_OUT }
+};
+
+result = await connection.execute(`CALL seachange.biggership(:inbv, :outbv)`, binds);
+console.log(result.outBinds.outbv.SHIPNAME, result.outBinds.outbv.WEIGHT);
+```
+
+The output shows the increased ship size:
+
+```
+BoatFace 2400
+```
+
+See [plsqlrecord.js][147] for a runnable example.
+
+### <a name="objexecmany"></a> 21.5 Inserting or Passing Multiple Objects of the Same Type
 
 You can use `executeMany()` with objects.  See [Binding Objects with
 `executeMany()`](#executemanyobjects).
 
-### <a name="objectlimitations"></a> Oracle Database Object Type Limitations
+### <a name="objectlimitations"></a> 21.6 Oracle Database Object Type Limitations
 
 PL/SQL collections and records can only be bound when both Oracle
 client libraries and Oracle Database are 12.1, or higher.
@@ -11798,6 +11887,7 @@ CREATE OR REPLACE PACKAGE rectest AS
    TYPE rectype IS RECORD (name VARCHAR2(40), pos NUMBER);
    PROCEDURE myproc (p_in IN rectype, p_out OUT rectype);
 END rectest;
+/
 ```
 
 This can be called like:
@@ -13900,3 +13990,4 @@ When upgrading from node-oracledb version 3.1 to version 4.0:
 [147]: https://github.com/oracle/node-oracledb/tree/master/examples/plsqlrecord.js
 [148]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C4C426FC-FD23-4B2E-8367-FA5F83F3F23A
 [149]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4848E6A0-58A7-44FD-8D6D-A033D0CCF9CB
+[150]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7E9034D5-0D33-43A1-9012-918350FE148C

@@ -84,7 +84,7 @@ async function run() {
     const binds = {
       inbv:
       {
-        type: "NETBALL.TEAMTYPE",
+        type: "NETBALL.TEAMTYPE",  // the name of the top level database type, case sensitive
         val:
         [
           { NAME: 'Jay',    POSITION: 'GOAL ATTACK',  SHIRTNUMBER: 0 },

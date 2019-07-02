@@ -171,7 +171,7 @@ async function run() {
       `INSERT INTO farmtab (id, farm) VALUES (:id, :f)`,
       { id: 4,
         f: {
-          type: 'DBFARMTYPE',   // the name of the database type, case sensitive
+          type: 'DBFARMTYPE',   // the name of the top level database type, case sensitive
           val: {                // a JavaScript object that maps to the DB object
             FARMERNAME: 'Boy',
             HARVEST: ['flowers', 'seedlings' ]
