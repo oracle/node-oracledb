@@ -19,7 +19,7 @@
  *   210. dbObject11.js
  *
  * DESCRIPTION
- *   DB Objects contain PL/SQL methods.
+ *   The attribute names of DB Objects contain special characters.
  *
  *****************************************************************************/
 'use strict';
