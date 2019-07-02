@@ -604,7 +604,7 @@ async function run() {
     connection = await oracledb.getConnection(  {
       user          : "hr",
       password      : mypw,
-      connectString : "localhost/orclpdb"
+      connectString : "localhost/orclpdb1"
     });
 
     // Create a new (or open an existing) document collection
@@ -872,7 +872,7 @@ Constant Name                               | Value |Description
 --------------------------------------------|-------|-----------------------------------------------
 `oracledb.SUBSCR_EVENT_TYPE_AQ`             | 100   | Advanced Queuing notifications are being used
 `oracledb.SUBSCR_EVENT_TYPE_DEREG`          | 5     | A subscription has been closed or the timeout value has been reached
-`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`     | 6     | Object-level notications are being used (Database Change Notification)
+`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`     | 6     | Object-level notifications are being used (Database Change Notification)
 `oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`   | 7     | Query-level notifications are being used (Continuous Query Notification)
 `oracledb.SUBSCR_EVENT_TYPE_SHUTDOWN`       | 2     | The database is being shut down
 `oracledb.SUBSCR_EVENT_TYPE_SHUTDOWN_ANY`   | 3     | An instance of Oracle Real Application Clusters (RAC) is being shut down
@@ -914,7 +914,7 @@ Refer to [Advanced Queuing documentation][129] for more details about attributes
 
 Constant Name                                           | Value      | Description
 --------------------------------------------------------|------------|---------------------------------------------------
-`oracledb.AQ_DEQ_MODE_BROWSE`                           | 1          | Read amessage without acquiring a lock.
+`oracledb.AQ_DEQ_MODE_BROWSE`                           | 1          | Read a message without acquiring a lock.
 `oracledb.AQ_DEQ_MODE_LOCKED`                           | 2          | Read and obtain write lock on message.
 `oracledb.AQ_DEQ_MODE_REMOVE`                           | 3          | Read the message and delete it.
 `oracledb.AQ_DEQ_MODE_REMOVE_NO_DATA`                   | 4          | Delete message without returning payload.
@@ -2078,7 +2078,7 @@ Callback function parameter | Description
 
 Callback:
 ```
-getConnection([String poolAlias | Object connAttrs], function(Error error, Connection conn){});
+getConnection([String poolAlias | Object connAttrs], function(Error error, Connection connection){});
 ```
 Promise:
 ```
@@ -2317,7 +2317,7 @@ proxy authentication.
 ##### Prototype
 
 ```
-function(Error error, Connection conn)
+function(Error error, Connection connection)
 ```
 
 ##### Parameters
@@ -3777,7 +3777,7 @@ The `message` parameter in the notification callback is an object containing the
 - `queueName` - the name of the Advanced Queue.  Undefined for CQN.  This was added in node-oracledb 4.0.
 - `queries` - an array of objects specifying the queries which were affected by the Query Change notification. This is only defined if the `type` key is the value [`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription). It contains the following key:
     - `tables` - an array of objects identical to the objects created for Database Change Notification (see the `tables` property below).
-- `registered` - a boolean indicating whether the subscription is registerd with the database.  Will be *false* if `type` is [`oracledb.SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription) or if the subscription was created with the [`qos`](#consubscribeoptqos) property set to [`oracledb.SUBSCR_QOS_DEREG_NFY`](#oracledbconstantssubscription).
+- `registered` - a boolean indicating whether the subscription is registered with the database.  Will be *false* if `type` is [`oracledb.SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription) or if the subscription was created with the [`qos`](#consubscribeoptqos) property set to [`oracledb.SUBSCR_QOS_DEREG_NFY`](#oracledbconstantssubscription).
 - `tables` - an array of objects specifying the tables which were affected by the notification. This is only defined if `type` is [`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription). It contains the following properties:
     - `name` - the name of the table which was modified in some way.
     - `operation` - an integer mask composed of one or more values of the following constants:
@@ -3794,7 +3794,7 @@ The `message` parameter in the notification callback is an object containing the
 - `type` - the type of notification sent. This will be the value of one of the following constants:
     - [`oracledb.SUBSCR_EVENT_TYPE_AQ`](#oracledbconstantssubscription) - One or more Advanced Queuing messages are available to be dequeued.
     - [`oracledb.SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription) - the subscription has been closed or the timeout value has been reached.
-    - [`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription) - object-level notications are being used (Database Change Notification).
+    - [`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription) - object-level notifications are being used (Database Change Notification).
     - [`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription) - query-level notifications are being used (Continuous Query Notification).
 
 ###### <a name="consubscribeoptgroupingclass"></a> 4.2.16.2.3 `groupingClass`
@@ -4041,7 +4041,7 @@ Attribute Name          | Description
 ------------------------|------------
 `deliveryMode`          | An integer defining the delivery mode when enqueuing messages.  It can be one of the following constants: [`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT`](#oracledbconstantsaq), [`oracledb.AQ_MSG_DELIV_MODE_BUFFERED`](#oracledbconstantsaq), [`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED`](#oracledbconstantsaq)
 `transformation`        | A string defining the transformation that will take place when messages are enqueued.
-`visibility`            | An integer value that defines whether the enqueue occurs in the current transaction or as a separate transction.  It can be one of the following constants: [`oracledb.AQ_VISIBILITY_IMMEDIATE`](#oracledbconstantsaq), [`oracledb.AQ_VISIBILITY_ON_COMMIT`](#oracledbconstantsaq).
+`visibility`            | An integer value that defines whether the enqueue occurs in the current transaction or as a separate transaction.  It can be one of the following constants: [`oracledb.AQ_VISIBILITY_IMMEDIATE`](#oracledbconstantsaq), [`oracledb.AQ_VISIBILITY_ON_COMMIT`](#oracledbconstantsaq).
 
 See [Oracle Advanced Queuing Documentation][129] for more information about attributes.
 
@@ -4150,7 +4150,7 @@ undefined if no message is available.
 ##### <a name="aqmessageclass"></a> 5.2.2.1 AqMessage Class
 
 Dequeued messages are returned as AqMessage objects.  Note AqMessage
-objectss are not used for enqueuing.
+objects are not used for enqueuing.
 
 Attribute Name  |  Description
 ----------------|--------------
@@ -4159,7 +4159,7 @@ Attribute Name  |  Description
 `deliveryMode`  | An integer containing the delivery mode the messages was enqueued with.
 `exceptionQueue`| A String containing the name of the exception queue defined when the message was enqueued.
 `expiration`    | The number of seconds until expiration defined when the message was enqueued.
-`msgId`         | A Buffer containing the unique identifier of the messsage.
+`msgId`         | A Buffer containing the unique identifier of the message.
 `numAttempts`   | An integer containing the number of attempts that were made to dequeue the message.
 `originalMsgId` | A Buffer containing the unique identifier of the message in the last queue that generated it.
 `payload`       | A Buffer or DbObject containing the payload of the message, depending on the value of `queue.payloadType`.  Note that enqueued Strings are returned as UTF-8 encoded Buffers.
@@ -4817,7 +4817,7 @@ The `drainTime` parameter was added in node-oracledb 3.0.
 
 Callback:
 ```
-getConnection([Object poolAttrs,] function(Error error, Connection conn){});
+getConnection([Object poolAttrs,] function(Error error, Connection connection){});
 ```
 Promise:
 ```
@@ -4885,7 +4885,7 @@ pools.
     discussion of these attributes.
 
 -   ```
-    function(Error error, Connection conn)
+    function(Error error, Connection connection)
     ```
 
     The parameters of the callback function are:
@@ -5886,7 +5886,7 @@ This method was added in node-oracledb 3.0.
     Callback function parameter | Description
     ----------------------------|-------------
     *Error error* | If `getDataGuide()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
-    *SodaDocument document* | The SodaDocument containining JSON content which can be accessed from the document as normal with [`sodaDocument.getContent()`](#sodadocgetcontent), [`sodaDocument.getContentAsString()`](#sodadocgetcontentasstring) or [`sodaDocument.getContentAsBuffer()`](#sodadocgetcontentasbuffer).
+    *SodaDocument document* | The SodaDocument containing JSON content which can be accessed from the document as normal with [`sodaDocument.getContent()`](#sodadocgetcontent), [`sodaDocument.getContentAsString()`](#sodadocgetcontentasstring) or [`sodaDocument.getContentAsBuffer()`](#sodadocgetcontentasbuffer).
 
 #### <a name="sodacollinsertmany"></a> 10.2.6 `sodaCollection.insertMany()`
 
@@ -7012,7 +7012,7 @@ asynchronous call that uses the thread pool otherwise the default size
 of 4 will still be used.
 
 Note the '[libuv][21]' library used by Node.js limits the number of
-threads to 128.  This implies the maxiumum number of connections
+threads to 128.  This implies the maximum number of connections
 opened, i.e. `poolMax`, should be less than 128.
 
 Connections can handle one database operation at a time.  Node.js
@@ -8000,7 +8000,7 @@ pool you could do:
 ```javascript
 const myproxyuserpw = ... // the password of the 'myproxyuser' proxy user
 
-const pool = await oracledb.createPool({ connectString: "localhost/orclpdb", homogeneous: false });
+const pool = await oracledb.createPool({ connectString: "localhost/orclpdb1", homogeneous: false });
 const connection = await pool.getConnection({ user: 'myproxyuser[hr]', password: myproxyuserpw});
 
 . . . // connection has access to the HR schema objects
@@ -8052,7 +8052,7 @@ of existing connections or pools.
 For a standalone connection:
 
 ```javascript
-const config = { connectString: "localhost/orclpdb", externalAuth: true };
+const config = { connectString: "localhost/orclpdb1", externalAuth: true };
 const connection = await oracledb.getConnection(config);
 
 . . . // connection has access to the schema objects of the externally identified user
@@ -8069,7 +8069,7 @@ then to specify that the session user of the connection should be
 `HR`, use:
 
 ```javascript
-const config = { connectString: "localhost/orclpdb", user: "[hr]", externalAuth: true };
+const config = { connectString: "localhost/orclpdb1", user: "[hr]", externalAuth: true };
 const connection = await oracledb.getConnection(config);
 
 . . . // connection has access to the HR schema objects
@@ -8078,7 +8078,7 @@ const connection = await oracledb.getConnection(config);
 For a *Pool*, you can authenticate as an externally identified user like:
 
 ```javascript
-const config = { connectString: "localhost/orclpdb", externalAuth: true };
+const config = { connectString: "localhost/orclpdb1", externalAuth: true };
 const pool = await oracledb.createPool(config);
 const connection = await pool.getConnection();
 
@@ -8092,7 +8092,7 @@ externally identified user, then to specify that the session user of
 the connection should be `HR`, use:
 
 ```javascript
-const config = { connectString: "localhost/orclpdb", externalAuth: true };
+const config = { connectString: "localhost/orclpdb1", externalAuth: true };
 const pool = await oracledb.createPool(config);
 const connection = await pool.getConnection({ user: "[hr]" });
 
@@ -8131,7 +8131,7 @@ works on it for a relatively short duration, and then releases it.
 
 To use DRCP in node-oracledb:
 
-1. The DRCP pool must be started in the database: `SQL> execute dbms_connection_pool.start_pool();`
+1. The DRCP pool must be started in the database: `SQL> EXECUTE DBMS_CONNECTION_POOL.START_POOL();`
 2. The [`connectionClass`](#propdbconclass) should be set by the node-oracledb application.  If it is not set, the pooled server session memory will not be reused optimally, and the statistic views will record large values for `NUM_MISSES`.
 3. The `pool.createPool()` or `oracledb.getConnection()` property `connectString` (or its alias `connectionString`) must specify to use a pooled server, either by the Easy Connect syntax like [`myhost/sales:POOLED`](#easyconnect), or by using a [`tnsnames.ora`](#tnsnames) alias for a connection that contains `(SERVER=POOLED)`.
 
@@ -8166,7 +8166,7 @@ try {
     {
       user          : 'sys',
       password      : 'secret',
-      connectString : 'localhost/orclpdb',
+      connectString : 'localhost/orclpdb1',
       privilege     : oracledb.SYSDBA
     });
 
@@ -8282,7 +8282,7 @@ const connection = await oracledb.getConnection(
   {
     user          : "hr",
     password      : currentpw,
-    connectString : "localhost/orclpdb"
+    connectString : "localhost/orclpdb1"
   });
 
 await connection.changePassword('hr', currentpw, newpw);
@@ -8299,7 +8299,7 @@ const connection = await oracledb.getConnection(
   {
     user          : "system",  // a privileged user
     password      : mypw,      // mypw contains the hr schema password
-    connectString : "localhost/orclpdb"
+    connectString : "localhost/orclpdb1"
   });
 
 await connection.changePassword('hr', '', newpw);
@@ -8324,7 +8324,7 @@ const connection = await oracledb.getConnection(
     user          : "hr",
     password      : oldpw,
     newPassword   : newpw,
-    connectString : "localhost/orclpdb"
+    connectString : "localhost/orclpdb1"
   });
 ```
 
@@ -8655,7 +8655,7 @@ metadata is available via a `metadata` event.  The `end` event
 indicates the end of the query results.
 
 Query results should be fetched to completion to avoid resource leaks,
-or (from Node.js 8 onwards) the Stream [`destroy()`][92] method can be
+or (from Node.js 8 onward) the Stream [`destroy()`][92] method can be
 used to terminate a stream early.  For older Node.js versions use a
 [ResultSet with callbacks](#resultsethandling) if you need to stop a
 query before retrieving all data.  Note the previous, experimental
@@ -9098,13 +9098,13 @@ Query data is commonly broken into small sets for two reasons:
 - 'Web pagination' that allows moving from one set of rows to a next,
   or previous, set.
 
-- Fetching of consectitive small sets of data for processing.  This
+- Fetching of consecutive small sets of data for processing.  This
   happens because the number of records is too large for Node.js to
   handle at the same time.
 
 The latter can be handled by [ResultSets](#resultsethandling) or
 [`queryStream()`](#querystream) with one execution of the SQL query as
-discsussed in those links.
+discussed in those links.
 
 How to do 'web pagination' is discussed in this section.  For each
 'page' of results, a SQL query is executed to get the appropriate set
@@ -9607,7 +9607,7 @@ const connection = await oracledb.getConnection(
   {
     user: 'nodedemo',
     password: mypw,
-    connectString: 'localhost/orclpdb'
+    connectString: 'localhost/orclpdb1'
   }
 );
 
@@ -9640,7 +9640,7 @@ const connection = await oracledb.getConnection(
   {
     user: 'nodedemo',
     password: mypw,  // mypw contains the nodedemo schema password
-    connectString: 'localhost/orclpdb',
+    connectString: 'localhost/orclpdb1',
     edition: 'e2'
   }
 );
@@ -12121,7 +12121,7 @@ SQL> GRANT CHANGE NOTIFICATION TO hr;
 
 Below is an example of CQN that uses object-level notification and
 grouped notifications in batches at 10 second intervals.  After 60
-seconds, the notification callback is unregisted and no more
+seconds, the notification callback is unregistered and no more
 notifications will occur.  The quality of service flags indicate
 ROWIDs should be returned in the callback:
 
@@ -12613,7 +12613,7 @@ const connection = await oracledb.getConnection(
   {
     user          : "hr",
     password      : mypw,  // mypw contains the hr schema password
-    connectString : "localhost/orclpdb"
+    connectString : "localhost/orclpdb1"
   }
 );
 
@@ -13440,7 +13440,7 @@ statement execution.
 Database statement tracing is commonly used to identify performance
 issues.  Oracle Database trace files can be analyzed after statements
 are executed.  Tracing can be enabled in various ways at a database
-system or individal session level.  Refer to [Oracle Database Tuning
+system or individual session level.  Refer to [Oracle Database Tuning
 documentation][95].  Setting a customer identifier is recommended to
 make searching for relevant log files easier:
 

@@ -129,7 +129,7 @@
 - Fixed writing of multi-byte characters to CLOBs when multiple writes
   are required.
 
-- Fixed a crash occuring when draining the connection pool ([ODPI-C
+- Fixed a crash occurring when draining the connection pool ([ODPI-C
   change](https://github.com/oracle/odpi/commit/https://github.com/oracle/odpi/commit/7666dc3208087383f7f0f5e49c1ee423cb154997)).
 
 - Corrected `pool.status` to be read-only, as was documented.
@@ -146,7 +146,7 @@
   ([ODPI-C change](https://github.com/oracle/odpi/issues/96)).
 
 - Fixed a CQN race condition to prevent a crash when a multiple
-  `conn.unsubscribe()` calls are made on the same subscription.
+  `connection.unsubscribe()` calls are made on the same subscription.
 
 - Improved validation of `executeMany()` arguments to prevent a crash.
 
