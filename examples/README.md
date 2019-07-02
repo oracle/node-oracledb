@@ -93,6 +93,7 @@ plsqlarray.js               | Examples of binding PL/SQL "INDEX BY" tables
 plsqlfunc.js                | How to call a PL/SQL function
 plsqlproc.js                | How to call a PL/SQL procedure
 plsqlrecord.js              | Shows binding of PL/SQL RECORDS
+plsqlvarrayrecord.js        | Shows binding a VARRAY of RECORD in PL/SQL
 raw1.js                     | Shows using a Buffer to insert and select a RAW
 refcursor.js                | Shows using a ResultSet to fetch rows from a REF CURSOR
 refcursortoquerystream.js   | Converts a REF CURSOR returned from `execute()` to a query stream.

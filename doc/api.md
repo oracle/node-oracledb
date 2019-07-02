@@ -185,11 +185,11 @@ For installation information, see the [Node-oracledb Installation Instructions][
                 - 4.2.7.4.3 [`outBinds`](#execmanyoutbinds)
                 - 4.2.7.4.4 [`rowsAffected`](#execmanyrowsaffected)
         - 4.2.8 [`getDbObjectClass()`](#getdbobjectclass)
-        - 4.2.9 [`getSodaDatabase()`](#getsodadatabase)
-        - 4.2.10 [`getStatementInfo()`](#getstmtinfo)
-        - 4.2.11 [`ping()`](#connectionping)
-        - 4.2.12 [`queryStream()`](#querystream)
-        - 4.2.13 [`getQueue()`](#getqueue)
+        - 4.2.9 [`getQueue()`](#getqueue)
+        - 4.2.10 [`getSodaDatabase()`](#getsodadatabase)
+        - 4.2.11 [`getStatementInfo()`](#getstmtinfo)
+        - 4.2.12 [`ping()`](#connectionping)
+        - 4.2.13 [`queryStream()`](#querystream)
         - 4.2.14 [`release()`](#release)
         - 4.2.15 [`rollback()`](#rollback)
         - 4.2.16 [`subscribe()`](#consubscribe)
@@ -233,8 +233,9 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 6.1.4 [`elementTypeName`](#dbobjattributeselementtypename)
         - 6.1.5 [`fqn`](#dbobjattributesfqn)
         - 6.1.6 [`isCollection`](#dbobjattributesiscollection)
-        - 6.1.7 [`name`](#dbobjattributesname)
-        - 6.1.8 [`schema`](#dbobjattributesschema)
+        - 6.1.7 [`length`](#dbobjattributeslength)
+        - 6.1.8 [`name`](#dbobjattributesname)
+        - 6.1.9 [`schema`](#dbobjattributesschema)
     - 6.2 [DbObject Methods](#dbobjectmethods)
         - 6.2.1 [DbObject Methods for Collections](#dbobjectmethodscolls)
             - [`append()`](#dbobjectmethodscolls), [`deleteElement()`](#dbobjectmethodscolls), [`getElement()`](#dbobjectmethodscolls),
@@ -3409,7 +3410,65 @@ This method was added in node-oracledb 4.0.
     *Error error* | If `getDbObjectClass()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
     *DbObject obj* | A [DbObject](#dbobjectclass) representing an Oracle Database object or collection.
 
-#### <a name="getsodadatabase"></a> 4.2.9 `connection.getSodaDatabase()`
+#### <a name="getQueue"></a> 4.2.9 `connection.getQueue()`
+
+##### Prototype
+
+Callback:
+```
+getQueue(String name, [Object options,] function(Error error, AqQueue queue){})
+```
+
+Promise:
+```
+promise = getQueue(String name [, Object options])
+```
+
+##### Return Value
+
+This method returns an [AqQueue Class](#aqqueueclass) object.
+
+##### Description
+
+This method returns a queue for enqueuing and dequeuing
+[Oracle Advanced Queuing (AQ)](#aq) messages.
+
+##### Parameters
+
+-   ```
+    String name
+    ```
+
+    The name of the Advanced Queue to use.  This queue should have
+    been created previously, for example with the
+    `DBMS_AQADM.CREATE_QUEUE()` function.
+
+    If the Advanced Queue does not exist in the database, an error will
+    occur when the queue is attempted to be used.
+
+-   ```
+    Object options
+    ```
+
+    This optional argument can be used to specify the payload type.
+    It is an object with the following attributes:
+
+    Attribute Name | Description
+    ---------------|-------------
+    `payloadType`  | A string containing the name of an Oracle Database object type, or a [DbObject Class](#dbobjectclass) earlier acquired from [`connection.getDbObjectClass()`](#getdbobjectclass).  If the name of an object type is used, it is recommended that a fully qualified name be used.
+
+-   ```
+    function(Error error, AqQueue queue)
+    ```
+
+    The parameters of the callback function are:
+
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `queue()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+
+#### <a name="getsodadatabase"></a> 4.2.10 `connection.getSodaDatabase()`
 
 ##### Prototype
 
@@ -3437,7 +3496,7 @@ information about using SODA in node-oracledb.
 
 This method was added in node-oracledb 3.0.
 
-#### <a name="getstmtinfo"></a> 4.2.10 `connection.getStatementInfo()`
+#### <a name="getstmtinfo"></a> 4.2.11 `connection.getStatementInfo()`
 
 ##### Prototype
 
@@ -3499,7 +3558,7 @@ This method was added in node-oracledb 2.2.
       Statement Type Constants](#oracledbconstantsstmttype).
 
 
-#### <a name="connectionping"></a> 4.2.11 `connection.ping()`
+#### <a name="connectionping"></a> 4.2.12 `connection.ping()`
 
 ##### Prototype
 
@@ -3543,7 +3602,7 @@ This method was added in node-oracledb 2.2.
     ----------------------------|-------------
     *Error error* | If `ping()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="querystream"></a> 4.2.12 `connection.queryStream()`
+#### <a name="querystream"></a> 4.2.13 `connection.queryStream()`
 
 ##### Prototype
 
@@ -3581,64 +3640,6 @@ This method was added in node-oracledb 1.8.
 ##### Parameters
 
 See [execute()](#execute).
-
-#### <a name="getQueue"></a> 4.2.13 `connection.getQueue()`
-
-##### Prototype
-
-Callback:
-```
-getQueue(String name, [Object options,] function(Error error, AqQueue queue){})
-```
-
-Promise:
-```
-promise = getQueue(String name [, Object options])
-```
-
-##### Return Value
-
-This method returns an [AqQueue Class](#aqqueueclass) object.
-
-##### Description
-
-This method returns a queue for enqueuing and dequeuing
-[Oracle Advanced Queuing (AQ)](#aq) messages.
-
-##### Parameters
-
--   ```
-    String name
-    ```
-
-    The name of the Advanced Queue to use.  This queue should have
-    been created previously, for example with the
-    `DBMS_AQADM.CREATE_QUEUE()` function.
-
-    If the Advanced Queue does not exist in the database, an error will
-    occur when the queue is attempted to be used.
-
--   ```
-    Object options
-    ```
-
-    This optional argument can be used to specify the payload type.
-    It is an object with the following attributes:
-
-    Attribute Name | Description
-    ---------------|-------------
-    `payloadType`  | A string containing the name of an Oracle Database object type, or a [DbObject Class](#dbobjectclass) earlier acquired from [`connection.getDbObjectClass()`](#getdbobjectclass).  If the name of an object type is used, it is recommended that a fully qualified name be used.
-
--   ```
-    function(Error error, AqQueue queue)
-    ```
-
-    The parameters of the callback function are:
-
-    Callback function parameter | Description
-    ----------------------------|-------------
-    *Error error* | If `queue()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
-
 
 #### <a name="release"></a> 4.2.14 `connection.release()`
 
@@ -4314,7 +4315,7 @@ semantics.
 
 Each attribute will have an object that contains:
 
-- `type`: the value of one of the [Oracle Database Type Constant](#oracledbconstantsdbtype), such as 2010 for `oracledb.DB_TYPE_NUMBER` and 2023 for `oracledb.DB_TYPE_OBJECT`.
+- `type`: the value of one of the [Oracle Database Type Constants](#oracledbconstantsdbtype), such as 2010 for `oracledb.DB_TYPE_NUMBER` and 2023 for `oracledb.DB_TYPE_OBJECT`.
 - `typeName`: a string corresponding to the type, such as "VARCHAR2" or "NUMBER".  When the attribute is a DbObject, it will contain the name of the object.
 - `typeClass`: set if the value of `type` is a DbObject.  It is the DbObject class for the attribute.
 
@@ -4372,7 +4373,16 @@ readonly Boolean isCollection
 
 This is *true* if the Oracle object is a collection, *false* otherwise.
 
-#### <a name="dbobjattributesname"></a> 6.1.7 `dbObject.name`
+#### <a name="dbobjattributeslength"></a> 6.1.7 `dbObject.length`
+
+```
+readonly Number length
+```
+
+When `dbObject.isCollection` is *true*, this will have the number of
+elements in the collection.  It is undefined for non-collections.
+
+#### <a name="dbobjattributesname"></a> 6.1.8 `dbObject.name`
 
 ```
 readonly String name
@@ -4380,13 +4390,13 @@ readonly String name
 
 The name of the Oracle Database object or collection.
 
-#### <a name="dbobjattributesschema"></a> 6.1.8 `dbObject.schema`
+#### <a name="dbobjattributesschema"></a> 6.1.9 `dbObject.schema`
 
 ```
 readonly String schema
 ```
 
-The schema owning  the Oracle Database object or collection.
+The schema owning the Oracle Database object or collection.
 
 ### <a name="dbobjectmethods"></a> 6.2 DbObject Methods
 
@@ -4409,7 +4419,7 @@ Method Name                                |  Description
 `dbObject.getLastIndex()`                  | To obtain the last index for later use to obtain a value.
 `dbObject.getNextIndex(Number index)`      | Returns the next index value for later use to obtain a value.
 `dbObject.getPrevIndex(Number index)`      | Returns the previous index for later use to obtain the value.
-`dbObject.hasElement()`                    | Returns *true* if any element exists in the collection. Returns *false* otherwise.
+`dbObject.hasElement(Number index)`        | Returns *true* if an element exists in the collection at the given index. Returns *false* otherwise.
 `dbObject.setElement(Number index, value)` | To set the given value at the position of the given index.
 `dbObject.getValues()`                     | Returns an array of element values as a JavaScript array in key order.
 `dbObject.trim(count)`                     | Trims the specified number of elements from the end of the collection.
@@ -11007,12 +11017,13 @@ multiple hard-coded SQL statements, each with a different ORDER BY.
 
 ## <a name="objects"></a> 21. Oracle Database Objects and Collections
 
-You can query and insert most Oracle Database objects and collections.
+You can query and insert most Oracle Database objects and collections,
+with some [limitations](#objectlimitations).
 
 ### Inserting Objects
 
 As an example, the Oracle Spatial type [SDO_GEOMETRY][139] can easily
-be used in node-oracledb.  Describinng SDO_GEOMETRY in SQL*Plus shows:
+be used in node-oracledb.  Describing SDO_GEOMETRY in SQL*Plus shows:
 
 ```
  Name                                      Null?    Type
@@ -11130,6 +11141,9 @@ await connection.execute(
   }
 );
 ```
+
+For objects that are nested, such as SDO_GEOMETRY is, you only need to
+give the name of the top level object.
 
 See [selectgeometry.js][140] for a runnable example.
 
@@ -11320,11 +11334,19 @@ See [selectvarray.js][146] for a runnable example.
 ### <a name="plsqlindexbybinds"></a> PL/SQL Collection Associative Arrays (Index-by)
 
 Arrays of strings and numbers can be bound to PL/SQL IN, IN OUT, and
-OUT parameters of PL/SQL INDEX BY associative array type.  This type
-was formerly called PL/SQL tables or index-by tables.
+OUT parameters of PL/SQL INDEX BY associative array types with integer
+keys.  This Oracle type was formerly called PL/SQL tables or index-by
+tables.
 
-While you could access Associative Arrays via named types as shown in
-previous examples, it is more efficient to use the method shown below.
+While you could bind associative arrays via named types as shown in
+previous examples, it is generally more efficient to use the method
+shown below.
+
+Note that if you bind associative arrays via named types for BIND_IN,
+then the resulting arrays in PL/SQL will start from index 0, which
+affects FORALL usage.  The method shown below results in indexes
+starting from 1.  (Using named type binding for nested tables and
+VARRAYs does result in indexes starting from 1).
 
 Given this table and PL/SQL package:
 
@@ -11466,7 +11488,7 @@ See [plsqlarray.js][58] for a runnable example.
 You can use `executeMany()` with objects.  See [Binding Objects with
 `executeMany()`](#executemanyobjects).
 
-### <a name="objectlimitations"></a> Oracle Database Type Limitations
+### <a name="objectlimitations"></a> Oracle Database Object Type Limitations
 
 PL/SQL collections and records can only be bound when both Oracle
 client libraries and Oracle Database are 12.1, or higher.
@@ -11476,6 +11498,8 @@ VARCHAR2, or VARCHAR2 sub-types, cannot be used natively by
 node-oracledb.
 
 Subclasses of types are not supported.
+
+Oracle objects with REF references are not supported.
 
 Where there is no native support, use a PL/SQL wrapper that accepts
 types supported by node-oracledb and converts them to the required
@@ -12083,7 +12107,7 @@ There are runnable examples in the GitHub [examples][3] directory.
 
 Oracle Advanced Queuing allows applications to use producer-consumer
 message passing.  Queuing is highly configurable and scalable,
-providing a great way to distribute workload.  Messages can be queued
+providing a great way to distribute workloads.  Messages can be queued
 by multiple producers.  Different consumers can filter messages for
 them.  Messages can also be transformed or propagated to queues in
 other databases.  Oracle AQ is available in all editions of the
