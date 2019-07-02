@@ -19,7 +19,7 @@
  *   205. dbObject6.js
  *
  * DESCRIPTION
- *   The test of examples/insertgeometry.js.
+ *   The test of examples/selectgeometry.js.
  *
  *****************************************************************************/
 'use strict';
@@ -38,7 +38,6 @@ describe('205. dbObject6.js', () => {
   before(async () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
-
 
       let sql =
         `CREATE TABLE ${TABLE} (
@@ -64,7 +63,7 @@ describe('205. dbObject6.js', () => {
     }
   }); // after()
 
-  it('205.1 Insert and query Oracle Spatial geometries', async () => {
+  it('205.1 examples/selectgeometry.js', async () => {
 
     try {
       const GeomType = await conn.getDbObjectClass("MDSYS.SDO_GEOMETRY");
