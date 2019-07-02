@@ -139,8 +139,7 @@ describe("73. poolPing.js", function() {
         try {
           pool.poolPingInterval = newInterval;
         } catch(err) {
-          should.exist(err);
-          (err.message).should.equal("Cannot assign to read only property 'poolPingInterval' of object '#<Pool>'");
+          should.strictEqual(err.name, "TypeError");
         }
         cb();
 
