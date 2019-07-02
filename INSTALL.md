@@ -1,3 +1,4 @@
+
 # Installing node-oracledb Version 4.0
 
 *Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.*
@@ -70,10 +71,11 @@ guaranteed to be available or usable in your environment.
 
 #### <a name="mig40"></a> 1.1 Installation Changes in node-oracledb version 4.0
 
-Node-oracledn 4.0 was refactored to use [N-API][53] version 2.  On
+Node-oracledb 4.0 was refactored to use [N-API][53] version 2.  On
 each operating system, a node-oracledb binary will work with a number
 of Node.js versions from Node.js 8.16 and Node.js 10.16 onwards,
-dependent on N-API compatibility.
+dependent on N-API compatibility.  This means that when upgrading
+Node.js, you may not need to reinstall node-oracledb.
 
 If compiling from source code, the compiler no longer needs C++11
 compatibility.  The node-oracledb source code is now pure C.
@@ -346,7 +348,15 @@ package contents are identical in both channels.  Alternatively,
 multiple versions of Instant Client RPMs are available from [Oracle
 Technology Network][12].
 
-[Install Instant Client Basic][13] with sudo or as the root user:
+[Install Instant Client Basic][13] with sudo or as the root user,
+either directly from yum.oracle.com:
+
+```
+sudo yum -y install oracle-release-el7
+sudo yum -y install oracle-instantclient19.3-basic
+```
+
+Or from a downloaded file:
 
 ```
 sudo yum install oracle-instantclient19.3-basic-19.3.0.0.0-1.x86_64.rpm
@@ -677,7 +687,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The pre-built binaries were built on macOS High Sierra, 10.13.6
+The pre-built binaries were built on macOS Mojave, 10.14.5.
 
 Oracle Instant Client libraries are required on macOS.  There is no
 native Oracle Database for macOS but one can easily be run in a Linux
@@ -720,7 +730,7 @@ and unzip it, for example:
 
 ```
 mkdir -p /opt/oracle
-unzip instantclient-basic-macos.x64-12.2.0.1.0.zip
+unzip instantclient-basic-macos.x64-18.1.0.0.0.zip
 ```
 
 Create a symbolic link for the 'client shared library' in the user
@@ -728,14 +738,14 @@ default library path such as in `~/lib` or `/usr/local/lib`.  For example:
 
 ```
 mkdir ~/lib
-ln -s instantclient_12_2/libclntsh.dylib ~/lib/
+ln -s instantclient_18_1/libclntsh.dylib ~/lib/
 ```
 
 Alternatively, copy the required OCI libraries, for example:
 
 ```
 mkdir ~/lib
-cp instantclient_12_2/{libclntsh.dylib.12.1,libclntshcore.dylib.12.1,libons.dylib,libnnz12.dylib,libociei.dylib} ~/lib/
+cp instantclient_18_1/{libclntsh.dylib.18.1,libclntshcore.dylib.18.1,libons.dylib,libnnz18.dylib,libociei.dylib} ~/lib/
 ```
 
 For Instant Client 11.2, the OCI libraries must be copied. For example:
@@ -805,7 +815,7 @@ install software.
 
 #### 3.6.2 Install Node.js
 
-Install the 64-bit Node.js MSI (e.g. node-v6.11.0-x64.msi) from
+Install the 64-bit Node.js MSI (e.g. node-v10.16.0-x86.msi) from
 [nodejs.org][11].  Make sure the option to add the Node and npm
 directories to the path is selected.
 
@@ -844,8 +854,8 @@ Download the free 64-bit Instant Client **Basic** ZIP file from
 
 - Unzip the ZIP file into a directory that is accessible to your
   application.  For example unzip
-  `instantclient-basic-windows.x64-18.3.0.0.0dbru.zip` to
-  `C:\oracle\instantclient_18_3`.
+  ` instantclient-basic-windows.x64-19.3.0.0.0dbru.zip` to
+  `C:\oracle\instantclient_19_3`.
 
 - Add this directory to the `PATH` environment variable.  For example
   on Windows 7, update `PATH` in Control Panel -> System -> Advanced
@@ -862,7 +872,7 @@ Download the free 64-bit Instant Client **Basic** ZIP file from
 
   ```
   REM mynode.bat
-  SET PATH=C:\oracle\instantclient_18_3;%PATH%
+  SET PATH=C:\oracle\instantclient_19_3;%PATH%
   node %*
   ```
 
@@ -893,6 +903,7 @@ Then set the environment variable `TNS_ADMIN` to that directory name.
 #### <a name="winredists"> </a> 3.6.6 Install the Visual Studio Redistributables
 
 The `PATH` variable needs to include the appropriate VS Redistributable:
+- Oracle client 19 requires the [Visual Studio 2017 Redistributable][27].
 - Oracle client 18 and 12.2 require the [Visual Studio 2013 Redistributable][27].
 - Oracle client 12.1 requires the [Visual Studio 2010 Redistributable][27].
 - Oracle client 11.2 requires the [Visual Studio 2005 Redistributable][29].
@@ -953,7 +964,7 @@ install software.
 
 #### 3.7.2 Install Node.js
 
-Install the 64-bit Node.js MSI (e.g. node-v10.15.3-x64.msi) from
+Install the 64-bit Node.js MSI (e.g. node-v10.16.0-x64.msi) from
 [nodejs.org][11].  Make sure the option to add the Node and npm
 directories to the path is selected.
 
@@ -1032,18 +1043,18 @@ Python 2.7 is needed by node-gyp.
 #### 3.9.2 Install Node.js
 
 Download [Node.js][11] for AIX on Power Systems.  For
-example, if you downloaded version 6.11.0 you could install Node.js
+example, if you downloaded version 10.16.0 you could install Node.js
 into `/opt`:
 
 ```
 cd /opt
-gunzip -c node-v6.11.0-aix-ppc64.tar.gz | tar -xvf -
+gunzip -c node-v10.16.0-aix-ppc64.tar.gz | tar -xvf -
 ```
 
 Set `PATH` to include Node.js:
 
 ```
-export PATH=/opt/node-v6.11.0-aix-ppc64/bin:$PATH
+export PATH=/opt/node-v10.16.0-aix-ppc64/bin:$PATH
 ```
 
 #### 3.9.3 Install the add-on
@@ -1085,15 +1096,15 @@ and extract it into a directory that is accessible to your
 application, for example `/opt/oracle`:
 
 ```
-unzip instantclient-basic-aix.ppc64-12.2.0.1.0.zip
+unzip instantclient-basic-aix.ppc64-19.3.0.0.0dbru.zip
 mkdir -p /opt/oracle
-mv instantclient_12_2 /opt/oracle
+mv instantclient_19_3 /opt/oracle
 ```
 
 To run applications, you will need to set the link path:
 
 ```
-export LIBPATH=/opt/oracle/instantclient_12_2:$LIBPATH
+export LIBPATH=/opt/oracle/instantclient_19_3:$LIBPATH
 ```
 
 #### 3.9.5 Optionally create the default Oracle Client configuration directory
@@ -1104,7 +1115,7 @@ If you intend to co-locate optional Oracle configuration files such as
 `network/admin` subdirectory.  Create this if needed.  For example:
 
 ```
-sudo mkdir -p /opt/oracle/instantclient_12_2/network/admin
+sudo mkdir -p /opt/oracle/instantclient_19_3/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
@@ -1206,13 +1217,13 @@ application, for example `/opt/oracle`:
 
 ```
 cd /opt/oracle
-unzip instantclient-basic-solaris.x64-12.2.0.1.0.zip
+unzip instantclient-basic-solaris.x64-18.3.0.0.0dbru.zip
 ```
 
 To run applications, you will need to set the link path:
 
 ```
-export LD_LIBRARY_PATH_64=/opt/oracle/instantclient_12_2:$LD_LIBRARY_PATH_64
+export LD_LIBRARY_PATH_64=/opt/oracle/instantclient_18_3:$LD_LIBRARY_PATH_64
 ```
 
 #### 3.9.5 Optionally create the default Oracle Client configuration directory
@@ -1223,7 +1234,7 @@ If you intend to co-locate optional Oracle configuration files such as
 `network/admin` subdirectory.  Create this if needed.  For example:
 
 ```
-mkdir -p /opt/oracle/instantclient_12_2/network/admin
+mkdir -p /opt/oracle/instantclient_18_3/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
@@ -1398,10 +1409,11 @@ versions do not have to be the same on different computers, but
 node-oracledb behavior and features may then differ.
 
 The destination computer's `PATH` needs to include Visual Studio
-Redistributables.  If you have Oracle client 18 or 12.2, install the Visual
-Studio 2013 Redistributable.  For Oracle client 12.1 install the Visual
-Studio 2010 Redistributable.  For Oracle client 11.2 install the Visual
-Studio 2005 Redistributable.
+Redistributables.  If you have Oracle client 19 install the Visual
+Studio 2017 Redistributable.  If you have Oracle client 18 or 12.2,
+install the Visual Studio 2013 Redistributable.  For Oracle client
+12.1 install the Visual Studio 2010 Redistributable.  For Oracle
+client 11.2 install the Visual Studio 2005 Redistributable.
 
 You can also find out the Redistributable required by locating the
 library `OCI.DLL` on the source computer and running:
@@ -1574,15 +1586,6 @@ If `npm install oracledb` fails:
 - Try running `npm cache clean -f` and deleting the
   `node_modules/oracledb` directory.
 
-If `require('oracledb')` fails:
-
-- Do you have multiple copies of Node.js installed?  Did the correct
-  `npm` and `node-gyp` get invoked?
-
-- Did you get *Error: Module version mismatch* or *Error: Module
-  did not self-register*?  You must rebuild node-oracledb when you
-  upgrade Node.js.
-
 If creating a connection fails:
 
 - If you got *DPI-1047: Cannot locate an Oracle Client library*,
@@ -1608,8 +1611,8 @@ If creating a connection fails:
   expected version first in `PATH` (on Windows) or `LD_LIBRARY_PATH`
   (on Linux)?
 
-- On macOS, did you install Oracle Instant Client in `~/lib` or
-  `/usr/local/lib`?
+- On macOS, did you install Oracle Instant Client libraries in `~/lib`
+  or `/usr/local/lib`?
 
 Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [Slack][48] ([link to join Slack][49]).
