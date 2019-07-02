@@ -614,7 +614,6 @@ struct njsPool {
 struct njsResultSet {
     NJS_INSTANCE_HEAD
     dpiStmt *handle;
-    dpiStmt *dependsOnHandle;
     njsConnection *conn;
     uint32_t numQueryVars;
     njsVariable *queryVars;
@@ -863,8 +862,8 @@ bool njsPool_newFromBaton(njsBaton *baton, napi_env env, napi_value *poolObj);
 // definition of functions for njsResultSet class
 //-----------------------------------------------------------------------------
 bool njsResultSet_new(njsBaton *baton, napi_env env, dpiStmt *handle,
-        dpiStmt *dependsOnHandle, njsVariable *vars, uint32_t numVars,
-        bool autoClose, napi_value *rsObj);
+        njsVariable *vars, uint32_t numVars, bool autoClose,
+        napi_value *rsObj);
 
 
 //-----------------------------------------------------------------------------

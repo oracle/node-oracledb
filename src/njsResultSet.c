@@ -99,12 +99,7 @@ static bool njsResultSet_closeAsync(njsBaton *baton)
 {
     njsResultSet *rs = (njsResultSet*) baton->callingInstance;
 
-    // implicit result sets cannot be closed, but releasing the reference to
-    // the statements will allow the parent result set to be closed
-    if (rs->dependsOnHandle) {
-        dpiStmt_release(rs->dependsOnHandle);
-        rs->dependsOnHandle = NULL;
-    } else if (dpiStmt_close(baton->dpiStmtHandle, NULL, 0) < 0) {
+    if (dpiStmt_close(baton->dpiStmtHandle, NULL, 0) < 0) {
         njsBaton_setErrorDPI(baton);
         rs->handle = baton->dpiStmtHandle;
         baton->dpiStmtHandle = NULL;
@@ -164,10 +159,6 @@ static void njsResultSet_finalize(napi_env env, void *finalizeData,
     if (rs->handle) {
         dpiStmt_release(rs->handle);
         rs->handle = NULL;
-    }
-    if (rs->dependsOnHandle) {
-        dpiStmt_release(rs->dependsOnHandle);
-        rs->dependsOnHandle = NULL;
     }
     free(rs);
 }
@@ -235,10 +226,6 @@ static bool njsResultSet_getRowsAsync(njsBaton *baton)
     if ((!ok || !moreRows) && rs->autoClose) {
         dpiStmt_release(rs->handle);
         rs->handle = NULL;
-        if (rs->dependsOnHandle) {
-            dpiStmt_release(rs->dependsOnHandle);
-            rs->dependsOnHandle = NULL;
-        }
     }
 
     return ok;
@@ -402,8 +389,7 @@ static bool njsResultSet_getRowsProcessArgs(njsBaton *baton, napi_env env,
 // connection.
 //-----------------------------------------------------------------------------
 bool njsResultSet_new(njsBaton *baton, napi_env env, dpiStmt *handle,
-        dpiStmt *dependsOnHandle, njsVariable *vars, uint32_t numVars,
-        bool autoClose, napi_value *rsObj)
+        njsVariable *vars, uint32_t numVars, bool autoClose, napi_value *rsObj)
 {
     napi_value connObj;
     njsResultSet *rs;
@@ -421,15 +407,8 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, dpiStmt *handle,
     NJS_CHECK_NAPI(env, napi_set_named_property(env, *rsObj, "_connection",
             connObj))
 
-    // if this result set depends on another ODPI-C statement remaining open,
-    // add a referene to it to make sure it doesn't get closed (used by
-    // implicit results)
-    if (dependsOnHandle && dpiStmt_addRef(dependsOnHandle) < 0)
-        return njsBaton_setErrorDPI(baton);
-
     // perform some initializations
     rs->handle = handle;
-    rs->dependsOnHandle = dependsOnHandle;
     rs->conn = (njsConnection*) baton->callingInstance;
     rs->numQueryVars = numVars;
     rs->queryVars = vars;
