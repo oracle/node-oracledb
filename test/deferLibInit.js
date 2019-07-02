@@ -25,6 +25,9 @@
  *   Test deferring initialization of ODPI-C library.
  *   This is a node-oracledb v3.1+ feature.
  *
+ *   Note: These tests will not succeed unless LD_LIBRARY_PATH is used to
+ *         point to the path of Oracle Instant Client.
+ *
  *****************************************************************************/
 'use strict';
 
@@ -56,7 +59,7 @@ describe('182. deferLibInit.js', () => {
     }
   });
 
-  it('183.3 Negative: call oracledb method', async () => {
+  it('182.3 Negative: call oracledb method', async () => {
     try {
       delete process.env.LD_LIBRARY_PATH;
       await callMethodCase();
