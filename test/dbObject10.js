@@ -126,7 +126,8 @@ describe('209. dbObject10.js', () => {
       let result = await conn.execute(`SELECT contact FROM ${TABLE}`);
       let dbObj = result.rows[0][0];
 
-      let expect = `x[HR.NODB_PERSON_TYP] { IDNO: 65,\n  FIRST_NAME: 'Verna',\n  LAST_NAME: 'Mills',\n  EMAIL: 'vmills@example.com',\n  PHONE: '1-650-555-0125' }`;
+      let schema = dbconfig.user.toUpperCase();
+      let expect = `x[${schema}.NODB_PERSON_TYP] { IDNO: 65,\n  FIRST_NAME: 'Verna',\n  LAST_NAME: 'Mills',\n  EMAIL: 'vmills@example.com',\n  PHONE: '1-650-555-0125' }`;
       let actual = 'x' + dbObj;
       should.strictEqual(actual, expect);
 
