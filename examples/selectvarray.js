@@ -66,8 +66,9 @@ async function run() {
       }
     }
 
-    // Get a prototype object representing the VARRAY
-
+    // Get a prototype object representing the VARRAY.
+    // Only the top level type needs to be acquired.
+    // Use a fully qualified name, where possible.
     const TeamTypeClass = await connection.getDbObjectClass("TEAMTYPE");
 
     // Insert with explicit constructor
@@ -100,7 +101,7 @@ async function run() {
             { SHIRTNUMBER: 30, NAME: 'Charlie' },
             { SHIRTNUMBER: 40, NAME: 'Doug' }
           ],
-          type: TeamTypeClass
+          type: TeamTypeClass // could also use 'type: "TEAMTYPE"'
         }
       });
 

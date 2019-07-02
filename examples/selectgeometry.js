@@ -61,6 +61,7 @@ async function run() {
     //
     // getDbObjectClass() can require a round-trip so minimize calls
     // to it.  Pass a fully qualified type name when possible.
+    // Only the top-level type needs to be acquired.
     //
     const GeomType = await connection.getDbObjectClass('MDSYS.SDO_GEOMETRY');
     // console.log(GeomType.prototype); // show attributes available
@@ -98,7 +99,7 @@ async function run() {
       `INSERT INTO testgeometry (id, geometry) VALUES (:id, :g)`,
       { id: 2,
         g: {
-          type: 'MDSYS.SDO_GEOMETRY',   // the name of the type, case sensitive
+          type: 'MDSYS.SDO_GEOMETRY',   // the name of the top-level database type, case sensitive
           val: {                        // a JavaScript object that maps to the DB object
             SDO_GTYPE: 2003,
             SDO_SRID: null,
