@@ -73,14 +73,14 @@ guaranteed to be available or usable in your environment.
 
 Node-oracledb 4.0 was refactored to use [N-API][53] version 2.  On
 each operating system, a node-oracledb binary will work with a number
-of Node.js versions from Node.js 8.16 and Node.js 10.16 onwards,
+of Node.js versions from Node.js 8.16 and Node.js 10.16 onward,
 dependent on N-API compatibility.  This means that when upgrading
 Node.js, you may not need to reinstall node-oracledb.
 
 If compiling from source code, the compiler no longer needs C++11
 compatibility.  The node-oracledb source code is now pure C.
 
-#### <a name="mig31"></a> 1.1 Installion Changes in node-oracledb version 3.1
+#### <a name="mig31"></a> 1.1 Installation Changes in node-oracledb version 3.1
 
 Pre-built binaries are now contained in the package downloaded from
 npm.  This removes the previous internally executed step of
@@ -876,7 +876,7 @@ Download the free 64-bit Instant Client **Basic** ZIP file from
   node %*
   ```
 
-  Invoke this batch file everytime you want to run Node.js.
+  Invoke this batch file every time you want to run Node.js.
 
   Alternatively use `SET` to change your `PATH` in each command prompt
   window before you run node.
