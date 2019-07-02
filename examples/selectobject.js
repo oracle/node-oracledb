@@ -19,7 +19,7 @@
  *   selectobject.js
  *
  * DESCRIPTION
- *   Insert and query a named Oracle database object
+ *   Insert and query a named Oracle database object.
  *   Shows various ways to work with objects.
  *
  *   This example requires node-oracledb 4 or later.
