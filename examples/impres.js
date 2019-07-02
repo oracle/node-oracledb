@@ -67,9 +67,8 @@ async function run() {
 
     console.log('2. Implict Results using node-oracledb ResultSets:');
     result = await connection.execute(plsql, [], { resultSet: true });
-    for (let i = 0; i < result.implicitResults.length; i++) {
-      console.log(" Implicit Result Set", i + 1);
-      const rs = result.implicitResults[i];
+    for (const rs of result.implicitResults) {
+      console.log(" Implicit Result Set:");
       while ((row = await rs.getRow())) {
         console.log("  ", row);
       }
