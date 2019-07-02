@@ -105,4 +105,36 @@ describe('209. dbObject10.js', () => {
       should.not.exist(err);
     }
   }); // 209.1
+
+  it('209.2 By default, JavaScript Object toString() returns "[object type]"', async () => {
+    try {
+      let result = await conn.execute(`SELECT contact FROM ${TABLE}`);
+      let dbObj = result.rows[0][0];
+
+      let expect = `[object ${dbconfig.user.toUpperCase()}.${TYPE}]`;
+      should.strictEqual(dbObj.toString(), expect);
+
+      expect = '[object Object]';
+      should.strictEqual(dbObj._toPojo().toString(), expect);
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 209.2
+
+  it('209.3 The Object literal and JSON.stringify()', async () => {
+    try {
+      let result = await conn.execute(`SELECT contact FROM ${TABLE}`);
+      let dbObj = result.rows[0][0];
+
+      let expect = `x[HR.NODB_PERSON_TYP] { IDNO: 65,\n  FIRST_NAME: 'Verna',\n  LAST_NAME: 'Mills',\n  EMAIL: 'vmills@example.com',\n  PHONE: '1-650-555-0125' }`;
+      let actual = 'x' + dbObj;
+      should.strictEqual(actual, expect);
+
+      expect = '{"IDNO":65,"FIRST_NAME":"Verna","LAST_NAME":"Mills","EMAIL":"vmills@example.com","PHONE":"1-650-555-0125"}';
+      actual = JSON.stringify(dbObj);
+      should.strictEqual(actual, expect);
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 209.3
 });
