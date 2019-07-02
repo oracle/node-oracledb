@@ -4563,3 +4563,12 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 210. dbObject11.js
     210.1 Attribute names with embedded "$", "#", "&" and spaces
+
+211. dbObject12.js
+    211.1 examples/plsqlrecord.js
+
+212. dbObject13.js
+    212.1 examples/plsqlvarrayrecord.js
+
+213. dbObject14.js
+    213.1 examples/selectvarray.js
