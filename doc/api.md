@@ -446,7 +446,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
 24. [Statement Caching](#stmtcache)
 25. [Continuous Query Notification (CQN)](#cqn)
 26. [Oracle Advanced Queuing (AQ)](#aq)
-    - 26.1 [Sending Simple AQ Messages](#aqexample)
+    - 26.1 [Sending Simple AQ Messages](#aqrawexample)
     - 26.2 [Sending Oracle Database Object AQ Messages](#aqobjexample)
     - 26.3 [Changing AQ options](#aqoptions)
     - 26.4 [Enqueuing and Dequeuing Multiple Messages](#aqmultiplemessages)
@@ -4276,7 +4276,7 @@ some attributes controlling the behavior of the queued message.
         `delay`           | The number of seconds to delay the message before it can be dequeued.
         `exceptionQueue`  | A string containing the name of an exception queue in which to place the message if an exception takes place.
         `expiration`      | The number of seconds the message is available to be dequeued before it expires.
-        `payload`         | A String, Buffer or DbObject that is the actual message to be queued.  This property must be specified.
+        `payload`         | A String, Buffer or [DbObject](#dbobjectclass) that is the actual message to be queued.  This property must be specified.
         `priority`        | An integer priority of the message.
 
         See [Oracle Advanced Queuing Documentation][129] for more information about attributes.
@@ -12212,24 +12212,32 @@ There are runnable examples in the GitHub [examples][3] directory.
 Oracle Advanced Queuing allows applications to use producer-consumer
 message passing.  Queuing is highly configurable and scalable,
 providing a great way to distribute workloads.  Messages can be queued
-by multiple producers.  Different consumers can filter messages for
-them.  Messages can also be transformed or propagated to queues in
-other databases.  Oracle AQ is available in all editions of the
-database, and has interfaces in many languages, allowing different
-applications to communicate.  For more details about AQ and its
-options, refer to the [Oracle Advanced Queuing User's Guide][129].
+by multiple producers.  Different consumers can filter messages.
+Messages can also be transformed or propagated to queues in other
+databases.  Oracle AQ is available in all editions of the database,
+and has interfaces in many languages, allowing different applications
+to communicate.  For more details about AQ and its options, refer to
+the [Oracle Advanced Queuing User's Guide][129].
 
-Native AQ support was added in node-oracledb 4.0.  With earlier
-versions, use AQ's PL/SQL interface.
+Node-oracledb APIs for AQ were introduced in node-oracledb 4.0.  With
+earlier versions, use AQ's PL/SQL interface.
 
 Oracle Advanced Queues are represented in node-oracledb by several
-classes, described below.  Before using a queue in node-oracledb, it
-must be created in the database using the DBMS_AQADM PL/SQL package.
+classes.  A single top level [AqQueue object](#aqqueueclass) in
+node-oracledb contains [`deqOptions`](#aqqueuedeqopts) and
+[`enqOptions`](#aqqueueenqopts) object properties which can be used to
+change queue behavior.  A single AqQueue object can be used for
+enqueuing, or dequeuing, or both at the same time.
+
+Messages are enqueued by passing them to an enqueue method directly,
+or by wrapping them in a [JavaScript object](#aqjsmessage).  Dequeued
+messages are returned as an [AqMessage object](#aqmessageclass).
 
 The following examples show how to enqueue and dequeue messages in
-node-oracledb.  For these examples, create a new Oracle user
-`demoqueue` with permission to create and use queues.  Connect in
-SQL*Plus as SYSDBA and run:
+node-oracledb.  Before using a queue in node-oracledb, it must be
+created in the database using the DBMS_AQADM PL/SQL package.  For
+these examples, create a new Oracle user `demoqueue` with permission
+to create and use queues.  Connect in SQL*Plus as SYSDBA and run:
 
 ```sql
 CREATE USER demoqueue IDENTIFIED BY &password;
@@ -12241,9 +12249,10 @@ GRANT EXECUTE ON DBMS_AQ TO demoqueue;
 
 When you have finished testing, remove the DEMOQUEUE schema.
 
-### <a name="aqexample"></a> 26.1 Sending Simple AQ Messages
+### <a name="aqrawexample"></a> 26.1 Sending Simple AQ Messages
 
-To create a queue for simple messaging:
+To create a queue for simple messaging, use SQL*Plus to connect as the
+new DEMOQUEUE user and run:
 
 ```sql
 -- Create and start a queue
@@ -12262,7 +12271,7 @@ END;
 /
 ```
 
-To enqueue a single, simple message, you could run:
+To enqueue a single, simple message, run:
 
 ```javascript
 const queueName = "DEMO_RAW_QUEUE";
@@ -12271,24 +12280,27 @@ await queue.enqOne("This is my message");
 await connection.commit();
 ```
 
-An application could dequeue a message by running:
+Messages can be passed directly to `enqOne()` as shown above.
+Alternatively they can be the `payload` property of a JavaScript
+object passed to `enqOne()`, as shown in [Changing AQ
+options](#aqoptions).
+
+To dequeue a message, run:
 
 ```javascript
 const queueName = "DEMO_RAW_QUEUE";
 const queue = await connection.getQueue(queueName);
 const msg = await queue.deqOne();
 await connection.commit();
-if (msg) {
-  console.log(msg.payload.toString());
-}
+console.log(msg.payload.toString());
 ```
 
 By default, `deqOne()` will wait until a message is available.
 
 The variable `msg` is returned as an [AqMessage
 object](#aqmessageclass) which contains the message payload and other
-metadata.  Note that string messages are encoded as UTF-8 Buffers.
-This example displays `This is my message`.
+metadata.  String messages are encoded as UTF-8 Buffers.  This example
+displays `This is my message`.
 
 See [`examples/aqraw.js`][142] for a runnable example.
 
@@ -12326,17 +12338,17 @@ END;
 /
 ```
 
-In the [previous section](#aqexample) the `QUEUE_PAYLOAD_TYPE` was 'RAW'
-but here the object type name `DEMOQUEUE.USER_ADDRESS_TYPE` is used.
+In the [previous section](#aqrawexample) the `QUEUE_PAYLOAD_TYPE` was 'RAW'
+but here the Oracle Database object type name `DEMOQUEUE.USER_ADDRESS_TYPE` is used.
 
-In node-oracledb, a queue is initialized for the database object type:
+In node-oracledb, a queue is initialized for that type:
 
 ```javascript
 const queueName = "ADDR_QUEUE";
 const queue = await connection.getQueue(queueName, {payloadType: "DEMOQUEUE.USER_ADDRESS_TYPE"});
 ```
 
-For efficiencey, it is recommended to use a fully qualified name for
+For efficiency, it is recommended to use a fully qualified name for
 the type.
 
 A [DbObject](#dbobjectclass) for the message is created and queued:
@@ -12365,10 +12377,8 @@ By default, `deqOne()` will wait until a message is available.
 The message can be printed:
 
 ```javascript
-if (msg) {
-  const o = msg.payload;
-  console.log(o);
-}
+const o = msg.payload;
+console.log(o);
 ```
 
 See [`examples/aqobjects.js`][143] for a runnable example.
@@ -12378,21 +12388,19 @@ See [`examples/aqobjects.js`][143] for a runnable example.
 The [AqQueue](#aqqueueclass) object created by calling
 [`connection.getQueue()`](#getqueue) contains
 [`enqOptions`](#aqqueueenqopts) and [`deqOptions`](#aqqueuedeqopts)
-attribute options that can be configured.  These options can be
+attribute objects that can be configured.  These options can be
 changed before each enqueue or dequeue call.
 
 Messages that are enqueued can also contain properties, such as an
-expiration.  For example to expire a message after 5 seconds if it
-hasn't been dequeued, you can enqueue a message in a [JavaScript
-object](#aqjsmessage) like:
+expiration.  Instead of passing a message String, Buffer or DbObject
+directly to `enqOne()`, a `payload` property of a [JavaScript
+object](#aqjsmessage) is set to the message.  Other object properties
+control the message behavior.  For example to expire a message after
+five seconds if it hasn't been dequeued:
 
 ```javascript
 const message = {
-  // correlation: "MyCorrelation",
-  // delay: 1,
-  // exceptionQueue: "MyExceptionQueue",
      expiration: 5,
-  // priority: 10,
      payload: "This is my message"
 };
 
@@ -12401,6 +12409,9 @@ const queue = await connection.getQueue(queueName);
 await queue.enqOne(message);
 await connection.commit();
 ```
+
+For RAW queues the `payload` value can be a String or Buffer.  For
+object queues `payload` can be a [DbObject](#dbobjectclass) object.
 
 To change the enqueue behavior of a queue, alter the
 [`enqOptions`](#aqqueueenqopts) attributes.  For example to make a
@@ -12451,7 +12462,7 @@ Object.assign(queue.deqOptions,
 
 See [`examples/aqoptions.js`][144] for a runnable example.
 
-### <a name="aqmultiplemessages"></a> 24.4 Enqueuing and Dequeuing Multiple Messages
+### <a name="aqmultiplemessages"></a> 26.4 Enqueuing and Dequeuing Multiple Messages
 
 Enqueuing multiple messages in one operation is similar to the basic
 examples.  However, instead of passing a single message to
@@ -12532,6 +12543,10 @@ await connection.close();
 
 See [Continuous Query Notification (CQN)](#cqn) for more information
 about subscriptions and notifications.
+
+AQ notifications require the same configuration as CQN.  Specifically
+the database must be able to connect back to node-oracledb.
+
 
 ## <a name="nls"></a> 27. Globalization and National Language Support (NLS)
 
