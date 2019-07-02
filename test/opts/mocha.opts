@@ -220,10 +220,6 @@ test/currentSchema.js
 
 test/implicitResults.js
 
-test/dbObjects.js
-test/dbObjectsOut.js
-test/dbObjectsInOut.js
-
 test/getDataOfLob.js
 
 test/dbObjectsNestTbl.js
