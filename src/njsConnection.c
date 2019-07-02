@@ -614,7 +614,7 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
                 metadata))
 
         // return result set
-        if (!njsResultSet_new(baton, env, baton->dpiStmtHandle, NULL,
+        if (!njsResultSet_new(baton, env, baton->dpiStmtHandle,
                 baton->queryVars, baton->numQueryVars, !baton->getRS,
                 &resultSet))
             return false;
@@ -1336,8 +1336,8 @@ static bool njsConnection_getImplicitResults(njsBaton *baton,
                 implicitResult->numQueryVars, env, baton))
             return false;
         if (!njsResultSet_new(baton, env, implicitResult->stmt,
-                baton->dpiStmtHandle, implicitResult->queryVars,
-                implicitResult->numQueryVars, !baton->getRS, &resultSet))
+                implicitResult->queryVars, implicitResult->numQueryVars,
+                !baton->getRS, &resultSet))
             return false;
         implicitResult->stmt = NULL;
         implicitResult->queryVars = NULL;
