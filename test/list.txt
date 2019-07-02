@@ -4346,7 +4346,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 182. deferLibInit.js
     182.1 defers initializatiion of ODPI-C
     182.2 Negative: throws error when asking for ODPI-C attributes
-    183.3 Negative: call oracledb method
+    182.3 Negative: call oracledb method
 
 184. sessionTag.js
     184.1 Remote PL/SQL Callback
