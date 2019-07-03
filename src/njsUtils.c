@@ -127,14 +127,16 @@ bool njsUtils_addTypeProperties(napi_env env, napi_value obj,
             temp))
 
     // set the type name
-    sprintf(propertyName, "%sName", propertyNamePrefix);
+    (void) snprintf(propertyName, sizeof(propertyName), "%sName",
+            propertyNamePrefix);
     NJS_CHECK_NAPI(env, napi_create_string_utf8(env, typeName, typeNameLength,
             &temp))
     NJS_CHECK_NAPI(env, napi_set_named_property(env, obj, propertyName, temp))
 
     // set the type class, if applicable
     if (objType) {
-        sprintf(propertyName, "%sClass", propertyNamePrefix);
+        (void) snprintf(propertyName, sizeof(propertyName), "%sClass",
+                propertyNamePrefix);
         NJS_CHECK_NAPI(env, napi_get_reference_value(env,
                 objType->jsDbObjectConstructor, &temp))
         NJS_CHECK_NAPI(env, napi_set_named_property(env, obj, propertyName,
@@ -481,7 +483,7 @@ bool njsUtils_getIntArg(napi_env env, napi_value *args, int index,
     NJS_CHECK_NAPI(env, napi_get_value_double(env, args[index], &doubleValue))
 
     // if the value is not an integer, return an error
-    *result = (uint32_t) doubleValue;
+    *result = (int32_t) doubleValue;
     if ((double) *result != doubleValue)
         return njsUtils_throwError(env, errInvalidParameterValue, index + 1);
 

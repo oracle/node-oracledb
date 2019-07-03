@@ -356,9 +356,10 @@ static napi_value njsDbObject_getKeys(napi_env env, napi_callback_info info)
 static bool njsDbObject_getKeysHelper(napi_env env, napi_callback_info info,
         napi_value *returnValue)
 {
-    int32_t arrayPos, index, exists, size;
     njsDbObjectType *objType = NULL;
+    int32_t index, exists, size;
     napi_value arr, temp;
+    uint32_t arrayPos;
     njsDbObject *obj;
 
     // get object instance from caller
@@ -368,7 +369,8 @@ static bool njsDbObject_getKeysHelper(napi_env env, napi_callback_info info,
     // determine the size of the collection and create an array of that length
     if (dpiObject_getSize(obj->handle, &size) < 0)
         return njsUtils_throwErrorDPI(env, obj->type->oracleDb);
-    NJS_CHECK_NAPI(env, napi_create_array_with_length(env, size, &arr))
+    NJS_CHECK_NAPI(env, napi_create_array_with_length(env, (size_t) size,
+            &arr))
 
     // iterate over the elements in the collection
     arrayPos = 0;
@@ -570,9 +572,10 @@ static napi_value njsDbObject_getValues(napi_env env, napi_callback_info info)
 static bool njsDbObject_getValuesHelper(napi_env env, napi_callback_info info,
         napi_value *returnValue)
 {
-    int32_t arrayPos, index, exists, size;
     njsDbObjectType *objType = NULL;
+    int32_t index, exists, size;
     napi_value arr, temp;
+    uint32_t arrayPos;
     njsDbObject *obj;
     dpiData data;
 
@@ -583,7 +586,8 @@ static bool njsDbObject_getValuesHelper(napi_env env, napi_callback_info info,
     // determine the size of the collection and create an array of that length
     if (dpiObject_getSize(obj->handle, &size) < 0)
         return njsUtils_throwErrorDPI(env, obj->type->oracleDb);
-    NJS_CHECK_NAPI(env, napi_create_array_with_length(env, size, &arr))
+    NJS_CHECK_NAPI(env, napi_create_array_with_length(env, (size_t) size,
+            &arr))
 
     // iterate over the elements in the collection
     arrayPos = 0;
@@ -1254,8 +1258,9 @@ static bool njsDbObjectType_populate(njsDbObjectType *objType,
     objType->fqn = malloc(objType->fqnLength + 1);
     if (!objType->fqn)
         return njsBaton_setError(baton, errInsufficientMemory);
-    sprintf(objType->fqn, "%.*s.%.*s", (int) info->schemaLength, info->schema,
-            (int) info->nameLength, info->name);
+    (void) snprintf(objType->fqn, objType->fqnLength + 1, "%.*s.%.*s",
+            (int) info->schemaLength, info->schema, (int) info->nameLength,
+            info->name);
 
     // set whether or not the class is a collection or not
     NJS_CHECK_NAPI(env, napi_get_boolean(env, info->isCollection, &temp))
