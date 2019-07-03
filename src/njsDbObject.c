@@ -101,6 +101,8 @@ static bool njsDbObject_validateArgs(napi_env env, napi_callback_info info,
 static bool njsDbObjectType_populate(njsDbObjectType *objType,
         dpiObjectType *objectTypeHandle, napi_env env, napi_value jsObjectType,
         dpiObjectTypeInfo *info, njsBaton *baton);
+static bool njsDbObjectType_populateTypeInfo(njsDataTypeInfo *info,
+        njsBaton *baton, napi_env env, dpiDataTypeInfo *sourceInfo);
 static bool njsDbObject_wrap(napi_env env, napi_value value,
         njsDbObject **obj);
 
@@ -1194,13 +1196,8 @@ static bool njsDbObjectType_populate(njsDbObjectType *objType,
 
     // process collections object types
     if (info->isCollection) {
-        objType->elementTypeInfo.oracleTypeNum =
-                info->elementTypeInfo.oracleTypeNum;
-        objType->elementTypeInfo.nativeTypeNum =
-                info->elementTypeInfo.defaultNativeTypeNum;
-        if (info->elementTypeInfo.objectType && !njsDbObject_getSubClass(baton,
-                info->elementTypeInfo.objectType, env, &temp,
-                &objType->elementTypeInfo.objectType))
+        if (!njsDbObjectType_populateTypeInfo(&objType->elementTypeInfo,
+                baton, env, &info->elementTypeInfo))
             return false;
         if (!njsUtils_addTypeProperties(env, jsObjectType, "elementType",
                 info->elementTypeInfo.oracleTypeNum,
@@ -1219,24 +1216,12 @@ static bool njsDbObjectType_populate(njsDbObjectType *objType,
             if (dpiObjectAttr_getInfo(attr->handle, &attrInfo) < 0)
                 return njsBaton_setErrorDPI(baton);
             attr->oracleDb = baton->oracleDb;
-            attr->typeInfo.oracleTypeNum = attrInfo.typeInfo.oracleTypeNum;
-            attr->typeInfo.nativeTypeNum =
-                    attrInfo.typeInfo.defaultNativeTypeNum;
+            if (!njsDbObjectType_populateTypeInfo(&attr->typeInfo,
+                    baton, env, &attrInfo.typeInfo))
+                return false;
             attr->name = attrInfo.name;
             attr->nameLength = attrInfo.nameLength;
-            if (attrInfo.typeInfo.oracleTypeNum == DPI_ORACLE_TYPE_TIMESTAMP ||
-                    attrInfo.typeInfo.oracleTypeNum == DPI_ORACLE_TYPE_DATE ||
-                    attrInfo.typeInfo.oracleTypeNum ==
-                            DPI_ORACLE_TYPE_TIMESTAMP_TZ ||
-                    attrInfo.typeInfo.oracleTypeNum ==
-                            DPI_ORACLE_TYPE_TIMESTAMP_LTZ) {
-                attr->typeInfo.nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
-            }
             NJS_CHECK_NAPI(env, napi_create_object(env, &element))
-            if (attrInfo.typeInfo.objectType && !njsDbObject_getSubClass(baton,
-                    attrInfo.typeInfo.objectType, env, &temp,
-                    &attr->typeInfo.objectType))
-                return false;
             if (!njsUtils_addTypeProperties(env, element, "type",
                     attrInfo.typeInfo.oracleTypeNum,
                     attr->typeInfo.objectType))
@@ -1277,5 +1262,31 @@ static bool njsDbObjectType_populate(njsDbObjectType *objType,
     NJS_CHECK_NAPI(env, napi_set_named_property(env, jsObjectType,
             "isCollection", temp))
 
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsDbObjectType_populateTypeInfo()
+//   Populates type information. Acquires the object type, if needed. Modifies
+// the native type to double for all dates.
+//-----------------------------------------------------------------------------
+static bool njsDbObjectType_populateTypeInfo(njsDataTypeInfo *info,
+        njsBaton *baton, napi_env env, dpiDataTypeInfo *sourceInfo)
+{
+    napi_value temp;
+
+    info->oracleTypeNum = sourceInfo->oracleTypeNum;
+    info->nativeTypeNum = sourceInfo->defaultNativeTypeNum;
+    if (info->oracleTypeNum == DPI_ORACLE_TYPE_DATE ||
+            info->oracleTypeNum == DPI_ORACLE_TYPE_TIMESTAMP ||
+            info->oracleTypeNum == DPI_ORACLE_TYPE_TIMESTAMP_TZ ||
+            info->oracleTypeNum == DPI_ORACLE_TYPE_TIMESTAMP_LTZ) {
+        info->nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
+    }
+    if (sourceInfo->objectType) {
+        return njsDbObject_getSubClass(baton, sourceInfo->objectType, env,
+                &temp, &info->objectType);
+    }
     return true;
 }
