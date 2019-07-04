@@ -22,7 +22,7 @@
  *   Oracle Advanced Queuing (AQ) example passing multiple messages.
  *
  *   Before running this, a queue allowing RAW payloads must be
- *   created, see https://oracle.github.io/node-oracledb/doc/api.html#aqexample
+ *   created, see https://oracle.github.io/node-oracledb/doc/api.html#aqrawexample
  *
  *   This example requires node-oracledb 4 or later.
  *
