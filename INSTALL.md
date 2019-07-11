@@ -71,7 +71,7 @@ guaranteed to be available or usable in your environment.
 
 #### <a name="mig40"></a> 1.1 Installation Changes in node-oracledb version 4.0
 
-Node-oracledb 4.0 was refactored to use [N-API][53] version 2.  On
+Node-oracledb 4.0 was refactored to use [N-API][53] version 4.  On
 each operating system, a node-oracledb binary will work with a number
 of Node.js versions from Node.js 8.16 and Node.js 10.16 onward,
 dependent on N-API compatibility.  This means that when upgrading
