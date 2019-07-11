@@ -36,7 +36,7 @@
  *     [//]host_name[:port][/service_name][:server_type][/instance_name]
  *
  *   Commonly just the host_name and service_name are needed
- *   e.g. "localhost/orclpdb" or "example.com/XEPDB1"
+ *   e.g. "localhost/orclpdb1" or "example.com/XEPDB1"
  *
  *   The Easy Connect syntax was enhanced in Oracle Database 19c to
  *   allow more options, refer to the documentation:
@@ -84,7 +84,7 @@ module.exports = {
 
   // For information on connection strings see:
   // https://oracle.github.io/node-oracledb/doc/api.html#connectionstrings
-  connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING || "localhost/orclpdb",
+  connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING || "localhost/orclpdb1",
 
   // Setting externalAuth is optional.  It defaults to false.  See:
   // https://oracle.github.io/node-oracledb/doc/api.html#extauth
