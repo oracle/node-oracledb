@@ -315,11 +315,11 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 10.2.7 [`insertManyAndGet()`](#sodacollinsertmanyandget)
         - 10.2.8 [`insertOne()`](#sodacollinsertone)
             - 10.2.8.1 [`insertOne()`: Parameters](#sodacollinsertoneparams)
-                - 10.2.8.1.1 [`newDocumentContent`](#sodacollinsertoneparamsdoc), [`newDocument`](#sodacollinsertoneparamsdoc)
+                - 10.2.8.1.1 [`newDocumentContent`](#sodacollinsertoneparamsdoc), [`newSodaDocument`](#sodacollinsertoneparamsdoc)
             - 10.2.8.2 [`insertOne()`: Callback Function](#sodacollinsertonecb)
         - 10.2.9 [`insertOneAndGet()`](#sodacollinsertoneandget)
             - 10.2.9.1 [`insertOneAndGet()`: Parameters](#sodacollinsertoneandgetparams)
-                - 10.2.9.1.1 [`newDocumentContent`](#sodacollinsertoneandgetparamsdoc), [`newDocument`](#sodacollinsertoneandgetparamsdoc)
+                - 10.2.9.1.1 [`newDocumentContent`](#sodacollinsertoneandgetparamsdoc), [`newSodaDocument`](#sodacollinsertoneandgetparamsdoc)
             - 10.2.9.2 [`insertOneAndGet()`: Callback Function](#sodacollinsertoneandgetcb)
 11. [SodaDatabase Class](#sodadatabaseclass)
     - 11.1 [SodaDatabase Methods](#sodadatabasemethods)
@@ -579,12 +579,9 @@ With Oracle's sample HR schema, the output is:
 
 #### <a name="examplesodaawait"></a> 1.1.2 Example: Simple Oracle Document Access (SODA) in Node.js
 
-Oracle Database 18c or 19c users who have been granted the SODA_APP
-role can use [node-oracledb's SODA API](#sodaoverview) to store
-content such as JSON.
-
-SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
-later.
+[node-oracledb's SODA API](#sodaoverview) can be used with Oracle Database 18
+and above, when node-oracledb uses Oracle Client 18.5 or Oracle Client 19.3, or
+later.  Users who have been granted the SODA_APP role.
 
 ```javascript
 // mysoda.js
@@ -3493,11 +3490,11 @@ This synchronous method returns a [SodaDatabase](#sodadatabaseclass).
 Returns a parent SodaDatabase object for use with Simple Oracle
 Document Access (SODA).
 
-SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
-later.  The SODA bulk insert methods
+SODA can be used with Oracle Database 18.3 and above, when node-oracledb uses
+Oracle Client 18.5 or Oracle Client 19.3, or later.  The SODA bulk insert methods
 [`sodaCollection.insertMany()`](#sodacollinsertmany) and
 [`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget)
-remain in Preview status.
+are in Preview status.
 
 See [Simple Oracle Document Access (SODA)](#sodaoverview) for more
 information about using SODA in node-oracledb.
@@ -5043,11 +5040,11 @@ for Node.js 8's Stream `destroy()` method was added in node-oracledb 2.1.
 
 ## <a name="sodacollectionclass"></a> 10. SodaCollection Class
 
-SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
-later.  The SODA bulk insert methods
-[`sodaCollection.insertMany()`](#sodacollinsertmany) and
-[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget)
-remain in Preview status.
+SODA can be used with Oracle Database 18.3 and above, when node-oracledb uses
+Oracle Client 18.5 or Oracle Client 19.3, or later.  The SODA bulk insert
+methods [`sodaCollection.insertMany()`](#sodacollinsertmany) and
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) are in Preview
+status.
 
 #### <a name="sodacollectionproperties"></a> 10.1 SodaCollection Properties
 
@@ -5801,10 +5798,10 @@ promise = replaceOneAndGet(SodaDocument newSodaDocument);
 
 ##### Description
 
-Replaces a document in a collection.  This is similar to
+Replaces a document in a collection similar to
 [`replaceOne()`](#sodaoperationclassreplaceone), but also returns the
-result document, which contains all [SodaDocument](#sodadocumentclass)
-components (key, version, etc.) except for content.  Content is not
+result document which contains all [SodaDocument](#sodadocumentclass)
+components (key, version, etc.) except for content.  Content itself is not
 returned for performance reasons.  The result document has new values
 for components that are updated as part of the replace operation (such
 as version, last-modified timestamp, and media type)
@@ -5833,7 +5830,7 @@ This method was added in node-oracledb 3.0.
     Callback function parameter | Description
     ----------------------------|-------------
     *Error error* | If `replaceOneAndGet()` succeeds, `error` is NULL.  It is not an error if no document is replaced.  If an error occurs, then `error` contains the error message.
-    *SodaDocument updatedDocument* | The updated [SodaDocument](#sodadocumentclass) if replacement was successful, otherwise `updatedDocument` will be undefined.  The `lastModified` and `version` attributes of the stored SodaDocument will be updated.  The `mediaType` attribute and the content will be replaced.  Other attributes of `newDocument` are ignored.  Note for performance reasons, `updatedDocument` will not have document content and cannot itself be passed directly to SODA insert or replace methods.
+    *SodaDocument updatedDocument* | The updated [SodaDocument](#sodadocumentclass) if replacement was successful, otherwise `updatedDocument` will be undefined.  The `lastModified` and `version` attributes of the stored SodaDocument will be updated.  The `mediaType` attribute and the content will be replaced.  Other attributes of `newSodaDocument` are ignored.  Note for performance reasons, `updatedDocument` will not have document content and cannot itself be passed directly to SODA insert or replace methods.
 
 #### <a name="sodacollgetdataguide"></a> 10.2.5 `sodaCollection.getDataGuide()`
 
@@ -5892,12 +5889,14 @@ This method was added in node-oracledb 3.0.
 
 Callback:
 ```
-insertMany(Array newDocumentArray, function(Error error){});
+insertMany(Array newDocumentContentArray, function(Error error){});
+insertMany(Array newSodaDocumentArray, function(Error error){});
 ```
 
 Promise:
 ```
-promise = insertMany(Array newDocumentArray);
+promise = insertMany(Array newDocumentContentArray);
+promise = insertMany(Array newSodaDocumentArray);
 ```
 
 ##### Description
@@ -5922,21 +5921,23 @@ This method was added in node-oracledb 4.0.  It requires Oracle Client 18.5 or h
 
 Callback
 ```
-insertManyAndGet(Array newDocumentArray, function(Error error, Array SodaDocuments){});
+insertManyAndGet(Array newDocumentContentArray, function(Error error, Array SodaDocuments){});
+insertManyAndGet(Array newSodaDocumentArray, function(Error error, Array SodaDocuments){});
 ```
 
 Promise
 ```
-promise = insertManyAndGet(Array newDocumentArray);
+promise = insertManyAndGet(Array newDocumentContentArray);
+promise = insertManyAndGet(Array newSodaDocumentArray);
 ```
 
 ##### Description
 
-Similar to [sodaCollection.insertMany()](#sodacollinsertmany) but also
-returns an array of the inserted documents so system managed
-properties, such as the keys (in default collections), can be found.
-When inserting multiple documents, using `insertManyAndGet()` is
-recommended in preference to `insertOneAndGet()`.
+Similar to [sodaCollection.insertMany()](#sodacollinsertmany) but also returns
+an array of the inserted documents so system managed properties, such as the
+keys (in default collections), can be found.  Content itself is not returned for
+performance reasons.  When inserting multiple documents, using
+`insertManyAndGet()` is recommended in preference to `insertOneAndGet()`.
 
 This method is in Preview status and should not be used in production.
 
@@ -5949,13 +5950,13 @@ This method was added in node-oracledb 4.0.  It requires Oracle Client 18.5 or h
 Callback:
 ```
 insertOne(Object newDocumentContent, function(Error error){});
-insertOne(SodaDocument newDocument, function(Error error){});
+insertOne(SodaDocument newSodaDocument, function(Error error){});
 ```
 
 Promise:
 ```
 promise = insertOne(Object newDocumentContent);
-promise = insertOne(SodaDocument newDocument);
+promise = insertOne(SodaDocument newSodaDocument);
 ```
 
 ##### Description
@@ -5965,14 +5966,13 @@ either a JavaScript object representing the data content, or it can be
 an existing [SodaDocument](#sodadocumentclass).
 
 Note SodaDocuments returned from
-[`sodaCollection.insertOneAndGet()`](#sodacollinsertoneandget) or from
-[`sodaOperation.replaceOneAndGet()`](#sodaoperationclassreplaceoneandget)
-cannot be passed to `insertOne()`, since these do not contain any
-document content.  Instead, create a JavaScript object using the
-desired attribute values, or use
-[`sodaDatabase.createDocument()`](#sodadbcreatedocument), or use a
-SodaDocument returned by a [`sodaCollection.find()`](#sodacollfind)
-query.
+[`sodaCollection.insertOneAndGet()`](#sodacollinsertoneandget),
+[`sodaOperation.replaceOneAndGet()`](#sodaoperationclassreplaceoneandget), and
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) cannot be
+passed to SODA insert methods, since they do not contain any document content.
+Instead, create a JavaScript object using the desired attribute values, or use
+[`sodaDatabase.createDocument()`](#sodadbcreatedocument), or use a SodaDocument
+returned by a [`sodaCollection.find()`](#sodacollfind) query.
 
 If [`oracledb.autoCommit`](#propdbisautocommit) is *true*, and
 `insertOne()` succeeds, then the new document and any open transaction
@@ -5997,11 +5997,11 @@ await sodaCollection.insertOne(doc);
 
 ##### <a name="sodacollinsertoneparams"></a> 10.2.8.1 `insertOne()`: Parameters
 
-###### <a name="sodacollinsertoneparamsdoc"></a> 10.2.8.1.1 `newDocumentContent`,  `newDocument`
+###### <a name="sodacollinsertoneparamsdoc"></a> 10.2.8.1.1 `newDocumentContent`,  `newSodaDocument`
 
 ```
 Object newDocumentContent
-SodaDocument newDocument
+SodaDocument newSodaDocument
 ```
 
 The document to insert.
@@ -6039,32 +6039,26 @@ Callback function parameter | Description
 Callback
 ```
 insertOneAndGet(Object newDocumentContent, function(Error error, SodaDocument document){});
-insertOneAndGet(SodaDocument newDocument, function(Error error, SodaDocument document){});
+insertOneAndGet(SodaDocument newSodaDocument, function(Error error, SodaDocument document){});
 ```
 
 Promise
 ```
 promise = insertOneAndGet(Object newDocumentContent);
-promise = insertOneAndGet(SodaDocument newDocument);
+promise = insertOneAndGet(SodaDocument newSodaDocument);
 ```
 
 ##### Description
 
-Similar to [sodaCollection.insertOne()](#sodacollinsertone) but also
-returns the inserted document so system managed properties, such as the
-key (in default collections), can be found.
+Inserts a document in a collection similar to
+[`sodaCollection.insertOne()`](#sodacollinsertone), but also returns the result
+document which contains all [SodaDocument](#sodadocumentclass) components (key,
+version, etc.) except for content.  Content itself is not returned for
+performance reasons.
 
-Inserts a document in a collection.  This is similar to
-[`sodaCollection.insertOne()`](#sodacollinsertone), but also returns the
-result document, which contains all [SodaDocument](#sodadocumentclass)
-components (key, version, etc.) except for content.  Content is not
-returned for performance reasons.  The result document has new values
-for components that are updated as part of the replace operation (such
-as version, last-modified timestamp, and media type)
-
-If you want to insert the returned document again, use the original
-`newDocumentContent` or `newDocument`.  Alternatively construct a new
-object from the returned document and add content.
+If you want to insert the document again, use the original `newDocumentContent`
+or `newSodaDocument`.  Alternatively construct a new object from the returned
+document and add content.
 
 If [`oracledb.autoCommit`](#propdbisautocommit) is *true*, and
 `insertOneAndGet()` succeeds, then any open transaction on the
@@ -6074,11 +6068,11 @@ This method was added in node-oracledb 3.0.
 
 ##### <a name="sodacollinsertoneandgetparams"></a> 10.2.9.1 `insertOneAndGet()`: Parameters
 
-###### <a name="sodacollinsertoneandgetparamsdoc"></a> 10.2.9.1.1 `newDocumentContent`,  `newDocument`
+###### <a name="sodacollinsertoneandgetparamsdoc"></a> 10.2.9.1.1 `newDocumentContent`,  `newSodaDocument`
 
 ```
 Object newDocumentContent
-SodaDocument newDocument
+SodaDocument newSodaDocument
 ```
 
 The document to insert.
@@ -6107,11 +6101,11 @@ operations. A 'SODA database' is an abstraction, allowing access to
 SODA collections in that 'SODA database', which then allow access to
 documents in those collections.
 
-SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
-later.  The SODA bulk insert methods
-[`sodaCollection.insertMany()`](#sodacollinsertmany) and
-[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget)
-remain in Preview status.
+SODA can be used with Oracle Database 18.3 and above, when node-oracledb uses
+Oracle Client 18.5 or Oracle Client 19.3, or later.  The SODA bulk insert
+methods [`sodaCollection.insertMany()`](#sodacollinsertmany) and
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) are in Preview
+status.
 
 A SODA database is equivalent to an Oracle Database user, see
 [Overview of SODA][117] in the Introduction to SODA manual.
@@ -6147,15 +6141,10 @@ that existing collection is opened without error.
 Optional metadata allows collection customization.  If metadata is not
 supplied, a default collection will be created
 
-Most users will allow `createCollection()` to create the Oracle
-Database table used internally to store SODA documents. However the
-option `mode` can be used to indicate the collection should be stored
-in a table that was previously manually created.
-
-By default, `createCollection()` first attempts to create the Oracle
-Database table used internally to store the collection.  If the table
-exists already, it will attempt to use it as the table underlying the
-collection.
+By default, `createCollection()` first attempts to create the Oracle Database
+table used internally to store the collection.  If the table exists already, it
+will attempt to use it as the table underlying the collection.  Most users will
+use this default behavior.
 
 If the optional `mode` parameter is
 [`oracledb.SODA_COLL_MAP_MODE`](#oracledbconstantssoda), SODA will
@@ -6417,37 +6406,33 @@ Callback function parameter | Description
 SodaDocuments represents the document for SODA read and write
 operations.
 
-SODA can be used with Oracle Client 18.5 and Oracle Client 19.3, or
-later.  The SODA bulk insert methods
-[`sodaCollection.insertMany()`](#sodacollinsertmany) and
-[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget)
-remain in Preview status.
+SODA can be used with Oracle Database 18.3 and above, when node-oracledb uses
+Oracle Client 18.5 or Oracle Client 19.3, or later.  The SODA bulk insert
+methods [`sodaCollection.insertMany()`](#sodacollinsertmany) and
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) are in Preview
+status.
 
 SodaDocument objects can be created in three ways:
 
-- The result of
-  [`sodaDatabase.createDocument()`](#sodadbcreatedocument): this is a
-  proto SodaDocument object usable for SODA insert and replace
-  methods.  The SodaDocument will have content and media type
-  components set.  Attributes like `createdOn` will not be defined.
-  Optional attributes not specified when calling `createDocument()`
-  will also not be defined.
+- The result of [`sodaDatabase.createDocument()`](#sodadbcreatedocument).  This
+  is a proto SodaDocument object usable for SODA insert and replace methods.
+  The SodaDocument will have content and media type components set.  Attributes
+  like `createdOn` will not be defined.  Optional attributes not specified when
+  calling `createDocument()` will also not be defined.
 
 - The result of a read operation from the database, such as calling
   [`sodaOperation.getOne()`](#sodaoperationclassgetone), or from
   [`sodaDocumentCursor.getNext()`](#sodadoccursorgetnext) after a
-  [`sodaOperation.getCursor()`](#sodaoperationclassgetcursor) call:
-  these return complete SodaDocument objects containing the document
-  content and attributes, such as time stamps.
+  [`sodaOperation.getCursor()`](#sodaoperationclassgetcursor) call.  These
+  return complete SodaDocument objects containing the document content and
+  attributes, such as time stamps.
 
-- The result of
-  [`sodaCollection.insertOneAndGet()`](#sodacollinsertoneandget)
-  or
-  [`sodaOperation.replaceOneAndGet()`](#sodaoperationclassreplaceoneandget)
-  methods: these return SodaDocuments contain all attributes but do
-  not contain the document content itself.  They are useful for
-  finding document attributes such as system generated keys and
-  versions of new and updated documents.
+- The result of [`sodaCollection.insertOneAndGet()`](#sodacollinsertoneandget),
+  [`sodaOperation.replaceOneAndGet()`](#sodaoperationclassreplaceoneandget), or
+  [`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) methods.
+  These return SodaDocuments that contain all attributes except the document
+  content itself.  They are useful for finding document attributes such as
+  system generated keys, and versions of new and updated documents.
 
 ### <a name="sodadocumentproperties"></a> 12.1 SodaDocument Properties
 
@@ -12762,14 +12747,11 @@ Node-oracledb uses the following objects for SODA:
 
 ### <a name="sodarequirements"></a> 29.1 Node-oracledb SODA Requirements
 
-SODA is available to Node.js applications when the node-oracledb
-driver uses Oracle Database 18.3, or later, and also Oracle Client
-18.5 or Oracle Client 19.3, or later.
-
-The SODA bulk insert methods
-[`sodaCollection.insertMany()`](#sodacollinsertmany) and
-[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) are
-in Preview status.
+SODA is available to Node.js applications using Oracle Database 18.3 and above,
+when node-oracledb uses Oracle Client 18.5 or Oracle Client 19.3, or later.  The
+SODA bulk insert methods [`sodaCollection.insertMany()`](#sodacollinsertmany)
+and [`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) are in
+Preview status.
 
 To execute SODA operations, Oracle Database users require the SODA_APP
 role granted to them by a DBA:
@@ -12880,14 +12862,16 @@ information.
 For many users, passing your document content directly to the
 [`insertOne()`](#sodacollinsertone),
 [`insertOneAndGet()`](#sodacollinsertoneandget),
-[`replaceOne()`](#sodaoperationclassreplaceone) or
-[`replaceOneAndGet()`](#sodaoperationclassreplaceoneandget) methods
-will be fine. System generated values for the key and other document
-components will be added to the stored SODA document.  For cases where
-you want to insert Buffers or Strings, or when you need more control
-over the SodaDocument, such as to use a client-assigned key, then you
-can call the [`sodaDatabase.createDocument()`](#sodadbcreatedocument)
-method and pass its result to methods like `insertOne()`:
+[`replaceOne()`](#sodaoperationclassreplaceone),
+[`replaceOneAndGet()`](#sodaoperationclassreplaceoneandget),
+[`insertMany()`](#sodacollinsertmany), or
+[`insertManyAndGet()`](#sodacollinsertmanyandget) methods will be fine.  System
+generated values for the key and other document components will be added to the
+stored SODA document.  For cases where you want to insert Buffers or Strings, or
+when you need more control over the SodaDocument, such as to use a
+client-assigned key, then you can call the
+[`sodaDatabase.createDocument()`](#sodadbcreatedocument) method and pass its
+result to an insert or replace method, for example:
 
 ```javascript
 try {
@@ -12996,19 +12980,22 @@ Other examples of chained read and write operations include:
     const n = collection.find().count();
     ```
 
-The [`sodaCollection.find()`](#sodacollfind) operators that return
-documents produce complete SodaDocument objects that can be used for
-reading document content and attributes such as the key, or for
-passing to methods like
-[`sodaCollection.insertOne()`](#sodacollinsertone),
+The [`sodaCollection.find()`](#sodacollfind) operators that return documents
+produce complete SodaDocument objects that can be used for reading document
+content and attributes such as the key.  They can also be used for passing to
+methods like [`sodaCollection.insertOne()`](#sodacollinsertone),
 [`sodaCollection.insertOneAndGet()`](#sodacollinsertoneandget),
-[`sodaOperation.replaceOne()`](#sodaoperationclassreplaceone) and
-[`sodaOperation.replaceOneAndGet()`](#sodaoperationclassreplaceoneandget).
-However note that for efficiency the SodaDocuments returned from
-[`sodaCollection.insertOneAndGet()`](#sodacollinsertoneandget) and
-[`sodaOperation.replaceOneAndGet()`](#sodaoperationclassreplaceoneandget)
-do not contain document content.  These SodaDocuments are useful for
-getting other document components such as the key and version.
+[`sodaOperation.replaceOne()`](#sodaoperationclassreplaceone),
+[`sodaOperation.replaceOneAndGet()`](#sodaoperationclassreplaceoneandget),
+[`sodaCollection.insertMany()`](#sodacollinsertmany), and
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget).
+
+Note that for efficiency, the SodaDocuments returned from
+[`sodaCollection.insertOneAndGet()`](#sodacollinsertoneandget),
+[`sodaOperation.replaceOneAndGet()`](#sodaoperationclassreplaceoneandget), and
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) do not contain
+document content.  These SodaDocuments are useful for getting other document
+components such as the key and version.
 
 ### <a name="sodaqbesearches"></a> 29.4 SODA Query-by-Example Searches for JSON Documents
 
