@@ -14,7 +14,7 @@ connection string:
   module.exports = {
       user: "hr",
       password: process.env.NODE_ORACLEDB_PASSWORD,
-      connectString:"localhost/orclpdb"
+      connectString:"localhost/orclpdb1"
   };
 
   ```
@@ -33,13 +33,13 @@ connection string:
   example, to load them in the HR schema run:
 
   ```
-  sqlplus hr/welcome@localhost/orclpdb @demo.sql
+  sqlplus hr/welcome@localhost/orclpdb1 @demo.sql
   ```
 
   The demonstration objects can be dropped with `demodrop.sql`:
 
   ```
-  sqlplus hr/welcome@localhost/orclpdb @demodrop.sql
+  sqlplus hr/welcome@localhost/orclpdb1 @demodrop.sql
   ```
 
 ## Example Overview
