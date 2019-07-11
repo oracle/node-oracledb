@@ -26,7 +26,7 @@
 #ifndef __NJSMODULE_H__
 #define __NJSMODULE_H__
 
-#define NAPI_VERSION 2
+#define NAPI_VERSION 4
 
 #include <node_api.h>
 #include <stdarg.h>
