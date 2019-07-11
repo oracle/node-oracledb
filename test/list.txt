@@ -4309,6 +4309,13 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     177.4 insertOneAndGet() with a document
     177.5 createDocument() followd by getContent() i.e. without being inserted
 
+178. soda10.js
+    178.1 insertMany() with newSodaDocumentArray
+    178.2 insertMany() with newSodaDocumentContentArray
+    178.3 insertManyAndGet() with newDocumentArray
+    178.4 insertManyAndGet() with newDocumentContentArray
+    - 174.5 Negative - insertMany() with empty array
+
 179. soda11.js
    179.1 create collection with metadata
    179.2 Negative - create collection with an invalid metadata

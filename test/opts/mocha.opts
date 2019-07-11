@@ -203,6 +203,7 @@ test/soda6.js
 test/soda7.js
 test/soda8.js
 test/soda9.js
+test/soda10.js
 test/soda11.js
 test/externalProxyAuth.js
 
