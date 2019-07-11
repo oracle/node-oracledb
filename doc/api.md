@@ -1437,10 +1437,9 @@ The default value is 4.
 
 This property may be overridden when [creating a connection pool](#createpool).
 
-See [Connections and Number of Threads](#numberofthreads) for why you
-should not increase this value beyond 128.  Importantly, if you
-increase `poolMax` you should also increase the number of threads
-available to node-oracledb.
+Importantly, if you increase `poolMax` you should also increase the
+number of threads available to node-oracledb.  See [Connections and
+Number of Threads](#numberofthreads).
 
 See [Connection Pooling](#connpooling) for other pool sizing guidelines.
 
@@ -1904,10 +1903,9 @@ The default value is 4.
 This optional property overrides the
 [`oracledb.poolMax`](#propdbpoolmax) property.
 
-See [Connections and Number of Threads](#numberofthreads) for why you
-should not increase this value beyond 128.  Importantly, if you
-increase `poolMax` you should also increase the number of threads
-available to node-oracledb.
+Importantly, if you increase `poolMax` you should also increase the
+number of threads available to node-oracledb.  See [Connections and
+Number of Threads](#numberofthreads).
 
 See [Connection Pooling](#connpooling) for other pool sizing guidelines.
 
@@ -7011,9 +7009,12 @@ If the value is set inside the application with
 asynchronous call that uses the thread pool otherwise the default size
 of 4 will still be used.
 
-Note the '[libuv][21]' library used by Node.js limits the number of
-threads to 128.  This implies the maximum number of connections
-opened, i.e. `poolMax`, should be less than 128.
+Note the '[libuv][21]' library used by Node.js 12.5 and earlier limits
+the number of threads to 128.  In Node.js 12.6 onward the limit
+is 1024.  You should restrict the maximum number of connections opened
+in an application, i.e. `poolMax`, to a value lower than the
+`UV_THREADPOOL_SIZE` limit.  If you have multiple pools, make sure the
+sum of all `poolMax` values is no larger than `UV_THREADPOOL_SIZE`.
 
 Connections can handle one database operation at a time.  Node.js
 worker threads executing database statements on a connection will wait
@@ -7138,9 +7139,7 @@ should be [executed sequentially, not in parallel](#numberofthreads)
 on each connection.
 
 If you increase the size of the pool, you must [increase the number of
-threads](#numberofthreads) used by Node.js.  Since the number of
-threads available to Node.js is at most 128, this implies that
-`poolMax` should be less than 128.
+threads](#numberofthreads) used by Node.js.
 
 The growth characteristics of a connection pool are determined by the
 Pool attributes [`poolIncrement`](#proppoolpoolincrement),
