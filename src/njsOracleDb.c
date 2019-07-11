@@ -876,9 +876,10 @@ static napi_value njsOracleDb_getOracleClientVersionString(napi_env env,
         njsUtils_throwErrorDPI(env, oracleDb);
         return NULL;
     }
-    (void) sprintf(versionString, "%d.%d.%d.%d.%d", versionInfo.versionNum,
-            versionInfo.releaseNum, versionInfo.updateNum,
-            versionInfo.portReleaseNum, versionInfo.portUpdateNum);
+    (void) snprintf(versionString, sizeof(versionString), "%d.%d.%d.%d.%d",
+            versionInfo.versionNum, versionInfo.releaseNum,
+            versionInfo.updateNum, versionInfo.portReleaseNum,
+            versionInfo.portUpdateNum);
     return njsUtils_convertToString(env, versionString, strlen(versionString));
 }
 
