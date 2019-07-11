@@ -99,10 +99,18 @@ describe('214. dbObject15.js', () => {
 
   it('214.2 Setter() - access collection element directly', async () => {
 
-    // TypeError: 'set' on proxy: trap returned falsish for property '0'
     try {
       const substitute = {SHIRTNUMBER: 15, NAME: 'Chris'};
       FrisbeeTeam[0] = substitute;
+      should.strictEqual(FrisbeeTeam[0].SHIRTNUMBER, substitute.SHIRTNUMBER);
+      should.strictEqual(FrisbeeTeam[0].NAME, substitute.NAME);
+
+      // Verify that the other elements are not impacted
+      for(let i = 1, element; i < FrisbeePlayers.length; i++) {
+        element = FrisbeeTeam[i];
+        should.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
+        should.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
+      }
     } catch (err) {
       should.not.exist(err);
     }

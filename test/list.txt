@@ -4575,6 +4575,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 214. dbObject15.js
     214.1 Getter() - access collection elements directly
-    - 214.2 Setter() - access collection element directly
+    214.2 Setter() - access collection element directly
     214.3 Negative - delete the collection element directly
     214.4 Negative - collection.deleteElement()
