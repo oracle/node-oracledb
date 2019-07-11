@@ -35,7 +35,7 @@ const testsUtil = require('./testsUtil.js');
 
 describe('178. soda10.js', () => {
 
-  let conn;
+  let conn, soda;
 
   before(async function() {
     try {
@@ -46,6 +46,7 @@ describe('178. soda10.js', () => {
       } else {
         await sodaUtil.cleanup();
         conn = await oracledb.getConnection(dbconfig);
+        soda = conn.getSodaDatabase();
       }
 
     } catch (err) {
@@ -64,7 +65,6 @@ describe('178. soda10.js', () => {
 
   it('178.1 basic case of sodaCollection.insertMany()', async () => {
     try {
-      let soda = conn.getSodaDatabase();
       const COLL = "soda_test_178_1";
       const collection = await soda.createCollection(COLL);
 
@@ -98,4 +98,45 @@ describe('178. soda10.js', () => {
       should.not.exist(err);
     }
   }); // 178.1
+
+  it.skip('178.2 basic case of sodaCollection.insertManyAndGet()', async () => {
+    try {
+      const COLL = "soda_test_178_2";
+      const collection = await soda.createCollection(COLL);
+
+      let inContents = [
+        { id: 1, name: "Paul",  office: "Singapore" },
+        { id: 2, name: "Emma",  office: "London" },
+        { id: 3, name: "Kate",  office: "Edinburgh" },
+        { id: 4, name: "Changjie",  office: "Shenzhen" }
+      ];
+      let inDocuments = [];
+      for (let i = 0; i < inContents.length; i++) {
+        inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
+      }
+
+      let middleDocuments = await collection.insertManyAndGet(inDocuments);
+      let middleContents = [];
+      for (let i = 0; i < middleDocuments.length; i++) {
+        middleContents[i] = middleDocuments[i].getContent(); // n.b. synchronous method
+      }
+      console.log(middleContents);
+
+      // Fetch back
+      let outDocuments = await collection.find().getDocuments();
+      let outContents = [];
+      for (let i = 0; i < outDocuments.length; i++) {
+        outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
+      }
+
+      console.log(outContents);
+
+      await conn.commit();
+
+      let res = await collection.drop();
+      should.strictEqual(res.dropped, true);
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 178.2
 });
