@@ -35,45 +35,49 @@ const testsUtil = require('./testsUtil.js');
 
 describe('178. soda10.js', () => {
 
+  let runnable;
   let conn, soda;
 
   before(async function() {
-    try {
-      const runnable = await testsUtil.checkPrerequisites();
-      if (!runnable) {
-        this.skip();
-        return;
-      } else {
-        await sodaUtil.cleanup();
-        conn = await oracledb.getConnection(dbconfig);
-        soda = conn.getSodaDatabase();
-      }
 
-    } catch (err) {
-      should.not.exist(err);
+    const runnable = await testsUtil.checkPrerequisites();
+
+    if (!runnable) {
+      this.skip();
+      return;
+    } else {
+      conn = await oracledb.getConnection(dbconfig);
+      soda = conn.getSodaDatabase();
     }
+
+    await sodaUtil.cleanup();
+
   }); // before()
 
-  after(async() => {
+  after(async function() {
+    if (!runnable) {
+      this.skip();
+      return;
+    }
     try {
-
       await conn.close();
     } catch (err) {
       should.not.exist(err);
     }
   }); // after()
 
-  it('178.1 basic case of sodaCollection.insertMany()', async () => {
+  const inContents = [
+    { id: 1, name: "Paul",  office: "Singapore" },
+    { id: 2, name: "Emma",  office: "London" },
+    { id: 3, name: "Kate",  office: "Edinburgh" },
+    { id: 4, name: "Changjie",  office: "Shenzhen" }
+  ];
+
+  it('178.1 insertMany() with newSodaDocumentArray', async () => {
     try {
       const COLL = "soda_test_178_1";
       const collection = await soda.createCollection(COLL);
 
-      let inContents = [
-        { id: 1, name: "Paul",  office: "Singapore" },
-        { id: 2, name: "Emma",  office: "London" },
-        { id: 3, name: "Kate",  office: "Edinburgh" },
-        { id: 4, name: "Changjie",  office: "Shenzhen" }
-      ];
       let inDocuments = [];
       for (let i = 0; i < inContents.length; i++) {
         inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
@@ -99,28 +103,12 @@ describe('178. soda10.js', () => {
     }
   }); // 178.1
 
-  it.skip('178.2 basic case of sodaCollection.insertManyAndGet()', async () => {
+  it('178.2 insertMany() with newSodaDocumentContentArray', async () => {
     try {
       const COLL = "soda_test_178_2";
       const collection = await soda.createCollection(COLL);
 
-      let inContents = [
-        { id: 1, name: "Paul",  office: "Singapore" },
-        { id: 2, name: "Emma",  office: "London" },
-        { id: 3, name: "Kate",  office: "Edinburgh" },
-        { id: 4, name: "Changjie",  office: "Shenzhen" }
-      ];
-      let inDocuments = [];
-      for (let i = 0; i < inContents.length; i++) {
-        inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
-      }
-
-      let middleDocuments = await collection.insertManyAndGet(inDocuments);
-      let middleContents = [];
-      for (let i = 0; i < middleDocuments.length; i++) {
-        middleContents[i] = middleDocuments[i].getContent(); // n.b. synchronous method
-      }
-      console.log(middleContents);
+      await collection.insertMany(inContents);
 
       // Fetch back
       let outDocuments = await collection.find().getDocuments();
@@ -129,7 +117,7 @@ describe('178. soda10.js', () => {
         outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
       }
 
-      console.log(outContents);
+      should.deepEqual(outContents, inContents);
 
       await conn.commit();
 
@@ -139,4 +127,100 @@ describe('178. soda10.js', () => {
       should.not.exist(err);
     }
   }); // 178.2
+
+  it('178.3 insertManyAndGet() with newDocumentArray', async () => {
+    try {
+      const COLL = "soda_test_178_3";
+      const collection = await soda.createCollection(COLL);
+
+      let inDocuments = [];
+      for (let i = 0; i < inContents.length; i++) {
+        inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
+      }
+
+      let middleDocuments = await collection.insertManyAndGet(inDocuments);
+      let middleContents = [];
+      for (let i = 0; i < middleDocuments.length; i++) {
+        middleContents[i] = middleDocuments[i].getContent();
+        should.exist(middleDocuments[i].key);
+      }
+      should.deepEqual(middleContents, [null, null, null, null]);
+
+      // Fetch back
+      let outDocuments = await collection.find().getDocuments();
+      let outContents = [];
+      for (let i = 0; i < outDocuments.length; i++) {
+        outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
+      }
+
+      should.deepEqual(outContents, inContents);
+
+      await conn.commit();
+
+      let res = await collection.drop();
+      should.strictEqual(res.dropped, true);
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 178.3
+
+  it('178.4 insertManyAndGet() with newDocumentContentArray', async () => {
+    try {
+      const COLL = "soda_test_178_4";
+      const collection = await soda.createCollection(COLL);
+
+      let middleDocuments = await collection.insertManyAndGet(inContents);
+      let middleContents = [];
+      for (let i = 0; i < middleDocuments.length; i++) {
+        middleContents[i] = middleDocuments[i].getContent();
+        should.exist(middleDocuments[i].key);
+      }
+      should.deepEqual(middleContents, [null, null, null, null]);
+
+      // Fetch back
+      let outDocuments = await collection.find().getDocuments();
+      let outContents = [];
+      for (let i = 0; i < outDocuments.length; i++) {
+        outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
+      }
+
+      should.deepEqual(outContents, inContents);
+
+      await conn.commit();
+
+      let res = await collection.drop();
+      should.strictEqual(res.dropped, true);
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 178.4
+
+  it.skip('174.5 Negative - insertMany() with empty array', async () => {
+    try {
+      const COLL = "soda_test_178_5";
+      const collection = await soda.createCollection(COLL);
+
+      // ORA-40673: arrayLength argument cannot be NULL.
+      let inDocuments = [];
+      await collection.insertMany(inDocuments);
+
+      // Fetch back
+      let outDocuments = await collection.find().getDocuments();
+      let outContents = [];
+      for (let i = 0; i < outDocuments.length; i++) {
+        outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
+      }
+
+      console.log(outContents);
+      // should.deepEqual(outContents, inContents);
+
+      await conn.commit();
+
+      let res = await collection.drop();
+      should.strictEqual(res.dropped, true);
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 174.5
+
 });
