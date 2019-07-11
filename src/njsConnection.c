@@ -1457,7 +1457,6 @@ static napi_value njsConnection_getOracleServerVersionString(napi_env env,
     uint32_t releaseStringLength;
     dpiVersionInfo versionInfo;
     const char *releaseString;
-    int versionStringLength;
     char versionString[40];
     njsConnection *conn;
 
@@ -1470,12 +1469,11 @@ static napi_value njsConnection_getOracleServerVersionString(napi_env env,
         njsUtils_throwErrorDPI(env, conn->oracleDb);
         return NULL;
     }
-    versionStringLength = sprintf(versionString, "%d.%d.%d.%d.%d",
+    (void) snprintf(versionString, sizeof(versionString), "%d.%d.%d.%d.%d",
             versionInfo.versionNum, versionInfo.releaseNum,
             versionInfo.updateNum, versionInfo.portReleaseNum,
             versionInfo.portUpdateNum);
-    return njsUtils_convertToString(env, versionString,
-            (uint32_t) versionStringLength);
+    return njsUtils_convertToString(env, versionString, strlen(versionString));
 }
 
 
