@@ -11239,15 +11239,13 @@ OUT parameters of PL/SQL INDEX BY associative array types with integer
 keys.  This Oracle type was formerly called PL/SQL tables or index-by
 tables.
 
-While you could bind associative arrays via named types as shown in
-previous examples, it is generally more efficient to use the method
-shown below.
-
-Note that if you bind associative arrays via named types for BIND_IN,
-then the resulting arrays in PL/SQL will start from index 0, which
-affects FORALL usage.  The method shown below results in indexes
-starting from 1.  (Using named type binding for nested tables and
-VARRAYs does result in indexes starting from 1).
+While you could bind associative arrays via named types as shown in previous
+examples, it is more efficient to use the method shown below which uses the
+type of each element, not the name of the associative array type.  Note that if
+you use named types for BIND_IN, then the resulting arrays in PL/SQL will start
+from index 0.  The method shown below results in indexes starting from 1.
+(Using named type binding for nested tables and VARRAYs results in indexes
+starting from 1).
 
 Given this table and PL/SQL package:
 
