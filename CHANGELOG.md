@@ -106,6 +106,9 @@
     - The NJS-014 error when setting a read-only property was replaced
       with a standard JavaScript message.
 
+    - When passing 0 or a negative value for the number of iterations to
+      `connection.executeMany()`, errors now occur through the error callback.
+
     - Some error numbers may have changed due to code refactoring.
       Some message text was updated.
 

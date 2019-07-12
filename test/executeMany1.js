@@ -659,7 +659,7 @@ describe('163. executeMany1.js', function() {
   it('163.15 Negative - set numIterations to be negative value', function(done) {
     async.series([
       function(cb) {
-        var sql = `
+        const sql = `
         declare
             t_Id number;
         begin
@@ -670,19 +670,13 @@ describe('163. executeMany1.js', function() {
             values (t_Id, 'Test String ' || t_Id);
         end;`;
 
-        var numIterations = -8;
-
-        should.throws(
-          function() {
-            conn.executeMany(
-              sql,
-              numIterations,
-              function() { }
-            );
-          },
-          /NJS-005: invalid value for parameter 2/
-        );
-        cb();
+        const numIterations = -8;
+        conn.executeMany(sql, numIterations, function(err, result) {
+          should.exist(err);
+          err.message.should.startWith('NJS-005:');
+          should.not.exist(result);
+          cb();
+        });
       },
       function(cb) {
         dotruncate(cb);
