@@ -9077,23 +9077,26 @@ See [Oracle Database Objects and Collections](#objects).
 
 #### <a name="pagingdata"></a> 15.1.7 Limiting Rows and Creating Paged Datasets
 
-Query data is commonly broken into small sets for two reasons:
+Query data is commonly broken into one or more sets:
 
-- 'Web pagination' that allows moving from one set of rows to a next,
-  or previous, set.
+- To give an upper bound on the number of rows that a query has to process,
+  which can help improve database scalability.
 
-- Fetching of consecutive small sets of data for processing.  This
-  happens because the number of records is too large for Node.js to
-  handle at the same time.
+- To perform 'Web pagination' that allows moving from one set of rows to a next,
+  or previous, set on demand.
+
+- For fetching of all data in consecutive small sets for batch processing.  This
+  happens because the number of records is too large for Python to handle at the
+  same time.
 
 The latter can be handled by [ResultSets](#resultsethandling) or
 [`queryStream()`](#querystream) with one execution of the SQL query as
 discussed in those links.
 
-How to do 'web pagination' is discussed in this section.  For each
-'page' of results, a SQL query is executed to get the appropriate set
-of rows from a table.  Since the query will be executed more than
-once, make sure to use bind variables for row numbers and row limits.
+'Web pagination' and limiting the maximum number of rows are discussed in this
+section.  For each 'page' of results, a SQL query is executed to get the
+appropriate set of rows from a table.  Since the query will be executed more
+than once, make sure to use bind variables for row numbers and row limits.
 
 Oracle Database 12c SQL introduced an `OFFSET` / `FETCH` clause which
 is similar to the `LIMIT` keyword of MySQL.  See [Row Limiting:
