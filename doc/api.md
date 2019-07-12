@@ -48,19 +48,20 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - [`DB_TYPE_BFILE`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_DOUBLE`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_FLOAT`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_INTEGER`](#oracledbconstantsdbtype), [`DB_TYPE_BLOB`](#oracledbconstantsdbtype), [`DB_TYPE_BOOLEAN`](#oracledbconstantsdbtype),
 [`DB_TYPE_CHAR`](#oracledbconstantsdbtype), [`DB_TYPE_CLOB`](#oracledbconstantsdbtype), [`DB_TYPE_CURSOR`](#oracledbconstantsdbtype),
 [`DB_TYPE_DATE`](#oracledbconstantsdbtype), [`DB_TYPE_INTERVAL_DS`](#oracledbconstantsdbtype), [`DB_TYPE_INTERVAL_YM`](#oracledbconstantsdbtype), [`DB_TYPE_LONG`](#oracledbconstantsdbtype), [`DB_TYPE_LONG_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_NCHAR`](#oracledbconstantsdbtype), [`DB_TYPE_NCLOB`](#oracledbconstantsdbtype), [`DB_TYPE_NUMBER`](#oracledbconstantsdbtype), [`DB_TYPE_NVARCHAR`](#oracledbconstantsdbtype), [`DB_TYPE_OBJECT`](#oracledbconstantsdbtype), [`DB_TYPE_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_ROWID`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_LTZ`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_TZ`](#oracledbconstantsdbtype), [`DB_TYPE_VARCHAR`](#oracledbconstantsdbtype)
+        - 3.1.4 [Execute Bind Direction Constants](#oracledbconstantsbinddir)
             - [`BIND_IN`](#oracledbconstantsbinddir), [`BIND_INOUT`](#oracledbconstantsbinddir), [`BIND_OUT`](#oracledbconstantsbinddir)
         - 3.1.5 [Privileged Connection Constants](#oracledbconstantsprivilege)
-            - [`SYSDBA`](#oracledbconstantsprivilege), [`SYSOPER`](#oracledbconstantsprivilege), [`SYSASM`](#oracledbconstantsprivilege), [`SYSBACKUP`](#oracledbconstantsprivilege), [`SYSDG`](#oracledbconstantsprivilege), [`SYSKM`](#oracledbconstantsprivilege), [`SYSRAC`](#oracledbconstantsprivilege)
+            - [`SYSASM`](#oracledbconstantsprivilege), [`SYSBACKUP`](#oracledbconstantsprivilege), [`SYSDBA`](#oracledbconstantsprivilege), [`SYSDG`](#oracledbconstantsprivilege), [`SYSKM`](#oracledbconstantsprivilege), [`SYSOPER`](#oracledbconstantsprivilege), [`SYSRAC`](#oracledbconstantsprivilege)
         - 3.1.6 [SQL Statement Type Constants](#oracledbconstantsstmttype)
-            - [`STMT_TYPE_UNKNOWN`](#oracledbconstantsstmttype), [`STMT_TYPE_SELECT`](#oracledbconstantsstmttype), [`STMT_TYPE_UPDATE`](#oracledbconstantsstmttype), [`STMT_TYPE_DELETE`](#oracledbconstantsstmttype), [`STMT_TYPE_INSERT`](#oracledbconstantsstmttype), [`STMT_TYPE_CREATE`](#oracledbconstantsstmttype), [`STMT_TYPE_DROP`](#oracledbconstantsstmttype), [`STMT_TYPE_ALTER`](#oracledbconstantsstmttype), [`STMT_TYPE_BEGIN`](#oracledbconstantsstmttype), [`STMT_TYPE_DECLARE`](#oracledbconstantsstmttype), [`STMT_TYPE_CALL`](#oracledbconstantsstmttype), [`STMT_TYPE_EXPLAIN_PLAN`](#oracledbconstantsstmttype), [`STMT_TYPE_MERGE`](#oracledbconstantsstmttype), [`STMT_TYPE_ROLLBACK`](#oracledbconstantsstmttype), [`STMT_TYPE_COMMIT`](#oracledbconstantsstmttype)
+            - [`STMT_TYPE_ALTER`](#oracledbconstantsstmttype), [`STMT_TYPE_BEGIN`](#oracledbconstantsstmttype), [`STMT_TYPE_CALL`](#oracledbconstantsstmttype), [`STMT_TYPE_COMMIT`](#oracledbconstantsstmttype) [`STMT_TYPE_CREATE`](#oracledbconstantsstmttype), [`STMT_TYPE_DECLARE`](#oracledbconstantsstmttype), [`STMT_TYPE_DELETE`](#oracledbconstantsstmttype), [`STMT_TYPE_DROP`](#oracledbconstantsstmttype), [`STMT_TYPE_EXPLAIN_PLAN`](#oracledbconstantsstmttype), [`STMT_TYPE_INSERT`](#oracledbconstantsstmttype), [`STMT_TYPE_MERGE`](#oracledbconstantsstmttype), [`STMT_TYPE_ROLLBACK`](#oracledbconstantsstmttype), [`STMT_TYPE_SELECT`](#oracledbconstantsstmttype), [`STMT_TYPE_UNKNOWN`](#oracledbconstantsstmttype), [`STMT_TYPE_UPDATE`](#oracledbconstantsstmttype)
         - 3.1.7 [Subscription Constants](#oracledbconstantssubscription)
-            - [`SUBSCR_EVENT_TYPE_SHUTDOWN`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_SHUTDOWN_ANY`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_STARTUP`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_AQ`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_CLASS_TIME`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_TYPE_SUMMARY`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_TYPE_LAST`](#oracledbconstantssubscription), [`SUBSCR_QOS_BEST_EFFORT`](#oracledbconstantssubscription), [`SUBSCR_QOS_DEREG_NFY`](#oracledbconstantssubscription), [`SUBSCR_QOS_QUERY`](#oracledbconstantssubscription), [`SUBSCR_QOS_RELIABLE`](#oracledbconstantssubscription), [`SUBSCR_QOS_ROWIDS`](#oracledbconstantssubscription)
+            - [`SUBSCR_EVENT_TYPE_AQ`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_SHUTDOWN`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_SHUTDOWN_ANY`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_STARTUP`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_CLASS_TIME`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_TYPE_LAST`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_TYPE_SUMMARY`](#oracledbconstantssubscription), [`SUBSCR_QOS_BEST_EFFORT`](#oracledbconstantssubscription), [`SUBSCR_QOS_DEREG_NFY`](#oracledbconstantssubscription), [`SUBSCR_QOS_QUERY`](#oracledbconstantssubscription), [`SUBSCR_QOS_RELIABLE`](#oracledbconstantssubscription), [`SUBSCR_QOS_ROWIDS`](#oracledbconstantssubscription), [`SUBSCR_NAMESPACE_AQ`](#oracledbconstantssubscription), [`SUBSCR_NAMESPACE_DBCHANGE`](#oracledbconstantssubscription)
         - 3.1.8 [Advanced Queuing Constants](#oracledbconstantsaq)
             - [`AQ_DEQ_MODE_BROWSE`](#oracledbconstantsaq), [`AQ_DEQ_MODE_LOCKED`](#oracledbconstantsaq), [`AQ_DEQ_MODE_REMOVE`](#oracledbconstantsaq), [`AQ_DEQ_MODE_REMOVE_NO_DATA`](#oracledbconstantsaq), [`AQ_DEQ_NAV_FIRST_MSG`](#oracledbconstantsaq), [`AQ_DEQ_NAV_NEXT_TRANSACTION`](#oracledbconstantsaq), [`AQ_DEQ_NAV_NEXT_MSG`](#oracledbconstantsaq), [`AQ_DEQ_NO_WAIT`](#oracledbconstantsaq), [`AQ_DEQ_WAIT_FOREVER`](#oracledbconstantsaq), [`AQ_MSG_DELIV_MODE_PERSISTENT`](#oracledbconstantsaq), [`AQ_MSG_DELIV_MODE_BUFFERED`](#oracledbconstantsaq), [`AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED`](#oracledbconstantsaq), [`AQ_MSG_STATE_READY`](#oracledbconstantsaq), [`AQ_MSG_STATE_WAITING`](#oracledbconstantsaq), [`AQ_MSG_STATE_PROCESSED`](#oracledbconstantsaq), [`AQ_MSG_STATE_EXPIRED`](#oracledbconstantsaq), [`AQ_VISIBILITY_IMMEDIATE`](#oracledbconstantsaq), [`AQ_VISIBILITY_ON_COMMIT`](#oracledbconstantsaq)
         - 3.1.9 [Continuous Query Notification Constants](#oracledbconstantscqn)
             - [`CQN_OPCODE_ALL_OPS`](#oracledbconstantscqn), [`CQN_OPCODE_ALL_ROWS`](#oracledbconstantscqn), [`CQN_OPCODE_ALTER`](#oracledbconstantscqn), [`CQN_OPCODE_DELETE`](#oracledbconstantscqn), [`CQN_OPCODE_DROP`](#oracledbconstantscqn), [`CQN_OPCODE_INSERT`](#oracledbconstantscqn), [`CQN_OPCODE_UPDATE`](#oracledbconstantscqn)
         - 3.1.10 [Pool Status Constants](#oracledbconstantspool)
-            - [`POOL_STATUS_OPEN`](#oracledbconstantspool), [`POOL_STATUS_DRAINING`](#oracledbconstantspool), [`POOL_STATUS_CLOSED`](#oracledbconstantspool)
+            - [`POOL_STATUS_CLOSED`](#oracledbconstantspool), [`POOL_STATUS_DRAINING`](#oracledbconstantspool), [`POOL_STATUS_OPEN`](#oracledbconstantspool)
         - 3.1.11 [Simple Oracle Document Access (SODA) Constants](#oracledbconstantssoda)
             - [`SODA_COLL_MAP_MODE`](#oracledbconstantssoda)
     - 3.2 [Oracledb Properties](#oracledbproperties)
@@ -441,7 +442,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 21.4 [PL/SQL RECORD Types](#plsqlrecords)
     - 21.5 [Inserting or Passing Multiple Objects of the Same Type](#objexecmany)
     - 21.6 [Oracle Database Object Type Limitations](#objectlimitations)
-22. [Batch Statement Execution with `executeMany()`](#batchexecution)
+22. [Batch Statement Execution and Bulk Loading](#batchexecution)
 23. [Transaction Management](#transactionmgt)
 24. [Statement Caching](#stmtcache)
 25. [Continuous Query Notification (CQN)](#cqn)
@@ -829,12 +830,12 @@ be used by the connection that is being established.
 
 Constant Name                        | Value |Description
 -------------------------------------|---------|-----------------------------------------------
-`oracledb.SYSDBA`                    |       2 | SYSDBA privileges
-`oracledb.SYSOPER`                   |       4 | SYSOPER privileges
 `oracledb.SYSASM`                    |   32768 | SYSASM privileges
 `oracledb.SYSBACKUP`                 |  131072 | SYSBACKUP privileges
+`oracledb.SYSDBA`                    |       2 | SYSDBA privileges
 `oracledb.SYSDG`                     |  262144 | SYSDG privileges
 `oracledb.SYSKM`                     |  524288 | SYSKM privileges
+`oracledb.SYSOPER`                   |       4 | SYSOPER privileges
 `oracledb.SYSRAC`                    | 1048576 | SYSRAC privileges
 
 #### <a name="oracledbconstantsstmttype"></a> 3.1.6 SQL Statement Type Constants
@@ -845,21 +846,21 @@ properties.
 
 Constant Name                        | Value |Description
 -------------------------------------|-------|-----------------------------------------------
-`oracledb.STMT_TYPE_UNKNOWN`         |     0 | Unknown statement type
-`oracledb.STMT_TYPE_SELECT`          |     1 | SELECT
-`oracledb.STMT_TYPE_UPDATE`          |     2 | UPDATE
-`oracledb.STMT_TYPE_DELETE`          |     3 | DELETE
-`oracledb.STMT_TYPE_INSERT`          |     4 | INSERT
-`oracledb.STMT_TYPE_CREATE`          |     5 | CREATE
-`oracledb.STMT_TYPE_DROP`            |     6 | DROP
 `oracledb.STMT_TYPE_ALTER`           |     7 | ALTER
 `oracledb.STMT_TYPE_BEGIN`           |     8 | BEGIN
-`oracledb.STMT_TYPE_DECLARE`         |     9 | DECLARE
 `oracledb.STMT_TYPE_CALL`            |    10 | CALL
+`oracledb.STMT_TYPE_COMMIT`          |    21 | COMMIT
+`oracledb.STMT_TYPE_CREATE`          |     5 | CREATE
+`oracledb.STMT_TYPE_DECLARE`         |     9 | DECLARE
+`oracledb.STMT_TYPE_DELETE`          |     3 | DELETE
+`oracledb.STMT_TYPE_DROP`            |     6 | DROP
 `oracledb.STMT_TYPE_EXPLAIN_PLAN`    |    15 | EXPLAIN PLAN
+`oracledb.STMT_TYPE_INSERT`          |     4 | INSERT
 `oracledb.STMT_TYPE_MERGE`           |    16 | MERGE
 `oracledb.STMT_TYPE_ROLLBACK`        |    17 | ROLLBACK
-`oracledb.STMT_TYPE_COMMIT`          |    21 | COMMIT
+`oracledb.STMT_TYPE_SELECT`          |     1 | SELECT
+`oracledb.STMT_TYPE_UNKNOWN`         |     0 | Unknown statement type
+`oracledb.STMT_TYPE_UPDATE`          |     2 | UPDATE
 
 #### <a name="oracledbconstantssubscription"></a> 3.1.7 Subscription Constants
 
@@ -885,8 +886,8 @@ Constants for the Continuous Query Notification [`groupingType`](#consubscribeop
 
 Constant Name                           | Value |Description
 ----------------------------------------|-------|-----------------------------------------------
-`oracledb.SUBSCR_GROUPING_TYPE_SUMMARY` | 1     | A summary of the grouped notifications is sent
 `oracledb.SUBSCR_GROUPING_TYPE_LAST`    | 2     | The last notification in the group is sent
+`oracledb.SUBSCR_GROUPING_TYPE_SUMMARY` | 1     | A summary of the grouped notifications is sent
 
 Constants for the Continuous Query Notification [`qos`](#consubscribeoptqos) Quality of Service.
 
@@ -909,24 +910,52 @@ Constant Name                        | Value |Description
 
 Refer to [Advanced Queuing documentation][129] for more details about attributes.
 
+Constants for [AqDeqOptions Class](#aqdeqoptionsclass) `mode`.
+
 Constant Name                                           | Value      | Description
 --------------------------------------------------------|------------|---------------------------------------------------
 `oracledb.AQ_DEQ_MODE_BROWSE`                           | 1          | Read a message without acquiring a lock.
 `oracledb.AQ_DEQ_MODE_LOCKED`                           | 2          | Read and obtain write lock on message.
 `oracledb.AQ_DEQ_MODE_REMOVE`                           | 3          | Read the message and delete it.
 `oracledb.AQ_DEQ_MODE_REMOVE_NO_DATA`                   | 4          | Delete message without returning payload.
+
+Constants for [AqDeqOptions Class](#aqdeqoptionsclass) `navigation`.
+
+Constant Name                                           | Value      | Description
+--------------------------------------------------------|------------|---------------------------------------------------
 `oracledb.AQ_DEQ_NAV_FIRST_MSG`                         | 1          | Get the message at the head of queue.
 `oracledb.AQ_DEQ_NAV_NEXT_TRANSACTION`                  | 2          | Get first message of next transaction group.
 `oracledb.AQ_DEQ_NAV_NEXT_MSG`                          | 3          | Get the next message in the queue.
+
+Constants for [AqDeqOptions Class](#aqdeqoptionsclass) `wait`.
+
+Constant Name                                           | Value      | Description
+--------------------------------------------------------|------------|---------------------------------------------------
 `oracledb.AQ_DEQ_NO_WAIT`                               | 0          | Do not wait if no message is available.
 `oracledb.AQ_DEQ_WAIT_FOREVER`                          | 4294967295 | Wait forever if no message is available.
+
+Constants for [AqEnqOptions Class](#aqenqoptionsclass) `deliveryMode`.
+
+Constant Name                                           | Value      | Description
+--------------------------------------------------------|------------|---------------------------------------------------
 `oracledb.AQ_MSG_DELIV_MODE_PERSISTENT`                 | 1          | Messages are persistent.
 `oracledb.AQ_MSG_DELIV_MODE_BUFFERED`                   | 2          | Messages are buffered.
 `oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED`     | 3          | Messages are either persistent or buffered.
+
+Constants for [AqMessage Class](#aqmessageclass) `state`.
+
+Constant Name                                           | Value      | Description
+--------------------------------------------------------|------------|---------------------------------------------------
 `oracledb.AQ_MSG_STATE_READY`                           | 0          | Consumers can dequeue messages that are in the READY state.
 `oracledb.AQ_MSG_STATE_WAITING`                         | 1          | Message is hidden for a given retry delay interval.
 `oracledb.AQ_MSG_STATE_PROCESSED`                       | 2          | All intended consumers have successfully dequeued the message.
 `oracledb.AQ_MSG_STATE_EXPIRED`                         | 3          | One or more consumers did not dequeue the message before the expiration time.
+
+Constants for [AqEnqOptions Class](#aqenqoptionsclass) and [AqDeqOptions
+Class](#aqdeqoptionsclass) `visibility`.
+
+Constant Name                                           | Value      | Description
+--------------------------------------------------------|------------|---------------------------------------------------
 `oracledb.AQ_VISIBILITY_IMMEDIATE`                      | 1          | The message is not part of the current transaction. It constitutes a transaction on its own.
 `oracledb.AQ_VISIBILITY_ON_COMMIT`                      | 2          | The message is part of the current transaction.
 
@@ -952,9 +981,9 @@ Constants for the connection [`pool.status`](#proppoolstatus) readonly attribute
 
 Constant Name                   | Value |Description
 --------------------------------|-------|---------------------------------------------------
-`oracledb.POOL_STATUS_OPEN`     | 6000  | The connection pool is open.
-`oracledb.POOL_STATUS_DRAINING` | 6001  | The connection pool is being drained of in-use connections and will be force closed soon.
 `oracledb.POOL_STATUS_CLOSED`   | 6002  | The connection pool has been closed.
+`oracledb.POOL_STATUS_DRAINING` | 6001  | The connection pool is being drained of in-use connections and will be force closed soon.
+`oracledb.POOL_STATUS_OPEN`     | 6000  | The connection pool is open.
 
 #### <a name="oracledbconstantssoda"></a> 3.1.11 Simple Oracle Document Access (SODA) Constants
 
@@ -1375,10 +1404,10 @@ or [`connection.queryStream()`](#querystream).  It affects
 both [ResultSet](#propexecresultset) and non-ResultSet queries.  It
 can be used for top level queries and REF CURSOR output.
 
-This can be either of
-the [Oracledb constants](#oracledbconstantsoutformat)
+This can be either of the [Oracledb constants](#oracledbconstantsoutformat)
 `oracledb.OUT_FORMAT_ARRAY` or `oracledb.OUT_FORMAT_OBJECT`.  The default value
-is `oracledb.OUT_FORMAT_ARRAY` which is more efficient.
+is `oracledb.OUT_FORMAT_ARRAY` which is more efficient.  The older, equivalent
+constants `oracledb.ARRAY` and `oracledb.OBJECT` are deprecated.
 
 If specified as `oracledb.OUT_FORMAT_ARRAY`, each row is fetched as an array of
 column values.
@@ -1977,29 +2006,35 @@ This optional property overrides the
 ###### <a name="createpoolpoolattrssessioncallback"></a> 3.3.1.1.15 `sessionCallback`
 
 ```
-String sessionCallback | function sessionCallback(Connection connection, String requestedTag, function callback)
+String sessionCallback | function sessionCallback(Connection connection, String requestedTag, function callback(Error error, Connection connection){})
 ```
 
-When `sessionCallback` is a Node.js function, it will be invoked for
-each `pool.getConnection()` call that will return a newly created
-connection in the pool.  It will also be called if
-`pool.getConnection()` requests a connection from the pool with a
-given [`tag`](#getconnectiondbattrstag), and that tag value does not
-match the connection's current actual tag.  It will not be invoked for
-other `getConnection()` calls.  The tag requested by
-`pool.getConnection()` is passed as the `requestedTag` parameter and
-the actual tag is available in [`connection.tag`](#propconntag).
+When `sessionCallback` is a Node.js function, each `pool.getConnection()` will
+select a connection from the pool and may invoke `sessionCallback` before
+returning.  The `sessionCallback` function is called:
 
-The session callback is called before `getConnection()` returns so it
-can be used to do logging or efficiently set session state such as
-with ALTER SESSION statements.  Make sure any session state is set and
-`connection.tag` is updated in the `sessionCallback` function prior to
-it calling its own `callback` function otherwise the session will not
-be correctly set when `getConnection()` returns.
+- when the pool selects a brand new, never used connection in the pool.
 
-When node-oracledb is using Oracle Client libraries 12.2 or later, the
-tag must be a [multi-property tag][125] with name=value pairs like
-"k1=v1;k2=v2".
+- if the pool selects a connection from the pool with a given
+  [`tag`](#getconnectiondbattrstag) but that tag string value does not match
+  the connection's current, actual tag.  The tag requested (if any) by
+  `pool.getConnection()` is available in the `requestedTag` parameter.  The
+  actual tag in the connection selected by the pool is available in
+  [`connection.tag`](#propconntag).
+
+It will not be invoked for other `pool.getConnection()` calls.
+
+The session callback is called before `pool.getConnection()` returns so it can
+be used for logging or to efficiently set session state, such as with ALTER
+SESSION statements.  Make sure any session state is set and `connection.tag` is
+updated in the `sessionCallback` function prior to it calling its own
+`callback()` function otherwise the session will not be correctly set when
+`getConnection()` returns.  The connection passed into `sessionCallback` should
+be passed out through `callback()` so it is returned from the application's
+`pool.getConnection()` call.
+
+When node-oracledb is using Oracle Client libraries 12.2 or later, tags are
+[multi-property tags][125] with name=value pairs like "k1=v1;k2=v2".
 
 When using Oracle Client libraries 12.2 or later, `sessionCallback`
 can be a string containing the name of a PL/SQL procedure to be called
@@ -3176,7 +3211,8 @@ The version of this function which accepts a number of iterations should be
 used when no bind parameters are required or when all bind parameters are OUT
 binds.
 
-See [Batch Statement Execution](#batchexecution) for more information.
+See [Batch Statement Execution and Bulk Loading](#batchexecution) for more
+information.
 
 This method was added in node-oracledb 2.2.
 
@@ -3708,14 +3744,13 @@ running node-oracledb needs a fixed IP address.  If there is any
 problem sending a notification, then the callback method will not be
 invoked.
 
-The `connection.subscribe()` method may be called multiple times with
-the same `name`.  In this case, the second and subsequent invocations
-ignore all `options` properties other than
-[`sql`](#consubscribeoptsql) and [`binds`](#consubscribeoptbinds).
-Instead, the new SQL statement is registered to the same subscription,
-and the same JavaScript notification callback is used.  For
-performance reasons this can be preferable to creating a new
-subscription for each query.
+The `connection.subscribe()` method may be called multiple times with the same
+`name`, as long as the same connection is used.  In this case, the second and
+subsequent invocations ignore all `options` properties other than
+[`sql`](#consubscribeoptsql) and [`binds`](#consubscribeoptbinds).  Instead, the
+new SQL statement is registered to the same subscription, and the same
+JavaScript notification callback is used.  For performance reasons this can be
+preferable to creating a new subscription for each query.
 
 See [Continuous Query Notification (CQN)](#cqn) and
 [Advanced Queuing Notifications](#aqnotifications) for more information.
@@ -3755,7 +3790,7 @@ bind values to use in the [`sql`](#consubscribeoptsql) property.
 ###### <a name="consubscribeoptcallback"></a> 4.2.16.2.2 `callback`
 
 ```
-function callback(message)
+function callback(Object message)
 ```
 
 The notification callback that will be called whenever notifications
@@ -4718,9 +4753,10 @@ See [`oracledb.queueTimeout`](#propdbqueuetimeout).
 readonly Number status
 ```
 
-One of the [`oracledb.POOL_STATUS_*`](#oracledbconstantspool) constants indicating
-whether the pool is open, being drained of in-use connections, or has
-been closed.
+One of the [`oracledb.POOL_STATUS_OPEN`](#oracledbconstantspool),
+[`POOL_STATUS_DRAINING`](#oracledbconstantspool), or
+[`POOL_STATUS_CLOSED`](#oracledbconstantspool) constants indicating whether the
+pool is open, being drained of in-use connections, or has been closed.
 
 See [Connection Pool Closing and Draining](#conpooldraining).
 
@@ -8638,12 +8674,8 @@ With streaming, each row is returned as a `data` event.  Query
 metadata is available via a `metadata` event.  The `end` event
 indicates the end of the query results.
 
-Query results should be fetched to completion to avoid resource leaks,
-or (from Node.js 8 onward) the Stream [`destroy()`][92] method can be
-used to terminate a stream early.  For older Node.js versions use a
-[ResultSet with callbacks](#resultsethandling) if you need to stop a
-query before retrieving all data.  Note the previous, experimental
-`_close()` method no longer emits a 'close' event.
+Query results should be fetched to completion to avoid resource leaks, or the
+Stream [`destroy()`][92] method can be used to terminate a stream early.
 
 The connection must remain open until the stream is completely read
 and any returned [Lob](#lobclass) objects have been processed.
@@ -8747,6 +8779,9 @@ specifies column names and their respective values.  Note the property
 names follow Oracle's standard name-casing rules.  They will commonly
 be uppercase, since most applications create tables using unquoted,
 case-insensitive names.
+
+Prior to node-oracledb 4.0, the constants `oracledb.ARRAY` and `oracledb.OBJECT`
+where used.  These are now deprecated.
 
 #### <a name="querymeta"></a> 15.1.5 Query Column Metadata
 
@@ -8933,12 +8968,12 @@ discussion of date handling.
 
 ##### <a name="fetchasstringhandling"></a> 15.1.6.4 Fetching Numbers and Dates as String
 
-The global [`fetchAsString`](#propdbfetchasstring) property can be
-used to force all number or date columns (and [CLOB
-columns](#queryinglobs)) queried by an application to be fetched as
-strings instead of in native format.  Allowing data to be fetched as
-strings helps avoid situations where using JavaScript types can lead
-to numeric precision loss, or where date conversion is unwanted.
+The global [`fetchAsString`](#propdbfetchasstring) property can be used to force
+all number or date columns (and [CLOB columns](#queryinglobs)) queried by an
+application to be fetched as strings instead of in native format.  Allowing data
+to be fetched as strings helps avoid situations where using JavaScript types can
+lead to numeric precision loss, or where date conversion is unwanted.  This
+method can be used for CLOBs up to 1 GB in length.
 
 For example, to force all dates and numbers used by queries in an
 application to be fetched as strings:
@@ -9033,13 +9068,13 @@ environment variable is also set.
 
 ##### <a name="fetchlob"></a> 15.1.6.5 Fetching BLOB, CLOB and NCLOB
 
-By default BLOB, CLOB and NCLOB columns are fetched into
-[Lob](#lobclass) instances.  For small LOBs it can be more convenient
-to fetch them directly into Buffers or Strings by using the global
+By default BLOB, CLOB and NCLOB columns are fetched into [Lob](#lobclass)
+instances.  For LOBs less than 1 GB in length it can be more convenient to fetch
+them directly into Buffers or Strings by using the global
 [`fetchAsBuffer`](#propdbfetchasbuffer) or
 [`fetchAsString`](#propdbfetchasstring) settings, or the per-column
-[`fetchInfo`](#propexecfetchinfo) setting.  See the section [Working
-with CLOB and BLOB Data](#lobhandling).
+[`fetchInfo`](#propexecfetchinfo) setting.  See the section [Working with CLOB
+and BLOB Data](#lobhandling).
 
 Note that binding NCLOB for [DML][14] is not supported and may cause
 unexpected character set translation, see [Bind Data Type
@@ -9808,13 +9843,13 @@ const result = await connection.execute(
 
 #### Querying LOBs
 
-Smaller LOBs queried from the database can be returned as Strings or
-Buffers by using [`oracledb.fetchAsString`](#propdbfetchasstring) or
+LOBs queried from the database that are shorter than 1 GB can be returned as
+Strings or Buffers by using [`oracledb.fetchAsString`](#propdbfetchasstring) or
 [`oracledb.fetchAsBuffer`](#propdbfetchasbuffer) (or
-[`fetchInfo`](#propexecfetchinfo)).  If the data is larger than can be
-handled as a String or Buffer in Node.js or node-oracledb, it will
-need to be streamed from a [Lob](#lobclass), as discussed later in
-[Streaming Lobs](#streamsandlobs).
+[`fetchInfo`](#propexecfetchinfo)).  If the data is larger than can be handled
+as a String or Buffer in Node.js or node-oracledb, it will need to be streamed
+from a [Lob](#lobclass), as discussed later in [Streaming
+Lobs](#streamsandlobs).
 
 For example, to make every CLOB queried by the application be returned
 as a string:
@@ -10411,9 +10446,8 @@ statement.
 Bind variables cannot be used in [DDL][15] statements, for example
 `CREATE TABLE` or `ALTER` commands.
 
-Sets of values can bound for use in
-[`connection.executeMany()`](#executemany), see [Batch Statement
-Execution](#batchexecution).
+Sets of values can bound for use in [`connection.executeMany()`](#executemany),
+see [Batch Statement Execution and Bulk Loading](#batchexecution).
 
 ### <a name="inbind"></a> 20.1 IN Bind Parameters
 
@@ -11592,7 +11626,7 @@ Where there is no native support, use a PL/SQL wrapper that accepts
 types supported by node-oracledb and converts them to the required
 Oracle Database type.
 
-## <a name="batchexecution"></a> 22. Batch Statement Execution with `executeMany()`
+## <a name="batchexecution"></a> 22. Batch Statement Execution and Bulk Loading
 
 The [`connection.executeMany()`](#executemany) method allows many sets
 of data values to be bound to one DML or PL/SQL statement for
