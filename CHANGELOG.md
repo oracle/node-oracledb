@@ -10,7 +10,7 @@
     - Node-oracledb 4 requires Node.js 8.16 or Node.js 10.16, or higher.  Node.js 8.16, 10.16, 11.12 and 12 contain an important N-API performance fix.
     - N-API allows node-oracledb binaries to be portable between Node.js versions on a given operating system, subject to N-API compatibility.  Node-oracledb uses N-API version 4.
     - Oracle Client libraries are still required at runtime.  These can be from Oracle Instant Client, the full Oracle Client, or an Oracle Database installation.
-    - The string representation of classes has changed to `[Object Object]` as a consequence of using N-API.  Use `Object.getPrototypeOf()` to get class information.
+    - The string representation of classes has changed to `[object Object]` as a consequence of using N-API.  Use `Object.getPrototypeOf()` to get class information.
     - The C compiler required for building from source code no longer needs C++11 compatibility.  The node-oracledb source code is now pure C.
 
 - Added support for querying and binding [Oracle Database Objects and
