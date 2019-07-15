@@ -19,7 +19,7 @@
  *   215. dbObject16.js
  *
  * DESCRIPTION
- *   Test DB Object collection methods.
+ *   Test DB Object collection with DATE column.
  *
  *****************************************************************************/
 'use strict';
