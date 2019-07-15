@@ -4587,3 +4587,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 215. dbObject16.js
     215.1 Collection of DATE, named Oracle type binds
+
+216. dbObject17.js
+    216.1 VARRAY Collection. Object columns contain TS, TSZ and LTZ
