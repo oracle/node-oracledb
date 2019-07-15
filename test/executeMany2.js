@@ -124,7 +124,7 @@ describe('172. executeMany2.js', function() {
       }
     });
 
-    it('172.2.1 binding by position and by name cannot be mixed', async () => {
+    it('172.2.1 Negative - Binding by position and by name cannot be mixed', async () => {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -155,7 +155,7 @@ describe('172. executeMany2.js', function() {
       }
     });
 
-    it('172.2.2 Binding an array which values are undefined will throw ORA-01008', async function() {
+    it('172.2.2 Negative - Binding an array which values are undefined will throw ORA-01008', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -181,7 +181,7 @@ describe('172. executeMany2.js', function() {
       }
     });
 
-    it('172.2.3 Binding an array starts with undefined will throw ORA-01008', async function() {
+    it('172.2.3 Negative - Binding an array starts with undefined will throw ORA-01008', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -212,7 +212,7 @@ describe('172. executeMany2.js', function() {
       }
     });
 
-    it('172.2.4 Binding an array contains undefined will throw JS TypeError', async function() {
+    it('172.2.4 Negative - Binding an array contains undefined will throw JS TypeError', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -241,6 +241,49 @@ describe('172. executeMany2.js', function() {
           }
         }
       }
-    });
-  });
+    }); // 172.2.4
+
+    it('172.2.5 Negative - Bind an empty array', async () => {
+      try {
+        let conn = await oracledb.getConnection(dbconfig);
+
+        await testsUtil.assertThrowsAsync(
+          async () => {
+            await conn.executeMany(
+              "insert into nodb_tab_emp values (:a, :b)",
+              []
+            );
+          },
+          /NJS-005/
+        );
+        // NJS-005: invalid value for parameter 2
+
+        await conn.close();
+      } catch (err) {
+        should.not.exist(err);
+      }
+    }); // 172.2.5
+
+    it('172.2.6 Negative - Set number of ierations to 0', async () => {
+      try {
+        let conn = await oracledb.getConnection(dbconfig);
+
+        await testsUtil.assertThrowsAsync(
+          async () => {
+            await conn.executeMany(
+              "insert into nodb_tab_emp values (:a, :b)",
+              0
+            );
+          },
+          /NJS-005/
+        );
+        // NJS-005: invalid value for parameter 2
+
+        await conn.close();
+      } catch (err) {
+        should.not.exist(err);
+      }
+    }); // 172.2.6
+
+  }); // 172.2
 });

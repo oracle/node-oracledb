@@ -4235,17 +4235,15 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     171.2 oracledb.fetchAsString
     171.3 data bind
 
-172. executeMany2.js
-    172.1 Negative - incorrect parameters
-    172.2 binding by position and by name cannot be mixed
-
-172. executeMany2.js
+72. executeMany2.js
     172.1 Negative - incorrect parameters
     172.2 Binding tests for invalid binding variables
-        172.2.1 binding by position and by name cannot be mixed
-        172.2.2 Binding an array which values are undefined will throw ORA-01008
-        172.2.3 Binding an array starts with undefined will throw ORA-01008
-        172.2.4 Binding an array contains undefined will throw JS TypeError
+        172.2.1 Negative - Bind by position and by name cannot be mixed
+        172.2.2 Negative - Bind an array which values are undefined will throw ORA-01008
+        172.2.3 Negative - Bind an array starts with undefined will throw ORA-01008
+        172.2.4 Negative - Bind an array contains undefined will throw JS TypeError
+        172.2.5 Negative - Bind an empty array
+        172.2.6 Negative - Set number of ierations to 0
 
 173. soda5.js
     173.1 create index, basic case
@@ -4314,7 +4312,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     178.2 insertMany() with newSodaDocumentContentArray
     178.3 insertManyAndGet() with newDocumentArray
     178.4 insertManyAndGet() with newDocumentContentArray
-    - 174.5 Negative - insertMany() with empty array
+    174.5 Negative - insertMany() with an empty array
+    174.6 Negative - insertManyAndGet() with an empty array
 
 179. soda11.js
    179.1 create collection with metadata
