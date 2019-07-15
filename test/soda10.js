@@ -56,7 +56,6 @@ describe('178. soda10.js', () => {
 
   after(async function() {
     if (!runnable) {
-      this.skip();
       return;
     }
     try {
@@ -195,24 +194,17 @@ describe('178. soda10.js', () => {
     }
   }); // 178.4
 
-  it.skip('174.5 Negative - insertMany() with empty array', async () => {
+  it('174.5 Negative - insertMany() with an empty array', async () => {
     try {
       const COLL = "soda_test_178_5";
       const collection = await soda.createCollection(COLL);
 
-      // ORA-40673: arrayLength argument cannot be NULL.
-      let inDocuments = [];
-      await collection.insertMany(inDocuments);
-
-      // Fetch back
-      let outDocuments = await collection.find().getDocuments();
-      let outContents = [];
-      for (let i = 0; i < outDocuments.length; i++) {
-        outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
-      }
-
-      console.log(outContents);
-      // should.deepEqual(outContents, inContents);
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await collection.insertMany( [] );
+        },
+        /NJS-005/
+      );
 
       await conn.commit();
 
@@ -222,5 +214,26 @@ describe('178. soda10.js', () => {
       should.not.exist(err);
     }
   }); // 174.5
+
+  it('174.6 Negative - insertManyAndGet() with an empty array', async () => {
+    try {
+      const COLL = "soda_test_178_6";
+      const collection = await soda.createCollection(COLL);
+
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await collection.insertManyAndGet( [] );
+        },
+        /NJS-005/
+      );
+
+      await conn.commit();
+
+      let res = await collection.drop();
+      should.strictEqual(res.dropped, true);
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 174.6
 
 });
