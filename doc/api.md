@@ -12756,10 +12756,10 @@ that connection.
 
 ## <a name="sodaoverview"></a> 29. Simple Oracle Document Access (SODA)
 
-Oracle Database Simple Oracle Document Access (SODA) access is
-available in node-oracledb through a set of NoSQL-style APIs.
-Documents can be inserted, queried, and retrieved from Oracle Database
-using node-oracledb methods.  By default, documents are JSON strings.
+Oracle Database Simple Oracle Document Access (SODA) is available in
+node-oracledb through a set of NoSQL-style APIs.  Documents can be inserted,
+queried, and retrieved from Oracle Database using node-oracledb methods.  By
+default, documents are JSON strings.
 
 The [Oracle Database Introduction to SODA][103] manual contains much
 information relevant to using SODA.  You can use Oracle SODA
