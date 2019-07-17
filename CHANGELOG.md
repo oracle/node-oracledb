@@ -1,8 +1,6 @@
 # Change Log
 
-## node-oracledb v4.0.0-dev (DD Mon YYYY)
-
-**This release is under development**
+## node-oracledb v4.0.0 (25 Jul 2019)
 
 - Refactored the node-oracledb implementation to use
   [N-API](https://nodejs.org/api/n-api.html) in place of

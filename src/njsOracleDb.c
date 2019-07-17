@@ -1005,7 +1005,7 @@ static napi_value njsOracleDb_getVersionString(napi_env env,
         napi_callback_info info)
 {
     return njsUtils_convertToString(env, NJS_VERSION_STRING,
-            strlen(NJS_VERSION_STRING));
+            sizeof(NJS_VERSION_STRING)-1);
 }
 
 
@@ -1016,12 +1016,8 @@ static napi_value njsOracleDb_getVersionString(napi_env env,
 static napi_value njsOracleDb_getVersionSuffix(napi_env env,
         napi_callback_info info)
 {
-#ifdef NJS_NODE_ORACLEDB_SUFFIX
     return njsUtils_convertToString(env, NJS_NODE_ORACLEDB_SUFFIX,
-            strlen(NJS_NODE_ORACLEDB_SUFFIX));
-#else
-    return NULL;
-#endif
+            sizeof(NJS_NODE_ORACLEDB_SUFFIX)-1);
 }
 
 
