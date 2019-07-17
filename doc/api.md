@@ -360,9 +360,9 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 14.1.3 [Optional Oracle Client Configuration](#oraaccess)
     - 14.2 [Connection Strings](#connectionstrings)
         - 14.2.1 [Easy Connect Syntax for Connection Strings](#easyconnect)
-        - 14.2.2 [Net Service Names for Connection Strings](#tnsnames)
-        - 14.2.3 [Embedded Connection Strings](#embedtns)
-        - 14.2.4 [JDBC and Node-oracledb Connection Strings Compared](#notjdbc)
+        - 14.2.2 [Embedded Connect Descriptor Strings](#embedtns)
+        - 14.2.3 [Net Service Names for Connection Strings](#tnsnames)
+        - 14.2.4 [JDBC and Oracle SQL Developer Connection Strings](#notjdbc)
     - 14.3 [Connections and Number of Threads](#numberofthreads)
     - 14.4 [Connection Pooling](#connpooling)
         - 14.4.1 [Connection Pool Sizing](#conpoolsizing)
@@ -6849,64 +6849,86 @@ The `oraaccess.xml` file has other uses including:
 
 ### <a name="connectionstrings"></a> 14.2 Connection Strings
 
-The `connectString` parameter for
-[`oracledb.getConnection()`](#getconnectiondb) and
-[`oracledb.createPool()`](#createpool) can be an
-[Easy Connect](#easyconnect) string, or a Net Service Name from a
-local [`tnsnames.ora`](#tnsnames) file or external naming service, or
-it can be the SID of a local Oracle database instance.
+The `connectString` property for [`oracledb.getConnection()`](#getconnectiondb)
+and [`oracledb.createPool()`](#createpool) can be one of:
 
-The `connectionString` property is an alias for `connectString`.
-Use only one of the properties.
+- An [Easy Connect](#easyconnect) string
+- A [Connect Descriptor](#embedtns) string
+- A [Net Service Name](#tnsnames) from a local [`tnsnames.ora`](#tnsnames) file or external naming service
+- The SID of a local Oracle database instance
 
 If a connect string is not specified, the empty string "" is used
 which indicates to connect to the local, default database.
 
+The `connectionString` property is an alias for `connectString`.
+Use only one of the properties.
+
 #### <a name="easyconnect"></a> 14.2.1 Easy Connect Syntax for Connection Strings
 
-An Easy Connect string is often the simplest to use.  With Oracle Database 12 or later
-the syntax is:
+An Easy Connect string is often the simplest to use.  For example, to connect to
+the Oracle Database service ``orclpdb1`` that is running on the host
+``mydbmachine.example.com`` with the default Oracle Database port 1521, use:
 
 ```
-[//]host_name[:port][/service_name][:server_type][/instance_name]
-```
-
-Note that old-school connection SIDs are not supported: only service names can be used.
-
-For example, use *"localhost/XEPDB1"* to connect to the database *XE* on the local machine:
-
-```javascript
 const oracledb = require('oracledb');
 
 const connection = await oracledb.getConnection(
   {
     user          : "hr",
     password      : mypw,  // mypw contains the hr schema password
-    connectString : "localhost/XEPDB1"
+    connectString : "mydbmachine.example.com/orclpdb1"
   }
 );
 ```
 
-For more information on Easy Connect strings see [Understanding the
-Easy Connect Naming Method][17] in the Oracle documentation.
+If the database is using a non-default port, for example 1984, the port must be
+given:
 
-#### <a name="tnsnames"></a> 14.2.2 Net Service Names for Connection Strings
+```
+const oracledb = require('oracledb');
 
-A Net Service Name, such as `sales` in the example below, can be used
-to connect:
+const connection = await oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : mypw,  // mypw contains the hr schema password
+    connectString : "mydbmachine.example.com:1984/orclpdb1"
+  }
+);
+```
+
+The Easy Connect syntax supports Oracle Database service names.  It cannot be
+used with the older System Identifiers (SID).
+
+The Easy Connect syntax has been extended in recent versions of Oracle Database
+client since its introduction in 10g.  Check the Easy Connect Naming method in
+[Oracle Net Service Administrator's Guide][17] for the syntax to use in your
+version of the Oracle Client libraries.
+
+If you are using Oracle Client 19c, the latest [Easy Connect Plus][151] syntax
+allows the use of multiple hosts or ports, along with optional entries for the
+wallet location, the distinguished name of the database server, and even lets
+some network configuration options be set. This means that a
+[`sqlnet.ora`](#tnsadmin) file is not needed for some common connection
+scenarios.
+
+#### <a name="embedtns"></a> 14.2.2 Embedded Connect Descriptor Strings
+
+Full Connect Descriptor strings can be embedded in applications:
 
 ```javascript
 const connection = await oracledb.getConnection(
   {
     user          : "hr",
     password      : mypw,  // mypw contains the hr schema password
-    connectString : "sales"
+    connectString : "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=mymachine.example.com)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl)))"
   }
 );
 ```
 
-This could be defined in a directory server, or in a local
-`tnsnames.ora` file, for example:
+#### <a name="tnsnames"></a> 14.2.3 Net Service Names for Connection Strings
+
+Connect Descriptor strings are commmonly stored in [`tnsnames.ora`](#tnsadmin)
+files and associated with a Net Service Name, for example:
 
 ```
 sales =
@@ -6917,6 +6939,20 @@ sales =
       (SERVICE_NAME = orcl)
     )
   )
+```
+
+Net Service Names may also be defined in a directory server.
+
+Given a Net Service Name, node-oracledb can connect like:
+
+```javascript
+const connection = await oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : mypw,  // mypw contains the hr schema password
+    connectString : "sales"
+  }
+);
 ```
 
 Some older databases may use a 'SID' instead of a 'Service Name'.  A
@@ -6933,43 +6969,34 @@ sales =
   )
 ```
 
-See [Optional Oracle Net Configuration](#tnsadmin) for where
-`tnsnames.ora` files can be located.
+See [Optional Oracle Net Configuration](#tnsadmin) for where `tnsnames.ora`
+files can be located.
 
-For more information on `tnsnames.ora` files, see the [Oracle Net
+For general information on `tnsnames.ora` files, see the [Oracle Net
 documentation on `tnsnames.ora`][18].
 
-#### <a name="embedtns"></a> 14.2.3 Embedded Connection Strings
+#### <a name="notjdbc"></a> 14.2.4 JDBC and Oracle SQL Developer Connection Strings
 
-Full connection strings can be embedded in applications:
+The node-oracledb connection string syntax is different to Java JDBC and the
+common Oracle SQL Developer syntax.  If these JDBC connection strings reference
+a service name like:
+
+    jdbc:oracle:thin:@hostname:port/service_name
+
+for example:
+
+```
+jdbc:oracle:thin:@mydbmachine.example.com:1521/orclpdb1
+```
+
+then use Oracle's Easy Connect syntax in node-oracledb:
 
 ```javascript
 const connection = await oracledb.getConnection(
   {
     user          : "hr",
     password      : mypw,  // mypw contains the hr schema password
-    connectString : "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=mymachine.example.com)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl)))"
-  }
-);
-```
-
-#### <a name="notjdbc"></a> 14.2.4 JDBC and Node-oracledb Connection Strings Compared
-
-Developers familiar with Java connection strings that reference a
-service name like:
-
-```
-jdbc:oracle:thin:@hostname:port/service_name
-```
-
-can use Oracle's Easy Connect syntax in node-oracledb:
-
-```javascript
-const connection = await oracledb.getConnection(
-  {
-    user          : "hr",
-    password      : mypw,  // mypw contains the hr schema password
-    connectString : "hostname:port/service_name"
+    connectString : "mydbmachine.example.com:1521/orclpdb1"
   }
 );
 ```
@@ -6981,12 +7008,32 @@ Oracle system identifier [SID][19], and there is no service name available:
 jdbc:oracle:thin:@hostname:port:sid
 ```
 
-then consider creating a [`tnsnames.ora`](#tnsnames) entry, for example:
+for example:
 
 ```
+jdbc:oracle:thin:@mydbmachine.example.com:1521:orcl
+```
+
+then either [embed the Connect Descriptor](#embedtns):
+
+```javascript
+const connection = await oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : mypw,  // mypw contains the hr schema password
+    connectString : "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=mymachine.example.com)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SID=ORCL)))"
+  }
+);
+```
+
+or create a [Net Service Name](#tnsnames):
+
+```
+# tnsnames.ora
+
 finance =
  (DESCRIPTION =
-   (ADDRESS = (PROTOCOL = TCP)(HOST = hostname)(PORT = 1521))
+   (ADDRESS = (PROTOCOL = TCP)(HOST = mydbmachine.example.com)(PORT = 1521))
    (CONNECT_DATA =
      (SID = ORCL)
    )
@@ -7004,8 +7051,6 @@ const connection = await oracledb.getConnection(
   }
 );
 ```
-
-Alternatively the connection string can be [embedded](#embedtns) in the application.
 
 ### <a name="numberofthreads"></a> 14.3 Connections and Number of Threads
 
@@ -7269,7 +7314,7 @@ connections.
 
 Pools are added to the cache by using a
 [`poolAlias`](#createpoolpoolattrspoolalias) property in the
-[`poolAttrs`](#createpoolpoolattrs) object::
+[`poolAttrs`](#createpoolpoolattrs) object:
 
 ```javascript
 async function init() {
@@ -13127,7 +13172,7 @@ Some QBE examples are:
 ### <a name="sodatextsearches"></a> 29.5 SODA Text Searches
 
 To perform text searches through documents, a [JSON search index][149]
-must be defined.  For example::
+must be defined.  For example:
 
 ```javascript
 await collection.createIndex({ name : "mySearchIdx");
@@ -14027,3 +14072,4 @@ When upgrading from node-oracledb version 3.1 to version 4.0:
 [148]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C4C426FC-FD23-4B2E-8367-FA5F83F3F23A
 [149]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4848E6A0-58A7-44FD-8D6D-A033D0CCF9CB
 [150]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7E9034D5-0D33-43A1-9012-918350FE148C
+[151]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8C85D289-6AF3-41BC-848B-BF39D32648BA
