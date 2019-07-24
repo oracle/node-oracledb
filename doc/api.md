@@ -771,6 +771,8 @@ Constant Name                        | Value |Description
 `oracledb.NUMBER`                    | 2010  | Bind as JavaScript number type.  Can also be used for fetchAsString and fetchInfo
 `oracledb.STRING`                    | 2001  | Bind as JavaScript String type.  Can be used for most database types.
 
+Note the values for these constants changed in node-oracledb 4.0.
+
 #### <a name="oracledbconstantsdbtype"></a> 3.1.3 Oracle Database Type Constants
 
 These values indicate the Oracle Database type shown in [extended
@@ -804,6 +806,8 @@ Constant Name                        | Value |Description
 `oracledb.DB_TYPE_TIMESTAMP_LTZ`     | 2014  | TIMESTAMP WITH LOCAL TIME ZONE
 `oracledb.DB_TYPE_TIMESTAMP_TZ`      | 2013  | TIMESTAMP WITH TIME ZONE
 `oracledb.DB_TYPE_VARCHAR`           | 2001  | VARCHAR2
+
+Note the values for constants changed in node-oracledb 4.0.
 
 #### <a name="oracledbconstantsbinddir"></a> 3.1.4 Execute Bind Direction Constants
 
