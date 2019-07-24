@@ -6753,9 +6753,10 @@ Name  |  Description
 `NLS_NUMERIC_CHARACTERS` | See [Fetching Numbers and Dates as String](#fetchasstringhandling).  The variable is ignored if `NLS_LANG` is not
 `TNS_ADMIN` | The location of the optional [Oracle Net configuration files](#tnsadmin) and [Oracle Client configuration files](#oraaccess), including `tnsnames.ora`, `sqlnet.ora`, and `oraaccess.xml`, if they are not in a default location.
 
-It is recommended to set variables in the environment before invoking
-Node.js, however they may also be set in application code as long as
-they are set before node-oracledb is first used.
+It is recommended to set Oracle variables in the environment before invoking
+Node.js, however they may also be set in application code as long as they are
+set before node-oracledb is first used.  System environment variables like
+`LD_LIBRARY_PATH` must be set before Node.js starts.
 
 If you are using Linux and node-oracledb is being run on the same
 computer as the database, you can set required Oracle environment
