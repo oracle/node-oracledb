@@ -54,7 +54,7 @@ async function enq() {
       },
       "Message 4"
     ];
-    await queue.enqMany(messages);
+    await queue.enqMany(messages);  // !! Review the enqMany() documentation's caveat before using it !!
 
   } catch (err) {
     console.error(err);
