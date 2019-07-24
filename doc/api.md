@@ -8449,7 +8449,7 @@ be several minutes.
 FAN allows node-oracledb to provide high availability features without
 the application being aware of an outage.  Unused, idle connections in
 a connection pool will be automatically cleaned up.  A future
-`pool.getConnection()` calls will establish a fresh connection to a
+`pool.getConnection()` call will establish a fresh connection to a
 surviving database instance without the application being aware of any
 service disruption.
 
