@@ -181,3 +181,76 @@ testsUtil.measureNetworkRoundTripTime = async function() {
   }
   return new Date() - startTime;
 };
+
+testsUtil.createAQtestUser = async function(AQ_USER, AQ_USER_PWD) {
+
+  if (!dbconfig.test.DBA_PRIVILEGE) {
+    let msg = "Note: DBA privilege environment variable is false!\n";
+    msg += "Without DBA privilege, it could not create schema!";
+    throw new Error(msg);
+  } else {
+    let dbaCredential = {
+      user:          dbconfig.test.DBA_user,
+      password:      dbconfig.test.DBA_password,
+      connectString: dbconfig.connectString,
+      privilege:     oracledb.SYSDBA
+    };
+
+    let plsql = `
+      BEGIN
+        DECLARE
+          e_user_missing EXCEPTION;
+          PRAGMA EXCEPTION_INIT(e_user_missing, -01918);
+        BEGIN
+          EXECUTE IMMEDIATE('DROP USER ${AQ_USER} CASCADE');
+        EXCEPTION
+          WHEN e_user_missing
+          THEN NULL;
+        END;
+        EXECUTE IMMEDIATE ('
+          CREATE USER ${AQ_USER} IDENTIFIED BY ${AQ_USER_PWD}
+        ');
+        EXECUTE IMMEDIATE ('
+          GRANT CONNECT, RESOURCE, UNLIMITED TABLESPACE TO ${AQ_USER}
+        ');
+        EXECUTE IMMEDIATE ('
+          GRANT AQ_ADMINISTRATOR_ROLE, AQ_USER_ROLE TO ${AQ_USER}
+        ');
+        EXECUTE IMMEDIATE ('
+          GRANT EXECUTE ON DBMS_AQ TO ${AQ_USER}
+        ');
+    END;
+    `;
+
+    try {
+      const connAsDBA = await oracledb.getConnection(dbaCredential);
+      await connAsDBA.execute(plsql);
+      await connAsDBA.close();
+    } catch (err) {
+      should.not.exist(err);
+    }
+
+  }
+};
+
+testsUtil.dropAQtestUser = async function(AQ_USER) {
+  if (!dbconfig.test.DBA_PRIVILEGE) {
+    let msg = "Without DBA privilege, it could not drop schema!\n";
+    throw new Error(msg);
+  } else {
+    let dbaCredential = {
+      user:          dbconfig.test.DBA_user,
+      password:      dbconfig.test.DBA_password,
+      connectString: dbconfig.connectString,
+      privilege:     oracledb.SYSDBA
+    };
+
+    try {
+      const connAsDBA = await oracledb.getConnection(dbaCredential);
+      let sql =`DROP USER ${AQ_USER} CASCADE`;
+      await connAsDBA.execute(sql);
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }
+};

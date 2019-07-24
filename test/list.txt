@@ -4590,3 +4590,11 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 216. dbObject17.js
     216.1 VARRAY Collection. Object columns contain TS, TSZ and LTZ
+
+217. aq1.js
+    217.1 examples/aqraw.js
+    217.2 examples/aqoptions.js
+    217.3 examples/aqmulti.js
+
+  218. aq2.js
+    218.1 examples/aqobject.js
