@@ -86,7 +86,7 @@ testsUtil.dropTable = async function(tableName) {
   }
 };
 
-testsUtil.checkPrerequisites = async function(clientVersion=1803000000, serverVersion=1803000000) {
+testsUtil.checkPrerequisites = async function(clientVersion=1805000000, serverVersion=1805000000) {
   if (oracledb.oracleClientVersion < clientVersion) return false;
   try {
     let connection = await oracledb.getConnection(dbconfig);
