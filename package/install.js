@@ -93,7 +93,7 @@ function done(err) {
       clientUrl = 'https://www.oracle.com/technetwork/topics/intel-macsoft-096467.html';
       installUrl = 'https://oracle.github.io/node-oracledb/INSTALL.html#instosx';
 
-      log('** - An Oracle Instant Client Basic or Basic Light package must be in ~/lib or /usr/local/lib');
+      log('** - Oracle Instant Client Basic or Basic Light package libraries must be in ~/lib or /usr/local/lib');
       log('**   Download from ' + clientUrl);
     } else if (process.platform === 'win32') {
       if (process.arch === 'x64') {
