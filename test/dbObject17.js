@@ -30,7 +30,7 @@ const should    = require('should');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('216. dbObject17.js', () => {
+describe.skip('216. dbObject17.js', () => {
 
   let conn;
 
