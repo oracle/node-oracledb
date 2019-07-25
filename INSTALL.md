@@ -153,7 +153,7 @@ version 2.0.
         - Run `npm install oracledb`, or add `oracledb` to your `package.json`
           dependencies.  This installs from the [npm registry][4].
 
-          Windows users will require the [Visual Studio 2015
+          Windows users will require the [Visual Studio 2017
           Redistributable][27].
 
     - If a binary is not available, you will need to compile node-oracledb
@@ -162,7 +162,7 @@ version 2.0.
         - Install [Python 2.7][2]
 
         - Install a C Compiler such as Xcode, GCC, Visual Studio
-          2015, or similar.
+          2017, or similar.
 
         - Run `npm install oracle/node-oracledb.git#v4.0.0`, or add
           `oracle/node-oracledb.git#v4.0.0` to your `package.json`
@@ -807,7 +807,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The pre-built binaries were built with Visual Studio 2015 and require
+The pre-built binaries were built with Visual Studio 2017 and require
 the matching [redistributable][27].
 
 You may need Administrator privileges to set environment variables or
@@ -948,7 +948,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The pre-built binaries were built with Visual Studio 2015 and require
+The pre-built binaries were built with Visual Studio 2017 and require
 the matching [redistributable][27].
 
 The Oracle software can be either a database home or a full Oracle
@@ -1287,7 +1287,7 @@ Install a C compiler:
 - On macOS install Xcode from the Mac App store.
 
 - On Windows, install a C build environment such as Microsoft
-  Visual Studio 2015.  Compilers supported by Oracle libraries are
+  Visual Studio 2017.  Compilers supported by Oracle libraries are
   found in [Oracle documentation][23] for each version, for example
   [Oracle Database Client Installation Guide for
   Microsoft Windows][24].  Some users report that the npm
