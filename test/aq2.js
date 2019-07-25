@@ -152,7 +152,7 @@ describe('218. aq2.js', function() {
     }
   }); // 218.2
 
-  it.skip('218.3 Enqueue a JSON', async () => {
+  it('218.3 Negative - enqueue a raw JavaScript object directly', async () => {
     try {
       const addrData = {
         NAME: "John Smith",
@@ -164,20 +164,16 @@ describe('218. aq2.js', function() {
         objQueueName,
         { payloadType: objType }
       );
-      // const message = new queue1.payloadTypeClass(addrData);
-      await queue1.enqOne(addrData);
-      await conn.commit();
-
-      // Dequeue
-      const queue2 = await conn.getQueue(
-        objQueueName,
-        { payloadType: objType }
+      testsUtil.assertThrowsAsync(
+        async () => {
+          await queue1.enqOne(addrData);
+        },
+        /NJS-070/
       );
-      const msg = await queue2.deqOne();
-      await conn.commit();
-      should.exist(msg);
-      should.strictEqual(msg.payload.NAME, addrData.NAME);
-      should.strictEqual(msg.payload.ADDRESS, addrData.ADDRESS);
+      /* NJS-070: message must be a string, buffer, database object or
+      an object containing a payload property which itself is a string,
+      buffer or database object */
+
     } catch (err) {
       should.not.exist(err);
     }
@@ -215,4 +211,65 @@ describe('218. aq2.js', function() {
       should.not.exist(err);
     }
   }); // 218.4
+
+  it.skip('218.5 Enqueue a DB object as payload attribute', async () => {
+    try {
+      const addrData = {
+        NAME: "Changjie",
+        ADDRESS: "400 Oracle Parkway Redwood City, CA US 94065"
+      };
+
+      // Enqueue
+      const queue1 = await conn.getQueue(
+        objQueueName,
+        { payloadType: objType }
+      );
+      const message = new queue1.payloadTypeClass(addrData);
+      await queue1.enqOne({ payload: message });
+      await conn.commit();
+
+      // Dequeue
+      const queue2 = await conn.getQueue(
+        objQueueName,
+        { payloadType: objType }
+      );
+      const msg = await queue2.deqOne();
+      await conn.commit();
+      should.exist(msg);
+      should.strictEqual(msg.payload.NAME, addrData.NAME);
+      should.strictEqual(msg.payload.ADDRESS, addrData.ADDRESS);
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 218.5
+
+  it.skip('218.6 Enqueue a JavaScript object as payload attribute', async () => {
+    try {
+      const addrData = {
+        NAME: "Chris",
+        ADDRESS: "400 Oracle Parkway Redwood City, CA US 94065"
+      };
+
+      // Enqueue
+      const queue1 = await conn.getQueue(
+        objQueueName,
+        { payloadType: objType }
+      );
+      await queue1.enqOne({ payload: addrData });
+      await conn.commit();
+
+      // Dequeue
+      const queue2 = await conn.getQueue(
+        objQueueName,
+        { payloadType: objType }
+      );
+      const msg = await queue2.deqOne();
+      await conn.commit();
+      should.exist(msg);
+      should.strictEqual(msg.payload.NAME, addrData.NAME);
+      should.strictEqual(msg.payload.ADDRESS, addrData.ADDRESS);
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 218.6
 });
