@@ -12447,7 +12447,7 @@ const o = msg.payload;
 console.log(o);
 ```
 
-See [`examples/aqobjects.js`][143] for a runnable example.
+See [`examples/aqobject.js`][143] for a runnable example.
 
 ### <a name="aqoptions"></a> 26.3 Changing AQ options
 
@@ -14066,7 +14066,7 @@ When upgrading from node-oracledb version 3.1 to version 4.0:
 [140]: https://github.com/oracle/node-oracledb/tree/master/examples/selectgeometry.js
 [141]: https://github.com/oracle/node-oracledb/tree/master/examples/plsqlrecord.js
 [142]: https://github.com/oracle/node-oracledb/tree/master/examples/aqraw.js
-[143]: https://github.com/oracle/node-oracledb/tree/master/examples/aqobjects.js
+[143]: https://github.com/oracle/node-oracledb/tree/master/examples/aqobject.js
 [144]: https://github.com/oracle/node-oracledb/tree/master/examples/aqoptions.js
 [145]: https://github.com/oracle/node-oracledb/tree/master/examples/aqmulti.js
 [146]: https://github.com/oracle/node-oracledb/tree/master/examples/selectvarray.js
