@@ -1,4 +1,5 @@
-# Installing node-oracledb Version 3.1
+
+# Installing node-oracledb Version 4.0
 
 *Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.*
 
@@ -18,9 +19,10 @@ limitations under the License.
 ##  <a name="contents"></a> Contents
 
 1. [Node-oracledb Overview](#overview)
-    - 1.1 [Changes in node-oracledb version 3.1](#mig31)
-    - 1.2 [Changes in node-oracledb version 3.0](#mig30)
-    - 1.3 [Changes in node-oracledb version 2.0](#mig20)
+    - 1.1 [Installation Changes in node-oracledb version 4.0](#mig40)
+    - 1.2 [Installation Changes in node-oracledb version 3.1](#mig31)
+    - 1.3 [Installation Changes in node-oracledb version 3.0](#mig30)
+    - 1.4 [Installation Changes in node-oracledb version 2.0](#mig20)
 2. [Quick Start Node-oracledb Installation](#quickstart)
 3. [Node-oracledb Installation Instructions](#instructions)
     - 3.1 [Prerequisites](#prerequisites)
@@ -51,20 +53,32 @@ The [*node-oracledb*][1] add-on for Node.js powers high performance Oracle Datab
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
-This node-oracledb release has been tested with Node.js 6, 8, 10 and
-11 on 64-bit Oracle Linux, Windows and macOS.  The add-on can also
-build on some 32-bit Linux, 32-bit Windows, Solaris and AIX
-environments, but these architectures have not been fully tested.
-Older versions of node-oracledb may work with older versions of Node.js.
+This node-oracledb release has been tested with Node.js 8, 10 and 12
+on 64-bit Oracle Linux, Windows and macOS.  Note Node.js 8.16, Node.js
+10.16, or later is required.  The add-on can also build on some 32-bit
+Linux, 32-bit Windows, Solaris and AIX environments, but these
+architectures have not been fully tested.  Older versions of
+node-oracledb may work with older versions of Node.js.
 
 Node-oracledb is an [add-on](https://nodejs.org/api/addons.html)
-available as C++ and C source code.  Pre-built binaries are available
+available as C source code.  Pre-built binaries are available
 as a convenience for common architectures.  Note the operating systems
 and versions of Node.js that the pre-built binaries are compatible
 with will change as the Node.js project evolves.  The binaries are not
 guaranteed to be available or usable in your environment.
 
-#### <a name="mig31"></a> 1.1 Changes in node-oracledb version 3.1
+#### <a name="mig40"></a> 1.1 Installation Changes in node-oracledb version 4.0
+
+Node-oracledb 4.0 was refactored to use [N-API][53] version 4.  On
+each operating system, a node-oracledb binary will work with a number
+of Node.js versions from Node.js 8.16 and Node.js 10.16 onward,
+dependent on N-API compatibility.  This means that when upgrading
+Node.js, you may not need to reinstall node-oracledb.
+
+If compiling from source code, the compiler no longer needs C++11
+compatibility.  The node-oracledb source code is now pure C.
+
+#### <a name="mig31"></a> 1.1 Installation Changes in node-oracledb version 3.1
 
 Pre-built binaries are now contained in the package downloaded from
 npm.  This removes the previous internally executed step of
@@ -82,7 +96,7 @@ that `require('oracledb')` can succeed on machines that do not have
 Oracle Client libraries installed.  See the [CHANGELOG][43] for more
 information.
 
-#### <a name="mig30"></a> 1.2 Changes in node-oracledb version 3.0
+#### <a name="mig30"></a> 1.2 Installation Changes in node-oracledb version 3.0
 
 Installation of node-oracledb binaries will now use the `npm config`
 proxy if it is set.  However, due to known npm performance issues, it
@@ -106,7 +120,7 @@ In node-oracledb version 2.0, pre-built binaries are now available for
 some environments.
 
 Building from source code has improved significantly in node-oracledb
-version 2.0 The Oracle header files, and the node-oracledb environment
+version 2.0.  The Oracle header files, and the node-oracledb environment
 variables `OCI_INC_DIR` and `OCI_LIB_DIR` are no longer required.
 
 The Oracle client libraries must now always be in the default library
@@ -137,22 +151,22 @@ version 2.0.
         - Run `npm install oracledb`, or add `oracledb` to your `package.json`
           dependencies.  This installs from the [npm registry][4].
 
-          Windows users will require the [Visual Studio 2015
+          Windows users will require the [Visual Studio 2017
           Redistributable][27].
 
     - If a binary is not available, you will need to compile node-oracledb
-    from source code:
+      from source code:
 
         - Install [Python 2.7][2]
 
-        - Install a C Compiler with support for C++ 11 (such as Xcode,
-          GCC 4.8, Visual Studio 2015, or similar)
+        - Install a C Compiler such as Xcode, GCC, Visual Studio
+          2017, or similar.
 
-        - Run `npm install oracle/node-oracledb.git#v3.1.2`, or add
-          `oracle/node-oracledb.git#v3.1.2` to your `package.json`
+        - Run `npm install oracle/node-oracledb.git#v4.0.0`, or add
+          `oracle/node-oracledb.git#v4.0.0` to your `package.json`
           dependencies.  Substitute your desired [GitHub tag][40].
 
-- Add Oracle 18, 12, or 11.2 client libraries to your operating
+- Add Oracle 19, 18, 12, or 11.2 client libraries to your operating
   system library search path such as `PATH` on Windows or
   `LD_LIBRARY_PATH` on Linux.  On macOS move the libraries to `~/lib`
   or `/usr/local/lib`.
@@ -170,10 +184,10 @@ version 2.0.
       in `$ORACLE_HOME/lib` from a locally installed database such as
       the free [Oracle XE][20] release.
 
-  Oracle Client libraries 18 and 12.2 can connect to Oracle Database 11.2 or
-  greater. Version 12.1 client libraries can connect to Oracle
-  Database 10.2 or greater. Version 11.2 client libraries can connect
-  to Oracle Database 9.2 or greater.
+  Oracle Client libraries 19, 18 and 12.2 can connect to Oracle
+  Database 11.2 or greater. Version 12.1 client libraries can connect
+  to Oracle Database 10.2 or greater. Version 11.2 client libraries
+  can connect to Oracle Database 9.2 or greater.
 
 - Your Node.js applications can now connect to your database.  The
   database can be on the same machine as Node.js, or on a remote
@@ -199,7 +213,8 @@ I have ... | Follow this ...
 Windows.  My database is on another machine | [Node-oracledb Installation on Windows with Instant Client ZIP files](#instwin)
 Windows.  My database is on the same machine as Node.js | [Node-oracledb Installation on Windows with a Local Database or Full Client](#instwinoh)
 Apple macOS | [Node-oracledb Installation on macOS](#instosx)
-Linux.  My database is on another machine | [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm) or [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
+Linux that uses RPM packages.  My database is on another machine | [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
+Linux that uses Debian packages.   My database is on another machine | [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
 Linux.  My database is on the same machine as Node.js | [Node-oracledb Installation on Linux with a Local Database or Full Client](#instoh)
 Linux. I have the full Oracle client (installed via `runInstaller`) on the same machine as Node.js | [Node-oracledb Installation on Linux with a Local Database or Full Client](#instoh)
 Linux.  I want to install Node.js and node-oracledb RPM packages | [Installing Node.js and Node-oracledb RPMs from yum.oracle.com](#instnoderpms)
@@ -213,7 +228,7 @@ I don't have internet access | [Node-oracledb Installation Without Internet Acce
 
 All installations need:
 
-- Oracle 18, 12.2, 12.1 or 11.2 client libraries on the machine Node.js is installed on.
+- Oracle 19, 18, 12.2, 12.1 or 11.2 client libraries on the machine Node.js is installed on.
 
   Run `node -p "process.arch"` and make sure to use 64-bit or 32-bit
   Oracle client libraries to match the Node.js architecture.
@@ -225,12 +240,12 @@ All installations need:
   Oracle's standard client-server network interoperability allows
   connections between different versions of Oracle Client and Oracle
   Database.  For certified configurations see Oracle Support's [Doc ID
-  207303.1][6].  In summary, Oracle Client 18 and 12.2 can connect to Oracle
-  Database 11.2 or greater. Oracle Client 12.1 can connect to Oracle
-  Database 10.2 or greater. Oracle Client 11.2 can connect to Oracle
-  Database 9.2 or greater.  The technical restrictions on creating
-  connections may be more flexible.  For example Oracle Client 12.2
-  can successfully connect to Oracle Database 10.2.
+  207303.1][6].  In summary, Oracle Client 19, 18 and 12.2 can connect
+  to Oracle Database 11.2 or greater. Oracle Client 12.1 can connect
+  to Oracle Database 10.2 or greater. Oracle Client 11.2 can connect
+  to Oracle Database 9.2 or greater.  The technical restrictions on
+  creating connections may be more flexible.  For example Oracle
+  Client 12.2 can successfully connect to Oracle Database 10.2.
 
 - An Oracle Database to test node-oracledb.
 
@@ -248,10 +263,6 @@ additional tools to build from source code:
 - A compiler.
 
   Use Visual Studio on Windows, GCC on Linux or Xcode on macOS.
-  **When building with Node.js 6 onward, the compiler must support
-  C++11.** Note the default compiler on Oracle Linux 6 and RHEL 6 does
-  not have the required support.  Install [GCC 4.8 or later][5] or
-  upgrade to Oracle Linux 7.
 
 - Python 2.7.
 
@@ -266,9 +277,9 @@ additional tools to build from source code:
 
 ### <a name="instrpm"></a> 3.2 Node-oracledb Installation on Linux with Instant Client RPMs
 
-Follow these steps if your database is on a remote machine.  Also see
-[Installing Node.js and Node-oracledb RPMs from
-yum.oracle.com](#instnoderpms).
+Follow these steps if your database is on a remote machine and your
+Linux distribution uses RPM packages.  Also see [Installing Node.js and
+Node-oracledb RPMs from yum.oracle.com](#instnoderpms).
 
 Questions and issues can be posted as [GitHub Issues][10].
 
@@ -335,10 +346,18 @@ package contents are identical in both channels.  Alternatively,
 multiple versions of Instant Client RPMs are available from [Oracle
 Technology Network][12].
 
-[Install Instant Client Basic][13] with sudo or as the root user:
+[Install Instant Client Basic][13] with sudo or as the root user,
+either directly from yum.oracle.com:
 
 ```
-sudo yum install oracle-instantclient18.3-basic-18.3.0.0.0-2.x86_64.rpm
+sudo yum -y install oracle-release-el7
+sudo yum -y install oracle-instantclient19.3-basic
+```
+
+Or from a downloaded file:
+
+```
+sudo yum install oracle-instantclient19.3-basic-19.3.0.0.0-1.x86_64.rpm
 ```
 
 This will install the required `libaio` package, if it is not already
@@ -349,17 +368,20 @@ to install the Basic package after enabling the
 ol7_x86_64_instantclient or ol6_x86_64_instantclient channel,
 depending on your version of Linux.
 
-If there is no other Oracle software on the machine
-that will be impacted, then permanently add Instant Client to the
-run-time link path.  For example, with sudo or as the root user:
+For Instant Client 19, the system library search path is automatically
+configured during installation.
+
+For older versions, if there is no other Oracle software on the
+machine that will be impacted, then permanently add Instant Client to
+the run-time link path.  For example, with sudo or as the root user:
 
 ```
 sudo sh -c "echo /usr/lib/oracle/18.3/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf"
 sudo ldconfig
 ```
 
-Alternatively, every shell running Node.js will need to have the link
-path set:
+Alternatively, for version 18 and earlier, every shell running Node.js
+will need to have the link path set:
 
 ```
 export LD_LIBRARY_PATH=/usr/lib/oracle/18.3/client64/lib
@@ -410,7 +432,10 @@ node example.js
 
 ### <a name="instzip"></a> 3.3 Node-oracledb Installation on Linux with Instant Client ZIP files
 
-Follow these steps if your database is on a remote machine.
+Follow these steps if your database is on a remote machine and your
+Linux distribution uses the Debian package format, for example if you
+are using Ubuntu.  These steps can also be used if you prefer not to
+install RPMs.
 
 Questions and issues can be posted as [GitHub Issues][10].
 
@@ -476,20 +501,20 @@ and [unzip it][13] into a directory accessible to your application,
 for example:
 
 ```
-unzip instantclient-basic-linux.x64-18.3.0.0.0dbru.zip
+unzip instantclient-basic-linux.x64-19.3.0.0.0dbru.zip
 mkdir -p /opt/oracle
-mv instantclient_18_3 /opt/oracle
+mv instantclient_19_3 /opt/oracle
 ```
 
 You will need the operating system `libaio` package installed.  On
 some platforms the package is called `libaio1`.
 
-if there is no other Oracle software on the machine
+If there is no other Oracle software on the machine
 that will be impacted, then permanently add Instant Client to the
 run-time link path.  For example, with sudo or as the root user:
 
 ```
-sudo sh -c "echo /opt/oracle/instantclient_18_3 > /etc/ld.so.conf.d/oracle-instantclient.conf"
+sudo sh -c "echo /opt/oracle/instantclient_19_3 > /etc/ld.so.conf.d/oracle-instantclient.conf"
 sudo ldconfig
 ```
 
@@ -497,7 +522,7 @@ Alternatively, every shell running Node.js will need to have the link
 path set:
 
 ```
-export LD_LIBRARY_PATH=/opt/oracle/instantclient_18_3:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_19_3:$LD_LIBRARY_PATH
 ```
 
 #### 3.3.5 Optionally create the default Oracle Client configuration directory
@@ -660,7 +685,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The pre-built binaries were built on macOS High Sierra, 10.13.6
+The pre-built binaries were built on macOS Mojave, 10.14.5.
 
 Oracle Instant Client libraries are required on macOS.  There is no
 native Oracle Database for macOS but one can easily be run in a Linux
@@ -703,7 +728,7 @@ and unzip it, for example:
 
 ```
 mkdir -p /opt/oracle
-unzip instantclient-basic-macos.x64-12.2.0.1.0.zip
+unzip instantclient-basic-macos.x64-18.1.0.0.0.zip
 ```
 
 Create a symbolic link for the 'client shared library' in the user
@@ -711,14 +736,14 @@ default library path such as in `~/lib` or `/usr/local/lib`.  For example:
 
 ```
 mkdir ~/lib
-ln -s instantclient_12_2/libclntsh.dylib ~/lib/
+ln -s instantclient_18_1/libclntsh.dylib ~/lib/
 ```
 
 Alternatively, copy the required OCI libraries, for example:
 
 ```
 mkdir ~/lib
-cp instantclient_12_2/{libclntsh.dylib.12.1,libclntshcore.dylib.12.1,libons.dylib,libnnz12.dylib,libociei.dylib} ~/lib/
+cp instantclient_18_1/{libclntsh.dylib.18.1,libclntshcore.dylib.18.1,libons.dylib,libnnz18.dylib,libociei.dylib} ~/lib/
 ```
 
 For Instant Client 11.2, the OCI libraries must be copied. For example:
@@ -780,7 +805,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The pre-built binaries were built with Visual Studio 2015 and require
+The pre-built binaries were built with Visual Studio 2017 and require
 the matching [redistributable][27].
 
 You may need Administrator privileges to set environment variables or
@@ -788,7 +813,7 @@ install software.
 
 #### 3.6.2 Install Node.js
 
-Install the 64-bit Node.js MSI (e.g. node-v6.11.0-x64.msi) from
+Install the 64-bit Node.js MSI (e.g. node-v10.16.0-x86.msi) from
 [nodejs.org][11].  Make sure the option to add the Node and npm
 directories to the path is selected.
 
@@ -827,8 +852,8 @@ Download the free 64-bit Instant Client **Basic** ZIP file from
 
 - Unzip the ZIP file into a directory that is accessible to your
   application.  For example unzip
-  `instantclient-basic-windows.x64-18.3.0.0.0dbru.zip` to
-  `C:\oracle\instantclient_18_3`.
+  ` instantclient-basic-windows.x64-19.3.0.0.0dbru.zip` to
+  `C:\oracle\instantclient_19_3`.
 
 - Add this directory to the `PATH` environment variable.  For example
   on Windows 7, update `PATH` in Control Panel -> System -> Advanced
@@ -845,11 +870,11 @@ Download the free 64-bit Instant Client **Basic** ZIP file from
 
   ```
   REM mynode.bat
-  SET PATH=C:\oracle\instantclient_18_3;%PATH%
+  SET PATH=C:\oracle\instantclient_19_3;%PATH%
   node %*
   ```
 
-  Invoke this batch file everytime you want to run Node.js.
+  Invoke this batch file every time you want to run Node.js.
 
   Alternatively use `SET` to change your `PATH` in each command prompt
   window before you run node.
@@ -876,6 +901,7 @@ Then set the environment variable `TNS_ADMIN` to that directory name.
 #### <a name="winredists"> </a> 3.6.6 Install the Visual Studio Redistributables
 
 The `PATH` variable needs to include the appropriate VS Redistributable:
+- Oracle client 19 requires the [Visual Studio 2017 Redistributable][27].
 - Oracle client 18 and 12.2 require the [Visual Studio 2013 Redistributable][27].
 - Oracle client 12.1 requires the [Visual Studio 2010 Redistributable][27].
 - Oracle client 11.2 requires the [Visual Studio 2005 Redistributable][29].
@@ -920,7 +946,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The pre-built binaries were built with Visual Studio 2015 and require
+The pre-built binaries were built with Visual Studio 2017 and require
 the matching [redistributable][27].
 
 The Oracle software can be either a database home or a full Oracle
@@ -936,7 +962,7 @@ install software.
 
 #### 3.7.2 Install Node.js
 
-Install the 64-bit Node.js MSI (e.g. node-v6.11.0-x64.msi) from
+Install the 64-bit Node.js MSI (e.g. node-v10.16.0-x64.msi) from
 [nodejs.org][11].  Make sure the option to add the Node and npm
 directories to the path is selected.
 
@@ -1006,9 +1032,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The GCC compiler is needed.  GCC 4.8 (or later) is needed to install
-because compiling for Node.js 6 (or later) requires a C++11 compatible
-compiler.
+The GCC compiler is needed.
 
 Use GNU Make 4.1-1 or above.
 
@@ -1017,18 +1041,18 @@ Python 2.7 is needed by node-gyp.
 #### 3.9.2 Install Node.js
 
 Download [Node.js][11] for AIX on Power Systems.  For
-example, if you downloaded version 6.11.0 you could install Node.js
+example, if you downloaded version 10.16.0 you could install Node.js
 into `/opt`:
 
 ```
 cd /opt
-gunzip -c node-v6.11.0-aix-ppc64.tar.gz | tar -xvf -
+gunzip -c node-v10.16.0-aix-ppc64.tar.gz | tar -xvf -
 ```
 
 Set `PATH` to include Node.js:
 
 ```
-export PATH=/opt/node-v6.11.0-aix-ppc64/bin:$PATH
+export PATH=/opt/node-v10.16.0-aix-ppc64/bin:$PATH
 ```
 
 #### 3.9.3 Install the add-on
@@ -1048,19 +1072,19 @@ export CC=gcc
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v3.1.2`, and use the `npm` package manager (which is
+example `v4.0.0`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v3.1.2
+npm install oracle/node-oracledb.git#v4.0.0
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v3.1.2/oracledb-src-3.1.2.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.0/oracledb-src-4.0.0.tgz
 ```
 
 #### 3.9.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1070,15 +1094,15 @@ and extract it into a directory that is accessible to your
 application, for example `/opt/oracle`:
 
 ```
-unzip instantclient-basic-aix.ppc64-12.2.0.1.0.zip
+unzip instantclient-basic-aix.ppc64-19.3.0.0.0dbru.zip
 mkdir -p /opt/oracle
-mv instantclient_12_2 /opt/oracle
+mv instantclient_19_3 /opt/oracle
 ```
 
 To run applications, you will need to set the link path:
 
 ```
-export LIBPATH=/opt/oracle/instantclient_12_2:$LIBPATH
+export LIBPATH=/opt/oracle/instantclient_19_3:$LIBPATH
 ```
 
 #### 3.9.5 Optionally create the default Oracle Client configuration directory
@@ -1089,7 +1113,7 @@ If you intend to co-locate optional Oracle configuration files such as
 `network/admin` subdirectory.  Create this if needed.  For example:
 
 ```
-sudo mkdir -p /opt/oracle/instantclient_12_2/network/admin
+sudo mkdir -p /opt/oracle/instantclient_19_3/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
@@ -1168,19 +1192,19 @@ export MAKE=gmake
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v3.1.2`, and use the `npm` package manager (which is
+example `v4.0.0`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v3.1.2
+npm install oracle/node-oracledb.git#v4.0.0
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v3.1.2/oracledb-src-3.1.2.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.0/oracledb-src-4.0.0.tgz
 ```
 
 #### 3.9.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1191,13 +1215,13 @@ application, for example `/opt/oracle`:
 
 ```
 cd /opt/oracle
-unzip instantclient-basic-solaris.x64-12.2.0.1.0.zip
+unzip instantclient-basic-solaris.x64-18.3.0.0.0dbru.zip
 ```
 
 To run applications, you will need to set the link path:
 
 ```
-export LD_LIBRARY_PATH_64=/opt/oracle/instantclient_12_2:$LD_LIBRARY_PATH_64
+export LD_LIBRARY_PATH_64=/opt/oracle/instantclient_18_3:$LD_LIBRARY_PATH_64
 ```
 
 #### 3.9.5 Optionally create the default Oracle Client configuration directory
@@ -1208,7 +1232,7 @@ If you intend to co-locate optional Oracle configuration files such as
 `network/admin` subdirectory.  Create this if needed.  For example:
 
 ```
-mkdir -p /opt/oracle/instantclient_12_2/network/admin
+mkdir -p /opt/oracle/instantclient_18_3/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
@@ -1254,18 +1278,14 @@ Install [Python 2.7][2], which is required for the node-gyp utility:
 - On Windows, install the Python 2.7 MSI and select the customization
   option to "Add python.exe to Path".
 
-Install a C++11 compatible compiler:
+Install a C compiler:
 
-- On Linux you need GCC 4.8 (or later) because compiling for Node.js 6
-  (or later) requires a C++11 compatible compiler.  The default
-  compiler on Oracle Linux 6 and RHEL 6 does not have the required
-  C++11 support. Install [GCC 4.8 or later][5] or upgrade to Oracle
-  Linux 7.
+- On Linux, GCC 4.4.7 (the default on Oracle Linux 6) is known to work.
 
 - On macOS install Xcode from the Mac App store.
 
-- On Windows, install a C/C++ build environment such as Microsoft
-  Visual Studio 2015.  Compilers supported by Oracle libraries are
+- On Windows, install a C build environment such as Microsoft
+  Visual Studio 2017.  Compilers supported by Oracle libraries are
   found in [Oracle documentation][23] for each version, for example
   [Oracle Database Client Installation Guide for
   Microsoft Windows][24].  Some users report that the npm
@@ -1287,12 +1307,12 @@ The `git` utility is required for this method.
 
 Build node-oracledb from source code by changing the package specifier
 so that `npm` downloads from GitHub instead of from npmjs.com.  For
-example, to install the code from the GitHub tag 'v3.1.2', add
-`oracle/node-oracledb#v3.1.2` to your `package.json` dependencies, or
+example, to install the code from the GitHub tag 'v4.0.0', add
+`oracle/node-oracledb#v4.0.0` to your `package.json` dependencies, or
 use the command:
 
 ```
-npm install oracle/node-oracledb#v3.1.2
+npm install oracle/node-oracledb#v4.0.0
 ```
 
 This will download, compile and install node-oracledb.
@@ -1306,7 +1326,7 @@ Users without `git`, or with older versions of `npm` such as included in
 Node.js 6, may alternatively need to use pre-bundled source code:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v3.1.2/oracledb-src-3.1.2.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.0/oracledb-src-4.0.0.tgz
 ```
 
 Note it may take some time before compilation begins due to the slow
@@ -1340,7 +1360,7 @@ installing.
 #### <a name="nogithubaccess"></a> 3.10.3 Compiling node-oracledb without GitHub Access
 
 Some companies block access to github.com so compiling source code
-from GitHub with `npm install oracle/node-oracledb.git#v3.1.2` will
+from GitHub with `npm install oracle/node-oracledb.git#v4.0.0` will
 fail.
 
 Oracle has a mirror of the GitHub repository source code that can be
@@ -1387,10 +1407,11 @@ versions do not have to be the same on different computers, but
 node-oracledb behavior and features may then differ.
 
 The destination computer's `PATH` needs to include Visual Studio
-Redistributables.  If you have Oracle client 18 or 12.2, install the Visual
-Studio 2013 Redistributable.  For Oracle client 12.1 install the Visual
-Studio 2010 Redistributable.  For Oracle client 11.2 install the Visual
-Studio 2005 Redistributable.
+Redistributables.  If you have Oracle client 19 install the Visual
+Studio 2017 Redistributable.  If you have Oracle client 18 or 12.2,
+install the Visual Studio 2013 Redistributable.  For Oracle client
+12.1 install the Visual Studio 2010 Redistributable.  For Oracle
+client 11.2 install the Visual Studio 2005 Redistributable.
 
 You can also find out the Redistributable required by locating the
 library `OCI.DLL` on the source computer and running:
@@ -1417,9 +1438,12 @@ sudo yum install -y oracle-nodejs-release-el7 oracle-release-el7
 sudo yum install nodejs node-oracledb-node10
 ```
 
-This will also install Oracle Instant Client, which needs to be
-configures.  As the root user, add Instant Client to the library
-search path:
+For Instant Client 19, the system library search path is automatically
+configured during installation.
+
+For older versions, if there is no other Oracle software on the
+machine that will be impacted, then permanently add Instant Client to
+the run-time link path.  For example, with sudo or as the root user:
 
 ```
 sudo sh -c "echo /usr/lib/oracle/18.3/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf"
@@ -1441,7 +1465,7 @@ See [Node.js for Oracle Linux][46] for details.
 You can host node-oracledb packages locally.
 
 Download the node-oracledb package from npm, for example from
-`https://registry.npmjs.com/oracledb/-/oracledb-3.1.2.tgz`
+`https://registry.npmjs.com/oracledb/-/oracledb-4.0.0.tgz`
 Alternatively, if you want to build your own binaries and
 node-oracledb package, the maintainer scripts in
 [/package](https://github.com/oracle/node-oracledb/tree/master/package)
@@ -1450,11 +1474,11 @@ can be used.  See
 for details.
 
 If you make the package accessible on your local web server, for
-example at https://www.example.com/oracledb-3.1.2.tgz, then your
+example at https://www.example.com/oracledb-4.0.0.tgz, then your
 install command would be:
 
 ```
-npm install https://www.example.com/oracledb-3.1.2.tgz
+npm install https://www.example.com/oracledb-4.0.0.tgz
 ```
 
 or your `package.json` would contain:
@@ -1462,7 +1486,7 @@ or your `package.json` would contain:
 ```
 . . .
    "dependencies": {
-      "oracledb": "https://www.example.com/oracledb-3.1.2.tgz"
+      "oracledb": "https://www.example.com/oracledb-4.0.0.tgz"
    },
 . . .
 ```
@@ -1550,9 +1574,6 @@ If `npm install oracledb` fails:
 - Use `npm install --verbose oracledb`.  Review your output and logs.
   Try to install in a different way.  Try some potential solutions.
 
-- When compiling node-oracledb from source, does your compiler have
-  C++11 support, e.g. use VS 2015 or GCC 4.8.
-
 - When compiling node-oracledb from source, do you have Python 2.7?
   Run `python --version`.
 
@@ -1563,18 +1584,9 @@ If `npm install oracledb` fails:
 - Try running `npm cache clean -f` and deleting the
   `node_modules/oracledb` directory.
 
-If `require('oracledb')` fails:
-
-- Do you have multiple copies of Node.js installed?  Did the correct
-  `npm` and `node-gyp` get invoked?
-
-- Did you get *Error: Module version mismatch* or *Error: Module
-  did not self-register*?  You must rebuild node-oracledb when you
-  upgrade Node.js.
-
 If creating a connection fails:
 
-- If you got *DPI-1047: Oracle Client library cannot be loaded*,
+- If you got *DPI-1047: Cannot locate an Oracle Client library*,
   then review any messages and the installation instructions.
 
 - Does your Node.js architecture (32-bit or 64-bit) match the Oracle
@@ -1597,8 +1609,8 @@ If creating a connection fails:
   expected version first in `PATH` (on Windows) or `LD_LIBRARY_PATH`
   (on Linux)?
 
-- On macOS, did you install Oracle Instant Client in `~/lib` or
-  `/usr/local/lib`?
+- On macOS, did you install Oracle Instant Client libraries in `~/lib`
+  or `/usr/local/lib`?
 
 Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [Slack][48] ([link to join Slack][49]).
@@ -1655,3 +1667,4 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [50]: http://yum.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/x86_64/index.html
 [51]: http://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html
 [52]: https://github.com/oracle/node-oracledb/blob/v2.3.0/INSTALL.md
+[53]: https://nodejs.org/api/n-api.html

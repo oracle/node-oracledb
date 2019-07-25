@@ -22,7 +22,7 @@
         <img class="headerLogo" alt="node-oracledb logo" src="logo.png" />
       </div>
       <div class="headerContent">
-        <h1 class="headerTitle">node-oracledb version 3.1</h1>
+        <h1 class="headerTitle">node-oracledb version 4.0</h1>
         <nav class="headerNav" role="navigation">
           <ul>
             <li><a href="https://oracle.github.io/node-oracledb/doc/api.html">Documentation</a></li>
@@ -46,7 +46,9 @@
       <p>The node-oracledb add-on for Node.js powers high performance
           Oracle Database applications.</p>
 
-      <p>Use node-oracledb 3.1 to connect Node.js 6, 8, 10 and 11 to Oracle Database.</p>
+      <p>Use node-oracledb 4.0 to connect Node.js 8.16, 10.16, 12, or later, to
+         Oracle Database.  Older versions of node-oracledb may work with older
+         versions of Node.js.</p>
 
       <p>Node-oracledb supports <a href="#features" >basic and
           advanced features</a> of Oracle Database and Oracle Client.</p>
@@ -135,17 +137,19 @@
           <li><p><a href="https://github.com/oracle/node-oracledb" >Hosted on GitHub</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#asyncawaitoverview" >Async/Await</a>, <a href="https://oracle.github.io/node-oracledb/doc/api.html#promiseoverview" >Promises</a>, <a href="https://oracle.github.io/node-oracledb/doc/api.html#intro" >Callbacks</a> and <a href="https://oracle.github.io/node-oracledb/doc/api.html#querystream" >Streams</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#sqlexecution" >SQL and PL/SQL Execution</a></p></li>
-          <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#batchexecution" >Batch Statement Execution</a></p></li>
+          <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#batchexecution" >Batch Statement Execution and Bulk Loading</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#dbcalltimeouts" >Call Timeouts</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#getstmtinfo" >Statement Metadata</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#ebr" >Edition-Based Redefinition</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#refcursors" >REF CURSORS</a></p></li>
+          <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#implicitresults" >PL/SQL Implicit Results</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#lobhandling" >Large Objects: CLOBs and BLOBs as Streams or Strings and Buffers</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#sodaoverview" >Oracle Database Simple Oracle Document Access (SODA)</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#jsondatatype" >Oracle Database JSON datatype</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#queryoutputformats" >Query results as JavaScript objects or arrays</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#typemap" >Smart mapping between JavaScript and Oracle types with manual override</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#bind" >Data binding using JavaScript types, objects or arrays</a></p></li>
+          <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#objects" >Query and bind Oracle Database named types and collections</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#transactionmgt" >Transaction Management</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#connpooling" >Inbuilt Connection Pool with Queuing, Aliasing, Tagging, Draining, Heterogeneous and Homogeneous connections, Proxy connections and Liveness checking</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#drcp" >Database Resident Connection Pooling (DRCP)</a></p></li>
@@ -153,7 +157,8 @@
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#extauth" >External Authentication</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#connectionping" >Connection Health Checking</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#changingpassword" >Password Changing</a></p></li>
-          <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#cqn" >Continuous Query Notification</a></p></li>
+          <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#aq" >Advanced Queuing (AQ)</a></p></li>
+          <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#cqn" >Continuous Query Notification (CQN)</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#propdbfetcharraysize" >Array Fetches</a></p></li>
           <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#stmtcache" >Statement Caching</a></p></li>
           <li><p><a href="https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS464" >Client Result Caching</a></p></li>
@@ -179,7 +184,7 @@
       <div id="license">
       <h2>License</h2>
 
-      <p>Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved.</p>
+      <p>Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.</p>
 
       <p>You may not use the identified files except in compliance with the Apache
       License, Version 2.0 (the "License.")</p>
