@@ -212,7 +212,7 @@ describe('218. aq2.js', function() {
     }
   }); // 218.4
 
-  it.skip('218.5 Enqueue a DB object as payload attribute', async () => {
+  it('218.5 Enqueue a DB object as payload attribute', async () => {
     try {
       const addrData = {
         NAME: "Changjie",
@@ -243,7 +243,7 @@ describe('218. aq2.js', function() {
     }
   }); // 218.5
 
-  it.skip('218.6 Enqueue a JavaScript object as payload attribute', async () => {
+  it('218.6 Enqueue a JavaScript object as payload attribute', async () => {
     try {
       const addrData = {
         NAME: "Chris",

@@ -108,7 +108,7 @@ bool njsAqQueue_createBaton(napi_env env, napi_callback_info info,
 static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
         napi_env env, napi_value value, dpiMsgProps **handle)
 {
-    napi_value payloadObj, constructor;
+    napi_value payloadObj, constructor, temp;
     napi_valuetype valueType;
     dpiMsgProps *tempHandle;
     bool found, isDbObject;
@@ -135,14 +135,25 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
                 NJS_CHECK_NAPI(env, napi_get_named_property(env, value,
                         "payload", &payloadObj))
                 NJS_CHECK_NAPI(env, napi_typeof(env, payloadObj, &valueType))
+                if (valueType == napi_string)
+                    break;
                 if (valueType == napi_object) {
                     NJS_CHECK_NAPI(env, napi_instanceof(env, payloadObj,
                             constructor, &isDbObject))
+                    if (isDbObject || njsUtils_isBuffer(env, payloadObj))
+                        break;
+                    if (queue->payloadObjectType) {
+                        NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+                                queue->payloadObjectType->jsDbObjectConstructor,
+                                &constructor))
+                        NJS_CHECK_NAPI(env, napi_new_instance(env, constructor,
+                                1, &payloadObj, &temp))
+                        payloadObj = temp;
+                        isDbObject = true;
+                        break;
+                    }
                 }
-                if (valueType != napi_string &&
-                        (valueType != napi_object || !isDbObject ||
-                                !njsUtils_isBuffer(env, payloadObj)))
-                    return njsBaton_setError(baton, errInvalidAqMessage);
+                return njsBaton_setError(baton, errInvalidAqMessage);
             }
             break;
         default:
