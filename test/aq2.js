@@ -288,4 +288,119 @@ describe('218. aq2.js', function() {
       should.not.exist(err);
     }
   }); // 218.7
+
+  const addrArray = [
+    {
+      NAME: "John",
+      ADDRESS: "100 Oracle Parkway Redwood City, CA US 94065"
+    },
+    {
+      NAME: "Jenny",
+      ADDRESS: "200 Oracle Parkway Redwood City, CA US 94065"
+    },
+    {
+      NAME: "Laura",
+      ADDRESS: "300 Oracle Parkway Redwood City, CA US 94065"
+    },
+    {
+      NAME: "Lawrance",
+      ADDRESS: "400 Oracle Parkway Redwood City, CA US 94065"
+    }
+  ];
+
+  it('218.8 enqMany() with DB object array', async () => {
+
+    try {
+      // Enqueue
+      const queue1 = await conn.getQueue(
+        objQueueName,
+        { payloadType: objType }
+      );
+      let msgArray = [];
+      for (let i = 0; i < addrArray.length; i++) {
+        msgArray[i] = new queue1.payloadTypeClass(addrArray[i]);
+      }
+      await queue1.enqMany(msgArray);
+
+      // Dequeue
+      const queue2 = await conn.getQueue(
+        objQueueName,
+        { payloadType: objType }
+      );
+      const messages = await queue2.deqMany(5);  // get at most 5 messages
+      if (messages) {
+        should.strictEqual(addrArray.length, messages.length);
+        should.strictEqual(addrArray[0].NAME, messages[0].payload.NAME);
+        should.strictEqual(addrArray[0].ADDRESS, messages[0].payload.ADDRESS);
+        should.strictEqual(addrArray[3].NAME, messages[3].payload.NAME);
+        should.strictEqual(addrArray[3].ADDRESS, messages[3].payload.ADDRESS);
+      }
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 218.8
+
+  it('218.9 enqMany() with DB object array as payload', async () => {
+    try {
+      // Enqueue
+      const queue1 = await conn.getQueue(
+        objQueueName,
+        { payloadType: objType }
+      );
+      let msgArray = [];
+      for (let i = 0; i < addrArray.length; i++) {
+        let msg = new queue1.payloadTypeClass(addrArray[i]);
+        msgArray[i] = { payload: msg };
+      }
+      await queue1.enqMany(msgArray);
+
+      // Dequeue
+      const queue2 = await conn.getQueue(
+        objQueueName,
+        { payloadType: objType }
+      );
+      const messages = await queue2.deqMany(5);  // get at most 5 messages
+      if (messages) {
+        should.strictEqual(addrArray.length, messages.length);
+        should.strictEqual(addrArray[0].NAME, messages[0].payload.NAME);
+        should.strictEqual(addrArray[0].ADDRESS, messages[0].payload.ADDRESS);
+        should.strictEqual(addrArray[3].NAME, messages[3].payload.NAME);
+        should.strictEqual(addrArray[3].ADDRESS, messages[3].payload.ADDRESS);
+      }
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); //218.9
+
+  it('218.10 enqMany() with JavaScript objects as payload', async () => {
+    try {
+      // Enqueue
+      const queue1 = await conn.getQueue(
+        objQueueName,
+        { payloadType: objType }
+      );
+      let msgArray = [];
+      for (let i = 0; i < addrArray.length; i++) {
+        let msg = addrArray[i];
+        msgArray[i] = { payload: msg };
+      }
+      await queue1.enqMany(msgArray);
+
+      // Dequeue
+      const queue2 = await conn.getQueue(
+        objQueueName,
+        { payloadType: objType }
+      );
+      const messages = await queue2.deqMany(5);  // get at most 5 messages
+      if (messages) {
+        should.strictEqual(addrArray.length, messages.length);
+        should.strictEqual(addrArray[0].NAME, messages[0].payload.NAME);
+        should.strictEqual(addrArray[0].ADDRESS, messages[0].payload.ADDRESS);
+        should.strictEqual(addrArray[3].NAME, messages[3].payload.NAME);
+        should.strictEqual(addrArray[3].ADDRESS, messages[3].payload.ADDRESS);
+      }
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 218.10
 });

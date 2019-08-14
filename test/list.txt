@@ -4590,6 +4590,9 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     218.5 Enqueue a DB object as payload attribute
     218.6 Enqueue a JavaScript object as payload attribute
     218.7 Negative - Set payloadType as oracledb.DB_TYPE_OBJECT
+    218.8 enqMany() with DB object array
+    218.9 enqMany() with DB object array as payload
+    218.10 enqMany() with JavaScript objects as payload
 
 219. aq3.js
     219.1 The read-only property "name" of AqQueue Class
