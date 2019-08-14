@@ -1994,9 +1994,8 @@ static bool njsConnection_processExecuteBinds(njsBaton *baton,
 
     // if binding by name, get the list of bind names
     bindNames = NULL;
-    if (!isArray) {
-        NJS_CHECK_NAPI(env, napi_get_property_names(env, binds, &bindNames))
-    }
+    if (!isArray && !njsUtils_getOwnPropertyNames(env, binds, &bindNames))
+        return false;
 
     // initialize variables; if there are no variables, nothing further to do!
     baton->bindArraySize = 1;
@@ -2069,9 +2068,8 @@ static bool njsConnection_processExecuteManyBinds(njsBaton *baton,
 
     // get the list of bind names, if binding by name
     bindNames = NULL;
-    if (!bindByPos) {
-        NJS_CHECK_NAPI(env, napi_get_property_names(env, bindDefs, &bindNames))
-    }
+    if (!bindByPos && !njsUtils_getOwnPropertyNames(env, bindDefs, &bindNames))
+        return false;
 
     // initialize variables; if there are no variables, nothing further to do!
     if (!njsConnection_initBindVars(baton, env, bindDefs, bindNames))

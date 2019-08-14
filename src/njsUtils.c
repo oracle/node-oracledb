@@ -509,6 +509,27 @@ napi_value njsUtils_getNull(napi_env env)
 
 
 //-----------------------------------------------------------------------------
+// njsUtils_getOwnPropertyNames()
+//   Returns an array of property names owned specifically by the given object.
+//-----------------------------------------------------------------------------
+bool njsUtils_getOwnPropertyNames(napi_env env, napi_value value,
+        napi_value *names)
+{
+    napi_value global, globalObject, method;
+
+    NJS_CHECK_NAPI(env, napi_get_global(env, &global))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, global, "Object",
+            &globalObject))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, globalObject,
+            "getOwnPropertyNames", &method))
+    NJS_CHECK_NAPI(env, napi_call_function(env, globalObject, method, 1,
+            &value, names))
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsUtils_getStringArg()
 //   Gets a string from the specified parameter. If the value is not a string,
 // an error is raised and false is returned.

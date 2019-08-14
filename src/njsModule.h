@@ -943,6 +943,8 @@ bool njsUtils_getError(napi_env env, dpiErrorInfo *errorInfo,
 bool njsUtils_getIntArg(napi_env env, napi_value *args, int index,
         int32_t *result);
 napi_value njsUtils_getNull(napi_env env);
+bool njsUtils_getOwnPropertyNames(napi_env env, napi_value value,
+        napi_value *names);
 bool njsUtils_getStringArg(napi_env env, napi_value *args, int index,
         char **result, size_t *resultLength);
 bool njsUtils_getStringFromArg(napi_env env, napi_value *args,

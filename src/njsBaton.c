@@ -452,7 +452,8 @@ bool njsBaton_getFetchInfoFromArg(njsBaton *baton, napi_env env,
         return true;
 
     // extract the property names from the object
-    NJS_CHECK_NAPI(env, napi_get_property_names(env, value, &keys))
+    if (!njsUtils_getOwnPropertyNames(env, value, &keys))
+        return false;
 
     // allocate space for the fetchInfo based on the number of keys
     NJS_CHECK_NAPI(env, napi_get_array_length(env, keys, &numElements))

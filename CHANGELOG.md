@@ -4,6 +4,10 @@
 
 **This release is under development**
 
+- Fixed a regression when enumerable properties were added to
+  `Object.prototype`.
+  ([#1129](https://github.com/oracle/node-oracledb/issues/1129)).
+
 - Fixed a regression with missing `metaData` from `connection.getStatementInfo()`
 
 - Fixed passing DbObjects and JavaScript objects as the `payload` attribute for
