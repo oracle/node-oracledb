@@ -164,8 +164,8 @@ version 2.0.
         - Install a C Compiler such as Xcode, GCC, Visual Studio
           2017, or similar.
 
-        - Run `npm install oracle/node-oracledb.git#v4.0.0`, or add
-          `oracle/node-oracledb.git#v4.0.0` to your `package.json`
+        - Run `npm install oracle/node-oracledb.git#v4.0.1`, or add
+          `oracle/node-oracledb.git#v4.0.1` to your `package.json`
           dependencies.  Substitute your desired [GitHub tag][40].
 
 - Add Oracle 19, 18, 12, or 11.2 client libraries to your operating
@@ -1074,19 +1074,19 @@ export CC=gcc
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v4.0.0`, and use the `npm` package manager (which is
+example `v4.0.1`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v4.0.0
+npm install oracle/node-oracledb.git#v4.0.1
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.0/oracledb-src-4.0.0.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.1/oracledb-src-4.0.1.tgz
 ```
 
 #### 3.9.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1194,19 +1194,19 @@ export MAKE=gmake
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v4.0.0`, and use the `npm` package manager (which is
+example `v4.0.1`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v4.0.0
+npm install oracle/node-oracledb.git#v4.0.1
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.0/oracledb-src-4.0.0.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.1/oracledb-src-4.0.1.tgz
 ```
 
 #### 3.9.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1309,12 +1309,12 @@ The `git` utility is required for this method.
 
 Build node-oracledb from source code by changing the package specifier
 so that `npm` downloads from GitHub instead of from npmjs.com.  For
-example, to install the code from the GitHub tag 'v4.0.0', add
-`oracle/node-oracledb#v4.0.0` to your `package.json` dependencies, or
+example, to install the code from the GitHub tag 'v4.0.1', add
+`oracle/node-oracledb#v4.0.1` to your `package.json` dependencies, or
 use the command:
 
 ```
-npm install oracle/node-oracledb#v4.0.0
+npm install oracle/node-oracledb#v4.0.1
 ```
 
 This will download, compile and install node-oracledb.
@@ -1328,7 +1328,7 @@ Users without `git`, or with older versions of `npm` such as included in
 Node.js 6, may alternatively need to use pre-bundled source code:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.0/oracledb-src-4.0.0.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.1/oracledb-src-4.0.1.tgz
 ```
 
 Note it may take some time before compilation begins due to the slow
@@ -1362,7 +1362,7 @@ installing.
 #### <a name="nogithubaccess"></a> 3.10.3 Compiling node-oracledb without GitHub Access
 
 Some companies block access to github.com so compiling source code
-from GitHub with `npm install oracle/node-oracledb.git#v4.0.0` will
+from GitHub with `npm install oracle/node-oracledb.git#v4.0.1` will
 fail.
 
 Oracle has a mirror of the GitHub repository source code that can be
@@ -1467,7 +1467,7 @@ See [Node.js for Oracle Linux][46] for details.
 You can host node-oracledb packages locally.
 
 Download the node-oracledb package from npm, for example from
-`https://registry.npmjs.com/oracledb/-/oracledb-4.0.0.tgz`
+`https://registry.npmjs.com/oracledb/-/oracledb-4.0.1.tgz`
 Alternatively, if you want to build your own binaries and
 node-oracledb package, the maintainer scripts in
 [/package](https://github.com/oracle/node-oracledb/tree/master/package)
@@ -1476,11 +1476,11 @@ can be used.  See
 for details.
 
 If you make the package accessible on your local web server, for
-example at https://www.example.com/oracledb-4.0.0.tgz, then your
+example at https://www.example.com/oracledb-4.0.1.tgz, then your
 install command would be:
 
 ```
-npm install https://www.example.com/oracledb-4.0.0.tgz
+npm install https://www.example.com/oracledb-4.0.1.tgz
 ```
 
 or your `package.json` would contain:
@@ -1488,7 +1488,7 @@ or your `package.json` would contain:
 ```
 . . .
    "dependencies": {
-      "oracledb": "https://www.example.com/oracledb-4.0.0.tgz"
+      "oracledb": "https://www.example.com/oracledb-4.0.1.tgz"
    },
 . . .
 ```
