@@ -18,6 +18,8 @@
 
 - Fixed a compilation warning seen on Windows.
 
+- Improve portability of buildbinary.js, a package creation script. (#1129)
+
 ## node-oracledb v4.0.0 (25 Jul 2019)
 
 - Refactored the node-oracledb implementation to use

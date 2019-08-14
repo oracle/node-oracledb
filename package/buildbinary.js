@@ -66,7 +66,7 @@ function buildBinary() {
     fs.unlink(buildBinaryFile, function(err) {if (err && !err.message.match(/ENOENT/)) throw(err);});
     fs.unlink(binaryStagingFile, function(err) {if (err && !err.message.match(/ENOENT/)) throw(err);});
     fs.unlink(binaryStagingInfoFile, function(err) {if (err && !err.message.match(/ENOENT/)) throw(err);});
-    execSync('npm install');
+    execSync('node-gyp rebuild');
     fs.renameSync(buildBinaryFile, binaryStagingFile);
     fs.appendFileSync(binaryStagingInfoFile, buildInfo + "\n");
   } catch(err) {
