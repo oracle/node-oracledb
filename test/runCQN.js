@@ -317,4 +317,56 @@ describe('185. runCQN.js', function() {
       should.not.exist(err);
     }
   }); // 185.5
+
+  it('185.6 getting registration ID "regId" for subscriptions', async () => {
+    try {
+      const TABLE = 'nodb_tab_cqn_6';
+      let sql =
+          `CREATE TABLE ${TABLE} (
+            k NUMBER
+          )`;
+      let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+      await conn.execute(plsql);
+
+      const myCallback = async function(message) {
+        // console.log(message);
+        should.strictEqual(message.registered, true);
+      };
+
+      const options = {
+        callback : myCallback,
+        sql: `SELECT * FROM ${TABLE} WHERE k > :bv`,
+        binds: { bv : 100 },
+        timeout : 20,
+        qos : oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
+      };
+
+      let sleepPLSQL = `BEGIN DBMS_SESSION.SLEEP(2); END;`;
+      await conn.execute(plsql);
+      await conn.commit();
+
+      const result = await conn.subscribe('sub6', options);
+      (result.regId).should.be.a.Number();
+
+      const tableName = dbconfig.user.toUpperCase() + '.' + TABLE.toUpperCase();
+      sql = `SELECT regid FROM USER_CHANGE_NOTIFICATION_REGS
+               WHERE table_name = '${tableName}'`;
+      const res = await conn.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+      should.strictEqual(result.regId, res.rows[0].REGID);
+
+      sql = `INSERT INTO ${TABLE} VALUES (101)`;
+      await conn.execute(sql);
+
+      await conn.execute(sleepPLSQL);
+      await conn.commit();
+
+      await conn.unsubscribe('sub6');
+
+      sql = `DROP TABLE ${TABLE} PURGE`;
+      await conn.execute(sql);
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 185.6
+
 });
