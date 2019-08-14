@@ -3455,7 +3455,7 @@ This method was added in node-oracledb 4.0.
     *Error error* | If `getDbObjectClass()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
     *DbObject obj* | A [DbObject](#dbobjectclass) representing an Oracle Database object or collection.
 
-#### <a name="getQueue"></a> 4.2.9 `connection.getQueue()`
+#### <a name="getqueue"></a> 4.2.9 `connection.getQueue()`
 
 ##### Prototype
 
