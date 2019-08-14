@@ -51,7 +51,7 @@ describe('221. connectionClass.js', () => {
     }
   }); // 221.1
 
-  it.skip('221.2 set the property when using a standalone connection', async () => {
+  it('221.2 set the property when using a standalone connection', async () => {
     try {
       oracledb.connectionClass = 'NODB_TEST';
       const conn = await oracledb.getConnection(dbconfig);
