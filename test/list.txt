@@ -4602,3 +4602,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 220. examineOwnedProperties.js
     220.1 Only examine "owned" properties on objects
+
+221. connectionClass.js
+    221.1 set the property when using a connection pool
+    221.2 set the property when using a standalone connection

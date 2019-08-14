@@ -246,3 +246,4 @@ test/aq2.js
 test/aq3.js
 
 test/examineOwnedProperties.js
+test/connectionClass.js
