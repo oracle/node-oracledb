@@ -19,11 +19,8 @@ limitations under the License.
 ##  <a name="contents"></a> Contents
 
 1. [Node-oracledb Overview](#overview)
-    - 1.1 [Installation Changes in node-oracledb version 4.0](#mig40)
-    - 1.2 [Installation Changes in node-oracledb version 3.1](#mig31)
-    - 1.3 [Installation Changes in node-oracledb version 3.0](#mig30)
-    - 1.4 [Installation Changes in node-oracledb version 2.0](#mig20)
-2. [Quick Start Node-oracledb Installation](#quickstart)
+    - 1.1 [Installation Changes in node-oracledb version 4.0](#mig)
+2. [Quick Start node-oracledb Installation](#quickstart)
 3. [Node-oracledb Installation Instructions](#instructions)
     - 3.1 [Prerequisites](#prerequisites)
     - 3.2 [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
@@ -42,9 +39,10 @@ limitations under the License.
         - 3.11.1 [Copying node-oracledb Binaries on Windows](#winbins)
     - 3.12 [Installing Node.js and Node-oracledb RPMs from yum.oracle.com](#instnoderpms)
     - 3.13 [Building and Hosting your own node-oracledb Packages](#selfhost)
-4. [Installing Node-oracledb 1.x or 2.x](#installingoldvers)
-5. [Useful Resources for Node-oracledb](#otherresources)
-6. [Troubleshooting Node-oracledb Installation Problems](#troubleshooting)
+4. [Installing Older Versions of Node-oracledb](#installingoldvers)
+    - 4.1 [Installing node-oracledb 2.x and 3.x](#installingv2)
+    - 4.2 [Installing node-oracledb 1.x](#installingv1)
+5. [Troubleshooting Node-oracledb Installation Problems](#troubleshooting)
 
 ## <a name="overview"></a> 1. Node-oracledb Overview
 
@@ -67,7 +65,7 @@ and versions of Node.js that the pre-built binaries are compatible
 with will change as the Node.js project evolves.  The binaries are not
 guaranteed to be available or usable in your environment.
 
-#### <a name="mig40"></a> 1.1 Installation Changes in node-oracledb version 4.0
+#### <a name="mig"></a> 1.1 Installation Changes in node-oracledb version 4.0
 
 Node-oracledb 4.0 was refactored to use [N-API][53] version 4.  On
 each operating system, a node-oracledb binary will work with a number
@@ -78,78 +76,21 @@ Node.js, you may not need to reinstall node-oracledb.
 If compiling from source code, the compiler no longer needs C++11
 compatibility.  The node-oracledb source code is now pure C.
 
-#### <a name="mig31"></a> 1.1 Installation Changes in node-oracledb version 3.1
+See [Installing Older Versions of Node-oracledb](#installingoldvers) for
+information about older versions.
 
-Pre-built binaries are now contained in the package downloaded from
-npm.  This removes the previous internally executed step of
-downloading a suitable binary package from GitHub.  If install size is
-an issue, all binaries except those for the current Node.js version
-can be deleted with `npm run prune`.
-
-Source code is no longer included in the package available from npm.
-To compile from source code, you need access to GitHub or its [Oracle
-mirror](#nogithubaccess).
-
-Node-oracledb now loads the Oracle Client libraries the first time a
-connection is needed, not during `require('oracledb')`.  This means
-that `require('oracledb')` can succeed on machines that do not have
-Oracle Client libraries installed.  See the [CHANGELOG][43] for more
-information.
-
-#### <a name="mig30"></a> 1.2 Installation Changes in node-oracledb version 3.0
-
-Installation of node-oracledb binaries will now use the `npm config`
-proxy if it is set.  However, due to known npm performance issues, it
-is recommended to use environment variables like `https_proxy`
-instead, since these will be used in preference to the npm
-configuration.
-
-The node-oracledb installer now supports basic proxy authentication.
-
-On Windows, node-oracledb will now attempt to load the Oracle Client
-libraries from the `node_modules\oracledb\build\Release` directory
-before doing the standard Windows library directory search i.e. of the
-`PATH` directories.
-
-See the [CHANGELOG][43] and [Migrating from Previous node-oracledb
-Releases][47] for more information about node-oracledb 3.0.
-
-#### <a name="mig20"></a> 1.3 Changes in node-oracledb version 2.0
-
-In node-oracledb version 2.0, pre-built binaries are now available for
-some environments.
-
-Building from source code has improved significantly in node-oracledb
-version 2.0.  The Oracle header files, and the node-oracledb environment
-variables `OCI_INC_DIR` and `OCI_LIB_DIR` are no longer required.
-
-The Oracle client libraries must now always be in the default library
-search path, such as `PATH` (on Windows), or `LD_LIBRARY_PATH` (on
-Linux), or in `~/lib` (on macOS).  This is because they are
-dynamically loaded during execution. 'Rpath' linking is no longer
-performed on Linux or macOS.
-
-Any node-oracledb version 2.0 binary will run with any of the Oracle
-client version 11.2, 12, or 18 libraries without needing recompilation.
-Note the available Oracle functionality will vary with different
-Oracle Client and Database versions.
-
-See the [CHANGELOG][43] and [Migrating from node-oracledb 1.13 to
-node-oracledb 2.0][42] for more information about node-oracledb
-version 2.0.
-
-## <a name="quickstart"></a> 2. Quick Start Node-oracledb Installation
+## <a name="quickstart"></a> 2. Quick Start node-oracledb Installation
 
 - Install Node.js from [nodejs.org][11].
 
-- Install node-oracledb using the `npm` package manager, which is
-  included in Node.js.  If you are behind a firewall, you may need to
-  set the environment variable `https_proxy` first.
+- Install node-oracledb using the `npm` package manager, which is included in
+  Node.js.  If you are behind a firewall, you may need to set the proxy with
+  `npm config set proxy http://myproxy.example.com:80/`.
 
     - Many users will be able to use a pre-built node-oracledb binary:
 
-        - Run `npm install oracledb`, or add `oracledb` to your `package.json`
-          dependencies.  This installs from the [npm registry][4].
+        - Add `oracledb` to your `package.json` dependencies or run `npm install
+          oracledb`.  This installs from the [npm registry][4].
 
           Windows users will require the [Visual Studio 2017
           Redistributable][27].
@@ -162,8 +103,8 @@ version 2.0.
         - Install a C Compiler such as Xcode, GCC, Visual Studio
           2017, or similar.
 
-        - Run `npm install oracle/node-oracledb.git#v4.0.0`, or add
-          `oracle/node-oracledb.git#v4.0.0` to your `package.json`
+        - Run `npm install oracle/node-oracledb.git#v4.0.1`, or add
+          `oracle/node-oracledb.git#v4.0.1` to your `package.json`
           dependencies.  Substitute your desired [GitHub tag][40].
 
 - Add Oracle 19, 18, 12, or 11.2 client libraries to your operating
@@ -204,8 +145,6 @@ Problems](#troubleshooting) if you have installation issues.
 
 ## <a name="instructions"></a> 3. Node-oracledb Installation Instructions
 
-#### Which Instructions to Follow
-
 Instructions may need to be adjusted for your platform, environment and versions being used.
 
 I have ... | Follow this ...
@@ -220,7 +159,7 @@ Linux. I have the full Oracle client (installed via `runInstaller`) on the same 
 Linux.  I want to install Node.js and node-oracledb RPM packages | [Installing Node.js and Node-oracledb RPMs from yum.oracle.com](#instnoderpms)
 AIX on Power Systems | [Node-oracledb Installation on AIX on Power Systems with Instant Client ZIP files](#instaix)
 Solaris x86-64 (64-Bit) | [Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files](#instsolarisx8664)
-Another OS with Oracle Database 11.2, 12, or 18 client libraries available | Update binding.gyp and make any code changes required, sign the [OCA][8], and submit a pull request with your patch.
+Another OS with Oracle Database 19, 18, 12, or  11.2 client libraries available | Update binding.gyp and make any code changes required, sign the [OCA][8], and submit a pull request with your patch.
 Source code from GitHub | [Node-oracledb Installation from Source Code](#github)
 I don't have internet access | [Node-oracledb Installation Without Internet Access](#offline)
 
@@ -313,8 +252,7 @@ If you are behind a firewall you may need to set your proxy, for
 example:
 
 ```
-export http_proxy=http://my-proxy.example.com:80/
-export https_proxy=http://my-proxy.example.com:80/
+npm config set proxy http://myproxy.example.com:80/
 ```
 
 ##### To install a pre-built binary:
@@ -469,8 +407,7 @@ If you are behind a firewall you may need to set your proxy, for
 example:
 
 ```
-export http_proxy=http://my-proxy.example.com:80/
-export https_proxy=http://my-proxy.example.com:80/
+npm config set proxy http://myproxy.example.com:80/
 ```
 
 ##### To install a pre-built binary:
@@ -605,8 +542,7 @@ If you are behind a firewall you may need to set your proxy, for
 example:
 
 ```
-export http_proxy=http://my-proxy.example.com:80/
-export https_proxy=http://my-proxy.example.com:80/
+npm config set proxy http://myproxy.example.com:80/
 ```
 
 ##### To install a pre-built binary:
@@ -702,8 +638,7 @@ If you are behind a firewall you may need to set your proxy, for
 example:
 
 ```
-export http_proxy=http://my-proxy.example.com:80/
-export https_proxy=http://my-proxy.example.com:80/
+npm config set proxy http://myproxy.example.com:80/
 ```
 
 ##### To install a pre-built binary:
@@ -825,8 +760,7 @@ If you are behind a firewall you may need to set your proxy, for
 example:
 
 ```
-set http_proxy=http://my-proxy.example.com:80/
-set https_proxy=http://my-proxy.example.com:80/
+npm config set proxy http://myproxy.example.com:80/
 ```
 
 ##### To install a pre-built binary:
@@ -974,8 +908,7 @@ If you are behind a firewall you may need to set your proxy, for
 example:
 
 ```
-set http_proxy=http://my-proxy.example.com:80/
-set https_proxy=http://my-proxy.example.com:80/
+npm config set proxy http://myproxy.example.com:80/
 ```
 
 ##### To install a pre-built binary:
@@ -1061,8 +994,7 @@ If you are behind a firewall you may need to set your proxy, for
 example:
 
 ```
-export http_proxy=http://my-proxy.example.com:80/
-export https_proxy=http://my-proxy.example.com:80/
+npm config set proxy http://myproxy.example.com:80/
 ```
 
 Set the compiler to GCC:
@@ -1072,19 +1004,19 @@ export CC=gcc
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v4.0.0`, and use the `npm` package manager (which is
+example `v4.0.1`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v4.0.0
+npm install oracle/node-oracledb.git#v4.0.1
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.0/oracledb-src-4.0.0.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.1/oracledb-src-4.0.1.tgz
 ```
 
 #### 3.9.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1181,8 +1113,7 @@ If you are behind a firewall you may need to set your proxy, for
 example:
 
 ```
-export http_proxy=http://my-proxy.example.com:80/
-export https_proxy=http://my-proxy.example.com:80/
+npm config set proxy http://myproxy.example.com:80/
 ```
 
 Use the GNU `gmake` utility:
@@ -1192,19 +1123,19 @@ export MAKE=gmake
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v4.0.0`, and use the `npm` package manager (which is
+example `v4.0.1`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v4.0.0
+npm install oracle/node-oracledb.git#v4.0.1
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.0/oracledb-src-4.0.0.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.1/oracledb-src-4.0.1.tgz
 ```
 
 #### 3.9.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1307,12 +1238,12 @@ The `git` utility is required for this method.
 
 Build node-oracledb from source code by changing the package specifier
 so that `npm` downloads from GitHub instead of from npmjs.com.  For
-example, to install the code from the GitHub tag 'v4.0.0', add
-`oracle/node-oracledb#v4.0.0` to your `package.json` dependencies, or
+example, to install the code from the GitHub tag 'v4.0.1', add
+`oracle/node-oracledb#v4.0.1` to your `package.json` dependencies, or
 use the command:
 
 ```
-npm install oracle/node-oracledb#v4.0.0
+npm install oracle/node-oracledb#v4.0.1
 ```
 
 This will download, compile and install node-oracledb.
@@ -1326,7 +1257,7 @@ Users without `git`, or with older versions of `npm` such as included in
 Node.js 6, may alternatively need to use pre-bundled source code:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.0/oracledb-src-4.0.0.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.1/oracledb-src-4.0.1.tgz
 ```
 
 Note it may take some time before compilation begins due to the slow
@@ -1360,7 +1291,7 @@ installing.
 #### <a name="nogithubaccess"></a> 3.10.3 Compiling node-oracledb without GitHub Access
 
 Some companies block access to github.com so compiling source code
-from GitHub with `npm install oracle/node-oracledb.git#v4.0.0` will
+from GitHub with `npm install oracle/node-oracledb.git#v4.0.1` will
 fail.
 
 Oracle has a mirror of the GitHub repository source code that can be
@@ -1465,7 +1396,7 @@ See [Node.js for Oracle Linux][46] for details.
 You can host node-oracledb packages locally.
 
 Download the node-oracledb package from npm, for example from
-`https://registry.npmjs.com/oracledb/-/oracledb-4.0.0.tgz`
+[`https://registry.npmjs.com/oracledb/-/oracledb-4.0.1.tgz`](https://registry.npmjs.com/oracledb/-/oracledb-4.0.1.tgz)
 Alternatively, if you want to build your own binaries and
 node-oracledb package, the maintainer scripts in
 [/package](https://github.com/oracle/node-oracledb/tree/master/package)
@@ -1474,11 +1405,11 @@ can be used.  See
 for details.
 
 If you make the package accessible on your local web server, for
-example at https://www.example.com/oracledb-4.0.0.tgz, then your
+example at www.example.com/oracledb-4.0.1.tgz, then your
 install command would be:
 
 ```
-npm install https://www.example.com/oracledb-4.0.0.tgz
+npm install https://www.example.com/oracledb-4.0.1.tgz
 ```
 
 or your `package.json` would contain:
@@ -1486,15 +1417,46 @@ or your `package.json` would contain:
 ```
 . . .
    "dependencies": {
-      "oracledb": "https://www.example.com/oracledb-4.0.0.tgz"
+      "oracledb": "https://www.example.com/oracledb-4.0.1.tgz"
    },
 . . .
 ```
 
 
-## <a name="installingoldvers"></a> <a name="installingv1"></a> 4. Installing Node-oracledb 1.x or 2.x
+## <a name="installingoldvers"></a>  4. Installing Older Versions of Node-oracledb
 
-### Installing Node-oracledb 1.x
+### <a name="installingv2"></a> 4.1 Installing node-oracledb 2.x and 3.x
+
+Pre-built node-oracledb 2 and 3 binaries are available for some platforms and
+Node.js versions.  Review the [release tags][41] for availability. You can
+compile the add-on for other platforms or Node.js versions.
+
+The node-oracledb 3.1 installation steps are in the [version 3.1 INSTALL
+guide][55].
+
+The node-oracledb 3.0 installation steps are in the [version 3.0 INSTALL
+guide][54].
+
+The node-oracledb 2.x installation steps are in the [version 2.x INSTALL
+guide][52]
+
+To get an old add-on you must explicitly use its version when installing:
+
+```
+npm install oracledb@2.3.0
+```
+
+or your `package.json` could contain:
+
+```
+. . .
+   "dependencies": {
+      "oracledb": "2.3.0"
+   },
+. . .
+```
+
+### <a name="installingv1"></a> 4.2 Installing node-oracledb 1.x
 
 The node-oracledb 1.x installation steps are in the [version 1.x
 INSTALL guide][32].  This version always requires compilation.  To get
@@ -1514,48 +1476,7 @@ or your `package.json` could contain:
 . . .
 ```
 
-### Installing Node-oracledb 2.x
-
-The node-oracledb 2.x installation steps are in the [version 2.x
-INSTALL guide][52].  Pre-built binaries are available for some
-platforms and Node.js versions. You can compile the add-on for other
-versions.  To get an old add-on you must explicitly use its version
-when installing:
-
-```
-npm install oracledb@2.3.0
-```
-
-or your `package.json` could contain:
-
-```
-. . .
-   "dependencies": {
-      "oracledb": "2.3.0"
-   },
-. . .
-```
-
-## <a name="otherresources"></a> 5. Useful Resources for Node-oracledb
-
-Node-oracledb can be installed on the pre-built [*Database App
-Development VM*][33] for [VirtualBox][34], which has Oracle Database
-12c pre-installed on Oracle Linux.
-
-If you want to use your own database, installing the free [Oracle
-Database 11.2 'XE' Express Edition][20] is quick and easy.  Other
-database editions may be downloaded [here][35] or [used with
-Docker][36].
-
-If you want to install Oracle Linux yourself, it is free from
-[here][37].
-
-Oracle's free [LiveSQL][38] site is a great place to learn SQL and
-test statements without needing your own database.  Any questions
-about SQL or PL/SQL can be asked at
-[AskTom][39].
-
-## <a name="troubleshooting"></a> 6. Troubleshooting Node-oracledb Installation Problems
+## <a name="troubleshooting"></a> 5. Troubleshooting Node-oracledb Installation Problems
 
 *Read the [Node-oracledb Installation Instructions](#instructions)*.
 
@@ -1568,8 +1489,8 @@ If `npm install oracledb` fails:
   operating system, then change your Node.js version or compile
   node-oracledb from source code.
 
-- Was there a network connection error?  Do you need to set
-  `http_proxy` and/or `https_proxy`?
+- Was there a network connection error?  Do you need to use `npm config set
+  proxy`, or set `http_proxy` and/or `https_proxy`?
 
 - Use `npm install --verbose oracledb`.  Review your output and logs.
   Try to install in a different way.  Try some potential solutions.
@@ -1647,13 +1568,6 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [30]: http://www.oracle.com/technetwork/topics/aix5lsoft-098883.html
 [31]: http://www.oracle.com/technetwork/topics/solx8664soft-097204.html
 [32]: https://github.com/oracle/node-oracledb/blob/v1.13.1/INSTALL.md
-[33]: http://www.oracle.com/technetwork/community/developer-vm/index.html#dbapp
-[34]: https://www.virtualbox.org
-[35]: http://www.oracle.com/technetwork/database/enterprise-edition/downloads/
-[36]: https://store.docker.com/
-[37]: http://yum.oracle.com/
-[38]: https://livesql.oracle.com/
-[39]: https://asktom.oracle.com/
 [40]: https://github.com/oracle/node-oracledb/tags
 [41]: https://github.com/oracle/node-oracledb/releases
 [42]: https://oracle.github.io/node-oracledb/doc/api.html#migratev1v2
@@ -1668,3 +1582,5 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [51]: http://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html
 [52]: https://github.com/oracle/node-oracledb/blob/v2.3.0/INSTALL.md
 [53]: https://nodejs.org/api/n-api.html
+[54]: https://github.com/oracle/node-oracledb/blob/v3.0.1/INSTALL.md
+[55]: https://github.com/oracle/node-oracledb/blob/v3.1.2/INSTALL.md
