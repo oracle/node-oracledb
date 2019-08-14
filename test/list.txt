@@ -4596,5 +4596,20 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     217.2 examples/aqoptions.js
     217.3 examples/aqmulti.js
 
-  218. aq2.js
+218. aq2.js
     218.1 examples/aqobject.js
+    - 218.2 The read-only property "payloadTypeClass"
+    218.3 Negative - enqueue a raw JavaScript object directly
+    218.4 Negative - getQueue() without options on DB Object data
+    218.5 Enqueue a DB object as payload attribute
+    218.6 Enqueue a JavaScript object as payload attribute
+    218.7 Negative - Set payloadType as oracledb.DB_TYPE_OBJECT
+
+219. aq3.js
+    219.1 The read-only property "name" of AqQueue Class
+    - 219.2 The read-only property "payloadType"
+    - 219.3 The read-only property "payloadTypeName"
+    219.4 Negative - Set "maxMessages" argument to be -5
+    219.5 Negative - Set "maxMessages" argument to be 0
+    219.6 Enqueue a Buffer
+    219.7 enqMany() mixes enqueuing string and buffer

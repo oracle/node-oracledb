@@ -29,6 +29,7 @@ const oracledb  = require('oracledb');
 const should    = require('should');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
+const assert    = require('assert');
 
 describe('218. aq2.js', function() {
 
@@ -179,34 +180,23 @@ describe('218. aq2.js', function() {
     }
   }); // 218.3
 
-  it.skip('218.4 getQueue() without options on DB Object data', async () => {
+  it('218.4 Negative - getQueue() without options on DB Object data', async () => {
     try {
       const addrData = {
         NAME: "Changjie",
         ADDRESS: "200 Oracle Parkway Redwood City, CA US 94065"
       };
-
-      // Enqueue
-      const queue1 = await conn.getQueue(
-        objQueueName,
-        //{ payloadType: objType }
+      await assert.rejects(
+        async () => {
+          const queue1 = await conn.getQueue(objQueueName);
+          const objClass = await conn.getDbObjectClass(objType);
+          const message = new objClass(addrData);
+          await queue1.enqOne(message);
+        },
+        /DPI-1071/
       );
-      const objClass = await conn.getDbObjectClass(objType);
-      const message = new objClass(addrData);
-      // const message = new queue1.payloadTypeClass(addrData);
-      await queue1.enqOne(message);
-      await conn.commit();
-
-      // Dequeue
-      const queue2 = await conn.getQueue(
-        objQueueName,
-        //{ payloadType: objType }
-      );
-      const msg = await queue2.deqOne();
-      await conn.commit();
-      should.exist(msg);
-      should.strictEqual(msg.payload.NAME, addrData.NAME);
-      should.strictEqual(msg.payload.ADDRESS, addrData.ADDRESS);
+      // DPI-1071: payload type in message properties must match
+      // the payload type of the queue
     } catch (err) {
       should.not.exist(err);
     }
@@ -274,34 +264,26 @@ describe('218. aq2.js', function() {
   }); // 218.6
 
   // A variation of 218.4
-  it.skip('218.7 Set payloadType as oracledb.DB_TYPE_OBJECT', async () => {
+  it('218.7 Negative - Set payloadType as oracledb.DB_TYPE_OBJECT', async () => {
     try {
       const addrData = {
         NAME: "Changjie",
         ADDRESS: "200 Oracle Parkway Redwood City, CA US 94065"
       };
-
-      // Enqueue
-      const queue1 = await conn.getQueue(
-        objQueueName,
-        { payloadType: oracledb.DB_TYPE_OBJECT }
+      await assert.rejects(
+        async () => {
+          const queue1 = await conn.getQueue(
+            objQueueName,
+            { payloadType: oracledb.DB_TYPE_OBJECT }
+          );
+          const objClass = await conn.getDbObjectClass(objType);
+          const message = new objClass(addrData);
+          await queue1.enqOne(message);
+        },
+        {
+          message: 'NJS-007: invalid value for "payloadType" in parameter 2'
+        }
       );
-      const objClass = await conn.getDbObjectClass(objType);
-      const message = new objClass(addrData);
-      // const message = new queue1.payloadTypeClass(addrData);
-      await queue1.enqOne(message);
-      await conn.commit();
-
-      // Dequeue
-      const queue2 = await conn.getQueue(
-        objQueueName,
-        { payloadType: oracledb.DB_TYPE_OBJECT }
-      );
-      const msg = await queue2.deqOne();
-      await conn.commit();
-      should.exist(msg);
-      should.strictEqual(msg.payload.NAME, addrData.NAME);
-      should.strictEqual(msg.payload.ADDRESS, addrData.ADDRESS);
     } catch (err) {
       should.not.exist(err);
     }
