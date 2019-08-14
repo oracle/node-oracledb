@@ -34,6 +34,7 @@
 
 const oracledb  = require('oracledb');
 const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -254,10 +255,16 @@ describe('185. runCQN.js', function() {
         qos : oracledb.SUBSCR_QOS_QUERY
       };
 
-      await conn.subscribe('sub4', options);
+      await assert.rejects(
+        async () => {
+          await conn.subscribe('sub4', options);
+        },
+        /DPI-1013/
+      );
+      // DPI-1013: not supported
+
     } catch (err) {
-      should.exist(err);
-      (err.message).should.startWith("DPI-1013:");
+      should.not.exist(err);
     }
   }); // 185.4
 
