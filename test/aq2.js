@@ -179,7 +179,7 @@ describe('218. aq2.js', function() {
     }
   }); // 218.3
 
-  it.skip('218.4 getQueue() without options', async () => {
+  it.skip('218.4 getQueue() without options on DB Object data', async () => {
     try {
       const addrData = {
         NAME: "Changjie",
@@ -272,4 +272,38 @@ describe('218. aq2.js', function() {
       should.not.exist(err);
     }
   }); // 218.6
+
+  // A variation of 218.4
+  it.skip('218.7 Set payloadType as oracledb.DB_TYPE_OBJECT', async () => {
+    try {
+      const addrData = {
+        NAME: "Changjie",
+        ADDRESS: "200 Oracle Parkway Redwood City, CA US 94065"
+      };
+
+      // Enqueue
+      const queue1 = await conn.getQueue(
+        objQueueName,
+        { payloadType: oracledb.DB_TYPE_OBJECT }
+      );
+      const objClass = await conn.getDbObjectClass(objType);
+      const message = new objClass(addrData);
+      // const message = new queue1.payloadTypeClass(addrData);
+      await queue1.enqOne(message);
+      await conn.commit();
+
+      // Dequeue
+      const queue2 = await conn.getQueue(
+        objQueueName,
+        { payloadType: oracledb.DB_TYPE_OBJECT }
+      );
+      const msg = await queue2.deqOne();
+      await conn.commit();
+      should.exist(msg);
+      should.strictEqual(msg.payload.NAME, addrData.NAME);
+      should.strictEqual(msg.payload.ADDRESS, addrData.ADDRESS);
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 218.7
 });
