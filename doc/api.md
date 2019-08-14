@@ -475,6 +475,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 33.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
     - 33.4 [Migrating from node-oracledb 3.0 to node-oracledb 3.1](#migratev30v31)
     - 33.5 [Migrating from node-oracledb 3.1 to node-oracledb 4.0](#migratev31v40)
+34. [Useful Resources for Node-oracledb](#otherresources)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
 
@@ -13940,6 +13941,22 @@ When upgrading from node-oracledb version 3.1 to version 4.0:
   [`OUT_FORMAT_ARRAY`](#oracledbconstantsoutformat) and
   [`OUT_FORMAT_OBJECT`](#oracledbconstantsoutformat).
 
+## <a name="otherresources"></a> 34. Useful Resources for Node-oracledb
+
+Node-oracledb can be installed on the pre-built [*Database App Development
+VM*][152] for [VirtualBox][153], which has Oracle Database pre-installed on
+Oracle Linux.
+
+If you want to use your own database, installing the free [Oracle Database 'XE'
+Express Edition][130] is quick and easy.  Other database editions may be
+downloaded [here][154] or [used with Docker][155].
+
+If you want to install Oracle Linux yourself, it is free from [here][156].
+
+Oracle's free [LiveSQL][157] site is a great place to learn SQL and test
+statements without needing your own database.  Any questions about SQL or PL/SQL
+can be asked at [AskTom][158].
+
 
 [1]: https://www.npmjs.com/package/oracledb
 [2]: https://oracle.github.io/node-oracledb/INSTALL.html
@@ -14090,3 +14107,10 @@ When upgrading from node-oracledb version 3.1 to version 4.0:
 [149]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4848E6A0-58A7-44FD-8D6D-A033D0CCF9CB
 [150]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7E9034D5-0D33-43A1-9012-918350FE148C
 [151]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8C85D289-6AF3-41BC-848B-BF39D32648BA
+[152]: https://www.oracle.com/technetwork/community/developer-vm/index.html#dbapp
+[153]: https://www.virtualbox.org
+[154]: http://www.oracle.com/technetwork/database/enterprise-edition/downloads/
+[155]: https://docker.com/
+[156]: http://yum.oracle.com/
+[157]: https://livesql.oracle.com/
+[158]: https://asktom.oracle.com/
