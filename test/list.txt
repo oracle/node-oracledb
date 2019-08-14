@@ -4405,10 +4405,10 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     185.3 Specify the notification only for INSERT operation
     185.4 Negative - provide invalid SQL in CQN option
     185.5 examples/cqn2.js
-    185.6 getting registration ID "regId" for subscriptions
+    185.6 Get the registration ID "regId" for subscriptions
     185.7 Negative - unsubscribe multiple times
     185.8 Negative - unsubscribe nonexistent subscriptions
-    185.9 Negative - unsubscribe the subscription which throwed error when subscribed
+    185.9 Negative - unsubscribe the invalid subscription
 
 186. instanceof2.js
     186.1 instanceof checks for SODA classes
