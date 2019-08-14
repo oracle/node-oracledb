@@ -1,14 +1,22 @@
 # Change Log
 
-## node-oracledb v4.0.1 (DD MON YYYY)
+## node-oracledb v4.0.1 (19 Aug 2019)
 
-**This release is under development**
+- Fixed a regression causing a segfault when setting `oracledb.connectionClass`
+  and not creating a pool ([ODPI-C change](https://github.com/oracle/odpi/commit/f945355f3e58e7337dd798cba0404ab5755f0692)).
 
 - Fixed a regression when enumerable properties were added to
   `Object.prototype`.
   ([#1129](https://github.com/oracle/node-oracledb/issues/1129)).
 
 - Fixed a regression with missing `metaData` from `connection.getStatementInfo()`
+
+- Fixed crashes with spurious subscription (e.g. CQN) notifications, and when
+  unsubscribing an invalid subscription.
+
+- A more meaningful error is returned when calling `connection.subscribe()` with
+  SQL that is not a SELECT statement ([ODPI-C
+  change](https://github.com/oracle/odpi/commit/f95846bef6cf70e8114cbbb59ca04fbe2e7a3903))
 
 - Fixed passing DbObjects and JavaScript objects as the `payload` attribute for
   AQ message enqueues when using an object queue.
@@ -18,7 +26,7 @@
 
 - Fixed a compilation warning seen on Windows.
 
-- Improve portability of buildbinary.js, a package creation script. (#1129)
+- Improve portability of buildbinary.js, a package creation script ([#1129](https://github.com/oracle/node-oracledb/issues/1129)).
 
 ## node-oracledb v4.0.0 (25 Jul 2019)
 
