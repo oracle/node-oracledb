@@ -220,9 +220,7 @@ test/fetchBinaryTypesAsString.js
 test/currentSchema.js
 
 test/implicitResults.js
-
 test/getDataOfLob.js
-
 test/dbObjectsNestTbl.js
 
 test/dbObject1.js
@@ -245,3 +243,6 @@ test/dbObject17.js
 
 test/aq1.js
 test/aq2.js
+test/aq3.js
+
+test/examineOwnedProperties.js

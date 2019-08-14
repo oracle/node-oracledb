@@ -4613,3 +4613,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     219.5 Negative - Set "maxMessages" argument to be 0
     219.6 Enqueue a Buffer
     219.7 enqMany() mixes enqueuing string and buffer
+
+220. examineOwnedProperties.js
+    220.1 Only examine "owned" properties on objects
