@@ -3183,6 +3183,9 @@ the number of rows affected, for example the number of rows
 inserted. For non-DML statements such as queries and PL/SQL statements,
 `rowsAffected` is undefined.
 
+Due to Node.js type limitations, the largest value shown will be
+2<sup>32</sup> - 1, even if more rows were affected.  Larger values will wrap.
+
 #### <a name="executemany"></a> 4.2.7 `connection.executeMany()`
 
 ##### Prototype
@@ -3406,6 +3409,9 @@ This is an integer identifying the total number of database rows
 affected by the processing of all records of the [binds
 parameter](#executemanybinds).  It is only present if a DML statement
 was executed.
+
+Due to Node.js type limitations, the largest value shown will be
+2<sup>32</sup> - 1, even if more rows were affected.  Larger values will wrap.
 
 #### <a name="getdbobjectclass"></a> 4.2.8 `connection.getDbObjectClass()`
 
@@ -3948,7 +3954,7 @@ function(Error error, Object result)
 Callback function parameter | Description
 ----------------------------|-------------
 *Error error*               | If `subscribe()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
-*Object result*             | For [CQN](#cqn) `oracledb.SUBSCR_NAMESPACE_DBCHANGE` subscriptions this contains a single property `regId` corresponding the value of `REGID` in the database view `USER_CHANGE_NOTIFICATION_REGS` or the value of `REG_ID` in `USER_SUBSCR_REGISTRATIONS`.  For [AQ](#aq) `oracledb.SUBSCR_NAMESPACE_AQ` subscriptions, `regId`is undefined.
+*Object result*             | For [CQN](#cqn) `oracledb.SUBSCR_NAMESPACE_DBCHANGE` subscriptions this contains a single property `regId` corresponding the value of `REGID` in the database view `USER_CHANGE_NOTIFICATION_REGS` or the value of `REG_ID` in `USER_SUBSCR_REGISTRATIONS`.  For [AQ](#aq) `oracledb.SUBSCR_NAMESPACE_AQ` subscriptions, `regId`is undefined. Due to Node.js type limitations, the largest `regId` shown will be 2<sup>32</sup> - 1.  Larger values will wrap.
 
 The `result` callback parameter was added in node-oracledb 4.0.
 
@@ -5569,6 +5575,9 @@ This method was added in node-oracledb 3.0.
 
     The number of documents matching the SodaOperation criteria.
 
+    Due to Node.js type limitations, the largest `count` value will be
+    2<sup>32</sup> - 1, even if more rows exist.  Larger values will wrap.
+
 ###### <a name="sodaoperationclassgetcursor"></a> 10.2.4.1.2.2 `sodaOperation.getCursor()`
 
 ##### Prototype
@@ -5748,6 +5757,9 @@ This method was added in node-oracledb 3.0.
     ```
 
     The number of documents removed from the collection.
+
+    Due to Node.js type limitations, the largest `count` value will be
+    2<sup>32</sup> - 1, even if Oracle Database removed more rows.  Larger values will wrap.
 
 ###### <a name="sodaoperationclassreplaceone"></a> 10.2.4.1.2.6 `sodaOperation.replaceOne()`
 
