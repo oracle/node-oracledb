@@ -442,12 +442,15 @@ bool njsSubscription_startNotifications(njsSubscription *subscr,
 // subscription is deregistered, either directly via a call to unsubscribe()
 // or indirectly via the timeout attribute or the quality of service flag that
 // tells a subscription to deregister after the first notification has been
-// received.
+// received. If notifications were never started (due to an error of some kind)
+// nothing needs to be done at this point.
 //-----------------------------------------------------------------------------
 bool njsSubscription_stopNotifications(njsSubscription *subscr)
 {
-    uv_close((uv_handle_t*) &subscr->async,
-            njsSubscription_onStopNotifications);
+    if (subscr->name) {
+        uv_close((uv_handle_t*) &subscr->async,
+                njsSubscription_onStopNotifications);
+    }
     return true;
 }
 

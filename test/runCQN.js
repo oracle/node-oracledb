@@ -433,7 +433,7 @@ describe('185. runCQN.js', function() {
   }); // 185.8
 
   // An variation of 185.4
-  it.skip('185.9 Negative - unsubscribe the invalid subscription', async () => {
+  it('185.9 Negative - unsubscribe the invalid subscription', async () => {
     try {
       const TABLE = 'nodb_tab_cqn_9';
       const myCallback = async function(message) {
@@ -456,7 +456,7 @@ describe('185. runCQN.js', function() {
       );
       // DPI-1013: not supported
 
-      conn.unsubscribe('sub9');
+      await conn.unsubscribe('sub9');
 
     } catch (err) {
       should.not.exist(err);
