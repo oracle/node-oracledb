@@ -241,7 +241,6 @@ describe('185. runCQN.js', function() {
 
   it('185.4 Negative - provide invalid SQL in CQN option', async() => {
     try {
-
       const TABLE = 'nodb_tab_cqn_4';
       const myCallback = async function(message) {
         console.log(message);
@@ -368,5 +367,100 @@ describe('185. runCQN.js', function() {
       should.not.exist(err);
     }
   }); // 185.6
+
+  it('185.7 Negative - unsubscribe multiple times', async () => {
+    try {
+      const TABLE = 'nodb_tab_cqn_7';
+      let sql =
+          `CREATE TABLE ${TABLE} (
+            k NUMBER
+          )`;
+      let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+      await conn.execute(plsql);
+
+      const myCallback = async function(message) {
+        // console.log(message);
+        should.strictEqual(message.registered, true);
+      };
+
+      const options = {
+        callback : myCallback,
+        sql: `SELECT * FROM ${TABLE} WHERE k > :bv`,
+        binds: { bv : 100 },
+        timeout : 20,
+        qos : oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
+      };
+
+      await conn.subscribe('sub7', options);
+
+      sql = `INSERT INTO ${TABLE} VALUES (101)`;
+      await conn.execute(sql);
+
+      plsql = `BEGIN DBMS_SESSION.SLEEP(2); END;`;
+      await conn.execute(plsql);
+      await conn.commit();
+
+      await conn.unsubscribe('sub7');
+
+      sql = `DROP TABLE ${TABLE} PURGE`;
+      await conn.execute(sql);
+
+      await assert.rejects(
+        async () => {
+          await conn.unsubscribe('sub7');
+        },
+        /NJS-061/
+      );
+      // NJS-061: invalid subscription
+    } catch (err) {
+      should.not.exist(err);
+    }
+
+  }); // 185.7
+
+  it('185.8 Negative - unsubscribe nonexistent subscriptions', async () => {
+    try {
+      await assert.rejects(
+        async () => {
+          await conn.unsubscribe('nonexist');
+        },
+        /NJS-061/
+      );
+      // NJS-061: invalid subscription
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 185.8
+
+  // An variation of 185.4
+  it('185.9 Negative - unsubscribe the subscription which throwed error when subscribed', async () => {
+    try {
+      const TABLE = 'nodb_tab_cqn_9';
+      const myCallback = async function(message) {
+        console.log(message);
+      };
+
+      const options = {
+        callback : myCallback,
+        sql: `DELETE FROM ${TABLE} WHERE k > :bv`,
+        binds: { bv : 100 },
+        timeout : 20,
+        qos : oracledb.SUBSCR_QOS_QUERY
+      };
+
+      await assert.rejects(
+        async () => {
+          await conn.subscribe('sub9', options);
+        },
+        /DPI-1013/
+      );
+      // DPI-1013: not supported
+
+      conn.unsubscribe('sub9');
+
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 185.9
 
 });
