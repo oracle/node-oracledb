@@ -843,8 +843,8 @@ static bool njsConnection_executeManyPostAsync(njsBaton *baton, napi_env env,
 
     // get total number of rows affected
     if (!baton->stmtInfo.isPLSQL) {
-        NJS_CHECK_NAPI(env, napi_create_uint32(env, baton->rowsAffected,
-                &temp))
+        NJS_CHECK_NAPI(env, napi_create_uint32(env,
+                (uint32_t) baton->rowsAffected, &temp))
         NJS_CHECK_NAPI(env, napi_set_named_property(env, result,
                 "rowsAffected", temp))
     }
@@ -1592,8 +1592,8 @@ static bool njsConnection_getRowCounts(njsBaton *baton, napi_env env,
     NJS_CHECK_NAPI(env, napi_create_array_with_length(env, baton->numRowCounts,
             rowCounts))
     for (i = 0; i < baton->numRowCounts; i++) {
-        NJS_CHECK_NAPI(env, napi_create_uint32(env, baton->rowCounts[i],
-                &temp))
+        NJS_CHECK_NAPI(env, napi_create_uint32(env,
+                (uint32_t) baton->rowCounts[i], &temp))
         NJS_CHECK_NAPI(env, napi_set_element(env, *rowCounts, i, temp))
     }
 
