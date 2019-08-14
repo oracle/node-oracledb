@@ -1759,11 +1759,23 @@ static bool njsConnection_getStatementInfoAsync(njsBaton *baton)
 static bool njsConnection_getStatementInfoPostAsync(njsBaton *baton,
         napi_env env, napi_value *args)
 {
-    napi_value result, bindNames, temp;
+    napi_value result, bindNames, metadata, temp;
     uint32_t i;
 
     // create object for the result
     NJS_CHECK_NAPI(env, napi_create_object(env, &result))
+
+    // add metadata (queries only)
+    if (baton->queryVars) {
+        if (!njsVariable_initForQueryJS(baton->queryVars, baton->numQueryVars,
+                env, baton))
+            return false;
+        if (!njsVariable_getMetadataMany(baton->queryVars, baton->numQueryVars,
+                env, baton->extendedMetaData, &metadata))
+            return false;
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, result, "metaData",
+                metadata))
+    }
 
     // add array for the bind names
     NJS_CHECK_NAPI(env, napi_create_array_with_length(env, baton->numBindNames,

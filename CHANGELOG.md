@@ -2,6 +2,8 @@
 
 ## node-oracledb v4.0.1 (DD MON YYYY)
 
+- Fixed a regression with missing `metaData` from `connection.getStatementInfo()`
+
 - Fixed passing DbObjects and JavaScript objects as the `payload` attribute for
   AQ message enqueues when using an object queue.
 

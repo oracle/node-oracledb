@@ -85,9 +85,20 @@ describe('162. getStmtInfo.js', function() {
       sql,
       function(err, info) {
         should.not.exist(err);
-        should.exist(info);
-        should.deepEqual(info.bindNames, []);
-        should.strictEqual(info.statementType, oracledb.STMT_TYPE_SELECT);
+        should.deepEqual(info,
+          { bindNames: [], statementType: oracledb.STMT_TYPE_SELECT,
+            metaData: [
+              {
+                dbType: oracledb.DB_TYPE_NUMBER,
+                dbTypeName: "NUMBER",
+                fetchType: oracledb.DB_TYPE_NUMBER,
+                name: "COL",
+                nullable: true,
+                precision: 0,
+                scale: -127
+              }
+            ]
+          });
         done();
       }
     );
