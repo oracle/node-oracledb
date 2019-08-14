@@ -1,5 +1,15 @@
 # Change Log
 
+## node-oracledb v4.0.1 (DD MON YYYY)
+
+- Fixed passing DbObjects and JavaScript objects as the `payload` attribute for
+  AQ message enqueues when using an object queue.
+
+- Made the error message for AQ `queue.deqMany(0)` the same NJS-005 given when a
+  negative number is used.
+
+- Fixed a compilation warning seen on Windows.
+
 ## node-oracledb v4.0.0 (25 Jul 2019)
 
 - Refactored the node-oracledb implementation to use
