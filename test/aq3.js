@@ -161,11 +161,17 @@ describe('219. aq3.js', function() {
     }
   }); // 219.4
 
-  it.skip('219.5 Negative - Set "maxMessages" argument to be 0', async () => {
+  it('219.5 Negative - Set "maxMessages" argument to be 0', async () => {
     try {
       const queue = await conn.getQueue(rawQueueName);
-      const messages = await queue.deqMany(0);
 
+      testsUtil.assertThrowsAsync(
+        async () => {
+          const messages = await queue.deqMany(0);
+          should.not.exist(messages);
+        },
+        /NJS-005/
+      );
     } catch (err) {
       should.not.exist(err);
     }

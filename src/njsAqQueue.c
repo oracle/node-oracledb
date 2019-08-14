@@ -396,6 +396,8 @@ static bool njsAqQueue_deqManyProcessArgs(njsBaton *baton,
 {
     if (!njsUtils_getUnsignedIntArg(env, args, 0, &baton->numMsgProps))
         return false;
+    if (baton->numMsgProps == 0)
+        return njsUtils_throwError(env, errInvalidParameterValue, 1);
 
     return true;
 }
