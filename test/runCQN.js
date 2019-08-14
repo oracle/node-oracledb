@@ -238,17 +238,10 @@ describe('185. runCQN.js', function() {
     }
   }); // 185.3
 
-  it.skip('185.4 Negative - provide invalid SQL in CQN option', async() => {
+  it('185.4 Negative - provide invalid SQL in CQN option', async() => {
     try {
 
       const TABLE = 'nodb_tab_cqn_4';
-      let sql =
-          `CREATE TABLE ${TABLE} (
-            k NUMBER
-          )`;
-      let plsql = testsUtil.sqlCreateTable(TABLE, sql);
-      await conn.execute(plsql);
-
       const myCallback = async function(message) {
         console.log(message);
       };
@@ -262,20 +255,9 @@ describe('185. runCQN.js', function() {
       };
 
       await conn.subscribe('sub4', options);
-
-      sql = `INSERT INTO ${TABLE} VALUES (103)`;
-      await conn.execute(sql);
-
-      plsql = `BEGIN DBMS_SESSION.SLEEP(2); END;`;
-      await conn.execute(plsql);
-      await conn.commit();
-
-      await conn.unsubscribe('sub4');
-
-      sql = `DROP TABLE ${TABLE} PURGE`;
-      await conn.execute(sql);
     } catch (err) {
-      should.not.exist(err);
+      should.exist(err);
+      (err.message).should.startWith("DPI-1013:");
     }
   }); // 185.4
 

@@ -247,7 +247,7 @@ static bool njsSubscription_createMessageTable(napi_env env,
 void njsSubscription_eventHandler(njsSubscription *subscr,
         dpiSubscrMessage *incomingMessage)
 {
-    if (subscr->handle) {
+    if (subscr->handle && subscr->name) {
         uv_mutex_lock(&subscr->mutex);
         uv_barrier_init(&subscr->barrier, 2);
         subscr->message = incomingMessage;
@@ -415,7 +415,7 @@ bool njsSubscription_startNotifications(njsSubscription *subscr,
 {
     uv_loop_t *loop;
 
-    if (subscr->nameLength == 0) {
+    if (!subscr->name) {
 
         // keep the name on the subscription
         subscr->name = baton->name;
