@@ -6925,9 +6925,14 @@ version of the Oracle Client libraries.
 If you are using Oracle Client 19c, the latest [Easy Connect Plus][151] syntax
 allows the use of multiple hosts or ports, along with optional entries for the
 wallet location, the distinguished name of the database server, and even lets
-some network configuration options be set. This means that a
-[`sqlnet.ora`](#tnsadmin) file is not needed for some common connection
-scenarios.
+some network configuration options be set. This means that
+[`tnsnames.ora`](#tnsadmin) or [`sqlnet.ora`](#tnsadmin) files are not needed
+for some further common connection scenarios.  For example, if a firewall
+terminates idle connections every four minutes, you may decide it is more
+efficient to keep connections alive instead of having the overhead of
+recreation.  Your connection string could be
+`"mydbmachine.example.com/orclpdb1?expire_time=3"` to send packets every three
+minutes with the [`SQLNET.EXPIRE_TIME`][159] feature.
 
 #### <a name="embedtns"></a> 14.2.2 Embedded Connect Descriptor Strings
 
@@ -7225,28 +7230,32 @@ on each connection.
 If you increase the size of the pool, you must [increase the number of
 threads](#numberofthreads) used by Node.js.
 
-The growth characteristics of a connection pool are determined by the
-Pool attributes [`poolIncrement`](#proppoolpoolincrement),
+The growth characteristics of a connection pool are determined by the Pool
+attributes [`poolIncrement`](#proppoolpoolincrement),
 [`poolMax`](#proppoolpoolmax), [`poolMin`](#proppoolpoolmin) and
-[`poolTimeout`](#proppoolpooltimeout).  Note that when External
-Authentication is used, the pool behavior is different, see
-[External Authentication](#extauth).
+[`poolTimeout`](#proppoolpooltimeout).  Note that when [external
+authentication](#extauth) or [heterogeneous pools](#connpoolproxy) are used, the
+pool growth behavior is different.
 
 Pool expansion happens when the following are all true: (i)
-[`getConnection()`](#getconnectionpool) is called and (ii) all the
-currently established connections in the pool are "checked out" by
-previous `getConnection()` calls and are in-use by the application,
-and (iii) the number of those connections is less than the pool's
-`poolMax` setting.
+[`pool.getConnection()`](#getconnectionpool) is called and (ii) all the
+currently established connections in the pool are "checked out" by previous
+`pool.getConnection()` calls and are in-use by the application, and (iii) the
+number of those connections is less than the pool's `poolMax` setting.
 
-The Oracle Real-World Performance Group's general recommendation for
-client connection pools is for the pool to have a fixed sized.  The
-values of `poolMin` and `poolMax` should be the same (and
-`poolIncrement` equal to zero), and the firewall, [resource
-manager][101] or user profile [`IDLE_TIME`][100] should not expire
-idle sessions.  This avoids connection storms which can decrease
-throughput.  See [About Optimizing Real-World Performance with Static
-Connection Pools][23], which contains details about sizing of pools.
+The Oracle Real-World Performance Group's general recommendation for client
+connection pools is to use a fixed sized.  The values of `poolMin` and `poolMax`
+should be the same (and `poolIncrement` equal to zero), and the firewall,
+[resource manager][101] or user profile [`IDLE_TIME`][100] should not expire
+idle sessions.  This avoids connection storms which can decrease throughput.
+See [Guideline for Preventing Connection Storms: Use Static Pools][23], which
+contains details about sizing of pools.  Having a fixed size will guarantee that
+the database can handle the upper pool size.  For example, if a pool needs to
+grow but the database resources are limited, then you may see errors such as
+*ORA-28547*.  With a fixed pool size, this class of error will occur when the
+pool is created, allowing you to change the size before users access the
+application.  With a dynamically growing pool, the error may occur much later
+after the pool has been in use for some time.
 
 The Pool attribute [`stmtCacheSize`](#propconnstmtcachesize) can be
 used to set the statement cache size used by connections in the pool,
@@ -8426,11 +8435,14 @@ terminating idle connections.
 You can configure your OS network settings and Oracle Net (which
 handles communication between node-oracledb and the database).
 
-For Oracle Net configuration, a [`tnsnames.ora`](#tnsnames) file can
-be used to configure the database service settings such as for
-failover using Oracle RAC or a standby database.  A
-[`ENABLE=BROKEN`][36] option can be used to aid detection of a
-terminated remote server.
+For Oracle Net configuration, a [`tnsnames.ora`](#tnsnames) file can be used to
+configure the database service settings such as for failover using Oracle RAC or
+a standby database.
+
+A [`SQLNET.EXPIRE_TIME`][159] or [`ENABLE=BROKEN`][36] option can be used to
+prevent firewalls from terminating connections.  They can also aid detection of
+a terminated remote database server.  With Oracle Client 19c, you can use
+`EXPIRE_TIME` in the [Easy Connect Plus](#easyconnect) connection string.
 
 A [`sqlnet.ora`][136] file can be used to configure settings like
 [`SQLNET.OUTBOUND_CONNECT_TIMEOUT`][33], [`SQLNET.RECV_TIMEOUT`][34]
@@ -13980,7 +13992,7 @@ can be asked at [AskTom][158].
 [20]: http://docs.libuv.org/en/v1.x/threadpool.html
 [21]: https://github.com/libuv/libuv
 [22]: https://github.com/oracle/node-oracledb/issues/603#issuecomment-277017313
-[23]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-BC09F045-5D80-4AF5-93F5-FEF0531E0E1D
+[23]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7DFBA826-7CC0-4D16-B19C-31D168069B54
 [24]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-015CA8C1-2386-4626-855D-CC546DDC1086
 [25]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-661BB906-74D2-4C5D-9C7E-2798F76501B3
 [26]: http://www.oracle.com/technetwork/topics/php/php-scalability-ha-twp-128842.pdf
@@ -14114,3 +14126,4 @@ can be asked at [AskTom][158].
 [156]: http://yum.oracle.com/
 [157]: https://livesql.oracle.com/
 [158]: https://asktom.oracle.com/
+[159]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1070805B-0703-457C-8D2E-4EEC26193E5F
