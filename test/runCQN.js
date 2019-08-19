@@ -106,8 +106,7 @@ describe('185. runCQN.js', function() {
       let plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
-      const myCallback = async function(message) {
-        // console.log(message);
+      const myCallback = function(message) {
         should.strictEqual(message.type, oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE);
         should.strictEqual(message.registered, true);
         const table = message.queries[0].tables[0];
@@ -124,16 +123,14 @@ describe('185. runCQN.js', function() {
         qos : oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
       };
 
-      await conn.subscribe('mysub', options);
+      await conn.subscribe('sub1', options);
 
       sql = `INSERT INTO ${TABLE} VALUES (101)`;
       await conn.execute(sql);
 
-      plsql = `BEGIN DBMS_SESSION.SLEEP(2); END;`;
-      await conn.execute(plsql);
       await conn.commit();
 
-      await conn.unsubscribe('mysub');
+      await conn.unsubscribe('sub1');
 
       sql = `DROP TABLE ${TABLE} PURGE`;
       await conn.execute(sql);
@@ -154,14 +151,16 @@ describe('185. runCQN.js', function() {
       let plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
-      const myCallback = async function(message) {
-        console.log(message);
+      const myCallback = function(message) {
         should.strictEqual(message.type, oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE);
         should.strictEqual(message.registered, true);
         const table = message.queries[0].tables[0];
         const tableName = dbconfig.user.toUpperCase() + '.' + TABLE.toUpperCase();
         should.strictEqual(table.name, tableName);
-        should.strictEqual(table.operation, oracledb.CQN_OPCODE_DELETE);
+        let expect = oracledb.CQN_OPCODE_INSERT |
+                     oracledb.CQN_OPCODE_DELETE |
+                     oracledb.CQN_OPCODE_ALL_ROWS;
+        should.strictEqual(expect, table.operation);
       };
 
       const options = {
@@ -171,12 +170,15 @@ describe('185. runCQN.js', function() {
         qos : oracledb.SUBSCR_QOS_QUERY
       };
       await conn.subscribe('sub2', options);
+      sql = `INSERT INTO ${TABLE} VALUES (99)`;
+      await conn.execute(sql);
+
+      sql = `INSERT INTO ${TABLE} VALUES (102)`;
+      await conn.execute(sql);
 
       sql = `DELETE FROM ${TABLE} WHERE k > :bv`;
       await conn.execute(sql, { bv : 100 });
 
-      plsql = `BEGIN DBMS_SESSION.SLEEP(2); END;`;
-      await conn.execute(plsql);
       await conn.commit();
 
       await conn.unsubscribe('sub2');
@@ -199,8 +201,7 @@ describe('185. runCQN.js', function() {
       let plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
-      const myCallback = async function(message) {
-        // console.log(message);
+      const myCallback = function(message) {
         should.strictEqual(message.type, oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE);
         should.strictEqual(message.registered, true);
         const table = message.queries[0].tables[0];
@@ -208,7 +209,7 @@ describe('185. runCQN.js', function() {
         should.strictEqual(table.name, tableName);
         let expect = oracledb.CQN_OPCODE_INSERT | oracledb.CQN_OPCODE_ALL_ROWS;
         should.strictEqual(table.operation, expect);
-      };
+      }
 
       const options = {
         callback : myCallback,
@@ -226,8 +227,6 @@ describe('185. runCQN.js', function() {
       sql = `INSERT INTO ${TABLE} VALUES (103)`;
       await conn.execute(sql);
 
-      plsql = `BEGIN DBMS_SESSION.SLEEP(2); END;`;
-      await conn.execute(plsql);
       await conn.commit();
 
       await conn.unsubscribe('sub3');
@@ -242,8 +241,9 @@ describe('185. runCQN.js', function() {
   it('185.4 Negative - provide invalid SQL in CQN option', async() => {
     try {
       const TABLE = 'nodb_tab_cqn_4';
-      const myCallback = async function(message) {
-        console.log(message);
+
+      const myCallback = function(message) {
+        should.exist(message);
       };
 
       const options = {
@@ -278,8 +278,7 @@ describe('185. runCQN.js', function() {
       let plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
-      const myCallback = async function(message) {
-        // console.log(message);
+      const myCallback = function(message) {
         should.strictEqual(message.type, oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE);
         should.strictEqual(message.registered, true);
       };
@@ -289,10 +288,10 @@ describe('185. runCQN.js', function() {
         sql: `SELECT * FROM ${TABLE}`,
         timeout : 60,
         qos : oracledb.SUBSCR_QOS_ROWIDS,
-        // Group notifications in batches covering 2 second
+        // Group notifications in batches covering 1 second
         // intervals, and send a summary
         groupingClass : oracledb.SUBSCR_GROUPING_CLASS_TIME,
-        groupingValue : 2,
+        groupingValue : 1,
         groupingType  : oracledb.SUBSCR_GROUPING_TYPE_SUMMARY
       };
 
@@ -304,8 +303,6 @@ describe('185. runCQN.js', function() {
         await conn.execute(sql, bindArr[i], { autoCommit: true });
       }
 
-      plsql = `BEGIN DBMS_SESSION.SLEEP(2); END;`;
-      await conn.execute(plsql);
       await conn.commit();
 
       await conn.unsubscribe('sub5');
@@ -327,8 +324,7 @@ describe('185. runCQN.js', function() {
       let plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
-      const myCallback = async function(message) {
-        // console.log(message);
+      const myCallback = function(message) {
         should.strictEqual(message.registered, true);
       };
 
@@ -340,8 +336,6 @@ describe('185. runCQN.js', function() {
         qos : oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
       };
 
-      let sleepPLSQL = `BEGIN DBMS_SESSION.SLEEP(2); END;`;
-      await conn.execute(plsql);
       await conn.commit();
 
       const result = await conn.subscribe('sub6', options);
@@ -356,7 +350,6 @@ describe('185. runCQN.js', function() {
       sql = `INSERT INTO ${TABLE} VALUES (101)`;
       await conn.execute(sql);
 
-      await conn.execute(sleepPLSQL);
       await conn.commit();
 
       await conn.unsubscribe('sub6');
@@ -378,8 +371,7 @@ describe('185. runCQN.js', function() {
       let plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
-      const myCallback = async function(message) {
-        // console.log(message);
+      const myCallback = function(message) {
         should.strictEqual(message.registered, true);
       };
 
@@ -396,8 +388,6 @@ describe('185. runCQN.js', function() {
       sql = `INSERT INTO ${TABLE} VALUES (101)`;
       await conn.execute(sql);
 
-      plsql = `BEGIN DBMS_SESSION.SLEEP(2); END;`;
-      await conn.execute(plsql);
       await conn.commit();
 
       await conn.unsubscribe('sub7');
@@ -432,12 +422,13 @@ describe('185. runCQN.js', function() {
     }
   }); // 185.8
 
-  // An variation of 185.4
+  // A variation of 185.4
   it('185.9 Negative - unsubscribe the invalid subscription', async () => {
     try {
       const TABLE = 'nodb_tab_cqn_9';
-      const myCallback = async function(message) {
-        console.log(message);
+
+      const myCallback = function(message) {
+        should.strictEqual(message.registered, true);
       };
 
       const options = {
