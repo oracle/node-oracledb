@@ -104,7 +104,7 @@ async function run() {
             SDO_GTYPE: 2003,
             SDO_SRID: null,
             SDO_POINT: null,
-            SDO_ELEM_INFO: [ 4, 1003, 3 ],
+            SDO_ELEM_INFO: [ 1, 1003, 3 ],
             SDO_ORDINATES: [ 4, 8, 5, 9 ]
           }
         }
