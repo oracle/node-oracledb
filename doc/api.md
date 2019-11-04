@@ -7818,7 +7818,6 @@ same pool:
 const sessionTag = "location=USA";
 
 function initSession(connection, requestedTag, cb) {
-  connection.tag = "LOCATION=GB";
   const seen = connection.tag ? connection.tag.split(";").includes(requestedTag) : false;
   if (seen) {
     cb()
