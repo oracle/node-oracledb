@@ -1,5 +1,12 @@
 # Change Log
 
+## node-oracledb v4.0.2 (DD Mon YYYY)
+
+**This release is under development**
+
+- Fixed a JavaScript memory leak when getting Oracle Database named type
+  information, such as with `getDbObjectClass()`.
+
 ## node-oracledb v4.0.1 (19 Aug 2019)
 
 - Fixed a regression causing a segfault when setting `oracledb.connectionClass`

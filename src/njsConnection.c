@@ -2350,8 +2350,9 @@ static bool njsConnection_scanExecuteBindUnit(njsBaton *baton,
     NJS_CHECK_NAPI(env, napi_get_named_property(env, args[1], "type", &value));
     NJS_CHECK_NAPI(env, napi_typeof(env, value, &valueType));
     if (valueType == napi_function) {
-        NJS_CHECK_NAPI(env, napi_get_prototype(env, value, &prototype))
-        NJS_CHECK_NAPI(env, napi_strict_equals(env, prototype,
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "prototype",
+                &prototype))
+        NJS_CHECK_NAPI(env, napi_instanceof(env, prototype,
                 baton->jsBaseDbObjectConstructor, &check))
         if (!check)
             return njsBaton_setError(baton, errInvalidBindDataType, 2);

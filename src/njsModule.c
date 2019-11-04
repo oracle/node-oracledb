@@ -69,6 +69,9 @@ static napi_value njsModule_externalInit(napi_env env, napi_callback_info info)
             &njsClassDefAqQueue, &oracleDb->jsAqQueueConstructor))
         return NULL;
     if (!njsOracleDb_prepareClass(oracleDb, env, instance,
+            &njsClassDefBaseDbObject, &oracleDb->jsBaseDbObjectConstructor))
+        return NULL;
+    if (!njsOracleDb_prepareClass(oracleDb, env, instance,
             &njsClassDefConnection, &oracleDb->jsConnectionConstructor))
         return NULL;
     if (!njsOracleDb_prepareClass(oracleDb, env, instance,

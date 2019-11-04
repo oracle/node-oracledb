@@ -1122,12 +1122,6 @@ bool njsOracleDb_new(napi_env env, napi_value instanceObj,
         return njsUtils_genericThrowError(env);
     }
 
-    // keep a reference to the base database object class
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, instanceObj,
-            "BaseDbObject", &temp))
-    NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
-            &oracleDb->jsBaseDbObjectConstructor))
-
     // create object for storing subscriptions
     NJS_CHECK_NAPI(env, napi_create_object(env, &temp))
     NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
@@ -1178,6 +1172,10 @@ bool njsOracleDb_prepareClass(njsOracleDb *oracleDb, napi_env env,
             njsUtils_throwError(env, errInsufficientMemory);
             return false;
         }
+
+        // store the instance on each of the properties as a convenience
+        for (i = 0; i < numProperties; i++)
+            allProperties[i].data = oracleDb;
 
         // populate the properties
         memcpy(allProperties, classDef->properties,

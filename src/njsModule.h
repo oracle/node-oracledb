@@ -253,6 +253,7 @@ extern const njsClassDef njsClassDefAqDeqOptions;
 extern const njsClassDef njsClassDefAqEnqOptions;
 extern const njsClassDef njsClassDefAqMessage;
 extern const njsClassDef njsClassDefAqQueue;
+extern const njsClassDef njsClassDefBaseDbObject;
 extern const njsClassDef njsClassDefConnection;
 extern const njsClassDef njsClassDefLob;
 extern const njsClassDef njsClassDefOracleDb;
