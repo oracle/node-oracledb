@@ -441,9 +441,17 @@ Overview of node-oracledb functional tests
         17.11.1 large number of columns
 
 18. constants.js
-      18.1 dbTypes maps correctly between names and numbers
-      18.2 jsTypes maps correctly
-      18.3 binding contants maps correctly
+    18.1 Query outFormat Constants
+    18.2 Node-oracledb Type Constants
+    18.3 Oracle Database Type Constants
+    18.4 Execute Bind Direction Constants
+    18.5 Privileged Connection Constants
+    18.6 SQL Statement Type Constants
+    18.7 Subscription Constants
+    18.8 Advanced Queuing Constants
+    18.9 Continuous Query Notification Constants
+    18.10 Pool Status Constants
+    18.11 Simple Oracle Document Access (SODA) Constants
 
 19. fetchTimestampAsString.js
     19.1 TIMESTAMP
