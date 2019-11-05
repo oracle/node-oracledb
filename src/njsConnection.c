@@ -1873,7 +1873,8 @@ static bool njsConnection_initBindVars(njsBaton *baton, napi_env env,
     njsVariable *var;
     uint32_t i;
 
-    // determine the numbe of bind variables
+    // determine the number of bind variables; if none are provided, nothing
+    // further needs to be done
     if (bindNames) {
         NJS_CHECK_NAPI(env, napi_get_array_length(env, bindNames,
                 &baton->numBindVars))
@@ -1881,6 +1882,8 @@ static bool njsConnection_initBindVars(njsBaton *baton, napi_env env,
         NJS_CHECK_NAPI(env, napi_get_array_length(env, binds,
                 &baton->numBindVars))
     }
+    if (baton->numBindVars == 0)
+        return true;
 
     // allocate memory for the bind variables
     baton->bindVars = calloc(baton->numBindVars, sizeof(njsVariable));

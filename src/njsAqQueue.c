@@ -526,6 +526,8 @@ static bool njsAqQueue_enqManyProcessArgs(njsBaton *baton,
         return njsUtils_throwError(env, errInvalidParameterValue, 1);
     NJS_CHECK_NAPI(env, napi_get_array_length(env, args[0],
             &baton->numMsgProps))
+    if (baton->numMsgProps == 0)
+        return njsUtils_throwError(env, errInvalidParameterValue, 1);
     baton->msgProps = calloc(baton->numMsgProps, sizeof(dpiMsgProps*));
     if (!baton->msgProps)
         return njsBaton_setError(baton, errInsufficientMemory);

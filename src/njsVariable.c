@@ -768,6 +768,8 @@ static bool njsVariable_processBuffer(njsVariable *var,
         case DPI_ORACLE_TYPE_NCLOB:
         case DPI_ORACLE_TYPE_BLOB:
             NJS_FREE_AND_CLEAR(buffer->lobs);
+            if (buffer->numElements == 0)
+                break;
             buffer->lobs = calloc(buffer->numElements, sizeof(njsLobBuffer));
             if (!buffer->lobs)
                 return njsBaton_setError(baton, errInsufficientMemory);

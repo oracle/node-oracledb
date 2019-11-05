@@ -274,7 +274,7 @@ bool njsUtils_copyArray(napi_env env, void *sourceArray, uint32_t numElements,
 bool njsUtils_copyString(napi_env env, char *source, size_t sourceLength,
         char **dest, size_t *destLength)
 {
-    if (source) {
+    if (source && sourceLength > 0) {
         *dest = malloc(sourceLength);
         if (!*dest)
             return njsUtils_throwError(env, errInsufficientMemory);
@@ -765,7 +765,7 @@ bool njsUtils_setPropUnsignedIntArray(napi_env env, napi_value value,
     // allocate memory for array, if applicable
     NJS_CHECK_NAPI(env, napi_get_array_length(env, value, &numElements))
     elements = calloc(numElements, sizeof(uint32_t));
-    if (!elements)
+    if (!elements && numElements > 0)
         return njsUtils_throwError(env, errInsufficientMemory);
 
     // validate values in the array

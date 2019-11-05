@@ -11,6 +11,8 @@
 - Fixed a [regression](https://github.com/oracle/node-oracledb/issues/1152) when
   binding dates with alternative JavaScript frameworks.
 
+- Fixed "NJS-024: memory allocation failed" errors seen on AIX.
+
 - Fixed a JavaScript memory leak when getting Oracle Database named type
   information, such as with `getDbObjectClass()`.
 

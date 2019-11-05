@@ -458,7 +458,7 @@ bool njsBaton_getFetchInfoFromArg(njsBaton *baton, napi_env env,
     // allocate space for the fetchInfo based on the number of keys
     NJS_CHECK_NAPI(env, napi_get_array_length(env, keys, &numElements))
     tempFetchInfo = calloc(numElements, sizeof(njsFetchInfo));
-    if (!tempFetchInfo)
+    if (!tempFetchInfo && numElements > 0)
         return njsBaton_setError(baton, errInsufficientMemory);
     *numFetchInfo = numElements;
     *fetchInfo = tempFetchInfo;
@@ -628,8 +628,11 @@ bool njsBaton_getStringArrayFromArg(njsBaton *baton, napi_env env,
     if (!array)
         return true;
 
-    // get length of array
+    // get length of array; if there are no elements in the array, nothing
+    // further needs to be done
     NJS_CHECK_NAPI(env, napi_get_array_length(env, array, &arrayLength))
+    if (arrayLength == 0)
+        return true;
 
     // allocate memory for the results
     tempStrings = calloc(arrayLength, sizeof(char*));
