@@ -1,4 +1,3 @@
 [submodule "odpi"]
 	path = odpi
 	url = ../odpi.git
-	branch = v3.2.x

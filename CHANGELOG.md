@@ -7,6 +7,8 @@
 - Fixed a JavaScript memory leak when getting Oracle Database named type
   information, such as with `getDbObjectClass()`.
 
+- Correct support for PLS_INTEGER and BINARY_INTEGER types when used in PL/SQL records (ODPI-C change).
+
 ## node-oracledb v4.0.1 (19 Aug 2019)
 
 - Fixed a regression causing a segfault when setting `oracledb.connectionClass`
