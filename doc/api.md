@@ -3321,7 +3321,7 @@ It should be an array or an object, depending on the structure of the
 [`binds parameter`](#executemanybinds).
 
 Each value in the `bindDefs` array or object should be an object
-containing the keys `dir`, `maxSize`, and `type` for each bind
+containing the keys `dir`, `maxSize`, and `type` for one bind
 variable, similar to how [`execute() bind
 parameters`](#executebindParams) are identified.
 
@@ -12886,15 +12886,20 @@ If your SODA document write operations are mostly independent of each
 other, this removes the overhead of explicit
 [`connection.commit()`](#commit) calls.
 
-When deciding how to commit transactions, beware of transactional
-consistency and performance requirements.  If you are inserting or
-updating a large number of documents, you should turn `autoCommit` off
-and issue a single, explicit [`connection.commit()`](#commit) after
-all documents have been processed.
+When deciding how to commit transactions, beware of transactional consistency
+and performance requirements.  If you are using individual SODA calls to insert
+or update a large number of documents with individual calls, you should turn
+`autoCommit` off and issue a single, explicit [`connection.commit()`](#commit)
+after all documents have been processed.  (Also consider using
+[`sodaCollection.insertMany()`](#sodacollinsertmany) or
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) which have
+performance benefits).
 
 If you are not autocommitting, and one of the SODA operations in your
-transaction fails, then your application must explicitly roll back the
-transaction with [`connection.rollback()`](#rollback).
+transaction fails, then previous uncommitted operations will not be rolled back.
+Your application should explicitly roll back the transaction with
+[`connection.rollback()`](#rollback) to prevent any later commits from
+committing a partial transaction.
 
 Note:
 
