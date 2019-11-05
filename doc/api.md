@@ -6928,11 +6928,13 @@ wallet location, the distinguished name of the database server, and even lets
 some network configuration options be set. This means that
 [`tnsnames.ora`](#tnsadmin) or [`sqlnet.ora`](#tnsadmin) files are not needed
 for some further common connection scenarios.  For example, if a firewall
-terminates idle connections every four minutes, you may decide it is more
+terminates idle connections every five minutes, you may decide it is more
 efficient to keep connections alive instead of having the overhead of
 recreation.  Your connection string could be
-`"mydbmachine.example.com/orclpdb1?expire_time=3"` to send packets every three
-minutes with the [`SQLNET.EXPIRE_TIME`][159] feature.
+`"mydbmachine.example.com/orclpdb1?expire_time=2"` to send packets every two
+minutes with the [`SQLNET.EXPIRE_TIME`][159] feature.  The general
+recommendation for `EXPIRE_TIME` is to use a value that is slightly less than
+half of the termination period.
 
 #### <a name="embedtns"></a> 14.2.2 Embedded Connect Descriptor Strings
 
