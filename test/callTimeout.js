@@ -33,13 +33,13 @@ const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('222. callTimeout.js', () => {
+describe('222. callTimeout.js', function() {
 
   let isRunnable = true;
   let conn;
 
   before(async function() {
-    const isRunnable = await testsUtil.checkPrerequisites();
+    isRunnable = await testsUtil.checkPrerequisites();
     if (!isRunnable) {
       this.skip();
       return;
@@ -50,7 +50,6 @@ describe('222. callTimeout.js', () => {
 
   after(async function() {
     if (!isRunnable) {
-      this.skip();
       return;
     } else {
       await conn.close();
