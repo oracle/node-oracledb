@@ -4621,3 +4621,13 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 221. connectionClass.js
     221.1 set the property when using a connection pool
     221.2 set the property when using a standalone connection
+
+222. callTimeout.js
+    222.1 examples/calltimeout.js
+    222.2 the timeout value is greater than the operation time
+    222.3 callTimeout is 0
+    222.4 callTimeout is a negative value
+    222.5 callTimeout == NaN
+    222.6 callTimeout is a String
+    222.7 The callTimeout value applies not to the sum of all round-trips
+    The callTimeout value applies to each round-trip individually
