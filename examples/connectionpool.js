@@ -45,7 +45,7 @@ async function init() {
       password: dbConfig.password,
       connectString: dbConfig.connectString
       // edition: 'ORA$BASE', // used for Edition Based Redefintion
-      // events: true, // whether to handle Oracle Database FAN and RLB events or support CQN
+      // events: false, // whether to handle Oracle Database FAN and RLB events or support CQN
       // externalAuth: false, // whether connections should be established using External Authentication
       // homogeneous: true, // all connections in the pool have the same credentials
       // poolAlias: 'default', // set an alias to allow access to the pool via a name.

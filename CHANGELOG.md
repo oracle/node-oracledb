@@ -1,11 +1,16 @@
 # Change Log
 
-## node-oracledb v4.0.2 (DD Mon YYYY)
+## node-oracledb v4.1.0 (DD Mon YYYY)
 
 **This release is under development**
 
 - Fixed a JavaScript memory leak when getting Oracle Database named type
   information, such as with `getDbObjectClass()`.
+
+- Revert the
+  [`events`](https://oracle.github.io/node-oracledb/doc/api.html#propdbevents)
+  default back to pre-4.0 behavior due to timeouts in some environments.  It is
+  now *false* again.
 
 - Correct support for PLS_INTEGER and BINARY_INTEGER types when used in PL/SQL records (ODPI-C change).
 

@@ -1102,7 +1102,7 @@ Boolean events
 
 Determines whether Oracle Client events mode should be enabled.
 
-The default value for `events` is *true*.
+The default value for `events` is *false*.
 
 This property can be overridden in the
 [`oracledb.createPool()`](#createpoolpoolattrsevents) call and when
@@ -1114,14 +1114,14 @@ Notification](#consubscribe), [Fast Application Notification
 (FAN)](#connectionfan) and [Runtime Load Balancing
 (RLB)](#connectionrlb).
 
-This property was added in node-oracledb 2.2.  Up until node-oracledb
-4.0 the default value for `events` was *false*.
+This property was added in node-oracledb 2.2.  In node-oracledb
+4.0.0 and 4.0.1 the default value for `events` was *true*.
 
 ##### Example
 
 ```javascript
 const oracledb = require('oracledb');
-oracledb.events = true;
+oracledb.events = false;
 ```
 
 #### <a name="propdbextendedmetadata"></a> 3.2.5 `oracledb.extendedMetaData`
@@ -3747,7 +3747,7 @@ changed in the database by any committed transaction, or when there
 are Advanced Queuing messages to be dequeued.
 
 For notification to work, the connection must be created with
-[`events`](#propdbevents) mode *true*, which is the default.
+[`events`](#propdbevents) mode *true*.
 
 The database must be able to connect to the node-oracledb machine for
 notifications to be received.  Typically this means that the machine
@@ -8464,10 +8464,9 @@ availability and performance tuning.  For example the database's
 
 #### <a name="connectionfan"></a> 14.9.1 Fast Application Notification (FAN)
 
-Users of [Oracle Database FAN][64] must connect to a FAN-enabled
-database service.  The application should have
-[`oracledb.events`](#propdbevents) is set to *true*, which is the
-default.  This value can also be changed via [Oracle Client
+Users of [Oracle Database FAN][64] must connect to a FAN-enabled database
+service.  The application should have [`oracledb.events`](#propdbevents) is set
+to *true*.  This value can also be changed via [Oracle Client
 Configuration](#oraaccess).
 
 FAN support is useful for planned and unplanned outages.  It provides

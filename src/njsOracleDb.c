@@ -1113,7 +1113,6 @@ bool njsOracleDb_new(napi_env env, napi_value instanceObj,
     oracleDb->fetchArraySize = DPI_DEFAULT_FETCH_ARRAY_SIZE;
     oracleDb->lobPrefetchSize = NJS_LOB_PREFETCH_SIZE;
     oracleDb->poolPingInterval = NJS_POOL_DEFAULT_PING_INTERVAL;
-    oracleDb->events = true;
 
     // wrap the structure for use by JavaScript
     if (napi_wrap(env, instanceObj, oracleDb, njsOracleDb_finalize, NULL,

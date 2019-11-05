@@ -328,10 +328,10 @@ describe('58. properties.js', function() {
 
     it('58.1.28 events', function() {
       var t = oracledb.events;
-      oracledb.events = false;
+      oracledb.events = true;
 
-      should.strictEqual(t, true);
-      should.strictEqual(oracledb.events, false);
+      should.strictEqual(t, false);
+      should.strictEqual(oracledb.events, true);
     });
 
     it('58.1.29 Negative - events', function() {
