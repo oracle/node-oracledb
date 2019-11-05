@@ -592,7 +592,7 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
     napi_value implicitResults;
 
     // create constructors used for various types that might be returned
-    if (!njsBaton_setConstructors(baton, env))
+    if (!njsBaton_setConstructors(baton, env, true))
         return false;
 
     // create result object
@@ -685,7 +685,7 @@ static bool njsConnection_executeProcessArgs(njsBaton *baton,
             (void**) &baton->fetchAsStringTypes,
             &baton->numFetchAsStringTypes))
         return false;
-    if (!njsBaton_setConstructors(baton, env))
+    if (!njsBaton_setConstructors(baton, env, true))
         return false;
 
     // get SQL from first argument
@@ -880,7 +880,7 @@ static bool njsConnection_executeManyProcessArgs(njsBaton *baton,
 {
     // setup defaults and define constructors for use in various checks
     baton->autoCommit = baton->oracleDb->autoCommit;
-    if (!njsBaton_setConstructors(baton, env))
+    if (!njsBaton_setConstructors(baton, env, true))
         return false;
 
     // get SQL from first argument
@@ -1069,7 +1069,9 @@ static bool njsConnection_getBindInfoFromValue(njsBaton *baton,
     if (valueType == napi_object) {
 
         // dates can be bound
-        if (njsBaton_isDate(baton, env, value)) {
+        if (!njsBaton_isDate(baton, env, value, &check))
+            return false;
+        if (check) {
             *bindType = NJS_DATATYPE_DATE;
             return true;
         }

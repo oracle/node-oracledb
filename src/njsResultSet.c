@@ -245,7 +245,7 @@ static bool njsResultSet_getRowsPostAsync(njsBaton *baton, napi_env env,
     njsVariable *var;
 
     // create constructors used for various types that might be returned
-    if (!njsBaton_setConstructors(baton, env))
+    if (!njsBaton_setConstructors(baton, env, false))
         return false;
 
     // if outFormat is OBJECT, create names for each of the variables

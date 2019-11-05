@@ -799,7 +799,9 @@ bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value)
         return true;
 
     // dates can be bound directly
-    if (njsBaton_isDate(baton, env, value))
+    if (!njsBaton_isDate(baton, env, value, &check))
+        return false;
+    if (check)
         return true;
 
     // LOBs can be bound directly
@@ -823,17 +825,18 @@ bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value)
 
 //-----------------------------------------------------------------------------
 // njsBaton_isDate()
-//   Returns a boolean indicating if the value refers to a date or not.
+//   Returns a boolean indicating if the value refers to a date or not. This
+// can be replaced by napi_is_date() once it is available in all LTS releases.
 //-----------------------------------------------------------------------------
-bool njsBaton_isDate(njsBaton *baton, napi_env env, napi_value value)
+bool njsBaton_isDate(njsBaton *baton, napi_env env, napi_value value,
+        bool *isDate)
 {
-    napi_status status;
-    bool check;
+    napi_value isDateObj;
 
-    status = napi_instanceof(env, value, baton->jsDateConstructor, &check);
-    if (status != napi_ok)
-        return false;
-    return check;
+    NJS_CHECK_NAPI(env, napi_call_function(env, baton->jsConnection,
+            baton->jsIsDateMethod, 1, &value, &isDateObj))
+    NJS_CHECK_NAPI(env, napi_get_value_bool(env, isDateObj, isDate))
+    return true;
 }
 
 
@@ -912,9 +915,20 @@ void njsBaton_reportError(njsBaton *baton, napi_env env)
 // njsBaton_setConstructors()
 //   Sets the constructors on the baton.
 //-----------------------------------------------------------------------------
-bool njsBaton_setConstructors(njsBaton *baton, napi_env env)
+bool njsBaton_setConstructors(njsBaton *baton, napi_env env, bool canBind)
 {
     napi_value global;
+
+    // if binding is possible, get the connection (which is the calling object)
+    // and acquire the method used for determining if a value is a date; this
+    // is needed until such time as napi_is_date() is available for all LTS
+    // releases
+    if (canBind) {
+        NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
+                &baton->jsConnection))
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, baton->jsConnection,
+                "_isDate", &baton->jsIsDateMethod))
+    }
 
     // acquire the Date constructor
     NJS_CHECK_NAPI(env, napi_get_global(env, &global))

@@ -479,6 +479,13 @@ struct njsBaton {
     napi_ref jsCallback;
     napi_ref jsSubscription;
 
+    // values required to check if a value is a date; this is only used when
+    // binding data in connection.execute() and connection.executeMany();
+    // this can be replaced with calls to napi_is_date() when it is available
+    // for all LTS releases
+    napi_value jsConnection;
+    napi_value jsIsDateMethod;
+
     // constructors
     napi_value jsDateConstructor;
     napi_value jsLobConstructor;
@@ -795,13 +802,14 @@ bool njsBaton_getValueFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, napi_valuetype expectedType,
         napi_value *value, bool *found);
 bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value);
-bool njsBaton_isDate(njsBaton *baton, napi_env env, napi_value value);
+bool njsBaton_isDate(njsBaton *baton, napi_env env, napi_value value,
+        bool *isDate);
 bool njsBaton_queueWork(njsBaton *baton, napi_env env, const char *methodName,
         bool (*workCallback)(njsBaton*),
         bool (*afterWorkCallback)(njsBaton*, napi_env, napi_value*),
         unsigned int numCallbackArgs);
 void njsBaton_reportError(njsBaton *baton, napi_env env);
-bool njsBaton_setConstructors(njsBaton *baton, napi_env env);
+bool njsBaton_setConstructors(njsBaton *baton, napi_env env, bool canBind);
 bool njsBaton_setError(njsBaton *baton, int errNum, ...);
 bool njsBaton_setErrorDPI(njsBaton *baton);
 

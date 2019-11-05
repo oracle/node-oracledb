@@ -941,8 +941,8 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     if (valueType == napi_object) {
 
         // handle binding dates
-        NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-                baton->jsDateConstructor, &check))
+        if (!njsBaton_isDate(baton, env, value, &check))
+            return false;
         if (check) {
             if (var->varTypeNum != DPI_ORACLE_TYPE_TIMESTAMP_LTZ)
                 return njsVariable_setInvalidBind(var, pos, baton);
