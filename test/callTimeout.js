@@ -33,7 +33,7 @@ const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('222. callTimeout.js', () => {
+describe.skip('222. callTimeout.js', () => {
 
   let isRunnable = true;
   let conn;
@@ -68,12 +68,8 @@ describe('222. callTimeout.js', () => {
         async () => {
           await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [DB_OP_TIME]);
         },
-        /ORA-03156/
+        /DPI-1067/
       );
-      /*
-        expect - DPI-1067: call timeout of %u ms exceeded with ORA-%d
-        actual - ORA-03156: OCI call timed out
-      */
     } catch (err) {
       should.not.exist(err);
     }
@@ -166,7 +162,7 @@ describe('222. callTimeout.js', () => {
     }
   }); // 222.7
 
-  it('The callTimeout value applies to each round-trip individually', async () => {
+  it('222.8 The callTimeout value applies to each round-trip individually', async () => {
     try {
       const TIME_OUT = 2;
       const DB_OP_TIME = 4;
@@ -177,7 +173,7 @@ describe('222. callTimeout.js', () => {
         async () => {
           await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [DB_OP_TIME]);
         },
-        /ORA-03156/
+        /DPI-1067/
       );
 
       await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [1]);

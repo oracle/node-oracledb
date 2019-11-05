@@ -248,3 +248,4 @@ test/aq3.js
 test/examineOwnedProperties.js
 test/connectionClass.js
 test/callTimeout.js
+test/accessPropertiesOnClosedObjects.js
