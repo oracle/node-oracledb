@@ -12669,6 +12669,15 @@ FROM nls_database_parameters
 WHERE parameter = 'NLS_CHARACTERSET'
 ```
 
+To find the database 'national character set' used for NCHAR and related types,
+execute the query:
+
+```sql
+SELECT value AS db_ncharset
+FROM nls_database_parameters
+WHERE parameter = 'NLS_NCHAR_CHARACTERSET'
+```
+
 The general Oracle statement to find the 'client' character set is:
 
 ```sql
