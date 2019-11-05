@@ -4,15 +4,31 @@
 
 **This release is under development**
 
+- Fixed a [regression](https://github.com/oracle/node-oracledb/issues/1152) when
+  binding dates with alternative JavaScript frameworks.
+
 - Fixed a JavaScript memory leak when getting Oracle Database named type
   information, such as with `getDbObjectClass()`.
 
-- Revert the
-  [`events`](https://oracle.github.io/node-oracledb/doc/api.html#propdbevents)
-  default back to pre-4.0 behavior due to timeouts in some environments.  It is
-  now *false* again.
+- Corrected support for PLS_INTEGER and BINARY_INTEGER types when used in PL/SQL
+  records ([ODPI-C
+  change](https://github.com/oracle/odpi/commit/4e80a81257ce6e1066f4f6242fed533eaed45753)).
 
-- Correct support for PLS_INTEGER and BINARY_INTEGER types when used in PL/SQL records (ODPI-C change).
+- Reverted the
+  [`events`](https://oracle.github.io/node-oracledb/doc/api.html#propdbevents)
+  default back to pre-4.0 behavior due to connection creation timeouts in some
+  environments.  It is now *false* again.
+
+- Error changes:
+
+    - Enforce only one of `connectString` or `connectionString` being used for
+      connection.
+
+    - Improved some error messages.
+
+    - Refactored implementation of function argument checking.
+
+- Test and documentation improvements.
 
 ## node-oracledb v4.0.1 (19 Aug 2019)
 
