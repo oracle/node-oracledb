@@ -1,9 +1,9 @@
-# node-oracledb version 4.0
+# node-oracledb version 4.1
 
 The node-oracledb add-on for Node.js powers high performance Oracle
 Database applications.
 
-Use node-oracledb 4.0 to connect Node.js 8.16, 10.16, 12, or later, to Oracle Database.
+Use node-oracledb 4.1 to connect Node.js 8.16, 10.16, 12, or later, to Oracle Database.
 Older versions of node-oracledb may work with older versions of Node.js.
 
 Node-oracledb supports basic and advanced features of Oracle Database

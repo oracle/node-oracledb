@@ -1,4 +1,4 @@
-# node-oracledb 4.0 Documentation for the Oracle Database Node.js Add-on
+# node-oracledb 4.1 Documentation for the Oracle Database Node.js Add-on
 
 *Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.*
 
@@ -475,6 +475,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 33.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
     - 33.4 [Migrating from node-oracledb 3.0 to node-oracledb 3.1](#migratev30v31)
     - 33.5 [Migrating from node-oracledb 3.1 to node-oracledb 4.0](#migratev31v40)
+    - 33.6 [Migrating from node-oracledb 4.0 to node-oracledb 4.1](#migratev40v41)
 34. [Useful Resources for Node-oracledb](#otherresources)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
@@ -13957,6 +13958,14 @@ When upgrading from node-oracledb version 3.1 to version 4.0:
   new, preferred names
   [`OUT_FORMAT_ARRAY`](#oracledbconstantsoutformat) and
   [`OUT_FORMAT_OBJECT`](#oracledbconstantsoutformat).
+
+### <a name="migratev40v41"></a> 33.6 Migrating from node-oracledb 4.0 to node-oracledb 4.1
+
+When upgrading from node-oracledb version 4.0 to version 4.1:
+
+- Review the [CHANGELOG][83] and take advantage of new features.
+
+- Review any programmatic or test use of node-oracledb error messages since some have changed.
 
 ## <a name="otherresources"></a> 34. Useful Resources for Node-oracledb
 
