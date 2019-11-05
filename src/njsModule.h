@@ -191,6 +191,9 @@ typedef enum {
     errConvertFromObjAttr,
     errConvertToObjElement,
     errConvertToObjAttr,
+    errDblConnectionString,
+    errInvalidNumberOfParametersRange,
+
 
     // New ones should be added here
 

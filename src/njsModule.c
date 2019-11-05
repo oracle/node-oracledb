@@ -44,7 +44,7 @@ static napi_value njsModule_externalInit(napi_env env, napi_callback_info info)
         return NULL;
     }
     if (actualArgs != 1) {
-        njsUtils_throwError(env, errInvalidNumberOfParameters);
+        njsUtils_throwError(env, errInvalidNumberOfParameters, actualArgs, 1);
         return NULL;
     }
 

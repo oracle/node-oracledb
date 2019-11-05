@@ -941,4 +941,27 @@ describe('1. connection.js', function(){
     }); // 1.9.2
   }); // 1.9
 
+
+  describe('1.10 connectString & connectionString specified', function() {
+    it('1.10.1 both connectString & ConnectionString specified',
+      function (done) {
+        oracledb.getConnection(
+          {
+            user : dbConfig.user,
+            password : dbConfig.password,
+            connectString : dbConfig.connectString,
+            connectionString : dbConfig.connectString
+          },
+          function(err, conn) {
+            should.not.exist(conn);
+            should.exist(err);
+            (err.message).should.startWith('NJS-075:');
+            done();
+          }
+        );
+      }
+    );  // 1.10.1
+  });  // 1.10
+
+
 });

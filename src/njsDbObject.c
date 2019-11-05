@@ -162,7 +162,7 @@ static napi_value njsDbObject_copy(napi_env env, napi_callback_info info)
         return NULL;
     }
     if (actualArgs != 0) {
-        njsUtils_throwError(env, errInvalidNumberOfParameters);
+        njsUtils_throwError(env, errInvalidNumberOfParameters, actualArgs, 0);
         return NULL;
     }
 
@@ -1004,7 +1004,8 @@ static bool njsDbObject_validateArgs(napi_env env, napi_callback_info info,
     NJS_CHECK_NAPI(env, napi_get_cb_info(env, info, &actualArgs, args,
             &thisArg, &data))
     if (actualArgs != numArgs)
-        return njsUtils_throwError(env, errInvalidNumberOfParameters);
+        return njsUtils_throwError(env, errInvalidNumberOfParameters,
+                actualArgs, numArgs);
 
     // data will either be an attribute or a pointer to the global njsOracleDb
     // instance

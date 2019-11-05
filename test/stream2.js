@@ -225,7 +225,7 @@ describe('14. stream2.js', function() {
       function() {
         connection.queryStream();
       },
-      /NJS-009: invalid number of parameters/
+      /NJS-076: invalid number of parameters/
     );
     done();
   });

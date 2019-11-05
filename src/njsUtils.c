@@ -855,7 +855,8 @@ bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
     NJS_CHECK_NAPI(env, napi_get_cb_info(env, info, &actualArgs, args,
             &thisArg, NULL))
     if (actualArgs != numArgs)
-        return njsUtils_throwError(env, errInvalidNumberOfParameters);
+        return njsUtils_throwError(env, errInvalidNumberOfParameters,
+                                   actualArgs, numArgs);
 
     // unwrap instance
     NJS_CHECK_NAPI(env, napi_unwrap(env, thisArg, (void**) instance))

@@ -413,7 +413,7 @@ static bool njsOracleDb_createPoolPostAsync(njsBaton *baton, napi_env env,
 static bool njsOracleDb_createPoolProcessArgs(njsBaton *baton, napi_env env,
         napi_value *args)
 {
-    bool found;
+    bool connStrFound, connStrFound1;
 
     // initialize ODPI-C library, if necessary
     if (!njsOracleDb_initDPI(baton->oracleDb, env, baton))
@@ -442,12 +442,14 @@ static bool njsOracleDb_createPoolProcessArgs(njsBaton *baton, napi_env env,
             &baton->password, &baton->passwordLength, NULL))
         return false;
     if (!njsBaton_getStringFromArg(baton, env, args, 0, "connectString",
-            &baton->connectString, &baton->connectStringLength, &found))
+            &baton->connectString, &baton->connectStringLength, &connStrFound))
         return false;
-    if (!found && !njsBaton_getStringFromArg(baton, env, args, 0,
-            "connectionString", &baton->connectString,
-            &baton->connectStringLength, NULL))
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "connectionString",
+            &baton->connectString, &baton->connectStringLength,
+            &connStrFound1))
         return false;
+    if (connStrFound && connStrFound1)
+        return njsBaton_setError (baton, errDblConnectionString);
     if (!njsBaton_getStringFromArg(baton, env, args, 0, "edition",
             &baton->edition, &baton->editionLength, NULL))
         return false;
@@ -627,7 +629,7 @@ static bool njsOracleDb_getConnectionPostAsync(njsBaton *baton, napi_env env,
 static bool njsOracleDb_getConnectionProcessArgs(njsBaton *baton,
         napi_env env, napi_value *args)
 {
-    bool found;
+    bool connStrFound, connStrFound1;
 
     // initialize ODPI-C library, if necessary
     if (!njsOracleDb_initDPI(baton->oracleDb, env, baton))
@@ -654,13 +656,16 @@ static bool njsOracleDb_getConnectionProcessArgs(njsBaton *baton,
     if (!njsBaton_getStringFromArg(baton, env, args, 0, "password",
             &baton->password, &baton->passwordLength, NULL))
         return false;
+
     if (!njsBaton_getStringFromArg(baton, env, args, 0, "connectString",
-            &baton->connectString, &baton->connectStringLength, &found))
+            &baton->connectString, &baton->connectStringLength, &connStrFound))
         return false;
-    if (!found && !njsBaton_getStringFromArg(baton, env, args, 0,
-            "connectionString", &baton->connectString,
-            &baton->connectStringLength, NULL))
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "connectionString",
+            &baton->connectString, &baton->connectStringLength,
+            &connStrFound1))
         return false;
+    if (connStrFound && connStrFound1)
+        return njsBaton_setError (baton, errDblConnectionString );
     if (!njsBaton_getStringFromArg(baton, env, args, 0, "newPassword",
             &baton->newPassword, &baton->newPasswordLength, NULL))
         return false;

@@ -954,4 +954,29 @@ describe('2. pool.js', function() {
 
   }); // 2.12
 
+  describe('2.13 connectString & connectionString provided', function() {
+    it('2.13.1 both connectString & connectionString provided',
+      function(done) {
+        oracledb.createPool(
+          {
+            user: dbConfig.user,
+            password: dbConfig.password,
+            connectString: dbConfig.connectString,
+            connectionString: dbConfig.connectString,
+            poolMin: 1,
+            poolMax: 1,
+            poolIncrement: 0
+          },
+          function(err, pool) {
+            should.not.exist(pool);
+            should.exist(err);
+            (err.message).should.startWith('NJS-075');
+            done();
+          }
+        );
+      }
+    );  // 2.13.1
+  });  // 2.13.1
+
+
 });
