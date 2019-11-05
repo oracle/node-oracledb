@@ -4484,6 +4484,12 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     192.2 implicit Results with Result Sets
     192.3 multiple options, outFormat is OBJECT
 
+193. connProps.js
+    193.1 the default values of clientInfo and dbOp are null
+    193.2 clientInfo and dbOp are write-only properties
+    193.3 check the results of setter()
+    193.4 Negative - invalid values
+
 196. getDataOfLob.js
     196.1 getData() works on CLOB
     196.2 getData() returns CLOB as Strings

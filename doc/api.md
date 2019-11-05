@@ -138,12 +138,14 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 4.1.1 [`action`](#propconnaction)
         - 4.1.2 [`callTimeout`](#propconncalltimeout)
         - 4.1.3 [`clientId`](#propconnclientid)
-        - 4.1.4 [`currentSchema`](#propconncurrentschema)
-        - 4.1.5 [`module`](#propconnmodule)
-        - 4.1.6 [`oracleServerVersion`](#propconnoracleserverversion)
-        - 4.1.7 [`oracleServerVersionString`](#propconnoracleserverversionstring)
-        - 4.1.8 [`stmtCacheSize`](#propconnstmtcachesize)
-        - 4.1.9 [`tag`](#propconntag)
+        - 4.1.4 [`clientInfo`](#propconnclientinfo)
+        - 4.1.5 [`currentSchema`](#propconncurrentschema)
+        - 4.1.6 [`dbOp`](#propconndbop)
+        - 4.1.7 [`module`](#propconnmodule)
+        - 4.1.8 [`oracleServerVersion`](#propconnoracleserverversion)
+        - 4.1.9 [`oracleServerVersionString`](#propconnoracleserverversionstring)
+        - 4.1.10 [`stmtCacheSize`](#propconnstmtcachesize)
+        - 4.1.11 [`tag`](#propconntag)
     - 4.2 [Connection Methods](#connectionmethods)
         - 4.2.1 [`break()`](#break)
         - 4.2.2 [`changePassword()`](#changepassword)
@@ -2442,11 +2444,25 @@ The [client identifier][10] for end-to-end application tracing, use
 with mid-tier authentication, and with [Virtual Private
 Databases][11].
 
-This is a write-only property.  Displaying a Connection object will
-show a value of `null` for this attribute.  See
-[End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
+This is a write-only property.  Displaying `Connection.clientId` will show a
+value of `null`.  See [End-to-end Tracing, Mid-tier Authentication, and
+Auditing](#endtoend).
 
-#### <a name="propconncurrentschema"></a> 4.1.4 `connection.currentSchema`
+#### <a name="propconnclientinfo"></a> 4.1.4 `connection.clientInfo`
+
+```
+writeonly String clientInfo
+```
+
+The client information for end-to-end application tracing.
+
+This is a write-only property.  Displaying `Connection.clientInfo` will show a
+value of `null`.  See [End-to-end Tracing, Mid-tier Authentication, and
+Auditing](#endtoend).
+
+This property was added in node-oracledb 4.1.
+
+#### <a name="propconncurrentschema"></a> 4.1.5 `connection.currentSchema`
 
 ```
 String currentSchema
@@ -2468,7 +2484,21 @@ CURRENT_SCHEMA`][137].
 
 This property was added in node-oracledb 4.0.
 
-#### <a name="propconnmodule"></a> 4.1.5 `connection.module`
+#### <a name="propconndbop"></a> 4.1.6 `connection.dbOp`
+
+```
+writeonly String dbOp
+```
+
+The database operation information for end-to-end application tracing.
+
+This is a write-only property.  Displaying `Connection.dbOp` will show a value
+of `null`.  See [End-to-end Tracing, Mid-tier Authentication, and
+Auditing](#endtoend).
+
+This property was added in node-oracledb 4.1.  It is available with Oracle 12c.
+
+#### <a name="propconnmodule"></a> 4.1.7 `connection.module`
 
 ```
 writeonly String module
@@ -2476,11 +2506,11 @@ writeonly String module
 
 The [module][9] attribute for end-to-end application tracing.
 
-This is a write-only property.  Displaying a Connection object will
-show a value of `null` for this attribute.  See
-[End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
+This is a write-only property.  Displaying `Connection.module` will show a value
+of `null`.  See [End-to-end Tracing, Mid-tier Authentication, and
+Auditing](#endtoend).
 
-#### <a name="propconnoracleserverversion"></a> 4.1.6 `connection.oracleServerVersion`
+#### <a name="propconnoracleserverversion"></a> 4.1.8 `connection.oracleServerVersion`
 
 ```
 readonly Number oracleServerVersion
@@ -2496,7 +2526,7 @@ instead of 1803000000.
 
 This property was added in node-oracledb 1.3.
 
-#### <a name="propconnoracleserverversionstring"></a> 4.1.7 `connection.oracleServerVersionString`
+#### <a name="propconnoracleserverversionstring"></a> 4.1.9 `connection.oracleServerVersionString`
 
 ```
 readonly String oracleServerVersionString
@@ -2511,7 +2541,7 @@ release such as "18.0.0.0.0" instead of "18.3.0.0.0".
 
 This property was added in node-oracledb 2.2.
 
-#### <a name="propconnstmtcachesize"></a> 4.1.8 `connection.stmtCacheSize`
+#### <a name="propconnstmtcachesize"></a> 4.1.10 `connection.stmtCacheSize`
 
 ```
 readonly Number stmtCacheSize
@@ -2522,7 +2552,7 @@ The number of statements to be cached in the
 the `stmtCacheSize` property in effect in the *Pool* object when the
 connection is created in the pool.
 
-#### <a name="propconntag"></a> 4.1.9 `connection.tag`
+#### <a name="propconntag"></a> 4.1.11 `connection.tag`
 
 ```
 String tag
@@ -12690,10 +12720,10 @@ In node-oracledb this will always show AL32UTF8.
 
 ## <a name="endtoend"></a> 28. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
-The Connection properties [action](#propconnaction),
-[module](#propconnmodule), and [clientId](#propconnclientid) set
-metadata for [end-to-end tracing][70].  The values can be tracked in
-database views, shown in audit trails, and seen in tools such as
+The Connection properties [action](#propconnaction), [module](#propconnmodule),
+[clientId](#propconnclientid), [clientInfo](#propconnclientinfo) and
+[dbOp](#propconndbop) set metadata for [end-to-end tracing][70].  The values can
+be tracked in database views, shown in audit trails, and seen in tools such as
 Enterprise Manager.
 
 The `clientId` property can also be used by applications that do their
@@ -12722,8 +12752,10 @@ const connection = await oracledb.getConnection(
 );
 
 connection.clientId = "Chris";
+connection.clientInfo = "My demo application";
 connection.module = "End-to-end example";
 connection.action = "Query departments";
+connection.dbOp   = "Billing"
 
 const result = await connection.execute(`SELECT . . .`);
 ```
@@ -12731,19 +12763,27 @@ const result = await connection.execute(`SELECT . . .`);
 While the connection is open the attribute values can be seen, for example with SQL*Plus:
 
 ```
-SQL> SELECT username, client_identifier, action, module FROM v$session WHERE username = 'HR';
+SQL> SELECT username, client_identifier, client_info, action, module FROM v$session WHERE username = 'HR';
 
-USERNAME   CLIENT_IDENTIFIER    ACTION               MODULE
----------- -------------------- -------------------- --------------------
-HR         Chris                Query departments    End-to-end example
+USERNAME   CLIENT_IDENTIFIER    CLIENT_INFO            ACTION               MODULE
+---------- -------------------- ---------------------- -------------------- --------------------
+HR         Chris                My demo application    Query departments    End-to-end example
+
+SQL> SELECT dbop_name FROM v$sql_monitor;
+DBOP_NAME
+------------------------------
+Billing
+. . .
 ```
 
-The values can also be manually set by calling
-[`DBMS_APPLICATION_INFO`][71] procedures or
-[`DBMS_SESSION.SET_IDENTIFIER`][72], however these cause explicit
-[round-trips](#roundtrips), reducing scalability.
+Other ways to access metadata include querying `V$SQLAREA` and `sys_context()`,
+for example `SELECT SYS_CONTEXT('userenv', 'client_info') FROM dual`.
 
-In general, applications should be consistent about how, and when,
+Metadata values can also be manually set by calling
+[`DBMS_APPLICATION_INFO`][71] procedures or [`DBMS_SESSION.SET_IDENTIFIER`][72],
+however these cause explicit [round-trips](#roundtrips), reducing scalability.
+
+Applications should be consistent about how, and when,
 they set the end-to-end tracing attributes so that current values are
 recorded by the database.
 
@@ -12786,8 +12826,8 @@ SQL> SELECT UNIQUE sid, client_driver
 
        SID CLIENT_DRIVER
 ---------- ------------------------------
-        16 node-oracledb : 2.2.0
-        33 node-oracledb : 2.2.0
+        16 node-oracledb : 4.1.0
+        33 node-oracledb : 4.1.0
 ```
 
 Note if [`oracledb.connectionClass`](#propdbconclass) is set for a

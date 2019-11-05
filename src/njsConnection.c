@@ -81,7 +81,9 @@ static NJS_PROCESS_ARGS_METHOD(njsConnection_subscribeProcessArgs);
 static NJS_NAPI_GETTER(njsConnection_getAction);
 static NJS_NAPI_GETTER(njsConnection_getCallTimeout);
 static NJS_NAPI_GETTER(njsConnection_getClientId);
+static NJS_NAPI_GETTER(njsConnection_getClientInfo);
 static NJS_NAPI_GETTER(njsConnection_getCurrentSchema);
+static NJS_NAPI_GETTER(njsConnection_getDbOp);
 static NJS_NAPI_GETTER(njsConnection_getModule);
 static NJS_NAPI_GETTER(njsConnection_getOracleServerVersion);
 static NJS_NAPI_GETTER(njsConnection_getOracleServerVersionString);
@@ -92,7 +94,9 @@ static NJS_NAPI_GETTER(njsConnection_getTag);
 static NJS_NAPI_SETTER(njsConnection_setAction);
 static NJS_NAPI_SETTER(njsConnection_setCallTimeout);
 static NJS_NAPI_SETTER(njsConnection_setClientId);
+static NJS_NAPI_SETTER(njsConnection_setClientInfo);
 static NJS_NAPI_SETTER(njsConnection_setCurrentSchema);
+static NJS_NAPI_SETTER(njsConnection_setDbOp);
 static NJS_NAPI_SETTER(njsConnection_setModule);
 static NJS_NAPI_SETTER(njsConnection_setTag);
 
@@ -137,8 +141,12 @@ static const napi_property_descriptor njsClassProperties[] = {
             njsConnection_setCallTimeout, NULL, napi_default, NULL },
     { "clientId", NULL, NULL, njsConnection_getClientId,
             njsConnection_setClientId, NULL, napi_default, NULL },
+    { "clientInfo", NULL, NULL, njsConnection_getClientInfo,
+            njsConnection_setClientInfo, NULL, napi_default, NULL },
     { "currentSchema", NULL, NULL, njsConnection_getCurrentSchema,
             njsConnection_setCurrentSchema, NULL, napi_default, NULL },
+    { "dbOp", NULL, NULL, njsConnection_getDbOp, njsConnection_setDbOp, NULL,
+            napi_default, NULL },
     { "module", NULL, NULL, njsConnection_getModule, njsConnection_setModule,
             NULL, napi_default, NULL },
     { "oracleServerVersion", NULL, NULL, njsConnection_getOracleServerVersion,
@@ -1172,6 +1180,17 @@ static napi_value njsConnection_getClientId(napi_env env,
 
 
 //-----------------------------------------------------------------------------
+// njsConnection_getClientInfo()
+//   Get accessor of "clientInfo" property.
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_getClientInfo(napi_env env,
+        napi_callback_info info)
+{
+    return njsUtils_getNull(env);
+}
+
+
+//-----------------------------------------------------------------------------
 // njsConnection_getCurrentSchema()
 //   Get accessor of "currentSchema" property.
 //-----------------------------------------------------------------------------
@@ -1267,6 +1286,17 @@ static bool njsConnection_getDbObjectClassProcessArgs(njsBaton *baton,
         return false;
 
     return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getDbOp()
+//   Get accessor of "dbOp" property.
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_getDbOp(napi_env env,
+        napi_callback_info info)
+{
+    return njsUtils_getNull(env);
 }
 
 
@@ -2572,6 +2602,18 @@ static napi_value njsConnection_setClientId(napi_env env,
 
 
 //-----------------------------------------------------------------------------
+// njsConnection_setClientInfo()
+//   Set accessor of "clientInfo" property.
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_setClientInfo(napi_env env,
+        napi_callback_info info)
+{
+    return njsConnection_setTextAttribute(env, info, "clientInfo",
+            dpiConn_setClientInfo);
+}
+
+
+//-----------------------------------------------------------------------------
 // njsConnection_setCurrentSchema()
 //   Set accessor of "clientId" property.
 //-----------------------------------------------------------------------------
@@ -2580,6 +2622,17 @@ static napi_value njsConnection_setCurrentSchema(napi_env env,
 {
     return njsConnection_setTextAttribute(env, info, "currentSchema",
             dpiConn_setCurrentSchema);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_setDbOp()
+//   Set accessor of "dbOp" property.
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_setDbOp(napi_env env,
+        napi_callback_info info)
+{
+    return njsConnection_setTextAttribute(env, info, "dbOp", dpiConn_setDbOp);
 }
 
 

@@ -4,6 +4,10 @@
 
 **This release is under development**
 
+- Added end-to-end tracing attributes
+  [`connection.clientInfo`](https://oracle.github.io/node-oracledb/doc/api.html#propconnclientinfo)
+  and [`connection.dbOp`](https://oracle.github.io/node-oracledb/doc/api.html#propconndbop).
+
 - Fixed a [regression](https://github.com/oracle/node-oracledb/issues/1152) when
   binding dates with alternative JavaScript frameworks.
 
