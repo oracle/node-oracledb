@@ -23,11 +23,6 @@
  *
  * DESCRIPTION
  *   Test external proxy authentication.
- *   Source the externalProxyAuthSetup.tcsh in csh shell first
- *   Make sure the env vars described in externalProxyAuthSetup.tcsh are set
- *   Tests on external authentication will skip if environment variable
- *     NODE_ORACLEDB_EXTERNALAUTH is not set or set to false
- *   All cases should pass
  *
  *****************************************************************************/
 'use strict';
