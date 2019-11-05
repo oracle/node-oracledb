@@ -131,10 +131,7 @@ describe('140. jsObjectGetter1.js', function() {
         [bindObj],
         function(err, result) {
           should.exist(err);
-          should.strictEqual(
-            err.message,
-            "NJS-044: named JSON object is not expected in this context"
-          );
+          (err.message).should.startWith("NJS-044:");
           should.not.exist(result);
           done();
         }

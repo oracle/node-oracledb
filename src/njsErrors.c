@@ -55,7 +55,7 @@ static const char *njsErrorMessages[] = {
     "NJS-041: cannot convert ResultSet to QueryStream after invoking methods", // errCannotConvertRsToStream
     "NJS-042: cannot invoke ResultSet methods after converting to QueryStream", // errCannotInvokeRsMethods
     "NJS-043: ResultSet already converted to QueryStream", // errResultSetAlreadyConverted
-    "NJS-044: named JSON object is not expected in this context", // errNamedJSON
+    "NJS-044: bind object must contain one of the following keys: \"dir\", \"type\", \"maxSize\", or \"val\"", // errNamedJSON
     "NJS-045: cannot load a node-oracledb binary for Node.js %s", // errCannotLoadBinary
     "NJS-046: pool alias \"%s\" already exists in the connection pool cache", // errPoolWithAliasAlreadyExists
     "NJS-047: pool alias \"%s\" not found in connection pool cache", // errPoolWithAliasNotFound
