@@ -33,7 +33,7 @@ static const char *njsErrorMessages[] = {
     "NJS-004: invalid value for property %s",        // errInvalidPropertyValue
     "NJS-005: invalid value for parameter %d",       // errInvalidParameterValue
     "NJS-007: invalid value for \"%s\" in parameter %d", // errInvalidPropertyValueInParam
-    "NJS-009: invalid number of parameters: %d passed but %d expected",         // errInvalidNumberOfParameters
+    "NJS-009: invalid number of parameters",         // errInvalidNumberOfParameters
     "NJS-010: unsupported data type %d in column %u", // errUnsupportedDataType
     "NJS-011: encountered bind value and type mismatch", // errBindValueAndTypeMismatch
     "NJS-012: encountered invalid bind data type in parameter %d", // errInvalidBindDataType
@@ -82,7 +82,6 @@ static const char *njsErrorMessages[] = {
     "NJS-073: cannot convert from JavaScript value to element of type %.*s", // errConvertToObjElement
     "NJS-074: cannot convert from JavaScript value to attribute \"%.*s\" of type \"%.*s\"", // errConvertToObjAttr
     "NJS-075: only one of connectString and connectionString can be used", // errDblConnectionString
-    "NJS-076: invalid number of parameters: %d passed but %d to %d expected", //errInvalidNumberOfParametersRange
 };
 
 
