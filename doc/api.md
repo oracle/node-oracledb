@@ -512,9 +512,6 @@ below.  As well as [Async/Await](#asyncawaitoverview) functions,
 node-oracledb can also use [Callbacks](#callbackoverview), and
 [Promises](#promiseoverview).
 
-Scripts to create Oracle's sample schemas can be found at
-[github.com/oracle/db-sample-schemas][4].
-
 Locate your Oracle Database [user name and password][91], and the database
 [connection string](#connectionstrings).  The connection string is
 commonly of the format `hostname/servicename`, using the host name
@@ -577,7 +574,7 @@ async function run() {
 run();
 ```
 
-With Oracle's sample HR schema, the output is:
+With Oracle's sample [HR schema][4], the output is:
 
 ```
 [ { MANAGER_ID: 103, DEPARTMENT_ID: 60, DEPARTMENT_NAME: 'IT' } ]

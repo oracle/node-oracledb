@@ -41,8 +41,8 @@ async function run() {
 
     // Setup
 
-    let stmts = [
-      `DROP TABLE sports`,
+    const stmts = [
+      `DROP TABLE no_sports`,
 
       `DROP TYPE teamtype`,
 
@@ -54,7 +54,7 @@ async function run() {
 
       `CREATE TYPE teamtype AS VARRAY(10) OF playertype;`,
 
-      `CREATE TABLE sports (sportname VARCHAR2(20), team teamtype)`,
+      `CREATE TABLE no_sports (sportname VARCHAR2(20), team teamtype)`,
     ];
 
     for (const s of stmts) {
@@ -81,7 +81,7 @@ async function run() {
     );
 
     await connection.execute(
-      `INSERT INTO sports (sportname, team) VALUES (:sn, :t)`,
+      `INSERT INTO no_sports (sportname, team) VALUES (:sn, :t)`,
       {
         sn: "Hockey",
         t: hockeyTeam
@@ -90,7 +90,7 @@ async function run() {
     // Insert with direct bind
 
     await connection.execute(
-      `INSERT INTO sports (sportname, team) VALUES (:sn, :t)`,
+      `INSERT INTO no_sports (sportname, team) VALUES (:sn, :t)`,
       {
         sn: "Badminton",
         t: {
@@ -108,7 +108,7 @@ async function run() {
     // Query the new data back
 
     let result = await connection.execute(
-      `SELECT sportname, team FROM sports`,
+      `SELECT sportname, team FROM no_sports`,
       [],
       {
         outFormat: oracledb.OUT_FORMAT_OBJECT

@@ -42,25 +42,37 @@ async function run() {
 
     connection = await oracledb.getConnection(dbConfig);
 
+    //
     // Create a PL/SQL package that uses a RECORD
+    //
 
-    await connection.execute(
+    const stmts = [
       `CREATE OR REPLACE PACKAGE rectest AS
          TYPE rectype IS RECORD (name VARCHAR2(40), pos NUMBER);
          PROCEDURE myproc (p_in IN rectype, p_out OUT rectype);
-       END rectest;`);
+       END rectest;`,
 
-    await connection.execute(
       `CREATE OR REPLACE PACKAGE BODY rectest AS
          PROCEDURE myproc (p_in IN rectype, p_out OUT rectype) AS
          BEGIN
            p_out := p_in;
            p_out.pos := p_out.pos * 2;
          END;
-       END rectest;`);
+       END rectest;`
+    ];
+
+    for (const s of stmts) {
+      try {
+        await connection.execute(s);
+      } catch(e) {
+        console.error(e);
+      }
+    }
 
 
+    //
     // Get the RECORD prototype object
+    //
 
     const RecTypeClass = await connection.getDbObjectClass("RECTEST.RECTYPE");
     // console.log(RecTypeClass.prototype);

@@ -22,27 +22,15 @@
  *   Shows using a ResultSet to fetch rows from a REF CURSOR using getRows().
  *   Streaming is also possible (this is not shown).
  *
- *   Uses Oracle's sample HR schema.
- *   Use demo.sql to create the required procedure or do:
- *
- *  CREATE OR REPLACE PROCEDURE get_emp_rs (p_sal IN NUMBER, p_recordset OUT SYS_REFCURSOR)
- *  AS
- *  BEGIN
- *    OPEN p_recordset FOR
- *      SELECT first_name, salary, hire_date
- *      FROM   employees
- *      WHERE  salary > p_sal;
- *  END;
- *  /
- *
  *   This example uses Node 8's async/await syntax.
  *
  *****************************************************************************/
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
-const numRows = 3;  // number of rows to return from each call to getRows()
+const numRows = 10;  // number of rows to return from each call to getRows()
 
 async function run() {
 
@@ -51,23 +39,48 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
+    await demoSetup.setupBf(connection);  // create the demo table
+
+    //
+    // Create a PL/SQL procedure
+    //
+
+    await connection.execute(
+      `CREATE OR REPLACE PROCEDURE no_get_rs (p_id IN NUMBER, p_recordset OUT SYS_REFCURSOR)
+       AS
+       BEGIN
+         OPEN p_recordset FOR
+           SELECT farmer, weight, ripeness
+           FROM   no_banana_farmer
+           WHERE  id < p_id;
+       END;`
+    );
+
+    //
+    // Get a REF CURSOR result set
+    //
+
     const result = await connection.execute(
       `BEGIN
-         get_emp_rs(:sal, :cursor);
+         no_get_rs(:id, :cursor);
        END;`,
       {
-        sal:    12000,
-        cursor: { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
+        id:     3,
+        cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       });
 
     console.log("Cursor metadata:");
     console.log(result.outBinds.cursor.metaData);
 
+    //
     // Fetch rows from the REF CURSOR.
+    //
+    //
     // If getRows(numRows) returns:
     //   Zero rows               => there were no rows, or are no more rows to return
     //   Fewer than numRows rows => this was the last set of rows to get
     //   Exactly numRows rows    => there may be more rows to fetch
+
     const resultSet = result.outBinds.cursor;
     let rows;
     do {

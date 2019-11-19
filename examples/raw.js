@@ -20,10 +20,6 @@
  *
  * DESCRIPTION
  *   Shows using a Buffer to insert and select a RAW.
- *   Use demo.sql to create the dependencies or do:
- *
- *   DROP TABLE myraw;
- *   CREATE TABLE myraw (r RAW(64));
  *
  *   This example requires node-oracledb 1.2 or later.
  *
@@ -41,14 +37,41 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
+    //
+    // Create table
+    //
+
+    const stmts = [
+      `DROP TABLE no_raw`,
+
+      `CREATE TABLE no_raw (r RAW(64))`
+    ];
+
+    for (const s of stmts) {
+      try {
+        await connection.execute(s);
+      } catch(e) {
+        if (e.errorNum != 942)
+          console.error(e);
+      }
+    }
+
+    //
+    // Insert RAW data
+    //
+
     const data = [0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x4f, 0x72, 0x61, 0x63, 0x6c, 0x65, 0x21];
     const inBuf = Buffer.from(data);
     let result = await connection.execute(
-      `INSERT INTO myraw VALUES (:r)`,
+      `INSERT INTO no_raw VALUES (:r)`,
       { r : { val: inBuf, type: oracledb.BUFFER, dir:oracledb.BIND_IN }});
     console.log(result.rowsAffected + " row(s) inserted.");
 
-    result = await connection.execute(`SELECT r FROM myraw`);
+    //
+    // Fetch RAW data
+    //
+
+    result = await connection.execute(`SELECT r FROM no_raw`);
     const outBuf = result.rows[0];
     console.log("Buffer queried:");
     console.log(outBuf);

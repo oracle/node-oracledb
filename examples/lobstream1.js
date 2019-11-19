@@ -21,21 +21,16 @@
  * DESCRIPTION
  *   SELECTs a CLOB and a BLOB and streams to files.
  *
- *   Use demo.sql to create the required table or do:
- *     DROP TABLE mylobs;
- *     CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
- *
- *   Run lobinsert1.js to load data before running this example.
- *
  *   This example requires node-oracledb 1.12 or later.
  *
  *   This example uses Node 8's async/await syntax.
  *
  *****************************************************************************/
 
-var fs = require('fs');
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const fs = require('fs');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
 // Stream a LOB to a file
 async function doStream(lob, outFileName) {
@@ -94,12 +89,14 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
+    await demoSetup.setupLobs(connection, true);  // create the demo table
+
     //
     // Fetch a CLOB and stream it
     //
-    let result = await connection.execute(`SELECT c FROM mylobs WHERE id = 1`);
+    let result = await connection.execute(`SELECT c FROM no_lobs WHERE id = 1`);
     if (result.rows.length === 0) {
-      throw new Error("No results.  Did you run lobinsert1.js?");
+      throw new Error("No row found");
     }
     let lob = result.rows[0][0];
     if (lob === null) {
@@ -110,9 +107,9 @@ async function run() {
     //
     // Fetch a BLOB and stream it
     //
-    result = await connection.execute(`SELECT b FROM mylobs WHERE id = 2`);
+    result = await connection.execute(`SELECT b FROM no_lobs WHERE id = 2`);
     if (result.rows.length === 0) {
-      throw new Error("No results.  Did you run lobinsert1.js?");
+      throw new Error("No row found");
     }
     lob = result.rows[0][0];
     if (lob === null) {

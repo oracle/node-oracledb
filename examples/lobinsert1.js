@@ -21,18 +21,13 @@
  * DESCRIPTION
  *   Reads text from clobexample.txt and INSERTs it into a CLOB column.
  *   Reads binary data from fuzzydinosaur.jpg and INSERTs it into a BLOB column.
- *   Run lobselect.js to query the inserted data.
+ *   After running this, Run lobselect.js to query the inserted data.
  *
  *   "Small" amounts of data can be bound directly for INSERT into LOB
  *   columns.  Larger amounts should be streamed, see lobinssert2.js.
  *   The boundary between 'small' and 'large' depends on how Node.js
  *   and V8 handle large data in memory, and on your streaming and
  *   performance requirements.
- *
- *   Create clobexample.txt and fuzzydinosaur.jpg before running this example.
- *   Use demo.sql to create the required table or do:
- *     DROP TABLE mylobs;
- *     CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
  *
  *   This example requires node-oracledb 1.12 or later.
  *
@@ -43,6 +38,7 @@
 const fs = require('fs');
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
 oracledb.autoCommit = true;  // for ease of demonstration only
 
@@ -56,16 +52,16 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
-    let result;
+    await demoSetup.setupLobs(connection, false);  // create the demo table without data
 
-    // Clean up the table
-    await connection.execute(`DELETE FROM mylobs`);
+    let result;
 
     // Insert a CLOB
     const str = fs.readFileSync(clobInFileName, 'utf8');
     result = await connection.execute(
-      `INSERT INTO mylobs (id, c) VALUES (:id, :c)`,
-      { id: 1, c: str });
+      `INSERT INTO no_lobs (id, c) VALUES (:id, :c)`,
+      { id: 1, c: str }
+    );
     if (result.rowsAffected != 1)
       throw new Error('CLOB was not inserted');
     else
@@ -74,8 +70,9 @@ async function run() {
     // Insert a BLOB
     const buf = fs.readFileSync(blobInFileName);
     result = await connection.execute(
-      `INSERT INTO mylobs (id, b) VALUES (:id, :b)`,
-      { id: 2, b: buf });
+      `INSERT INTO no_lobs (id, b) VALUES (:id, :b)`,
+      { id: 2, b: buf },
+    );
     if (result.rowsAffected != 1)
       throw new Error('BLOB was not inserted');
     else

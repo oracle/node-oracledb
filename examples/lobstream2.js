@@ -21,20 +21,15 @@
  * DESCRIPTION
  *   SELECTs a CLOB, streams it using 'data' events, and then displays it to the screen
  *
- *   Use demo.sql to create the required table or do:
- *     DROP TABLE mylobs;
- *     CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
- *
- *   Run lobinsert1.js to load data before running this example.
- *
  *   This example requires node-oracledb 1.12 or later.
  *
  *   This example uses Node 8's async/await syntax.
  *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
 async function run() {
   let connection;
@@ -42,12 +37,14 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
+    await demoSetup.setupLobs(connection, true);  // create the demo table with data
+
     //
     // Fetch a CLOB and write to the console
     //
-    let result = await connection.execute(`SELECT c FROM mylobs WHERE id = 1`);
+    let result = await connection.execute(`SELECT c FROM no_lobs WHERE id = 1`);
     if (result.rows.length === 0) {
-      throw new Error("No results.  Did you run lobinsert1.js?");
+      throw new Error("No row found");
     }
     const clob = result.rows[0][0];
     if (clob === null) {

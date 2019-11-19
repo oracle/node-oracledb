@@ -22,12 +22,6 @@
  *   Listens for an HTTP request and returns an image queried from a BLOB column
  *   Also shows the connection pool's caching using a 'default' pool.
  *
- *   Use demo.sql to create the required table or do:
- *     DROP TABLE mylobs;
- *     CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
- *
- *   Run lobinsert1.js to load an image before running this example.
- *
  *   Start the listener with 'node blobhttp.js' and then use a browser
  *   to load http://localhost:7000/getimage
  *
@@ -35,24 +29,25 @@
  *
  *****************************************************************************/
 
-var url = require('url');
-var http = require('http');
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const url = require('url');
+const http = require('http');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
-var httpPort = 7000;
+const httpPort = 7000;
 
 // Main entry point.  Creates a connection pool which becomes the
 // 'default' pool, and then creates an HTTP server.
 async function init() {
   try {
-    await oracledb.createPool(
-      {
-        user: dbConfig.user,
-        password: dbConfig.password,
-        connectString: dbConfig.connectString
-      });
+    await oracledb.createPool(dbConfig);
     console.log('Connection pool started');
+
+    // create the demo table
+    const connection = await oracledb.getConnection();
+    await demoSetup.setupLobs(connection, true);
+    await connection.close();
 
     // Create HTTP server and listen on port httpPort
     const server = http.createServer();
@@ -63,7 +58,7 @@ async function init() {
       handleRequest(request, response);
     });
     await server.listen(httpPort);
-    console.log("Server running.  Try requesting: http://localhost:" + httpPort + "/getimage");
+    console.log("Server is running.  Try loading http://localhost:" + httpPort + "/getimage");
 
   } catch (err) {
     console.error('init() error: ' + err.message);
@@ -84,14 +79,14 @@ async function handleRequest(request, response) {
       connection = await oracledb.getConnection();  // gets a connection from the 'default' connection pool
 
       const result = await connection.execute(
-        "SELECT b FROM mylobs WHERE id = :id",  // get the image
+        "SELECT b FROM no_lobs WHERE id = :id",  // get the image
         { id: 2 }
       );
       if (result.rows.length === 0) {
-        throw new Error("No results.  Did you run lobinsert1.js?");
+        throw new Error("No data selected from table.");
       }
 
-      var lob = result.rows[0][0];
+      const lob = result.rows[0][0];
       if (lob === null) {
         throw new Error("BLOB was NULL");
       }
@@ -117,6 +112,7 @@ async function handleRequest(request, response) {
 
     } catch (err) {
       console.error(err);
+      await closePoolAndExit();
     } finally {
       if (connection) {
         try {
@@ -137,9 +133,9 @@ async function closePoolAndExit() {
   console.log('\nTerminating');
   try {
     // Get the pool from the pool cache and close it when no
-    // connections are in use, or force it closed after 10 seconds
+    // connections are in use, or force it closed after 2 seconds
     // If this hangs, you may need DISABLE_OOB=ON in a sqlnet.ora file
-    await oracledb.getPool().close(10);
+    await oracledb.getPool().close(2);
     console.log('Pool closed');
     process.exit(0);
   } catch(err) {

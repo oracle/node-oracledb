@@ -19,20 +19,14 @@
  *   webappawait.js
  *
  * DESCRIPTION
- *   Shows a web based query using connections from connection pool.
+ *   A web based application displaying banana harvest details.
  *
- *   This displays a table of employees in the specified department.
- *
- *   The script creates an HTTP server listening on port 7000 and
- *   accepts a URL parameter for the department ID, for example:
- *   http://localhost:7000/90
+ *   The script creates an HTTP server listening on port 7000 and accepts a URL
+ *   parameter for the banana farmer ID, for example: http://localhost:7000/3
  *
  *   In some networks forced pool termination may hang unless you have
  *   'disable_oob=on' in sqlnet.ora, see
  *   https://oracle.github.io/node-oracledb/doc/api.html#tnsadmin
- *
- *   Uses Oracle's sample HR schema.  Scripts to create the HR schema
- *   can be found at: https://github.com/oracle/db-sample-schemas
  *
  *   This example requires node-oracledb 3 or later.
  *
@@ -43,6 +37,7 @@
 const http = require('http');
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
 const httpPort = 7000;
 
@@ -70,6 +65,11 @@ async function init() {
       // stmtCacheSize: 30 // number of statements that are cached in the statement cache of each connection
     });
 
+    // create the demo table
+    const connection = await oracledb.getConnection();
+    await demoSetup.setupBf(connection);
+    await connection.close();
+
     // Create HTTP server and listen on port httpPort
     const server = http.createServer();
     server.on('error', (err) => {
@@ -79,7 +79,8 @@ async function init() {
       handleRequest(request, response);
     });
     await server.listen(httpPort);
-    console.log("Server running at http://localhost:" + httpPort);
+    console.log("Server is running at http://localhost:" + httpPort);
+    console.log("Try loading a farmer such as http://localhost:" + httpPort + "/3");
   } catch (err) {
     console.error("init() error: " + err.message);
   }
@@ -87,23 +88,23 @@ async function init() {
 
 async function handleRequest(request, response) {
   const urlparts = request.url.split("/");
-  const deptid = urlparts[1];
+  const id = urlparts[1];
 
   htmlHeader(
     response,
-    "Oracle Database Driver for Node.js",
+    "Banana Farmer Demonstration",
     "Example using node-oracledb driver"
   );
 
-  if (deptid == 'favicon.ico') {
+  if (id == 'favicon.ico') {  // ignore requests for the icon
     htmlFooter(response);
     return;
   }
 
-  if (deptid != parseInt(deptid)) {
+  if (id != parseInt(id)) {
     handleError(
       response,
-      'URL path "' + deptid + '" is not an integer.  Try http://localhost:' + httpPort + '/30',
+      'URL path "' + id + '" is not an integer.  Try http://localhost:' + httpPort + '/3',
       null
     );
 
@@ -116,13 +117,13 @@ async function handleRequest(request, response) {
     connection = await oracledb.getConnection();
 
     const result = await connection.execute(
-      `SELECT employee_id, first_name, last_name
-         FROM employees
-         WHERE department_id = :id`,
-      [deptid] // bind variable value
+      `SELECT farmer, weight, ripeness, picked
+         FROM no_banana_farmer
+         WHERE id = :idbv`,
+      [id] // bind variable value
     );
 
-    displayResults(response, result, deptid);
+    displayResults(response, result, id);
 
   } catch (err) {
     handleError(response, "handleRequest() error", err);
@@ -149,8 +150,8 @@ function handleError(response, text, err) {
 }
 
 // Display query results
-function displayResults(response, result, deptid) {
-  response.write("<h2>" + "Employees in Department " + deptid + "</h2>");
+function displayResults(response, result, id) {
+  response.write("<h2>" + "Harvest details for farmer " + id + "</h2>");
   response.write("<table>");
 
   // Column Title
@@ -200,6 +201,7 @@ async function closePoolAndExit() {
   try {
     // Get the pool from the pool cache and close it when no
     // connections are in use, or force it closed after 10 seconds
+    // If this hangs, you may need DISABLE_OOB=ON in a sqlnet.ora file
     await oracledb.getPool().close(10);
     console.log("Pool closed");
     process.exit(0);

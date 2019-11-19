@@ -23,9 +23,6 @@
  *   This is an alternative means of processing instead of using
  *   resultSet.getRows().
  *
- *   Scripts to create the HR schema can be found at:
- *   https://github.com/oracle/db-sample-schemas
- *
  *   This example requires node-oracledb 1.9 or later.
  *
  *   This example uses Node 8's async/await syntax.
@@ -34,6 +31,7 @@
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
 async function run() {
   let connection;
@@ -41,11 +39,14 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
+    await demoSetup.setupBf(connection);  // create the demo table
+
     const result = await connection.execute(
       `BEGIN
          OPEN :cursor FOR
-           SELECT department_id, department_name
-           FROM departments;
+           SELECT id, farmer
+           FROM no_banana_farmer
+           ORDER BY id;
        END;`,
       {
         cursor: {

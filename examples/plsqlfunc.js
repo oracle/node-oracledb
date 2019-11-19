@@ -19,15 +19,7 @@
  *   plsqlfunc.js
  *
  * DESCRIPTION
- *   Show calling a PL/SQL function
- *   Use demo.sql to create the required function or do:
- *
- *   CREATE OR REPLACE FUNCTION testfunc (p1_in IN VARCHAR2, p2_in IN VARCHAR2) RETURN VARCHAR2
- *   AS
- *   BEGIN
- *     RETURN p1_in || p2_in;
- *   END;
- *   /
+ *   Shows how to call a PL/SQL function.
  *
  *   This example uses Node 8's async/await syntax.
  *
@@ -43,16 +35,27 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
+    // Create a PL/SQL stored procedure
+
+    await connection.execute(
+      `CREATE OR REPLACE FUNCTION no_func
+         (p1_in IN VARCHAR2, p2_in IN VARCHAR2) RETURN VARCHAR2
+       AS
+       BEGIN
+         RETURN p1_in || ' ' || p2_in;
+       END;`
+    );
+
     // Invoke the PL/SQL function.
     //
     // The equivalent call with PL/SQL named parameter syntax is:
     // `BEGIN
-    //    :ret := testfunc(p1_in => :p1, p2_in => :p2);
+    //    :ret := no_func(p1_in => :p1, p2_in => :p2);
     //  END;`
 
     const result = await connection.execute(
       `BEGIN
-         :ret := testfunc(:p1, :p2);
+         :ret := no_func(:p1, :p2);
        END;`,
       {
         p1:  'Chris', // Bind type is determined from the data.  Default direction is BIND_IN

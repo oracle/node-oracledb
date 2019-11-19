@@ -45,8 +45,8 @@ async function run() {
     // Create a table with a named type
     //
 
-    let stmts = [
-      `DROP TABLE farmtab`,
+    const stmts = [
+      `DROP TABLE no_farmtab`,
 
       `DROP TYPE dbfarmtype`,
 
@@ -58,7 +58,7 @@ async function run() {
          farmername     VARCHAR2(20),
          harvest        dbharvesttype)`,
 
-      `CREATE TABLE farmtab (id NUMBER, farm dbfarmtype)`
+      `CREATE TABLE no_farmtab (id NUMBER, farm dbfarmtype)`
     ];
 
     for (const s of stmts) {
@@ -108,7 +108,7 @@ async function run() {
     console.log(farm1);
 
     await connection.execute(
-      `INSERT INTO farmtab (id, farm) VALUES (:id, :f)`,
+      `INSERT INTO no_farmtab (id, farm) VALUES (:id, :f)`,
       {id: 1, f: farm1}
     );
 
@@ -138,7 +138,7 @@ async function run() {
     console.log(farm2.HARVEST.getValues());
 
     await connection.execute(
-      `INSERT INTO farmtab (id, farm) VALUES (:id, :f)`,
+      `INSERT INTO no_farmtab (id, farm) VALUES (:id, :f)`,
       { id: 2, f: farm2 }
     );
 
@@ -149,7 +149,7 @@ async function run() {
     //
 
     await connection.execute(
-      `INSERT INTO farmtab (id, farm) VALUES (:id, :f)`,
+      `INSERT INTO no_farmtab (id, farm) VALUES (:id, :f)`,
       { id: 3,
         f: {
           type: FarmType,   // pass the prototype object
@@ -168,7 +168,7 @@ async function run() {
     //
 
     await connection.execute(
-      `INSERT INTO farmtab (id, farm) VALUES (:id, :f)`,
+      `INSERT INTO no_farmtab (id, farm) VALUES (:id, :f)`,
       { id: 4,
         f: {
           type: 'DBFARMTYPE',   // the name of the top level database type, case sensitive
@@ -187,7 +187,7 @@ async function run() {
     console.log('\nQuerying:');
 
     result = await connection.execute(
-      `SELECT id, farm FROM farmtab WHERE id = 1 `,
+      `SELECT id, farm FROM no_farmtab WHERE id = 1 `,
       [],
       // outFormat determines whether rows will be in arrays or JavaScript objects.
       // It does not affect how the FARM column itself is represented.

@@ -21,15 +21,13 @@
  * DESCRIPTION
  *   Basic Simple Oracle Document Access (SODA) example.
  *
- *   Creates and uses a SODA collection.
  *   Requires Oracle Database and Client 18.3, or higher.
  *   The user must have been granted the SODA_APP and CREATE TABLE privileges.
  *   See https://oracle.github.io/node-oracledb/doc/api.html#sodaoverview
  *
- *   This uses Node 8's async/await syntax but could be rewritten to
- *   use callbacks.
- *
  *   This example requires node-oracledb 3.0 or later.
+ *
+ *   This example uses Node 8's async/await syntax.
  *
  *****************************************************************************/
 

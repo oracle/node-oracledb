@@ -19,8 +19,9 @@
  *   endtoend.js
  *
  * DESCRIPTION
- *   Show setting connection metadata for end-to-end tracing and client authorization.
- *   While the script sleeps (keeping the connection open), use SQL*Plus as SYSTEM to execute:
+ *   Sets connection metadata for end-to-end tracing and client authorization.
+ *
+ *   While the script sleeps (keeping the connection open), use SQL*Plus as a privileged user to execute:
  *      SELECT username, client_identifier, action, module FROM v$session WHERE username IS NOT NULL;
  *   The end-to-end tracing attributes are shown in various other DBA views and in Enterprise Manager.
  *
@@ -44,8 +45,8 @@ async function run() {
     connection.module = "End-to-end example";
     connection.action = "Query departments";
 
-    console.log("Use SQL*Plus as SYSTEM to execute the query:");
-    console.log("SELECT username, client_identifier, action, module FROM v$session WHERE username = UPPER('" + dbConfig.user +"');");
+    console.log("Use SQL*Plus as SYSTEM (or ADMIN for Oracle Cloud databases) to execute the query:");
+    console.log("  SELECT username, client_identifier, action, module FROM v$session WHERE username = UPPER('" + dbConfig.user +"');");
 
     // Sleep 10 seconds to keep the connection open.  This allows
     // external queries on V$SESSION to show the connection
@@ -64,5 +65,15 @@ async function run() {
     }
   }
 }
+
+process
+  .on('SIGTERM', function() {
+    console.log("\nTerminating");
+    process.exit(0);
+  })
+  .on('SIGINT', function() {
+    console.log("\nTerminating");
+    process.exit(0);
+  });
 
 run();

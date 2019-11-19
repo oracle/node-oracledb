@@ -43,18 +43,20 @@ async function run() {
     //
     // Setup
     //
+    const stmts = [
+      `DROP TABLE no_geometry`,
 
-    await connection.execute(
-      `BEGIN
-         EXECUTE IMMEDIATE 'DROP TABLE testgeometry';
-         EXCEPTION WHEN OTHERS THEN
-         IF SQLCODE <> -942 THEN
-           RAISE;
-         END IF;
-       END;`);
+      `CREATE TABLE no_geometry (id NUMBER, geometry MDSYS.SDO_GEOMETRY)`
+    ];
 
-    await connection.execute(
-      `CREATE TABLE testgeometry (id NUMBER, geometry MDSYS.SDO_GEOMETRY)`);
+    for (const s of stmts) {
+      try {
+        await connection.execute(s);
+      } catch(e) {
+        if (e.errorNum != 942)
+          console.error(e);
+      }
+    }
 
     //
     // Get a prototype object for the database SDO_GEOMETRY type.
@@ -86,7 +88,7 @@ async function run() {
     );
 
     await connection.execute(
-      `INSERT INTO testgeometry (id, geometry) VALUES (:id, :g)`,
+      `INSERT INTO no_geometry (id, geometry) VALUES (:id, :g)`,
       {id: 1, g: geometry1}
     );
 
@@ -96,7 +98,7 @@ async function run() {
     //
 
     await connection.execute(
-      `INSERT INTO testgeometry (id, geometry) VALUES (:id, :g)`,
+      `INSERT INTO no_geometry (id, geometry) VALUES (:id, :g)`,
       { id: 2,
         g: {
           type: 'MDSYS.SDO_GEOMETRY',   // the name of the top-level database type, case sensitive
@@ -116,7 +118,7 @@ async function run() {
     //
 
     result = await connection.execute(
-      `SELECT id, geometry FROM testgeometry`,
+      `SELECT id, geometry FROM no_geometry`,
       [],
       // outFormat determines whether rows will be in arrays or JavaScript objects.
       // It does not affect how the GEOMETRY column itself is represented.

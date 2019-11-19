@@ -20,23 +20,6 @@
  *
  * DESCRIPTION
  *   Displays PL/SQL DBMS_OUTPUT using a pipelined table.
- *   Use demo.sql to create the dependencies or do:
- *
- *   CREATE OR REPLACE TYPE dorow AS TABLE OF VARCHAR2(32767);
- *   /
- *   SHOW ERRORS
- *
- *   CREATE OR REPLACE FUNCTION mydofetch RETURN dorow PIPELINED IS
- *   line VARCHAR2(32767);
- *   status INTEGER;
- *   BEGIN LOOP
- *     DBMS_OUTPUT.GET_LINE(line, status);
- *     EXIT WHEN status = 1;
- *     PIPE ROW (line);
- *   END LOOP;
- *   END;
- *   /
- *   SHOW ERRORS
  *
  *   This example uses Node 8's async/await syntax.
  *
@@ -52,6 +35,38 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
+    //
+    // Setup
+    //
+
+    const stmts = [
+      `CREATE OR REPLACE TYPE no_dorow AS TABLE OF VARCHAR2(32767)`,
+
+      `CREATE OR REPLACE FUNCTION no_dofetch RETURN no_dorow PIPELINED IS
+      line VARCHAR2(32767);
+      status INTEGER;
+      BEGIN LOOP
+        DBMS_OUTPUT.GET_LINE(line, status);
+        EXIT WHEN status = 1;
+        PIPE ROW (line);
+      END LOOP;
+      END;`
+
+    ];
+
+    for (const s of stmts) {
+      try {
+        await connection.execute(s);
+      } catch(e) {
+        if (e.errorNum != 942)
+          console.error(e);
+      }
+    }
+
+    //
+    // Show DBMS_OUTPUT
+    //
+
     await connection.execute(
       `BEGIN
          DBMS_OUTPUT.ENABLE(NULL);
@@ -64,7 +79,7 @@ async function run() {
        END;`);
 
     const result = await connection.execute(
-      `SELECT * FROM TABLE(mydofetch())`);
+      `SELECT * FROM TABLE(no_dofetch())`);
     console.log(result.rows);
 
   } catch (err) {

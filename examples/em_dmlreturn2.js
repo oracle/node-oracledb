@@ -20,8 +20,6 @@
  *
  * DESCRIPTION
  *   executeMany() example of DML RETURNING that returns multiple values
- *   This example also uses Async/Await of Node 8.
- *   Use demo.sql to create the required schema.
  *
  *   This example requires node-oracledb 2.2 or later.
  *
@@ -31,9 +29,9 @@
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
-const truncateSql = "TRUNCATE TABLE em_tab";
-const insertSql = "INSERT INTO em_tab VALUES (:1, :2)";
+const insertSql = "INSERT INTO no_em_tab VALUES (:1, :2)";
 
 const insertData = [
   [1, "Test 1 (One)"],
@@ -53,7 +51,7 @@ const insertOptions = {
   ]
 };
 
-const deleteSql = "DELETE FROM em_tab WHERE id < :1 RETURNING id, val INTO :2, :3";
+const deleteSql = "DELETE FROM no_em_tab WHERE id < :1 RETURNING id, val INTO :2, :3";
 
 const deleteData = [
   [2],
@@ -75,7 +73,7 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
-    await connection.execute(truncateSql);
+    await demoSetup.setupEm(connection);  // create the demo tables
 
     await connection.executeMany(insertSql, insertData, insertOptions);
 

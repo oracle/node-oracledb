@@ -27,7 +27,7 @@
  *
  *   Run this script and when the subscription has been created, run
  *   these statements in a SQL*Plus session:
- *      INSERT INTO CQNTABLE VALUES (101);
+ *      INSERT INTO NO_CQNTABLE VALUES (101);
  *      COMMIT;
  *
  *   This example requires node-oracledb 2.3 or later.
@@ -81,19 +81,39 @@ function myCallback(message)
 
 const options = {
   callback : myCallback,
-  sql: "SELECT * FROM cqntable WHERE k > :bv",
+  sql: `SELECT * FROM no_cqntable WHERE k > :bv`,
   binds: { bv : 100 },
   timeout : 60, // Stop after 60 seconds
+  // ipAddress: '127.0.0.1',
   // SUBSCR_QOS_QUERY: generate notifications when rows with k > 100 are changed
   // SUBSCR_QOS_ROWIDS: Return ROWIDs in the notification message
   qos : oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
 };
+
+async function setup(connection) {
+  const stmts = [
+    `DROP TABLE no_cqntable`,
+
+    `CREATE TABLE no_cqntable (k NUMBER)`
+  ];
+
+  for (const s of stmts) {
+    try {
+      await connection.execute(s);
+    } catch(e) {
+      if (e.errorNum != 942)
+        console.error(e);
+    }
+  }
+}
 
 async function runTest() {
   let connection;
 
   try {
     connection = await oracledb.getConnection(dbConfig);
+
+    await setup(connection);
 
     await connection.subscribe('mysub', options);
 

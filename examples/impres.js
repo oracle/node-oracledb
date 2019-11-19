@@ -31,6 +31,7 @@
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
 oracledb.outFormat =  oracledb.OUT_FORMAT_OBJECT;
 
@@ -41,6 +42,8 @@ async function run() {
 
     connection = await oracledb.getConnection(dbConfig);
 
+    await demoSetup.setupBf(connection);  // create the demo table
+
     let result, row;
 
     const plsql = `
@@ -48,14 +51,12 @@ async function run() {
         c1 SYS_REFCURSOR;
         c2 SYS_REFCURSOR;
       BEGIN
-        OPEN c1 FOR SELECT city, postal_code
-                    FROM locations
-                    WHERE location_id < 1500;
+        OPEN c1 FOR SELECT weight, ripeness
+                    FROM no_banana_farmer;
         DBMS_SQL.RETURN_RESULT(c1);
 
-        OPEN C2 FOR SELECT job_id, employee_id, last_name
-                    FROM employees
-                    WHERE employee_id < 110;
+        OPEN C2 FOR SELECT sum(weight) AS KILOGRAMS
+                    FROM no_banana_farmer;
         DBMS_SQL.RETURN_RESULT(c2);
       END;`;
 

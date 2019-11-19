@@ -22,15 +22,13 @@
  *   Converts a ResultSet returned from execute() into a Readable Stream.
  *   This is an alternative to using resultset.getRows().
  *
- *   Scripts to create the HR schema can be found at:
- *   https://github.com/oracle/db-sample-schemas
- *
  *   This example uses Node 8's async/await syntax.
  *
  *****************************************************************************/
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
 async function run() {
   let connection;
@@ -38,10 +36,12 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
+    await demoSetup.setupBf(connection);  // create the demo table
+
     const result = await connection.execute(
-      `SELECT employee_id, last_name
-       FROM employees WHERE ROWNUM < 25
-       ORDER BY employee_id`,
+      `SELECT id, farmer
+       FROM no_banana_farmer
+       ORDER BY id`,
       [],
       {
         resultSet: true

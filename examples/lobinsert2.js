@@ -23,20 +23,16 @@
  *
  *   For smaller LOBs you will probably prefer the method shown in lobinsert1.js
  *
- *   Create clobexample.txt before running this example.
- *   Use demo.sql to create the required table or do:
- *     DROP TABLE mylobs;
- *     CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
- *
  *   This example requires node-oracledb 1.12 or later.
  *
  *****************************************************************************/
 
-var fs = require('fs');
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const fs = require('fs');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
-var inFileName = 'clobexample.txt';  // the file with text to be inserted into the database
+const inFileName = 'clobexample.txt';  // the file with text to be inserted into the database
 
 async function run() {
 
@@ -45,8 +41,10 @@ async function run() {
   try {
     const connection = await oracledb.getConnection(dbConfig);
 
+    await demoSetup.setupLobs(connection);  // create the demo table
+
     const result = await connection.execute(
-      `INSERT INTO mylobs (id, c) VALUES (:id, EMPTY_CLOB()) RETURNING c INTO :lobbv`,
+      `INSERT INTO no_lobs (id, c) VALUES (:id, EMPTY_CLOB()) RETURNING c INTO :lobbv`,
       {
         id: 4,
         lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT}
@@ -92,7 +90,7 @@ async function run() {
       });
 
       console.log('Reading from ' + inFileName);
-      var inStream = fs.createReadStream(inFileName);
+      const inStream = fs.createReadStream(inFileName);
       inStream.on('error', (err) => {
         // console.log("inStream.on 'error' event");
         if (!errorHandled) {

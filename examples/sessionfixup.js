@@ -35,14 +35,9 @@
  *   The function initSession() will be called just once per connection
  *   in the pool.
  *
- *   This file uses Node 8's async/await syntax but could be rewritten
- *   to use callbacks.
- *
  *   This example requires node-oracledb 3.1 or later.
  *
  *   This example uses Node 8's async/await syntax.
- *
- *   Also see sessiontagging1.js and sessiontagging2.js
  *
  *****************************************************************************/
 

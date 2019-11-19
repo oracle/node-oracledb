@@ -41,16 +41,12 @@ async function run() {
 
     // Create a PL/SQL package that uses a RECORD
 
-    let stmts = [
+    const stmts = [
 
       `CREATE OR REPLACE PACKAGE netball AS
-
          TYPE playerType IS RECORD (name VARCHAR2(40), position varchar2(20), shirtnumber NUMBER);
-
          TYPE teamType IS VARRAY(10) OF playerType;
-
          PROCEDURE assignShirtNumbers (t_in IN teamType, t_out OUT teamType);
-
        END netball;`,
 
 

@@ -20,16 +20,12 @@
  *
  * DESCRIPTION
  *   Shows ways to limit the number of records fetched by queries.
- *   Uses Oracle's sample HR schema.
  *
- *   Scripts to create the HR schema can be found at:
- *   https://github.com/oracle/db-sample-schemas/releases
- *
- *   Although adjusting maxRows can be used to control the number of
- *   rows available to the application, it is more efficient for the
- *   database if the SQL query syntax limits the number of rows
- *   returned from the database.  Use maxRows to prevent badly coded
- *   queries from over-consuming Node.js resources.
+ *   Although maxRows can be used to control the number of rows available to the
+ *   application, it is more efficient for the database if the SQL query syntax
+ *   limits the number of rows returned from the database.  Use maxRows to
+ *   prevent badly coded queries from over-consuming Node.js resources, or when
+ *   the number of rows to be selected is a known, small value.
  *
  *   This example uses Node 8's async/await syntax.
  *
@@ -37,9 +33,10 @@
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
-const myoffset     = 2;  // number of rows to skip
-const mymaxnumrows = 6;  // number of rows to fetch
+const myoffset     = 1;  // number of rows to skip
+const mymaxnumrows = 2;  // number of rows to fetch
 
 async function run() {
 
@@ -48,20 +45,23 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
-    let sql = `SELECT employee_id, last_name FROM employees ORDER BY employee_id`;
+    await demoSetup.setupBf(connection);  // create the demo table
+
+    let sql = `SELECT id, farmer FROM no_banana_farmer ORDER BY id`;
 
     if (connection.oracleServerVersion >= 1201000000) {
       // 12c row-limiting syntax
       sql += ` OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`;
     } else {
-      // Pre-12c syntax [could also customize the original query and use row_number()]
+      // Pre-12c syntax [you could also customize the original query and use row_number()]
       sql = `SELECT * FROM (SELECT A.*, ROWNUM AS MY_RNUM FROM ( ${sql} ) A
-        WHERE ROWNUM <= :maxnumrows + :offset) WHERE MY_RNUM > :offset`;
+             WHERE ROWNUM <= :maxnumrows + :offset) WHERE MY_RNUM > :offset`;
     }
 
     const result = await connection.execute(
       sql,
-      { offset: myoffset, maxnumrows: mymaxnumrows });
+      { offset: myoffset, maxnumrows: mymaxnumrows }
+    );
 
     console.log("Executed: " + sql);
     console.log("Number of rows returned: " + result.rows.length);

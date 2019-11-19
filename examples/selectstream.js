@@ -20,10 +20,6 @@
  *
  * DESCRIPTION
  *   Executes a basic query using a Readable Stream.
- *   Uses Oracle's sample HR schema.
- *
- *   Scripts to create the HR schema can be found at:
- *   https://github.com/oracle/db-sample-schemas
  *
  *   This example requires node-oracledb 1.8 or later.
  *
@@ -33,6 +29,7 @@
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
 async function run() {
   let connection;
@@ -40,13 +37,15 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
+    await demoSetup.setupBf(connection);  // create the demo table
+
     const stream = await connection.queryStream(
-      `SELECT first_name, last_name
-       FROM employees
-       ORDER BY employee_id`,
+      `SELECT farmer, weight
+       FROM no_banana_farmer
+       ORDER BY id`,
       [],  // no binds
       {
-        fetchArraySize: 150 // internal buffer size used for performance tuning
+        fetchArraySize: 150 // internal buffer size can be adjusted for performance tuning
       }
     );
 

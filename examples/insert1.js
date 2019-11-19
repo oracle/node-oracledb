@@ -37,36 +37,48 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
-    await connection.execute(
-      `BEGIN
-         EXECUTE IMMEDIATE 'DROP TABLE test';
-         EXCEPTION WHEN OTHERS THEN
-         IF SQLCODE <> -942 THEN
-           RAISE;
-         END IF;
-       END;`);
-    console.log("Table dropped");
+    //
+    // Create a table
+    //
 
-    await connection.execute(
-      `CREATE TABLE test (id NUMBER, name VARCHAR2(20))`);
-    console.log("Table created");
+    const stmts = [
+      `DROP TABLE no_tab1`,
+
+      `CREATE TABLE no_tab1 (id NUMBER, name VARCHAR2(20))`
+    ];
+
+    for (const s of stmts) {
+      try {
+        await connection.execute(s);
+      } catch(e) {
+        if (e.errorNum != 942)
+          console.error(e);
+      }
+    }
+
+    //
+    // Show several examples of inserting
+    //
 
     // 'bind by name' syntax
     let result = await connection.execute(
-      `INSERT INTO test VALUES (:id, :nm)`,
-      { id : {val: 1 }, nm : {val: 'Chris'} });
+      `INSERT INTO no_tab1 VALUES (:id, :nm)`,
+      { id : {val: 1 }, nm : {val: 'Chris'} }
+    );
     console.log("Rows inserted: " + result.rowsAffected);  // 1
 
     // 'bind by position' syntax
     result = await connection.execute(
-      `INSERT INTO test VALUES (:id, :nm)`,
-      [2, 'Alison']);
+      `INSERT INTO no_tab1 VALUES (:id, :nm)`,
+      [2, 'Alison']
+    );
     console.log("Rows inserted: " + result.rowsAffected);  // 1
 
     result = await connection.execute(
-      `UPDATE test SET name = :nm`,
+      `UPDATE no_tab1 SET name = :nm`,
       ['Bambi'],
-      { autoCommit: true });  // commit once for all DML in the script
+      { autoCommit: true }  // commit once for all DML in the script
+    );
     console.log("Rows updated: " + result.rowsAffected); // 2
 
   } catch (err) {

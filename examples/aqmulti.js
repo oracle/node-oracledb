@@ -77,6 +77,8 @@ async function deq() {
     const queue = await connection.getQueue(queueName);
     queue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE; // Change the visibility so no explicit commit is required
 
+    console.log('Dequeuing messages');
+
     const messages = await queue.deqMany(5);  // get at most 5 messages
     console.log("Dequeued " + messages.length + " messages");
     for (const msg of messages) {

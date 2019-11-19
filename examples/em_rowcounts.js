@@ -21,8 +21,6 @@
  * DESCRIPTION
  *   executeMany() example showing dmlRowCounts.
  *   For this example, there no commit so it is re-runnable.
- *   This example also uses Async/Await of Node 8.
- *   Use demo.sql to create the required schema.
  *
  *   This example requires node-oracledb 2.2 or later.
  *
@@ -32,8 +30,9 @@
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
-const sql = "DELETE FROM em_childtab WHERE parentid = :1";
+const sql = "DELETE FROM no_em_childtab WHERE parentid = :1";
 
 const binds = [
   [20],
@@ -48,6 +47,8 @@ async function run() {
 
   try {
     connection = await oracledb.getConnection(dbConfig);
+
+    await demoSetup.setupEm(connection);  // create the demo tables
 
     const result = await connection.executeMany(sql, binds, options);
     console.log("Result is:", result);

@@ -26,9 +26,6 @@
  *   4) Querying a LOB and binding using PL/SQL IN OUT bind
  *   5) PL/SQL OUT bind followed by PL/SQL IN OUT bind
  *
- *   Use demo.sql to create the required tables and procedures
- *   Run lobinsert1.js to load text before running this example
- *
  *   This example requires node-oracledb 1.13 or later.
  *
  *   This example uses Node 8's async/await syntax.
@@ -38,6 +35,7 @@
 const fs = require('fs');
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
 const clobOutFileName1 = 'lobbindsout1.txt';
 const clobOutFileName2 = 'lobbindsout2.txt';
@@ -50,12 +48,12 @@ async function query_bind_insert(connection) {
   console.log ("1. query_bind_insert(): Inserting a CLOB using a LOB IN bind for INSERT");
 
   let result = await connection.execute(
-    `SELECT c FROM mylobs WHERE id = :id`,
+    `SELECT c FROM no_lobs WHERE id = :id`,
     { id: 1 }
   );
 
   if (result.rows.length === 0) {
-    throw new Error('query_bind_insert(): No results.  Did you run lobinsert1.js?');
+    throw new Error('query_bind_insert(): No row found');
   }
 
   const clob1 = result.rows[0][0];
@@ -65,7 +63,7 @@ async function query_bind_insert(connection) {
 
   // Insert the value back as a new row
   result = await connection.execute(
-    `INSERT INTO mylobs (id, c) VALUES (:id, :c)`,
+    `INSERT INTO no_lobs (id, c) VALUES (:id, :c)`,
     {
       id: 10,
       c: {val: clob1, type: oracledb.CLOB, dir: oracledb.BIND_IN}
@@ -88,7 +86,7 @@ async function plsql_in_as_str_buf(connection) {
 
   await connection.execute(
     `BEGIN
-       lobs_in(:id, :c, :b);
+       no_lobs_in(:id, :c, :b);
      END;`,
     {
       id: 20,
@@ -107,7 +105,7 @@ async function plsql_out_as_str_buf(connection) {
 
   const result = await connection.execute(
     `BEGIN
-       lobs_out(:id, :c, :b);
+       no_lobs_out(:id, :c, :b);
      END;`,
     {
       id: 20,
@@ -127,12 +125,12 @@ async function query_plsql_inout(connection) {
   console.log ("4. query_plsql_inout(): Querying then inserting a CLOB using a PL/SQL IN OUT LOB bind");
 
   let result = await connection.execute(
-    `SELECT c FROM mylobs WHERE id = :id`,
+    `SELECT c FROM no_lobs WHERE id = :id`,
     { id: 1 }
   );
 
   if (result.rows.length === 0) {
-    throw new Error('query_plsql_inout(): No results');
+    throw new Error('query_plsql_inout(): No row found');
   }
 
   const clob1 = result.rows[0][0];
@@ -144,7 +142,7 @@ async function query_plsql_inout(connection) {
   // The returned Lob clob2 will be autoclosed because it is streamed to completion.
   result = await connection.execute(
     `BEGIN
-       lob_in_out(:idbv, :ciobv);
+       no_lob_in_out(:idbv, :ciobv);
      END;`,
     {
       idbv: 30,
@@ -209,7 +207,7 @@ async function plsql_out_inout(connection) {
 
   const result1 = await connection.execute(
     `BEGIN
-       lobs_out(:idbv, :cobv, :bobv);
+       no_lobs_out(:idbv, :cobv, :bobv);
      END;`,
     {
       idbv: 1,
@@ -227,7 +225,7 @@ async function plsql_out_inout(connection) {
   // The returned Lob clob2 will be autoclosed because it is streamed to completion.
   const result2 = await connection.execute(
     `BEGIN
-       lob_in_out(:idbv, :ciobv);
+       no_lob_in_out(:idbv, :ciobv);
      END;`,
     {
       idbv: 50,
@@ -305,8 +303,7 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
-    // Cleanup anything other than lobinsert1.js demonstration data
-    await connection.execute(`DELETE FROM mylobs WHERE id > 2`);
+    await demoSetup.setupLobs(connection, true);  // create the demo table with data
 
     await query_bind_insert(connection);
     await plsql_in_as_str_buf(connection);

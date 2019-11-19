@@ -22,7 +22,7 @@
  *   Oracle Advanced Queuing (AQ) example passing an Oracle Database object
  *
  *   Before running this, a queue allowing an Oracle Database object
- *   payloads must be created, see
+ *   payload must be created, see
  *   https://oracle.github.io/node-oracledb/doc/api.html#aqobjexample
  *
  *   This example requires node-oracledb 4 or later.

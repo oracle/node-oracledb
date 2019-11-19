@@ -25,20 +25,18 @@
  *   You may prefer the method shown in lobinsert2.js, which inserts
  *   directly into the table.
  *
- *   Create clobexample.txt before running this example.
- *   Use demo.sql to create the required schema.
- *
  *   This example requires node-oracledb 1.12 or later.
  *
  *   This example uses Node 8's async/await syntax.
  *
  *****************************************************************************/
 
-var fs = require('fs');
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const fs = require('fs');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
-var inFileName = 'clobexample.txt';  // the file with text to be inserted into the database
+const inFileName = 'clobexample.txt';  // the file with text to be inserted into the database
 
 async function run() {
 
@@ -47,8 +45,7 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
-    // Cleanup anything other than lobinsert1.js demo data
-    await connection.execute(`DELETE FROM mylobs WHERE id > 2`);
+    await demoSetup.setupLobs(connection);  // create the demo table
 
     // Write into a temporary LOB.
     // An alternative would be to stream into it.
@@ -66,7 +63,7 @@ async function run() {
         try {
           console.log('Inserting the temporary LOB into the database');
           const result = await connection.execute(
-            `INSERT INTO mylobs (id, c) VALUES (:idbv, :lobbv)`,
+            `INSERT INTO no_lobs (id, c) VALUES (:idbv, :lobbv)`,
             {
               idbv: 3,
               lobbv: tempLob

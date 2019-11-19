@@ -25,20 +25,18 @@
  *   Smaller amounts of data can be passed directly to PL/SQL without
  *   needed a temporary LOB.  See lobbinds.js
  *
- *   Create clobexample.txt before running this example.
- *   Use demo.sql to create the required schema.
- *
  *   This example requires node-oracledb 1.12.1 or later.
  *
  *   This example uses Node 8's async/await syntax.
  *
  *****************************************************************************/
 
-var fs = require('fs');
-var oracledb = require('oracledb');
-var dbConfig = require('./dbconfig.js');
+const fs = require('fs');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
-var inFileName = 'clobexample.txt';  // the file with text to be inserted into the database
+const inFileName = 'clobexample.txt';  // the file with text to be inserted into the database
 
 async function run() {
 
@@ -47,8 +45,7 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
-    // Cleanup anything other than lobinsert1.js demonstration data
-    await connection.execute(`DELETE FROM mylobs WHERE id > 2`);
+    await demoSetup.setupLobs(connection);  // create the demo table
 
     // Create an empty Temporary Lob
     const tempLob = await connection.createLob(oracledb.CLOB);
@@ -79,7 +76,7 @@ async function run() {
       });
 
       console.log('Reading from ' + inFileName);
-      var inStream = fs.createReadStream(inFileName);
+      const inStream = fs.createReadStream(inFileName);
       inStream.on('error', (err) => {
         // console.log("inStream.on 'error' event");
         if (!errorHandled) {

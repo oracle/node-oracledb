@@ -21,10 +21,6 @@
  * DESCRIPTION
  *   Executes queries to show array and object output formats.
  *   Gets results directly without using a ResultSet.
- *   Uses Oracle's sample HR schema.
- *
- *   Scripts to create the HR schema can be found at:
- *   https://github.com/oracle/db-sample-schemas
  *
  *   This example uses Node 8's async/await syntax.
  *
@@ -34,6 +30,7 @@
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
 // Oracledb properties are applicable to all connections and SQL
 // executions.  They can also be set or overridden at the individual
@@ -58,24 +55,21 @@ async function run() {
   try {
     // Get a non-pooled connection
 
-    connection = await oracledb.getConnection(  {
-      user         : dbConfig.user,
-      password     : dbConfig.password,
-      connectString: dbConfig.connectString
-    });
+    connection = await oracledb.getConnection(dbConfig);
+
+    await demoSetup.setupBf(connection);  // create the demo table
 
     // The statement to execute
     const sql =
-        `SELECT location_id, city
-         FROM locations
-         WHERE city LIKE 'S%'
-         ORDER BY city`;
+        `SELECT farmer, picked, ripeness
+         FROM no_banana_farmer
+         ORDER BY id`;
 
     let result;
 
     // Default Array Output Format
     result = await connection.execute(sql);
-    console.log("----- Cities beginning with 'S' (default ARRAY output format) --------");
+    console.log("----- Banana Farmers (default ARRAY output format) --------");
     console.log(result.rows);
 
     // Optional Object Output Format
@@ -83,7 +77,7 @@ async function run() {
       sql,
       {}, // A bind parameter is needed to disambiguate the following options parameter and avoid ORA-01036
       { outFormat: oracledb.OUT_FORMAT_OBJECT }); // outFormat can be OBJECT or ARRAY.  The default is ARRAY
-    console.log("----- Cities beginning with 'S' (OBJECT output format) --------");
+    console.log("----- Banana Farmers (default OBJECT output format) --------");
     console.log(result.rows);
 
   } catch (err) {
@@ -91,7 +85,7 @@ async function run() {
   } finally {
     if (connection) {
       try {
-        // Note: connections should always be released when not needed
+        // Connections should always be released when not needed
         await connection.close();
       } catch (err) {
         console.error(err);

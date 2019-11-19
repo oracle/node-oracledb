@@ -21,7 +21,6 @@
  * DESCRIPTION
  *   Executes a query and uses a ResultSet to fetch batches of rows
  *   with getRows().  Also shows setting the fetch array size.
- *   Uses Oracle's sample HR schema.
  *
  *   This example uses Node 8's async/await syntax.
  *
@@ -29,9 +28,10 @@
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
 // Number of rows to return from each call to getRows()
-const numRows = 10;
+const numRows = 2;
 
 async function run() {
   let connection;
@@ -39,11 +39,12 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
+    await demoSetup.setupBf(connection);  // create the demo table
+
     const result = await connection.execute(
-      `SELECT employee_id, last_name
-       FROM   employees
-       WHERE ROWNUM < 25
-       ORDER BY employee_id`,
+      `SELECT id, farmer
+       FROM no_banana_farmer
+       ORDER BY id`,
       [], // no bind variables
       {
         resultSet: true // return a ResultSet (default is false)

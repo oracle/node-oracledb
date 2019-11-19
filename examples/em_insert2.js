@@ -20,8 +20,6 @@
  *
  * DESCRIPTION
  *   Array DML example using executeMany() with bind by position.
- *   This example also uses Async/Await of Node 8.
- *   Use demo.sql to create the required schema.
  *
  *   This example requires node-oracledb 2.2 or later.
  *
@@ -31,9 +29,9 @@
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
-const truncateSql = "TRUNCATE TABLE em_tab";
-const insertSql = "INSERT INTO em_tab values (:1, :2)";
+const sql = "INSERT INTO no_em_tab values (:1, :2)";
 
 const binds = [
   [1, "Test 1 (One)"],
@@ -59,9 +57,9 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
-    await connection.execute(truncateSql);
+    await demoSetup.setupEm(connection);  // create the demo tables
 
-    const result = await connection.executeMany(insertSql, binds, options);
+    const result = await connection.executeMany(sql, binds, options);
     console.log("Result is:", result);
 
   } catch (err) {

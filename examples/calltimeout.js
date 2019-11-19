@@ -22,8 +22,8 @@
  *   Shows how to time out long running database calls.
  *   See https://oracle.github.io/node-oracledb/doc/api.html#dbcalltimeouts
  *
- *   This example requires node-oracledb 3 or later.
- *   Node-oracledb must be using Oracle Client 18c libraries, or greater.
+ *   This example requires node-oracledb 3 (or later) and Oracle Client 18c
+ *   libraries (or later).
  *
  *   This example uses Node 8's async/await syntax.
  *
@@ -40,6 +40,11 @@ async function run() {
   let connection;
 
   try {
+
+    if (oracledb.oracleClientVersion < 1800000000) {
+      throw new Error("Oracle Client libraries must be 18c or later");
+    }
+
     connection = await oracledb.getConnection(dbConfig);
 
     connection.callTimeout = timeout * 1000;  // milliseconds
@@ -65,5 +70,15 @@ async function run() {
     }
   }
 }
+
+process
+  .on('SIGTERM', function() {
+    console.log("\nTerminating");
+    process.exit(0);
+  })
+  .on('SIGINT', function() {
+    console.log("\nTerminating");
+    process.exit(0);
+  });
 
 run();

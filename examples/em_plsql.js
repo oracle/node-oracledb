@@ -20,8 +20,6 @@
  *
  * DESCRIPTION
  *   executeMany() example calling PL/SQL.
- *   This example also uses Async/Await of Node 8.
- *   Use demo.sql to create the required schema.
  *
  *   This example requires node-oracledb 2.2 or later.
  *
@@ -31,8 +29,9 @@
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
-const sql = "BEGIN em_testproc(:1, :2, :3); END;";
+const sql = "BEGIN no_em_proc(:1, :2, :3); END;";
 
 const binds = [
   [1],
@@ -55,6 +54,8 @@ async function run() {
 
   try {
     connection = await oracledb.getConnection(dbConfig);
+
+    await demoSetup.setupEm(connection);  // create the demo tables
 
     const result = await connection.executeMany(sql, binds, options);
     console.log("Result is:", result);

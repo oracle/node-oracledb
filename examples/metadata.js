@@ -20,10 +20,6 @@
  *
  * DESCRIPTION
  *   Shows default and extended query column metadata
- *   Uses Oracle's sample HR schema.
- *
- *   Scripts to create the HR schema can be found at:
- *   https://github.com/oracle/db-sample-schemas
  *
  *   This example requires node-oracledb 1.10 or later.
  *
@@ -33,6 +29,7 @@
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const demoSetup = require('./demosetup.js');
 
 async function run() {
 
@@ -41,17 +38,19 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
+    await demoSetup.setupBf(connection);  // create the demo table
+
     console.log('Default query metadata');
     let result = await connection.execute(
-      `SELECT location_id, city
-       FROM locations`);
+      `SELECT id, farmer, picked
+       FROM no_banana_farmer`);
     console.log(result.metaData);
 
     console.log('Extended query metadata');
     result = await connection.execute(
-      `SELECT location_id, city
-       FROM locations`,
-      {},  // no binds
+      `SELECT id, farmer, picked
+       FROM no_banana_farmer`,
+      {},                           // no binds
       { extendedMetaData: true });  // enable the extra metadata
     console.log(result.metaData);
 

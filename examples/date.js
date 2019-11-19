@@ -47,32 +47,32 @@ async function run() {
     connection = await oracledb.getConnection(dbConfig);
 
     console.log('Creating table');
-    await connection.execute(
-      `BEGIN
-         DECLARE
-           e_table_exists EXCEPTION;
-           PRAGMA EXCEPTION_INIT(e_table_exists, -00942);
-         BEGIN
-           EXECUTE IMMEDIATE ('DROP TABLE datetest');
-         EXCEPTION
-           WHEN e_table_exists
-           THEN NULL;
-         END;
-       END;`);
 
-    await connection.execute(
-      `CREATE TABLE datetest(
+    const stmts = [
+      `DROP TABLE no_datetab`,
+
+      `CREATE TABLE no_datetab(
          id NUMBER,
          timestampcol TIMESTAMP,
          timestamptz  TIMESTAMP WITH TIME ZONE,
          timestampltz TIMESTAMP WITH LOCAL TIME ZONE,
-         datecol DATE)`);
+         datecol DATE)`
+    ];
+
+    for (const s of stmts) {
+      try {
+        await connection.execute(s);
+      } catch(e) {
+        if (e.errorNum != 942)
+          console.error(e);
+      }
+    }
 
     // When bound, JavaScript Dates are inserted using TIMESTAMP WITH LOCAL TIMEZONE
     date = new Date();
     console.log('Inserting JavaScript date: ' + date);
     result = await connection.execute(
-      `INSERT INTO datetest (id, timestampcol, timestamptz, timestampltz, datecol)
+      `INSERT INTO no_datetab (id, timestampcol, timestamptz, timestampltz, datecol)
        VALUES (1, :ts, :tstz, :tsltz, :td)`,
       { ts: date, tstz: date, tsltz: date, td: date });
     console.log('Rows inserted: ' + result.rowsAffected );
@@ -81,7 +81,7 @@ async function run() {
     result = await connection.execute(
       `SELECT id, timestampcol, timestamptz, timestampltz, datecol,
               TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') AS CD
-       FROM datetest
+       FROM no_datetab
        ORDER BY id`);
     console.log(result.rows);
 
@@ -91,7 +91,7 @@ async function run() {
     date = new Date();
     console.log('Inserting JavaScript date: ' + date);
     result = await connection.execute(
-      `INSERT INTO datetest (id, timestampcol, timestamptz, timestampltz, datecol)
+      `INSERT INTO no_datetab (id, timestampcol, timestamptz, timestampltz, datecol)
        VALUES (2, :ts, :tstz, :tsltz, :td)`,
       { ts: date, tstz: date, tsltz: date, td: date });
     console.log('Rows inserted: ' + result.rowsAffected );
@@ -100,7 +100,7 @@ async function run() {
     result = await connection.execute(
       `SELECT id, timestampcol, timestamptz, timestampltz, datecol,
               TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') AS CD
-       FROM datetest
+       FROM no_datetab
        ORDER BY id`);
     console.log(result.rows);
 
