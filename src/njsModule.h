@@ -423,6 +423,7 @@ struct njsBaton {
     // integer values
     uint32_t poolMin;
     uint32_t poolMax;
+    uint32_t poolMaxPerShard;
     uint32_t poolIncrement;
     uint32_t poolTimeout;
     int32_t poolPingInterval;
@@ -472,6 +473,12 @@ struct njsBaton {
     // subscriptions (no free required)
     njsSubscription *subscription;
 
+    // sharding (requires free)
+    dpiShardingKeyColumn *shardingKeyColumns;
+    dpiShardingKeyColumn *superShardingKeyColumns;
+    uint8_t  numShardingKeyColumns;
+    uint8_t  numSuperShardingKeyColumns;
+
     // references that are held (requires free)
     napi_ref jsBuffer;
     napi_ref jsCallingObj;
@@ -479,10 +486,11 @@ struct njsBaton {
     napi_ref jsSubscription;
 
     // values required to check if a value is a date; this is only used when
-    // binding data in connection.execute() and connection.executeMany();
-    // this can be replaced with calls to napi_is_date() when it is available
-    // for all LTS releases
-    napi_value jsConnection;
+    // binding data in connection.execute() and connection.executeMany() and
+    // when managing sharding keys (when getting a connection); this can be
+    // replaced with calls to napi_is_date() when it is available for all LTS
+    // releases
+    napi_value jsIsDateObj;
     napi_value jsIsDateMethod;
 
     // constructors
@@ -573,6 +581,7 @@ struct njsOracleDb {
     uint32_t fetchArraySize;
     uint32_t poolMin;
     uint32_t poolMax;
+    uint32_t poolMaxPerShard;
     uint32_t poolIncrement;
     uint32_t poolTimeout;
     uint32_t lobPrefetchSize;
@@ -614,6 +623,7 @@ struct njsPool {
     njsOracleDb *oracleDb;
     uint32_t poolMin;
     uint32_t poolMax;
+    uint32_t poolMaxPerShard;
     uint32_t poolIncrement;
     uint32_t poolTimeout;
     uint32_t stmtCacheSize;
@@ -783,6 +793,9 @@ bool njsBaton_getFetchInfoFromArg(njsBaton *baton, napi_env env,
 bool njsBaton_getIntFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, int32_t *result, bool *found);
 uint32_t njsBaton_getNumOutBinds(njsBaton *baton);
+bool njsBaton_getShardingKeyColumnsFromArg(njsBaton *baton, napi_env env,
+        napi_value *args, int argIndex, const char *propertyName,
+        uint8_t *numShardKeys, dpiShardingKeyColumn **shards);
 bool njsBaton_getSodaDocument(njsBaton *baton, njsSodaDatabase *db,
         napi_env env, napi_value obj, dpiSodaDoc **handle);
 bool njsBaton_getStringFromArg(njsBaton *baton, napi_env env, napi_value *args,
@@ -808,7 +821,7 @@ bool njsBaton_queueWork(njsBaton *baton, napi_env env, const char *methodName,
         bool (*afterWorkCallback)(njsBaton*, napi_env, napi_value*),
         unsigned int numCallbackArgs);
 void njsBaton_reportError(njsBaton *baton, napi_env env);
-bool njsBaton_setConstructors(njsBaton *baton, napi_env env, bool canBind);
+bool njsBaton_setConstructors(njsBaton *baton, napi_env env);
 bool njsBaton_setError(njsBaton *baton, int errNum, ...);
 bool njsBaton_setErrorDPI(njsBaton *baton);
 

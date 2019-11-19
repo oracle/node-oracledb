@@ -60,7 +60,7 @@ static const char *njsErrorMessages[] = {
     "NJS-046: pool alias \"%s\" already exists in the connection pool cache", // errPoolWithAliasAlreadyExists
     "NJS-047: pool alias \"%s\" not found in connection pool cache", // errPoolWithAliasNotFound
     "NJS-052: invalid data type at array index %d for bind position %d", // errIncompatibleTypeArrayIndexBind
-    "NJS-053: array value expected, a non-array value provided", //errNonArrayProvided
+    "NJS-053: an array value was expected", //errNonArrayProvided
     "NJS-055: binding by position and name cannot be mixed", // errMixedBind
     "NJS-056: maxSize must be specified and not zero for bind position %u", // errMissingMaxSizeByPos
     "NJS-057: maxSize must be specified and not zero for bind \"%.*s\"", // errMissingMaxSizeByName

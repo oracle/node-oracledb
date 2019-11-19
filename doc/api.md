@@ -81,17 +81,18 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 3.2.14 [`outFormat`](#propdboutformat)
         - 3.2.15 [`poolIncrement`](#propdbpoolincrement)
         - 3.2.16 [`poolMax`](#propdbpoolmax)
-        - 3.2.17 [`poolMin`](#propdbpoolmin)
-        - 3.2.18 [`poolPingInterval`](#propdbpoolpinginterval)
-        - 3.2.19 [`poolTimeout`](#propdbpooltimeout)
-        - 3.2.20 [`prefetchRows`](#propdbprefetchrows)
-        - 3.2.21 [`Promise`](#propdbpromise)
-        - 3.2.22 [`queueRequests`](#propdbqueuerequests)
-        - 3.2.23 [`queueTimeout`](#propdbqueuetimeout)
-        - 3.2.24 [`stmtCacheSize`](#propdbstmtcachesize)
-        - 3.2.25 [`version`](#propdbversion)
-        - 3.2.26 [`versionString`](#propdbversionstring)
-        - 3.2.27 [`versionSuffix`](#propdbversionsuffix)
+        - 3.2.17 [`poolMaxPerShard`](#propdbpoolmaxpershard)
+        - 3.2.18 [`poolMin`](#propdbpoolmin)
+        - 3.2.19 [`poolPingInterval`](#propdbpoolpinginterval)
+        - 3.2.20 [`poolTimeout`](#propdbpooltimeout)
+        - 3.2.21 [`prefetchRows`](#propdbprefetchrows)
+        - 3.2.22 [`Promise`](#propdbpromise)
+        - 3.2.23 [`queueRequests`](#propdbqueuerequests)
+        - 3.2.24 [`queueTimeout`](#propdbqueuetimeout)
+        - 3.2.25 [`stmtCacheSize`](#propdbstmtcachesize)
+        - 3.2.26 [`version`](#propdbversion)
+        - 3.2.27 [`versionString`](#propdbversionstring)
+        - 3.2.28 [`versionSuffix`](#propdbversionsuffix)
     - 3.3 [Oracledb Methods](#oracledbmethods)
         - 3.3.1 [`createPool()`](#createpool)
             - 3.3.1.1 [`createPool()`: Parameters and Attributes](#createpoolpoolattrs)
@@ -104,14 +105,15 @@ For installation information, see the [Node-oracledb Installation Instructions][
                 - 3.3.1.1.7 [`poolAlias`](#createpoolpoolattrspoolalias)
                 - 3.3.1.1.8 [`poolIncrement`](#createpoolpoolattrspoolincrement)
                 - 3.3.1.1.9 [`poolMax`](#createpoolpoolattrspoolmax)
-                - 3.3.1.1.10 [`poolMin`](#createpoolpoolattrspoolmin)
-                - 3.3.1.1.11 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
-                - 3.3.1.1.12 [`poolTimeout`](#createpoolpoolattrspooltimeout)
-                - 3.3.1.1.13 [`queueRequests`](#createpoolpoolattrsqueuerequests)
-                - 3.3.1.1.14 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
-                - 3.3.1.1.15 [`sessionCallback`](#createpoolpoolattrssessioncallback)
-                - 3.3.1.1.16 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
-                - 3.3.1.1.17 [`user`](#createpoolpoolattrsuser)
+                - 3.3.1.1.10 [`poolMaxPerShard`](#createpoolpoolattrspoolmaxpershard)
+                - 3.3.1.1.11 [`poolMin`](#createpoolpoolattrspoolmin)
+                - 3.3.1.1.12 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
+                - 3.3.1.1.13 [`poolTimeout`](#createpoolpoolattrspooltimeout)
+                - 3.3.1.1.14 [`queueRequests`](#createpoolpoolattrsqueuerequests)
+                - 3.3.1.1.15 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
+                - 3.3.1.1.16 [`sessionCallback`](#createpoolpoolattrssessioncallback)
+                - 3.3.1.1.17 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+                - 3.3.1.1.18 [`user`](#createpoolpoolattrsuser)
             - 3.3.1.2 [`createPool()`: Callback Function](#createpoolpoolcallback)
         - 3.3.2 [`getConnection()`](#getconnectiondb)
             - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
@@ -126,9 +128,11 @@ For installation information, see the [Node-oracledb Installation Instructions][
                     - 3.3.2.1.2.7 [`poolAlias`](#getconnectiondbattrspoolalias)
                     - 3.3.2.1.2.8 [`password`](#getconnectiondbattrspassword)
                     - 3.3.2.1.2.9 [`privilege`](#getconnectiondbattrsprivilege)
-                    - 3.3.2.1.2.10 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
-                    - 3.3.2.1.2.11 [`tag`](#getconnectiondbattrstag)
-                    - 3.3.2.1.2.12 [`user`](#getconnectiondbattrsuser)
+                    - 3.3.2.1.2.10 [`shardingKey`](#getconnectiondbattrsshardingkey)
+                    - 3.3.2.1.2.11 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
+                    - 3.3.2.1.2.12 [`superShardingKey`](#getconnectiondbattrssupershardingkey)
+                    - 3.3.2.1.2.13 [`tag`](#getconnectiondbattrstag)
+                    - 3.3.2.1.2.14 [`user`](#getconnectiondbattrsuser)
             - 3.3.2.2 [`getConnection()`: Callback Function](#getconnectiondbcallback)
         - 3.3.3 [`getPool()`](#getpool)
             - 3.3.3.1 [`getPool()`: Parameters](#getpoolattrs)
@@ -389,6 +393,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 14.9.2 [Runtime Load Balancing (RLB)](#connectionrlb)
         - 14.9.3 [Database Call Timeouts](#dbcalltimeouts)
     - 14.10 [Connecting to Oracle Autonomous Database](#connectionadb)
+    - 14.11 [Connecting to Sharded Databases](#sharding)
 15. [SQL Execution](#sqlexecution)
     - 15.1 [SELECT Statements](#select)
         - 15.1.1 [Fetching Rows with Direct Fetches](#fetchingrows)
@@ -1482,7 +1487,28 @@ const oracledb = require('oracledb');
 oracledb.poolMax = 4;
 ```
 
-#### <a name="propdbpoolmin"></a> 3.2.17 `oracledb.poolMin`
+#### <a name="propdbpoolmaxpershard"></a> 3.2.17 `oracledb.poolMaxPerShard`
+
+```
+Number poolMaxPerShard
+```
+
+Sets the maximum number of connections per [shard](#sharding) for connection
+pools.  This ensures that the pool is balanced towards each shard.
+
+This property may be overridden when [creating a connection pool](#createpool).
+
+This property was added in node-oracledb 4.1.  It is available when
+node-oracledb uses Oracle client libraries 18.3, or later.
+
+##### Example
+
+```javascript
+const oracledb = require('oracledb');
+oracledb.poolMin = 0;
+```
+
+#### <a name="propdbpoolmin"></a> 3.2.18 `oracledb.poolMin`
 
 ```
 Number poolMin
@@ -1512,7 +1538,7 @@ const oracledb = require('oracledb');
 oracledb.poolMin = 0;
 ```
 
-#### <a name="propdbpoolpinginterval"></a> 3.2.18 `oracledb.poolPingInterval`
+#### <a name="propdbpoolpinginterval"></a> 3.2.19 `oracledb.poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -1550,7 +1576,7 @@ const oracledb = require('oracledb');
 oracledb.poolPingInterval = 60;     // seconds
 ```
 
-#### <a name="propdbpooltimeout"></a> 3.2.19 `oracledb.poolTimeout`
+#### <a name="propdbpooltimeout"></a> 3.2.20 `oracledb.poolTimeout`
 
 ```
 Number poolTimeout
@@ -1572,7 +1598,7 @@ const oracledb = require('oracledb');
 oracledb.poolTimeout = 60;
 ```
 
-#### <a name="propdbprefetchrows"></a> 3.2.20 `oracledb.prefetchRows`
+#### <a name="propdbprefetchrows"></a> 3.2.21 `oracledb.prefetchRows`
 
 ```
 Number prefetchRows
@@ -1589,7 +1615,7 @@ const oracledb = require('oracledb');
 oracledb.prefetchRows = 100;
 ```
 
-#### <a name="propdbpromise"></a> 3.2.21 `oracledb.Promise`
+#### <a name="propdbpromise"></a> 3.2.22 `oracledb.Promise`
 
 ```
 Promise Promise
@@ -1617,13 +1643,13 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-#### <a name="propdbqueuerequests"></a> 3.2.22 `oracledb.queueRequests`
+#### <a name="propdbqueuerequests"></a> 3.2.23 `oracledb.queueRequests`
 
 This property was removed in node-oracledb 3.0.  Queuing is now always
 enabled.  See [Connection Pool Queue](#connpoolqueue) for more
 information.
 
-#### <a name="propdbqueuetimeout"></a> 3.2.23 `oracledb.queueTimeout`
+#### <a name="propdbqueuetimeout"></a> 3.2.24 `oracledb.queueTimeout`
 
 ```
 Number queueTimeout
@@ -1648,7 +1674,7 @@ const oracledb = require('oracledb');
 oracledb.queueTimeout = 3000; // 3 seconds
 ```
 
-#### <a name="propdbstmtcachesize"></a> 3.2.24 `oracledb.stmtCacheSize`
+#### <a name="propdbstmtcachesize"></a> 3.2.25 `oracledb.stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -1675,7 +1701,7 @@ const oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.25 `oracledb.version`
+#### <a name="propdbversion"></a> 3.2.26 `oracledb.version`
 ```
 readonly Number version
 ```
@@ -1690,7 +1716,7 @@ const oracledb = require('oracledb');
 console.log("Driver version number is " + oracledb.version);
 ```
 
-#### <a name="propdbversionstring"></a> 3.2.26 `oracledb.versionString`
+#### <a name="propdbversionstring"></a> 3.2.27 `oracledb.versionString`
 ```
 readonly String versionString
 ```
@@ -1706,7 +1732,7 @@ const oracledb = require('oracledb');
 console.log("Driver version is " + oracledb.versionString);
 ```
 
-#### <a name="propdbversionsuffix"></a> 3.2.27 `oracledb.versionSuffix`
+#### <a name="propdbversionsuffix"></a> 3.2.28 `oracledb.versionSuffix`
 ```
 readonly String versionSuffix
 ```
@@ -1941,7 +1967,21 @@ Number of Threads](#numberofthreads).
 
 See [Connection Pooling](#connpooling) for other pool sizing guidelines.
 
-###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.10 `poolMin`
+###### <a name="createpoolpoolattrspoolmaxpershard"></a> 3.3.1.1.10 `poolMaxPerShard`
+
+```
+Number poolMaxPerShard
+```
+
+Sets the maximum number of connections per shard for connection pools.  This
+ensures that the pool is balanced towards each shard.
+
+This optional property overrides the
+[`oracledb.poolMaxPerShard`](#propdbpoolmaxpershard) property.
+
+This property was added in node-oracledb 4.1.
+
+###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.11 `poolMin`
 
 ```
 Number poolMin
@@ -1955,7 +1995,7 @@ The default value is 0.
 This optional property overrides the
 [`oracledb.poolMin`](#propdbpoolmin) property.
 
-###### <a name="createpoolpoolattrspoolpinginterval"></a> 3.3.1.1.11 `poolPingInterval`
+###### <a name="createpoolpoolattrspoolpinginterval"></a> 3.3.1.1.12 `poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -1973,7 +2013,7 @@ This optional property overrides the
 
 See [Connection Pool Pinging](#connpoolpinging) for more discussion.
 
-###### <a name="createpoolpoolattrspooltimeout"></a> 3.3.1.1.12 `poolTimeout`
+###### <a name="createpoolpoolattrspooltimeout"></a> 3.3.1.1.13 `poolTimeout`
 
 ```
 Number poolTimeout
@@ -1988,13 +2028,13 @@ The default value is 60.
 This optional property overrides the
 [`oracledb.poolTimeout`](#propdbpooltimeout) property.
 
-###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.13 `queueRequests`
+###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.14 `queueRequests`
 
 This property was removed in node-oracledb 3.0.  Queuing is now always
 enabled.  See [Connection Pool Queue](#connpoolqueue) for more
 information.
 
-###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.14 `queueTimeout`
+###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.15 `queueTimeout`
 
 ```
 Number queueTimeout
@@ -2009,7 +2049,7 @@ The default value is 60000.
 This optional property overrides the
 [`oracledb.queueTimeout`](#propdbqueuetimeout) property.
 
-###### <a name="createpoolpoolattrssessioncallback"></a> 3.3.1.1.15 `sessionCallback`
+###### <a name="createpoolpoolattrssessioncallback"></a> 3.3.1.1.16 `sessionCallback`
 
 ```
 String sessionCallback | function sessionCallback(Connection connection, String requestedTag, function callback(Error error, Connection connection){})
@@ -2066,7 +2106,7 @@ information.
 
 This property was added in node-oracledb 3.1.
 
-###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.16 `stmtCacheSize`
+###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.17 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -2078,7 +2118,7 @@ The number of statements to be cached in the
 This optional property overrides the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.17 `user`
+###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.18 `user`
 
 ```
 String user
@@ -2311,7 +2351,22 @@ Note only non-pooled connections can be privileged.
 
 This property was added in node-oracledb 2.1.
 
-###### <a name="getconnectiondbattrsstmtcachesize"></a> 3.3.2.1.2.10 `stmtCacheSize`
+###### <a name="getconnectiondbattrsshardingkey"></a> 3.3.2.1.2.10 `shardingKey`
+
+```
+Array shardingKey
+```
+
+Allows a connection to be established directly to a database shard.  See
+[Connecting to Sharded Databases](#sharding).
+
+Array values may be of String type (mapping to VARCHAR2 sharding keys), Number
+(NUMBER), or Buffer (RAW).  Multiple types may be used in the array.  Sharding
+keys of DATE and TIMESTAMP types are not supported.
+
+This property was added in node-oracledb 4.1.
+
+###### <a name="getconnectiondbattrsstmtcachesize"></a> 3.3.2.1.2.11 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -2322,7 +2377,22 @@ The number of statements to be cached in the
 property may be used to override the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="getconnectiondbattrstag"></a> 3.3.2.1.2.11 `tag`
+###### <a name="getconnectiondbattrssupershardingkey"></a> 3.3.2.1.2.12 `superShardingKey`
+
+```
+Array superShardingKey
+```
+
+Allows a connection to be established directly to a database shard.  See
+[Connecting to Sharded Databases](#sharding).
+
+Array values may be of String type (mapping to VARCHAR2 sharding keys), Number
+(NUMBER), or Buffer (RAW).  Multiple types may be used in the array.  Sharding
+keys of DATE and TIMESTAMP types are not supported.
+
+This property was added in node-oracledb 4.1.
+
+###### <a name="getconnectiondbattrstag"></a> 3.3.2.1.2.13 `tag`
 
 ```
 String tag
@@ -2337,7 +2407,7 @@ State](#connpooltagging).
 
 This property was added in node-oracledb 3.1.
 
-###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.12 `user`
+###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.14 `user`
 
 ```
 String user
@@ -4948,11 +5018,15 @@ pools.
     Object poolAttrs
     ```
 
-    This optional parameter is used when getting connections from
-    heterogeneous pools.  It can contain `user` and `password` properties
-    for true heterogeneous pool usage, or it can contain a `user` property
-    when a pool proxy user is desired.  It can contain `tag` when
-    [connection tagging](#connpooltagging) is in use.
+    This parameter can contain a `tag` property when [connection
+    tagging](#connpooltagging) is in use.  It can also contain
+    [`shardingKey`](#getconnectiondbattrsshardingkey) and
+    [`superShardingKey`](#getconnectiondbattrssupershardingkey) properties, when
+    using [database sharding](#sharding).
+
+    When getting connections from heterogeneous pools, this parameter can
+    contain `user` and `password` properties for true heterogeneous pool usage,
+    or it can contain a `user` property when a pool proxy user is desired.
 
     See [Connection Attributes](#getconnectiondbattrsconnattrs) for
     discussion of these attributes.
@@ -8422,7 +8496,7 @@ const newpw = ... // the new password
 const connection = await oracledb.getConnection(
   {
     user          : "system",  // a privileged user
-    password      : mypw,      // mypw contains the hr schema password
+    password      : mypw,      // mypw contains the system schema password
     connectString : "localhost/orclpdb1"
   });
 
@@ -8652,6 +8726,153 @@ for example:
 
 ```
 cjdb1_high = (description= (address=(https_proxy=myproxy.example.com)(https_proxy_port=80)(protocol=tcps)(port=1522)(host=  . . .
+```
+
+### <a name="sharding"></a> 14.11 Connecting to Sharded Databases
+
+Sharding can be used to horizontally partition data across independent
+databases.  A database table can be split so each shard contains a table with
+the same columns but a different subset of rows.  These tables are known as
+sharded tables.
+
+Sharding is configured in Oracle Database, see the [Oracle Sharding][164]
+manual.  Sharding requires Oracle Database and client libraries 12.2, or later.
+
+When opening a connection in node-oracledb, the
+[`shardingKey`](#getconnectiondbattrsshardingkey) and
+[`superShardingKey`](#getconnectiondbattrssupershardingkey) properties can be
+used to route the connection directly to a given
+shard.  A sharding key is always required.  A super sharding key is additionally
+required when using composite sharding, which is when data has been partitioned
+by a list or range (the super sharding key), and then further partitioned by a
+sharding key.
+
+When creating a [connection pool](#poolclass), the property
+[`poolMaxPerShard`](#propdbpoolmaxpershard) can be set.  This is used to balance
+connections in the pool equally across shards.
+
+When connected to a shard, queries only returns data from that shard.  For
+queries that need to access data from multiple shards, connections can be
+established to the coordinator shard catalog database.  In this case, no shard
+key or super shard key is used.
+
+The sharding and super sharding key properties are arrays of values.  Array key
+values may be of type String (mapping to VARCHAR2 sharding keys), Number
+(NUMBER), or Buffer (RAW).  Multiple types may be used in each array.  Sharding
+keys of DATE and TIMESTAMP types are not supported by node-oracledb.
+
+For example, if sharding had been configured on a single column like:
+
+```sql
+CREATE SHARDED TABLE customers (
+  cust_id NUMBER,
+  cust_name VARCHAR2(30),
+  class VARCHAR2(10) NOT NULL,
+  signup_date DATE,
+  cust_code RAW(20),
+  CONSTRAINT cust_name_pk PRIMARY KEY(cust_name))
+  PARTITION BY CONSISTENT HASH (cust_name)
+  PARTITIONS AUTO TABLESPACE SET ts1;
+```
+
+then a shard can be directly connected to by passing a single sharding key:
+
+```javascript
+const connection = await oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : mypw,  // mypw contains the hr schema password
+    connectString : "localhost/orclpdb1",
+    shardingkey   : ["SCOTT"]
+  });
+```
+
+Similar code works for NUMBER keys.
+
+The `shardingkey` and `superShardingKey` properties are arrays because multiple
+values can be used.  If database shards had been partitioned with multiple keys
+such as with:
+
+```sql
+CREATE SHARDED TABLE customers (
+  cust_id NUMBER NOT NULL,
+  cust_name VARCHAR2(30) NOT NULL,
+  class VARCHAR2(10) NOT NULL,
+  signup_date DATE,
+  cust_code RAW(20),
+  CONSTRAINT cust_pk PRIMARY KEY(cust_id, cust_name));
+  PARTITION BY CONSISTENT HASH (cust_id, cust_name)
+  PARTITIONS AUTO TABLESPACE SET ts1;
+```
+
+then direct connection to a shard can be established by specifying multiple
+keys, for example:
+
+```javascript
+const connection = await oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : mypw,  // mypw contains the hr schema password
+    connectString : "localhost/orclpdb1",
+    shardingkey   : [70, "SCOTT"]
+  });
+```
+
+To connect to shards when the sharding key is a RAW column like:
+
+```sql
+CREATE SHARDED TABLE customers (
+  cust_id NUMBER,
+  cust_name VARCHAR2(30),
+  class VARCHAR2(10) NOT NULL,
+  signup_date DATE,
+  cust_code RAW(20),
+  CONSTRAINT cust_code_pk PRIMARY KEY(cust_code))
+  PARTITION BY CONSISTENT HASH (cust_code)
+  PARTITIONS AUTO TABLESPACE SET ts1;
+```
+
+then direct connection to a shard could be like:
+
+```javascript
+const data = [0x00, 0x01, 0x02];
+const key = Buffer.from(data);
+const connection = await oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : mypw,  // mypw contains the hr schema password
+    connectString : "localhost/orclpdb1",
+    shardingkey   : [key]
+  });
+```
+
+If composite sharding was in use, for example:
+
+```sql
+CREATE SHARDED TABLE customers (
+  cust_id NUMBER NOT NULL,
+  cust_name VARCHAR2(30) NOT NULL,
+  class VARCHAR2(10) NOT NULL,
+  signup_date DATE,
+  cust_code RAW(20),
+  PARTITIONSET BY LIST (class)
+  PARTITION BY CONSISTENT HASH (cust_name)
+  PARTITIONS AUTO (PARTITIONSET gold VALUES ('gold') TABLESPACE SET ts1,
+  PARTITIONSET silver VALUES ('silver') TABLESPACE SET ts2);
+```
+
+then direct connection to a shard can be established by specifying a super
+sharding key and sharding key, for example:
+
+```javascript
+const connection = await oracledb.getConnection(
+  {
+    user            : "hr",
+    password        : mypw,  // mypw contains the hr schema password
+    connectString   : "localhost/orclpdb1",
+    superShardingKey: ["gold"]
+    shardingkey     : ["SCOTT"],
+  });
 ```
 
 ## <a name="sqlexecution"></a> 15. SQL Execution
@@ -14272,3 +14493,4 @@ can be asked at [AskTom][158].
 [161]: https://docs.oracle.com/en/cloud/paas/atp-cloud/atpud/manage.html
 [162]: https://www.oracle.com//cloud/free/
 [163]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C672E92D-CE32-4759-9931-92D7960850F7
+[164]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=SHARD

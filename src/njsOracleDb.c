@@ -58,6 +58,7 @@ static NJS_NAPI_GETTER(njsOracleDb_getOracleClientVersionString);
 static NJS_NAPI_GETTER(njsOracleDb_getOutFormat);
 static NJS_NAPI_GETTER(njsOracleDb_getPoolIncrement);
 static NJS_NAPI_GETTER(njsOracleDb_getPoolMax);
+static NJS_NAPI_GETTER(njsOracleDb_getPoolMaxPerShard);
 static NJS_NAPI_GETTER(njsOracleDb_getPoolMin);
 static NJS_NAPI_GETTER(njsOracleDb_getPoolPingInterval);
 static NJS_NAPI_GETTER(njsOracleDb_getPoolTimeout);
@@ -81,6 +82,7 @@ static NJS_NAPI_SETTER(njsOracleDb_setMaxRows);
 static NJS_NAPI_SETTER(njsOracleDb_setOutFormat);
 static NJS_NAPI_SETTER(njsOracleDb_setPoolIncrement);
 static NJS_NAPI_SETTER(njsOracleDb_setPoolMax);
+static NJS_NAPI_SETTER(njsOracleDb_setPoolMaxPerShard);
 static NJS_NAPI_SETTER(njsOracleDb_setPoolMin);
 static NJS_NAPI_SETTER(njsOracleDb_setPoolPingInterval);
 static NJS_NAPI_SETTER(njsOracleDb_setPoolTimeout);
@@ -286,6 +288,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             njsOracleDb_setPoolIncrement, NULL, napi_default, NULL },
     { "poolMax", NULL, NULL, njsOracleDb_getPoolMax, njsOracleDb_setPoolMax,
             NULL, napi_default, NULL },
+    { "poolMaxPerShard", NULL, NULL, njsOracleDb_getPoolMaxPerShard,
+            njsOracleDb_setPoolMaxPerShard, NULL, napi_default, NULL },
     { "poolMin", NULL, NULL, njsOracleDb_getPoolMin, njsOracleDb_setPoolMin,
             NULL, napi_default, NULL },
     { "poolPingInterval", NULL, NULL, njsOracleDb_getPoolPingInterval,
@@ -361,6 +365,7 @@ static bool njsOracleDb_createPoolAsync(njsBaton *baton)
         return njsBaton_setErrorDPI(baton);
     params.minSessions = baton->poolMin;
     params.maxSessions = baton->poolMax;
+    params.maxSessionsPerShard = baton->poolMaxPerShard;
     params.sessionIncrement = baton->poolIncrement;
     params.getMode = DPI_MODE_POOL_GET_WAIT;
     params.externalAuth = baton->externalAuth;
@@ -422,6 +427,7 @@ static bool njsOracleDb_createPoolProcessArgs(njsBaton *baton, napi_env env,
     // set defaults on baton
     baton->homogeneous = true;
     baton->poolMax = baton->oracleDb->poolMax;
+    baton->poolMaxPerShard = baton->oracleDb->poolMaxPerShard;
     baton->poolMin = baton->oracleDb->poolMin;
     baton->poolIncrement = baton->oracleDb->poolIncrement;
     baton->poolTimeout = baton->oracleDb->poolTimeout;
@@ -459,6 +465,9 @@ static bool njsOracleDb_createPoolProcessArgs(njsBaton *baton, napi_env env,
         return false;
     if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolMax",
             &baton->poolMax, NULL))
+        return false;
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolMaxPerShard",
+            &baton->poolMaxPerShard, NULL))
         return false;
     if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolMin",
             &baton->poolMin, NULL))
@@ -591,6 +600,13 @@ static bool njsOracleDb_getConnectionAsync(njsBaton *baton)
     params.newPasswordLength = (uint32_t) baton->newPasswordLength;
     if (!njsOracleDb_initCommonCreateParams(baton, &commonParams))
         return false;
+
+    // Sharding
+    params.shardingKeyColumns = baton->shardingKeyColumns;
+    params.numShardingKeyColumns = baton->numShardingKeyColumns;
+    params.superShardingKeyColumns = baton->superShardingKeyColumns;
+    params.numSuperShardingKeyColumns = baton->numSuperShardingKeyColumns;
+
     commonParams.edition = baton->edition;
     commonParams.editionLength = (uint32_t) baton->editionLength;
 
@@ -683,6 +699,14 @@ static bool njsOracleDb_getConnectionProcessArgs(njsBaton *baton,
         return false;
     if (!njsBaton_getBoolFromArg(baton, env, args, 0, "events", &baton->events,
             NULL))
+        return false;
+    if (!njsBaton_getShardingKeyColumnsFromArg(baton, env, args, 0,
+            "shardingKey", &baton->numShardingKeyColumns,
+            &baton->shardingKeyColumns))
+        return false;
+    if (!njsBaton_getShardingKeyColumnsFromArg(baton, env, args, 0,
+            "superShardingKey", &baton->numSuperShardingKeyColumns,
+            &baton->superShardingKeyColumns))
         return false;
 
     return true;
@@ -930,6 +954,21 @@ static napi_value njsOracleDb_getPoolMax(napi_env env, napi_callback_info info)
     if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &oracleDb))
         return NULL;
     return njsUtils_convertToUnsignedInt(env, oracleDb->poolMax);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracleDb_getPoolMaxPerShard()
+//   Get accessor of "poolMaxPerShard" property.
+//-----------------------------------------------------------------------------
+static napi_value njsOracleDb_getPoolMaxPerShard(napi_env env,
+        napi_callback_info info)
+{
+    njsOracleDb *oracleDb;
+
+    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &oracleDb))
+        return NULL;
+    return njsUtils_convertToUnsignedInt(env, oracleDb->poolMaxPerShard);
 }
 
 
@@ -1509,6 +1548,27 @@ static napi_value njsOracleDb_setPoolMax(napi_env env, napi_callback_info info)
         return NULL;
     if (!njsUtils_setPropUnsignedInt(env, value, "poolMax",
             &oracleDb->poolMax))
+        return NULL;
+
+    return NULL;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracleDb_setPoolMaxPerShard()
+//   Set accessor of "poolMaxPerShard" property.
+//-----------------------------------------------------------------------------
+static napi_value njsOracleDb_setPoolMaxPerShard(napi_env env,
+        napi_callback_info info)
+{
+    njsOracleDb *oracleDb;
+    napi_value value;
+
+    if (!njsUtils_validateSetter(env, info, (njsBaseInstance**) &oracleDb,
+            &value))
+        return NULL;
+    if (!njsUtils_setPropUnsignedInt(env, value, "poolMaxPerShard",
+            &oracleDb->poolMaxPerShard))
         return NULL;
 
     return NULL;

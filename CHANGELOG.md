@@ -8,6 +8,9 @@
   [`connection.clientInfo`](https://oracle.github.io/node-oracledb/doc/api.html#propconnclientinfo)
   and [`connection.dbOp`](https://oracle.github.io/node-oracledb/doc/api.html#propconndbop).
 
+- Added support for [Oracle
+  Sharding](https://oracle.github.io/node-oracledb/doc/api.html#sharding).
+
 - Fixed a [regression](https://github.com/oracle/node-oracledb/issues/1152) when
   binding dates with alternative JavaScript frameworks.
 

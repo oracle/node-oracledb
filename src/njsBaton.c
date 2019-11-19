@@ -28,6 +28,8 @@
 // methods used internally
 static bool njsBaton_completeAsyncHelper(njsBaton *baton, napi_env env,
         napi_value *callback, napi_value *callingObj);
+static void njsBaton_freeShardingKeys(uint8_t *numShardingKeyColumns,
+        dpiShardingKeyColumn **shardingKeyColumns);
 
 
 //-----------------------------------------------------------------------------
@@ -359,7 +361,36 @@ void njsBaton_free(njsBaton *baton, napi_env env)
     }
     NJS_FREE_AND_CLEAR(baton->callbackArgs);
 
+    // free sharding and super sharding keys
+    njsBaton_freeShardingKeys(&baton->numShardingKeyColumns,
+            &baton->shardingKeyColumns);
+    njsBaton_freeShardingKeys(&baton->numSuperShardingKeyColumns,
+            &baton->superShardingKeyColumns);
+
     free(baton);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsBaton_freeShardingKeys()
+//   To clean up array of ShardingKeys
+//-----------------------------------------------------------------------------
+void njsBaton_freeShardingKeys(uint8_t *numShardingKeyColumns,
+        dpiShardingKeyColumn **shardingKeyColumns)
+{
+    dpiShardingKeyColumn *shards = *shardingKeyColumns;
+    uint32_t i;
+
+    for (i = 0; i < *numShardingKeyColumns; i++) {
+        if (shards[i].oracleTypeNum == DPI_ORACLE_TYPE_VARCHAR &&
+                shards[i].value.asBytes.ptr) {
+            free(shards[i].value.asBytes.ptr);
+            shards[i].value.asBytes.ptr = NULL;
+        }
+    }
+    free(shards);
+    *numShardingKeyColumns = 0;
+    *shardingKeyColumns = NULL;
 }
 
 
@@ -537,6 +568,109 @@ uint32_t njsBaton_getNumOutBinds(njsBaton *baton)
             numOutBinds++;
     }
     return numOutBinds;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsBaton_getShardingKeyColumnsFromArg()
+//   Gets an array of sharding key columns from the specified JavaScript object
+// property, if possible. If the given property is undefined, no error is set
+// and the value is left untouched; otherwise, if the value is not an array,
+// the error is set on the baton.
+//-----------------------------------------------------------------------------
+bool njsBaton_getShardingKeyColumnsFromArg(njsBaton *baton, napi_env env,
+        napi_value *args, int argIndex, const char *propertyName,
+        uint8_t *numShardingKeyColumns,
+        dpiShardingKeyColumn **shardingKeyColumns)
+{
+    napi_value asNumber, value, element;
+    dpiShardingKeyColumn *shards;
+    napi_valuetype valueType;
+    uint32_t arrLen, i;
+    size_t numBytes;
+    bool check;
+
+    // validate parameter
+    if (!njsBaton_getValueFromArg(baton, env, args, argIndex, propertyName,
+            napi_object, &value, NULL))
+        return false;
+    if (!value)
+        return true;
+    NJS_CHECK_NAPI(env, napi_is_array(env, value, &check))
+    if (!check)
+        return njsBaton_setError(baton, errNonArrayProvided);
+
+    // allocate space for sharding key columns; if array is empty, nothing
+    // further to do!
+    NJS_CHECK_NAPI(env, napi_get_array_length(env, value, &arrLen))
+    if (arrLen == 0)
+        return true;
+    shards = calloc(arrLen, sizeof(dpiShardingKeyColumn));
+    if (!shards)
+        return njsBaton_setError(baton, errInsufficientMemory);
+    *shardingKeyColumns = shards;
+    *numShardingKeyColumns = (uint8_t)arrLen;
+
+    // process each element
+    for (i = 0; i < arrLen; i++) {
+        NJS_CHECK_NAPI(env, napi_get_element(env, value, i, &element))
+        NJS_CHECK_NAPI(env, napi_typeof(env, element, &valueType))
+
+        // handle strings
+        if (valueType == napi_string) {
+            shards[i].nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
+            shards[i].oracleTypeNum = DPI_ORACLE_TYPE_VARCHAR;
+            if (!njsUtils_copyStringFromJS(env, element,
+                    &shards[i].value.asBytes.ptr, &numBytes))
+                return false;
+            shards[i].value.asBytes.length = (uint32_t) numBytes;
+            continue;
+        }
+
+        // handle numbers
+        if (valueType == napi_number) {
+            shards[i].nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
+            shards[i].oracleTypeNum = DPI_ORACLE_TYPE_NUMBER;
+            NJS_CHECK_NAPI(env, napi_get_value_double(env, element,
+                    &shards[i].value.asDouble));
+            continue;
+        }
+
+        // handle objects
+        if (valueType == napi_object) {
+
+            // handle buffers
+            NJS_CHECK_NAPI(env, napi_is_buffer(env, element, &check))
+            if (check) {
+                shards[i].nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
+                shards[i].oracleTypeNum = DPI_ORACLE_TYPE_RAW;
+                NJS_CHECK_NAPI(env, napi_get_buffer_info(env, element,
+                        (void*) &shards[i].value.asBytes.ptr, &numBytes))
+                shards[i].value.asBytes.length = (uint32_t) numBytes;
+                continue;
+            }
+
+            // handle dates
+            if (!njsBaton_isDate(baton, env, element, &check))
+                return false;
+            if (check) {
+                shards[i].nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
+                shards[i].oracleTypeNum = DPI_ORACLE_TYPE_DATE;
+                NJS_CHECK_NAPI(env, napi_coerce_to_number(env, element,
+                        &asNumber))
+                NJS_CHECK_NAPI(env, napi_get_value_double(env, asNumber,
+                        &shards[i].value.asDouble))
+                continue;
+            }
+
+        }
+
+        // no support for other types
+        return njsBaton_setError(baton, errInvalidPropertyValueInParam,
+                propertyName, argIndex + 1);
+    }
+
+    return true;
 }
 
 
@@ -836,7 +970,13 @@ bool njsBaton_isDate(njsBaton *baton, napi_env env, napi_value value,
 {
     napi_value isDateObj;
 
-    NJS_CHECK_NAPI(env, napi_call_function(env, baton->jsConnection,
+    if (!baton->jsIsDateObj) {
+        NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
+                &baton->jsIsDateObj))
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, baton->jsIsDateObj,
+                "_isDate", &baton->jsIsDateMethod))
+    }
+    NJS_CHECK_NAPI(env, napi_call_function(env, baton->jsIsDateObj,
             baton->jsIsDateMethod, 1, &value, &isDateObj))
     NJS_CHECK_NAPI(env, napi_get_value_bool(env, isDateObj, isDate))
     return true;
@@ -918,20 +1058,9 @@ void njsBaton_reportError(njsBaton *baton, napi_env env)
 // njsBaton_setConstructors()
 //   Sets the constructors on the baton.
 //-----------------------------------------------------------------------------
-bool njsBaton_setConstructors(njsBaton *baton, napi_env env, bool canBind)
+bool njsBaton_setConstructors(njsBaton *baton, napi_env env)
 {
     napi_value global;
-
-    // if binding is possible, get the connection (which is the calling object)
-    // and acquire the method used for determining if a value is a date; this
-    // is needed until such time as napi_is_date() is available for all LTS
-    // releases
-    if (canBind) {
-        NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
-                &baton->jsConnection))
-        NJS_CHECK_NAPI(env, napi_get_named_property(env, baton->jsConnection,
-                "_isDate", &baton->jsIsDateMethod))
-    }
 
     // acquire the Date constructor
     NJS_CHECK_NAPI(env, napi_get_global(env, &global))

@@ -45,6 +45,7 @@ static NJS_NAPI_GETTER(njsPool_getConnectionsInUse);
 static NJS_NAPI_GETTER(njsPool_getConnectionsOpen);
 static NJS_NAPI_GETTER(njsPool_getPoolIncrement);
 static NJS_NAPI_GETTER(njsPool_getPoolMax);
+static NJS_NAPI_GETTER(njsPool_getPoolMaxPerShard);
 static NJS_NAPI_GETTER(njsPool_getPoolMin);
 static NJS_NAPI_GETTER(njsPool_getPoolPingInterval);
 static NJS_NAPI_GETTER(njsPool_getPoolTimeout);
@@ -66,6 +67,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             napi_default, NULL },
     { "poolMax", NULL, NULL, njsPool_getPoolMax, NULL, NULL, napi_default,
             NULL },
+    { "poolMaxPerShard", NULL, NULL, njsPool_getPoolMaxPerShard, NULL, NULL,
+            napi_default, NULL },
     { "poolMin", NULL, NULL, njsPool_getPoolMin, NULL, NULL, napi_default,
             NULL },
     { "poolPingInterval", NULL, NULL, njsPool_getPoolPingInterval, NULL, NULL,
@@ -244,6 +247,12 @@ static bool njsPool_getConnectionAsync(njsBaton *baton)
     params.tag = baton->tag;
     params.tagLength = baton->tagLength;
 
+    // Sharding
+    params.shardingKeyColumns = baton->shardingKeyColumns;
+    params.numShardingKeyColumns = baton->numShardingKeyColumns;
+    params.superShardingKeyColumns = baton->superShardingKeyColumns;
+    params.numSuperShardingKeyColumns = baton->numSuperShardingKeyColumns;
+
     // acquire connection from pool
     if (dpiPool_acquireConnection(pool->handle, baton->user, baton->userLength,
             baton->password, baton->passwordLength, &params,
@@ -313,6 +322,14 @@ static bool njsPool_getConnectionProcessArgs(njsBaton *baton, napi_env env,
         return false;
     if (!njsBaton_getBoolFromArg(baton, env, args, 0, "matchAnyTag",
             &baton->matchAnyTag, NULL))
+        return false;
+    if (!njsBaton_getShardingKeyColumnsFromArg(baton, env, args, 0,
+            "shardingKey", &baton->numShardingKeyColumns,
+            &baton->shardingKeyColumns))
+        return false;
+    if (!njsBaton_getShardingKeyColumnsFromArg(baton, env, args, 0,
+            "superShardingKey", &baton->numSuperShardingKeyColumns,
+            &baton->superShardingKeyColumns))
         return false;
 
     // copy items used from the OracleDb class since they may change after
@@ -400,6 +417,21 @@ static napi_value njsPool_getPoolMax(napi_env env, napi_callback_info info)
 
 
 //-----------------------------------------------------------------------------
+// njsPool_getPoolMaxPerShard()
+//   Get accessor of "poolMaxPerShard" property.
+//-----------------------------------------------------------------------------
+static napi_value njsPool_getPoolMaxPerShard(napi_env env,
+        napi_callback_info info)
+{
+    njsPool *pool;
+
+    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &pool))
+        return NULL;
+    return njsUtils_convertToUnsignedInt(env, pool->poolMaxPerShard);
+}
+
+
+//-----------------------------------------------------------------------------
 // njsPool_getPoolMin()
 //   Get accessor of "poolMin" property.
 //-----------------------------------------------------------------------------
@@ -478,6 +510,7 @@ bool njsPool_newFromBaton(njsBaton *baton, napi_env env, napi_value *poolObj)
     // perform other initializations
     pool->oracleDb = baton->oracleDb;
     pool->poolMax = baton->poolMax;
+    pool->poolMaxPerShard = baton->poolMaxPerShard;
     pool->poolMin = baton->poolMin;
     pool->poolIncrement = baton->poolIncrement;
     pool->poolTimeout = baton->poolTimeout;
