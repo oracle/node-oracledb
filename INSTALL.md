@@ -1578,7 +1578,7 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [46]: http://yum.oracle.com/oracle-linux-nodejs.html
 [47]: https://oracle.github.io/node-oracledb/doc/api.html#migrate
 [48]: https://node-oracledb.slack.com/
-[49]: https://node-oracledb.slack.com/join/shared_invite/enQtNDU4Mjc2NzM5OTA2LTdkMzczODY3OGY3MGI0Yjk3NmQ4NDU4MTI2OGVjNTYzMjE5OGY5YzVkNDY4MWNkNjFiMDM2ZDMwOWRjNWVhNTg
+[49]: https://join.slack.com/t/node-oracledb/shared_invite/enQtNDU4Mjc2NzM5OTA2LWMzY2ZlZDY5MDdlMGZiMGRkY2IzYjI5OGU4YTEzZWM5YjQ3ODUzMjcxNWQyNzE4MzM5YjNkYjVmNDk5OWU5NDM
 [50]: http://yum.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/x86_64/index.html
 [51]: http://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html
 [52]: https://github.com/oracle/node-oracledb/blob/v2.3.0/INSTALL.md
