@@ -3533,8 +3533,10 @@ This method returns a queue for enqueuing and dequeuing
     Object options
     ```
 
-    This optional argument can be used to specify the payload type.
-    It is an object with the following attributes:
+    This optional argument can be used to specify the payload type.  If the
+    argument is not passed, then the database queue must be a RAW queue.
+
+    The `options` object has the following attributes:
 
     Attribute Name | Description
     ---------------|-------------
