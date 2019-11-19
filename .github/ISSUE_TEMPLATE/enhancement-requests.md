@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-1. Review existing [enhancement requests](https://github.com/oracle/node-oracledb/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
+1. Review existing [enhancement requests](https://github.com/oracle/node-oracledb/labels/enhancement)
 
 2. Describe your new request in detail
 

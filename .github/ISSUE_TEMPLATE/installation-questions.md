@@ -13,7 +13,7 @@ assignees: ''
 
 - Review the [troubleshooting tips](https://oracle.github.io/node-oracledb/INSTALL.html#troubleshooting)
 
-- If you have a `DPI-1047` error, review both the above again before opening an issue.
+- If you have a `DPI-1047`, `DPI-1050` or `DPI-1072` error, review both the above again before opening an issue.
 
 # Answer the following questions
 
@@ -26,6 +26,8 @@ assignees: ''
 process.platform
 process.version
 process.arch
+require('oracledb').versionString
+require('oracledb').oracleClientVersionString
 ```
 
 3. Are you installing into vanilla Node.js, or using something like Electron?
