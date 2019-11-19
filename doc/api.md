@@ -388,6 +388,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 14.9.1 [Fast Application Notification (FAN)](#connectionfan)
         - 14.9.2 [Runtime Load Balancing (RLB)](#connectionrlb)
         - 14.9.3 [Database Call Timeouts](#dbcalltimeouts)
+    - 14.10 [Connecting to Oracle Autonomous Database](#connectionadb)
 15. [SQL Execution](#sqlexecution)
     - 15.1 [SELECT Statements](#select)
         - 15.1.1 [Fetching Rows with Direct Fetches](#fetchingrows)
@@ -8584,6 +8585,78 @@ Users of pre-Oracle 18c client libraries can set call timeouts by
 setting [`SQLNET.RECV_TIMEOUT`][34] and [`SQLNET.SEND_TIMEOUT`][35] in
 a [`sqlnet.ora` file](#tnsadmin).
 
+### <a name="connectionadb"></a> 14.10 Connecting to Oracle Autonomous Database
+
+To enable connection to Oracle Autonomous Database in Oracle Cloud, a wallet
+needs be downloaded from the cloud GUI, and node-oracledb needs to be configured
+to use it.  A database username and password is still required.  The wallet only
+enables SSL/TLS.
+
+##### Install the Wallet and Network Configuration Files
+
+From the Oracle Cloud console for the database download the wallet zip file.  It
+contains the wallet and network configuration files.  Note: keep wallet files in
+a secure location and share them only with authorized users.
+
+Unzip the wallet zip file.
+
+For node-oracledb, only these files from the zip are needed:
+
+- `tnsnames.ora` - Maps net service names used for application connection strings to your database services
+- `sqlnet.ora`  - Configures Oracle Network settings
+- `cwallet.sso` - Enables SSL/TLS connections
+
+The other files and the wallet password are not needed.
+
+Place these files as shown in [Optional Oracle Net Configuration](#tnsadmin).
+
+##### Run Your Application
+
+The `tnsnames.ora` file contains net service names for various levels of
+database service.  For example, if you create a database called CJDB1 with the
+Always Free services from the [Oracle Cloud Free Tier][162], then you might
+decide to use the connection string in `tnsnames.ora` called `cjdb1_high`.
+
+Update your application to use your schema username, its database password, and
+a net service name, for example:
+
+```javascript
+connection = await oracledb.getConnection({
+  user: "scott",
+  password: mypw,  // mypw contains the scott schema password
+  connectString: "cjdb1_high"
+});
+```
+
+Once you have set Oracle environment variables required by your application,
+such as `ORA_SDTZ` or `TNS_ADMIN`, you can start your application.
+
+If you need to create a new database schema so you do not login as the privileged
+ADMIN user, refer to the relevant Oracle Cloud documentation, for example see
+[Create Database Users][161] in the Oracle Autonomous Transaction Processing
+Dedicated Deployments manual.
+
+##### Access Through a Proxy
+
+If you are behind a firewall, you can tunnel TLS/SSL connections via a proxy
+using [HTTPS_PROXY][163] in the connect descriptor.  Successful connection
+depends on specific proxy configurations.  Oracle does not recommend doing this
+when performance is critical.
+
+Edit `sqlnet.ora` and add a line:
+
+```
+SQLNET.USE_HTTPS_PROXY=on
+```
+
+Edit `tnsnames.ora` and add an `HTTPS_PROXY` proxy name and `HTTPS_PROXY_PORT`
+port to the connect descriptor address list of any service name you plan to use,
+for example:
+
+```
+cjdb1_high = (description= (address=(https_proxy=myproxy.example.com)(https_proxy_port=80)(protocol=tcps)(port=1522)(host=  . . .
+```
+
 ## <a name="sqlexecution"></a> 15. SQL Execution
 
 A single SQL or PL/SQL statement may be executed using the
@@ -14024,9 +14097,10 @@ Node-oracledb can be installed on the pre-built [*Database App Development
 VM*][152] for [VirtualBox][153], which has Oracle Database pre-installed on
 Oracle Linux.
 
-If you want to use your own database, installing the free [Oracle Database 'XE'
-Express Edition][130] is quick and easy.  Other database editions may be
-downloaded [here][154] or [used with Docker][155].
+To get a free database hosted in Oracle Cloud, see [Oracle Cloud Free
+Tier][162].  If you want to use your own database, installing the free [Oracle
+Database 'XE' Express Edition][130] is quick and easy.  Other database editions
+may be downloaded [here][154] or [used with Docker][155].
 
 If you want to install Oracle Linux yourself, it is free from [here][156].
 
@@ -14193,3 +14267,6 @@ can be asked at [AskTom][158].
 [158]: https://asktom.oracle.com/
 [159]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1070805B-0703-457C-8D2E-4EEC26193E5F
 [160]: https://github.com/oracle/node-oracledb/issues/699#issuecomment-524009129
+[161]: https://docs.oracle.com/en/cloud/paas/atp-cloud/atpud/manage.html
+[162]: https://www.oracle.com//cloud/free/
+[163]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C672E92D-CE32-4759-9931-92D7960850F7
