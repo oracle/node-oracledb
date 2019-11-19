@@ -69,7 +69,13 @@ async function run() {
       });
 
       stream.on('end', function() {
-        // console.log("stream 'end' event");
+        // console.log("stream 'end' event"); // all data has been fetched
+      });
+
+      stream.on('close', function() {
+        // console.log("stream 'close' event");
+        // The underlying ResultSet has been closed, so the connection can now
+        // be closed, if desired.  Note: do not close connections on 'end'.
         resolve(rowcount);
       });
     });

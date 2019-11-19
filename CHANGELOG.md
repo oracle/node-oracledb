@@ -20,12 +20,21 @@
   records ([ODPI-C
   change](https://github.com/oracle/odpi/commit/4e80a81257ce6e1066f4f6242fed533eaed45753)).
 
+- Corrected `queryStream()` documentation and examples to show the `'close'`
+  event should be received before closing connections.  If connections are
+  closed on the `'end'` event, then significant C layer memory may be [held
+  open](https://github.com/oracle/node-oracledb/issues/1173) until the garbage
+  collector frees the associated JavaScript resource.
+
 - Reverted the
   [`events`](https://oracle.github.io/node-oracledb/doc/api.html#propdbevents)
   default back to pre-4.0 behavior due to connection creation timeouts in some
   environments.  It is now *false* again.
 
 - Error changes:
+
+    - Ensured that `queryStream()` errors raised during close are emitted in the
+      `'error'` event.
 
     - Enforce only one of `connectString` or `connectionString` being used for
       connection.

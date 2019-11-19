@@ -3703,11 +3703,11 @@ This function provides query streaming support.  The parameters are
 the same as [`execute()`](#execute) except a callback is not used.
 Instead this function returns a stream used to fetch data.
 
-Each row is returned as a `data` event.  Query metadata is available
-via a `metadata` event.  The `end` event indicates the end of the
-query results.
-
-The connection must remain open until the stream is completely read.
+Each row is returned as a `data` event.  Query metadata is available via a
+`metadata` event.  The `end` event indicates the end of the query results. The
+connection must remain open until the stream is completely read and the `close`
+event received.  Alternatively the Stream [`destroy()`][92] method can be used
+to terminate a stream early.
 
 For tuning, adjust the value of
 [`oracledb.fetchArraySize`](#propdbfetcharraysize) or the
@@ -8841,22 +8841,23 @@ await rs.close();
 Streaming of query results allows data to be piped to other streams,
 for example when dealing with HTTP responses.
 
-Use [`connection.queryStream()`](#querystream) to create a stream from
-a top level query and listen for events.  You can also call
-[`connection.execute()`](#execute) and use
-[`toQueryStream()`](#toquerystream) to return a stream from the
-returned [ResultSet](#resultsetclass), an OUT bind REF CURSOR
-ResultSet, or [Implicit Results](#implicitresults) ResultSet.
+Use [`connection.queryStream()`](#querystream) to create a stream from a top
+level query and listen for events.  You can also call
+[`connection.execute()`](#execute) and use [`toQueryStream()`](#toquerystream)
+to return a stream from the returned [ResultSet](#resultsetclass), from an OUT
+bind REF CURSOR ResultSet, or from [Implicit Results](#implicitresults)
+ResultSets.
 
-With streaming, each row is returned as a `data` event.  Query
-metadata is available via a `metadata` event.  The `end` event
-indicates the end of the query results.
+With streaming, each row is returned as a `data` event.  Query metadata is
+available via a `metadata` event.  The `end` event indicates the end of the
+query results, however it is generally best to put end-of-fetch logic in the
+`close` event.
 
 Query results should be fetched to completion to avoid resource leaks, or the
-Stream [`destroy()`][92] method can be used to terminate a stream early.
-
-The connection must remain open until the stream is completely read
-and any returned [Lob](#lobclass) objects have been processed.
+Stream [`destroy()`][92] method can be used to terminate a stream early.  When
+fetching, the connection must remain open until the stream is completely read
+and the `close` event received.  Any returned [Lob](#lobclass) objects should
+also be processed first.
 
 The query stream implementation is a wrapper over the [ResultSet
 Class](#resultsetclass).  In particular, successive calls to
@@ -8879,7 +8880,11 @@ stream.on('data', function (data) {
 });
 
 stream.on('end', function () {
-  // release connection...
+  // all data has been fetched...
+});
+
+stream.on('close', function () {
+  // can now close connection...  (Note: do not close connections on 'end')
 });
 
 stream.on('metadata', function (metadata) {
