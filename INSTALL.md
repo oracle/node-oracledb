@@ -785,7 +785,7 @@ Download the free 64-bit Instant Client **Basic** ZIP file from
 [Oracle Technology Network][25].  If your Node.js architecture is
 32-bit, then use the [32-bit Instant Client][26] instead.
 
-Windows 7 users: Note that Oracle 19.3 is not supported on Windows 7.
+Windows 7 users: Note that Oracle 19 is not supported on Windows 7.
 
 - Unzip the ZIP file into a directory that is accessible to your
   application.  For example unzip
@@ -1513,9 +1513,9 @@ If creating a connection fails:
 - If you got *DPI-1047: Cannot locate an Oracle Client library*,
   then review any messages and the installation instructions.
 
-- If you got *DPI-1072*, then review the installation requirements.
-  Node-oracledb needs Oracle client libraries 11.2 or later.  Note that 19c is
-  not supported on Windows 7.
+- If you got *DPI-1072: the Oracle Client library version is unsupported*, then
+  review the installation requirements.  Node-oracledb needs Oracle client
+  libraries 11.2 or later.  Note that version 19 is not supported on Windows 7.
 
 - Does your Node.js architecture (32-bit or 64-bit) match the Oracle
   client library architecture?  Run `node -p 'process.arch'` and
