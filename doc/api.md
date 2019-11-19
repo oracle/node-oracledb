@@ -14314,6 +14314,9 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
 
 - Review any programmatic or test use of node-oracledb error messages since some have changed.
 
+- Note that the default for [`oracledb.events`](#propdbevents) has reverted to
+  *false*.  If you relied on it being *true*, then explicitly set it.
+
 ## <a name="otherresources"></a> 34. Useful Resources for Node-oracledb
 
 Node-oracledb can be installed on the pre-built [*Database App Development
