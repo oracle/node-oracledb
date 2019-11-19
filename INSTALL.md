@@ -664,7 +664,7 @@ and unzip it, for example:
 
 ```
 mkdir -p /opt/oracle
-unzip instantclient-basic-macos.x64-18.1.0.0.0.zip
+unzip instantclient-basic-macos.x64-19.3.0.0.0dbru.zip
 ```
 
 Create a symbolic link for the 'client shared library' in the user
@@ -672,14 +672,14 @@ default library path such as in `~/lib` or `/usr/local/lib`.  For example:
 
 ```
 mkdir ~/lib
-ln -s instantclient_18_1/libclntsh.dylib ~/lib/
+ln -s instantclient_19_3/libclntsh.dylib ~/lib/
 ```
 
 Alternatively, copy the required OCI libraries, for example:
 
 ```
 mkdir ~/lib
-cp instantclient_18_1/{libclntsh.dylib.18.1,libclntshcore.dylib.18.1,libons.dylib,libnnz18.dylib,libociei.dylib} ~/lib/
+cp instantclient_19_3/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} ~/lib/
 ```
 
 For Instant Client 11.2, the OCI libraries must be copied. For example:
