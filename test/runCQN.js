@@ -209,7 +209,7 @@ describe('185. runCQN.js', function() {
         should.strictEqual(table.name, tableName);
         let expect = oracledb.CQN_OPCODE_INSERT | oracledb.CQN_OPCODE_ALL_ROWS;
         should.strictEqual(table.operation, expect);
-      }
+      };
 
       const options = {
         callback : myCallback,

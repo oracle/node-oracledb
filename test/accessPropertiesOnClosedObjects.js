@@ -54,11 +54,11 @@ describe('223. accessPropertiesOnClosedObjects.js', () => {
 
       await Lob.close();
       should.strictEqual(Lob.type, oracledb.DB_TYPE_BLOB);
-      should.strictEqual(Lob.length, 0)
+      should.strictEqual(Lob.length, 0);
 
       await conn.close();
       should.strictEqual(Lob.type, oracledb.DB_TYPE_BLOB);
-      should.strictEqual(Lob.length, 0)
+      should.strictEqual(Lob.length, 0);
     } catch (err) {
       should.not.exist(err);
     }

@@ -28,7 +28,6 @@
 const oracledb  = require('oracledb');
 const should    = require('should');
 const dbconfig  = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('193. connProps.js', function() {
 
@@ -81,7 +80,7 @@ describe('193. connProps.js', function() {
       should.strictEqual(conn.clientInfo, null);
       should.strictEqual(conn.dbOp, null);
       await conn.close();
-    } catch (error) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 193.2
