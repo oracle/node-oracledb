@@ -11092,11 +11092,11 @@ This will construct a SQL statement:
 SELECT first_name, last_name FROM employees WHERE first_name IN (:0, :1, :2)
 ```
 
-Binds are still used for security.  But, depending how often this
-query is executed, and how changeable the number of bind values is,
-you can end up with lots of 'unique' query strings being executed.
-You might not get the statement caching benefits that re-executing a
-fixed SQL statement would have.
+You could use a [tagged literal template][160] to do this conveniently.  Binds
+are still used for security.  But, depending how often this query is executed,
+and how changeable the number of bind values is, you can end up with lots of
+'unique' query strings being executed.  You might not get the statement caching
+benefits that re-executing a fixed SQL statement would have.
 
 Another solution for a larger number of values is to construct a SQL
 statement like:
@@ -14190,3 +14190,4 @@ can be asked at [AskTom][158].
 [157]: https://livesql.oracle.com/
 [158]: https://asktom.oracle.com/
 [159]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1070805B-0703-457C-8D2E-4EEC26193E5F
+[160]: https://github.com/oracle/node-oracledb/issues/699#issuecomment-524009129
