@@ -2361,8 +2361,8 @@ Allows a connection to be established directly to a database shard.  See
 [Connecting to Sharded Databases](#sharding).
 
 Array values may be of String type (mapping to VARCHAR2 sharding keys), Number
-(NUMBER), or Buffer (RAW).  Multiple types may be used in the array.  Sharding
-keys of DATE and TIMESTAMP types are not supported.
+(NUMBER), Date (DATE), or Buffer (RAW).  Multiple types may be used in the
+array.  Sharding keys TIMESTAMP type are not supported.
 
 This property was added in node-oracledb 4.1.
 
@@ -2387,8 +2387,8 @@ Allows a connection to be established directly to a database shard.  See
 [Connecting to Sharded Databases](#sharding).
 
 Array values may be of String type (mapping to VARCHAR2 sharding keys), Number
-(NUMBER), or Buffer (RAW).  Multiple types may be used in the array.  Sharding
-keys of DATE and TIMESTAMP types are not supported.
+(NUMBER), Date (DATE), or Buffer (RAW).  Multiple types may be used in the
+array.  Sharding keys TIMESTAMP type are not supported.
 
 This property was added in node-oracledb 4.1.
 
@@ -8758,8 +8758,8 @@ key or super shard key is used.
 
 The sharding and super sharding key properties are arrays of values.  Array key
 values may be of type String (mapping to VARCHAR2 sharding keys), Number
-(NUMBER), or Buffer (RAW).  Multiple types may be used in each array.  Sharding
-keys of DATE and TIMESTAMP types are not supported by node-oracledb.
+(NUMBER), Date (DATE), or Buffer (RAW).  Multiple types may be used in each
+array.  Sharding keys of TIMESTAMP type are not supported by node-oracledb.
 
 For example, if sharding had been configured on a single column like:
 
@@ -8818,7 +8818,36 @@ const connection = await oracledb.getConnection(
   });
 ```
 
-To connect to shards when the sharding key is a RAW column like:
+When the sharding key is a DATE column like:
+
+```sql
+CREATE SHARDED TABLE customers (
+  cust_id NUMBER,
+  cust_name VARCHAR2(30),
+  class VARCHAR2(10) NOT NULL,
+  signup_date DATE,
+  cust_code RAW(20),
+  CONSTRAINT signup_date_pk PRIMARY KEY(signup_date))
+  PARTITION BY CONSISTENT HASH (signup_date)
+  PARTITIONS AUTO TABLESPACE SET ts1;
+```
+
+then direct connection to a shard needs a Date key that is in the session time
+zone.  For example if the session time zone is set to UTC (see [Fetching Dates
+and Timestamps](#datehandling)) then Dates must also be in UTC:
+
+```javascript
+key = new Date ("2019-11-30Z");   // when session time zone is UTC
+const connection = await oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : mypw,  // mypw contains the hr schema password
+    connectString : "localhost/orclpdb1",
+    shardingkey   : [key]
+  });
+```
+
+When the sharding key is a RAW column like:
 
 ```sql
 CREATE SHARDED TABLE customers (
@@ -9341,6 +9370,16 @@ before starting Node.js, for example:
 ```
 $ export ORA_SDTZ='UTC'
 $ node myapp.js
+```
+
+If this variable is set in the application, it must be set before the first
+connection is established:
+
+```javascript
+process.env.ORA_SDTZ = 'UTC';
+
+const oracledb = require('oracledb');
+const connection = await oracledb.getConnection(. . . );
 ```
 
 The session time zone can also be changed at runtime for each
