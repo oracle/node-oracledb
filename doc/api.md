@@ -1498,6 +1498,13 @@ pools.  This ensures that the pool is balanced towards each shard.
 
 This property may be overridden when [creating a connection pool](#createpool).
 
+When this property is set, and a new connection request would cause the number
+of connections to the target shard to exceed the limit, then that new connection
+request will block until a suitable connection has been released back to the
+pool.  Importantly, when blocked, the [`queueTimeout`](#propdbqueuetimeout)
+value will be ignored and the pending connection request will consume one worker
+thread.
+
 This property was added in node-oracledb 4.1.  It is available when
 node-oracledb uses Oracle client libraries 18.3, or later.
 
