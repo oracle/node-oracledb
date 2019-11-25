@@ -1,5 +1,4 @@
-
-# Installing node-oracledb Version 4.0
+# Installing node-oracledb Version 4.1
 
 *Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.*
 
@@ -17,6 +16,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 ##  <a name="contents"></a> Contents
+
+## ===> *** Note: Go to [https://oracle.github.io/node-oracledb/INSTALL.html](https://oracle.github.io/node-oracledb/INSTALL.html) for production documentation ***
 
 1. [Node-oracledb Overview](#overview)
     - 1.1 [Installation Changes in node-oracledb version 4.0](#mig)
@@ -39,6 +40,7 @@ limitations under the License.
         - 3.11.1 [Copying node-oracledb Binaries on Windows](#winbins)
     - 3.12 [Installing Node.js and Node-oracledb RPMs from yum.oracle.com](#instnoderpms)
     - 3.13 [Building and Hosting your own node-oracledb Packages](#selfhost)
+    - 3.14 [Using node-oracledb in Docker](#docker)
 4. [Installing Older Versions of Node-oracledb](#installingoldvers)
     - 4.1 [Installing node-oracledb 2.x and 3.x](#installingv2)
     - 4.2 [Installing node-oracledb 1.x](#installingv1)
@@ -103,8 +105,8 @@ information about older versions.
         - Install a C Compiler such as Xcode, GCC, Visual Studio
           2017, or similar.
 
-        - Run `npm install oracle/node-oracledb.git#v4.0.1`, or add
-          `oracle/node-oracledb.git#v4.0.1` to your `package.json`
+        - Run `npm install oracle/node-oracledb.git#v4.1.0`, or add
+          `oracle/node-oracledb.git#v4.1.0` to your `package.json`
           dependencies.  Substitute your desired [GitHub tag][40].
 
 - Add Oracle 19, 18, 12, or 11.2 client libraries to your operating
@@ -663,7 +665,7 @@ and unzip it, for example:
 
 ```
 mkdir -p /opt/oracle
-unzip instantclient-basic-macos.x64-18.1.0.0.0.zip
+unzip instantclient-basic-macos.x64-19.3.0.0.0dbru.zip
 ```
 
 Create a symbolic link for the 'client shared library' in the user
@@ -671,14 +673,14 @@ default library path such as in `~/lib` or `/usr/local/lib`.  For example:
 
 ```
 mkdir ~/lib
-ln -s instantclient_18_1/libclntsh.dylib ~/lib/
+ln -s instantclient_19_3/libclntsh.dylib ~/lib/
 ```
 
 Alternatively, copy the required OCI libraries, for example:
 
 ```
 mkdir ~/lib
-cp instantclient_18_1/{libclntsh.dylib.18.1,libclntshcore.dylib.18.1,libons.dylib,libnnz18.dylib,libociei.dylib} ~/lib/
+cp instantclient_19_3/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} ~/lib/
 ```
 
 For Instant Client 11.2, the OCI libraries must be copied. For example:
@@ -783,6 +785,8 @@ Source Code](#github).
 Download the free 64-bit Instant Client **Basic** ZIP file from
 [Oracle Technology Network][25].  If your Node.js architecture is
 32-bit, then use the [32-bit Instant Client][26] instead.
+
+Windows 7 users: Note that Oracle 19 is not supported on Windows 7.
 
 - Unzip the ZIP file into a directory that is accessible to your
   application.  For example unzip
@@ -1004,19 +1008,19 @@ export CC=gcc
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v4.0.1`, and use the `npm` package manager (which is
+example `v4.1.0`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v4.0.1
+npm install oracle/node-oracledb.git#v4.1.0
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.1/oracledb-src-4.0.1.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v4.1.0/oracledb-src-4.1.0.tgz
 ```
 
 #### 3.9.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1123,19 +1127,19 @@ export MAKE=gmake
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v4.0.1`, and use the `npm` package manager (which is
+example `v4.1.0`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v4.0.1
+npm install oracle/node-oracledb.git#v4.1.0
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.1/oracledb-src-4.0.1.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v4.1.0/oracledb-src-4.1.0.tgz
 ```
 
 #### 3.9.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1238,12 +1242,12 @@ The `git` utility is required for this method.
 
 Build node-oracledb from source code by changing the package specifier
 so that `npm` downloads from GitHub instead of from npmjs.com.  For
-example, to install the code from the GitHub tag 'v4.0.1', add
-`oracle/node-oracledb#v4.0.1` to your `package.json` dependencies, or
+example, to install the code from the GitHub tag 'v4.1.0', add
+`oracle/node-oracledb#v4.1.0` to your `package.json` dependencies, or
 use the command:
 
 ```
-npm install oracle/node-oracledb#v4.0.1
+npm install oracle/node-oracledb#v4.1.0
 ```
 
 This will download, compile and install node-oracledb.
@@ -1257,7 +1261,7 @@ Users without `git`, or with older versions of `npm` such as included in
 Node.js 6, may alternatively need to use pre-bundled source code:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v4.0.1/oracledb-src-4.0.1.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v4.1.0/oracledb-src-4.1.0.tgz
 ```
 
 Note it may take some time before compilation begins due to the slow
@@ -1291,7 +1295,7 @@ installing.
 #### <a name="nogithubaccess"></a> 3.10.3 Compiling node-oracledb without GitHub Access
 
 Some companies block access to github.com so compiling source code
-from GitHub with `npm install oracle/node-oracledb.git#v4.0.1` will
+from GitHub with `npm install oracle/node-oracledb.git#v4.1.0` will
 fail.
 
 Oracle has a mirror of the GitHub repository source code that can be
@@ -1396,7 +1400,7 @@ See [Node.js for Oracle Linux][46] for details.
 You can host node-oracledb packages locally.
 
 Download the node-oracledb package from npm, for example from
-[`https://registry.npmjs.com/oracledb/-/oracledb-4.0.1.tgz`](https://registry.npmjs.com/oracledb/-/oracledb-4.0.1.tgz)
+[`https://registry.npmjs.com/oracledb/-/oracledb-4.1.0.tgz`](https://registry.npmjs.com/oracledb/-/oracledb-4.1.0.tgz)
 Alternatively, if you want to build your own binaries and
 node-oracledb package, the maintainer scripts in
 [/package](https://github.com/oracle/node-oracledb/tree/master/package)
@@ -1405,11 +1409,11 @@ can be used.  See
 for details.
 
 If you make the package accessible on your local web server, for
-example at www.example.com/oracledb-4.0.1.tgz, then your
+example at www.example.com/oracledb-4.1.0.tgz, then your
 install command would be:
 
 ```
-npm install https://www.example.com/oracledb-4.0.1.tgz
+npm install https://www.example.com/oracledb-4.1.0.tgz
 ```
 
 or your `package.json` would contain:
@@ -1417,11 +1421,260 @@ or your `package.json` would contain:
 ```
 . . .
    "dependencies": {
-      "oracledb": "https://www.example.com/oracledb-4.0.1.tgz"
+      "oracledb": "https://www.example.com/oracledb-4.1.0.tgz"
    },
 . . .
 ```
 
+### <a name="docker"></a> 3.14 Using node-oracledb in Docker
+
+[Docker][59] allows applications to be containerized.  Each application will
+have a `Dockerfile` with steps to create a Docker image.  Once created, the
+image can be shared and run.
+
+#### Installing Node.js in Docker
+
+If your `Dockerfile` uses Oracle Linux:
+
+```
+FROM oraclelinux:7-slim
+```
+
+Then you can install Node.js from [yum.oracle.com][46] using:
+
+```
+RUN  yum -y install oracle-release-el7 oracle-nodejs-release-el7 && \
+     yum-config-manager --disable ol7_developer_EPEL && \
+     yum -y install nodejs && \
+     rm -rf /var/cache/yum
+```
+
+Alternatively you may prefer to use a [Node.js image from
+Docker Hub][56], for
+example using:
+
+```
+FROM node:12-buster-slim
+```
+
+#### Installing Instant Client in Docker
+
+Review the [Oracle Technology Network][12] or the [Oracle Linux 7][51] channel
+for the latest Instant Client package available.
+
+1. Using Oracle Linux Instant Client RPMs
+
+   If you have an Oracle Linux image:
+
+   ```
+   FROM oraclelinux:7-slim
+   ```
+
+   Then you can install Instant Client RPMs:
+
+   ```
+   RUN  yum -y install oracle-release-el7 && \
+        yum-config-manager --enable ol7_oracle_instantclient && \
+        yum -y install oracle-instantclient19.3-basiclite && \
+        rm -rf /var/cache/yum
+   ```
+
+2. Automatically downloading the Instant Client zip File
+
+    Use an Instant Client zip file on Debian-based operating systems.
+
+    You can script the download of the Instant Client package during image
+    creation.  To use the latest available Instant Client:
+
+    ```
+    RUN wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
+        unzip instantclient-basiclite-linuxx64.zip && rm -f instantclient-basiclite-linuxx64.zip && \
+        cd /opt/oracle/instantclient* && rm -f *jdbc* *occi* *mysql* *jar uidrvci genezi adrci && \
+        echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
+    ```
+
+    The `libaio` or `libaio1` package will need to be added manually.
+
+    On Oracle Linux
+
+    ```
+    RUN yum install -y libaio
+    ```
+
+    On a Debian-based Linux:
+    ```
+    RUN apt-get update && apt-get install -y libaio1
+    ```
+
+3. Copying Instant Client zip files from the host
+
+    Download the Instant Client Basic Light Zip file, extract it, and remove
+    unnecessary files.  The resulting directory can be added during image
+    creation.  For example, with Instant Client Basic Light 19.3, the host
+    computer (where you run Docker) could have a directory `instantclient_19_3`
+    with these files:
+
+    ```
+    libclntshcore.so.19.1
+    libclntsh.so.19.1
+    libipc1.so
+    libmql1.so
+    libnnz19.so
+    libociicus.so
+    ```
+
+    With this, your Dockerfile could contain:
+
+    ```
+    ADD instantclient_19_3/* /opt/oracle/instantclient_19_3
+    RUN echo /opt/oracle/instantclient_19_3 > /etc/ld.so.conf.d/oracle-instantclient.conf && \
+        ldconfig
+    ```
+
+    The `libaio` or `libaio1` package will be needed, as shown in the previous option.
+
+#### Installing node-oracledb and your application
+
+Include node-oracledb as a normal dependency in your application `package.json` file:
+
+```
+  . . .
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "oracledb" : "^4"
+  },
+  . . .
+```
+
+The `packge.json` and application file can be added to the image, and
+dependencies installed when the image is built:
+
+```
+WORKDIR /myapp
+ADD package.json /myapp/
+ADD server.js /myapp/
+RUN npm install
+
+CMD exec node server.js
+```
+
+#### Using Oracle Net configuration files and Oracle Wallets
+
+[Optional Oracle Net Configuration][58] files (like `tnsnames.ora` and
+`sqlnet.net`) and files that need to be secured such as [Oracle wallets][57] can
+be mounted at runtime using a Docker volume.  Map the volume to the
+`network/admin` subdirectory of Instant Client so the `TNS_ADMIN` environment
+variable does not need to be set.  For example, when the Wallet or configuration
+files are in `/OracleCloud/wallet/` on the host computer, and the image uses
+Instant Client 19.3 RPMs, then you can mount the files using:
+
+```
+docker run -v /OracleCloud/wallet:/usr/lib/oracle/19.3/client64/lib/network/admin:Z,ro . . .
+```
+
+The `Z` option is needed when SELinux is enabled.
+
+#### <a name="dockerexample"></a> Example Application in Docker
+
+This example consists of a `Dockerfile`, a `package.json` file with the
+application dependencies, a `server.js` file that is the application, and an
+`envfile.list` containing the database credentials as environment variables.  It
+is based on Oracle Linux.
+
+The example `Dockerfile` is:
+
+```
+FROM oraclelinux:7-slim
+
+RUN  yum -y install oracle-release-el7 oracle-nodejs-release-el7 && \
+     yum-config-manager --disable ol7_developer_EPEL --enable ol7_oracle_instantclient && \
+     yum -y install nodejs oracle-instantclient19.3-basiclite && \
+     rm -rf /var/cache/yum
+
+WORKDIR /myapp
+ADD package.json /myapp/
+ADD server.js /myapp/
+RUN npm install
+
+CMD exec node server.js
+```
+
+The `package.json` is:
+
+```
+{
+  "name": "test",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Docker Node.js application",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "myapp"
+  ],
+  "dependencies": {
+    "oracledb" : "^4"
+  },
+  "author": "Me",
+  "license": "UPL"
+}
+```
+
+The application `server.js` contains:
+
+```javascript
+. . .
+connection = await oracledb.getConnection({
+  user: process.env.NODE_ORACLEDB_USER,
+  password: process.env.NODE_ORACLEDB_PASSWORD,
+  connectString: process.env.NODE_ORACLEDB_CONNECTIONSTRING
+});
+const result = await connection.execute(
+  `SELECT TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') AS D FROM DUAL`,
+  [],
+  { outFormat: oracledb.OUT_FORMAT_OBJECT }
+);
+console.log(result);
+. . .
+```
+
+The environment variables in `envfile.list` are used at runtime.  The file
+contains:
+
+```
+NODE_ORACLEDB_USER=hr
+NODE_ORACLEDB_PASSWORD=<hr password>
+NODE_ORACLEDB_CONNECTIONSTRING=server.example.com/orclpdb1
+```
+
+The image can be built:
+
+```
+docker build -t nodedoc .
+
+```
+
+Alternatively, if you are behind a firewall, you can pass proxies when building:
+
+```
+docker build --build-arg https_proxy=http://myproxy.example.com:80 --build-arg http_proxy=http://www-myproxy.example.com:80 -t nodedoc .
+```
+
+Finaly, a container can be run from the image:
+
+```
+docker run -ti --name nodedoc --env-file envfile.list nodedoc
+```
+
+The output is like:
+
+```
+{ metaData: [ { name: 'D' } ],
+  rows: [ { D: '24-Nov-2019 23:39' } ] }
+```
 
 ## <a name="installingoldvers"></a>  4. Installing Older Versions of Node-oracledb
 
@@ -1510,6 +1763,10 @@ If creating a connection fails:
 - If you got *DPI-1047: Cannot locate an Oracle Client library*,
   then review any messages and the installation instructions.
 
+- If you got *DPI-1072: the Oracle Client library version is unsupported*, then
+  review the installation requirements.  Node-oracledb needs Oracle client
+  libraries 11.2 or later.  Note that version 19 is not supported on Windows 7.
+
 - Does your Node.js architecture (32-bit or 64-bit) match the Oracle
   client library architecture?  Run `node -p 'process.arch'` and
   compare with, for example, `dumpbin /headers oci.dll` (on Windows),
@@ -1539,7 +1796,7 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 
 [1]: http://oracle.github.io/node-oracledb/
 [2]: https://www.python.org/downloads/
-[3]: http://www.oracle.com/technetwork/database/database-technologies/instant-client/overview/index.html
+[3]: https://www.oracle.com/database/technologies/instant-client.html
 [4]: https://www.npmjs.com/package/oracledb
 [5]: https://blogs.oracle.com/opal/getting-a-c11-compiler-for-node-4,-5-and-6-on-oracle-linux-6
 [6]: https://support.oracle.com/epmos/faces/DocumentDisplay?id=207303.1
@@ -1548,8 +1805,8 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [9]: https://www.github.com/oracle/odpi
 [10]: https://github.com/oracle/node-oracledb/issues
 [11]: http://nodejs.org
-[12]: http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html
-[13]: http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html#ic_x64_inst
+[12]: https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html
+[13]: https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html#ic_x64_inst
 [14]: https://linux.oracle.com
 [15]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7F967CE5-5498-427C-9390-4A5C6767ADAA
 [16]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2041545B-58D4-48DC-986F-DCC9D0DEC642
@@ -1558,15 +1815,15 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [19]: https://github.com/oracle/node-oracledb/tree/master/examples
 [20]: https://www.oracle.com/database/technologies/appdev/xe.html
 [21]: https://blogs.oracle.com/opal/the-easiest-way-to-install-oracle-database-on-apple-mac-os-x
-[22]: http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html
+[22]: https://www.oracle.com/database/technologies/instant-client/macos-intel-x86-downloads.html
 [23]: https://docs.oracle.com/database/
 [24]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=NTCLI
-[25]: http://www.oracle.com/technetwork/topics/winx64soft-089540.html
-[26]: http://www.oracle.com/technetwork/topics/winsoft-085727.html
+[25]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
+[26]: https://www.oracle.com/database/technologies/instant-client/microsoft-windows-32-downloads.html
 [27]: https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads
 [29]: https://www.microsoft.com/en-us/download/details.aspx?id=3387
-[30]: http://www.oracle.com/technetwork/topics/aix5lsoft-098883.html
-[31]: http://www.oracle.com/technetwork/topics/solx8664soft-097204.html
+[30]: https://www.oracle.com/database/technologies/instant-client/aix-ppc64-downloads.html
+[31]: https://www.oracle.com/database/technologies/instant-client/solx8664-downloads.html
 [32]: https://github.com/oracle/node-oracledb/blob/v1.13.1/INSTALL.md
 [40]: https://github.com/oracle/node-oracledb/tags
 [41]: https://github.com/oracle/node-oracledb/releases
@@ -1577,10 +1834,14 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [46]: http://yum.oracle.com/oracle-linux-nodejs.html
 [47]: https://oracle.github.io/node-oracledb/doc/api.html#migrate
 [48]: https://node-oracledb.slack.com/
-[49]: https://node-oracledb.slack.com/join/shared_invite/enQtNDU4Mjc2NzM5OTA2LTdkMzczODY3OGY3MGI0Yjk3NmQ4NDU4MTI2OGVjNTYzMjE5OGY5YzVkNDY4MWNkNjFiMDM2ZDMwOWRjNWVhNTg
+[49]: https://join.slack.com/t/node-oracledb/shared_invite/enQtNDU4Mjc2NzM5OTA2LWMzY2ZlZDY5MDdlMGZiMGRkY2IzYjI5OGU4YTEzZWM5YjQ3ODUzMjcxNWQyNzE4MzM5YjNkYjVmNDk5OWU5NDM
 [50]: http://yum.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/x86_64/index.html
 [51]: http://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html
 [52]: https://github.com/oracle/node-oracledb/blob/v2.3.0/INSTALL.md
 [53]: https://nodejs.org/api/n-api.html
 [54]: https://github.com/oracle/node-oracledb/blob/v3.0.1/INSTALL.md
 [55]: https://github.com/oracle/node-oracledb/blob/v3.1.2/INSTALL.md
+[56]: https://hub.docker.com/_/node/
+[57]: https://oracle.github.io/node-oracledb/doc/api.html#connectionadb
+[58]: https://oracle.github.io/node-oracledb/doc/api.html##tnsadmin
+[59]: https://www.docker.com/

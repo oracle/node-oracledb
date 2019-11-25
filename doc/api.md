@@ -1,4 +1,4 @@
-# node-oracledb 4.0 Documentation for the Oracle Database Node.js Add-on
+# node-oracledb 4.1 Documentation for the Oracle Database Node.js Add-on
 
 *Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.*
 
@@ -14,6 +14,9 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
 See the License for the specific language governing permissions and
 limitations under the License.
+
+##
+## ===> *** Note: Go to [https://oracle.github.io/node-oracledb/doc/api.html](https://oracle.github.io/node-oracledb/doc/api.html) for production documentation ***
 
 ## Manual Sections
 
@@ -78,17 +81,18 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 3.2.14 [`outFormat`](#propdboutformat)
         - 3.2.15 [`poolIncrement`](#propdbpoolincrement)
         - 3.2.16 [`poolMax`](#propdbpoolmax)
-        - 3.2.17 [`poolMin`](#propdbpoolmin)
-        - 3.2.18 [`poolPingInterval`](#propdbpoolpinginterval)
-        - 3.2.19 [`poolTimeout`](#propdbpooltimeout)
-        - 3.2.20 [`prefetchRows`](#propdbprefetchrows)
-        - 3.2.21 [`Promise`](#propdbpromise)
-        - 3.2.22 [`queueRequests`](#propdbqueuerequests)
-        - 3.2.23 [`queueTimeout`](#propdbqueuetimeout)
-        - 3.2.24 [`stmtCacheSize`](#propdbstmtcachesize)
-        - 3.2.25 [`version`](#propdbversion)
-        - 3.2.26 [`versionString`](#propdbversionstring)
-        - 3.2.27 [`versionSuffix`](#propdbversionsuffix)
+        - 3.2.17 [`poolMaxPerShard`](#propdbpoolmaxpershard)
+        - 3.2.18 [`poolMin`](#propdbpoolmin)
+        - 3.2.19 [`poolPingInterval`](#propdbpoolpinginterval)
+        - 3.2.20 [`poolTimeout`](#propdbpooltimeout)
+        - 3.2.21 [`prefetchRows`](#propdbprefetchrows)
+        - 3.2.22 [`Promise`](#propdbpromise)
+        - 3.2.23 [`queueRequests`](#propdbqueuerequests)
+        - 3.2.24 [`queueTimeout`](#propdbqueuetimeout)
+        - 3.2.25 [`stmtCacheSize`](#propdbstmtcachesize)
+        - 3.2.26 [`version`](#propdbversion)
+        - 3.2.27 [`versionString`](#propdbversionstring)
+        - 3.2.28 [`versionSuffix`](#propdbversionsuffix)
     - 3.3 [Oracledb Methods](#oracledbmethods)
         - 3.3.1 [`createPool()`](#createpool)
             - 3.3.1.1 [`createPool()`: Parameters and Attributes](#createpoolpoolattrs)
@@ -101,14 +105,15 @@ For installation information, see the [Node-oracledb Installation Instructions][
                 - 3.3.1.1.7 [`poolAlias`](#createpoolpoolattrspoolalias)
                 - 3.3.1.1.8 [`poolIncrement`](#createpoolpoolattrspoolincrement)
                 - 3.3.1.1.9 [`poolMax`](#createpoolpoolattrspoolmax)
-                - 3.3.1.1.10 [`poolMin`](#createpoolpoolattrspoolmin)
-                - 3.3.1.1.11 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
-                - 3.3.1.1.12 [`poolTimeout`](#createpoolpoolattrspooltimeout)
-                - 3.3.1.1.13 [`queueRequests`](#createpoolpoolattrsqueuerequests)
-                - 3.3.1.1.14 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
-                - 3.3.1.1.15 [`sessionCallback`](#createpoolpoolattrssessioncallback)
-                - 3.3.1.1.16 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
-                - 3.3.1.1.17 [`user`](#createpoolpoolattrsuser)
+                - 3.3.1.1.10 [`poolMaxPerShard`](#createpoolpoolattrspoolmaxpershard)
+                - 3.3.1.1.11 [`poolMin`](#createpoolpoolattrspoolmin)
+                - 3.3.1.1.12 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
+                - 3.3.1.1.13 [`poolTimeout`](#createpoolpoolattrspooltimeout)
+                - 3.3.1.1.14 [`queueRequests`](#createpoolpoolattrsqueuerequests)
+                - 3.3.1.1.15 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
+                - 3.3.1.1.16 [`sessionCallback`](#createpoolpoolattrssessioncallback)
+                - 3.3.1.1.17 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+                - 3.3.1.1.18 [`user`](#createpoolpoolattrsuser)
             - 3.3.1.2 [`createPool()`: Callback Function](#createpoolpoolcallback)
         - 3.3.2 [`getConnection()`](#getconnectiondb)
             - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
@@ -123,9 +128,11 @@ For installation information, see the [Node-oracledb Installation Instructions][
                     - 3.3.2.1.2.7 [`poolAlias`](#getconnectiondbattrspoolalias)
                     - 3.3.2.1.2.8 [`password`](#getconnectiondbattrspassword)
                     - 3.3.2.1.2.9 [`privilege`](#getconnectiondbattrsprivilege)
-                    - 3.3.2.1.2.10 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
-                    - 3.3.2.1.2.11 [`tag`](#getconnectiondbattrstag)
-                    - 3.3.2.1.2.12 [`user`](#getconnectiondbattrsuser)
+                    - 3.3.2.1.2.10 [`shardingKey`](#getconnectiondbattrsshardingkey)
+                    - 3.3.2.1.2.11 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
+                    - 3.3.2.1.2.12 [`superShardingKey`](#getconnectiondbattrssupershardingkey)
+                    - 3.3.2.1.2.13 [`tag`](#getconnectiondbattrstag)
+                    - 3.3.2.1.2.14 [`user`](#getconnectiondbattrsuser)
             - 3.3.2.2 [`getConnection()`: Callback Function](#getconnectiondbcallback)
         - 3.3.3 [`getPool()`](#getpool)
             - 3.3.3.1 [`getPool()`: Parameters](#getpoolattrs)
@@ -135,12 +142,14 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 4.1.1 [`action`](#propconnaction)
         - 4.1.2 [`callTimeout`](#propconncalltimeout)
         - 4.1.3 [`clientId`](#propconnclientid)
-        - 4.1.4 [`currentSchema`](#propconncurrentschema)
-        - 4.1.5 [`module`](#propconnmodule)
-        - 4.1.6 [`oracleServerVersion`](#propconnoracleserverversion)
-        - 4.1.7 [`oracleServerVersionString`](#propconnoracleserverversionstring)
-        - 4.1.8 [`stmtCacheSize`](#propconnstmtcachesize)
-        - 4.1.9 [`tag`](#propconntag)
+        - 4.1.4 [`clientInfo`](#propconnclientinfo)
+        - 4.1.5 [`currentSchema`](#propconncurrentschema)
+        - 4.1.6 [`dbOp`](#propconndbop)
+        - 4.1.7 [`module`](#propconnmodule)
+        - 4.1.8 [`oracleServerVersion`](#propconnoracleserverversion)
+        - 4.1.9 [`oracleServerVersionString`](#propconnoracleserverversionstring)
+        - 4.1.10 [`stmtCacheSize`](#propconnstmtcachesize)
+        - 4.1.11 [`tag`](#propconntag)
     - 4.2 [Connection Methods](#connectionmethods)
         - 4.2.1 [`break()`](#break)
         - 4.2.2 [`changePassword()`](#changepassword)
@@ -383,6 +392,8 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 14.9.1 [Fast Application Notification (FAN)](#connectionfan)
         - 14.9.2 [Runtime Load Balancing (RLB)](#connectionrlb)
         - 14.9.3 [Database Call Timeouts](#dbcalltimeouts)
+    - 14.10 [Connecting to Oracle Autonomous Database](#connectionadb)
+    - 14.11 [Connecting to Sharded Databases](#sharding)
 15. [SQL Execution](#sqlexecution)
     - 15.1 [SELECT Statements](#select)
         - 15.1.1 [Fetching Rows with Direct Fetches](#fetchingrows)
@@ -472,6 +483,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 33.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
     - 33.4 [Migrating from node-oracledb 3.0 to node-oracledb 3.1](#migratev30v31)
     - 33.5 [Migrating from node-oracledb 3.1 to node-oracledb 4.0](#migratev31v40)
+    - 33.6 [Migrating from node-oracledb 4.0 to node-oracledb 4.1](#migratev40v41)
 34. [Useful Resources for Node-oracledb](#otherresources)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
@@ -504,9 +516,6 @@ Download node-oracledb [examples][3] or create a script like the one
 below.  As well as [Async/Await](#asyncawaitoverview) functions,
 node-oracledb can also use [Callbacks](#callbackoverview), and
 [Promises](#promiseoverview).
-
-Scripts to create Oracle's sample schemas can be found at
-[github.com/oracle/db-sample-schemas][4].
 
 Locate your Oracle Database [user name and password][91], and the database
 [connection string](#connectionstrings).  The connection string is
@@ -570,7 +579,7 @@ async function run() {
 run();
 ```
 
-With Oracle's sample HR schema, the output is:
+With Oracle's sample [HR schema][4], the output is:
 
 ```
 [ { MANAGER_ID: 103, DEPARTMENT_ID: 60, DEPARTMENT_NAME: 'IT' } ]
@@ -1099,7 +1108,7 @@ Boolean events
 
 Determines whether Oracle Client events mode should be enabled.
 
-The default value for `events` is *true*.
+The default value for `events` is *false*.
 
 This property can be overridden in the
 [`oracledb.createPool()`](#createpoolpoolattrsevents) call and when
@@ -1111,14 +1120,14 @@ Notification](#consubscribe), [Fast Application Notification
 (FAN)](#connectionfan) and [Runtime Load Balancing
 (RLB)](#connectionrlb).
 
-This property was added in node-oracledb 2.2.  Up until node-oracledb
-4.0 the default value for `events` was *false*.
+This property was added in node-oracledb 2.2.  In node-oracledb
+4.0.0 and 4.0.1 the default value for `events` was *true*.
 
 ##### Example
 
 ```javascript
 const oracledb = require('oracledb');
-oracledb.events = true;
+oracledb.events = false;
 ```
 
 #### <a name="propdbextendedmetadata"></a> 3.2.5 `oracledb.extendedMetaData`
@@ -1478,7 +1487,35 @@ const oracledb = require('oracledb');
 oracledb.poolMax = 4;
 ```
 
-#### <a name="propdbpoolmin"></a> 3.2.17 `oracledb.poolMin`
+#### <a name="propdbpoolmaxpershard"></a> 3.2.17 `oracledb.poolMaxPerShard`
+
+```
+Number poolMaxPerShard
+```
+
+Sets the maximum number of connections per [shard](#sharding) for connection
+pools.  This ensures that the pool is balanced towards each shard.
+
+This property may be overridden when [creating a connection pool](#createpool).
+
+When this property is set, and a new connection request would cause the number
+of connections to the target shard to exceed the limit, then that new connection
+request will block until a suitable connection has been released back to the
+pool.  Importantly, when blocked, the [`queueTimeout`](#propdbqueuetimeout)
+value will be ignored and the pending connection request will consume one worker
+thread.
+
+This property was added in node-oracledb 4.1.  It is available when
+node-oracledb uses Oracle client libraries 18.3, or later.
+
+##### Example
+
+```javascript
+const oracledb = require('oracledb');
+oracledb.poolMin = 0;
+```
+
+#### <a name="propdbpoolmin"></a> 3.2.18 `oracledb.poolMin`
 
 ```
 Number poolMin
@@ -1508,7 +1545,7 @@ const oracledb = require('oracledb');
 oracledb.poolMin = 0;
 ```
 
-#### <a name="propdbpoolpinginterval"></a> 3.2.18 `oracledb.poolPingInterval`
+#### <a name="propdbpoolpinginterval"></a> 3.2.19 `oracledb.poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -1546,7 +1583,7 @@ const oracledb = require('oracledb');
 oracledb.poolPingInterval = 60;     // seconds
 ```
 
-#### <a name="propdbpooltimeout"></a> 3.2.19 `oracledb.poolTimeout`
+#### <a name="propdbpooltimeout"></a> 3.2.20 `oracledb.poolTimeout`
 
 ```
 Number poolTimeout
@@ -1568,7 +1605,7 @@ const oracledb = require('oracledb');
 oracledb.poolTimeout = 60;
 ```
 
-#### <a name="propdbprefetchrows"></a> 3.2.20 `oracledb.prefetchRows`
+#### <a name="propdbprefetchrows"></a> 3.2.21 `oracledb.prefetchRows`
 
 ```
 Number prefetchRows
@@ -1585,7 +1622,7 @@ const oracledb = require('oracledb');
 oracledb.prefetchRows = 100;
 ```
 
-#### <a name="propdbpromise"></a> 3.2.21 `oracledb.Promise`
+#### <a name="propdbpromise"></a> 3.2.22 `oracledb.Promise`
 
 ```
 Promise Promise
@@ -1613,13 +1650,13 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-#### <a name="propdbqueuerequests"></a> 3.2.22 `oracledb.queueRequests`
+#### <a name="propdbqueuerequests"></a> 3.2.23 `oracledb.queueRequests`
 
 This property was removed in node-oracledb 3.0.  Queuing is now always
 enabled.  See [Connection Pool Queue](#connpoolqueue) for more
 information.
 
-#### <a name="propdbqueuetimeout"></a> 3.2.23 `oracledb.queueTimeout`
+#### <a name="propdbqueuetimeout"></a> 3.2.24 `oracledb.queueTimeout`
 
 ```
 Number queueTimeout
@@ -1644,7 +1681,7 @@ const oracledb = require('oracledb');
 oracledb.queueTimeout = 3000; // 3 seconds
 ```
 
-#### <a name="propdbstmtcachesize"></a> 3.2.24 `oracledb.stmtCacheSize`
+#### <a name="propdbstmtcachesize"></a> 3.2.25 `oracledb.stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -1671,7 +1708,7 @@ const oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.25 `oracledb.version`
+#### <a name="propdbversion"></a> 3.2.26 `oracledb.version`
 ```
 readonly Number version
 ```
@@ -1686,7 +1723,7 @@ const oracledb = require('oracledb');
 console.log("Driver version number is " + oracledb.version);
 ```
 
-#### <a name="propdbversionstring"></a> 3.2.26 `oracledb.versionString`
+#### <a name="propdbversionstring"></a> 3.2.27 `oracledb.versionString`
 ```
 readonly String versionString
 ```
@@ -1702,7 +1739,7 @@ const oracledb = require('oracledb');
 console.log("Driver version is " + oracledb.versionString);
 ```
 
-#### <a name="propdbversionsuffix"></a> 3.2.27 `oracledb.versionSuffix`
+#### <a name="propdbversionsuffix"></a> 3.2.28 `oracledb.versionSuffix`
 ```
 readonly String versionSuffix
 ```
@@ -1937,7 +1974,21 @@ Number of Threads](#numberofthreads).
 
 See [Connection Pooling](#connpooling) for other pool sizing guidelines.
 
-###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.10 `poolMin`
+###### <a name="createpoolpoolattrspoolmaxpershard"></a> 3.3.1.1.10 `poolMaxPerShard`
+
+```
+Number poolMaxPerShard
+```
+
+Sets the maximum number of connections per shard for connection pools.  This
+ensures that the pool is balanced towards each shard.
+
+This optional property overrides the
+[`oracledb.poolMaxPerShard`](#propdbpoolmaxpershard) property.
+
+This property was added in node-oracledb 4.1.
+
+###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.11 `poolMin`
 
 ```
 Number poolMin
@@ -1951,7 +2002,7 @@ The default value is 0.
 This optional property overrides the
 [`oracledb.poolMin`](#propdbpoolmin) property.
 
-###### <a name="createpoolpoolattrspoolpinginterval"></a> 3.3.1.1.11 `poolPingInterval`
+###### <a name="createpoolpoolattrspoolpinginterval"></a> 3.3.1.1.12 `poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -1969,7 +2020,7 @@ This optional property overrides the
 
 See [Connection Pool Pinging](#connpoolpinging) for more discussion.
 
-###### <a name="createpoolpoolattrspooltimeout"></a> 3.3.1.1.12 `poolTimeout`
+###### <a name="createpoolpoolattrspooltimeout"></a> 3.3.1.1.13 `poolTimeout`
 
 ```
 Number poolTimeout
@@ -1984,13 +2035,13 @@ The default value is 60.
 This optional property overrides the
 [`oracledb.poolTimeout`](#propdbpooltimeout) property.
 
-###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.13 `queueRequests`
+###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.14 `queueRequests`
 
 This property was removed in node-oracledb 3.0.  Queuing is now always
 enabled.  See [Connection Pool Queue](#connpoolqueue) for more
 information.
 
-###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.14 `queueTimeout`
+###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.15 `queueTimeout`
 
 ```
 Number queueTimeout
@@ -2005,7 +2056,7 @@ The default value is 60000.
 This optional property overrides the
 [`oracledb.queueTimeout`](#propdbqueuetimeout) property.
 
-###### <a name="createpoolpoolattrssessioncallback"></a> 3.3.1.1.15 `sessionCallback`
+###### <a name="createpoolpoolattrssessioncallback"></a> 3.3.1.1.16 `sessionCallback`
 
 ```
 String sessionCallback | function sessionCallback(Connection connection, String requestedTag, function callback(Error error, Connection connection){})
@@ -2062,7 +2113,7 @@ information.
 
 This property was added in node-oracledb 3.1.
 
-###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.16 `stmtCacheSize`
+###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.17 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -2074,7 +2125,7 @@ The number of statements to be cached in the
 This optional property overrides the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.17 `user`
+###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.18 `user`
 
 ```
 String user
@@ -2307,7 +2358,22 @@ Note only non-pooled connections can be privileged.
 
 This property was added in node-oracledb 2.1.
 
-###### <a name="getconnectiondbattrsstmtcachesize"></a> 3.3.2.1.2.10 `stmtCacheSize`
+###### <a name="getconnectiondbattrsshardingkey"></a> 3.3.2.1.2.10 `shardingKey`
+
+```
+Array shardingKey
+```
+
+Allows a connection to be established directly to a database shard.  See
+[Connecting to Sharded Databases](#sharding).
+
+Array values may be of String type (mapping to VARCHAR2 sharding keys), Number
+(NUMBER), Date (DATE), or Buffer (RAW).  Multiple types may be used in the
+array.  Sharding keys TIMESTAMP type are not supported.
+
+This property was added in node-oracledb 4.1.
+
+###### <a name="getconnectiondbattrsstmtcachesize"></a> 3.3.2.1.2.11 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -2318,7 +2384,22 @@ The number of statements to be cached in the
 property may be used to override the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="getconnectiondbattrstag"></a> 3.3.2.1.2.11 `tag`
+###### <a name="getconnectiondbattrssupershardingkey"></a> 3.3.2.1.2.12 `superShardingKey`
+
+```
+Array superShardingKey
+```
+
+Allows a connection to be established directly to a database shard.  See
+[Connecting to Sharded Databases](#sharding).
+
+Array values may be of String type (mapping to VARCHAR2 sharding keys), Number
+(NUMBER), Date (DATE), or Buffer (RAW).  Multiple types may be used in the
+array.  Sharding keys TIMESTAMP type are not supported.
+
+This property was added in node-oracledb 4.1.
+
+###### <a name="getconnectiondbattrstag"></a> 3.3.2.1.2.13 `tag`
 
 ```
 String tag
@@ -2333,7 +2414,7 @@ State](#connpooltagging).
 
 This property was added in node-oracledb 3.1.
 
-###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.12 `user`
+###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.14 `user`
 
 ```
 String user
@@ -2438,11 +2519,25 @@ The [client identifier][10] for end-to-end application tracing, use
 with mid-tier authentication, and with [Virtual Private
 Databases][11].
 
-This is a write-only property.  Displaying a Connection object will
-show a value of `null` for this attribute.  See
-[End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
+This is a write-only property.  Displaying `Connection.clientId` will show a
+value of `null`.  See [End-to-end Tracing, Mid-tier Authentication, and
+Auditing](#endtoend).
 
-#### <a name="propconncurrentschema"></a> 4.1.4 `connection.currentSchema`
+#### <a name="propconnclientinfo"></a> 4.1.4 `connection.clientInfo`
+
+```
+writeonly String clientInfo
+```
+
+The client information for end-to-end application tracing.
+
+This is a write-only property.  Displaying `Connection.clientInfo` will show a
+value of `null`.  See [End-to-end Tracing, Mid-tier Authentication, and
+Auditing](#endtoend).
+
+This property was added in node-oracledb 4.1.
+
+#### <a name="propconncurrentschema"></a> 4.1.5 `connection.currentSchema`
 
 ```
 String currentSchema
@@ -2464,7 +2559,21 @@ CURRENT_SCHEMA`][137].
 
 This property was added in node-oracledb 4.0.
 
-#### <a name="propconnmodule"></a> 4.1.5 `connection.module`
+#### <a name="propconndbop"></a> 4.1.6 `connection.dbOp`
+
+```
+writeonly String dbOp
+```
+
+The database operation information for end-to-end application tracing.
+
+This is a write-only property.  Displaying `Connection.dbOp` will show a value
+of `null`.  See [End-to-end Tracing, Mid-tier Authentication, and
+Auditing](#endtoend).
+
+This property was added in node-oracledb 4.1.  It is available with Oracle 12c.
+
+#### <a name="propconnmodule"></a> 4.1.7 `connection.module`
 
 ```
 writeonly String module
@@ -2472,11 +2581,11 @@ writeonly String module
 
 The [module][9] attribute for end-to-end application tracing.
 
-This is a write-only property.  Displaying a Connection object will
-show a value of `null` for this attribute.  See
-[End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
+This is a write-only property.  Displaying `Connection.module` will show a value
+of `null`.  See [End-to-end Tracing, Mid-tier Authentication, and
+Auditing](#endtoend).
 
-#### <a name="propconnoracleserverversion"></a> 4.1.6 `connection.oracleServerVersion`
+#### <a name="propconnoracleserverversion"></a> 4.1.8 `connection.oracleServerVersion`
 
 ```
 readonly Number oracleServerVersion
@@ -2492,7 +2601,7 @@ instead of 1803000000.
 
 This property was added in node-oracledb 1.3.
 
-#### <a name="propconnoracleserverversionstring"></a> 4.1.7 `connection.oracleServerVersionString`
+#### <a name="propconnoracleserverversionstring"></a> 4.1.9 `connection.oracleServerVersionString`
 
 ```
 readonly String oracleServerVersionString
@@ -2507,7 +2616,7 @@ release such as "18.0.0.0.0" instead of "18.3.0.0.0".
 
 This property was added in node-oracledb 2.2.
 
-#### <a name="propconnstmtcachesize"></a> 4.1.8 `connection.stmtCacheSize`
+#### <a name="propconnstmtcachesize"></a> 4.1.10 `connection.stmtCacheSize`
 
 ```
 readonly Number stmtCacheSize
@@ -2518,7 +2627,7 @@ The number of statements to be cached in the
 the `stmtCacheSize` property in effect in the *Pool* object when the
 connection is created in the pool.
 
-#### <a name="propconntag"></a> 4.1.9 `connection.tag`
+#### <a name="propconntag"></a> 4.1.11 `connection.tag`
 
 ```
 String tag
@@ -3318,7 +3427,7 @@ It should be an array or an object, depending on the structure of the
 [`binds parameter`](#executemanybinds).
 
 Each value in the `bindDefs` array or object should be an object
-containing the keys `dir`, `maxSize`, and `type` for each bind
+containing the keys `dir`, `maxSize`, and `type` for one bind
 variable, similar to how [`execute() bind
 parameters`](#executebindParams) are identified.
 
@@ -3499,8 +3608,10 @@ This method returns a queue for enqueuing and dequeuing
     Object options
     ```
 
-    This optional argument can be used to specify the payload type.
-    It is an object with the following attributes:
+    This optional argument can be used to specify the payload type.  If the
+    argument is not passed, then the database queue must be a RAW queue.
+
+    The `options` object has the following attributes:
 
     Attribute Name | Description
     ---------------|-------------
@@ -3669,11 +3780,11 @@ This function provides query streaming support.  The parameters are
 the same as [`execute()`](#execute) except a callback is not used.
 Instead this function returns a stream used to fetch data.
 
-Each row is returned as a `data` event.  Query metadata is available
-via a `metadata` event.  The `end` event indicates the end of the
-query results.
-
-The connection must remain open until the stream is completely read.
+Each row is returned as a `data` event.  Query metadata is available via a
+`metadata` event.  The `end` event indicates the end of the query results. The
+connection must remain open until the stream is completely read and the `close`
+event received.  Alternatively the Stream [`destroy()`][92] method can be used
+to terminate a stream early.
 
 For tuning, adjust the value of
 [`oracledb.fetchArraySize`](#propdbfetcharraysize) or the
@@ -3744,7 +3855,7 @@ changed in the database by any committed transaction, or when there
 are Advanced Queuing messages to be dequeued.
 
 For notification to work, the connection must be created with
-[`events`](#propdbevents) mode *true*, which is the default.
+[`events`](#propdbevents) mode *true*.
 
 The database must be able to connect to the node-oracledb machine for
 notifications to be received.  Typically this means that the machine
@@ -4914,11 +5025,15 @@ pools.
     Object poolAttrs
     ```
 
-    This optional parameter is used when getting connections from
-    heterogeneous pools.  It can contain `user` and `password` properties
-    for true heterogeneous pool usage, or it can contain a `user` property
-    when a pool proxy user is desired.  It can contain `tag` when
-    [connection tagging](#connpooltagging) is in use.
+    This parameter can contain a `tag` property when [connection
+    tagging](#connpooltagging) is in use.  It can also contain
+    [`shardingKey`](#getconnectiondbattrsshardingkey) and
+    [`superShardingKey`](#getconnectiondbattrssupershardingkey) properties, when
+    using [database sharding](#sharding).
+
+    When getting connections from heterogeneous pools, this parameter can
+    contain `user` and `password` properties for true heterogeneous pool usage,
+    or it can contain a `user` property when a pool proxy user is desired.
 
     See [Connection Attributes](#getconnectiondbattrsconnattrs) for
     discussion of these attributes.
@@ -6925,11 +7040,13 @@ wallet location, the distinguished name of the database server, and even lets
 some network configuration options be set. This means that
 [`tnsnames.ora`](#tnsadmin) or [`sqlnet.ora`](#tnsadmin) files are not needed
 for some further common connection scenarios.  For example, if a firewall
-terminates idle connections every four minutes, you may decide it is more
+terminates idle connections every five minutes, you may decide it is more
 efficient to keep connections alive instead of having the overhead of
 recreation.  Your connection string could be
-`"mydbmachine.example.com/orclpdb1?expire_time=3"` to send packets every three
-minutes with the [`SQLNET.EXPIRE_TIME`][159] feature.
+`"mydbmachine.example.com/orclpdb1?expire_time=2"` to send packets every two
+minutes with the [`SQLNET.EXPIRE_TIME`][159] feature.  The general
+recommendation for `EXPIRE_TIME` is to use a value that is slightly less than
+half of the termination period.
 
 #### <a name="embedtns"></a> 14.2.2 Embedded Connect Descriptor Strings
 
@@ -7815,7 +7932,6 @@ same pool:
 const sessionTag = "location=USA";
 
 function initSession(connection, requestedTag, cb) {
-  connection.tag = "LOCATION=GB";
   const seen = connection.tag ? connection.tag.split(";").includes(requestedTag) : false;
   if (seen) {
     cb()
@@ -8387,7 +8503,7 @@ const newpw = ... // the new password
 const connection = await oracledb.getConnection(
   {
     user          : "system",  // a privileged user
-    password      : mypw,      // mypw contains the hr schema password
+    password      : mypw,      // mypw contains the system schema password
     connectString : "localhost/orclpdb1"
   });
 
@@ -8460,10 +8576,9 @@ availability and performance tuning.  For example the database's
 
 #### <a name="connectionfan"></a> 14.9.1 Fast Application Notification (FAN)
 
-Users of [Oracle Database FAN][64] must connect to a FAN-enabled
-database service.  The application should have
-[`oracledb.events`](#propdbevents) is set to *true*, which is the
-default.  This value can also be changed via [Oracle Client
+Users of [Oracle Database FAN][64] must connect to a FAN-enabled database
+service.  The application should have [`oracledb.events`](#propdbevents) is set
+to *true*.  This value can also be changed via [Oracle Client
 Configuration](#oraaccess).
 
 FAN support is useful for planned and unplanned outages.  It provides
@@ -8547,6 +8662,254 @@ be usable.  It should be released.
 Users of pre-Oracle 18c client libraries can set call timeouts by
 setting [`SQLNET.RECV_TIMEOUT`][34] and [`SQLNET.SEND_TIMEOUT`][35] in
 a [`sqlnet.ora` file](#tnsadmin).
+
+### <a name="connectionadb"></a> 14.10 Connecting to Oracle Autonomous Database
+
+To enable connection to Oracle Autonomous Database in Oracle Cloud, a wallet
+needs be downloaded from the cloud GUI, and node-oracledb needs to be configured
+to use it.  A database username and password is still required.  The wallet only
+enables SSL/TLS.
+
+##### Install the Wallet and Network Configuration Files
+
+From the Oracle Cloud console for the database download the wallet zip file.  It
+contains the wallet and network configuration files.  Note: keep wallet files in
+a secure location and share them only with authorized users.
+
+Unzip the wallet zip file.
+
+For node-oracledb, only these files from the zip are needed:
+
+- `tnsnames.ora` - Maps net service names used for application connection strings to your database services
+- `sqlnet.ora`  - Configures Oracle Network settings
+- `cwallet.sso` - Enables SSL/TLS connections
+
+The other files and the wallet password are not needed.
+
+Place these files as shown in [Optional Oracle Net Configuration](#tnsadmin).
+
+##### Run Your Application
+
+The `tnsnames.ora` file contains net service names for various levels of
+database service.  For example, if you create a database called CJDB1 with the
+Always Free services from the [Oracle Cloud Free Tier][162], then you might
+decide to use the connection string in `tnsnames.ora` called `cjdb1_high`.
+
+Update your application to use your schema username, its database password, and
+a net service name, for example:
+
+```javascript
+connection = await oracledb.getConnection({
+  user: "scott",
+  password: mypw,  // mypw contains the scott schema password
+  connectString: "cjdb1_high"
+});
+```
+
+Once you have set Oracle environment variables required by your application,
+such as `ORA_SDTZ` or `TNS_ADMIN`, you can start your application.
+
+If you need to create a new database schema so you do not login as the privileged
+ADMIN user, refer to the relevant Oracle Cloud documentation, for example see
+[Create Database Users][161] in the Oracle Autonomous Transaction Processing
+Dedicated Deployments manual.
+
+##### Access Through a Proxy
+
+If you are behind a firewall, you can tunnel TLS/SSL connections via a proxy
+using [HTTPS_PROXY][163] in the connect descriptor.  Successful connection
+depends on specific proxy configurations.  Oracle does not recommend doing this
+when performance is critical.
+
+Edit `sqlnet.ora` and add a line:
+
+```
+SQLNET.USE_HTTPS_PROXY=on
+```
+
+Edit `tnsnames.ora` and add an `HTTPS_PROXY` proxy name and `HTTPS_PROXY_PORT`
+port to the connect descriptor address list of any service name you plan to use,
+for example:
+
+```
+cjdb1_high = (description= (address=(https_proxy=myproxy.example.com)(https_proxy_port=80)(protocol=tcps)(port=1522)(host=  . . .
+```
+
+### <a name="sharding"></a> 14.11 Connecting to Sharded Databases
+
+Sharding can be used to horizontally partition data across independent
+databases.  A database table can be split so each shard contains a table with
+the same columns but a different subset of rows.  These tables are known as
+sharded tables.
+
+Sharding is configured in Oracle Database, see the [Oracle Sharding][164]
+manual.  Sharding requires Oracle Database and client libraries 12.2, or later.
+
+When opening a connection in node-oracledb, the
+[`shardingKey`](#getconnectiondbattrsshardingkey) and
+[`superShardingKey`](#getconnectiondbattrssupershardingkey) properties can be
+used to route the connection directly to a given
+shard.  A sharding key is always required.  A super sharding key is additionally
+required when using composite sharding, which is when data has been partitioned
+by a list or range (the super sharding key), and then further partitioned by a
+sharding key.
+
+When creating a [connection pool](#poolclass), the property
+[`poolMaxPerShard`](#propdbpoolmaxpershard) can be set.  This is used to balance
+connections in the pool equally across shards.
+
+When connected to a shard, queries only returns data from that shard.  For
+queries that need to access data from multiple shards, connections can be
+established to the coordinator shard catalog database.  In this case, no shard
+key or super shard key is used.
+
+The sharding and super sharding key properties are arrays of values.  Array key
+values may be of type String (mapping to VARCHAR2 sharding keys), Number
+(NUMBER), Date (DATE), or Buffer (RAW).  Multiple types may be used in each
+array.  Sharding keys of TIMESTAMP type are not supported by node-oracledb.
+
+For example, if sharding had been configured on a single column like:
+
+```sql
+CREATE SHARDED TABLE customers (
+  cust_id NUMBER,
+  cust_name VARCHAR2(30),
+  class VARCHAR2(10) NOT NULL,
+  signup_date DATE,
+  cust_code RAW(20),
+  CONSTRAINT cust_name_pk PRIMARY KEY(cust_name))
+  PARTITION BY CONSISTENT HASH (cust_name)
+  PARTITIONS AUTO TABLESPACE SET ts1;
+```
+
+then a shard can be directly connected to by passing a single sharding key:
+
+```javascript
+const connection = await oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : mypw,  // mypw contains the hr schema password
+    connectString : "localhost/orclpdb1",
+    shardingkey   : ["SCOTT"]
+  });
+```
+
+Similar code works for NUMBER keys.
+
+The `shardingkey` and `superShardingKey` properties are arrays because multiple
+values can be used.  If database shards had been partitioned with multiple keys
+such as with:
+
+```sql
+CREATE SHARDED TABLE customers (
+  cust_id NUMBER NOT NULL,
+  cust_name VARCHAR2(30) NOT NULL,
+  class VARCHAR2(10) NOT NULL,
+  signup_date DATE,
+  cust_code RAW(20),
+  CONSTRAINT cust_pk PRIMARY KEY(cust_id, cust_name));
+  PARTITION BY CONSISTENT HASH (cust_id, cust_name)
+  PARTITIONS AUTO TABLESPACE SET ts1;
+```
+
+then direct connection to a shard can be established by specifying multiple
+keys, for example:
+
+```javascript
+const connection = await oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : mypw,  // mypw contains the hr schema password
+    connectString : "localhost/orclpdb1",
+    shardingkey   : [70, "SCOTT"]
+  });
+```
+
+When the sharding key is a DATE column like:
+
+```sql
+CREATE SHARDED TABLE customers (
+  cust_id NUMBER,
+  cust_name VARCHAR2(30),
+  class VARCHAR2(10) NOT NULL,
+  signup_date DATE,
+  cust_code RAW(20),
+  CONSTRAINT signup_date_pk PRIMARY KEY(signup_date))
+  PARTITION BY CONSISTENT HASH (signup_date)
+  PARTITIONS AUTO TABLESPACE SET ts1;
+```
+
+then direct connection to a shard needs a Date key that is in the session time
+zone.  For example if the session time zone is set to UTC (see [Fetching Dates
+and Timestamps](#datehandling)) then Dates must also be in UTC:
+
+```javascript
+key = new Date ("2019-11-30Z");   // when session time zone is UTC
+const connection = await oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : mypw,  // mypw contains the hr schema password
+    connectString : "localhost/orclpdb1",
+    shardingkey   : [key]
+  });
+```
+
+When the sharding key is a RAW column like:
+
+```sql
+CREATE SHARDED TABLE customers (
+  cust_id NUMBER,
+  cust_name VARCHAR2(30),
+  class VARCHAR2(10) NOT NULL,
+  signup_date DATE,
+  cust_code RAW(20),
+  CONSTRAINT cust_code_pk PRIMARY KEY(cust_code))
+  PARTITION BY CONSISTENT HASH (cust_code)
+  PARTITIONS AUTO TABLESPACE SET ts1;
+```
+
+then direct connection to a shard could be like:
+
+```javascript
+const data = [0x00, 0x01, 0x02];
+const key = Buffer.from(data);
+const connection = await oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : mypw,  // mypw contains the hr schema password
+    connectString : "localhost/orclpdb1",
+    shardingkey   : [key]
+  });
+```
+
+If composite sharding was in use, for example:
+
+```sql
+CREATE SHARDED TABLE customers (
+  cust_id NUMBER NOT NULL,
+  cust_name VARCHAR2(30) NOT NULL,
+  class VARCHAR2(10) NOT NULL,
+  signup_date DATE,
+  cust_code RAW(20),
+  PARTITIONSET BY LIST (class)
+  PARTITION BY CONSISTENT HASH (cust_name)
+  PARTITIONS AUTO (PARTITIONSET gold VALUES ('gold') TABLESPACE SET ts1,
+  PARTITIONSET silver VALUES ('silver') TABLESPACE SET ts2);
+```
+
+then direct connection to a shard can be established by specifying a super
+sharding key and sharding key, for example:
+
+```javascript
+const connection = await oracledb.getConnection(
+  {
+    user            : "hr",
+    password        : mypw,  // mypw contains the hr schema password
+    connectString   : "localhost/orclpdb1",
+    superShardingKey: ["gold"]
+    shardingkey     : ["SCOTT"],
+  });
+```
 
 ## <a name="sqlexecution"></a> 15. SQL Execution
 
@@ -8735,22 +9098,23 @@ await rs.close();
 Streaming of query results allows data to be piped to other streams,
 for example when dealing with HTTP responses.
 
-Use [`connection.queryStream()`](#querystream) to create a stream from
-a top level query and listen for events.  You can also call
-[`connection.execute()`](#execute) and use
-[`toQueryStream()`](#toquerystream) to return a stream from the
-returned [ResultSet](#resultsetclass), an OUT bind REF CURSOR
-ResultSet, or [Implicit Results](#implicitresults) ResultSet.
+Use [`connection.queryStream()`](#querystream) to create a stream from a top
+level query and listen for events.  You can also call
+[`connection.execute()`](#execute) and use [`toQueryStream()`](#toquerystream)
+to return a stream from the returned [ResultSet](#resultsetclass), from an OUT
+bind REF CURSOR ResultSet, or from [Implicit Results](#implicitresults)
+ResultSets.
 
-With streaming, each row is returned as a `data` event.  Query
-metadata is available via a `metadata` event.  The `end` event
-indicates the end of the query results.
+With streaming, each row is returned as a `data` event.  Query metadata is
+available via a `metadata` event.  The `end` event indicates the end of the
+query results, however it is generally best to put end-of-fetch logic in the
+`close` event.
 
 Query results should be fetched to completion to avoid resource leaks, or the
-Stream [`destroy()`][92] method can be used to terminate a stream early.
-
-The connection must remain open until the stream is completely read
-and any returned [Lob](#lobclass) objects have been processed.
+Stream [`destroy()`][92] method can be used to terminate a stream early.  When
+fetching, the connection must remain open until the stream is completely read
+and the `close` event received.  Any returned [Lob](#lobclass) objects should
+also be processed first.
 
 The query stream implementation is a wrapper over the [ResultSet
 Class](#resultsetclass).  In particular, successive calls to
@@ -8773,7 +9137,11 @@ stream.on('data', function (data) {
 });
 
 stream.on('end', function () {
-  // release connection...
+  // all data has been fetched...
+});
+
+stream.on('close', function () {
+  // can now close connection...  (Note: do not close connections on 'end')
 });
 
 stream.on('metadata', function (metadata) {
@@ -9001,14 +9369,33 @@ are not supported.
 Note that JavaScript Date has millisecond precision therefore
 timestamps will lose any sub-millisecond fractional part when fetched.
 
-To make applications more portable, it is recommended to always set
-the session time zone to a pre-determined value, such as UTC.  This
-can be done by setting the environment variable [`ORA_SDTZ`][42]
-before starting Node.js, for example:
+To make applications more portable, it is recommended to always set the session
+time zone to a pre-determined value, such as UTC.  The session timezone should
+generally match the client system timezone, for example the `TZ` environment
+variable or the Windows timezone region.
+
+You can find the current session timezone with:
+
+```sql
+SELECT sessiontimezone FROM DUAL;
+```
+
+You can set the environment variable [`ORA_SDTZ`][42] before starting Node.js,
+for example:
 
 ```
 $ export ORA_SDTZ='UTC'
 $ node myapp.js
+```
+
+If this variable is set in the application, it must be set before the first
+connection is established:
+
+```javascript
+process.env.ORA_SDTZ = 'UTC';
+
+const oracledb = require('oracledb');
+const connection = await oracledb.getConnection(. . . );
 ```
 
 The session time zone can also be changed at runtime for each
@@ -9035,8 +9422,17 @@ BEGIN
 END;
 ```
 
-See [Working with Dates Using the Node.js Driver][43] for more
-discussion of date handling.
+A query that returns the node-oracledb client-side date and timestamp is:
+
+```sql
+oracledb.fetchAsString = [oracledb.DATE];
+result = await connection.execute(`SELECT current_date, current_timestamp FROM DUAL`);
+console.log(result);
+```
+
+For more information on time zones, see Oracle Support's [Timestamps & time
+zones - Frequently Asked Questions, Doc ID 340512.1][165].  Also see [Working
+with Dates Using the Node.js Driver][43].
 
 ##### <a name="fetchasstringhandling"></a> 15.1.6.4 Fetching Numbers and Dates as String
 
@@ -11058,11 +11454,11 @@ This will construct a SQL statement:
 SELECT first_name, last_name FROM employees WHERE first_name IN (:0, :1, :2)
 ```
 
-Binds are still used for security.  But, depending how often this
-query is executed, and how changeable the number of bind values is,
-you can end up with lots of 'unique' query strings being executed.
-You might not get the statement caching benefits that re-executing a
-fixed SQL statement would have.
+You could use a [tagged literal template][160] to do this conveniently.  Binds
+are still used for security.  But, depending how often this query is executed,
+and how changeable the number of bind values is, you can end up with lots of
+'unique' query strings being executed.  You might not get the statement caching
+benefits that re-executing a fixed SQL statement would have.
 
 Another solution for a larger number of values is to construct a SQL
 statement like:
@@ -12665,6 +13061,15 @@ FROM nls_database_parameters
 WHERE parameter = 'NLS_CHARACTERSET'
 ```
 
+To find the database 'national character set' used for NCHAR and related types,
+execute the query:
+
+```sql
+SELECT value AS db_ncharset
+FROM nls_database_parameters
+WHERE parameter = 'NLS_NCHAR_CHARACTERSET'
+```
+
 The general Oracle statement to find the 'client' character set is:
 
 ```sql
@@ -12677,10 +13082,10 @@ In node-oracledb this will always show AL32UTF8.
 
 ## <a name="endtoend"></a> 28. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
-The Connection properties [action](#propconnaction),
-[module](#propconnmodule), and [clientId](#propconnclientid) set
-metadata for [end-to-end tracing][70].  The values can be tracked in
-database views, shown in audit trails, and seen in tools such as
+The Connection properties [action](#propconnaction), [module](#propconnmodule),
+[clientId](#propconnclientid), [clientInfo](#propconnclientinfo) and
+[dbOp](#propconndbop) set metadata for [end-to-end tracing][70].  The values can
+be tracked in database views, shown in audit trails, and seen in tools such as
 Enterprise Manager.
 
 The `clientId` property can also be used by applications that do their
@@ -12709,8 +13114,10 @@ const connection = await oracledb.getConnection(
 );
 
 connection.clientId = "Chris";
+connection.clientInfo = "My demo application";
 connection.module = "End-to-end example";
 connection.action = "Query departments";
+connection.dbOp   = "Billing"
 
 const result = await connection.execute(`SELECT . . .`);
 ```
@@ -12718,19 +13125,27 @@ const result = await connection.execute(`SELECT . . .`);
 While the connection is open the attribute values can be seen, for example with SQL*Plus:
 
 ```
-SQL> SELECT username, client_identifier, action, module FROM v$session WHERE username = 'HR';
+SQL> SELECT username, client_identifier, client_info, action, module FROM v$session WHERE username = 'HR';
 
-USERNAME   CLIENT_IDENTIFIER    ACTION               MODULE
----------- -------------------- -------------------- --------------------
-HR         Chris                Query departments    End-to-end example
+USERNAME   CLIENT_IDENTIFIER    CLIENT_INFO            ACTION               MODULE
+---------- -------------------- ---------------------- -------------------- --------------------
+HR         Chris                My demo application    Query departments    End-to-end example
+
+SQL> SELECT dbop_name FROM v$sql_monitor;
+DBOP_NAME
+------------------------------
+Billing
+. . .
 ```
 
-The values can also be manually set by calling
-[`DBMS_APPLICATION_INFO`][71] procedures or
-[`DBMS_SESSION.SET_IDENTIFIER`][72], however these cause explicit
-[round-trips](#roundtrips), reducing scalability.
+Other ways to access metadata include querying `V$SQLAREA` and `sys_context()`,
+for example `SELECT SYS_CONTEXT('userenv', 'client_info') FROM dual`.
 
-In general, applications should be consistent about how, and when,
+Metadata values can also be manually set by calling
+[`DBMS_APPLICATION_INFO`][71] procedures or [`DBMS_SESSION.SET_IDENTIFIER`][72],
+however these cause explicit [round-trips](#roundtrips), reducing scalability.
+
+Applications should be consistent about how, and when,
 they set the end-to-end tracing attributes so that current values are
 recorded by the database.
 
@@ -12773,8 +13188,8 @@ SQL> SELECT UNIQUE sid, client_driver
 
        SID CLIENT_DRIVER
 ---------- ------------------------------
-        16 node-oracledb : 2.2.0
-        33 node-oracledb : 2.2.0
+        16 node-oracledb : 4.1.0
+        33 node-oracledb : 4.1.0
 ```
 
 Note if [`oracledb.connectionClass`](#propdbconclass) is set for a
@@ -12882,15 +13297,20 @@ If your SODA document write operations are mostly independent of each
 other, this removes the overhead of explicit
 [`connection.commit()`](#commit) calls.
 
-When deciding how to commit transactions, beware of transactional
-consistency and performance requirements.  If you are inserting or
-updating a large number of documents, you should turn `autoCommit` off
-and issue a single, explicit [`connection.commit()`](#commit) after
-all documents have been processed.
+When deciding how to commit transactions, beware of transactional consistency
+and performance requirements.  If you are using individual SODA calls to insert
+or update a large number of documents with individual calls, you should turn
+`autoCommit` off and issue a single, explicit [`connection.commit()`](#commit)
+after all documents have been processed.  (Also consider using
+[`sodaCollection.insertMany()`](#sodacollinsertmany) or
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) which have
+performance benefits).
 
 If you are not autocommitting, and one of the SODA operations in your
-transaction fails, then your application must explicitly roll back the
-transaction with [`connection.rollback()`](#rollback).
+transaction fails, then previous uncommitted operations will not be rolled back.
+Your application should explicitly roll back the transaction with
+[`connection.rollback()`](#rollback) to prevent any later commits from
+committing a partial transaction.
 
 Note:
 
@@ -13950,15 +14370,28 @@ When upgrading from node-oracledb version 3.1 to version 4.0:
   [`OUT_FORMAT_ARRAY`](#oracledbconstantsoutformat) and
   [`OUT_FORMAT_OBJECT`](#oracledbconstantsoutformat).
 
+### <a name="migratev40v41"></a> 33.6 Migrating from node-oracledb 4.0 to node-oracledb 4.1
+
+When upgrading from node-oracledb version 4.0 to version 4.1:
+
+- Review the [CHANGELOG][83] and take advantage of new features.
+
+- Review any programmatic or test use of node-oracledb error messages since some have changed.
+
+- Note that the default for [`oracledb.events`](#propdbevents) has reverted to
+  *false*.  If you relied on it being *true*, then explicitly set it.
+
 ## <a name="otherresources"></a> 34. Useful Resources for Node-oracledb
 
 Node-oracledb can be installed on the pre-built [*Database App Development
 VM*][152] for [VirtualBox][153], which has Oracle Database pre-installed on
 Oracle Linux.
 
-If you want to use your own database, installing the free [Oracle Database 'XE'
-Express Edition][130] is quick and easy.  Other database editions may be
-downloaded [here][154] or [used with Docker][155].
+To get a free database hosted in Oracle Cloud, see [Oracle Cloud Free
+Tier][162].  If you want to use your own database, installing the free [Oracle
+Database 'XE' Express Edition][130] is quick and easy.  Other database editions
+may be downloaded [here][154]. Dockerfiles for Oracle Database and Oracle
+Instant Client are on [github.com/oracle/docker-images][155].
 
 If you want to install Oracle Linux yourself, it is free from [here][156].
 
@@ -14119,8 +14552,14 @@ can be asked at [AskTom][158].
 [152]: https://www.oracle.com/technetwork/community/developer-vm/index.html#dbapp
 [153]: https://www.virtualbox.org
 [154]: http://www.oracle.com/technetwork/database/enterprise-edition/downloads/
-[155]: https://docker.com/
+[155]: https://github.com/oracle/docker-images
 [156]: http://yum.oracle.com/
 [157]: https://livesql.oracle.com/
 [158]: https://asktom.oracle.com/
 [159]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1070805B-0703-457C-8D2E-4EEC26193E5F
+[160]: https://github.com/oracle/node-oracledb/issues/699#issuecomment-524009129
+[161]: https://docs.oracle.com/en/cloud/paas/atp-cloud/atpud/manage.html
+[162]: https://www.oracle.com//cloud/free/
+[163]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C672E92D-CE32-4759-9931-92D7960850F7
+[164]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=SHARD
+[165]: https://support.oracle.com/epmos/faces/DocumentDisplay?id=340512.1
