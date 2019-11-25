@@ -1,8 +1,6 @@
 # Change Log
 
-## node-oracledb v4.1.0 (DD Mon YYYY)
-
-**This release is under development**
+## node-oracledb v4.1.0 (26 Nov 2019)
 
 - Added end-to-end tracing attributes
   [`connection.clientInfo`](https://oracle.github.io/node-oracledb/doc/api.html#propconnclientinfo)
