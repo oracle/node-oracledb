@@ -9369,10 +9369,19 @@ are not supported.
 Note that JavaScript Date has millisecond precision therefore
 timestamps will lose any sub-millisecond fractional part when fetched.
 
-To make applications more portable, it is recommended to always set
-the session time zone to a pre-determined value, such as UTC.  This
-can be done by setting the environment variable [`ORA_SDTZ`][42]
-before starting Node.js, for example:
+To make applications more portable, it is recommended to always set the session
+time zone to a pre-determined value, such as UTC.  The session timezone should
+generally match the client system timezone, for example the `TZ` environment
+variable or the Windows timezone region.
+
+You can find the current session timezone with:
+
+```sql
+SELECT sessiontimezone FROM DUAL;
+```
+
+You can set the environment variable [`ORA_SDTZ`][42] before starting Node.js,
+for example:
 
 ```
 $ export ORA_SDTZ='UTC'
@@ -9413,8 +9422,17 @@ BEGIN
 END;
 ```
 
-See [Working with Dates Using the Node.js Driver][43] for more
-discussion of date handling.
+A query that returns the node-oracledb client-side date and timestamp is:
+
+```sql
+oracledb.fetchAsString = [oracledb.DATE];
+result = await connection.execute(`SELECT current_date, current_timestamp FROM DUAL`);
+console.log(result);
+```
+
+For more information on time zones, see Oracle Support's [Timestamps & time
+zones - Frequently Asked Questions, Doc ID 340512.1][165].  Also see [Working
+with Dates Using the Node.js Driver][43].
 
 ##### <a name="fetchasstringhandling"></a> 15.1.6.4 Fetching Numbers and Dates as String
 
@@ -14543,3 +14561,4 @@ can be asked at [AskTom][158].
 [162]: https://www.oracle.com//cloud/free/
 [163]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C672E92D-CE32-4759-9931-92D7960850F7
 [164]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=SHARD
+[165]: https://support.oracle.com/epmos/faces/DocumentDisplay?id=340512.1
