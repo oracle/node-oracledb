@@ -15,9 +15,6 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-##
-## ===> *** Note: Go to [https://oracle.github.io/node-oracledb/doc/api.html](https://oracle.github.io/node-oracledb/doc/api.html) for production documentation ***
-
 ## Manual Sections
 
 This document contains:
@@ -7064,7 +7061,7 @@ const connection = await oracledb.getConnection(
 
 #### <a name="tnsnames"></a> 14.2.3 Net Service Names for Connection Strings
 
-Connect Descriptor strings are commmonly stored in [`tnsnames.ora`](#tnsadmin)
+Connect Descriptor strings are commonly stored in [`tnsnames.ora`](#tnsadmin)
 files and associated with a Net Service Name, for example:
 
 ```
