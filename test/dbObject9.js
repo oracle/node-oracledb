@@ -29,8 +29,9 @@ const should    = require('should');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('208. dbObject9.js', () => {
+describe('208. dbObject9.js', function() {
 
+  let isRunnable = false;
   let conn;
   const TYPE = 'NODB_PERSON_T';
   const TABLE = 'NODB_TAB_EMPLOYEES';
@@ -41,62 +42,74 @@ describe('208. dbObject9.js', () => {
     { ID: 456, NAME: 'Dolores', GENDER: 'Female' }
   ];
 
-  before(async() => {
-    try {
-      conn = await oracledb.getConnection(dbconfig);
+  before(async function() {
+    isRunnable = await testsUtil.checkPrerequisites();
+    if(!isRunnable) {
+      this.skip();
+      return;
+    } else {
+      try {
+        conn = await oracledb.getConnection(dbconfig);
 
-      let sql =
-        `CREATE OR REPLACE TYPE ${TYPE} AS OBJECT (
-          id     NUMBER,
-          name   VARCHAR2(30),
-          gender VARCHAR2(20)
-        );`;
-      await conn.execute(sql);
+        let sql =
+          `CREATE OR REPLACE TYPE ${TYPE} AS OBJECT (
+            id     NUMBER,
+            name   VARCHAR2(30),
+            gender VARCHAR2(20)
+          );`;
+        await conn.execute(sql);
 
-      sql =
-        `CREATE TABLE ${TABLE} (
-          empnum NUMBER,
-          person ${TYPE}
-        )`;
-      let plsql = testsUtil.sqlCreateTable(TABLE, sql);
-      await conn.execute(plsql);
+        sql =
+          `CREATE TABLE ${TABLE} (
+            empnum NUMBER,
+            person ${TYPE}
+          )`;
+        let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+        await conn.execute(plsql);
 
-      const PersonType = await conn.getDbObjectClass(TYPE);
-      let bindArr = [];
-      for (let i = 0, num, p; i < PEOPLE.length; i++) {
-        num = i + 1;
-        p = new PersonType(PEOPLE[i]);
-        bindArr[i] = [num, p];
+        const PersonType = await conn.getDbObjectClass(TYPE);
+        let bindArr = [];
+        for (let i = 0, num, p; i < PEOPLE.length; i++) {
+          num = i + 1;
+          p = new PersonType(PEOPLE[i]);
+          bindArr[i] = [num, p];
+        }
+        let opts = {
+          autoCommit: true,
+          bindDefs: [ { type: oracledb.NUMBER }, { type: PersonType } ]
+        };
+        let result = await conn.executeMany(
+          `INSERT INTO ${TABLE} VALUES (:1, :2)`,
+          bindArr,
+          opts
+        );
+
+        should.strictEqual(result.rowsAffected, PEOPLE.length);
+
+      } catch (err) {
+        should.not.exist(err);
       }
-      let opts = {
-        autoCommit: true,
-        bindDefs: [ { type: oracledb.NUMBER }, { type: PersonType } ]
-      };
-      let result = await conn.executeMany(
-        `INSERT INTO ${TABLE} VALUES (:1, :2)`,
-        bindArr,
-        opts
-      );
-
-      should.strictEqual(result.rowsAffected, PEOPLE.length);
-
-    } catch (err) {
-      should.not.exist(err);
     }
+
   }); // before()
 
-  after(async() => {
-    try {
-      let sql = `DROP TABLE ${TABLE} PURGE`;
-      await conn.execute(sql);
+  after(async function() {
+    if(!isRunnable) {
+      return;
+    } else {
+      try {
+        let sql = `DROP TABLE ${TABLE} PURGE`;
+        await conn.execute(sql);
 
-      sql = `DROP TYPE ${TYPE}`;
-      await conn.execute(sql);
+        sql = `DROP TYPE ${TYPE}`;
+        await conn.execute(sql);
 
-      await conn.close();
-    } catch (err) {
-      should.not.exist(err);
+        await conn.close();
+      } catch (err) {
+        should.not.exist(err);
+      }
     }
+
   }); // after()
 
   it('208.1 REF cursors that fetch object', async () => {

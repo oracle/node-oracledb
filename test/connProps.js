@@ -28,13 +28,15 @@
 const oracledb  = require('oracledb');
 const should    = require('should');
 const dbconfig  = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('193. connProps.js', function() {
 
   let isRunnable = false;
 
   before(async function() {
-    if (process.env.NODE_ORACLEDB_DBA_PRIVILEGE) {
+    let preps = await testsUtil.checkPrerequisites();
+    if (preps && process.env.NODE_ORACLEDB_DBA_PRIVILEGE) {
       isRunnable = true;
     }
 

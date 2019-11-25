@@ -27,51 +27,65 @@
 const oracledb  = require('oracledb');
 const should    = require('should');
 const dbconfig  = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
-describe('211. dbObject12.js', () => {
+describe('211. dbObject12.js', function() {
 
+  let isRunnable = false;
   let conn;
 
   const PKG  = 'NODB_REC_PKG';
   const TYPE = 'NODB_REC_TYP';
 
-  before(async () => {
-    try {
-      conn = await oracledb.getConnection(dbconfig);
+  before(async function() {
+    isRunnable = await testsUtil.checkPrerequisites();
+    if(!isRunnable) {
+      this.skip();
+      return;
+    } else {
+      try {
+        conn = await oracledb.getConnection(dbconfig);
 
-      let plsql =`
-        CREATE OR REPLACE PACKAGE ${PKG} AS
-          TYPE ${TYPE} IS RECORD (name VARCHAR2(40), pos NUMBER);
-          PROCEDURE myproc (p_in IN ${TYPE}, p_out OUT ${TYPE});
-        END ${PKG};
-      `;
-      await conn.execute(plsql);
+        let plsql =`
+          CREATE OR REPLACE PACKAGE ${PKG} AS
+            TYPE ${TYPE} IS RECORD (name VARCHAR2(40), pos NUMBER);
+            PROCEDURE myproc (p_in IN ${TYPE}, p_out OUT ${TYPE});
+          END ${PKG};
+        `;
+        await conn.execute(plsql);
 
-      plsql =`
-        CREATE OR REPLACE PACKAGE BODY ${PKG} AS
-          PROCEDURE myproc (p_in IN ${TYPE}, p_out OUT ${TYPE}) AS
-          BEGIN
-            p_out := p_in;
-            p_out.pos := p_out.pos * 2;
-          END;
-        END ${PKG};
-      `;
-      await conn.execute(plsql);
+        plsql =`
+          CREATE OR REPLACE PACKAGE BODY ${PKG} AS
+            PROCEDURE myproc (p_in IN ${TYPE}, p_out OUT ${TYPE}) AS
+            BEGIN
+              p_out := p_in;
+              p_out.pos := p_out.pos * 2;
+            END;
+          END ${PKG};
+        `;
+        await conn.execute(plsql);
 
-    } catch(err) {
-      should.not.exist(err);
+      } catch(err) {
+        should.not.exist(err);
+      }
     }
+
   }); // before()
 
-  after(async () => {
-    try {
-      let sql = `DROP PACKAGE ${PKG}`;
-      await conn.execute(sql);
+  after(async function() {
+    if(!isRunnable) {
+      return;
+    } else {
+      try {
+        let sql = `DROP PACKAGE ${PKG}`;
+        await conn.execute(sql);
 
-      await conn.close();
-    } catch(err) {
-      should.not.exist(err);
+        await conn.close();
+      } catch(err) {
+        should.not.exist(err);
+      }
     }
+
   }); // after()
 
   it('211.1 examples/plsqlrecord.js', async () => {

@@ -29,7 +29,18 @@ const should    = require('should');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('191. currentSchema.js', () => {
+describe('191. currentSchema.js', function() {
+
+  let isRunnable = false;
+
+  before(async function() {
+    isRunnable = await testsUtil.checkPrerequisites();
+
+    if (!isRunnable) {
+      this.skip();
+      return;
+    }
+  });
 
   it('191.1 the value will be empty until it has been explicitly set', async () => {
 

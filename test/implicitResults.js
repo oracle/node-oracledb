@@ -29,7 +29,9 @@ const should    = require('should');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('192. implicitResults.js', () => {
+describe('192. implicitResults.js', function() {
+
+  let isRunnable = false;
 
   const tab1 = 'nodb_tab_impres1';
   const tab2 = 'nodb_tab_impres2';
@@ -49,71 +51,84 @@ describe('192. implicitResults.js', () => {
             dbms_sql.return_result(c2);
         end;`;
 
-  before(async () => {
-    try {
-      const conn = await oracledb.getConnection(dbconfig);
+  before(async function() {
+    isRunnable = await testsUtil.checkPrerequisites();
 
-      let sql =
-        `create table ${tab1} (
-          id number(9) not null,
-          value varchar2(100) not null
-        )`;
-      let plsql = testsUtil.sqlCreateTable(tab1, sql);
-      await conn.execute(plsql);
+    if (!isRunnable) {
+      this.skip();
+      return;
+    } else {
+      try {
+        const conn = await oracledb.getConnection(dbconfig);
 
-      let sqlInsertValues =
-        `DECLARE \n` +
-        `    x NUMBER := 0; \n` +
-        `    n VARCHAR2(100); \n` +
-        `BEGIN \n` +
-        `    FOR i IN 1..23 LOOP \n` +
-        `        x := x + 1; \n` +
-        `        n := 'Staff ' || x; \n` +
-        `        INSERT INTO ${tab1} VALUES (x, n); \n` +
-        `    END LOOP; \n` +
-        `END; `;
-      await conn.execute(sqlInsertValues);
+        let sql =
+          `create table ${tab1} (
+            id number(9) not null,
+            value varchar2(100) not null
+          )`;
+        let plsql = testsUtil.sqlCreateTable(tab1, sql);
+        await conn.execute(plsql);
 
-      sql = `create table ${tab2} (
-              id    number(9) not null,
-              tsval timestamp not null
-            )`;
-      plsql = testsUtil.sqlCreateTable(tab2, sql);
-      await conn.execute(plsql);
+        let sqlInsertValues =
+          `DECLARE \n` +
+          `    x NUMBER := 0; \n` +
+          `    n VARCHAR2(100); \n` +
+          `BEGIN \n` +
+          `    FOR i IN 1..23 LOOP \n` +
+          `        x := x + 1; \n` +
+          `        n := 'Staff ' || x; \n` +
+          `        INSERT INTO ${tab1} VALUES (x, n); \n` +
+          `    END LOOP; \n` +
+          `END; `;
+        await conn.execute(sqlInsertValues);
 
-      sqlInsertValues =
-        `DECLARE \n` +
-        `    x NUMBER := 0; \n` +
-        `    n TIMESTAMP; \n` +
-        `BEGIN \n` +
-        `    FOR i IN 1..5 LOOP \n` +
-        `        x := x + 1; \n` +
-        `        n := systimestamp + (i / 10); \n` +
-        `        INSERT INTO ${tab2} VALUES (x, n); \n` +
-        `    END LOOP; \n` +
-        `END; `;
-      await conn.execute(sqlInsertValues);
+        sql = `create table ${tab2} (
+                id    number(9) not null,
+                tsval timestamp not null
+              )`;
+        plsql = testsUtil.sqlCreateTable(tab2, sql);
+        await conn.execute(plsql);
 
-      await conn.commit();
-      await conn.close();
-    } catch(err) {
-      should.not.exist(err);
+        sqlInsertValues =
+          `DECLARE \n` +
+          `    x NUMBER := 0; \n` +
+          `    n TIMESTAMP; \n` +
+          `BEGIN \n` +
+          `    FOR i IN 1..5 LOOP \n` +
+          `        x := x + 1; \n` +
+          `        n := systimestamp + (i / 10); \n` +
+          `        INSERT INTO ${tab2} VALUES (x, n); \n` +
+          `    END LOOP; \n` +
+          `END; `;
+        await conn.execute(sqlInsertValues);
+
+        await conn.commit();
+        await conn.close();
+      } catch(err) {
+        should.not.exist(err);
+      }
     }
+
   }); // before()
 
-  after(async () => {
-    try {
-      const conn = await oracledb.getConnection(dbconfig);
+  after(async function() {
 
-      let sql = `DROP TABLE ${tab1} PURGE`;
-      await conn.execute(sql);
+    if (!isRunnable) {
+      return;
+    } else {
+      try {
+        const conn = await oracledb.getConnection(dbconfig);
 
-      sql = `DROP TABLE ${tab2} PURGE`;
-      await conn.execute(sql);
+        let sql = `DROP TABLE ${tab1} PURGE`;
+        await conn.execute(sql);
 
-      await conn.close();
-    } catch(err) {
-      should.not.exist(err);
+        sql = `DROP TABLE ${tab2} PURGE`;
+        await conn.execute(sql);
+
+        await conn.close();
+      } catch(err) {
+        should.not.exist(err);
+      }
     }
 
   }); // after()
