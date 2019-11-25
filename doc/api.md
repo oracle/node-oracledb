@@ -7064,7 +7064,7 @@ const connection = await oracledb.getConnection(
 
 #### <a name="tnsnames"></a> 14.2.3 Net Service Names for Connection Strings
 
-Connect Descriptor strings are commmonly stored in [`tnsnames.ora`](#tnsadmin)
+Connect Descriptor strings are commonly stored in [`tnsnames.ora`](#tnsadmin)
 files and associated with a Net Service Name, for example:
 
 ```
