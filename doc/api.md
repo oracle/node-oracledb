@@ -14390,7 +14390,8 @@ Oracle Linux.
 To get a free database hosted in Oracle Cloud, see [Oracle Cloud Free
 Tier][162].  If you want to use your own database, installing the free [Oracle
 Database 'XE' Express Edition][130] is quick and easy.  Other database editions
-may be downloaded [here][154] or [used with Docker][155].
+may be downloaded [here][154]. Dockerfiles for Oracle Database and Oracle
+Instant Client are on [github.com/oracle/docker-images][155].
 
 If you want to install Oracle Linux yourself, it is free from [here][156].
 
@@ -14551,7 +14552,7 @@ can be asked at [AskTom][158].
 [152]: https://www.oracle.com/technetwork/community/developer-vm/index.html#dbapp
 [153]: https://www.virtualbox.org
 [154]: http://www.oracle.com/technetwork/database/enterprise-edition/downloads/
-[155]: https://docker.com/
+[155]: https://github.com/oracle/docker-images
 [156]: http://yum.oracle.com/
 [157]: https://livesql.oracle.com/
 [158]: https://asktom.oracle.com/
