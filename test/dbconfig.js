@@ -69,6 +69,15 @@ if (process.env.NODE_ORACLEDB_EXTERNALAUTH) {
   }
 }
 
+if (process.env.NODE_ORACLEDB_QA) {
+  let isQA = process.env.NODE_ORACLEDB_QA;
+  isQA = String(isQA);
+  isQA = isQA.toLowerCase();
+  if (isQA == 'true') {
+    config.test.NODE_ORACLEDB_QA = true;
+  }
+}
+
 if (process.env.NODE_ORACLEDB_DBA_PRIVILEGE) {
   var priv = process.env.NODE_ORACLEDB_DBA_PRIVILEGE;
   priv = String(priv);

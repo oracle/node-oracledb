@@ -23,6 +23,9 @@
  *
  * DESCRIPTION
  *   Test "Connection.callTimeout" property.
+ *   This test requries NODE_ORACLEDB_QA environment variable to be true.
+ *   Because test cases use the hard-code variables TIME_OUT and
+ *   DB_OP_TIME which are not stable in all network situations.
  *
  *****************************************************************************/
 'use strict';
@@ -39,7 +42,10 @@ describe('222. callTimeout.js', function() {
   let conn;
 
   before(async function() {
-    isRunnable = await testsUtil.checkPrerequisites();
+
+    const isQA = dbconfig.test.NODE_ORACLEDB_QA;
+    const prep = await testsUtil.checkPrerequisites();
+    isRunnable = isQA && prep;
     if (!isRunnable) {
       this.skip();
       return;
