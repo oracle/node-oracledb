@@ -8787,13 +8787,13 @@ const connection = await oracledb.getConnection(
     user          : "hr",
     password      : mypw,  // mypw contains the hr schema password
     connectString : "localhost/orclpdb1",
-    shardingkey   : ["SCOTT"]
+    shardingKey   : ["SCOTT"]
   });
 ```
 
 Similar code works for NUMBER keys.
 
-The `shardingkey` and `superShardingKey` properties are arrays because multiple
+The `shardingKey` and `superShardingKey` properties are arrays because multiple
 values can be used.  If database shards had been partitioned with multiple keys
 such as with:
 
@@ -8818,7 +8818,7 @@ const connection = await oracledb.getConnection(
     user          : "hr",
     password      : mypw,  // mypw contains the hr schema password
     connectString : "localhost/orclpdb1",
-    shardingkey   : [70, "SCOTT"]
+    shardingKey   : [70, "SCOTT"]
   });
 ```
 
@@ -8847,7 +8847,7 @@ const connection = await oracledb.getConnection(
     user          : "hr",
     password      : mypw,  // mypw contains the hr schema password
     connectString : "localhost/orclpdb1",
-    shardingkey   : [key]
+    shardingKey   : [key]
   });
 ```
 
@@ -8875,7 +8875,7 @@ const connection = await oracledb.getConnection(
     user          : "hr",
     password      : mypw,  // mypw contains the hr schema password
     connectString : "localhost/orclpdb1",
-    shardingkey   : [key]
+    shardingKey   : [key]
   });
 ```
 
@@ -8904,7 +8904,7 @@ const connection = await oracledb.getConnection(
     password        : mypw,  // mypw contains the hr schema password
     connectString   : "localhost/orclpdb1",
     superShardingKey: ["gold"]
-    shardingkey     : ["SCOTT"],
+    shardingKey     : ["SCOTT"],
   });
 ```
 
