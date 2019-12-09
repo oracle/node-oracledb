@@ -8326,6 +8326,15 @@ resource sharing for applications that run in multiple client
 processes or run on multiple middle-tier application servers.  DRCP
 reduces the overall number of connections that a database must handle.
 
+DRCP is generally used only when the database host does not have enough memory
+to keep all connections open concurrently.  For example, if your application
+runs as 10 Node.js processes each with a connection pool having `poolMax` of
+50, then the database host must be able to have 10 * 50 = 500 database server
+processes open at the same time.  If the database host does not have enough
+memory for these 500 server processes, then DRCP may be a solution because a
+smaller pool of server processes will be shared between all the Node.js
+connections.
+
 DRCP is useful for applications which share the same database credentials, have
 similar session settings (for example date format settings and PL/SQL
 package state), and where the application gets a database connection,
