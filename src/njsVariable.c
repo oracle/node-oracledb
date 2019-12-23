@@ -239,6 +239,8 @@ uint32_t njsVariable_getDataType(njsVariable *var)
             return NJS_DATATYPE_CLOB;
         case DPI_ORACLE_TYPE_BLOB:
             return NJS_DATATYPE_BLOB;
+        case DPI_ORACLE_TYPE_BOOLEAN:
+            return NJS_DATATYPE_BOOLEAN;
         case DPI_ORACLE_TYPE_OBJECT:
             return NJS_DATATYPE_OBJECT;
         default:
@@ -539,6 +541,10 @@ bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
             case DPI_ORACLE_TYPE_NATIVE_FLOAT:
             case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
             case DPI_ORACLE_TYPE_ROWID:
+                break;
+            case DPI_ORACLE_TYPE_BOOLEAN:
+                vars[i].varTypeNum = DPI_ORACLE_TYPE_BOOLEAN;
+                vars[i].nativeTypeNum = DPI_NATIVE_TYPE_BOOLEAN;
                 break;
             case DPI_ORACLE_TYPE_OBJECT:
                 vars[i].dpiObjectTypeHandle = queryInfo.typeInfo.objectType;
@@ -945,6 +951,15 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
             return njsVariable_setInvalidBind(var, pos, baton);
         NJS_CHECK_NAPI(env, napi_get_value_double(env, value,
                 &data->value.asDouble))
+        return true;
+    }
+
+    // handle binding booleans
+    if (valueType == napi_boolean) {
+        if (var->varTypeNum != DPI_ORACLE_TYPE_BOOLEAN)
+            return njsVariable_setInvalidBind(var, pos, baton);
+        NJS_CHECK_NAPI(env, napi_get_value_bool(env, value,
+                (bool*) &data->value.asBoolean))
         return true;
     }
 
