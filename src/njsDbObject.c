@@ -890,6 +890,13 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
                 *nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
             }
             return true;
+        
+        // handle booleans
+        case napi_boolean:
+            NJS_CHECK_NAPI(env, napi_get_value_bool(env, value,
+                (bool*) &data->value.asBoolean))
+            *nativeTypeNum = DPI_NATIVE_TYPE_BOOLEAN;
+            return true;
 
         // several types of objects are supported
         case napi_object:
