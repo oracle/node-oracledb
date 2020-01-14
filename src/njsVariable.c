@@ -239,8 +239,6 @@ uint32_t njsVariable_getDataType(njsVariable *var)
             return NJS_DATATYPE_CLOB;
         case DPI_ORACLE_TYPE_BLOB:
             return NJS_DATATYPE_BLOB;
-        case DPI_ORACLE_TYPE_BOOLEAN:
-            return NJS_DATATYPE_BOOLEAN;
         case DPI_ORACLE_TYPE_OBJECT:
             return NJS_DATATYPE_OBJECT;
         default:
@@ -541,10 +539,6 @@ bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
             case DPI_ORACLE_TYPE_NATIVE_FLOAT:
             case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
             case DPI_ORACLE_TYPE_ROWID:
-                break;
-            case DPI_ORACLE_TYPE_BOOLEAN:
-                vars[i].varTypeNum = DPI_ORACLE_TYPE_BOOLEAN;
-                vars[i].nativeTypeNum = DPI_NATIVE_TYPE_BOOLEAN;
                 break;
             case DPI_ORACLE_TYPE_OBJECT:
                 vars[i].dpiObjectTypeHandle = queryInfo.typeInfo.objectType;
