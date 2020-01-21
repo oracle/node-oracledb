@@ -2773,6 +2773,7 @@ static bool njsConnection_subscribeAsync(njsBaton *baton)
         params.groupingClass = (uint8_t) baton->subscrGroupingClass;
         params.groupingValue = baton->subscrGroupingValue;
         params.groupingType = (uint8_t) baton->subscrGroupingType;
+        params.clientInitiated = baton->clientInitiated;
         if (dpiConn_subscribe(conn->handle, &params,
                 &baton->subscription->handle) < 0)
             return njsBaton_setErrorDPI(baton);
@@ -2887,6 +2888,9 @@ static bool njsConnection_subscribeProcessArgs(njsBaton *baton, napi_env env,
             return false;
         if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1,
                 "groupingType", &baton->subscrGroupingType, NULL))
+            return false;
+        if (!njsBaton_getBoolFromArg(baton, env, args, 1, "clientInitiated",
+                &baton->clientInitiated, NULL))
             return false;
         if (!njsBaton_getValueFromArg(baton, env, args, 1, "callback",
                 napi_function, &callback, NULL))

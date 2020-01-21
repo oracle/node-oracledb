@@ -465,6 +465,7 @@ struct njsBaton {
     bool isDropped;
     bool replaced;
     bool force;
+    bool clientInitiated;
 
     // LOB buffer (requires free only if string was used)
     uint64_t bufferSize;

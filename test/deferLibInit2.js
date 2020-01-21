@@ -29,11 +29,11 @@
 const oracledb = require('oracledb');
 const should   = require('should');
 
-delete process.env.ORACLE_HOME;
-
 describe('deferLibInit2.js', () => {
 
   it('child process #2 of test/deferLibInit.js', () => {
+
+    delete process.env.ORACLE_HOME;
 
     should.throws(
       () => {

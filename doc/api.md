@@ -204,16 +204,17 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - 4.2.16.2 [`subscribe()`: Options](#consubscribeoptions)
                 - 4.2.16.2.1 [`binds`](#consubscribeoptbinds)
                 - 4.2.16.2.2 [`callback`](#consubscribeoptcallback)
-                - 4.2.16.2.3 [`groupingClass`](#consubscribeoptgroupingclass)
-                - 4.2.16.2.4 [`groupingType`](#consubscribeoptgroupingtype)
-                - 4.2.16.2.5 [`groupingValue`](#consubscribeoptgroupingvalue)
-                - 4.2.16.2.6 [`ipAddress`](#consubscribeoptipaddress)
-                - 4.2.16.2.7 [`namespace`](#consubscribeoptnamespace)
-                - 4.2.16.2.8 [`operations`](#consubscribeoptoperations)
-                - 4.2.16.2.9 [`port`](#consubscribeoptport)
-                - 4.2.16.2.10 [`qos`](#consubscribeoptqos)
-                - 4.2.16.2.11 [`sql`](#consubscribeoptsql)
-                - 4.2.16.2.12 [`timeout`](#consubscribeopttimeout)
+                - 4.2.16.2.3 [`clientInitiated`](#consubscribeoptclientinitiated)
+                - 4.2.16.2.4 [`groupingClass`](#consubscribeoptgroupingclass)
+                - 4.2.16.2.5 [`groupingType`](#consubscribeoptgroupingtype)
+                - 4.2.16.2.6 [`groupingValue`](#consubscribeoptgroupingvalue)
+                - 4.2.16.2.7 [`ipAddress`](#consubscribeoptipaddress)
+                - 4.2.16.2.8 [`namespace`](#consubscribeoptnamespace)
+                - 4.2.16.2.9 [`operations`](#consubscribeoptoperations)
+                - 4.2.16.2.10 [`port`](#consubscribeoptport)
+                - 4.2.16.2.11 [`qos`](#consubscribeoptqos)
+                - 4.2.16.2.12 [`sql`](#consubscribeoptsql)
+                - 4.2.16.2.13 [`timeout`](#consubscribeopttimeout)
             - 4.2.16.3 [`subscribe()`: Callback Function](#consubscribecallback)
         - 4.2.17 [`unsubscribe()`](#conunsubscribe)
 5. [AqQueue Class](#aqqueueclass)
@@ -3946,7 +3947,23 @@ The `message` parameter in the notification callback is an object containing the
     - [`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription) - object-level notifications are being used (Database Change Notification).
     - [`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription) - query-level notifications are being used (Continuous Query Notification).
 
-###### <a name="consubscribeoptgroupingclass"></a> 4.2.16.2.3 `groupingClass`
+###### <a name="consubscribeoptclientinitiated"></a> 4.2.16.2.3 `clientInitiated`
+
+```
+Boolean clientInitiated
+```
+
+This property enables CQN "client initiated" connections which internally use the same
+approach as normal connections to the database, and do not require the database
+to be able to connect back to the application.  Since client initiated
+connections do not need additional network configuration, they have ease-of-use
+and security advantages.
+
+The default is *false*.
+
+This property was added in node-oracledb 4.2.  It is available when Oracle Database and the Oracle client libraries are version 19.4 or higher.
+
+###### <a name="consubscribeoptgroupingclass"></a> 4.2.16.2.4 `groupingClass`
 
 ```
 Number groupingClass
@@ -3957,7 +3974,7 @@ An integer mask which currently, if set, can only contain the value
 this value is set then notifications are grouped by time into a single
 notification.
 
-###### <a name="consubscribeoptgroupingtype"></a> 4.2.16.2.4 `groupingType`
+###### <a name="consubscribeoptgroupingtype"></a> 4.2.16.2.5 `groupingType`
 
 ```
 Number groupingType
@@ -3970,7 +3987,7 @@ or
 [`oracledb.SUBSCR_GROUPING_TYPE_LAST`](#oracledbconstantssubscription)
 indicating the last notification in the group should be sent.
 
-###### <a name="consubscribeoptgroupingvalue"></a> 4.2.16.2.5 `groupingValue`
+###### <a name="consubscribeoptgroupingvalue"></a> 4.2.16.2.6 `groupingValue`
 
 ```
 Number groupingValue
@@ -3982,7 +3999,7 @@ then `groupingValue` can be used to set the number of seconds over
 which notifications will be grouped together, invoking `callback`
 once.  If `groupingClass` is not set, then `groupingValue` is ignored.
 
-###### <a name="consubscribeoptipaddress"></a> 4.2.16.2.6 `ipAddress`
+###### <a name="consubscribeoptipaddress"></a> 4.2.16.2.7 `ipAddress`
 
 ```
 String ipAddress
@@ -3992,7 +4009,7 @@ A string containing an IPv4 or IPv6 address on which the subscription
 should listen to receive notifications.  If not specified, then the
 Oracle Client library will select an IP address.
 
-###### <a name="consubscribeoptnamespace"></a> 4.2.16.2.7 `namespace`
+###### <a name="consubscribeoptnamespace"></a> 4.2.16.2.8 `namespace`
 
 ```
 Number namespace
@@ -4007,7 +4024,7 @@ You can use `oracledb.SUBSCR_NAMESPACE_AQ` to get notifications that
 Advanced Queuing messages are available to be dequeued, see
 [Advanced Queuing Notifications](#aqnotifications).
 
-###### <a name="consubscribeoptoperations"></a> 4.2.16.2.8 `operations`
+###### <a name="consubscribeoptoperations"></a> 4.2.16.2.9 `operations`
 
 ```
 Number operations
@@ -4017,7 +4034,7 @@ An integer mask containing one or more of the operation type
 [`oracledb.CQN_OPCODE_*`](#oracledbconstantscqn) constants to indicate
 what types of database change should generation notifications.
 
-###### <a name="consubscribeoptport"></a> 4.2.16.2.9 `port`
+###### <a name="consubscribeoptport"></a> 4.2.16.2.10 `port`
 
 ```
 Number port
@@ -4027,7 +4044,7 @@ The port number on which the subscription should listen to receive
 notifications.  If not specified, then the Oracle Client library will
 select a port number.
 
-###### <a name="consubscribeoptqos"></a> 4.2.16.2.10 `qos`
+###### <a name="consubscribeoptqos"></a> 4.2.16.2.11 `qos`
 
 ```
 Number qos
@@ -4036,7 +4053,7 @@ Number qos
 An integer mask containing one or more of the quality of service
 [`oracledb.SUBSCR_QOS_*`](#oracledbconstantssubscription) constants.
 
-###### <a name="consubscribeoptsql"></a> 4.2.16.2.11 `sql`
+###### <a name="consubscribeoptsql"></a> 4.2.16.2.12 `sql`
 
 ```
 String sql
@@ -4044,7 +4061,7 @@ String sql
 
 The SQL query string to use for notifications.
 
-###### <a name="consubscribeopttimeout"></a> 4.2.16.2.12 `timeout`
+###### <a name="consubscribeopttimeout"></a> 4.2.16.2.13 `timeout`
 
 The number of seconds the subscription should remain active.  Once
 this length of time has been reached, the subscription is
@@ -12503,34 +12520,38 @@ satisfaction.
 
 ## <a name="cqn"></a> 25. Continuous Query Notification (CQN)
 
-[Continuous Query Notification (CQN)][99] lets node-oracledb
-applications register a JavaScript method that is invoked when changed
-data is committed to the database, regardless of the user or the
-application that made the change.  For example your application may be
-interested in knowing if a table used for lookup data has changed so
-the application can update a local cache of that table.
+[Continuous Query Notification (CQN)][99] lets node-oracledb applications
+subscribe to receive notification when changed data is committed to the
+database, regardless of the user or the application that made the change.  For
+example your application may be interested in knowing if a table used for lookup
+data has changed so that the application can update a local cache of that table.
+CQN can invoke a JavaScript method, which can perform the action.
 
 CQN is suitable for infrequently modified tables.  It is recommended
 to avoid frequent subscription and unsubscription.
 
-The connection must be created with [`events`](#propdbevents) mode
-*true*.
+By default, CQN requires the database to be able to connect back to the
+node-oracledb application for notifications to be received.  This typically
+means that the machine running node-oracledb needs a fixed IP address.  Note
+`connection.subscribe()` does not verify that this reverse connection is
+possible.  If there is any problem sending a notification, then the callback
+method will not be invoked.  The configuration options can include an
+[`ipAddress`](#consubscribeoptipaddress) and [`port`](#consubscribeoptport) on
+which to listen for notifications, otherwise the database chooses values.
 
-The database must be able to connect to the node-oracledb machine for
-notifications to be received.  Typically this means that the machine
-running node-oracledb needs a fixed IP address.  Note
-`connection.subscribe()` does not verify that this reverse connection
-is possible.  If there is any problem sending a notification, then the
-callback method will not be invoked.  The configuration options can
-include an [`ipAddress`](#consubscribeoptipaddress) and
-[`port`](#consubscribeoptport) on which to listen for notifications,
-otherwise the database chooses values.
+Alternatively, when using Oracle Database and Oracle client libraries 19.4, or
+later, subscriptions can set the optional
+[`clientInitiated`](#consubscribeoptclientinitiated) property to *true*.  This
+makes CQN internally use the same approach as normal connections to the
+database, and does not require the database to be able to connect back to the
+application.  Since client initiated CQN notifications do not need additional
+network configuration, they have ease-of-use and security advantages.
 
-To register interest in database changes, the
-[`connection.subscribe()`](#consubscribe) method is passed an
-arbitrary name and an [`options`](#consubscribeoptions) object that
-controls notification.  In particular `options` contains a valid SQL
-query and a JavaScript callback:
+To register interest in database changes, the connection must be created with
+[`events`](#propdbevents) mode *true*.  Then the
+[`connection.subscribe()`](#consubscribe) method is passed an arbitrary name and
+an [`options`](#consubscribeoptions) object that controls notification.  In
+particular `options` contains a valid SQL query and a JavaScript callback:
 
 ```javascript
 function myCallback(message) {

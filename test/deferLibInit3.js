@@ -31,11 +31,11 @@ const should   = require('should');
 const testsUtil = require('./testsUtil.js');
 const dbconfig = require('./dbconfig.js');
 
-delete process.env.ORACLE_HOME;
-
 describe('deferLibInit3.js', () => {
 
   it('child process #3 of test/deferLibInit.js', async () => {
+    delete process.env.ORACLE_HOME;
+
     let conn;
     await testsUtil.assertThrowsAsync(
       async () => conn = await oracledb.getConnection(dbconfig),
