@@ -862,7 +862,7 @@ static bool njsVariable_setFromString(njsVariable *var, uint32_t pos,
 
     // write it to the variable
     if (dpiVar_setFromBytes(var->dpiVarHandle, pos, buffer,
-            bufferLength) < 0) {
+            (uint32_t) bufferLength) < 0) {
         free(buffer);
         return njsBaton_setErrorDPI(baton);
     }

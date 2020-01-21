@@ -371,7 +371,8 @@ static bool njsOracleDb_createPoolAsync(njsBaton *baton)
     params.externalAuth = baton->externalAuth;
     params.homogeneous = baton->homogeneous;
     params.plsqlFixupCallback = baton->plsqlFixupCallback;
-    params.plsqlFixupCallbackLength = baton->plsqlFixupCallbackLength;
+    params.plsqlFixupCallbackLength =
+            (uint32_t) baton->plsqlFixupCallbackLength;
     if (params.externalAuth)
         params.homogeneous = 0;
     params.pingInterval = baton->poolPingInterval;
@@ -384,8 +385,9 @@ static bool njsOracleDb_createPoolAsync(njsBaton *baton)
 
     // create pool
     if (dpiPool_create(baton->oracleDb->context, baton->user,
-            baton->userLength, baton->password, baton->passwordLength,
-            baton->connectString, baton->connectStringLength, &commonParams,
+            (uint32_t) baton->userLength, baton->password,
+            (uint32_t) baton->passwordLength, baton->connectString,
+            (uint32_t) baton->connectStringLength, &commonParams,
             &params, &baton->dpiPoolHandle) < 0) {
         return njsBaton_setErrorDPI(baton);
     } else if (dpiPool_setTimeout(baton->dpiPoolHandle,
@@ -725,7 +727,7 @@ static napi_value njsOracleDb_getConnectionClass(napi_env env,
     if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &oracleDb))
         return NULL;
     return njsUtils_convertToString(env, oracleDb->connectionClass,
-            oracleDb->connectionClassLength);
+            (uint32_t) oracleDb->connectionClassLength);
 }
 
 
@@ -740,7 +742,7 @@ static napi_value njsOracleDb_getEdition(napi_env env, napi_callback_info info)
     if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &oracleDb))
         return NULL;
     return njsUtils_convertToString(env, oracleDb->edition,
-            oracleDb->editionLength);
+            (uint32_t) oracleDb->editionLength);
 }
 
 
@@ -909,7 +911,8 @@ static napi_value njsOracleDb_getOracleClientVersionString(napi_env env,
             versionInfo.versionNum, versionInfo.releaseNum,
             versionInfo.updateNum, versionInfo.portReleaseNum,
             versionInfo.portUpdateNum);
-    return njsUtils_convertToString(env, versionString, strlen(versionString));
+    return njsUtils_convertToString(env, versionString,
+            (uint32_t) strlen(versionString));
 }
 
 

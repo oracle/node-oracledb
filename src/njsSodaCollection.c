@@ -163,7 +163,7 @@ static bool njsSodaCollection_createIndexAsync(njsBaton *baton)
     if (baton->oracleDb->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_createIndex(coll->handle, baton->indexSpec,
-            baton->indexSpecLength, flags) < 0)
+            (uint32_t) baton->indexSpecLength, flags) < 0)
         return njsBaton_setErrorDPI(baton);
 
     return true;
@@ -269,8 +269,8 @@ static bool njsSodaCollection_dropIndexAsync(njsBaton *baton)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (baton->force)
         flags |= DPI_SODA_FLAGS_INDEX_DROP_FORCE;
-    if (dpiSodaColl_dropIndex(coll->handle, baton->name, baton->nameLength,
-            flags, &isDropped) < 0)
+    if (dpiSodaColl_dropIndex(coll->handle, baton->name,
+            (uint32_t) baton->nameLength, flags, &isDropped) < 0)
         return njsBaton_setErrorDPI(baton);
     baton->isDropped = (bool) isDropped;
     return true;

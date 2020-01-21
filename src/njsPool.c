@@ -243,9 +243,9 @@ static bool njsPool_getConnectionAsync(njsBaton *baton)
         return njsBaton_setErrorDPI(baton);
     params.matchAnyTag = baton->matchAnyTag;
     params.connectionClass = baton->connectionClass;
-    params.connectionClassLength = baton->connectionClassLength;
+    params.connectionClassLength = (uint32_t) baton->connectionClassLength;
     params.tag = baton->tag;
-    params.tagLength = baton->tagLength;
+    params.tagLength = (uint32_t) baton->tagLength;
 
     // Sharding
     params.shardingKeyColumns = baton->shardingKeyColumns;
@@ -254,8 +254,9 @@ static bool njsPool_getConnectionAsync(njsBaton *baton)
     params.numSuperShardingKeyColumns = baton->numSuperShardingKeyColumns;
 
     // acquire connection from pool
-    if (dpiPool_acquireConnection(pool->handle, baton->user, baton->userLength,
-            baton->password, baton->passwordLength, &params,
+    if (dpiPool_acquireConnection(pool->handle, baton->user,
+            (uint32_t) baton->userLength, baton->password,
+            (uint32_t) baton->passwordLength, &params,
             &baton->dpiConnHandle) < 0)
         return njsBaton_setErrorDPI(baton);
 

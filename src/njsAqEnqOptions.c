@@ -175,7 +175,7 @@ static napi_value njsAqEnqOptions_setTransformation(napi_env env,
             &valueLength))
         return NULL;
     status = dpiEnqOptions_setTransformation(options->handle, value,
-            valueLength);
+            (uint32_t) valueLength);
     free(value);
     if (status < 0)
         njsUtils_throwErrorDPI(env, options->oracleDb);

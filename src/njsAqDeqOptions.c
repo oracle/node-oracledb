@@ -348,7 +348,8 @@ static napi_value njsAqDeqOptions_setMsgId(napi_env env,
         njsUtils_genericThrowError(env);
         return NULL;
     }
-    if (dpiDeqOptions_setMsgId(options->handle, buffer, bufferLength) < 0)
+    if (dpiDeqOptions_setMsgId(options->handle, buffer,
+            (uint32_t) bufferLength) < 0)
         njsUtils_throwErrorDPI(env, options->oracleDb);
     return NULL;
 }
@@ -387,7 +388,7 @@ static napi_value njsAqDeqOptions_setTextAttribute(napi_env env,
     if (!njsUtils_setPropString(env, value, attributeName, &buffer,
             &bufferLength))
         return NULL;
-    status = (*setter)(options->handle, buffer, bufferLength);
+    status = (*setter)(options->handle, buffer, (uint32_t) bufferLength);
     free(buffer);
     if (status < 0)
         njsUtils_throwErrorDPI(env, options->oracleDb);

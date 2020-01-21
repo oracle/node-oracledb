@@ -875,7 +875,7 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
             if (!njsUtils_copyStringFromJS(env, value, strBuffer, &length))
                 return false;
             *nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
-            dpiData_setBytes(data, *strBuffer, length);
+            dpiData_setBytes(data, *strBuffer, (uint32_t) length);
             return true;
 
         // numbers are handled as doubles in JavaScript
@@ -910,7 +910,7 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
             if (check) {
                 NJS_CHECK_NAPI(env, napi_get_buffer_info(env, value,
                         &bufferData, &length))
-                dpiData_setBytes(data, bufferData, length);
+                dpiData_setBytes(data, bufferData, (uint32_t) length);
                 *nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
                 return true;
             }

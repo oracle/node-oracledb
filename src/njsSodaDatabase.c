@@ -136,8 +136,9 @@ static bool njsSodaDatabase_createCollectionAsync(njsBaton *baton)
     if (baton->createCollectionMode == NJS_SODA_COLL_CREATE_MODE_MAP)
         flags |= DPI_SODA_FLAGS_CREATE_COLL_MAP;
 
-    if (dpiSodaDb_createCollection(db->handle, baton->name, baton->nameLength,
-            baton->sodaMetaData, baton->sodaMetaDataLength, flags,
+    if (dpiSodaDb_createCollection(db->handle, baton->name,
+            (uint32_t) baton->nameLength, baton->sodaMetaData,
+            (uint32_t) baton->sodaMetaDataLength, flags,
             &baton->dpiSodaCollHandle) < 0)
         return njsBaton_setErrorDPI(baton);
 
@@ -222,9 +223,9 @@ static napi_value njsSodaDatabase_createDocument(napi_env env,
     }
 
     // create ODPI-C document
-    dpiStatus = dpiSodaDb_createDocument(db->handle, key, keyLength,
-            content, contentLength, mediaType, mediaTypeLength,
-            DPI_SODA_FLAGS_DEFAULT, &docHandle);
+    dpiStatus = dpiSodaDb_createDocument(db->handle, key, (uint32_t) keyLength,
+            content, (uint32_t) contentLength, mediaType,
+            (uint32_t) mediaTypeLength, DPI_SODA_FLAGS_DEFAULT, &docHandle);
     if (key)
         free(key);
     if (mediaType)
@@ -432,8 +433,9 @@ static bool njsSodaDatabase_openCollectionAsync(njsBaton *baton)
 
     if (db->oracleDb->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
-    if (dpiSodaDb_openCollection(db->handle, baton->name, baton->nameLength,
-            flags, &baton->dpiSodaCollHandle) < 0)
+    if (dpiSodaDb_openCollection(db->handle, baton->name,
+            (uint32_t) baton->nameLength, flags,
+            &baton->dpiSodaCollHandle) < 0)
         return njsBaton_setErrorDPI(baton);
     return true;
 }

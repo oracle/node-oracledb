@@ -710,7 +710,8 @@ bool njsBaton_getSodaDocument(njsBaton *baton, njsSodaDatabase *db,
         NJS_CHECK_NAPI(env, napi_get_buffer_info(env, obj, &content,
                 &contentLength))
         if (dpiSodaDb_createDocument(db->handle, NULL, 0, content,
-                contentLength, NULL, 0, DPI_SODA_FLAGS_DEFAULT, handle) < 0)
+                (uint32_t) contentLength, NULL, 0, DPI_SODA_FLAGS_DEFAULT,
+                handle) < 0)
             return njsBaton_setErrorDPI(baton);
     }
 

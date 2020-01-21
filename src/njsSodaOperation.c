@@ -474,11 +474,11 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
 
     // populate SODDA operations options structure
     baton->sodaOperOptions->filter = baton->filter;
-    baton->sodaOperOptions->filterLength = baton->filterLength;
+    baton->sodaOperOptions->filterLength = (uint32_t) baton->filterLength;
     baton->sodaOperOptions->version = baton->version;
-    baton->sodaOperOptions->versionLength = baton->versionLength;
+    baton->sodaOperOptions->versionLength = (uint32_t) baton->versionLength;
     baton->sodaOperOptions->key = baton->key;
-    baton->sodaOperOptions->keyLength = baton->keyLength;
+    baton->sodaOperOptions->keyLength = (uint32_t) baton->keyLength;
     baton->sodaOperOptions->numKeys = baton->numKeys;
     baton->sodaOperOptions->keys = (const char**) baton->keys;
     baton->sodaOperOptions->keyLengths = baton->keysLengths;

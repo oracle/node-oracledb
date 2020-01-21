@@ -355,7 +355,7 @@ static bool njsConnection_closeAsync(njsBaton *baton)
     } else if (conn->retag) {
         mode = DPI_MODE_CONN_CLOSE_RETAG;
         tag = conn->tag;
-        tagLength = conn->tagLength;
+        tagLength = (uint32_t) conn->tagLength;
     }
 
     if (dpiConn_close(baton->dpiConnHandle, mode, tag, tagLength) < 0) {
@@ -929,7 +929,7 @@ static void njsConnection_finalize(napi_env env, void *finalizeData,
         if (conn->retag) {
             mode = DPI_MODE_CONN_CLOSE_RETAG;
             tag = conn->tag;
-            tagLength = conn->tagLength;
+            tagLength = (uint32_t) conn->tagLength;
         }
         dpiConn_close(conn->handle, mode, tag, tagLength);
         dpiConn_release(conn->handle);
@@ -1252,8 +1252,8 @@ static bool njsConnection_getDbObjectClassAsync(njsBaton *baton)
 {
     njsConnection *conn = (njsConnection*) baton->callingInstance;
 
-    if (dpiConn_getObjectType(conn->handle, baton->name, baton->nameLength,
-            &baton->dpiObjectTypeHandle) < 0)
+    if (dpiConn_getObjectType(conn->handle, baton->name,
+            (uint32_t) baton->nameLength, &baton->dpiObjectTypeHandle) < 0)
         return njsBaton_setErrorDPI(baton);
 
     return true;
@@ -1505,7 +1505,8 @@ static napi_value njsConnection_getOracleServerVersionString(napi_env env,
             versionInfo.versionNum, versionInfo.releaseNum,
             versionInfo.updateNum, versionInfo.portReleaseNum,
             versionInfo.portUpdateNum);
-    return njsUtils_convertToString(env, versionString, strlen(versionString));
+    return njsUtils_convertToString(env, versionString,
+            (uint32_t) strlen(versionString));
 }
 
 
@@ -1543,10 +1544,11 @@ static bool njsConnection_getQueueAsync(njsBaton *baton)
     njsConnection *conn = (njsConnection*) baton->callingInstance;
 
     if (baton->typeName && dpiConn_getObjectType(conn->handle, baton->typeName,
-            baton->typeNameLength, &baton->dpiObjectTypeHandle) < 0)
+            (uint32_t) baton->typeNameLength, &baton->dpiObjectTypeHandle) < 0)
         return njsBaton_setErrorDPI(baton);
-    if (dpiConn_newQueue(conn->handle, baton->name, baton->nameLength,
-            baton->dpiObjectTypeHandle, &baton->dpiQueueHandle) < 0)
+    if (dpiConn_newQueue(conn->handle, baton->name,
+            (uint32_t) baton->nameLength, baton->dpiObjectTypeHandle,
+            &baton->dpiQueueHandle) < 0)
         return njsBaton_setErrorDPI(baton);
 
     return true;
@@ -1857,7 +1859,8 @@ static napi_value njsConnection_getTag(napi_env env,
 
     if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &conn))
         return NULL;
-    return njsUtils_convertToString(env, conn->tag, conn->tagLength);
+    return njsUtils_convertToString(env, conn->tag,
+            (uint32_t) conn->tagLength);
 }
 
 
@@ -1988,8 +1991,8 @@ static bool njsConnection_prepareAndBind(njsConnection *conn, njsBaton *baton)
     int status;
 
     // prepare statement
-    if (dpiConn_prepareStmt(conn->handle, 0, baton->sql, baton->sqlLength,
-            NULL, 0, &baton->dpiStmtHandle) < 0)
+    if (dpiConn_prepareStmt(conn->handle, 0, baton->sql,
+            (uint32_t) baton->sqlLength, NULL, 0, &baton->dpiStmtHandle) < 0)
         return njsBaton_setErrorDPI(baton);
 
     // determine statement information
@@ -2001,7 +2004,7 @@ static bool njsConnection_prepareAndBind(njsConnection *conn, njsBaton *baton)
         var = &baton->bindVars[i];
         if (var->name) {
             status = dpiStmt_bindByName(baton->dpiStmtHandle, var->name,
-                    var->nameLength, var->dpiVarHandle);
+                    (uint32_t) var->nameLength, var->dpiVarHandle);
         } else {
             status = dpiStmt_bindByPos(baton->dpiStmtHandle, var->pos,
                     var->dpiVarHandle);
@@ -2416,7 +2419,7 @@ static bool njsConnection_scanExecuteBindUnit(njsBaton *baton,
                     &baton->typeNameLength))
                 return false;
             if (dpiConn_getObjectType(conn->handle, baton->typeName,
-                    baton->typeNameLength, &objTypeHandle) < 0)
+                    (uint32_t) baton->typeNameLength, &objTypeHandle) < 0)
                 return njsBaton_setErrorDPI(baton);
             if (!njsDbObject_getSubClass(baton, objTypeHandle, env, &temp,
                     &var->objectType)) {
@@ -2700,7 +2703,7 @@ static napi_value njsConnection_setTextAttribute(napi_env env,
         return NULL;
 
     // call the ODPI-C function to set the value
-    if ((*setter)(conn->handle, buffer, bufferLength) < 0) {
+    if ((*setter)(conn->handle, buffer, (uint32_t) bufferLength) < 0) {
         njsUtils_throwErrorDPI(env, conn->oracleDb);
         free(buffer);
         return NULL;
@@ -2760,12 +2763,12 @@ static bool njsConnection_subscribeAsync(njsBaton *baton)
             return njsBaton_setErrorDPI(baton);
         params.subscrNamespace = baton->subscription->subscrNamespace;
         params.name = baton->name;
-        params.nameLength = baton->nameLength;
+        params.nameLength = (uint32_t) baton->nameLength;
         params.protocol = DPI_SUBSCR_PROTO_CALLBACK;
         params.callback = (dpiSubscrCallback) njsSubscription_eventHandler;
         params.callbackContext = baton->subscription;
         params.ipAddress = baton->ipAddress;
-        params.ipAddressLength = baton->ipAddressLength;
+        params.ipAddressLength = (uint32_t) baton->ipAddressLength;
         params.portNumber = baton->portNumber;
         params.timeout = baton->timeout;
         params.qos = baton->qos;

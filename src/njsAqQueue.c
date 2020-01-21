@@ -171,7 +171,8 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
         if (!njsUtils_copyStringFromJS(env, payloadObj, &buffer,
                 &bufferLength))
             return false;
-        status = dpiMsgProps_setPayloadBytes(tempHandle, buffer, bufferLength);
+        status = dpiMsgProps_setPayloadBytes(tempHandle, buffer,
+                (uint32_t) bufferLength);
         free(buffer);
     } else if (isDbObject) {
         if (!njsDbObject_getInstance(baton->oracleDb, env, payloadObj, &obj))
@@ -180,7 +181,8 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
     } else {
         NJS_CHECK_NAPI(env, napi_get_buffer_info(env, payloadObj,
                 (void**) &buffer, &bufferLength))
-        status = dpiMsgProps_setPayloadBytes(tempHandle, buffer, bufferLength);
+        status = dpiMsgProps_setPayloadBytes(tempHandle, buffer,
+                (uint32_t) bufferLength);
     }
     if (status < 0)
         return njsBaton_setErrorDPI(baton);
@@ -195,7 +197,8 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
             &buffer, &bufferLength, &found))
         return false;
     if (found) {
-        status = dpiMsgProps_setCorrelation(tempHandle, buffer, bufferLength);
+        status = dpiMsgProps_setCorrelation(tempHandle, buffer,
+                (uint32_t) bufferLength);
         free(buffer);
         if (status < 0)
             return njsBaton_setErrorDPI(baton);
@@ -214,7 +217,8 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
             &buffer, &bufferLength, &found))
         return false;
     if (found) {
-        status = dpiMsgProps_setExceptionQ(tempHandle, buffer, bufferLength);
+        status = dpiMsgProps_setExceptionQ(tempHandle, buffer,
+                (uint32_t) bufferLength);
         free(buffer);
         if (status < 0)
             return njsBaton_setErrorDPI(baton);
