@@ -7314,12 +7314,15 @@ async function run() {
   let pool;
 
   try {
+    // Typically a pool is created only when the application starts
     pool = await oracledb.createPool({
       user          : "hr",
       password      : mypw  // mypw contains the hr schema password
       connectString : "localhost/XEPDB1"
     });
 
+    // Typically there would be multiple pool.getConnection() / connection.close() calls
+    // on a pool before the pool is closed.
     let connection;
     try {
       connection = await pool.getConnection();
@@ -7336,10 +7339,13 @@ async function run() {
         }
       }
     }
+
   } catch (err) {
     console.error(err.message);
   } finally {
-    await pool.close();
+
+    // At the end of the application, the pool can be closed
+    await pool.close(0);   // close pool immediately
   }
 }
 
