@@ -19,23 +19,44 @@ The node-oracledb test suite uses 'mocha', 'should' and 'async'.  See
 [LICENSE](https://github.com/oracle/node-oracledb/blob/master/LICENSE.md)
 for relevant licenses.
 
-## 1. Preparations
+##  <a name="contents"></a> Contents
+
+1. [Preparations](#preparations)
+    - 1.1 [Create a work directory](#workdir)
+    - 1.2 [Clone node-oracledb from GitHub](#clonerep)
+    - 1.3 [Build](#build)
+    - 1.4 [Configure Database credentials](#credentials)
+    - 1.5 [Set NODE_PATH](#nodepath)
+2. [Run tests](#runtests)
+    - 2.1 [Run the complete test suite](#runall)
+    - 2.2 [Run specified tests](#runspecified)
+3. [Enable tests that require extra configuration](#enablespecified)
+    - 3.1 [externalProxyAuth.js](#externalproxyauth)
+4. [Contribute New Tests](#addtests)
+5. [Troubleshoot](#troubleshoot)
+    - 5.1 [ORA-00054: resource busy](#ORA-00054)
+    - 5.2 [ORA-00018: maximum number of sessions exceeded](#ORA-00018)
+    - 5.3 [ORA-28865: SSL connection closed](#ORA-28865)
+    - 5.4 [ORA-03114: not connected to ORACLE](#ORA-03114)
+
+
+## <a name="preparations"></a> 1. Preparations
 
 See [INSTALL](https://oracle.github.io/node-oracledb/INSTALL.html)
 for installation details.
 
 Note: the
 [test suite](https://github.com/oracle/node-oracledb/tree/master/test)
-is on GitHub. NPM module has not contained the tests since node-oracledb 1.9.1.
+is on GitHub. NPM module had not contained the tests since node-oracledb 1.9.1.
 
-### 1.1 Create a working directory
+### <a name="workdir"></a> 1.1 Create a working directory
 
 ```
 mkdir <some-directory>
 cd <some-directory>
 ```
 
-### 1.2 Clone node-oracledb from GitHub
+### <a name="clonerep"></a> 1.2 Clone node-oracledb from GitHub
 
 Clone the project repository:
 
@@ -44,7 +65,7 @@ cd <some-directory>
 git clone https://github.com/oracle/node-oracledb.git
 ```
 
-### 1.3 Build
+### <a name="build"></a> 1.3 Build
 
 ```
 cd <some-directory>/node-oracledb
@@ -60,7 +81,7 @@ The test suite uses [mocha](https://www.npmjs.com/package/mocha),
 [async](https://www.npmjs.com/package/async) and
 [should](https://www.npmjs.com/package/should).
 
-### 1.4 Configure Database credentials
+### <a name="credentials"></a> 1.4 Configure Database credentials
 
 Set the following environment variables to provide credentials for the test suite.
 
@@ -80,25 +101,27 @@ Set the following environment variables to provide credentials for the test suit
 
 * `NODE_ORACLEDB_PROXY_SESSION_USER` provides the username of a schema user that can connect through the schema user which you used for testing using proxy authentication. Setting this environment variable will enable the tests that require proxy authentication.
 
-Note: the test suite requires a schema with privileges CREATE TABLE, CREATE SESSION,
-CREATE PROCEDURE, CREATE SEQUENCE, CREATE TRIGGER.
+* `NODE_ORACLEDB_QA`. This boolean environment variable serves as the toggle switch of certain tests. Some tests, such as `callTimeout.js`, use hard-coded variables as assertion condition. The test results may be inconsistent in different network situations.
 
-### 1.5 Set NODE_PATH
+Note: the test suite requires the schema to have these privileges: CREATE TABLE, CREATE SESSION,
+CREATE PROCEDURE, CREATE SEQUENCE, CREATE TRIGGER, and CREATE TYPE.
+
+### <a name="nodepath"></a> 1.5 Set NODE_PATH
 
 ```bash
 export NODE_PATH=<some-directory>/node-oracledb/lib
 ```
 
-## 2. Run tests
+## <a name="runtests"></a> 2. Run tests
 
-### 2.1 Run the complete test suite
+### <a name="runall"></a> 2.1 Run the complete test suite
 
 ```
 cd node-oracledb
 npm test
 ```
 
-### 2.2 Run specified test(s)
+### <a name="runspecified"></a> 2.2 Run specified tests
 
 ```
 cd node_oracledb
@@ -107,11 +130,11 @@ cd node_oracledb
 
 See [mochajs.org](http://mochajs.org/) for more information on running tests with mocha.
 
-## 3. Enable test(s) that requires extra configuration
+## <a name="enablespecified"></a> 3. Enable tests that requires extra configuration
 
 The following test(s) are automatically skipped if their required environment variable(s) are not properly set.
 
-### 3.1 externalProxyAuth.js
+### <a name="externalproxyauth"></a> 3.1 externalProxyAuth.js
 This test aims to test the combined usage of external authentication and proxy authentication. To run this test, you need to complete the following prerequisite setups.
 
 * Enable external authentication on the schema user which you used for testing. See [Documentation for External Authentication](https://oracle.github.io/node-oracledb/doc/api.html#extauth) for more information on external authentication. Then use the following command to enable external authentication in the test suite.
@@ -128,8 +151,7 @@ This test aims to test the combined usage of external authentication and proxy a
 
     ```
 
-
-## 4. Add Tests
+## <a name="addtests"></a> 4. Contribute New Tests
 
 See [CONTRIBUTING](https://github.com/oracle/node-oracledb/blob/master/CONTRIBUTING.md)
 for general information on contribution requirements.
@@ -141,14 +163,14 @@ shows the numbering of tests.
 In order to include your tests in the suite, add each new test file
 name to [`test/opts/mocha.opts`](https://github.com/oracle/node-oracledb/blob/master/test/opts/mocha.opts).
 
-## 5. Troubleshooting
+## <a name="troubleshoot"></a> 5. Troubleshoot
 
 You may encounter some troubles when running the test suite. These troubles
 might be caused by the concurrency issue of Mocha framework, network latencies,
 or database server issues. This section gives some issues that we ever saw
 and our solutions.
 
-### 5.1 ORA-00054: resource busy and acquire with NOWAIT specified or timeout expired
+### <a name="ORA-00054"></a> 5.1 ORA-00054: resource busy and acquire with NOWAIT specified or timeout expired
 
 This error occurs when Node.js programs try to change database objects which
 hold locks. The workaround would be:
@@ -158,7 +180,7 @@ test files.
 (2) Try not to use 'beforeEach' blocks for object operations to avoid
 the interference between cases.
 
-### 5.2 ORA-00018: maximum number of sessions exceeded
+### <a name="ORA-00018"></a> 5.2 ORA-00018: maximum number of sessions exceeded
 
 This error occurs when the test suite takes up more sessions than the
 configured limit. You can alter the session limit on the database server side.
@@ -175,7 +197,7 @@ do
 done
 ```
 
-### 5.3 ORA-28865: SSL connection closed
+### <a name="ORA-28865"></a> 5.3 ORA-28865: SSL connection closed
 
 You may encounter this error when the test suite sends more connection
 requests per second than the database is configured to handle.
@@ -199,3 +221,9 @@ dbaccess = (description=(RETRY_COUNT=20)(RETRY_DELAY=3)
           (security=(my_wallet_directory=<wallet-location>)(ssl_server_cert_dn=<ssl-server-cert-dn>))
        )
 ```
+
+### <a name="ORA-03114"></a> 5.4 ORA-03114: not connected to ORACLE
+
+We firstly encoutered this error with `test/callTimeout.js`. It uses some hard-coded variables as assertion condition, which may lead to assertion fail in slow network situation.
+
+The solution is commenting out this line `sqlnet.recv_timeout=<minutes>` from `sqlnet.ora` file.
