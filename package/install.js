@@ -81,25 +81,25 @@ function done(err) {
 
     if (process.platform === 'linux') {
       if (process.arch === 'x64') {
-        clientUrl = 'https://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html';
+        clientUrl = 'https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html';
       } else {
-        clientUrl = 'https://www.oracle.com/technetwork/topics/linuxsoft-082809.html';
+        clientUrl = 'https://www.oracle.com/database/technologies/instant-client/linux-x86-32-downloads.html';
       }
 
       log('** - Oracle Client libraries (' + arch + ') must be configured with ldconfig or LD_LIBRARY_PATH');
       log('** - To get libraries, install an Instant Client Basic or Basic Light package from');
       log('**   ' + clientUrl);
     } else if (process.platform === 'darwin') {
-      clientUrl = 'https://www.oracle.com/technetwork/topics/intel-macsoft-096467.html';
+      clientUrl = 'https://www.oracle.com/database/technologies/instant-client/macos-intel-x86-downloads.html';
       installUrl = 'https://oracle.github.io/node-oracledb/INSTALL.html#instosx';
 
       log('** - Oracle Instant Client Basic or Basic Light package libraries must be in ~/lib or /usr/local/lib');
       log('**   Download from ' + clientUrl);
     } else if (process.platform === 'win32') {
       if (process.arch === 'x64') {
-        clientUrl = 'https://www.oracle.com/technetwork/topics/winx64soft-089540.html';
+        clientUrl = 'https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html';
       } else {
-        clientUrl = 'https://www.oracle.com/technetwork/topics/winsoft-085727.html';
+        clientUrl = 'https://www.oracle.com/database/technologies/instant-client/microsoft-windows-32-downloads.html';
       }
 
       log('** - Oracle Client libraries (' + arch + ') must be in your PATH environment variable');
