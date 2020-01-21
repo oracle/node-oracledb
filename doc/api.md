@@ -9672,7 +9672,8 @@ WHERE myr BETWEEN 1 and 20
 ```
 
 Refer to [On Top-n and Pagination Queries][85] in Oracle Magazine for
-details.
+details. Also review the videos [SQL for pagination queries - memory and
+performance][166] and [SQL for pagination queries - advanced options][167].
 
 #### <a name="autoincrement"></a> 15.1.8 Auto-Increment Columns
 
@@ -14563,3 +14564,5 @@ can be asked at [AskTom][158].
 [163]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C672E92D-CE32-4759-9931-92D7960850F7
 [164]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=SHARD
 [165]: https://support.oracle.com/epmos/faces/DocumentDisplay?id=340512.1
+[166]: https://www.youtube.com/watch?v=rhOVF82KY7E
+[167]: https://www.youtube.com/watch?v=0TdqGlA4bxI
