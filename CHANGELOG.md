@@ -2,6 +2,14 @@
 
 ## node-oracledb v4.2.0 (DD MON YYYY)
 
+- Added [client initiated
+  connections](https://oracle.github.io/node-oracledb/doc/api.html#consubscribeoptclientinitiated)
+  support for Continuous Query Notification (CQN) and other subscription based
+  notifications.
+
+- Fixed various execution failures with Node.js 13.2 due to Node.js NULL pointer behavior change ([ODPI-C
+  change](https://github.com/oracle/odpi/commit/7693865bb6a98568546aa319cc0fdb9e208cf9d4)).
+
 ## node-oracledb v4.1.0 (26 Nov 2019)
 
 - Added end-to-end tracing attributes
