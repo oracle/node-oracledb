@@ -370,7 +370,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 14.2.2 [Embedded Connect Descriptor Strings](#embedtns)
         - 14.2.3 [Net Service Names for Connection Strings](#tnsnames)
         - 14.2.4 [JDBC and Oracle SQL Developer Connection Strings](#notjdbc)
-    - 14.3 [Connections and Number of Threads](#numberofthreads)
+    - 14.3 [Connections, Threads, and Parallelism](#numberofthreads)
     - 14.4 [Connection Pooling](#connpooling)
         - 14.4.1 [Connection Pool Sizing](#conpoolsizing)
         - 14.4.2 [Connection Pool Closing and Draining](#conpooldraining)
@@ -7206,7 +7206,7 @@ const connection = await oracledb.getConnection(
 );
 ```
 
-### <a name="numberofthreads"></a> 14.3 Connections and Number of Threads
+### <a name="numberofthreads"></a> 14.3 Connections, Threads, and Parallelism
 
 If you open more than four connections, such as via
 increasing [`poolMax`](#proppoolpoolmax), you should increase the
@@ -7246,21 +7246,26 @@ This prevents other connections from beginning work and stops Node.js
 from handling more user load.  Increasing the number of worker threads
 may improve throughput and prevent [deadlocks][22].
 
-As well as correctly setting the thread pool size, structure your code
-to avoid starting parallel operations on a connection.  For example,
-instead of using `async.parallel` or `async.each()` which call each
-of their items in parallel, use `async.series` or `async.eachSeries()`.
-When you use parallel calls on a connection, the queuing ends up being
-done in the C layer via a mutex.  However libuv is not aware that a
-connection can only do one thing at a time - it only knows when it has
-background threads available and so it sends off the work to be done.
-If your application runs operations in parallel on a connection, you
-could use more than one background thread (perhaps all of them) and
-each could be waiting on the one before it to finish its "execute". Of
-course other users or transactions cannot use the threads at
-that time either.  When you use methods like `async.series` or
-`async.eachSeries()`, the queuing is instead done in the main
-JavaScript thread.
+#### Parallelism on a Connection
+
+Structure your code to avoid parallel operations on a single connection.  For
+example, do not use `Promise.all`.  Instead consider, for example, using a basic
+`for` loop and `async` to iterate through each action.  Also, instead of using
+`async.parallel` or `async.each()` which call each of their items in parallel,
+use `async.series` or `async.eachSeries()`.  Code will not run faster when
+parallel calls are used with a single connection since each connection can only
+ever execute one statement at a time.  Statements will still be executed
+sequentially.
+
+When you use parallel calls on a single connection, queuing of each call is done
+in the C layer via a mutex.  However libuv is not aware that a connection can
+only do one thing at a time - it only knows when it has background threads
+available and so it sends off the work to be done.  If your application runs
+operations in parallel on a connection, you could use more than one background
+thread (perhaps all of them) and each could be waiting on the one before it to
+finish its "execute". Of course other users or transactions cannot use the
+threads at that time either.  When you use methods like `async.series` or
+`async.eachSeries()`, the queuing is instead done in the main JavaScript thread.
 
 ### <a name="connpooling"></a> 14.4 Connection Pooling
 
