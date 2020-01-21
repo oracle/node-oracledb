@@ -1,5 +1,7 @@
 # Change Log
 
+## node-oracledb v4.2.0 (DD MON YYYY)
+
 ## node-oracledb v4.1.0 (26 Nov 2019)
 
 - Added end-to-end tracing attributes
