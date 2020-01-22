@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -111,7 +111,7 @@ describe('41. dataTypeBlob.js', function() {
 
               inStream.pipe(lob);  // pipes the data to the BLOB
 
-              lob.on('close', function() {
+              lob.on('finish', function() {
                 connection.commit(function(err) {
                   should.not.exist(err);
                   callback();
@@ -143,7 +143,7 @@ describe('41. dataTypeBlob.js', function() {
 
               lob.pipe(outStream);
 
-              outStream.on('close', function() {
+              outStream.on('finish', function() {
                 fs.readFile( inFileName, function(err, originalData) {
                   should.not.exist(err);
 
@@ -154,7 +154,7 @@ describe('41. dataTypeBlob.js', function() {
                   });
                 });
 
-              }); // close event
+              }); // finish event
             }
           );
         },
@@ -181,7 +181,7 @@ describe('41. dataTypeBlob.js', function() {
                 blob = Buffer.concat([blob, chunk], blobLength);
               });
 
-              lob.on('close', function() {
+              lob.on('end', function() {
                 fs.readFile( inFileName, function(err, data) {
                   should.not.exist(err);
                   data.length.should.be.exactly(blob.length);
@@ -229,7 +229,7 @@ describe('41. dataTypeBlob.js', function() {
 
               inStream.pipe(lob);  // pipes the data to the BLOB
 
-              lob.on('close', function() {
+              lob.on('finish', function() {
                 connection.commit(function(err) {
                   should.not.exist(err);
                   callback();

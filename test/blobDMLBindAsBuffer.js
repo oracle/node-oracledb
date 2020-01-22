@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -550,51 +550,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
     }); // 82.1.18
 
-    it('82.1.19 Negative: RETURNING INTO with autocommit on', function(done) {
-      var id = insertID++;
-      var sql = "INSERT INTO nodb_dml_blob_1 (id, blob) VALUES (:i, EMPTY_BLOB()) RETURNING blob INTO :lobbv";
-      var inFileName = './test/tree.jpg';
-
-      connection.execute(
-        sql,
-        {
-          i: id,
-          lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
-        },
-        { autoCommit: true },
-        function(err, result) {
-          should.not.exist(err);
-          var inStream = fs.createReadStream(inFileName);
-          var lob = result.outBinds.lobbv[0];
-
-          lob.on('error', function(err) {
-            should.exist(err);
-            // ORA-22990: LOB locators cannot span transactions
-            // ORA-22920: row containing the LOB value is not locked
-            var isExpectedError;
-            if ( (err.message).startsWith('ORA-22990') || (err.message).startsWith('ORA-22920') ) {
-              isExpectedError = true;
-            } else {
-              isExpectedError = false;
-            }
-            isExpectedError.should.be.true();
-          });
-
-          inStream.on('error', function(err) {
-            should.not.exist(err, "inStream.on 'error' event");
-          });
-
-          lob.on('close', function(err) {
-            should.not.exist(err);
-            done();
-          });
-
-          inStream.pipe(lob); // copies the text to the CLOB
-        }
-      );
-    }); // 82.1.19
-
-    it('82.1.20 works with bind in maxSize smaller than buffer size', function(done) {
+    it('82.1.19 works with bind in maxSize smaller than buffer size', function(done) {
       var id = insertID++;
       var contentLength = 32768;
       var specialStr = "82.1.20";
@@ -620,7 +576,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, specialStr, cb);
         }
       ], done);
-    }); // 82.1.20
+    }); // 82.1.19
 
   }); // 82.1
 

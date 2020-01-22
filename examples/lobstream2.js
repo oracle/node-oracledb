@@ -80,9 +80,6 @@ async function run() {
       clob.on('end', () => {
         // console.log("clob.on 'end' event");
         console.log(myclob);
-      });
-      clob.on('close', () => {
-        // console.log("clob.on 'close' event");
         if (!errorHandled) {
           resolve();
         }

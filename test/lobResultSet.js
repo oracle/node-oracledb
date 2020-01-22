@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -121,7 +121,7 @@ describe('59. lobResultSet.js', function() {
 
           inStream.pipe(lob);
 
-          lob.on('close', function() {
+          lob.on('finish', function() {
             connection.commit( function(err) {
               should.not.exist(err);
               cb(); // insertion done
@@ -345,7 +345,7 @@ describe('59. lobResultSet.js', function() {
 
           inStream.pipe(lob);
 
-          lob.on('close', function() {
+          lob.on('finish', function() {
             connection.commit( function(err) {
               should.not.exist(err);
               cb(); // insertion done

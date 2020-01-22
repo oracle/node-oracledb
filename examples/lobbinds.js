@@ -172,10 +172,6 @@ async function query_plsql_inout(connection) {
     });
     clob2.on('end', () => {
       // console.log("clob2.on 'end' event");
-    });
-    clob2.on('close', () => {
-      // console.log("clob2.on 'close' event");
-
       console.log ("   Completed");
       if (!errorHandled) {
         resolve();

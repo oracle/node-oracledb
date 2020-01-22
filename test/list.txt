@@ -1682,8 +1682,7 @@ Overview of node-oracledb functional tests
         81.1.16 mixing named with positional binding
         81.1.17 bind with invalid CLOB
         81.1.18 RETURNING INTO with bind type STRING
-        81.1.19 Negative: RETURNING INTO with autocommit on
-        81.1.20 works with bind in maxSize smaller than string length
+        81.1.19 works with bind in maxSize smaller than string length
      81.2 CLOB, UPDATE
         81.2.1 update EMPTY_CLOB column
         81.2.2 update a cloumn with EMPTY_CLOB
@@ -1711,8 +1710,7 @@ Overview of node-oracledb functional tests
         82.1.16 mixing named with positional binding
         82.1.17 bind with invalid BLOB
         82.1.18 RETURNING INTO with bind type BUFFER
-        82.1.19 Negative: RETURNING INTO with autocommit on
-        82.1.20 works with bind in maxSize smaller than buffer size
+        82.1.19 works with bind in maxSize smaller than buffer size
     82.2 BLOB, UPDATE
         82.2.1 update EMPTY_BLOB column
         82.2.2 update a cloumn with EMPTY_BLOB

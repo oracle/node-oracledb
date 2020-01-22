@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -541,51 +541,7 @@ describe('81. clobDMLBindAsString.js', function() {
       ], done);
     }); // 81.1.18
 
-    it('81.1.19 Negative: RETURNING INTO with autocommit on', function(done) {
-      var id = insertID++;
-      var sql = "INSERT INTO nodb_dml_clob_1 (id, clob) VALUES (:i, EMPTY_CLOB()) RETURNING clob INTO :lobbv";
-      var inFileName = './test/clobexample.txt';
-
-      connection.execute(
-        sql,
-        {
-          i: id,
-          lobbv: { type: oracledb.CLOB, dir: oracledb.BIND_OUT }
-        },
-        { autoCommit: true },
-        function(err, result) {
-          should.not.exist(err);
-          var inStream = fs.createReadStream(inFileName);
-          var lob = result.outBinds.lobbv[0];
-
-          lob.on('error', function(err) {
-            should.exist(err);
-            // ORA-22990: LOB locators cannot span transactions
-            // ORA-22920: row containing the LOB value is not locked
-            var isExpectedError;
-            if ( (err.message).startsWith('ORA-22990') || (err.message).startsWith('ORA-22920') ) {
-              isExpectedError = true;
-            } else {
-              isExpectedError = false;
-            }
-            isExpectedError.should.be.true();
-          });
-
-          inStream.on('error', function(err) {
-            should.not.exist(err, "inStream.on 'error' event");
-          });
-
-          lob.on('close', function(err) {
-            should.not.exist(err);
-            done();
-          });
-
-          inStream.pipe(lob); // copies the text to the CLOB
-        }
-      );
-    }); // 81.1.19
-
-    it('81.1.20 works with bind in maxSize smaller than string length', function(done) {
+    it('81.1.19 works with bind in maxSize smaller than string length', function(done) {
       var id = insertID++;
       var contentLength = 32768;
       var specialStr = "81.1.20";
@@ -610,7 +566,7 @@ describe('81. clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, specialStr, cb);
         }
       ], done);
-    }); // 81.1.20
+    }); // 81.1.19
 
   }); // 81.1
 

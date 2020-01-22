@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -65,8 +65,8 @@ async function run() {
 
       let errorHandled = false;
 
-      lob.on('close', () => {
-        // console.log("lob.on 'close' event");
+      lob.on('finish', () => {
+        // console.log("lob.on 'finish' event");
         connection.commit((err) => {
           if (err) {
             if (!errorHandled) {

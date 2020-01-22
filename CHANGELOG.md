@@ -31,6 +31,12 @@
 
 - Fixed some static code analysis warnings.
 
+- Updated Lob streaming documentation and examples. Applications should use the
+  `end` event (for readable streams) and `finish` event (for writeable streams)
+  instead of the `close` event.  The node-oracledb's `lob.close()` method is now
+  deprecated in favor of the more functional Node.js 8 Stream `destroy()`
+  method.
+
 ## node-oracledb v4.1.0 (26 Nov 2019)
 
 - Added end-to-end tracing attributes

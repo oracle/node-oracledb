@@ -259,7 +259,8 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 7.1.4 [`type`](#proplobtype)
     - 7.2 [Lob Methods](#lobmethods)
         - 7.2.1 [`close()`](#lobclose)
-        - 7.2.2 [`getData()`](#lobgetdata)
+        - 7.2.2 [`destroy()`](#lobdestroy)
+        - 7.2.3 [`getData()`](#lobgetdata)
 8. [Pool Class](#poolclass)
     - 8.1 [Pool Properties](#poolproperties)
         - 8.1.1 [`connectionsInUse`](#proppoolconnectionsinuse)
@@ -486,6 +487,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 33.4 [Migrating from node-oracledb 3.0 to node-oracledb 3.1](#migratev30v31)
     - 33.5 [Migrating from node-oracledb 3.1 to node-oracledb 4.0](#migratev31v40)
     - 33.6 [Migrating from node-oracledb 4.0 to node-oracledb 4.1](#migratev40v41)
+    - 33.7 [Migrating from node-oracledb 4.1 to node-oracledb 4.2](#migratev41v42)
 34. [Useful Resources for Node-oracledb](#otherresources)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
@@ -2913,7 +2915,7 @@ is initially empty.  Data can be streamed to the LOB, which can then
 be passed into PL/SQL blocks, or inserted into the database.
 
 When no longer required, Lobs created with `createLob()` should be
-closed with [`lob.close()`](#lobclose) because Oracle Database
+closed with [`lob.destroy()`](#lobdestroy) because Oracle Database
 resources are held open if temporary LOBs are not closed.
 
 Open temporary LOB usage can be monitored using the view
@@ -4662,7 +4664,7 @@ Number pieceSize
 ```
 
 The number of bytes (for BLOBs) or characters (for CLOBs) to read for
-each Stream 'data' event of a queried LOB.
+each Stream `data` event of a queried LOB.
 
 The default value is [`chunkSize`](#proplobchunksize).
 
@@ -4691,6 +4693,9 @@ a LOB is returned by a query.
 
 #### <a name="lobclose"></a> 7.2.1 `lob.close()`
 
+**Note: this method is deprecated and [`lob.destroy()`](#lobdestroy) should be
+used instead.**
+
 ##### Prototype
 
 Callback:
@@ -4706,19 +4711,18 @@ promise = close();
 
 Explicitly closes a Lob.
 
-Lobs created with [`createLob()`](#connectioncreatelob) should be
-explicitly closed with [`lob.close()`](#lobclose) when no longer
-needed.  This frees resources in node-oracledb and in Oracle Database.
+Lobs created with [`createLob()`](#connectioncreatelob) should be explicitly
+closed when no longer needed.  This frees resources in node-oracledb and in
+Oracle Database.
 
-Persistent or temporary Lobs returned from the database may also be
-closed with `lob.close()` as long as streaming is not currently
-happening.  Note these Lobs are automatically closed when streamed to
-completion or used as the source for an IN OUT bind.  If you try to
-close a Lob being used for streaming you will get the error *NJS-023:
+Persistent or temporary Lobs returned from the database may also be closed as
+long as streaming is not currently happening.  Note these Lobs are automatically
+closed when streamed to completion or used as the source for an IN OUT bind.  If
+you try to close a Lob being used for streaming you will get the error *NJS-023:
 concurrent operations on a Lob are not allowed*.
 
-The `lob.close()` method emits the [Node.js Stream][16] 'close' event
-unless the Lob has already been explicitly or automatically closed.
+The `lob.close()` method emits the [Node.js Stream][16] `close` event unless the
+Lob has already been explicitly or automatically closed.
 
 The connection must be open when calling `lob.close()` on a temporary
 LOB, such as those created by `createLob()`.
@@ -4740,7 +4744,43 @@ See [Closing Lobs](#closinglobs) for more discussion.
     *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 
-#### <a name="lobgetdata"></a> 7.2.2 `lob.getData()`
+#### <a name="lobdestroy"></a> 7.2.2 `lob.destroy()`
+
+##### Prototype
+
+```
+destroy([Error error]);
+```
+
+##### Description
+
+This synchronous method explicitly destroys a Lob.
+
+Lobs created with [`createLob()`](#connectioncreatelob) should be
+explicitly closed with `lob.destroy()` when no longer
+needed.  This frees resources in node-oracledb and in Oracle Database.
+
+Persistent or temporary Lobs returned from the database may also be
+closed with `lob.destroy()`.  Note these Lobs are automatically closed when streamed to
+completion or used as the source for an IN OUT bind.
+
+The `lob.destroy()` method emits the [Node.js Stream][16] `close` event.
+
+Once a Lob is destroyed, it cannot be used.
+
+See [Closing Lobs](#closinglobs) for more discussion.
+
+##### Parameters
+
+-   ```
+    Error error
+    ```
+
+    Parameter | Description
+    ----------------------------|-------------
+    *Error error*               | This optional parameter is used for the error emitted in an `error` event.
+
+#### <a name="lobgetdata"></a> 7.2.3 `lob.getData()`
 
 ##### Prototype
 
@@ -10509,12 +10549,12 @@ get data.
 The `read(size)` unit is in characters for CLOBs and in bytes for
 BLOBs.
 
-When reading a LOB from the database, resources are automatically
-released at completion of the readable stream or if there is a LOB
-error.  The `lob.close()` method can also be used to close persistent
-LOBs that have not been streamed to completion.
+When reading a LOB from the database, resources are automatically released at
+completion of the readable stream or if there is a LOB error.  The
+[`lob.destroy()`](#lobdestroy) method can also be used to close persistent LOBs
+that have not been streamed to completion.
 
-A Readable Lob object starts out in paused mode.  If a 'data' event
+A Readable Lob object starts out in paused mode.  If a `data` event
 handler is added, or the Lob is piped to a Writeable stream, then the
 Lob switches to flowing mode.
 
@@ -10525,7 +10565,7 @@ emitting `data` events.
 
 Similarly, a Readable Lob operating in the paused mode can be switched
 to flowing mode by calling `resume()`.  It will then start emitting
-'data' events again.
+`data` events again.
 
 #### Writeable Lobs
 
@@ -10538,11 +10578,9 @@ resources.  If the Lob is being piped into, then the `write()` and
 Writeable Lobs also have events, see the [Node.js Stream][16]
 documentation.
 
-At the conclusion of streaming into a Writeable Lob, the `close` event
-will occur.  It is recommended to put logic such as committing and
-releasing connections in this event (or after it occurs).  See
-[lobinsert2.js][51].  It is also recommended that persistent LOBs not
-use the `finish` event handler for cleanup.
+At the conclusion of streaming into a Writeable Lob, the `finish` event will
+occur.  It is recommended to put logic such as committing and releasing
+connections in this event (or after it occurs).  See [lobinsert2.js][51].
 
 ### <a name="lobinsertdiscussion"></a> 17.4 Using RETURNING INTO to Insert into LOBs
 
@@ -10566,7 +10604,7 @@ if (result.rowsAffected != 1 || result.outBinds.lobbv.length != 1) {
 
 const doInsert = new Promise((resolve, reject) => {
   const lob = result.outBinds.lobbv[0];
-  lob.on('close', async () => {
+  lob.on('finish', async () => {
     await connection.commit();  // all data is loaded so we can commit it
   });
   lob.on('error', async (err) => {
@@ -10587,7 +10625,7 @@ await doInsert;
 
 This example streams from a file into the table.  When the data has
 been completely streamed, the Lob is automatically closed and the
-'close' event triggered.  At this point the data can be committed.
+`close` event triggered.  At this point the data can be committed.
 
 See [lobinsert2.js][51] for the full example.
 
@@ -10610,7 +10648,7 @@ the stream, persistent LOBs are automatically closed.
 Lobs returned from the database that are not streamed can be passed
 back to the database as IN binds for PL/SQL blocks, for `INSERT`, or
 for `UPDATE` statements.  The Lobs should then be closed with
-[`lob.close()`](#lobclose).  If they are passed as IN OUT binds, they
+[`lob.destroy()`](#lobdestroy).  If they are passed as IN OUT binds, they
 will be automatically closed and the execution
 [`outBinds`](#execoutbinds) property will contain the updated Lob.
 
@@ -10674,7 +10712,7 @@ if (lob.type === oracledb.CLOB) {
 }
 
 lob.on('error', function(err) { cb(err); });
-lob.on('close', function() { cb(null); });   // all done.  The Lob is automatically closed.
+lob.on('end', function() { cb(null); });   // all done.  The Lob is automatically closed.
 
 const outStream = fs.createWriteStream('myoutput.txt');
 outStream.on('error', function(err) { cb(err); });
@@ -10699,7 +10737,7 @@ let str = "";
 
 lob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
 lob.on('error', function(err) { cb(err); });
-lob.on('close', function() { cb(null); });   // all done.  The Lob is automatically closed.
+lob.on('end', function() { cb(null); });   // all done.  The Lob is automatically closed.
 lob.on('data', function(chunk) {
   str += chunk; // or use Buffer.concat() for BLOBS
 });
@@ -10710,7 +10748,7 @@ lob.on('end', function() {
 ```
 
 Node-oracledb's [`lob.pieceSize`](#proplobpiecesize) can be used to
-control the number of bytes retrieved for each readable 'data' event.
+control the number of bytes retrieved for each readable `data` event.
 This sets the number of bytes (for BLOBs) or characters (for CLOBs).
 The default is [`lob.chunkSize`](#proplobchunksize).  The
 recommendation is for it to be a multiple of `chunkSize`.
@@ -10729,7 +10767,7 @@ statement IN binds, however the `RETURNING INTO` method shown above
 will be more efficient.
 
 Lobs from `createLob()` will use space in the temporary tablespace
-until [`lob.close()`](#lobclose) is called.  Database Administrators
+until [`lob.destroy()`](#lobdestroy) is called.  Database Administrators
 can track this usage by querying [`V$TEMPORARY_LOBS`][13].
 
 #### Passing a Lob Into PL/SQL
@@ -10774,10 +10812,10 @@ const result = await connection.execute(
 ```
 
 When the temporary LOB is no longer needed, it must be closed with
-[`lob.close()`](#lobclose):
+[`lob.destroy()`](#lobdestroy):
 
 ```javascript
-await templob.close();
+await templob.destroy();
 ```
 
 ### <a name="closinglobs"></a> 17.7 Closing Lobs
@@ -10787,24 +10825,15 @@ tablespace storage used by a temporary LOB is released.  Once a Lob is
 closed, it can no longer be bound or used for streaming.
 
 Lobs created with [`createLob()`](#connectioncreatelob) should be
-explicitly closed with [`lob.close()`](#lobclose).
+explicitly closed with [`lob.destroy()`](#lobdestroy).
 
 Persistent or temporary Lobs returned from the database should be
-closed with `lob.close()` unless they have been automatically closed.
+closed with `lob.destroy()` unless they have been automatically closed.
 Automatic closing of returned Lobs occurs when:
 
 - streaming has completed
 - a stream error occurs
 - the Lob was used as the source for an IN OUT bind
-
-If you try to close a Lob being used for streaming you will get the
-error *NJS-023: concurrent operations on a Lob are not allowed*.
-
-The connection must be open when calling `lob.close()` on a temporary
-LOB.
-
-The `lob.close()` method emits the [Node.js Stream][16] 'close' event
-unless the Lob has already been closed explicitly or automatically.
 
 ## <a name="jsondatatype"></a> 18. Oracle Database JSON Data type
 
@@ -14448,6 +14477,18 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
 
 - Note that the default for [`oracledb.events`](#propdbevents) has reverted to
   *false*.  If you relied on it being *true*, then explicitly set it.
+
+### <a name="migratev41v42"></a> 33.7 Migrating from node-oracledb 4.1 to node-oracledb 4.2
+
+- Review the [CHANGELOG][83] and take advantage of new features.
+
+- Review the updated Lob stream documentation.  The best practice is to use the
+  `end` event (for readable streams) and `finish` event (for writeable streams)
+  instead of depending on the `close` event.  Applications should migrate to the
+  Node.js 8 [`destroy()`](#lobdestroy) method instead of the deprecated
+  node-oracledb [`close()`](#lobclose) method.  Note that unlike `close()`, the
+  `destroy()` method does not take a callback parameter.  If `destroy()` is
+  given an error argument, an `error` event is emitted with this error.
 
 ## <a name="otherresources"></a> 34. Useful Resources for Node-oracledb
 

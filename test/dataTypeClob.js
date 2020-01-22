@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -110,7 +110,7 @@ describe('40. dataTypeClob.js', function() {
                 should.not.exist(err, "inStream.on 'error' event");
               });
 
-              lob.on('close', function() {
+              lob.on('finish', function() {
                 // now commit updates
                 connection.commit( function(err) {
                   should.not.exist(err);
@@ -144,7 +144,7 @@ describe('40. dataTypeClob.js', function() {
 
               lob.pipe(outStream);
 
-              outStream.on('close', function() {
+              outStream.on('finish', function() {
 
                 fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
                   should.not.exist(err);
@@ -177,7 +177,7 @@ describe('40. dataTypeClob.js', function() {
                 clob += chunk;
               });
 
-              lob.on('close', function() {
+              lob.on('end', function() {
                 fs.readFile( inFileName, { encoding: 'utf8' }, function(err, data) {
                   should.not.exist(err);
                   data.length.should.be.exactly(clob.length);
@@ -210,7 +210,7 @@ describe('40. dataTypeClob.js', function() {
                 clob = clob + chunk;
               });
 
-              lob.on('close', function() {
+              lob.on('end', function() {
                 callback();
               });
 
@@ -256,7 +256,7 @@ describe('40. dataTypeClob.js', function() {
                 should.not.exist(err, "inStream.on 'error' event");
               });
 
-              lob.on('close', function() {
+              lob.on('finish', function() {
                 // now commit updates
                 connection.commit( function(err) {
                   should.not.exist(err);

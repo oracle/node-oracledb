@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -183,7 +183,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
           should.not.exist(err, "inStream.on 'error' event");
         });
 
-        lob.on('close', function() {
+        lob.on('finish', function() {
           connection.commit( function(err) {
             should.not.exist(err);
             return callback();

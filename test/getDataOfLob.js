@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -113,7 +113,7 @@ describe('196. getDataOfLob.js', () => {
       let insertionComplete = new Promise((resolve, reject) => {
         inStream.on('error', reject);
         clob.on('error', reject);
-        clob.on('close', () => resolve(conn.commit()));
+        clob.on('finish', () => resolve(conn.commit()));
       });
 
       await insertionComplete;
@@ -173,7 +173,7 @@ describe('196. getDataOfLob.js', () => {
       let insertionComplete = new Promise((resolve, reject) => {
         inStream.on('error', reject);
         blob.on('error', reject);
-        blob.on('close', () => resolve(conn.commit()));
+        blob.on('finish', () => resolve(conn.commit()));
       });
 
       await insertionComplete;

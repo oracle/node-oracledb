@@ -57,9 +57,6 @@ async function doStream(lob, outFileName) {
     });
     lob.on('end', () => {
       // console.log("lob.on 'end' event");
-    });
-    lob.on('close', () => {
-      // console.log("lob.on 'close' event");
       if (!errorHandled) {
         resolve();
       }
