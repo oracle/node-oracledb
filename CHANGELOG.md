@@ -12,6 +12,13 @@
   to `execute()`.  It contains the ROWID of the last row affected by an INSERT,
   UPDATE, DELETE or MERGE statement.
 
+- Changed the Error object
+  [`offset`](https://oracle.github.io/node-oracledb/doc/api.html#properroffset)
+  to be 32-bit, allowing the
+  [`batchErrors`](https://oracle.github.io/node-oracledb/doc/api.html#executemanyoptbatcherrors)
+  mode of `executeMany()` to show row `offset` values up to (2^32)-1 ([ODPI-C
+  change](https://github.com/oracle/odpi/commit/294d5966cd513d0c29fdeec3bbbdfad376f81d4f)).
+
 - Fixed various execution failures with Node.js 13.2 due to Node.js NULL pointer behavior change ([ODPI-C
   change](https://github.com/oracle/odpi/commit/7693865bb6a98568546aa319cc0fdb9e208cf9d4)).
 

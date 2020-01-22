@@ -1,6 +1,6 @@
 # node-oracledb 4.2 Documentation for the Oracle Database Node.js Add-on
 
-*Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -722,11 +722,12 @@ contexts.  This value is undefined for non-Oracle errors and for
 messages prefixed with NJS or DPI.
 
 When [`batchErrors`](#executemanyoptbatcherrors) mode in
-[`executeMany()`](#executemany) returns an array of Error objects in
-the callback result parameter, each `offset` property is a 0-based
-index corresponding to the `executeMany()` [binds
-parameter](#executemanybinds) array, indicating which record could not
-be processed. See [Handling Data Errors](#handlingbatcherrors).
+[`executeMany()`](#executemany) returns an array of Error objects in the
+callback result parameter, each `offset` property is a 0-based index
+corresponding to the `executeMany()` [binds parameter](#executemanybinds) array,
+indicating which record could not be processed. See [Handling Data
+Errors](#handlingbatcherrors).  In node-oracledb 4.2, the maximum `offset` value
+was changed from (2^16)-1 to (2^32)-1.
 
 ## <a name="oracledbclass"></a> 3. Oracledb Class
 
@@ -3420,20 +3421,24 @@ while still letting valid data be processed.  It can only be set
 When *false*, the `executeMany()` call will stop when the first error
 occurs.  The callback [error object](#errorobj) will be set.
 
-When `batchErrors` is *true*, processing will continue even if there
-are data errors.  The `executeMany()` callback error parameter is not
-set.  Instead, an array containing an error per input data record will
-be returned in the callback `result` parameter.  All valid data
-records will be processed and a transaction will be started but not
-committed, even if `autoCommit` is *true*.  The application can
-examine the errors, take action, and explicitly commit or rollback as
-desired.
+When `batchErrors` is *true*, processing will continue even if there are data
+errors.  The `executeMany()` callback error parameter is not set.  Instead, a
+property (also called `batchErrors`) will be returned in the callback `result`
+parameter.  The property holds an array of [Error objects](#errorobj).  Each Error
+`offset` indicates the row number of a data record that could not be
+processed.  All other valid data records will be processed and a transaction
+will be started but not committed, even if `autoCommit` is *true*.  The
+application can examine the errors, take action, and explicitly commit or
+rollback as desired.  In node-oracledb 4.2, the maximum `offset` value
+was changed from (2^16)-1 to (2^32)-1.
 
 Note that some classes of error will always return via the
 `executeMany()` callback error object, not as batch errors.  No
 transaction is created in this case.
 
 The default value is *false*.
+
+See [Handling Data Errors with `executeMany()`](#handlingbatcherrors) for examples.
 
 ###### <a name="executemanyoptbinddefs"></a> 4.2.7.3.3 `bindDefs`
 
