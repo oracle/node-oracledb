@@ -945,6 +945,7 @@ describe("72. lobBind2.js", function() {
 
         lob.on("error", function(err) {
           should.not.exist(err, "lob.on 'error' event.");
+          reject(err);
         });
 
         lob.on("end", function() {
@@ -982,13 +983,14 @@ describe("72. lobBind2.js", function() {
 
         lob.on("error", function(err) {
           should.not.exist(err, "lob.on 'error' event.");
+          reject(err);
         });
 
         lob.on("finish", async function() {
           const sql = `insert into nodb_tab_nclob72 (id, content)
               values (:id, :bindvar)`;
           const result = await connection.execute(sql,
-              { id: seq, bindvar: lob});
+            { id: seq, bindvar: lob});
           should.strictEqual(result.rowsAffected, 1);
           await lob.close();
         }); // finish event
@@ -1035,6 +1037,7 @@ describe("72. lobBind2.js", function() {
 
         lob.on("error", function(err) {
           should.not.exist(err, "lob.on 'error' event.");
+          reject(err);
         });
 
         lob.on("finish", async function() {
@@ -1108,13 +1111,14 @@ describe("72. lobBind2.js", function() {
 
         lob.on("error", function(err) {
           should.not.exist(err, "lob.on 'error' event.");
+          reject(err);
         });
 
         lob.on("finish", async function() {
           const sql = `update nodb_tab_nclob72 set content = :bindvar
               where id = :id`;
           const result = await connection.execute(sql,
-              { id: seq, bindvar: lob});
+            { id: seq, bindvar: lob});
           should.strictEqual(result.rowsAffected, 1);
           await lob.close();
           await connection.commit();
@@ -1159,6 +1163,7 @@ describe("72. lobBind2.js", function() {
 
         lob.on("error", function(err) {
           should.not.exist(err, "lob.on 'error' event.");
+          reject(err);
         });
 
         lob.on("finish", async function() {
@@ -1166,7 +1171,7 @@ describe("72. lobBind2.js", function() {
           const binds = {
             id: seq,
             io: { type: oracledb.DB_TYPE_NCLOB,
-                  dir: oracledb.BIND_INOUT, val: lob }
+              dir: oracledb.BIND_INOUT, val: lob }
           };
           const options = { autoCommit: true };
           const result = await connection.execute(sql, binds, options);
@@ -1183,6 +1188,7 @@ describe("72. lobBind2.js", function() {
 
             lobout.on("error", function(err) {
               should.not.exist(err, "lob.on 'error' event.");
+              reject(err);
             });
 
             lobout.on("end", async function() {

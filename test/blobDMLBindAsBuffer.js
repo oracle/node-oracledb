@@ -32,7 +32,6 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var random   = require('./random.js');
-var fs       = require('fs');
 var assist   = require('./dataTypeAssist.js');
 
 describe('82.blobDMLBindAsBuffer.js', function() {

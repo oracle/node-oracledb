@@ -30,7 +30,6 @@
 var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
-var fs       = require('fs');
 var dbConfig = require('./dbconfig.js');
 var random   = require('./random.js');
 

@@ -35,7 +35,7 @@ describe('226. dbType01.js', function() {
   const default_stmtCacheSize = oracledb.stmtCacheSize;
 
   before(async () => {
-	oracledb.stmtCacheSize = 0;
+    oracledb.stmtCacheSize = 0;
     try {
       conn = await oracledb.getConnection(dbconfig);
     } catch (err) {
@@ -147,7 +147,7 @@ describe('226. dbType01.js', function() {
 
   it('226.9 DB_TYPE_NUMBER', async () => {
     try {
-	  const sql = `SELECT DUMP(:1) FROM dual`;
+      const sql = `SELECT DUMP(:1) FROM dual`;
       const result = await conn.execute(sql,
         [{ val: numInVal, type: oracledb.DB_TYPE_NUMBER }]);
       (result.rows[0][0]).should.startWith('Typ=2 Len=2');

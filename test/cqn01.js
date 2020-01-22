@@ -138,7 +138,7 @@ describe('224. cqn01.js', function() {
         eventEmitter.on("received", function() {
           console.log("Received message!");
           clearTimeout(timeout);
-          resolve()
+          resolve();
         });
       });
 
@@ -206,7 +206,7 @@ describe('224. cqn01.js', function() {
         eventEmitter.on("received", function() {
           console.log("Received message!");
           clearTimeout(timeout);
-          resolve()
+          resolve();
         });
       });
 
