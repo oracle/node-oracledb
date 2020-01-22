@@ -16,7 +16,7 @@
  * limitations under the License.
  *
  * NAME
- *   225. cqn01.js
+ *   225. cqn02.js
  *
  * DESCRIPTION
  *   Negative test of CQN client initiated connections.

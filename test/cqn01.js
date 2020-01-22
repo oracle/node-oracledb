@@ -26,6 +26,7 @@
 
 const oracledb  = require('oracledb');
 const should    = require('should');
+const events    = require('events');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -85,15 +86,16 @@ describe('224. cqn01.js', function() {
     }
   }); // after()
 
-  it('224.1', async () => {
+  it('224.1 client initiated CQN', async () => {
     try {
-      const TABLE = 'nodb_tab_cqn_01';
+      const TABLE = 'nodb_tab_cqn_001';
       let sql =
           `CREATE TABLE ${TABLE} (
             k NUMBER
           )`;
       let plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
+      const eventEmitter = new events.EventEmitter();
 
       const myCallback = function(message) {
         // should.strictEqual(message.type, oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE);
@@ -103,6 +105,7 @@ describe('224. cqn01.js', function() {
         // should.strictEqual(table.name, tableName);
         // should.strictEqual(table.operation, oracledb.CQN_OPCODE_INSERT);
         console.log(message);
+        eventEmitter.emit("received");
       };
 
       const options = {
@@ -114,14 +117,32 @@ describe('224. cqn01.js', function() {
         clientInitiated: true
       };
 
-      await conn.subscribe('nodb_sub_01', options);
+      console.log("Message 1:");
+      await conn.subscribe('nodb_sub_001', options);
 
       sql = `INSERT INTO ${TABLE} VALUES (101)`;
       await conn.execute(sql);
 
+      sql = `INSERT INTO ${TABLE} VALUES (99)`;
+      await conn.execute(sql);
+
+      sql = `INSERT INTO ${TABLE} VALUES (102)`;
+      await conn.execute(sql);
+
       await conn.commit();
 
-      await conn.unsubscribe('nodb_sub_01');
+      await new Promise(function(resolve, reject) {
+        const timeout = setTimeout(function() {
+          reject(new Error("Timed out!"));
+        }, 25000);
+        eventEmitter.on("received", function() {
+          console.log("Received message!");
+          clearTimeout(timeout);
+          resolve()
+        });
+      });
+
+      await conn.unsubscribe('nodb_sub_001');
 
       sql = `DROP TABLE ${TABLE} PURGE`;
       await conn.execute(sql);
@@ -130,4 +151,71 @@ describe('224. cqn01.js', function() {
     }
 
   }); // 224.1
+
+  it('224.2 previous CQN', async () => {
+    try {
+      const TABLE = 'nodb_tab_cqn_002';
+      let sql =
+          `CREATE TABLE ${TABLE} (
+            k NUMBER
+          )`;
+      let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+      await conn.execute(plsql);
+
+      const eventEmitter = new events.EventEmitter();
+
+      const myCallback = function(message) {
+        // should.strictEqual(message.type, oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE);
+        // should.strictEqual(message.registered, true);
+        // const table = message.queries[0].tables[0];
+        // const tableName = dbconfig.user.toUpperCase() + '.' + TABLE.toUpperCase();
+        // should.strictEqual(table.name, tableName);
+        // should.strictEqual(table.operation, oracledb.CQN_OPCODE_INSERT);
+        console.log(message);
+        eventEmitter.emit("received");
+      };
+
+      const options = {
+        callback : myCallback,
+        sql: `SELECT * FROM ${TABLE} WHERE k > :bv`,
+        binds: { bv : 100 },
+        timeout : 20,
+        qos : oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
+      };
+
+      console.log("Message 2:");
+      await conn.subscribe('nodb_sub_002', options);
+
+      await testsUtil.sleep();
+
+      sql = `INSERT INTO ${TABLE} VALUES (101)`;
+      await conn.execute(sql);
+
+      sql = `INSERT INTO ${TABLE} VALUES (99)`;
+      await conn.execute(sql);
+
+      sql = `INSERT INTO ${TABLE} VALUES (102)`;
+      await conn.execute(sql);
+
+      await conn.commit();
+
+      await new Promise(function(resolve, reject) {
+        const timeout = setTimeout(function() {
+          reject(new Error("Timed out!"));
+        }, 25000);
+        eventEmitter.on("received", function() {
+          console.log("Received message!");
+          clearTimeout(timeout);
+          resolve()
+        });
+      });
+
+      await conn.unsubscribe('nodb_sub_002');
+
+      sql = `DROP TABLE ${TABLE} PURGE`;
+      await conn.execute(sql);
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 224.2
 });
