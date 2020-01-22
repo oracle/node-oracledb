@@ -250,6 +250,7 @@ test/examineOwnedProperties.js
 test/connectionClass.js
 test/callTimeout.js
 test/accessPropertiesOnClosedObjects.js
+test/booleanBind.js
 
 test/dbType01.js
 test/dbType02.js

@@ -4639,6 +4639,17 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     223.1 access properties of closed Connection object
     223.2 access properties of closed Lob object
 
+224. booleanBind.js
+    224.1 IN bind boolean value
+    224.2 IN bind value "false"
+    224.3 IN bind value "null"
+    224.4 Negative - IN bind value type mismatch
+    224.5 OUT bind value "false"
+    224.6 OUT bind value "true"
+    224.7 IN bind array with boolean data
+    224.8 OUT bind array with boolean data
+    224.9 INOUT bind record with boolean data
+
 226. dbType01.js
     226.1 DB_TYPE_VARCHAR
     226.2 DB_TYPE_CHAR
