@@ -291,13 +291,13 @@ either directly from yum.oracle.com:
 
 ```
 sudo yum -y install oracle-release-el7
-sudo yum -y install oracle-instantclient19.3-basic
+sudo yum -y install oracle-instantclient19.5-basic
 ```
 
 Or from a downloaded file:
 
 ```
-sudo yum install oracle-instantclient19.3-basic-19.3.0.0.0-1.x86_64.rpm
+sudo yum install oracle-instantclient19.5-basic-19.5.0.0.0-1.x86_64.rpm
 ```
 
 This will install the required `libaio` package, if it is not already
@@ -440,9 +440,9 @@ and [unzip it][13] into a directory accessible to your application,
 for example:
 
 ```
-unzip instantclient-basic-linux.x64-19.3.0.0.0dbru.zip
+unzip instantclient-basic-linux.x64-19.5.0.0.0dbru.zip
 mkdir -p /opt/oracle
-mv instantclient_19_3 /opt/oracle
+mv instantclient_19_5 /opt/oracle
 ```
 
 You will need the operating system `libaio` package installed.  On
@@ -453,7 +453,7 @@ that will be impacted, then permanently add Instant Client to the
 run-time link path.  For example, with sudo or as the root user:
 
 ```
-sudo sh -c "echo /opt/oracle/instantclient_19_3 > /etc/ld.so.conf.d/oracle-instantclient.conf"
+sudo sh -c "echo /opt/oracle/instantclient_19_5 > /etc/ld.so.conf.d/oracle-instantclient.conf"
 sudo ldconfig
 ```
 
@@ -461,7 +461,7 @@ Alternatively, every shell running Node.js will need to have the link
 path set:
 
 ```
-export LD_LIBRARY_PATH=/opt/oracle/instantclient_19_3:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_19_5:$LD_LIBRARY_PATH
 ```
 
 #### 3.3.5 Optionally create the default Oracle Client configuration directory
@@ -665,7 +665,7 @@ and unzip it, for example:
 
 ```
 mkdir -p /opt/oracle
-unzip instantclient-basic-macos.x64-19.3.0.0.0dbru.zip
+unzip instantclient-basic-macos.x64-19.5.0.0.0dbru.zip
 ```
 
 Create a symbolic link for the 'client shared library' in the user
@@ -673,14 +673,14 @@ default library path such as in `~/lib` or `/usr/local/lib`.  For example:
 
 ```
 mkdir ~/lib
-ln -s instantclient_19_3/libclntsh.dylib ~/lib/
+ln -s instantclient_19_5/libclntsh.dylib ~/lib/
 ```
 
 Alternatively, copy the required OCI libraries, for example:
 
 ```
 mkdir ~/lib
-cp instantclient_19_3/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} ~/lib/
+cp instantclient_19_5/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} ~/lib/
 ```
 
 For Instant Client 11.2, the OCI libraries must be copied. For example:
@@ -790,8 +790,8 @@ Windows 7 users: Note that Oracle 19 is not supported on Windows 7.
 
 - Unzip the ZIP file into a directory that is accessible to your
   application.  For example unzip
-  ` instantclient-basic-windows.x64-19.3.0.0.0dbru.zip` to
-  `C:\oracle\instantclient_19_3`.
+  ` instantclient-basic-windows.x64-19.5.0.0.0dbru.zip` to
+  `C:\oracle\instantclient_19_5`.
 
 - Add this directory to the `PATH` environment variable.  For example
   on Windows 7, update `PATH` in Control Panel -> System -> Advanced
@@ -808,7 +808,7 @@ Windows 7 users: Note that Oracle 19 is not supported on Windows 7.
 
   ```
   REM mynode.bat
-  SET PATH=C:\oracle\instantclient_19_3;%PATH%
+  SET PATH=C:\oracle\instantclient_19_5;%PATH%
   node %*
   ```
 
@@ -1030,15 +1030,15 @@ and extract it into a directory that is accessible to your
 application, for example `/opt/oracle`:
 
 ```
-unzip instantclient-basic-aix.ppc64-19.3.0.0.0dbru.zip
+unzip instantclient-basic-aix.ppc64-19.5.0.0.0dbru.zip
 mkdir -p /opt/oracle
-mv instantclient_19_3 /opt/oracle
+mv instantclient_19_5 /opt/oracle
 ```
 
 To run applications, you will need to set the link path:
 
 ```
-export LIBPATH=/opt/oracle/instantclient_19_3:$LIBPATH
+export LIBPATH=/opt/oracle/instantclient_19_5:$LIBPATH
 ```
 
 #### 3.9.5 Optionally create the default Oracle Client configuration directory
@@ -1049,7 +1049,7 @@ If you intend to co-locate optional Oracle configuration files such as
 `network/admin` subdirectory.  Create this if needed.  For example:
 
 ```
-sudo mkdir -p /opt/oracle/instantclient_19_3/network/admin
+sudo mkdir -p /opt/oracle/instantclient_19_5/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
@@ -1150,13 +1150,13 @@ application, for example `/opt/oracle`:
 
 ```
 cd /opt/oracle
-unzip instantclient-basic-solaris.x64-18.3.0.0.0dbru.zip
+unzip instantclient-basic-solaris.x64-19.5.0.0.0dbru.zip
 ```
 
 To run applications, you will need to set the link path:
 
 ```
-export LD_LIBRARY_PATH_64=/opt/oracle/instantclient_18_3:$LD_LIBRARY_PATH_64
+export LD_LIBRARY_PATH_64=/opt/oracle/instantclient_19_5:$LD_LIBRARY_PATH_64
 ```
 
 #### 3.9.5 Optionally create the default Oracle Client configuration directory
@@ -1167,7 +1167,7 @@ If you intend to co-locate optional Oracle configuration files such as
 `network/admin` subdirectory.  Create this if needed.  For example:
 
 ```
-mkdir -p /opt/oracle/instantclient_18_3/network/admin
+mkdir -p /opt/oracle/instantclient_19_5/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
@@ -1475,7 +1475,7 @@ for the latest Instant Client package available.
    ```
    RUN  yum -y install oracle-release-el7 && \
         yum-config-manager --enable ol7_oracle_instantclient && \
-        yum -y install oracle-instantclient19.3-basiclite && \
+        yum -y install oracle-instantclient19.5-basiclite && \
         rm -rf /var/cache/yum
    ```
 
@@ -1510,15 +1510,13 @@ for the latest Instant Client package available.
 
     Download the Instant Client Basic Light Zip file, extract it, and remove
     unnecessary files.  The resulting directory can be added during image
-    creation.  For example, with Instant Client Basic Light 19.3, the host
-    computer (where you run Docker) could have a directory `instantclient_19_3`
+    creation.  For example, with Instant Client Basic Light 19.5, the host
+    computer (where you run Docker) could have a directory `instantclient_19_5`
     with these files:
 
     ```
     libclntshcore.so.19.1
     libclntsh.so.19.1
-    libipc1.so
-    libmql1.so
     libnnz19.so
     libociicus.so
     ```
@@ -1526,8 +1524,8 @@ for the latest Instant Client package available.
     With this, your Dockerfile could contain:
 
     ```
-    ADD instantclient_19_3/* /opt/oracle/instantclient_19_3
-    RUN echo /opt/oracle/instantclient_19_3 > /etc/ld.so.conf.d/oracle-instantclient.conf && \
+    ADD instantclient_19_5/* /opt/oracle/instantclient_19_5
+    RUN echo /opt/oracle/instantclient_19_5 > /etc/ld.so.conf.d/oracle-instantclient.conf && \
         ldconfig
     ```
 
@@ -1568,10 +1566,10 @@ be mounted at runtime using a Docker volume.  Map the volume to the
 `network/admin` subdirectory of Instant Client so the `TNS_ADMIN` environment
 variable does not need to be set.  For example, when the Wallet or configuration
 files are in `/OracleCloud/wallet/` on the host computer, and the image uses
-Instant Client 19.3 RPMs, then you can mount the files using:
+Instant Client 19.5 RPMs, then you can mount the files using:
 
 ```
-docker run -v /OracleCloud/wallet:/usr/lib/oracle/19.3/client64/lib/network/admin:Z,ro . . .
+docker run -v /OracleCloud/wallet:/usr/lib/oracle/19.5/client64/lib/network/admin:Z,ro . . .
 ```
 
 The `Z` option is needed when SELinux is enabled.
@@ -1590,7 +1588,7 @@ FROM oraclelinux:7-slim
 
 RUN  yum -y install oracle-release-el7 oracle-nodejs-release-el7 && \
      yum-config-manager --disable ol7_developer_EPEL --enable ol7_oracle_instantclient && \
-     yum -y install nodejs oracle-instantclient19.3-basiclite && \
+     yum -y install nodejs oracle-instantclient19.5-basiclite && \
      rm -rf /var/cache/yum
 
 WORKDIR /myapp
