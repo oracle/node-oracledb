@@ -7115,6 +7115,12 @@ Then set the environment variable [`TNS_ADMIN`][8] to that directory
 name.  For example, if the file `/etc/my-oracle-config/tnsnames.ora`
 is being used, set `TNS_ADMIN` to `/etc/my-oracle-config`.
 
+The wallet configuration file `cwallet.sso` can be located with, or separately
+from, the `tnsnames.ora` and `sqlnet.ora` files.  It should be securely stored.
+The `sqlnet.ora` file's `WALLET_LOCATION` path should be set to the directory
+containing `cwallet.sso`.  For Oracle Autonomous Database use of wallets, see
+[Connecting to Oracle Autonomous Database](#connectionadb).
+
 #### <a name="oraaccess"></a> 14.1.3. Optional Oracle Client Configuration
 
 If the Oracle Client Libraries used by node-oracledb are version 12,
@@ -8887,11 +8893,18 @@ For node-oracledb, only these files from the zip are needed:
 
 - `tnsnames.ora` - Maps net service names used for application connection strings to your database services
 - `sqlnet.ora`  - Configures Oracle Network settings
-- `cwallet.sso` - Enables SSL/TLS connections
+- `cwallet.sso` - Enables SSL/TLS connections.  Note the cloud wallet does not contain a database username or password.
 
 The other files and the wallet password are not needed.
 
 Place these files as shown in [Optional Oracle Net Configuration](#tnsadmin).
+The `sqlnet.ora` file contains a `WALLET_LOCATION` path to the directory where
+`cwallet.sso` will be read from.  By default this path is `"?/network/admin"`.
+This path maps to the `network/admin` subdirectory of Oracle Instant Client , or
+to the `$ORACLE_HOME/network/admin` subdirectory (when node-oracledb is linked
+with the client libraries from a full client or database installation).  If
+`cwallet.sso` is in a different location, then you will need to edit the path in
+`sqlnet.ora` and set it to the directory containing `cwallet.sso`.
 
 ##### Run Your Application
 
