@@ -1,6 +1,6 @@
 # Change Log
 
-## node-oracledb v4.2.0 (DD MON YYYY)
+## node-oracledb v4.2.0 (24 Jan 2020)
 
 - Added support for binding using the node-oracledb [Database Type
   Constants](https://oracle.github.io/node-oracledb/doc/api.html#oracledbconstantsdbtype)
@@ -33,7 +33,7 @@
 - Avoid intermediate conversion from the database national character set to the
   database character set when querying NCLOB columns as String.
 
-- Fixed various execution failures with Node.js 13.2 due to Node.js NULL pointer behavior change ([ODPI-C
+- Fixed various execution failures with Node.js 13.2 due to a Node.js NULL pointer behavior change ([ODPI-C
   change](https://github.com/oracle/odpi/commit/7693865bb6a98568546aa319cc0fdb9e208cf9d4)).
 
 - Fixed connection pooling so sharded `pool.getConnection()` requests respect
