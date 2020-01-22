@@ -4643,3 +4643,4 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     228.1 examples
     228.2 MERGE statement
     228.3 Negative - not applicable to executeMany()
+    228.4 INSERT ALL statement

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -26,7 +26,6 @@
 
 const oracledb  = require('oracledb');
 const should    = require('should');
-const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -169,5 +168,31 @@ describe('228. lastRowid.js', function() {
     } catch (err) {
       should.not.exist(err);
     }
-  });
+  }); // 228.3
+
+  it('228.4 INSERT ALL statement', async () => {
+    const rows = ['Redwood city', 'Sydney', 'Shenzhen'];
+    const sqlInsertAll = `
+      insert all
+        into ${TABLE} (id, value) values (100, :v)
+        into ${TABLE} (id, value) values (200, :v)
+        into ${TABLE} (id, value) values (300, :v)
+      select * from dual
+    `;
+
+    try {
+      let result = await conn.execute(sqlInsertAll, rows);
+      should.not.exist(result.lastRowid);
+      should.strictEqual(result.rowsAffected, 3);
+
+      let sql = `select * from ${TABLE} where id >= 100 order by id asc`;
+      result = await conn.execute(sql);
+
+      should.strictEqual(result.rows[0][1], rows[0]);
+      should.strictEqual(result.rows[1][1], rows[1]);
+      should.strictEqual(result.rows[2][1], rows[2]);
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }); // 228.4
 });
