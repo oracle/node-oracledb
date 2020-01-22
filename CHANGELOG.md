@@ -51,6 +51,8 @@
   deprecated in favor of the more functional Node.js 8 Stream `destroy()`
   method.
 
+- Test and documentation improvements.
+
 ## node-oracledb v4.1.0 (26 Nov 2019)
 
 - Added end-to-end tracing attributes
