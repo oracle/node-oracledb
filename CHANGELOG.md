@@ -22,6 +22,9 @@
 - Fixed various execution failures with Node.js 13.2 due to Node.js NULL pointer behavior change ([ODPI-C
   change](https://github.com/oracle/odpi/commit/7693865bb6a98568546aa319cc0fdb9e208cf9d4)).
 
+- Fixed connection pooling so sharded `pool.getConnection()` requests respect
+  `queueTimeout` when `poolMaxPerShard` has been reached.
+
 - Added a directory the binary module search to help Webpack use, though a copy
   plugin is still required, see
   [here](https://github.com/oracle/node-oracledb/issues/1156#issuecomment-571554125).

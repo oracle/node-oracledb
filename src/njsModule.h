@@ -1,4 +1,4 @@
-// Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -426,6 +426,7 @@ struct njsBaton {
     uint32_t poolMaxPerShard;
     uint32_t poolIncrement;
     uint32_t poolTimeout;
+    uint32_t poolWaitTimeout;
     int32_t poolPingInterval;
     uint32_t stmtCacheSize;
     uint32_t maxRows;

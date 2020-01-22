@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -367,7 +367,9 @@ static bool njsOracleDb_createPoolAsync(njsBaton *baton)
     params.maxSessions = baton->poolMax;
     params.maxSessionsPerShard = baton->poolMaxPerShard;
     params.sessionIncrement = baton->poolIncrement;
-    params.getMode = DPI_MODE_POOL_GET_WAIT;
+    params.getMode = (baton->poolMaxPerShard > 0) ?
+            DPI_MODE_POOL_GET_TIMEDWAIT : DPI_MODE_POOL_GET_WAIT;
+    params.waitTimeout = baton->poolWaitTimeout;
     params.externalAuth = baton->externalAuth;
     params.homogeneous = baton->homogeneous;
     params.plsqlFixupCallback = baton->plsqlFixupCallback;
@@ -494,6 +496,9 @@ static bool njsOracleDb_createPoolProcessArgs(njsBaton *baton, napi_env env,
         return false;
     if (!njsBaton_getBoolFromArg(baton, env, args, 0, "events",
             &baton->events, NULL))
+        return false;
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "queueTimeout",
+            &baton->poolWaitTimeout, NULL))
         return false;
 
     return true;
