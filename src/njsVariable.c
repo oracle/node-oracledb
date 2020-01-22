@@ -99,6 +99,9 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
         case DPI_ORACLE_TYPE_BLOB:
             var->nativeTypeNum = DPI_NATIVE_TYPE_LOB;
             break;
+        case NJS_DATATYPE_BOOLEAN:
+            var->nativeTypeNum = DPI_NATIVE_TYPE_BOOLEAN;
+            break;
         case DPI_ORACLE_TYPE_OBJECT:
             var->nativeTypeNum = DPI_NATIVE_TYPE_OBJECT;
             break;
@@ -423,6 +426,10 @@ bool njsVariable_getScalarValue(njsVariable *var, njsVariableBuffer *buffer,
                 return njsBaton_setErrorDPI(baton);
             NJS_CHECK_NAPI(env, napi_create_string_utf8(env, rowidValue,
                     rowidValueLength, value))
+            break;
+        case DPI_NATIVE_TYPE_BOOLEAN:
+            NJS_CHECK_NAPI(env, napi_get_boolean(env, data->value.asBoolean,
+                    value))
             break;
         case DPI_NATIVE_TYPE_OBJECT:
             if (!njsDbObject_new(var->objectType, data->value.asObject,
@@ -959,6 +966,15 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
         } else {
             data->value.asDouble = tempDouble;
         }
+        return true;
+    }
+
+    // handle binding booleans
+    if (valueType == napi_boolean) {
+        if (var->varTypeNum != DPI_ORACLE_TYPE_BOOLEAN)
+            return njsVariable_setInvalidBind(var, pos, baton);
+        NJS_CHECK_NAPI(env, napi_get_value_bool(env, value,
+                (bool*) &data->value.asBoolean))
         return true;
     }
 

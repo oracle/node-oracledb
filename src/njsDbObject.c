@@ -826,6 +826,10 @@ static bool njsDbObject_transformFromOracle(njsDbObject *obj, napi_env env,
         case DPI_ORACLE_TYPE_OBJECT:
             return njsDbObject_new(typeInfo->objectType, data->value.asObject,
                     env, value);
+        case DPI_ORACLE_TYPE_BOOLEAN:
+            NJS_CHECK_NAPI(env, napi_get_boolean(env, data->value.asBoolean,
+                    value))
+            return true;
         default:
             break;
     }
@@ -852,9 +856,9 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
     napi_valuetype valueType;
     njsDbObjectType *objType;
     njsDbObject *valueObj;
+    bool check, tempBool;
     void *bufferData;
     size_t length;
-    bool check;
 
     data->isNull = 0;
     *strBuffer = NULL;
@@ -883,6 +887,13 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
             if (*nativeTypeNum != DPI_NATIVE_TYPE_TIMESTAMP) {
                 *nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
             }
+            return true;
+
+        // handle booleans
+        case napi_boolean:
+            NJS_CHECK_NAPI(env, napi_get_value_bool(env, value, &tempBool))
+            *nativeTypeNum = DPI_NATIVE_TYPE_BOOLEAN;
+            data->value.asBoolean = (int) tempBool;
             return true;
 
         // several types of objects are supported

@@ -133,6 +133,7 @@
 #define NJS_DATATYPE_CLOB               DPI_ORACLE_TYPE_CLOB
 #define NJS_DATATYPE_NCLOB              DPI_ORACLE_TYPE_NCLOB
 #define NJS_DATATYPE_BLOB               DPI_ORACLE_TYPE_BLOB
+#define NJS_DATATYPE_BOOLEAN            DPI_ORACLE_TYPE_BOOLEAN
 #define NJS_DATATYPE_OBJECT             DPI_ORACLE_TYPE_OBJECT
 
 // error messages used within the driver

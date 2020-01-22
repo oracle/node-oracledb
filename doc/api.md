@@ -3127,13 +3127,14 @@ Lob           | NCLOB                          | `oracledb.NCLOB` or `oracledb.D
 String        | ROWID                          | `oracledb.STRING` or `oracledb.DB_TYPE_VARCHAR`     |                                                                   |
 String        | UROWID                         | `oracledb.STRING` or `oracledb.DB_TYPE_VARCHAR`     |                                                                   |
 String        | XMLType                        | `oracledb.STRING` or `oracledb.DB_TYPE_VARCHAR`     | Size is limited to the maximum database VARCHAR length            |
+Boolean       | BOOLEAN                        | `oracledb.DB_TYPE_BOOLEAN`                          | This combination is supported from node-oracledb 4.2.  Only supported for PL/SQL binds |
 ResultSet     | CURSOR                         | `oracledb.CURSOR` or `oracledb.DB_TYPE_CURSOR`      | Only supported for OUT binds                                      |
 DbObject      | Named type or collection       | A string with the name of the Oracle Database object or collection, or a [DbObject](#dbobjectclass) | This combination is supported from node-oracledb 4.0 |
 
 When binding LONG, LONG RAW, CLOB, NCLOB, and BLOB database types using string
 or buffer bind types, then data is limited to a maxium size of 1 GB.
 
-Binding Oracle Database INTERVAL types, BFILE, or BOOLEAN is not supported.
+Binding Oracle Database INTERVAL types or BFILE not supported.
 
 ##### <a name="executebindparamval"></a> 4.2.6.2.5 `val`
 
@@ -11153,7 +11154,7 @@ For IN binds:
 - The `val` attribute may be a constant or a JavaScript variable.
 
 - If `type` is omitted, it is derived from the bind data value.  If it is set,
-  it can be one of the values in the [`type`](#executebindparamtype) table.
+  it can be one of the values in the [`type` table](#executebindparamtype).
   Typically `type` is one of `oracledb.STRING`, `oracledb.NUMBER`,
   `oracledb.DATE` or `oracledb.BUFFER` matching the standard Node.js type of the
   data being passed into the database.  Use a bind type of `oracledb.BLOB` or
@@ -11248,9 +11249,9 @@ bind variable object containing [`dir`](#executebindparamdir),
 - The `val` parameter in needed when binding IN OUT to pass a value
   into the database.  It is not used for OUT binds.
 
-- The `type` attribute can be one of the constants as discussed in [`execute()`
-  `bindParams` `type`](#executebindparamtype).  This determines the mapping
-  between the database type and the JavaScript type.
+- The `type` attribute can be one of the constants as discussed in the [`type`
+  table](#executebindparamtype).  This determines the mapping between the
+  database type and the JavaScript type.
 
   The attribute should be set for OUT binds.  If `type` is not specified, then
   `oracledb.STRING` is assumed.
@@ -11260,11 +11261,10 @@ bind variable object containing [`dir`](#executebindparamdir),
   determined if the input data is null.  The output data type will always be the
   same as the input data type.
 
-- A `maxSize` attribute should be set for `oracledb.STRING` or
-  `oracledb.BUFFER` OUT or IN OUT binds.  This is the maximum number
-  of bytes the bind parameter will return.  If the output value does
-  not fit in `maxSize` bytes, then an error such *ORA-06502: PL/SQL:
-  numeric or value error: character string buffer too small* or
+- A `maxSize` attribute should be set for String and Buffer OUT or IN OUT binds.
+  This is the maximum number of bytes the bind parameter will return.  If the
+  output value does not fit in `maxSize` bytes, then an error such *ORA-06502:
+  PL/SQL: numeric or value error: character string buffer too small* or
   *NJS-016: buffer is too small for OUT binds* occurs.
 
   A default value of 200 bytes is used when `maxSize` is not provided for OUT

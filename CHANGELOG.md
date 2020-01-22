@@ -5,7 +5,10 @@
 - Added support for binding using the node-oracledb [Database Type
   Constants](https://oracle.github.io/node-oracledb/doc/api.html#oracledbconstantsdbtype)
   `DB_TYPE_DATE`, `DB_TYPE_CHAR`, `DB_TYPE_NCHAR`, `DB_TYPE_NVARCHAR`,
-  `DB_TYPE_NCLOB`, `DB_TYPE_TIMESTAMP`, and `DB_TYPE_TIMESTAMP_TZ`.
+  `DB_TYPE_NCLOB`, `DB_TYPE_BINARY_DOUBLE`, `DB_TYPE_BINARY_FLOAT`,
+  `DB_TYPE_BINARY_INTEGER`, `DB_TYPE_TIMESTAMP`, and `DB_TYPE_TIMESTAMP_TZ`.
+
+- Added support for binding using `DB_TYPE_BOOLEAN` (Diego Arce).
 
 - Added support for creating temporary NCLOBS with
   [`connection.createLob(oracledb.NCLOB)`](https://oracle.github.io/node-oracledb/doc/api.html#connectioncreatelob).

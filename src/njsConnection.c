@@ -1088,6 +1088,12 @@ static bool njsConnection_getBindInfoFromValue(njsBaton *baton,
         return true;
     }
 
+    // booleans
+    if (valueType == napi_boolean) {
+        *bindType = NJS_DATATYPE_BOOLEAN;
+        return true;
+    }
+
     // dates, LOBs, buffers and arrays are all objects
     if (valueType == napi_object) {
 

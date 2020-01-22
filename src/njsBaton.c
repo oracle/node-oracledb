@@ -917,7 +917,7 @@ bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value)
         return false;
     if (valueType != napi_undefined && valueType != napi_null &&
             valueType != napi_number && valueType != napi_string &&
-            valueType != napi_object)
+            valueType != napi_object && valueType != napi_boolean)
         return false;
     if (valueType != napi_object)
         return true;
