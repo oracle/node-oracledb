@@ -254,5 +254,5 @@ test/booleanBind.js
 
 test/dbType01.js
 test/dbType02.js
-
 test/lastRowid.js
+test/dbType03.js

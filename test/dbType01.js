@@ -19,8 +19,7 @@
  *   226. dbType01.js
  *
  * DESCRIPTION
- *   Test binding data of types DB_TYPE_CHAR, DB_TYPE_NCHAR,
- *   DB_TYPE_NVARCHAR, DB_TYPE_DATE and DB_TYPE_TIMESTAMP_LTZ.
+ *   Test binding data of types DB_TYPE_*.
  *
  *****************************************************************************/
 'use strict';
@@ -28,12 +27,15 @@
 const oracledb  = require('oracledb');
 const should    = require('should');
 const dbconfig  = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('226. dbType01.js', function() {
 
   let conn;
+  const default_stmtCacheSize = oracledb.stmtCacheSize;
 
   before(async () => {
+	oracledb.stmtCacheSize = 0;
     try {
       conn = await oracledb.getConnection(dbconfig);
     } catch (err) {
@@ -47,17 +49,24 @@ describe('226. dbType01.js', function() {
     } catch (err) {
       should.not.exist(err);
     }
+    oracledb.stmtCacheSize = default_stmtCacheSize;
+  });
+
+  afterEach(async () => {
+    await testsUtil.sleep(100);
   });
 
   const strInVal = "Node-oracledb";
   const dateInVal = new Date();
-  const SQL = `SELECT DUMP(:1) FROM dual`;
+  const numInVal = 12;
+  const SQL = `SELECT :1, DUMP(:1) FROM dual`;
 
   it('226.1 DB_TYPE_VARCHAR', async () => {
     try {
       const result = await conn.execute(SQL,
         [{ val: strInVal, type: oracledb.DB_TYPE_VARCHAR }]);
-      (result.rows[0][0]).should.startWith('Typ=1 Len=13');
+      should.strictEqual(strInVal, result.rows[0][0]);
+      (result.rows[0][1]).should.startWith('Typ=1 Len=13');
     } catch (err) {
       should.not.exist(err);
     }
@@ -67,7 +76,8 @@ describe('226. dbType01.js', function() {
     try {
       const result = await conn.execute(SQL,
         [{ val: strInVal, type: oracledb.DB_TYPE_CHAR }]);
-      (result.rows[0][0]).should.startWith('Typ=96 Len=13');
+      should.strictEqual(strInVal, result.rows[0][0]);
+      (result.rows[0][1]).should.startWith('Typ=96 Len=13');
     } catch (err) {
       should.not.exist(err);
     }
@@ -77,7 +87,8 @@ describe('226. dbType01.js', function() {
     try {
       const result = await conn.execute(SQL,
         [{ val: strInVal, type: oracledb.DB_TYPE_NVARCHAR }]);
-      (result.rows[0][0]).should.startWith('Typ=1 Len=26');
+      should.strictEqual(strInVal, result.rows[0][0]);
+      (result.rows[0][1]).should.startWith('Typ=1 Len=26');
     } catch (err) {
       should.not.exist(err);
     }
@@ -87,7 +98,8 @@ describe('226. dbType01.js', function() {
     try {
       const result = await conn.execute(SQL,
         [{ val: strInVal, type: oracledb.DB_TYPE_NCHAR }]);
-      (result.rows[0][0]).should.startWith('Typ=96 Len=26');
+      should.strictEqual(strInVal, result.rows[0][0]);
+      (result.rows[0][1]).should.startWith('Typ=96 Len=26');
     } catch (err) {
       should.not.exist(err);
     }
@@ -97,7 +109,7 @@ describe('226. dbType01.js', function() {
     try {
       const result = await conn.execute(SQL,
         [{ val: dateInVal, type: oracledb.DB_TYPE_DATE }]);
-      (result.rows[0][0]).should.startWith('Typ=12 Len=7');
+      (result.rows[0][1]).should.startWith('Typ=12 Len=7');
     } catch (err) {
       should.not.exist(err);
     }
@@ -107,10 +119,82 @@ describe('226. dbType01.js', function() {
     try {
       const result = await conn.execute(SQL,
         [{ val: dateInVal, type: oracledb.DB_TYPE_TIMESTAMP_LTZ }]);
-      (result.rows[0][0]).should.startWith('Typ=231 Len=11');
+      (result.rows[0][1]).should.startWith('Typ=231 Len=11');
     } catch (err) {
       should.not.exist(err);
     }
   }); // 226.6
 
+  it('226.7 DB_TYPE_TIMESTAMP', async () => {
+    try {
+      const result = await conn.execute(SQL,
+        [{ val: dateInVal, type: oracledb.DB_TYPE_TIMESTAMP }]);
+      (result.rows[0][1]).should.startWith('Typ=180 Len=11');
+    } catch (err) {
+      should.not.exist(err);
+    }
+  });
+
+  it('226.8 DB_TYPE_TIMESTAMP_TZ', async () => {
+    try {
+      const result = await conn.execute(SQL,
+        [{ val: dateInVal, type: oracledb.DB_TYPE_TIMESTAMP_TZ }]);
+      (result.rows[0][1]).should.startWith('Typ=181 Len=13');
+    } catch (err) {
+      should.not.exist(err);
+    }
+  });
+
+  it('226.9 DB_TYPE_NUMBER', async () => {
+    try {
+	  const sql = `SELECT DUMP(:1) FROM dual`;
+      const result = await conn.execute(sql,
+        [{ val: numInVal, type: oracledb.DB_TYPE_NUMBER }]);
+      (result.rows[0][0]).should.startWith('Typ=2 Len=2');
+    } catch (err) {
+      should.not.exist(err);
+    }
+  });
+
+  it('226.10 DB_TYPE_BINARY_FLOAT', async () => {
+    try {
+      const result = await conn.execute(SQL,
+        [{ val: numInVal, type: oracledb.DB_TYPE_BINARY_FLOAT }]);
+      (result.rows[0][1]).should.startWith('Typ=100 Len=4');
+    } catch (err) {
+      should.not.exist(err);
+    }
+  });
+
+  it('226.11 DB_TYPE_BINARY_DOUBLE', async () => {
+    try {
+      const result = await conn.execute(SQL,
+        [{ val: numInVal, type: oracledb.DB_TYPE_BINARY_DOUBLE }]);
+      (result.rows[0][1]).should.startWith('Typ=101 Len=8');
+    } catch (err) {
+      should.not.exist(err);
+    }
+  });
+
+  it('226.12 Infinity, DB_TYPE_BINARY_FLOAT', async () => {
+    try {
+      const num = 1 / 0;
+      const result = await conn.execute(SQL,
+        [{ val: num, type: oracledb.DB_TYPE_BINARY_FLOAT }]);
+      (result.rows[0][1]).should.startWith('Typ=100 Len=4');
+    } catch (err) {
+      should.not.exist(err);
+    }
+  });
+
+  it('226.13 Infinity, DB_TYPE_BINARY_DOUBLE', async () => {
+    try {
+      const num = 1 / 0;
+      const result = await conn.execute(SQL,
+        [{ val: num, type: oracledb.DB_TYPE_BINARY_DOUBLE }]);
+      (result.rows[0][1]).should.startWith('Typ=101 Len=8');
+    } catch (err) {
+      should.not.exist(err);
+    }
+  });
 });

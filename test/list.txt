@@ -4657,6 +4657,13 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     226.4 DB_TYPE_NCHAR
     226.5 DB_TYPE_DATE
     226.6 DB_TYPE_TIMESTAMP_LTZ
+    226.7 DB_TYPE_TIMESTAMP
+    226.8 DB_TYPE_TIMESTAMP_TZ
+    226.9 DB_TYPE_NUMBER
+    226.10 DB_TYPE_BINARY_FLOAT
+    226.11 DB_TYPE_BINARY_DOUBLE
+    226.12 Infinity, DB_TYPE_BINARY_FLOAT
+    226.13 Infinity, DB_TYPE_BINARY_DOUBLE
 
 227. dbType02.js
     227.1 DB_TYPE_VARCHAR
@@ -4671,3 +4678,11 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     228.2 MERGE statement
     228.3 Negative - not applicable to executeMany()
     228.4 INSERT ALL statement
+
+229. dbType03.js
+    229.1 IN binds binary_float and binary_double
+    229.2 OUT binds
+    229.3 IN bind Infinity number
+    229.4 OUT bind Infinity number
+    229.5 IN bind NaN
+    229.6 OUT bind NaN

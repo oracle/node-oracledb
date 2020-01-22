@@ -16,11 +16,10 @@
  * limitations under the License.
  *
  * NAME
- *   227. dbType01.js
+ *   227. dbType02.js
  *
  * DESCRIPTION
- *   Roundtrip tests of binding data of typesDB_TYPE_CHAR, DB_TYPE_NCHAR,
- *   DB_TYPE_NVARCHAR, DB_TYPE_DATE and DB_TYPE_TIMESTAMP_LTZ.
+ *   Roundtrip tests of binding data of types DB_TYPE_*.
  *
  *****************************************************************************/
 'use strict';
