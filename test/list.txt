@@ -1289,7 +1289,6 @@ Overview of node-oracledb functional tests
         72.2.4 Negative - not providing first parameter
         72.2.5 promise test of createLob()
         72.2.6 call lob.close() multiple times sequentially
-        72.2.7 BIND_INOUT, PL/SQL, needs to close out lob explicitly
 
 73. poolPing.js
     73.1 the default value of poolPingInterval is 60
