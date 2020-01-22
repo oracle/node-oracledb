@@ -39,8 +39,8 @@
 - Fixed connection pooling so sharded `pool.getConnection()` requests respect
   `queueTimeout` when `poolMaxPerShard` has been reached.
 
-- Added a directory the binary module search to help Webpack use, though a copy
-  plugin is still required, see
+- Added a directory to the binary module search to help Webpack use, though a
+  copy plugin is still required, see
   [here](https://github.com/oracle/node-oracledb/issues/1156#issuecomment-571554125).
 
 - Fixed some static code analysis warnings.
