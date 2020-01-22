@@ -42,12 +42,12 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 3.1 [Oracledb Constants](#oracledbconstants)
         - 3.1.1 [Query `outFormat` Constants](#oracledbconstantsoutformat)
             - [`OUT_FORMAT_ARRAY`](#oracledbconstantsoutformat), [`OUT_FORMAT_OBJECT`](#oracledbconstantsoutformat)
-        - 3.1.2 [Node-oracledb Type Constants](#oracledbconstantsnodbtype)
-            - [`BLOB`](#oracledbconstantsnodbtype), [`BUFFER`](#oracledbconstantsnodbtype), [`CLOB`](#oracledbconstantsnodbtype), [`CURSOR`](#oracledbconstantsnodbtype), [`DATE`](#oracledbconstantsnodbtype), [`DEFAULT`](#oracledbconstantsnodbtype), [`NUMBER`](#oracledbconstantsnodbtype), [`STRING`](#oracledbconstantsnodbtype)
-        - 3.1.3 [Oracle Database Type Constants](#oracledbconstantsdbtype)
+        - 3.1.2 [Oracle Database Type Constants](#oracledbconstantsdbtype)
             - [`DB_TYPE_BFILE`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_DOUBLE`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_FLOAT`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_INTEGER`](#oracledbconstantsdbtype), [`DB_TYPE_BLOB`](#oracledbconstantsdbtype), [`DB_TYPE_BOOLEAN`](#oracledbconstantsdbtype),
 [`DB_TYPE_CHAR`](#oracledbconstantsdbtype), [`DB_TYPE_CLOB`](#oracledbconstantsdbtype), [`DB_TYPE_CURSOR`](#oracledbconstantsdbtype),
 [`DB_TYPE_DATE`](#oracledbconstantsdbtype), [`DB_TYPE_INTERVAL_DS`](#oracledbconstantsdbtype), [`DB_TYPE_INTERVAL_YM`](#oracledbconstantsdbtype), [`DB_TYPE_LONG`](#oracledbconstantsdbtype), [`DB_TYPE_LONG_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_NCHAR`](#oracledbconstantsdbtype), [`DB_TYPE_NCLOB`](#oracledbconstantsdbtype), [`DB_TYPE_NUMBER`](#oracledbconstantsdbtype), [`DB_TYPE_NVARCHAR`](#oracledbconstantsdbtype), [`DB_TYPE_OBJECT`](#oracledbconstantsdbtype), [`DB_TYPE_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_ROWID`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_LTZ`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_TZ`](#oracledbconstantsdbtype), [`DB_TYPE_VARCHAR`](#oracledbconstantsdbtype)
+        - 3.1.3 [Node-oracledb Type Constants](#oracledbconstantsnodbtype)
+            - [`BLOB`](#oracledbconstantsnodbtype), [`BUFFER`](#oracledbconstantsnodbtype), [`CLOB`](#oracledbconstantsnodbtype), [`CURSOR`](#oracledbconstantsnodbtype), [`DATE`](#oracledbconstantsnodbtype), [`DEFAULT`](#oracledbconstantsnodbtype), [`NCLOB`](#oracledbconstantsnodbtype), [`NUMBER`](#oracledbconstantsnodbtype), [`STRING`](#oracledbconstantsnodbtype)
         - 3.1.4 [Execute Bind Direction Constants](#oracledbconstantsbinddir)
             - [`BIND_IN`](#oracledbconstantsbinddir), [`BIND_INOUT`](#oracledbconstantsbinddir), [`BIND_OUT`](#oracledbconstantsbinddir)
         - 3.1.5 [Privileged Connection Constants](#oracledbconstantsprivilege)
@@ -159,7 +159,11 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 4.2.6 [`execute()`](#execute)
             - 4.2.6.1 [`execute()`: SQL Statement](#executesqlparam)
             - 4.2.6.2 [`execute()`: Bind Parameters](#executebindParams)
-                - [`dir`](#executebindParams), [`maxArraySize`](#executebindParams), [`maxSize`](#executebindParams), [`type`](#executebindParams), [`val`](#executebindParams)
+                - 4.2.6.2.1 [`dir`](#executebindparamdir)
+                - 4.2.6.2.2 [`maxArraySize`](#executebindparammaxarraysize)
+                - 4.2.6.2.3 [`maxSize`](#executebindparammaxsize)
+                - 4.2.6.2.4 [`type`](#executebindparamtype)
+                - 4.2.6.2.5 [`val`](#executebindparamval)
             - 4.2.6.3 [`execute()`: Options](#executeoptions)
                 - 4.2.6.3.1 [`autoCommit`](#propexecautocommit)
                 - 4.2.6.3.2 [`extendedMetaData`](#propexecextendedmetadata)
@@ -409,7 +413,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - 15.1.6.2 [Fetching Numbers](#numberhandling)
             - 15.1.6.3 [Fetching Dates and Timestamps](#datehandling)
             - 15.1.6.4 [Fetching Numbers and Dates as String](#fetchasstringhandling)
-            - 15.1.6.5 [Fetching BLOB and CLOB](#fetchlob)
+            - 15.1.6.5 [Fetching BLOB, CLOB and NCLOB](#fetchlob)
             - 15.1.6.6 [Fetching LONG and LONG RAW](#fetchlong)
             - 15.1.6.7 [Fetching ROWID and UROWID](#fetchrowid)
             - 15.1.6.8 [Fetching XMLType](#fetchxml)
@@ -425,7 +429,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 16.4 [Using DBMS_OUTPUT](#dbmsoutput)
     - 16.5 [Edition-Based Redefinition](#ebr)
     - 16.6 [Implicit Results](#implicitresults)
-17. [Working with CLOB and BLOB Data](#lobhandling)
+17. [Working with CLOB, NCLOB and BLOB Data](#lobhandling)
     - 17.1 [Simple Insertion of LOBs](#basiclobinsert)
     - 17.2 [Simple LOB Queries and PL/SQL OUT Binds](#queryinglobs)
     - 17.3 [Streaming Lobs](#streamsandlobs)
@@ -768,66 +772,64 @@ constants were introduced in node-oracledb 4.0.  The previous
 constants `oracledb.ARRAY` and `oracledb.OBJECT` are deprecated but
 still usable.
 
-#### <a name="oracledbconstantsnodbtype"></a> 3.1.2 Node-oracledb Type Constants
+#### <a name="oracledbconstantsdbtype"></a> 3.1.2 Oracle Database Type Constants
 
-Constants for `execute()` [bind parameter](#executebindParams) `type` property,
-for the [`createLob()`](#connectioncreatelob) `type` parameter,
-for the [Lob](#proplobtype) `type` property,
-for [`fetchAsBuffer`](#propdbfetchasbuffer),
-for [`fetchAsString`](#propdbfetchasstring)
-and [`fetchInfo`](#propexecfetchinfo), and
-for [extended metadata](#propdbextendedmetadata).
+Constants uses for database types in node-oracledb.
 
-Not all constants can be used in all places.
+These values indicate the Oracle Database type in [Extended
+metadata](#propdbextendedmetadata), [DbObject](#dbobjectclass) types and in the
+[Lob](#proplobtype) `type` property.
 
-Constant Name                        | Value |Description
--------------------------------------|-------|-----------------------------------------------
-`oracledb.BLOB`                      | 2019  | Bind a BLOB to a Node.js Stream or create a temporary BLOB, or for fetchAsBuffer and fetchInfo
-`oracledb.BUFFER`                    | 2006  | Bind a RAW, LONG RAW or BLOB to a Node.js Buffer
-`oracledb.CLOB`                      | 2017  | Bind a CLOB to a Node.js Stream, create a temporary CLOB, or for fetchAsString and fetchInfo
-`oracledb.CURSOR`                    | 2021  | Bind a REF CURSOR to a node-oracledb ResultSet class
-`oracledb.DATE`                      | 2014  | Bind as JavaScript date type.  Can also be used for fetchAsString and fetchInfo
-`oracledb.DEFAULT`                   |    0  | Used with fetchInfo to reset the fetch type to the database type
-`oracledb.NUMBER`                    | 2010  | Bind as JavaScript number type.  Can also be used for fetchAsString and fetchInfo
-`oracledb.STRING`                    | 2001  | Bind as JavaScript String type.  Can be used for most database types.
+Some constants can also be used for:
+- the `execute()` `bindParams`[`type`](#executebindparamtype) and the `executeMany()` [`bindDefs`](#executemanyoptbinddefs) `type` properties
+- for the [`createLob()`](#connectioncreatelob) `type` parameter
+- for [`fetchAsBuffer`](#propdbfetchasbuffer), [`fetchAsString`](#propdbfetchasstring), and [`fetchInfo`](#propexecfetchinfo)
+
+Constant Name                        | Value | Database Datatype                             |
+-------------------------------------|-------|-----------------------------------------------|
+`oracledb.DB_TYPE_BFILE`             | 2020  | BFILE                                         |
+`oracledb.DB_TYPE_BINARY_DOUBLE`     | 2008  | BINARY_DOUBLE                                 |
+`oracledb.DB_TYPE_BINARY_FLOAT`      | 2007  | BINARY_FLOAT                                  |
+`oracledb.DB_TYPE_BINARY_INTEGER`    | 2009  | BINARY_INTEGER, PLS_INTEGER, SMALLINT, etc.   |
+`oracledb.DB_TYPE_BLOB`              | 2019  | BLOB                                          |
+`oracledb.DB_TYPE_BOOLEAN`           | 2022  | PL/SQL BOOLEAN                                |
+`oracledb.DB_TYPE_CHAR`              | 2003  | CHAR                                          |
+`oracledb.DB_TYPE_CLOB`              | 2017  | CLOB                                          |
+`oracledb.DB_TYPE_CURSOR`            | 2021  | SYS_REFCURSOR, Nested Cursors                 |
+`oracledb.DB_TYPE_DATE`              | 2011  | DATE                                          |
+`oracledb.DB_TYPE_INTERVAL_DS`       | 2015  | INTERVAL DAY TO SECOND                        |
+`oracledb.DB_TYPE_INTERVAL_YM`       | 2016  | INTERVAL YEAR TO MONTH                        |
+`oracledb.DB_TYPE_LONG`              | 2024  | LONG                                          |
+`oracledb.DB_TYPE_LONG_RAW`          | 2025  | LONG RAW                                      |
+`oracledb.DB_TYPE_NCHAR`             | 2004  | NCHAR                                         |
+`oracledb.DB_TYPE_NCLOB`             | 2018  | NCLOB                                         |
+`oracledb.DB_TYPE_NUMBER`            | 2010  | NUMBER or FLOAT                               |
+`oracledb.DB_TYPE_NVARCHAR`          | 2002  | NVARCHAR                                      |
+`oracledb.DB_TYPE_OBJECT`            | 2023  | OBJECT                                        |
+`oracledb.DB_TYPE_RAW`               | 2006  | RAW                                           |
+`oracledb.DB_TYPE_ROWID`             | 2005  | ROWID                                         |
+`oracledb.DB_TYPE_TIMESTAMP`         | 2012  | TIMESTAMP                                     |
+`oracledb.DB_TYPE_TIMESTAMP_LTZ`     | 2014  | TIMESTAMP WITH LOCAL TIME ZONE                |
+`oracledb.DB_TYPE_TIMESTAMP_TZ`      | 2013  | TIMESTAMP WITH TIME ZONE                      |
+`oracledb.DB_TYPE_VARCHAR`           | 2001  | VARCHAR2                                      |
 
 Note the values for these constants changed in node-oracledb 4.0.
 
-#### <a name="oracledbconstantsdbtype"></a> 3.1.3 Oracle Database Type Constants
+#### <a name="oracledbconstantsnodbtype"></a> 3.1.3 Node-oracledb Type Constants
 
-These values indicate the Oracle Database type shown in [extended
-metadata](#propdbextendedmetadata) for queries and REF CURSORS, and
-also shown for [DbObject](#dbobjectclass) types.
+From node-oracledb 4.0, these constant values changed and became aliases for common [Oracle Database Type Constants](#oracledbconstantsdbtype).
 
-Constant Name                        | Value |Description
--------------------------------------|-------|-----------------------------------------------
-`oracledb.DB_TYPE_BFILE`             | 2020  | BFILE
-`oracledb.DB_TYPE_BINARY_DOUBLE`     | 2008  | BINARY_DOUBLE
-`oracledb.DB_TYPE_BINARY_FLOAT`      | 2007  | BINARY_FLOAT
-`oracledb.DB_TYPE_BINARY_INTEGER`    | 2009  | BINARY_INTEGER, PLS_INTEGER, SMALLINT, etc.
-`oracledb.DB_TYPE_BLOB`              | 2019  | BLOB
-`oracledb.DB_TYPE_BOOLEAN`           | 2022  | PL/SQL BOOLEAN
-`oracledb.DB_TYPE_CHAR`              | 2003  | CHAR
-`oracledb.DB_TYPE_CLOB`              | 2017  | CLOB
-`oracledb.DB_TYPE_CURSOR`            | 2021  | Nested Cursors, SYS_REFCURSOR
-`oracledb.DB_TYPE_DATE`              | 2011  | DATE
-`oracledb.DB_TYPE_INTERVAL_DS`       | 2015  | Interval Day to Second
-`oracledb.DB_TYPE_INTERVAL_YM`       | 2016  | Interval Year to Month
-`oracledb.DB_TYPE_LONG`              | 2024  | LONG
-`oracledb.DB_TYPE_LONG_RAW`          | 2025  | LONG RAW
-`oracledb.DB_TYPE_NCHAR`             | 2004  | NCHAR
-`oracledb.DB_TYPE_NCLOB`             | 2018  | NCLOB
-`oracledb.DB_TYPE_NUMBER`            | 2010  | NUMBER or FLOAT
-`oracledb.DB_TYPE_NVARCHAR`          | 2002  | NVARCHAR
-`oracledb.DB_TYPE_OBJECT`            | 2023  | OBJECT
-`oracledb.DB_TYPE_RAW`               | 2006  | RAW
-`oracledb.DB_TYPE_ROWID`             | 2005  | ROWID
-`oracledb.DB_TYPE_TIMESTAMP`         | 2012  | TIMESTAMP
-`oracledb.DB_TYPE_TIMESTAMP_LTZ`     | 2014  | TIMESTAMP WITH LOCAL TIME ZONE
-`oracledb.DB_TYPE_TIMESTAMP_TZ`      | 2013  | TIMESTAMP WITH TIME ZONE
-`oracledb.DB_TYPE_VARCHAR`           | 2001  | VARCHAR2
-
-Note the values for constants changed in node-oracledb 4.0.
+Constant Name                        | Value | `DB_TYPE_*` equivalent           | Notes
+-------------------------------------|-------|----------------------------------|--------------------------------------------------------------------|
+`oracledb.BLOB`                      | 2019  | `oracledb.DB_TYPE_BLOB`          |                                                                    |
+`oracledb.BUFFER`                    | 2006  | `oracledb.DB_TYPE_RAW`           |                                                                    |
+`oracledb.CLOB`                      | 2017  | `oracledb.DB_TYPE_CLOB`          |                                                                    |
+`oracledb.CURSOR`                    | 2021  | `oracledb.DB_TYPE_CURSOR`        |                                                                    |
+`oracledb.DATE`                      | 2014  | `oracledb.DB_TYPE_TIMESTAMP_LTZ` |                                                                    |
+`oracledb.DEFAULT`                   |    0  | n/a                              | Used with `fetchInfo` to reset the fetch type to the database type |
+`oracledb.NUMBER`                    | 2010  | `oracledb.DB_TYPE_NUMBER`        |                                                                    |
+`oracledb.NCLOB`                     | 2018  | `oracledb.DB_TYPE_NCLOB`         | Constant added in node-oracledb 4.2                                |
+`oracledb.STRING`                    | 2001  | `oracledb.DB_TYPE_VARCHAR`       |                                                                    |
 
 #### <a name="oracledbconstantsbinddir"></a> 3.1.4 Execute Bind Direction Constants
 
@@ -1153,7 +1155,7 @@ Determines whether additional metadata is available for queries and
 for REF CURSORs returned from PL/SQL blocks.
 
 The default value for `extendedMetaData` is *false*. With this value,
-the [`result.metaData`](#execmetadata)
+the [`result.metaData`](#execmetadata) and
 [`result.resultSet.metaData`](#rsmetadata) objects only include column
 names.
 
@@ -1242,14 +1244,12 @@ oracledb.fetchArraySize = 100;
 Array fetchAsBuffer
 ```
 
-An array of node-oracledb types.  Currently the only valid type
-is [`oracledb.BLOB`](#oracledbconstantsnodbtype).  When a BLOB column is
-queried with [`execute()`](#execute)
-or [`queryStream()`](#querystream), the column data is returned as a
-Buffer instead of the default representation.
-
-By default in node-oracledb, all columns are returned as native types
-or as [Lob](#lobclass) instances, in the case of CLOB and BLOB types.
+An array of types.  Currently the only valid type is
+[`oracledb.BLOB`](#oracledbconstantsnodbtype) (or its equivalent
+[`oracledb.DB_TYPE_BLOB`](#oracledbconstantsdbtype).  When set, and a BLOB
+column is queried with [`execute()`](#execute) or
+[`queryStream()`](#querystream), then the column data is returned as a Buffer
+instead of the default [Lob](#lobclass) instance.
 
 Individual query columns in [`execute()`](#execute)
 or [`queryStream()`](#querystream) calls can override the
@@ -1271,26 +1271,32 @@ oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 Array fetchAsString
 ```
 
-An array of node-oracledb types.  The valid types are
+An array of types.  The valid types are
 [`oracledb.DATE`](#oracledbconstantsnodbtype),
 [`oracledb.NUMBER`](#oracledbconstantsnodbtype),
 [`oracledb.BUFFER`](#oracledbconstantsnodbtype),
-and [`oracledb.CLOB`](#oracledbconstantsnodbtype).  When any column having one
-of the specified types is queried with [`execute()`](#execute)
-or [`queryStream()`](#querystream), the column data is returned as a
-string instead of the default representation.
+[`oracledb.CLOB`](#oracledbconstantsnodbtype), and
+[`oracledb.NCLOB`](#oracledbconstantsnodbtype).
 
-By default in node-oracledb, all columns are returned as native types
-or as [Lob](#lobclass) instances, in the case of CLOB and BLOB types.
+When any column having one of the types is queried with [`execute()`](#execute)
+or [`queryStream()`](#querystream), the column data is returned as a string
+instead of the default representation.
 
-This property helps avoid situations where using JavaScript types can
-lead to numeric precision loss, or where date conversion is unwanted.
-See [Query Result Type Mapping](#typemap) for more discussion.
+Note:
+- specifying [`oracledb.DATE`](#oracledbconstantsnodbtype) will affect date and timestamp columns
+- specifying [`oracledb.NUMBER`](#oracledbconstantsnodbtype) will affect numeric columns
+- specifying [`oracledb.CLOB`](#oracledbconstantsnodbtype) will affect both CLOB and NCLOB columns
+
+By default in node-oracledb, all columns are returned as JavaScript types or as
+[Lob](#lobclass) instances, in the case of CLOB and NCLOB types.  The
+`fetchAsString` property helps avoid situations where using JavaScript types
+can lead to numeric precision loss, or where date conversion is unwanted.  See
+[Query Result Type Mapping](#typemap) for more discussion.
 
 For raw data returned as a string, Oracle returns the data as a hex-encoded
 string.  For dates and numbers returned as a string, the maximum length of a
-string created by this mapping is 200 bytes.  Strings created for CLOB columns
-will generally be limited by Node.js and V8 memory restrictions.
+string created by this mapping is 200 bytes.  Strings created for CLOB and NCLOB
+columns will generally be limited by Node.js and V8 memory restrictions.
 
 Individual query columns in [`execute()`](#execute)
 or [`queryStream()`](#querystream) calls can override the
@@ -2924,7 +2930,8 @@ Open temporary LOB usage can be monitored using the view
 LOBs created with `createLob()` can be bound for IN, IN OUT and OUT
 binds.
 
-See [Working with CLOB and BLOB Data](#lobhandling) and [LOB Bind Parameters](#lobbinds) for more information.
+See [Working with CLOB, NCLOB and BLOB Data](#lobhandling) and [LOB Bind
+Parameters](#lobbinds) for more information.
 
 ##### Parameters
 
@@ -2932,8 +2939,7 @@ See [Working with CLOB and BLOB Data](#lobhandling) and [LOB Bind Parameters](#l
     Number type
     ```
 
-    One of the constants [`oracledb.CLOB`](#oracledbconstantsnodbtype)
-    or [`oracledb.BLOB`](#oracledbconstantsnodbtype).
+    One of the constants [`oracledb.CLOB`](#oracledbconstantsnodbtype), [`oracledb.BLOB`](#oracledbconstantsnodbtype), or [`oracledb.NCLOB`](#oracledbconstantsnodbtype) (or equivalent `DB_TYPE_*` constants).
 
 -   ```
     function(Error error)
@@ -2977,7 +2983,6 @@ variables, and the number of rows affected by the execution of
 
 ##### Parameters
 
-
 Parameter | Description
 ----------|------------
 [`String sql`](#executesqlparam) | The SQL statement that is executed. The statement may contain bind parameters.
@@ -3013,29 +3018,126 @@ on binding.
 
 If a bind value is an object it may have the following properties:
 
-Bind Property | Description
----------------|------------
-`dir` | The direction of the bind.  One of the [Execute Bind Direction Constants](#oracledbconstantsbinddir) `oracledb.BIND_IN`, `oracledb.BIND_INOUT`, or `oracledb.BIND_OUT`. The default is `oracledb.BIND_IN`.
-`maxArraySize` | The number of array elements to be allocated for a PL/SQL Collection INDEX BY associative array OUT or IN OUT array bind variable.  For IN binds, the value of `maxArraySize` is ignored.  See [PL/SQL Collection Associative Arrays](#plsqlindexbybinds).
-`maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable of type `oracledb.STRING` or `oracledb.BUFFER` can use to get data. The default value is 200. The maximum limit depends on the database type, see below.  When binding IN OUT, then `maxSize` refers to the size of the returned  value: the input value can be smaller or bigger.  For IN binds, `maxSize` is ignored.
-`type` | The node-oracledb or JavaScript data type or Oracle object type name to be bound.  Can be one of the [Node-oracledb Type Constants](#oracledbconstantsnodbtype) `oracledb.BLOB`, `oracledb.BUFFER`, `oracledb.CLOB`, `oracledb.CURSOR`, `oracledb.DATE`, `oracledb.NUMBER`, or `oracledb.STRING`.  It may also be the name of an Oracle Database object or collection, or a [DbObject Class](#dbobjectclass).  With IN or IN OUT binds the type can be explicitly set with `type` or it will default to the type of the input data value.  With OUT binds, the type defaults to `oracledb.STRING` whenever `type` is not specified.
-`val` | The input value or variable to be used for an IN or IN OUT bind variable.
+Bind Property                                   | Description
+------------------------------------------------|------------
+[`dir`](#executebindparamdir)                   | The direction of the bind
+[`maxArraySize`](#executebindparammaxarraysize) | The number of array elements to be allocated for a PL/SQL Collection INDEX BY associative array OUT or IN OUT array bind variable
+[`maxSize`](#executebindparammaxsize)           | The maximum number of bytes that an OUT or IN OUT bind variable in a String or Buffer will hold
+[`type`](#executebindparamtype)                 | The data type to be bound
+[`val`](#executebindparamval)                   | The input value or variable to be used for an IN or IN OUT bind variable
 
-The limit for `maxSize` when binding as `oracledb.BUFFER` is 2000
-bytes, and as `oracledb.STRING` is 4000 bytes unless you are using
-Oracle Database 12 or later, and the database initialization parameter
-`MAX_STRING_SIZE` has a value of `EXTENDED`.  In this case the limit
-is 32767 bytes.
+These properties are discussed in the following sections.
 
-When binding Oracle LOBs as `oracledb.STRING` or `oracledb.BUFFER`,
-the value of `maxSize` can be much larger, see the limits
-in [LOB Bind Parameters](#lobbinds).
+##### <a name="executebindparamdir"></a> 4.2.6.2.1 `dir`
+
+The direction of the bind, indicating whether data is being passed into, or out
+from, the database.  The value can be one of the [Execute Bind Direction
+Constants](#oracledbconstantsbinddir) `oracledb.BIND_IN`, `oracledb.BIND_INOUT`,
+or `oracledb.BIND_OUT`. The default is `oracledb.BIND_IN`.
+
+##### <a name="executebindparammaxarraysize"></a> 4.2.6.2.2 `maxArraySize`
+
+The number of array elements to be allocated for a PL/SQL Collection INDEX BY
+associative array OUT or IN OUT array bind variable.  For IN binds, the value of
+`maxArraySize` is ignored.  See [PL/SQL Collection Associative
+Arrays](#plsqlindexbybinds).
+
+##### <a name="executebindparammaxsize"></a> 4.2.6.2.3 `maxSize`
+
+The maximum number of bytes that OUT or IN OUT bind variable values of type
+String or Buffer can use to get data.  The default value is 200.  The maximum
+limit depends on the database type, see below.  When binding IN OUT, then
+`maxSize` refers to the size of the returned value: the input value can be
+smaller or bigger.  For IN binds, `maxSize` is ignored.
+
+The limit for `maxSize` when binding a value that is returned as a Buffer is
+2000 bytes.  For Strings, the limit is 4000 bytes unless you are using Oracle
+Database 12 or later, and the database initialization parameter
+`MAX_STRING_SIZE` has a value of `EXTENDED`.  In this case the limit is 32767
+bytes.
+
+When binding Oracle LOBs as `oracledb.STRING`, `oracledb.DB_TYPE_NVARCHAR` or
+`oracledb.BUFFER`, the data cannot be greater than 1 GB.  See [LOB Bind
+Parameters](#lobbinds).  For larger data, use the [Lob Class](#lobclass).
+
+Similarly, when binding LONG as `oracledb.STRING`and LONG RAW as
+`oracledb.BUFFER`, data cannot be greater than 1 GB.
 
 When binding to get a UROWID value from the database, note that
 UROWIDs can take up to 5267 bytes when fetched from the database so
 `maxSize` should be set to at least this value.
 
-Note `oracledb.CURSOR` bind variables can be used only for PL/SQL OUT binds.
+##### <a name="executebindparamtype"></a> 4.2.6.2.4 `type`
+
+The `type` indicates to the database how data should be handled.
+
+If `type` is not set for IN or IN OUT binds its value will be derived from the
+type of the input data.  It is recommended to explicitly set the type because
+null data will be assumed to be `oracledb.STRING`.  With OUT binds, `type`
+defaults to `oracledb.STRING`.
+
+Commonly, `type` is set to a [node-oracledb Type
+Constant](#oracledbconstantsnodbtype) that matches the JavaScript type.
+Node-oracledb and the underlying Oracle client libraries then do a mapping to,
+or from, the actual database data type.  Since Oracle Database does not provide
+actual database type information prior to binding, some special cases need
+`type` set explicitly to avoid data conversion issues.  For example, binding a
+String to an NVARCHAR needs `type` set to `oracledb.DB_TYPE_NVARCHAR`.
+
+For each JavaScript and database type combination, the `type` property can be
+one of the values in the following table.  For example, if you are inserting
+data from a String into an Oracle Database CHAR column, then set `type` to
+`oracledb.DB_TYPE_CHAR`.
+
+This table does not cover implicit data type conversions that will take place in
+Oracle libraries.  In particular many Oracle types will allow JavaScript values
+to be bound as `oracledb.STRING`.  For example, you can bind the string "1234"
+to insert into a NUMBER column.  Another example is that the string "31-01-2019"
+can be bound for insert into a DATE column (if the
+[NLS_DATE_FORMAT](#environmentvariables) is "DD-MM-YYYY").
+
+Similarly when binding a JavaScript Date, `type` can be set to `oracledb.DATE`
+for all date and timestamp database types.  This bind type is the default for
+Date IN and IN OUT binds.  Using the date or timestamp type constant
+corresponding to the database type may be preferred when binding in
+node-oracledb 4.2.  This reduces type conversions and it may be useful in cases
+such as when calling overloaded PL/SQL procedures, or to ensure the correct
+index is used by a query.
+
+Node.js Type  | Database Type                  | Bind `type` value                 | Notes                                                                           |
+--------------|--------------------------------|-----------------------------------|---------------------------------------------------------------------------------|
+String        | VARCHAR2                       | `oracledb.STRING` or `oracledb.DB_TYPE_VARCHAR`     | Default `type` for String IN and IN OUT binds                 |
+String        | CHAR                           | `oracledb.DB_TYPE_CHAR`                             | This combination is supported from node-oracledb 4.2          |
+String        | NVARCHAR                       | `oracledb.DB_TYPE_NVARCHAR`                         | This combination is supported from node-oracledb 4.2          |
+String        | NCHAR                          | `oracledb.DB_TYPE_NCHAR`                            | This combination is supported from node-oracledb 4.2          |
+String        | LONG                           | `oracledb.STRING` or `oracledb.DB_TYPE_VARCHAR`     | Not available for PL/SQL binds                                |
+Number        | NUMBER                         | `oracledb.NUMBER` or `oracledb.DB_TYPE_NUMBER`      | Default `type` for Number IN and IN OUT binds                 |
+Number        | BINARY_DOUBLE                  | `oracledb.DB_TYPE_BINARY_DOUBLE`                    | This combination is supported from node-oracledb 4.2          |
+Number        | BINARY_FLOAT                   | `oracledb.DB_TYPE_BINARY_FLOAT`                     | This combination is supported from node-oracledb 4.2          |
+Number        | BINARY_INTEGER                 | `oracledb.DB_TYPE_BINARY_INTEGER`                   | This combination is supported from node-oracledb 4.2. Only supported for PL/SQL binds |
+Date          | DATE                           | `oracledb.DB_TYPE_DATE`                             | This combination is supported from node-oracledb 4.2.  It is **not** the default for Date IN and IN OUT binds |
+Date          | TIMESTAMP                      | `oracledb.DB_TYPE_TIMESTAMP`                        | This combination is supported from node-oracledb 4.2          |
+Date          | TIMESTAMP WITH TIME ZONE       | `oracledb.DB_TYPE_TIMESTAMP_TZ`                     | This combination is supported from node-oracledb 4.2          |
+Date          | TIMESTAMP WITH LOCAL TIME ZONE | `oracledb.DATE` or `oracledb.DB_TYPE_TIMESTAMP_LTZ` | Default `type` for Date IN and IN OUT binds                   |
+Buffer        | RAW                            | `oracledb.BUFFER` or `oracledb.DB_TYPE_RAW`         | Default `type` for Buffer IN and IN OUT binds                 |
+Buffer        | LONG RAW                       | `oracledb.BUFFER` or `oracledb.DB_TYPE_RAW`         | Not available for PL/SQL binds |
+Lob           | CLOB                           | `oracledb.CLOB` or `oracledb.DB_TYPE_CLOB`          | Default `type` for CLOB Lob IN and IN OUT binds.  Binding a String as `oracledb.DB_TYPE_VARCHAR` will generally be preferred |
+Lob           | BLOB                           | `oracledb.BLOB` or `oracledb.DB_TYPE_BLOB`          | Default `type` for BLOB Lob IN and IN OUT binds.  Binding a Buffer as `oracledb.DB_TYPE_RAW` will generally be preferred |
+Lob           | NCLOB                          | `oracledb.NCLOB` or `oracledb.DB_TYPE_NCLOB`        | This combination is supported from node-oracledb 4.2. Binding a String with `type` of `oracledb.DB_TYPE_NVARCHAR` will generally be preferred |
+String        | ROWID                          | `oracledb.STRING` or `oracledb.DB_TYPE_VARCHAR`     |                                                                   |
+String        | UROWID                         | `oracledb.STRING` or `oracledb.DB_TYPE_VARCHAR`     |                                                                   |
+String        | XMLType                        | `oracledb.STRING` or `oracledb.DB_TYPE_VARCHAR`     | Size is limited to the maximum database VARCHAR length            |
+ResultSet     | CURSOR                         | `oracledb.CURSOR` or `oracledb.DB_TYPE_CURSOR`      | Only supported for OUT binds                                      |
+DbObject      | Named type or collection       | A string with the name of the Oracle Database object or collection, or a [DbObject](#dbobjectclass) | This combination is supported from node-oracledb 4.0 |
+
+When binding LONG, LONG RAW, CLOB, NCLOB, and BLOB database types using string
+or buffer bind types, then data is limited to a maxium size of 1 GB.
+
+Binding Oracle Database INTERVAL types, BFILE, or BOOLEAN is not supported.
+
+##### <a name="executebindparamval"></a> 4.2.6.2.5 `val`
+
+The input value or variable to be used for an IN or IN OUT bind variable.
 
 ##### <a name="executeoptions"></a> 4.2.6.3 `execute()`: Options
 
@@ -3103,10 +3205,10 @@ convention.
 
 The `type` property can be set to one of:
 
-- [`oracledb.STRING`](#oracledbconstantsnodbtype) for number, date and
-  raw columns in a query to indicate they should be returned as
-  Strings instead of their native format.  CLOB column data can also
-  be returned as Strings instead of [Lob](#lobclass) instances.
+- [`oracledb.STRING`](#oracledbconstantsnodbtype) for number, date and raw
+  columns in a query to indicate they should be returned as Strings instead of
+  their native format.  For CLOB and NCLOB columns, data will be returned as
+  Strings instead of [Lob](#lobclass) instances.
 
   Raw columns returned as strings will be returned as hex-encoded
   strings.  The maximum length of a string created by type mapping
@@ -3386,12 +3488,9 @@ characteristics.  If all values in all records for a particular bind
 variable are null, the type of that bind is `oracledb.STRING` with a
 maximum size of 1.
 
-The maximum sizes of strings and buffers are determined by scanning
-all records in the bind data.
-
-If a [`bindDefs`](#executemanyoptbinddefs) property is used, no data
-scanning occurs.  This property explicitly specifies the
-characteristics of each bind variable.
+The maximum sizes of strings and buffers are determined by scanning all records
+unless a [`bindDefs`](#executemanyoptbinddefs) property is used.  This property
+explicitly specifies the characteristics of each bind variable.
 
 ##### <a name="executemanyoptions"></a> 4.2.7.3 `executeMany()`: Options
 
@@ -3464,7 +3563,7 @@ BindDef Property | Description
 ---------------|------------
 `dir` | The direction of the bind.  One of the [Execute Bind Direction Constants](#oracledbconstantsbinddir) `oracledb.BIND_IN`, `oracledb.BIND_INOUT`  or `oracledb.BIND_OUT`.  The default is `oracledb.BIND_IN`.
 `maxSize` | Required for Strings and Buffers.  Ignored for other types.  Specifies the maximum number of bytes allocated when processing each value of this bind variable.  When data is being passed into the database, `maxSize` should be at least the size of the longest value.  When data is being returned from the database, `maxSize` should be the size of the longest value.  If `maxSize` is too small, `executeMany()` will throw an error that is not handled by [`batchErrors`](#executemanyoptbatcherrors).
-`type` | The node-oracledb or JavaScript data type to be bound.  One of the [Node-oracledb Type Constants](#oracledbconstantsnodbtype) `oracledb.BLOB`, `oracledb.BUFFER`, `oracledb.CLOB`, `oracledb.CURSOR`, `oracledb.DATE`, `oracledb.NUMBER`, or `oracledb.STRING`.
+`type` | Specifies the mapping between the node-oracledb and database data type. See the `execute()` [`type`](#executebindparamtype) table.
 
 ###### <a name="executemanyoptdmlrowcounts"></a> 4.2.7.3.4 `dmlRowCounts`
 
@@ -4634,7 +4733,8 @@ Lob objects can be used to access Oracle Database CLOB and BLOB data.
 
 A Lob object implements the [Node.js Stream][16] interface.
 
-See [Working with CLOB and BLOB Data](#lobhandling) and [LOB Bind Parameters](#lobbinds) for more information.
+See [Working with CLOB, NCLOB and BLOB Data](#lobhandling) and [LOB Bind
+Parameters](#lobbinds) for more information.
 
 ### <a name="lobproperties"></a> 7.1 Lob Properties
 
@@ -4655,7 +4755,8 @@ accessing or modifying the LOB value.
 readonly Number length
 ```
 
-Length of a queried LOB in bytes (for BLOBs) or characters (for CLOBs).
+Length of a queried LOB in bytes (for BLOBs) or characters (for CLOBs and
+NCLOBs).
 
 #### <a name="proplobpiecesize"></a> 7.1.3 `lob.pieceSize`
 
@@ -4663,7 +4764,7 @@ Length of a queried LOB in bytes (for BLOBs) or characters (for CLOBs).
 Number pieceSize
 ```
 
-The number of bytes (for BLOBs) or characters (for CLOBs) to read for
+The number of bytes (for BLOBs) or characters (for CLOBs and NCOBs) to read for
 each Stream `data` event of a queried LOB.
 
 The default value is [`chunkSize`](#proplobchunksize).
@@ -9401,9 +9502,9 @@ Also see [`connection.getStatementInfo()`](#getstmtinfo).
 
 #### <a name="typemap"></a> 15.1.6 Query Result Type Mapping
 
-Supported Oracle number, date, character, ROWID, UROWID, LONG and LONG
-RAW column types are selected as Numbers, Dates, Strings, or Buffers.
-BLOBs and CLOBs are selected into [Lobs](#lobclass).
+Oracle number, date, character, ROWID, UROWID, LONG and LONG RAW column types
+are selected as Numbers, Dates, Strings, or Buffers.  BLOBs and CLOBs are
+selected into [Lobs](#lobclass) by default.
 
 The default mapping for some types can be changed using
 [`fetchAsBuffer`](#propdbfetchasbuffer), or
@@ -9422,10 +9523,6 @@ Details are in the following sections.
 
 Columns of database type CHAR, VARCHAR2, NCHAR and NVARCHAR are
 returned from queries as JavaScript strings.
-
-Note that binding NCHAR and NVARCHAR for [DML][14] is not supported
-and may cause unexpected character set translation, see [Bind Data
-Type Notes](#binddatatypenotes).
 
 ##### <a name="numberhandling"></a> 15.1.6.2 Fetching Numbers
 
@@ -9640,16 +9737,12 @@ environment variable is also set.
 ##### <a name="fetchlob"></a> 15.1.6.5 Fetching BLOB, CLOB and NCLOB
 
 By default BLOB, CLOB and NCLOB columns are fetched into [Lob](#lobclass)
-instances.  For LOBs less than 1 GB in length it can be more convenient to fetch
-them directly into Buffers or Strings by using the global
+instances.  For LOBs less than 1 GB in length it can be more efficient and
+convenient to fetch them directly into Buffers or Strings by using the global
 [`fetchAsBuffer`](#propdbfetchasbuffer) or
 [`fetchAsString`](#propdbfetchasstring) settings, or the per-column
-[`fetchInfo`](#propexecfetchinfo) setting.  See the section [Working with CLOB
-and BLOB Data](#lobhandling).
-
-Note that binding NCLOB for [DML][14] is not supported and may cause
-unexpected character set translation, see [Bind Data Type
-Notes](#binddatatypenotes).
+[`fetchInfo`](#propexecfetchinfo) setting.  See the section [Working with CLOB,
+NCLOB and BLOB Data](#lobhandling).
 
 ##### <a name="fetchlong"></a> 15.1.6.6 Fetching LONG and LONG RAW
 
@@ -10335,12 +10428,13 @@ Implicit Result Set 2
 
 A runnable example is in [impres.js][138].
 
-## <a name="lobhandling"></a> 17. Working with CLOB and BLOB Data
+## <a name="lobhandling"></a> 17. Working with CLOB, NCLOB and BLOB Data
 
-Oracle Database uses LOB data types to store long objects. The CLOB
-type is used for character data and the BLOB type is used for binary
-data.  In node-oracledb, LOBs can be represented by instances of the
-[Lob](#lobclass) class or as Strings and Buffers.
+Oracle Database uses LOB data types to store long objects. The CLOB type is used
+for character data and the BLOB type is used for binary data.  NCLOB can hold
+character data in the database's alternative [national character set][168].  In
+node-oracledb, LOBs can be represented by instances of the [Lob](#lobclass)
+class or as Strings and Buffers.
 
 There are runnable LOB examples in the GitHub [examples][3] directory.
 
@@ -10390,6 +10484,17 @@ const result = await connection.execute(
 Buffers can similarly be bound for inserting into, or updating, BLOB
 columns.
 
+When binding Strings to NCLOB columns, explicitly specify the bind
+[`type`](#executebindparamtype) as
+[`oracledb.DB_TYPE_NVARCHAR`](#oracledbconstantsdbtype):
+
+```javascript
+const result = await connection.execute(
+  `UPDATE mylobs SET mynclobcol = :ncbv WHERE id = :idbv`,
+  { idbv: 1,  ncbv: { type: oracledb.DB_TYPE_NVARCHAR, val: str } }
+);
+```
+
 When using PL/SQL, a procedure:
 
 ```sql
@@ -10405,7 +10510,7 @@ const bigBuf = Buffer.from([. . .]);
 const result = await connection.execute(
   `BEGIN lobs_in(:id, :c, :b); END;`,
   { id: 20,
-    c: bigStr,    // type and direction are optional for IN binds
+    c: bigStr,    // type and direction are optional for CLOB and BLOB IN binds
     b: bigBuf }
   }
 );
@@ -10423,7 +10528,7 @@ as a String or Buffer in Node.js or node-oracledb, it will need to be streamed
 from a [Lob](#lobclass), as discussed later in [Streaming
 Lobs](#streamsandlobs).
 
-For example, to make every CLOB queried by the application be returned
+For example, to make every CLOB and NCLOB queried by the application be returned
 as a string:
 
 ```javascript
@@ -10494,9 +10599,10 @@ if (result.rows.length === 0) {
 
 #### Getting LOBs as String or Buffer from PL/SQL
 
-PL/SQL LOB OUT parameters can be bound as `oracledb.STRING` or
-`oracledb.BUFFER`.  See [LOB Bind Parameters](#lobbinds) for size
-considerations regarding LOB binds.
+To get PL/SQL LOB OUT parameters as String or Buffer, set the bind `type` as:
+- `oracledb.STRING` for CLOB
+- `oracledb.DB_TYPE_NVARCHAR` for NCLOB
+- `oracledb.BUFFER` for BLOB
 
 ```javascript
 const result = await connection.execute(
@@ -10524,7 +10630,7 @@ considerations regarding LOB binds.
 ### <a name="streamsandlobs"></a> 17.3 Streaming Lobs
 
 The [Lob Class](#lobclass) in node-oracledb implements the [Node.js
-Stream][16] interface to provide streaming access to CLOB and BLOB
+Stream][16] interface to provide streaming access to CLOB, NCLOB and BLOB
 database columns and to PL/SQL bind parameters.
 
 Node-oracledb Lobs can represent persistent LOBs (those permanently
@@ -10546,8 +10652,8 @@ mode, data is piped to another stream, or events are posted as data is
 read.  In paused mode the application must explicitly call `read()` to
 get data.
 
-The `read(size)` unit is in characters for CLOBs and in bytes for
-BLOBs.
+The `read(size)` unit is in bytes for BLOBs, and characters for CLOBs and
+NCLOBs.
 
 When reading a LOB from the database, resources are automatically released at
 completion of the readable stream or if there is a LOB error.  The
@@ -10654,8 +10760,8 @@ will be automatically closed and the execution
 
 #### LOB Query Example
 
-Each CLOB or BLOB in a `SELECT` returns a [Lob](#lobclass) by default.
-The table:
+Each CLOB, NCLOB or BLOB in a `SELECT` returns a [Lob](#lobclass) by default.
+For example, the table:
 
 ```sql
 CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
@@ -10667,7 +10773,7 @@ const result = await connection.execute(`SELECT c FROM mylobs WHERE id = 1`);
 
 if (result.rows.length === 1) {
   const clob = result.rows[0][0]; // Instance of a node-oracledb Lob
-  // console.log(clob.type);      // -> 2006 aka oracledb.CLOB
+  // console.log(clob.type);      // -> 2017 aka oracledb.CLOB
   . . .                           // do something with the Lob
 }
 ```
@@ -10696,6 +10802,8 @@ const blob = result.outBinds.b;
 
 . . . // do something with the Lobs
 ```
+
+To bind a Lob object to an NCLOB parameter, set `type` to `oracledb.DB_TYPE_NCLOB`.
 
 #### Streaming Out a Lob
 
@@ -10747,11 +10855,11 @@ lob.on('end', function() {
 
 ```
 
-Node-oracledb's [`lob.pieceSize`](#proplobpiecesize) can be used to
-control the number of bytes retrieved for each readable `data` event.
-This sets the number of bytes (for BLOBs) or characters (for CLOBs).
-The default is [`lob.chunkSize`](#proplobchunksize).  The
-recommendation is for it to be a multiple of `chunkSize`.
+Node-oracledb's [`lob.pieceSize`](#proplobpiecesize) can be used to control the
+number of bytes retrieved for each readable `data` event.  This sets the number
+of bytes (for BLOBs) or characters (for CLOBs and NCLOBs).  The default is
+[`lob.chunkSize`](#proplobchunksize).  The recommendation is for it to be a
+multiple of `chunkSize`.
 
 See [lobbinds.js][52] for a full example.
 
@@ -10972,7 +11080,7 @@ const result = await connection.execute(
 );
 ```
 
-LOB handling as discussed in the section [Working with CLOB and BLOB
+LOB handling as discussed in the section [Working with CLOB, NCLOB and BLOB
 Data](#lobhandling).
 
 ## <a name="bind"></a> 20. Bind Parameters for Prepared Statements
@@ -10986,9 +11094,9 @@ IN binds are values passed into the database.  OUT binds are used to
 retrieve data.  IN OUT binds are passed in, and may return a different
 value after the statement executes.
 
-Using bind parameters is recommended in preference to constructing SQL
+*Using bind parameters is recommended in preference to constructing SQL
 or PL/SQL statements by string concatenation or template literals.
-This is for performance and security.
+This is for performance and security.*
 
 Inserted data that is bound is passed to the database separately from
 the statement text.  It can never be executed directly.  This means
@@ -11017,11 +11125,11 @@ into the statement during execution of SQL or PL/SQL.
 
 #### <a name="bindbyname"></a> Bind by Name
 
-To bind data values, the [`bindParams`](#executebindParams) argument
-of `execute()` should contain bind variable objects with
-[`dir`](#executebindParams), [`val`](#executebindParams),
-[`type`](#executebindParams) properties.  Each bind variable object
-name must match the statement's bind parameter name:
+To bind data values, the [`bindParams`](#executebindParams) argument of
+`execute()` should contain bind variable objects with
+[`dir`](#executebindparamdir), [`val`](#executebindparamval),
+[`type`](#executebindparamtype) properties.  Each bind variable object name must
+match the statement's bind parameter name:
 
 ```javascript
 const oracledb = require('oracledb');
@@ -11030,7 +11138,7 @@ const result = await connection.execute(
   `INSERT INTO countries VALUES (:country_id, :country_name)`,
   {
     country_id: { dir: oracledb.BIND_IN, val: 90, type: oracledb.NUMBER },
-    country_name: { dir: oracledb.BIND_IN, val: "Tonga", type:oracledb.STRING }
+    country_name: { dir: oracledb.BIND_IN, val: "Tonga", type: oracledb.STRING }
   }
 );
 
@@ -11044,15 +11152,14 @@ For IN binds:
 
 - The `val` attribute may be a constant or a JavaScript variable.
 
-- If `type` is omitted, it is inferred from the bind data value.  If
-  `type` is set, it can be `oracledb.STRING`, `oracledb.NUMBER`,
-  `oracledb.DATE` or `oracledb.BUFFER` matching the standard Node.js
-  type of the data being passed into the database.  Use a bind type of
-  `oracledb.BLOB` or `oracledb.CLOB` to pass in [Lob](#lobclass)
-  instances.  The type `oracledb.BUFFER` can bind a Node.js Buffer to
-  an Oracle Database RAW, LONG RAW or BLOB type.  For binding Oracle
-  Database objects, it can also be the name of an Oracle Database
-  object or collection, or a [DbObject Class](#dbobjectclass) type.
+- If `type` is omitted, it is derived from the bind data value.  If it is set,
+  it can be one of the values in the [`type`](#executebindparamtype) table.
+  Typically `type` is one of `oracledb.STRING`, `oracledb.NUMBER`,
+  `oracledb.DATE` or `oracledb.BUFFER` matching the standard Node.js type of the
+  data being passed into the database.  Use a bind type of `oracledb.BLOB` or
+  `oracledb.CLOB` to pass in [Lob](#lobclass) instances.  For binding Oracle
+  Database objects, it can also be the name of an Oracle Database object or
+  collection, or a [DbObject Class](#dbobjectclass) type.
 
 Since `dir` and `type` have defaults, these attributes are sometimes
 omitted for IN binds.  Binds can be like:
@@ -11114,33 +11221,25 @@ name](#bindbyname) syntax should be used.
 
 #### <a name="binddatatypenotes"></a> Bind Data Type Notes
 
-When binding a JavaScript Date value in an `INSERT` statement, it is
-inserted as if it represented a TIMESTAMP WITH LOCAL TIME ZONE value.
-In the database, TIMESTAMP WITH LOCAL TIME ZONE dates are normalized
-to the database time zone, or to the time zone specified for TIMESTAMP
-WITH TIME ZONE columns.  If later queried, they are returned in the
-session time zone.  See [Fetching Date and Timestamps](#datehandling)
-for more information.
+When binding a JavaScript Date value in an `INSERT` statement, by default the
+bind `type` is equivalent to TIMESTAMP WITH LOCAL TIME ZONE.  In the database,
+TIMESTAMP WITH LOCAL TIME ZONE dates are normalized to the database time zone,
+or to the time zone specified for TIMESTAMP WITH TIME ZONE columns.  If later
+queried, they are returned in the session time zone.  See [Fetching Date and
+Timestamps](#datehandling) for more information.
 
 The type `oracledb.CURSOR` cannot be used with IN binds.
 
-Binding NCHAR, NVARCHAR or NCLOB for [DML][14] may result in incorrect
-character mapping, depending on the database character set and the
-database national character set.  It may work in the case where the
-database character set can safely convert to the database national
-character set.
-
 ### <a name="outbind"></a> 20.2 OUT and IN OUT Bind Parameters
 
-OUT binds are used to retrieve data from the database.  IN OUT binds
-are passed in, and may return a different value after the statement
+OUT binds are used to retrieve data from the database.  IN OUT binds are passed
+into the database, and may return a different value after the statement
 executes.  IN OUT binds can be used for PL/SQL calls, but not for SQL.
 
-For each OUT and IN OUT bind parameter in
-[`bindParams`](#executebindParams), a bind variable object containing
-[`dir`](#executebindParams), [`val`](#executebindParams),
-[`type`](#executebindParams), and [`maxSize`](#executebindParams)
-properties is used:
+For each OUT and IN OUT bind parameter in [`bindParams`](#executebindParams), a
+bind variable object containing [`dir`](#executebindparamdir),
+[`val`](#executebindparamval), [`type`](#executebindparamtype), and
+[`maxSize`](#executebindparammaxsize) properties is used:
 
 - The `dir` attribute should be `oracledb.BIND_OUT` or
   `oracledb.BIND_INOUT`, depending on whether data is only to be
@@ -11149,36 +11248,17 @@ properties is used:
 - The `val` parameter in needed when binding IN OUT to pass a value
   into the database.  It is not used for OUT binds.
 
-- For `oracledb.BIND_INOUT` parameters, the `type` attribute is
-  inferred from the input data type.  Alternatively it can be
-  explicitly set to `oracledb.STRING`, `oracledb.NUMBER`,
-  `oracledb.DATE`, `oracledb.BLOB`, `oracledb.CLOB` or
-  `oracledb.BUFFER`, or the name of an Oracle Database object or
-  collection, or a [DbObject Class](#dbobjectclass) type.  This must
-  match the data type of the Node.js value or variable.  The output
-  data type will always be the same as the input data type.
+- The `type` attribute can be one of the constants as discussed in [`execute()`
+  `bindParams` `type`](#executebindparamtype).  This determines the mapping
+  between the database type and the JavaScript type.
 
-  For `oracledb.BIND_OUT` parameters the `type` attribute will be the
-  node-oracledb or Node.js data type that data will be returned as.
-  It should be `oracledb.STRING`, `oracledb.NUMBER`, `oracledb.DATE`,
-  `oracledb.BUFFER`, `oracledb.CURSOR`, `oracledb.BLOB`, or
-  `oracledb.CLOB`, or the name of an Oracle Database object or
-  collection, or a [DbObject Class](#dbobjectclass) type.  If `type`
-  is not specified for OUT binds then `oracledb.STRING` is assumed.
+  The attribute should be set for OUT binds.  If `type` is not specified, then
+  `oracledb.STRING` is assumed.
 
-  Oracle Database CLOB data can be bound with a `type` of
-  `oracledb.STRING` to return a Node.js String, or as `type` of
-  `oracledb.CLOB` to return a [Lob instance](#lobclass).
-
-  Oracle Database BLOB data can be bound with a `type` of
-  `oracledb.BUFFER` to return a Node.js Buffer, or as `type` of
-  `oracledb.BLOB` to return a [Lob instance](#lobclass).
-
-  Oracle Database RAW and LONG RAW data can be bound with a `type` of
-  `oracledb.BUFFER` to return a Node.js Buffer.
-
-  Oracle Database LONG, ROWID and UROWID data can be bound with a
-  `type` of `oracledb.STRING` to return a JavaScript String.
+  For IN OUT binds, `type` can inferred from the input data value type.  However
+  is recommended to explicitly set `type`, because the correct value cannot be
+  determined if the input data is null.  The output data type will always be the
+  same as the input data type.
 
 - A `maxSize` attribute should be set for `oracledb.STRING` or
   `oracledb.BUFFER` OUT or IN OUT binds.  This is the maximum number
@@ -11187,17 +11267,18 @@ properties is used:
   numeric or value error: character string buffer too small* or
   *NJS-016: buffer is too small for OUT binds* occurs.
 
-  A default value of 200 bytes is used when `maxSize` is not provided
-  for OUT binds of type `oracledb.STRING` or `oracledb.BUFFER`.
+  A default value of 200 bytes is used when `maxSize` is not provided for OUT
+  binds that are returned in Strings or Buffers.
 
   A string representing a UROWID may be up to 5267 bytes long in
   node-oracledb.
 
 For [PL/SQL Associative Array binds](#plsqlindexbybinds) a
-[`maxArraySize`](#executebindParams) property is also required
+[`maxArraySize`](#executebindparammaxarraysize) property is also required.
 
-Note that before a PL/SQL block returns, all OUT binds should be set
-to NULL or, for REF CURSORS, to an empty result set.  See this [GitHub
+Note that before a PL/SQL block returns, all OUT binds should be explicitly set
+to a value.  This includes bind variables that will be ignored.  Set simple
+variables to NULL.  Set REF CURSORS to an empty result set.  See this [GitHub
 Issue][102].
 
 #### <a name="outbinds"></a> Accessing OUT Bind Values
@@ -11290,11 +11371,10 @@ the ROWIDs of newly inserted rows.  Another common use case is to
 return [auto incremented column values ](#autoincrement).
 
 Bind parameters for DML RETURNING statements can use `oracledb.BLOB`,
-`oracledb.CLOB`, `oracledb.STRING`, `oracledb.NUMBER` or
-`oracledb.DATE` for the BIND_OUT [`type`](#executebindParams).  To
-bind named Oracle objects use the class name or
-[DbObject](#dbobjectclass) prototype class for the bind type, as shown
-for object binds in [Fetching Oracle Database Objects and
+`oracledb.CLOB`, `oracledb.STRING`, `oracledb.NUMBER` or `oracledb.DATE` for the
+BIND_OUT [`type`](#executebindparamtype).  To bind named Oracle objects use the
+class name or [DbObject](#dbobjectclass) prototype class for the bind type, as
+shown for object binds in [Fetching Oracle Database Objects and
 Collections](#objects).
 
 Oracle Database DATE, TIMESTAMP, TIMESTAMP WITH LOCAL TIME ZONE and
@@ -11304,8 +11384,8 @@ desired.  ROWID and UROWID data to be returned can be bound as
 `oracledb.STRING`.  Note that a string representing a UROWID may be up
 to 5267 bytes long.
 
-For `oracledb.STRING` types, an error occurs if
-[`maxSize`](#executebindParams) is not large enough to hold a returned
+For string and buffer types, an error occurs if
+[`maxSize`](#executebindparammaxsize) is not large enough to hold a returned
 value.
 
 Note each DML RETURNING bind OUT parameter is returned as an array
@@ -11466,27 +11546,29 @@ completes. Make sure to do this in all PL/SQL code paths including in
 error handlers. This prevents node-oracledb throwing the error
 *DPI-007: invalid OCI handle or descriptor*.
 
-In many cases it will be easier to work with JavaScript Strings and
-Buffers instead of [Lobs](#lobclass).  These types can be bound
-directly for SQL IN binds to insert into, or update, LOB columns.
-They can also be bound to PL/SQL LOB parameters.  Use the bind type
-[`oracledb.STRING`](#oracledbconstants) for CLOBs and
-[`oracledb.BUFFER`](#oracledbconstants) for BLOBs.  The default size
+In many cases it will be easier to work with JavaScript Strings and Buffers
+instead of [Lobs](#lobclass).  These types can be bound directly for SQL IN
+binds to insert into, or update, LOB columns.  They can also be bound to PL/SQL
+LOB parameters.  Set the bind `type` to
+[`oracledb.STRING`](#oracledbconstantsnodbtype) for CLOBs,
+[`oracledb.DB_TYPE_NVARCHAR`](#oracledbconstantsdbtype) for NCLOBs, and
+[`oracledb.BUFFER`](#oracledbconstantsnodbtype) for BLOBs.  The default size
 used for these binds in the OUT direction is 200, so set `maxSize`
 appropriately.
 
-See [Working with CLOB and BLOB Data](#lobhandling) for examples and
-more information on binding and working with LOBs.
+See [Working with CLOB, NCLOB and BLOB Data](#lobhandling) for examples and more
+information on binding and working with LOBs.
 
 #### Size Limits for Binding LOBs to Strings and Buffers
 
-When CLOBs are bound as `oracledb.STRING`, or BLOBs are bound as
-`oracledb.BUFFER`, the limitation on binding is the memory available
-to Node.js and the V8 engine.  For data larger than several megabytes,
-it is recommended to bind as `oracledb.CLOB` or `oracledb.BLOB` and
-use [Lob streaming](#streamsandlobs).  If you try to create large
-Strings or Buffers in Node.js you will see errors like *JavaScript
-heap out of memory*, or other space related messages.
+When CLOBs are bound as `oracledb.STRING`, BCLOBs bound as
+`oracledb.DB_TYPE_NVARCHAR`, or BLOBs are bound as `oracledb.BUFFER`, then their
+size is limited to 1GB.  Commonly the practical limitation is the memory
+available to Node.js and the V8 engine.  For data larger than several megabytes,
+it is recommended to bind as `oracledb.CLOB` or `oracledb.BLOB` and use [Lob
+streaming](#streamsandlobs).  If you try to create large Strings or Buffers in
+Node.js you will see errors like *JavaScript heap out of memory*, or other space
+related messages.
 
 Internally, temporary LOBs are used when binding Strings and Buffers
 larger than 32 KB for PL/SQL calls.  Freeing of the temporary LOB is
@@ -11917,18 +11999,17 @@ After executing either of these `mytab` will contain:
       1234         10
 ```
 
-The [`type`](#executebindParams) must be set for PL/SQL array binds.
-It can be set to [`oracledb.STRING`](#oracledbconstantsnodbtype) or
+The [`type`](#executebindparamtype) must be set for PL/SQL array binds.  It can
+be set to [`oracledb.STRING`](#oracledbconstantsnodbtype) or
 [`oracledb.NUMBER`](#oracledbconstantsnodbtype).
 
-For OUT and IN OUT binds, the [`maxArraySize`](#executebindParams)
-bind property must be set.  Its value is the maximum number of
-elements that can be returned in an array.  An error will occur if the
-PL/SQL block attempts to insert data beyond this limit.  If the PL/SQL
-code returns fewer items, the JavaScript array will have the actual
-number of data elements and will not contain null entries.  Setting
-`maxArraySize` larger than needed will cause unnecessary memory
-allocation.
+For OUT and IN OUT binds, the [`maxArraySize`](#executebindparammaxarraysize)
+bind property must be set.  Its value is the maximum number of elements that can
+be returned in an array.  An error will occur if the PL/SQL block attempts to
+insert data beyond this limit.  If the PL/SQL code returns fewer items, the
+JavaScript array will have the actual number of data elements and will not
+contain null entries.  Setting `maxArraySize` larger than needed will cause
+unnecessary memory allocation.
 
 For IN OUT binds, `maxArraySize` can be greater than the number of
 elements in the input array.  This allows more values to be returned
@@ -11936,12 +12017,12 @@ than are passed in.
 
 For IN binds, `maxArraySize` is ignored, as also is `maxSize`.
 
-For `oracledb.STRING` IN OUT or OUT binds, the string length
-[`maxSize`](#executebindParams) property may be set.  If it is not set
-the memory allocated per string will default to 200 bytes.  If the
-value is not large enough to hold the longest string data item in the
-collection a runtime error occurs.  To avoid unnecessary memory
-allocation, do not let the size be larger than needed.
+For IN OUT or OUT binds that are returned as String or Buffer, the
+[`maxSize`](#executebindparammaxsize) property may be set.  If it is not set the
+memory allocated per string will default to 200 bytes.  If the value is not
+large enough to hold the longest data item in the collection, then a runtime
+error occurs.  To avoid unnecessary memory allocation, do not let the size be
+larger than needed.
 
 The next example fetches an array of values from a table.  First,
 insert these values:
@@ -13158,8 +13239,8 @@ FROM nls_database_parameters
 WHERE parameter = 'NLS_CHARACTERSET'
 ```
 
-To find the database 'national character set' used for NCHAR and related types,
-execute the query:
+To find the database ['national character set'][168] used for NCHAR and related
+types, execute the query:
 
 ```sql
 SELECT value AS db_ncharset
@@ -13950,7 +14031,7 @@ const sid = r.rows[0][0];  // session id
 
 This can be used with `V$SESSTAT` to find the current number of
 round-trips.  A second connection is used to avoid affecting the
-count.  If your user doesn't have access to the V$ views, then use a
+count.  If your user does not have access to the V$ views, then use a
 SYSTEM connection:
 
 ```javascript
@@ -14674,3 +14755,4 @@ can be asked at [AskTom][158].
 [165]: https://support.oracle.com/epmos/faces/DocumentDisplay?id=340512.1
 [166]: https://www.youtube.com/watch?v=rhOVF82KY7E
 [167]: https://www.youtube.com/watch?v=0TdqGlA4bxI
+[168]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-AA8D783D-7337-4A61-BD7D-5DB580C46D9A

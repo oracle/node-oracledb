@@ -131,6 +131,7 @@
 #define NJS_DATATYPE_CURSOR             DPI_ORACLE_TYPE_STMT
 #define NJS_DATATYPE_BUFFER             DPI_ORACLE_TYPE_RAW
 #define NJS_DATATYPE_CLOB               DPI_ORACLE_TYPE_CLOB
+#define NJS_DATATYPE_NCLOB              DPI_ORACLE_TYPE_NCLOB
 #define NJS_DATATYPE_BLOB               DPI_ORACLE_TYPE_BLOB
 #define NJS_DATATYPE_OBJECT             DPI_ORACLE_TYPE_OBJECT
 
@@ -708,7 +709,6 @@ struct njsVariable {
     njsDbObjectType *objectType;
     dpiVar *dpiVarHandle;
     uint32_t bindDir;
-    uint32_t bindDataType;
     uint32_t maxArraySize;
     uint32_t maxSize;
     uint32_t dbSizeInBytes;
@@ -1017,7 +1017,6 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
 void njsVariable_free(njsVariable *var);
 bool njsVariable_getArrayValue(njsVariable *var, uint32_t pos, njsBaton *baton,
         napi_env env, napi_value *value);
-uint32_t njsVariable_getDataType(njsVariable *var);
 bool njsVariable_getMetadataMany(njsVariable *vars, uint32_t numVars,
         napi_env env, bool extended, napi_value *metadata);
 bool njsVariable_getMetadataOne(njsVariable *var, napi_env env, bool extended,

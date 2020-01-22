@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -895,5 +895,324 @@ describe("72. lobBind2.js", function() {
     }); // 72.2.6
 
   }); // 72.2
+
+  describe("72.3 NCLOB", function() {
+
+    before(async function() {
+
+      const sql = `
+          BEGIN
+              DECLARE
+                  e_table_missing EXCEPTION;
+                  PRAGMA EXCEPTION_INIT(e_table_missing, -00942);
+              BEGIN
+                  EXECUTE IMMEDIATE('DROP TABLE nodb_tab_nclob72 PURGE');
+              EXCEPTION
+                  WHEN e_table_missing
+                      THEN NULL;
+              END;
+              EXECUTE IMMEDIATE ('
+                  CREATE TABLE nodb_tab_nclob72 (
+                      id       NUMBER,
+                      content  NCLOB
+                  )');
+              END;`;
+
+      await connection.execute(sql);
+
+    }); // before
+
+    after(async function() {
+      const sql = `DROP TABLE nodb_tab_nclob72 PURGE`;
+      await connection.execute(sql);
+    }); // after
+
+    const verifyNclobValue = async function(sequence, expectLob) {
+
+      const sql = `select content from nodb_tab_nclob72 where id = :i`;
+      const result = await connection.execute(sql, { i: sequence });
+      const lob = result.rows[0][0];
+      should.exist(lob);
+      lob.setEncoding("utf8");
+
+      await new Promise((resolve, reject) => {
+
+        let nclobData = "";
+
+        lob.on("data", function(chunk) {
+          nclobData += chunk;
+        });
+
+        lob.on("error", function(err) {
+          should.not.exist(err, "lob.on 'error' event.");
+        });
+
+        lob.on("end", function() {
+
+          fs.readFile(expectLob, { encoding: "utf8"}, function(err, originalData) {
+            should.not.exist(err);
+
+            should.strictEqual(nclobData, originalData);
+            resolve();
+          });
+
+        }); // end event
+      });
+
+    }; // verifyNclobValue
+
+    const inFileName = './test/clobexample.txt';
+
+    it("72.3.1 BIND_IN, DML, a txt file", async function() {
+
+      const seq = 1;
+
+      const lob = await connection.createLob(oracledb.DB_TYPE_NCLOB);
+
+      await new Promise((resolve, reject) => {
+
+        lob.on("close", function(err) {
+          should.not.exist(err);
+
+          connection.commit(function(err) {
+            should.not.exist(err);
+            resolve();
+          });
+        }); // close event
+
+        lob.on("error", function(err) {
+          should.not.exist(err, "lob.on 'error' event.");
+        });
+
+        lob.on("finish", async function() {
+          const sql = `insert into nodb_tab_nclob72 (id, content)
+              values (:id, :bindvar)`;
+          const result = await connection.execute(sql,
+              { id: seq, bindvar: lob});
+          should.strictEqual(result.rowsAffected, 1);
+          await lob.close();
+        }); // finish event
+
+        const inStream = fs.createReadStream(inFileName);
+
+        inStream.on("error", function(err) {
+          should.not.exist(err, "inStream.on 'error' event.");
+        });
+
+        inStream.pipe(lob);
+
+      });
+
+      await verifyNclobValue(seq, inFileName);
+
+    }); // 72.3.1
+
+    it("72.3.2 BIND_IN, PL/SQL, a txt file", async function() {
+
+      const seq = 2;
+      const sql = `
+          CREATE OR REPLACE PROCEDURE nodb_proc_nclob_in (
+              p_num IN NUMBER,
+              p_lob IN NCLOB
+          ) AS
+          BEGIN
+              insert into nodb_tab_nclob72 (id, content) VALUES (p_num, p_lob);
+          END;`;
+
+      await connection.execute(sql);
+
+      const lob = await connection.createLob(oracledb.DB_TYPE_NCLOB);
+
+      await new Promise((resolve, reject) => {
+
+        lob.on("close", function(err) {
+          should.not.exist(err);
+          connection.commit(function(err) {
+            should.not.exist(err);
+            resolve();
+          });
+        });
+
+        lob.on("error", function(err) {
+          should.not.exist(err, "lob.on 'error' event.");
+        });
+
+        lob.on("finish", async function() {
+          const sql = `begin nodb_proc_nclob_in(:1, :2); end;`;
+          await connection.execute(sql, [seq, lob]);
+          await lob.close();
+        });
+
+        const inStream = fs.createReadStream(inFileName);
+
+        inStream.on("error", function(err) {
+          should.not.exist(err, "inStream.on 'error' event.");
+        });
+
+        inStream.pipe(lob);
+
+      });
+
+      await verifyNclobValue(seq, inFileName);
+
+      await connection.execute("DROP PROCEDURE nodb_proc_nclob_in");
+
+    }); // 72.3.2
+
+    it("72.3.3 Negative - invalid type", function(done) {
+      try {
+        connection.createLob('NCLOB', function(err, lob) {
+          should.exist(err);
+          should.not.exist(lob);
+          done();
+        });
+      } catch (err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-005:');
+        // NJS-005: invalid value for parameter 1
+        done();
+      }
+    }); // 72.3.3
+
+    it("72.3.4 Negative - invalid value", function(done) {
+
+      try {
+        connection.createLob(oracledb.STRING, function(err, lob) {
+          should.exist(err);
+          should.not.exist(lob);
+          done();
+        });
+      } catch (err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-005:');
+        // NJS-005: invalid value for parameter 1
+        done();
+      }
+
+    }); // 72.3.4
+
+    it("72.3.5 DML - UPDATE statement", async function() {
+
+      const seq = 5;
+
+      const sql = `
+          begin
+              insert into nodb_tab_nclob72 (id, content)
+              values ( :1, to_nclob('This is nclob data.') );
+          end;`;
+      await connection.execute(sql, [seq]);
+
+      const lob = await connection.createLob(oracledb.DB_TYPE_NCLOB);
+
+      await new Promise((resolve, reject) => {
+
+        lob.on("error", function(err) {
+          should.not.exist(err, "lob.on 'error' event.");
+        });
+
+        lob.on("finish", async function() {
+          const sql = `update nodb_tab_nclob72 set content = :bindvar
+              where id = :id`;
+          const result = await connection.execute(sql,
+              { id: seq, bindvar: lob});
+          should.strictEqual(result.rowsAffected, 1);
+          await lob.close();
+          await connection.commit();
+          resolve();
+        });
+
+        const inStream = fs.createReadStream(inFileName);
+
+        inStream.on("error", function(err) {
+          should.not.exist(err, "inStream.on 'error' event.");
+        });
+
+        inStream.pipe(lob);
+
+      });
+
+      await verifyNclobValue(seq, inFileName);
+
+    }); // 72.3.5
+
+    it("72.3.6 BIND_INOUT, PL/SQL, IN LOB gets closed automatically", async function() {
+
+      const seq = 7;
+      const outStr = "This is a out bind string.";
+      const sql = `
+          CREATE OR REPLACE PROCEDURE nodb_proc_nclob_inout1 (
+              p_num IN NUMBER,
+              p_inout IN OUT NCLOB
+            ) AS
+            BEGIN
+                insert into nodb_tab_nclob72 (id, content)
+                values (p_num, p_inout);
+
+                select to_nclob('${outStr}') into p_inout from dual;
+            END;`;
+
+      await connection.execute(sql);
+
+      const lob = await connection.createLob(oracledb.DB_TYPE_NCLOB);
+
+      await new Promise((resolve, reject) => {
+
+        lob.on("error", function(err) {
+          should.not.exist(err, "lob.on 'error' event.");
+        });
+
+        lob.on("finish", async function() {
+          const sql = `begin nodb_proc_nclob_inout1(:id, :io); end;`;
+          const binds = {
+            id: seq,
+            io: { type: oracledb.DB_TYPE_NCLOB,
+                  dir: oracledb.BIND_INOUT, val: lob }
+          };
+          const options = { autoCommit: true };
+          const result = await connection.execute(sql, binds, options);
+
+          const lobout = result.outBinds.io;
+          lobout.setEncoding("utf8");
+
+          await new Promise((resolve, reject) => {
+
+            let nclobData = "";
+            lobout.on("data", function(chunk) {
+              nclobData += chunk;
+            });
+
+            lobout.on("error", function(err) {
+              should.not.exist(err, "lob.on 'error' event.");
+            });
+
+            lobout.on("end", async function() {
+              should.strictEqual(nclobData, outStr);
+              await lobout.close();
+              resolve();
+            });
+
+          });
+
+          resolve();
+
+        });
+
+        const inStream = fs.createReadStream(inFileName);
+
+        inStream.on("error", function(err) {
+          should.not.exist(err, "inStream.on 'error' event.");
+        });
+
+        inStream.pipe(lob);
+
+      });
+
+      await verifyNclobValue(seq, inFileName);
+
+      await connection.execute("DROP PROCEDURE nodb_proc_nclob_inout1");
+
+    }); // 72.3.6
+
+  }); // 72.3
 
 });

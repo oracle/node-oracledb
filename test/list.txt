@@ -4639,6 +4639,22 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     223.1 access properties of closed Connection object
     223.2 access properties of closed Lob object
 
+226. dbType01.js
+    226.1 DB_TYPE_VARCHAR
+    226.2 DB_TYPE_CHAR
+    226.3 DB_TYPE_NVARCHAR
+    226.4 DB_TYPE_NCHAR
+    226.5 DB_TYPE_DATE
+    226.6 DB_TYPE_TIMESTAMP_LTZ
+
+227. dbType02.js
+    227.1 DB_TYPE_VARCHAR
+    227.2 DB_TYPE_CHAR
+    227.3 DB_TYPE_NVARCHAR
+    227.4 DB_TYPE_NCHAR
+    227.5 DB_TYPE_DATE
+    227.6 DB_TYPE_TIMESTAMP_LTZ
+
 228. lastRowid.js
     228.1 examples
     228.2 MERGE statement

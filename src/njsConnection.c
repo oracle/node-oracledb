@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -463,14 +463,12 @@ static napi_value njsConnection_createLob(napi_env env,
 static bool njsConnection_createLobAsync(njsBaton *baton)
 {
     njsConnection *conn = (njsConnection*) baton->callingInstance;
-    dpiOracleTypeNum typeNum;
 
-    typeNum = (baton->lobType == NJS_DATATYPE_CLOB) ?  DPI_ORACLE_TYPE_CLOB :
-            DPI_ORACLE_TYPE_BLOB;
     baton->lob = calloc(1, sizeof(njsLobBuffer));
     if (!baton->lob)
         return njsBaton_setError(baton, errInsufficientMemory);
-    if (dpiConn_newTempLob(conn->handle, typeNum, &baton->lob->handle) < 0)
+    if (dpiConn_newTempLob(conn->handle, baton->lobType,
+                &baton->lob->handle) < 0)
         return njsBaton_setErrorDPI(baton);
     baton->lob->dataType = baton->lobType;
     if (!njsLob_populateBuffer(baton, baton->lob))
@@ -503,11 +501,10 @@ static bool njsConnection_createLobProcessArgs(njsBaton *baton,
 {
     if (!njsUtils_getUnsignedIntArg(env, args, 0, &baton->lobType))
         return false;
-    if (baton->lobType != NJS_DATATYPE_CLOB &&
-            baton->lobType != NJS_DATATYPE_BLOB) {
-        njsUtils_throwError(env, errInvalidParameterValue, 1);
-        return false;
-    }
+    if (baton->lobType != DPI_ORACLE_TYPE_CLOB &&
+            baton->lobType != DPI_ORACLE_TYPE_BLOB &&
+            baton->lobType != DPI_ORACLE_TYPE_NCLOB)
+        return njsUtils_throwError(env, errInvalidParameterValue, 1);
 
     return true;
 }
@@ -2309,17 +2306,17 @@ static bool njsConnection_scanExecuteBinds(njsBaton *baton, napi_env env,
         }
 
         // get bind information from value if it has not already been specified
-        if (var->bindDataType == NJS_DATATYPE_DEFAULT || !var->maxSize ||
+        if (var->varTypeNum == NJS_DATATYPE_DEFAULT || !var->maxSize ||
                 var->maxSize == NJS_MAX_OUT_BIND_SIZE) {
-            defaultBindType = var->bindDataType;
+            defaultBindType = var->varTypeNum;
             defaultMaxSize = var->maxSize;
             defaultObjectTypeHandle = var->dpiObjectTypeHandle;
             if (!njsConnection_getBindInfoFromValue(baton, false, env,
                     bindValue, &defaultBindType, &defaultMaxSize,
                     &defaultObjectTypeHandle))
                 return false;
-            if (var->bindDataType == NJS_DATATYPE_DEFAULT)
-                var->bindDataType = defaultBindType;
+            if (var->varTypeNum == NJS_DATATYPE_DEFAULT)
+                var->varTypeNum = defaultBindType;
             if (defaultMaxSize > var->maxSize)
                 var->maxSize = defaultMaxSize;
             if (!var->dpiObjectTypeHandle && defaultObjectTypeHandle)
@@ -2331,7 +2328,7 @@ static bool njsConnection_scanExecuteBinds(njsBaton *baton, napi_env env,
         // specified by the application; for OUT binds, the value from the
         // application must be accepted as is as there is no way to
         // validate it
-        if (var->bindDataType != NJS_DATATYPE_OBJECT) {
+        if (var->varTypeNum != DPI_ORACLE_TYPE_OBJECT) {
 
             NJS_CHECK_NAPI(env, napi_is_array(env, bindValue, &check))
             if (check) {
@@ -2415,7 +2412,7 @@ static bool njsConnection_scanExecuteBindUnit(njsBaton *baton,
         if (!njsDbObjectType_getFromClass(env, value, &var->objectType))
             return false;
         var->dpiObjectTypeHandle = var->objectType->handle;
-        var->bindDataType = NJS_DATATYPE_OBJECT;
+        var->varTypeNum = DPI_ORACLE_TYPE_OBJECT;
         okBindUnit = true;
     } else if (valueType == napi_string) {
 
@@ -2447,11 +2444,11 @@ static bool njsConnection_scanExecuteBindUnit(njsBaton *baton,
             dpiObjectType_release(objTypeHandle);
         }
         var->dpiObjectTypeHandle = var->objectType->handle;
-        var->bindDataType = NJS_DATATYPE_OBJECT;
+        var->varTypeNum = DPI_ORACLE_TYPE_OBJECT;
         okBindUnit = true;
     } else {
         if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1, "type",
-                &var->bindDataType, &found))
+                &var->varTypeNum, &found))
             return false;
         if (found) {
             okBindUnit = true;
@@ -2474,8 +2471,8 @@ static bool njsConnection_scanExecuteBindUnit(njsBaton *baton,
         if (found) {
             okBindUnit = true;
         } else if (inExecuteMany) {
-            if (var->bindDataType == NJS_DATATYPE_STR ||
-                    var->bindDataType == NJS_DATATYPE_BUFFER) {
+            if (var->varTypeNum == DPI_ORACLE_TYPE_VARCHAR ||
+                    var->varTypeNum == DPI_ORACLE_TYPE_RAW) {
                 if (var->pos > 0)
                     return njsBaton_setError(baton, errMissingMaxSizeByPos,
                             var->pos);
@@ -2557,15 +2554,15 @@ static bool njsConnection_scanExecuteManyBinds(njsBaton *baton,
                 continue;
 
             // otherwise, determine bind type and size by examining the value
-            defaultBindType = var->bindDataType;
+            defaultBindType = var->varTypeNum;
             defaultMaxSize = var->maxSize;
             defaultObjectTypeHandle = var->dpiObjectTypeHandle;
             if (!njsConnection_getBindInfoFromValue(baton, true, env,
                     value, &defaultBindType, &defaultMaxSize,
                     &defaultObjectTypeHandle))
                 return false;
-            if (var->bindDataType == NJS_DATATYPE_DEFAULT)
-                var->bindDataType = defaultBindType;
+            if (var->varTypeNum == NJS_DATATYPE_DEFAULT)
+                var->varTypeNum = defaultBindType;
             if (defaultMaxSize > var->maxSize)
                 var->maxSize = defaultMaxSize;
             if (!var->dpiObjectTypeHandle && defaultObjectTypeHandle)

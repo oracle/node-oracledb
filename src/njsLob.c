@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -344,7 +344,8 @@ static bool njsLob_getDataPostAsync(njsBaton *baton, napi_env env,
 
     if (!baton->bufferSize) {
         NJS_CHECK_NAPI(env, napi_get_null(env, &result))
-    } else if (lob->dataType == NJS_DATATYPE_CLOB) {
+    } else if (lob->dataType == DPI_ORACLE_TYPE_CLOB ||
+            lob->dataType == DPI_ORACLE_TYPE_NCLOB) {
         NJS_CHECK_NAPI(env, napi_create_string_utf8(env, baton->bufferPtr,
                 baton->bufferSize, &result))
     } else {
@@ -488,7 +489,8 @@ static bool njsLob_readPostAsync(njsBaton *baton, napi_env env,
 
     if (!baton->bufferSize) {
         NJS_CHECK_NAPI(env, napi_get_null(env, &result))
-    } else if (lob->dataType == NJS_DATATYPE_CLOB) {
+    } else if (lob->dataType == DPI_ORACLE_TYPE_CLOB ||
+            lob->dataType == DPI_ORACLE_TYPE_NCLOB) {
         NJS_CHECK_NAPI(env, napi_create_string_utf8(env, lob->bufferPtr,
                 baton->bufferSize, &result))
     } else {

@@ -2,8 +2,16 @@
 
 ## node-oracledb v4.2.0 (DD MON YYYY)
 
+- Added support for binding using the node-oracledb [Database Type
+  Constants](https://oracle.github.io/node-oracledb/doc/api.html#oracledbconstantsdbtype)
+  `DB_TYPE_DATE`, `DB_TYPE_CHAR`, `DB_TYPE_NCHAR`, `DB_TYPE_NVARCHAR`,
+  `DB_TYPE_NCLOB`, `DB_TYPE_TIMESTAMP`, and `DB_TYPE_TIMESTAMP_TZ`.
+
+- Added support for creating temporary NCLOBS with
+  [`connection.createLob(oracledb.NCLOB)`](https://oracle.github.io/node-oracledb/doc/api.html#connectioncreatelob).
+
 - Added [client initiated
-  connections](https://oracle.github.io/node-oracledb/doc/api.html#consubscribeoptclientinitiated)
+  connection](https://oracle.github.io/node-oracledb/doc/api.html#consubscribeoptclientinitiated)
   support for Continuous Query Notification (CQN) and other subscription based
   notifications.
 
@@ -19,6 +27,9 @@
   mode of `executeMany()` to show row `offset` values up to (2^32)-1 ([ODPI-C
   change](https://github.com/oracle/odpi/commit/294d5966cd513d0c29fdeec3bbbdfad376f81d4f)).
 
+- Avoid intermediate conversion from the database national character set to the
+  database character set when querying NCLOB columns as String.
+
 - Fixed various execution failures with Node.js 13.2 due to Node.js NULL pointer behavior change ([ODPI-C
   change](https://github.com/oracle/odpi/commit/7693865bb6a98568546aa319cc0fdb9e208cf9d4)).
 
@@ -33,7 +44,7 @@
 
 - Updated Lob streaming documentation and examples. Applications should use the
   `end` event (for readable streams) and `finish` event (for writeable streams)
-  instead of the `close` event.  The node-oracledb's `lob.close()` method is now
+  instead of the `close` event.  The node-oracledb `lob.close()` method is now
   deprecated in favor of the more functional Node.js 8 Stream `destroy()`
   method.
 

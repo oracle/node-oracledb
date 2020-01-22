@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -30,7 +30,7 @@ const should    = require('should');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe.skip('216. dbObject17.js', () => {
+describe('216. dbObject17.js', () => {
 
   let conn;
 
@@ -128,6 +128,7 @@ describe.skip('216. dbObject17.js', () => {
         should.strictEqual(result.rows[0].TEAM[i].LTZ.getTime(), FrisbeePlayers[i].LTZ.getTime());
       }
     } catch (err) {
+      console.log(err);
       should.not.exist(err);
     }
   }); // 216.1

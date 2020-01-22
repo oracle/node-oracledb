@@ -187,6 +187,7 @@ static njsConstant njsClassConstants[] = {
     { "CURSOR", NJS_DATATYPE_CURSOR },
     { "DATE", NJS_DATATYPE_DATE },
     { "DEFAULT", NJS_DATATYPE_DEFAULT },
+    { "NCLOB", NJS_DATATYPE_NCLOB },
     { "NUMBER", NJS_DATATYPE_NUM },
     { "STRING", NJS_DATATYPE_STR },
 

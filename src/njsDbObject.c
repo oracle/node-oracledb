@@ -1,4 +1,4 @@
-// Copyright (c) 2019, Oracle and/or its affilitates.  All rights reserved.
+// Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -810,9 +810,7 @@ static bool njsDbObject_transformFromOracle(njsDbObject *obj, napi_env env,
         case DPI_ORACLE_TYPE_CLOB:
         case DPI_ORACLE_TYPE_NCLOB:
         case DPI_ORACLE_TYPE_BLOB:
-            lobBuffer.dataType =
-                    (typeInfo->oracleTypeNum == DPI_ORACLE_TYPE_BLOB) ?
-                    NJS_DATATYPE_BLOB : NJS_DATATYPE_CLOB;
+            lobBuffer.dataType = typeInfo->oracleTypeNum;
             lobBuffer.handle = data->value.asLOB;
             lobBuffer.isAutoClose = true;
             if (dpiLob_getChunkSize(lobBuffer.handle,
