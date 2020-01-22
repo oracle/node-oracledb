@@ -510,8 +510,10 @@ editions, or require additional database options or packs.
 
 Install Node.js from [nodejs.org][88].
 
-Install node-oracledb using the [Quick Start Node-oracledb
-Installation][87] steps.
+Install node-oracledb using the [Quick Start Node-oracledb Installation][87]
+steps.  Node-oracledb runs in Node.js, typically as a mid-tier application
+server or service.  Node-oracledb applications will not run directly in a
+browser.
 
 Download node-oracledb [examples][3] or create a script like the one
 below.  As well as [Async/Await](#asyncawaitoverview) functions,
@@ -590,7 +592,7 @@ With Oracle's sample [HR schema][4], the output is:
 
 [node-oracledb's SODA API](#sodaoverview) can be used with Oracle Database 18
 and above, when node-oracledb uses Oracle Client 18.5 or Oracle Client 19.3, or
-later.  Users who have been granted the SODA_APP role.
+later.  Users require the CREATE TABLE privilege and the SODA_APP role.
 
 ```javascript
 // mysoda.js
@@ -643,6 +645,12 @@ async function run() {
 }
 
 run();
+```
+
+Output is:
+
+```
+Sally lives in Melbourne.
 ```
 
 ## <a name="errorobj"></a> 2. Errors
