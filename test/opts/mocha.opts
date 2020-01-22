@@ -250,3 +250,5 @@ test/examineOwnedProperties.js
 test/connectionClass.js
 test/callTimeout.js
 test/accessPropertiesOnClosedObjects.js
+
+test/lastRowid.js

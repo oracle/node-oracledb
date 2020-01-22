@@ -7,6 +7,11 @@
   support for Continuous Query Notification (CQN) and other subscription based
   notifications.
 
+- Added
+  [`result.lastRowid`](https://oracle.github.io/node-oracledb/doc/api.html#execlastrowid)
+  to `execute()`.  It contains the ROWID of the last row affected by an INSERT,
+  UPDATE, DELETE or MERGE statement.
+
 - Fixed various execution failures with Node.js 13.2 due to Node.js NULL pointer behavior change ([ODPI-C
   change](https://github.com/oracle/odpi/commit/7693865bb6a98568546aa319cc0fdb9e208cf9d4)).
 

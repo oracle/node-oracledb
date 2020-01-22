@@ -4641,3 +4641,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 223. accessPropertiesOnClosedObjects.js
     223.1 access properties of closed Connection object
     223.2 access properties of closed Lob object
+
+228. lastRowid.js
+    228.1 examples
+    228.2 MERGE statement
+    228.3 Negative - not applicable to executeMany()

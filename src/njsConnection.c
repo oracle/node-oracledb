@@ -596,8 +596,11 @@ static bool njsConnection_executeAsync(njsBaton *baton)
 static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
         napi_value *args)
 {
-    napi_value result, metadata, resultSet, rowsAffected, outBinds;
+    napi_value result, metadata, resultSet, rowsAffected, outBinds, lastRowid;
     napi_value implicitResults;
+    uint32_t rowidValueLength;
+    const char *rowidValue;
+    dpiRowid *rowid;
 
     // create constructors used for various types that might be returned
     if (!njsBaton_setConstructors(baton, env))
@@ -641,6 +644,21 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
         if (outBinds) {
             NJS_CHECK_NAPI(env, napi_set_named_property(env, result,
                     "outBinds", outBinds))
+        }
+
+        // for DML statements, check to see if the last rowid is available
+        if (baton->stmtInfo.isDML) {
+            if (dpiStmt_getLastRowid(baton->dpiStmtHandle, &rowid) < 0)
+                return njsBaton_setErrorDPI(baton);
+            if (rowid) {
+                if (dpiRowid_getStringValue(rowid, &rowidValue,
+                        &rowidValueLength) < 0)
+                    return njsBaton_setErrorDPI(baton);
+                NJS_CHECK_NAPI(env, napi_create_string_utf8(env, rowidValue,
+                        rowidValueLength, &lastRowid))
+                NJS_CHECK_NAPI(env, napi_set_named_property(env, result,
+                        "lastRowid", lastRowid))
+            }
         }
 
         // check for implicit results when executing PL/SQL

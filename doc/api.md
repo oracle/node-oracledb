@@ -171,12 +171,13 @@ For installation information, see the [Node-oracledb Installation Instructions][
                 - 4.2.6.3.8 [`resultSet`](#propexecresultset)
             - 4.2.6.4 [`execute()`: Callback Function](#executecallback)
                 - 4.2.6.4.1 [`implicitResults`](#execimplicitresults)
-                - 4.2.6.4.2 [`metaData`](#execmetadata)
+                - 4.2.6.4.2 [`lastRowid`](#execlastrowid)
+                - 4.2.6.4.3 [`metaData`](#execmetadata)
                     - [`byteSize`](#execmetadata), [`dbType`](#execmetadata), [`dbTypeClass`](#execmetadata), [`dbTypeName`](#execmetadata), [`fetchType`](#execmetadata), [`name`](#execmetadata), [`nullable`](#execmetadata), [`precision`](#execmetadata), [`scale`](#execmetadata)
-                - 4.2.6.4.3 [`outBinds`](#execoutbinds)
-                - 4.2.6.4.4 [`resultSet`](#execresultset)
-                - 4.2.6.4.5 [`rows`](#execrows)
-                - 4.2.6.4.6 [`rowsAffected`](#execrowsaffected)
+                - 4.2.6.4.4 [`outBinds`](#execoutbinds)
+                - 4.2.6.4.5 [`resultSet`](#execresultset)
+                - 4.2.6.4.6 [`rows`](#execrows)
+                - 4.2.6.4.7 [`rowsAffected`](#execrowsaffected)
         - 4.2.7 [`executeMany()`](#executemany)
             - 4.2.7.1 [`executeMany()`: SQL Statement](#executemanysqlparam)
             - 4.2.7.2 [`executeMany()`: Binds](#executemanybinds)
@@ -3199,7 +3200,19 @@ This property was added in node-oracledb 4.0. Implicit Results
 requires Oracle Database 12.1 or later, and Oracle Client 12.1 or
 later.
 
-###### <a name="execmetadata"></a> 4.2.6.4.2 `metaData`
+###### <a name="execlastrowid"></a> 4.2.6.4.2 `lastRowid`
+
+```
+readonly String lastRowid
+```
+
+The ROWID of a row affected by an INSERT, UPDATE, DELETE or MERGE statement.
+For other statements, or if no row was affected, it is not set.  If more than
+one row was affected, only the ROWID of the last row is returned.
+
+This property was added in node-oracledb 4.2.
+
+###### <a name="execmetadata"></a> 4.2.6.4.3 `metaData`
 
 ```
 readonly Array metaData
@@ -3241,7 +3254,7 @@ such as `WHERE 1 = 0` so the database does minimal work.
 
 See [Query Column Metadata](#querymeta) for examples.
 
-###### <a name="execoutbinds"></a> 4.2.6.4.3 `outBinds`
+###### <a name="execoutbinds"></a> 4.2.6.4.4 `outBinds`
 
 ```
 Array/object outBinds
@@ -3253,7 +3266,7 @@ If [`bindParams`](#executebindParams) is passed as an array, then
 object, then `outBinds` is returned as an object. If there are no OUT
 or IN OUT binds, the value is undefined.
 
-###### <a name="execresultset"></a> 4.2.6.4.4 `resultSet`
+###### <a name="execresultset"></a> 4.2.6.4.5 `resultSet`
 
 ```
 Object resultSet
@@ -3268,7 +3281,7 @@ When using this option, [`resultSet.close()`](#close) must be called
 when the ResultSet is no longer needed.  This is true whether or not
 rows have been fetched from the ResultSet.
 
-###### <a name="execrows"></a> 4.2.6.4.5 `rows`
+###### <a name="execrows"></a> 4.2.6.4.6 `rows`
 
 ```
 Array rows
@@ -3288,7 +3301,7 @@ The number of rows returned is limited by
 `maxRows` is 0, then the number of rows is limited by Node.js memory
 constraints.
 
-###### <a name="execrowsaffected"></a> 4.2.6.4.6 `rowsAffected`
+###### <a name="execrowsaffected"></a> 4.2.6.4.7 `rowsAffected`
 
 ```
 Number rowsAffected
