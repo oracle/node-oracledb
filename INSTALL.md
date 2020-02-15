@@ -1,6 +1,6 @@
 # Installing node-oracledb Version 5.0-dev
 
-*Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -20,7 +20,6 @@ limitations under the License.
 ## ===> *** Note: Go to [https://oracle.github.io/node-oracledb/INSTALL.html](https://oracle.github.io/node-oracledb/INSTALL.html) for production documentation ***
 
 1. [Node-oracledb Overview](#overview)
-    - 1.1 [Installation Changes in node-oracledb version 4.0](#mig)
 2. [Quick Start node-oracledb Installation](#quickstart)
 3. [Node-oracledb Installation Instructions](#instructions)
     - 3.1 [Prerequisites](#prerequisites)
@@ -53,12 +52,11 @@ The [*node-oracledb*][1] add-on for Node.js powers high performance Oracle Datab
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
-This node-oracledb release has been tested with Node.js 8, 10 and 12
-on 64-bit Oracle Linux, Windows and macOS.  Note Node.js 8.16, Node.js
-10.16, or later is required.  The add-on can also build on some 32-bit
-Linux, 32-bit Windows, Solaris and AIX environments, but these
-architectures have not been fully tested.  Older versions of
-node-oracledb may work with older versions of Node.js.
+This node-oracledb release has been tested with Node.js 10 and 12 on 64-bit
+Oracle Linux, Windows and macOS.  Note Node.js 10.16, or later is required.  The
+add-on can also build on some 32-bit Linux, 32-bit Windows, Solaris and AIX
+environments, but these architectures have not been fully tested.  Older
+versions of node-oracledb may work with older versions of Node.js.
 
 Node-oracledb is an [add-on](https://nodejs.org/api/addons.html)
 available as C source code.  Pre-built binaries are available
@@ -66,20 +64,6 @@ as a convenience for common architectures.  Note the operating systems
 and versions of Node.js that the pre-built binaries are compatible
 with will change as the Node.js project evolves.  The binaries are not
 guaranteed to be available or usable in your environment.
-
-#### <a name="mig"></a> 1.1 Installation Changes in node-oracledb version 4.0
-
-Node-oracledb 4.0 was refactored to use [N-API][53] version 4.  On
-each operating system, a node-oracledb binary will work with a number
-of Node.js versions from Node.js 8.16 and Node.js 10.16 onward,
-dependent on N-API compatibility.  This means that when upgrading
-Node.js, you may not need to reinstall node-oracledb.
-
-If compiling from source code, the compiler no longer needs C++11
-compatibility.  The node-oracledb source code is now pure C.
-
-See [Installing Older Versions of Node-oracledb](#installingoldvers) for
-information about older versions.
 
 ## <a name="quickstart"></a> 2. Quick Start node-oracledb Installation
 
@@ -169,7 +153,7 @@ I don't have internet access | [Node-oracledb Installation Without Internet Acce
 
 All installations need:
 
-- Oracle 19, 18, 12.2, 12.1 or 11.2 client libraries on the machine Node.js is installed on.
+- Oracle 19, 18, 12 or 11.2 client libraries on the machine Node.js is installed on.
 
   Run `node -p "process.arch"` and make sure to use 64-bit or 32-bit
   Oracle client libraries to match the Node.js architecture.
@@ -234,18 +218,18 @@ compatible glibc.
 #### 3.2.2 Install Node.js
 
 Download and extract the [Node.js "Linux Binaries"][11] package.  For
-example, if you downloaded version 8.9.4 for 64-bit you could install
+example, if you downloaded version 12.14.1 for 64-bit you could install
 Node.js into `/opt`:
 
 ```
 cd /opt
-tar -Jxf node-v8.9.4-linux-x64.tar.xz
+tar -Jxf node-v12.14.1-linux-x64.tar.xz
 ```
 
 Set `PATH` to include Node.js:
 
 ```
-export PATH=/opt/node-v8.9.4-linux-x64/bin:$PATH
+export PATH=/opt/node-v12.14.1-linux-x64/bin:$PATH
 ```
 
 #### 3.2.3 Install the add-on
@@ -389,18 +373,18 @@ compatible glibc.
 #### 3.3.2 Install Node.js
 
 Download and extract the [Node.js "Linux Binaries"][11] package.  For
-example, if you downloaded version 8.9.4 for 64-bit you could install
+example, if you downloaded version 12.14.1 for 64-bit you could install
 Node.js into `/opt`:
 
 ```
 cd /opt
-tar -Jxf node-v8.9.4-linux-x64.tar.xz
+tar -Jxf node-v12.14.1-linux-x64.tar.xz
 ```
 
 Set `PATH` to include Node.js:
 
 ```
-export PATH=/opt/node-v8.9.4-linux-x64/bin:$PATH
+export PATH=/opt/node-v12.14.1-linux-x64/bin:$PATH
 ```
 
 #### 3.3.3 Install the add-on
@@ -524,18 +508,18 @@ immediately used with other editions of the Oracle Database.
 #### 3.4.2 Install Node.js
 
 Download and extract the [Node.js "Linux Binaries"][11] package.  For
-example, if you downloaded version 8.9.4 for 64-bit you could install
+example, if you downloaded version 12.14.1 for 64-bit you could install
 Node.js into `/opt`:
 
 ```
 cd /opt
-tar -zxf node-v8.9.4-linux-x64.tar.gz
+tar -zxf node-v12.14.1-linux-x64.tar.gz
 ```
 
 Set `PATH` to include Node.js:
 
 ```
-export PATH=/opt/node-v8.9.4-linux-x64/bin:$PATH
+export PATH=/opt/node-v12.14.1-linux-x64/bin:$PATH
 ```
 
 #### 3.4.3 Install the add-on
@@ -827,7 +811,7 @@ Windows 7 users: Note that Oracle 19 is not supported on Windows 7.
 If you intend to co-locate optional Oracle configuration files such as
 [`tnsnames.ora`][15], [`sqlnet.ora`][16], [`ldap.ora`][17], or
 [`oraaccess.xml`][18] with Instant Client, they can be put in a
-`C:\oracle\instantclient_18_3\network\admin` subdirectory.  Create
+`C:\oracle\instantclient_19_5\network\admin` subdirectory.  Create
 this if needed.
 
 This is the default Oracle configuration directory for applications
