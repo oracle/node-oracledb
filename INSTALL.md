@@ -23,7 +23,7 @@ limitations under the License.
 2. [Quick Start node-oracledb Installation](#quickstart)
 3. [Node-oracledb Installation Instructions](#instructions)
     - 3.1 [Prerequisites](#prerequisites)
-    - 3.2 [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
+    =- 3.2 [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
     - 3.3 [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
     - 3.4 [Node-oracledb Installation on Linux with a Local Database or Full Client](#instoh)
     - 3.5 [Node-oracledb Installation on macOS](#instosx)
@@ -1444,7 +1444,8 @@ FROM node:12-buster-slim
 #### Installing Instant Client in Docker
 
 Review the [Oracle Technology Network][12] or the [Oracle Linux 7][51] channel
-for the latest Instant Client package available.
+for the latest Instant Client package available.  There are various ways to
+install Instant Client.  Three methods are shown below.
 
 1. Using Oracle Linux Instant Client RPMs
 
@@ -1463,57 +1464,70 @@ for the latest Instant Client package available.
         rm -rf /var/cache/yum
    ```
 
-2. Automatically downloading the Instant Client zip File
+2. Automatically downloading an Instant Client zip file
 
-    Use an Instant Client zip file on Debian-based operating systems.
+   You can automatically download an Instant Client zip file during image
+   creation.  This is most useful on Debian-based operating systems.
 
-    You can script the download of the Instant Client package during image
-    creation.  To use the latest available Instant Client:
+   The `libaio` (or `libaio1`), `wget` and `unzip` packages will need to be
+   added manually.
 
-    ```
-    RUN wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
-        unzip instantclient-basiclite-linuxx64.zip && rm -f instantclient-basiclite-linuxx64.zip && \
-        cd /opt/oracle/instantclient* && rm -f *jdbc* *occi* *mysql* *jar uidrvci genezi adrci && \
-        echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
-    ```
+   On Oracle Linux:
 
-    The `libaio` or `libaio1` package will need to be added manually.
+   ```
+   RUN yum install -y libaio wget unzip
+   ```
 
-    On Oracle Linux
+   On a Debian-based Linux:
+   ```
+   RUN apt-get update && apt-get install -y libaio1 wget unzip
+   ```
 
-    ```
-    RUN yum install -y libaio
-    ```
+   Then, to use the latest available Instant Client:
 
-    On a Debian-based Linux:
-    ```
-    RUN apt-get update && apt-get install -y libaio1
-    ```
+   ```
+   RUN wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
+       unzip instantclient-basiclite-linuxx64.zip && rm -f instantclient-basiclite-linuxx64.zip && \
+       cd /opt/oracle/instantclient* && rm -f *jdbc* *occi* *mysql* *jar uidrvci genezi adrci && \
+       echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
+   ```
 
 3. Copying Instant Client zip files from the host
 
-    Download the Instant Client Basic Light Zip file, extract it, and remove
-    unnecessary files.  The resulting directory can be added during image
-    creation.  For example, with Instant Client Basic Light 19.5, the host
-    computer (where you run Docker) could have a directory `instantclient_19_5`
-    with these files:
+   To avoid the cost of repeated network traffic, you may prefer to download the
+   Instant Client Basic Light zip file to your Docker host, extract it, and
+   remove unnecessary files.  The resulting directory can be added during
+   subsequent image creation.  For example, with Instant Client Basic Light
+   19.5, the host computer (where you run Docker) could have a directory
+   `instantclient_19_5` with these files:
 
-    ```
-    libclntshcore.so.19.1
-    libclntsh.so.19.1
-    libnnz19.so
-    libociicus.so
-    ```
+   ```
+   libclntshcore.so.19.1
+   libclntsh.so.19.1
+   libnnz19.so
+   libociicus.so
+   ```
 
-    With this, your Dockerfile could contain:
+   With this, your Dockerfile could contain:
 
-    ```
-    ADD instantclient_19_5/* /opt/oracle/instantclient_19_5
-    RUN echo /opt/oracle/instantclient_19_5 > /etc/ld.so.conf.d/oracle-instantclient.conf && \
-        ldconfig
-    ```
+   ```
+   ADD instantclient_19_5/* /opt/oracle/instantclient_19_5
+   RUN echo /opt/oracle/instantclient_19_5 > /etc/ld.so.conf.d/oracle-instantclient.conf && \
+       ldconfig
+   ```
 
-    The `libaio` or `libaio1` package will be needed, as shown in the previous option.
+   The `libaio` or `libaio1` package will be needed.
+
+   On Oracle Linux:
+
+   ```
+   RUN yum install -y libaio
+   ```
+
+   On a Debian-based Linux:
+   ```
+   RUN apt-get update && apt-get install -y libaio1
+   ```
 
 #### Installing node-oracledb and your application
 
@@ -1535,8 +1549,7 @@ dependencies installed when the image is built:
 
 ```
 WORKDIR /myapp
-ADD package.json /myapp/
-ADD server.js /myapp/
+ADD package.json server.js /myapp/
 RUN npm install
 
 CMD exec node server.js
@@ -1562,10 +1575,9 @@ The `Z` option is needed when SELinux is enabled.
 
 This example consists of a `Dockerfile`, a `package.json` file with the
 application dependencies, a `server.js` file that is the application, and an
-`envfile.list` containing the database credentials as environment variables.  It
-is based on Oracle Linux.
+`envfile.list` containing the database credentials as environment variables.
 
-The example `Dockerfile` is:
+If you use Oracle Linux, your `Dockerfile` will be like:
 
 ```
 FROM oraclelinux:7-slim
@@ -1576,14 +1588,34 @@ RUN  yum -y install oracle-release-el7 oracle-nodejs-release-el7 && \
      rm -rf /var/cache/yum
 
 WORKDIR /myapp
-ADD package.json /myapp/
-ADD server.js /myapp/
+ADD package.json server.js /myapp/
 RUN npm install
 
 CMD exec node server.js
 ```
 
-The `package.json` is:
+An equivalent Dockerfile that uses a Node.js image is:
+
+```
+FROM node:12-buster-slim
+
+RUN apt-get update && apt-get install -y libaio1 wget unzip
+
+WORKDIR /opt/oracle
+
+RUN wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
+    unzip instantclient-basiclite-linuxx64.zip && rm -f instantclient-basiclite-linuxx64.zip && \
+    cd /opt/oracle/instantclient* && rm -f *jdbc* *occi* *mysql* *jar uidrvci genezi adrci && \
+    echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
+
+WORKDIR /myapp
+ADD package.json server.js /myapp/
+RUN npm install
+
+CMD exec node server.js
+```
+
+For either Dockerfile, the `package.json` is:
 
 ```
 {
@@ -1605,7 +1637,7 @@ The `package.json` is:
 }
 ```
 
-The application `server.js` contains:
+The application `server.js` contains code like:
 
 ```javascript
 . . .
