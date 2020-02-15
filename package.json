@@ -1,6 +1,6 @@
 {
   "name": "oracledb",
-  "version": "4.2.0",
+  "version": "5.0.0-dev",
   "description": "A Node.js module for Oracle Database access",
   "license": "Apache-2.0",
   "homepage": "http://oracle.github.io/node-oracledb/",
@@ -40,7 +40,7 @@
     "buildpackage": "node package/buildpackage.js"
   },
   "engines": {
-    "node": ">=8.16"
+    "node": ">=10.16"
   },
   "maintainers": [
     {

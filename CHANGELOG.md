@@ -1,5 +1,9 @@
 # Change Log
 
+## node-oracledb v5.0.0 (DD Mon YYYY)
+
+**This release is under development**
+
 ## node-oracledb v4.2.0 (24 Jan 2020)
 
 - Added support for binding using the node-oracledb [Database Type
