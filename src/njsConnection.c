@@ -1482,17 +1482,14 @@ static napi_value njsConnection_getModule(napi_env env,
 static napi_value njsConnection_getOracleServerVersion(napi_env env,
         napi_callback_info info)
 {
-    uint32_t releaseStringLength;
     dpiVersionInfo versionInfo;
-    const char *releaseString;
     njsConnection *conn;
 
     if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &conn))
         return NULL;
     if (!conn->handle)
         return NULL;
-    if (dpiConn_getServerVersion(conn->handle, &releaseString,
-            &releaseStringLength, &versionInfo) < 0) {
+    if (dpiConn_getServerVersion(conn->handle, NULL, NULL, &versionInfo) < 0) {
         njsUtils_throwErrorDPI(env, conn->oracleDb);
         return NULL;
     }
@@ -1507,9 +1504,7 @@ static napi_value njsConnection_getOracleServerVersion(napi_env env,
 static napi_value njsConnection_getOracleServerVersionString(napi_env env,
         napi_callback_info info)
 {
-    uint32_t releaseStringLength;
     dpiVersionInfo versionInfo;
-    const char *releaseString;
     char versionString[40];
     njsConnection *conn;
 
@@ -1517,8 +1512,7 @@ static napi_value njsConnection_getOracleServerVersionString(napi_env env,
         return NULL;
     if (!conn->handle)
         return NULL;
-    if (dpiConn_getServerVersion(conn->handle, &releaseString,
-            &releaseStringLength, &versionInfo) < 0) {
+    if (dpiConn_getServerVersion(conn->handle, NULL, NULL, &versionInfo) < 0) {
         njsUtils_throwErrorDPI(env, conn->oracleDb);
         return NULL;
     }
