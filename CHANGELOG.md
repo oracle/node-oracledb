@@ -4,6 +4,15 @@
 
 **This release is under development**
 
+- Stated compatibility is now for Node.js 10.16+ and Node.js 12.
+
+- Fixed a segfault that occurred when binding a database object IN/OUT without
+  providing the database object class.
+
+- Updated [Docker installation
+  documentation](https://oracle.github.io/node-oracledb/INSTALL.html#docker) for changes
+  to the Node.js image ([Issue #1201](https://github.com/oracle/node-oracledb/issues/1201)).
+
 ## node-oracledb v4.2.0 (24 Jan 2020)
 
 - Added support for binding using the node-oracledb [Database Type
