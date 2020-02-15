@@ -1065,6 +1065,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
                 return false;
             if (dpiVar_setFromObject(var->dpiVarHandle, pos, obj->handle) < 0)
                 return njsBaton_setErrorDPI(baton);
+            var->objectType = obj->type;
             return true;
         }
 
