@@ -30,9 +30,10 @@ For installation information, see the [Node-oracledb Installation Instructions][
 ##  <a name="contents"></a> Contents
 
 1. [Introduction](#intro)
-    - 1.1 [Getting Started with Node-oracledb](#getstarted)
-        - 1.1.1 [Example: A SQL SELECT statement in Node.js](#examplequery)
-        - 1.1.2 [Example: Simple Oracle Document Access (SODA) in Node.js](#examplesodaawait)
+    - 1.1 [Node-oracledb Architecture](#architecture)
+    - 2.1 [Getting Started with Node-oracledb](#getstarted)
+        - 2.1.1 [Example: A SQL SELECT statement in Node.js](#examplequery)
+        - 2.1.2 [Example: Simple Oracle Document Access (SODA) in Node.js](#examplesodaawait)
 2. [Errors](#errorobj)
     - 2.1 [Error Properties](#properror)
         - 2.1.1 [`errorNum`](#properrerrornum)
@@ -501,12 +502,9 @@ For installation information, see the [Node-oracledb Installation Instructions][
 
 The [*node-oracledb*][1] add-on for Node.js powers high performance Oracle Database applications.
 
-This document shows how to use node-oracledb version 4.  The API
-reference is in the first sections of this document and the [user
-manual](#usermanual) in subsequent sections.  Documentation about
-node-oracledb version 1 is [here][94].  Documentation about
-node-oracledb version 2 is [here][121].  Documentation about
-node-oracledb version 3 is [here][135].
+This document shows how to use node-oracledb.  The API reference is in the first
+sections of this document and the [user manual](#usermanual) in subsequent
+sections.
 
 The node-oracledb API is a generic Oracle Database access layer.
 Almost all the functionality described here is common across all
@@ -514,7 +512,50 @@ current Oracle Databases.  However the documentation may describe some
 database features that are in specific Oracle Database versions,
 editions, or require additional database options or packs.
 
-### <a name="getstarted"></a> 1.1 Getting Started with Node-oracledb
+#### Node-oracledb Features
+
+The node-oracledb feature highlights are:
+
+- Easily installed from [npm][1]
+- Support for Node.js 10 and later, and for multiple Oracle Database versions.  (Note: older versions of node-oracledb supported older versions of Node.js)
+- Execution of SQL and PL/SQL statements
+- Extensive Oracle data type support, including large objects (CLOB and BLOB) and binding of SQL objects
+- Connection management, including connection pooling
+- Oracle Database High Availability features
+- Full use of Oracle Network Service infrastructure, including encrypted network traffic and security features
+
+A complete list of features can be seen [here][169].
+
+### <a name="architecture"></a> 1.1 Node-oracledb Architecture
+
+Node-oracledb is a Node.js add-on that allows Node.js applications to access
+Oracle Database.  Node.js programs call node-oracledb functions. Internally
+node-oracledb dynamically loads Oracle Client libraries to access Oracle
+Database.
+
+![node-oracledb Architecture](./images/node-oracledb-architecture.png)
+
+Node-oracledb is typically installed from the [npm registry][1].  The Oracle
+Client libraries need to be installed separately.  The libraries can be obtained
+from an installation of Oracle Instant Client, from a full Oracle Client
+installation, or even from an Oracle Database installation (if Node.js is
+running on the same machine as the database).
+
+Some behaviors of the Oracle Client libraries can optionally be configured with
+an `oraaccess.xml` file, for example to enable auto-tuning of a statement cache.
+See [Optional Oracle Client Configuration](#oraaccess).
+
+The Oracle Net layer can optionally be configured with files such as
+`tnsnames.ora` and `sqlnet.ora`, for example to enable network encryption.  See
+[Optional Oracle Net Configuration](#tnsadmin).  Oracle Net is not a separate
+product: it is how the Oracle Client and Oracle Database communicate.
+
+Oracle environment variables that are set before node-oracledb first creates a
+database connection will affect node-oracledb behavior.  Optional variables
+include `NLS_LANG`, `NLS_DATE_FORMAT` and `TNS_ADMIN`.  See [Oracle Environment
+Variables](#environmentvariables).
+
+### <a name="getstarted"></a> 1.2 Getting Started with Node-oracledb
 
 Install Node.js from [nodejs.org][88].
 
@@ -543,7 +584,7 @@ Run the script, for example:
 node myscript.js
 ```
 
-####  <a name="examplequery"></a> 1.1.1 Example: A SQL SELECT statement in Node.js
+####  <a name="examplequery"></a> 1.2.1 Example: A SQL SELECT statement in Node.js
 
 ```javascript
 // myscript.js
@@ -596,7 +637,7 @@ With Oracle's sample [HR schema][4], the output is:
 [ { MANAGER_ID: 103, DEPARTMENT_ID: 60, DEPARTMENT_NAME: 'IT' } ]
 ```
 
-#### <a name="examplesodaawait"></a> 1.1.2 Example: Simple Oracle Document Access (SODA) in Node.js
+#### <a name="examplesodaawait"></a> 1.2.2 Example: Simple Oracle Document Access (SODA) in Node.js
 
 [node-oracledb's SODA API](#sodaoverview) can be used with Oracle Database 18
 and above, when node-oracledb uses Oracle Client 18.5 or Oracle Client 19.3, or
@@ -14424,6 +14465,8 @@ Documentation about node-oracledb version 2 is [here][121].
 
 Documentation about node-oracledb version 3 is [here][135].
 
+Documentation about node-oracledb version 4 is [here][170].
+
 ### <a name="migratev1v2"></a> 33.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
 
 When upgrading from node-oracledb version 1.13 to version 2.0:
@@ -14776,3 +14819,5 @@ can be asked at [AskTom][158].
 [166]: https://www.youtube.com/watch?v=rhOVF82KY7E
 [167]: https://www.youtube.com/watch?v=0TdqGlA4bxI
 [168]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-AA8D783D-7337-4A61-BD7D-5DB580C46D9A
+[169]: https://oracle.github.io/node-oracledb/#features
+[170]: https://github.com/oracle/node-oracledb/blob/v4.2.0/doc/api.md
