@@ -21,6 +21,13 @@
   documentation](https://oracle.github.io/node-oracledb/INSTALL.html#docker) for changes
   to the Node.js image ([Issue #1201](https://github.com/oracle/node-oracledb/issues/1201)).
 
+- [SODA](https://oracle.github.io/node-oracledb/doc/api.html#sodaoverview) changes for Oracle Database 20c:
+
+    - Added SODA 'upsert' methods
+      [`sodaCollection.save()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollsave)
+      and
+      [`sodaCollection.saveAndGet()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollsaveandget).
+
 ## node-oracledb v4.2.0 (24 Jan 2020)
 
 - Added support for binding using the node-oracledb [Database Type

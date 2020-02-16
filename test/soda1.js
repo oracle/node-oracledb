@@ -36,7 +36,7 @@ const testsUtil = require('./testsUtil.js');
 describe('164. soda1.js', () => {
 
   before(async function() {
-    const runnable = await testsUtil.checkPrerequisites();
+    const runnable = await testsUtil.isSodaRunnable();
     if (!runnable) {
       this.skip();
       return;

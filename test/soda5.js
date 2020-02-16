@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -38,7 +38,7 @@ const t_contents = sodaUtil.t_contents;
 describe('173. soda5.js', () => {
 
   before(async function() {
-    const runnable = await testsUtil.checkPrerequisites();
+    const runnable = await testsUtil.isSodaRunnable();
     if (!runnable) {
       this.skip();
       return;

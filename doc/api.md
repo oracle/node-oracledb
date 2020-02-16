@@ -336,6 +336,8 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - 10.2.9.1 [`insertOneAndGet()`: Parameters](#sodacollinsertoneandgetparams)
                 - 10.2.9.1.1 [`newDocumentContent`](#sodacollinsertoneandgetparamsdoc), [`newSodaDocument`](#sodacollinsertoneandgetparamsdoc)
             - 10.2.9.2 [`insertOneAndGet()`: Callback Function](#sodacollinsertoneandgetcb)
+        - 10.2.10 [`save()`](#sodacollsave)
+        - 10.2.11 [`saveAndGet()`](#sodacollsaveandget)
 11. [SodaDatabase Class](#sodadatabaseclass)
     - 11.1 [SodaDatabase Methods](#sodadatabasemethods)
         - 11.1.1 [`createCollection()`](#sodadbcreatecollection)
@@ -6489,6 +6491,64 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `insertOne()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
 *SodaDocument document* | A result [SodaDocument](#sodadocumentclass) that is useful for finding the system generated key and other metadata of the newly inserted document.  Note for performance reasons, `document` will not have document content and cannot itself be passed directly to SODA insert or replace methods.
+
+#### <a name="sodacollsave"></a> 10.2.10 `sodaCollection.save()`
+
+##### Prototype
+
+Callback:
+```
+save(SodaDocument newSodaDocument, function(Error error){});
+```
+
+Promise:
+```
+promise = save(SodaDocument newSodaDocument);
+```
+
+##### Description
+
+This method behaves like [`sodaCollection.insertOne()`](#sodacollinsertone) with
+the exception that if a document with the same key already exists, then it is
+updated instead.
+
+The collection must use [client-assigned keys](#sodaclientkeys) keys, which is
+why `save()` accepts only a [SodaDocument](#sodadocumentclass), unlike
+`insertOne()`.  If the collection is not configured with client-assigned keys,
+then the behavior is exactly the same as `sodaCollection.insertOne()`.
+
+This method was added in node-oracledb 5.0.  It requires Oracle Client 20 or
+later, and Oracle Database 18.3 or later.
+
+#### <a name="sodacollsaveandget"></a> 10.2.11 `sodaCollection.saveAndGet()`
+
+##### Prototype
+
+Callback
+```
+saveAndGet(SodaDocument newSodaDocument, function(Error error, SodaDocument document){});
+```
+
+Promise
+```
+promise = saveAndGet(SodaDocument newSodaDocument);
+```
+
+##### Description
+
+This method behaves like
+[`sodaCollection.insertOneAndGet()`](#sodacollinsertoneandget) with the
+exception that if a document with the same key already exists, then it is
+updated instead.
+
+The collection must use [client-assigned keys](#sodaclientkeys) keys, which is
+why `saveAndGet()` accepts only a [SodaDocument](#sodadocumentclass), unlike
+`insertOneAndGet()`.  If the collection is not configured with client-assigned
+keys, then the behavior is exactly the same as
+`sodaCollection.insertOneAndGet()`.
+
+This method was added in node-oracledb 5.0.  It requires Oracle Client 20 or
+later, and Oracle Database 18.3 or later.
 
 ## <a name="sodadatabaseclass"></a> 11. SodaDatabase Class
 
@@ -13650,6 +13710,12 @@ try {
 Note: to use client-assigned keys, collections must be created with
 custom metadata, see [SODA Client-Assigned Keys and Collection
 Metadata](#sodaclientkeys).
+
+Collections with client-assigned keys can be used for 'upsert' operations using
+[`sodaCollection.save()`](#sodacollsave) and
+[`sodaCollection.saveAndGet()`](#sodacollsaveandget).  These methods are similar
+to the insertion methods, however if an existing document with the same key
+already exists in the collection, it is replaced.
 
 To extract documents from a collection, the [`find()`](#sodacollfind)
 method can be used to build a [SodaOperation](#sodaoperationclass)

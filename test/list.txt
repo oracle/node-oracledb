@@ -4190,10 +4190,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     165.4 Negative - createCollection() when collection name is empty string
     165.5 connections from a pool concurrently insert documents into the same collection
 
-166. sodaCallback.js
-    166.1 create a collection, then drop it
-    166.2 the callback version of "examples/soda1.js" case
-
 167 soda3.js
     167.1 get collection names
     167.2 getCollectionNames() - limit option
@@ -4685,3 +4681,9 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     229.4 OUT bind Infinity number
     229.5 IN bind NaN
     229.6 OUT bind NaN
+
+230. soda12.js
+    230.1 example case
+    230.2 insertOne() and save()
+    230.3 Negative - client assigned keys are necessary
+    230.4 Negative - save without arguments

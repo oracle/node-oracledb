@@ -192,7 +192,6 @@ test/poolDrain.js
 test/soda1.js
 test/soda2.js
 test/soda3.js
-test/sodaCallback.js
 
 test/soda4.js
 test/jsObjectGetter2.js
@@ -256,3 +255,4 @@ test/dbType01.js
 test/dbType02.js
 test/lastRowid.js
 test/dbType03.js
+test/soda12.js

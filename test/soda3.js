@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -44,7 +44,7 @@ describe('167. soda3.js', () => {
   ];
 
   before('create collections', async function() {
-    isRunnable = await testsUtil.checkPrerequisites();
+    isRunnable = await testsUtil.isSodaRunnable();
     if (!isRunnable) {
       this.skip();
       return;

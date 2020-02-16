@@ -98,6 +98,25 @@ testsUtil.checkPrerequisites = async function(clientVersion=1805000000, serverVe
   }
 };
 
+testsUtil.isSodaRunnable = async function() {
+  const clientVersion = oracledb.oracleClientVersion;
+  let serverVersion;
+  try {
+    const conn = await oracledb.getConnection(dbconfig);
+    serverVersion = conn.oracleServerVersion;
+
+    await conn.close();
+  } catch (error) {
+    console.log('Error in checking SODA prerequistes:\n', error);
+  }
+
+  if ( (clientVersion < 1805000000) || (serverVersion < 1805000000) ) return false;
+
+  if ( (serverVersion >= 2000000000) && (clientVersion < 2000000000) ) return false;
+
+  return true;
+};
+
 testsUtil.generateRandomPassword = function(length=6) {
   let result = "";
   const choices = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
