@@ -14578,8 +14578,6 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
   `destroy()` method does not take a callback parameter.  If `destroy()` is
   given an error argument, an `error` event is emitted with this error.
 
-    - 33.8 [Migrating from node-oracledb 4.2 to node-oracledb 5.0](#migratev42v50)
-
 ### <a name="migratev42v50"></a> 33.8 Migrating from node-oracledb 4.2 to node-oracledb 5.0
 
 - Review the [CHANGELOG][83] and take advantage of new features.
