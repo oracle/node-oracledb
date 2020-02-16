@@ -1228,6 +1228,9 @@ For direct fetches (those using `execute()` option [`resultSet:
 false`](#propexecresultset)), the internal buffer size will be based
 on the lesser of [`maxRows`](#propdbmaxrows) and `fetchArraySize`.
 
+This property can be overridden by the `execute()` option
+[`fetchArraySize`](#propexecfetcharraysize).
+
 The property was introduced in node-oracledb version 2.0.  It replaces
 [`prefetchRows`](#propdbprefetchrows).
 
