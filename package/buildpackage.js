@@ -47,6 +47,11 @@ if (fs.existsSync('.npmignore')) {
 async function packageUp() {
   console.log('Creating the npm package for node-oracledb ' + packageJSON.version);
   try {
+
+    if (!fs.existsSync(nodbUtil.STAGING_DIR)) {
+      throw new Error("Directory '" + nodbUtil.STAGING_DIR + "' not found.  Run 'npm run buildbinary' first.");
+    }
+
     // Update package.json by setting an install script target to call
     // package/install.js and one that deletes unneeded binaries
     delete packageJSON.dependencies;
