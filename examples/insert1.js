@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -23,6 +23,7 @@
  *
  *   To insert many records at a time see em_insert1.js
  *
+ *   This example requires node-oracledb 4.2 or later.
  *   This example uses Node 8's async/await syntax.
  *
  *****************************************************************************/
@@ -66,6 +67,7 @@ async function run() {
       { id : {val: 1 }, nm : {val: 'Chris'} }
     );
     console.log("Rows inserted: " + result.rowsAffected);  // 1
+    console.log("ROWID of new row: " + result.lastRowid);
 
     // 'bind by position' syntax
     result = await connection.execute(
@@ -73,6 +75,7 @@ async function run() {
       [2, 'Alison']
     );
     console.log("Rows inserted: " + result.rowsAffected);  // 1
+    console.log("ROWID of new row: " + result.lastRowid);
 
     result = await connection.execute(
       `UPDATE no_tab1 SET name = :nm`,
@@ -80,6 +83,7 @@ async function run() {
       { autoCommit: true }  // commit once for all DML in the script
     );
     console.log("Rows updated: " + result.rowsAffected); // 2
+    console.log("ROWID of final row updated: " + result.lastRowid);  // only gives one
 
   } catch (err) {
     console.error(err);
