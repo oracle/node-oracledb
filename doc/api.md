@@ -7529,13 +7529,15 @@ may improve throughput and prevent [deadlocks][22].
 #### Parallelism on a Connection
 
 Structure your code to avoid parallel operations on a single connection.  For
-example, do not use `Promise.all`.  Instead consider, for example, using a basic
+example, do not use `Promise.all()`.  Instead consider, for example, using a basic
 `for` loop and `async` to iterate through each action.  Also, instead of using
-`async.parallel` or `async.each()` which call each of their items in parallel,
-use `async.series` or `async.eachSeries()`.  Code will not run faster when
+`async.parallel()` or `async.each()` which call each of their items in parallel,
+use `async.series()` or `async.eachSeries()`.  Code will not run faster when
 parallel calls are used with a single connection since each connection can only
 ever execute one statement at a time.  Statements will still be executed
-sequentially.
+sequentially.  If you are using one of these constructs to repeat a number of
+INSERT or UPDATE statements, then use [`connection.executeMany()`](#executemany)
+instead.
 
 When you use parallel calls on a single connection, queuing of each call is done
 in the C layer via a mutex.  However libuv is not aware that a connection can
