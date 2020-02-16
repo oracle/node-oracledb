@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -36,6 +36,13 @@ const execSync = require('child_process').execSync;
 const nodbUtil = require('../lib/util.js');
 const packageJSON = require("../package.json");
 
+// Save files that get overwritten
+const origPackageJson = fs.readFileSync('package.json');
+let origNpmignore;
+if (fs.existsSync('.npmignore')) {
+  origNpmignore = fs.readFileSync('.npmignore');
+}
+
 // Create the npm package
 async function packageUp() {
   console.log('Creating the npm package for node-oracledb ' + packageJSON.version);
@@ -58,7 +65,10 @@ async function packageUp() {
     // done dynamically because .npmignore cannot exclude source code
     // by default otherwise compiling from a GitHub tag or branch
     // won't work.
-    fs.appendFileSync('.npmignore', '\n/odpi\n/src\nbinding.gyp\n/package/buildbinary.js\n/package/buildpackage.js\n');
+    // Some of the entries already exist in the GitHub clone .npmignore file,
+    // but they make building from a source bundle cleaner, because the source bundles
+    // in GitHub releases don't contain .npmignore.
+    fs.appendFileSync('.npmignore', '\n/odpi\n/src\nbinding.gyp\n/package/buildbinary.js\n/package/buildpackage.js\n/package/Staging\n/build/Makefile\n/build/oracledb.target.mk\n/build/Release/obj.target\n/build/binding.Makefile\n*.tgz\n');
 
     // Build the package
     execSync('npm pack');
@@ -67,7 +77,11 @@ async function packageUp() {
     console.error(err);
   } finally {
     // Undo changes to the repo
-    execSync('git checkout package.json .npmignore');
+    fs.writeFileSync('package.json', origPackageJson);
+    if (origNpmignore)
+      fs.writeFileSync('.npmignore', origNpmignore);
+    else
+      fs.unlinkSync('.npmignore');
   }
 }
 
