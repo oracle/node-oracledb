@@ -1,4 +1,4 @@
-// Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -93,22 +93,20 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
 //
 // PARAMETERS
 //   - options
-//   - JS callback which will receive (error, result)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaOperation_count(napi_env env, napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaOperation_createBaton(env, info, 2, args, &baton))
+    if (!njsSodaOperation_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaOperation_processOptions(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "Count", njsSodaOperation_countAsync,
-            njsSodaOperation_countPostAsync, 2);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Count", njsSodaOperation_countAsync,
+            njsSodaOperation_countPostAsync);
 }
 
 
@@ -132,19 +130,17 @@ static bool njsSodaOperation_countAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsSodaOperation_countPostAsync()
-//   Sets up the arguments for the callback to JS.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsSodaOperation_countPostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
-    napi_value result, count;
+    napi_value count;
 
-    NJS_CHECK_NAPI(env, napi_create_object(env, &result))
+    NJS_CHECK_NAPI(env, napi_create_object(env, result))
     NJS_CHECK_NAPI(env, napi_create_uint32(env, (uint32_t) baton->docCount,
             &count))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, result, "count", count))
-
-    args[1] = result;
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "count", count))
     return true;
 }
 
@@ -216,24 +212,22 @@ static void njsSodaOperation_finalize(napi_env env, void *finalizeData,
 //
 // PARAMETERS
 //   - options
-//   - JS callback which will receive (error, cursor)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaOperation_getCursor(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaOperation_createBaton(env, info, 2, args, &baton))
+    if (!njsSodaOperation_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaOperation_processOptions(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "GetCursor",
+    return njsBaton_queueWork(baton, env, "GetCursor",
             njsSodaOperation_getCursorAsync,
-            njsSodaOperation_getCursorPostAsync, 2);
-    return NULL;
+            njsSodaOperation_getCursorPostAsync);
 }
 
 
@@ -257,12 +251,12 @@ static bool njsSodaOperation_getCursorAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsSodaOperation_getCursorPostAsync()
-//   Sets up the arguments for the callback to JS.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsSodaOperation_getCursorPostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
-    return njsSodaDocCursor_newFromBaton(baton, env, &args[1]);
+    return njsSodaDocCursor_newFromBaton(baton, env, result);
 }
 
 
@@ -272,24 +266,22 @@ static bool njsSodaOperation_getCursorPostAsync(njsBaton *baton, napi_env env,
 //
 // PARAMETERS
 //   - options
-//   - JS callback which will receive (error, documents)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaOperation_getDocuments(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaOperation_createBaton(env, info, 2, args, &baton))
+    if (!njsSodaOperation_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaOperation_processOptions(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "GetDocuments",
+    return njsBaton_queueWork(baton, env, "GetDocuments",
             njsSodaOperation_getDocumentsAsync,
-            njsSodaOperation_getDocumentsPostAsync, 2);
-    return NULL;
+            njsSodaOperation_getDocumentsPostAsync);
 }
 
 
@@ -348,17 +340,17 @@ static bool njsSodaOperation_getDocumentsAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsSodaOperation_getDocumentsPostAsync()
-//   Sets up the arguments for the callback to JS.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsSodaOperation_getDocumentsPostAsync(njsBaton *baton,
-        napi_env env, napi_value *args)
+        napi_env env, napi_value *result)
 {
-    napi_value array, element;
+    napi_value element;
     uint32_t i;
 
     // create array of the specified length
     NJS_CHECK_NAPI(env, napi_create_array_with_length(env, baton->numSodaDocs,
-            &array))
+            result))
 
     // populate it
     for (i = 0; i < baton->numSodaDocs; i++) {
@@ -371,11 +363,10 @@ static bool njsSodaOperation_getDocumentsPostAsync(njsBaton *baton,
         baton->sodaDocs[i] = NULL;
 
         // add it to the array
-        NJS_CHECK_NAPI(env, napi_set_element(env, array, i, element))
+        NJS_CHECK_NAPI(env, napi_set_element(env, *result, i, element))
 
     }
 
-    args[1] = array;
     return true;
 }
 
@@ -386,23 +377,21 @@ static bool njsSodaOperation_getDocumentsPostAsync(njsBaton *baton,
 //
 // PARAMETERS
 //   - options
-//   - JS callback which will receive (error, document)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaOperation_getOne(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaOperation_createBaton(env, info, 2, args, &baton))
+    if (!njsSodaOperation_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaOperation_processOptions(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "GetOne", njsSodaOperation_getOneAsync,
-            njsSodaOperation_getOnePostAsync, 2);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "GetOne",
+            njsSodaOperation_getOneAsync, njsSodaOperation_getOnePostAsync);
 }
 
 
@@ -426,13 +415,13 @@ static bool njsSodaOperation_getOneAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsSodaOperation_getOnePostAsync()
-//   Sets up the arguments for the callback to JS.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsSodaOperation_getOnePostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
     if (baton->dpiSodaDocHandle && !njsSodaDocument_createFromHandle(env,
-            baton->dpiSodaDocHandle, baton->oracleDb, &args[1]))
+            baton->dpiSodaDocHandle, baton->oracleDb, result))
         return false;
     baton->dpiSodaDocHandle = NULL;
     return true;
@@ -494,23 +483,21 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
 //
 // PARAMETERS
 //   - options
-//   - JS callback which will receive (error, result)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaOperation_remove(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaOperation_createBaton(env, info, 2, args, &baton))
+    if (!njsSodaOperation_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaOperation_processOptions(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "Remove", njsSodaOperation_removeAsync,
-            njsSodaOperation_removePostAsync, 2);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Remove",
+            njsSodaOperation_removeAsync, njsSodaOperation_removePostAsync);
 }
 
 
@@ -534,19 +521,17 @@ static bool njsSodaOperation_removeAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsSodaOperation_removePostAsync()
-//   Sets up the arguments for the callback to JS.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsSodaOperation_removePostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
-    napi_value result, count;
+    napi_value count;
 
-    NJS_CHECK_NAPI(env, napi_create_object(env, &result))
+    NJS_CHECK_NAPI(env, napi_create_object(env, result))
     NJS_CHECK_NAPI(env, napi_create_uint32(env, (uint32_t) baton->docCount,
             &count))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, result, "count", count))
-
-    args[1] = result;
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "count", count))
     return true;
 }
 
@@ -559,16 +544,15 @@ static bool njsSodaOperation_removePostAsync(njsBaton *baton, napi_env env,
 // PARAMETERS
 //   - options
 //   - content
-//   - JS callback which will receive (error, result)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaOperation_replaceOne(napi_env env,
         napi_callback_info info)
 {
     njsSodaOperation *op;
-    napi_value args[3];
+    napi_value args[2];
     njsBaton *baton;
 
-    if (!njsSodaOperation_createBaton(env, info, 3, args, &baton))
+    if (!njsSodaOperation_createBaton(env, info, 2, args, &baton))
         return NULL;
     if (!njsSodaOperation_processOptions(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -580,10 +564,9 @@ static napi_value njsSodaOperation_replaceOne(napi_env env,
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "ReplaceOne",
+    return njsBaton_queueWork(baton, env, "ReplaceOne",
             njsSodaOperation_replaceOneAsync,
-            njsSodaOperation_replaceOnePostAsync, 2);
-    return NULL;
+            njsSodaOperation_replaceOnePostAsync);
 }
 
 
@@ -609,19 +592,17 @@ static bool njsSodaOperation_replaceOneAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsSodaOperation_replaceOnePostAsync()
-//   Sets up the arguments for the callback to JS.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsSodaOperation_replaceOnePostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
-    napi_value result, replaced;
+    napi_value replaced;
 
-    NJS_CHECK_NAPI(env, napi_create_object(env, &result))
+    NJS_CHECK_NAPI(env, napi_create_object(env, result))
     NJS_CHECK_NAPI(env, napi_get_boolean(env, baton->replaced, &replaced))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, result, "replaced",
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "replaced",
             replaced))
-
-    args[1] = result;
     return true;
 }
 
@@ -634,16 +615,15 @@ static bool njsSodaOperation_replaceOnePostAsync(njsBaton *baton, napi_env env,
 // PARAMETERS
 //   - options
 //   - content
-//   - JS callback which will receive (error, doc)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaOperation_replaceOneAndGet(napi_env env,
         napi_callback_info info)
 {
     njsSodaOperation *op;
-    napi_value args[3];
+    napi_value args[2];
     njsBaton *baton;
 
-    if (!njsSodaOperation_createBaton(env, info, 3, args, &baton))
+    if (!njsSodaOperation_createBaton(env, info, 2, args, &baton))
         return NULL;
     if (!njsSodaOperation_processOptions(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -655,10 +635,9 @@ static napi_value njsSodaOperation_replaceOneAndGet(napi_env env,
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "ReplaceOneAndGet",
+    return njsBaton_queueWork(baton, env, "ReplaceOneAndGet",
             njsSodaOperation_replaceOneAndGetAsync,
-            njsSodaOperation_replaceOneAndGetPostAsync, 2);
-    return NULL;
+            njsSodaOperation_replaceOneAndGetPostAsync);
 }
 
 
@@ -688,13 +667,13 @@ static bool njsSodaOperation_replaceOneAndGetAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsSodaOperation_replaceOneAndGetPostAsync()
-//   Sets up the arguments for the callback to JS.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsSodaOperation_replaceOneAndGetPostAsync(njsBaton *baton,
-        napi_env env, napi_value *args)
+        napi_env env, napi_value *result)
 {
     if (baton->dpiSodaDocHandle && !njsSodaDocument_createFromHandle(env,
-            baton->dpiSodaDocHandle, baton->oracleDb, &args[1]))
+            baton->dpiSodaDocHandle, baton->oracleDb, result))
         return false;
     baton->dpiSodaDocHandle = NULL;
     return true;

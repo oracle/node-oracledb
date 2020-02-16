@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -27,7 +27,7 @@
 
 // methods used internally
 static bool njsBaton_completeAsyncHelper(njsBaton *baton, napi_env env,
-        napi_value *callback, napi_value *callingObj);
+        napi_value *resolution);
 static void njsBaton_freeShardingKeys(uint8_t *numShardingKeyColumns,
         dpiShardingKeyColumn **shardingKeyColumns);
 
@@ -42,30 +42,21 @@ static void njsBaton_freeShardingKeys(uint8_t *numShardingKeyColumns,
 static void njsBaton_completeAsync(napi_env env, napi_status ignoreStatus,
         void *data)
 {
-    napi_value callback, callingObj, *callbackArgs;
     njsBaton *baton = (njsBaton*) data;
-    size_t numCallbackArgs;
     napi_status status;
+    napi_value result;
 
     // call helper to perform actual work; report error if any occurs
-    if (!njsBaton_completeAsyncHelper(baton, env, &callback, &callingObj)) {
+    if (!njsBaton_completeAsyncHelper(baton, env, &result)) {
         njsBaton_reportError(baton, env);
         return;
     }
 
-    // destroy baton as it is no longer needed, but save a copy of the callback
-    // arguments so they be used
-    numCallbackArgs = baton->numCallbackArgs;
-    callbackArgs = baton->callbackArgs;
-    baton->callbackArgs = NULL;
-    njsBaton_free(baton, env);
-
-    // invoke callback
-    status = napi_call_function(env, callingObj, callback, numCallbackArgs,
-            callbackArgs, NULL);
-    free(callbackArgs);
+    // resolve promise
+    status = napi_resolve_deferred(env, baton->deferred, result);
     if (status != napi_ok)
         njsUtils_genericThrowError(env);
+    njsBaton_free(baton, env);
 }
 
 
@@ -75,41 +66,20 @@ static void njsBaton_completeAsync(napi_env env, napi_status ignoreStatus,
 // for invoking the callback.
 //-----------------------------------------------------------------------------
 static bool njsBaton_completeAsyncHelper(njsBaton *baton, napi_env env,
-        napi_value *callback, napi_value *callingObj)
+        napi_value *result)
 {
-    size_t i;
-
     // if an error already occurred during the asynchronous processing, nothing
     // to do
     if (baton->hasError)
         return false;
 
-    // allocate memory for the arguments
-    baton->callbackArgs = calloc(baton->numCallbackArgs, sizeof(napi_value));
-    if (!baton->callbackArgs)
-        return njsBaton_setError(baton, errInsufficientMemory);
-
-    // the first parameter should always be null (the error message)
-    // all other values should be undefined unless otherwise specified
-    NJS_CHECK_NAPI(env, napi_get_null(env, &baton->callbackArgs[0]))
-    for (i = 1; i < baton->numCallbackArgs; i++) {
-        NJS_CHECK_NAPI(env, napi_get_undefined(env, &baton->callbackArgs[i]))
-    }
-
-    // call the completion callback and if an error occurred, nothing further
-    // to do
+    // if an after work callback has been specified, call it to determine what
+    // the result should be; the default value is undefined
+    NJS_CHECK_NAPI(env, napi_get_undefined(env, result))
     if (baton->afterWorkCallback) {
-        if (!baton->afterWorkCallback(baton, env, baton->callbackArgs))
+        if (!baton->afterWorkCallback(baton, env, result))
             return false;
     }
-
-    // acquire callback from reference stored on the baton
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallback,
-            callback))
-
-    // acquire calling object from reference stored on the baton
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
-            callingObj))
 
     return true;
 }
@@ -123,7 +93,6 @@ static bool njsBaton_completeAsyncHelper(njsBaton *baton, napi_env env,
 bool njsBaton_create(njsBaton *baton, napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args)
 {
-    napi_valuetype argType;
     napi_value callingObj;
 
     // validate the number of args required for the asynchronous function
@@ -132,22 +101,10 @@ bool njsBaton_create(njsBaton *baton, napi_env env, napi_callback_info info,
             &baton->callingInstance))
         return false;
 
-    // verify that the final argument is a function
-    argType = napi_undefined;
-    if (numArgs > 0) {
-        NJS_CHECK_NAPI(env, napi_typeof(env, args[numArgs - 1], &argType))
-    }
-    if (argType != napi_function)
-        return njsUtils_throwError(env, errMissingCallback);
-
     // save a reference to the calling object so that it will not be garbage
     // collected during the asynchronous call
     NJS_CHECK_NAPI(env, napi_create_reference(env, callingObj, 1,
             &baton->jsCallingObj))
-
-    // save a reference to the callback
-    NJS_CHECK_NAPI(env, napi_create_reference(env, args[numArgs - 1], 1,
-            &baton->jsCallback))
 
     return true;
 }
@@ -353,13 +310,11 @@ void njsBaton_free(njsBaton *baton, napi_env env)
     // remove references to JS objects
     NJS_DELETE_REF_AND_CLEAR(baton->jsBuffer);
     NJS_DELETE_REF_AND_CLEAR(baton->jsCallingObj);
-    NJS_DELETE_REF_AND_CLEAR(baton->jsCallback);
     NJS_DELETE_REF_AND_CLEAR(baton->jsSubscription);
     if (baton->asyncWork) {
         napi_delete_async_work(env, baton->asyncWork);
         baton->asyncWork = NULL;
     }
-    NJS_FREE_AND_CLEAR(baton->callbackArgs);
 
     // free sharding and super sharding keys
     njsBaton_freeShardingKeys(&baton->numShardingKeyColumns,
@@ -423,8 +378,8 @@ bool njsBaton_getBoolFromArg(njsBaton *baton, napi_env env, napi_value *args,
 // false is returned, the callback should not be invoked; instead an exception
 // will be passed on to JavaScript.
 //-----------------------------------------------------------------------------
-bool njsBaton_getErrorInfo(njsBaton *baton, napi_env env, napi_value *error,
-        napi_value *callingObj, napi_value *callback)
+static bool njsBaton_getErrorInfo(njsBaton *baton, napi_env env,
+        napi_value *error)
 {
     napi_value tempString, tempError;
     dpiErrorInfo *errorInfo;
@@ -435,6 +390,8 @@ bool njsBaton_getErrorInfo(njsBaton *baton, napi_env env, napi_value *error,
     // pass it through to the callback
     NJS_CHECK_NAPI(env, napi_is_exception_pending(env, &isPending))
     if (isPending) {
+        if (!baton->deferred)
+            return false;
         baton->dpiError = false;
         NJS_CHECK_NAPI(env, napi_get_and_clear_last_exception(env, &tempError))
         NJS_CHECK_NAPI(env, napi_coerce_to_string(env, tempError, &tempString))
@@ -446,14 +403,6 @@ bool njsBaton_getErrorInfo(njsBaton *baton, napi_env env, napi_value *error,
     errorInfo = (baton->dpiError) ? &baton->errorInfo : NULL;
     if (!njsUtils_getError(env, errorInfo, baton->error, error))
         return false;
-
-    // acquire callback from reference stored on the baton
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallback,
-            callback))
-
-    // acquire calling object from reference stored on the baton
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
-            callingObj))
 
     return true;
 }
@@ -990,24 +939,22 @@ bool njsBaton_isDate(njsBaton *baton, napi_env env, napi_value value,
 // method fails for some reason, the baton is destroyed and is no longer
 // usable.
 //-----------------------------------------------------------------------------
-bool njsBaton_queueWork(njsBaton *baton, napi_env env, const char *methodName,
-        bool (*workCallback)(njsBaton*),
-        bool (*afterWorkCallback)(njsBaton*, napi_env, napi_value*),
-        unsigned int numCallbackArgs)
+napi_value njsBaton_queueWork(njsBaton *baton, napi_env env,
+        const char *methodName, bool (*workCallback)(njsBaton*),
+        bool (*afterWorkCallback)(njsBaton*, napi_env, napi_value*))
 {
-    napi_value asyncResourceName;
+    napi_value asyncResourceName, promise;
 
     // save the methods that will be used to perform the asynchronous work
     baton->workCallback = workCallback;
     baton->afterWorkCallback = afterWorkCallback;
-    baton->numCallbackArgs = numCallbackArgs;
 
     // create the async resource name
     if (napi_create_string_utf8(env, methodName, NAPI_AUTO_LENGTH,
             &asyncResourceName) != napi_ok) {
         njsUtils_genericThrowError(env);
         njsBaton_free(baton, env);
-        return false;
+        return NULL;
     }
 
     // create the asynchronous work handle
@@ -1016,17 +963,25 @@ bool njsBaton_queueWork(njsBaton *baton, napi_env env, const char *methodName,
             &baton->asyncWork) != napi_ok) {
         njsUtils_genericThrowError(env);
         njsBaton_free(baton, env);
-        return false;
+        return NULL;
+    }
+
+    // create a promise which will be returned to JavaScript
+    if (napi_create_promise(env, &baton->deferred, &promise) != napi_ok) {
+        njsUtils_genericThrowError(env);
+        njsBaton_free(baton, env);
+        return NULL;
     }
 
     // queue the asynchronous work
     if (napi_queue_async_work(env, baton->asyncWork) != napi_ok) {
+        napi_reject_deferred(env, baton->deferred, NULL);
         njsUtils_genericThrowError(env);
         njsBaton_free(baton, env);
-        return false;
+        return NULL;
     }
 
-    return true;
+    return promise;
 }
 
 
@@ -1042,16 +997,19 @@ bool njsBaton_queueWork(njsBaton *baton, napi_env env, const char *methodName,
 //-----------------------------------------------------------------------------
 void njsBaton_reportError(njsBaton *baton, napi_env env)
 {
-    napi_value error, callback, callingObj;
+    napi_value error;
     bool ok;
 
-    ok = njsBaton_getErrorInfo(baton, env, &error, &callingObj, &callback);
-    njsBaton_free(baton, env);
+    ok = njsBaton_getErrorInfo(baton, env, &error);
     if (ok) {
-        if (napi_call_function(env, callingObj, callback, 1, &error,
-                NULL) != napi_ok)
-            njsUtils_genericThrowError(env);
+        if (baton->deferred) {
+            if (napi_reject_deferred(env, baton->deferred, error) != napi_ok)
+                njsUtils_genericThrowError(env);
+        } else {
+            napi_throw(env, error);
+        }
     }
+    njsBaton_free(baton, env);
 }
 
 

@@ -14,26 +14,21 @@ Overview of node-oracledb functional tests
     1.4 Testing commit() & rollback() functions
         1.4.1 commit() function works well
         1.4.2 rollback() function works well
-    1.5 Testing parameter assertions
-        1.5.1 too few params should throw an error
-        1.5.2 too many params should throw error
-        1.5.3 wrong type for param 1 should throw an error
-        1.5.4 wrong type for param 2 should throw an error
-        1.5.5 wrong type for param 3 should throw an error
-        1.5.6 wrong type for param 4 should throw an error
-    1.6 Close method
-        1.6.1 close can be used as an alternative to release
-    1.7 connectionString alias
-        1.7.1 allows connectionString to be used as an alias for connectString
-    1.8 privileged connections
-        1.8.1 Negative value - null
-        1.8.2 Negative - invalid type, a String
-        1.8.3 Negative value - random constants
-        1.8.4 Negative value - NaN
-        1.8.5 gets ignored when acquiring a connection from Pool
-    1.9 Ping method
-        1.9.1 ping() checks the connection is usable
-        1.9.2 closed connection
+    1.5 Close method
+        1.5.1 close can be used as an alternative to release
+    1.6 connectionString alias
+        1.6.1 allows connectionString to be used as an alias for connectString
+    1.7 privileged connections
+        1.7.1 Negative value - null
+        1.7.2 Negative - invalid type, a String
+        1.7.3 Negative value - random constants
+        1.7.4 Negative value - NaN
+        1.7.5 gets ignored when acquiring a connection from Pool
+    1.8 Ping method
+        1.8.1 ping() checks the connection is usable
+        1.8.2 closed connection
+    1.9 connectString & connectionString specified
+        1.9.1 both connectString & ConnectionString specified
 
   2. pool.js
     2.1 default settting
@@ -1280,15 +1275,13 @@ Overview of node-oracledb functional tests
         72.1.3 Negative - invalid type
         72.1.4 Negative - invalid value
         72.1.5 DML - UPDATE statement
-        72.1.6 promise test of createLob()
-        72.1.7 BIND_INOUT, PL/SQL, IN LOB gets closed automatically
+        72.1.6 BIND_INOUT, PL/SQL, IN LOB gets closed automatically
     72.2 BLOB
         72.2.1 BIND_IN, DML, a jpg file
         72.2.2 BIND_IN, PL/SQL, a jpg file
         72.2.3 Negative - inconsistent datatypes
         72.2.4 Negative - not providing first parameter
-        72.2.5 promise test of createLob()
-        72.2.6 call lob.close() multiple times sequentially
+        72.2.5 call lob.close() multiple times sequentially
     72.3 NCLOB
         72.3.1 BIND_IN, DML, a txt file
         72.3.2 BIND_IN, PL/SQL, a txt file
@@ -4175,8 +4168,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     163.11 numIterations - only OUT parameters
     163.12 numIterations - No parameters
     163.13 numIterations - DML RETURNING
-    163.14 Negative - set numIterations to be string
-    163.15 Negative - set numIterations to be negative value
+    163.14 Negative - set numIterations to be negative value
 
 164. soda1.js
     164.1 getSodaDatabase() creates a sodaDatabase Object

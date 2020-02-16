@@ -91,22 +91,20 @@ static bool njsLob_createBaton(napi_env env, napi_callback_info info,
 // njsLob_close()
 //   Close the LOB.
 //
-// PARAMETERS
-//   - JS callback which will receive (error)
+// PARAMETERS - NONE
 //-----------------------------------------------------------------------------
 static napi_value njsLob_close(napi_env env, napi_callback_info info)
 {
     njsBaton *baton;
     njsLob *lob;
 
-    if (!njsLob_createBaton(env, info, 1, NULL, &baton))
+    if (!njsLob_createBaton(env, info, 0, NULL, &baton))
         return NULL;
     lob = (njsLob*) baton->callingInstance;
     lob->activeBaton = NULL;
     baton->dpiLobHandle = lob->handle;
     lob->handle = NULL;
-    njsBaton_queueWork(baton, env, "Close", njsLob_closeAsync, NULL, 1);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Close", njsLob_closeAsync, NULL);
 }
 
 
@@ -267,18 +265,16 @@ static napi_value njsLob_getValid(napi_env env, napi_callback_info info)
 //   Read all of the data from the LOB and return it as a single string or
 // buffer.
 //
-// PARAMETERS
-//   - JS callback which will receive (error, data)
+// PARAMETERS - NONE
 //-----------------------------------------------------------------------------
 static napi_value njsLob_getData(napi_env env, napi_callback_info info)
 {
     njsBaton *baton;
 
-    if (!njsLob_createBaton(env, info, 1, NULL, &baton))
+    if (!njsLob_createBaton(env, info, 0, NULL, &baton))
         return NULL;
-    njsBaton_queueWork(baton, env, "GetData", njsLob_getDataAsync,
-            njsLob_getDataPostAsync, 2);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "GetData", njsLob_getDataAsync,
+            njsLob_getDataPostAsync);
 }
 
 
@@ -334,26 +330,24 @@ static bool njsLob_getDataAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsLob_getDataPostAsync()
-//   Generates return values for njsLob_getData().
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsLob_getDataPostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
     njsLob *lob = (njsLob*) baton->callingInstance;
-    napi_value result;
 
     if (!baton->bufferSize) {
-        NJS_CHECK_NAPI(env, napi_get_null(env, &result))
+        NJS_CHECK_NAPI(env, napi_get_null(env, result))
     } else if (lob->dataType == DPI_ORACLE_TYPE_CLOB ||
             lob->dataType == DPI_ORACLE_TYPE_NCLOB) {
         NJS_CHECK_NAPI(env, napi_create_string_utf8(env, baton->bufferPtr,
-                baton->bufferSize, &result))
+                baton->bufferSize, result))
     } else {
         NJS_CHECK_NAPI(env, napi_create_buffer_copy(env, baton->bufferSize,
-                baton->bufferPtr, NULL, &result))
+                baton->bufferPtr, NULL, result))
     }
 
-    args[1] = result;
     return true;
 }
 
@@ -409,22 +403,20 @@ bool njsLob_populateBuffer(njsBaton *baton, njsLobBuffer *buffer)
 //
 // PARAMETERS
 //   - offset
-//   - JS callback which will receive (error, data)
 //-----------------------------------------------------------------------------
 static napi_value njsLob_read(napi_env env, napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsLob_createBaton(env, info, 2, args, &baton))
+    if (!njsLob_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsLob_readProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "Read", njsLob_readAsync,
-            njsLob_readPostAsync, 2);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Read", njsLob_readAsync,
+            njsLob_readPostAsync);
 }
 
 
@@ -479,26 +471,24 @@ static bool njsLob_readAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsLob_readPostAsync()
-//   Generates return values for njsLob_read().
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsLob_readPostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
     njsLob *lob = (njsLob*) baton->callingInstance;
-    napi_value result;
 
     if (!baton->bufferSize) {
-        NJS_CHECK_NAPI(env, napi_get_null(env, &result))
+        NJS_CHECK_NAPI(env, napi_get_null(env, result))
     } else if (lob->dataType == DPI_ORACLE_TYPE_CLOB ||
             lob->dataType == DPI_ORACLE_TYPE_NCLOB) {
         NJS_CHECK_NAPI(env, napi_create_string_utf8(env, lob->bufferPtr,
-                baton->bufferSize, &result))
+                baton->bufferSize, result))
     } else {
         NJS_CHECK_NAPI(env, napi_create_buffer_copy(env, baton->bufferSize,
-                lob->bufferPtr, NULL, &result))
+                lob->bufferPtr, NULL, result))
     }
 
-    args[1] = result;
     return true;
 }
 
@@ -541,21 +531,19 @@ static napi_value njsLob_setPieceSize(napi_env env, napi_callback_info info)
 // PARAMETERS
 //   - offset
 //   - data
-//   - JS callback which will receive (error)
 //-----------------------------------------------------------------------------
 static napi_value njsLob_write(napi_env env, napi_callback_info info)
 {
-    napi_value args[3];
+    napi_value args[2];
     njsBaton *baton;
 
-    if (!njsLob_createBaton(env, info, 3, args, &baton))
+    if (!njsLob_createBaton(env, info, 2, args, &baton))
         return NULL;
     if (!njsLob_writeProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "Write", njsLob_writeAsync, NULL, 1);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Write", njsLob_writeAsync, NULL);
 }
 
 

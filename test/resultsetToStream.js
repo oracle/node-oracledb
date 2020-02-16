@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -261,17 +261,15 @@ describe('15. resultsetToStream.js', function () {
           var cursor = result.outBinds.cursor;
           var stream = cursor.toQueryStream();
 
+          stream.on('close', done);
+          stream.on('error', function(err) {
+            should.not.exist(err);
+          });
+
           cursor.getRow(function(err) {
             (err.message).should.startWith('NJS-042:');
             // NJS-042: cannot invoke methods after converting to stream
-
-            // Closing cursor via stream._close because the cursor.close method
-            // is not invokable after conversion to stream and destroy wasn't
-            // available till Node.js v8+.
-            stream._close(function(err) {
-              should.not.exist(err);
-              done();
-            });
+            stream.destroy();
           });
         }
       );
@@ -291,16 +289,14 @@ describe('15. resultsetToStream.js', function () {
           var cursor = result.outBinds.cursor;
           var stream = cursor.toQueryStream();
 
+          stream.on('close', done);
+          stream.on('error', function(err) {
+            should.not.exist(err);
+          });
+
           cursor.getRows(5, function(err) {
             (err.message).should.startWith('NJS-042:');
-
-            // Closing cursor via stream._close because the cursor.close method
-            // is not invokable after conversion to stream and destroy wasn't
-            // available till Node.js v8+.
-            stream._close(function(err) {
-              should.not.exist(err);
-              done();
-            });
+            stream.destroy();
           });
         }
       );
@@ -320,16 +316,14 @@ describe('15. resultsetToStream.js', function () {
           var cursor = result.outBinds.cursor;
           var stream = cursor.toQueryStream();
 
+          stream.on('close', done);
+          stream.on('error', function(err) {
+            should.not.exist(err);
+          });
+
           cursor.close(function(err) {
             (err.message).should.startWith('NJS-042:');
-
-            // Closing cursor via stream._close because the cursor.close method
-            // is not invokable after conversion to stream and destroy wasn't
-            // available till Node.js v8+.
-            stream._close(function(err) {
-              should.not.exist(err);
-              done();
-            });
+            stream.destroy();
           });
         }
       );
@@ -351,19 +345,17 @@ describe('15. resultsetToStream.js', function () {
           // First conversion to stream
           var stream = cursor.toQueryStream();
 
+          stream.on('close', done);
+          stream.on('error', function(err) {
+            should.not.exist(err);
+          });
+
           try {
             // Second conversion to stream
             stream = cursor.toQueryStream();
           } catch (err) {
             (err.message).should.startWith('NJS-043:');
-
-            // Closing cursor via stream._close because the cursor.close method
-            // is not invokable after conversion to stream and destroy wasn't
-            // available till Node.js v8+.
-            stream._close(function(err) {
-              should.not.exist(err);
-              done();
-            });
+            stream.destroy();
           }
         }
       );

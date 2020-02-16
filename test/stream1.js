@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -427,6 +427,7 @@ describe('13. stream1.js', function () {
 
       stream.on('end', function () {
         events.push('end');
+        stream.destroy();
       });
 
       stream.on('close', function() {
@@ -592,18 +593,18 @@ describe('13. stream1.js', function () {
         // Using the internal/private caches to validate
         should.equal(stream._resultSet._rowCache.length, testFetchArraySize - (1 + stream._readableState.buffer.length));
 
-        // Using internal close method for Node.js versions < 8
-        stream._close(function() {
-          oracledb.fetchArraySize = defaultFetchArraySize;
-          done();
-        });
+        stream.destroy();
+        oracledb.fetchArraySize = defaultFetchArraySize;
+        done();
       });
 
       stream.on('end', function () {
+        oracledb.fetchArraySize = defaultFetchArraySize;
         done(new Error('Reached the end of the stream'));
       });
 
       stream.on('error', function (err) {
+        oracledb.fetchArraySize = defaultFetchArraySize;
         done(err);
       });
     });
@@ -618,10 +619,8 @@ describe('13. stream1.js', function () {
         // Using the internal/private caches to validate
         should.equal(stream._resultSet._rowCache.length, testFetchArraySize - (1 + stream._readableState.buffer.length));
 
-        // Using internal close method for Node.js versions < 8
-        stream._close(function() {
-          done();
-        });
+        stream.destroy();
+        done();
       });
 
       stream.on('end', function () {
@@ -648,8 +647,8 @@ describe('13. stream1.js', function () {
             return;
           }
 
-          var stream = result.resultSet.toQueryStream();
-          var receivedEvent = false;
+          const stream = result.resultSet.toQueryStream();
+          let receivedEvent = false;
 
           stream.on('open', function() {
             receivedEvent = true;
@@ -661,7 +660,8 @@ describe('13. stream1.js', function () {
             done(err);
           });
 
-          stream.on('close', function() {
+          stream.on('end', function() {
+            stream.destroy();
             if (receivedEvent) {
               done();
             } else {
@@ -685,8 +685,8 @@ describe('13. stream1.js', function () {
             return;
           }
 
-          var stream = result.resultSet.toQueryStream();
-          var receivedEvent = false;
+          const stream = result.resultSet.toQueryStream();
+          let receivedEvent = false;
 
           stream.on('metadata', function() {
             receivedEvent = true;
@@ -696,6 +696,10 @@ describe('13. stream1.js', function () {
 
           stream.on('error', function (err) {
             done(err);
+          });
+
+          stream.on('end', function() {
+            stream.destroy();
           });
 
           stream.on('close', function() {

@@ -486,7 +486,6 @@ struct njsBaton {
     // references that are held (requires free)
     napi_ref jsBuffer;
     napi_ref jsCallingObj;
-    napi_ref jsCallback;
     napi_ref jsSubscription;
 
     // values required to check if a value is a date; this is only used when
@@ -506,8 +505,7 @@ struct njsBaton {
     napi_async_work asyncWork;
     bool (*workCallback)(njsBaton*);
     bool (*afterWorkCallback)(njsBaton*, napi_env, napi_value*);
-    napi_value *callbackArgs;
-    unsigned int numCallbackArgs;
+    napi_deferred deferred;
 };
 
 // data for class definitions exposed to JS
@@ -788,8 +786,6 @@ bool njsBaton_createDate(njsBaton *baton, napi_env env, double value,
 void njsBaton_free(njsBaton *baton, napi_env env);
 bool njsBaton_getBoolFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, bool *result, bool *found);
-bool njsBaton_getErrorInfo(njsBaton *baton, napi_env env, napi_value *error,
-        napi_value *callingObj, napi_value *callback);
 bool njsBaton_getFetchInfoFromArg(njsBaton *baton, napi_env env,
         napi_value *args, int argIndex, const char *propertyName,
         uint32_t *numFetchInfo, njsFetchInfo **fetchInfo, bool *found);
@@ -819,10 +815,9 @@ bool njsBaton_getValueFromArg(njsBaton *baton, napi_env env, napi_value *args,
 bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value);
 bool njsBaton_isDate(njsBaton *baton, napi_env env, napi_value value,
         bool *isDate);
-bool njsBaton_queueWork(njsBaton *baton, napi_env env, const char *methodName,
-        bool (*workCallback)(njsBaton*),
-        bool (*afterWorkCallback)(njsBaton*, napi_env, napi_value*),
-        unsigned int numCallbackArgs);
+napi_value njsBaton_queueWork(njsBaton *baton, napi_env env,
+        const char *methodName, bool (*workCallback)(njsBaton*),
+        bool (*afterWorkCallback)(njsBaton*, napi_env, napi_value*));
 void njsBaton_reportError(njsBaton *baton, napi_env env);
 bool njsBaton_setConstructors(njsBaton *baton, napi_env env);
 bool njsBaton_setError(njsBaton *baton, int errNum, ...);

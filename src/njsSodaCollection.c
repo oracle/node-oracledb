@@ -1,4 +1,4 @@
-// Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -130,24 +130,22 @@ bool njsSodaCollection_createBaton(napi_env env, napi_callback_info info,
 //
 // PARAMETERS
 //   - index spec
-//   - JS callback which will receive (error, result)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaCollection_createIndex(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 2, args, &baton))
+    if (!njsSodaCollection_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsUtils_getStringArg(env, args, 0, &baton->indexSpec,
             &baton->indexSpecLength)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "Drop", njsSodaCollection_createIndexAsync,
-            NULL, 1);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Drop",
+            njsSodaCollection_createIndexAsync, NULL);
 }
 
 
@@ -174,18 +172,16 @@ static bool njsSodaCollection_createIndexAsync(njsBaton *baton)
 // njsSodaCollection_drop()
 //   Drops the collection from the database.
 //
-// PARAMETERS
-//   - JS callback which will receive (error, result)
+// PARAMETERS - NONE
 //-----------------------------------------------------------------------------
 static napi_value njsSodaCollection_drop(napi_env env, napi_callback_info info)
 {
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 1, NULL, &baton))
+    if (!njsSodaCollection_createBaton(env, info, 0, NULL, &baton))
         return NULL;
-    njsBaton_queueWork(baton, env, "Drop", njsSodaCollection_dropAsync,
-            njsSodaCollection_dropPostAsync, 2);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Drop", njsSodaCollection_dropAsync,
+            njsSodaCollection_dropPostAsync);
 }
 
 
@@ -210,19 +206,18 @@ static bool njsSodaCollection_dropAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsSodaCollection_dropPostAsync()
-//   Creates the result object which is returned to the JS application.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsSodaCollection_dropPostAsync(njsBaton *baton,
-        napi_env env, napi_value *args)
+        napi_env env, napi_value *result)
 {
-    napi_value result, isDropped;
+    napi_value isDropped;
 
-    NJS_CHECK_NAPI(env, napi_create_object(env, &result))
+    NJS_CHECK_NAPI(env, napi_create_object(env, result))
     NJS_CHECK_NAPI(env, napi_get_boolean(env, baton->isDropped, &isDropped))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, result, "dropped",
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "dropped",
             isDropped))
 
-    args[1] = result;
     return true;
 }
 
@@ -234,24 +229,22 @@ static bool njsSodaCollection_dropPostAsync(njsBaton *baton,
 // PARAMETERS
 //   - name
 //   - options
-//   - JS callback which will receive (error, result)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaCollection_dropIndex(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[3];
+    napi_value args[2];
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 3, args, &baton))
+    if (!njsSodaCollection_createBaton(env, info, 2, args, &baton))
         return NULL;
     if (!njsSodaCollection_dropIndexProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "DropIndex",
+    return njsBaton_queueWork(baton, env, "DropIndex",
             njsSodaCollection_dropIndexAsync,
-            njsSodaCollection_dropIndexPostAsync, 2);
-    return NULL;
+            njsSodaCollection_dropIndexPostAsync);
 }
 
 
@@ -279,19 +272,18 @@ static bool njsSodaCollection_dropIndexAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsSodaCollection_dropIndexPostAsync()
-//   Creates the result object which is returned to the JS application.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsSodaCollection_dropIndexPostAsync(njsBaton *baton,
-        napi_env env, napi_value *args)
+        napi_env env, napi_value *result)
 {
-    napi_value result, isDropped;
+    napi_value isDropped;
 
-    NJS_CHECK_NAPI(env, napi_create_object(env, &result))
+    NJS_CHECK_NAPI(env, napi_create_object(env, result))
     NJS_CHECK_NAPI(env, napi_get_boolean(env, baton->isDropped, &isDropped))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, result, "dropped",
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "dropped",
             isDropped))
 
-    args[1] = result;
     return true;
 }
 
@@ -354,20 +346,18 @@ static napi_value njsSodaCollection_find(napi_env env, napi_callback_info info)
 // njsSodaCollection_getDataGuide()
 //   Returns the data guide associated with the SODA collection.
 //
-// PARAMETERS
-//   - JS callback which will receive (error, document)
+// PARAMETERS - NONE
 //-----------------------------------------------------------------------------
 static napi_value njsSodaCollection_getDataGuide(napi_env env,
         napi_callback_info info)
 {
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 1, NULL, &baton))
+    if (!njsSodaCollection_createBaton(env, info, 0, NULL, &baton))
         return NULL;
-    njsBaton_queueWork(baton, env, "GetDataGuide",
+    return njsBaton_queueWork(baton, env, "GetDataGuide",
             njsSodaCollection_getDataGuideAsync,
-            njsSodaCollection_getDataGuidePostAsync, 2);
-    return NULL;
+            njsSodaCollection_getDataGuidePostAsync);
 }
 
 
@@ -388,13 +378,13 @@ static bool njsSodaCollection_getDataGuideAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsSodaCollection_getDataGuidePostAsync()
-//   Creates the result object which is returned to the JS application.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsSodaCollection_getDataGuidePostAsync(njsBaton *baton,
-        napi_env env, napi_value *args)
+        napi_env env, napi_value *result)
 {
     if (!njsSodaDocument_createFromHandle(env, baton->dpiSodaDocHandle,
-            baton->oracleDb, &args[1]))
+            baton->oracleDb, result))
         return false;
     baton->dpiSodaDocHandle = NULL;
     return true;
@@ -452,23 +442,21 @@ static napi_value njsSodaCollection_getName(napi_env env,
 //
 // PARAMETERS
 //   - array of SODA documents
-//   - JS callback which will receive (error)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaCollection_insertMany(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 2, args, &baton))
+    if (!njsSodaCollection_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaCollection_insertManyProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "InsertMany",
-            njsSodaCollection_insertManyAsync, NULL, 1);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "InsertMany",
+            njsSodaCollection_insertManyAsync, NULL);
 }
 
 
@@ -527,24 +515,22 @@ static bool njsSodaCollection_insertManyProcessArgs(njsBaton *baton,
 //
 // PARAMETERS
 //   - SODA document
-//   - JS callback which will receive (error, document)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaCollection_insertManyAndGet(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 2, args, &baton))
+    if (!njsSodaCollection_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaCollection_insertManyProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "InsertManyAndGet",
+    return njsBaton_queueWork(baton, env, "InsertManyAndGet",
             njsSodaCollection_insertManyAndGetAsync,
-            njsSodaCollection_insertManyAndGetPostAsync, 2);
-    return NULL;
+            njsSodaCollection_insertManyAndGetPostAsync);
 }
 
 
@@ -583,21 +569,21 @@ static bool njsSodaCollection_insertManyAndGetAsync(njsBaton *baton)
 //   Creates the result object which is returned to the JS application.
 //-----------------------------------------------------------------------------
 static bool njsSodaCollection_insertManyAndGetPostAsync(njsBaton *baton,
-        napi_env env, napi_value *args)
+        napi_env env, napi_value *result)
 {
-    napi_value result, temp;
+    napi_value temp;
     uint32_t i;
 
     NJS_CHECK_NAPI(env, napi_create_array_with_length(env, baton->numSodaDocs,
-            &result))
+            result))
     for (i = 0; i < baton->numSodaDocs; i++) {
         if (!njsSodaDocument_createFromHandle(env, baton->sodaDocs[i],
                 baton->oracleDb, &temp))
             return false;
         baton->sodaDocs[i] = NULL;
-        NJS_CHECK_NAPI(env, napi_set_element(env, result, i, temp))
+        NJS_CHECK_NAPI(env, napi_set_element(env, *result, i, temp))
     }
-    args[1] = result;
+
     return true;
 }
 
@@ -608,16 +594,15 @@ static bool njsSodaCollection_insertManyAndGetPostAsync(njsBaton *baton,
 //
 // PARAMETERS
 //   - SODA document
-//   - JS callback which will receive (error)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaCollection_insertOne(napi_env env,
         napi_callback_info info)
 {
     njsSodaCollection *coll;
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 2, args, &baton))
+    if (!njsSodaCollection_createBaton(env, info, 1, args, &baton))
         return NULL;
     coll = (njsSodaCollection*) baton->callingInstance;
     if (!njsBaton_getSodaDocument(baton, coll->db, env, args[0],
@@ -625,9 +610,8 @@ static napi_value njsSodaCollection_insertOne(napi_env env,
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "InsertOne",
-            njsSodaCollection_insertOneAsync, NULL, 1);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "InsertOne",
+            njsSodaCollection_insertOneAsync, NULL);
 }
 
 
@@ -655,16 +639,15 @@ static bool njsSodaCollection_insertOneAsync(njsBaton *baton)
 //
 // PARAMETERS
 //   - SODA document
-//   - JS callback which will receive (error, document)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaCollection_insertOneAndGet(napi_env env,
         napi_callback_info info)
 {
     njsSodaCollection *coll;
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 2, args, &baton))
+    if (!njsSodaCollection_createBaton(env, info, 1, args, &baton))
         return NULL;
     coll = (njsSodaCollection*) baton->callingInstance;
     if (!njsBaton_getSodaDocument(baton, coll->db, env, args[0],
@@ -672,10 +655,9 @@ static napi_value njsSodaCollection_insertOneAndGet(napi_env env,
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "InsertOneAndGet",
+    return njsBaton_queueWork(baton, env, "InsertOneAndGet",
             njsSodaCollection_insertOneAndGetAsync,
-            njsSodaCollection_insertOneAndGetPostAsync, 2);
-    return NULL;
+            njsSodaCollection_insertOneAndGetPostAsync);
 }
 
 
@@ -702,13 +684,13 @@ static bool njsSodaCollection_insertOneAndGetAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsSodaCollection_insertOneAndGetPostAsync()
-//   Creates the result object which is returned to the JS application.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsSodaCollection_insertOneAndGetPostAsync(njsBaton *baton,
-        napi_env env, napi_value *args)
+        napi_env env, napi_value *result)
 {
     if (!njsSodaDocument_createFromHandle(env, baton->dpiSodaDocHandle,
-            baton->oracleDb, &args[1]))
+            baton->oracleDb, result))
         return false;
     baton->dpiSodaDocHandle = NULL;
     return true;

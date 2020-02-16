@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -553,182 +553,8 @@ describe('1. connection.js', function(){
     });
   });
 
-  describe('1.5 Testing parameter assertions', function() {
-    var conn1;
-
-    beforeEach('get connection ready', function(done) {
-      oracledb.getConnection(credentials, function(err, conn) {
-        should.not.exist(err);
-        conn1 = conn;
-        done();
-      });
-    });
-
-    afterEach('release connection', function(done) {
-      conn1.release(function(err) {
-        should.not.exist(err);
-        done();
-      });
-    });
-
-    it('1.5.1 too few params should throw an error', function(done) {
-      // This test returns a promise because the last parameter to execute is not
-      // a function. Normally, errors thrown in a promise would be directed to
-      // to a catch handler. In the case of an "accidental promise" the error
-      // could go undetected. Because of this, the promisify function in util.js
-      // uses process.nextTick to throw invalid number or type of params (NJS-009
-      // and NJS-005). This test has been updated to account for this behavior.
-      var promiseSupportEnabled = oracledb.Promise !== undefined;
-      var listeners = process.listeners('uncaughtException');
-
-      if (promiseSupportEnabled) {
-        process.removeAllListeners('uncaughtException');
-
-        process.once('uncaughtException', function(err) {
-          listeners.forEach(function(listener) {
-            process.on('uncaughtException', listener);
-          });
-
-          should.exist(err);
-
-          done();
-        });
-      }
-
-      // Using try catch for instances where promises are not supported or have
-      // been disabled by setting oracledb.Promise to something falsey.
-      try {
-        conn1.execute();
-      } catch (err) {
-        if (promiseSupportEnabled) {
-          listeners.forEach(function(listener) {
-            process.on('uncaughtException', listener);
-          });
-        }
-
-        should.exist(err);
-
-        done();
-      }
-    });
-
-    it('1.5.2 too many params should throw error', function(done) {
-      // This test returns a promise because the last parameter to execute is not
-      // a function. Normally, errors thrown in a promise would be directed to
-      // to a catch handler. In the case of an "accidental promise" the error
-      // could go undetected. Because of this, the promisify function in util.js
-      // uses process.nextTick to throw invalid number or type of params (NJS-009
-      // and NJS-005). This test has been updated to account for this behavior.
-      var promiseSupportEnabled = oracledb.Promise !== undefined;
-      var listeners = process.listeners('uncaughtException');
-
-      if (promiseSupportEnabled) {
-        process.removeAllListeners('uncaughtException');
-
-        process.once('uncaughtException', function(err) {
-          listeners.forEach(function(listener) {
-            process.on('uncaughtException', listener);
-          });
-
-          should.exist(err);
-
-          done();
-        });
-      }
-
-      // Using try catch for instances where promises are not supported or have
-      // been disabled by setting oracledb.Promise to something falsey.
-      try {
-        conn1.execute(1, 2, 3, 4, 5);
-      } catch (err) {
-        if (promiseSupportEnabled) {
-          listeners.forEach(function(listener) {
-            process.on('uncaughtException', listener);
-          });
-        }
-        should.exist(err);
-
-        done();
-      }
-    });
-
-    it('1.5.3 wrong type for param 1 should throw an error', function(done) {
-      // Don't need to listen for unhandledRejection because a promise will not
-      // be returned as the last param is a function.
-      try {
-        conn1.execute(1, function() {});
-      } catch (err) {
-        should.exist(err);
-        done();
-      }
-    });
-
-    it('1.5.4 wrong type for param 2 should throw an error', function(done) {
-      // This test returns a promise because the last parameter to execute is not
-      // a function. Normally, errors thrown in a promise would be directed to
-      // to a catch handler. In the case of an "accidental promise" the error
-      // could go undetected. Because of this, the promisify function in util.js
-      // uses process.nextTick to throw invalid number or type of params (NJS-009
-      // and NJS-005). This test has been updated to account for this behavior.
-      var promiseSupportEnabled = oracledb.Promise !== undefined;
-      var listeners = process.listeners('uncaughtException');
-
-      if (promiseSupportEnabled) {
-        process.removeAllListeners('uncaughtException');
-
-        process.once('uncaughtException', function(err) {
-          listeners.forEach(function(listener) {
-            process.on('uncaughtException', listener);
-          });
-
-          should.exist(err);
-
-          done();
-        });
-      }
-
-      // Using try catch for instances where promises are not supported or have
-      // been disabled by setting oracledb.Promise to something falsey.
-      try {
-        conn1.execute('select 1 from dual', 1);
-      } catch (err) {
-        if (promiseSupportEnabled) {
-          listeners.forEach(function(listener) {
-            process.on('uncaughtException', listener);
-          });
-        }
-
-        should.exist(err);
-
-        done();
-      }
-    });
-
-    it('1.5.5 wrong type for param 3 should throw an error', function(done) {
-      // Don't need to listen for unhandledRejection because a promise will not
-      // be returned as the last param is a function.
-      try {
-        conn1.execute('select 1 from dual', 1, function() {});
-      } catch (err) {
-        should.exist(err);
-        done();
-      }
-    });
-
-    it('1.5.6 wrong type for param 4 should throw an error', function(done) {
-      // Don't need to listen for unhandledRejection because a promise will not
-      // be returned as the last param is a function.
-      try {
-        conn1.execute('select 1 from dual', {}, 1, function() {});
-      } catch (err) {
-        should.exist(err);
-        done();
-      }
-    });
-  });
-
-  describe('1.6 Close method', function() {
-    it('1.6.1 close can be used as an alternative to release', function(done) {
+  describe('1.5 Close method', function() {
+    it('1.5.1 close can be used as an alternative to release', function(done) {
       oracledb.getConnection(credentials, function(err, conn) {
         should.not.exist(err);
 
@@ -738,10 +564,10 @@ describe('1. connection.js', function(){
         });
       });
     });
-  }); // 1.6
+  });
 
-  describe('1.7 connectionString alias', function() {
-    it('1.7.1 allows connectionString to be used as an alias for connectString', function(done) {
+  describe('1.6 connectionString alias', function() {
+    it('1.6.1 allows connectionString to be used as an alias for connectString', function(done) {
       oracledb.getConnection(
         {
           user: dbConfig.user,
@@ -762,11 +588,11 @@ describe('1. connection.js', function(){
       );
     });
 
-  }); // 1.7
+  });
 
-  describe('1.8 privileged connections', function() {
+  describe('1.7 privileged connections', function() {
 
-    it('1.8.1 Negative value - null', function(done) {
+    it('1.7.1 Negative value - null', function(done) {
 
       oracledb.getConnection(
         {
@@ -785,9 +611,9 @@ describe('1. connection.js', function(){
           done();
         }
       );
-    }); // 1.8.1
+    });
 
-    it('1.8.2 Negative - invalid type, a String', function(done) {
+    it('1.7.2 Negative - invalid type, a String', function(done) {
 
       oracledb.getConnection(
         {
@@ -806,9 +632,9 @@ describe('1. connection.js', function(){
           done();
         }
       );
-    }); // 1.8.2
+    });
 
-    it('1.8.3 Negative value - random constants', function(done) {
+    it('1.7.3 Negative value - random constants', function(done) {
 
       oracledb.getConnection(
         {
@@ -825,9 +651,9 @@ describe('1. connection.js', function(){
           done();
         }
       );
-    }); // 1.8.3
+    });
 
-    it('1.8.4 Negative value - NaN', function(done) {
+    it('1.7.4 Negative value - NaN', function(done) {
 
       oracledb.getConnection(
         {
@@ -846,9 +672,9 @@ describe('1. connection.js', function(){
           done();
         }
       );
-    }); // 1.8.4
+    });
 
-    it('1.8.5 gets ignored when acquiring a connection from Pool', function(done) {
+    it('1.7.5 gets ignored when acquiring a connection from Pool', function(done) {
 
       oracledb.createPool(
         {
@@ -875,13 +701,13 @@ describe('1. connection.js', function(){
           });
         }
       );
-    }); // 1.8.5
+    });
 
-  }); // 1.8
+  }); // 1.7
 
-  describe('1.9 Ping method', function() {
+  describe('1.8 Ping method', function() {
 
-    it('1.9.1 ping() checks the connection is usable', function(done) {
+    it('1.8.1 ping() checks the connection is usable', function(done) {
       var conn;
       async.series([
         function(cb) {
@@ -907,9 +733,9 @@ describe('1. connection.js', function(){
           });
         }
       ], done);
-    }); // 1.9.1
+    });
 
-    it('1.9.2 closed connection', function(done) {
+    it('1.8.2 closed connection', function(done) {
       var conn;
       async.series([
         function(cb) {
@@ -938,12 +764,12 @@ describe('1. connection.js', function(){
           });
         },
       ], done);
-    }); // 1.9.2
-  }); // 1.9
+    });
+  }); // 1.8
 
 
-  describe('1.10 connectString & connectionString specified', function() {
-    it('1.10.1 both connectString & ConnectionString specified',
+  describe('1.9 connectString & connectionString specified', function() {
+    it('1.9.1 both connectString & ConnectionString specified',
       function (done) {
         oracledb.getConnection(
           {
@@ -960,8 +786,7 @@ describe('1. connection.js', function(){
           }
         );
       }
-    );  // 1.10.1
-  });  // 1.10
-
+    );
+  });
 
 });

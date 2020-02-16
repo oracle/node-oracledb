@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -73,21 +73,20 @@ static bool njsResultSet_getRowsHelper(njsResultSet *rs, njsBaton *baton,
 // njsResultSet_close()
 //   Close the result set.
 //
-// PARAMETERS
-//   - JS callback which will receive (error)
+// PARAMETERS - NONE
 //-----------------------------------------------------------------------------
 static napi_value njsResultSet_close(napi_env env, napi_callback_info info)
 {
     njsResultSet *rs;
     njsBaton *baton;
 
-    if (!njsResultSet_createBaton(env, info, 1, NULL, &baton))
+    if (!njsResultSet_createBaton(env, info, 0, NULL, &baton))
         return NULL;
     rs = (njsResultSet*) baton->callingInstance;
     baton->dpiStmtHandle = rs->handle;
     rs->handle = NULL;
-    njsBaton_queueWork(baton, env, "Close", njsResultSet_closeAsync, NULL, 1);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Close", njsResultSet_closeAsync,
+            NULL);
 }
 
 
@@ -191,22 +190,20 @@ static napi_value njsResultSet_getMetaData(napi_env env,
 //
 // PARAMETERS
 //   - max number of rows to fetch at this time
-//   - JS callback which will receive (error, rows)
 //-----------------------------------------------------------------------------
 static napi_value njsResultSet_getRows(napi_env env, napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsResultSet_createBaton(env, info, 2, args, &baton))
+    if (!njsResultSet_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsResultSet_getRowsProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "GetRows", njsResultSet_getRowsAsync,
-            njsResultSet_getRowsPostAsync, 2);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "GetRows", njsResultSet_getRowsAsync,
+            njsResultSet_getRowsPostAsync);
 }
 
 
@@ -234,13 +231,13 @@ static bool njsResultSet_getRowsAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsResultSet_getRowsPostAsync()
-//   Generates return values for njsResultSet_getRows().
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsResultSet_getRowsPostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
     njsResultSet *rs = (njsResultSet*) baton->callingInstance;
-    napi_value result, rowObj, colObj;
+    napi_value rowObj, colObj;
     uint32_t row, col, i;
     njsVariable *var;
 
@@ -259,7 +256,7 @@ static bool njsResultSet_getRowsPostAsync(njsBaton *baton, napi_env env,
 
     // create array
     NJS_CHECK_NAPI(env, napi_create_array_with_length(env, baton->rowsFetched,
-            &result))
+            result))
 
     // process each row
     for (row = 0; row < baton->rowsFetched; row++) {
@@ -285,7 +282,7 @@ static bool njsResultSet_getRowsPostAsync(njsBaton *baton, napi_env env,
                         colObj))
             }
         }
-        NJS_CHECK_NAPI(env, napi_set_element(env, result, row, rowObj))
+        NJS_CHECK_NAPI(env, napi_set_element(env, *result, row, rowObj))
 
     }
 
@@ -298,7 +295,6 @@ static bool njsResultSet_getRowsPostAsync(njsBaton *baton, napi_env env,
         rs->numQueryVars = 0;
     }
 
-    args[1] = result;
     return true;
 }
 

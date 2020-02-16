@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -96,15 +96,14 @@ static bool njsPool_createBaton(napi_env env, napi_callback_info info,
 //
 // PARAMETERS
 //   - options
-//   - JS callback which will receive (error)
 //-----------------------------------------------------------------------------
 static napi_value njsPool_close(napi_env env, napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
     njsPool *pool;
 
-    if (!njsPool_createBaton(env, info, 2, args, &baton))
+    if (!njsPool_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsPool_closeProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -113,8 +112,7 @@ static napi_value njsPool_close(napi_env env, napi_callback_info info)
     pool = (njsPool*) baton->callingInstance;
     baton->dpiPoolHandle = pool->handle;
     pool->handle = NULL;
-    njsBaton_queueWork(baton, env, "Close", njsPool_closeAsync, NULL, 1);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Close", njsPool_closeAsync, NULL);
 }
 
 
@@ -204,16 +202,15 @@ static void njsPool_finalize(napi_env env, void *finalizeData,
 //
 // PARAMETERS
 //   - options
-//   - JS callback which will receive (error, connection)
 //-----------------------------------------------------------------------------
 static napi_value njsPool_getConnection(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
     // verify number of arguments and create baton
-    if (!njsPool_createBaton(env, info, 2, args, &baton))
+    if (!njsPool_createBaton(env, info, 1, args, &baton))
         return NULL;
 
     // get information from arguments and store on the baton
@@ -223,9 +220,8 @@ static napi_value njsPool_getConnection(napi_env env,
     }
 
     // queue work
-    njsBaton_queueWork(baton, env, "GetConnection", njsPool_getConnectionAsync,
-            njsPool_getConnectionPostAsync, 3);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "GetConnection",
+            njsPool_getConnectionAsync, njsPool_getConnectionPostAsync);
 }
 
 
@@ -278,27 +274,26 @@ static bool njsPool_getConnectionAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsPool_getConnectionPostAsync()
-//   Sets up the arguments for the callback to JS. The connection object is
-// created and passed as the second argument. The first argument is always the
-// error and at this point it is known that no error has taken place.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsPool_getConnectionPostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
-    napi_value conn, pool;
+    napi_value temp;
 
     // create connection
-    if (!njsConnection_newFromBaton(baton, env, &conn))
+    if (!njsConnection_newFromBaton(baton, env, result))
         return false;
-    args[1] = conn;
 
     // store a reference to the pool on the connection
     NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
-            &pool))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, conn, "_pool", pool))
+            &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "_pool", temp))
 
-    // return boolean indicating whether a new session was created
-    NJS_CHECK_NAPI(env, napi_get_boolean(env, baton->newSession, &args[2]))
+    // store a boolean indicating whether a new session was created
+    NJS_CHECK_NAPI(env, napi_get_boolean(env, baton->newSession, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "_newSession",
+            temp))
 
     return true;
 }

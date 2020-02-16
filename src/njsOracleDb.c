@@ -325,16 +325,15 @@ const njsClassDef njsClassDefOracleDb = {
 //
 // PARAMETERS
 //   - options
-//   - JS callback which will receive (error, pool)
 //-----------------------------------------------------------------------------
 static napi_value njsOracleDb_createPool(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
     // verify number of arguments and create baton
-    if (!njsUtils_createBaton(env, info, 2, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
     baton->oracleDb = (njsOracleDb*) baton->callingInstance;
 
@@ -345,9 +344,8 @@ static napi_value njsOracleDb_createPool(napi_env env,
     }
 
     // queue work
-    njsBaton_queueWork(baton, env, "createPool", njsOracleDb_createPoolAsync,
-            njsOracleDb_createPoolPostAsync, 2);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "createPool",
+            njsOracleDb_createPoolAsync, njsOracleDb_createPoolPostAsync);
 }
 
 
@@ -407,12 +405,12 @@ static bool njsOracleDb_createPoolAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsOracleDb_createPoolPostAsync()
-//   Creates the pool object which is returned to the JS application.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsOracleDb_createPoolPostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
-    return njsPool_newFromBaton(baton, env, &args[1]);
+    return njsPool_newFromBaton(baton, env, result);
 }
 
 
@@ -558,32 +556,23 @@ static napi_value njsOracleDb_getAutoCommit(napi_env env,
 //
 // PARAMETERS
 //   - options
-//   - JS callback which will receive (error, pool)
 //-----------------------------------------------------------------------------
 static napi_value njsOracleDb_getConnection(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    // verify number of arguments and create baton
-    if (!njsUtils_createBaton(env, info, 2, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
     baton->oracleDb = (njsOracleDb*) baton->callingInstance;
-
-    // get information from arguments and store on the baton
     if (!njsOracleDb_getConnectionProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-
-    // queue work
-    if (!njsBaton_queueWork(baton, env, "GetConnection",
+    return njsBaton_queueWork(baton, env, "GetConnection",
             njsOracleDb_getConnectionAsync,
-            njsOracleDb_getConnectionPostAsync, 2))
-        return NULL;
-
-    return NULL;
+            njsOracleDb_getConnectionPostAsync);
 }
 
 
@@ -635,14 +624,12 @@ static bool njsOracleDb_getConnectionAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsOracleDb_getConnectionPostAsync()
-//   Sets up the arguments for the callback to JS. The connection object is
-// created and passed as the second argument. The first argument is always the
-// error and at this point it is known that no error has taken place.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsOracleDb_getConnectionPostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
-    return njsConnection_newFromBaton(baton, env, &args[1]);
+    return njsConnection_newFromBaton(baton, env, result);
 }
 
 

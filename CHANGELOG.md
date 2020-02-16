@@ -4,6 +4,14 @@
 
 **This release is under development**
 
+- Removed support for custom Promise libraries.  Use the native Node.js Promise
+  implementation instead.  This change was necessitated by the refactored
+  JavaScript implementation.
+
+- Refactored the module's JavaScript code layer to use async/await.
+
+- NJS-005 and NJS-009 are now passed through the callback (if one is used).
+
 - Stated compatibility is now for Node.js 10.16+ and Node.js 12.
 
 - Fixed a segfault that occurred when binding a database object IN/OUT without

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -626,37 +626,7 @@ describe('163. executeMany1.js', function() {
     ], done);
   }); // 164.13
 
-  it('163.14 Negative - set numIterations to be string', function(done) {
-    async.series([
-      function(cb) {
-        var sql = `
-        declare
-            t_Id          number;
-        begin
-            select nvl(count(*), 0) + 1 into t_Id
-            from nodb_tab_xmany;
-
-            insert into nodb_tab_xmany
-            values (t_Id, 'Test String ' || t_Id);
-        end;`;
-
-        var numIterations = "foobar";
-
-        should.throws(
-          function() {
-            conn.executeMany(sql, numIterations, function() {} );
-          },
-          /NJS-005: invalid value for parameter 2/
-        );
-        cb();
-      },
-      function(cb) {
-        dotruncate(cb);
-      }
-    ], done);
-  }); // 163.14
-
-  it('163.15 Negative - set numIterations to be negative value', function(done) {
+  it('163.14 Negative - set numIterations to be negative value', function(done) {
     async.series([
       function(cb) {
         const sql = `
@@ -682,7 +652,7 @@ describe('163. executeMany1.js', function() {
         dotruncate(cb);
       }
     ], done);
-  }); // 163.15
+  }); // 163.14
 
   var doCreateProc = function(cb) {
     var proc = "CREATE OR REPLACE PROCEDURE nodb_proc_em (a_num IN NUMBER, " +

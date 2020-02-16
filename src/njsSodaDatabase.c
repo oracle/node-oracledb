@@ -1,4 +1,4 @@
-// Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -101,24 +101,22 @@ bool njsSodaDatabase_createBaton(napi_env env, napi_callback_info info,
 // PARAMETERS
 //   - name
 //   - options
-//   - JS callback which will receive (error, collection)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaDatabase_createCollection(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[3];
+    napi_value args[2];
     njsBaton *baton;
 
-    if (!njsSodaDatabase_createBaton(env, info, 3, args, &baton))
+    if (!njsSodaDatabase_createBaton(env, info, 2, args, &baton))
         return NULL;
     if (!njsSodaDatabase_createCollectionProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "CreateCollection",
+    return njsBaton_queueWork(baton, env, "CreateCollection",
             njsSodaDatabase_createCollectionAsync,
-            njsSodaDatabase_createCollectionPostAsync, 2);
-    return NULL;
+            njsSodaDatabase_createCollectionPostAsync);
 }
 
 
@@ -148,12 +146,12 @@ static bool njsSodaDatabase_createCollectionAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsSodaDatabase_createCollectionPostAsync()
-//   Creates the result object which is returned to the JS application.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsSodaDatabase_createCollectionPostAsync(njsBaton *baton,
-        napi_env env, napi_value *args)
+        napi_env env, napi_value *result)
 {
-    return njsSodaCollection_newFromBaton(baton, env, &args[1]);
+    return njsSodaCollection_newFromBaton(baton, env, result);
 }
 
 
@@ -269,23 +267,22 @@ static void njsSodaDatabase_finalize(napi_env env, void *finalizeData,
 //
 // PARAMETERS
 //   - options
-//   - JS callback which will receive (error, names)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaDatabase_getCollectionNames(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaDatabase_createBaton(env, info, 2, args, &baton))
+    if (!njsSodaDatabase_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaDatabase_getCollectionNamesProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "GetCollectionNames",
+    return njsBaton_queueWork(baton, env, "GetCollectionNames",
             njsSodaDatabase_getCollectionNamesAsync,
-            njsSodaDatabase_getCollectionNamesPostAsync, 2);
+            njsSodaDatabase_getCollectionNamesPostAsync);
     return NULL;
 }
 
@@ -311,19 +308,19 @@ static bool njsSodaDatabase_getCollectionNamesAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsSodaDatabase_getCollectionNamesPostAsync()
-//   Creates the result object which is returned to the JS application.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsSodaDatabase_getCollectionNamesPostAsync(njsBaton *baton,
-        napi_env env, napi_value *args)
+        napi_env env, napi_value *result)
 {
     njsSodaDatabase *db = (njsSodaDatabase*) baton->callingInstance;
-    napi_value result, value;
+    napi_value value;
     bool ok = true;
     uint32_t i;
 
     // create array for the collection names
     if (napi_create_array_with_length(env, baton->sodaCollNames->numNames,
-            &result) != napi_ok)
+            result) != napi_ok)
         ok = false;
 
     // populate it with the collection names
@@ -337,7 +334,7 @@ static bool njsSodaDatabase_getCollectionNamesPostAsync(njsBaton *baton,
         }
 
         // add it to the array
-        if (napi_set_element(env, result, i, value) != napi_ok)
+        if (napi_set_element(env, *result, i, value) != napi_ok)
             ok = false;
 
     }
@@ -345,7 +342,6 @@ static bool njsSodaDatabase_getCollectionNamesPostAsync(njsBaton *baton,
     if (!ok)
         return false;
 
-    args[1] = result;
     return true;
 }
 
@@ -401,24 +397,22 @@ bool njsSodaDatabase_createFromHandle(napi_env env, njsConnection *conn,
 //
 // PARAMETERS
 //   - name
-//   - JS callback which will receive (error, collection)
 //-----------------------------------------------------------------------------
 static napi_value njsSodaDatabase_openCollection(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaDatabase_createBaton(env, info, 2, args, &baton))
+    if (!njsSodaDatabase_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaDatabase_openCollectionProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "OpenCollection",
+    return njsBaton_queueWork(baton, env, "OpenCollection",
             njsSodaDatabase_openCollectionAsync,
-            njsSodaDatabase_openCollectionPostAsync, 2);
-    return NULL;
+            njsSodaDatabase_openCollectionPostAsync);
 }
 
 
@@ -443,13 +437,13 @@ static bool njsSodaDatabase_openCollectionAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsSodaDatabase_openCollectionPostAsync()
-//   Creates the result object which is returned to the JS application.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsSodaDatabase_openCollectionPostAsync(njsBaton *baton,
-        napi_env env, napi_value *args)
+        napi_env env, napi_value *result)
 {
     if (baton->dpiSodaCollHandle)
-        return njsSodaCollection_newFromBaton(baton, env, &args[1]);
+        return njsSodaCollection_newFromBaton(baton, env, result);
     return true;
 }
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -105,7 +105,7 @@ describe('140. jsObjectGetter1.js', function() {
     var bindObj = {id: 23};
     Object.defineProperty(bindObj, 'id', {
       get: function() {
-        throw 'Nope';
+        throw new Error('Nope');
       }
     });
 
@@ -158,19 +158,19 @@ describe('140. jsObjectGetter1.js', function() {
           var foo = { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 200 };
           Object.defineProperty(foo, 'dir', {
             get: function() {
-              throw 'No Dir';
+              throw new Error('No Dir');
             }
           });
 
           Object.defineProperty(foo, 'type', {
             get: function() {
-              throw 'No Type';
+              throw new Error('No Type');
             }
           });
 
           Object.defineProperty(foo, 'maxSize', {
             get: function() {
-              throw 'No maxSize';
+              throw new Error('No maxSize');
             }
           });
 
@@ -300,7 +300,7 @@ describe('140. jsObjectGetter1.js', function() {
 
       Object.defineProperty(foo, 'depth_in', {
         get: function() {
-          throw 'No type';
+          throw new Error('No type');
         }
       });
 
@@ -322,7 +322,7 @@ describe('140. jsObjectGetter1.js', function() {
       var foo = { type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val:  [45, 30, 67] };
       Object.defineProperty(foo, 'type', {
         get: function() {
-          throw 'No type';
+          throw new Error('No type');
         }
       });
 
@@ -356,7 +356,7 @@ describe('140. jsObjectGetter1.js', function() {
 
       Object.defineProperty(foo, 'fetchInfo', {
         get: function() {
-          throw 'No fetchInfo';
+          throw new Error('No fetchInfo');
         }
       });
 
@@ -382,7 +382,7 @@ describe('140. jsObjectGetter1.js', function() {
 
       Object.defineProperty(foo, 'type', {
         get: function() {
-          throw 'No type';
+          throw new Error('No type');
         }
       });
 
@@ -433,7 +433,7 @@ describe('140. jsObjectGetter1.js', function() {
       var options = { autoCommit: true };
       Object.defineProperty(options, 'autoCommit', {
         get: function() {
-          throw 'Wrong boolean value';
+          throw new Error('Wrong boolean value');
         }
       });
       dotest(options, done);
@@ -445,7 +445,7 @@ describe('140. jsObjectGetter1.js', function() {
       var options = { extendedMetaData: true };
       Object.defineProperty(options, 'extendedMetaData', {
         get: function() {
-          throw 'Wrong boolean value';
+          throw new Error('Wrong boolean value');
         }
       });
       dotest(options, done);
@@ -460,7 +460,7 @@ describe('140. jsObjectGetter1.js', function() {
       var options = { fetchArraySize: 200 };
       Object.defineProperty(options, 'fetchArraySize', {
         get: function() {
-          throw 'No value';
+          throw new Error('No value');
         }
       });
 
@@ -496,7 +496,7 @@ describe('140. jsObjectGetter1.js', function() {
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'user', {
         get: function() {
-          throw 'Nope';
+          throw new Error('Nope');
         }
       });
       dotest(cred, done);
@@ -507,7 +507,7 @@ describe('140. jsObjectGetter1.js', function() {
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'password', {
         get: function() {
-          throw 'Nope';
+          throw new Error('Nope');
         }
       });
       dotest(cred, done);
@@ -518,7 +518,7 @@ describe('140. jsObjectGetter1.js', function() {
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'connectString', {
         get: function() {
-          throw 'Nope';
+          throw new Error('Nope');
         }
       });
       dotest(cred, done);
@@ -529,7 +529,7 @@ describe('140. jsObjectGetter1.js', function() {
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'poolMin', {
         get: function() {
-          throw 'Nope';
+          throw new Error('Nope');
         }
       });
       dotest(cred, done);
@@ -540,7 +540,7 @@ describe('140. jsObjectGetter1.js', function() {
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'poolMax', {
         get: function() {
-          throw 'Nope';
+          throw new Error('Nope');
         }
       });
       dotest(cred, done);
@@ -551,7 +551,7 @@ describe('140. jsObjectGetter1.js', function() {
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'poolIncrement', {
         get: function() {
-          throw 'Nope';
+          throw new Error('Nope');
         }
       });
       dotest(cred, done);
@@ -562,7 +562,7 @@ describe('140. jsObjectGetter1.js', function() {
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'poolTimeout', {
         get: function() {
-          throw 'Nope';
+          throw new Error('Nope');
         }
       });
       dotest(cred, done);
@@ -573,7 +573,7 @@ describe('140. jsObjectGetter1.js', function() {
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'poolPingInterval', {
         get: function() {
-          throw 'Nope';
+          throw new Error('Nope');
         }
       });
 
@@ -585,7 +585,7 @@ describe('140. jsObjectGetter1.js', function() {
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'stmtCacheSize', {
         get: function() {
-          throw 'Nope';
+          throw new Error('Nope');
         }
       });
       dotest(cred, done);
@@ -600,7 +600,7 @@ describe('140. jsObjectGetter1.js', function() {
 
           Object.defineProperty(pool, 'connecionsOpen', {
             get: function() {
-              throw 'Property Wrong';
+              throw new Error('Property Wrong');
             }
           });
 
@@ -628,7 +628,7 @@ describe('140. jsObjectGetter1.js', function() {
 
           Object.defineProperty(pool, 'connecionsInUse', {
             get: function() {
-              throw 'Property Wrong';
+              throw new Error('Property Wrong');
             }
           });
           should.throws(
@@ -655,7 +655,7 @@ describe('140. jsObjectGetter1.js', function() {
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'user', {
         get : function () {
-          throw 'Nope';
+          throw new Error('Nope');
         }
       });
 
@@ -671,7 +671,7 @@ describe('140. jsObjectGetter1.js', function() {
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'password', {
         get : function () {
-          throw 'Nope';
+          throw new Error('Nope');
         }
       });
 
@@ -687,7 +687,7 @@ describe('140. jsObjectGetter1.js', function() {
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'connectString', {
         get : function () {
-          throw 'Nope';
+          throw new Error('Nope');
         }
       });
 
@@ -703,7 +703,7 @@ describe('140. jsObjectGetter1.js', function() {
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'privilege', {
         get : function () {
-          throw 'Nope';
+          throw new Error('Nope');
         }
       });
       oracledb.getConnection(cred, function(err, conn) {

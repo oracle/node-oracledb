@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -243,7 +243,9 @@ describe('170. poolDrain.js', () => {
       should.exist(err);
       should.strictEqual(err.message, "NJS-005: invalid value for parameter 1");
     } finally {
-      await pool.close(0);
+      if (pool) {
+        await pool.close(0);
+      }
     }
   });
 

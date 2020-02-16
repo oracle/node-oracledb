@@ -214,17 +214,16 @@ static bool njsConnection_transferExecuteManyBinds(njsBaton *baton,
 // njsConnection_break()
 //   Break (interrupt) the currently executing operation.
 //
-// PARAMETERS
-//   - JS callback which will receive (error)
+// PARAMETERS - NONE
 //-----------------------------------------------------------------------------
 static napi_value njsConnection_break(napi_env env, napi_callback_info info)
 {
     njsBaton *baton;
 
-    if (!njsConnection_createBaton(env, info, 1, NULL, &baton))
+    if (!njsConnection_createBaton(env, info, 0, NULL, &baton))
         return NULL;
-    njsBaton_queueWork(baton, env, "Break", njsConnection_breakAsync, NULL, 1);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Break", njsConnection_breakAsync,
+            NULL);
 }
 
 
@@ -251,23 +250,21 @@ static bool njsConnection_breakAsync(njsBaton *baton)
 //   - user which will have its password changed
 //   - original password
 //   - new password
-//   - JS callback which will receive (error)
 //-----------------------------------------------------------------------------
 static napi_value njsConnection_changePassword(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[4];
+    napi_value args[3];
     njsBaton *baton;
 
-    if (!njsConnection_createBaton(env, info, 4, args, &baton))
+    if (!njsConnection_createBaton(env, info, 3, args, &baton))
         return NULL;
     if (!njsConnection_changePasswordProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "ChangePassword",
-            njsConnection_changePasswordAsync, NULL, 1);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "ChangePassword",
+            njsConnection_changePasswordAsync, NULL);
 }
 
 
@@ -317,15 +314,15 @@ static bool njsConnection_changePasswordProcessArgs(njsBaton *baton,
 // possible.
 //
 // PARAMETERS
-//   - JS callback which will receive (error)
+//   - options object
 //-----------------------------------------------------------------------------
 static napi_value njsConnection_close(napi_env env, napi_callback_info info)
 {
     njsConnection *conn;
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsConnection_createBaton(env, info, 2, args, &baton))
+    if (!njsConnection_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsBaton_getBoolFromArg(baton, env, args, 0, "drop",
             &baton->dropSession, NULL)) {
@@ -335,8 +332,8 @@ static napi_value njsConnection_close(napi_env env, napi_callback_info info)
     conn = (njsConnection*) baton->callingInstance;
     baton->dpiConnHandle = conn->handle;
     conn->handle = NULL;
-    njsBaton_queueWork(baton, env, "Close", njsConnection_closeAsync, NULL, 1);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Close", njsConnection_closeAsync,
+            NULL);
 }
 
 
@@ -373,18 +370,16 @@ static bool njsConnection_closeAsync(njsBaton *baton)
 // njsConnection_commit()
 //   Commits the active transaction.
 //
-// PARAMETERS
-//   - JS callback which will receive (error)
+// PARAMETERS - NONE
 //-----------------------------------------------------------------------------
 static napi_value njsConnection_commit(napi_env env, napi_callback_info info)
 {
     njsBaton *baton;
 
-    if (!njsConnection_createBaton(env, info, 1, NULL, &baton))
+    if (!njsConnection_createBaton(env, info, 0, NULL, &baton))
         return NULL;
-    njsBaton_queueWork(baton, env, "Commit", njsConnection_commitAsync, NULL,
-            1);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Commit", njsConnection_commitAsync,
+            NULL);
 }
 
 
@@ -436,23 +431,21 @@ bool njsConnection_createBaton(napi_env env, napi_callback_info info,
 //
 // PARAMETERS
 //   - LOB type
-//   - JS callback which will receive (error, lob)
 //-----------------------------------------------------------------------------
 static napi_value njsConnection_createLob(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsConnection_createBaton(env, info, 2, args, &baton))
+    if (!njsConnection_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsConnection_createLobProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "CreateLob", njsConnection_createLobAsync,
-            njsConnection_createLobPostAsync, 2);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "CreateLob",
+            njsConnection_createLobAsync, njsConnection_createLobPostAsync);
 }
 
 
@@ -480,14 +473,12 @@ static bool njsConnection_createLobAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsConnection_createLobPostAsync()
-//   Sets up the arguments for the callback to JS. The LOB object is created
-// and passed as the second argument. The first argument is always the error
-// and at this point it is known that no error has taken place.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsConnection_createLobPostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
-    return njsLob_new(baton->oracleDb, baton->lob, env, &args[1]);
+    return njsLob_new(baton->oracleDb, baton->lob, env, result);
 }
 
 
@@ -518,23 +509,21 @@ static bool njsConnection_createLobProcessArgs(njsBaton *baton,
 //   - SQL statement
 //   - binds object/array
 //   - options
-//   - JS callback which will receive (error, result)
 //-----------------------------------------------------------------------------
 static napi_value njsConnection_execute(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[4];
+    napi_value args[3];
     njsBaton *baton;
 
-    if (!njsConnection_createBaton(env, info, 4, args, &baton))
+    if (!njsConnection_createBaton(env, info, 3, args, &baton))
         return NULL;
     if (!njsConnection_executeProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "Execute", njsConnection_executeAsync,
-            njsConnection_executePostAsync, 2);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Execute",
+            njsConnection_executeAsync, njsConnection_executePostAsync);
 }
 
 
@@ -588,12 +577,12 @@ static bool njsConnection_executeAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsConnection_executePostAsync()
-//   Generates return values for njsConnection_execute().
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
-    napi_value result, metadata, resultSet, rowsAffected, outBinds, lastRowid;
+    napi_value metadata, resultSet, rowsAffected, outBinds, lastRowid;
     napi_value implicitResults;
     uint32_t rowidValueLength;
     const char *rowidValue;
@@ -604,7 +593,7 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
         return false;
 
     // create result object
-    NJS_CHECK_NAPI(env, napi_create_object(env, &result))
+    NJS_CHECK_NAPI(env, napi_create_object(env, result))
 
     // handle queries
     if (baton->queryVars) {
@@ -618,7 +607,7 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
         if (!njsVariable_getMetadataMany(baton->queryVars, baton->numQueryVars,
                 env, baton->extendedMetaData, &metadata))
             return false;
-        NJS_CHECK_NAPI(env, napi_set_named_property(env, result, "metaData",
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "metaData",
                 metadata))
 
         // return result set
@@ -629,7 +618,7 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
         baton->dpiStmtHandle = NULL;
         baton->queryVars = NULL;
         baton->numQueryVars = 0;
-        NJS_CHECK_NAPI(env, napi_set_named_property(env, result, "resultSet",
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "resultSet",
                 resultSet))
 
     } else {
@@ -639,7 +628,7 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
         if (!njsConnection_getExecuteOutBinds(baton, env, &outBinds))
             return false;
         if (outBinds) {
-            NJS_CHECK_NAPI(env, napi_set_named_property(env, result,
+            NJS_CHECK_NAPI(env, napi_set_named_property(env, *result,
                     "outBinds", outBinds))
         }
 
@@ -653,7 +642,7 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
                     return njsBaton_setErrorDPI(baton);
                 NJS_CHECK_NAPI(env, napi_create_string_utf8(env, rowidValue,
                         rowidValueLength, &lastRowid))
-                NJS_CHECK_NAPI(env, napi_set_named_property(env, result,
+                NJS_CHECK_NAPI(env, napi_set_named_property(env, *result,
                         "lastRowid", lastRowid))
             }
         }
@@ -665,7 +654,7 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
                     &implicitResults))
                 return false;
             if (implicitResults) {
-                NJS_CHECK_NAPI(env, napi_set_named_property(env, result,
+                NJS_CHECK_NAPI(env, napi_set_named_property(env, *result,
                         "implicitResults", implicitResults))
             }
 
@@ -673,13 +662,12 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
         } else {
             NJS_CHECK_NAPI(env, napi_create_uint32(env,
                     (uint32_t) baton->rowsAffected, &rowsAffected))
-            NJS_CHECK_NAPI(env, napi_set_named_property(env, result,
+            NJS_CHECK_NAPI(env, napi_set_named_property(env, *result,
                     "rowsAffected", rowsAffected))
         }
 
     }
 
-    args[1] = result;
     return true;
 }
 
@@ -761,24 +749,22 @@ static bool njsConnection_executeProcessArgs(njsBaton *baton,
 //   - SQL statement
 //   - array of binds (or number of rows to process)
 //   - options
-//   - JS callback which will receive (error, result)
 //-----------------------------------------------------------------------------
 static napi_value njsConnection_executeMany(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[4];
+    napi_value args[3];
     njsBaton *baton;
 
-    if (!njsConnection_createBaton(env, info, 4, args, &baton))
+    if (!njsConnection_createBaton(env, info, 3, args, &baton))
         return NULL;
     if (!njsConnection_executeManyProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "ExecuteMany",
-            njsConnection_executeManyAsync, njsConnection_executeManyPostAsync,
-            2);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "ExecuteMany",
+            njsConnection_executeManyAsync,
+            njsConnection_executeManyPostAsync);
 }
 
 
@@ -843,16 +829,16 @@ static bool njsConnection_executeManyAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsConnection_executeManyPostAsync()
-//   Generates return values for njsConnection_executeMany().
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsConnection_executeManyPostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
-    napi_value result, temp;
     uint32_t numOutBinds;
+    napi_value temp;
 
     // create object for result
-    NJS_CHECK_NAPI(env, napi_create_object(env, &result))
+    NJS_CHECK_NAPI(env, napi_create_object(env, result))
 
     // get out binds
     numOutBinds = njsBaton_getNumOutBinds(baton);
@@ -860,7 +846,7 @@ static bool njsConnection_executeManyPostAsync(njsBaton *baton, napi_env env,
         if (!njsConnection_getExecuteManyOutBinds(baton, env, numOutBinds,
                 &temp))
             return false;
-        NJS_CHECK_NAPI(env, napi_set_named_property(env, result, "outBinds",
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "outBinds",
                 temp))
     }
 
@@ -868,7 +854,7 @@ static bool njsConnection_executeManyPostAsync(njsBaton *baton, napi_env env,
     if (!baton->stmtInfo.isPLSQL) {
         NJS_CHECK_NAPI(env, napi_create_uint32(env,
                 (uint32_t) baton->rowsAffected, &temp))
-        NJS_CHECK_NAPI(env, napi_set_named_property(env, result,
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *result,
                 "rowsAffected", temp))
     }
 
@@ -876,7 +862,7 @@ static bool njsConnection_executeManyPostAsync(njsBaton *baton, napi_env env,
     if (baton->dmlRowCounts && baton->numRowCounts > 0) {
         if (!njsConnection_getRowCounts(baton, env, &temp))
             return false;
-        NJS_CHECK_NAPI(env, napi_set_named_property(env, result,
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *result,
                 "dmlRowCounts", temp))
     }
 
@@ -884,11 +870,10 @@ static bool njsConnection_executeManyPostAsync(njsBaton *baton, napi_env env,
     if (baton->batchErrors && baton->numBatchErrorInfos > 0) {
         if (!njsConnection_getBatchErrors(baton, env, &temp))
             return false;
-        NJS_CHECK_NAPI(env, napi_set_named_property(env, result, "batchErrors",
-                temp))
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *result,
+                "batchErrors", temp))
     }
 
-    args[1] = result;
     return true;
 }
 
@@ -1244,24 +1229,22 @@ static napi_value njsConnection_getCurrentSchema(napi_env env,
 //
 // PARAMETERS
 //   - name
-//   - JS callback which will receive (error, cls)
 //-----------------------------------------------------------------------------
 static napi_value njsConnection_getDbObjectClass(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsConnection_createBaton(env, info, 2, args, &baton))
+    if (!njsConnection_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsConnection_getDbObjectClassProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "GetDbObjectClass",
+    return njsBaton_queueWork(baton, env, "GetDbObjectClass",
             njsConnection_getDbObjectClassAsync,
-            njsConnection_getDbObjectClassPostAsync, 2);
-    return NULL;
+            njsConnection_getDbObjectClassPostAsync);
 }
 
 
@@ -1283,15 +1266,15 @@ static bool njsConnection_getDbObjectClassAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsConnection_getDbObjectClassPostAsync()
-//   Sets up the arguments for the callback to JS.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsConnection_getDbObjectClassPostAsync(njsBaton *baton,
-        napi_env env, napi_value *args)
+        napi_env env, napi_value *result)
 {
     njsDbObjectType *objType;
 
     return njsDbObject_getSubClass(baton, baton->dpiObjectTypeHandle, env,
-            &args[1], &objType);
+            result, &objType);
 }
 
 
@@ -1530,23 +1513,22 @@ static napi_value njsConnection_getOracleServerVersionString(napi_env env,
 //   Creates an AQ queue associated with the connection.
 //
 // PARAMETERS
-//   - JS callback which will receive (error, queue)
+//   - name of queue to create
+//   - options object
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_getQueue(napi_env env,
-        napi_callback_info info)
+static napi_value njsConnection_getQueue(napi_env env, napi_callback_info info)
 {
-    napi_value args[3];
+    napi_value args[2];
     njsBaton *baton;
 
-    if (!njsConnection_createBaton(env, info, 3, args, &baton))
+    if (!njsConnection_createBaton(env, info, 2, args, &baton))
         return NULL;
     if (!njsConnection_getQueueProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "GetQueue", njsConnection_getQueueAsync,
-            njsConnection_getQueuePostAsync, 2);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "GetQueue",
+            njsConnection_getQueueAsync, njsConnection_getQueuePostAsync);
 }
 
 
@@ -1572,12 +1554,12 @@ static bool njsConnection_getQueueAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsConnection_getQueuePostAsync()
-//   Generates return values for njsConnection_getQueue().
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsConnection_getQueuePostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
-    return njsAqQueue_createFromHandle(baton, env, &args[1]);
+    return njsAqQueue_createFromHandle(baton, env, result);
 }
 
 
@@ -1713,25 +1695,23 @@ static napi_value njsConnection_getStmtCacheSize(napi_env env,
 //
 // PARAMETERS
 //   - SQL statement
-//   - JS callback which will receive (error, result)
 //-----------------------------------------------------------------------------
 static napi_value njsConnection_getStatementInfo(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsConnection_createBaton(env, info, 2, args, &baton))
+    if (!njsConnection_createBaton(env, info, 1, args, &baton))
         return NULL;
     baton->extendedMetaData = true;
     if (!njsConnection_getStatementInfoProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "GetStatementInfo",
+    return njsBaton_queueWork(baton, env, "GetStatementInfo",
             njsConnection_getStatementInfoAsync,
-            njsConnection_getStatementInfoPostAsync, 2);
-    return NULL;
+            njsConnection_getStatementInfoPostAsync);
 }
 
 
@@ -1803,16 +1783,16 @@ static bool njsConnection_getStatementInfoAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsConnection_getStatementInfoPostAsync()
-//   Sets up the arguments for the callback to JS.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsConnection_getStatementInfoPostAsync(njsBaton *baton,
-        napi_env env, napi_value *args)
+        napi_env env, napi_value *result)
 {
-    napi_value result, bindNames, metadata, temp;
+    napi_value bindNames, metadata, temp;
     uint32_t i;
 
     // create object for the result
-    NJS_CHECK_NAPI(env, napi_create_object(env, &result))
+    NJS_CHECK_NAPI(env, napi_create_object(env, result))
 
     // add metadata (queries only)
     if (baton->queryVars) {
@@ -1822,7 +1802,7 @@ static bool njsConnection_getStatementInfoPostAsync(njsBaton *baton,
         if (!njsVariable_getMetadataMany(baton->queryVars, baton->numQueryVars,
                 env, baton->extendedMetaData, &metadata))
             return false;
-        NJS_CHECK_NAPI(env, napi_set_named_property(env, result, "metaData",
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "metaData",
                 metadata))
     }
 
@@ -1834,16 +1814,15 @@ static bool njsConnection_getStatementInfoPostAsync(njsBaton *baton,
                 baton->bindNameLengths[i], &temp))
         NJS_CHECK_NAPI(env, napi_set_element(env, bindNames, i, temp))
     }
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, result, "bindNames",
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "bindNames",
             bindNames))
 
     // add statement type to result object
     NJS_CHECK_NAPI(env, napi_create_uint32(env, baton->stmtInfo.statementType,
             &temp))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, result, "statementType",
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "statementType",
             temp))
 
-    args[1] = result;
     return true;
 }
 
@@ -1966,18 +1945,16 @@ bool njsConnection_newFromBaton(njsBaton *baton, napi_env env,
 // njsConnection_ping()
 //   Ping the database to see if it is "alive".
 //
-// PARAMETERS
-//   - JS callback which will receive (error)
+// PARAMETERS - NONE
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_ping(napi_env env,
-        napi_callback_info info)
+static napi_value njsConnection_ping(napi_env env, napi_callback_info info)
 {
     njsBaton *baton;
 
-    if (!njsConnection_createBaton(env, info, 1, NULL, &baton))
+    if (!njsConnection_createBaton(env, info, 0, NULL, &baton))
         return NULL;
-    njsBaton_queueWork(baton, env, "Ping", njsConnection_pingAsync, NULL, 1);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Ping", njsConnection_pingAsync,
+            NULL);
 }
 
 
@@ -2240,18 +2217,16 @@ static bool njsConnection_processImplicitResults(njsBaton *baton)
 // njsConnection_rollback()
 //   Rolls back the active transaction.
 //
-// PARAMETERS
-//   - JS callback which will receive (error)
+// PARAMETERS - NONE
 //-----------------------------------------------------------------------------
 static napi_value njsConnection_rollback(napi_env env, napi_callback_info info)
 {
     njsBaton *baton;
 
-    if (!njsConnection_createBaton(env, info, 1, NULL, &baton))
+    if (!njsConnection_createBaton(env, info, 0, NULL, &baton))
         return NULL;
-    njsBaton_queueWork(baton, env, "Rollback", njsConnection_rollbackAsync,
-            NULL, 1);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Rollback",
+            njsConnection_rollbackAsync, NULL);
 }
 
 
@@ -2739,23 +2714,21 @@ static napi_value njsConnection_setTextAttribute(napi_env env,
 // PARAMETERS
 //   - name
 //   - options
-//   - JS callback which will receive (error)
 //-----------------------------------------------------------------------------
 static napi_value njsConnection_subscribe(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[3];
+    napi_value args[2];
     njsBaton *baton;
 
-    if (!njsConnection_createBaton(env, info, 3, args, &baton))
+    if (!njsConnection_createBaton(env, info, 2, args, &baton))
         return NULL;
     if (!njsConnection_subscribeProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "Subscribe", njsConnection_subscribeAsync,
-            njsConnection_subscribePostAsync, 2);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Subscribe",
+            njsConnection_subscribeAsync, njsConnection_subscribePostAsync);
 }
 
 
@@ -2834,12 +2807,12 @@ static bool njsConnection_subscribeAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsConnection_subscribePostAsync()
-//   Generates return values for njsConnection_subscribe().
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsConnection_subscribePostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
-    napi_value result, regId;
+    napi_value regId;
 
     // start notifications
     if (!njsSubscription_startNotifications(baton->subscription, env,
@@ -2850,12 +2823,11 @@ static bool njsConnection_subscribePostAsync(njsBaton *baton, napi_env env,
     // meaningful value
     if (baton->subscription->subscrNamespace ==
             DPI_SUBSCR_NAMESPACE_DBCHANGE) {
-        NJS_CHECK_NAPI(env, napi_create_object(env, &result))
+        NJS_CHECK_NAPI(env, napi_create_object(env, result))
         NJS_CHECK_NAPI(env, napi_create_uint32(env,
                 (uint32_t) baton->subscription->regId, &regId))
-        NJS_CHECK_NAPI(env, napi_set_named_property(env, result, "regId",
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "regId",
                 regId))
-        args[1] = result;
     }
 
     return true;
@@ -2997,23 +2969,21 @@ static bool njsConnection_transferExecuteManyBinds(njsBaton *baton,
 //
 // PARAMETERS
 //   - name
-//   - JS callback which will receive (error)
 //-----------------------------------------------------------------------------
 static napi_value njsConnection_unsubscribe(napi_env env,
         napi_callback_info info)
 {
-    napi_value args[2];
+    napi_value args[1];
     njsBaton *baton;
 
-    if (!njsConnection_createBaton(env, info, 2, args, &baton))
+    if (!njsConnection_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsBaton_getSubscription(baton, env, args[0], true)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
-    njsBaton_queueWork(baton, env, "Unsubscribe",
-            njsConnection_unsubscribeAsync, NULL, 1);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Unsubscribe",
+            njsConnection_unsubscribeAsync, NULL);
 }
 
 

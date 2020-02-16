@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -624,17 +624,16 @@ describe('12. resultSet1.js', function() {
       );
 
       function fetchRowFromRS(rs) {
-        try {
-          rs.getRows(function() {});
-        } catch (err) {
+        rs.getRows(function(err, rows) {
           should.exist(err);
+          should.not.exist(rows);
           (err.message).should.startWith('NJS-009:');
           // NJS-009: invalid number of parameters
           rs.close(function(err) {
             should.not.exist(err);
             done();
           });
-        }
+        });
       }
     });
 
@@ -653,9 +652,7 @@ describe('12. resultSet1.js', function() {
       );
 
       function fetchRowFromRS(rs, numRows) {
-        try {
-          rs.getRows(numRows, function() {});
-        } catch (err) {
+        rs.getRows(numRows, function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-005:');
           // NJS-005: invalid value for parameter 1
@@ -663,7 +660,7 @@ describe('12. resultSet1.js', function() {
             should.not.exist(err);
             done();
           });
-        }
+        });
       }
     });
 
@@ -682,9 +679,7 @@ describe('12. resultSet1.js', function() {
       );
 
       function fetchRowFromRS(rs, numRows) {
-        try {
-          rs.getRows(numRows, function() {});
-        } catch (err) {
+        rs.getRows(numRows, function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-005:');
           // NJS-005: invalid value for parameter 1
@@ -692,7 +687,7 @@ describe('12. resultSet1.js', function() {
             should.not.exist(err);
             done();
           });
-        }
+        });
       }
     });
 
@@ -711,9 +706,7 @@ describe('12. resultSet1.js', function() {
       );
 
       function fetchRowFromRS(rs, numRows) {
-        try {
-          rs.getRows(numRows, function() {});
-        } catch (err) {
+        rs.getRows(numRows, function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-005:');
           // NJS-005: invalid value for parameter 1
@@ -721,7 +714,7 @@ describe('12. resultSet1.js', function() {
             should.not.exist(err);
             done();
           });
-        }
+        });
       }
     });
   });
@@ -875,9 +868,7 @@ describe('12. resultSet1.js', function() {
       );
 
       function fetchRowFromRS(rs, numRows) {
-        try {
-          rs.getRow(numRows, function() {});
-        } catch (err) {
+        rs.getRow(numRows, function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-009:');
           // NJS-009: invalid number of parameters
@@ -885,7 +876,7 @@ describe('12. resultSet1.js', function() {
             should.not.exist(err);
             done();
           });
-        }
+        });
       }
     });
 

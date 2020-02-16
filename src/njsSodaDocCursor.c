@@ -1,4 +1,4 @@
-// Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -63,22 +63,20 @@ static bool njsSodaDocCursor_createBaton(napi_env env, napi_callback_info info,
 // njsSodaDocCursor_close()
 //   Close the cursor.
 //
-// PARAMETERS
-//   - JS callback which will receive (error)
+// PARAMETERS - NONE
 //-----------------------------------------------------------------------------
 static napi_value njsSodaDocCursor_close(napi_env env, napi_callback_info info)
 {
     njsSodaDocCursor *cursor;
     njsBaton *baton;
 
-    if (!njsSodaDocCursor_createBaton(env, info, 1, NULL, &baton))
+    if (!njsSodaDocCursor_createBaton(env, info, 0, NULL, &baton))
         return NULL;
     cursor = (njsSodaDocCursor*) baton->callingInstance;
     baton->dpiSodaDocCursorHandle = cursor->handle;
     cursor->handle = NULL;
-    njsBaton_queueWork(baton, env, "Close", njsSodaDocCursor_closeAsync,
-            NULL, 1);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "Close", njsSodaDocCursor_closeAsync,
+            NULL);
 }
 
 
@@ -147,19 +145,17 @@ static void njsSodaDocCursor_finalize(napi_env env, void *finalizeData,
 // njsSodaDocCursor_getNext()
 //   Gets the next document from the cursor.
 //
-// PARAMETERS
-//   - JS callback which will receive (error, doc)
+// PARAMETERS - NONE
 //-----------------------------------------------------------------------------
 static napi_value njsSodaDocCursor_getNext(napi_env env,
         napi_callback_info info)
 {
     njsBaton *baton;
 
-    if (!njsSodaDocCursor_createBaton(env, info, 1, NULL, &baton))
+    if (!njsSodaDocCursor_createBaton(env, info, 0, NULL, &baton))
         return NULL;
-    njsBaton_queueWork(baton, env, "GetNext", njsSodaDocCursor_getNextAsync,
-            njsSodaDocCursor_getNextPostAsync, 2);
-    return NULL;
+    return njsBaton_queueWork(baton, env, "GetNext",
+            njsSodaDocCursor_getNextAsync, njsSodaDocCursor_getNextPostAsync);
 }
 
 
@@ -185,13 +181,13 @@ static bool njsSodaDocCursor_getNextAsync(njsBaton *baton)
 
 //-----------------------------------------------------------------------------
 // njsSodaDocCursor_getNextPostAsync()
-//   Sets up the arguments for the callback to JS.
+//   Defines the value returned to JS.
 //-----------------------------------------------------------------------------
 static bool njsSodaDocCursor_getNextPostAsync(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value *result)
 {
     if (baton->dpiSodaDocHandle && !njsSodaDocument_createFromHandle(env,
-            baton->dpiSodaDocHandle, baton->oracleDb, &args[1]))
+            baton->dpiSodaDocHandle, baton->oracleDb, result))
         return false;
     baton->dpiSodaDocHandle = NULL;
     return true;

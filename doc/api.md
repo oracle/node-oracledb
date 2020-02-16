@@ -492,6 +492,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 33.5 [Migrating from node-oracledb 3.1 to node-oracledb 4.0](#migratev31v40)
     - 33.6 [Migrating from node-oracledb 4.0 to node-oracledb 4.1](#migratev40v41)
     - 33.7 [Migrating from node-oracledb 4.1 to node-oracledb 4.2](#migratev41v42)
+    - 33.8 [Migrating from node-oracledb 4.2 to node-oracledb 5.0](#migratev42v50)
 34. [Useful Resources for Node-oracledb](#otherresources)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
@@ -1650,23 +1651,24 @@ oracledb.prefetchRows = 100;
 Promise Promise
 ```
 
-Node-oracledb supports Promises on all methods.  The standard Promise
-library is used.
+**The ``oracledb.Promise`` property is no longer used in node-oracledb 5 and has no
+effect.**
 
-See [Promises and node-oracledb](#promiseoverview) for a discussion of
+Node-oracledb supports Promises on all methods.  The native Promise library is
+used.  See [Promises and node-oracledb](#promiseoverview) for a discussion of
 using Promises.
 
-This property can be set to override or disable the Promise
-implementation.
-
 ##### Example
+
+Prior to node-oracledb 5, this property could be set to override or disable the
+Promise implementation.
 
 ```javascript
 const mylib = require('myfavpromiseimplementation');
 oracledb.Promise = mylib;
 ```
 
-Promises can be completely disabled by setting
+Prior to node-oracledb 5, Promises could be completely disabled by setting:
 
 ```javascript
 oracledb.Promise = null;
@@ -14350,19 +14352,8 @@ using promises][73].
 
 #### <a name="custompromises"></a> 32.2.1 Custom Promise Libraries
 
-The Promise implementation is designed to be overridden, allowing a
-custom Promise library to be used.
-
-```javascript
-const mylib = require('myfavpromiseimplementation');
-oracledb.Promise = mylib;
-```
-
-Promises can be completely disabled by setting
-
-```javascript
-oracledb.Promise = null;
-```
+From node-oracledb 5.0, custom Promise libraries can no longer be used.  Use the
+native Node.js Promise implementation instead.
 
 ### <a name="asyncawaitoverview"></a> 32.3 Async/Await and node-oracledb
 
@@ -14586,6 +14577,21 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
   node-oracledb [`close()`](#lobclose) method.  Note that unlike `close()`, the
   `destroy()` method does not take a callback parameter.  If `destroy()` is
   given an error argument, an `error` event is emitted with this error.
+
+    - 33.8 [Migrating from node-oracledb 4.2 to node-oracledb 5.0](#migratev42v50)
+
+### <a name="migratev42v50"></a> 33.8 Migrating from node-oracledb 4.2 to node-oracledb 5.0
+
+- Review the [CHANGELOG][83] and take advantage of new features.
+
+- Support for custom Promises was necessarily removed due to a refactoring of
+  the module's JavaScript layer.  Code should be migrated to use the native
+  Node.js Promise implementation.
+
+- The function call parameter errors *NJS-005: invalid value for parameter* and
+  *NJS-009: invalid number of parameters* are now passed through the callback,
+  if one is used.  In earlier versions they were thrown without the ability for
+  them to be caught.
 
 ## <a name="otherresources"></a> 34. Useful Resources for Node-oracledb
 

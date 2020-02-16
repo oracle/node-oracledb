@@ -145,16 +145,6 @@ describe("72. lobBind2.js", function() {
           connection.createLob(oracledb.CLOB, function(err, lob) {
             should.not.exist(err);
 
-            lob.on("close", function(err) {
-              should.not.exist(err);
-
-              connection.commit(function(err) {
-                should.not.exist(err);
-
-                return cb();
-              });
-            }); // close event
-
             lob.on("error", function(err) {
               should.not.exist(err, "lob.on 'error' event.");
             });
@@ -168,8 +158,10 @@ describe("72. lobBind2.js", function() {
 
                   should.strictEqual(result.rowsAffected, 1);
 
-                  lob.close(function(err) {
+                  lob.destroy();
+                  connection.commit(function(err) {
                     should.not.exist(err);
+                    return cb();
                   });
                 }
               );
@@ -209,16 +201,6 @@ describe("72. lobBind2.js", function() {
           connection.createLob(oracledb.CLOB, function(err, lob) {
             should.not.exist(err);
 
-            lob.on("close", function(err) {
-              should.not.exist(err);
-
-              connection.commit(function(err) {
-                should.not.exist(err);
-
-                return cb();
-              });
-            }); // close event
-
             lob.on("error", function(err) {
               should.not.exist(err, "lob.on 'error' event.");
             });
@@ -230,8 +212,11 @@ describe("72. lobBind2.js", function() {
                 function(err) {
                   should.not.exist(err);
 
-                  lob.close(function(err) {
+                  lob.destroy();
+
+                  connection.commit(function(err) {
                     should.not.exist(err);
+                    return cb();
                   });
                 }
               );
@@ -315,16 +300,6 @@ describe("72. lobBind2.js", function() {
           connection.createLob(oracledb.CLOB, function(err, lob) {
             should.not.exist(err);
 
-            lob.on("close", function(err) {
-              should.not.exist(err);
-
-              connection.commit(function(err) {
-                should.not.exist(err);
-
-                return cb();
-              });
-            }); // close event
-
             lob.on("error", function(err) {
               should.not.exist(err, "lob.on 'error' event.");
             });
@@ -338,8 +313,10 @@ describe("72. lobBind2.js", function() {
 
                   should.strictEqual(result.rowsAffected, 1);
 
-                  lob.close(function(err) {
+                  lob.destroy();
+                  connection.commit(function(err) {
                     should.not.exist(err);
+                    return cb();
                   });
                 }
               );
@@ -362,62 +339,7 @@ describe("72. lobBind2.js", function() {
 
     }); // 72.1.5
 
-    it("72.1.6 promise test of createLob()", function(done) {
-
-      var seq = 6;
-
-      if (oracledb.Promise) {
-        connection.createLob(oracledb.CLOB)
-          .then(function(lob) {
-            should.exist(lob);
-
-            lob.on("close", function(err) {
-              should.not.exist(err);
-
-              connection.commit()
-                .then(function() {
-                  verifyClobValue(seq, inFileName, done);
-                });
-            });
-
-            lob.on("error", function(err) {
-              should.not.exist(err, "lob.on 'error' event.");
-            });
-
-            lob.on("finish", function() {
-              connection.execute(
-                "insert into nodb_tab_clob72 (id, content) values (:id, :bindvar)",
-                { id: seq, bindvar: lob}
-              ).then(function(result) {
-                should.strictEqual(result.rowsAffected, 1);
-
-                var lobClosePromise = lob.close();
-                lobClosePromise.should.be.an.instanceOf(oracledb.Promise);
-              });
-            });
-
-            var inStream = fs.createReadStream(inFileName);
-
-            inStream.on("error", function(err) {
-              should.not.exist(err, "inStream.on 'error' event.");
-            });
-
-            inStream.pipe(lob);
-
-          })
-          .catch(function(err) {
-            should.not.exist(err);
-            return done();
-          });
-      }
-      else {
-        // This version of Node.js does not support Promise
-        return done();
-      }
-
-    }); // 72.1.6
-
-    it("72.1.7 BIND_INOUT, PL/SQL, IN LOB gets closed automatically", function(done) {
+    it("72.1.6 BIND_INOUT, PL/SQL, IN LOB gets closed automatically", function(done) {
 
       var seq = 7;
       var outStr = "This is a out bind string.";
@@ -503,7 +425,7 @@ describe("72. lobBind2.js", function() {
           executeSQL(sql, cb);
         }
       ], done);
-    }); // 72.1.7
+    }); // 72.1.6
 
   }); // 72.1
 
@@ -595,16 +517,6 @@ describe("72. lobBind2.js", function() {
           connection.createLob(oracledb.BLOB, function(err, lob) {
             should.not.exist(err);
 
-            lob.on("close", function(err) {
-              should.not.exist(err);
-
-              connection.commit(function(err) {
-                should.not.exist(err);
-
-                return cb();
-              });
-            }); // close event
-
             lob.on("error", function(err) {
               should.not.exist(err, "lob.on 'error' event.");
             });
@@ -618,8 +530,10 @@ describe("72. lobBind2.js", function() {
 
                   should.strictEqual(result.rowsAffected, 1);
 
-                  lob.close(function(err) {
+                  lob.destroy();
+                  connection.commit(function(err) {
                     should.not.exist(err);
+                    return cb();
                   });
                 }
               );
@@ -659,16 +573,6 @@ describe("72. lobBind2.js", function() {
           connection.createLob(oracledb.BLOB, function(err, lob) {
             should.not.exist(err);
 
-            lob.on("close", function(err) {
-              should.not.exist(err);
-
-              connection.commit(function(err) {
-                should.not.exist(err);
-
-                return cb();
-              });
-            }); // close event
-
             lob.on("error", function(err) {
               should.not.exist(err, "lob.on 'error' event.");
             });
@@ -680,8 +584,10 @@ describe("72. lobBind2.js", function() {
                 function(err) {
                   should.not.exist(err);
 
-                  lob.close(function(err) {
+                  lob.destroy();
+                  connection.commit(function(err) {
                     should.not.exist(err);
+                    return cb();
                   });
                 }
               );
@@ -717,16 +623,6 @@ describe("72. lobBind2.js", function() {
           connection.createLob(oracledb.CLOB, function(err, lob) {
             should.not.exist(err);
 
-            lob.on("close", function(err) {
-              should.not.exist(err);
-
-              connection.commit(function(err) {
-                should.not.exist(err);
-
-                return cb();
-              });
-            }); // close event
-
             lob.on("error", function(err) {
               should.not.exist(err, "lob.on 'error' event.");
             });
@@ -740,8 +636,10 @@ describe("72. lobBind2.js", function() {
                   (err.message).should.startWith("ORA-00932:");
                   // ORA-00932: inconsistent datatypes: expected BLOB got CLOB
 
-                  lob.close(function(err) {
+                  lob.destroy();
+                  connection.commit(function(err) {
                     should.not.exist(err);
+                    return cb();
                   });
                 }
               );
@@ -763,78 +661,17 @@ describe("72. lobBind2.js", function() {
 
     it("72.2.4 Negative - not providing first parameter", function(done) {
 
-      try {
-        connection.createLob(function(err, lob) {
-          should.not.exist(err);
-          should.not.exist(lob);
-
-        });
-      } catch(error) {
-        should.exist(error);
-        (error.message).should.startWith("NJS-009:");
+      connection.createLob(function(err, lob) {
+        should.exist(err);
+        (err.message).should.startWith("NJS-009:");
         // NJS-009: invalid number of parameters
-
-        return done();
-      }
+        should.not.exist(lob);
+        done();
+      });
 
     }); // 72.2.4
 
-    it("72.2.5 promise test of createLob()", function(done) {
-
-      var seq = 5;
-
-      if (oracledb.Promise) {
-        connection.createLob(oracledb.BLOB)
-          .then(function(lob) {
-            should.exist(lob);
-
-            lob.on("close", function(err) {
-              should.not.exist(err);
-
-              connection.commit()
-                .then(function() {
-                  verifyBlobValue(seq, jpgFileName, done);
-                });
-            });
-
-            lob.on("error", function(err) {
-              should.not.exist(err, "lob.on 'error' event.");
-            });
-
-            lob.on("finish", function() {
-              connection.execute(
-                "insert into nodb_tab_blob72 (id, content) values (:id, :bindvar)",
-                { id: seq, bindvar: lob}
-              ).then(function(result) {
-                should.strictEqual(result.rowsAffected, 1);
-
-                var lobClosePromise = lob.close();
-                lobClosePromise.should.be.an.instanceOf(oracledb.Promise);
-              });
-            });
-
-            var inStream = fs.createReadStream(jpgFileName);
-
-            inStream.on("error", function(err) {
-              should.not.exist(err, "inStream.on 'error' event.");
-            });
-
-            inStream.pipe(lob);
-
-          })
-          .catch(function(err) {
-            should.not.exist(err);
-            return done();
-          });
-      }
-      else {
-        // This version of Node.js does not support Promise
-        return done();
-      }
-
-    }); // 72.2.5
-
-    it("72.2.6 call lob.close() multiple times sequentially", function(done) {
+    it("72.2.5 call lob.close() multiple times sequentially", function(done) {
 
       var seq = 7000;
 
@@ -842,19 +679,6 @@ describe("72. lobBind2.js", function() {
         function(cb) {
           connection.createLob(oracledb.BLOB, function(err, lob) {
             should.not.exist(err);
-
-            lob.on("close", function(err) {
-              should.not.exist(err);
-
-              lob.close(function(err) {
-                should.not.exist(err);
-              });
-              connection.commit(function(err) {
-                should.not.exist(err);
-
-                return cb();
-              });
-            }); // close event
 
             lob.on("error", function(err) {
               should.not.exist(err, "lob.on 'error' event.");
@@ -869,10 +693,11 @@ describe("72. lobBind2.js", function() {
 
                   should.strictEqual(result.rowsAffected, 1);
 
-                  lob.close(function(err) {
+                  lob.destroy();
+                  connection.commit(function(err) {
                     should.not.exist(err);
+                    return cb();
                   });
-
                 }
               );
             }); // finish event
@@ -892,7 +717,7 @@ describe("72. lobBind2.js", function() {
         }
       ], done);
 
-    }); // 72.2.6
+    }); // 72.2.5
 
   }); // 72.2
 

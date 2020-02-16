@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -136,25 +136,16 @@ describe('45. instanceof1.js', function() {
 
             var lob = result.rows[0][0];
 
-            lob.on("close", function(err) {
+            lob.on("finish", function(err) {
               should.not.exist(err);
-
-              conn.release(function(err) {
-                should.not.exist(err);
-
-                done();
-              });
-
-            }); // lob close event
+            });
 
             lob.on("error", function(err) {
               should.not.exist(err, "lob.on 'error' event.");
             });
 
-            lob.close(function(err) {
-              should.not.exist(err);
-            });
-
+            lob.destroy();
+            done();
           }
         );
       }
