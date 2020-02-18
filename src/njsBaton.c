@@ -172,6 +172,7 @@ void njsBaton_free(njsBaton *baton, napi_env env)
     NJS_FREE_AND_CLEAR(baton->key);
     NJS_FREE_AND_CLEAR(baton->filter);
     NJS_FREE_AND_CLEAR(baton->version);
+    NJS_FREE_AND_CLEAR(baton->pfile);
 
     // free and clear various buffers
     NJS_FREE_AND_CLEAR(baton->bindNames);

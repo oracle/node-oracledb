@@ -4,6 +4,13 @@
 
 **This release is under development**
 
+- Added database instance startup and shutdown functions
+[`oracledb.startup()`](https://oracle.github.io/node-oracledb/doc/api.html#odbstartup),
+[`oracledb.shutdown()`](https://oracle.github.io/node-oracledb/doc/api.html#odbshutdown),
+[`connection.startup()`](https://oracle.github.io/node-oracledb/doc/api.html#constartup),
+and
+[`connection.shutdown()`](https://oracle.github.io/node-oracledb/doc/api.html#conshutdown).
+
 - Removed support for custom Promise libraries.  Use the native Node.js Promise
   implementation instead.  This change was necessitated by the refactored
   JavaScript implementation.

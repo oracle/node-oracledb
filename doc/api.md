@@ -52,7 +52,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 3.1.4 [Execute Bind Direction Constants](#oracledbconstantsbinddir)
             - [`BIND_IN`](#oracledbconstantsbinddir), [`BIND_INOUT`](#oracledbconstantsbinddir), [`BIND_OUT`](#oracledbconstantsbinddir)
         - 3.1.5 [Privileged Connection Constants](#oracledbconstantsprivilege)
-            - [`SYSASM`](#oracledbconstantsprivilege), [`SYSBACKUP`](#oracledbconstantsprivilege), [`SYSDBA`](#oracledbconstantsprivilege), [`SYSDG`](#oracledbconstantsprivilege), [`SYSKM`](#oracledbconstantsprivilege), [`SYSOPER`](#oracledbconstantsprivilege), [`SYSRAC`](#oracledbconstantsprivilege)
+            - [`SYSASM`](#oracledbconstantsprivilege), [`SYSBACKUP`](#oracledbconstantsprivilege), [`SYSDBA`](#oracledbconstantsprivilege), [`SYSDG`](#oracledbconstantsprivilege), [`SYSKM`](#oracledbconstantsprivilege), [`SYSOPER`](#oracledbconstantsprivilege), [`SYSRAC`](#oracledbconstantsprivilege), [`SYSPRELIM`](#oracledbconstantsprivilege)
         - 3.1.6 [SQL Statement Type Constants](#oracledbconstantsstmttype)
             - [`STMT_TYPE_ALTER`](#oracledbconstantsstmttype), [`STMT_TYPE_BEGIN`](#oracledbconstantsstmttype), [`STMT_TYPE_CALL`](#oracledbconstantsstmttype), [`STMT_TYPE_COMMIT`](#oracledbconstantsstmttype) [`STMT_TYPE_CREATE`](#oracledbconstantsstmttype), [`STMT_TYPE_DECLARE`](#oracledbconstantsstmttype), [`STMT_TYPE_DELETE`](#oracledbconstantsstmttype), [`STMT_TYPE_DROP`](#oracledbconstantsstmttype), [`STMT_TYPE_EXPLAIN_PLAN`](#oracledbconstantsstmttype), [`STMT_TYPE_INSERT`](#oracledbconstantsstmttype), [`STMT_TYPE_MERGE`](#oracledbconstantsstmttype), [`STMT_TYPE_ROLLBACK`](#oracledbconstantsstmttype), [`STMT_TYPE_SELECT`](#oracledbconstantsstmttype), [`STMT_TYPE_UNKNOWN`](#oracledbconstantsstmttype), [`STMT_TYPE_UPDATE`](#oracledbconstantsstmttype)
         - 3.1.7 [Subscription Constants](#oracledbconstantssubscription)
@@ -65,6 +65,8 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - [`POOL_STATUS_CLOSED`](#oracledbconstantspool), [`POOL_STATUS_DRAINING`](#oracledbconstantspool), [`POOL_STATUS_OPEN`](#oracledbconstantspool)
         - 3.1.11 [Simple Oracle Document Access (SODA) Constants](#oracledbconstantssoda)
             - [`SODA_COLL_MAP_MODE`](#oracledbconstantssoda)
+        - 3.1.12 [Database Shutdown Constants](#oracledbconstantsshutdown)
+            - [`SHUTDOWN_MODE_ABORT`](#oracledbconstantsshutdown), [`SHUTDOWN_MODE_DEFAULT`](#oracledbconstantsshutdown), [`SHUTDOWN_MODE_FINAL`](#oracledbconstantsshutdown), [`SHUTDOWN_MODE_IMMEDIATE`](#oracledbconstantsshutdown), [`SHUTDOWN_MODE_TRANSACTIONAL`](#oracledbconstantsshutdown), [`SHUTDOWN_MODE_TRANSACTIONAL_LOCAL`](#oracledbconstantsshutdown)
     - 3.2 [Oracledb Properties](#oracledbproperties)
         - 3.2.1 [`autoCommit`](#propdbisautocommit)
         - 3.2.2 [`connectionClass`](#propdbconclass)
@@ -138,6 +140,17 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 3.3.3 [`getPool()`](#getpool)
             - 3.3.3.1 [`getPool()`: Parameters](#getpoolattrs)
                 - 3.3.3.1.1 [`poolAlias`](#getpoolattrsalias)
+        - 3.3.4 [`shutdown()`](#odbshutdown)
+            - 3.3.4.1 [`shutdown()`: Parameters](#odbshutdownattrs)
+                - 3.3.4.1.1 [`connAttr`](#odbshutdownattrsconn)
+                - 3.3.4.1.2 [`shutdownMode`](#odbshutdownattrsmode)
+            - 3.3.4.2 [`shutdown()`: Callback Function](#odbshutdowncallback)
+        - 3.3.5 [`startup()`](#odbstartup)
+            - 3.3.5.1 [`startup()`: Parameters](#odbstartupattrs)
+                - 3.3.5.1.1 [`connAttr`](#odbstartupattrsconn)
+                - 3.3.5.1.2 [`options`](#odbstartupattrsoptions)
+                    - [`force`](#odbstartupattrsoptions), [`restrict`](#odbstartupattrsoptions), [`pfile`](#odbstartupattrsoptions)
+            - 3.3.5.2 [`startup()`: Callback Function](#odbstartupcallback)
 4. [Connection Class](#connectionclass)
     - 4.1 [Connection Properties](#connectionproperties)
         - 4.1.1 [`action`](#propconnaction)
@@ -205,24 +218,33 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 4.2.13 [`queryStream()`](#querystream)
         - 4.2.14 [`release()`](#release)
         - 4.2.15 [`rollback()`](#rollback)
-        - 4.2.16 [`subscribe()`](#consubscribe)
-            - 4.2.16.1 [`subscribe()`: Name](#consubscribename)
-            - 4.2.16.2 [`subscribe()`: Options](#consubscribeoptions)
-                - 4.2.16.2.1 [`binds`](#consubscribeoptbinds)
-                - 4.2.16.2.2 [`callback`](#consubscribeoptcallback)
-                - 4.2.16.2.3 [`clientInitiated`](#consubscribeoptclientinitiated)
-                - 4.2.16.2.4 [`groupingClass`](#consubscribeoptgroupingclass)
-                - 4.2.16.2.5 [`groupingType`](#consubscribeoptgroupingtype)
-                - 4.2.16.2.6 [`groupingValue`](#consubscribeoptgroupingvalue)
-                - 4.2.16.2.7 [`ipAddress`](#consubscribeoptipaddress)
-                - 4.2.16.2.8 [`namespace`](#consubscribeoptnamespace)
-                - 4.2.16.2.9 [`operations`](#consubscribeoptoperations)
-                - 4.2.16.2.10 [`port`](#consubscribeoptport)
-                - 4.2.16.2.11 [`qos`](#consubscribeoptqos)
-                - 4.2.16.2.12 [`sql`](#consubscribeoptsql)
-                - 4.2.16.2.13 [`timeout`](#consubscribeopttimeout)
-            - 4.2.16.3 [`subscribe()`: Callback Function](#consubscribecallback)
-        - 4.2.17 [`unsubscribe()`](#conunsubscribe)
+        - 4.2.16 [`shutdown()`](#conshutdown)
+            - 4.2.16.1 [`shutdown()`: shutdownMode](#conshutdownmode)
+            - 4.2.16.2 [`shutdown()`: Callback Function](#conshutdowncallback)
+        - 4.2.17 [`subscribe()`](#consubscribe)
+            - 4.2.17.1 [`subscribe()`: Name](#consubscribename)
+            - 4.2.17.2 [`subscribe()`: Options](#consubscribeoptions)
+                - 4.2.17.2.1 [`binds`](#consubscribeoptbinds)
+                - 4.2.17.2.2 [`callback`](#consubscribeoptcallback)
+                - 4.2.17.2.3 [`clientInitiated`](#consubscribeoptclientinitiated)
+                - 4.2.17.2.4 [`groupingClass`](#consubscribeoptgroupingclass)
+                - 4.2.17.2.5 [`groupingType`](#consubscribeoptgroupingtype)
+                - 4.2.17.2.6 [`groupingValue`](#consubscribeoptgroupingvalue)
+                - 4.2.17.2.7 [`ipAddress`](#consubscribeoptipaddress)
+                - 4.2.17.2.8 [`namespace`](#consubscribeoptnamespace)
+                - 4.2.17.2.9 [`operations`](#consubscribeoptoperations)
+                - 4.2.17.2.10 [`port`](#consubscribeoptport)
+                - 4.2.17.2.11 [`qos`](#consubscribeoptqos)
+                - 4.2.17.2.12 [`sql`](#consubscribeoptsql)
+                - 4.2.17.2.13 [`timeout`](#consubscribeopttimeout)
+            - 4.2.17.3 [`subscribe()`: Callback Function](#consubscribecallback)
+        - 4.2.18 [`startup()`](#constartup)
+            - 4.2.18.1 [`startup()`: Options](#constartupoptions)
+                - 4.2.18.1.1 [`force`](#constartupoptionsforce)
+                - 4.2.18.1.2 [`pfile`](#constartupoptionspfile)
+                - 4.2.18.1.3 [`restrict`](#constartupoptionsrestrict)
+            - 4.2.18.2 [`startup()`: Callback Function](#constartupcallback)
+        - 4.2.19 [`unsubscribe()`](#conunsubscribe)
 5. [AqQueue Class](#aqqueueclass)
     - 5.1 [AqQueue Properties](#aqqueueproperties)
         - 5.1.1 [`name`](#aqqueuename)
@@ -480,23 +502,27 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 29.5 [SODA Text Searches](#sodatextsearches)
     - 29.6 [SODA Client-Assigned Keys and Collection Metadata](#sodaclientkeys)
     - 29.7 [JSON Data Guides in SODA](#sodajsondataguide)
-30. [Database Round-trips](#roundtrips)
-31. [Tracing SQL and PL/SQL Statements](#tracingsql)
-32. [Node.js Programming Styles and node-oracledb](#programstyles)
-    - 32.1 [Callbacks and node-oracledb](#callbackoverview)
-    - 32.2 [Promises and node-oracledb](#promiseoverview)
-        - 32.2.1 [Custom Promise Libraries](#custompromises)
-    - 32.3 [Async/Await and node-oracledb](#asyncawaitoverview)
-33. [Migrating from Previous node-oracledb Releases](#migrate)
-    - 33.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
-    - 33.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
-    - 33.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
-    - 33.4 [Migrating from node-oracledb 3.0 to node-oracledb 3.1](#migratev30v31)
-    - 33.5 [Migrating from node-oracledb 3.1 to node-oracledb 4.0](#migratev31v40)
-    - 33.6 [Migrating from node-oracledb 4.0 to node-oracledb 4.1](#migratev40v41)
-    - 33.7 [Migrating from node-oracledb 4.1 to node-oracledb 4.2](#migratev41v42)
-    - 33.8 [Migrating from node-oracledb 4.2 to node-oracledb 5.0](#migratev42v50)
-34. [Useful Resources for Node-oracledb](#otherresources)
+30. [Database Start Up and Shut Down](#startupshutdown)
+    - 30.1 [Simple Database Start Up and Shut Down](#startupshutdownsimple)
+    - 30.2 [Flexible Database Start Up and Shut Down](#startupshutdownflexible)
+    - 30.3 [Oracle Multitenant Pluggable and Container Databases](#startupshutdownpdb)
+31. [Database Round-trips](#roundtrips)
+32. [Tracing SQL and PL/SQL Statements](#tracingsql)
+33. [Node.js Programming Styles and node-oracledb](#programstyles)
+    - 33.1 [Callbacks and node-oracledb](#callbackoverview)
+    - 33.2 [Promises and node-oracledb](#promiseoverview)
+        - 33.2.1 [Custom Promise Libraries](#custompromises)
+    - 33.3 [Async/Await and node-oracledb](#asyncawaitoverview)
+34. [Migrating from Previous node-oracledb Releases](#migrate)
+    - 34.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
+    - 34.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
+    - 34.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
+    - 34.4 [Migrating from node-oracledb 3.0 to node-oracledb 3.1](#migratev30v31)
+    - 34.5 [Migrating from node-oracledb 3.1 to node-oracledb 4.0](#migratev31v40)
+    - 34.6 [Migrating from node-oracledb 4.0 to node-oracledb 4.1](#migratev40v41)
+    - 34.7 [Migrating from node-oracledb 4.1 to node-oracledb 4.2](#migratev41v42)
+    - 34.8 [Migrating from node-oracledb 4.2 to node-oracledb 5.0](#migratev42v50)
+35. [Useful Resources for Node-oracledb](#otherresources)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
 
@@ -603,7 +629,7 @@ async function run() {
   let connection;
 
   try {
-    connection = await oracledb.getConnection(  {
+    connection = await oracledb.getConnection( {
       user          : "hr",
       password      : mypw,
       connectString : "localhost/XEPDB1"
@@ -660,7 +686,7 @@ async function run() {
   let connection;
 
   try {
-    connection = await oracledb.getConnection(  {
+    connection = await oracledb.getConnection( {
       user          : "hr",
       password      : mypw,
       connectString : "localhost/orclpdb1"
@@ -906,6 +932,7 @@ Constant Name                        | Value |Description
 `oracledb.SYSDG`                     |  262144 | SYSDG privileges
 `oracledb.SYSKM`                     |  524288 | SYSKM privileges
 `oracledb.SYSOPER`                   |       4 | SYSOPER privileges
+`oracledb.SYSPRELIM`                 |       8 | Preliminary privilege required when starting up a database with [`connection.startup()`](#constartup).
 `oracledb.SYSRAC`                    | 1048576 | SYSRAC privileges
 
 #### <a name="oracledbconstantsstmttype"></a> 3.1.6 SQL Statement Type Constants
@@ -1060,6 +1087,23 @@ Constant Name                   | Value |Description
 Constant Name                   | Value |Description
 --------------------------------|-------|---------------------------------------------------
 `oracledb.SODA_COLL_MAP_MODE`   | 5001  | Indicate [`sodaDatabase.createCollection()`](#sodadbcreatecollection) should use an externally created table to store the collection
+
+#### <a name="oracledbconstantsshutdown"></a> 3.1.12 Database Shutdown Constants
+
+Constants for shutting down the Oracle Database with
+[`oracledb.shutdown()`](#odbshutdown) and
+[`connection.shutdown()`](#conshutdown).
+
+These are new in node-oracledb 5.
+
+Constant Name                                 | Value | Description
+----------------------------------------------|-------|---------------------------------------------------
+`oracledb.SHUTDOWN_MODE_ABORT`                | 4     | All uncommitted transactions are terminated and not rolled back. This is the fastest way to shut down the database, but the next database start up may require instance recovery.
+`oracledb.SHUTDOWN_MODE_DEFAULT`              | 0     | Further connections to the database are prohibited.  Wait for users to disconnect from the database.
+`oracledb.SHUTDOWN_MODE_FINAL`                | 5     | Used with a second [`connection.shutdown()`](#conshutdown) to conclude the database shut down steps.
+`oracledb.SHUTDOWN_MODE_IMMEDIATE`            | 3     | All uncommitted transactions are terminated and rolled back and all connections to the database are closed immediately.
+`oracledb.SHUTDOWN_MODE_TRANSACTIONAL`        | 1     | Further connections to the database are prohibited and no new transactions are allowed to be started.  Wait for active transactions to complete.
+`oracledb.SHUTDOWN_MODE_TRANSACTIONAL_LOCAL`  | 2     | Behaves the same way as SHUTDOWN_MODE_TRANSACTIONAL, but only waits for local transactions to complete.
 
 ### <a name="oracledbproperties"></a> 3.2 Oracledb Properties
 
@@ -2415,9 +2459,10 @@ proxy user is specified.
 Number privilege
 ```
 
-The privilege to use when establishing connection to the database. This
-optional property should be one of the
-[privileged connection constants](#oracledbconstantsprivilege).
+The privilege to use when establishing connection to the database. This optional
+property should be one of the [privileged connection
+constants](#oracledbconstantsprivilege).  Multiple privileges may be used by
+when required, for example `oracledb.SYSDBA | oracledb.SYSPRELIM`.
 
 See [Privileged Connections](#privconn) for more information.
 
@@ -2530,6 +2575,134 @@ String poolAlias
 
 The pool alias of the pool to retrieve from the connection pool cache. The default
 value is 'default' which will retrieve the default pool from the cache.
+
+#### <a name="odbshutdown"></a> 3.3.4 `oracledb.shutdown()`
+
+##### Prototype
+
+Callback:
+```
+shutdown([Object connAttr, [Number shutdownMode, ] ] function(Error error) {});
+```
+
+Promise:
+```
+promise = shutdown([Object connAttr [, Number shutdownMode]]);
+
+```
+
+##### Description
+
+This is the simplified form of [`connection.shutdown()`](#conshutdown) used for
+shutting down a database instance.  It accepts connection credentials and shuts
+the database instance completely down.
+
+Internally it creates, and closes, a standalone connection using the
+[`oracledb.SYSOPER`](#oracledbconstantsprivilege) privilege.
+
+See [Database Start Up and Shut Down](#startupshutdown).
+
+This method was added in node-oracledb 5.0.
+
+##### <a name="odbshutdownattrs"></a> 3.3.4.1 Parameters
+
+###### <a name="odbshutdownattrsconn"></a> 3.3.4.1.1 `connAttr`
+
+```
+Object connAttr
+```
+
+Connection credentials similar to [`oracledb.getConnection()`
+credentials](#getconnectiondbattrsconnattrs).  The properties `user`,
+`password`, `connectString`, `connectionString`, and `externalAuth` may be
+specified.
+
+###### <a name="odbshutdownattrsmode"></a> 3.3.4.1.2 `shutdownMode`
+
+```
+Number shutdownMode
+```
+
+One of the constants
+[`oracledb.SHUTDOWN_MODE_ABORT`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_DEFAULT`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_IMMEDIATE`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_TRANSACTIONAL`](#oracledbconstantsshutdown), or
+[`oracledb.SHUTDOWN_MODE_TRANSACTIONAL_LOCAL`](#oracledbconstantsshutdown).
+
+The default mode is [`oracledb.SHUTDOWN_MODE_DEFAULT`](#oracledbconstantsshutdown).
+
+##### <a name="odbshutdowncallback"></a> 3.3.4.2 `shutdown()`: Callback Function
+
+##### Parameters
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error*               | If `shutdown()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="odbstartup"></a> 3.3.5 `oracledb.startup()`
+
+##### Prototype
+
+Callback:
+```
+startup([Object connAttrs, [Object options, ] ] function(Error error) {});
+```
+
+Promise:
+```
+promise = startup([Object connAttrs [, Object options ]]);
+```
+
+##### Description
+
+This is the simplified form of [`connection.startup()`](#constartup) used for
+starting a database instance up.  It accepts connection credentials and starts
+the database instance completely.
+
+As part of the start up process, a standalone connection using the
+[`oracledb.SYSOPER`](#oracledbconstantsprivilege) privilege is internally
+created and closed.
+
+See [Database Start Up and Shut Down](#startupshutdown).
+
+This method was added in node-oracledb 5.0.
+
+##### <a name="odbstartupattrs"></a> 3.3.5.1 Parameters
+
+###### <a name="odbstartupattrsconn"></a> 3.3.5.1.1 `connAttr`
+
+```
+Object connAttr
+```
+
+Connection credentials similar to [`oracledb.getConnection()`
+credentials](#getconnectiondbattrsconnattrs).  The properties `username`,
+`password`, `connectString`, `connectionString`, and `externalAuth` may be
+specified.
+
+###### <a name="odbstartupattrsoptions"></a> 3.3.5.1.2 `options`
+
+```
+Object options
+```
+
+The optional `options` object can contain one or more of these properties:
+
+Attribute          | Description
+-------------------|-----------------------------
+*Boolean force*    | Shuts down a running database using [`oracledb.SHUTDOWN_MODE_ABORT`](#oracledbconstantsshutdown) before restarting the database.  The database start up may require instance recovery.  The default for `force` is *false*.
+*Boolean restrict* | After the database is started, access is restricted to users who have the CREATE_SESSION and RESTRICTED SESSION privileges.  The default is *false*.
+*String pfile*     | The path and filename for a text file containing [Oracle Database initialization parameters][171].  If `pfile` is not set, then the database server-side parameter file is used.
+
+##### <a name="odbstartupcallback"></a> 3.3.5.2 `startup()`: Callback Function
+
+##### Parameters
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error*               | If `startup()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
 
 ## <a name="connectionclass"></a> 4. Connection Class
 
@@ -4012,7 +4185,73 @@ connection.
     ----------------------------|-------------
     *Error error* | If `rollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="consubscribe"></a> 4.2.16 `connection.subscribe()`
+#### <a name="conshutdown"></a> 4.2.16 `connection.shutdown()`
+
+##### Prototype
+
+Callback:
+```
+shutdown([Number shutdownMode,] function(Error error) {});
+```
+
+Promise:
+```
+promise = shutdown([Number shutdownMode])
+```
+
+##### Description
+
+Used to shut down a database instance.  This is the flexible version of
+[`oracledb.shutdown()`](#odbshutdown), allowing more control over behavior.
+
+This method must be called twice.  The first call blocks new connections.  SQL
+statements such as await `ALTER DATABASE CLOSE NORMAL` and `ALTER DATABASE
+DISMOUNT` can then be used to close and unmount the database instance.
+Alternatively database administration can be performed.  Finally, a second call
+`connection.shutdown(oracledb.SHUTDOWN_MODE_FINAL)` is required to fully close
+the database instance.
+
+If the initial `connection.shutdown()` [`shutdownMode`](#conshutdownmode) mode
+`oracledb.SHUTDOWN_MODE_ABORT` is used, then `connection.shutdown()` does not
+need to be called a second time.
+
+See [Database Start Up and Shut Down](#startupshutdown).
+
+This method was added in node-oracledb 5.0.
+
+##### <a name="conshutdownmode"></a> 4.2.16.1 `shutdown()`: shutdownMode
+
+```
+Number shutdownMode
+```
+
+One of the constants
+[`oracledb.SHUTDOWN_MODE_ABORT`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_DEFAULT`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_FINAL`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_IMMEDIATE`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_TRANSACTIONAL`](#oracledbconstantsshutdown), or
+[`oracledb.SHUTDOWN_MODE_TRANSACTIONAL_LOCAL`](#oracledbconstantsshutdown).
+
+If `oracledb.SHUTDOWN_MODE_ABORT` is used, then `connection.shutdown()` does not
+need to be called a second time.
+
+Only the second invocation of `connection.shutdown()` should use
+`oracledb.SHUTDOWN_MODE_FINAL`.
+
+##### <a name="conshutdowncallback"></a> 4.2.16.2 `shutdown()`: Callback Function
+
+```
+function(Error error)
+```
+
+##### Parameters
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error*               | If `shutdown()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="consubscribe"></a> 4.2.17 `connection.subscribe()`
 
 ##### Prototype
 
@@ -4056,7 +4295,7 @@ added in node-oracledb 4.0
 
 The [`result`](#consubscribecallback) callback parameter was added in node-oracledb 4.0.
 
-##### <a name="consubscribename"></a> 4.2.16.1 `subscribe()`: Name
+##### <a name="consubscribename"></a> 4.2.17.1 `subscribe()`: Name
 
 ```
 String name
@@ -4066,7 +4305,7 @@ For Continuous Query Notification this is an arbitrary name given to
 the subscription.  For Advanced Queuing notifications this must be the
 queue name.
 
-##### <a name="consubscribeoptions"></a> 4.2.16.2 `subscribe()`: Options
+##### <a name="consubscribeoptions"></a> 4.2.17.2 `subscribe()`: Options
 
 ```
 Object options
@@ -4074,7 +4313,7 @@ Object options
 
 The options that control the subscription.  The following properties can be set.
 
-###### <a name="consubscribeoptbinds"></a> 4.2.16.2.1 `binds`
+###### <a name="consubscribeoptbinds"></a> 4.2.17.2.1 `binds`
 
 ```
 Object binds
@@ -4083,7 +4322,7 @@ Object binds
 An array (bind by position) or object (bind by name) containing the
 bind values to use in the [`sql`](#consubscribeoptsql) property.
 
-###### <a name="consubscribeoptcallback"></a> 4.2.16.2.2 `callback`
+###### <a name="consubscribeoptcallback"></a> 4.2.17.2.2 `callback`
 
 ```
 function callback(Object message)
@@ -4123,7 +4362,7 @@ The `message` parameter in the notification callback is an object containing the
     - [`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription) - object-level notifications are being used (Database Change Notification).
     - [`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription) - query-level notifications are being used (Continuous Query Notification).
 
-###### <a name="consubscribeoptclientinitiated"></a> 4.2.16.2.3 `clientInitiated`
+###### <a name="consubscribeoptclientinitiated"></a> 4.2.17.2.3 `clientInitiated`
 
 ```
 Boolean clientInitiated
@@ -4139,7 +4378,7 @@ The default is *false*.
 
 This property was added in node-oracledb 4.2.  It is available when Oracle Database and the Oracle client libraries are version 19.4 or higher.
 
-###### <a name="consubscribeoptgroupingclass"></a> 4.2.16.2.4 `groupingClass`
+###### <a name="consubscribeoptgroupingclass"></a> 4.2.17.2.4 `groupingClass`
 
 ```
 Number groupingClass
@@ -4150,7 +4389,7 @@ An integer mask which currently, if set, can only contain the value
 this value is set then notifications are grouped by time into a single
 notification.
 
-###### <a name="consubscribeoptgroupingtype"></a> 4.2.16.2.5 `groupingType`
+###### <a name="consubscribeoptgroupingtype"></a> 4.2.17.2.5 `groupingType`
 
 ```
 Number groupingType
@@ -4163,7 +4402,7 @@ or
 [`oracledb.SUBSCR_GROUPING_TYPE_LAST`](#oracledbconstantssubscription)
 indicating the last notification in the group should be sent.
 
-###### <a name="consubscribeoptgroupingvalue"></a> 4.2.16.2.6 `groupingValue`
+###### <a name="consubscribeoptgroupingvalue"></a> 4.2.17.2.6 `groupingValue`
 
 ```
 Number groupingValue
@@ -4175,7 +4414,7 @@ then `groupingValue` can be used to set the number of seconds over
 which notifications will be grouped together, invoking `callback`
 once.  If `groupingClass` is not set, then `groupingValue` is ignored.
 
-###### <a name="consubscribeoptipaddress"></a> 4.2.16.2.7 `ipAddress`
+###### <a name="consubscribeoptipaddress"></a> 4.2.17.2.7 `ipAddress`
 
 ```
 String ipAddress
@@ -4185,7 +4424,7 @@ A string containing an IPv4 or IPv6 address on which the subscription
 should listen to receive notifications.  If not specified, then the
 Oracle Client library will select an IP address.
 
-###### <a name="consubscribeoptnamespace"></a> 4.2.16.2.8 `namespace`
+###### <a name="consubscribeoptnamespace"></a> 4.2.17.2.8 `namespace`
 
 ```
 Number namespace
@@ -4200,7 +4439,7 @@ You can use `oracledb.SUBSCR_NAMESPACE_AQ` to get notifications that
 Advanced Queuing messages are available to be dequeued, see
 [Advanced Queuing Notifications](#aqnotifications).
 
-###### <a name="consubscribeoptoperations"></a> 4.2.16.2.9 `operations`
+###### <a name="consubscribeoptoperations"></a> 4.2.17.2.9 `operations`
 
 ```
 Number operations
@@ -4210,7 +4449,7 @@ An integer mask containing one or more of the operation type
 [`oracledb.CQN_OPCODE_*`](#oracledbconstantscqn) constants to indicate
 what types of database change should generation notifications.
 
-###### <a name="consubscribeoptport"></a> 4.2.16.2.10 `port`
+###### <a name="consubscribeoptport"></a> 4.2.17.2.10 `port`
 
 ```
 Number port
@@ -4220,7 +4459,7 @@ The port number on which the subscription should listen to receive
 notifications.  If not specified, then the Oracle Client library will
 select a port number.
 
-###### <a name="consubscribeoptqos"></a> 4.2.16.2.11 `qos`
+###### <a name="consubscribeoptqos"></a> 4.2.17.2.11 `qos`
 
 ```
 Number qos
@@ -4229,7 +4468,7 @@ Number qos
 An integer mask containing one or more of the quality of service
 [`oracledb.SUBSCR_QOS_*`](#oracledbconstantssubscription) constants.
 
-###### <a name="consubscribeoptsql"></a> 4.2.16.2.12 `sql`
+###### <a name="consubscribeoptsql"></a> 4.2.17.2.12 `sql`
 
 ```
 String sql
@@ -4237,13 +4476,13 @@ String sql
 
 The SQL query string to use for notifications.
 
-###### <a name="consubscribeopttimeout"></a> 4.2.16.2.13 `timeout`
+###### <a name="consubscribeopttimeout"></a> 4.2.17.2.13 `timeout`
 
 The number of seconds the subscription should remain active.  Once
 this length of time has been reached, the subscription is
 automatically unregistered and a deregistration notification is sent.
 
-##### <a name="consubscribecallback"></a> 4.2.16.3 `subscribe()`: Callback Function
+##### <a name="consubscribecallback"></a> 4.2.17.3 `subscribe()`: Callback Function
 
 ##### Prototype
 
@@ -4260,7 +4499,74 @@ Callback function parameter | Description
 
 The `result` callback parameter was added in node-oracledb 4.0.
 
-#### <a name="conunsubscribe"></a> 4.2.17 `connection.unsubscribe()`
+#### <a name="constartup"></a> 4.2.18 `connection.startup()`
+
+##### Prototype
+
+Callback:
+```
+startup ([Object options,] function(Error error) {});
+```
+
+Promise:
+```
+promise = startup([Object options]);
+```
+
+##### Description
+
+Used to start up a database instance. This is the flexible version of
+[`oracledb.startup()`](#odbstartup), allowing more control over behavior.
+
+The connection must be a standalone connection, not a pooled connection.
+
+This function starts the database in an unmounted state.  SQL statements such as
+`ALTER DATABASE MOUNT` and `ALTER DATABASE OPEN` can then be executed to
+completely open the database instance.  Database recovery commands could also be
+executed at this time.
+
+The connection used must have the [`privilege`](#getconnectiondbattrsprivilege) set to
+[`oracledb.SYSPRELIM`](#oracledbconstantsprivilege), along with either
+[`oracledb.SYSDBA`](#oracledbconstantsprivilege) or
+[`oracledb.SYSOPER`](#oracledbconstantsprivilege).  For example `oracledb.SYSDBA
+| oracledb.SYSPRELIM`.
+
+See [Database Start Up and Shut Down](#startupshutdown).
+
+This method was added in node-oracledb 5.0.
+
+##### <a name="constartupoptions"></a> 4.2.18.1 `startup()`: options
+
+##### <a name="constartupoptionsforce"></a> 4.2.18.1.1.1 `force`
+
+Shuts down a running database using
+[`oracledb.SHUTDOWN_MODE_ABORT`](#oracledbconstantsshutdown) before restarting
+the database instance.  The next database start up may require instance recovery.
+The default for `force` is *false*.
+
+##### <a name="constartupoptionspfile"></a> 4.2.18.1.1.2 `pfile`
+
+After the database is started, access is restricted to users who have the CREATE_SESSION and RESTRICTED SESSION privileges.  The default is *false*.
+
+##### <a name="constartupoptionsrestrict"></a> 4.2.18.1.1.3 `restrict`
+
+The path and filename for a local text file containing [Oracle Database initialization parameters][171].  If `pfile` is not set, then the database server-side parameter file is used.
+
+##### <a name="constartupcallback"></a> 4.2.18.2 `startup()`: Callback Function
+
+##### Prototype
+
+```
+function(Error error)
+```
+
+##### Parameters
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error*               | If `startup()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="conunsubscribe"></a> 4.2.19 `connection.unsubscribe()`
 
 ##### Prototype
 
@@ -8721,7 +9027,7 @@ of the operating system [`dba`][96] group allows `SYSDBA` connections.
 Administrative privileges can allow access to a database instance even
 when the database is not open.  Control of these privileges is totally
 outside of the database itself.  Care must be taken with
-authentication to ensure security.  See the [Database Administrators
+authentication to ensure security.  See the [Database Administrator's
 Guide][90] for information.
 
 ### <a name="securenetwork"></a> 14.7 Securely Encrypting Network Traffic to Oracle Database
@@ -14124,7 +14430,203 @@ this case) and lengths of the values of these fields are listed.  The
 want to define SQL views over JSON data. They suggest how to name the
 columns of a view.
 
-## <a name="roundtrips"></a> 30. Database Round-trips
+## <a name="startupshutdown"></a> 30. Database Start Up and Shut Down
+
+There are two groups of database start up and shut down functions::
+
+- Simple usage: [`oracledb.startup()`](#odbstartup) and [`oracledb.shutdown()`](#odbshutdown)
+
+- Flexible usage: [`connection.startup()`](#constartup) and [`connection.shutdown()`](#conshutdown)
+
+These can be used to control database instances.  With the [Oracle Database
+Multitenant architecture][172], you use these functions on a "CDB" container
+database instance and then use SQL commands to control the pluggable "PDB"
+databases.
+
+### <a name="startupshutdownsimple"></a> 30.1 Simple Database Start Up and Shut Down
+
+The simple methods accept database credentials and perform the requested start
+up or shut down.  Internally a standalone connection with privilege
+[`oracledb.SYSOPER`](#oracledbconstantsprivilege) is created, used, and then
+closed.  The methods require appropriate connection attributes, which will vary
+depending with your database access rights, and if you are connecting over TCP
+or to a local database.  A username, password, connection string and mode to
+specify external authentication can be used.
+
+#### Simple Start Up
+
+The simple [`oracledb.startup()`](#odbstartup) method to start up a local
+database instance, when your operating system user is in the operating system's
+`oper` group, is:
+
+```javascript
+await oracledb.startup( {
+    externalAuth: true
+});
+```
+
+Start up [`options`](#odbstartupattrsoptions) can be specified.  You can use a
+database parameter '[pfile][171]', or indicate that database access should be
+restricted after start up, or force the database instance to be shut down before
+restarting it.  For example:
+
+```javascript
+await oracledb.startup( {
+    externalAuth: true
+  },
+  {
+    force: true,
+    restrict: true
+    pfile: '/my/path/to/my/pfile.ora'
+  }
+);
+```
+
+By default, the database is opened normally, and uses the database parameter
+file.
+
+#### Simple Shut Down
+
+The simple [`oracledb.shutdown()`](#odbshutdown) method to shut down a remote
+database is:
+
+```javascript
+const syspw = ...  // set syspw to the sys schema password
+
+await oracledb.shutdown( {
+  user: "sys",
+  password: syspw,
+  connectionString: "mymachine.example.com/orclcdb"
+});
+```
+
+An optional, [`shutdownMode`](#odbshutdownattrsmode) can be passed, for example
+to terminate uncommitted transactions and roll back:
+
+```javascript
+await oracledb.shutdown( {
+    user: "sys",
+    password: syspw,
+    connectionString: "mymachine.example.com/orclpdb1"
+  },
+  oracledb.SHUTDOWN_MODE_IMMEDIATE
+);
+```
+
+The shut down mode should be one of the constants:
+[`oracledb.SHUTDOWN_MODE_ABORT`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_DEFAULT`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_IMMEDIATE`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_TRANSACTIONAL`](#oracledbconstantsshutdown), or
+[`oracledb.SHUTDOWN_MODE_TRANSACTIONAL_LOCAL`](#oracledbconstantsshutdown).  If
+a mode is not specified, `oracledb.SHUTDOWN_MODE_DEFAULT` is used.
+
+### <a name="startupshutdownflexible"></a> 30.2 Flexible Database Start Up and Shut Down
+
+The 'flexible' functions for starting and stopping databases allow you more
+control over connection access, for example you can use the `oracledb.SYSDBA`
+privilege instead of `oracledb.SYSOPER`.  The functions also let you, for
+example, do database recovery as part of the database start up.
+
+#### Flexible Start Up
+
+A [`connection.startup()`](#constartup) example that is equivalent to the first
+'simple' start up example above is:
+
+```javascript
+connection = await oracledb.getConnection( {
+  externalAuth: true
+  privilege: oracledb.SYSOPER | oracledb.SYSPRELIM
+});
+
+await connection.startup();  // options could be passed, if required
+
+await connection.close();
+
+connection = await oracledb.getConnection( {
+  externalAuth: true
+  privilege: oracledb.SYSOPER
+});
+
+await connection.execute(`ALTER DATABASE MOUNT`);
+await connection.execute(`ALTER DATABASE OPEN`);
+
+await connection.close();
+```
+
+The `SYSPRELIM` privilege is required for the first connection.  The
+[`connection.startup()`](#constartup) method lets you optionally specify a
+database parameter 'pfile', or indicate the database access should be restricted
+after start up, or force the database instance to be shut down before restarting
+it.
+
+After calling `connection.startup()`, you can use your choice of SQL statements,
+for example to perform database recovery.
+
+#### Flexible Shut Down
+
+The flexible [`connection.shutdown()`](#conshutdown) example equivalent to the
+first 'simple' shut down example above is:
+
+```javascript
+connection = await oracledb.getConnection({
+  user: "sys",
+  password: syspw,
+  connectionString: "mymachine.example.com/orclcdb",
+  privilege: oracledb.SYSOPER
+});
+
+await connection.shutdown();  // a shut down mode can be specified, if required
+
+await connection.execute (`ALTER DATABASE CLOSE NORMAL`);
+await connection.execute (`ALTER DATABASE DISMOUNT`);
+
+await connection.shutdown(oracledb.SHUTDOWN_MODE_FINAL);
+
+connection.close();
+```
+
+If the `connection.shutdown()` [`shutdownMode`](#conshutdownmode)
+`oracledb.SHUTDOWN_MODE_ABORT` is used, then `connection.shutdown()` does not
+need to be called a second time.
+
+### <a name="startupshutdownpdb"></a> 30.3 Oracle Multitenant Pluggable and Container Databases
+
+You can use the `startup()` and `shutdown()` methods on Oracle Multitenant
+[container database][172] instances.
+
+Once a CDB is running, you can connect as a privileged user and execute SQL
+`ALTER PLUGGABLE` commands to start or stop PDBs.  Similar commands can also be
+run if you connect directly to a PDB.
+
+For example, when connected to a CDB, you can open the pluggable database in it
+called 'orclpdb1' with:
+
+```sql
+ALTER PLUGGABLE DATABASE orclpdb1 OPEN
+```
+
+or, to open all PDBs:
+
+```sql
+ALTER PLUGGABLE DATABASE ALL OPEN
+```
+
+The command:
+
+```sql
+ALTER PLUGGABLE DATABASE ALL SAVE STATE
+```
+
+can be used so that a subsequent restart of a CDB will automatically open all
+currently open PDBs.
+
+To close a PDB, you can use a command like `ALTER PLUGGABLE DATABASE mypdbname
+CLOSE`.
+
+Refer to the [Oracle Database Administrator's Guide][173] for more options.
+
+## <a name="roundtrips"></a> 31. Database Round-trips
 
 Along with tuning an application's architecture and tuning its SQL
 statements, a general performance and scalability goal is to minimize
@@ -14244,7 +14746,7 @@ after = await getRT(sid);
 console.log('Round-trips required: ' + (after - before));   // 1 round-trip
 ```
 
-## <a name="bindtrace"></a> <a name="tracingsql"></a> 31. Tracing SQL and PL/SQL Statements
+## <a name="bindtrace"></a> <a name="tracingsql"></a> 32. Tracing SQL and PL/SQL Statements
 
 ####  End-to-End Tracing
 
@@ -14301,14 +14803,14 @@ parameters.
 
 PL/SQL users may be interested in using [PL/Scope][78].
 
-## <a name="programstyles"></a> 32. Node.js Programming Styles and node-oracledb
+## <a name="programstyles"></a> 33. Node.js Programming Styles and node-oracledb
 
 Node.oracle supports [callbacks](#callbackoverview),
 [Promises](#promiseoverview), and Node.js 8's
 [async/await](#asyncawaitoverview) styles of programming.  The latter
 is recommended.
 
-### <a name="callbackoverview"></a> <a name="examplequerycb"></a> 32.1 Callbacks and node-oracledb
+### <a name="callbackoverview"></a> <a name="examplequerycb"></a> 33.1 Callbacks and node-oracledb
 
 Node-oracledb supports callbacks.
 
@@ -14361,7 +14863,7 @@ With Oracle's sample HR schema, the output is:
 [ [ 103, 60, 'IT' ] ]
 ```
 
-### <a name="promiseoverview"></a> 32.2 Promises and node-oracledb
+### <a name="promiseoverview"></a> 33.2 Promises and node-oracledb
 
 Node-oracledb supports Promises with all asynchronous methods.  The native Promise
 implementation is used.
@@ -14459,12 +14961,12 @@ Unhandled Rejection at:  Promise {
 For more information, see [How to get, use, and close a DB connection
 using promises][73].
 
-#### <a name="custompromises"></a> 32.2.1 Custom Promise Libraries
+#### <a name="custompromises"></a> 33.2.1 Custom Promise Libraries
 
 From node-oracledb 5.0, custom Promise libraries can no longer be used.  Use the
 native Node.js Promise implementation instead.
 
-### <a name="asyncawaitoverview"></a> 32.3 Async/Await and node-oracledb
+### <a name="asyncawaitoverview"></a> 33.3 Async/Await and node-oracledb
 
 Node.js 7.6 supports async functions, also known as Async/Await.  These
 can be used with node-oracledb.  For example:
@@ -14525,7 +15027,7 @@ Buffers.
 For more information, see [How to get, use, and close a DB connection
 using async functions][74].
 
-## <a name="migrate"></a> 33. Migrating from Previous node-oracledb Releases
+## <a name="migrate"></a> 34. Migrating from Previous node-oracledb Releases
 
 Documentation about node-oracledb version 1 is [here][94].
 
@@ -14535,7 +15037,8 @@ Documentation about node-oracledb version 3 is [here][135].
 
 Documentation about node-oracledb version 4 is [here][170].
 
-### <a name="migratev1v2"></a> 33.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
+### <a name="migratev1v2"></a> 34.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
+
 
 When upgrading from node-oracledb version 1.13 to version 2.0:
 
@@ -14589,7 +15092,7 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
 - Test applications to check if changes such as the improved property
   validation uncover latent problems in your code.
 
-### <a name="migratev20v21"></a> 33.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
+### <a name="migratev20v21"></a> 34.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
 
 When upgrading from node-oracledb version 2.0 to version 2.1:
 
@@ -14600,7 +15103,7 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
     - Stop passing a callback.
     - Optionally pass an error.
 
-### <a name="migratev23v30"></a> 33.3 Migrating from node-oracledb 2.3 to node-oracledb 3.0
+### <a name="migratev23v30"></a> 34.3 Migrating from node-oracledb 2.3 to node-oracledb 3.0
 
 When upgrading from node-oracledb version 2.3 to version 3.0:
 
@@ -14621,7 +15124,7 @@ When upgrading from node-oracledb version 2.3 to version 3.0:
   `execute()` result being set to `undefined`.  These properties are
   no longer set in node-oracledb 3.
 
-### <a name="migratev30v31"></a> 33.4 Migrating from node-oracledb 3.0 to node-oracledb 3.1
+### <a name="migratev30v31"></a> 34.4 Migrating from node-oracledb 3.0 to node-oracledb 3.1
 
 When upgrading from node-oracledb version 3.0 to version 3.1:
 
@@ -14640,7 +15143,7 @@ When upgrading from node-oracledb version 3.0 to version 3.1:
   [`oracledb.oracleClientVersionString`](#propdboracleclientversionstring),
   or try opening a connection.
 
-### <a name="migratev31v40"></a> 33.5 Migrating from node-oracledb 3.1 to node-oracledb 4.0
+### <a name="migratev31v40"></a> 34.5 Migrating from node-oracledb 3.1 to node-oracledb 4.0
 
 When upgrading from node-oracledb version 3.1 to version 4.0:
 
@@ -14666,7 +15169,7 @@ When upgrading from node-oracledb version 3.1 to version 4.0:
   [`OUT_FORMAT_ARRAY`](#oracledbconstantsoutformat) and
   [`OUT_FORMAT_OBJECT`](#oracledbconstantsoutformat).
 
-### <a name="migratev40v41"></a> 33.6 Migrating from node-oracledb 4.0 to node-oracledb 4.1
+### <a name="migratev40v41"></a> 34.6 Migrating from node-oracledb 4.0 to node-oracledb 4.1
 
 When upgrading from node-oracledb version 4.0 to version 4.1:
 
@@ -14677,7 +15180,7 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
 - Note that the default for [`oracledb.events`](#propdbevents) has reverted to
   *false*.  If you relied on it being *true*, then explicitly set it.
 
-### <a name="migratev41v42"></a> 33.7 Migrating from node-oracledb 4.1 to node-oracledb 4.2
+### <a name="migratev41v42"></a> 34.7 Migrating from node-oracledb 4.1 to node-oracledb 4.2
 
 - Review the [CHANGELOG][83] and take advantage of new features.
 
@@ -14689,7 +15192,7 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
   `destroy()` method does not take a callback parameter.  If `destroy()` is
   given an error argument, an `error` event is emitted with this error.
 
-### <a name="migratev42v50"></a> 33.8 Migrating from node-oracledb 4.2 to node-oracledb 5.0
+### <a name="migratev42v50"></a> 34.8 Migrating from node-oracledb 4.2 to node-oracledb 5.0
 
 - Review the [CHANGELOG][83] and take advantage of new features.
 
@@ -14702,7 +15205,7 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
   if one is used.  In earlier versions they were thrown without the ability for
   them to be caught.
 
-## <a name="otherresources"></a> 34. Useful Resources for Node-oracledb
+## <a name="otherresources"></a> 35. Useful Resources for Node-oracledb
 
 Node-oracledb can be installed on the pre-built [*Database App Development
 VM*][152] for [VirtualBox][153], which has Oracle Database pre-installed on
@@ -14889,3 +15392,6 @@ can be asked at [AskTom][158].
 [168]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-AA8D783D-7337-4A61-BD7D-5DB580C46D9A
 [169]: https://oracle.github.io/node-oracledb/#features
 [170]: https://github.com/oracle/node-oracledb/blob/v4.2.0/doc/api.md
+[171]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8BAD86FC-27C5-4103-8151-AC5BADF274E3
+[172]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C5B0AF7D-ABE8-4F69-9552-F4DAF40281F1
+[173]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-0F711EA4-08A8-463F-B4C6-1CE3A24274C8

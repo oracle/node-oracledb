@@ -39,6 +39,8 @@ static NJS_NAPI_METHOD(njsConnection_getSodaDatabase);
 static NJS_NAPI_METHOD(njsConnection_getStatementInfo);
 static NJS_NAPI_METHOD(njsConnection_ping);
 static NJS_NAPI_METHOD(njsConnection_rollback);
+static NJS_NAPI_METHOD(njsConnection_shutdown);
+static NJS_NAPI_METHOD(njsConnection_startup);
 static NJS_NAPI_METHOD(njsConnection_subscribe);
 static NJS_NAPI_METHOD(njsConnection_unsubscribe);
 
@@ -55,6 +57,8 @@ static NJS_ASYNC_METHOD(njsConnection_getQueueAsync);
 static NJS_ASYNC_METHOD(njsConnection_getStatementInfoAsync);
 static NJS_ASYNC_METHOD(njsConnection_pingAsync);
 static NJS_ASYNC_METHOD(njsConnection_rollbackAsync);
+static NJS_ASYNC_METHOD(njsConnection_shutdownAsync);
+static NJS_ASYNC_METHOD(njsConnection_startupAsync);
 static NJS_ASYNC_METHOD(njsConnection_subscribeAsync);
 static NJS_ASYNC_METHOD(njsConnection_unsubscribeAsync);
 
@@ -75,6 +79,7 @@ static NJS_PROCESS_ARGS_METHOD(njsConnection_executeManyProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_getDbObjectClassProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_getQueueProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_getStatementInfoProcessArgs);
+static NJS_PROCESS_ARGS_METHOD(njsConnection_startupProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_subscribeProcessArgs);
 
 // getters
@@ -130,6 +135,10 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "_ping", NULL, njsConnection_ping, NULL, NULL, NULL, napi_default,
             NULL },
     { "_rollback", NULL, njsConnection_rollback, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "_shutdown", NULL, njsConnection_shutdown, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "_startup", NULL, njsConnection_startup, NULL, NULL, NULL,
             napi_default, NULL },
     { "_subscribe", NULL, njsConnection_subscribe, NULL, NULL, NULL,
             napi_default, NULL },
@@ -2701,6 +2710,111 @@ static napi_value njsConnection_setTextAttribute(napi_env env,
 
     free(buffer);
     return NULL;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_shutdown()
+//   Initiates a Database Server shutdown with provided option.
+//
+// PARAMETERS
+//   - shutdown mode to use
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_shutdown(napi_env env, napi_callback_info info)
+{
+    napi_value args[1];
+    njsBaton *baton;
+
+    if (!njsConnection_createBaton(env, info, 1, args, &baton))
+        return NULL;
+    if (!njsUtils_getUnsignedIntArg(env, args, 0, &baton->shutdownMode)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
+    return njsBaton_queueWork(baton, env, "Shutdown",
+            njsConnection_shutdownAsync, NULL);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_shutdownAsync()
+//   Worker thread function for njsConnection_shutdown().
+//-----------------------------------------------------------------------------
+static bool njsConnection_shutdownAsync(njsBaton *baton)
+{
+    njsConnection *conn = (njsConnection*) baton->callingInstance;
+
+    if (dpiConn_shutdownDatabase(conn->handle, baton->shutdownMode))
+        return njsBaton_setErrorDPI(baton);
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_startup()
+//   Initiates a Database Server startup (mounting of Database).
+//
+// PARAMETERS
+//   - startup mode to use
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_startup(napi_env env, napi_callback_info info)
+{
+    napi_value args[1];
+    njsBaton *baton;
+
+    if (!njsConnection_createBaton(env, info, 1, args, &baton))
+        return NULL;
+
+    if (!njsConnection_startupProcessArgs(baton, env, args)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
+
+    return njsBaton_queueWork(baton, env, "Startup",
+            njsConnection_startupAsync, NULL);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_startupProcessArgs()
+//   Process the arguments provided by the caller and place them on the baton.
+//-----------------------------------------------------------------------------
+static bool njsConnection_startupProcessArgs(njsBaton *baton, napi_env env,
+        napi_value *args)
+{
+    bool force = false, rest = false;
+
+    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "force", &force, NULL))
+        return false;
+    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "restrict", &rest, NULL))
+        return false;
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "pfile", &baton->pfile,
+            &baton->pfileLength, NULL))
+        return false;
+
+    if (force)
+        baton->startupMode |= DPI_MODE_STARTUP_FORCE;
+    if (rest)
+        baton->startupMode |= DPI_MODE_STARTUP_RESTRICT;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_startupAsync()
+//   Worker thread function for njsConnection_startup().
+//-----------------------------------------------------------------------------
+static bool njsConnection_startupAsync(njsBaton *baton)
+{
+    njsConnection *conn = (njsConnection*) baton->callingInstance;
+
+    if (dpiConn_startupDatabaseWithPfile(conn->handle, baton->pfile,
+            baton->pfileLength, baton->startupMode))
+        return njsBaton_setErrorDPI(baton);
+
+    return true;
 }
 
 

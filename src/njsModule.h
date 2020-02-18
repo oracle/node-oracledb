@@ -364,6 +364,8 @@ struct njsBaton {
     size_t filterLength;
     char *version;
     size_t versionLength;
+    char *pfile;                             // for DB startup
+    size_t pfileLength;
 
     // various buffers (requires free)
     uint32_t numBindNames;
@@ -452,6 +454,8 @@ struct njsBaton {
     uint32_t subscrGroupingClass;
     uint32_t subscrGroupingValue;
     uint32_t subscrGroupingType;
+    uint32_t shutdownMode;
+    uint32_t startupMode;
 
     // boolean values
     bool externalAuth;
