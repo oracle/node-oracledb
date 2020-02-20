@@ -37,6 +37,7 @@ static NJS_NAPI_METHOD(njsSodaCollection_insertOne);
 static NJS_NAPI_METHOD(njsSodaCollection_insertOneAndGet);
 static NJS_NAPI_METHOD(njsSodaCollection_save);
 static NJS_NAPI_METHOD(njsSodaCollection_saveAndGet);
+static NJS_NAPI_METHOD(njsSodaCollection_truncate);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsSodaCollection_createIndexAsync);
@@ -49,6 +50,7 @@ static NJS_ASYNC_METHOD(njsSodaCollection_insertOneAsync);
 static NJS_ASYNC_METHOD(njsSodaCollection_insertOneAndGetAsync);
 static NJS_ASYNC_METHOD(njsSodaCollection_saveAsync);
 static NJS_ASYNC_METHOD(njsSodaCollection_saveAndGetAsync);
+static NJS_ASYNC_METHOD(njsSodaCollection_truncateAsync);
 
 // post asynchronous methods
 static NJS_ASYNC_POST_METHOD(njsSodaCollection_dropPostAsync);
@@ -96,6 +98,8 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "_save", NULL, njsSodaCollection_save, NULL, NULL, NULL, napi_default,
             NULL },
     { "_saveAndGet", NULL, njsSodaCollection_saveAndGet, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "_truncate", NULL, njsSodaCollection_truncate, NULL, NULL, NULL,
             napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
@@ -846,5 +850,37 @@ static bool njsSodaCollection_saveAndGetPostAsync(njsBaton *baton,
             baton->oracleDb, result))
         return false;
     baton->dpiSodaDocHandle = NULL;
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsSodaCollection_truncate()
+//   Removes all of the documents from a collection.
+//
+// PARAMETERS - NONE
+//-----------------------------------------------------------------------------
+static napi_value njsSodaCollection_truncate(napi_env env,
+        napi_callback_info info)
+{
+    njsBaton *baton;
+
+    if (!njsSodaCollection_createBaton(env, info, 0, NULL, &baton))
+        return NULL;
+    return njsBaton_queueWork(baton, env, "Truncate",
+            njsSodaCollection_truncateAsync, NULL);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsSodaCollection_truncateAsync()
+//   Worker function for njsSodaCollection_truncate().
+//-----------------------------------------------------------------------------
+static bool njsSodaCollection_truncateAsync(njsBaton *baton)
+{
+    njsSodaCollection *coll = (njsSodaCollection*) baton->callingInstance;
+
+    if (dpiSodaColl_truncate(coll->handle) < 0)
+        return njsBaton_setErrorDPI(baton);
     return true;
 }

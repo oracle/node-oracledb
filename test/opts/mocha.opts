@@ -256,3 +256,5 @@ test/dbType02.js
 test/lastRowid.js
 test/dbType03.js
 test/soda12.js
+
+test/soda13.js

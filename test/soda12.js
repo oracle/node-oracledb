@@ -27,8 +27,6 @@
  *****************************************************************************/
 'use strict';
 
-'use strict';
-
 const oracledb  = require('oracledb');
 const should    = require('should');
 const assert    = require('assert');

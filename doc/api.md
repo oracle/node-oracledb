@@ -360,6 +360,8 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - 10.2.9.2 [`insertOneAndGet()`: Callback Function](#sodacollinsertoneandgetcb)
         - 10.2.10 [`save()`](#sodacollsave)
         - 10.2.11 [`saveAndGet()`](#sodacollsaveandget)
+        - 10.2.12 [`truncate()`](#sodacolltruncate)
+            - 10.2.12.1 [`truncate()`: Callback Function](#sodacolltruncatecb)
 11. [SodaDatabase Class](#sodadatabaseclass)
     - 11.1 [SodaDatabase Methods](#sodadatabasemethods)
         - 11.1.1 [`createCollection()`](#sodadbcreatecollection)
@@ -6855,6 +6857,43 @@ keys, then the behavior is exactly the same as
 
 This method was added in node-oracledb 5.0.  It requires Oracle Client 20 or
 later, and Oracle Database 18.3 or later.
+
+#### <a name="sodacolltruncate"></a> 10.2.12 `sodaCollection.truncate()`
+
+##### Prototype
+
+Callback
+```
+truncate(function(Error error) {});
+```
+
+Promise
+```
+promise = truncate();
+```
+
+##### Description
+
+This method truncates a collection, removing all documents.  The collection will
+not be deleted.
+
+This method was added in node-oracledb 5.0.  It requires Oracle Client 20 or
+later, and Oracle Database 18.3 or later.
+
+##### <a name="sodacolltruncatecb"></a> 10.2.12.1 `truncate()` Callback Function
+
+##### Prototype
+
+```
+function(Error error)
+```
+
+##### Parameters
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error* | If `truncate()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+
 
 ## <a name="sodadatabaseclass"></a> 11. SodaDatabase Class
 
