@@ -36,7 +36,7 @@ and
       [`sodaCollection.saveAndGet()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollsaveandget).
 
     - Added SODA function
-      [`sodaCollection.truncte()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacolltruncate).
+      [`sodaCollection.truncate()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacolltruncate).
 
 - Removed use of git in `package/buildpackage.js` making offline builds cleaner
   for self-hosted node-oracledb.
