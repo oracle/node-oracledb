@@ -14500,7 +14500,7 @@ database instance, when your operating system user is in the operating system's
 
 ```javascript
 await oracledb.startup( {
-    externalAuth: true
+  externalAuth: true
 });
 ```
 
@@ -14521,8 +14521,20 @@ await oracledb.startup( {
 );
 ```
 
-By default, the database is opened normally, and uses the database parameter
-file.
+By default when the options are not specified, the database is opened normally,
+and uses the database parameter file.
+
+To start up a remote database, configure the Oracle Net listener to use [static
+service registration][175] by adding a `SID_LIST_LISTENER` entry to the database
+`listener.ora` file.  Starting the database in node-oracledb would then be like:
+
+```javascript
+await oracledb.startup( {
+  user: 'sys',
+  password: syspw,
+  connectString: 'mymachine.example.com/orclcdb'
+});
+```
 
 #### Simple Shut Down
 
@@ -14535,7 +14547,7 @@ const syspw = ...  // set syspw to the sys schema password
 await oracledb.shutdown( {
   user: "sys",
   password: syspw,
-  connectionString: "mymachine.example.com/orclcdb"
+  connectString: "mymachine.example.com/orclcdb"
 });
 ```
 
@@ -14546,7 +14558,7 @@ to terminate uncommitted transactions and roll back:
 await oracledb.shutdown( {
     user: "sys",
     password: syspw,
-    connectionString: "mymachine.example.com/orclpdb1"
+    connectString: "mymachine.example.com/orclpdb1"
   },
   oracledb.SHUTDOWN_MODE_IMMEDIATE
 );
@@ -14611,7 +14623,7 @@ first 'simple' shut down example above is:
 connection = await oracledb.getConnection({
   user: "sys",
   password: syspw,
-  connectionString: "mymachine.example.com/orclcdb",
+  connectString: "mymachine.example.com/orclcdb",
   privilege: oracledb.SYSOPER
 });
 
@@ -15434,3 +15446,4 @@ can be asked at [AskTom][158].
 [171]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8BAD86FC-27C5-4103-8151-AC5BADF274E3
 [172]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C5B0AF7D-ABE8-4F69-9552-F4DAF40281F1
 [173]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-0F711EA4-08A8-463F-B4C6-1CE3A24274C8
+[175]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-0203C8FA-A4BE-44A5-9A25-3D1E578E879F
