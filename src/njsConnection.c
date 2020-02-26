@@ -620,9 +620,9 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
                 metadata))
 
         // return result set
-        if (!njsResultSet_new(baton, env, baton->dpiStmtHandle,
-                baton->queryVars, baton->numQueryVars, !baton->getRS,
-                &resultSet))
+        if (!njsResultSet_new(baton, env,
+                (njsConnection*) baton->callingInstance, baton->dpiStmtHandle,
+                baton->queryVars, baton->numQueryVars, &resultSet))
             return false;
         baton->dpiStmtHandle = NULL;
         baton->queryVars = NULL;
@@ -689,6 +689,8 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
 static bool njsConnection_executeProcessArgs(njsBaton *baton,
         napi_env env, napi_value *args)
 {
+    bool getResultSet = false;
+
     // setup defaults and define constructors for use in various checks
     baton->autoCommit = baton->oracleDb->autoCommit;
     baton->fetchArraySize = baton->oracleDb->fetchArraySize;
@@ -733,7 +735,7 @@ static bool njsConnection_executeProcessArgs(njsBaton *baton,
             baton->outFormat != NJS_ROWS_OBJECT)
         return njsBaton_setError(baton, errInvalidPropertyValue, "outFormat");
     if (!njsBaton_getBoolFromArg(baton, env, args, 2, "resultSet",
-            &baton->getRS, NULL))
+            &getResultSet, NULL))
         return false;
     if (!njsBaton_getBoolFromArg(baton, env, args, 2, "autoCommit",
             &baton->autoCommit, NULL))
@@ -1380,9 +1382,10 @@ static bool njsConnection_getImplicitResults(njsBaton *baton,
         if (!njsVariable_initForQueryJS(implicitResult->queryVars,
                 implicitResult->numQueryVars, env, baton))
             return false;
-        if (!njsResultSet_new(baton, env, implicitResult->stmt,
+        if (!njsResultSet_new(baton, env,
+                (njsConnection*) baton->callingInstance, implicitResult->stmt,
                 implicitResult->queryVars, implicitResult->numQueryVars,
-                !baton->getRS, &resultSet))
+                &resultSet))
             return false;
         implicitResult->stmt = NULL;
         implicitResult->queryVars = NULL;
@@ -1403,6 +1406,7 @@ static bool njsConnection_getImplicitResults(njsBaton *baton,
 static bool njsConnection_getOutBinds(njsBaton *baton, napi_env env,
         uint32_t numOutBinds, uint32_t pos, napi_value *outBinds)
 {
+    njsConnection *conn = (njsConnection*) baton->callingInstance;
     napi_value tempBinds, key, val;
     uint32_t arrayPos, i;
     bool bindByPos, ok;
@@ -1431,10 +1435,10 @@ static bool njsConnection_getOutBinds(njsBaton *baton, napi_env env,
 
         // get value stored in the variable
         if (var->isArray || baton->stmtInfo.isReturning) {
-            ok = njsVariable_getArrayValue(var, pos, baton, env, &val);
+            ok = njsVariable_getArrayValue(var, conn, pos, baton, env, &val);
         } else {
-            ok = njsVariable_getScalarValue(var, var->buffer, pos, baton, env,
-                    &val);
+            ok = njsVariable_getScalarValue(var, conn, var->buffer, pos, baton,
+                    env, &val);
         }
         if (!ok)
             return false;

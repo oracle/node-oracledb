@@ -434,20 +434,21 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 15.1.2 [Fetching Rows with Result Sets](#resultsethandling)
         - 15.1.3 [Query Streaming](#streamingresults)
         - 15.1.4 [Query Output Formats](#queryoutputformats)
-        - 15.1.5 [Query Column Metadata](#querymeta)
-        - 15.1.6 [Query Result Type Mapping](#typemap)
-            - 15.1.6.1 [Fetching CHAR, VARCHAR2, NCHAR and NVARCHAR](#stringhandling)
-            - 15.1.6.2 [Fetching Numbers](#numberhandling)
-            - 15.1.6.3 [Fetching Dates and Timestamps](#datehandling)
-            - 15.1.6.4 [Fetching Numbers and Dates as String](#fetchasstringhandling)
-            - 15.1.6.5 [Fetching BLOB, CLOB and NCLOB](#fetchlob)
-            - 15.1.6.6 [Fetching LONG and LONG RAW](#fetchlong)
-            - 15.1.6.7 [Fetching ROWID and UROWID](#fetchrowid)
-            - 15.1.6.8 [Fetching XMLType](#fetchxml)
-            - 15.1.6.9 [Fetching RAW](#fetchraw)
-            - 15.1.6.10 [Fetching Oracle Database Objects and Collections](#fetchobjects)
-        - 15.1.7 [Limiting Rows and Creating Paged Datasets](#pagingdata)
-        - 15.1.8 [Auto-Increment Columns](#autoincrement)
+        - 15.1.5 [Fetching Nested Cursors](#nestedcursors)
+        - 15.1.6 [Query Column Metadata](#querymeta)
+        - 15.1.7 [Query Result Type Mapping](#typemap)
+            - 15.1.7.1 [Fetching CHAR, VARCHAR2, NCHAR and NVARCHAR](#stringhandling)
+            - 15.1.7.2 [Fetching Numbers](#numberhandling)
+            - 15.1.7.3 [Fetching Dates and Timestamps](#datehandling)
+            - 15.1.7.4 [Fetching Numbers and Dates as String](#fetchasstringhandling)
+            - 15.1.7.5 [Fetching BLOB, CLOB and NCLOB](#fetchlob)
+            - 15.1.7.6 [Fetching LONG and LONG RAW](#fetchlong)
+            - 15.1.7.7 [Fetching ROWID and UROWID](#fetchrowid)
+            - 15.1.7.8 [Fetching XMLType](#fetchxml)
+            - 15.1.7.9 [Fetching RAW](#fetchraw)
+            - 15.1.7.10 [Fetching Oracle Database Objects and Collections](#fetchobjects)
+        - 15.1.8 [Limiting Rows and Creating Paged Datasets](#pagingdata)
+        - 15.1.9 [Auto-Increment Columns](#autoincrement)
     - 15.2 [Cursor Management](#cursors1000)
 16. [PL/SQL Execution](#plsqlexecution)
     - 16.1 [PL/SQL Stored Procedures](#plsqlproc)
@@ -1444,6 +1445,8 @@ The maximum number of rows that are fetched by a query with
 [ResultSet](#resultsetclass).  Rows beyond this limit are not fetched
 from the database.  A value of 0 means there is no limit.
 
+For nested cursors, the limit is also applied to each cursor.
+
 The default value is 0, meaning unlimited.
 
 This property may be overridden in an [`execute()`](#executeoptions)
@@ -1453,6 +1456,9 @@ To improve database efficiency, SQL queries should use a row limiting
 clause like [`OFFSET` / `FETCH`](#pagingdata) or equivalent. The `maxRows`
 property can be used to stop badly coded queries from returning
 unexpectedly large numbers of rows.
+
+For queries that return a fixed, small number of rows, then set `maxRows` to
+that value.  For example, for queries that return one row, set `maxRows` to 1.
 
 When the number of query rows is relatively big, or can not be
 predicted, it is recommended to use a [ResultSet](#resultsetclass) or
@@ -3493,10 +3499,9 @@ has no effect on applications.  Use
 Boolean resultSet
 ```
 
-Determines whether query results and [Implicit
-Results](#implicitresults) should be returned as a
-[ResultSet](#resultsetclass) object or directly.  The default is
-*false*.
+Determines whether query results, [Implicit Results](#implicitresults), and
+[nested cursors](#nestedcursors) should be returned as
+[ResultSet](#resultsetclass) objects or directly.  The default is *false*.
 
 ##### <a name="executecallback"></a> 4.2.6.4 `execute()`: Callback Function
 
@@ -3629,6 +3634,10 @@ The number of rows returned is limited by
 [`maxRows`](#propexecmaxrows) option in an `execute()` call.  If
 `maxRows` is 0, then the number of rows is limited by Node.js memory
 constraints.
+
+If the query contains [nested cursors](#nestedcursors), then each nested cursor
+is returned as an array of rows fetched from that cursor.  The number of rows
+returned for each cursor is limited by `maxRows`.
 
 ###### <a name="execrowsaffected"></a> 4.2.6.4.7 `rowsAffected`
 
@@ -7874,15 +7883,17 @@ may improve throughput and prevent [deadlocks][22].
 #### Parallelism on a Connection
 
 Structure your code to avoid parallel operations on a single connection.  For
-example, do not use `Promise.all()`.  Instead consider, for example, using a basic
-`for` loop and `async` to iterate through each action.  Also, instead of using
-`async.parallel()` or `async.each()` which call each of their items in parallel,
-use `async.series()` or `async.eachSeries()`.  Code will not run faster when
-parallel calls are used with a single connection since each connection can only
-ever execute one statement at a time.  Statements will still be executed
-sequentially.  If you are using one of these constructs to repeat a number of
-INSERT or UPDATE statements, then use [`connection.executeMany()`](#executemany)
-instead.
+example, do not use `Promise.all()`.  Instead consider, for example, using a
+basic `for` loop and `async` to iterate through each action.  Also, instead of
+using `async.parallel()` or `async.each()` which call each of their items in
+parallel, use `async.series()` or `async.eachSeries()`.  Code will not run
+faster when parallel calls are used with a single connection since each
+connection can only ever execute one statement at a time.  Statements will still
+be executed sequentially.  If you are using one of these constructs to repeat a
+number of INSERT or UPDATE statements, then use
+[`connection.executeMany()`](#executemany) instead.  Using constructs like
+`promise.all()` to fetch rows from [nested cursor result sets](#nestedcursors)
+can result in inconsistent data.
 
 When you use parallel calls on a single connection, queuing of each call is done
 in the C layer via a mutex.  However libuv is not aware that a connection can
@@ -9694,9 +9705,9 @@ continue getting more rows, then the ResultSet should be freed using
 [`close()`](#close).  The ResultSet should also be explicitly closed
 in the cases where no rows will be fetched from it.
 
-REF CURSORS returned from a PL/SQL block via an
-[`oracledb.CURSOR`](#oracledbconstants) OUT binds are also available
-as a ResultSet. See [REF CURSOR Bind Parameters](#refcursors).
+REF CURSORS returned from PL/SQL blocks via
+[`oracledb.CURSOR`](#oracledbconstants) OUT binds are also available as
+ResultSets.  See [REF CURSOR Bind Parameters](#refcursors).
 
 The format of each row will be an array or object, depending on the
 value of [outFormat](#propdboutformat).
@@ -9894,7 +9905,145 @@ case-insensitive names.
 Prior to node-oracledb 4.0, the constants `oracledb.ARRAY` and `oracledb.OBJECT`
 where used.  These are now deprecated.
 
-#### <a name="querymeta"></a> 15.1.5 Query Column Metadata
+#### <a name="nestedcursors"></a> 15.1.5 Fetching Nested Cursors
+
+Support for queries containing [cursor expressions][176] that return nested
+cursors was added in node-oracledb 5.0.
+
+Each nested cursor in query results is returned as a sub-array of rows in
+[`result.rows`](#execrows).  For example with:
+
+```javascript
+const sql = `SELECT department_name,
+                    CURSOR(SELECT salary, commission_pct
+                           FROM employees e
+                           WHERE e.department_id = d.department_id
+                           ORDER BY salary) as nc
+             FROM departments d
+             ORDER BY department_name`;
+
+const result = await connection.execute(sql);
+console.dir(result.rows, {depth: null});
+```
+
+Output will be:
+
+```
+[
+  [ 'Accounting', [ [ 8300, null ], [ 12008, null ] ] ],
+  [ 'Administration', [ [ 4400, null ] ] ],
+  [ 'Benefits', [] ],
+  [ 'Construction', [] ],
+  [ 'Contracting', [] ],
+  [ 'Control And Credit', [] ],
+  [ 'Corporate Tax', [] ],
+  [
+    'Executive',
+    [ [ 17000, null ], [ 17000, null ], [ 24000, null ] ]
+  ],
+  [
+    'Finance',
+    [
+      [ 6900, null ],
+      [ 7700, null ],
+      [ 7800, null ],
+      [ 8200, null ],
+      [ 9000, null ],
+      [ 12008, null ]
+    ]
+  ],
+  . . .
+```
+
+If [`oracledb.outFormat`](#propdboutformat) is `oracledb.OUT_FORMAT_OBJECT`,
+then each row in the sub-array is an object, for example with:
+
+```javascript
+result = await connection.execute(sql, [], {outFormat: oracledb.OUT_FORMAT_OBJECT});
+```
+
+Output will be:
+
+```
+[
+  {
+    DEPARTMENT_NAME: 'Accounting',
+    NC: [
+      { SALARY: 8300, COMMISSION_PCT: null },
+      { SALARY: 12008, COMMISSION_PCT: null }
+    ]
+  },
+  {
+    DEPARTMENT_NAME: 'Administration',
+    NC: [ { SALARY: 4400, COMMISSION_PCT: null } ]
+  },
+  . . .
+```
+
+The values of [`oracledb.maxRows`](#propdbmaxrows), and
+[`oracledb.fetchArraySize`](#propdbfetcharraysize) used when executing the
+top-level query also apply to each nested cursor that is fetched.  The
+[`oracledb.fetchAsBuffer`](#propdbfetchasbuffer) and
+[`oracledb.fetchAsString`](#propdbfetchasstring) values are also used.
+
+The total number of cursors open is constrained by the [OPEN_CURSORS
+initialization parameter][174] of the database.  With the query above, where
+each row contains a single nested cursor, and when
+[`fetchArraySize`](#propdbfetcharraysize) is 100 (the default), then 101 cursors
+will be open at a time.  One cursor is required for the top level query and one
+cursor is required for each of the 100 rows internally fetched at a time.
+
+If the `connection.execute()` option [`resultSet`](#propexecresultset) is set to
+*true*, or when using [`connection.queryStream()`](#querystream), then each
+nested cursor in a fetched row is returned as a [ResultSet](#resultsetclass)
+object.  You can recursively call [`resultSet.getRow()`](#getrow),
+[`resultSet.getRows()`](#getrows), or
+[`resultSet.toQueryStream()`](#toquerystream) on the ResultSet to fetch each
+nested cursor's data.  You should not concurrently fetch data from nested
+cursors in different data rows because this may give inconsistent results.
+
+For example:
+
+```javascript
+async function traverseResults(resultSet) {
+  const fetchedRows = [];
+  while (true) {
+    const row = await resultSet.getRow();
+    if (!row)
+      break;
+    for (const i in row) {
+      if (row[i] instanceof oracledb.ResultSet) {
+        const rs = row[i];
+        row[i] = await traverseResults(rs); // replace a cursor with its expansion
+        rs.close();
+      }
+    }
+    fetchedRows.push(row);
+  }
+  await resultSet.close();
+  return fetchedRows;
+}
+
+const sql = `SELECT department_name,
+                    CURSOR(SELECT salary, commission_pct
+                           FROM employees e
+                           WHERE e.department_id = d.department_id
+                           ORDER BY salary) as nc
+             FROM departments d
+             ORDER BY department_name`;
+
+const result = await connection.execute(sql);
+
+const rows = await traverseResults(result.resultSet);
+
+console.dir(rows, {depth: null});
+```
+
+Output is the same as the previous non-resultSet example.
+
+Each ResultSet should be closed when it is no longer needed.
+
+#### <a name="querymeta"></a> 15.1.6 Query Column Metadata
 
 The column names of a query are returned in the `execute()` callback's
 [`result.metaData`](#execmetadata) attribute:
@@ -9967,7 +10116,7 @@ Description of the properties is given in the
 
 Also see [`connection.getStatementInfo()`](#getstmtinfo).
 
-#### <a name="typemap"></a> 15.1.6 Query Result Type Mapping
+#### <a name="typemap"></a> 15.1.7 Query Result Type Mapping
 
 Oracle number, date, character, ROWID, UROWID, LONG and LONG RAW column types
 are selected as Numbers, Dates, Strings, or Buffers.  BLOBs and CLOBs are
@@ -9986,12 +10135,12 @@ INTERVAL, BFILE and XMLType types.
 
 Details are in the following sections.
 
-##### <a name="stringhandling"></a> 15.1.6.1 Fetching CHAR, VARCHAR2, NCHAR and NVARCHAR
+##### <a name="stringhandling"></a> 15.1.7.1 Fetching CHAR, VARCHAR2, NCHAR and NVARCHAR
 
 Columns of database type CHAR, VARCHAR2, NCHAR and NVARCHAR are
 returned from queries as JavaScript strings.
 
-##### <a name="numberhandling"></a> 15.1.6.2 Fetching Numbers
+##### <a name="numberhandling"></a> 15.1.7.2 Fetching Numbers
 
 By default all numeric columns are mapped to JavaScript numbers.
 Node.js uses double floating point numbers as its native number type.
@@ -10025,7 +10174,7 @@ string format, and then use one of the available third-party
 JavaScript number libraries that handles large values and more
 precision.
 
-##### <a name="datehandling"></a> 15.1.6.3 Fetching Dates and Timestamps
+##### <a name="datehandling"></a> 15.1.7.3 Fetching Dates and Timestamps
 
 By default, date and timestamp columns are mapped to JavaScript Date
 objects.  Internally, DATE, TIMESTAMP, TIMESTAMP WITH LOCAL TIME ZONE,
@@ -10101,7 +10250,7 @@ For more information on time zones, see Oracle Support's [Timestamps & time
 zones - Frequently Asked Questions, Doc ID 340512.1][165].  Also see [Working
 with Dates Using the Node.js Driver][43].
 
-##### <a name="fetchasstringhandling"></a> 15.1.6.4 Fetching Numbers and Dates as String
+##### <a name="fetchasstringhandling"></a> 15.1.7.4 Fetching Numbers and Dates as String
 
 The global [`fetchAsString`](#propdbfetchasstring) property can be used to force
 all number or date columns (and [CLOB columns](#queryinglobs)) queried by an
@@ -10201,7 +10350,7 @@ $ export NLS_NUMERIC_CHARACTERS='.,'
 Note this environment variable is not used unless the `NLS_LANG`
 environment variable is also set.
 
-##### <a name="fetchlob"></a> 15.1.6.5 Fetching BLOB, CLOB and NCLOB
+##### <a name="fetchlob"></a> 15.1.7.5 Fetching BLOB, CLOB and NCLOB
 
 By default BLOB, CLOB and NCLOB columns are fetched into [Lob](#lobclass)
 instances.  For LOBs less than 1 GB in length it can be more efficient and
@@ -10211,7 +10360,7 @@ convenient to fetch them directly into Buffers or Strings by using the global
 [`fetchInfo`](#propexecfetchinfo) setting.  See the section [Working with CLOB,
 NCLOB and BLOB Data](#lobhandling).
 
-##### <a name="fetchlong"></a> 15.1.6.6 Fetching LONG and LONG RAW
+##### <a name="fetchlong"></a> 15.1.7.6 Fetching LONG and LONG RAW
 
 LONG columns in queries will be fetched as Strings.  LONG RAW columns
 will be fetched as Buffers.
@@ -10224,24 +10373,24 @@ the database.  The SQL function [`TO_LOB`][44] can be used to migrate
 data to LOB columns which can be streamed to node-oracledb, however
 `TO_LOB` cannot be used directly in a `SELECT`.
 
-##### <a name="fetchrowid"></a> 15.1.6.7 Fetching ROWID and UROWID
+##### <a name="fetchrowid"></a> 15.1.7.7 Fetching ROWID and UROWID
 
 Queries will return ROWID and UROWID columns as Strings.
 
-##### <a name="fetchxml"></a> 15.1.6.8 Fetching XMLType
+##### <a name="fetchxml"></a> 15.1.7.8 Fetching XMLType
 
 `XMLType` columns queried will returns as Strings.  They can also be
 handled as CLOBs, see [Working with XMLType](#xmltype).
 
-##### <a name="fetchraw"></a> 15.1.6.9 Fetching RAW
+##### <a name="fetchraw"></a> 15.1.7.9 Fetching RAW
 
 Queries will return RAW columns as Node.js Buffers.
 
-##### <a name="fetchobjects"></a> 15.1.6.10 Fetching Oracle Database Objects and Collections
+##### <a name="fetchobjects"></a> 15.1.7.10 Fetching Oracle Database Objects and Collections
 
 See [Oracle Database Objects and Collections](#objects).
 
-#### <a name="pagingdata"></a> 15.1.7 Limiting Rows and Creating Paged Datasets
+#### <a name="pagingdata"></a> 15.1.8 Limiting Rows and Creating Paged Datasets
 
 Query data is commonly broken into one or more sets:
 
@@ -10338,7 +10487,7 @@ Refer to [On Top-n and Pagination Queries][85] in Oracle Magazine for
 details. Also review the videos [SQL for pagination queries - memory and
 performance][166] and [SQL for pagination queries - advanced options][167].
 
-#### <a name="autoincrement"></a> 15.1.8 Auto-Increment Columns
+#### <a name="autoincrement"></a> 15.1.9 Auto-Increment Columns
 
 From Oracle Database 12c you can create tables with auto-incremented
 values.  This is useful to generate unique primary keys for your data
@@ -15446,4 +15595,6 @@ can be asked at [AskTom][158].
 [171]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8BAD86FC-27C5-4103-8151-AC5BADF274E3
 [172]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C5B0AF7D-ABE8-4F69-9552-F4DAF40281F1
 [173]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-0F711EA4-08A8-463F-B4C6-1CE3A24274C8
+[174]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FAFD1247-06E5-4E64-917F-AEBD4703CF40
 [175]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-0203C8FA-A4BE-44A5-9A25-3D1E578E879F
+[176]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-B28362BE-8831-4687-89CF-9F77DB3698D2

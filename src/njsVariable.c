@@ -184,8 +184,8 @@ static void njsVariable_freeBuffer(njsVariableBuffer *buffer)
 // njsVariable_getArrayValue()
 //   Get the value from the variable as an array.
 //-----------------------------------------------------------------------------
-bool njsVariable_getArrayValue(njsVariable *var, uint32_t pos, njsBaton *baton,
-        napi_env env, napi_value *value)
+bool njsVariable_getArrayValue(njsVariable *var, njsConnection *conn,
+        uint32_t pos, njsBaton *baton, napi_env env, napi_value *value)
 {
     njsVariableBuffer *buffer = var->buffer;
     napi_value element;
@@ -199,7 +199,8 @@ bool njsVariable_getArrayValue(njsVariable *var, uint32_t pos, njsBaton *baton,
 
     // populate array
     for (i = 0; i < buffer->numElements; i++) {
-        if (!njsVariable_getScalarValue(var, buffer, i, baton, env, &element))
+        if (!njsVariable_getScalarValue(var, conn, buffer, i, baton, env,
+                &element))
             return false;
         NJS_CHECK_NAPI(env, napi_set_element(env, *value, i, element))
     }
@@ -243,6 +244,8 @@ static uint32_t njsVariable_getDataType(njsVariable *var)
             return NJS_DATATYPE_BLOB;
         case DPI_ORACLE_TYPE_OBJECT:
             return NJS_DATATYPE_OBJECT;
+        case DPI_ORACLE_TYPE_STMT:
+            return NJS_DATATYPE_CURSOR;
         default:
             break;
     }
@@ -354,11 +357,49 @@ bool njsVariable_getMetadataOne(njsVariable *var, napi_env env, bool extended,
 
 
 //-----------------------------------------------------------------------------
+// njsVariable_getNestedCursorIndices()
+//   Return an array consisting of the indices corresponding to nested cursors.
+// This is needed for the case when rows are being returned instead of a result
+// set and the rows contain nested cursors themselves.
+//-----------------------------------------------------------------------------
+bool njsVariable_getNestedCursorIndices(njsVariable *vars, uint32_t numVars,
+        napi_env env, napi_value *indices)
+{
+    uint32_t i, indicesIx, numNestedCursors;
+    napi_value temp;
+
+    // determine how many nested cursors there are
+    numNestedCursors = 0;
+    for (i = 0; i < numVars; i++) {
+        if (vars[i].varTypeNum == DPI_ORACLE_TYPE_STMT)
+            numNestedCursors++;
+    }
+
+    // create array of the specified length
+    NJS_CHECK_NAPI(env, napi_create_array_with_length(env, numNestedCursors,
+            indices))
+
+    // populate array
+    indicesIx = 0;
+    for (i = 0; i < numVars; i++) {
+        if (vars[i].varTypeNum == DPI_ORACLE_TYPE_STMT) {
+            NJS_CHECK_NAPI(env, napi_create_uint32(env, i, &temp))
+            NJS_CHECK_NAPI(env, napi_set_element(env, *indices, indicesIx++,
+                    temp))
+        }
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsVariable_getScalarValue()
 //   Get the value from the variable at the specified position in the variable.
 //-----------------------------------------------------------------------------
-bool njsVariable_getScalarValue(njsVariable *var, njsVariableBuffer *buffer,
-        uint32_t pos, njsBaton *baton, napi_env env, napi_value *value)
+bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
+        njsVariableBuffer *buffer, uint32_t pos, njsBaton *baton, napi_env env,
+        napi_value *value)
 {
     uint32_t bufferRowIndex, rowidValueLength;
     const char *rowidValue;
@@ -412,13 +453,18 @@ bool njsVariable_getScalarValue(njsVariable *var, njsVariableBuffer *buffer,
         case DPI_NATIVE_TYPE_STMT:
             if (dpiStmt_addRef(data->value.asStmt) < 0)
                 return njsBaton_setErrorDPI(baton);
-            if (!njsResultSet_new(baton, env, data->value.asStmt,
-                    buffer->queryVars, buffer->numQueryVars, false, value)) {
+            if (!njsResultSet_new(baton, env, conn, data->value.asStmt,
+                    buffer->queryVars, buffer->numQueryVars, value)) {
                 dpiStmt_release(data->value.asStmt);
                 return false;
             }
-            buffer->queryVars = NULL;
-            buffer->numQueryVars = 0;
+            // only nested cursors need to have their variables retained; for
+            // regular cursors, the variables must be tranferred to the result
+            // set and deleted there once the result set is closed
+            if (baton->callingInstance == (void*) conn) {
+                buffer->queryVars = NULL;
+                buffer->numQueryVars = 0;
+            }
             break;
         case DPI_NATIVE_TYPE_ROWID:
             if (dpiRowid_getStringValue(data->value.asRowid, &rowidValue,
@@ -542,6 +588,7 @@ bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
             case DPI_ORACLE_TYPE_NATIVE_FLOAT:
             case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
             case DPI_ORACLE_TYPE_ROWID:
+            case DPI_ORACLE_TYPE_STMT:
                 break;
             case DPI_ORACLE_TYPE_OBJECT:
                 vars[i].dpiObjectTypeHandle = queryInfo.typeInfo.objectType;

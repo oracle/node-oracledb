@@ -100,6 +100,7 @@ File Name                                                 | Description
 [`selectjson.js`](selectjson.js)                          | Shows some JSON features of Oracle Database
 [`selectjsonblob.js`](selectjsonblob.js)                  | Shows how to use a BLOB as a JSON column store
 [`selectobject.js`](selectobject.js)                      | Insert and query a named Oracle database object
+[`selectnestedcursor.js`](selectnestedcursor.js)          | Shows selecting from a nested cursor
 [`selectstream.js`](selectstream.js)                      | Executes a basic query using a Readable Stream
 [`selectvarray.js`](selectvarray.js)                      | Shows inserting and selecting from a VARRAY column
 [`sessionfixup.js`](sessionfixup.js)                      | Shows a pooled connection callback to efficiently set session state

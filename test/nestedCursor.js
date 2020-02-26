@@ -35,7 +35,7 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe('57. nestedCursor.js', function() {
+describe.skip('57. nestedCursor.js', function() {
 
   var connection = null;
   var createParentTable =

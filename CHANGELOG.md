@@ -16,6 +16,9 @@ and
   to allow preliminary database connections, such as required when starting a
   database.
 
+- Added support for queries containing cursor expressions that return [nested
+  cursors](https://oracle.github.io/node-oracledb/doc/api.html#nestedcursors).
+
 - Removed support for custom Promise libraries.  Use the native Node.js Promise
   implementation instead.  This change was necessitated by the refactored
   JavaScript implementation.

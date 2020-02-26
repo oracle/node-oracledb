@@ -420,6 +420,22 @@ bool njsUtils_genericThrowError(napi_env env)
 
 
 //-----------------------------------------------------------------------------
+// njsUtils_getBoolArg()
+//   Gets a boolean from the specified parameter. If the value is not a
+// boolean, an error is raised and false is returned.
+//-----------------------------------------------------------------------------
+bool njsUtils_getBoolArg(napi_env env, napi_value *args, int index,
+        bool *result)
+{
+    if (!njsUtils_validateArgType(env, args, napi_boolean, index))
+        return false;
+    NJS_CHECK_NAPI(env, napi_get_value_bool(env, args[index], result))
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsUtils_getError()
 //   This method will create an error object and, if it is an ODPI-C error,
 // also acquire the error number and offset and store those as properties on

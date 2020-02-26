@@ -92,6 +92,10 @@ async function run() {
 
       `DROP TABLE no_tab2 PURGE`,
 
+      `DROP TABLE no_nc_people PURGE`,
+
+      `DROP TABLE no_nc_address PURGE`,
+
       `CALL DBMS_AQADM.STOP_QUEUE('DEMO_RAW_QUEUE')`,
 
       `CALL DBMS_AQADM.DROP_QUEUE('DEMO_RAW_QUEUE')`,

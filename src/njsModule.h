@@ -460,7 +460,8 @@ struct njsBaton {
     // boolean values
     bool externalAuth;
     bool homogeneous;
-    bool getRS;
+    bool closeOnFetch;
+    bool closeOnAllRowsFetched;
     bool autoCommit;
     bool extendedMetaData;
     bool events;
@@ -643,10 +644,11 @@ struct njsResultSet {
     njsConnection *conn;
     uint32_t numQueryVars;
     njsVariable *queryVars;
+    uint32_t fetchArraySize;
     uint32_t outFormat;
-    uint32_t maxRows;
     bool extendedMetaData;
-    bool autoClose;
+    bool isNested;
+    bool varsDefined;
 };
 
 // data for class SodaCollection exposed to JS.
@@ -887,8 +889,8 @@ bool njsPool_newFromBaton(njsBaton *baton, napi_env env, napi_value *poolObj);
 //-----------------------------------------------------------------------------
 // definition of functions for njsResultSet class
 //-----------------------------------------------------------------------------
-bool njsResultSet_new(njsBaton *baton, napi_env env, dpiStmt *handle,
-        njsVariable *vars, uint32_t numVars, bool autoClose,
+bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
+        dpiStmt *handle, njsVariable *vars, uint32_t numVars,
         napi_value *rsObj);
 
 
@@ -964,6 +966,8 @@ bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
         napi_ref constructorRef, napi_value *instanceObj,
         njsBaseInstance **instance);
 bool njsUtils_genericThrowError(napi_env env);
+bool njsUtils_getBoolArg(napi_env env, napi_value *args, int index,
+        bool *result);
 bool njsUtils_getError(napi_env env, dpiErrorInfo *errorInfo,
         const char *buffer, napi_value *error);
 bool njsUtils_getIntArg(napi_env env, napi_value *args, int index,
@@ -1015,14 +1019,17 @@ bool njsUtils_validatePropType(napi_env env, napi_value value,
 bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
         njsBaton *baton);
 void njsVariable_free(njsVariable *var);
-bool njsVariable_getArrayValue(njsVariable *var, uint32_t pos, njsBaton *baton,
-        napi_env env, napi_value *value);
+bool njsVariable_getArrayValue(njsVariable *var, njsConnection *conn,
+        uint32_t pos, njsBaton *baton, napi_env env, napi_value *value);
 bool njsVariable_getMetadataMany(njsVariable *vars, uint32_t numVars,
         napi_env env, bool extended, napi_value *metadata);
 bool njsVariable_getMetadataOne(njsVariable *var, napi_env env, bool extended,
         napi_value *metadata);
-bool njsVariable_getScalarValue(njsVariable *var, njsVariableBuffer *buffer,
-        uint32_t pos, njsBaton *baton, napi_env env, napi_value *value);
+bool njsVariable_getNestedCursorIndices(njsVariable *vars, uint32_t numVars,
+        napi_env env, napi_value *indices);
+bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
+        njsVariableBuffer *buffer, uint32_t pos, njsBaton *baton, napi_env env,
+        napi_value *value);
 bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
         dpiStmt *handle, njsBaton *baton);
 bool njsVariable_initForQueryJS(njsVariable *vars, uint32_t numVars,

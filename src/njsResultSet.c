@@ -40,7 +40,9 @@ static NJS_ASYNC_POST_METHOD(njsResultSet_getRowsPostAsync);
 static NJS_PROCESS_ARGS_METHOD(njsResultSet_getRowsProcessArgs);
 
 // getters
+static NJS_NAPI_GETTER(njsResultSet_getFetchArraySize);
 static NJS_NAPI_GETTER(njsResultSet_getMetaData);
+static NJS_NAPI_GETTER(njsResultSet_getNestedCursorIndices);
 
 // finalize
 static NJS_NAPI_FINALIZE(njsResultSet_finalize);
@@ -51,6 +53,10 @@ static const napi_property_descriptor njsClassProperties[] = {
             napi_default, NULL },
     { "_getRows", NULL, njsResultSet_getRows, NULL, NULL, NULL,
             napi_default, NULL },
+    { "_fetchArraySize", NULL, NULL, njsResultSet_getFetchArraySize, NULL,
+            NULL, napi_default, NULL },
+    { "_nestedCursorIndices", NULL, NULL, njsResultSet_getNestedCursorIndices,
+            NULL, NULL, napi_default, NULL },
     { "metaData", NULL, NULL, njsResultSet_getMetaData, NULL, NULL,
             napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
@@ -105,10 +111,13 @@ static bool njsResultSet_closeAsync(njsBaton *baton)
         return false;
     }
 
-    baton->queryVars = rs->queryVars;
-    baton->numQueryVars = rs->numQueryVars;
-    rs->queryVars = NULL;
-    rs->numQueryVars = 0;
+    if (!rs->isNested) {
+        baton->queryVars = rs->queryVars;
+        baton->numQueryVars = rs->numQueryVars;
+        rs->queryVars = NULL;
+        rs->numQueryVars = 0;
+    }
+
     return true;
 }
 
@@ -164,6 +173,21 @@ static void njsResultSet_finalize(napi_env env, void *finalizeData,
 
 
 //-----------------------------------------------------------------------------
+// njsResultSet_getFetchArraySize()
+//   Get accessor of "_fetchArraySize" property.
+//-----------------------------------------------------------------------------
+static napi_value njsResultSet_getFetchArraySize(napi_env env,
+        napi_callback_info info)
+{
+    njsResultSet *rs;
+
+    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &rs))
+        return NULL;
+    return njsUtils_convertToUnsignedInt(env, rs->fetchArraySize);
+}
+
+
+//-----------------------------------------------------------------------------
 // njsResultSet_getMetaData()
 //   Get accessor of "metaData" property.
 //-----------------------------------------------------------------------------
@@ -185,18 +209,41 @@ static napi_value njsResultSet_getMetaData(napi_env env,
 
 
 //-----------------------------------------------------------------------------
+// njsResultSet_getNestedCursorIndices()
+//   Get accessor of "_nestedCursorIndices" property.
+//-----------------------------------------------------------------------------
+static napi_value njsResultSet_getNestedCursorIndices(napi_env env,
+        napi_callback_info info)
+{
+    napi_value indices;
+    njsResultSet *rs;
+
+    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &rs))
+        return NULL;
+    if (!rs->handle || !rs->conn->handle)
+        return NULL;
+    if (!njsVariable_getNestedCursorIndices(rs->queryVars, rs->numQueryVars,
+            env, &indices))
+        return NULL;
+    return indices;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsResultSet_getRows()
 //   Get a number of rows from the result set.
 //
 // PARAMETERS
 //   - max number of rows to fetch at this time
+//   - should the result set be closed after the fetch has completed?
+//   - should the result set be closed after all rows have been fetched?
 //-----------------------------------------------------------------------------
 static napi_value njsResultSet_getRows(napi_env env, napi_callback_info info)
 {
-    napi_value args[1];
+    napi_value args[3];
     njsBaton *baton;
 
-    if (!njsResultSet_createBaton(env, info, 1, args, &baton))
+    if (!njsResultSet_createBaton(env, info, 3, args, &baton))
         return NULL;
     if (!njsResultSet_getRowsProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -216,11 +263,18 @@ static bool njsResultSet_getRowsAsync(njsBaton *baton)
     njsResultSet *rs = (njsResultSet*) baton->callingInstance;
     bool moreRows = false, ok;
 
-    // result sets that should be auto closed are closed if the result set
-    // is exhaused or the maximum number of rows has been fetched or an error
-    // has taken place
+    // after rows have been fetched, the JavaScript layer may have requested
+    // that the result set be closed automatically; this occurs if all of the
+    // rows are being fetched by the JavaScript library and one of the
+    // following three situations occurs:
+    //   (1) no further rows are available,
+    //   (2) an error has taken place or
+    //   (3) when a maximum number of rows has been specified and this fetch
+    //       will either satisfy that request or not enough rows are available
+    //       to satisfy that request
     ok = njsResultSet_getRowsHelper(rs, baton, &moreRows);
-    if ((!ok || !moreRows) && rs->autoClose) {
+    if (baton->closeOnFetch ||
+            ((!ok || !moreRows) && baton->closeOnAllRowsFetched)) {
         dpiStmt_release(rs->handle);
         rs->handle = NULL;
     }
@@ -272,8 +326,8 @@ static bool njsResultSet_getRowsPostAsync(njsBaton *baton, napi_env env,
         // process each column
         for (col = 0; col < rs->numQueryVars; col++) {
             var = &rs->queryVars[col];
-            if (!njsVariable_getScalarValue(var, var->buffer, row, baton,
-                    env, &colObj))
+            if (!njsVariable_getScalarValue(var, rs->conn, var->buffer, row,
+                    baton, env, &colObj))
                 return false;
             if (rs->outFormat == NJS_ROWS_ARRAY) {
                 NJS_CHECK_NAPI(env, napi_set_element(env, rowObj, col, colObj))
@@ -287,7 +341,7 @@ static bool njsResultSet_getRowsPostAsync(njsBaton *baton, napi_env env,
     }
 
     // clear variables if result set was closed
-    if (!rs->handle) {
+    if (!rs->handle && !rs->isNested) {
         for (i = 0; i < rs->numQueryVars; i++)
             njsVariable_free(&rs->queryVars[i]);
         free(rs->queryVars);
@@ -307,53 +361,54 @@ static bool njsResultSet_getRowsPostAsync(njsBaton *baton, napi_env env,
 static bool njsResultSet_getRowsHelper(njsResultSet *rs, njsBaton *baton,
         bool *moreRows)
 {
-    uint32_t i, numRowsToFetch;
     njsVariable *var;
     int tempMoreRows;
+    uint32_t i;
 
-    // determine how many rows to fetch; use fetchArraySize unless it is less
-    // than maxRows (no need to waste memory!)
-    numRowsToFetch = baton->fetchArraySize;
-    if (rs->maxRows > 0 && rs->maxRows < numRowsToFetch)
-        numRowsToFetch = rs->maxRows;
-
-    // create ODPI-C variables and define them, if necessary
+    // create ODPI-C variables, if necessary
     for (i = 0; i < rs->numQueryVars; i++) {
         var = &rs->queryVars[i];
-        if (var->dpiVarHandle && var->maxArraySize >= numRowsToFetch)
+        if (var->dpiVarHandle && var->maxArraySize >= baton->fetchArraySize)
             continue;
+        rs->varsDefined = false;
         if (var->dpiVarHandle) {
             if (dpiVar_release(var->dpiVarHandle) < 0)
                 return njsBaton_setErrorDPI(baton);
             var->dpiVarHandle = NULL;
         }
         if (dpiConn_newVar(rs->conn->handle, var->varTypeNum,
-                var->nativeTypeNum, numRowsToFetch, var->maxSize, 1, 0,
+                var->nativeTypeNum, baton->fetchArraySize, var->maxSize, 1, 0,
                 var->dpiObjectTypeHandle, &var->dpiVarHandle,
                 &var->buffer->dpiVarData) < 0)
             return njsBaton_setErrorDPI(baton);
-        var->maxArraySize = numRowsToFetch;
-        if (dpiStmt_define(rs->handle, i + 1, var->dpiVarHandle) < 0)
-            return njsBaton_setErrorDPI(baton);
+        var->maxArraySize = baton->fetchArraySize;
+    }
+
+    // perform define, if necessary
+    if (!rs->varsDefined) {
+        for (i = 0; i < rs->numQueryVars; i++) {
+            var = &rs->queryVars[i];
+            if (dpiStmt_define(rs->handle, i + 1, var->dpiVarHandle) < 0)
+                return njsBaton_setErrorDPI(baton);
+        }
+        rs->varsDefined = true;
     }
 
     // set fetch array size as requested
-    if (dpiStmt_setFetchArraySize(rs->handle, numRowsToFetch) < 0)
+    if (dpiStmt_setFetchArraySize(rs->handle, baton->fetchArraySize) < 0)
         return njsBaton_setErrorDPI(baton);
 
     // perform fetch
-    if (dpiStmt_fetchRows(rs->handle, numRowsToFetch, &baton->bufferRowIndex,
-            &baton->rowsFetched, &tempMoreRows) < 0)
+    if (dpiStmt_fetchRows(rs->handle, baton->fetchArraySize,
+            &baton->bufferRowIndex, &baton->rowsFetched, &tempMoreRows) < 0)
         return njsBaton_setErrorDPI(baton);
     *moreRows = (bool) tempMoreRows;
 
     // result sets that should be auto closed are closed if the result set
     // is exhaused or the maximum number of rows has been fetched
-    if (*moreRows && rs->maxRows > 0) {
-        if (baton->rowsFetched == rs->maxRows) {
+    if (*moreRows && baton->maxRows > 0) {
+        if (baton->rowsFetched == baton->maxRows) {
             *moreRows = 0;
-        } else {
-            rs->maxRows -= baton->rowsFetched;
         }
     }
     return njsVariable_process(rs->queryVars, rs->numQueryVars,
@@ -369,10 +424,30 @@ static bool njsResultSet_getRowsHelper(njsResultSet *rs, njsBaton *baton,
 static bool njsResultSet_getRowsProcessArgs(njsBaton *baton, napi_env env,
         napi_value *args)
 {
+    njsResultSet *rs = (njsResultSet*) baton->callingInstance;
+
+    // copy arrays for fetch as buffer and fetch as RAW types
+    if (!njsUtils_copyArray(env, baton->oracleDb->fetchAsBufferTypes,
+            baton->oracleDb->numFetchAsBufferTypes, sizeof(uint32_t),
+            (void**) &baton->fetchAsBufferTypes,
+            &baton->numFetchAsBufferTypes))
+        return false;
+    if (!njsUtils_copyArray(env, baton->oracleDb->fetchAsStringTypes,
+            baton->oracleDb->numFetchAsStringTypes, sizeof(uint32_t),
+            (void**) &baton->fetchAsStringTypes,
+            &baton->numFetchAsStringTypes))
+        return false;
+
     if (!njsUtils_getUnsignedIntArg(env, args, 0, &baton->fetchArraySize))
         return false;
     if (baton->fetchArraySize == 0)
         return njsUtils_throwError(env, errInvalidParameterValue, 1);
+    if (!njsUtils_getBoolArg(env, args, 1, &baton->closeOnFetch))
+        return false;
+    if (!njsUtils_getBoolArg(env, args, 2, &baton->closeOnAllRowsFetched))
+        return false;
+    baton->extendedMetaData = rs->extendedMetaData;
+    baton->outFormat = rs->outFormat;
 
     return true;
 }
@@ -384,10 +459,11 @@ static bool njsResultSet_getRowsProcessArgs(njsBaton *baton, napi_env env,
 // been built previously. It as assumed that the calling instance is a
 // connection.
 //-----------------------------------------------------------------------------
-bool njsResultSet_new(njsBaton *baton, napi_env env, dpiStmt *handle,
-        njsVariable *vars, uint32_t numVars, bool autoClose, napi_value *rsObj)
+bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
+        dpiStmt *handle, njsVariable *vars, uint32_t numVars,
+        napi_value *rsObj)
 {
-    napi_value connObj;
+    napi_value callingObj;
     njsResultSet *rs;
 
     // create new instance
@@ -396,24 +472,24 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, dpiStmt *handle,
             (njsBaseInstance**) &rs))
         return false;
 
-    // store a reference to the connection to ensure that it is not garbage
-    // collected during the lifetime of the result set
+    // store a reference to the parent object (a connection or a parent result
+    // set) to ensure that it is not garbage collected during the lifetime of
+    // the result set
     NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
-            &connObj))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, *rsObj, "_connection",
-            connObj))
+            &callingObj))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *rsObj, "_parentObj",
+            callingObj))
 
     // perform some initializations
     rs->handle = handle;
-    rs->conn = (njsConnection*) baton->callingInstance;
+    rs->conn = conn;
     rs->numQueryVars = numVars;
     rs->queryVars = vars;
     rs->outFormat = baton->outFormat;
     rs->extendedMetaData = baton->extendedMetaData;
-    if (autoClose) {
-        rs->maxRows = baton->maxRows;
-        rs->autoClose = true;
-    }
+    rs->fetchArraySize = baton->fetchArraySize;
+    rs->outFormat = baton->outFormat;
+    rs->isNested = (baton->callingInstance != (void*) conn);
 
     return true;
 }
