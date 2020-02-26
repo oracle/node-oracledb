@@ -2811,7 +2811,7 @@ static bool njsConnection_startupAsync(njsBaton *baton)
     njsConnection *conn = (njsConnection*) baton->callingInstance;
 
     if (dpiConn_startupDatabaseWithPfile(conn->handle, baton->pfile,
-            baton->pfileLength, baton->startupMode))
+            (uint32_t) baton->pfileLength, baton->startupMode))
         return njsBaton_setErrorDPI(baton);
 
     return true;
