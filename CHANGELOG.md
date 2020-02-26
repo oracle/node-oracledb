@@ -11,6 +11,11 @@
 and
 [`connection.shutdown()`](https://oracle.github.io/node-oracledb/doc/api.html#conshutdown).
 
+- Added a new constant
+  [`oracledb.SYSPRELIM`](https://oracle.github.io/node-oracledb/doc/api.html#oracledbconstantsprivilege)
+  to allow preliminary database connections, such as required when starting a
+  database.
+
 - Removed support for custom Promise libraries.  Use the native Node.js Promise
   implementation instead.  This change was necessitated by the refactored
   JavaScript implementation.

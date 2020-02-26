@@ -934,7 +934,7 @@ Constant Name                        | Value |Description
 `oracledb.SYSDG`                     |  262144 | SYSDG privileges
 `oracledb.SYSKM`                     |  524288 | SYSKM privileges
 `oracledb.SYSOPER`                   |       4 | SYSOPER privileges
-`oracledb.SYSPRELIM`                 |       8 | Preliminary privilege required when starting up a database with [`connection.startup()`](#constartup).
+`oracledb.SYSPRELIM`                 |       8 | Preliminary privilege required when starting up a database with [`connection.startup()`](#constartup).  Added in node-oracledb 5.0.
 `oracledb.SYSRAC`                    | 1048576 | SYSRAC privileges
 
 #### <a name="oracledbconstantsstmttype"></a> 3.1.6 SQL Statement Type Constants
