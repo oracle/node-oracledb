@@ -49,6 +49,11 @@ and
 - Removed use of git in `package/buildpackage.js` making offline builds cleaner
   for self-hosted node-oracledb.
 
+- Made an internal change to use an Oracle Client 20 feature to avoid a
+  round-trip when accessing
+  [`oracledb.version`](https://oracle.github.io/node-oracledb/doc/api.html#propdbversion)
+  for the first time.
+
 ## node-oracledb v4.2.0 (24 Jan 2020)
 
 - Added support for binding using the node-oracledb [Database Type
