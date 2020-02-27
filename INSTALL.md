@@ -61,6 +61,10 @@ add-on can also build on some 32-bit Linux, 32-bit Windows, Solaris and AIX
 environments, but these architectures have not been fully tested.  Older
 versions of node-oracledb may work with older versions of Node.js.
 
+Node-oracledb requires Oracle Client libraries version 11.2 or later, and
+connect to Oracle Database 9.2 or later, depending on the Oracle Client library
+version.  The architecture is shown in [Node-oracledb Architecture][60].
+
 Node-oracledb is an [add-on](https://nodejs.org/api/addons.html)
 available as C source code.  Pre-built binaries are available
 as a convenience for common architectures.  Note the operating systems
@@ -235,7 +239,7 @@ Set `PATH` to include Node.js:
 export PATH=/opt/node-v12.14.1-linux-x64/bin:$PATH
 ```
 
-#### 3.2.3 Install the add-on
+#### 3.2.3 Install node-oracledb
 
 If you are behind a firewall you may need to set your proxy, for
 example:
@@ -243,8 +247,6 @@ example:
 ```
 npm config set proxy http://myproxy.example.com:80/
 ```
-
-##### To install a pre-built binary:
 
 Install node-oracledb using the `npm` package manager, which is
 included in Node.js:
@@ -255,52 +257,47 @@ npm install oracledb
 
 The pre-built binaries were built on Oracle Linux 6.
 
-If a pre-built binary is successfully installed but isn't usable
-because it depends on a different glibc version, uninstall
-node-oracledb and install again from source code.
-
-##### To install from source code:
-
-If a pre-built node-oracledb binary is not installable, the binary can
-be built from source code, see [Node-oracledb Installation from
-Source Code](#github).
+If a pre-built node-oracledb binary is not installable or depends on an newer
+glibc version, uninstall node-oracledb and build the binary from source code,
+see [Node-oracledb Installation from Source Code](#github).
 
 #### 3.2.4 Install the free Oracle Instant Client 'Basic' RPM
 
-Download the free **Basic** RPM from yum.oracle.com.  There are
-channels for [Oracle Linux 6][50] and [Oracle Linux 7][51].  The
-package contents are identical in both channels.  Alternatively,
-multiple versions of Instant Client RPMs are available from [Oracle
-Technology Network][12].
+Download the latest version of the free **Basic** RPM from yum.oracle.com.
+There are channels for [Oracle Linux 6][50] and [Oracle Linux 7][51].  The
+package contents are identical in both channels.  The RPMs are also available
+from [Oracle Technology Network][12].
 
-[Install Instant Client Basic][13] with sudo or as the root user,
-either directly from yum.oracle.com:
+[Install Instant Client Basic][13] with sudo or as the root user.  You can
+install directly from yum.oracle.com, for example using:
 
 ```
 sudo yum -y install oracle-release-el7
+sudo yum-config-manager --enable ol7_oracle_instantclient
 sudo yum -y install oracle-instantclient19.5-basic
 ```
 
-Or from a downloaded file:
+Alternatively you can manually download the RPM and install from your local file
+system:
 
 ```
 sudo yum install oracle-instantclient19.5-basic-19.5.0.0.0-1.x86_64.rpm
 ```
 
-This will install the required `libaio` package, if it is not already
-present.
+The link [instantclient-basic-linuxx64.zip][61] will download the latest version
+available from [OTN][12].
 
-If you have a [ULN][14] subscription, you can alternatively use `yum`
-to install the Basic package after enabling the
-ol7_x86_64_instantclient or ol6_x86_64_instantclient channel,
-depending on your version of Linux.
+If you have a [ULN][14] subscription, another alternative is to use `yum` to
+install the Basic package after enabling the ol7_x86_64_instantclient or
+ol6_x86_64_instantclient channel, depending on your version of Linux.
 
-For Instant Client 19, the system library search path is automatically
-configured during installation.
+Using any of these methods will install the required `libaio` package, if it is
+not already present.
 
-For older versions, if there is no other Oracle software on the
-machine that will be impacted, then permanently add Instant Client to
-the run-time link path.  For example, with sudo or as the root user:
+For Instant Client 19 RPMs, the system library search path is automatically
+configured during installation.  For older versions, if there is no other Oracle
+software on the machine that will be impacted, then permanently add Instant
+Client to the run-time link path.  For example, with sudo or as the root user:
 
 ```
 sudo sh -c "echo /usr/lib/oracle/18.3/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf"
@@ -390,7 +387,7 @@ Set `PATH` to include Node.js:
 export PATH=/opt/node-v12.14.1-linux-x64/bin:$PATH
 ```
 
-#### 3.3.3 Install the add-on
+#### 3.3.3 Install node-oracledb
 
 If you are behind a firewall you may need to set your proxy, for
 example:
@@ -398,8 +395,6 @@ example:
 ```
 npm config set proxy http://myproxy.example.com:80/
 ```
-
-##### To install a pre-built binary:
 
 Install node-oracledb using the `npm` package manager, which is
 included in Node.js:
@@ -410,15 +405,9 @@ npm install oracledb
 
 The pre-built binaries were built on Oracle Linux 6.
 
-If a pre-built binary is successfully installed but isn't usable
-because it depends on a different glibc version, uninstall
-node-oracledb and install again from source code.
-
-##### To install from source code:
-
-If a pre-built node-oracledb binary is not installable, the binary can
-be built from source code, see [Node-oracledb Installation from
-Source Code](#github).
+If a pre-built node-oracledb binary is not installable or depends on an newer
+glibc version, uninstall node-oracledb and build the binary from source code,
+see [Node-oracledb Installation from Source Code](#github).
 
 #### 3.3.4 Install the free Oracle Instant Client 'Basic' ZIP file
 
@@ -427,20 +416,24 @@ and [unzip it][13] into a directory accessible to your application,
 for example:
 
 ```
-unzip instantclient-basic-linux.x64-19.5.0.0.0dbru.zip
 mkdir -p /opt/oracle
-mv instantclient_19_5 /opt/oracle
+cd /opt/oracle
+wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basic-linuxx64.zip
+unzip instantclient-basic-linuxx64.zip
 ```
 
-You will need the operating system `libaio` package installed.  On
-some platforms the package is called `libaio1`.
+You will need the operating system `libaio` package installed.  On some
+platforms the package is called `libaio1`.  Run a command like `yum install -y
+libaio` or `apt-get install -y libaio1`, depending on your Linux distribution
+package manager.
 
-If there is no other Oracle software on the machine
-that will be impacted, then permanently add Instant Client to the
-run-time link path.  For example, with sudo or as the root user:
+If there is no other Oracle software on the machine that will be impacted, then
+permanently add Instant Client to the run-time link path.  For example, if the
+Basic package unzipped to `/opt/oracle/instantclient_19_6`, then run the
+following using sudo or as the root user:
 
 ```
-sudo sh -c "echo /opt/oracle/instantclient_19_5 > /etc/ld.so.conf.d/oracle-instantclient.conf"
+sudo sh -c "echo /opt/oracle/instantclient_19_6 > /etc/ld.so.conf.d/oracle-instantclient.conf"
 sudo ldconfig
 ```
 
@@ -448,7 +441,7 @@ Alternatively, every shell running Node.js will need to have the link
 path set:
 
 ```
-export LD_LIBRARY_PATH=/opt/oracle/instantclient_19_5:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_19_6:$LD_LIBRARY_PATH
 ```
 
 #### 3.3.5 Optionally create the default Oracle Client configuration directory
@@ -525,7 +518,7 @@ Set `PATH` to include Node.js:
 export PATH=/opt/node-v12.14.1-linux-x64/bin:$PATH
 ```
 
-#### 3.4.3 Install the add-on
+#### 3.4.3 Install node-oracledb
 
 If you are behind a firewall you may need to set your proxy, for
 example:
@@ -533,8 +526,6 @@ example:
 ```
 npm config set proxy http://myproxy.example.com:80/
 ```
-
-##### To install a pre-built binary:
 
 Install node-oracledb using the `npm` package manager, which is
 included in Node.js:
@@ -546,8 +537,6 @@ npm install oracledb
 If a pre-built binary is successfully installed but isn't usable
 because it depends on a different glibc version, uninstall
 node-oracledb and install again from source code.
-
-##### To install from source code:
 
 If a pre-built node-oracledb binary is not installable, the binary can
 be built from source code, see [Node-oracledb Installation from
@@ -621,7 +610,7 @@ Apple Mac OS X][21].
 
 Download the [Node.js package][11] for macOS 64-bit and install it.
 
-#### 3.5.3 Install the add-on
+#### 3.5.3 Install node-oracledb
 
 If you are behind a firewall you may need to set your proxy, for
 example:
@@ -630,16 +619,12 @@ example:
 npm config set proxy http://myproxy.example.com:80/
 ```
 
-##### To install a pre-built binary:
-
 Install node-oracledb using the `npm` package manager, which is
 included in Node.js:
 
 ```
 npm install oracledb
 ```
-
-##### To install from source code:
 
 If a pre-built node-oracledb binary is not installable, the binary can
 be built from source code, see [Node-oracledb Installation from
@@ -741,7 +726,7 @@ Install the 64-bit Node.js MSI (e.g. node-v10.16.0-x86.msi) from
 [nodejs.org][11].  Make sure the option to add the Node and npm
 directories to the path is selected.
 
-#### 3.6.3 Install the add-on
+#### 3.6.3 Install node-oracledb
 
 Open a terminal window.
 
@@ -752,16 +737,12 @@ example:
 npm config set proxy http://myproxy.example.com:80/
 ```
 
-##### To install a pre-built binary:
-
 Install node-oracledb using the `npm` package manager, which is
 included in Node.js:
 
 ```
 npm install oracledb
 ```
-
-##### To install from source code:
 
 If a pre-built node-oracledb binary is not installable, the binary can
 be built from source code, see [Node-oracledb Installation from
@@ -891,7 +872,7 @@ Install the 64-bit Node.js MSI (e.g. node-v10.16.0-x64.msi) from
 [nodejs.org][11].  Make sure the option to add the Node and npm
 directories to the path is selected.
 
-#### 3.7.3 Install the add-on
+#### 3.7.3 Install node-oracledb
 
 Open a terminal window.
 
@@ -902,16 +883,12 @@ example:
 npm config set proxy http://myproxy.example.com:80/
 ```
 
-##### To install a pre-built binary:
-
 Install node-oracledb using the `npm` package manager, which is
 included in Node.js:
 
 ```
 npm install oracledb
 ```
-
-##### To install from source code:
 
 If a pre-built node-oracledb binary is not installable, the binary can
 be built from source code, see [Node-oracledb Installation from
@@ -979,7 +956,7 @@ Set `PATH` to include Node.js:
 export PATH=/opt/node-v10.16.0-aix-ppc64/bin:$PATH
 ```
 
-#### 3.9.3 Install the add-on
+#### 3.9.3 Install node-oracledb
 
 If you are behind a firewall you may need to set your proxy, for
 example:
@@ -1098,7 +1075,7 @@ Set `PATH` to include the Node.js and Node-gyp binaries
 export PATH=/opt/node/bin:/opt/node/lib/node_modules/npm/bin/node-gyp-bin:$PATH
 ```
 
-#### 3.9.3 Install the add-on
+#### 3.9.3 Install node-oracledb
 
 If you are behind a firewall you may need to set your proxy, for
 example:
@@ -1910,5 +1887,7 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [55]: https://github.com/oracle/node-oracledb/blob/v3.1.2/INSTALL.md
 [56]: https://hub.docker.com/_/node/
 [57]: https://oracle.github.io/node-oracledb/doc/api.html#connectionadb
-[58]: https://oracle.github.io/node-oracledb/doc/api.html##tnsadmin
+[58]: https://oracle.github.io/node-oracledb/doc/api.html#tnsadmin
 [59]: https://www.docker.com/
+[60]: https://oracle.github.io/node-oracledb/doc/api.html#architecture
+[61]: https://download.oracle.com/otn_software/linux/instantclient/instantclient-basic-linuxx64.zip
