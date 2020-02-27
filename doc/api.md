@@ -10020,7 +10020,6 @@ async function traverseResults(resultSet) {
     }
     fetchedRows.push(row);
   }
-  await resultSet.close();
   return fetchedRows;
 }
 
@@ -10032,9 +10031,10 @@ const sql = `SELECT department_name,
              FROM departments d
              ORDER BY department_name`;
 
-const result = await connection.execute(sql);
+const result = await connection.execute(sql, [], { resultSet: true });
 
 const rows = await traverseResults(result.resultSet);
+await result.resultSet.close();
 
 console.dir(rows, {depth: null});
 ```

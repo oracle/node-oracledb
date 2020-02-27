@@ -856,6 +856,10 @@ static bool njsVariable_processBuffer(njsVariable *var,
             }
             break;
         case DPI_ORACLE_TYPE_STMT:
+            // if no rows have been fetched or query variables have already
+            // been set up for a nested cursor, no need to do anything further
+            if (buffer->numElements == 0 || buffer->queryVars)
+                break;
             stmt = buffer->dpiVarData->value.asStmt;
             if (dpiStmt_getNumQueryColumns(stmt, &buffer->numQueryVars) < 0)
                 return njsBaton_setErrorDPI(baton);
