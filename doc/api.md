@@ -3555,9 +3555,12 @@ readonly Array metaData
 For `SELECT` statements, this contains an array of objects describing
 details of columns for the select list.  For non queries, this property is undefined.
 
-Each column's `name` is always given.  If the
-[`oracledb.extendedMetaData`](#propdbextendedmetadata) or `execute()` option
-[`extendedMetaData`](#propexecextendedmetadata) are *true* then
+Each column's `name` is always given.  If the column is a [nested
+cursor](#nestedcursors), then the column's object will also contain a `metaData`
+attribute which is an array describing each column in the nested query.
+
+If the [`oracledb.extendedMetaData`](#propdbextendedmetadata) or `execute()`
+option [`extendedMetaData`](#propexecextendedmetadata) are *true* then
 additional information is included.
 
 - `byteSize`: the database byte size.  This is only set for `oracledb.DB_TYPE_VARCHAR`, `oracledb.DB_TYPE_CHAR` and `oracledb.DB_TYPE_RAW` column types.
@@ -10011,7 +10014,7 @@ async function traverseResults(resultSet) {
     const row = await resultSet.getRow();
     if (!row)
       break;
-    for (const i in row) {
+    for (let i = 0; i < row.length; i++) {
       if (row[i] instanceof oracledb.ResultSet) {
         const rs = row[i];
         row[i] = await traverseResults(rs); // replace a cursor with its expansion
@@ -10056,7 +10059,7 @@ const result = await connection.execute(
   [110]  // bind value for :id
 );
 
-console.log(result.metaData);  // show the metadata
+console.dir(result.metaData, { depth: null });  // show the metadata
 ```
 
 When using a [ResultSet](#resultsetclass), metadata is also available
@@ -10092,7 +10095,7 @@ const result = await connection.execute(
   { extendedMetaData: true }
 );
 
-console.log(result.metaData);  // show the extended metadata
+console.dir(result.metaData, { depth: null });  // show the extended metadata
 ```
 
 The output is:

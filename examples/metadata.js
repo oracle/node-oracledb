@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -44,7 +44,7 @@ async function run() {
     let result = await connection.execute(
       `SELECT id, farmer, picked
        FROM no_banana_farmer`);
-    console.log(result.metaData);
+    console.dir(result.metaData, { depth: null });
 
     console.log('Extended query metadata');
     result = await connection.execute(
@@ -52,7 +52,7 @@ async function run() {
        FROM no_banana_farmer`,
       {},                           // no binds
       { extendedMetaData: true });  // enable the extra metadata
-    console.log(result.metaData);
+    console.dir(result.metaData, { depth: null });
 
   } catch (err) {
     console.error(err);

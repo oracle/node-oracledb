@@ -129,6 +129,8 @@ async function run() {
 
     result = await connection.execute(sql, binds, options);
 
+    console.log("Metadata: ");
+    console.dir(result.metaData, { depth: null });
     console.log("Query results: ");
     console.dir(result.rows, {depth: null});
 

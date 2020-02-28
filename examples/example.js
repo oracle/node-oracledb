@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -106,9 +106,10 @@ async function run() {
 
     result = await connection.execute(sql, binds, options);
 
-    console.log("Column metadata: ", result.metaData);
+    console.log("Metadata: ");
+    console.dir(result.metaData, { depth: null });
     console.log("Query results: ");
-    console.log(result.rows);
+    console.dir(result.rows, { depth: null });
 
     //
     // Show the date.  The value of ORA_SDTZ affects the output
