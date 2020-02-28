@@ -29,13 +29,13 @@
     "url": "git://github.com/oracle/node-oracledb.git"
   },
   "devDependencies": {
-    "mocha": "6.1.4",
+    "mocha": "7.0.1",
     "should": "13.2.3",
-    "async": "3.1.0",
+    "async": "3.2.0",
     "eslint": "6.8.0"
   },
   "scripts": {
-    "test": "mocha --opts test/opts/mocha.opts",
+    "test": "mocha --config test/opts/.mocharc.yaml",
     "posttest": "node test/opts/version.js",
     "buildbinary": "node package/buildbinary.js",
     "buildpackage": "node package/buildpackage.js"
