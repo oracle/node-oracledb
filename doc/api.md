@@ -10015,7 +10015,7 @@ async function traverseResults(resultSet) {
       if (row[i] instanceof oracledb.ResultSet) {
         const rs = row[i];
         row[i] = await traverseResults(rs); // replace a cursor with its expansion
-        rs.close();
+        await rs.close();
       }
     }
     fetchedRows.push(row);
