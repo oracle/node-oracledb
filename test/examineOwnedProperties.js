@@ -117,6 +117,8 @@ describe('220. examineOwnedProperties.js', () => {
 
       await conn.executeMany(sql, data, options);
 
+      delete Object.prototype.noop;
+
     } catch (err) {
       should.not.exist(err);
     }
