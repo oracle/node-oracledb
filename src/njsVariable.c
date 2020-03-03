@@ -238,8 +238,9 @@ static uint32_t njsVariable_getDataType(njsVariable *var)
         case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
             return NJS_DATATYPE_DATE;
         case DPI_ORACLE_TYPE_CLOB:
-        case DPI_ORACLE_TYPE_NCLOB:
             return NJS_DATATYPE_CLOB;
+        case DPI_ORACLE_TYPE_NCLOB:
+            return NJS_DATATYPE_NCLOB;
         case DPI_ORACLE_TYPE_BLOB:
             return NJS_DATATYPE_BLOB;
         case DPI_ORACLE_TYPE_OBJECT:
@@ -841,8 +842,7 @@ static bool njsVariable_processBuffer(njsVariable *var,
                 return njsBaton_setError(baton, errInsufficientMemory);
             for (i = 0; i < buffer->numElements; i++) {
                 lob = &buffer->lobs[i];
-                lob->dataType = (var->varTypeNum == DPI_ORACLE_TYPE_BLOB) ?
-                        NJS_DATATYPE_BLOB : NJS_DATATYPE_CLOB;
+                lob->dataType = var->varTypeNum;
                 lob->isAutoClose = true;
                 elementIndex = baton->bufferRowIndex + i;
                 data = &buffer->dpiVarData[elementIndex];

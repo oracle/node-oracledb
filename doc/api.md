@@ -5152,12 +5152,12 @@ The maximum value for `pieceSize` is limited to the value of UINT_MAX.
 readonly Number type
 ```
 
-This read-only attribute shows the type of Lob being used.  It will
-have the value of one of the constants
-[`oracledb.BLOB`](#oracledbconstantsnodbtype) or
-[`oracledb.CLOB`](#oracledbconstantsnodbtype).  The value is derived from the
-bind type when using LOB bind variables, or from the column type when
-a LOB is returned by a query.
+This read-only attribute shows the type of Lob being used.  It will have the
+value of one of the constants [`oracledb.BLOB`](#oracledbconstantsnodbtype),
+[`oracledb.CLOB`](#oracledbconstantsnodbtype) or
+[`oracledb.NCLOB`](#oracledbconstantsnodbtype).  The value is derived from the
+bind type when using LOB bind variables, or from the column type when a LOB is
+returned by a query.
 
 ### <a name="lobmethods"></a> 7.2 Lob Methods
 

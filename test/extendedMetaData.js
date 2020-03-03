@@ -1296,7 +1296,7 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'NCLB',
-              fetchType: oracledb.CLOB,
+              fetchType: oracledb.NCLOB,
               dbType: oracledb.DB_TYPE_NCLOB,
               dbTypeName: "NCLOB",
               nullable: true } ]

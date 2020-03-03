@@ -46,6 +46,13 @@ and
     - Added SODA function
       [`sodaCollection.truncate()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacolltruncate).
 
+- Fixed Lob class
+  [`lob.type`](https://oracle.github.io/node-oracledb/doc/api.html#proplobtype)
+  and
+  [`metaData.fetchType`](https://oracle.github.io/node-oracledb/doc/api.html#execmetadata)
+  when streaming NCLOB data.  They are now `oracledb.NCLOB` instead of
+  `oracledb.CLOB`.`
+
 - Removed use of git in `package/buildpackage.js` making offline builds cleaner
   for self-hosted node-oracledb.
 
