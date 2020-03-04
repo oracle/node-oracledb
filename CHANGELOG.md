@@ -32,6 +32,9 @@ and
 - Fixed a segfault that occurred when binding a database object IN/OUT without
   providing the database object class.
 
+- Fixed OUT binds of type `oracledb.DB_TYPE_DATE`, `oracledb.DB_TYPE_TIMESTAMP`
+  and `oracledb.DB_TYPE_TIMESTAMP_TZ` to correctly return Dates.
+
 - Updated [Docker installation
   documentation](https://oracle.github.io/node-oracledb/INSTALL.html#docker) for changes
   to the Node.js image ([Issue #1201](https://github.com/oracle/node-oracledb/issues/1201)).

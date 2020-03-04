@@ -427,7 +427,10 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
                     value))
             break;
         case DPI_NATIVE_TYPE_DOUBLE:
-            if (var->varTypeNum == DPI_ORACLE_TYPE_TIMESTAMP_LTZ)
+            if (var->varTypeNum == DPI_ORACLE_TYPE_TIMESTAMP_LTZ ||
+                    var->varTypeNum == DPI_ORACLE_TYPE_TIMESTAMP ||
+                    var->varTypeNum == DPI_ORACLE_TYPE_TIMESTAMP_TZ ||
+                    var->varTypeNum == DPI_ORACLE_TYPE_DATE)
                 return njsBaton_createDate(baton, env, data->value.asDouble,
                         value);
             NJS_CHECK_NAPI(env, napi_create_double(env, data->value.asDouble,
