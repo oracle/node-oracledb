@@ -632,34 +632,41 @@ Source Code](#github).
 
 #### 3.5.4 Install the free Oracle Instant Client 'Basic' ZIP file
 
-Download the free **Basic** 64-bit ZIP from [Oracle Technology Network][22]
-and unzip it, for example:
+Download the free **Basic** 64-bit ZIP from [Oracle Technology Network][22] and
+unzip it, for example in Terminal you could unzip in your home directory:
 
 ```
-mkdir -p /opt/oracle
-unzip instantclient-basic-macos.x64-19.5.0.0.0dbru.zip
+cd ~
+unzip instantclient-basic-macos.x64-19.3.0.0.0dbru.zip
 ```
 
-Create a symbolic link for the 'client shared library' in the user
-default library path such as in `~/lib` or `/usr/local/lib`.  For example:
+Create a symbolic link for the 'client shared library' in the user default
+library path such as in `~/lib` or `/usr/local/lib`.  If the `lib`
+sub-directory does not exist, you can create it.  For example:
 
 ```
 mkdir ~/lib
-ln -s instantclient_19_5/libclntsh.dylib ~/lib/
+ln -s ~/instantclient_19_3/libclntsh.dylib ~/lib/
+```
+
+If you now run `ls -l ~/lib/libclntsh.dylib` you will see something like::
+
+```
+lrwxr-xr-x  1 yourname  staff  48 12 Nov 15:04 /Users/yourname/lib/libclntsh.dylib -> /Users/yourname/instantclient_19_3/libclntsh.dylib
 ```
 
 Alternatively, copy the required OCI libraries, for example:
 
 ```
 mkdir ~/lib
-cp instantclient_19_5/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} ~/lib/
+cp ~/instantclient_19_3/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} ~/lib/
 ```
 
 For Instant Client 11.2, the OCI libraries must be copied. For example:
 
 ```
 mkdir ~/lib
-cp /opt/oracle/instantclient_11_2/{libclntsh.dylib.11.1,libnnz11.dylib,libociei.dylib} ~/lib/
+cp ~/instantclient_11_2/{libclntsh.dylib.11.1,libnnz11.dylib,libociei.dylib} ~/lib/
 ```
 
 #### 3.5.5 Optionally create the default Oracle Client configuration directory
@@ -671,7 +678,7 @@ If you intend to co-locate optional Oracle configuration files such as
 create this:
 
 ```
-sudo mkdir -p /opt/oracle/instantclient_12_2/network/admin
+sudo mkdir -p ~/instantclient_12_2/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
