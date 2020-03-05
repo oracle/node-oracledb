@@ -1209,7 +1209,7 @@ and
 - Some enhancements were made to the underlying DPI data access layer.
   **These are not exposed to node-oracledb users.**
 
-    - Allow <code>SYSDBA</code> connections
+    - Allow SYSDBA connections
     - Allow session tagging
     - Allow the character set and national character set to be specified via parameters to the DPI layer.
     - Support heterogeneous pools (in addition to existing homogeneous pools)
