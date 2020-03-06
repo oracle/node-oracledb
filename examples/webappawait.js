@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -60,7 +60,8 @@ async function init() {
       // poolMin: 0, // start with no connections; let the pool shrink completely
       // poolPingInterval: 60, // check aliveness of connection if idle in the pool for 60 seconds
       // poolTimeout: 60, // terminate connections that are idle in the pool for 60 seconds
-      // queueTimeout: 60000, // terminate getConnection() calls in the queue longer than 60000 milliseconds
+      // queueMax: 500, // don't allow more than 500 unsatisfied getConnection() calls in the pool queue
+      // queueTimeout: 60000, // terminate getConnection() calls queued for longer than 60000 milliseconds
       // sessionCallback: myFunction, // function invoked for brand new connections or by a connection tag mismatch
       // stmtCacheSize: 30 // number of statements that are cached in the statement cache of each connection
     });

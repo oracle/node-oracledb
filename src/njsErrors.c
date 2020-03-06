@@ -82,6 +82,7 @@ static const char *njsErrorMessages[] = {
     "NJS-073: cannot convert from JavaScript value to element of type %.*s", // errConvertToObjElement
     "NJS-074: cannot convert from JavaScript value to attribute \"%.*s\" of type \"%.*s\"", // errConvertToObjAttr
     "NJS-075: only one of connectString and connectionString can be used", // errDblConnectionString
+    "NJS-076: connection request rejected. Pool queue length queueMax %d reached", // errQueueMax
 };
 
 

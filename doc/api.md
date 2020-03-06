@@ -90,12 +90,13 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 3.2.20 [`poolTimeout`](#propdbpooltimeout)
         - 3.2.21 [`prefetchRows`](#propdbprefetchrows)
         - 3.2.22 [`Promise`](#propdbpromise)
-        - 3.2.23 [`queueRequests`](#propdbqueuerequests)
-        - 3.2.24 [`queueTimeout`](#propdbqueuetimeout)
-        - 3.2.25 [`stmtCacheSize`](#propdbstmtcachesize)
-        - 3.2.26 [`version`](#propdbversion)
-        - 3.2.27 [`versionString`](#propdbversionstring)
-        - 3.2.28 [`versionSuffix`](#propdbversionsuffix)
+        - 3.2.23 [`queueMax`](#propdbqueuemax)
+        - 3.2.24 [`queueRequests`](#propdbqueuerequests)
+        - 3.2.25 [`queueTimeout`](#propdbqueuetimeout)
+        - 3.2.26 [`stmtCacheSize`](#propdbstmtcachesize)
+        - 3.2.27 [`version`](#propdbversion)
+        - 3.2.28 [`versionString`](#propdbversionstring)
+        - 3.2.29 [`versionSuffix`](#propdbversionsuffix)
     - 3.3 [Oracledb Methods](#oracledbmethods)
         - 3.3.1 [`createPool()`](#createpool)
             - 3.3.1.1 [`createPool()`: Parameters and Attributes](#createpoolpoolattrs)
@@ -112,11 +113,12 @@ For installation information, see the [Node-oracledb Installation Instructions][
                 - 3.3.1.1.11 [`poolMin`](#createpoolpoolattrspoolmin)
                 - 3.3.1.1.12 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
                 - 3.3.1.1.13 [`poolTimeout`](#createpoolpoolattrspooltimeout)
-                - 3.3.1.1.14 [`queueRequests`](#createpoolpoolattrsqueuerequests)
-                - 3.3.1.1.15 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
-                - 3.3.1.1.16 [`sessionCallback`](#createpoolpoolattrssessioncallback)
-                - 3.3.1.1.17 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
-                - 3.3.1.1.18 [`user`](#createpoolpoolattrsuser)
+                - 3.3.1.1.14 [`queueMax`](#createpoolpoolattrsqueuemax)
+                - 3.3.1.1.15 [`queueRequests`](#createpoolpoolattrsqueuerequests)
+                - 3.3.1.1.16 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
+                - 3.3.1.1.17 [`sessionCallback`](#createpoolpoolattrssessioncallback)
+                - 3.3.1.1.18 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+                - 3.3.1.1.19 [`user`](#createpoolpoolattrsuser)
             - 3.3.1.2 [`createPool()`: Callback Function](#createpoolpoolcallback)
         - 3.3.2 [`getConnection()`](#getconnectiondb)
             - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
@@ -298,10 +300,11 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 8.1.6 [`poolMin`](#proppoolpoolmin)
         - 8.1.7 [`poolPingInterval`](#proppoolpoolpinginterval)
         - 8.1.8 [`poolTimeout`](#proppoolpooltimeout)
-        - 8.1.9 [`queueRequests`](#proppoolqueuerequests)
-        - 8.1.10 [`queueTimeout`](#proppoolqueueTimeout)
-        - 8.1.11 [`status`](#proppoolstatus)
-        - 8.1.12 [`stmtCacheSize`](#proppoolstmtcachesize)
+        - 8.1.9 [`queueMax`](#proppoolqueuemax)
+        - 8.1.10 [`queueRequests`](#proppoolqueuerequests)
+        - 8.1.11 [`queueTimeout`](#proppoolqueueTimeout)
+        - 8.1.12 [`status`](#proppoolstatus)
+        - 8.1.13 [`stmtCacheSize`](#proppoolstmtcachesize)
     - 8.2 [Pool Methods](#poolmethods)
         - 8.2.1 [`close()`](#poolclose)
         - 8.2.2 [`getConnection()`](#getconnectionpool)
@@ -1769,13 +1772,39 @@ Prior to node-oracledb 5, Promises could be completely disabled by setting:
 oracledb.Promise = null;
 ```
 
-#### <a name="propdbqueuerequests"></a> 3.2.23 `oracledb.queueRequests`
+#### <a name="propdbqueuemax"></a> 3.2.23 `oracledb.queueMax`
+
+```
+Number queueMax
+```
+
+The maximum number of pending `pool.getConnection()` calls that can be queued.
+
+When the number of `pool.getConnection()` calls that have been
+[queued](#connpoolqueue) waiting for an available connection reaches `queueMax`,
+then any future `pool.getConnection()` calls will immediately return an error
+and will not be queued.
+
+If `queueMax` is 0, then the queue length is not limited.
+
+The default value is 500.
+
+This property may be overridden when [creating a connection pool](#createpool).
+
+##### Example
+
+```javascript
+const oracledb = require('oracledb');
+oracledb.queueMax = 500;
+```
+
+#### <a name="propdbqueuerequests"></a> 3.2.24 `oracledb.queueRequests`
 
 This property was removed in node-oracledb 3.0.  Queuing is now always
 enabled.  See [Connection Pool Queue](#connpoolqueue) for more
 information.
 
-#### <a name="propdbqueuetimeout"></a> 3.2.24 `oracledb.queueTimeout`
+#### <a name="propdbqueuetimeout"></a> 3.2.25 `oracledb.queueTimeout`
 
 ```
 Number queueTimeout
@@ -1800,7 +1829,7 @@ const oracledb = require('oracledb');
 oracledb.queueTimeout = 3000; // 3 seconds
 ```
 
-#### <a name="propdbstmtcachesize"></a> 3.2.25 `oracledb.stmtCacheSize`
+#### <a name="propdbstmtcachesize"></a> 3.2.26 `oracledb.stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -1827,7 +1856,7 @@ const oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.26 `oracledb.version`
+#### <a name="propdbversion"></a> 3.2.27 `oracledb.version`
 ```
 readonly Number version
 ```
@@ -1842,7 +1871,7 @@ const oracledb = require('oracledb');
 console.log("Driver version number is " + oracledb.version);
 ```
 
-#### <a name="propdbversionstring"></a> 3.2.27 `oracledb.versionString`
+#### <a name="propdbversionstring"></a> 3.2.28 `oracledb.versionString`
 ```
 readonly String versionString
 ```
@@ -1858,7 +1887,7 @@ const oracledb = require('oracledb');
 console.log("Driver version is " + oracledb.versionString);
 ```
 
-#### <a name="propdbversionsuffix"></a> 3.2.28 `oracledb.versionSuffix`
+#### <a name="propdbversionsuffix"></a> 3.2.29 `oracledb.versionSuffix`
 ```
 readonly String versionSuffix
 ```
@@ -2154,13 +2183,33 @@ The default value is 60.
 This optional property overrides the
 [`oracledb.poolTimeout`](#propdbpooltimeout) property.
 
-###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.14 `queueRequests`
+###### <a name="createpoolpoolattrsqueuemax"></a> 3.3.1.1.14 `queueMax`
+
+```
+Number queueMax
+```
+
+The maximum number of pending `pool.getConnection()` calls that can be queued.
+
+When the number of `pool.getConnection()` calls that have been
+[queued](#connpoolqueue) waiting for an available connection reaches `queueMax`,
+then any future `pool.getConnection()` calls will immediately return an error
+and will not be queued.
+
+If `queueMax` is 0, then the queue length is not limited.
+
+The default value is 500.
+
+This optional property overrides the
+[`oracledb.queueMax`](#propdbqueuemax) property.
+
+###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.15 `queueRequests`
 
 This property was removed in node-oracledb 3.0.  Queuing is now always
 enabled.  See [Connection Pool Queue](#connpoolqueue) for more
 information.
 
-###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.15 `queueTimeout`
+###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.16 `queueTimeout`
 
 ```
 Number queueTimeout
@@ -2175,7 +2224,7 @@ The default value is 60000.
 This optional property overrides the
 [`oracledb.queueTimeout`](#propdbqueuetimeout) property.
 
-###### <a name="createpoolpoolattrssessioncallback"></a> 3.3.1.1.16 `sessionCallback`
+###### <a name="createpoolpoolattrssessioncallback"></a> 3.3.1.1.17 `sessionCallback`
 
 ```
 String sessionCallback | function sessionCallback(Connection connection, String requestedTag, function callback(Error error, Connection connection){})
@@ -2232,7 +2281,7 @@ information.
 
 This property was added in node-oracledb 3.1.
 
-###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.17 `stmtCacheSize`
+###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.18 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -2244,7 +2293,7 @@ The number of statements to be cached in the
 This optional property overrides the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.18 `user`
+###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.19 `user`
 
 ```
 String user
@@ -5402,13 +5451,24 @@ poolMin.
 
 See [`oracledb.poolTimeout`](#propdbpooltimeout).
 
-#### <a name="proppoolqueuerequests"></a> 8.1.9 `pool.queueRequests`
+#### <a name="proppoolqueuemax"></a> 8.1.9 `pool.queueMax`
+
+```
+readonly Number queueMax
+```
+
+The maximum number of pending `pool.getConnection()` calls that can be
+[queued](#connpoolqueue).
+
+See [`oracledb.queueMax`](#propdbqueuemax).
+
+#### <a name="proppoolqueuerequests"></a> 8.1.10 `pool.queueRequests`
 
 This property was removed in node-oracledb 3.0.  Queuing is now always
 enabled.  See [Connection Pool Queue](#connpoolqueue) for more
 information.
 
-#### <a name="proppoolqueueTimeout"></a> 8.1.10 `pool.queueTimeout`
+#### <a name="proppoolqueueTimeout"></a> 8.1.11 `pool.queueTimeout`
 
 ```
 readonly Number queueTimeout
@@ -5419,7 +5479,7 @@ the queue before the request is terminated.
 
 See [`oracledb.queueTimeout`](#propdbqueuetimeout).
 
-#### <a name="proppoolstatus"></a> 8.1.11 `pool.status`
+#### <a name="proppoolstatus"></a> 8.1.12 `pool.status`
 
 ```
 readonly Number status
@@ -5432,7 +5492,7 @@ pool is open, being drained of in-use connections, or has been closed.
 
 See [Connection Pool Closing and Draining](#conpooldraining).
 
-#### <a name="proppoolstmtcachesize"></a> 8.1.12 `pool.stmtCacheSize`
+#### <a name="proppoolstmtcachesize"></a> 8.1.13 `pool.stmtCacheSize`
 
 ```
 readonly Number stmtCacheSize
@@ -8269,19 +8329,35 @@ const connection = await oracledb.getConnection({ poolAlias: 'default', tag: 'lo
 
 #### <a name="connpoolqueue"></a> 14.4.4 Connection Pool Queue
 
-If the application has called `getConnection()` so that all
-connections in the pool are in use, and
-further [`pool.getConnection()`](#getconnectionpool) requests
-(or [`oracledb.getConnection()`](#getconnectiondb) calls that use a
-pool) are made, then each new request will be queued until an in-use
-connection is released back to the pool
-with [`connection.close()`](#connectionclose).  If `poolMax` has not
-been reached, then connections can be satisfied and are not queued.
+The connection pool queue allows applications to gracefully handle connection
+load spikes without having to set `poolMax` too large for general operation.
+Keeping `poolMax` small allows efficient use of resources.
+
+If the application has called `getConnection()` enough times so that all
+connections in the pool are in use, and further
+[`pool.getConnection()`](#getconnectionpool) calls (or
+[`oracledb.getConnection()`](#getconnectiondb) calls that use a pool) are made,
+then each new request will be queued until an in-use connection is released back
+to the pool with [`connection.close()`](#connectionclose).  If `poolMax` has not
+been reached, then connection requests can be satisfied and are not queued.
 
 The amount of time that a queued request will wait for a free
 connection can be configured with [queueTimeout](#propdbqueuetimeout).
 When connections are timed out of the queue, they will return the
 error *NJS-040: connection request timeout* to the application.
+
+If more than [`oracledb.queueMax`](#propdbqueuemax) pending connection requests
+are in the queue, then `pool.getConnection()` calls will immediately return an
+error *NJS-076: connection request rejected. Pool queue length queueMax reached*
+and will not be queued.  Use this to protect against connection request storms.
+It helps applications return errors early when many connections are requested
+concurrently.  This avoids connection requests blocking (for up to
+[`poolTimeout`](#propdbpooltimeout)) while waiting an available pooled
+connection.  It lets you see when the pool is too small.
+
+You may also experience *NJS-040* or *NJS-076* errors if your application is not
+correctly closing connections, or [UV_THREADPOOL_SIZE](#numberofthreads) is too
+small.
 
 Internally the queue is implemented in node-oracledb's JavaScript top
 level.  A queued connection request is dequeued and passed down to
@@ -8326,8 +8402,8 @@ current statistics to the console by calling:
 pool._logStats();
 ```
 
-The current implementation of `_logStats()` displays pool queue
-statistics, pool settings, and related environment variables.
+The output contains pool queue statistics, pool settings, and related
+environment variables.
 
 ##### Statistics
 
@@ -8337,15 +8413,16 @@ Statistic                 | Description
 --------------------------|-------------
 total up time             | The number of milliseconds this pool has been running.
 total connection requests | Number of `getConnection()` requests made by the application to this pool.
-total requests enqueued   | Number of `getConnection()` requests that could not be immediately satisfied because every connection in this pool was already being used, and so they had to be queued waiting for the application to return an in-use connection to the pool.
+total requests enqueued   | Number of `getConnection()` requests that were added to this pool's queue (waiting for the application to return an in-use connection to the pool) because every connection in this pool was already being used.
 total requests dequeued   | Number of `getConnection()` requests that were dequeued when a connection in this pool became available for use.
-total requests failed     | Number of `getConnection()` requests that invoked the underlying C API `getConnection()` callback with an error state. Does not include queue request timeout errors.
-total request timeouts    | Number of queued `getConnection()` requests that were timed out after they had spent [queueTimeout](#propdbqueuetimeout) or longer in this pool's queue.
-max queue length          | Maximum number of `getConnection()` requests that were ever waiting at one time.
-sum of time in queue      | The sum of the time (milliseconds) that dequeued requests spent in the queue.
-min time in queue         | The minimum time (milliseconds) that any dequeued request spent in the queue.
-max time in queue         | The maximum time (milliseconds) that any dequeued request spent in the queue.
-avg time in queue         | The average time (milliseconds) that dequeued requests spent in the queue.
+total requests failed     | Number of `getConnection()` requests that invoked the underlying C API callback with an error state. Does not include queue size limit or queue timeout errors.
+total requests exceeding queueMax | Number of `getConnection()` requests rejected because the number of connections in the queue exceeded [`queueMax`](#propdbqueuemax).
+total request timeouts    | Number of queued `getConnection()` requests that were timed out after they had spent [queueTimeout](#propdbqueuetimeout) or longer in the pool queue.
+max queue length          | Maximum number of `getConnection()` requests that were ever waiting in the queue at one time.
+sum of time in queue      | The sum of the time (milliseconds) that dequeued requests spent in the pool queue.
+min time in queue         | The minimum time (milliseconds) that any dequeued request spent in the pool queue.
+max time in queue         | The maximum time (milliseconds) that any dequeued request spent in the pool queue.
+avg time in queue         | The average time (milliseconds) that dequeued requests spent in the pool queue.
 pool connections in use   | The number of connections from this pool that `getConnection()` returned successfully to the application and have not yet been released back to the pool.
 pool connections open     | The number of connections in this pool that have been established to the database.
 
@@ -8354,6 +8431,10 @@ times in the queue are calculated when requests are removed from the
 queue.  They do not take into account times for connection requests
 still waiting in the queue.
 
+The sum of 'total requests failed', 'total requests exceeding queueMax', and
+'total request timeouts' is the number of `pool.getConnection()` calls that
+failed.
+
 ##### Attribute Values
 
 The `_logStats()` method also shows attribute values of the pool:
@@ -8361,6 +8442,7 @@ The `_logStats()` method also shows attribute values of the pool:
 Attribute                                   |
 --------------------------------------------|
 [`poolAlias`](#createpoolpoolattrspoolalias)|
+[`queueMax`](#propdbqueuemax)           |
 [`queueTimeout`](#propdbqueuetimeout)       |
 [`poolMin`](#propdbpoolmin)                 |
 [`poolMax`](#propdbpoolmax)                 |
@@ -15378,7 +15460,12 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
 
 - Review the [CHANGELOG][83] and take advantage of new features.
 
-- Review any programmatic or test use of node-oracledb error messages since some have changed.
+  Choose a sensible value for the new *Pool* [`queueMax`](#propdbqueuemax)
+  attribute, so that applications get the new error only under abnormal
+  connection load.  To allow all pooled connection requests to be queued (the
+  previous behavior), set it to 0.
+
+- Review your application use of node-oracledb error messages since some have changed.
 
 - Note that the default for [`oracledb.events`](#propdbevents) has reverted to
   *false*.  If you relied on it being *true*, then explicitly set it.

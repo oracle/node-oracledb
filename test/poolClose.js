@@ -283,6 +283,7 @@ describe('51. poolClose.js', function(){
           // Default values
           should.strictEqual(pool.poolPingInterval, 60);
           should.strictEqual(pool.poolTimeout, 60);
+          should.strictEqual(pool.queueMax, 500);
           should.strictEqual(pool.queueTimeout, 60000);
           should.strictEqual(pool.stmtCacheSize, 30);
 

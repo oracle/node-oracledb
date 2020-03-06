@@ -62,6 +62,7 @@ Overview of node-oracledb functional tests
         2.8.1 basic case
         2.8.2 generates NJS-040 if request is queued and queueTimeout expires
         2.8.3 does not generate NJS-040 if request is queued for less time than queueTimeout
+        2.8.4 generates NJS-076 if request exceeds queueMax
     2.9 _enableStats & _logStats functionality
         2.9.1 does not work after the pool has been terminated
     2.10 Close method
@@ -906,20 +907,21 @@ Overview of node-oracledb functional tests
         58.1.13 lobPrefetchSize
         58.1.14 oracleClientVersion (read-only)
         58.1.15 queueTimeout
-        58.1.16 stmtCacheSize
-        58.1.17 poolPingInterval
-        58.1.18 fetchAsBuffer
-        58.1.19 Negative - connectionClass
-        58.1.20 Negative - autoCommit
-        58.1.21 Negative - outFormat
-        58.1.22 Negative - externalAuth
-        58.1.23 versionString (read-only)
-        58.1.24 versionSuffix (read-only)
-        58.1.25 oracleClientVersionString (read-only)
-        58.1.26 edition
-        58.1.27 Negative - edition
-        58.1.28 events
-        58.1.29 Negative - events
+        58.1.16 queueMax
+        58.1.17 stmtCacheSize
+        58.1.18 poolPingInterval
+        58.1.19 fetchAsBuffer
+        58.1.20 Negative - connectionClass
+        58.1.21 Negative - autoCommit
+        58.1.22 Negative - outFormat
+        58.1.23 Negative - externalAuth
+        58.1.24 versionString (read-only)
+        58.1.25 versionSuffix (read-only)
+        58.1.26 oracleClientVersionString (read-only)
+        58.1.27 edition
+        58.1.28 Negative - edition
+        58.1.29 events
+        58.1.30 Negative - events
     58.2 Pool Class
         58.2.1 poolMin
         58.2.2 poolMax
@@ -930,6 +932,7 @@ Overview of node-oracledb functional tests
         58.2.7 connectionsOpen
         58.2.8 queueTimeout
         58.2.9 poolPingInterval
+        58.2.10 poolMax
     58.3 Connection Class
         58.3.1 Connection object initial toString values
         58.3.2 stmtCacheSize (read-only)

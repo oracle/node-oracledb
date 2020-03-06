@@ -808,6 +808,61 @@ describe('2. pool.js', function() {
         }
       );
     });
+
+    it('2.8.4 generates NJS-076 if request exceeds queueMax', function(done) {
+      oracledb.createPool(
+        {
+          user              : dbConfig.user,
+          password          : dbConfig.password,
+          connectString     : dbConfig.connectString,
+          poolMin           : 1,
+          poolMax           : 1,
+          poolIncrement     : 0,
+          queueTimeout      : 5000, // 5 seconds
+          queueMax          : 1
+        },
+        function(err, pool){
+          should.not.exist(err);
+
+          async.parallel(
+            [
+              function(cb) {
+                pool.getConnection(function(err, conn1) {
+                  should.not.exist(err);
+
+                  pool.getConnection(function(err, conn2) {  // queued until timeout
+                    (err.message.startsWith("NJS-040:")).should.be.true();
+                    should.not.exist(conn2);
+                    conn1.close(function(err) {
+                      should.not.exist(err);
+                      cb();
+                    });
+                  });
+                });
+              },
+              function(cb) {
+                //using setTimeout to help ensure this gets to the db last
+                setTimeout(function() {
+                  pool.getConnection(function(err, conn) {
+                    should.exist(err);
+                    (err.message.startsWith("NJS-076:")).should.be.true();
+                    should.not.exist(conn);
+                    cb();
+                  });
+                }, 100);
+              }
+            ],
+            function(err){
+              should.not.exist(err);
+              pool.close(function(err) {
+                should.not.exist(err);
+                done();
+              });
+            }
+          );
+        }
+      );
+    });
   });
 
   describe('2.9 _enableStats & _logStats functionality', function(){

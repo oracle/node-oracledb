@@ -19,6 +19,11 @@ and
 - Added support for queries containing cursor expressions that return [nested
   cursors](https://oracle.github.io/node-oracledb/doc/api.html#nestedcursors).
 
+- Added
+  [`oracledb.queueMax`](https://oracle.github.io/node-oracledb/doc/api.html#propdbqueuemax)
+  and equivalent `createPool()` attributes to limit the number of pending
+  `pool.getConnection()` calls in the pool queue ([Issue #514](https://github.com/oracle/node-oracledb/issues/514)).
+
 - Removed support for custom Promise libraries.  Use the native Node.js Promise
   implementation instead.  This change was necessitated by the refactored
   JavaScript implementation.

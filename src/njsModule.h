@@ -194,6 +194,7 @@ typedef enum {
     errConvertToObjElement,
     errConvertToObjAttr,
     errDblConnectionString,
+    errQueueMax,
 
 
     // New ones should be added here
