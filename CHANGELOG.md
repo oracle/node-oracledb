@@ -64,6 +64,16 @@ and
 - Removed use of git in `package/buildpackage.js` making offline builds cleaner
   for self-hosted node-oracledb.
 
+- Fixed how the module binary is found when using Webpack.
+
+  Webpack users should copy the node-oracledb binary into a sub-directory of the
+  output directory.  For example if the output directory is `dist`, then the
+  binary should be in
+  `dist/node_modules/oracledb/build/Release/oracledb-5.0.0-linux-x64.node`.  A
+  copy plugin in `webpack.config.js` can do this by copying
+  `node_modules/oracledb/build` to a directory of that same name.  See [Issue
+  1156](https://github.com/oracle/node-oracledb/issues/1156).
+
 - Made an internal change to use an Oracle Client 20 feature to avoid a
   round-trip when accessing
   [`oracledb.version`](https://oracle.github.io/node-oracledb/doc/api.html#propdbversion)
