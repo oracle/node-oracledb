@@ -61,6 +61,11 @@ and
   when streaming NCLOB data.  They are now `oracledb.NCLOB` instead of
   `oracledb.CLOB`.`
 
+- Fixed `Lob.destroy()` so it does not call the old `Lob.close()` method, which
+  emits a duplicate close event.
+
+- Lobs being streamed to are now correctly destroyed on error.
+
 - Removed use of git in `package/buildpackage.js` making offline builds cleaner
   for self-hosted node-oracledb.
 
