@@ -886,10 +886,6 @@ Overview of node-oracledb functional tests
     56.21 Negative - passing Date for fetchAsString
     56.22 Negative - passing Buffer for fetchAsstring
 
-57. nestedCursor.js
-    57.1 testing nested cursor support - result set
-    57.2 testing nested cursor support - REF Cursor
-
 58. properties.js
     58.1 Oracledb Class
         58.1.1 poolMin
@@ -4692,3 +4688,38 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     231.1 example case
     231.2 truncate multiple times
     231.3 Negative - invalid parameters
+
+232. nestedCursor01.js
+    232.1 example/selectnestedcursor.js
+
+233. nestedCursor02.js
+    233.1 example-nested-cursor.js
+
+234. nestedCursor03.js
+    234.1 fetch zero row without resultSet option
+    234.2 fetch zero row with resultSet
+    234.3 fetch one row without resultSet option
+    234.4 fetch one row with resultSet option
+    234.5 fetch multiple rows directly
+    234.6 fetch multiple rows with resultSet
+    234.7 directly fetch multiple rows with each contains a nested cursor
+    234.8 fetch multiple rows with each contains a nested cursor in resultSet
+    234.9 maxRows option
+    234.10 maxRows option is ignored when resultSet option is true
+
+235. nestedCursor04.js
+    235.1 fetch multiple nested cursors which each fetches zero row directly
+    235.2 fetch zero row with resultSet
+    235.3 fetch one row directly
+    235.4 fetch one row with resultSet
+    235.5 fetch multiple rows directly
+    235.6 fetch multiple rows with resultSet
+    235.7 query rows that contain null values and a nested cursor
+    235.8 maxRows option is respected at all levels of nested cursors
+
+236. nestedCursor05.js
+    236.1 multi-level nested cursors
+    236.2 maxRows option is respected at all levels of nested cursors
+    236.3 fetchArraySize option is respected at all levels of nested cursors
+    236.4 extendedMetaData option is respected at all levels of nested cursors
+    236.5 combination of options maxRows, fetchArraySize, extendedMetaData

@@ -55,7 +55,6 @@ spec:
   - test/lobClose.js
   - test/resultSet2.js
   - test/fetchAs.js
-  - test/nestedCursor.js
   - test/properties.js
   - test/lobResultSet.js
   - test/clobPlsqlString.js
@@ -219,3 +218,8 @@ spec:
   - test/dbType03.js
   - test/soda12.js
   - test/soda13.js
+  - test/nestedCursor01.js
+  - test/nestedCursor02.js
+  - test/nestedCursor03.js
+  - test/nestedCursor04.js
+  - test/nestedCursor05.js
