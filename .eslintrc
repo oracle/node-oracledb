@@ -1,0 +1,34 @@
+{
+    "parserOptions": {
+        "ecmaVersion": 2019
+    },
+    "rules": {
+        "indent": [
+            2,
+            2,
+            { "SwitchCase": 1 /*, "VariableDeclarator": { "var": 2} */},
+
+        ],
+        "quotes": [
+            0,
+            "double"
+        ],
+        "linebreak-style": [
+            2,
+            "unix"
+        ],
+        "semi": [
+            2,
+            "always"
+        ],
+        "no-console": [
+            0
+        ],
+    },
+    "env": {
+        "es6": true,
+        "node": true,
+        "mocha": true
+    },
+    "extends": "eslint:recommended"
+}
