@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -53,46 +53,45 @@ async function run() {
     const data = fs.readFileSync(inFileName, 'utf8');
     tempLob.write(data);
     tempLob.write("That's all!");
-    await tempLob.end();  //  indicate the app has no more data to insert
+    tempLob.end();  //  indicate the app has no more data to insert
 
-    const doInsert = new Promise((resolve, reject) => {
+    const doInsert = new Promise((resolve) => {
 
       // The 'finish' event is emitted when node-oracledb has
       // processed all data for the Temporary LOB
       tempLob.on('finish', async () => {
-        try {
-          console.log('Inserting the temporary LOB into the database');
-          const result = await connection.execute(
-            `INSERT INTO no_lobs (id, c) VALUES (:idbv, :lobbv)`,
-            {
-              idbv: 3,
-              lobbv: tempLob
-            },
-            {
-              autoCommit: true
-            });
-          console.log("Rows inserted: " + result.rowsAffected);
-
-        } catch (err) {
-          reject(err);
-        } finally {
-          if (tempLob) {
-            try {
-              // Applications should close LOBs that were created using createLob()
-              console.log('Closing the temporary LOB');
-              await tempLob.close();
-              resolve();
-            } catch (err) {
-              reject(err);
-            }
-          }
-        }
+        console.log('Inserting the temporary LOB into the database');
+        const result = await connection.execute(
+          `INSERT INTO no_lobs (id, c) VALUES (:idbv, :lobbv)`,
+          {
+            idbv: 3,
+            lobbv: tempLob
+          },
+          {
+            autoCommit: true
+          });
+        console.log("Rows inserted: " + result.rowsAffected);
+        resolve();
       }); // end 'finish'
+
     });   // end Promise
 
     await doInsert;
 
+    // Applications should destroy LOBs that were created using createLob().
+    tempLob.destroy();
+
+    // Wait for destroy() to emit the the close event.  This means the lob will
+    // be cleanly closed before the app closes the connection, otherwise a race
+    // will occur.
+    await new Promise((resolve, reject) => {
+      tempLob.on('error', reject);
+      tempLob.on('close', resolve);
+    });
+
   } catch (err) {
+    // Note: in this example tempLob is not explicitly destroyed on error.  This
+    // is left to the connection close to initiate.
     console.error(err);
   } finally {
     if (connection) {

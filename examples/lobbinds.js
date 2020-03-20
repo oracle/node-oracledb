@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -70,7 +70,12 @@ async function query_bind_insert(connection) {
     }
   );
 
-  await clob1.close();
+  // destroy the LOB and wait for it to be closed completely before continuing
+  clob1.destroy();
+  await new Promise((resolve, reject) => {
+    clob1.on('error', reject);
+    clob1.on('close', resolve);
+  });
 
   console.log ("   " + result.rowsAffected + " row(s) inserted");
 }
@@ -158,34 +163,27 @@ async function query_plsql_inout(connection) {
   // Stream the returned LOB to a file
   const doStream = new Promise((resolve, reject) => {
 
-    let errorHandled = false;
-
     // Set up the Lob stream
     console.log('   Writing to ' + clobOutFileName1);
     clob2.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
     clob2.on('error', (err) => {
       // console.log("clob2.on 'error' event");
-      if (!errorHandled) {
-        errorHandled = true;
-        reject(err);
-      }
+      reject(err);
     });
     clob2.on('end', () => {
       // console.log("clob2.on 'end' event");
-      console.log ("   Completed");
-      if (!errorHandled) {
-        resolve();
-      }
+      clob2.destroy();
+    });
+    clob2.on('close', () => {
+      // console.log("clob2.on 'close' event");
+      resolve();
     });
 
     // Set up the stream to write to a file
     const outStream = fs.createWriteStream(clobOutFileName1);
     outStream.on('error', (err) => {
       // console.log("outStream.on 'error' event");
-      if (!errorHandled) {
-        errorHandled = true;
-        reject(err);
-      }
+      clob2.destroy(err);
     });
 
     // Switch into flowing mode and push the LOB to the file
@@ -193,6 +191,7 @@ async function query_plsql_inout(connection) {
   });
 
   await doStream;
+  console.log ("   Completed");
 }
 
 // 5. Get CLOB as a PL/SQL OUT bind and pass it to another procedure as IN OUT.
@@ -231,8 +230,6 @@ async function plsql_out_inout(connection) {
 
   const doStream = new Promise((resolve, reject) => {
 
-    let errorHandled = false;
-
     const clob2 = result2.outBinds.ciobv;
     if (clob2 === null) {
       throw new Error('plsql_out_inout(): NULL clob2 found');
@@ -243,29 +240,21 @@ async function plsql_out_inout(connection) {
     clob2.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
     clob2.on('error', (err) => {
       // console.log("clob2.on 'error' event");
-      if (!errorHandled) {
-        errorHandled = true;
-        reject (err);
-      }
+      reject (err);
     });
     clob2.on('end', () => {
       // console.log("clob2.on 'end' event");
+      clob2.destroy();
     });
     clob2.on('close', () => {
       // console.log("clob2.on 'close' event");
-      if (!errorHandled) {
-        console.log ("   Completed");
-        resolve();
-      }
+      resolve();
     });
 
     const outStream = fs.createWriteStream(clobOutFileName2);
     outStream.on('error', (err) => {
       // console.log("outStream.on 'error' event");
-      if (!errorHandled) {
-        errorHandled = true;
-        reject (err);
-      }
+      clob2.destroy(err);
     });
 
     // Switch into flowing mode and push the LOB to the file
@@ -273,6 +262,7 @@ async function plsql_out_inout(connection) {
   });
 
   await doStream;
+  console.log ("   Completed");
 }
 
 /*

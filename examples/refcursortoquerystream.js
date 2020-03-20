@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -64,10 +64,14 @@ async function run() {
         console.log(row);
       });
       queryStream.on('error', reject);
+      queryStream.on('end', function() {
+        queryStream.destroy(); // free up resources
+      });
       queryStream.on('close', resolve);
     });
 
     await consumeStream;
+
   } catch (err) {
     console.error(err);
   } finally {

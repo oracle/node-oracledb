@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -44,33 +44,25 @@ async function doStream(lob, outFileName) {
       console.log('Writing a BLOB to ' + outFileName);
     }
 
-    let errorHandled = false;
-
     lob.on('error', (err) => {
       // console.log("lob.on 'error' event");
-      if (!errorHandled) {
-        errorHandled = true;
-        lob.close(() => {
-          reject(err);
-        });
-      }
+      reject(err);
     });
+
     lob.on('end', () => {
       // console.log("lob.on 'end' event");
-      if (!errorHandled) {
-        resolve();
-      }
+      lob.destroy();
+    });
+
+    lob.on('close', () => {
+      // console.log("lob.on 'close' event");
+      resolve();
     });
 
     const outStream = fs.createWriteStream(outFileName);
     outStream.on('error', (err) => {
       // console.log("outStream.on 'error' event");
-      if (!errorHandled) {
-        errorHandled = true;
-        lob.close(() => {
-          reject(err);
-        });
-      }
+      lob.destroy(err);
     });
 
     // Switch into flowing mode and push the LOB to the file

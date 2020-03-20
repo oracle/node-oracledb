@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -53,39 +53,29 @@ async function run() {
     // Helper function for loading data to the Temporary Lob
     const doStream = new Promise((resolve, reject) => {
 
-      let errorHandled = false;
-
-      tempLob.on('close', () => {
-        // console.log("templob.on 'close' event");
-      });
+      // Note: there is no 'close' event to destroy templob because it is needed
+      // for the INSERT
 
       tempLob.on('error', (err) => {
         // console.log("templob.on 'error' event");
-        if (!errorHandled) {
-          errorHandled = true;
-          reject(err);
-        }
+        reject(err);
       });
 
       tempLob.on('finish', () => {
         // console.log("templob.on 'finish' event");
         // The data was loaded into the temporary LOB
-        if (!errorHandled) {
-          resolve();
-        }
+        resolve();
       });
 
       console.log('Reading from ' + inFileName);
       const inStream = fs.createReadStream(inFileName);
       inStream.on('error', (err) => {
         // console.log("inStream.on 'error' event");
-        if (!errorHandled) {
-          errorHandled = true;
-          reject(err);
-        }
+        tempLob.destroy(err);
       });
 
       inStream.pipe(tempLob);  // copies the text to the temporary LOB
+
     });
 
     // Load the data into the Temporary LOB
@@ -95,7 +85,7 @@ async function run() {
     console.log('Calling PL/SQL to insert the temporary LOB into the database');
     await connection.execute(
       `BEGIN
-         lobs_in(:id, :c, null);
+         no_lobs_in(:id, :c, null);
        END;`,
       {
         id: 3,
@@ -105,10 +95,20 @@ async function run() {
     );
     console.log("Call completed");
 
-    // Applications should close LOBs that were created using createLob()
-    await tempLob.close();
+    // Applications should destroy LOBs that were created using createLob().
+    tempLob.destroy();
+
+    // Wait for destroy() to emit the the close event.  This means the lob will
+    // be cleanly closed before the app closes the connection, otherwise a race
+    // will occur.
+    await new Promise((resolve, reject) => {
+      tempLob.on('error', reject);
+      tempLob.on('close', resolve);
+    });
 
   } catch (err) {
+    // Note: in this example the stream is not explicitly destroyed on error.
+    // This is left to the connection close to initiate.
     console.error(err);
   } finally {
     if (connection) {

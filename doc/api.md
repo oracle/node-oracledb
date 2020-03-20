@@ -4195,10 +4195,12 @@ the same as [`execute()`](#execute) except a callback is not used.
 Instead this function returns a stream used to fetch data.
 
 Each row is returned as a `data` event.  Query metadata is available via a
-`metadata` event.  The `end` event indicates the end of the query results. The
-connection must remain open until the stream is completely read and the `close`
-event received.  Alternatively the Stream [`destroy()`][92] method can be used
-to terminate a stream early.
+`metadata` event.  The `end` event indicates the end of the query results.
+After the `end` event has been received, the Stream [destroy()][92] function
+should be called to clean up resources properly.  Any further end-of-fetch
+logic, in particular the connection release, should be in the `close` event.
+Alternatively the Stream [`destroy()`][92] method can be used to terminate a
+stream early.
 
 For tuning, adjust the value of
 [`oracledb.fetchArraySize`](#propdbfetcharraysize) or the
@@ -9895,11 +9897,13 @@ ResultSets.
 
 With streaming, each row is returned as a `data` event.  Query metadata is
 available via a `metadata` event.  The `end` event indicates the end of the
-query results, however it is generally best to put end-of-fetch logic in the
-`close` event.
+query results.  After the `end` event has been received, the Stream
+[destroy()][92] function should be called to clean up resources properly.  Any
+further end-of-fetch logic, in particular the connection release, should be in
+the `close` event.
 
 Query results should be fetched to completion to avoid resource leaks, or the
-Stream [`destroy()`][92] method can be used to terminate a stream early.  When
+Stream [`destroy()`][92] function can be used to terminate a stream early.  When
 fetching, the connection must remain open until the stream is completely read
 and the `close` event received.  Any returned [Lob](#lobclass) objects should
 also be processed first.
@@ -9926,6 +9930,7 @@ stream.on('data', function (data) {
 
 stream.on('end', function () {
   // all data has been fetched...
+  stream.destroy();  // the stream should be closed when it has been finished
 });
 
 stream.on('close', function () {

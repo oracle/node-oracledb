@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -54,7 +54,6 @@ async function run() {
     // Stream a CLOB and builds up a String piece-by-piece
     const doStream = new Promise((resolve, reject) => {
 
-      let errorHandled = false;
       let myclob = ""; // or myblob = Buffer.alloc(0) for BLOBs
 
       // node-oracledb's lob.pieceSize is the number of bytes retrieved
@@ -65,25 +64,26 @@ async function run() {
       clob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
       clob.on('error', (err) => {
         // console.log("clob.on 'error' event");
-        if (!errorHandled) {
-          errorHandled = true;
-          clob.close(function() {
-            reject(err);
-          });
-        }
+        reject(err);
       });
+
       clob.on('data', (chunk) => {
         // Build up the string.  For larger LOBs you might want to print or use each chunk separately
         // console.log("clob.on 'data' event.  Got %d bytes of data", chunk.length);
         myclob += chunk; // or use Buffer.concat() for BLOBS
       });
+
       clob.on('end', () => {
         // console.log("clob.on 'end' event");
+        clob.destroy();
         console.log(myclob);
-        if (!errorHandled) {
-          resolve();
-        }
       });
+
+      clob.on('close', () => {
+        // console.log("clob.on 'close' event");
+        resolve();
+      });
+
     });
 
     await doStream;

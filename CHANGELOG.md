@@ -84,6 +84,9 @@ and
   [`oracledb.version`](https://oracle.github.io/node-oracledb/doc/api.html#propdbversion)
   for the first time.
 
+- Update examples and documentation to make more use of Node.js 8's Stream
+  `destroy()` method, allowing resources to be freed early.
+
 ## node-oracledb v4.2.0 (24 Jan 2020)
 
 - Added support for binding using the node-oracledb [Database Type
