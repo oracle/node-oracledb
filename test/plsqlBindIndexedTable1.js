@@ -475,23 +475,6 @@ describe('43. plsqlBindIndexedTable1.js', function() {
       );
     });
 
-    it('43.2.4 DATE type indexed table has not been supported yet', function(done) {
-      var bindvars = {
-        p:  {type: oracledb.DATE, dir: oracledb.BIND_IN, val: [new Date(), new Date()]}
-      };
-      connection.execute(
-        "BEGIN nodb_plsqlbindpack21.test3(:p); END;",
-        bindvars,
-        function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-034:');
-          // NJS-034: data type is unsupported for array bind
-          should.not.exist(result);
-          done();
-        }
-      );
-    });
-
     it('43.2.5 negative case: incorrect type of array element - bind by name 1', function(done) {
       var bindvars = {
         id: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: ["1", 1]},

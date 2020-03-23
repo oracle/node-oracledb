@@ -12640,10 +12640,9 @@ Types][150] in the Database PL/SQL Language Reference.
 
 #### <a name="plsqlindexbybinds"></a> 21.3.1 PL/SQL Collection Associative Arrays (Index-by)
 
-Arrays of strings and numbers can be bound to PL/SQL IN, IN OUT, and
-OUT parameters of PL/SQL INDEX BY associative array types with integer
-keys.  This Oracle type was formerly called PL/SQL tables or index-by
-tables.
+Arrays can be bound to PL/SQL IN, IN OUT, and OUT parameters of PL/SQL INDEX BY
+associative array types with integer keys.  This Oracle type was formerly called
+PL/SQL tables or index-by tables.
 
 While you could bind associative arrays via named types as shown in previous
 examples, it is more efficient to use the method shown below which uses the
@@ -12726,8 +12725,20 @@ After executing either of these `mytab` will contain:
 ```
 
 The [`type`](#executebindparamtype) must be set for PL/SQL array binds.  It can
-be set to [`oracledb.STRING`](#oracledbconstantsnodbtype) or
-[`oracledb.NUMBER`](#oracledbconstantsnodbtype).
+be set to [`oracledb.STRING`](#oracledbconstantsnodbtype),
+[`oracledb.DB_TYPE_VARCHAR`](#oracledbconstantsdbtype),
+[`oracledb.NUMBER`](#oracledbconstantsnodbtype),
+[`oracledb.DB_TYPE_NUMBER`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_NVARCHAR`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_CHAR`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_NCHAR`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_BINARY_FLOAT`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_BINARY_DOUBLE`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_DATE`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_TIMESTAMP`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_TIMESTAMP_LTZ`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_TIMESTAMP_TZ`](#oracledbconstantsdbtype) or
+[`oracledb.DB_TYPE_RAW`](#oracledbconstantsdbtype).
 
 For OUT and IN OUT binds, the [`maxArraySize`](#executebindparammaxarraysize)
 bind property must be set.  Its value is the maximum number of elements that can

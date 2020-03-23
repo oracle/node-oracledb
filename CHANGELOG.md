@@ -19,6 +19,13 @@ and
 - Added support for queries containing cursor expressions that return [nested
   cursors](https://oracle.github.io/node-oracledb/doc/api.html#nestedcursors).
 
+- Added support for PL/SQL Collection Associative Arrays "index-by tables" of
+  the following types: `oracledb.DB_TYPE_NVARCHAR`, `oracledb.DB_TYPE_CHAR`,
+  `oracledb.DB_TYPE_NCHAR`, `oracledb.DB_TYPE_BINARY_FLOAT`,
+  `oracledb.DB_TYPE_BINARY_DOUBLE`, `oracledb.DB_TYPE_DATE`,
+  `oracledb.DB_TYPE_TIMESTAMP`, `oracledb.DB_TYPE_TIMESTAMP_LTZ`,
+  `oracledb.DB_TYPE_TIMESTAMP_TZ` and `oracledb.DB_TYPE_RAW`.
+
 - Added
   [`oracledb.queueMax`](https://oracle.github.io/node-oracledb/doc/api.html#propdbqueuemax)
   and equivalent `createPool()` attributes to limit the number of pending

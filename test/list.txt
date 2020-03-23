@@ -751,7 +751,6 @@ Overview of node-oracledb functional tests
         43.2.1 maxArraySize is ignored when specifying BIND_IN
         43.2.2 maxArraySize is mandatory for BIND_INOUT
         43.2.3 maxArraySize cannot smaller than the number of array elements
-        43.2.4 DATE type indexed table has not been supported yet
         43.2.5 negative case: incorrect type of array element - bind by name 1
         43.2.6 negative case: incorrect type of array element - bind by name 2
         43.2.7 negative case: incorrect type of array element - bind by name 3
@@ -4723,3 +4722,16 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     236.3 fetchArraySize option is respected at all levels of nested cursors
     236.4 extendedMetaData option is respected at all levels of nested cursors
     236.5 combination of options maxRows, fetchArraySize, extendedMetaData
+
+237. indexedTables01.js
+    237.1 check VARCHAR2 type support in PL/SQL index-by tables
+    237.2 DB_TYPE_NVARCHAR
+    237.3 DB_TYPE_CHAR
+    237.4 DB_TYPE_NCHAR
+    237.5 DB_TYPE_NUMBER
+    237.6 DB_TYPE_BINARY_FLOAT
+    237.7 DB_TYPE_BINARY_DOUBLE
+    237.8 DB_TYPE_TIMESTAMP
+    237.9 DB_TYPE_TIMESTAMP_LTZ
+    237.10 DB_TYPE_TIMESTAMP_TZ
+    237.10 DB_TYPE_RAW

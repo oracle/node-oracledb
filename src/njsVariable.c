@@ -1159,11 +1159,23 @@ bool njsVariable_setValue(njsVariable *var, napi_env env, napi_value value,
     if (!var->isArray)
         return njsVariable_setScalarValue(var, 0, env, value, false, baton);
 
-    // only strings and numbers are currently allowed in arrays
-    if (var->varTypeNum != DPI_ORACLE_TYPE_VARCHAR &&
-            var->varTypeNum != DPI_ORACLE_TYPE_NUMBER &&
-            var->varTypeNum != DPI_ORACLE_TYPE_NATIVE_INT) {
-        return njsBaton_setError(baton, errInvalidTypeForArrayBind);
+    // only some types are permitted in arrays
+    switch (var->varTypeNum) {
+        case DPI_ORACLE_TYPE_VARCHAR:
+        case DPI_ORACLE_TYPE_NVARCHAR:
+        case DPI_ORACLE_TYPE_CHAR:
+        case DPI_ORACLE_TYPE_NCHAR:
+        case DPI_ORACLE_TYPE_NUMBER:
+        case DPI_ORACLE_TYPE_NATIVE_FLOAT:
+        case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
+        case DPI_ORACLE_TYPE_DATE:
+        case DPI_ORACLE_TYPE_TIMESTAMP:
+        case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
+        case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
+        case DPI_ORACLE_TYPE_RAW:
+            break;
+        default:
+            return njsBaton_setError(baton, errInvalidTypeForArrayBind);
     }
 
     // verify we have an array
