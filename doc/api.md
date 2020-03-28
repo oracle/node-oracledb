@@ -407,6 +407,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 14.2.3 [Net Service Names for Connection Strings](#tnsnames)
         - 14.2.4 [JDBC and Oracle SQL Developer Connection Strings](#notjdbc)
     - 14.3 [Connections, Threads, and Parallelism](#numberofthreads)
+        - 14.3.1 [Parallelism on a Connection](#parallelism)
     - 14.4 [Connection Pooling](#connpooling)
         - 14.4.1 [Connection Pool Sizing](#conpoolsizing)
         - 14.4.2 [Connection Pool Closing and Draining](#conpooldraining)
@@ -7925,42 +7926,53 @@ to 10 by using the following command:
 $ UV_THREADPOOL_SIZE=10 node myapp.js
 ```
 
-If the value is set inside the application with
-`process.env.UV_THREADPOOL_SIZE` ensure it is set prior to any
-asynchronous call that uses the thread pool otherwise the default size
-of 4 will still be used.
+If the value is set inside the application then ensure it is set prior to any
+asynchronous Node.js call that uses the thread pool:
 
-Note the '[libuv][21]' library used by Node.js 12.5 and earlier limits
-the number of threads to 128.  In Node.js 12.6 onward the limit
-is 1024.  You should restrict the maximum number of connections opened
-in an application, i.e. `poolMax`, to a value lower than the
-`UV_THREADPOOL_SIZE` limit.  If you have multiple pools, make sure the
-sum of all `poolMax` values is no larger than `UV_THREADPOOL_SIZE`.
+```
+// !! First file executed !!
 
-Connections can handle one database operation at a time.  Node.js
-worker threads executing database statements on a connection will wait
-until [round-trips](#roundtrips) between node-oracledb and the
-database are complete.  When an application handles a sustained number
-of user requests, and database operations take some time to execute or
-the network is slow, then all available threads may be held in use.
-This prevents other connections from beginning work and stops Node.js
-from handling more user load.  Increasing the number of worker threads
-may improve throughput and prevent [deadlocks][22].
+process.env.UV_THREADPOOL_SIZE = 10
 
-#### Parallelism on a Connection
+// ... rest of code
+```
 
-Structure your code to avoid parallel operations on a single connection.  For
-example, do not use `Promise.all()`.  Instead consider, for example, using a
-basic `for` loop and `async` to iterate through each action.  Also, instead of
-using `async.parallel()` or `async.each()` which call each of their items in
-parallel, use `async.series()` or `async.eachSeries()`.  Code will not run
-faster when parallel calls are used with a single connection since each
-connection can only ever execute one statement at a time.  Statements will still
-be executed sequentially.  If you are using one of these constructs to repeat a
-number of INSERT or UPDATE statements, then use
-[`connection.executeMany()`](#executemany) instead.  Using constructs like
+If you set it too late, the setting will be ignored and the default thread pool
+size of 4 will still be used.  Note that [`pool._logStats()`](#connpoolmonitor)
+will show the value of the variable, not the actual size of the pool.
+
+The '[libuv][21]' library used by Node.js 12.5 and earlier limits the number of
+threads to 128.  In Node.js 12.6 onward the limit is 1024.  You should restrict
+the maximum number of connections opened in an application,
+i.e. [`poolMax`](#createpoolpoolattrspoolmax), to a value lower than
+`UV_THREADPOOL_SIZE`.  If you have multiple pools, make sure the sum of all
+`poolMax` values is no larger than `UV_THREADPOOL_SIZE`.
+
+Node.js worker threads executing database statements on a connection will wait
+until [round-trips](#roundtrips) between node-oracledb and the database are
+complete.  When an application handles a sustained number of user requests, and
+database operations take some time to execute or the network is slow, then all
+available threads may be held in use.  This prevents other connections from
+beginning work and stops Node.js from handling more user load.  Increasing the
+number of worker threads may improve throughput and prevent [deadlocks][22].
+
+#### <a name="parallelism"></a> 14.3.1 Parallelism on a Connection
+
+Each connection can only execute one statement at a time.  Structure your code
+to avoid parallel operations on a single connection.  For example, do not use
+`Promise.all()`.  Instead consider, for example, using a basic `for` loop and
+`async` to iterate through each action.  Also, instead of using
+`async.parallel()` or `async.each()` which call each of their items in parallel,
+use `async.series()` or `async.eachSeries()`.  Code will not run faster when
+parallel calls are used with a single connection since only one call will be
+able to use the connection at a time.  Statements will still be executed
+sequentially.  You may end up blocking many threads.  If you want to repeat a
+number of INSERT or UPDATE statements, then consider using
+[`connection.executeMany()`](#executemany).  Using functions like
 `promise.all()` to fetch rows from [nested cursor result sets](#nestedcursors)
-can result in inconsistent data.
+can result in inconsistent data.  If you use ESlint for code validation, and it
+warns about [await in loops][179] for code that is using a single connection,
+then disable the `no-await-in-loop` rule for these cases.
 
 When you use parallel calls on a single connection, queuing of each call is done
 in the C layer via a mutex.  However libuv is not aware that a connection can
@@ -15727,3 +15739,4 @@ can be asked at [AskTom][158].
 [176]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-B28362BE-8831-4687-89CF-9F77DB3698D2
 [177]: https://download.oracle.com/ocomdocs/global/Oracle-Net-19c-Easy-Connect-Plus.pdf
 [178]: https://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/adb-continuousavailability-5169724.pdf
+[179]: https://eslint.org/docs/rules/no-await-in-loop
