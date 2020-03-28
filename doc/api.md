@@ -336,12 +336,13 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 10.2.4 [`find()`](#sodacollfind)
             - 10.2.4.1 [SodaOperation Class](#sodaoperationclass)
                 - 10.2.4.1.1 [Non-terminal SodaOperation Methods](#sodaoperationclassnonterm)
-                    - 10.2.4.1.1.1 [`filter()`](#sodaoperationclassfilter)
-                    - 10.2.4.1.1.2 [`key()`](#sodaoperationclasskey)
-                    - 10.2.4.1.1.3 [`keys()`](#sodaoperationclasskeys)
-                    - 10.2.4.1.1.4 [`limit()`](#sodaoperationclasslimit)
-                    - 10.2.4.1.1.5 [`skip()`](#sodaoperationclassskip)
-                    - 10.2.4.1.1.6 [`version()`](#sodaoperationclassversion)
+                    - 10.2.4.1.1.1 [`fetchArraySize()`](#sodaoperationclassfetcharraysize)
+                    - 10.2.4.1.1.2 [`filter()`](#sodaoperationclassfilter)
+                    - 10.2.4.1.1.3 [`key()`](#sodaoperationclasskey)
+                    - 10.2.4.1.1.4 [`keys()`](#sodaoperationclasskeys)
+                    - 10.2.4.1.1.5 [`limit()`](#sodaoperationclasslimit)
+                    - 10.2.4.1.1.6 [`skip()`](#sodaoperationclassskip)
+                    - 10.2.4.1.1.7 [`version()`](#sodaoperationclassversion)
                 - 10.2.4.1.2 [Terminal SodaOperation Methods](#sodaoperationclassterm)
                     - 10.2.4.1.2.1 [`count()`](#sodaoperationclasscount)
                     - 10.2.4.1.2.2 [`getCursor()`](#sodaoperationclassgetcursor)
@@ -6123,7 +6124,32 @@ then only documents with the key "b" are matched. If
 `find().keys(["a","b"]).key("c")...` is used, then only the document
 with the key "c" is matched.
 
-###### <a name="sodaoperationclassfilter"></a> 10.2.4.1.1.1 `sodaOperation.filter()`
+###### <a name="sodaoperationclassfetcharraysize"></a> 10.2.4.1.1.1 `sodaOperation.fetchArraySize()`
+
+##### Prototype
+
+```
+fetchArraySize(Number size)
+```
+
+##### Description
+
+This property sets the size of an internal buffer used for fetching documents
+from a collection with the terminal SodaOperation methods
+[`getCursor()`](#sodaoperationclassgetcursor) and
+[`getDocuments()`](#sodaoperationclassgetdocuments).  Changing `size` may affect
+performance but does not affect how many documents are returned.
+
+If `fetchArraySize()` is not used, the size defaults to the current value of
+[`oracledb.fetchArraySize`](#propdbfetcharraysize).
+
+For node-oracledb examples, see [SODA Query-by-Example Searches for
+JSON Documents](#sodaqbesearches)
+
+This method was added in node-oracledb 5.0.  It requires Oracle Client 19.5 or
+later, and Oracle Database 18.3 or later.
+
+###### <a name="sodaoperationclassfilter"></a> 10.2.4.1.1.2 `sodaOperation.filter()`
 
 ##### Prototype
 
@@ -6145,7 +6171,7 @@ JSON Documents](#sodaqbesearches)
 
 This method was added in node-oracledb 3.0.
 
-###### <a name="sodaoperationclasskey"></a> 10.2.4.1.1.2 `sodaOperation.key()`
+###### <a name="sodaoperationclasskey"></a> 10.2.4.1.1.3 `sodaOperation.key()`
 
 ##### Prototype
 
@@ -6163,7 +6189,7 @@ SODA document keys are unique.
 
 This method was added in node-oracledb 3.0.
 
-###### <a name="sodaoperationclasskeys"></a> 10.2.4.1.1.3 `sodaOperation.keys()`
+###### <a name="sodaoperationclasskeys"></a> 10.2.4.1.1.4 `sodaOperation.keys()`
 
 ##### Prototype
 
@@ -6183,7 +6209,7 @@ A maximum of 1000 keys can be used.
 
 This method was added in node-oracledb 3.0.
 
-###### <a name="sodaoperationclasslimit"></a> 10.2.4.1.1.4 `sodaOperation.limit()`
+###### <a name="sodaoperationclasslimit"></a> 10.2.4.1.1.5 `sodaOperation.limit()`
 
 ##### Prototype
 
@@ -6205,7 +6231,7 @@ The `limit()` method cannot be used in conjunction with
 
 This method was added in node-oracledb 3.0.
 
-###### <a name="sodaoperationclassskip"></a> 10.2.4.1.1.5 `sodaOperation.skip()`
+###### <a name="sodaoperationclassskip"></a> 10.2.4.1.1.6 `sodaOperation.skip()`
 
 ##### Prototype
 
@@ -6228,7 +6254,7 @@ The `skip()` method only applies to SodaOperation read operations like
 
 This method was added in node-oracledb 3.0.
 
-###### <a name="sodaoperationclassversion"></a> 10.2.4.1.1.6 `sodaOperation.version()`
+###### <a name="sodaoperationclassversion"></a> 10.2.4.1.1.7 `sodaOperation.version()`
 
 ##### Prototype
 
@@ -14398,8 +14424,13 @@ Other examples of chained read and write operations include:
 
     ```javascript
     docCursor = await collection.find().keys(["k1", "k2"]).getCursor();
+    let myDocument;
+    while ((myDocument = await docCursor.getNext())) {
+      console.log(myDocument.getContent());
+    }
+    docCursor.close();
     ```
-- To remove the documents matching the supplied keys
+- To remove the documents matching the supplied keys:
 
     ```javascript
     await collection.find().keys(["k1", "k2"])).remove();
@@ -14444,6 +14475,19 @@ Other examples of chained read and write operations include:
     const n = collection.find().count();
     ```
 
+- When using [`getCursor()`](#sodaoperationclassgetcursor) and
+  [`getDocuments()`](#sodaoperationclassgetdocuments) to return a number
+  of documents, performance of document retrieval can be tuned by
+  setting [`oracledb.fetchArraySize`](#propdbfetcharraysize) or using
+  the `find()` non-terminal
+  [`fetchArraySize()`](#sodaoperationclassfetcharraysize).  For example,
+  to get all documents in a collection:
+
+    ```javascript
+    const documents = await coll.find().fetchArraySize(500).getDocuments();
+    ```
+
+
 The [`sodaCollection.find()`](#sodacollfind) operators that return documents
 produce complete SodaDocument objects that can be used for reading document
 content and attributes such as the key.  They can also be used for passing to
@@ -14480,6 +14524,7 @@ Some QBE examples are:
     const n = await collection.find().filter({"age": {"$lt": 30},
                                               "address.city": "San Francisco",
                                               "salary": {"$gt": 500000}}).count();
+    console.log(n);
     ```
 
 - To return all documents that have an age less than 30, an address in
@@ -14489,6 +14534,11 @@ Some QBE examples are:
     const docCursor = await collection.find().filter({"age": {"$lt": 30},
                                                       "address.city": "San Francisco",
                                                       "salary": {"$gt": 500000}}).getCursor();
+    let myDocument;
+    while ((myDocument = await docCursor.getNext())) {
+      console.log(myDocument.getContent());
+    }
+    docCursor.close();
     ```
 
 - Same as the previous example, but allowing for pagination of results
@@ -14559,7 +14609,7 @@ To perform text searches through documents, a [JSON search index][149]
 must be defined.  For example:
 
 ```javascript
-await collection.createIndex({ name : "mySearchIdx");
+await collection.createIndex({"name": "mySearchIdx"});
 ```
 
 See [SODA Index Specifications (Reference)][119] for information on

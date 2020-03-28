@@ -441,7 +441,13 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
     if (!baton->sodaOperOptions)
         return njsBaton_setError(baton, errInsufficientMemory);
 
+    // set non-zero defaults
+    baton->sodaOperOptions->fetchArraySize = baton->oracleDb->fetchArraySize;
+
     // process each of the options
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "fetchArraySize",
+            &baton->sodaOperOptions->fetchArraySize, NULL))
+        return false;
     if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "limit",
             &baton->sodaOperOptions->limit, NULL))
         return false;

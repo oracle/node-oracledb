@@ -4722,3 +4722,10 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     237.9 DB_TYPE_TIMESTAMP_LTZ
     237.10 DB_TYPE_TIMESTAMP_TZ
     237.10 DB_TYPE_RAW
+
+238. soda14.js
+    238.1 the fetchArraySize() method works
+    238.2 fetchArraySize value is larger than the size of collection
+    238.3 Negative - call fetchArraySize() without parameter
+    238.4 fetchArraySize is 0
+    238.5 Negative - fetchArraySize is a negative value

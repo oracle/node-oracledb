@@ -51,14 +51,20 @@ and
   documentation](https://oracle.github.io/node-oracledb/INSTALL.html#docker) for changes
   to the Node.js image ([Issue #1201](https://github.com/oracle/node-oracledb/issues/1201)).
 
-- [SODA](https://oracle.github.io/node-oracledb/doc/api.html#sodaoverview) changes for Oracle Database 20c:
+- [SODA](https://oracle.github.io/node-oracledb/doc/api.html#sodaoverview) changes:
 
-    - Added SODA 'upsert' functions
+    - The value of `oracledb.fetchArraySize` now tunes SODA `getCursor()` and
+      `getDocuments()` performance when using Oracle Client 19.5.  Added the
+      SODA `find()` non-terminal function
+      [`fetchArraySize()`](https://oracle.github.io/node-oracledb/doc/api.html#sodaoperationclassfetcharraysize)
+      to tune individual `find()` operations.
+
+    - Added Oracle Database 20c SODA 'upsert' functions
       [`sodaCollection.save()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollsave)
       and
       [`sodaCollection.saveAndGet()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacollsaveandget).
 
-    - Added SODA function
+    - Added Oracle Database 20c SODA function
       [`sodaCollection.truncate()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacolltruncate).
 
 - Fixed Lob class
