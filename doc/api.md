@@ -12102,11 +12102,14 @@ const bindVars = [
 
 ### <a name="dmlreturn"></a> 20.3 DML RETURNING Bind Parameters
 
-"DML RETURNING" statements (such as `INSERT ... RETURNING ... INTO
-...`) are a way information can be returned about row changes from
-[DML][14] statements.  For example you can use DML RETURNING to get
-the ROWIDs of newly inserted rows.  Another common use case is to
-return [auto incremented column values ](#autoincrement).
+"DML RETURNING" (also known as "RETURNING INTO") statements such as `INSERT INTO
+tab VALUES (:1) RETURNING ROWID INTO :2` are a way information can be returned
+about row changes from [DML][14] statements.  For example you can use DML
+RETURNING to get the ROWIDs of newly inserted rows.  Another common use case is
+to return [auto incremented column values ](#autoincrement).
+
+For statements that affect single rows, you may prefer to use
+[`lastRowid`](#execlastrowid).
 
 Bind parameters for DML RETURNING statements can use `oracledb.BLOB`,
 `oracledb.CLOB`, `oracledb.STRING`, `oracledb.NUMBER` or `oracledb.DATE` for the
@@ -12133,9 +12136,10 @@ returned array length is not greater than one.  This will help
 identify invalid data or an incorrect `WHERE` clause that causes more
 results to be returned.
 
-No duplicate binds are allowed in a DML statement with a `RETURNING`
-clause, and no duplication is allowed between bind parameters in the
-DML section and the `RETURNING` section of the statement.
+Duplicate binds (using the same bind name more than once in the statement) are
+not allowed in a DML statement with a `RETURNING` clause, and no duplication is
+allowed between bind parameters in the DML section and the `RETURNING` section
+of the statement.
 
 An example of DML RETURNING binds is:
 
