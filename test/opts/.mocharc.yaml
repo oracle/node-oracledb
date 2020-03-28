@@ -176,10 +176,10 @@ spec:
   - test/dataTypeXML.js
   - test/deferLibInit.js
   - test/sessionTag.js
-  - test/instanceof2.js
+  - test/sodaInstanceof.js
   - test/plsqlBindList.js
   - test/fetchRawAsString.js
-  - test/writableProperties2.js
+  - test/sodaOverwrite.js
   - test/fetchBinaryTypesAsString.js
   - test/currentSchema.js
   - test/implicitResults.js

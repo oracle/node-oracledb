@@ -4392,7 +4392,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     185.8 Negative - unsubscribe nonexistent subscriptions
     185.9 Negative - unsubscribe the invalid subscription
 
-186. instanceof2.js
+186. sodaInstanceof.js
     186.1 instanceof checks for SODA classes
 
 187. plsqlBindList.js
@@ -4427,7 +4427,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     188.9 Insert a string exceeds maximum lenght of RAW
     188.10 Insert null to RAW column then fetch it as string
 
-189. writableProperties2.js
+189. sodaOverwrite.js
     189.1 Allows overwriting of public methods on SodaDatabase instance
     189.2 Allows overwriting of public methods on SodaDocument instance
     189.3 Allows overwriting of public methods on SodaCollection instance

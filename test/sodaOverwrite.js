@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -16,10 +16,10 @@
  * limitations under the License.
  *
  * NAME
- *   186. instanceof2.js
+ *   189. sodaOverwrite.js
  *
  * DESCRIPTION
- *   The instanceof checks for SODA classes.
+ *   Test overwriting of public methods on SodaDatabase instance
  *
  *****************************************************************************/
 'use strict';
@@ -30,16 +30,28 @@ const dbConfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('189. writableProperties2.js', function() {
+describe('189. sodaOverwrite.js', function() {
 
   let conn, sodaDocument, sodaDB, sodaCollection, sodaOperation, sodaCursor;
 
   before(async function() {
-    const runnable = await testsUtil.checkPrerequisites();
-    if (!runnable) {
+
+    let isSodaRunnable = await testsUtil.isSodaRunnable();
+
+    const clientVersion = oracledb.oracleClientVersion;
+    let isClientOK;
+    if (clientVersion < 2000000000) {
+      isClientOK = false;
+    } else {
+      isClientOK = true;
+    }
+
+    const isRunnable = isClientOK && isSodaRunnable;
+    if (!isRunnable) {
       this.skip();
       return;
     }
+
     await sodaUtil.cleanup();
 
     try {
