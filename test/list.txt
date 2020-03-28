@@ -336,19 +336,6 @@ Overview of node-oracledb functional tests
         15.2.6 should prevent invoking close after conversion to stream
         15.2.7 should prevent calling toQueryStream more than once
 
-16. promises.js
-    16.1 returns a promise from oracledb.getConnection
-    16.2 returns a promise from oracledb.createPool
-    16.3 returns a promise from pool.terminate
-    16.4 returns a promise from pool.getConnection
-    16.5 returns a promise from connection.release
-    16.6 returns a promise from connection.execute
-    16.7 returns a promise from connection.commit
-    16.8 returns a promise form connection.rollback
-    16.9 returns a promise from resultSet.close
-    16.10 returns a promise from resultSet.getRow
-    16.11 returns a promise from resultSet.getRows
-
 17. extendedMetaData.js
     17.1 extendedMetaData as an execute() option
         17.1.1 default value is 'false' when not setting
