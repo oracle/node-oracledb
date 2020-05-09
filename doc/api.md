@@ -455,7 +455,8 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - 15.1.7.10 [Fetching Oracle Database Objects and Collections](#fetchobjects)
         - 15.1.8 [Limiting Rows and Creating Paged Datasets](#pagingdata)
         - 15.1.9 [Auto-Increment Columns](#autoincrement)
-    - 15.2 [Cursor Management](#cursors1000)
+    - 15.2 [Client Result Cache](#clientresultcache)
+    - 15.3 [Cursor Management](#cursors1000)
 16. [PL/SQL Execution](#plsqlexecution)
     - 16.1 [PL/SQL Stored Procedures](#plsqlproc)
     - 16.2 [PL/SQL Stored Functions](#plsqlfunc)
@@ -10715,17 +10716,53 @@ const result = await connection.execute(
 console.log(result.outBinds.id);  // print the ID of the inserted row
 ```
 
-### <a name="cursors1000"></a> 15.2 Cursor Management
+### <a name="clientresultcache"></a> 15.2 Client Result Cache
 
-Developers starting out with Node have to get to grips with the
-'different' programming style of JavaScript that seems to cause
-methods to be called when least expected!  While you are still in the
-initial hacking-around-with-node-oracledb phase you may sometimes
-encounter the error *ORA-01000: maximum open cursors exceeded*.  A
-cursor is a "handle for the session-specific private SQL area that
-holds a parsed SQL statement and other processing information".
+Node-oracledb applications can use Oracle Database's [Client Result Cache][180].
+The CRC enables client-side caching of SQL query (SELECT statement) results in
+client memory for immediate use when the same query is re-executed.  This is
+useful for reducing the cost of queries for small, mostly static, lookup tables,
+such as for postal codes.  CRC reduces network round-trips, and also reduces
+database server CPU usage.
 
-Here are things to do when you see an *ORA-1000*:
+The cache is at the application process level.  Access and invalidation is
+managed by the Oracle Client libraries.  This removes the need for extra
+application logic, or external utilities, to implement a cache.
+
+CRC can be enabled by setting the [database parameters][181]
+`CLIENT_RESULT_CACHE_SIZE` and `CLIENT_RESULT_CACHE_LAG`, and then restarting
+the database, for example:
+
+```sql
+SQL> ALTER SYSTEM SET CLIENT_RESULT_CACHE_LAG = 3000 SCOPE=SPFILE;
+SQL> ALTER SYSTEM SET CLIENT_RESULT_CACHE_SIZE = 64K SCOPE=SPFILE;
+SQL> STARTUP FORCE
+```
+
+CRC can alternatively be configured in an [`oraaccess.xml`](#oraaccess) or
+[`sqlnet.ora`](#tnsadmin) file on the Node.js host, see [Client Configuration
+Parameters][182].
+
+Tables can then be created, or altered, so repeated queries use CRC.  This
+allows existing applications to use CRC with needing modification.  For example:
+
+```sql
+SQL> CREATE TABLE cities (id number, name varchar2(40)) RESULT_CACHE (MODE FORCE);
+SQL> ALTER TABLE locations RESULT_CACHE (MODE FORCE);
+```
+
+Alternatively, hints can be used in SQL statements.  For example:
+
+```sql
+SELECT /*+ result_cache */ postal_code FROM locations
+```
+
+### <a name="cursors1000"></a> 15.3 Cursor Management
+
+A cursor is a "handle for the session-specific private SQL area that holds a
+parsed SQL statement and other processing information".  If your application
+returns the error *ORA-1000: maximum open cursors exceeded* here are possible
+solutions:
 
 - Avoid having too many incompletely processed statements open at one
   time:
@@ -10778,16 +10815,15 @@ Here are things to do when you see an *ORA-1000*:
   ResultSets that have not been released (in neither situation are
   these yet cached), will also consume a cursor.  Make sure that
   *open_cursors* is large enough to accommodate the maximum open
-  cursors any connection may have.  The upper bound required is
-  *stmtCacheSize* + the maximum number of executing statements in a
+  cursors any connection may have.  The upper bound required is the sum of
+  *stmtCacheSize* and the maximum number of executing statements in a
   connection.
 
   Remember this is all per connection. Also cache management happens
   when statements are internally released.  The majority of your
   connections may use less than *open_cursors* cursors, but if one
   connection is at the limit and it then tries to execute a new
-  statement, that connection will get *ORA-1000: maximum open cursors
-  exceeded*.
+  statement, that connection will get *ORA-1000*.
 
 ## <a name="plsqlexecution"></a> 16. PL/SQL Execution
 
@@ -15794,3 +15830,6 @@ can be asked at [AskTom][158].
 [177]: https://download.oracle.com/ocomdocs/global/Oracle-Net-19c-Easy-Connect-Plus.pdf
 [178]: https://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/adb-continuousavailability-5169724.pdf
 [179]: https://eslint.org/docs/rules/no-await-in-loop
+[180]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-35CB2592-7588-4C2D-9075-6F639F25425E
+[181]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A9D4A5F5-B939-48FF-80AE-0228E7314C7D
+[182]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E63D75A1-FCAA-4A54-A3D2-B068442CE766
