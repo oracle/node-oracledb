@@ -3636,6 +3636,11 @@ To get query metadata without fetching rows, use a
 not call `getRow()` or `getRows()`.  Preferably use a query clause
 such as `WHERE 1 = 0` so the database does minimal work.
 
+If you wish to change the case of `name`, then use a column alias in your query.
+For example, the query `select mycol from mytab` will return the `name` as
+'MYCOL'.  However, executing `select mycol as "myCol" from mytab` will return
+the name 'myCol'.
+
 See [Query Column Metadata](#querymeta) for examples.
 
 ###### <a name="execoutbinds"></a> 4.2.6.4.4 `outBinds`
