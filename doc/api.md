@@ -7937,15 +7937,18 @@ const connection = await oracledb.getConnection(
 
 ### <a name="numberofthreads"></a> 14.3 Connections, Threads, and Parallelism
 
-If you open more than four connections, such as via
-increasing [`poolMax`](#proppoolpoolmax), you should increase the
-number of worker threads available to node-oracledb.  The thread pool
-size should be at least equal to the maximum number of connections.
-If the application does database and non-database work concurrently,
-extra threads could also be required for optimal throughput.
+If you open more than four connections, such as via increasing
+[`poolMax`](#proppoolpoolmax), you should increase the number of worker threads
+available to node-oracledb.  A thread pool that is too small can cause
+connection requests to fail with the error *NJS-040: connection request
+timeout* or *NJS-076: connection request rejected*.
+
+The thread pool size should be equal to, or greater than, the maximum number of
+connections.  If the application does database and non-database work
+concurrently, then additional threads could also be required for optimal throughput.
 
 Increase the thread pool size by setting the environment variable
-[UV_THREADPOOL_SIZE][20] before starting Node.  For example, in a
+[UV_THREADPOOL_SIZE][20] before starting Node.js.  For example, in a
 Linux terminal, the number of Node.js worker threads can be increased
 to 10 by using the following command:
 
