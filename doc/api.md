@@ -3865,8 +3865,8 @@ for INSERT, UPDATE, DELETE or MERGE statements.
 
 The default value is *false*.
 
-This feature works when node-oracledb is using version 12, or later,
-of the Oracle client library.
+This feature works when node-oracledb is using version 12, or later, of the
+Oracle client library, and using Oracle Database 12, or later.
 
 ##### <a name="executemanycallback"></a> 4.2.7.4 `executeMany()`: Callback Function
 
