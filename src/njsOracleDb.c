@@ -384,6 +384,7 @@ static bool njsOracleDb_createPoolAsync(njsBaton *baton)
     params.getMode = (baton->poolMaxPerShard > 0) ?
             DPI_MODE_POOL_GET_TIMEDWAIT : DPI_MODE_POOL_GET_WAIT;
     params.waitTimeout = baton->poolWaitTimeout;
+    params.timeout = baton->poolTimeout;
     params.externalAuth = baton->externalAuth;
     params.homogeneous = baton->homogeneous;
     params.plsqlFixupCallback = baton->plsqlFixupCallback;
@@ -405,9 +406,6 @@ static bool njsOracleDb_createPoolAsync(njsBaton *baton)
             (uint32_t) baton->passwordLength, baton->connectString,
             (uint32_t) baton->connectStringLength, &commonParams,
             &params, &baton->dpiPoolHandle) < 0) {
-        return njsBaton_setErrorDPI(baton);
-    } else if (dpiPool_setTimeout(baton->dpiPoolHandle,
-            baton->poolTimeout) < 0) {
         return njsBaton_setErrorDPI(baton);
     } else if (dpiPool_setStmtCacheSize(baton->dpiPoolHandle,
             baton->stmtCacheSize) < 0) {

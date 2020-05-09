@@ -26,10 +26,16 @@ and
   `oracledb.DB_TYPE_TIMESTAMP`, `oracledb.DB_TYPE_TIMESTAMP_LTZ`,
   `oracledb.DB_TYPE_TIMESTAMP_TZ` and `oracledb.DB_TYPE_RAW`.
 
-- Added
-  [`oracledb.queueMax`](https://oracle.github.io/node-oracledb/doc/api.html#propdbqueuemax)
-  and equivalent `createPool()` attributes to limit the number of pending
-  `pool.getConnection()` calls in the pool queue ([Issue #514](https://github.com/oracle/node-oracledb/issues/514)).
+- Connection Pool changes:
+
+    - Added
+      [`oracledb.queueMax`](https://oracle.github.io/node-oracledb/doc/api.html#propdbqueuemax)
+      and equivalent `createPool()` attributes to limit the number of pending
+      `pool.getConnection()` calls in the pool queue ([Issue #514](https://github.com/oracle/node-oracledb/issues/514)).
+
+    - Made an internal change to use an Oracle Client 20 Session Pool feature
+      allowing node-oracledb connection pools to shrink to `poolMin` even when
+      there is no pool activity.
 
 - Removed support for custom Promise libraries.  Use the native Node.js Promise
   implementation instead.  This change was necessitated by the refactored
