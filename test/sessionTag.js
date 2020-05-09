@@ -1454,23 +1454,10 @@ describe('184. sessionTag.js', function () {
         await conn.close();
         resetTag();
         await sleep(10000);
-        should.strictEqual(pool.connectionsOpen, 1);
         should.strictEqual(pool.connectionsInUse, 0);
-        conn = await pool.getConnection({tag: tag1});
-        should.strictEqual(callbackRequestedTag, tag1);
-        should.strictEqual(callbackActualTag, '');
-        should.strictEqual(pool.connectionsOpen, 1);
-        should.strictEqual(pool.connectionsInUse, 1);
       } catch (err) {
         should.not.exist(err);
       } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch(err) {
-            should.not.exist(err);
-          }
-        }
         if (pool) {
           try {
             await pool.close();
