@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -32,6 +32,11 @@
  *   This example uses Node 8's async/await syntax.
  *
  *****************************************************************************/
+
+// If you increase poolMax, you must increase UV_THREADPOOL_SIZE before Node.js
+// starts its thread pool.  If you set UV_THREADPOOL_SIZE too late, the value is
+// ignored and the default size of 4 is used.
+// process.env.UV_THREADPOOL_SIZE = 4;
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
