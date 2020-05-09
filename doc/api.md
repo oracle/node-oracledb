@@ -10804,7 +10804,7 @@ CRC can alternatively be configured in an [`oraaccess.xml`](#oraaccess) or
 Parameters][182].
 
 Tables can then be created, or altered, so repeated queries use CRC.  This
-allows existing applications to use CRC with needing modification.  For example:
+allows existing applications to use CRC without needing modification.  For example:
 
 ```sql
 SQL> CREATE TABLE cities (id number, name varchar2(40)) RESULT_CACHE (MODE FORCE);
