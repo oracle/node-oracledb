@@ -3511,11 +3511,6 @@ The `type` property can be set to one of:
 Strings and Buffers created for LOB columns will generally be limited
 by Node.js and V8 memory restrictions.
 
-Columns fetched from REF CURSORS are not mapped by `fetchInfo`
-settings in the `execute()` call.  Use the
-global [`fetchAsString`](#propdbfetchasstring)
-or [`fetchAsBuffer`](#propdbfetchasbuffer) settings instead.
-
 See [Query Result Type Mapping](#typemap) for more information on query type
 mapping.
 
