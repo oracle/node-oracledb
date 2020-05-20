@@ -12569,6 +12569,11 @@ multiple hard-coded SQL statements, each with a different ORDER BY.
 You can query and insert most Oracle Database objects and collections,
 with some [limitations](#objectlimitations).
 
+Performance-sensitive applications should consider using scalar types instead of
+objects. If you do use objects, avoid calling
+[`connection.getDbObjectClass()`](#getdbobjectclass) unnecessarily, and avoid
+objects with large numbers of attributes.
+
 ### <a name="objectinsert"></a> 21.1 Inserting Objects
 
 As an example, the Oracle Spatial type [SDO_GEOMETRY][139] can easily
@@ -15113,20 +15118,21 @@ Refer to the [Oracle Database Administrator's Guide][173] for more options.
 
 ## <a name="roundtrips"></a> 31. Database Round-trips
 
-Along with tuning an application's architecture and tuning its SQL
-statements, a general performance and scalability goal is to minimize
-[round-trips][124].  A round-trip is defined as the trip from the
-Oracle client libraries (used by node-oracledb) to the database and
-back.
+A round-trip is defined as the trip from the Oracle client libraries (used by
+node-oracledb) to the database and back.  Calling each node-oracledb function,
+or accessing each attribute, will require zero or more round-trips.  Along with
+tuning an application's architecture and tuning its SQL statements, a general
+performance and scalability goal is to minimize [round-trips][124].
 
 Some general tips for reducing round-trips are:
 
 - Tune [`fetchArraySize`](#propdbfetcharraysize).
 - Use [`executeMany()`](#executemany) for optimal DML execution.
 - Only commit when necessary.  Use [`autoCommit`](#propexecautocommit) on the last statement of a transaction.
-- Avoid over pinging with [`connection.ping()`](#connectionping) or by setting [`poolPingInterval`](#proppoolpoolpinginterval) too low.
 - For connection pools, use a callback to set connection state, see [Connection Tagging and Session State](#connpooltagging)
 - Make use of PL/SQL procedures which execute multiple SQL statements instead of executing them individually from node-oracledb.
+- Use scalar types instead of [Oracle Database object types](#objects).
+- Avoid overuse of [`connection.ping()`](#connectionping), and avoid setting [`poolPingInterval`](#proppoolpoolpinginterval) too low.
 
 Oracle's [Automatic Workload Repository][62] (AWR) reports show
 'SQL*Net roundtrips to/from client' and are useful for finding the
