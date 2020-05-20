@@ -356,10 +356,11 @@ node example.js
 
 ### <a name="instzip"></a> 3.3 Node-oracledb Installation on Linux with Instant Client ZIP files
 
-Follow these steps if your database is on a remote machine and your
-Linux distribution uses the Debian package format, for example if you
-are using Ubuntu.  These steps can also be used if you prefer not to
-install RPMs.
+Follow these steps if your database is on a remote machine and your Linux
+distribution uses the Debian package format, for example if you are using
+Ubuntu.  (Note: you should review Oracle's supported distributions before
+choosing an operating system).  These steps can also be used if you prefer not
+to install RPMs.
 
 Questions and issues can be posted as [GitHub Issues][10].
 
@@ -1471,12 +1472,14 @@ RUN  yum -y install oracle-release-el7 oracle-nodejs-release-el7 && \
 ```
 
 Alternatively you may prefer to use a [Node.js image from
-Docker Hub][56], for
-example using:
+Docker Hub][56], for example using:
 
 ```
 FROM node:12-buster-slim
 ```
+
+Note: you should review Oracle's supported distributions before choosing an
+operating system.
 
 #### Installing Instant Client in Docker
 
@@ -1504,7 +1507,9 @@ install Instant Client.  Three methods are shown below.
 2. Automatically downloading an Instant Client ZIP file
 
    You can automatically download an Instant Client ZIP file during image
-   creation.  This is most useful on Debian-based operating systems.
+   creation.  This is most useful on Debian-based operating systems.  (Note: you
+   should review Oracle's supported distributions before choosing an operating
+   system).
 
    The `libaio` (or `libaio1`), `wget` and `unzip` packages will need to be
    added manually.
