@@ -88,6 +88,14 @@ and
 - Removed use of git in `package/buildpackage.js` making offline builds cleaner
   for self-hosted node-oracledb.
 
+- Updated macOS installation instructions and building for recent Node.js
+  versions.  Oracle's `libclntsh.dylib` needs to in, or symbolically linked to,
+  `/usr/local/lib`. Using `~/lib` is no longer possible.  See the [installation
+  instructions](https://oracle.github.io/node-oracledb/INSTALL.html#instosx).
+  This helps resolve the DPI-1047 runtime error `dlopen(libclntsh.dylib, 1):
+  image not found` reported on macOS Mojave with Node.js versions 10.20.0,
+  12.16.2, 13.12.0, and later.
+
 - Fixed how the module binary is found when using Webpack.
 
   Webpack users should copy the node-oracledb binary into a sub-directory of the

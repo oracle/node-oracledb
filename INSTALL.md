@@ -56,13 +56,14 @@ The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
 This node-oracledb release has been tested with Node.js 10 and 12 on 64-bit
-Oracle Linux, Windows and macOS.  Note Node.js 10.16, or later is required.  The
-add-on can also build on some 32-bit Linux, 32-bit Windows, Solaris and AIX
-environments, but these architectures have not been fully tested.  Older
-versions of node-oracledb may work with older versions of Node.js.
+Oracle Linux, Windows and macOS Mojave 10.14.  Note Node.js 10.16, or later is
+required.  The add-on can also build on some 32-bit Linux, 32-bit Windows,
+Solaris and AIX environments, but these architectures have not been fully
+tested.  Older versions of node-oracledb may work with older versions of
+Node.js.
 
 Node-oracledb requires Oracle Client libraries version 11.2 or later, and
-connect to Oracle Database 9.2 or later, depending on the Oracle Client library
+can connect to Oracle Database 9.2 or later, depending on the Oracle Client library
 version.  The architecture is shown in [Node-oracledb Architecture][60].
 
 Node-oracledb is an [add-on](https://nodejs.org/api/addons.html)
@@ -91,7 +92,7 @@ guaranteed to be available or usable in your environment.
     - If a binary is not available, you will need to compile node-oracledb
       from source code:
 
-        - Install [Python 2.7][2] (Note: Node.js tools should work with Python 3).
+        - Install [Python 2.7][2] (Note: recent Node.js tools should work with Python 3).
 
         - Install a C Compiler such as Xcode, GCC, Visual Studio
           2017, or similar.
@@ -102,8 +103,8 @@ guaranteed to be available or usable in your environment.
 
 - Add Oracle 19, 18, 12, or 11.2 client libraries to your operating
   system library search path such as `PATH` on Windows or
-  `LD_LIBRARY_PATH` on Linux.  On macOS move the libraries to `~/lib`
-  or `/usr/local/lib`.
+  `LD_LIBRARY_PATH` on Linux.  On macOS link the libraries to
+  `/usr/local/lib`.
 
     - If your database is remote, then get the libraries by
       downloading and unzipping the free [Oracle Instant Client][3]
@@ -600,12 +601,14 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The pre-built binaries were built on macOS Mojave, 10.14.5.
+The pre-built binaries were built on macOS Mojave, 10.14.6.
 
-Oracle Instant Client libraries are required on macOS.  There is no
-native Oracle Database for macOS but one can easily be run in a Linux
-virtual machine, see [The Easiest Way to Install Oracle Database on
-Apple Mac OS X][21].
+Oracle Instant Client libraries are required on macOS.  Note that Oracle Instant
+Client 19c and earlier are not supported on macOS Catalina 10.15.
+
+There is no native Oracle Database for macOS but one can easily be run in a
+Linux virtual machine, see [The Easiest Way to Install Oracle Database on Apple
+macOS][21].
 
 #### 3.5.2 Install Node.js
 
@@ -641,34 +644,31 @@ cd ~
 unzip instantclient-basic-macos.x64-19.3.0.0.0dbru.zip
 ```
 
-Create a symbolic link for the 'client shared library' in the user default
-library path such as in `~/lib` or `/usr/local/lib`.  If the `lib`
-sub-directory does not exist, you can create it.  For example:
+Create a symbolic link for the 'client shared library' in `/usr/local/lib`.  If
+the `lib` sub-directory does not exist, you can create it.  For example:
 
 ```
-mkdir ~/lib
-ln -s ~/instantclient_19_3/libclntsh.dylib ~/lib/
+mkdir /usr/local/lib
+ln -s ~/instantclient_19_3/libclntsh.dylib /usr/local/lib
 ```
 
-If you now run `ls -l ~/lib/libclntsh.dylib` you will see something like::
+If you now run `ls -l /usr/local/lib/libclntsh.dylib` you will see something like::
 
 ```
-lrwxr-xr-x  1 yourname  staff  48 12 Nov 15:04 /Users/yourname/lib/libclntsh.dylib -> /Users/yourname/instantclient_19_3/libclntsh.dylib
+lrwxr-xr-x  1 yourname  staff  48 12 Nov 15:04 /usr/local/lib/libclntsh.dylib -> /Users/yourname/instantclient_19_3/libclntsh.dylib
 ```
 
 Alternatively, copy the required OCI libraries, for example:
 
 ```
-mkdir ~/lib
-cp ~/instantclient_19_3/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} ~/lib/
+mkdir /usr/local/lib
+cp ~/instantclient_19_3/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} /usr/local/lib/
 ```
 
-For Instant Client 11.2, the OCI libraries must be copied. For example:
+Setting `DYLD_LIBRARY_PATH` to the directory containing Instant Client is
+usable, but only if the variable is set in the shell that invokes Node.js.
 
-```
-mkdir ~/lib
-cp ~/instantclient_11_2/{libclntsh.dylib.11.1,libnnz11.dylib,libociei.dylib} ~/lib/
-```
+To use Instant Client 11.2, set `DYLD_LIBRARY_PATH`.
 
 #### 3.5.5 Optionally create the default Oracle Client configuration directory
 
@@ -679,7 +679,7 @@ If you intend to co-locate optional Oracle configuration files such as
 create this:
 
 ```
-sudo mkdir -p ~/instantclient_12_2/network/admin
+mkdir -p ~/instantclient_12_2/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
@@ -1843,8 +1843,7 @@ If creating a connection fails:
   expected version first in `PATH` (on Windows) or `LD_LIBRARY_PATH`
   (on Linux)?
 
-- On macOS, did you install Oracle Instant Client libraries in `~/lib`
-  or `/usr/local/lib`?
+- On macOS, did you install Oracle Instant Client libraries in `/usr/local/lib`?
 
 Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [Slack][48] ([link to join Slack][49]).

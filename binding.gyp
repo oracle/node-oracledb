@@ -75,7 +75,7 @@
           "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
           "GCC_ENABLE_CPP_RTTI": "YES"
         },
-          "libraries"     : ['-ldl', '-lpthread']
+          "libraries"     : ['-ldl', '-lpthread', '-Wl,-rpath,/usr/local/lib']
       }
     ],
     [
