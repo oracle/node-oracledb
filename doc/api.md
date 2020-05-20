@@ -7957,11 +7957,11 @@ to 10 by using the following command:
 $ UV_THREADPOOL_SIZE=10 node myapp.js
 ```
 
-If the value is set inside the application then ensure it is set prior to any
-asynchronous Node.js call that uses the thread pool:
+On non-Windows platforms, the value can also be set inside the application.  It
+must be set prior to any asynchronous Node.js call that uses the thread pool:
 
 ```
-// !! First file executed !!
+// !! First file executed.  Non-Windows only !!
 
 process.env.UV_THREADPOOL_SIZE = 10
 
