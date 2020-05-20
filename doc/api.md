@@ -7673,6 +7673,9 @@ The `sqlnet.ora` file's `WALLET_LOCATION` path should be set to the directory
 containing `cwallet.sso`.  For Oracle Autonomous Database use of wallets, see
 [Connecting to Oracle Autonomous Database](#connectionadb).
 
+See [Connections and High Availability](#connectionha) for discussion on Oracle
+Net configuration.
+
 #### <a name="oraaccess"></a> 14.1.3. Optional Oracle Client Configuration
 
 If the Oracle Client Libraries used by node-oracledb are version 12,
@@ -7788,7 +7791,7 @@ connection scenarios.  For example, if a firewall terminates idle connections
 every five minutes, you may decide it is more efficient to keep connections
 alive instead of having the overhead of recreation.  Your connection string
 could be `"mydbmachine.example.com/orclpdb1?expire_time=2"` to send packets
-every two minutes with the [`SQLNET.EXPIRE_TIME`][159] feature.  The general
+every two minutes with the [`EXPIRE_TIME`][159] feature.  The general
 recommendation for `EXPIRE_TIME` is to use a value that is slightly less than
 half of the termination period.
 
@@ -9399,13 +9402,13 @@ killing idle connections.  The network layers can also be configured to avoid
 long TCP timeouts.  These timeouts can cause applications to hang if there is a
 network failure.
 
-A [`sqlnet.ora`][136] option [`SQLNET.EXPIRE_TIME`][159] can be used to prevent
-firewalls from terminating idle connections and to adjust keepalive timeouts.
-With Oracle Client 19c, you can use `EXPIRE_TIME` in the [Easy Connect
-Plus](#easyconnect) connection string.  The general recommendation for
-`EXPIRE_TIME` is to use a value that is slightly less than half of the
-termination period.  In older versions of Oracle Client, a
-[`tnsnames.ora`](#tnsnames) connect string option [`ENABLE=BROKEN`][36] can
+With Oracle Client 19c, [`EXPIRE_TIME`][159] can be used in
+[`tnsnames.ora`](#tnsnames) connect descriptors to prevent firewalls from
+terminating idle connections and to adjust keepalive timeouts.  You can also use
+`EXPIRE_TIME` in the [Easy Connect Plus](#easyconnect) connection string.  The
+general recommendation for `EXPIRE_TIME` is to use a value that is slightly less
+than half of the termination period.  In older versions of Oracle Client, a
+[`tnsnames.ora`](#tnsnames) connect descriptor option [`ENABLE=BROKEN`][36] can
 be used instead of `EXPIRE_TIME`.  These settings can also aid detection of a
 terminated remote database server.
 
@@ -15867,7 +15870,7 @@ can be asked at [AskTom][158].
 [156]: http://yum.oracle.com/
 [157]: https://livesql.oracle.com/
 [158]: https://asktom.oracle.com/
-[159]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1070805B-0703-457C-8D2E-4EEC26193E5F
+[159]: https://docs.oracle.com/en/database/oracle/oracle-database/20/netrf/local-naming-parameters-in-tns-ora-file.html#GUID-6140611A-83FC-4C9C-B31F-A41FC2A5B12D
 [160]: https://github.com/oracle/node-oracledb/issues/699#issuecomment-524009129
 [161]: https://docs.oracle.com/en/cloud/paas/atp-cloud/atpud/manage.html
 [162]: https://www.oracle.com//cloud/free/
