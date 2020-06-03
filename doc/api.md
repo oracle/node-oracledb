@@ -1690,9 +1690,9 @@ are:
 
 `poolPingInterval` Value     | Behavior of a Pool `getConnection()` Call
 ----------|------------------------------------------
-`n` < `0` | Never checks for connection aliveness
-`n` = `0` | Always checks for connection aliveness. This value is not recommended for most applications because of the overhead in performing each ping
-`n` > `0` | Checks aliveness if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
+`n` < `0` | Never checks for connection validity
+`n` = `0` | Always checks for connection validity. This value is not recommended for most applications because of the overhead in performing each ping
+`n` > `0` | Checks validity if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
 
 This property may be overridden when [creating a connection pool](#createpool).
 
@@ -2163,7 +2163,7 @@ Number poolPingInterval
 When a pool [`getConnection()`](#getconnectionpool) is called and the
 connection has been idle in the pool for at least `poolPingInterval`
 seconds, an internal "ping" will be performed first to check the
-aliveness of the connection.
+validity of the connection.
 
 The default value is 60.
 
@@ -8584,9 +8584,9 @@ seconds.  Possible values are:
 
 `poolPingInterval` Value     | Behavior of a Pool `getConnection()` Call
 ----------|------------------------------------------
-`n` < `0` | Never checks for connection aliveness
-`n` = `0` | Always checks for connection aliveness
-`n` > `0` | Checks aliveness if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
+`n` < `0` | Never checks for connection validity
+`n` = `0` | Always checks for connection validity
+`n` > `0` | Checks validity if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
 
 A ping has the cost of a [round-trip](#roundtrips) to the database so
 always pinging after each `getConnection()` is not recommended for
