@@ -113,6 +113,9 @@
 // fetchInfo
 #define NJS_MAX_FETCH_AS_STRING_SIZE    200
 
+// encoding name to use for all strings
+#define NJS_ENCODING                    "UTF-8"
+
 
 //-----------------------------------------------------------------------------
 // enumerations
@@ -195,7 +198,7 @@ typedef enum {
     errConvertToObjAttr,
     errDblConnectionString,
     errQueueMax,
-
+    errClientLibAlreadyInitialized,
 
     // New ones should be added here
 

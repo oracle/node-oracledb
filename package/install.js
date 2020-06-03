@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -21,10 +21,6 @@
  * DESCRIPTION
  *   This script is included in the npm bundle of node-oracledb.  It
  *   is invoked by package.json during npm install.
- *
- *   The node-oracledb npm package bundles all available pre-built
- *   binaries, so this script is really just a check to see if an
- *   appropriate pre-built binary is available.
  *
  * MAINTENANCE NOTES
  *   This file should only ever 'require' packages included in core Node.js.
@@ -50,7 +46,7 @@ function error(message) { // eslint-disable-line
   console.error.apply(console, args);
 }
 
-// Print a concluding messages and quits
+// Print concluding messages and quit
 function done(err) {
   let installUrl = 'https://oracle.github.io/node-oracledb/INSTALL.html';
 
@@ -64,7 +60,6 @@ function done(err) {
     process.exit(87);
   } else { // Successfully installed
     let arch;
-    let clientUrl;
 
     if (process.arch === 'x64') {
       arch = '64-bit';
@@ -72,50 +67,21 @@ function done(err) {
       arch = '32-bit';
     }
 
-    log('********************************************************************************');
-
-    log('** Node-oracledb ' + nodbUtil.PACKAGE_JSON_VERSION + ' installed for Node.js ' + process.versions.node + ' (' + process.platform + ', ' + process.arch +')');
-
-    log('**');
-    log('** To use node-oracledb:');
-
     if (process.platform === 'linux') {
-      if (process.arch === 'x64') {
-        clientUrl = 'https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html';
-      } else {
-        clientUrl = 'https://www.oracle.com/database/technologies/instant-client/linux-x86-32-downloads.html';
-      }
-
-      log('** - Oracle Client libraries (' + arch + ') must be configured with ldconfig or LD_LIBRARY_PATH');
-      log('** - To get libraries, install an Instant Client Basic or Basic Light package from');
-      log('**   ' + clientUrl);
+      installUrl += '#linuxinstall';
     } else if (process.platform === 'darwin') {
-      clientUrl = 'https://www.oracle.com/database/technologies/instant-client/macos-intel-x86-downloads.html';
-      installUrl = 'https://oracle.github.io/node-oracledb/INSTALL.html#instosx';
-
-      log('** - Oracle Instant Client Basic or Basic Light package libraries must be in ~/lib or /usr/local/lib');
-      log('**   Download from ' + clientUrl);
+      installUrl += '#instosx';
     } else if (process.platform === 'win32') {
-      if (process.arch === 'x64') {
-        clientUrl = 'https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html';
-      } else {
-        clientUrl = 'https://www.oracle.com/database/technologies/instant-client/microsoft-windows-32-downloads.html';
-      }
-
-      log('** - Oracle Client libraries (' + arch + ') must be in your PATH environment variable');
-      log('** - To get libraries, install an Instant Client Basic or Basic Light package from');
-      log('**   ' + clientUrl);
-      log('** - A Microsoft Visual Studio Redistributable suitable for your Oracle Client library version must be available');
-      log('**   See ' + installUrl + ' for details');
-    } else {
-      clientUrl = 'https://www.oracle.com/technetwork/database/database-technologies/instant-client/overview/index.html';
-      log('** - Oracle Client libraries (' + arch + ') must be in your operating system library search path');
-      log('** - To get libraries, install an Instant Client Basic or Basic Light package from:');
-      log('**   ' + clientUrl);
+      installUrl += '#windowsinstallation';
     }
 
+    log('********************************************************************************');
+    log('** Node-oracledb ' + nodbUtil.PACKAGE_JSON_VERSION + ' installed for Node.js ' + process.versions.node + ' (' + process.platform + ', ' + process.arch +')');
     log('**');
-    log('** Installation instructions: ' + installUrl);
+    log('** To use node-oracledb:');
+    log('** - Oracle Client libraries (' + arch + ') must be available.');
+    log('** - Follow the installation instructions:');
+    log('**   ' + installUrl);
     log('********************************************************************************\n');
   }
 }

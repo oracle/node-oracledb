@@ -4,6 +4,13 @@
 
 **This release is under development**
 
+- Added a
+  [`oracledb.initOracleClient()`](https://oracle.github.io/node-oracledb/doc/api.html#odbinitoracleclient)
+  function to specify the directory that the Oracle Client libraries and
+  optional configuration files should be located from, and to specify other
+  configuration values, see [Initializing
+  Node-oracledb](https://oracle.github.io/node-oracledb/doc/api.html#initnodeoracledb).
+
 - Added database instance startup and shutdown functions
 [`oracledb.startup()`](https://oracle.github.io/node-oracledb/doc/api.html#odbstartup),
 [`oracledb.shutdown()`](https://oracle.github.io/node-oracledb/doc/api.html#odbshutdown),

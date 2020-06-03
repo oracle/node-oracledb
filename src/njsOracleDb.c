@@ -28,6 +28,7 @@
 // class methods
 static NJS_NAPI_METHOD(njsOracleDb_createPool);
 static NJS_NAPI_METHOD(njsOracleDb_getConnection);
+static NJS_NAPI_METHOD(njsOracleDb_initOracleClient);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsOracleDb_createPoolAsync);
@@ -95,7 +96,7 @@ static NJS_NAPI_FINALIZE(njsOracleDb_finalize);
 static bool njsOracleDb_initCommonCreateParams(njsBaton *baton,
         dpiCommonCreateParams *params);
 static bool njsOracleDb_initDPI(njsOracleDb *oracleDb, napi_env env,
-        njsBaton *baton);
+        dpiContextCreateParams *params, njsBaton *baton);
 
 // define constants exposed to JS
 static njsConstant njsClassConstants[] = {
@@ -324,6 +325,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             napi_default, NULL },
     { "_getConnection", NULL, njsOracleDb_getConnection, NULL, NULL, NULL,
             napi_default, NULL },
+    { "_initOracleClient", NULL, njsOracleDb_initOracleClient, NULL, NULL,
+            NULL, napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
@@ -437,7 +440,7 @@ static bool njsOracleDb_createPoolProcessArgs(njsBaton *baton, napi_env env,
     bool connStrFound, connStrFound1;
 
     // initialize ODPI-C library, if necessary
-    if (!njsOracleDb_initDPI(baton->oracleDb, env, baton))
+    if (!njsOracleDb_initDPI(baton->oracleDb, env, NULL, baton))
         return false;
 
     // set defaults on baton
@@ -656,7 +659,7 @@ static bool njsOracleDb_getConnectionProcessArgs(njsBaton *baton,
     bool connStrFound, connStrFound1;
 
     // initialize ODPI-C library, if necessary
-    if (!njsOracleDb_initDPI(baton->oracleDb, env, baton))
+    if (!njsOracleDb_initDPI(baton->oracleDb, env, NULL, baton))
         return false;
 
     // copy items used from the OracleDb class since they may change after
@@ -884,7 +887,7 @@ static napi_value njsOracleDb_getOracleClientVersion(napi_env env,
 
     if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &oracleDb))
         return NULL;
-    if (!njsOracleDb_initDPI(oracleDb, env, NULL))
+    if (!njsOracleDb_initDPI(oracleDb, env, NULL, NULL))
         return NULL;
     if (dpiContext_getClientVersion(oracleDb->context, &versionInfo) < 0) {
         njsUtils_throwErrorDPI(env, oracleDb);
@@ -907,7 +910,7 @@ static napi_value njsOracleDb_getOracleClientVersionString(napi_env env,
 
     if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &oracleDb))
         return NULL;
-    if (!njsOracleDb_initDPI(oracleDb, env, NULL))
+    if (!njsOracleDb_initDPI(oracleDb, env, NULL, NULL))
         return NULL;
     if (dpiContext_getClientVersion(oracleDb->context, &versionInfo) < 0) {
         njsUtils_throwErrorDPI(env, oracleDb);
@@ -1075,6 +1078,84 @@ static napi_value njsOracleDb_getVersionSuffix(napi_env env,
 
 
 //-----------------------------------------------------------------------------
+// njsOracleDb_initOracleClientHelper()
+//   Helper method that performs the work of njsOracleDb_initOracleClient().
+//-----------------------------------------------------------------------------
+static bool njsOracleDb_initOracleClientHelper(napi_env env,
+        napi_callback_info info)
+{
+    size_t libDirLength, configDirLength, errorUrlLength, driverNameLength;
+    char *libDir, *configDir, *errorUrl, *driverName;
+    njsBaseInstance *callingInstance;
+    napi_value callingObj, args[1];
+    dpiContextCreateParams params;
+    njsOracleDb *oracleDb;
+    bool ok;
+
+    // process arguments
+    libDir = configDir = errorUrl = driverName = NULL;
+    libDirLength = configDirLength = errorUrlLength = driverNameLength = 0;
+    if (!njsUtils_validateArgs(env, info, 1, args, &callingObj,
+            &callingInstance))
+        return false;
+    if (!njsUtils_getStringFromArg(env, args, 0, "libDir", &libDir,
+            &libDirLength, NULL, NULL))
+        return false;
+    if (!njsUtils_getStringFromArg(env, args, 0, "configDir", &configDir,
+            &configDirLength, NULL, NULL))
+        return false;
+    if (!njsUtils_getStringFromArg(env, args, 0, "errorUrl", &errorUrl,
+            &errorUrlLength, NULL, NULL))
+        return false;
+    if (!njsUtils_getStringFromArg(env, args, 0, "driverName", &driverName,
+            &driverNameLength, NULL, NULL))
+        return false;
+
+    // initialize library
+    memset(&params, 0, sizeof(params));
+    if (libDirLength > 0)
+        params.oracleClientLibDir = libDir;
+    if (configDirLength > 0)
+        params.oracleClientConfigDir = configDir;
+    if (errorUrlLength > 0)
+        params.loadErrorUrl = errorUrl;
+    if (driverNameLength > 0)
+        params.defaultDriverName = driverName;
+    oracleDb = (njsOracleDb*) callingInstance;
+    ok = njsOracleDb_initDPI(oracleDb, env, &params, NULL);
+
+    // cleanup
+    if (libDir)
+        free(libDir);
+    if (configDir)
+        free(configDir);
+    if (errorUrl)
+        free(errorUrl);
+    if (driverName)
+        free(driverName);
+    return ok;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracleDb_initOracleClient()
+//   Initialize the Oracle Client library now, rather than when the first pool
+// or standalone connection is created, or a request is made to determine the
+// Oracle Client version. If the Oracle Client library has already been
+// initialized, an exception is raised.
+//
+// PARAMETERS
+//   - options
+//-----------------------------------------------------------------------------
+static napi_value njsOracleDb_initOracleClient(napi_env env,
+        napi_callback_info info)
+{
+    njsOracleDb_initOracleClientHelper(env, info);
+    return NULL;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsOracleDb_initCommonCreateParams()
 //   Initialize common creation parameters for pools and standalone
 // connection creation.
@@ -1089,10 +1170,6 @@ static bool njsOracleDb_initCommonCreateParams(njsBaton *baton,
     if (baton->events)
         params->createMode = (dpiCreateMode)
                 (params->createMode | DPI_MODE_CREATE_EVENTS);
-    params->encoding = "UTF-8";
-    params->nencoding = "UTF-8";
-    params->driverName = NJS_DRIVER_NAME;
-    params->driverNameLength = (uint32_t) strlen(params->driverName);
     return true;
 }
 
@@ -1106,27 +1183,47 @@ static bool njsOracleDb_initCommonCreateParams(njsBaton *baton,
 // errors that can take place when the module is imported.
 //-----------------------------------------------------------------------------
 static bool njsOracleDb_initDPI(njsOracleDb *oracleDb, napi_env env,
-        njsBaton *baton)
+        dpiContextCreateParams *params, njsBaton *baton)
 {
+    dpiContextCreateParams localParams;
     napi_value error, message;
     dpiErrorInfo errorInfo;
 
-    // if already initialized, nothing needs to be done
-    if (oracleDb->context)
-        return true;
+    // if already initialized and parameters were passed, raise an exception;
+    // otherwise do nothing as this is implicitly called when creating a
+    // standalone connection or session pool and when getting the Oracle Client
+    // library version
+    if (oracleDb->context) {
+        if (!params)
+            return true;
+        return njsUtils_throwError(env, errClientLibAlreadyInitialized);
+    }
+
+    // set up parameters used for initializing ODPI-C
+    if (params) {
+        memcpy(&localParams, params, sizeof(dpiContextCreateParams));
+    } else {
+        memset(&localParams, 0, sizeof(dpiContextCreateParams));
+    }
+    localParams.defaultEncoding = NJS_ENCODING;
+    if (!localParams.defaultDriverName)
+        localParams.defaultDriverName = NJS_DRIVER_NAME;
+    if (!localParams.loadErrorUrl)
+        localParams.loadErrorUrl =
+                "https://oracle.github.io/node-oracledb/INSTALL.html";
 
     // create global DPI context (with baton available)
     if (baton) {
-        if (dpiContext_create(DPI_MAJOR_VERSION, DPI_MINOR_VERSION,
-                &oracleDb->context, &baton->errorInfo) < 0) {
+        if (dpiContext_createWithParams(DPI_MAJOR_VERSION, DPI_MINOR_VERSION,
+                &localParams, &oracleDb->context, &baton->errorInfo) < 0) {
             baton->dpiError = true;
             return false;
         }
 
     // create global DPI context (no baton available, throw error immediately)
     } else {
-        if (dpiContext_create(DPI_MAJOR_VERSION, DPI_MINOR_VERSION,
-                &oracleDb->context, &errorInfo) < 0) {
+        if (dpiContext_createWithParams(DPI_MAJOR_VERSION, DPI_MINOR_VERSION,
+                &localParams, &oracleDb->context, &errorInfo) < 0) {
             NJS_CHECK_NAPI(env, napi_create_string_utf8(env, errorInfo.message,
                     errorInfo.messageLength, &message))
             NJS_CHECK_NAPI(env, napi_create_error(env, NULL, message, &error))
