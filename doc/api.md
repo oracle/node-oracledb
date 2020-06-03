@@ -7667,9 +7667,14 @@ relaxed.
 
 #### <a name="tnsadmin"></a> 14.1.2 Optional Oracle Net Configuration
 
-Optional Oracle Net configuration files are read when node-oracledb
-is loaded.  These files affect connections and applications.  The common
-files are:
+Optional Oracle Net configuration files are read when node-oracledb is loaded.
+These files affect connections and applications.  For example you can specify
+where your database is located, and what name the application uses to connect to
+that database.  Behaviors such as timeouts, failover, network checks,
+encryption, and [Session Data Unit (SDU) and socket buffer sizes][185] for
+network optimization can be set.
+
+The common files are:
 
 Name | Description
 -----|------------
@@ -15952,3 +15957,4 @@ can be asked at [AskTom][158].
 [182]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E63D75A1-FCAA-4A54-A3D2-B068442CE766
 [183]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=RACAD
 [184]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F20C5DC5-C2FC-4145-9E4E-345CCB8148C7
+[185]: https://static.rainfocus.com/oracle/oow19/sess/1553616880266001WLIh/PF/OOW19_Net_CON4641_1569022126580001esUl.pdf
