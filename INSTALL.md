@@ -1536,7 +1536,7 @@ install Instant Client.  Three methods are shown below.
    ```
    RUN wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
        unzip instantclient-basiclite-linuxx64.zip && rm -f instantclient-basiclite-linuxx64.zip && \
-       cd /opt/oracle/instantclient* && rm -f *jdbc* *occi* *mysql* *jar uidrvci genezi adrci && \
+       cd /opt/oracle/instantclient* && rm -f *jdbc* *occi* *mysql* *mql1* *ipc1* *jar uidrvci genezi adrci && \
        echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
    ```
 
@@ -1659,7 +1659,7 @@ WORKDIR /opt/oracle
 
 RUN wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
     unzip instantclient-basiclite-linuxx64.zip && rm -f instantclient-basiclite-linuxx64.zip && \
-    cd /opt/oracle/instantclient* && rm -f *jdbc* *occi* *mysql* *jar uidrvci genezi adrci && \
+    cd /opt/oracle/instantclient* && rm -f *jdbc* *occi* *mysql* *mql1* *ipc1* *jar uidrvci genezi adrci && \
     echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
 
 WORKDIR /myapp
