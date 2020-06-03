@@ -568,8 +568,9 @@ A complete list of features can be seen [here][169].
 
 Node-oracledb is a Node.js add-on that allows Node.js applications to access
 Oracle Database.  Node.js programs call node-oracledb functions. Internally
-node-oracledb dynamically loads Oracle Client libraries to access Oracle
-Database.
+node-oracledb dynamically loads Oracle Client libraries.  Connections are made
+from node-oracledb to Oracle Database so [SQL](#sqlexecution),
+[PL/SQL](#plsqlexecution), and [SODA](#sodaoverview) can be used.
 
 ![node-oracledb Architecture](./images/node-oracledb-architecture.png)
 
@@ -577,7 +578,9 @@ Node-oracledb is typically installed from the [npm registry][1].  The Oracle
 Client libraries need to be installed separately.  The libraries can be obtained
 from an installation of Oracle Instant Client, from a full Oracle Client
 installation, or even from an Oracle Database installation (if Node.js is
-running on the same machine as the database).
+running on the same machine as the database).  The versions of Oracle Client and
+Oracle Database do not have to be the same.  Oracle Net is not a separate
+product: it is how the Oracle Client and Oracle Database communicate.
 
 Some behaviors of the Oracle Client libraries can optionally be configured with
 an `oraaccess.xml` file, for example to enable auto-tuning of a statement cache.
@@ -585,8 +588,7 @@ See [Optional Oracle Client Configuration](#oraaccess).
 
 The Oracle Net layer can optionally be configured with files such as
 `tnsnames.ora` and `sqlnet.ora`, for example to enable network encryption.  See
-[Optional Oracle Net Configuration](#tnsadmin).  Oracle Net is not a separate
-product: it is how the Oracle Client and Oracle Database communicate.
+[Optional Oracle Net Configuration](#tnsadmin).
 
 Oracle environment variables that are set before node-oracledb first creates a
 database connection will affect node-oracledb behavior.  Optional variables
@@ -2795,14 +2797,15 @@ Number callTimeout
 ```
 
 Sets the maximum number of milliseconds that each underlying
-[round-trip](#roundtrips) between node-oracledb and Oracle Database
-may take.  Each node-oracledb method or operation may make zero or
-more round-trips.  The `callTimeout` value applies to each round-trip
-individually, not to the sum of all round-trips.  Time spent
-processing in node-oracledb before or after the completion of each
-round-trip is not counted.
+[round-trip](#roundtrips) between node-oracledb and Oracle Database may take on
+a connection.  Each node-oracledb method or operation may make zero or more
+round-trips.  The `callTimeout` value applies to each round-trip individually,
+not to the sum of all round-trips.  Time spent processing in node-oracledb
+before or after the completion of each round-trip is not counted.
 
-See [Database Call Timeouts](#dbcalltimeouts) for more information.
+See [Database Call Timeouts](#dbcalltimeouts) for more information about
+limiting statement execution time, and also about limiting the time taken to
+open new connections.
 
 This property was added in node-oracledb 3.0.  An exception will occur
 if node-oracledb is not using Oracle client library version 18.1 or
@@ -7509,7 +7512,25 @@ This method was added in node-oracledb 3.0.
 
 ## <a name="connectionhandling"></a> 14. Connection Handling
 
-Connections may be standalone or pooled.
+Connections between node-oracledb and Oracle Database are used for executing
+[SQL](#sqlexecution), [PL/SQL](#plsqlexecution), and [SODA](#sodaoverview).
+
+There are two types of connection:
+
+- Standalone connections: These are useful when the application maintains a
+  single user session to a database.
+
+- Pooled connections: Connection pooling is important for performance when
+  applications frequently connect and disconnect from the database.  Oracle high
+  availability features in the pool implementation mean that small pools can
+  also be useful for applications that want a few connections available for
+  infrequent use.
+
+Many connection behaviors can be controlled by node-oracledb options.  Other
+settings can be configured in [Oracle Net files](#tnsadmin) or in [connection
+strings](#easyconnect).  These include [limiting the amount of
+time](#dbcalltimeouts) that opening a connection can take, or enabling [network
+encryption](#securenetwork).
 
 ##### Standalone Connections
 
@@ -7673,8 +7694,11 @@ The `sqlnet.ora` file's `WALLET_LOCATION` path should be set to the directory
 containing `cwallet.sso`.  For Oracle Autonomous Database use of wallets, see
 [Connecting to Oracle Autonomous Database](#connectionadb).
 
-See [Connections and High Availability](#connectionha) for discussion on Oracle
-Net configuration.
+Note the [Easy Connect Plus](#easyconnect) syntax can set many common
+configuration options without needing `tnsnames.ora` or `sqlnet.ora` files.
+
+The section [Connections and High Availability](#connectionha) has some
+discussion about Oracle Net configuration.
 
 #### <a name="oraaccess"></a> 14.1.3. Optional Oracle Client Configuration
 
@@ -7787,13 +7811,20 @@ some network configuration options be set.  The whitepaper [Oracle Database 19c
 Easy Connect Plus Configurable Database Connection Syntax][177] discusses the
 syntax.  The Easy Connect Plus syntax means that [`tnsnames.ora`](#tnsadmin) or
 [`sqlnet.ora`](#tnsadmin) files are not needed for some further common
-connection scenarios.  For example, if a firewall terminates idle connections
-every five minutes, you may decide it is more efficient to keep connections
-alive instead of having the overhead of recreation.  Your connection string
-could be `"mydbmachine.example.com/orclpdb1?expire_time=2"` to send packets
-every two minutes with the [`EXPIRE_TIME`][159] feature.  The general
-recommendation for `EXPIRE_TIME` is to use a value that is slightly less than
-half of the termination period.
+connection scenarios.
+
+For example, if a firewall terminates idle connections every five minutes, you
+may decide it is more efficient to keep connections alive instead of having the
+overhead of recreation.  Your connection string could be
+`"mydbmachine.example.com/orclpdb1?expire_time=2"` to send packets every two
+minutes with the [`EXPIRE_TIME`][159] feature.  The general recommendation for
+`EXPIRE_TIME` is to use a value that is slightly less than half of the
+termination period.
+
+Another common use case for Easy Connect Plus is to limit the amount of time
+required to open a connection.  For example, to return an error after 15 seconds
+if a connection cannot be established to the database, use
+`"mydbmachine.example.com/orclpdb1?connect_timeout=15"`.
 
 #### <a name="embedtns"></a> 14.2.2 Embedded Connect Descriptor Strings
 
@@ -7811,8 +7842,9 @@ const connection = await oracledb.getConnection(
 
 #### <a name="tnsnames"></a> 14.2.3 Net Service Names for Connection Strings
 
-Connect Descriptor strings are commonly stored in [`tnsnames.ora`](#tnsadmin)
-files and associated with a Net Service Name, for example:
+Connect Descriptor strings are commonly stored in optional [`tnsnames.ora
+configuration files`](#tnsadmin) and associated with a Net Service Name, for
+example:
 
 ```
 sales =
@@ -9363,8 +9395,8 @@ and Database.  Also use the latest node-oracledb driver.  These have improved
 APIs and improved implementations to make connections efficient and available.
 In addition, features like [Connection Pool Pinging](#connpoolpinging), [Fast
 Application Notification (FAN)](#connectionfan), [Application
-Continuity](#appcontinuity), and Oracle network settings can all help high
-availability, often without the application being aware of any issue.
+Continuity](#appcontinuity), and [Oracle Net Services][37] settings can all help
+high availability, often without the application being aware of any issue.
 
 Note scalability-reducing issues such as firewalls terminating idle connections
 can be hidden by automatic connection re-establishment features.  It is
@@ -9400,48 +9432,18 @@ Similarly, configure your OS network settings and Oracle Net (which handles
 communication between node-oracledb and the database) to prevent firewalls
 killing idle connections.  The network layers can also be configured to avoid
 long TCP timeouts.  These timeouts can cause applications to hang if there is a
-network failure.
+network failure.  See [Database Call Timeouts](#dbcalltimeouts).
 
-With Oracle Client 19c, [`EXPIRE_TIME`][159] can be used in
-[`tnsnames.ora`](#tnsnames) connect descriptors to prevent firewalls from
-terminating idle connections and to adjust keepalive timeouts.  You can also use
-`EXPIRE_TIME` in the [Easy Connect Plus](#easyconnect) connection string.  The
-general recommendation for `EXPIRE_TIME` is to use a value that is slightly less
-than half of the termination period.  In older versions of Oracle Client, a
-[`tnsnames.ora`](#tnsnames) connect descriptor option [`ENABLE=BROKEN`][36] can
-be used instead of `EXPIRE_TIME`.  These settings can also aid detection of a
-terminated remote database server.
-
-If the network connections, or the database server processes, cannot be
-prevented from becoming unusable, tune [Connection Pool
-Pinging](#connpoolpinging).  Another case where this internal pinging is helpful
-is during development, where a laptop may go offline for an extended time.
-
-A `sqlnet.ora` file can also be used to configure settings like
-[`SQLNET.OUTBOUND_CONNECT_TIMEOUT`][33], [`SQLNET.RECV_TIMEOUT`][34] and
-[`SQLNET.SEND_TIMEOUT`][35] to bound the amount of time the application will
-wait for responses from the database service.  Note that
-[`connection.callTimeout`](#dbcalltimeouts) is a newer alternative to the latter
-two options.  The necessary out-of-band break setting is automatically
-configured when using Oracle Client 19 and Oracle Database 19, or later.  With
-older Oracle versions on systems that drop (or in-line) out-of-band breaks, you
-may need to add [`DISABLE_OOB=ON`][122] to a `sqlnet.ora` file.
-
-In the bigger picture, a [`tnsnames.ora`](#tnsnames) file can be used to
-configure the database service settings such as for failover using [Oracle
-RAC][183] or a standby database.
-
-See [Optional Oracle Net Configuration](#tnsadmin) for where to place
-`tnsnames.ora` and `sqlnet.ora`.
-
-Other [Oracle Net Services][37] options may also be useful for high
-availability and performance tuning.  For example the database's
-`listener.ora` file can have [`RATE_LIMIT`][133] and
-[`QUEUESIZE`][134] parameters that can help handle connection storms.
+Other Oracle Net options may also be useful for high availability and
+performance tuning.  For example the database's `listener.ora` file can have
+[`RATE_LIMIT`][133] and [`QUEUESIZE`][134] parameters that can help handle
+connection storms.  In the bigger picture, Oracle Net can be used to configure
+database service settings, such as for failover using [Oracle RAC][183] or a
+standby database.
 
 [Database Resident Connection Pooling (DRCP)](#drcp) may be useful to reduce
 load on a database host.  It can also help reduce connection time when a number
-of Node.js processes are used to scale up, and scale down, an application.
+of Node.js processes are used to scale up an application.
 
 Finally, applications should always check for execution errors, and perform
 appropriate application-specific recovery.
@@ -9507,16 +9509,68 @@ supports AC or TAC.
 
 #### <a name="dbcalltimeouts"></a> 14.9.4 Database Call Timeouts
 
-When node-oracledb is using Oracle client libraries version 18, or
-later, a millisecond timeout for database calls can be set with
-[`connection.callTimeout`](#propconncalltimeout).
+##### Limiting the time to open new connections
 
-The call timeout is on each individual [round-trip](#roundtrips)
-between node-oracledb and Oracle Database.  Each node-oracledb method
-or operation may require zero or more round-trips to Oracle Database.
-The `callTimeout` value applies to each round-trip individually, not
-to the sum of all round-trips.  Time spent processing in node-oracledb
-before or after the completion of each round-trip is not counted.
+To limit the amount of time taken to establish new connections to Oracle
+Database, use Oracle Net options like [`SQLNET.OUTBOUND_CONNECT_TIMEOUT`][33] in
+a [`sqlnet.ora`](#tnsadmin) file or [`CONNECT_TIMEOUT`][184] in a [connection
+string](#easyconnect).  When using a connection pool, these values affect the
+time taken to establish each connection stored in the pool.  The
+[`queueTimeout`](#propdbqueuetimeout) and [`queueMax`](#propdbqueuemax) settings
+control higher level pool behavior.
+
+With Oracle Client 19c, timeouts can be passed in [Easy Connect
+strings](#easyconnect), for example to timeout after 15 seconds:
+`"mydbmachine.example.com/orclpdb1?connect_timeout=15"`
+
+##### Preventing connections from being closed prematurely
+
+When connections are idle, external timeouts may disconnect them from the
+database.  This can impact scalability, cause connection storms, and lead to
+application errors when invalid connections are attempted to be used.
+
+Disable any firewall that is killing idle connections.  Also disable the
+database [resource manager][101] and any user resource profile
+[`IDLE_TIME`][100] setting so they do not terminate sessions.
+
+With Oracle Client 19c, [`EXPIRE_TIME`][159] can be used in
+[`tnsnames.ora`](#tnsnames) connect descriptors to prevent firewalls from
+terminating idle connections and to adjust keepalive timeouts.  The general
+recommendation for `EXPIRE_TIME` is to use a value that is slightly less than
+half of the termination period.  In older versions of Oracle Client, a
+tnsnames.ora connect descriptor option [`ENABLE=BROKEN`][36] can be used instead
+of `EXPIRE_TIME`.  These settings can also aid detection of a terminated remote
+database server.
+
+With Oracle Client 19c, the setting can be passed in [Easy Connect
+strings](#easyconnect), for example your connection string could be
+`"mydbmachine.example.com/orclpdb1?expire_time=2"` to send packets every two
+minutes.
+
+If the network or the database server processes used by node-oracledb
+connections cannot be prevented from becoming unusable, tune [Connection Pool
+Pinging](#connpoolpinging).  Another case where this internal pinging is helpful
+is during development, where a laptop may go offline for an extended time.
+
+##### Limiting the time taken to execute statements
+
+To limit the amount of time taken to execute statements on connections, use
+[`connection.callTimeout`](#propconncalltimeout) or Oracle Net settings like
+[`SQLNET.RECV_TIMEOUT`][34] and [`SQLNET.SEND_TIMEOUT`][35] in a `sqlnet.ora`
+file.  The necessary out-of-band break setting is automatically configured when
+using Oracle Client 19 and Oracle Database 19, or later.  With older Oracle
+versions on systems that drop (or in-line) out-of-band breaks, you may need to
+add [`DISABLE_OOB=ON`][122] to a `sqlnet.ora` file.
+
+The [`connection.callTimeout`](#propconncalltimeout) attribute is available when
+node-oracledb is using Oracle client libraries version 18, or later.  It is a
+millisecond timeout for executing database calls on a connection.  The
+`connection.callTimeout` period is on each individual [round-trip](#roundtrips)
+between node-oracledb and Oracle Database.  Each node-oracledb method or
+operation may require zero or more round-trips to Oracle Database.  The
+`callTimeout` value applies to each round-trip individually, not to the sum of
+all round-trips.  Time spent processing in node-oracledb before or after the
+completion of each round-trip is not counted.
 
 - If the time from the start of any one round-trip to the completion
   of that same round-trip exceeds `callTimeout` milliseconds, then the
@@ -9541,10 +9595,6 @@ For small values of `callTimeout`, the connection cleanup may not
 complete successfully within the additional `callTimeout` period.  In
 this case an *ORA-3114* is returned and the connection will no longer
 be usable.  It should be released.
-
-Users of pre-Oracle 18c client libraries can set call timeouts by
-setting [`SQLNET.RECV_TIMEOUT`][34] and [`SQLNET.SEND_TIMEOUT`][35] in
-a [`sqlnet.ora`](#tnsadmin) file.
 
 ### <a name="connectionadb"></a> 14.10 Connecting to Oracle Autonomous Database
 
@@ -15901,3 +15951,4 @@ can be asked at [AskTom][158].
 [181]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A9D4A5F5-B939-48FF-80AE-0228E7314C7D
 [182]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E63D75A1-FCAA-4A54-A3D2-B068442CE766
 [183]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=RACAD
+[184]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F20C5DC5-C2FC-4145-9E4E-345CCB8148C7
