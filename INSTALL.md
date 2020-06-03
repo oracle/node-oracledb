@@ -449,6 +449,19 @@ path set:
 export LD_LIBRARY_PATH=/opt/oracle/instantclient_19_6:$LD_LIBRARY_PATH
 ```
 
+If disk space is important, most users will be able to use the smaller Basic
+Light package instead of the Basic package.  Review its [globalization
+limitations][62].  Disk space can be reduced by removing unnecessary libraries
+and files from either the Basic or Basic Light packages.  The exact libraries
+depend on the Instant Client version.  For example, with Oracle Instant Client
+19c, you can optionally remove files using:
+
+```
+rm -i *jdbc* *occi* *mysql* *mql1* *ipc1* *jar uidrvci genezi adrci
+```
+
+Refer to the Oracle Instant Client documentation for details.
+
 #### 3.3.5 Optionally create the default Oracle Client configuration directory
 
 If you intend to co-locate optional Oracle configuration files such as
@@ -800,6 +813,13 @@ Windows 7 users: Note that Oracle 19 is not supported on Windows 7.
   `node_modules\oracledb\build\Release` so the DLLs and other files
   are in the same directory as the `oracledb*.node` binaries.  If you
   do this, then `PATH` does not need to be set.
+
+If disk space is important, most users will be able to use the smaller Basic
+Light package instead of the Basic package.  Review its [globalization
+limitations][62].  Disk space can be reduced by removing unnecessary libraries
+and files from either the Basic or Basic Light packages.  The exact libraries
+depend on the Instant Client version.  Refer to the Instant Client
+documentation.
 
 #### 3.6.5 Optionally create the default Oracle Client configuration directory
 
@@ -1914,3 +1934,4 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [59]: https://www.docker.com/
 [60]: https://oracle.github.io/node-oracledb/doc/api.html#architecture
 [61]: https://download.oracle.com/otn_software/linux/instantclient/instantclient-basic-linuxx64.zip
+[62]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-81D364CE-326D-4B3C-8C82-F468FF1AF30C
