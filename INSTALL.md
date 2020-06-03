@@ -276,14 +276,14 @@ install directly from yum.oracle.com, for example using:
 ```
 sudo yum -y install oracle-release-el7
 sudo yum-config-manager --enable ol7_oracle_instantclient
-sudo yum -y install oracle-instantclient19.5-basic
+sudo yum -y install oracle-instantclient19.6-basic
 ```
 
 Alternatively you can manually download the RPM and install from your local file
 system:
 
 ```
-sudo yum install oracle-instantclient19.5-basic-19.5.0.0.0-1.x86_64.rpm
+sudo yum install oracle-instantclient19.6-basic-19.6.0.0.0-1.x86_64.rpm
 ```
 
 The link [instantclient-basic-linuxx64.zip][61] will download the latest version
@@ -769,8 +769,8 @@ Windows 7 users: Note that Oracle 19 is not supported on Windows 7.
 
 - Unzip the ZIP file into a directory that is accessible to your
   application.  For example unzip
-  ` instantclient-basic-windows.x64-19.5.0.0.0dbru.zip` to
-  `C:\oracle\instantclient_19_5`.
+  ` instantclient-basic-windows.x64-19.6.0.0.0dbru.zip` to
+  `C:\oracle\instantclient_19_6`.
 
 - Add this directory to the `PATH` environment variable.  For example
   on Windows 7, update `PATH` in Control Panel -> System -> Advanced
@@ -787,7 +787,7 @@ Windows 7 users: Note that Oracle 19 is not supported on Windows 7.
 
   ```
   REM mynode.bat
-  SET PATH=C:\oracle\instantclient_19_5;%PATH%
+  SET PATH=C:\oracle\instantclient_19_6;%PATH%
   node %*
   ```
 
@@ -806,7 +806,7 @@ Windows 7 users: Note that Oracle 19 is not supported on Windows 7.
 If you intend to co-locate optional Oracle configuration files such as
 [`tnsnames.ora`][15], [`sqlnet.ora`][16], [`ldap.ora`][17], or
 [`oraaccess.xml`][18] with Instant Client, they can be put in a
-`C:\oracle\instantclient_19_5\network\admin` subdirectory.  Create
+`C:\oracle\instantclient_19_6\network\admin` subdirectory.  Create
 this if needed.
 
 This is the default Oracle configuration directory for applications
@@ -1005,15 +1005,15 @@ and extract it into a directory that is accessible to your
 application, for example `/opt/oracle`:
 
 ```
-unzip instantclient-basic-aix.ppc64-19.5.0.0.0dbru.zip
+unzip instantclient-basic-aix.ppc64-19.6.0.0.0dbru.zip
 mkdir -p /opt/oracle
-mv instantclient_19_5 /opt/oracle
+mv instantclient_19_6 /opt/oracle
 ```
 
 To run applications, you will need to set the link path:
 
 ```
-export LIBPATH=/opt/oracle/instantclient_19_5:$LIBPATH
+export LIBPATH=/opt/oracle/instantclient_19_6:$LIBPATH
 ```
 
 #### 3.9.5 Optionally create the default Oracle Client configuration directory
@@ -1024,7 +1024,7 @@ If you intend to co-locate optional Oracle configuration files such as
 `network/admin` subdirectory.  Create this if needed.  For example:
 
 ```
-sudo mkdir -p /opt/oracle/instantclient_19_5/network/admin
+sudo mkdir -p /opt/oracle/instantclient_19_6/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
@@ -1125,13 +1125,13 @@ application, for example `/opt/oracle`:
 
 ```
 cd /opt/oracle
-unzip instantclient-basic-solaris.x64-19.5.0.0.0dbru.zip
+unzip instantclient-basic-solaris.x64-19.6.0.0.0dbru.zip
 ```
 
 To run applications, you will need to set the link path:
 
 ```
-export LD_LIBRARY_PATH_64=/opt/oracle/instantclient_19_5:$LD_LIBRARY_PATH_64
+export LD_LIBRARY_PATH_64=/opt/oracle/instantclient_19_6:$LD_LIBRARY_PATH_64
 ```
 
 #### 3.9.5 Optionally create the default Oracle Client configuration directory
@@ -1142,7 +1142,7 @@ If you intend to co-locate optional Oracle configuration files such as
 `network/admin` subdirectory.  Create this if needed.  For example:
 
 ```
-mkdir -p /opt/oracle/instantclient_19_5/network/admin
+mkdir -p /opt/oracle/instantclient_19_6/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
@@ -1503,7 +1503,7 @@ install Instant Client.  Three methods are shown below.
    ```
    RUN  yum -y install oracle-release-el7 && \
         yum-config-manager --enable ol7_oracle_instantclient && \
-        yum -y install oracle-instantclient19.5-basiclite && \
+        yum -y install oracle-instantclient19.6-basiclite && \
         rm -rf /var/cache/yum
    ```
 
@@ -1549,8 +1549,8 @@ install Instant Client.  Three methods are shown below.
    Instant Client Basic Light zip file to your Docker host, extract it, and
    remove unnecessary files.  The resulting directory can be added during
    subsequent image creation.  For example, with Instant Client Basic Light
-   19.5, the host computer (where you run Docker) could have a directory
-   `instantclient_19_5` with these files:
+   19.6, the host computer (where you run Docker) could have a directory
+   `instantclient_19_6` with these files:
 
    ```
    libclntshcore.so.19.1
@@ -1562,8 +1562,8 @@ install Instant Client.  Three methods are shown below.
    With this, your Dockerfile could contain:
 
    ```
-   ADD instantclient_19_5/* /opt/oracle/instantclient_19_5
-   RUN echo /opt/oracle/instantclient_19_5 > /etc/ld.so.conf.d/oracle-instantclient.conf && \
+   ADD instantclient_19_6/* /opt/oracle/instantclient_19_6
+   RUN echo /opt/oracle/instantclient_19_6 > /etc/ld.so.conf.d/oracle-instantclient.conf && \
        ldconfig
    ```
 
@@ -1617,10 +1617,10 @@ be mounted at runtime using a Docker volume.  Map the volume to the
 `network/admin` subdirectory of Instant Client so the `TNS_ADMIN` environment
 variable does not need to be set.  For example, when the Wallet or configuration
 files are in `/OracleCloud/wallet/` on the host computer, and the image uses
-Instant Client 19.5 RPMs, then you can mount the files using:
+Instant Client 19.6 RPMs, then you can mount the files using:
 
 ```
-docker run -v /OracleCloud/wallet:/usr/lib/oracle/19.5/client64/lib/network/admin:Z,ro . . .
+docker run -v /OracleCloud/wallet:/usr/lib/oracle/19.6/client64/lib/network/admin:Z,ro . . .
 ```
 
 The `Z` option is needed when SELinux is enabled.
@@ -1638,7 +1638,7 @@ FROM oraclelinux:7-slim
 
 RUN  yum -y install oracle-release-el7 oracle-nodejs-release-el7 && \
      yum-config-manager --disable ol7_developer_EPEL --enable ol7_oracle_instantclient && \
-     yum -y install nodejs oracle-instantclient19.5-basiclite && \
+     yum -y install nodejs oracle-instantclient19.6-basiclite && \
      rm -rf /var/cache/yum
 
 WORKDIR /myapp
