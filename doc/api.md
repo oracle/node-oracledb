@@ -1753,7 +1753,7 @@ oracledb.prefetchRows = 100;
 Promise Promise
 ```
 
-**The ``oracledb.Promise`` property is no longer used in node-oracledb 5 and has no
+**The `oracledb.Promise` property is no longer used in node-oracledb 5 and has no
 effect.**
 
 Node-oracledb supports Promises on all methods.  The native Promise library is
@@ -7771,8 +7771,8 @@ Use only one of the properties.
 #### <a name="easyconnect"></a> 14.2.1 Easy Connect Syntax for Connection Strings
 
 An Easy Connect string is often the simplest to use.  For example, to connect to
-the Oracle Database service ``orclpdb1`` that is running on the host
-``mydbmachine.example.com`` with the default Oracle Database port 1521, use:
+the Oracle Database service `orclpdb1` that is running on the host
+`mydbmachine.example.com` with the default Oracle Database port 1521, use:
 
 ```
 const oracledb = require('oracledb');
