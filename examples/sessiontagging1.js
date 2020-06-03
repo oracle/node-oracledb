@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -151,7 +151,9 @@ async function closePoolAndExit() {
   try {
     // Get the 'default' pool from the pool cache and close it (force
     // closed after 3 seconds).
-    // If this hangs, you may need DISABLE_OOB=ON in a sqlnet.ora file
+    // If this hangs, you may need DISABLE_OOB=ON in a sqlnet.ora file.
+    // This setting should not be needed if both Oracle Client and Oracle
+    // Database are 19c (or later).
     await oracledb.getPool().close(3);
     process.exit(0);
   } catch(err) {

@@ -207,8 +207,10 @@ async function closePoolAndExit() {
   console.log("\nTerminating");
   try {
     // Get the pool from the pool cache and close it when no
-    // connections are in use, or force it closed after 10 seconds
-    // If this hangs, you may need DISABLE_OOB=ON in a sqlnet.ora file
+    // connections are in use, or force it closed after 10 seconds.
+    // If this hangs, you may need DISABLE_OOB=ON in a sqlnet.ora file.
+    // This setting should not be needed if both Oracle Client and Oracle
+    // Database are 19c (or later).
     await oracledb.getPool().close(10);
     console.log("Pool closed");
     process.exit(0);
