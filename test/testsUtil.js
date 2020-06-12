@@ -110,7 +110,7 @@ testsUtil.isSodaRunnable = async function() {
     console.log('Error in checking SODA prerequistes:\n', error);
   }
 
-  if ( (clientVersion < 1805000000) || (serverVersion < 1805000000) ) return false;
+  if ( (clientVersion < 1905000000) || (serverVersion < 1805000000) ) return false;
 
   if ( (serverVersion >= 2000000000) && (clientVersion < 2000000000) ) return false;
 
