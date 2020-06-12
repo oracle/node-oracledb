@@ -54,12 +54,6 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
         var->maxSize = 1;
     }
 
-    // REF cursors are only supported as out binds currently
-    if (var->varTypeNum == DPI_ORACLE_TYPE_STMT &&
-            var->bindDir != NJS_BIND_OUT)
-        return njsBaton_setError(baton, errInvalidPropertyValueInParam, "type",
-                1);
-
     // max size must be specified for in/out and out binds
     if (!var->maxSize && var->bindDir != NJS_BIND_IN)
         return njsBaton_setError(baton, errInvalidPropertyValueInParam,
@@ -973,6 +967,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
 {
     napi_value asNumber, constructor, temp;
     napi_valuetype valueType;
+    njsResultSet *resultSet;
     dpiLob *tempLobHandle;
     size_t bufferLength;
     double tempDouble;
@@ -1063,6 +1058,19 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
                         var->maxSize, bufferLength, pos);
             if (dpiVar_setFromBytes(var->dpiVarHandle, pos, buffer,
                     (uint32_t) bufferLength) < 0)
+                return njsBaton_setErrorDPI(baton);
+            return true;
+        }
+
+        // handle binding cursors
+        NJS_CHECK_NAPI(env, napi_instanceof(env, value,
+                baton->jsResultSetConstructor, &check))
+        if (check) {
+            if (var->varTypeNum != DPI_ORACLE_TYPE_STMT)
+                return njsVariable_setInvalidBind(var, pos, baton);
+            NJS_CHECK_NAPI(env, napi_unwrap(env, value, (void**) &resultSet))
+            if (dpiVar_setFromStmt(var->dpiVarHandle, pos,
+                    resultSet->handle) < 0)
                 return njsBaton_setErrorDPI(baton);
             return true;
         }

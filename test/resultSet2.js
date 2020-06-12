@@ -730,7 +730,7 @@ describe('55. resultSet2.js', function() {
 
   }); // 55.11
 
-  describe('55.12 bind a cursor BIND_INOUT', function() {
+  describe.skip('55.12 bind a cursor BIND_INOUT', function() {
 
     before('prepare table nodb_rs2_emp', function(done) {
       setUp(connection, tableName, done);

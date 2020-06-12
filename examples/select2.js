@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -36,14 +36,6 @@ const demoSetup = require('./demosetup.js');
 // executions.  They can also be set or overridden at the individual
 // execute() call level
 
-// fetchArraySize can be adjusted to tune the internal data transfer
-// from the Oracle Database to node-oracledb.  The value does not
-// affect how, or when, rows are returned by node-oracledb to the
-// application.  Buffering is handled internally by node-oracledb.
-// Benchmark to choose the optimal size for each application or query.
-//
-// oracledb.fetchArraySize = 100;  // default value is 100
-
 // This script sets outFormat in the execute() call but it could be set here instead:
 //
 // oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
@@ -75,8 +67,13 @@ async function run() {
     // Optional Object Output Format
     result = await connection.execute(
       sql,
-      {}, // A bind parameter is needed to disambiguate the following options parameter and avoid ORA-01036
-      { outFormat: oracledb.OUT_FORMAT_OBJECT }); // outFormat can be OBJECT or ARRAY.  The default is ARRAY
+      [], // A bind parameter is needed to disambiguate the following options parameter and avoid ORA-01036
+      {
+        outFormat: oracledb.OUT_FORMAT_OBJECT,     // outFormat can be OBJECT or ARRAY.  The default is ARRAY
+        // prefetchRows:   100,                    // internal buffer allocation size for tuning
+        // fetchArraySize: 100                     // internal buffer allocation size for tuning
+      }
+    );
     console.log("----- Banana Farmers (default OBJECT output format) --------");
     console.log(result.rows);
 

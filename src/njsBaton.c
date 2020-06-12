@@ -899,6 +899,14 @@ bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value)
     if (check)
         return true;
 
+    // result sets can be bound directly
+    status = napi_instanceof(env, value, baton->jsResultSetConstructor,
+            &check);
+    if (status != napi_ok)
+        return false;
+    if (check)
+        return true;
+
     // database objects can be bound directly
     status = napi_instanceof(env, value, baton->jsBaseDbObjectConstructor,
             &check);
@@ -1030,6 +1038,11 @@ bool njsBaton_setConstructors(njsBaton *baton, napi_env env)
     // acquire the LOB constructor
     NJS_CHECK_NAPI(env, napi_get_reference_value(env,
             baton->oracleDb->jsLobConstructor, &baton->jsLobConstructor))
+
+    // acquire the result set constructor
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            baton->oracleDb->jsResultSetConstructor,
+            &baton->jsResultSetConstructor))
 
     // acquire the base database object constructor
     NJS_CHECK_NAPI(env, napi_get_reference_value(env,

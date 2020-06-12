@@ -224,3 +224,4 @@ spec:
   - test/nestedCursor05.js
   - test/indexedTables01.js
   - test/soda14.js
+  - test/plsqlBindCursorsIN.js

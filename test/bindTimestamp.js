@@ -706,19 +706,12 @@ describe('102. bindTimestamp.js', function() {
             ],
             { autoCommit: true },
             function(err) {
-              // console.log(err)
+
               should.exist(err);
-              if (inType == oracledb.CURSOR) {
-                should.strictEqual(
-                  err.message,
-                  'NJS-007: invalid value for "type" in parameter 1'
-                );
-              } else {
-                should.strictEqual(
-                  err.message,
-                  "NJS-011: encountered bind value and type mismatch"
-                );
-              }
+              should.strictEqual(
+                err.message,
+                "NJS-011: encountered bind value and type mismatch"
+              );
               cb();
             }
           );
@@ -1147,17 +1140,10 @@ describe('102. bindTimestamp.js', function() {
         function(err, result) {
           should.exist(err);
           should.not.exist(result);
-          if (inoutType == oracledb.CURSOR) {
-            should.strictEqual(
-              err.message,
-              'NJS-007: invalid value for "type" in parameter 1'
-            );
-          } else {
-            should.strictEqual(
-              err.message,
-              "NJS-011: encountered bind value and type mismatch"
-            );
-          }
+          should.strictEqual(
+            err.message,
+            "NJS-011: encountered bind value and type mismatch"
+          );
           callback();
         }
       );

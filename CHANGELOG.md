@@ -50,6 +50,14 @@
       allowing node-oracledb connection pools to shrink to `poolMin` even when
       there is no pool activity.
 
+- Added
+  [`oracledb.prefetchRows`](https://oracle.github.io/node-oracledb/doc/api.html#propdbprefetchrows)
+  and equivalent `execute()` option attribute
+  [`prefetchRows`](https://oracle.github.io/node-oracledb/doc/api.html#propexecprefetchrows)
+  for query row fetch tuning to optimize round-trips, or disable prefetching
+  altogether.  See [Tuning Fetch
+  Performance](https://oracle.github.io/node-oracledb/doc/api.html#rowfetching).
+
 - Added support for queries containing cursor expressions that return [nested
   cursors](https://oracle.github.io/node-oracledb/doc/api.html#nestedcursors).
 
@@ -64,6 +72,8 @@ and
   [`oracledb.SYSPRELIM`](https://oracle.github.io/node-oracledb/doc/api.html#oracledbconstantsprivilege)
   to allow preliminary database connections, such as required when starting a
   database.
+
+- Added support for ResultSet IN binds to PL/SQL REF CURSOR parameters.
 
 - Added support for PL/SQL Collection Associative Arrays "index-by tables" of
   the following types: `oracledb.DB_TYPE_NVARCHAR`, `oracledb.DB_TYPE_CHAR`,

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -31,15 +31,6 @@ const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 const demoSetup = require('./demosetup.js');
 
-// For getRow(), the fetchArraySize property can be adjusted to tune
-// data transfer from the Oracle Database to node-oracledb.  The value
-// of fetchArraySize does not affect how, or when, rows are returned
-// by node-oracledb to the application.  Buffering is handled by
-// internally in node-oracledb.  Benchmark to choose the optimal size
-// for each application or query.
-//
-// oracledb.fetchArraySize = 100;  // default value is 100
-
 async function run() {
   let connection;
 
@@ -54,7 +45,9 @@ async function run() {
        ORDER BY id`,
       [], // no bind variables
       {
-        resultSet: true // return a ResultSet (default is false)
+        resultSet: true,             // return a ResultSet (default is false)
+        // prefetchRows:   100,      // internal buffer allocation size for tuning
+        // fetchArraySize: 100       // internal buffer allocation size for tuning
       }
     );
 

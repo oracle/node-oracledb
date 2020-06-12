@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -60,7 +60,8 @@ async function run() {
 
     const result = await connection.execute(
       sql,
-      { offset: myoffset, maxnumrows: mymaxnumrows }
+      { offset: myoffset, maxnumrows: mymaxnumrows },
+      { prefetchRows: mymaxnumrows + 1, fetchArraySize: mymaxnumrows }
     );
 
     console.log("Executed: " + sql);

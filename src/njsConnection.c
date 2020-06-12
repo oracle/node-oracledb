@@ -549,6 +549,13 @@ static bool njsConnection_executeAsync(njsBaton *baton)
     if (!njsConnection_prepareAndBind(conn, baton))
         return false;
 
+    // set prefetch rows if a value other than the default is specified
+    if (baton->prefetchRows != DPI_DEFAULT_PREFETCH_ROWS) {
+        if (dpiStmt_setPrefetchRows(baton->dpiStmtHandle,
+                baton->prefetchRows) < 0)
+            return njsBaton_setErrorDPI(baton);
+    }
+
     // execute statement
     mode = (baton->autoCommit) ? DPI_MODE_EXEC_COMMIT_ON_SUCCESS :
             DPI_MODE_EXEC_DEFAULT;
@@ -697,6 +704,8 @@ static bool njsConnection_executeProcessArgs(njsBaton *baton,
     baton->maxRows = baton->oracleDb->maxRows;
     baton->outFormat = baton->oracleDb->outFormat;
     baton->extendedMetaData = baton->oracleDb->extendedMetaData;
+    baton->prefetchRows = baton->oracleDb->prefetchRows;
+
     if (!njsUtils_copyArray(env, baton->oracleDb->fetchAsBufferTypes,
             baton->oracleDb->numFetchAsBufferTypes, sizeof(uint32_t),
             (void**) &baton->fetchAsBufferTypes,
@@ -724,6 +733,9 @@ static bool njsConnection_executeProcessArgs(njsBaton *baton,
         return false;
     if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 2, "fetchArraySize",
             &baton->fetchArraySize, NULL))
+        return false;
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 2, "prefetchRows",
+            &baton->prefetchRows, NULL))
         return false;
     if (baton->fetchArraySize == 0)
         return njsBaton_setError(baton, errInvalidPropertyValueInParam,
@@ -1117,6 +1129,14 @@ static bool njsConnection_getBindInfoFromValue(njsBaton *baton,
         if (check) {
             NJS_CHECK_NAPI(env, napi_unwrap(env, value, (void**) &lob))
             *bindType = lob->dataType;
+            return true;
+        }
+
+        // result sets can be bound
+        NJS_CHECK_NAPI(env, napi_instanceof(env, value,
+                baton->jsResultSetConstructor, &check))
+        if (check) {
+            *bindType = NJS_DATATYPE_CURSOR;
             return true;
         }
 

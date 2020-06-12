@@ -45,7 +45,8 @@ async function run() {
        ORDER BY id`,
       [],  // no binds
       {
-        fetchArraySize: 150 // internal buffer size can be adjusted for performance tuning
+        prefetchRows:   150,  // internal buffer sizes can be adjusted for performance tuning
+        fetchArraySize: 150
       }
     );
 

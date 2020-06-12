@@ -460,6 +460,7 @@ struct njsBaton {
     uint32_t subscrGroupingType;
     uint32_t shutdownMode;
     uint32_t startupMode;
+    uint32_t prefetchRows;
 
     // boolean values
     bool externalAuth;
@@ -508,6 +509,7 @@ struct njsBaton {
     // constructors
     napi_value jsDateConstructor;
     napi_value jsLobConstructor;
+    napi_value jsResultSetConstructor;
     napi_value jsBaseDbObjectConstructor;
 
     // asynchronous work parameters
@@ -595,6 +597,7 @@ struct njsOracleDb {
     uint32_t poolMaxPerShard;
     uint32_t poolIncrement;
     uint32_t poolTimeout;
+    uint32_t prefetchRows;
     uint32_t lobPrefetchSize;
     uint32_t numFetchAsBufferTypes;
     uint32_t *fetchAsBufferTypes;

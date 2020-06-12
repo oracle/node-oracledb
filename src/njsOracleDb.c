@@ -63,6 +63,7 @@ static NJS_NAPI_GETTER(njsOracleDb_getPoolMaxPerShard);
 static NJS_NAPI_GETTER(njsOracleDb_getPoolMin);
 static NJS_NAPI_GETTER(njsOracleDb_getPoolPingInterval);
 static NJS_NAPI_GETTER(njsOracleDb_getPoolTimeout);
+static NJS_NAPI_GETTER(njsOracleDb_getPrefetchRows);
 static NJS_NAPI_GETTER(njsOracleDb_getStmtCacheSize);
 static NJS_NAPI_GETTER(njsOracleDb_getVersion);
 static NJS_NAPI_GETTER(njsOracleDb_getVersionString);
@@ -87,6 +88,7 @@ static NJS_NAPI_SETTER(njsOracleDb_setPoolMaxPerShard);
 static NJS_NAPI_SETTER(njsOracleDb_setPoolMin);
 static NJS_NAPI_SETTER(njsOracleDb_setPoolPingInterval);
 static NJS_NAPI_SETTER(njsOracleDb_setPoolTimeout);
+static NJS_NAPI_SETTER(njsOracleDb_setPrefetchRows);
 static NJS_NAPI_SETTER(njsOracleDb_setStmtCacheSize);
 
 // finalize
@@ -313,6 +315,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             njsOracleDb_setPoolPingInterval, NULL, napi_default, NULL },
     { "poolTimeout", NULL, NULL, njsOracleDb_getPoolTimeout,
             njsOracleDb_setPoolTimeout, NULL, napi_default, NULL },
+    { "prefetchRows", NULL, NULL, njsOracleDb_getPrefetchRows,
+            njsOracleDb_setPrefetchRows, NULL, napi_default, NULL },
     { "stmtCacheSize", NULL, NULL, njsOracleDb_getStmtCacheSize,
             njsOracleDb_setStmtCacheSize, NULL, napi_default, NULL },
     { "version", NULL, NULL, njsOracleDb_getVersion, NULL, NULL, napi_default,
@@ -1029,6 +1033,21 @@ static napi_value njsOracleDb_getPoolTimeout(napi_env env,
 
 
 //-----------------------------------------------------------------------------
+// njsOracleDb_getPrefetchRows()
+//   Get accessor of "prefetchRows" property.
+//-----------------------------------------------------------------------------
+static napi_value njsOracleDb_getPrefetchRows(napi_env env,
+        napi_callback_info info)
+{
+    njsOracleDb *oracleDb;
+
+    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &oracleDb))
+        return NULL;
+    return njsUtils_convertToUnsignedInt(env, oracleDb->prefetchRows);
+}
+
+
+//-----------------------------------------------------------------------------
 // njsOracleDb_getStmtCacheSize()
 //   Get accessor of "stmtCacheSize" property.
 //-----------------------------------------------------------------------------
@@ -1261,6 +1280,7 @@ bool njsOracleDb_new(napi_env env, napi_value instanceObj,
     oracleDb->poolIncrement = NJS_POOL_INCR;
     oracleDb->poolTimeout = NJS_POOL_TIMEOUT;
     oracleDb->fetchArraySize = DPI_DEFAULT_FETCH_ARRAY_SIZE;
+    oracleDb->prefetchRows = DPI_DEFAULT_PREFETCH_ROWS;
     oracleDb->lobPrefetchSize = NJS_LOB_PREFETCH_SIZE;
     oracleDb->poolPingInterval = NJS_POOL_DEFAULT_PING_INTERVAL;
 
@@ -1737,6 +1757,27 @@ static napi_value njsOracleDb_setPoolTimeout(napi_env env,
         return NULL;
     if (!njsUtils_setPropUnsignedInt(env, value, "poolTimeout",
             &oracleDb->poolTimeout))
+        return NULL;
+
+    return NULL;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracleDb_setPrefetchRows()
+//   Set accessor of "prefetchRows" property.
+//-----------------------------------------------------------------------------
+static napi_value njsOracleDb_setPrefetchRows(napi_env env,
+        napi_callback_info info)
+{
+    njsOracleDb *oracleDb;
+    napi_value value;
+
+    if (!njsUtils_validateSetter(env, info, (njsBaseInstance**) &oracleDb,
+            &value))
+        return NULL;
+    if (!njsUtils_setPropUnsignedInt(env, value, "prefetchRows",
+            &oracleDb->prefetchRows))
         return NULL;
 
     return NULL;

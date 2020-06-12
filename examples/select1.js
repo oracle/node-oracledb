@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -63,6 +63,7 @@ async function run() {
         maxRows: 1
         //, outFormat: oracledb.OUT_FORMAT_OBJECT  // query result format
         //, extendedMetaData: true                 // get extra metadata
+        //, prefetchRows:   100                    // internal buffer allocation size for tuning
         //, fetchArraySize: 100                    // internal buffer allocation size for tuning
       });
 
