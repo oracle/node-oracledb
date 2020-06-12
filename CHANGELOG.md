@@ -4,12 +4,54 @@
 
 **This release is under development**
 
-- Added a
-  [`oracledb.initOracleClient()`](https://oracle.github.io/node-oracledb/doc/api.html#odbinitoracleclient)
-  function to specify the directory that the Oracle Client libraries and
-  optional configuration files should be located from, and to specify other
-  configuration values, see [Initializing
-  Node-oracledb](https://oracle.github.io/node-oracledb/doc/api.html#initnodeoracledb).
+- Stated compatibility is now for Node.js 10.16+, 12 and 14.
+
+- Installation Changes:
+
+    - Added a
+      [`oracledb.initOracleClient()`](https://oracle.github.io/node-oracledb/doc/api.html#odbinitoracleclient)
+      function to specify the directories that the Oracle Client libraries and
+      optional Oracle configuration files are in, and to specify other
+      configuration values, see [Initializing
+      Node-oracledb](https://oracle.github.io/node-oracledb/doc/api.html#initnodeoracledb).
+
+    - macOS Instant Client installation instructions have necessarily changed to
+      work with recent Node.js versions.  Instant Client libraries in `~/lib`
+      will no longer be used.  See
+      [INSTALL](https://oracle.github.io/node-oracledb/INSTALL.html#instosx).
+
+    - Fixed how the module binary is found when using Webpack.
+
+      Webpack users should copy the node-oracledb binary into a sub-directory of
+      the output directory.  For example if the output directory is `dist`, then
+      the binary should be in
+      `dist/node_modules/oracledb/build/Release/oracledb-5.0.0-linux-x64.node`.
+      A copy plugin in `webpack.config.js` can do this by copying
+      `node_modules/oracledb/build` to a directory of that same name.  See
+      [Issue 1156](https://github.com/oracle/node-oracledb/issues/1156).
+
+    - Updated [Docker installation
+      documentation](https://oracle.github.io/node-oracledb/INSTALL.html#docker)
+      for changes to the Node.js image ([Issue #1201](https://github.com/oracle/node-oracledb/issues/1201)).
+
+    - Removed use of git in `package/buildpackage.js` making offline builds cleaner
+      for self-hosting node-oracledb.
+
+- Connection Pool changes:
+
+    - Added
+      [`oracledb.queueMax`](https://oracle.github.io/node-oracledb/doc/api.html#propdbqueuemax)
+      and equivalent `createPool()` option attribute
+      [`queueMax`](https://oracle.github.io/node-oracledb/doc/api.html#createpoolpoolattrsqueuemax)
+      to limit the number of pending `pool.getConnection()` calls in the pool
+      queue ([Issue #514](https://github.com/oracle/node-oracledb/issues/514)).
+
+    - Made an internal change to use an Oracle Client 20 Session Pool feature
+      allowing node-oracledb connection pools to shrink to `poolMin` even when
+      there is no pool activity.
+
+- Added support for queries containing cursor expressions that return [nested
+  cursors](https://oracle.github.io/node-oracledb/doc/api.html#nestedcursors).
 
 - Added database instance startup and shutdown functions
 [`oracledb.startup()`](https://oracle.github.io/node-oracledb/doc/api.html#odbstartup),
@@ -23,9 +65,6 @@ and
   to allow preliminary database connections, such as required when starting a
   database.
 
-- Added support for queries containing cursor expressions that return [nested
-  cursors](https://oracle.github.io/node-oracledb/doc/api.html#nestedcursors).
-
 - Added support for PL/SQL Collection Associative Arrays "index-by tables" of
   the following types: `oracledb.DB_TYPE_NVARCHAR`, `oracledb.DB_TYPE_CHAR`,
   `oracledb.DB_TYPE_NCHAR`, `oracledb.DB_TYPE_BINARY_FLOAT`,
@@ -33,36 +72,19 @@ and
   `oracledb.DB_TYPE_TIMESTAMP`, `oracledb.DB_TYPE_TIMESTAMP_LTZ`,
   `oracledb.DB_TYPE_TIMESTAMP_TZ` and `oracledb.DB_TYPE_RAW`.
 
-- Connection Pool changes:
-
-    - Added
-      [`oracledb.queueMax`](https://oracle.github.io/node-oracledb/doc/api.html#propdbqueuemax)
-      and equivalent `createPool()` attributes to limit the number of pending
-      `pool.getConnection()` calls in the pool queue ([Issue #514](https://github.com/oracle/node-oracledb/issues/514)).
-
-    - Made an internal change to use an Oracle Client 20 Session Pool feature
-      allowing node-oracledb connection pools to shrink to `poolMin` even when
-      there is no pool activity.
+- Refactored the module's JavaScript code layer to use async/await.
 
 - Removed support for custom Promise libraries.  Use the native Node.js Promise
   implementation instead.  This change was necessitated by the refactored
   JavaScript implementation.
 
-- Refactored the module's JavaScript code layer to use async/await.
-
 - NJS-005 and NJS-009 are now passed through the callback (if one is used).
-
-- Stated compatibility is now for Node.js 10.16+, 12 and 14.
 
 - Fixed a segfault that occurred when binding a database object IN/OUT without
   providing the database object class.
 
 - Fixed OUT binds of type `oracledb.DB_TYPE_DATE`, `oracledb.DB_TYPE_TIMESTAMP`
   and `oracledb.DB_TYPE_TIMESTAMP_TZ` to correctly return Dates.
-
-- Updated [Docker installation
-  documentation](https://oracle.github.io/node-oracledb/INSTALL.html#docker) for changes
-  to the Node.js image ([Issue #1201](https://github.com/oracle/node-oracledb/issues/1201)).
 
 - [SODA](https://oracle.github.io/node-oracledb/doc/api.html#sodaoverview) changes:
 
@@ -80,46 +102,29 @@ and
     - Added Oracle Database 20c SODA function
       [`sodaCollection.truncate()`](https://oracle.github.io/node-oracledb/doc/api.html#sodacolltruncate).
 
-- Fixed Lob class
-  [`lob.type`](https://oracle.github.io/node-oracledb/doc/api.html#proplobtype)
-  and
-  [`metaData.fetchType`](https://oracle.github.io/node-oracledb/doc/api.html#execmetadata)
-  when streaming NCLOB data.  They are now `oracledb.NCLOB` instead of
-  `oracledb.CLOB`.`
+- Lob Changes:
 
-- Fixed `Lob.destroy()` so it does not call the old `Lob.close()` method, which
-  emits a duplicate close event.
+    - Fixed Lob class
+      [`lob.type`](https://oracle.github.io/node-oracledb/doc/api.html#proplobtype)
+      and
+      [`metaData.fetchType`](https://oracle.github.io/node-oracledb/doc/api.html#execmetadata)
+      when streaming NCLOB data.  They are now `oracledb.NCLOB` instead of
+      `oracledb.CLOB`.
 
-- Lobs being streamed to are now correctly destroyed on error.
+    - Fixed `Lob.destroy()` so it does not call the old `Lob.close()` method, which
+      emits a duplicate close event.
 
-- Removed use of git in `package/buildpackage.js` making offline builds cleaner
-  for self-hosted node-oracledb.
-
-- Updated macOS installation instructions and building for recent Node.js
-  versions.  Oracle's `libclntsh.dylib` needs to in, or symbolically linked to,
-  `/usr/local/lib`. Using `~/lib` is no longer possible.  See the [installation
-  instructions](https://oracle.github.io/node-oracledb/INSTALL.html#instosx).
-  This helps resolve the DPI-1047 runtime error `dlopen(libclntsh.dylib, 1):
-  image not found` reported on macOS Mojave with Node.js versions 10.20.0,
-  12.16.2, 13.12.0, and later.
-
-- Fixed how the module binary is found when using Webpack.
-
-  Webpack users should copy the node-oracledb binary into a sub-directory of the
-  output directory.  For example if the output directory is `dist`, then the
-  binary should be in
-  `dist/node_modules/oracledb/build/Release/oracledb-5.0.0-linux-x64.node`.  A
-  copy plugin in `webpack.config.js` can do this by copying
-  `node_modules/oracledb/build` to a directory of that same name.  See [Issue
-  1156](https://github.com/oracle/node-oracledb/issues/1156).
+    - Lobs being streamed to are now correctly destroyed on error.
 
 - Made an internal change to use an Oracle Client 20 feature to avoid a
   round-trip when accessing
   [`oracledb.version`](https://oracle.github.io/node-oracledb/doc/api.html#propdbversion)
   for the first time.
 
-- Update examples and documentation to make more use of Node.js 8's Stream
+- Updated examples and documentation to make more use of Node.js 8's Stream
   `destroy()` method, allowing resources to be freed early.
+
+- Test and documentation improvements.
 
 ## node-oracledb v4.2.0 (24 Jan 2020)
 
