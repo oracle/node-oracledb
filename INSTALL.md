@@ -57,7 +57,7 @@ The [*node-oracledb*][4] add-on for Node.js powers high performance Oracle Datab
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
-This node-oracledb release has been tested with Node.js 10 and 12 on 64-bit
+This node-oracledb release has been tested with Node.js 10, 12 and 14 on 64-bit
 Oracle Linux, Windows and macOS Mojave 10.14.  Note Node.js 10.16, or later is
 required.  The add-on can also build on some 32-bit Linux, 32-bit Windows,
 Solaris and AIX environments, but these architectures have not been fully

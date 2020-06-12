@@ -52,7 +52,7 @@ and
 
 - NJS-005 and NJS-009 are now passed through the callback (if one is used).
 
-- Stated compatibility is now for Node.js 10.16+ and Node.js 12.
+- Stated compatibility is now for Node.js 10.16+, 12 and 14.
 
 - Fixed a segfault that occurred when binding a database object IN/OUT without
   providing the database object class.
