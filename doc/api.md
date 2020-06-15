@@ -7667,7 +7667,7 @@ Node-oracledb looks for the Oracle Client libraries as follows:
       node_modules/oracledb/build/Release/`.  If the libraries are not found, no
       error is thrown and the search continues, see next bullet point.
 
-    - In `/usr/lib/dir`.  If the Oracle Client libraries cannot be loaded, then
+    - In `/usr/local/lib`.  If the Oracle Client libraries cannot be loaded, then
       an error is thrown.
 
 - On Linux and related platforms:
