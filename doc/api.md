@@ -435,10 +435,11 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 15.7 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
     - 15.8 [Changing Passwords and Connecting with an Expired Password](#changingpassword)
     - 15.9 [Connections and High Availability](#connectionha)
-        - 15.9.1 [Fast Application Notification (FAN)](#connectionfan)
-        - 15.9.2 [Runtime Load Balancing (RLB)](#connectionrlb)
-        - 15.9.3 [Application Continuity](#appcontinuity)
-        - 15.9.4 [Database Call Timeouts](#dbcalltimeouts)
+        - 15.9.1 [Preventing Premature Connection Closing](#connectionpremclose)
+        - 15.9.2 [Fast Application Notification (FAN)](#connectionfan)
+        - 15.9.3 [Runtime Load Balancing (RLB)](#connectionrlb)
+        - 15.9.4 [Application Continuity](#appcontinuity)
+        - 15.9.5 [Database Call Timeouts](#dbcalltimeouts)
     - 15.10 [Connecting to Oracle Autonomous Database](#connectionadb)
     - 15.11 [Connecting to Sharded Databases](#sharding)
 16. [SQL Execution](#sqlexecution)
@@ -1610,7 +1611,11 @@ Importantly, if you increase `poolMax` you should also increase the
 number of threads available to node-oracledb.  See [Connections and
 Number of Threads](#numberofthreads).
 
-See [Connection Pooling](#connpooling) for other pool sizing guidelines.
+A fixed pool size where `poolMin` equals `poolMax` [is strongly
+recommended](#conpoolsizing).  This helps prevent connection storms and helps
+overall system stability.
+
+See [Connection Pooling](#connpooling) for pool sizing guidelines.
 
 ##### Example
 
@@ -1667,6 +1672,10 @@ regardless of the value of
 of open connections exceeds `poolMin` and connections are idle for
 more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
 number of open connections does not fall below `poolMin`.
+
+A fixed pool size where `poolMin` equals `poolMax` [is strongly
+recommended](#conpoolsizing).  This helps prevent connection storms and helps
+overall system stability.
 
 ##### Example
 
@@ -8108,7 +8117,7 @@ version of the Oracle Client libraries.
 If you are using Oracle Client 19c, the latest [Easy Connect Plus][151] syntax
 allows the use of multiple hosts or ports, along with optional entries for the
 wallet location, the distinguished name of the database server, and even lets
-some network configuration options be set.  The whitepaper [Oracle Database 19c
+some network configuration options be set.  The white paper [Oracle Database 19c
 Easy Connect Plus Configurable Database Connection Syntax][177] discusses the
 syntax.  The Easy Connect Plus syntax means that [`tnsnames.ora`](#tnsadmin) or
 [`sqlnet.ora`](#tnsadmin) files are not needed for some further common
@@ -8282,13 +8291,26 @@ connections.  If the application does database and non-database work
 concurrently, then additional threads could also be required for optimal throughput.
 
 Increase the thread pool size by setting the environment variable
-[UV_THREADPOOL_SIZE][20] before starting Node.js.  For example, in a
-Linux terminal, the number of Node.js worker threads can be increased
-to 10 by using the following command:
+[UV_THREADPOOL_SIZE][20] before starting Node.js.  For example, on Linux your
+`package.json` may have a script like:
 
 ```
-$ UV_THREADPOOL_SIZE=10 node myapp.js
+"scripts": {
+    "start": "export UV_THREADPOOL_SIZE=10 && node index.js"
+  },
+. . .
 ```
+
+Or, on Windows:
+
+```
+"scripts": {
+    "start": "SET UV_THREADPOOL_SIZE=10 && node index.js"
+  },
+. . .
+```
+
+With these, you can start your application with `npm start`.
 
 On non-Windows platforms, the value can also be set inside the application.  It
 must be set prior to any asynchronous Node.js call that uses the thread pool:
@@ -8301,9 +8323,10 @@ process.env.UV_THREADPOOL_SIZE = 10
 // ... rest of code
 ```
 
-If you set it too late, the setting will be ignored and the default thread pool
-size of 4 will still be used.  Note that [`pool._logStats()`](#connpoolmonitor)
-will show the value of the variable, not the actual size of the pool.
+If you set `UV_THREADPOOL_SIZE` too late, the setting will be ignored and the
+default thread pool size of 4 will still be used.  Note that
+[`pool._logStats()`](#connpoolmonitor) can only show the value of the variable,
+not the actual size of the thread pool.
 
 The '[libuv][21]' library used by Node.js 12.5 and earlier limits the number of
 threads to 128.  In Node.js 12.6 onward the limit is 1024.  You should restrict
@@ -8370,9 +8393,13 @@ threads at that time either.  When you use methods like `async.series` or
 ### <a name="connpooling"></a> 15.3 Connection Pooling
 
 When applications use a lot of connections for short periods, Oracle recommends
-using a connection pool for efficiency.  Each node-oracledb process can use one
-or more connection pools.  Each pool can contain one or more connections.  A
-pool can grow or shrink, as needed.  In addition to providing an immediately
+using a connection pool for efficiency.  Each connection in a pool should be
+used for a given unit of work, such as a transaction or a set of sequentially
+executed statements.  Statements should be [executed sequentially, not in
+parallel](#numberofthreads) on each connection.
+
+Each node-oracledb process can use one or more connection pools.  Each pool can
+contain zero or more connections.  In addition to providing an immediately
 available set of connections, pools provide [dead connection
 detection](#connpoolpinging) and transparently handle Oracle Database [High
 Availability events](#connectionha).  This helps shield applications during
@@ -8391,12 +8418,12 @@ pool, it should release all connections and terminate the connection
 pool by calling the [`pool.close()`](#poolclose) method.
 
 Connections from the pool are obtained with
-[`pool.getConnection()`](#getconnectionpool).  If all connections in a
-pool are being used, then subsequent `getConnection()` calls will be
-put in a [queue](#connpoolqueue).  Connections must be released with
-[`connection.close()`](#connectionclose) when no longer needed so they
-are available for reuse.  Make sure to release connections in all
-codes paths, include error handlers.
+[`pool.getConnection()`](#getconnectionpool).  If all connections in a pool are
+being used, then subsequent `getConnection()` calls will be put in a
+[queue](#connpoolqueue) until a connection is available.  Connections must be
+released with [`connection.close()`](#connectionclose) when no longer needed so
+they can be reused.  Make sure to release connections in all codes paths,
+include error handlers.
 
 When a connection is released back to its pool, any ongoing
 transaction will be [rolled back](#transactionmgt) however it will
@@ -8406,93 +8433,122 @@ State](#connpooltagging) for more information.
 
 Connections can also be [dropped completely from the pool](#connectionclose).
 
-A connection pool can be used like:
+A connection pool should be started during application initialization, for
+example before the web server is started:
 
 ```javascript
 const oracledb = require('oracledb');
 
 const mypw = ...  // set mypw to the hr schema password
 
-async function run() {
-
+// Start the pool and webserver
+async function init() {
   try {
-    // Typically a pool is created only when the application starts
+
     await oracledb.createPool({
       user          : "hr",
-      password      : mypw  // mypw contains the hr schema password
-      connectString : "localhost/XEPDB1"
+      password      : mypw,               // mypw contains the hr schema password
+      connectString : "localhost/XEPDB1",
+      poolIncrement : 0,
+      poolMax       : 4,
+      poolMin       : 4
     });
 
-    // Typically there would be multiple oracledb.getConnection() and connection.close() calls
-    // on a pool before the pool is closed.
-    let connection;
-    try {
-      connection = await oracledb.getConnection();
-      result = await connection.execute(`SELECT last_name FROM employees`);
-      console.log("Result is:", result);
-    } catch (err) {
-      throw (err);
-    } finally {
-      if (connection) {
-        try {
-          await connection.close(); // Put the connection back in the pool
-        } catch (err) {
-          throw (err);
-        }
-      }
-    }
+    const server = http.createServer();
+    server.on('error', (err) => {
+      console.log('HTTP server problem: ' + err);
+    });
+    server.on('request', (request, response) => {
+      handleRequest(request, response);
+    });
+    await server.listen(3000);
+
+    console.log("Server is running");
 
   } catch (err) {
-    console.error(err.message);
-  } finally {
-
-    // At the end of the application, the pool can be closed
-    await oracledb.getPool().close(0);   // close pool immediately
+    console.error("init() error: " + err.message);
   }
 }
-
-run();
 ```
+
+Each web request will invoke `handleRequest()`. In it, a connection can be
+obtained from the pool and used:
+
+```javascript
+async function handleRequest(request, response) {
+
+  response.writeHead(200, {"Content-Type": "text/html"});
+  response.write("<!DOCTYPE html><html><head><title>My App</title></head><body>");
+
+  let connection;
+  try {
+
+    connection = await oracledb.getConnection();
+    const result = await connection.execute(`SELECT * FROM locations`);
+
+    displayResults(response, result);  // do something with the results
+
+  } catch (err) {
+    response.write("<p>Error: " + text + "</p>");
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();  // always release the connection back to the pool
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+
+  response.write("</body></html>");
+  response.end();
+
+}
+```
+
+See [webappawait.js][189] for a runnable example.
 
 #### <a name="conpoolsizing"></a> 15.3.1 Connection Pool Sizing
 
-The characteristics of a connection pool are determined by the Pool attributes
+The characteristics of a connection pool are determined by its attributes
 [`poolMin`](#proppoolpoolmin), [`poolMax`](#proppoolpoolmax),
 [`poolIncrement`](#proppoolpoolincrement), and
-[`poolTimeout`](#proppoolpooltimeout).  Each connection should be used for a
-given unit of work, such as a transaction or a set of sequentially executed
-statements.  Statements should be [executed sequentially, not in
-parallel](#numberofthreads) on each connection.  The pool attributes should be
-adjusted to handle the desired workload within the bounds of available resources
-in Node.js and the database.  Note that when [external authentication](#extauth)
-or [heterogeneous pools](#connpoolproxy) are used, the pool growth behavior is
+[`poolTimeout`](#proppoolpooltimeout).  Pool expansion happens when the
+following are all true: (i) [`pool.getConnection()`](#getconnectionpool) is
+called and (ii) all the currently established connections in the pool are
+"checked out" by previous `pool.getConnection()` calls and are in-use by the
+application, and (iii) the number of those connections is less than the pool's
+`poolMax` setting.  Note that when [external authentication](#extauth) or
+[heterogeneous pools](#connpoolproxy) are used, the pool growth behavior is
 different.
 
-To find the current size of a pool, and determine whether its parameters are set
-appropriately, see [Connection Pool Monitoring](#connpoolmonitor).
+Importantly, if you increase the size of the pool, you must [increase the number
+of threads](#numberofthreads) used by Node.js before Node.js starts its
+threadpool.
 
-If you increase the size of the pool, you must [increase the number of
-threads](#numberofthreads) used by Node.js.
+The Oracle Real-World Performance Group's recommendation is to use fixed size
+connection pools.  The values of `poolMin` and `poolMax` should be the same (and
+`poolIncrement` equal to zero).  This avoids connection storms which can
+decrease throughput.  See [Guideline for Preventing Connection Storms: Use
+Static Pools][23], which contains more details about sizing of pools.  Having a
+fixed size will guarantee that the database can handle the upper pool size.  For
+example, if a pool needs to grow but the database resources are limited, then
+`pool.getConnection()` may return errors such as *ORA-28547*.  With a fixed pool
+size, this class of error will occur when the pool is created, allowing you to
+change the size before users access the application.  With a dynamically growing
+pool, the error may occur much later after the pool has been in use for some
+time.
 
-Pool expansion happens when the following are all true: (i)
-[`pool.getConnection()`](#getconnectionpool) is called and (ii) all the
-currently established connections in the pool are "checked out" by previous
-`pool.getConnection()` calls and are in-use by the application, and (iii) the
-number of those connections is less than the pool's `poolMax` setting.
+The Real-World Performance Group also recommends keeping pool sizes small, as
+this may perform better than larger pools.  Use
+[`pool._logStats()`](#connpoolmonitor) to monitor pool usage.  The pool
+attributes should be adjusted to handle the desired workload within the bounds
+of available resources in Node.js and the database.
 
-The Oracle Real-World Performance Group's general recommendation for client
-connection pools is to use a fixed sized.  The values of `poolMin` and `poolMax`
-should be the same (and `poolIncrement` equal to zero), and the firewall,
-[resource manager][101] or user profile [`IDLE_TIME`][100] should not expire
-idle sessions.  This avoids connection storms which can decrease throughput.
-See [Guideline for Preventing Connection Storms: Use Static Pools][23], which
-contains details about sizing of pools.  Having a fixed size will guarantee that
-the database can handle the upper pool size.  For example, if a pool needs to
-grow but the database resources are limited, then `pool.getConnection()` may
-return errors such as *ORA-28547*.  With a fixed pool size, this class of error
-will occur when the pool is created, allowing you to change the size before
-users access the application.  With a dynamically growing pool, the error may
-occur much later after the pool has been in use for some time.
+Make sure any firewall, [resource manager][101] or user profile
+[`IDLE_TIME`][100] does not expire idle connections, since this will require
+connections be recreated, which will impact performance and scalability.  See
+[Preventing Premature Connection Closing](#connectionpremclose).
 
 #### <a name="conpooldraining"></a> 15.3.2 Connection Pool Closing and Draining
 
@@ -8926,8 +8982,8 @@ KILL SESSION` command.  The explicit ping initiated by
 For ultimate scalability, use Oracle client 12.2 (or later) libraries, disable
 explicit pool pinging by setting `poolPingInterval` to a negative value, and
 make sure the firewall, database resource manager, or user profile is not
-expiring idle sessions.  Also see [Connections and High
-Availability](#connectionha).
+expiring idle connections.  See [Preventing Premature Connection
+Closing](#connectionpremclose).
 
 In all cases, when a bad connection is released back to the pool with
 [connection.close()](#connectionclose), the connection is
@@ -9697,18 +9753,39 @@ Application Notification (FAN)](#connectionfan), [Application
 Continuity](#appcontinuity), and [Oracle Net Services][37] settings can all help
 high availability, often without the application being aware of any issue.
 
-Note scalability-reducing issues such as firewalls terminating idle connections
-can be hidden by automatic connection re-establishment features.  It is
-recommended to use [AWR][62] to check the connection rate, and fix underlying
-causes.
+For application high availability, use a [connection pool](#connpooling).  Pools
+provide immediately available connections.  Also the internal pool
+implementation supports a number of Oracle Database high availability features
+for planned and unplanned database instance downtime.  Use a [fixed size
+pool](#conpoolsizing) to avoid connection storms.
 
-For application high availability, use a [connection pool](#connpooling).
-Pools provide immediately available connections.  Also the internal pool
-implementation supports a number of Oracle Database high availability features.
+Configuring TCP timeouts can help avoid application hangs if there is a network
+failure. [FAN](#connectionfan) is also useful.
+
+Oracle Net options may be useful for high availability and performance tuning.
+Connection establishment timeouts can be [set](#dbcalltimeouts).  The database's
+`listener.ora` file can have [`RATE_LIMIT`][133] and [`QUEUESIZE`][134]
+parameters that can help handle connection storms.  In the bigger picture,
+Oracle Net can be used to configure database service settings, such as for
+failover using [Oracle RAC][183] or a standby database.
+
+[Database Resident Connection Pooling (DRCP)](#drcp) may be useful to reduce
+load on a database host.  It can also help reduce connection time when a number
+of Node.js processes are used to scale up an application.
+
+Finally, applications should always check for execution errors, and perform
+appropriate application-specific recovery.
+
+#### <a name="connectionpremclose"></a> 15.9.1 Preventing Premature Connection Closing
+
+When connections are idle, external timeouts may disconnect them from the
+database.  This can impact scalability, cause connection storms, and lead to
+application errors when invalid connections are attempted to be used.
 
 There are three components to a node-oracledb connection:
 
-  1. The memory structure in node-oracledb that is returned by a `getConnection()` call.  It may be stored in a connection pool.
+  1. The memory structure in node-oracledb that is returned by a
+     `getConnection()` call.  It may be stored in a connection pool.
 
   2. The underlying network connection between the Oracle Client libraries and the database.
 
@@ -9722,32 +9799,31 @@ call could successfully return a connection to the application that will not be
 usable.  An error would only occur when calling `connection.execute()`, or
 similar.
 
-To make sure connections returned from a pool do not cause execution errors,
-disable the database [resource manager][101] and any user resource profile
-[`IDLE_TIME`][100] setting so they do not terminate sessions.  This also avoids
-the cost of internal or explicit reconnection in node-oracledb.
+Disable any firewall that is killing idle connections.  Also disable the
+database [resource manager][101] and any user resource profile
+[`IDLE_TIME`][100] setting so they do not terminate sessions.  These issues can
+be hidden by node-oracledb's automatic connection re-establishment features so
+it is recommended to use [AWR][62] to check the connection rate, and then fix
+underlying causes.
 
-Similarly, configure your OS network settings and Oracle Net (which handles
-communication between node-oracledb and the database) to prevent firewalls
-killing idle connections.  The network layers can also be configured to avoid
-long TCP timeouts.  These timeouts can cause applications to hang if there is a
-network failure.  See [Database Call Timeouts](#dbcalltimeouts).
+With Oracle Client 19c, [`EXPIRE_TIME`][159] can be used in
+[`tnsnames.ora`](#tnsnames) connect descriptors to prevent firewalls from
+terminating idle connections and to adjust keepalive timeouts.  The general
+recommendation for `EXPIRE_TIME` is to use a value that is slightly less than
+half of the termination period.  In older versions of Oracle Client, a
+tnsnames.ora connect descriptor option [`ENABLE=BROKEN`][36] can be used instead
+of `EXPIRE_TIME`.  These settings can also aid detection of a terminated remote
+database server.  With Oracle Client 19c, the setting can be passed in [Easy
+Connect strings](#easyconnect), for example your connection string could be
+`"mydbmachine.example.com/orclpdb1?expire_time=2"` to send packets every two
+minutes.
 
-Other Oracle Net options may also be useful for high availability and
-performance tuning.  For example the database's `listener.ora` file can have
-[`RATE_LIMIT`][133] and [`QUEUESIZE`][134] parameters that can help handle
-connection storms.  In the bigger picture, Oracle Net can be used to configure
-database service settings, such as for failover using [Oracle RAC][183] or a
-standby database.
+If the network or the database server processes used by node-oracledb
+connections cannot be prevented from becoming unusable, tune [Connection Pool
+Pinging](#connpoolpinging).  Another case where this internal pinging is helpful
+is during development, where a laptop may go offline for an extended time.
 
-[Database Resident Connection Pooling (DRCP)](#drcp) may be useful to reduce
-load on a database host.  It can also help reduce connection time when a number
-of Node.js processes are used to scale up an application.
-
-Finally, applications should always check for execution errors, and perform
-appropriate application-specific recovery.
-
-#### <a name="connectionfan"></a> 15.9.1 Fast Application Notification (FAN)
+#### <a name="connectionfan"></a> 15.9.2 Fast Application Notification (FAN)
 
 FAN support is useful for planned and unplanned outages.  It provides
 immediate notification to node-oracledb following outages related to
@@ -9767,10 +9843,10 @@ a connection pool will be automatically cleaned up.  A future
 surviving database instance without the application being aware of any
 service disruption.
 
-To handle errors that affect active connections, you can add
-application logic to re-connect (this will connect to a surviving
-database instance) and replay application logic without having to
-return an error to the application user.
+To handle errors that affect active connections, you can add application logic
+to re-connect (this will connect to a surviving database instance) and replay
+application logic without having to return an error to the application user.
+Alternatively, use [Application Continuity](#appcontinuity).
 
 FAN benefits users of Oracle Database's clustering technology ([Oracle
 RAC][93]) because connections to surviving database instances can be
@@ -9781,7 +9857,7 @@ Standalone databases will send FAN events when the database restarts.
 For a more information on FAN see the [white paper on Fast Application
 Notification][97].
 
-#### <a name="connectionrlb"></a> 15.9.2 Runtime Load Balancing (RLB)
+#### <a name="connectionrlb"></a> 15.9.3 Runtime Load Balancing (RLB)
 
 [Oracle Database RAC][93] users with [Oracle Database (RLB)][65]
 advisory events configured should use node-oracledb [Connection
@@ -9795,18 +9871,19 @@ requests across RAC instances.
 For a more information on RLB, see the [white paper on Fast Application
 Notification][97].
 
-#### <a name="appcontinuity"></a> 15.9.3 Application Continuity
+#### <a name="appcontinuity"></a> 15.9.4 Application Continuity
 
 Node-oracledb applications can take advantage of continuous availability with
 the Oracle Database features Application Continuity and Transparent Application
 Continuity.  These help make unplanned database service downtime transparent to
-applications.  See the white paper [Continuous Availability Application
-Continuity for the Oracle Database][178].
+applications.  See the white papers [Continuous Availability Application
+Continuity for the Oracle Database][178] and [Continuous Availability Best
+Practices for Applications Using Autonomous Database - Dedicated][190].
 
 When connected to an AC or TAC enabled service, node-oracledb automatically
 supports AC or TAC.
 
-#### <a name="dbcalltimeouts"></a> 15.9.4 Database Call Timeouts
+#### <a name="dbcalltimeouts"></a> 15.9.5 Database Call Timeouts
 
 ##### Limiting the time to open new connections
 
@@ -9821,35 +9898,6 @@ control higher level pool behavior.
 With Oracle Client 19c, timeouts can be passed in [Easy Connect
 strings](#easyconnect), for example to timeout after 15 seconds:
 `"mydbmachine.example.com/orclpdb1?connect_timeout=15"`
-
-##### Preventing connections from being closed prematurely
-
-When connections are idle, external timeouts may disconnect them from the
-database.  This can impact scalability, cause connection storms, and lead to
-application errors when invalid connections are attempted to be used.
-
-Disable any firewall that is killing idle connections.  Also disable the
-database [resource manager][101] and any user resource profile
-[`IDLE_TIME`][100] setting so they do not terminate sessions.
-
-With Oracle Client 19c, [`EXPIRE_TIME`][159] can be used in
-[`tnsnames.ora`](#tnsnames) connect descriptors to prevent firewalls from
-terminating idle connections and to adjust keepalive timeouts.  The general
-recommendation for `EXPIRE_TIME` is to use a value that is slightly less than
-half of the termination period.  In older versions of Oracle Client, a
-tnsnames.ora connect descriptor option [`ENABLE=BROKEN`][36] can be used instead
-of `EXPIRE_TIME`.  These settings can also aid detection of a terminated remote
-database server.
-
-With Oracle Client 19c, the setting can be passed in [Easy Connect
-strings](#easyconnect), for example your connection string could be
-`"mydbmachine.example.com/orclpdb1?expire_time=2"` to send packets every two
-minutes.
-
-If the network or the database server processes used by node-oracledb
-connections cannot be prevented from becoming unusable, tune [Connection Pool
-Pinging](#connpoolpinging).  Another case where this internal pinging is helpful
-is during development, where a laptop may go offline for an extended time.
 
 ##### Limiting the time taken to execute statements
 
@@ -12854,7 +12902,7 @@ Analytics][59] and in [this StackOverflow answer][60].
 ### <a name="sqlbindtablename"></a> 21.7 Binding Column and Table Names in Queries
 
 It is not possible to bind table names in queries.  Instead use a
-hardcoded whitelist of names to build the final SQL statement, for
+hardcoded Allow List of names to build the final SQL statement, for
 example:
 
 ```javascript
@@ -12870,7 +12918,7 @@ const query = `SELECT * FROM ` + tableName;
 ```
 
 The same technique can be used to construct the list of selected
-column names.  Make sure to use a whitelist of names to avoid SQL
+column names.  Make sure to use a Allow List of names to avoid SQL
 Injection security risks.
 
 Each final SQL statement will obviously be distinct, and will use a
@@ -16371,3 +16419,5 @@ can be asked at [AskTom][158].
 [186]: https://static.rainfocus.com/oracle/oow19/sess/1553616880266001WLIh/PF/OOW19_Net_CON4641_1569022126580001esUl.pdf
 [187]: https://support.oracle.com/epmos/faces/DocumentDisplay?id=207303.1
 [188]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=TGDBA
+[189]: https://github.com/oracle/node-oracledb/tree/master/examples/webappawait.js
+[190]: https://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/continuous-service-for-apps-on-atpd-5486113.pdf

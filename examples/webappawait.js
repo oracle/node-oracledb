@@ -28,6 +28,8 @@
  *   'disable_oob=on' in sqlnet.ora, see
  *   https://oracle.github.io/node-oracledb/doc/api.html#tnsadmin
  *
+ *   In production applications, set poolMin=poolMax (and poolIncrement=0)
+ *
  *   This example requires node-oracledb 3 or later.
  *
  *   This example uses Node 8's async/await syntax.
