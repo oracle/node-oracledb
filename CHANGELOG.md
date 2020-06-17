@@ -519,7 +519,7 @@ and
 
 - Fixed some SODA stability issues (node-oracledb and ODPI-C changes).
 
-- Improved the statement error white list to avoid unnecessarily
+- Improved the statement error Allow List to avoid unnecessarily
   dropping statements from the statement cache (ODPI-C change).
 
 - Made internal changes to fix V8 deprecation compilation warnings

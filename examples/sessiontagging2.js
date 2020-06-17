@@ -57,8 +57,8 @@ const httpPort = 7000;
 //
 // This implementation assumes the tag has name-value pairs like
 // "k1=v1;k2=v2" where the pairs can be used in an ALTER SESSION
-// statement.  Specifically it white lists TIME_ZONE=UTC and
-// TIME_ZONE=Australia/Melbourne.  The white list could be enhanced to
+// statement.  Specifically it allows TIME_ZONE=UTC and
+// TIME_ZONE=Australia/Melbourne.  The Allow List could be enhanced to
 // support more settings.  Another potential improvement would be to
 // identify properties in connection.tag that were not specifically
 // asked for in requestedTag.  These can be reset, as needed.
@@ -89,7 +89,7 @@ function initSession(connection, requestedTag, cb) {
     }
   }
 
-  // Check allowed values against a white list to avoid any SQL
+  // Check allowed values against an Allow List to avoid any SQL
   // injection issues.  Construct a string of valid options usable by
   // ALTER SESSION.
   let s = "";
@@ -103,7 +103,7 @@ function initSession(connection, requestedTag, cb) {
           cb(new Error(`Error: Invalid time zone value ${requestedProperties[k]}`));
           return;
       }
-      // add white listing code to check other properties and values here
+      // add Allow Listing code to check other properties and values here
     } else {
       cb(new Error(`Error: Invalid connection tag property ${k}`));
       return;
