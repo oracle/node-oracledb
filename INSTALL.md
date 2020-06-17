@@ -666,7 +666,9 @@ Review the generic [prerequisites](#prerequisites).
 The pre-built binaries were built on macOS Mojave, 10.14.6.
 
 Oracle Instant Client libraries are required on macOS.  Note that Oracle Instant
-Client 19c and earlier are not supported on macOS Catalina 10.15.
+Client 19c and earlier are not supported on macOS Catalina 10.15: you will need
+to allow access to several Instant Client libraries from the Security & Privacy
+preference pane.
 
 There is no native Oracle Database for macOS but one can easily be run in a
 Linux virtual machine, see [The Easiest Way to Install Oracle Database on Apple
