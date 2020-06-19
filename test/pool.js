@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -863,6 +863,41 @@ describe('2. pool.js', function() {
         }
       );
     });
+
+    it('2.8.5 generates NJS-076 if request exceeds queueMax 0', function(done) {
+      oracledb.createPool(
+        {
+          user              : dbConfig.user,
+          password          : dbConfig.password,
+          connectString     : dbConfig.connectString,
+          poolMin           : 1,
+          poolMax           : 1,
+          poolIncrement     : 0,
+          queueTimeout      : 5000, // 5 seconds
+          queueMax          : 0
+        },
+        function(err, pool) {
+          should.not.exist(err);
+
+          pool.getConnection(function(err, conn1) {
+            should.not.exist(err);
+            pool.getConnection(function(err, conn) {
+              should.exist(err);
+              (err.message.startsWith("NJS-076:")).should.be.true();
+              should.not.exist(conn);
+              conn1.close(function(err) {
+                should.not.exist(err);
+
+                pool.close(function(err) {
+                  should.not.exist(err);
+                  done();
+                });
+              });
+            });
+          });
+        });
+    });
+
   });
 
   describe('2.9 _enableStats & _logStats functionality', function(){

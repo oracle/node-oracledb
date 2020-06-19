@@ -1820,7 +1820,7 @@ When the number of `pool.getConnection()` calls that have been
 then any future `pool.getConnection()` calls will immediately return an error
 and will not be queued.
 
-If `queueMax` is 0, then the queue length is not limited.
+If `queueMax` is -1, then the queue length is not limited.
 
 The default value is 500.
 
@@ -1835,9 +1835,9 @@ oracledb.queueMax = 500;
 
 #### <a name="propdbqueuerequests"></a> 3.2.24 `oracledb.queueRequests`
 
-This property was removed in node-oracledb 3.0.  Queuing is now always
-enabled.  See [Connection Pool Queue](#connpoolqueue) for more
-information.
+This property was removed in node-oracledb 3.0 and queuing was always enabled.
+In node-oracledb 5.0, set `queueMax` to 0 to disable queuing.  See [Connection
+Pool Queue](#connpoolqueue) for more information.
 
 #### <a name="propdbqueuetimeout"></a> 3.2.25 `oracledb.queueTimeout`
 
@@ -2231,7 +2231,7 @@ When the number of `pool.getConnection()` calls that have been
 then any future `pool.getConnection()` calls will immediately return an error
 and will not be queued.
 
-If `queueMax` is 0, then the queue length is not limited.
+If `queueMax` is -1, then the queue length is not limited.
 
 The default value is 500.
 
@@ -2240,9 +2240,9 @@ This optional property overrides the
 
 ###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.15 `queueRequests`
 
-This property was removed in node-oracledb 3.0.  Queuing is now always
-enabled.  See [Connection Pool Queue](#connpoolqueue) for more
-information.
+This property was removed in node-oracledb 3.0 and queuing was always enabled.
+In node-oracledb 5.0, set `queueMax` to 0 to disable queuing.  See [Connection
+Pool Queue](#connpoolqueue) for more information.
 
 ###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.16 `queueTimeout`
 
@@ -5560,9 +5560,8 @@ See [`oracledb.queueMax`](#propdbqueuemax).
 
 #### <a name="proppoolqueuerequests"></a> 8.1.10 `pool.queueRequests`
 
-This property was removed in node-oracledb 3.0.  Queuing is now always
-enabled.  See [Connection Pool Queue](#connpoolqueue) for more
-information.
+This property was removed in node-oracledb 3.0.  See [Connection Pool
+Queue](#connpoolqueue) for more information.
 
 #### <a name="proppoolqueueTimeout"></a> 8.1.11 `pool.queueTimeout`
 
@@ -9893,7 +9892,7 @@ a [`sqlnet.ora`](#tnsadmin) file or [`CONNECT_TIMEOUT`][185] in a [connection
 string](#easyconnect).  When using a connection pool, these values affect the
 time taken to establish each connection stored in the pool.  The
 [`queueTimeout`](#propdbqueuetimeout) and [`queueMax`](#propdbqueuemax) settings
-control higher level pool behavior.
+control higher-level pool behavior.
 
 With Oracle Client 19c, timeouts can be passed in [Easy Connect
 strings](#easyconnect), for example to timeout after 15 seconds:
