@@ -4501,7 +4501,7 @@ The `message` parameter in the notification callback is an object containing the
 - `queueName` - the name of the Advanced Queue.  Undefined for CQN.  This was added in node-oracledb 4.0.
 - `queries` - an array of objects specifying the queries which were affected by the Query Change notification. This is only defined if the `type` key is the value [`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription). It contains the following key:
     - `tables` - an array of objects identical to the objects created for Database Change Notification (see the `tables` property below).
-- `registered` - a boolean indicating whether the subscription is registered with the database.  Will be *false* if `type` is [`oracledb.SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription) or if the subscription was created with the [`qos`](#consubscribeoptqos) property set to [`oracledb.SUBSCR_QOS_DEREG_NFY`](#oracledbconstantssubscription).
+- `registered` - a Boolean indicating whether the subscription is registered with the database.  Will be *false* if `type` is [`oracledb.SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription) or if the subscription was created with the [`qos`](#consubscribeoptqos) property set to [`oracledb.SUBSCR_QOS_DEREG_NFY`](#oracledbconstantssubscription).
 - `tables` - an array of objects specifying the tables which were affected by the notification. This is only defined if `type` is [`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription). It contains the following properties:
     - `name` - the name of the table which was modified in some way.
     - `operation` - an integer mask composed of one or more values of the following constants:
@@ -12767,7 +12767,7 @@ await conn.execute(
 ```
 
 Because the default bind direction is `BIND_IN`, and the type can be inferred
-from `result.resultSet`, the PL/SQL procedure call can be simplied to:
+from `result.resultSet`, the PL/SQL procedure call can be simplified to:
 
 ```javascript
 await conn.execute(`BEGIN myproc(:rc); END;`, [result.resultSet]);
@@ -12901,7 +12901,7 @@ Analytics][59] and in [this StackOverflow answer][60].
 ### <a name="sqlbindtablename"></a> 21.7 Binding Column and Table Names in Queries
 
 It is not possible to bind table names in queries.  Instead use a
-hardcoded Allow List of names to build the final SQL statement, for
+hard-coded Allow List of names to build the final SQL statement, for
 example:
 
 ```javascript
@@ -15526,7 +15526,7 @@ reduce [round-trips](#roundtrips) to the database. The difference is the code
 layer that is doing the buffering, and when the buffering occurs.  The Oracle
 Client libraries used by node-oracledb have separate "execute SQL statement" and
 "fetch data" calls.  Prefetching allows query results to be returned to the
-application when the successful statement execution acknowledgment is returned
+application when the successful statement execution acknowledgement is returned
 from the database.  This means that a subsequent internal "fetch data" operation
 does not always need to make a round-trip to the database because rows are
 already buffered in the Oracle Client libraries.  Reducing round-trips helps
@@ -15601,7 +15601,7 @@ There are two cases that will benefit from disabling row prefetching
 by setting `prefetchRows` to 0:
 
 - When a query returns a ResultSet which is then passed into PL/SQL.
-  Set `prefetchRows` to 0 during the inital query so the first rows
+  Set `prefetchRows` to 0 during the initial query so the first rows
   from the cursor are not prematurely (and silently) fetched by
   node-oracledb.  This lets all rows be available to the later,
   receiving PL/SQL code.  See [REF CURSOR Bind
@@ -15842,7 +15842,7 @@ Tables can then be created, or altered, so repeated queries use CRC.  This
 allows existing applications to use CRC without needing modification.  For example:
 
 ```sql
-SQL> CREATE TABLE cities (id number, name varchar2(40)) RESULT_CACHE (MODE FORCE);
+SQL> CREATE TABLE cities (id NUMBER, name VARCHAR2(40)) RESULT_CACHE (MODE FORCE);
 SQL> ALTER TABLE locations RESULT_CACHE (MODE FORCE);
 ```
 
