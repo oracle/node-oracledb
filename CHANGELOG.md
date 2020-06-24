@@ -1,8 +1,6 @@
 # Change Log
 
-## node-oracledb v5.0.0 (DD Mon YYYY)
-
-**This release is under development**
+## node-oracledb v5.0.0 (29 Jun 2020)
 
 - Stated compatibility is now for Node.js 10.16+, 12 and 14.
 
