@@ -13915,6 +13915,13 @@ an [`options`](#consubscribeoptions) object that controls notification.  In
 particular `options` contains a valid SQL query and a JavaScript callback:
 
 ```javascript
+const connection = await oracledb.getConnection({
+    user          : "hr",
+    password      : mypw,  // mypw contains the hr schema password
+    connectString : "localhost/XEPDB1",
+    events        : true
+});
+
 function myCallback(message) {
     console.log(message);
 }
@@ -14041,7 +14048,7 @@ try {
       user          : "hr",
       password      : mypw,  // mypw contains the hr schema password
       connectString : "localhost/XEPDB1",
-      events        :  true
+      events        : true
     });
 
     await connection.subscribe('mysub', options);
