@@ -46,8 +46,6 @@ limitations under the License.
     - 3.9 [Hosting your own node-oracledb Packages](#selfhost)
     - 3.10 [Using node-oracledb in Docker](#docker)
 4. [Installing Older Versions of Node-oracledb](#installingoldvers)
-    - 4.1 [Installing node-oracledb 2.x and 3.x](#installingv2)
-    - 4.2 [Installing node-oracledb 1.x](#installingv1)
 5. [Troubleshooting Node-oracledb Installation Problems](#troubleshooting)
 
 ## <a name="overview"></a> 1. Node-oracledb Overview
@@ -58,11 +56,10 @@ The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
 This node-oracledb release has been tested with Node.js 10, 12 and 14 on 64-bit
-Oracle Linux, Windows and macOS Mojave 10.14.  Note Node.js 10.16, or later is
-required.  The add-on can also build on some 32-bit Linux, 32-bit Windows,
-Solaris and AIX environments, but these architectures have not been fully
-tested.  Older versions of node-oracledb may work with older versions of
-Node.js.
+Oracle Linux, Windows and macOS.  Note Node.js 10.16, or later is required.  The
+add-on can also build on some 32-bit Linux, 32-bit Windows, Solaris and AIX
+environments, but these architectures have not been fully tested.  Older
+versions of node-oracledb may work with older versions of Node.js.
 
 Node-oracledb requires Oracle Client libraries version 11.2 or later, and
 can connect to Oracle Database 9.2 or later, depending on the Oracle Client library
@@ -663,7 +660,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The pre-built binaries were built on macOS Mojave, 10.14.6.
+The pre-built binaries were built on macOS Mojave 10.14.6.
 
 Oracle Instant Client libraries are required on macOS.  Note that Oracle Instant
 Client 19c and earlier are not supported on macOS Catalina 10.15: you will need
@@ -1540,6 +1537,8 @@ or your `package.json` would contain:
 have a `Dockerfile` with steps to create a Docker image.  Once created, the
 image can be shared and run.
 
+Sample Dockerfiles for Oracle Linux are available on [GitHub][65].
+
 #### Installing Node.js in Docker
 
 If your `Dockerfile` uses Oracle Linux:
@@ -1551,14 +1550,13 @@ FROM oraclelinux:7-slim
 Then you can install Node.js from [yum.oracle.com][46] using:
 
 ```
-RUN  yum -y install oracle-release-el7 oracle-nodejs-release-el7 && \
-     yum-config-manager --disable ol7_developer_EPEL && \
+RUN  yum -y install oracle-nodejs-release-el7 && \
      yum -y install nodejs && \
      rm -rf /var/cache/yum
 ```
 
-Alternatively you may prefer to use a [Node.js image from
-Docker Hub][56], for example using:
+One alternative to Oracle Linux is to use a [Node.js image from Docker Hub][56],
+for example using:
 
 ```
 FROM node:12-buster-slim
@@ -1585,7 +1583,6 @@ install Instant Client.  Three methods are shown below.
 
    ```
    RUN  yum -y install oracle-release-el7 && \
-        yum-config-manager --enable ol7_oracle_instantclient && \
         yum -y install oracle-instantclient19.6-basiclite && \
         rm -rf /var/cache/yum
    ```
@@ -1720,7 +1717,6 @@ If you use Oracle Linux, your `Dockerfile` will be like:
 FROM oraclelinux:7-slim
 
 RUN  yum -y install oracle-release-el7 oracle-nodejs-release-el7 && \
-     yum-config-manager --disable ol7_developer_EPEL --enable ol7_oracle_instantclient && \
      yum -y install nodejs oracle-instantclient19.6-basiclite && \
      rm -rf /var/cache/yum
 
@@ -1767,7 +1763,7 @@ For either Dockerfile, the `package.json` is:
     "myapp"
   ],
   "dependencies": {
-    "oracledb" : "^4"
+    "oracledb" : "^5"
   },
   "author": "Me",
   "license": "UPL"
@@ -1827,27 +1823,23 @@ The output is like:
   rows: [ { D: '24-Nov-2019 23:39' } ] }
 ```
 
-## <a name="installingoldvers"></a>  4. Installing Older Versions of Node-oracledb
+## <a name="installingoldvers"></a> <a name="installingv2"></a> <a name="installingv1"></a> 4. Installing Older Versions of Node-oracledb
 
-### <a name="installingv2"></a> 4.1 Installing node-oracledb 2.x and 3.x
-
-Pre-built node-oracledb 2 and 3 binaries are available for some platforms and
+Pre-built node-oracledb 3 and 4 binaries are available for some platforms and
 Node.js versions.  Review the [release tags][41] for availability. You can
-compile the add-on for other platforms or Node.js versions.
+compile the add-on for other platforms or versions.
+
+The node-oracledb 4.2 installation steps are in the [version 4.2 INSTALL
+guide][66].
 
 The node-oracledb 3.1 installation steps are in the [version 3.1 INSTALL
 guide][55].
 
-The node-oracledb 3.0 installation steps are in the [version 3.0 INSTALL
-guide][54].
-
-The node-oracledb 2.x installation steps are in the [version 2.x INSTALL
-guide][52]
-
-To get an old add-on you must explicitly use its version when installing:
+To get an old add-on you must explicitly use its version when installing, for
+example:
 
 ```
-npm install oracledb@2.3.0
+npm install oracledb@4.2.0
 ```
 
 or your `package.json` could contain:
@@ -1855,27 +1847,7 @@ or your `package.json` could contain:
 ```
 . . .
    "dependencies": {
-      "oracledb": "2.3.0"
-   },
-. . .
-```
-
-### <a name="installingv1"></a> 4.2 Installing node-oracledb 1.x
-
-The node-oracledb 1.x installation steps are in the [version 1.x
-INSTALL guide][32].  This version always requires compilation.  To get
-an old add-on you must explicitly use its version when installing:
-
-```
-npm install oracledb@1.13.1
-```
-
-or your `package.json` could contain:
-
-```
-. . .
-   "dependencies": {
-      "oracledb": "1.13.1"
+      "oracledb": "4.2.0"
    },
 . . .
 ```
@@ -1911,8 +1883,9 @@ If `npm install oracledb` fails:
 
 If creating a connection fails:
 
-- If you got *DPI-1047: Cannot locate an Oracle Client library*,
-  then review any messages and the installation instructions.
+- If you got *DPI-1047: Cannot locate an Oracle Client library*, then review any
+  messages, the installation instructions, and see [Initializing
+  Node-oracledb][17].
 
 - If you got *DPI-1072: the Oracle Client library version is unsupported*, then
   review the installation requirements.  Node-oracledb needs Oracle client
@@ -1974,7 +1947,6 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [29]: https://www.microsoft.com/en-us/download/details.aspx?id=3387
 [30]: https://www.oracle.com/database/technologies/instant-client/aix-ppc64-downloads.html
 [31]: https://www.oracle.com/database/technologies/instant-client/solx8664-downloads.html
-[32]: https://github.com/oracle/node-oracledb/blob/v1.13.1/INSTALL.md
 [40]: https://github.com/oracle/node-oracledb/tags
 [41]: https://github.com/oracle/node-oracledb/releases
 [42]: https://oracle.github.io/node-oracledb/doc/api.html#migratev1v2
@@ -1987,9 +1959,7 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [49]: https://join.slack.com/t/node-oracledb/shared_invite/enQtNDU4Mjc2NzM5OTA2LWMzY2ZlZDY5MDdlMGZiMGRkY2IzYjI5OGU4YTEzZWM5YjQ3ODUzMjcxNWQyNzE4MzM5YjNkYjVmNDk5OWU5NDM
 [50]: http://yum.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/x86_64/index.html
 [51]: http://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html
-[52]: https://github.com/oracle/node-oracledb/blob/v2.3.0/INSTALL.md
 [53]: https://nodejs.org/api/n-api.html
-[54]: https://github.com/oracle/node-oracledb/blob/v3.0.1/INSTALL.md
 [55]: https://github.com/oracle/node-oracledb/blob/v3.1.2/INSTALL.md
 [56]: https://hub.docker.com/_/node/
 [57]: https://oracle.github.io/node-oracledb/doc/api.html#connectionadb
@@ -2000,3 +1970,5 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [62]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-81D364CE-326D-4B3C-8C82-F468FF1AF30C
 [63]: https://github.com/oracle/node-oracledb/tree/master/examples/example.js
 [64]: https://oracle.github.io/node-oracledb/doc/api.html#odbinitoracleclient
+[65]: https://github.com/oracle/docker-images/tree/master/OracleLinuxDevelopers/oraclelinux7/nodejs
+[66]: https://github.com/oracle/node-oracledb/blob/v4.2.0/INSTALL.md
