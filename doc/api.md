@@ -16206,6 +16206,9 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
   Node-oracledb](#initnodeoracledb), particularly around how node-oracledb can
   locate Oracle Client libraries.
 
+- Take advantage of the new [`prefetchRows`](#propexecprefetchrows) attribute to
+  re-tune SQL queries.
+
 - Support for custom Promises was necessarily removed due to a refactoring of
   the module's JavaScript layer.  Code should be migrated to use the native
   Node.js Promise implementation.
