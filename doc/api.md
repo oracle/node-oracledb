@@ -7616,11 +7616,11 @@ This method was added in node-oracledb 3.0.
 ## <a name="initnodeoracledb"></a> <a name="configureconnections"></a> 14. Initializing Node-oracledb
 
 The node-oracledb add-on consists of JavaScript code that calls a binary module.
-This binary loads Oracle Client libraries which communicate over Oracle Net
-to an existing database.  The Oracle Client libraries need to be installed
-separately.  See the [node-oracledb installation instructions][2].  Oracle Net
-is not a separate product: it is how the Oracle Client and Oracle Database
-communicate.
+This binary loads Oracle Client libraries which communicate over Oracle Net to
+an existing database.  Node-oracledb can be installed with `npm` but the Oracle
+Client libraries need to be installed separately.  See the [node-oracledb
+installation instructions][2].  Oracle Net is not a separate product: it is how
+the Oracle Client and Oracle Database communicate.
 
 ![node-oracledb Architecture](./images/node-oracledb-architecture.png)
 
@@ -7632,7 +7632,8 @@ be in an installation of Oracle Instant Client, in a full Oracle Client
 installation, or in an Oracle Database installation (if Node.js is running on
 the same machine as the database).  The versions of Oracle Client and Oracle
 Database do not have to be the same.  For certified configurations see Oracle
-Support's [Doc ID 207303.1][187].
+Support's [Doc ID 207303.1][187] and see the [node-installation
+instructions][2].
 
 Node-oracledb looks for the Oracle Client libraries as follows:
 
@@ -7644,7 +7645,7 @@ Node-oracledb looks for the Oracle Client libraries as follows:
       'Basic' or 'Basic Light' package.  If you pass the library directory from
       a full client or database installation, such as Oracle Database "XE"
       Express Edition, then you will need to have previously set your
-      environment to use that software installation, otherwise files such as
+      environment to use that software installation otherwise files such as
       message files will not be located.  If the Oracle Client libraries cannot
       be loaded from `libDir`, then an error is thrown.
 
@@ -7675,21 +7676,23 @@ Node-oracledb looks for the Oracle Client libraries as follows:
       node_modules/oracledb/build/Release/`.  If the libraries are not found, no
       error is thrown and the search continues, see next bullet point.
 
-    - In `/usr/local/lib`.  If the Oracle Client libraries cannot be loaded, then
-      an error is thrown.
+    - In the library search path such as set in `DYLD_LIBRARY_PATH` (note this
+      variable does not propagate to sub-shells) or in `/usr/local/lib`.  If the
+      Oracle Client libraries cannot be loaded, then an error is thrown.
 
 - On Linux and related platforms:
 
     - In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
       call to [`oracledb.initOracleClient()`](#odbinitoracleclient).  Note on
       Linux this is only useful to force immediate loading of the libraries
-      because the libraries must also be in the system library search path.
-      This directory should contain the libraries from an unzipped Instant
-      Client 'Basic' or 'Basic Light' package.  If you pass the library
-      directory from a full client or database installation, such as Oracle
-      Database "XE" Express Edition then you will need to have previously set
-      the `ORACLE_HOME` environment variable.  If the Oracle Client libraries
-      cannot be loaded from `libDir`, then an error is thrown.
+      because the libraries must also be in the system library search path,
+      i.e. configured with `ldconfig` or set in `LD_LIBRARY_PATH`.  This
+      directory should contain the libraries from an unzipped Instant Client
+      'Basic' or 'Basic Light' package.  If you pass the library directory from
+      a full client or database installation, such as Oracle Database "XE"
+      Express Edition then you will need to have previously set the
+      `ORACLE_HOME` environment variable.  If the Oracle Client libraries cannot
+      be loaded from `libDir`, then an error is thrown.
 
     - If `libDir` was not specified, then Oracle Client libraries are looked for
       in the operating system library search path, such as configured with
@@ -7782,8 +7785,10 @@ Name | Description
 The files should be in a directory accessible to Node.js, not on the
 database server host.
 
-For example, if the file `/etc/my-oracle-config/tnsnames.ora` should be used,
-you can call [`oracledb.initOracleClient()`](#odbinitoracleclient):
+To make node-oracledb use the files you can set
+[`configDir`](#odbinitoracleclientattrsopts) in a call to
+[`oracledb.initOracleClient()`](#odbinitoracleclient).  For example, if the file
+`/etc/my-oracle-config/tnsnames.ora` should be used, then your code could be:
 
 ```javascript
 const oracledb = require('oracledb');
@@ -7865,13 +7870,22 @@ Name  |  Description
 ------|-------------
 `LD_LIBRARY_PATH` | Used on Linux and some UNIX platforms.  Set this to the directory containing the Oracle Client libraries, for example `/opt/oracle/instantclient_19_6` or `$ORACLE_HOME/lib`.  The variable needs to be set in the environment before Node.js is invoked.  The variable is not needed if the libraries are located by an alternative method, such as from running `ldconfig`.  On some UNIX platforms an OS specific equivalent, such as `LIBPATH` or `SHLIB_PATH` is used instead of `LD_LIBRARY_PATH`.
 `PATH` | The library search path for Windows should include the location where `OCI.DLL` is found.  Not needed if you pass [`libDir`](#odbinitoracleclientattrsopts) when calling [`oracledb.initOracleClient()`](#odbinitoracleclient)
-`TNS_ADMIN` | The location of the optional [Oracle Net configuration files](#tnsadmin) and [Oracle Client configuration files](#oraaccess), including `tnsnames.ora`, `sqlnet.ora`, and `oraaccess.xml`, if they are not in a default location, or if [`configDir`](#odbinitoracleclientattrsopts) was not used in a call to [`oracledb.initOracleClient()`](#odbinitoracleclient).
+`TNS_ADMIN` | The location of the optional [Oracle Net configuration files](#tnsadmin) and [Oracle Client configuration files](#oraaccess), including `tnsnames.ora`, `sqlnet.ora`, and `oraaccess.xml`, if they are not in a default location. The [`configDir`](#odbinitoracleclientattrsopts) value in a call to [`oracledb.initOracleClient()`](#odbinitoracleclient) overrides `TNS_ADMIN`.
 `ORA_SDTZ` | The default session time zone,  see [Fetching Dates and Timestamps](#datehandling).
 `ORA_TZFILE` | The name of the Oracle time zone file to use.  See the notes below.
 `ORACLE_HOME` | The directory containing the Oracle Database software. This directory must be accessible by the Node.js process. This variable should *not* be set if node-oracledb uses Oracle Instant Client.
 `NLS_LANG` | Determines the 'national language support' globalization options for node-oracledb.  If not set, a default value will be chosen by Oracle. Note that node-oracledb will always uses the AL32UTF8 character set.  See [Globalization and National Language Support (NLS)](#nls).
 `NLS_DATE_FORMAT`, `NLS_TIMESTAMP_FORMAT` | See [Fetching Numbers and Dates as String](#fetchasstringhandling).  The variables are ignored if `NLS_LANG` is not set.
 `NLS_NUMERIC_CHARACTERS` | See [Fetching Numbers and Dates as String](#fetchasstringhandling).  The variable is ignored if `NLS_LANG` is not
+
+##### Time Zone File
+
+The name of the Oracle time zone file to use can be set in `ORA_TZFILE`.
+
+If node-oracledb is using Oracle Client libraries from an Oracle Database or
+full Oracle Client software installation, and you want to use a non-default time
+zone file, then set `ORA_TZFILE` to the file name with a directory prefix, for
+example: `export ORA_TZFILE=/opt/oracle/myconfig/timezone_31.dat`.
 
 Oracle Instant Client includes a small and big time zone file, for example
 `timezone_32.dat` and `timezlrg_32.dat`.  The versions can be shown by running
@@ -7885,11 +7899,6 @@ file.  Create a subdirectory `oracore/zoneinfo` under the Instant Client
 directory, and move the file into it.  Then set `ORA_TZFILE` to the file name,
 without any directory prefix.  The `genezi -v` utility will show the time zone
 file in use.
-
-If node-oracledb is using Oracle Client libraries from an Oracle Database or
-full Oracle Client software installation, and you want to use a non-default time
-zone file, then set `ORA_TZFILE` to the file name with a directory prefix, for
-example: `export ORA_TZFILE=/opt/oracle/myconfig/timezone_31.dat`.
 
 The Oracle Database documentation contains more information about time zone
 files, see [Choosing a Time Zone File][184].
@@ -7932,22 +7941,22 @@ oracledb.initOracleClient({
 });
 ```
 
-The convention for `driverName` is to separate the product name from the product
-version by a colon and single space characters.  The value will be shown in
-Oracle Database views like `V$SESSION_CONNECT_INFO`.  If this attribute is not
-specified, then the value "node-oracledb : *version*" is used, see [Add-on
-Name](#drivernameview).
+The `driverName` value will be shown in Oracle Database views like
+`V$SESSION_CONNECT_INFO`.  The convention for `driverName` is to separate the
+product name from the product version by a colon and single space characters.
+If this attribute is not specified, then the value "node-oracledb : *version*"
+is used, see [Add-on Name](#drivernameview).
 
-The `errorUrl` string will be shown in the exception raised if
-`initOracleClient()` cannot load the Oracle Client libraries.  This allows
-applications that use node-oracledb to refer users to application-specific
-installation instructions.  If this value is not specified, then the
-[node-oracledb installation instructions][2] URL is used.
+The `errorUrl` string will be shown in the exception raised if the Oracle Client
+libraries cannot be loaded.  This allows applications that use node-oracledb to
+refer users to application-specific installation instructions.  If this
+attribute is not set, then the [node-oracledb installation instructions][2] URL
+is used.
 
 ## <a name="connectionhandling"></a> 15. Connection Handling
 
 Connections between node-oracledb and Oracle Database are used for executing
-[SQL](#sqlexecution), [PL/SQL](#plsqlexecution), and [SODA](#sodaoverview).
+[SQL](#sqlexecution), [PL/SQL](#plsqlexecution), and for [SODA](#sodaoverview).
 
 There are two types of connection:
 

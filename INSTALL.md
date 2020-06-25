@@ -721,10 +721,6 @@ Client libraries are, see [Initializing Node-oracledb][17]:
     }
     ```
 
-- Alternative, set `DYLD_LIBRARY_PATH` to include the Oracle Instant Client
-  directory.  Note this variable must be set in the terminal or shell that
-  directly invokes Node.js.  The variable will not propagate to sub-shells.
-
 - Alternatively, create a symbolic link for the 'client shared library' in the
   `node_modules/oracledb/build/Release` directory where the `oracledb*.node`
   binary is.  For example:
@@ -739,6 +735,10 @@ Client libraries are, see [Initializing Node-oracledb][17]:
     cp ~/instantclient_19_3/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} node_modules/oracledb/build/Release
     cd node_modules/oracledb/build/Release/ && ln -s libclntsh.dylib.19.1 libclntsh.dylib
     ```
+
+- Alternatively, set `DYLD_LIBRARY_PATH` to include the Oracle Instant Client
+  directory.  Note this variable must be set in the terminal or shell that
+  directly invokes Node.js.  The variable will not propagate to sub-shells.
 
 - Alternatively, create a symbolic link for the 'client shared library' in
   `/usr/local/lib`.  If the `lib` sub-directory does not exist, you can create
