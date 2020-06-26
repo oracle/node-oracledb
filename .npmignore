@@ -1,6 +1,7 @@
 .github
 .nycrc
 .gitmodules
+.eslintrc
 INSTALL.md
 CONTRIBUTING.md
 Makefile
