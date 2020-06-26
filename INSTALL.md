@@ -1232,6 +1232,11 @@ Otherwise install using:
 npm install https://github.com/oracle/node-oracledb/releases/download/v5.0.0/oracledb-src-5.0.0.tgz
 ```
 
+If this fails due to an invalid `cp -a` option, you can download the
+node-oracledb source from GitHub.  Then use `node-gyp configure`.  Edit
+`build/Makefile` and change the `cmd_copy` definition `cp` options from `cp -af`
+to `cp -pPR`.  Finally, run `node-gyp build`.
+
 #### 3.6.4 Install the free Oracle Instant Client 'Basic' ZIP file
 
 Download the **Basic** ZIP file from [Oracle Technology Network][31]
