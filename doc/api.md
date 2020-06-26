@@ -11040,7 +11040,9 @@ const result = await connection.execute(
    FROM employees
    ORDER BY last_name
    OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`,
-  {offset: myoffset, maxnumrows: mymaxnumrows});
+  { offset: myoffset, maxnumrows: mymaxnumrows },
+  { prefetchRows: mymaxnumrows + 1, fetchArraySize: mymaxnumrows }
+);
 ```
 
 A runnable example is in [rowlimit.js][84].
@@ -15549,69 +15551,79 @@ already buffered in the Oracle Client libraries.  Reducing round-trips helps
 performance and scalability.  An overhead of prefetching is the need for an
 additional data copy from Oracle Client's prefetch buffers.
 
-To tune queries that return an unknown number of rows, estimate the number of
-rows returned and start with an appropriate `fetchArraySize` value.  The default
-is 100.  Then set `prefetchRows` to the `fetchArraySize` value.  Do not make the
-sizes unnecessarily large.  Keep `fetchArraySize` as big, or bigger than,
-`prefetchRows`.  For example:
-
-```javascript
-result = await connection.execute(
-  `SELECT * FROM very_big_table`,
-  [],
-  {
-    prefetchRows:   1000,
-    fetchArraySize: 1000,
-    resultSet:      true
-  }
-);
-```
-
-For a large quantity of rows or very "wide" rows on fast networks you may prefer
-to leave `prefetchRows` at its default value of 2.  Adjust the values as needed
-for performance, memory and round-trip usage.  The documentation in [Database
-Round-trips](#roundtrips) shows how to measure round-trips.
-
-If you are fetching a fixed number of rows, start your tuning by setting
-`fetchArraySize` to the number of expected rows, and set `prefetchRows` to one
-greater than this value.  (Adding one removes the need for a round-trip to check
-for end-of-fetch).  For example, if you are querying 20 rows, perhaps to
-[display a page](#pagingdata) of data, set `prefetchRows` to 21 and
-`fetchArraySize` to 20:
-
-```javascript
-const myoffset = 0;       // do not skip any rows (start at row 1)
-const mymaxnumrows = 20;  // get 20 rows
-
-sql = `SELECT last_name
-       FROM employees
-       ORDER BY last_name
-       OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`;
-
-binds = { offset: myoffset, maxnumrows: mymaxnumrows };
-
-options = { prefetchRows: mymaxnumrows + 1, fetchArraySize: mymaxnumrows };
-
-result = await connection.execute(sql, binds, options);
-```
-
-This will return all rows for the query in one round-trip.
-
-If you know that a query returns just one row then set `fetchArraySize` to 1 to
-minimize memory usage.  The default prefetch value of 2 allows minimal
-round-trips for single-row queries:
-
-```javascript
-result = await connection.execute(`SELECT * FROM mytable WHERE id = 1`, [], {fetchArraySize: 1});
-```
+##### Choosing values for `fetchArraySize` and `prefetchRows`
 
 The best `fetchArraySize` and `prefetchRows` values can be found by
 experimenting with your application under the expected load of normal
-application use.  This is because the cost of the extra memory copy from the
-prefetch buffers when fetching a large quantity of rows or very "wide" rows may
-outweigh the cost of a round-trip for a single node-oracledb user on a fast
-network.  However under production application load, the reduction of
-round-trips may help performance and overall system scalability.
+application use.  This is because the cost of the extra memory copy
+from the prefetch buffers when fetching a large quantity of rows or
+very "wide" rows may outweigh the cost of a round-trip for a single
+node-oracledb user on a fast network.  However under production
+application load, the reduction of round-trips may help performance
+and overall system scalability.  The documentation in [Database
+Round-trips](#roundtrips) shows how to measure round-trips.
+
+Here are some suggestions for the starting point to being your tuning
+
+- To tune queries that return an unknown number of rows, estimate the
+  number of rows returned and start with an appropriate
+  `fetchArraySize` value.  The default is 100.  Then set
+  `prefetchRows` to the `fetchArraySize` value.  Do not make the sizes
+  unnecessarily large.  For example:
+
+    ```javascript
+    result = await connection.execute(
+      `SELECT * FROM very_big_table`,
+      [],
+      {
+        prefetchRows:   1000,
+        fetchArraySize: 1000,
+        resultSet:      true
+      }
+    );
+    ```
+
+    Adjust the values as needed for performance, memory and round-trip
+    usage.  For a large quantity of rows or very "wide" rows on fast
+    networks you may prefer to leave `prefetchRows` at its default
+    value of 2.  Keep `fetchArraySize` equal to, or bigger than,
+    `prefetchRows`.
+
+- If you are fetching a fixed number of rows, start your tuning by
+  setting `fetchArraySize` to the number of expected rows, and set
+  `prefetchRows` to one greater than this value.  (Adding one removes
+  the need for a round-trip to check for end-of-fetch).  For example,
+  if you are querying 20 rows, perhaps to [display a
+  page](#pagingdata) of data, set `prefetchRows` to 21 and
+  `fetchArraySize` to 20:
+
+    ```javascript
+    const myoffset = 0;       // do not skip any rows (start at row 1)
+    const mymaxnumrows = 20;  // get 20 rows
+
+    sql = `SELECT last_name
+           FROM employees
+           ORDER BY last_name
+           OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`;
+
+    binds = { offset: myoffset, maxnumrows: mymaxnumrows };
+
+    options = { prefetchRows: mymaxnumrows + 1, fetchArraySize: mymaxnumrows };
+
+    result = await connection.execute(sql, binds, options);
+    ```
+
+    This will return all rows for the query in one round-trip.
+
+
+- If you know that a query returns just one row then set
+  `fetchArraySize` to 1 to minimize memory usage.  The default
+  prefetch value of 2 allows minimal round-trips for single-row
+  queries:
+
+    ```javascript
+    result = await connection.execute(`SELECT * FROM mytable WHERE id = 1`, [], {fetchArraySize: 1});
+    ```
 
 There are two cases that will benefit from disabling row prefetching
 by setting `prefetchRows` to 0:
