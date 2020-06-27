@@ -7,8 +7,19 @@ assignees: ''
 
 ---
 
-- Include a link to the documentation section or the example
+<!--
 
-- Describe the confusion
+Thank you for using node-oracledb.
 
-- Suggest changes that would help
+Please answer these questions so we can help you.
+
+Use Markdown syntax, see https://help.github.com/github/writing-on-github/basic-writing-and-formatting-syntax
+
+-->
+
+
+1. What is the link to the documentation section that needs improving?
+
+2. Describe the confusion
+
+3. Suggest changes that would help
