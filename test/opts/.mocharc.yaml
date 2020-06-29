@@ -225,3 +225,4 @@ spec:
   - test/indexedTables01.js
   - test/soda14.js
   - test/plsqlBindCursorsIN.js
+  - test/errorOffset.js

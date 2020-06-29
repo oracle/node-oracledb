@@ -4736,3 +4736,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     239.2 prefetchRows is enabled with default value
     239.3 cursor bind OUT then bind IN
     239.4 implicit binding type
+
+240. errorOffset.js
+    240.1 checks the offset value of the error
