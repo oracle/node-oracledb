@@ -1,4 +1,4 @@
-# node-oracledb 4.2 Documentation for the Oracle Database Node.js Add-on
+# node-oracledb 5.0 Documentation for the Oracle Database Node.js Add-on
 
 *Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.*
 
@@ -27,9 +27,10 @@ For installation information, see the [Node-oracledb Installation Instructions][
 ##  <a name="contents"></a> Contents
 
 1. [Introduction](#intro)
-    - 1.1 [Getting Started with Node-oracledb](#getstarted)
-        - 1.1.1 [Example: A SQL SELECT statement in Node.js](#examplequery)
-        - 1.1.2 [Example: Simple Oracle Document Access (SODA) in Node.js](#examplesodaawait)
+    - 1.1 [Node-oracledb Architecture](#architecture)
+    - 2.1 [Getting Started with Node-oracledb](#getstarted)
+        - 2.1.1 [Example: A SQL SELECT statement in Node.js](#examplequery)
+        - 2.1.2 [Example: Simple Oracle Document Access (SODA) in Node.js](#examplesodaawait)
 2. [Errors](#errorobj)
     - 2.1 [Error Properties](#properror)
         - 2.1.1 [`errorNum`](#properrerrornum)
@@ -48,7 +49,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 3.1.4 [Execute Bind Direction Constants](#oracledbconstantsbinddir)
             - [`BIND_IN`](#oracledbconstantsbinddir), [`BIND_INOUT`](#oracledbconstantsbinddir), [`BIND_OUT`](#oracledbconstantsbinddir)
         - 3.1.5 [Privileged Connection Constants](#oracledbconstantsprivilege)
-            - [`SYSASM`](#oracledbconstantsprivilege), [`SYSBACKUP`](#oracledbconstantsprivilege), [`SYSDBA`](#oracledbconstantsprivilege), [`SYSDG`](#oracledbconstantsprivilege), [`SYSKM`](#oracledbconstantsprivilege), [`SYSOPER`](#oracledbconstantsprivilege), [`SYSRAC`](#oracledbconstantsprivilege)
+            - [`SYSASM`](#oracledbconstantsprivilege), [`SYSBACKUP`](#oracledbconstantsprivilege), [`SYSDBA`](#oracledbconstantsprivilege), [`SYSDG`](#oracledbconstantsprivilege), [`SYSKM`](#oracledbconstantsprivilege), [`SYSOPER`](#oracledbconstantsprivilege), [`SYSRAC`](#oracledbconstantsprivilege), [`SYSPRELIM`](#oracledbconstantsprivilege)
         - 3.1.6 [SQL Statement Type Constants](#oracledbconstantsstmttype)
             - [`STMT_TYPE_ALTER`](#oracledbconstantsstmttype), [`STMT_TYPE_BEGIN`](#oracledbconstantsstmttype), [`STMT_TYPE_CALL`](#oracledbconstantsstmttype), [`STMT_TYPE_COMMIT`](#oracledbconstantsstmttype) [`STMT_TYPE_CREATE`](#oracledbconstantsstmttype), [`STMT_TYPE_DECLARE`](#oracledbconstantsstmttype), [`STMT_TYPE_DELETE`](#oracledbconstantsstmttype), [`STMT_TYPE_DROP`](#oracledbconstantsstmttype), [`STMT_TYPE_EXPLAIN_PLAN`](#oracledbconstantsstmttype), [`STMT_TYPE_INSERT`](#oracledbconstantsstmttype), [`STMT_TYPE_MERGE`](#oracledbconstantsstmttype), [`STMT_TYPE_ROLLBACK`](#oracledbconstantsstmttype), [`STMT_TYPE_SELECT`](#oracledbconstantsstmttype), [`STMT_TYPE_UNKNOWN`](#oracledbconstantsstmttype), [`STMT_TYPE_UPDATE`](#oracledbconstantsstmttype)
         - 3.1.7 [Subscription Constants](#oracledbconstantssubscription)
@@ -61,6 +62,8 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - [`POOL_STATUS_CLOSED`](#oracledbconstantspool), [`POOL_STATUS_DRAINING`](#oracledbconstantspool), [`POOL_STATUS_OPEN`](#oracledbconstantspool)
         - 3.1.11 [Simple Oracle Document Access (SODA) Constants](#oracledbconstantssoda)
             - [`SODA_COLL_MAP_MODE`](#oracledbconstantssoda)
+        - 3.1.12 [Database Shutdown Constants](#oracledbconstantsshutdown)
+            - [`SHUTDOWN_MODE_ABORT`](#oracledbconstantsshutdown), [`SHUTDOWN_MODE_DEFAULT`](#oracledbconstantsshutdown), [`SHUTDOWN_MODE_FINAL`](#oracledbconstantsshutdown), [`SHUTDOWN_MODE_IMMEDIATE`](#oracledbconstantsshutdown), [`SHUTDOWN_MODE_TRANSACTIONAL`](#oracledbconstantsshutdown), [`SHUTDOWN_MODE_TRANSACTIONAL_LOCAL`](#oracledbconstantsshutdown)
     - 3.2 [Oracledb Properties](#oracledbproperties)
         - 3.2.1 [`autoCommit`](#propdbisautocommit)
         - 3.2.2 [`connectionClass`](#propdbconclass)
@@ -84,12 +87,13 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 3.2.20 [`poolTimeout`](#propdbpooltimeout)
         - 3.2.21 [`prefetchRows`](#propdbprefetchrows)
         - 3.2.22 [`Promise`](#propdbpromise)
-        - 3.2.23 [`queueRequests`](#propdbqueuerequests)
-        - 3.2.24 [`queueTimeout`](#propdbqueuetimeout)
-        - 3.2.25 [`stmtCacheSize`](#propdbstmtcachesize)
-        - 3.2.26 [`version`](#propdbversion)
-        - 3.2.27 [`versionString`](#propdbversionstring)
-        - 3.2.28 [`versionSuffix`](#propdbversionsuffix)
+        - 3.2.23 [`queueMax`](#propdbqueuemax)
+        - 3.2.24 [`queueRequests`](#propdbqueuerequests)
+        - 3.2.25 [`queueTimeout`](#propdbqueuetimeout)
+        - 3.2.26 [`stmtCacheSize`](#propdbstmtcachesize)
+        - 3.2.27 [`version`](#propdbversion)
+        - 3.2.28 [`versionString`](#propdbversionstring)
+        - 3.2.29 [`versionSuffix`](#propdbversionsuffix)
     - 3.3 [Oracledb Methods](#oracledbmethods)
         - 3.3.1 [`createPool()`](#createpool)
             - 3.3.1.1 [`createPool()`: Parameters and Attributes](#createpoolpoolattrs)
@@ -106,11 +110,12 @@ For installation information, see the [Node-oracledb Installation Instructions][
                 - 3.3.1.1.11 [`poolMin`](#createpoolpoolattrspoolmin)
                 - 3.3.1.1.12 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
                 - 3.3.1.1.13 [`poolTimeout`](#createpoolpoolattrspooltimeout)
-                - 3.3.1.1.14 [`queueRequests`](#createpoolpoolattrsqueuerequests)
-                - 3.3.1.1.15 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
-                - 3.3.1.1.16 [`sessionCallback`](#createpoolpoolattrssessioncallback)
-                - 3.3.1.1.17 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
-                - 3.3.1.1.18 [`user`](#createpoolpoolattrsuser)
+                - 3.3.1.1.14 [`queueMax`](#createpoolpoolattrsqueuemax)
+                - 3.3.1.1.15 [`queueRequests`](#createpoolpoolattrsqueuerequests)
+                - 3.3.1.1.16 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
+                - 3.3.1.1.17 [`sessionCallback`](#createpoolpoolattrssessioncallback)
+                - 3.3.1.1.18 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+                - 3.3.1.1.19 [`user`](#createpoolpoolattrsuser)
             - 3.3.1.2 [`createPool()`: Callback Function](#createpoolpoolcallback)
         - 3.3.2 [`getConnection()`](#getconnectiondb)
             - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
@@ -134,6 +139,21 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 3.3.3 [`getPool()`](#getpool)
             - 3.3.3.1 [`getPool()`: Parameters](#getpoolattrs)
                 - 3.3.3.1.1 [`poolAlias`](#getpoolattrsalias)
+        - 3.3.4 [`initOracleClient()`](#odbinitoracleclient)
+            - 3.3.4.1 [`initOracleClient()`: Parameters](#odbinitoracleclientattrs)
+                - 3.3.4.1.1 [`options`](#odbinitoracleclientattrsopts)
+                    - [`configDir`](#odbinitoracleclientattrsopts), [`driverName`](#odbinitoracleclientattrsopts), [`errorUrl`](#odbinitoracleclientattrsopts), [`libDir`](#odbinitoracleclientattrsopts)
+        - 3.3.5 [`shutdown()`](#odbshutdown)
+            - 3.3.5.1 [`shutdown()`: Parameters](#odbshutdownattrs)
+                - 3.3.5.1.1 [`connAttr`](#odbshutdownattrsconn)
+                - 3.3.5.1.2 [`shutdownMode`](#odbshutdownattrsmode)
+            - 3.3.5.2 [`shutdown()`: Callback Function](#odbshutdowncallback)
+        - 3.3.6 [`startup()`](#odbstartup)
+            - 3.3.6.1 [`startup()`: Parameters](#odbstartupattrs)
+                - 3.3.6.1.1 [`connAttr`](#odbstartupattrsconn)
+                - 3.3.6.1.2 [`options`](#odbstartupattrsoptions)
+                    - [`force`](#odbstartupattrsoptions), [`restrict`](#odbstartupattrsoptions), [`pfile`](#odbstartupattrsoptions)
+            - 3.3.6.2 [`startup()`: Callback Function](#odbstartupcallback)
 4. [Connection Class](#connectionclass)
     - 4.1 [Connection Properties](#connectionproperties)
         - 4.1.1 [`action`](#propconnaction)
@@ -201,24 +221,33 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 4.2.13 [`queryStream()`](#querystream)
         - 4.2.14 [`release()`](#release)
         - 4.2.15 [`rollback()`](#rollback)
-        - 4.2.16 [`subscribe()`](#consubscribe)
-            - 4.2.16.1 [`subscribe()`: Name](#consubscribename)
-            - 4.2.16.2 [`subscribe()`: Options](#consubscribeoptions)
-                - 4.2.16.2.1 [`binds`](#consubscribeoptbinds)
-                - 4.2.16.2.2 [`callback`](#consubscribeoptcallback)
-                - 4.2.16.2.3 [`clientInitiated`](#consubscribeoptclientinitiated)
-                - 4.2.16.2.4 [`groupingClass`](#consubscribeoptgroupingclass)
-                - 4.2.16.2.5 [`groupingType`](#consubscribeoptgroupingtype)
-                - 4.2.16.2.6 [`groupingValue`](#consubscribeoptgroupingvalue)
-                - 4.2.16.2.7 [`ipAddress`](#consubscribeoptipaddress)
-                - 4.2.16.2.8 [`namespace`](#consubscribeoptnamespace)
-                - 4.2.16.2.9 [`operations`](#consubscribeoptoperations)
-                - 4.2.16.2.10 [`port`](#consubscribeoptport)
-                - 4.2.16.2.11 [`qos`](#consubscribeoptqos)
-                - 4.2.16.2.12 [`sql`](#consubscribeoptsql)
-                - 4.2.16.2.13 [`timeout`](#consubscribeopttimeout)
-            - 4.2.16.3 [`subscribe()`: Callback Function](#consubscribecallback)
-        - 4.2.17 [`unsubscribe()`](#conunsubscribe)
+        - 4.2.16 [`shutdown()`](#conshutdown)
+            - 4.2.16.1 [`shutdown()`: shutdownMode](#conshutdownmode)
+            - 4.2.16.2 [`shutdown()`: Callback Function](#conshutdowncallback)
+        - 4.2.17 [`subscribe()`](#consubscribe)
+            - 4.2.17.1 [`subscribe()`: Name](#consubscribename)
+            - 4.2.17.2 [`subscribe()`: Options](#consubscribeoptions)
+                - 4.2.17.2.1 [`binds`](#consubscribeoptbinds)
+                - 4.2.17.2.2 [`callback`](#consubscribeoptcallback)
+                - 4.2.17.2.3 [`clientInitiated`](#consubscribeoptclientinitiated)
+                - 4.2.17.2.4 [`groupingClass`](#consubscribeoptgroupingclass)
+                - 4.2.17.2.5 [`groupingType`](#consubscribeoptgroupingtype)
+                - 4.2.17.2.6 [`groupingValue`](#consubscribeoptgroupingvalue)
+                - 4.2.17.2.7 [`ipAddress`](#consubscribeoptipaddress)
+                - 4.2.17.2.8 [`namespace`](#consubscribeoptnamespace)
+                - 4.2.17.2.9 [`operations`](#consubscribeoptoperations)
+                - 4.2.17.2.10 [`port`](#consubscribeoptport)
+                - 4.2.17.2.11 [`qos`](#consubscribeoptqos)
+                - 4.2.17.2.12 [`sql`](#consubscribeoptsql)
+                - 4.2.17.2.13 [`timeout`](#consubscribeopttimeout)
+            - 4.2.17.3 [`subscribe()`: Callback Function](#consubscribecallback)
+        - 4.2.18 [`startup()`](#constartup)
+            - 4.2.18.1 [`startup()`: Options](#constartupoptions)
+                - 4.2.18.1.1 [`force`](#constartupoptionsforce)
+                - 4.2.18.1.2 [`pfile`](#constartupoptionspfile)
+                - 4.2.18.1.3 [`restrict`](#constartupoptionsrestrict)
+            - 4.2.18.2 [`startup()`: Callback Function](#constartupcallback)
+        - 4.2.19 [`unsubscribe()`](#conunsubscribe)
 5. [AqQueue Class](#aqqueueclass)
     - 5.1 [AqQueue Properties](#aqqueueproperties)
         - 5.1.1 [`name`](#aqqueuename)
@@ -272,10 +301,12 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 8.1.6 [`poolMin`](#proppoolpoolmin)
         - 8.1.7 [`poolPingInterval`](#proppoolpoolpinginterval)
         - 8.1.8 [`poolTimeout`](#proppoolpooltimeout)
-        - 8.1.9 [`queueRequests`](#proppoolqueuerequests)
-        - 8.1.10 [`queueTimeout`](#proppoolqueueTimeout)
-        - 8.1.11 [`status`](#proppoolstatus)
-        - 8.1.12 [`stmtCacheSize`](#proppoolstmtcachesize)
+        - 8.1.9 [`queueMax`](#proppoolqueuemax)
+        - 8.1.10 [`queueRequests`](#proppoolqueuerequests)
+        - 8.1.11 [`queueTimeout`](#proppoolqueueTimeout)
+        - 8.1.12 [`sessionCallback`](#proppoolsessioncallback)
+        - 8.1.13 [`status`](#proppoolstatus)
+        - 8.1.14 [`stmtCacheSize`](#proppoolstmtcachesize)
     - 8.2 [Pool Methods](#poolmethods)
         - 8.2.1 [`close()`](#poolclose)
         - 8.2.2 [`getConnection()`](#getconnectionpool)
@@ -307,12 +338,13 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 10.2.4 [`find()`](#sodacollfind)
             - 10.2.4.1 [SodaOperation Class](#sodaoperationclass)
                 - 10.2.4.1.1 [Non-terminal SodaOperation Methods](#sodaoperationclassnonterm)
-                    - 10.2.4.1.1.1 [`filter()`](#sodaoperationclassfilter)
-                    - 10.2.4.1.1.2 [`key()`](#sodaoperationclasskey)
-                    - 10.2.4.1.1.3 [`keys()`](#sodaoperationclasskeys)
-                    - 10.2.4.1.1.4 [`limit()`](#sodaoperationclasslimit)
-                    - 10.2.4.1.1.5 [`skip()`](#sodaoperationclassskip)
-                    - 10.2.4.1.1.6 [`version()`](#sodaoperationclassversion)
+                    - 10.2.4.1.1.1 [`fetchArraySize()`](#sodaoperationclassfetcharraysize)
+                    - 10.2.4.1.1.2 [`filter()`](#sodaoperationclassfilter)
+                    - 10.2.4.1.1.3 [`key()`](#sodaoperationclasskey)
+                    - 10.2.4.1.1.4 [`keys()`](#sodaoperationclasskeys)
+                    - 10.2.4.1.1.5 [`limit()`](#sodaoperationclasslimit)
+                    - 10.2.4.1.1.6 [`skip()`](#sodaoperationclassskip)
+                    - 10.2.4.1.1.7 [`version()`](#sodaoperationclassversion)
                 - 10.2.4.1.2 [Terminal SodaOperation Methods](#sodaoperationclassterm)
                     - 10.2.4.1.2.1 [`count()`](#sodaoperationclasscount)
                     - 10.2.4.1.2.2 [`getCursor()`](#sodaoperationclassgetcursor)
@@ -332,6 +364,10 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - 10.2.9.1 [`insertOneAndGet()`: Parameters](#sodacollinsertoneandgetparams)
                 - 10.2.9.1.1 [`newDocumentContent`](#sodacollinsertoneandgetparamsdoc), [`newSodaDocument`](#sodacollinsertoneandgetparamsdoc)
             - 10.2.9.2 [`insertOneAndGet()`: Callback Function](#sodacollinsertoneandgetcb)
+        - 10.2.10 [`save()`](#sodacollsave)
+        - 10.2.11 [`saveAndGet()`](#sodacollsaveandget)
+        - 10.2.12 [`truncate()`](#sodacolltruncate)
+            - 10.2.12.1 [`truncate()`: Callback Function](#sodacolltruncatecb)
 11. [SodaDatabase Class](#sodadatabaseclass)
     - 11.1 [SodaDatabase Methods](#sodadatabasemethods)
         - 11.1.1 [`createCollection()`](#sodadbcreatecollection)
@@ -363,100 +399,105 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 13.1 [SodaDocumentCursor Methods](#sodadoccursormethods)
         - 13.1.1 [`close()`](#sodadoccursorclose)
         - 13.1.2 [`getNext()`](#sodadoccursorgetnext)
-14. [Connection Handling](#connectionhandling)
-    - 14.1 [Configuring Connections and Node-oracledb](#configureconnections)
-        - 14.1.1 [Oracle Environment Variables](#environmentvariables)
-        - 14.1.2 [Optional Oracle Net Configuration](#tnsadmin)
-        - 14.1.3 [Optional Oracle Client Configuration](#oraaccess)
-    - 14.2 [Connection Strings](#connectionstrings)
-        - 14.2.1 [Easy Connect Syntax for Connection Strings](#easyconnect)
-        - 14.2.2 [Embedded Connect Descriptor Strings](#embedtns)
-        - 14.2.3 [Net Service Names for Connection Strings](#tnsnames)
-        - 14.2.4 [JDBC and Oracle SQL Developer Connection Strings](#notjdbc)
-    - 14.3 [Connections, Threads, and Parallelism](#numberofthreads)
-    - 14.4 [Connection Pooling](#connpooling)
-        - 14.4.1 [Connection Pool Sizing](#conpoolsizing)
-        - 14.4.2 [Connection Pool Closing and Draining](#conpooldraining)
-        - 14.4.3 [Connection Pool Cache](#connpoolcache)
-        - 14.4.4 [Connection Pool Queue](#connpoolqueue)
-        - 14.4.5 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
-        - 14.4.6 [Connection Pool Pinging](#connpoolpinging)
-        - 14.4.7 [Connection Tagging and Session State](#connpooltagging)
-            - 14.4.7.1 [Node.js Session Callback](#sessionfixupnode)
-            - 14.4.7.2 [Connection Tagging](#sessionfixuptagging)
-            - 14.4.7.3 [Node.js Session Tagging Callback](#sessiontaggingnode)
-            - 14.4.7.4 [PL/SQL Session Tagging Callback](#sessiontaggingplsql)
-        - 14.4.8 [Heterogeneous Connection Pools and Pool Proxy Authentication](#connpoolproxy)
-    - 14.4 [External Authentication](#extauth)
-    - 14.5 [Database Resident Connection Pooling (DRCP)](#drcp)
-    - 14.6 [Privileged Connections](#privconn)
-    - 14.7 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
-    - 14.8 [Changing Passwords and Connecting with an Expired Password](#changingpassword)
-    - 14.9 [Connections and High Availability](#connectionha)
-        - 14.9.1 [Fast Application Notification (FAN)](#connectionfan)
-        - 14.9.2 [Runtime Load Balancing (RLB)](#connectionrlb)
-        - 14.9.3 [Database Call Timeouts](#dbcalltimeouts)
-    - 14.10 [Connecting to Oracle Autonomous Database](#connectionadb)
-    - 14.11 [Connecting to Sharded Databases](#sharding)
-15. [SQL Execution](#sqlexecution)
-    - 15.1 [SELECT Statements](#select)
-        - 15.1.1 [Fetching Rows with Direct Fetches](#fetchingrows)
-        - 15.1.2 [Fetching Rows with Result Sets](#resultsethandling)
-        - 15.1.3 [Query Streaming](#streamingresults)
-        - 15.1.4 [Query Output Formats](#queryoutputformats)
-        - 15.1.5 [Query Column Metadata](#querymeta)
-        - 15.1.6 [Query Result Type Mapping](#typemap)
-            - 15.1.6.1 [Fetching CHAR, VARCHAR2, NCHAR and NVARCHAR](#stringhandling)
-            - 15.1.6.2 [Fetching Numbers](#numberhandling)
-            - 15.1.6.3 [Fetching Dates and Timestamps](#datehandling)
-            - 15.1.6.4 [Fetching Numbers and Dates as String](#fetchasstringhandling)
-            - 15.1.6.5 [Fetching BLOB, CLOB and NCLOB](#fetchlob)
-            - 15.1.6.6 [Fetching LONG and LONG RAW](#fetchlong)
-            - 15.1.6.7 [Fetching ROWID and UROWID](#fetchrowid)
-            - 15.1.6.8 [Fetching XMLType](#fetchxml)
-            - 15.1.6.9 [Fetching RAW](#fetchraw)
-            - 15.1.6.10 [Fetching Oracle Database Objects and Collections](#fetchobjects)
-        - 15.1.7 [Limiting Rows and Creating Paged Datasets](#pagingdata)
-        - 15.1.8 [Auto-Increment Columns](#autoincrement)
-    - 15.2 [Cursor Management](#cursors1000)
-16. [PL/SQL Execution](#plsqlexecution)
-    - 16.1 [PL/SQL Stored Procedures](#plsqlproc)
-    - 16.2 [PL/SQL Stored Functions](#plsqlfunc)
-    - 16.3 [Anonymous PL/SQL blocks](#plsqlanon)
-    - 16.4 [Using DBMS_OUTPUT](#dbmsoutput)
-    - 16.5 [Edition-Based Redefinition](#ebr)
-    - 16.6 [Implicit Results](#implicitresults)
-17. [Working with CLOB, NCLOB and BLOB Data](#lobhandling)
-    - 17.1 [Simple Insertion of LOBs](#basiclobinsert)
-    - 17.2 [Simple LOB Queries and PL/SQL OUT Binds](#queryinglobs)
-    - 17.3 [Streaming Lobs](#streamsandlobs)
-    - 17.4 [Using RETURNING INTO to Insert into LOBs](#lobinsertdiscussion)
-    - 17.5 [Getting LOBs as Streams from Oracle Database](#loboutstream)
-    - 17.6 [Using `createLob()` for PL/SQL IN Binds](#templobdiscussion)
-    - 17.7 [Closing Lobs](#closinglobs)
-18. [Oracle Database 12c JSON Data type](#jsondatatype)
-19. [Working with XMLType](#xmltype)
-20. [Bind Parameters for Prepared Statements](#bind)
-    - 20.1 [IN Bind Parameters](#inbind)
-    - 20.2 [OUT and IN OUT Bind Parameters](#outbind)
-    - 20.3 [DML RETURNING Bind Parameters](#dmlreturn)
-    - 20.4 [REF CURSOR Bind Parameters](#refcursors)
-    - 20.5 [LOB Bind Parameters](#lobbinds)
-    - 20.6 [Binding Multiple Values to a SQL `WHERE IN` Clause](#sqlwherein)
-    - 20.7 [Binding Column and Table Names in Queries](#sqlbindtablename)
-21. [Oracle Database Objects and Collections](#objects)
-    - 21.1 [Inserting Objects](#objectinsert)
-    - 21.2 [Fetching Objects](#objectfetch)
-    - 21.3 [PL/SQL Collection Types](#plsqlcollections)
-        - 21.3.1 [PL/SQL Collection Associative Arrays (Index-by)](#plsqlindexbybinds)
-        - 21.3.2 [PL/SQL Collection VARRAY Types](#plsqlvarray)
-        - 21.3.3 [PL/SQL Collection Nested Tables](#plsqlnestedtables)
-    - 21.4 [PL/SQL RECORD Types](#plsqlrecords)
-    - 21.5 [Inserting or Passing Multiple Objects of the Same Type](#objexecmany)
-    - 21.6 [Oracle Database Object Type Limitations](#objectlimitations)
-22. [Batch Statement Execution and Bulk Loading](#batchexecution)
-23. [Transaction Management](#transactionmgt)
-24. [Statement Caching](#stmtcache)
+14. [Initializing Node-oracledb](#initnodeoracledb)
+    - 14.1 [Locating the Oracle Client Libraries](#oracleclientloading)
+    - 14.2 [Optional Oracle Net Configuration](#tnsadmin)
+    - 14.3 [Optional Oracle Client Configuration](#oraaccess)
+    - 14.4 [Oracle Environment Variables](#environmentvariables)
+    - 14.5 [Other Node-oracledb Initialization](#otherinit)
+15. [Connection Handling](#connectionhandling)
+    - 15.1 [Connection Strings](#connectionstrings)
+        - 15.1.1 [Easy Connect Syntax for Connection Strings](#easyconnect)
+        - 15.1.2 [Embedded Connect Descriptor Strings](#embedtns)
+        - 15.1.3 [Net Service Names for Connection Strings](#tnsnames)
+        - 15.1.4 [JDBC and Oracle SQL Developer Connection Strings](#notjdbc)
+    - 15.2 [Connections, Threads, and Parallelism](#numberofthreads)
+        - 15.2.1 [Parallelism on a Connection](#parallelism)
+    - 15.3 [Connection Pooling](#connpooling)
+        - 15.3.1 [Connection Pool Sizing](#conpoolsizing)
+        - 15.3.2 [Connection Pool Closing and Draining](#conpooldraining)
+        - 15.3.3 [Connection Pool Cache](#connpoolcache)
+        - 15.3.4 [Connection Pool Queue](#connpoolqueue)
+        - 15.3.5 [Connection Pool Monitoring](#connpoolmonitor)
+        - 15.3.6 [Connection Pool Pinging](#connpoolpinging)
+        - 15.3.7 [Connection Tagging and Session State](#connpooltagging)
+            - 15.3.7.1 [Node.js Session Callback](#sessionfixupnode)
+            - 15.3.7.2 [Connection Tagging](#sessionfixuptagging)
+            - 15.3.7.3 [Node.js Session Tagging Callback](#sessiontaggingnode)
+            - 15.3.7.4 [PL/SQL Session Tagging Callback](#sessiontaggingplsql)
+        - 15.3.8 [Heterogeneous Connection Pools and Pool Proxy Authentication](#connpoolproxy)
+    - 15.4 [External Authentication](#extauth)
+    - 15.5 [Database Resident Connection Pooling (DRCP)](#drcp)
+    - 15.6 [Privileged Connections](#privconn)
+    - 15.7 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
+    - 15.8 [Changing Passwords and Connecting with an Expired Password](#changingpassword)
+    - 15.9 [Connections and High Availability](#connectionha)
+        - 15.9.1 [Preventing Premature Connection Closing](#connectionpremclose)
+        - 15.9.2 [Fast Application Notification (FAN)](#connectionfan)
+        - 15.9.3 [Runtime Load Balancing (RLB)](#connectionrlb)
+        - 15.9.4 [Application Continuity](#appcontinuity)
+        - 15.9.5 [Database Call Timeouts](#dbcalltimeouts)
+    - 15.10 [Connecting to Oracle Autonomous Database](#connectionadb)
+    - 15.11 [Connecting to Sharded Databases](#sharding)
+16. [SQL Execution](#sqlexecution)
+    - 16.1 [SELECT Statements](#select)
+        - 16.1.1 [Fetching Rows with Direct Fetches](#fetchingrows)
+        - 16.1.2 [Fetching Rows with Result Sets](#resultsethandling)
+        - 16.1.3 [Query Streaming](#streamingresults)
+        - 16.1.4 [Query Output Formats](#queryoutputformats)
+        - 16.1.5 [Fetching Nested Cursors](#nestedcursors)
+        - 16.1.6 [Query Column Metadata](#querymeta)
+        - 16.1.7 [Query Result Type Mapping](#typemap)
+            - 16.1.7.1 [Fetching CHAR, VARCHAR2, NCHAR and NVARCHAR](#stringhandling)
+            - 16.1.7.2 [Fetching Numbers](#numberhandling)
+            - 16.1.7.3 [Fetching Dates and Timestamps](#datehandling)
+            - 16.1.7.4 [Fetching Numbers and Dates as String](#fetchasstringhandling)
+            - 16.1.7.5 [Fetching BLOB, CLOB and NCLOB](#fetchlob)
+            - 16.1.7.6 [Fetching LONG and LONG RAW](#fetchlong)
+            - 16.1.7.7 [Fetching ROWID and UROWID](#fetchrowid)
+            - 16.1.7.8 [Fetching XMLType](#fetchxml)
+            - 16.1.7.9 [Fetching RAW](#fetchraw)
+            - 16.1.7.10 [Fetching Oracle Database Objects and Collections](#fetchobjects)
+        - 16.1.8 [Limiting Rows and Creating Paged Datasets](#pagingdata)
+        - 16.1.9 [Auto-Increment Columns](#autoincrement)
+    - 16.2 [Cursor Management](#cursors1000)
+17. [PL/SQL Execution](#plsqlexecution)
+    - 17.1 [PL/SQL Stored Procedures](#plsqlproc)
+    - 17.2 [PL/SQL Stored Functions](#plsqlfunc)
+    - 17.3 [Anonymous PL/SQL blocks](#plsqlanon)
+    - 17.4 [Using DBMS_OUTPUT](#dbmsoutput)
+    - 17.5 [Edition-Based Redefinition](#ebr)
+    - 17.6 [Implicit Results](#implicitresults)
+18. [Working with CLOB, NCLOB and BLOB Data](#lobhandling)
+    - 18.1 [Simple Insertion of LOBs](#basiclobinsert)
+    - 18.2 [Simple LOB Queries and PL/SQL OUT Binds](#queryinglobs)
+    - 18.3 [Streaming Lobs](#streamsandlobs)
+    - 18.4 [Using RETURNING INTO to Insert into LOBs](#lobinsertdiscussion)
+    - 18.5 [Getting LOBs as Streams from Oracle Database](#loboutstream)
+    - 18.6 [Using `createLob()` for PL/SQL IN Binds](#templobdiscussion)
+    - 18.7 [Closing Lobs](#closinglobs)
+19. [Oracle Database 12c JSON Data type](#jsondatatype)
+20. [Working with XMLType](#xmltype)
+21. [Bind Parameters for Prepared Statements](#bind)
+    - 21.1 [IN Bind Parameters](#inbind)
+    - 21.2 [OUT and IN OUT Bind Parameters](#outbind)
+    - 21.3 [DML RETURNING Bind Parameters](#dmlreturn)
+    - 21.4 [REF CURSOR Bind Parameters](#refcursors)
+    - 21.5 [LOB Bind Parameters](#lobbinds)
+    - 21.6 [Binding Multiple Values to a SQL `WHERE IN` Clause](#sqlwherein)
+    - 21.7 [Binding Column and Table Names in Queries](#sqlbindtablename)
+22. [Oracle Database Objects and Collections](#objects)
+    - 22.1 [Inserting Objects](#objectinsert)
+    - 22.2 [Fetching Objects](#objectfetch)
+    - 22.3 [PL/SQL Collection Types](#plsqlcollections)
+        - 22.3.1 [PL/SQL Collection Associative Arrays (Index-by)](#plsqlindexbybinds)
+        - 22.3.2 [PL/SQL Collection VARRAY Types](#plsqlvarray)
+        - 22.3.3 [PL/SQL Collection Nested Tables](#plsqlnestedtables)
+    - 22.4 [PL/SQL RECORD Types](#plsqlrecords)
+    - 22.5 [Inserting or Passing Multiple Objects of the Same Type](#objexecmany)
+    - 22.6 [Oracle Database Object Type Limitations](#objectlimitations)
+23. [Batch Statement Execution and Bulk Loading](#batchexecution)
+24. [Transaction Management](#transactionmgt)
 25. [Continuous Query Notification (CQN)](#cqn)
 26. [Oracle Advanced Queuing (AQ)](#aq)
     - 26.1 [Sending Simple AQ Messages](#aqrawexample)
@@ -474,22 +515,27 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 29.5 [SODA Text Searches](#sodatextsearches)
     - 29.6 [SODA Client-Assigned Keys and Collection Metadata](#sodaclientkeys)
     - 29.7 [JSON Data Guides in SODA](#sodajsondataguide)
-30. [Database Round-trips](#roundtrips)
-31. [Tracing SQL and PL/SQL Statements](#tracingsql)
-32. [Node.js Programming Styles and node-oracledb](#programstyles)
-    - 32.1 [Callbacks and node-oracledb](#callbackoverview)
-    - 32.2 [Promises and node-oracledb](#promiseoverview)
-        - 32.2.1 [Custom Promise Libraries](#custompromises)
-    - 32.3 [Async/Await and node-oracledb](#asyncawaitoverview)
-33. [Migrating from Previous node-oracledb Releases](#migrate)
-    - 33.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
-    - 33.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
-    - 33.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
-    - 33.4 [Migrating from node-oracledb 3.0 to node-oracledb 3.1](#migratev30v31)
-    - 33.5 [Migrating from node-oracledb 3.1 to node-oracledb 4.0](#migratev31v40)
-    - 33.6 [Migrating from node-oracledb 4.0 to node-oracledb 4.1](#migratev40v41)
-    - 33.7 [Migrating from node-oracledb 4.1 to node-oracledb 4.2](#migratev41v42)
-34. [Useful Resources for Node-oracledb](#otherresources)
+30. [Database Start Up and Shut Down](#startupshutdown)
+    - 30.1 [Simple Database Start Up and Shut Down](#startupshutdownsimple)
+    - 30.2 [Flexible Database Start Up and Shut Down](#startupshutdownflexible)
+    - 30.3 [Oracle Multitenant Pluggable and Container Databases](#startupshutdownpdb)
+31. [Node-oracledb Tuning](#tuning)
+    - 31.1 [Tuning Fetch Performance](#rowfetching)
+    - 31.2 [Database Round-trips](#roundtrips)
+    - 31.3 [Statement Caching](#stmtcache)
+    - 31.4 [Client Result Cache](#clientresultcache)
+32. [Tracing SQL and PL/SQL Statements](#tracingsql)
+33. [Node.js Programming Styles and node-oracledb](#programstyles)
+    - 33.1 [Callbacks and node-oracledb](#callbackoverview)
+    - 33.2 [Promises and node-oracledb](#promiseoverview)
+        - 33.2.1 [Custom Promise Libraries](#custompromises)
+    - 33.3 [Async/Await and node-oracledb](#asyncawaitoverview)
+34. [Migrating from Previous node-oracledb Releases](#migrate)
+    - 34.1 [Migrating from node-oracledb 3.1 to node-oracledb 4.0](#migratev31v40)
+    - 34.2 [Migrating from node-oracledb 4.0 to node-oracledb 4.1](#migratev40v41)
+    - 34.3 [Migrating from node-oracledb 4.1 to node-oracledb 4.2](#migratev41v42)
+    - 34.4 [Migrating from node-oracledb 4.2 to node-oracledb 5.0](#migratev42v50)
+35. [Useful Resources for Node-oracledb](#otherresources)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
 
@@ -497,12 +543,9 @@ For installation information, see the [Node-oracledb Installation Instructions][
 
 The [*node-oracledb*][1] add-on for Node.js powers high performance Oracle Database applications.
 
-This document shows how to use node-oracledb version 4.  The API
-reference is in the first sections of this document and the [user
-manual](#usermanual) in subsequent sections.  Documentation about
-node-oracledb version 1 is [here][94].  Documentation about
-node-oracledb version 2 is [here][121].  Documentation about
-node-oracledb version 3 is [here][135].
+This document shows how to use node-oracledb.  The API reference is in the first
+sections of this document and the [user manual](#usermanual) in subsequent
+sections.  Also see the [installation manual][2].
 
 The node-oracledb API is a generic Oracle Database access layer.
 Almost all the functionality described here is common across all
@@ -510,7 +553,52 @@ current Oracle Databases.  However the documentation may describe some
 database features that are in specific Oracle Database versions,
 editions, or require additional database options or packs.
 
-### <a name="getstarted"></a> 1.1 Getting Started with Node-oracledb
+#### Node-oracledb Features
+
+The node-oracledb feature highlights are:
+
+- Easily installed from [npm][1]
+- Support for Node.js 10 and later, and for multiple Oracle Database versions.  (Note: older versions of node-oracledb supported older versions of Node.js)
+- Execution of SQL and PL/SQL statements, and access to [SODA](#sodaoverview) document-style access APIs.
+- Extensive Oracle data type support, including large objects (CLOB and BLOB) and binding of SQL objects
+- Connection management, including connection pooling
+- Oracle Database High Availability features
+- Full use of Oracle Network Service infrastructure, including encrypted network traffic and security features
+
+A complete list of features can be seen [here][169].
+
+### <a name="architecture"></a> 1.1 Node-oracledb Architecture
+
+Node-oracledb is a Node.js add-on that allows Node.js applications to access
+Oracle Database.  Node.js programs call node-oracledb functions. Internally
+node-oracledb dynamically loads Oracle Client libraries.  Connections are made
+from node-oracledb to Oracle Database so [SQL](#sqlexecution),
+[PL/SQL](#plsqlexecution), and [SODA](#sodaoverview) can be used.
+
+![node-oracledb Architecture](./images/node-oracledb-architecture.png)
+
+Node-oracledb is typically installed from the [npm registry][1].  The Oracle
+Client libraries need to be installed separately.  The libraries can be obtained
+from an installation of Oracle Instant Client, from a full Oracle Client
+installation, or even from an Oracle Database installation (if Node.js is
+running on the same machine as the database).  The versions of Oracle Client and
+Oracle Database do not have to be the same.  Oracle Net is not a separate
+product: it is how the Oracle Client and Oracle Database communicate.
+
+Some behaviors of the Oracle Client libraries can optionally be configured with
+an `oraaccess.xml` file, for example to enable auto-tuning of a statement cache.
+See [Optional Oracle Client Configuration](#oraaccess).
+
+The Oracle Net layer can optionally be configured with files such as
+`tnsnames.ora` and `sqlnet.ora`, for example to enable network encryption.  See
+[Optional Oracle Net Configuration](#tnsadmin).
+
+Oracle environment variables that are set before node-oracledb first creates a
+database connection will affect node-oracledb behavior.  Optional variables
+include `NLS_LANG`, `NLS_DATE_FORMAT` and `TNS_ADMIN`.  See [Oracle Environment
+Variables](#environmentvariables).
+
+### <a name="getstarted"></a> 1.2 Getting Started with Node-oracledb
 
 Install Node.js from [nodejs.org][88].
 
@@ -539,7 +627,7 @@ Run the script, for example:
 node myscript.js
 ```
 
-####  <a name="examplequery"></a> 1.1.1 Example: A SQL SELECT statement in Node.js
+####  <a name="examplequery"></a> 1.2.1 Example: A SQL SELECT statement in Node.js
 
 ```javascript
 // myscript.js
@@ -556,7 +644,7 @@ async function run() {
   let connection;
 
   try {
-    connection = await oracledb.getConnection(  {
+    connection = await oracledb.getConnection( {
       user          : "hr",
       password      : mypw,
       connectString : "localhost/XEPDB1"
@@ -592,11 +680,12 @@ With Oracle's sample [HR schema][4], the output is:
 [ { MANAGER_ID: 103, DEPARTMENT_ID: 60, DEPARTMENT_NAME: 'IT' } ]
 ```
 
-#### <a name="examplesodaawait"></a> 1.1.2 Example: Simple Oracle Document Access (SODA) in Node.js
+#### <a name="examplesodaawait"></a> 1.2.2 Example: Simple Oracle Document Access (SODA) in Node.js
 
-[node-oracledb's SODA API](#sodaoverview) can be used with Oracle Database 18
-and above, when node-oracledb uses Oracle Client 18.5 or Oracle Client 19.3, or
-later.  Users require the CREATE TABLE privilege and the SODA_APP role.
+[node-oracledb's SODA API](#sodaoverview) can be used for document-style access
+with Oracle Database 18 and above, when node-oracledb uses Oracle Client 18.5 or
+Oracle Client 19.3, or later.  Users require the CREATE TABLE privilege and the
+SODA_APP role.
 
 ```javascript
 // mysoda.js
@@ -613,7 +702,7 @@ async function run() {
   let connection;
 
   try {
-    connection = await oracledb.getConnection(  {
+    connection = await oracledb.getConnection( {
       user          : "hr",
       password      : mypw,
       connectString : "localhost/orclpdb1"
@@ -859,6 +948,7 @@ Constant Name                        | Value |Description
 `oracledb.SYSDG`                     |  262144 | SYSDG privileges
 `oracledb.SYSKM`                     |  524288 | SYSKM privileges
 `oracledb.SYSOPER`                   |       4 | SYSOPER privileges
+`oracledb.SYSPRELIM`                 |       8 | Preliminary privilege required when starting up a database with [`connection.startup()`](#constartup).  Added in node-oracledb 5.0.
 `oracledb.SYSRAC`                    | 1048576 | SYSRAC privileges
 
 #### <a name="oracledbconstantsstmttype"></a> 3.1.6 SQL Statement Type Constants
@@ -1013,6 +1103,23 @@ Constant Name                   | Value |Description
 Constant Name                   | Value |Description
 --------------------------------|-------|---------------------------------------------------
 `oracledb.SODA_COLL_MAP_MODE`   | 5001  | Indicate [`sodaDatabase.createCollection()`](#sodadbcreatecollection) should use an externally created table to store the collection
+
+#### <a name="oracledbconstantsshutdown"></a> 3.1.12 Database Shutdown Constants
+
+Constants for shutting down the Oracle Database with
+[`oracledb.shutdown()`](#odbshutdown) and
+[`connection.shutdown()`](#conshutdown).
+
+These are new in node-oracledb 5.
+
+Constant Name                                 | Value | Description
+----------------------------------------------|-------|---------------------------------------------------
+`oracledb.SHUTDOWN_MODE_ABORT`                | 4     | All uncommitted transactions are terminated and not rolled back. This is the fastest way to shut down the database, but the next database start up may require instance recovery.
+`oracledb.SHUTDOWN_MODE_DEFAULT`              | 0     | Further connections to the database are prohibited.  Wait for users to disconnect from the database.
+`oracledb.SHUTDOWN_MODE_FINAL`                | 5     | Used with a second [`connection.shutdown()`](#conshutdown) to conclude the database shut down steps.
+`oracledb.SHUTDOWN_MODE_IMMEDIATE`            | 3     | All uncommitted transactions are terminated and rolled back and all connections to the database are closed immediately.
+`oracledb.SHUTDOWN_MODE_TRANSACTIONAL`        | 1     | Further connections to the database are prohibited and no new transactions are allowed to be started.  Wait for active transactions to complete.
+`oracledb.SHUTDOWN_MODE_TRANSACTIONAL_LOCAL`  | 2     | Behaves the same way as SHUTDOWN_MODE_TRANSACTIONAL, but only waits for local transactions to complete.
 
 ### <a name="oracledbproperties"></a> 3.2 Oracledb Properties
 
@@ -1225,8 +1332,10 @@ For direct fetches (those using `execute()` option [`resultSet:
 false`](#propexecresultset)), the internal buffer size will be based
 on the lesser of [`maxRows`](#propdbmaxrows) and `fetchArraySize`.
 
-The property was introduced in node-oracledb version 2.0.  It replaces
-[`prefetchRows`](#propdbprefetchrows).
+This property can be overridden by the `execute()` option
+[`fetchArraySize`](#propexecfetcharraysize).
+
+The property was introduced in node-oracledb version 2.0.
 
 ##### Example
 
@@ -1317,13 +1426,13 @@ oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 Number lobPrefetchSize
 ```
 
-This attribute is temporarily disabled.  Setting it has no effect.
+This attribute is temporarily disabled.  Setting it has no effect.  For best
+performance, fetch Lobs as Strings or Buffers.
 
 Node-oracledb internally uses Oracle *LOB Locators* to manipulate long
 object (LOB) data.  LOB Prefetching allows LOB data to be returned
 early to node-oracledb when these locators are first returned.  This
-is similar to the way [row prefetching](#rowprefetching) allows for
-efficient use of resources and [round-trips](#roundtrips) between
+allows for efficient use of resources and [round-trips](#roundtrips) between
 node-oracledb and the database.
 
 Prefetching of LOBs is mostly useful for small LOBs.
@@ -1348,6 +1457,8 @@ The maximum number of rows that are fetched by a query with
 [ResultSet](#resultsetclass).  Rows beyond this limit are not fetched
 from the database.  A value of 0 means there is no limit.
 
+For nested cursors, the limit is also applied to each cursor.
+
 The default value is 0, meaning unlimited.
 
 This property may be overridden in an [`execute()`](#executeoptions)
@@ -1357,6 +1468,9 @@ To improve database efficiency, SQL queries should use a row limiting
 clause like [`OFFSET` / `FETCH`](#pagingdata) or equivalent. The `maxRows`
 property can be used to stop badly coded queries from returning
 unexpectedly large numbers of rows.
+
+For queries that return a fixed, small number of rows, then set `maxRows` to
+that value.  For example, for queries that return one row, set `maxRows` to 1.
 
 When the number of query rows is relatively big, or can not be
 predicted, it is recommended to use a [ResultSet](#resultsetclass) or
@@ -1494,7 +1608,11 @@ Importantly, if you increase `poolMax` you should also increase the
 number of threads available to node-oracledb.  See [Connections and
 Number of Threads](#numberofthreads).
 
-See [Connection Pooling](#connpooling) for other pool sizing guidelines.
+A fixed pool size where `poolMin` equals `poolMax` [is strongly
+recommended](#conpoolsizing).  This helps prevent connection storms and helps
+overall system stability.
+
+See [Connection Pooling](#connpooling) for pool sizing guidelines.
 
 ##### Example
 
@@ -1517,9 +1635,7 @@ This property may be overridden when [creating a connection pool](#createpool).
 When this property is set, and a new connection request would cause the number
 of connections to the target shard to exceed the limit, then that new connection
 request will block until a suitable connection has been released back to the
-pool.  Importantly, when blocked, the [`queueTimeout`](#propdbqueuetimeout)
-value will be ignored and the pending connection request will consume one worker
-thread.
+pool.  The pending connection request will consume one worker thread.
 
 This property was added in node-oracledb 4.1.  It is available when
 node-oracledb uses Oracle client libraries 18.3, or later.
@@ -1528,7 +1644,7 @@ node-oracledb uses Oracle client libraries 18.3, or later.
 
 ```javascript
 const oracledb = require('oracledb');
-oracledb.poolMin = 0;
+oracledb.poolMaxPerShard = 0;
 ```
 
 #### <a name="propdbpoolmin"></a> 3.2.18 `oracledb.poolMin`
@@ -1553,6 +1669,10 @@ regardless of the value of
 of open connections exceeds `poolMin` and connections are idle for
 more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
 number of open connections does not fall below `poolMin`.
+
+A fixed pool size where `poolMin` equals `poolMax` [is strongly
+recommended](#conpoolsizing).  This helps prevent connection storms and helps
+overall system stability.
 
 ##### Example
 
@@ -1581,9 +1701,9 @@ are:
 
 `poolPingInterval` Value     | Behavior of a Pool `getConnection()` Call
 ----------|------------------------------------------
-`n` < `0` | Never checks for connection aliveness
-`n` = `0` | Always checks for connection aliveness. This value is not recommended for most applications because of the overhead in performing each ping
-`n` > `0` | Checks aliveness if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
+`n` < `0` | Never checks for connection validity
+`n` = `0` | Always checks for connection validity. This value is not recommended for most applications because of the overhead in performing each ping
+`n` > `0` | Checks validity if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
 
 This property may be overridden when [creating a connection pool](#createpool).
 
@@ -1627,15 +1747,32 @@ oracledb.poolTimeout = 60;
 Number prefetchRows
 ```
 
-This attribute is no longer used in node-oracledb version 2 and has no
-effect on applications.  Use
-[`oracledb.fetchArraySize`](#propdbfetcharraysize) instead.
+This is a query tuning option to set the number of additional rows the
+underlying Oracle Client library fetches during the internal initial statement
+execution phase of a query.  The prefetch size does not affect when, or how
+many, rows are returned by node-oracledb to the application.
+
+The `prefetchRows` attribute can be used in conjunction with
+[`oracledb.fetchArraySize`](#propdbfetcharraysize) to tune query performance,
+memory use, and to reduce the number of [round-trip](#roundtrips) calls needed
+to return query results, see [Tuning Fetch Performance](#rowfetching).
+
+The `prefetchRows` value is ignored in some cases, such as when the query
+involves a LOB.
+
+The default value is 2.
+
+This property may be overridden in an [`connection.execute()`](#execute) call,
+which is preferred usage if you need to change the value..
+
+This attribute is not used in node-oracledb version 2, 3 or 4.  In those
+versions use only [`oracledb.fetchArraySize`](#propdbfetcharraysize) instead.
 
 ##### Example
 
 ```javascript
 const oracledb = require('oracledb');
-oracledb.prefetchRows = 100;
+oracledb.prefetchRows = 2;
 ```
 
 #### <a name="propdbpromise"></a> 3.2.22 `oracledb.Promise`
@@ -1644,35 +1781,62 @@ oracledb.prefetchRows = 100;
 Promise Promise
 ```
 
-Node-oracledb supports Promises on all methods.  The standard Promise
-library is used.
+**The `oracledb.Promise` property is no longer used in node-oracledb 5 and has no
+effect.**
 
-See [Promises and node-oracledb](#promiseoverview) for a discussion of
+Node-oracledb supports Promises on all methods.  The native Promise library is
+used.  See [Promises and node-oracledb](#promiseoverview) for a discussion of
 using Promises.
 
-This property can be set to override or disable the Promise
-implementation.
-
 ##### Example
+
+Prior to node-oracledb 5, this property could be set to override or disable the
+Promise implementation.
 
 ```javascript
 const mylib = require('myfavpromiseimplementation');
 oracledb.Promise = mylib;
 ```
 
-Promises can be completely disabled by setting
+Prior to node-oracledb 5, Promises could be completely disabled by setting:
 
 ```javascript
 oracledb.Promise = null;
 ```
 
-#### <a name="propdbqueuerequests"></a> 3.2.23 `oracledb.queueRequests`
+#### <a name="propdbqueuemax"></a> 3.2.23 `oracledb.queueMax`
 
-This property was removed in node-oracledb 3.0.  Queuing is now always
-enabled.  See [Connection Pool Queue](#connpoolqueue) for more
-information.
+```
+Number queueMax
+```
 
-#### <a name="propdbqueuetimeout"></a> 3.2.24 `oracledb.queueTimeout`
+The maximum number of pending `pool.getConnection()` calls that can be queued.
+
+When the number of `pool.getConnection()` calls that have been
+[queued](#connpoolqueue) waiting for an available connection reaches `queueMax`,
+then any future `pool.getConnection()` calls will immediately return an error
+and will not be queued.
+
+If `queueMax` is -1, then the queue length is not limited.
+
+The default value is 500.
+
+This property may be overridden when [creating a connection pool](#createpool).
+
+##### Example
+
+```javascript
+const oracledb = require('oracledb');
+oracledb.queueMax = 500;
+```
+
+#### <a name="propdbqueuerequests"></a> 3.2.24 `oracledb.queueRequests`
+
+This property was removed in node-oracledb 3.0 and queuing was always enabled.
+In node-oracledb 5.0, set `queueMax` to 0 to disable queuing.  See [Connection
+Pool Queue](#connpoolqueue) for more information.
+
+#### <a name="propdbqueuetimeout"></a> 3.2.25 `oracledb.queueTimeout`
 
 ```
 Number queueTimeout
@@ -1697,7 +1861,7 @@ const oracledb = require('oracledb');
 oracledb.queueTimeout = 3000; // 3 seconds
 ```
 
-#### <a name="propdbstmtcachesize"></a> 3.2.25 `oracledb.stmtCacheSize`
+#### <a name="propdbstmtcachesize"></a> 3.2.26 `oracledb.stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -1724,7 +1888,7 @@ const oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.26 `oracledb.version`
+#### <a name="propdbversion"></a> 3.2.27 `oracledb.version`
 ```
 readonly Number version
 ```
@@ -1739,7 +1903,7 @@ const oracledb = require('oracledb');
 console.log("Driver version number is " + oracledb.version);
 ```
 
-#### <a name="propdbversionstring"></a> 3.2.27 `oracledb.versionString`
+#### <a name="propdbversionstring"></a> 3.2.28 `oracledb.versionString`
 ```
 readonly String versionString
 ```
@@ -1755,7 +1919,7 @@ const oracledb = require('oracledb');
 console.log("Driver version is " + oracledb.versionString);
 ```
 
-#### <a name="propdbversionsuffix"></a> 3.2.28 `oracledb.versionSuffix`
+#### <a name="propdbversionsuffix"></a> 3.2.29 `oracledb.versionSuffix`
 ```
 readonly String versionSuffix
 ```
@@ -2027,7 +2191,7 @@ Number poolPingInterval
 When a pool [`getConnection()`](#getconnectionpool) is called and the
 connection has been idle in the pool for at least `poolPingInterval`
 seconds, an internal "ping" will be performed first to check the
-aliveness of the connection.
+validity of the connection.
 
 The default value is 60.
 
@@ -2051,13 +2215,33 @@ The default value is 60.
 This optional property overrides the
 [`oracledb.poolTimeout`](#propdbpooltimeout) property.
 
-###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.14 `queueRequests`
+###### <a name="createpoolpoolattrsqueuemax"></a> 3.3.1.1.14 `queueMax`
 
-This property was removed in node-oracledb 3.0.  Queuing is now always
-enabled.  See [Connection Pool Queue](#connpoolqueue) for more
-information.
+```
+Number queueMax
+```
 
-###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.15 `queueTimeout`
+The maximum number of pending `pool.getConnection()` calls that can be queued.
+
+When the number of `pool.getConnection()` calls that have been
+[queued](#connpoolqueue) waiting for an available connection reaches `queueMax`,
+then any future `pool.getConnection()` calls will immediately return an error
+and will not be queued.
+
+If `queueMax` is -1, then the queue length is not limited.
+
+The default value is 500.
+
+This optional property overrides the
+[`oracledb.queueMax`](#propdbqueuemax) property.
+
+###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.15 `queueRequests`
+
+This property was removed in node-oracledb 3.0 and queuing was always enabled.
+In node-oracledb 5.0, set `queueMax` to 0 to disable queuing.  See [Connection
+Pool Queue](#connpoolqueue) for more information.
+
+###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.16 `queueTimeout`
 
 ```
 Number queueTimeout
@@ -2072,7 +2256,7 @@ The default value is 60000.
 This optional property overrides the
 [`oracledb.queueTimeout`](#propdbqueuetimeout) property.
 
-###### <a name="createpoolpoolattrssessioncallback"></a> 3.3.1.1.16 `sessionCallback`
+###### <a name="createpoolpoolattrssessioncallback"></a> 3.3.1.1.17 `sessionCallback`
 
 ```
 String sessionCallback | function sessionCallback(Connection connection, String requestedTag, function callback(Error error, Connection connection){})
@@ -2129,7 +2313,7 @@ information.
 
 This property was added in node-oracledb 3.1.
 
-###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.17 `stmtCacheSize`
+###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.18 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -2141,7 +2325,7 @@ The number of statements to be cached in the
 This optional property overrides the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.18 `user`
+###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.19 `user`
 
 ```
 String user
@@ -2283,7 +2467,7 @@ Boolean events
 Determines if the standalone connection is created using Oracle Call Interface events mode.
 
 This optional property overrides the
-[`oracledb.events`](#propdbisevents) property.
+[`oracledb.events`](#propdbevents) property.
 
 This property was added in node-oracledb 2.2.
 
@@ -2364,9 +2548,10 @@ proxy user is specified.
 Number privilege
 ```
 
-The privilege to use when establishing connection to the database. This
-optional property should be one of the
-[privileged connection constants](#oracledbconstantsprivilege).
+The privilege to use when establishing connection to the database. This optional
+property should be one of the [privileged connection
+constants](#oracledbconstantsprivilege).  Multiple privileges may be used by
+when required, for example `oracledb.SYSDBA | oracledb.SYSPRELIM`.
 
 See [Privileged Connections](#privconn) for more information.
 
@@ -2480,6 +2665,191 @@ String poolAlias
 The pool alias of the pool to retrieve from the connection pool cache. The default
 value is 'default' which will retrieve the default pool from the cache.
 
+#### <a name="odbinitoracleclient"></a> 3.3.4 `oracledb.initOracleClient()`
+
+##### Prototype
+
+```
+initOracleClient([Object options]);
+```
+
+##### Description
+
+This synchronous function loads and initializes the [Oracle Client
+libraries](#architecture) that are necessary for node-oracledb to communicate
+with Oracle Database.  This function is optional.  If used, it should be the
+first node-oracledb call made by an application.
+
+If `initOracleClient()` is not called, then the Oracle Client libraries are
+loaded at the time of first use in the application, such as when creating a
+connection pool.  The default values described for
+[`options`](#odbinitoracleclientattrsopts) will be used in this case.
+
+If the Oracle Client libraries cannot be loaded, or they have already been
+initialized, either by a previous call to this function or because another
+function call already required the Oracle Client libraries, then
+`initOracleClient()` raises an exception.
+
+See [Initializing Node-oracledb](#initnodeoracledb) for more information.
+
+This method was added in node-oracledb 5.0.
+
+##### <a name="odbinitoracleclientattrs"></a> 3.3.4.1 Parameters
+
+###### <a name="odbinitoracleclientattrsopts"></a> 3.3.4.1.1 `options`
+
+```
+Object options
+```
+
+The options parameter and option attributes are optional.  If an attribute is set, it should be a string value.
+
+Attribute           | Description
+------------------- |-----------------------------
+`configDir`         | This specifies the directory in which the [Optional Oracle Net Configuration](#tnsadmin) and [Optional Oracle Client Configuration](#oraaccess) files reside.  It is equivalent to setting the Oracle environment variable `TNS_ADMIN` to this value.  Any value in that environment variable prior to the call to `oracledb.initOracleClient()` is ignored.  If this attribute is not set, Oracle's default configuration file [search heuristics](#tnsadmin) are used.
+`driverName`        | This specifies the driver name value shown in database views, such as `V$SESSION_CONNECT_INFO`.  It can be used by applications to identify themselves for tracing and monitoring purposes.  The convention is to separate the product name from the product version by a colon and single space characters.  If this attribute is not specified, the value "node-oracledb : *version*" is used. See [Other Node-oracledb Initialization](#otherinit).
+`errorUrl`          | This specifies the URL that is included in the node-oracledb exception message if the Oracle Client libraries cannot be loaded.  This allows applications that use node-oracledb to refer users to application-specific installation instructions.  If this attribute is not specified, then the [node-oracledb installation instructions][2] URL is used.  See [Other Node-oracledb Initialization](#otherinit).
+`libDir`            | This specifies the directory containing the Oracle Client libraries.  If `libDir` is not specified, the default library search mechanism is used.  If your client libraries are in a full Oracle Client or Oracle Database installation, such as Oracle Database "XE" Express Edition, then you must have previously set environment variables like `ORACLE_HOME` before calling `initOracleClient()`.  See [Locating the Oracle Client Libraries](#oracleclientloading).
+
+
+On Linux, ensure a `libclntsh.so` file exists.  On macOS ensure a
+`libclntsh.dylib` file exists.  Node-oracledb will not directly load
+`libclntsh.*.XX.1` files in `libDir`.  Note other libraries used by `libclntsh*`
+are also required.
+
+On Linux, using `libDir` is only useful for forcing `initOracleClient()` to
+immediately load the Oracle Client libraries because those libraries still need
+to be in the operating system search path, such as from running `ldconfig` or
+set in the environment variable `LD_LIBRARY_PATH`.
+
+#### <a name="odbshutdown"></a> 3.3.5 `oracledb.shutdown()`
+
+##### Prototype
+
+Callback:
+```
+shutdown([Object connAttr, [Number shutdownMode, ] ] function(Error error) {});
+```
+
+Promise:
+```
+promise = shutdown([Object connAttr [, Number shutdownMode]]);
+
+```
+
+##### Description
+
+This is the simplified form of [`connection.shutdown()`](#conshutdown) used for
+shutting down a database instance.  It accepts connection credentials and shuts
+the database instance completely down.
+
+Internally it creates, and closes, a standalone connection using the
+[`oracledb.SYSOPER`](#oracledbconstantsprivilege) privilege.
+
+See [Database Start Up and Shut Down](#startupshutdown).
+
+This method was added in node-oracledb 5.0.
+
+##### <a name="odbshutdownattrs"></a> 3.3.5.1 Parameters
+
+###### <a name="odbshutdownattrsconn"></a> 3.3.5.1.1 `connAttr`
+
+```
+Object connAttr
+```
+
+Connection credentials similar to [`oracledb.getConnection()`
+credentials](#getconnectiondbattrsconnattrs).  The properties `user`,
+`password`, `connectString`, `connectionString`, and `externalAuth` may be
+specified.
+
+###### <a name="odbshutdownattrsmode"></a> 3.3.5.1.2 `shutdownMode`
+
+```
+Number shutdownMode
+```
+
+One of the constants
+[`oracledb.SHUTDOWN_MODE_ABORT`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_DEFAULT`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_IMMEDIATE`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_TRANSACTIONAL`](#oracledbconstantsshutdown), or
+[`oracledb.SHUTDOWN_MODE_TRANSACTIONAL_LOCAL`](#oracledbconstantsshutdown).
+
+The default mode is [`oracledb.SHUTDOWN_MODE_DEFAULT`](#oracledbconstantsshutdown).
+
+##### <a name="odbshutdowncallback"></a> 3.3.5.2 `shutdown()`: Callback Function
+
+##### Parameters
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error*               | If `shutdown()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="odbstartup"></a> 3.3.6 `oracledb.startup()`
+
+##### Prototype
+
+Callback:
+```
+startup([Object connAttrs, [Object options, ] ] function(Error error) {});
+```
+
+Promise:
+```
+promise = startup([Object connAttrs [, Object options ]]);
+```
+
+##### Description
+
+This is the simplified form of [`connection.startup()`](#constartup) used for
+starting a database instance up.  It accepts connection credentials and starts
+the database instance completely.
+
+As part of the start up process, a standalone connection using the
+[`oracledb.SYSOPER`](#oracledbconstantsprivilege) privilege is internally
+created and closed.
+
+See [Database Start Up and Shut Down](#startupshutdown).
+
+This method was added in node-oracledb 5.0.
+
+##### <a name="odbstartupattrs"></a> 3.3.6.1 Parameters
+
+###### <a name="odbstartupattrsconn"></a> 3.3.6.1.1 `connAttr`
+
+```
+Object connAttr
+```
+
+Connection credentials similar to [`oracledb.getConnection()`
+credentials](#getconnectiondbattrsconnattrs).  The properties `username`,
+`password`, `connectString`, `connectionString`, and `externalAuth` may be
+specified.
+
+###### <a name="odbstartupattrsoptions"></a> 3.3.6.1.2 `options`
+
+```
+Object options
+```
+
+The optional `options` object can contain one or more of these properties:
+
+Attribute          | Description
+-------------------|-----------------------------
+*Boolean force*    | Shuts down a running database using [`oracledb.SHUTDOWN_MODE_ABORT`](#oracledbconstantsshutdown) before restarting the database.  The database start up may require instance recovery.  The default for `force` is *false*.
+*Boolean restrict* | After the database is started, access is restricted to users who have the CREATE_SESSION and RESTRICTED SESSION privileges.  The default is *false*.
+*String pfile*     | The path and filename for a text file containing [Oracle Database initialization parameters][171].  If `pfile` is not set, then the database server-side parameter file is used.
+
+##### <a name="odbstartupcallback"></a> 3.3.6.2 `startup()`: Callback Function
+
+##### Parameters
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error*               | If `startup()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+
 ## <a name="connectionclass"></a> 4. Connection Class
 
 A *Connection* object is obtained by a *Pool* class
@@ -2512,14 +2882,15 @@ Number callTimeout
 ```
 
 Sets the maximum number of milliseconds that each underlying
-[round-trip](#roundtrips) between node-oracledb and Oracle Database
-may take.  Each node-oracledb method or operation may make zero or
-more round-trips.  The `callTimeout` value applies to each round-trip
-individually, not to the sum of all round-trips.  Time spent
-processing in node-oracledb before or after the completion of each
-round-trip is not counted.
+[round-trip](#roundtrips) between node-oracledb and Oracle Database may take on
+a connection.  Each node-oracledb method or operation may make zero or more
+round-trips.  The `callTimeout` value applies to each round-trip individually,
+not to the sum of all round-trips.  Time spent processing in node-oracledb
+before or after the completion of each round-trip is not counted.
 
-See [Database Call Timeouts](#dbcalltimeouts) for more information.
+See [Database Call Timeouts](#dbcalltimeouts) for more information about
+limiting statement execution time, and also about limiting the time taken to
+open new connections.
 
 This property was added in node-oracledb 3.0.  An exception will occur
 if node-oracledb is not using Oracle client library version 18.1 or
@@ -2610,10 +2981,10 @@ readonly Number oracleServerVersion
 This readonly property gives a numeric representation of the Oracle database version which is useful in comparisons.
 For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e`
 
-Note if you connect to Oracle Database 18, the version will only be
-accurate if node-oracledb is also using Oracle Database 18 client
-libraries.  Otherwise it will show the base release such as 1800000000
-instead of 1803000000.
+Note if you connect to Oracle Database 18, or later, then the version
+will only be accurate if node-oracledb is also using Oracle Database
+18, or later, client libraries.  Otherwise it will show the base
+release such as 1800000000 instead of 1803000000.
 
 This property was added in node-oracledb 1.3.
 
@@ -3227,11 +3598,6 @@ The `type` property can be set to one of:
 Strings and Buffers created for LOB columns will generally be limited
 by Node.js and V8 memory restrictions.
 
-Columns fetched from REF CURSORS are not mapped by `fetchInfo`
-settings in the `execute()` call.  Use the
-global [`fetchAsString`](#propdbfetchasstring)
-or [`fetchAsBuffer`](#propdbfetchasbuffer) settings instead.
-
 See [Query Result Type Mapping](#typemap) for more information on query type
 mapping.
 
@@ -3257,9 +3623,9 @@ Overrides [`oracledb.outFormat`](#propdboutformat).
 Number prefetchRows
 ```
 
-This attribute is no longer supported in node-oracledb version 2 and
-has no effect on applications.  Use
-[`fetchArraySize`](#propexecfetcharraysize) instead.
+Overrides [`oracledb.prefetchRows`](#propdbprefetchrows).
+
+This attribute is not used in node-oracledb version 2, 3 or 4.
 
 ###### <a name="propexecresultset"></a> 4.2.6.3.8 `resultSet`
 
@@ -3267,10 +3633,9 @@ has no effect on applications.  Use
 Boolean resultSet
 ```
 
-Determines whether query results and [Implicit
-Results](#implicitresults) should be returned as a
-[ResultSet](#resultsetclass) object or directly.  The default is
-*false*.
+Determines whether query results, [Implicit Results](#implicitresults), and
+[nested cursors](#nestedcursors) should be returned as
+[ResultSet](#resultsetclass) objects or directly.  The default is *false*.
 
 ##### <a name="executecallback"></a> 4.2.6.4 `execute()`: Callback Function
 
@@ -3324,9 +3689,12 @@ readonly Array metaData
 For `SELECT` statements, this contains an array of objects describing
 details of columns for the select list.  For non queries, this property is undefined.
 
-Each column's `name` is always given.  If the
-[`oracledb.extendedMetaData`](#propdbextendedmetadata) or `execute()` option
-[`extendedMetaData`](#propexecextendedmetadata) are *true* then
+Each column's `name` is always given.  If the column is a [nested
+cursor](#nestedcursors), then the column's object will also contain a `metaData`
+attribute which is an array describing each column in the nested query.
+
+If the [`oracledb.extendedMetaData`](#propdbextendedmetadata) or `execute()`
+option [`extendedMetaData`](#propexecextendedmetadata) are *true* then
 additional information is included.
 
 - `byteSize`: the database byte size.  This is only set for `oracledb.DB_TYPE_VARCHAR`, `oracledb.DB_TYPE_CHAR` and `oracledb.DB_TYPE_RAW` column types.
@@ -3354,6 +3722,11 @@ To get query metadata without fetching rows, use a
 [`resultset.metaData`](#rsmetadata) and then close the ResultSet.  Do
 not call `getRow()` or `getRows()`.  Preferably use a query clause
 such as `WHERE 1 = 0` so the database does minimal work.
+
+If you wish to change the case of `name`, then use a column alias in your query.
+For example, the query `select mycol from mytab` will return the `name` as
+'MYCOL'.  However, executing `select mycol as "myCol" from mytab` will return
+the name 'myCol'.
 
 See [Query Column Metadata](#querymeta) for examples.
 
@@ -3403,6 +3776,10 @@ The number of rows returned is limited by
 [`maxRows`](#propexecmaxrows) option in an `execute()` call.  If
 `maxRows` is 0, then the number of rows is limited by Node.js memory
 constraints.
+
+If the query contains [nested cursors](#nestedcursors), then each nested cursor
+is returned as an array of rows fetched from that cursor.  The number of rows
+returned for each cursor is limited by `maxRows`.
 
 ###### <a name="execrowsaffected"></a> 4.2.6.4.7 `rowsAffected`
 
@@ -3575,8 +3952,8 @@ for INSERT, UPDATE, DELETE or MERGE statements.
 
 The default value is *false*.
 
-This feature works when node-oracledb is using version 12, or later,
-of the Oracle client library.
+This feature works when node-oracledb is using version 12, or later, of the
+Oracle client library, and using Oracle Database 12, or later.
 
 ##### <a name="executemanycallback"></a> 4.2.7.4 `executeMany()`: Callback Function
 
@@ -3907,14 +4284,17 @@ the same as [`execute()`](#execute) except a callback is not used.
 Instead this function returns a stream used to fetch data.
 
 Each row is returned as a `data` event.  Query metadata is available via a
-`metadata` event.  The `end` event indicates the end of the query results. The
-connection must remain open until the stream is completely read and the `close`
-event received.  Alternatively the Stream [`destroy()`][92] method can be used
-to terminate a stream early.
+`metadata` event.  The `end` event indicates the end of the query results.
+After the `end` event has been received, the Stream [destroy()][92] function
+should be called to clean up resources properly.  Any further end-of-fetch
+logic, in particular the connection release, should be in the `close` event.
+Alternatively the Stream [`destroy()`][92] method can be used to terminate a
+stream early.
 
-For tuning, adjust the value of
-[`oracledb.fetchArraySize`](#propdbfetcharraysize) or the
-option [`fetchArraySize`](#propexecfetcharraysize) (see `execute()`).
+For tuning, adjust the values of the `connection.execute()` options
+[`fetchArraySize`](#propexecfetcharraysize) and
+[`prefetchRows`](#propexecprefetchrows), see [Tuning Fetch
+Performance](#rowfetching).
 
 See [Query Streaming](#streamingresults) for more information.
 
@@ -3961,7 +4341,73 @@ connection.
     ----------------------------|-------------
     *Error error* | If `rollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="consubscribe"></a> 4.2.16 `connection.subscribe()`
+#### <a name="conshutdown"></a> 4.2.16 `connection.shutdown()`
+
+##### Prototype
+
+Callback:
+```
+shutdown([Number shutdownMode,] function(Error error) {});
+```
+
+Promise:
+```
+promise = shutdown([Number shutdownMode])
+```
+
+##### Description
+
+Used to shut down a database instance.  This is the flexible version of
+[`oracledb.shutdown()`](#odbshutdown), allowing more control over behavior.
+
+This method must be called twice.  The first call blocks new connections.  SQL
+statements such as await `ALTER DATABASE CLOSE NORMAL` and `ALTER DATABASE
+DISMOUNT` can then be used to close and unmount the database instance.
+Alternatively database administration can be performed.  Finally, a second call
+`connection.shutdown(oracledb.SHUTDOWN_MODE_FINAL)` is required to fully close
+the database instance.
+
+If the initial `connection.shutdown()` [`shutdownMode`](#conshutdownmode) mode
+`oracledb.SHUTDOWN_MODE_ABORT` is used, then `connection.shutdown()` does not
+need to be called a second time.
+
+See [Database Start Up and Shut Down](#startupshutdown).
+
+This method was added in node-oracledb 5.0.
+
+##### <a name="conshutdownmode"></a> 4.2.16.1 `shutdown()`: shutdownMode
+
+```
+Number shutdownMode
+```
+
+One of the constants
+[`oracledb.SHUTDOWN_MODE_ABORT`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_DEFAULT`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_FINAL`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_IMMEDIATE`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_TRANSACTIONAL`](#oracledbconstantsshutdown), or
+[`oracledb.SHUTDOWN_MODE_TRANSACTIONAL_LOCAL`](#oracledbconstantsshutdown).
+
+If `oracledb.SHUTDOWN_MODE_ABORT` is used, then `connection.shutdown()` does not
+need to be called a second time.
+
+Only the second invocation of `connection.shutdown()` should use
+`oracledb.SHUTDOWN_MODE_FINAL`.
+
+##### <a name="conshutdowncallback"></a> 4.2.16.2 `shutdown()`: Callback Function
+
+```
+function(Error error)
+```
+
+##### Parameters
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error*               | If `shutdown()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="consubscribe"></a> 4.2.17 `connection.subscribe()`
 
 ##### Prototype
 
@@ -4005,7 +4451,7 @@ added in node-oracledb 4.0
 
 The [`result`](#consubscribecallback) callback parameter was added in node-oracledb 4.0.
 
-##### <a name="consubscribename"></a> 4.2.16.1 `subscribe()`: Name
+##### <a name="consubscribename"></a> 4.2.17.1 `subscribe()`: Name
 
 ```
 String name
@@ -4015,7 +4461,7 @@ For Continuous Query Notification this is an arbitrary name given to
 the subscription.  For Advanced Queuing notifications this must be the
 queue name.
 
-##### <a name="consubscribeoptions"></a> 4.2.16.2 `subscribe()`: Options
+##### <a name="consubscribeoptions"></a> 4.2.17.2 `subscribe()`: Options
 
 ```
 Object options
@@ -4023,7 +4469,7 @@ Object options
 
 The options that control the subscription.  The following properties can be set.
 
-###### <a name="consubscribeoptbinds"></a> 4.2.16.2.1 `binds`
+###### <a name="consubscribeoptbinds"></a> 4.2.17.2.1 `binds`
 
 ```
 Object binds
@@ -4032,7 +4478,7 @@ Object binds
 An array (bind by position) or object (bind by name) containing the
 bind values to use in the [`sql`](#consubscribeoptsql) property.
 
-###### <a name="consubscribeoptcallback"></a> 4.2.16.2.2 `callback`
+###### <a name="consubscribeoptcallback"></a> 4.2.17.2.2 `callback`
 
 ```
 function callback(Object message)
@@ -4052,7 +4498,7 @@ The `message` parameter in the notification callback is an object containing the
 - `queueName` - the name of the Advanced Queue.  Undefined for CQN.  This was added in node-oracledb 4.0.
 - `queries` - an array of objects specifying the queries which were affected by the Query Change notification. This is only defined if the `type` key is the value [`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription). It contains the following key:
     - `tables` - an array of objects identical to the objects created for Database Change Notification (see the `tables` property below).
-- `registered` - a boolean indicating whether the subscription is registered with the database.  Will be *false* if `type` is [`oracledb.SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription) or if the subscription was created with the [`qos`](#consubscribeoptqos) property set to [`oracledb.SUBSCR_QOS_DEREG_NFY`](#oracledbconstantssubscription).
+- `registered` - a Boolean indicating whether the subscription is registered with the database.  Will be *false* if `type` is [`oracledb.SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription) or if the subscription was created with the [`qos`](#consubscribeoptqos) property set to [`oracledb.SUBSCR_QOS_DEREG_NFY`](#oracledbconstantssubscription).
 - `tables` - an array of objects specifying the tables which were affected by the notification. This is only defined if `type` is [`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription). It contains the following properties:
     - `name` - the name of the table which was modified in some way.
     - `operation` - an integer mask composed of one or more values of the following constants:
@@ -4072,7 +4518,7 @@ The `message` parameter in the notification callback is an object containing the
     - [`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription) - object-level notifications are being used (Database Change Notification).
     - [`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription) - query-level notifications are being used (Continuous Query Notification).
 
-###### <a name="consubscribeoptclientinitiated"></a> 4.2.16.2.3 `clientInitiated`
+###### <a name="consubscribeoptclientinitiated"></a> 4.2.17.2.3 `clientInitiated`
 
 ```
 Boolean clientInitiated
@@ -4088,7 +4534,7 @@ The default is *false*.
 
 This property was added in node-oracledb 4.2.  It is available when Oracle Database and the Oracle client libraries are version 19.4 or higher.
 
-###### <a name="consubscribeoptgroupingclass"></a> 4.2.16.2.4 `groupingClass`
+###### <a name="consubscribeoptgroupingclass"></a> 4.2.17.2.4 `groupingClass`
 
 ```
 Number groupingClass
@@ -4099,7 +4545,7 @@ An integer mask which currently, if set, can only contain the value
 this value is set then notifications are grouped by time into a single
 notification.
 
-###### <a name="consubscribeoptgroupingtype"></a> 4.2.16.2.5 `groupingType`
+###### <a name="consubscribeoptgroupingtype"></a> 4.2.17.2.5 `groupingType`
 
 ```
 Number groupingType
@@ -4112,7 +4558,7 @@ or
 [`oracledb.SUBSCR_GROUPING_TYPE_LAST`](#oracledbconstantssubscription)
 indicating the last notification in the group should be sent.
 
-###### <a name="consubscribeoptgroupingvalue"></a> 4.2.16.2.6 `groupingValue`
+###### <a name="consubscribeoptgroupingvalue"></a> 4.2.17.2.6 `groupingValue`
 
 ```
 Number groupingValue
@@ -4124,7 +4570,7 @@ then `groupingValue` can be used to set the number of seconds over
 which notifications will be grouped together, invoking `callback`
 once.  If `groupingClass` is not set, then `groupingValue` is ignored.
 
-###### <a name="consubscribeoptipaddress"></a> 4.2.16.2.7 `ipAddress`
+###### <a name="consubscribeoptipaddress"></a> 4.2.17.2.7 `ipAddress`
 
 ```
 String ipAddress
@@ -4134,7 +4580,7 @@ A string containing an IPv4 or IPv6 address on which the subscription
 should listen to receive notifications.  If not specified, then the
 Oracle Client library will select an IP address.
 
-###### <a name="consubscribeoptnamespace"></a> 4.2.16.2.8 `namespace`
+###### <a name="consubscribeoptnamespace"></a> 4.2.17.2.8 `namespace`
 
 ```
 Number namespace
@@ -4149,7 +4595,7 @@ You can use `oracledb.SUBSCR_NAMESPACE_AQ` to get notifications that
 Advanced Queuing messages are available to be dequeued, see
 [Advanced Queuing Notifications](#aqnotifications).
 
-###### <a name="consubscribeoptoperations"></a> 4.2.16.2.9 `operations`
+###### <a name="consubscribeoptoperations"></a> 4.2.17.2.9 `operations`
 
 ```
 Number operations
@@ -4159,7 +4605,7 @@ An integer mask containing one or more of the operation type
 [`oracledb.CQN_OPCODE_*`](#oracledbconstantscqn) constants to indicate
 what types of database change should generation notifications.
 
-###### <a name="consubscribeoptport"></a> 4.2.16.2.10 `port`
+###### <a name="consubscribeoptport"></a> 4.2.17.2.10 `port`
 
 ```
 Number port
@@ -4169,7 +4615,7 @@ The port number on which the subscription should listen to receive
 notifications.  If not specified, then the Oracle Client library will
 select a port number.
 
-###### <a name="consubscribeoptqos"></a> 4.2.16.2.11 `qos`
+###### <a name="consubscribeoptqos"></a> 4.2.17.2.11 `qos`
 
 ```
 Number qos
@@ -4178,7 +4624,7 @@ Number qos
 An integer mask containing one or more of the quality of service
 [`oracledb.SUBSCR_QOS_*`](#oracledbconstantssubscription) constants.
 
-###### <a name="consubscribeoptsql"></a> 4.2.16.2.12 `sql`
+###### <a name="consubscribeoptsql"></a> 4.2.17.2.12 `sql`
 
 ```
 String sql
@@ -4186,13 +4632,13 @@ String sql
 
 The SQL query string to use for notifications.
 
-###### <a name="consubscribeopttimeout"></a> 4.2.16.2.13 `timeout`
+###### <a name="consubscribeopttimeout"></a> 4.2.17.2.13 `timeout`
 
 The number of seconds the subscription should remain active.  Once
 this length of time has been reached, the subscription is
 automatically unregistered and a deregistration notification is sent.
 
-##### <a name="consubscribecallback"></a> 4.2.16.3 `subscribe()`: Callback Function
+##### <a name="consubscribecallback"></a> 4.2.17.3 `subscribe()`: Callback Function
 
 ##### Prototype
 
@@ -4209,7 +4655,74 @@ Callback function parameter | Description
 
 The `result` callback parameter was added in node-oracledb 4.0.
 
-#### <a name="conunsubscribe"></a> 4.2.17 `connection.unsubscribe()`
+#### <a name="constartup"></a> 4.2.18 `connection.startup()`
+
+##### Prototype
+
+Callback:
+```
+startup ([Object options,] function(Error error) {});
+```
+
+Promise:
+```
+promise = startup([Object options]);
+```
+
+##### Description
+
+Used to start up a database instance. This is the flexible version of
+[`oracledb.startup()`](#odbstartup), allowing more control over behavior.
+
+The connection must be a standalone connection, not a pooled connection.
+
+This function starts the database in an unmounted state.  SQL statements such as
+`ALTER DATABASE MOUNT` and `ALTER DATABASE OPEN` can then be executed to
+completely open the database instance.  Database recovery commands could also be
+executed at this time.
+
+The connection used must have the [`privilege`](#getconnectiondbattrsprivilege) set to
+[`oracledb.SYSPRELIM`](#oracledbconstantsprivilege), along with either
+[`oracledb.SYSDBA`](#oracledbconstantsprivilege) or
+[`oracledb.SYSOPER`](#oracledbconstantsprivilege).  For example `oracledb.SYSDBA
+| oracledb.SYSPRELIM`.
+
+See [Database Start Up and Shut Down](#startupshutdown).
+
+This method was added in node-oracledb 5.0.
+
+##### <a name="constartupoptions"></a> 4.2.18.1 `startup()`: options
+
+##### <a name="constartupoptionsforce"></a> 4.2.18.1.1.1 `force`
+
+Shuts down a running database using
+[`oracledb.SHUTDOWN_MODE_ABORT`](#oracledbconstantsshutdown) before restarting
+the database instance.  The next database start up may require instance recovery.
+The default for `force` is *false*.
+
+##### <a name="constartupoptionspfile"></a> 4.2.18.1.1.2 `pfile`
+
+After the database is started, access is restricted to users who have the CREATE_SESSION and RESTRICTED SESSION privileges.  The default is *false*.
+
+##### <a name="constartupoptionsrestrict"></a> 4.2.18.1.1.3 `restrict`
+
+The path and filename for a local text file containing [Oracle Database initialization parameters][171].  If `pfile` is not set, then the database server-side parameter file is used.
+
+##### <a name="constartupcallback"></a> 4.2.18.2 `startup()`: Callback Function
+
+##### Prototype
+
+```
+function(Error error)
+```
+
+##### Parameters
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error*               | If `startup()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="conunsubscribe"></a> 4.2.19 `connection.unsubscribe()`
 
 ##### Prototype
 
@@ -4781,12 +5294,12 @@ The maximum value for `pieceSize` is limited to the value of UINT_MAX.
 readonly Number type
 ```
 
-This read-only attribute shows the type of Lob being used.  It will
-have the value of one of the constants
-[`oracledb.BLOB`](#oracledbconstantsnodbtype) or
-[`oracledb.CLOB`](#oracledbconstantsnodbtype).  The value is derived from the
-bind type when using LOB bind variables, or from the column type when
-a LOB is returned by a query.
+This read-only attribute shows the type of Lob being used.  It will have the
+value of one of the constants [`oracledb.BLOB`](#oracledbconstantsnodbtype),
+[`oracledb.CLOB`](#oracledbconstantsnodbtype) or
+[`oracledb.NCLOB`](#oracledbconstantsnodbtype).  The value is derived from the
+bind type when using LOB bind variables, or from the column type when a LOB is
+returned by a query.
 
 ### <a name="lobmethods"></a> 7.2 Lob Methods
 
@@ -5031,13 +5544,23 @@ poolMin.
 
 See [`oracledb.poolTimeout`](#propdbpooltimeout).
 
-#### <a name="proppoolqueuerequests"></a> 8.1.9 `pool.queueRequests`
+#### <a name="proppoolqueuemax"></a> 8.1.9 `pool.queueMax`
 
-This property was removed in node-oracledb 3.0.  Queuing is now always
-enabled.  See [Connection Pool Queue](#connpoolqueue) for more
-information.
+```
+readonly Number queueMax
+```
 
-#### <a name="proppoolqueueTimeout"></a> 8.1.10 `pool.queueTimeout`
+The maximum number of pending `pool.getConnection()` calls that can be
+[queued](#connpoolqueue).
+
+See [`oracledb.queueMax`](#propdbqueuemax).
+
+#### <a name="proppoolqueuerequests"></a> 8.1.10 `pool.queueRequests`
+
+This property was removed in node-oracledb 3.0.  See [Connection Pool
+Queue](#connpoolqueue) for more information.
+
+#### <a name="proppoolqueueTimeout"></a> 8.1.11 `pool.queueTimeout`
 
 ```
 readonly Number queueTimeout
@@ -5048,7 +5571,19 @@ the queue before the request is terminated.
 
 See [`oracledb.queueTimeout`](#propdbqueuetimeout).
 
-#### <a name="proppoolstatus"></a> 8.1.11 `pool.status`
+#### <a name="proppoolsessioncallback"></a> 8.1.12 `pool.sessionCallback`
+
+```
+readonly Function sessionCallback
+readonly String sessionCallback
+```
+
+The Node.js or PL/SQL function that is invoked by `pool.getConnection()`
+when the connection is brand new.
+
+See [Connection Tagging and Session State](#connpooltagging).
+
+#### <a name="proppoolstatus"></a> 8.1.13 `pool.status`
 
 ```
 readonly Number status
@@ -5061,7 +5596,7 @@ pool is open, being drained of in-use connections, or has been closed.
 
 See [Connection Pool Closing and Draining](#conpooldraining).
 
-#### <a name="proppoolstmtcachesize"></a> 8.1.12 `pool.stmtCacheSize`
+#### <a name="proppoolstmtcachesize"></a> 8.1.14 `pool.stmtCacheSize`
 
 ```
 readonly Number stmtCacheSize
@@ -5317,9 +5852,11 @@ column values, depending on the value of
 At the end of fetching, the ResultSet should be freed by calling
 [`close()`](#close).
 
-Performance of `getRow()` can be tuned by adjusting the value of
-[`oracledb.fetchArraySize`](#propdbfetcharraysize) or the `execute()`
-option [`fetchArraySize`](#propexecfetcharraysize).
+For tuning, adjust the values of the `connection.execute()` options
+[`fetchArraySize`](#propexecfetcharraysize) and
+[`prefetchRows`](#propexecprefetchrows), see [Tuning Fetch
+Performance](#rowfetching).
+
 
 #### <a name="getrows"></a> 9.2.3 `resultset.getRows()`
 
@@ -5341,10 +5878,10 @@ array of column values, depending on the value of [outFormat](#propdboutformat).
 
 At the end of fetching, the ResultSet should be freed by calling [`close()`](#close).
 
-Different values of `numRows` may alter the time needed for fetching
-data from Oracle Database.  The value of
-[`fetchArraySize`](#propdbfetcharraysize) has no effect on `getRows()`
-performance or internal buffering.
+Different values of `numRows` may alter the time needed for fetching data from
+Oracle Database.  The value of [`fetchArraySize`](#propexecfetcharraysize) has
+no effect on `getRows()` performance or internal buffering.  The
+[`prefetchRows`](#propexecprefetchrows) can have an effect.
 
 #### <a name="toquerystream"></a> 9.2.4 `resultset.toQueryStream()`
 
@@ -5368,10 +5905,11 @@ streamable, the alternative [`connection.queryStream()`](#querystream)
 method may be easier to use.
 
 To change the behavior of `toQueryStream()`, such as setting the
-[query output Format](#queryoutputformats) or the internal buffer size
+[query output Format](#queryoutputformats) or the internal buffer sizes
 for performance, adjust global attributes such as
-[`oracledb.outFormat`](#propdboutformat) and
-[`oracledb.fetchArraySize`](#propdbfetcharraysize) before calling
+[`oracledb.outFormat`](#propdboutformat),
+[`oracledb.fetchArraySize`](#propdbfetcharraysize), and
+[`oracledb.prefetchRows`](#propdbprefetchrows) before calling
 [`execute()`](#execute).
 
 See [Query Streaming](#streamingresults) for more information.
@@ -5688,7 +6226,32 @@ then only documents with the key "b" are matched. If
 `find().keys(["a","b"]).key("c")...` is used, then only the document
 with the key "c" is matched.
 
-###### <a name="sodaoperationclassfilter"></a> 10.2.4.1.1.1 `sodaOperation.filter()`
+###### <a name="sodaoperationclassfetcharraysize"></a> 10.2.4.1.1.1 `sodaOperation.fetchArraySize()`
+
+##### Prototype
+
+```
+fetchArraySize(Number size)
+```
+
+##### Description
+
+This property sets the size of an internal buffer used for fetching documents
+from a collection with the terminal SodaOperation methods
+[`getCursor()`](#sodaoperationclassgetcursor) and
+[`getDocuments()`](#sodaoperationclassgetdocuments).  Changing `size` may affect
+performance but does not affect how many documents are returned.
+
+If `fetchArraySize()` is not used, the size defaults to the current value of
+[`oracledb.fetchArraySize`](#propdbfetcharraysize).
+
+For node-oracledb examples, see [SODA Query-by-Example Searches for
+JSON Documents](#sodaqbesearches)
+
+This method was added in node-oracledb 5.0.  It requires Oracle Client 19.5 or
+later, and Oracle Database 18.3 or later.
+
+###### <a name="sodaoperationclassfilter"></a> 10.2.4.1.1.2 `sodaOperation.filter()`
 
 ##### Prototype
 
@@ -5710,7 +6273,7 @@ JSON Documents](#sodaqbesearches)
 
 This method was added in node-oracledb 3.0.
 
-###### <a name="sodaoperationclasskey"></a> 10.2.4.1.1.2 `sodaOperation.key()`
+###### <a name="sodaoperationclasskey"></a> 10.2.4.1.1.3 `sodaOperation.key()`
 
 ##### Prototype
 
@@ -5728,7 +6291,7 @@ SODA document keys are unique.
 
 This method was added in node-oracledb 3.0.
 
-###### <a name="sodaoperationclasskeys"></a> 10.2.4.1.1.3 `sodaOperation.keys()`
+###### <a name="sodaoperationclasskeys"></a> 10.2.4.1.1.4 `sodaOperation.keys()`
 
 ##### Prototype
 
@@ -5748,7 +6311,7 @@ A maximum of 1000 keys can be used.
 
 This method was added in node-oracledb 3.0.
 
-###### <a name="sodaoperationclasslimit"></a> 10.2.4.1.1.4 `sodaOperation.limit()`
+###### <a name="sodaoperationclasslimit"></a> 10.2.4.1.1.5 `sodaOperation.limit()`
 
 ##### Prototype
 
@@ -5770,7 +6333,7 @@ The `limit()` method cannot be used in conjunction with
 
 This method was added in node-oracledb 3.0.
 
-###### <a name="sodaoperationclassskip"></a> 10.2.4.1.1.5 `sodaOperation.skip()`
+###### <a name="sodaoperationclassskip"></a> 10.2.4.1.1.6 `sodaOperation.skip()`
 
 ##### Prototype
 
@@ -5793,7 +6356,7 @@ The `skip()` method only applies to SodaOperation read operations like
 
 This method was added in node-oracledb 3.0.
 
-###### <a name="sodaoperationclassversion"></a> 10.2.4.1.1.6 `sodaOperation.version()`
+###### <a name="sodaoperationclassversion"></a> 10.2.4.1.1.7 `sodaOperation.version()`
 
 ##### Prototype
 
@@ -6441,6 +7004,101 @@ Callback function parameter | Description
 *Error error* | If `insertOne()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
 *SodaDocument document* | A result [SodaDocument](#sodadocumentclass) that is useful for finding the system generated key and other metadata of the newly inserted document.  Note for performance reasons, `document` will not have document content and cannot itself be passed directly to SODA insert or replace methods.
 
+#### <a name="sodacollsave"></a> 10.2.10 `sodaCollection.save()`
+
+##### Prototype
+
+Callback:
+```
+save(SodaDocument newSodaDocument, function(Error error){});
+```
+
+Promise:
+```
+promise = save(SodaDocument newSodaDocument);
+```
+
+##### Description
+
+This method behaves like [`sodaCollection.insertOne()`](#sodacollinsertone) with
+the exception that if a document with the same key already exists, then it is
+updated instead.
+
+The collection must use [client-assigned keys](#sodaclientkeys) keys, which is
+why `save()` accepts only a [SodaDocument](#sodadocumentclass), unlike
+`insertOne()`.  If the collection is not configured with client-assigned keys,
+then the behavior is exactly the same as `sodaCollection.insertOne()`.
+
+This method was added in node-oracledb 5.0.  It requires Oracle Client 20 or
+later, and Oracle Database 18.3 or later.
+
+#### <a name="sodacollsaveandget"></a> 10.2.11 `sodaCollection.saveAndGet()`
+
+##### Prototype
+
+Callback
+```
+saveAndGet(SodaDocument newSodaDocument, function(Error error, SodaDocument document){});
+```
+
+Promise
+```
+promise = saveAndGet(SodaDocument newSodaDocument);
+```
+
+##### Description
+
+This method behaves like
+[`sodaCollection.insertOneAndGet()`](#sodacollinsertoneandget) with the
+exception that if a document with the same key already exists, then it is
+updated instead.
+
+The collection must use [client-assigned keys](#sodaclientkeys) keys, which is
+why `saveAndGet()` accepts only a [SodaDocument](#sodadocumentclass), unlike
+`insertOneAndGet()`.  If the collection is not configured with client-assigned
+keys, then the behavior is exactly the same as
+`sodaCollection.insertOneAndGet()`.
+
+This method was added in node-oracledb 5.0.  It requires Oracle Client 20 or
+later, and Oracle Database 18.3 or later.
+
+#### <a name="sodacolltruncate"></a> 10.2.12 `sodaCollection.truncate()`
+
+##### Prototype
+
+Callback
+```
+truncate(function(Error error) {});
+```
+
+Promise
+```
+promise = truncate();
+```
+
+##### Description
+
+This method truncates a collection, removing all documents.  The collection will
+not be deleted.
+
+This method was added in node-oracledb 5.0.  It requires Oracle Client 20 or
+later, and Oracle Database 18.3 or later.
+
+##### <a name="sodacolltruncatecb"></a> 10.2.12.1 `truncate()` Callback Function
+
+##### Prototype
+
+```
+function(Error error)
+```
+
+##### Parameters
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error* | If `truncate()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+
+
 ## <a name="sodadatabaseclass"></a> 11. SodaDatabase Class
 
 The SodaDatabase class is the top level object for node-oracledb SODA
@@ -6952,9 +7610,367 @@ This method was added in node-oracledb 3.0.
 
 ## <a name="usermanual"></a> NODE-ORACLEDB USER MANUAL
 
-## <a name="connectionhandling"></a> 14. Connection Handling
+## <a name="initnodeoracledb"></a> <a name="configureconnections"></a> 14. Initializing Node-oracledb
 
-Connections may be standalone or pooled.
+The node-oracledb add-on consists of JavaScript code that calls a binary module.
+This binary loads Oracle Client libraries which communicate over Oracle Net to
+an existing database.  Node-oracledb can be installed with `npm` but the Oracle
+Client libraries need to be installed separately.  See the [node-oracledb
+installation instructions][2].  Oracle Net is not a separate product: it is how
+the Oracle Client and Oracle Database communicate.
+
+![node-oracledb Architecture](./images/node-oracledb-architecture.png)
+
+### <a name="oracleclientloading"></a> 14.1 Locating the Oracle Client Libraries
+
+Node-oracledb dynamically loads the Oracle Client libraries using a search
+heuristic.  Only the first set of libraries found are loaded.  The libraries can
+be in an installation of Oracle Instant Client, in a full Oracle Client
+installation, or in an Oracle Database installation (if Node.js is running on
+the same machine as the database).  The versions of Oracle Client and Oracle
+Database do not have to be the same.  For certified configurations see Oracle
+Support's [Doc ID 207303.1][187] and see the [node-installation
+instructions][2].
+
+Node-oracledb looks for the Oracle Client libraries as follows:
+
+- On Windows:
+
+    - In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
+      call to [`oracledb.initOracleClient()`](#odbinitoracleclient).  This
+      directory should contain the libraries from an unzipped Instant Client
+      'Basic' or 'Basic Light' package.  If you pass the library directory from
+      a full client or database installation, such as Oracle Database "XE"
+      Express Edition, then you will need to have previously set your
+      environment to use that software installation otherwise files such as
+      message files will not be located.  If the Oracle Client libraries cannot
+      be loaded from `libDir`, then an error is thrown.
+
+    - If `libDir` was not specified, then Oracle Client libraries are looked for
+      in the directory where the `oracledb*.node` binary is.  For example in
+      `node_modules\oracledb\build\Release`.  This directory should contain the
+      libraries from an unzipped Instant Client 'Basic' or 'Basic Light'
+      package.  If the libraries are not found, no error is thrown and the
+      search continues, see next bullet point.
+
+    - In the directories on the system library search path, e.g. the `PATH`
+      environment variable.  If the Oracle Client libraries cannot be loaded,
+      then an error is thrown.
+
+- On macOS:
+
+    - In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
+      call to [`oracledb.initOracleClient()`](#odbinitoracleclient).  This
+      directory should contain the libraries from an unzipped Instant Client
+      'Basic' or 'Basic Light' package.  If the Oracle Client libraries cannot
+      be loaded from `libDir`, then an error is thrown.
+
+    - If `libDir` was not specified, then Oracle Client libraries are looked for
+      in the directory where the `oracledb*.node` binary is.  For example in
+      `node_modules/oracledb/build/Release`.  This directory should contain the
+      libraries from an unzipped Instant Client 'Basic' or 'Basic Light'
+      package.  For example, use `ln -s ~/instantclient_19_3/libclntsh.dylib
+      node_modules/oracledb/build/Release/`.  If the libraries are not found, no
+      error is thrown and the search continues, see next bullet point.
+
+    - In the library search path such as set in `DYLD_LIBRARY_PATH` (note this
+      variable does not propagate to sub-shells) or in `/usr/local/lib`.  If the
+      Oracle Client libraries cannot be loaded, then an error is thrown.
+
+- On Linux and related platforms:
+
+    - In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
+      call to [`oracledb.initOracleClient()`](#odbinitoracleclient).  Note on
+      Linux this is only useful to force immediate loading of the libraries
+      because the libraries must also be in the system library search path,
+      i.e. configured with `ldconfig` or set in `LD_LIBRARY_PATH`.  This
+      directory should contain the libraries from an unzipped Instant Client
+      'Basic' or 'Basic Light' package.  If you pass the library directory from
+      a full client or database installation, such as Oracle Database "XE"
+      Express Edition then you will need to have previously set the
+      `ORACLE_HOME` environment variable.  If the Oracle Client libraries cannot
+      be loaded from `libDir`, then an error is thrown.
+
+    - If `libDir` was not specified, then Oracle Client libraries are looked for
+      in the operating system library search path, such as configured with
+      `ldconfig` or set in the environment variable `LD_LIBRARY_PATH`.  On some
+      UNIX platforms an OS specific equivalent, such as `LIBPATH` or
+      `SHLIB_PATH` is used instead of `LD_LIBRARY_PATH`.  If the libraries are
+      not found, no error is thrown and the search continues, see next bullet
+      point.
+
+    - In `$ORACLE_HOME/lib`.  Note the environment variable `ORACLE_HOME` should
+      only ever be set when you have a full database installation or full client
+      installation.  It should not be set if you are using Oracle Instant
+      Client.  The `ORACLE_HOME` variable, and other necessary variables, should
+      be set before starting Node.js.  See [Oracle Environment
+      Variables](#environmentvariables).  If the Oracle Client libraries cannot
+      be loaded, then an error is thrown.
+
+If you call `initOracleClient()` with a `libDir` attribute, the Oracle Client
+libraries are loaded immediately from that directory.  If you call
+`initOracleClient()` but do *not* set the `libDir` attribute, the Oracle Client
+libraries are loaded immediately using the search heuristic above.  If you do
+not call `initOracleClient()`, then the libraries are loaded using the search
+heuristic when the first node-oracledb function that depends on the libraries is
+called, for example when a connection pool is created.  If there is a problem
+loading the libraries, then an error is thrown.
+
+Make sure the Node.js process has directory and file access permissions for the
+Oracle Client libraries.  On Linux ensure a `libclntsh.so` file exists.  On
+macOS ensure a `libclntsh.dylib` file exists.  Node-oracledb will not directly
+load `libclntsh.*.XX.1` files in `libDir` or from the directory where the
+`oracledb*.node` binary is.  Note other libraries used by `libclntsh*` are also
+required.
+
+To trace the loading of Oracle Client libraries, the environment variable
+`DPI_DEBUG_LEVEL` can be set to 64 before starting Node.js.  For example, on
+Linux, you might use:
+
+```
+$ export DPI_DEBUG_LEVEL=64
+$ node myapp.js 2> log.txt
+```
+
+The `oracledb.initOracleClient()` method and searching of the directory where
+the `oracledb*.node` binary is located were added in node-oracledb 5.0.
+
+##### Using `initOracleClient()` to set the Oracle Client directory
+
+Applications can call the synchronous function
+[`oracledb.initOracleClient()`](#odbinitoracleclient) to specify the directory
+containing Oracle Instant Client libraries.  The Oracle Client Libraries are
+loaded when `initOracleClient()` is called.  For example, if the Oracle Instant
+Client Libraries are in `C:\oracle\instantclient_19_6` on Windows, then you can
+use:
+
+```javascript
+const oracledb = require('oracledb');
+try {
+  oracledb.initOracleClient({libDir: 'C:\oracle\instantclient_19_6'});
+} catch (err) {
+  console.error('Whoops!');
+  console.error(err);
+  process.exit(1);
+}
+```
+
+The `initOracleClient()` function should only be called once.
+
+If you set `libDir` on Linux and related platforms, you must still have
+configured the system library search path to include that directory before
+starting Node.js.
+
+On any operating system, if you set `libDir` to the library directory of a full
+database or full client installation, you will need to have previously set the
+Oracle environment, for example by setting the `ORACLE_HOME` environment
+variable.  Otherwise you will get errors like *ORA-1804*.  You should set this,
+and other Oracle environment variables, before starting Node.js, as shown in
+[Oracle Environment Variables](#environmentvariables).
+
+### <a name="tnsadmin"></a> 14.2 Optional Oracle Net Configuration
+
+Optional Oracle Net configuration files are read when node-oracledb
+is loaded.  These files affect connections and applications.  The common
+files are:
+
+Name | Description
+-----|------------
+`tnsnames.ora` | Contains net service names and Oracle Net options for databases that can be connected to, see [Net Service Names for Connection Strings](#tnsnames). This file is only needed for advanced configuration.  Not needed if connection strings use the [Easy Connect syntax](#easyconnect). The [Oracle Net documentation on `tnsnames.ora`][18] has more information.
+`sqlnet.ora` | A configuration file controlling the network transport behavior.  For example it can set call timeouts for [high availability](#connectionha), or be used to [encrypt network traffic](#securenetwork), or be used to configure logging and tracing.  The [Oracle Net documentation on `sqlnet.ora`][132] has more information.
+
+The files should be in a directory accessible to Node.js, not on the
+database server host.
+
+To make node-oracledb use the files you can set
+[`configDir`](#odbinitoracleclientattrsopts) in a call to
+[`oracledb.initOracleClient()`](#odbinitoracleclient).  For example, if the file
+`/etc/my-oracle-config/tnsnames.ora` should be used, then your code could be:
+
+```javascript
+const oracledb = require('oracledb');
+oracledb.initOracleClient({configDir: '/etc/my-oracle-config'});
+```
+
+This is equivalent to setting the environment variable [`TNS_ADMIN`][8] to
+`/etc/my-oracle-config`.
+
+If `initOracleClient()` is not called, or it is called but
+[`configDir`](#odbinitoracleclientattrsopts) is not set, then default
+directories are searched for the configuration files.  They include:
+
+- `$TNS_ADMIN`
+- `/opt/oracle/instantclient_19_6/network/admin` if Instant Client is in `/opt/oracle/instantclient_19_6`.
+- `/usr/lib/oracle/19.6/client64/lib/network/admin` if Oracle 19.6 Instant Client RPMs are used on Linux.
+- `$ORACLE_HOME/network/admin` if node-oracledb is using libraries from the database installation.
+
+A wallet configuration file `cwallet.sso` for secure connection can be located
+with, or separately from, the `tnsnames.ora` and `sqlnet.ora` files.  It should
+be securely stored.  The `sqlnet.ora` file's `WALLET_LOCATION` path should be
+set to the directory containing `cwallet.sso`.  For Oracle Autonomous Database
+use of wallets, see [Connecting to Oracle Autonomous Database](#connectionadb).
+
+Note the [Easy Connect Plus](#easyconnect) syntax can set many common
+configuration options without needing `tnsnames.ora` or `sqlnet.ora` files.
+
+The section [Connections and High Availability](#connectionha) has some
+discussion about Oracle Net configuration.
+
+### <a name="oraaccess"></a> 14.3 Optional Oracle Client Configuration
+
+If the Oracle Client Libraries used by node-oracledb are version 12, or later,
+then an optional [`oraaccess.xml`][63] file can be used to configure some
+behaviors of those libraries, such as statement caching and prefetching.  This
+can be useful if the application cannot be altered.  The file is read when
+node-oracledb starts.  The file is read from the same directory as the [Optional
+Oracle Net Configuration](#tnsadmin) files.
+
+The following `oraaccess.xml` file sets the Oracle client
+['prefetch'][79] value to 1000 rows.  This value affects every SQL
+query in the application:
+
+```
+<?xml version="1.0"?>
+ <oraaccess xmlns="http://xmlns.oracle.com/oci/oraaccess"
+  xmlns:oci="http://xmlns.oracle.com/oci/oraaccess"
+  schemaLocation="http://xmlns.oracle.com/oci/oraaccess
+  http://xmlns.oracle.com/oci/oraaccess.xsd">
+  <default_parameters>
+    <prefetch>
+      <rows>1000</rows>
+    </prefetch>
+  </default_parameters>
+</oraaccess>
+```
+
+Prefetching is a tuning feature, see [Tuning Fetch Performance](#rowfetching).
+
+The `oraaccess.xml` file has other uses including:
+
+- Changing the value of [Fast Application Notification (FAN)](#connectionfan) events which affects notifications and [Runtime Load Balancing (RLB)](#connectionrlb).
+- Configuring [Client Result Caching][66] parameters
+- Turning on [Client Statement Cache Auto-tuning][67]
+
+Refer to the [`oraaccess.xml` documentation][63] for more information.
+
+### <a name="environmentvariables"></a> 14.4 Oracle Environment Variables
+
+Some common environment variables that influence node-oracledb are shown below.
+The variables that may be needed depend on how Node.js is installed, how you
+connect to the database, and what optional settings are desired.  It is
+recommended to set Oracle variables in the environment before invoking Node.js,
+however they may also be set in application code as long as they are set before
+node-oracledb is first used.  System environment variables like
+`LD_LIBRARY_PATH` must be set before Node.js starts.
+
+Name  |  Description
+------|-------------
+`LD_LIBRARY_PATH` | Used on Linux and some UNIX platforms.  Set this to the directory containing the Oracle Client libraries, for example `/opt/oracle/instantclient_19_6` or `$ORACLE_HOME/lib`.  The variable needs to be set in the environment before Node.js is invoked.  The variable is not needed if the libraries are located by an alternative method, such as from running `ldconfig`.  On some UNIX platforms an OS specific equivalent, such as `LIBPATH` or `SHLIB_PATH` is used instead of `LD_LIBRARY_PATH`.
+`PATH` | The library search path for Windows should include the location where `OCI.DLL` is found.  Not needed if you pass [`libDir`](#odbinitoracleclientattrsopts) when calling [`oracledb.initOracleClient()`](#odbinitoracleclient)
+`TNS_ADMIN` | The location of the optional [Oracle Net configuration files](#tnsadmin) and [Oracle Client configuration files](#oraaccess), including `tnsnames.ora`, `sqlnet.ora`, and `oraaccess.xml`, if they are not in a default location. The [`configDir`](#odbinitoracleclientattrsopts) value in a call to [`oracledb.initOracleClient()`](#odbinitoracleclient) overrides `TNS_ADMIN`.
+`ORA_SDTZ` | The default session time zone,  see [Fetching Dates and Timestamps](#datehandling).
+`ORA_TZFILE` | The name of the Oracle time zone file to use.  See the notes below.
+`ORACLE_HOME` | The directory containing the Oracle Database software. This directory must be accessible by the Node.js process. This variable should *not* be set if node-oracledb uses Oracle Instant Client.
+`NLS_LANG` | Determines the 'national language support' globalization options for node-oracledb.  If not set, a default value will be chosen by Oracle. Note that node-oracledb will always uses the AL32UTF8 character set.  See [Globalization and National Language Support (NLS)](#nls).
+`NLS_DATE_FORMAT`, `NLS_TIMESTAMP_FORMAT` | See [Fetching Numbers and Dates as String](#fetchasstringhandling).  The variables are ignored if `NLS_LANG` is not set.
+`NLS_NUMERIC_CHARACTERS` | See [Fetching Numbers and Dates as String](#fetchasstringhandling).  The variable is ignored if `NLS_LANG` is not
+
+##### Time Zone File
+
+The name of the Oracle time zone file to use can be set in `ORA_TZFILE`.
+
+If node-oracledb is using Oracle Client libraries from an Oracle Database or
+full Oracle Client software installation, and you want to use a non-default time
+zone file, then set `ORA_TZFILE` to the file name with a directory prefix, for
+example: `export ORA_TZFILE=/opt/oracle/myconfig/timezone_31.dat`.
+
+Oracle Instant Client includes a small and big time zone file, for example
+`timezone_32.dat` and `timezlrg_32.dat`.  The versions can be shown by running
+the utility `genezi -v` located in the Instant Client directory.  The small file
+contains only the most commonly used time zones.  By default the larger
+`timezlrg_n.dat` file is used.  If you want to use the smaller `timezone_n.dat`
+file, then set the `ORA_TZFILE` environment variable to the name of the file
+without any directory prefix, for example `export ORA_TZFILE=timezone_32.dat`.
+With Oracle Instant Client 12.2 or later, you can also use an external time zone
+file.  Create a subdirectory `oracore/zoneinfo` under the Instant Client
+directory, and move the file into it.  Then set `ORA_TZFILE` to the file name,
+without any directory prefix.  The `genezi -v` utility will show the time zone
+file in use.
+
+The Oracle Database documentation contains more information about time zone
+files, see [Choosing a Time Zone File][184].
+
+##### Scripts for the Default Environment in a Database Installation
+
+If you are using Linux, and node-oracledb is being run on the same
+computer as the database, you can set required Oracle environment
+variables, such as `ORACLE_HOME` and `LD_LIBRARY_PATH` in your shell
+by executing:
+
+```
+source /usr/local/bin/oraenv
+```
+
+Or, if you are using [Oracle Database XE 11.2][130], by executing:
+
+```
+source /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh
+```
+
+Make sure the Node.js process has directory and file access
+permissions for the Oracle libraries and other files.  Typically the
+home directory of the Oracle software owner will need permissions
+relaxed.
+
+### <a name="otherinit"></a> 14.5 Other Node-oracledb Initialization
+
+The [`oracledb.initOracleClient()`](#odbinitoracleclient) function allows
+[`driverName`](#odbinitoracleclientattrsopts) and
+[`errorUrl`](#odbinitoracleclientattrsopts) attributes to be set.  These are
+useful for applications whose end-users are not aware node-oracledb is being
+used.  An example of setting the attributes is:
+
+```javascript
+const oracledb = require('oracledb');
+oracledb.initOracleClient({
+  driverName: 'My Great App : 3.1.4'
+  errorUrl: 'https://example.com/MyInstallInstructions.html',
+});
+```
+
+The `driverName` value will be shown in Oracle Database views like
+`V$SESSION_CONNECT_INFO`.  The convention for `driverName` is to separate the
+product name from the product version by a colon and single space characters.
+If this attribute is not specified, then the value "node-oracledb : *version*"
+is used, see [Add-on Name](#drivernameview).
+
+The `errorUrl` string will be shown in the exception raised if the Oracle Client
+libraries cannot be loaded.  This allows applications that use node-oracledb to
+refer users to application-specific installation instructions.  If this
+attribute is not set, then the [node-oracledb installation instructions][2] URL
+is used.
+
+## <a name="connectionhandling"></a> 15. Connection Handling
+
+Connections between node-oracledb and Oracle Database are used for executing
+[SQL](#sqlexecution), [PL/SQL](#plsqlexecution), and for [SODA](#sodaoverview).
+
+There are two types of connection:
+
+- Standalone connections: These are useful when the application maintains a
+  single user session to a database.
+
+- Pooled connections: Connection pooling is important for performance when
+  applications frequently connect and disconnect from the database.  Oracle high
+  availability features in the pool implementation mean that small pools can
+  also be useful for applications that want a few connections available for
+  infrequent use.
+
+Many connection behaviors can be controlled by node-oracledb options.  Other
+settings can be configured in [Oracle Net files](#tnsadmin) or in [connection
+strings](#easyconnect).  These include [limiting the amount of
+time](#dbcalltimeouts) that opening a connection can take, or enabling [network
+encryption](#securenetwork).
 
 ##### Standalone Connections
 
@@ -7046,126 +8062,7 @@ run();
 
 See [Connection Pooling](#connpooling) for more information.
 
-### <a name="configureconnections"></a> 14.1 Configuring Connections and Node-oracledb
-
-Connections to Oracle Database are influenced by optional Oracle
-environment variables and configuration files.
-
-#### <a name="environmentvariables"></a> 14.1.1 Oracle Environment Variables
-
-Some Oracle environment variables that can influence node-oracledb include:
-
-Name  |  Description
-------|-------------
-`LD_LIBRARY_PATH` | Used on Linux and some UNIX platforms.  Set this to include the Oracle libraries, for example `$ORACLE_HOME/lib` or `/opt/oracle/instantclient_19_3`. Not needed if the libraries are located by an alternative method, such as from running `ldconfig`. On other UNIX platforms you will need to set the OS specific equivalent, such as `LIBPATH` or `SHLIB_PATH`.
-`ORACLE_HOME` | The directory containing the Oracle Database software. This directory must be accessible by the Node.js process. This variable should *not* be set if node-oracledb uses Oracle Instant Client.
-`NLS_DATE_FORMAT`, `NLS_TIMESTAMP_FORMAT` | See [Fetching Numbers and Dates as String](#fetchasstringhandling).  The variables are ignored if `NLS_LANG` is not set.
-`NLS_LANG` | Determines the globalization options for node-oracledb.  If not set, a default value will be chosen by Oracle. Note that node-oracledb will always uses the AL32UTF8 character set.  See [Globalization and National Language Support (NLS)](#nls).
-`NLS_NUMERIC_CHARACTERS` | See [Fetching Numbers and Dates as String](#fetchasstringhandling).  The variable is ignored if `NLS_LANG` is not
-`TNS_ADMIN` | The location of the optional [Oracle Net configuration files](#tnsadmin) and [Oracle Client configuration files](#oraaccess), including `tnsnames.ora`, `sqlnet.ora`, and `oraaccess.xml`, if they are not in a default location.
-
-It is recommended to set Oracle variables in the environment before invoking
-Node.js, however they may also be set in application code as long as they are
-set before node-oracledb is first used.  System environment variables like
-`LD_LIBRARY_PATH` must be set before Node.js starts.
-
-If you are using Linux and node-oracledb is being run on the same
-computer as the database, you can set required Oracle environment
-variables, such as `ORACLE_HOME` and `LD_LIBRARY_PATH` in your shell
-by executing:
-
-```
-source /usr/local/bin/oraenv
-```
-
-Or, if you are using [Oracle Database XE 11.2][130], by executing:
-
-```
-source /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh
-```
-
-Make sure the Node.js process has directory and file access
-permissions for the Oracle libraries and other files.  Typically the
-home directory of the Oracle software owner will need permissions
-relaxed.
-
-#### <a name="tnsadmin"></a> 14.1.2 Optional Oracle Net Configuration
-
-Optional Oracle Net configuration files are read when node-oracledb
-is loaded.  These files affect connections and applications.  The common
-files are:
-
-Name | Description
------|------------
-`tnsnames.ora` | Contains net service names and Oracle Net options for databases that can be connected to, see [Net Service Names for Connection Strings](#tnsnames). This file is only needed for advanced configuration.  Not needed if connection strings use the [Easy Connect syntax](#easyconnect). The [Oracle Net documentation on `tnsnames.ora`][18] has more information.
-`sqlnet.ora` | A configuration file controlling the network transport behavior.  For example it can set call timeouts for [high availability](#connectionha), or be used to [encrypt network traffic](#securenetwork), or be used to configure logging and tracing.  The [Oracle Net documentation on `sqlnet.ora`][132] has more information.
-
-The files should be in a directory accessible to Node.js, not the
-database server.  Default locations include:
-
-- `/opt/oracle/instantclient_19_3/network/admin` if Instant Client is in `/opt/oracle/instantclient_19_3`.
-- `/usr/lib/oracle/19.3/client64/lib/network/admin` if Oracle 19.3 Instant Client RPMs are used on Linux.
-- `$ORACLE_HOME/network/admin` if node-oracledb is using libraries from the database installation.
-
-Alternatively, the files can be put in another, accessible directory.
-Then set the environment variable [`TNS_ADMIN`][8] to that directory
-name.  For example, if the file `/etc/my-oracle-config/tnsnames.ora`
-is being used, set `TNS_ADMIN` to `/etc/my-oracle-config`.
-
-The wallet configuration file `cwallet.sso` can be located with, or separately
-from, the `tnsnames.ora` and `sqlnet.ora` files.  It should be securely stored.
-The `sqlnet.ora` file's `WALLET_LOCATION` path should be set to the directory
-containing `cwallet.sso`.  For Oracle Autonomous Database use of wallets, see
-[Connecting to Oracle Autonomous Database](#connectionadb).
-
-#### <a name="oraaccess"></a> 14.1.3. Optional Oracle Client Configuration
-
-If the Oracle Client Libraries used by node-oracledb are version 12,
-or later, then an optional [`oraaccess.xml`][63] file can be used to
-configure some behaviors of those libraries.  The file is read when
-node-oracledb starts.  The directory it should be in is determined
-using a similar heuristic to the [Optional Oracle Net
-Configuration](#tnsadmin) file directory.
-
-Refer to the [`oraaccess.xml` documentation][63] for more information.
-
-The following `oraaccess.xml` file sets the Oracle client
-['prefetch'][79] value to 100 rows.  This value affects every SQL
-query in the application:
-
-```
-<?xml version="1.0"?>
- <oraaccess xmlns="http://xmlns.oracle.com/oci/oraaccess"
-  xmlns:oci="http://xmlns.oracle.com/oci/oraaccess"
-  schemaLocation="http://xmlns.oracle.com/oci/oraaccess
-  http://xmlns.oracle.com/oci/oraaccess.xsd">
-  <default_parameters>
-    <prefetch>
-      <rows>100</rows>
-    </prefetch>
-  </default_parameters>
-</oraaccess>
-```
-
-Prefetching is the number of additional rows the underlying Oracle
-client library fetches whenever node-oracledb requests query data from
-the database.  Prefetching is a tuning option to maximize data
-transfer efficiency and minimize [round-trips](#roundtrips) to the
-database.  The prefetch size does not affect when, or how many, rows
-are returned by node-oracledb to the application.  The cache
-management is transparently handled by the Oracle client
-libraries. Note, standard node-oracledb fetch tuning is via
-[`fetchArraySize`](#propdbfetcharraysize), but changing the prefetch
-value can be useful in some cases such as when modifying the
-application is not feasible.
-
-The `oraaccess.xml` file has other uses including:
-
-- Changing the value of [Fast Application Notification (FAN)](#connectionfan) events which affects FAN notifications and [Runtime Load Balancing (RLB)](#connectionrlb).
-- Configuring [Client Result Caching][66] parameters
-- Turning on [Client Statement Cache Auto-tuning][67]
-
-### <a name="connectionstrings"></a> 14.2 Connection Strings
+### <a name="connectionstrings"></a> 15.1 Connection Strings
 
 The `connectString` property for [`oracledb.getConnection()`](#getconnectiondb)
 and [`oracledb.createPool()`](#createpool) can be one of:
@@ -7173,7 +8070,7 @@ and [`oracledb.createPool()`](#createpool) can be one of:
 - An [Easy Connect](#easyconnect) string
 - A [Connect Descriptor](#embedtns) string
 - A [Net Service Name](#tnsnames) from a local [`tnsnames.ora`](#tnsnames) file or external naming service
-- The SID of a local Oracle database instance
+- The SID of a local Oracle Database instance
 
 If a connect string is not specified, the empty string "" is used
 which indicates to connect to the local, default database.
@@ -7181,11 +8078,11 @@ which indicates to connect to the local, default database.
 The `connectionString` property is an alias for `connectString`.
 Use only one of the properties.
 
-#### <a name="easyconnect"></a> 14.2.1 Easy Connect Syntax for Connection Strings
+`#### <a name="easyconnect"></a> 15.1.1 Easy Connect Syntax for Connection Strings
 
 An Easy Connect string is often the simplest to use.  For example, to connect to
-the Oracle Database service ``orclpdb1`` that is running on the host
-``mydbmachine.example.com`` with the default Oracle Database port 1521, use:
+the Oracle Database service `orclpdb1` that is running on the host
+`mydbmachine.example.com` with the default Oracle Database port 1521, use:
 
 ```
 const oracledb = require('oracledb');
@@ -7218,25 +8115,33 @@ The Easy Connect syntax supports Oracle Database service names.  It cannot be
 used with the older System Identifiers (SID).
 
 The Easy Connect syntax has been extended in recent versions of Oracle Database
-client since its introduction in 10g.  Check the Easy Connect Naming method in
-[Oracle Net Service Administrator's Guide][17] for the syntax to use in your
+client since its introduction in Oracle 10g.  Check the Easy Connect Naming
+method in [Oracle Net Service Administrator's Guide][17] for the syntax in your
 version of the Oracle Client libraries.
 
 If you are using Oracle Client 19c, the latest [Easy Connect Plus][151] syntax
 allows the use of multiple hosts or ports, along with optional entries for the
 wallet location, the distinguished name of the database server, and even lets
-some network configuration options be set. This means that
-[`tnsnames.ora`](#tnsadmin) or [`sqlnet.ora`](#tnsadmin) files are not needed
-for some further common connection scenarios.  For example, if a firewall
-terminates idle connections every five minutes, you may decide it is more
-efficient to keep connections alive instead of having the overhead of
-recreation.  Your connection string could be
-`"mydbmachine.example.com/orclpdb1?expire_time=2"` to send packets every two
-minutes with the [`SQLNET.EXPIRE_TIME`][159] feature.  The general
-recommendation for `EXPIRE_TIME` is to use a value that is slightly less than
-half of the termination period.
+some network configuration options be set.  The white paper [Oracle Database 19c
+Easy Connect Plus Configurable Database Connection Syntax][177] discusses the
+syntax.  The Easy Connect Plus syntax means that [`tnsnames.ora`](#tnsadmin) or
+[`sqlnet.ora`](#tnsadmin) files are not needed for some further common
+connection scenarios.
 
-#### <a name="embedtns"></a> 14.2.2 Embedded Connect Descriptor Strings
+For example, if a firewall terminates idle connections every five minutes, you
+may decide it is more efficient to keep connections alive instead of having the
+overhead of recreation.  Your connection string could be
+`"mydbmachine.example.com/orclpdb1?expire_time=2"` to send packets every two
+minutes with the [`EXPIRE_TIME`][159] feature.  The general recommendation for
+`EXPIRE_TIME` is to use a value that is slightly less than half of the
+termination period.
+
+Another common use case for Easy Connect Plus is to limit the amount of time
+required to open a connection.  For example, to return an error after 15 seconds
+if a connection cannot be established to the database, use
+`"mydbmachine.example.com/orclpdb1?connect_timeout=15"`.
+
+#### <a name="embedtns"></a> 15.1.2 Embedded Connect Descriptor Strings
 
 Full Connect Descriptor strings can be embedded in applications:
 
@@ -7250,10 +8155,11 @@ const connection = await oracledb.getConnection(
 );
 ```
 
-#### <a name="tnsnames"></a> 14.2.3 Net Service Names for Connection Strings
+#### <a name="tnsnames"></a> 15.1.3 Net Service Names for Connection Strings
 
-Connect Descriptor strings are commonly stored in [`tnsnames.ora`](#tnsadmin)
-files and associated with a Net Service Name, for example:
+Connect Descriptor strings are commonly stored in optional [`tnsnames.ora
+configuration files`](#tnsadmin) and associated with a Net Service Name, for
+example:
 
 ```
 sales =
@@ -7300,7 +8206,7 @@ files can be located.
 For general information on `tnsnames.ora` files, see the [Oracle Net
 documentation on `tnsnames.ora`][18].
 
-#### <a name="notjdbc"></a> 14.2.4 JDBC and Oracle SQL Developer Connection Strings
+#### <a name="notjdbc"></a> 15.1.4 JDBC and Oracle SQL Developer Connection Strings
 
 The node-oracledb connection string syntax is different to Java JDBC and the
 common Oracle SQL Developer syntax.  If these JDBC connection strings reference
@@ -7377,59 +8283,110 @@ const connection = await oracledb.getConnection(
 );
 ```
 
-### <a name="numberofthreads"></a> 14.3 Connections, Threads, and Parallelism
+### <a name="numberofthreads"></a> 15.2 Connections, Threads, and Parallelism
 
-If you open more than four connections, such as via
-increasing [`poolMax`](#proppoolpoolmax), you should increase the
-number of worker threads available to node-oracledb.  The thread pool
-size should be at least equal to the maximum number of connections.
-If the application does database and non-database work concurrently,
-extra threads could also be required for optimal throughput.
+If you open more than four connections, such as via increasing
+[`poolMax`](#proppoolpoolmax), you should increase the number of worker threads
+available to node-oracledb.  A thread pool that is too small can cause
+connection requests to fail with the error *NJS-040: connection request
+timeout* or *NJS-076: connection request rejected*.
+
+The thread pool size should be equal to, or greater than, the maximum number of
+connections.  If the application does database and non-database work
+concurrently, then additional threads could also be required for optimal throughput.
 
 Increase the thread pool size by setting the environment variable
-[UV_THREADPOOL_SIZE][20] before starting Node.  For example, in a
-Linux terminal, the number of Node.js worker threads can be increased
-to 10 by using the following command:
+[UV_THREADPOOL_SIZE][20] before starting Node.js.  For example, on Linux your
+`package.json` may have a script like:
 
 ```
-$ UV_THREADPOOL_SIZE=10 node myapp.js
+"scripts": {
+    "start": "export UV_THREADPOOL_SIZE=10 && node index.js"
+  },
+. . .
 ```
 
-If the value is set inside the application with
-`process.env.UV_THREADPOOL_SIZE` ensure it is set prior to any
-asynchronous call that uses the thread pool otherwise the default size
-of 4 will still be used.
+Or, on Windows:
 
-Note the '[libuv][21]' library used by Node.js 12.5 and earlier limits
-the number of threads to 128.  In Node.js 12.6 onward the limit
-is 1024.  You should restrict the maximum number of connections opened
-in an application, i.e. `poolMax`, to a value lower than the
-`UV_THREADPOOL_SIZE` limit.  If you have multiple pools, make sure the
-sum of all `poolMax` values is no larger than `UV_THREADPOOL_SIZE`.
+```
+"scripts": {
+    "start": "SET UV_THREADPOOL_SIZE=10 && node index.js"
+  },
+. . .
+```
 
-Connections can handle one database operation at a time.  Node.js
-worker threads executing database statements on a connection will wait
-until [round-trips](#roundtrips) between node-oracledb and the
-database are complete.  When an application handles a sustained number
-of user requests, and database operations take some time to execute or
-the network is slow, then all available threads may be held in use.
-This prevents other connections from beginning work and stops Node.js
-from handling more user load.  Increasing the number of worker threads
-may improve throughput and prevent [deadlocks][22].
+With these, you can start your application with `npm start`.
 
-#### Parallelism on a Connection
+On non-Windows platforms, the value can also be set inside the application.  It
+must be set prior to any asynchronous Node.js call that uses the thread pool:
 
-Structure your code to avoid parallel operations on a single connection.  For
-example, do not use `Promise.all`.  Instead consider, for example, using a basic
-`for` loop and `async` to iterate through each action.  Also, instead of using
-`async.parallel` or `async.each()` which call each of their items in parallel,
-use `async.series` or `async.eachSeries()`.  Code will not run faster when
-parallel calls are used with a single connection since each connection can only
-ever execute one statement at a time.  Statements will still be executed
-sequentially.
+```
+// !! First file executed.  Non-Windows only !!
+
+process.env.UV_THREADPOOL_SIZE = 10
+
+// ... rest of code
+```
+
+If you set `UV_THREADPOOL_SIZE` too late, the setting will be ignored and the
+default thread pool size of 4 will still be used.  Note that
+[`pool._logStats()`](#connpoolmonitor) can only show the value of the variable,
+not the actual size of the thread pool.
+
+The '[libuv][21]' library used by Node.js 12.5 and earlier limits the number of
+threads to 128.  In Node.js 12.6 onward the limit is 1024.  You should restrict
+the maximum number of connections opened in an application,
+i.e. [`poolMax`](#createpoolpoolattrspoolmax), to a value lower than
+`UV_THREADPOOL_SIZE`.  If you have multiple pools, make sure the sum of all
+`poolMax` values is no larger than `UV_THREADPOOL_SIZE`.
+
+Node.js worker threads executing database statements on a connection will wait
+until [round-trips](#roundtrips) between node-oracledb and the database are
+complete.  When an application handles a sustained number of user requests, and
+database operations take some time to execute or the network is slow, then all
+available threads may be held in use.  This prevents other connections from
+beginning work and stops Node.js from handling more user load.  Increasing the
+number of worker threads may improve throughput and prevent [deadlocks][22].
+
+#### <a name="parallelism"></a> 15.2.1 Parallelism on a Connection
+
+Each connection can only execute one statement at a time.  Code will not run
+faster when parallel calls are used with a single connection since statements
+will still be executed sequentially and only one call will be able to use the
+connection at a time.  You may end up blocking many threads.
+
+Structure your code to avoid parallel operations on a single connection.  Do not
+use `Promise.all()` on a single connection.  Instead consider, for example,
+using a basic `for` loop and `async/await` to iterate through each action:
+
+```javascript
+async function myfunc() {
+  const stmts = [
+    `INSERT INTO ADRESSES (ADDRESS_ID, CITY) VALUES (94065, 'Redwood Shores')`,
+    `INSERT INTO EMPLOYEES (ADDRESS_ID, EMPLOYEE_NAME) VALUES (94065, 'Jones')`
+  ];
+
+  for (const s of stmts) {
+    await connection.execute(s);
+  }
+}
+```
+
+If you use ESlint for code validation, and it warns about [await in loops][179]
+for code that is using a single connection, then disable the `no-await-in-loop`
+rule for these cases.
+
+Instead of using `async.parallel()` or `async.each()` which call each of
+their items in parallel, use `async.series()` or `async.eachSeries()`.
+
+If you want to repeat a number of INSERT or UPDATE statements, then consider
+using [`connection.executeMany()`](#executemany).
+
+Using functions like `promise.all()` to fetch rows from [nested cursor result
+sets](#nestedcursors) can result in inconsistent data.
 
 When you use parallel calls on a single connection, queuing of each call is done
-in the C layer via a mutex.  However libuv is not aware that a connection can
+in the C layer via a mutex.  However [`libuv`][21] is not aware that a connection can
 only do one thing at a time - it only knows when it has background threads
 available and so it sends off the work to be done.  If your application runs
 operations in parallel on a connection, you could use more than one background
@@ -7438,19 +8395,21 @@ finish its "execute". Of course other users or transactions cannot use the
 threads at that time either.  When you use methods like `async.series` or
 `async.eachSeries()`, the queuing is instead done in the main JavaScript thread.
 
-### <a name="connpooling"></a> 14.4 Connection Pooling
+### <a name="connpooling"></a> 15.3 Connection Pooling
 
-When applications use a lot of connections for short periods, Oracle
-recommends using a connection pool for efficiency.  Each node-oracledb
-process can use one or more connection pools.  Each pool can contain
-one or more connections.  A pool can grow or shrink, as needed.  In
-addition to providing an immediately available set of connections,
-pools provide [dead connection detection](#connpoolpinging) and
-transparently handle Oracle Database [High Availability
-events](#connectionha).  This helps shield applications during planned
-maintenance and from unplanned failures.  Internally [Oracle Call
-Interface Session Pooling][6] is used, which provides many of these
-features.
+When applications use a lot of connections for short periods, Oracle recommends
+using a connection pool for efficiency.  Each connection in a pool should be
+used for a given unit of work, such as a transaction or a set of sequentially
+executed statements.  Statements should be [executed sequentially, not in
+parallel](#numberofthreads) on each connection.
+
+Each node-oracledb process can use one or more connection pools.  Each pool can
+contain zero or more connections.  In addition to providing an immediately
+available set of connections, pools provide [dead connection
+detection](#connpoolpinging) and transparently handle Oracle Database [High
+Availability events](#connectionha).  This helps shield applications during
+planned maintenance and from unplanned failures.  Internally [Oracle Call
+Interface Session Pooling][6] is used, which provides many of these features.
 
 Since pools provide Oracle high availability features, using one is
 also recommended if you have a long running application, particularly
@@ -7464,12 +8423,12 @@ pool, it should release all connections and terminate the connection
 pool by calling the [`pool.close()`](#poolclose) method.
 
 Connections from the pool are obtained with
-[`pool.getConnection()`](#getconnectionpool).  If all connections in a
-pool are being used, then subsequent `getConnection()` calls will be
-put in a [queue](#connpoolqueue).  Connections must be released with
-[`connection.close()`](#connectionclose) when no longer needed so they
-are available for reuse.  Make sure to release connections in all
-codes paths, include error handlers.
+[`pool.getConnection()`](#getconnectionpool).  If all connections in a pool are
+being used, then subsequent `getConnection()` calls will be put in a
+[queue](#connpoolqueue) until a connection is available.  Connections must be
+released with [`connection.close()`](#connectionclose) when no longer needed so
+they can be reused.  Make sure to release connections in all codes paths,
+include error handlers.
 
 When a connection is released back to its pool, any ongoing
 transaction will be [rolled back](#transactionmgt) however it will
@@ -7479,102 +8438,124 @@ State](#connpooltagging) for more information.
 
 Connections can also be [dropped completely from the pool](#connectionclose).
 
-A connection pool can be used like:
+A connection pool should be started during application initialization, for
+example before the web server is started:
 
 ```javascript
 const oracledb = require('oracledb');
 
 const mypw = ...  // set mypw to the hr schema password
 
-async function run() {
-  let pool;
-
+// Start the pool and webserver
+async function init() {
   try {
-    // Typically a pool is created only when the application starts
-    pool = await oracledb.createPool({
+
+    await oracledb.createPool({
       user          : "hr",
-      password      : mypw  // mypw contains the hr schema password
-      connectString : "localhost/XEPDB1"
+      password      : mypw,               // mypw contains the hr schema password
+      connectString : "localhost/XEPDB1",
+      poolIncrement : 0,
+      poolMax       : 4,
+      poolMin       : 4
     });
 
-    // Typically there would be multiple pool.getConnection() / connection.close() calls
-    // on a pool before the pool is closed.
-    let connection;
-    try {
-      connection = await pool.getConnection();
-      result = await connection.execute(`SELECT last_name FROM employees`);
-      console.log("Result is:", result);
-    } catch (err) {
-      throw (err);
-    } finally {
-      if (connection) {
-        try {
-          await connection.close(); // Put the connection back in the pool
-        } catch (err) {
-          throw (err);
-        }
-      }
-    }
+    const server = http.createServer();
+    server.on('error', (err) => {
+      console.log('HTTP server problem: ' + err);
+    });
+    server.on('request', (request, response) => {
+      handleRequest(request, response);
+    });
+    await server.listen(3000);
+
+    console.log("Server is running");
 
   } catch (err) {
-    console.error(err.message);
-  } finally {
-
-    // At the end of the application, the pool can be closed
-    await pool.close(0);   // close pool immediately
+    console.error("init() error: " + err.message);
   }
 }
-
-run();
 ```
 
-#### <a name="conpoolsizing"></a> 14.4.1 Connection Pool Sizing
+Each web request will invoke `handleRequest()`. In it, a connection can be
+obtained from the pool and used:
 
-The [`poolMax`](#propdbpoolmax), [`poolMin`](#propdbpoolmin) and
-[`poolPingInterval`](#propdbpoolpinginterval) attributes should be
-adjusted to handle the desired workload within the bounds of available
-resources in Node.js and the database.
+```javascript
+async function handleRequest(request, response) {
 
-Each connection should be used for a given unit of work, such as a
-transaction or a set of sequentially executed statements.  Statements
-should be [executed sequentially, not in parallel](#numberofthreads)
-on each connection.
+  response.writeHead(200, {"Content-Type": "text/html"});
+  response.write("<!DOCTYPE html><html><head><title>My App</title></head><body>");
 
-If you increase the size of the pool, you must [increase the number of
-threads](#numberofthreads) used by Node.js.
+  let connection;
+  try {
 
-The growth characteristics of a connection pool are determined by the Pool
-attributes [`poolIncrement`](#proppoolpoolincrement),
-[`poolMax`](#proppoolpoolmax), [`poolMin`](#proppoolpoolmin) and
-[`poolTimeout`](#proppoolpooltimeout).  Note that when [external
-authentication](#extauth) or [heterogeneous pools](#connpoolproxy) are used, the
-pool growth behavior is different.
+    connection = await oracledb.getConnection();
+    const result = await connection.execute(`SELECT * FROM locations`);
 
-Pool expansion happens when the following are all true: (i)
-[`pool.getConnection()`](#getconnectionpool) is called and (ii) all the
-currently established connections in the pool are "checked out" by previous
-`pool.getConnection()` calls and are in-use by the application, and (iii) the
-number of those connections is less than the pool's `poolMax` setting.
+    displayResults(response, result);  // do something with the results
 
-The Oracle Real-World Performance Group's general recommendation for client
-connection pools is to use a fixed sized.  The values of `poolMin` and `poolMax`
-should be the same (and `poolIncrement` equal to zero), and the firewall,
-[resource manager][101] or user profile [`IDLE_TIME`][100] should not expire
-idle sessions.  This avoids connection storms which can decrease throughput.
-See [Guideline for Preventing Connection Storms: Use Static Pools][23], which
-contains details about sizing of pools.  Having a fixed size will guarantee that
-the database can handle the upper pool size.  For example, if a pool needs to
-grow but the database resources are limited, then you may see errors such as
-*ORA-28547*.  With a fixed pool size, this class of error will occur when the
-pool is created, allowing you to change the size before users access the
-application.  With a dynamically growing pool, the error may occur much later
-after the pool has been in use for some time.
+  } catch (err) {
+    response.write("<p>Error: " + text + "</p>");
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();  // always release the connection back to the pool
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
 
-The Pool attribute [`stmtCacheSize`](#propconnstmtcachesize) can be
-used to set the statement cache size used by connections in the pool,
-see [Statement Caching](#stmtcache).
+  response.write("</body></html>");
+  response.end();
 
-#### <a name="conpooldraining"></a> 14.4.2 Connection Pool Closing and Draining
+}
+```
+
+See [webappawait.js][189] for a runnable example.
+
+#### <a name="conpoolsizing"></a> 15.3.1 Connection Pool Sizing
+
+The characteristics of a connection pool are determined by its attributes
+[`poolMin`](#proppoolpoolmin), [`poolMax`](#proppoolpoolmax),
+[`poolIncrement`](#proppoolpoolincrement), and
+[`poolTimeout`](#proppoolpooltimeout).  Pool expansion happens when the
+following are all true: (i) [`pool.getConnection()`](#getconnectionpool) is
+called and (ii) all the currently established connections in the pool are
+"checked out" by previous `pool.getConnection()` calls and are in-use by the
+application, and (iii) the number of those connections is less than the pool's
+`poolMax` setting.  Note that when [external authentication](#extauth) or
+[heterogeneous pools](#connpoolproxy) are used, the pool growth behavior is
+different.
+
+Importantly, if you increase the size of the pool, you must [increase the number
+of threads](#numberofthreads) used by Node.js before Node.js starts its
+threadpool.
+
+The Oracle Real-World Performance Group's recommendation is to use fixed size
+connection pools.  The values of `poolMin` and `poolMax` should be the same (and
+`poolIncrement` equal to zero).  This avoids connection storms which can
+decrease throughput.  See [Guideline for Preventing Connection Storms: Use
+Static Pools][23], which contains more details about sizing of pools.  Having a
+fixed size will guarantee that the database can handle the upper pool size.  For
+example, if a pool needs to grow but the database resources are limited, then
+`pool.getConnection()` may return errors such as *ORA-28547*.  With a fixed pool
+size, this class of error will occur when the pool is created, allowing you to
+change the size before users access the application.  With a dynamically growing
+pool, the error may occur much later after the pool has been in use for some
+time.
+
+The Real-World Performance Group also recommends keeping pool sizes small, as
+this may perform better than larger pools.  Use
+[`pool._logStats()`](#connpoolmonitor) to monitor pool usage.  The pool
+attributes should be adjusted to handle the desired workload within the bounds
+of available resources in Node.js and the database.
+
+Make sure any firewall, [resource manager][101] or user profile
+[`IDLE_TIME`][100] does not expire idle connections, since this will require
+connections be recreated, which will impact performance and scalability.  See
+[Preventing Premature Connection Closing](#connectionpremclose).
+
+#### <a name="conpooldraining"></a> 15.3.2 Connection Pool Closing and Draining
 
 Closing a connection pool allows database resources to be freed.  If
 Node.js is killed without [`pool.close()`](#poolclose) being called,
@@ -7645,7 +8626,7 @@ process
   .once('SIGINT',  closePoolAndExit);
 ```
 
-#### <a name="connpoolcache"></a> 14.4.3 Connection Pool Cache
+#### <a name="connpoolcache"></a> 15.3.3 Connection Pool Cache
 
 When pools are created, they can be given a named alias.  The alias
 can later be used to retrieve the related pool object for use.  This
@@ -7699,34 +8680,37 @@ and cache it using the pool alias 'default':
 ```javascript
 async function init() {
   try {
-    const pool = await oracledb.createPool({
+    await oracledb.createPool({
       user: 'hr',
       password: mypw,  // mypw contains the hr schema password
       connectString: 'localhost/XEPDB1'
     });
 
-    console.log(pool.poolAlias); // 'default'
     . . .
 }
 ```
 
 If you are using callbacks, note that `createPool()` is not synchronous.
 
-Once cached, the default pool can be retrieved using [oracledb.getPool()](#getpool) without
-passing the `poolAlias` parameter:
-
-```javascript
-const pool = oracledb.getPool();
-const connection = await pool.getConnection();
-```
-
-This specific sequence can be simplified by using the shortcut to
-[oracledb.getConnection()](#getconnectiondb) that returns a connection
-from a pool:
+Connections can be returned by using the shortcut to
+[oracledb.getConnection()](#getconnectiondb) that returns a connection from a
+pool:
 
 ```javascript
 const connection = await oracledb.getConnection();
-. . . // Use connection from the previously created 'default' pool and then release it
+
+. . . // Use connection from the previously created 'default' pool
+
+await connection.close();
+```
+
+The default pool can also be retrieved using [oracledb.getPool()](#getpool)
+without passing the `poolAlias` parameter:
+
+```javascript
+const pool = oracledb.getPool();
+console.log(pool.poolAlias); // 'default'
+const connection = await pool.getConnection();
 ```
 
 ##### Using Multiple Pools
@@ -7797,21 +8781,37 @@ const connection = await oracledb.getConnection({ poolAlias: 'default', tag: 'lo
 . . . // Use connection from the pool and then release it
 ```
 
-#### <a name="connpoolqueue"></a> 14.4.4 Connection Pool Queue
+#### <a name="connpoolqueue"></a> 15.3.4 Connection Pool Queue
 
-If the application has called `getConnection()` so that all
-connections in the pool are in use, and
-further [`pool.getConnection()`](#getconnectionpool) requests
-(or [`oracledb.getConnection()`](#getconnectiondb) calls that use a
-pool) are made, then each new request will be queued until an in-use
-connection is released back to the pool
-with [`connection.close()`](#connectionclose).  If `poolMax` has not
-been reached, then connections can be satisfied and are not queued.
+The connection pool queue allows applications to gracefully handle connection
+load spikes without having to set `poolMax` too large for general operation.
+Keeping `poolMax` small allows efficient use of resources.
+
+If the application has called `getConnection()` enough times so that all
+connections in the pool are in use, and further
+[`pool.getConnection()`](#getconnectionpool) calls (or
+[`oracledb.getConnection()`](#getconnectiondb) calls that use a pool) are made,
+then each new request will be queued until an in-use connection is released back
+to the pool with [`connection.close()`](#connectionclose).  If `poolMax` has not
+been reached, then connection requests can be satisfied and are not queued.
 
 The amount of time that a queued request will wait for a free
 connection can be configured with [queueTimeout](#propdbqueuetimeout).
 When connections are timed out of the queue, they will return the
 error *NJS-040: connection request timeout* to the application.
+
+If more than [`oracledb.queueMax`](#propdbqueuemax) pending connection requests
+are in the queue, then `pool.getConnection()` calls will immediately return an
+error *NJS-076: connection request rejected. Pool queue length queueMax reached*
+and will not be queued.  Use this to protect against connection request storms.
+It helps applications return errors early when many connections are requested
+concurrently.  This avoids connection requests blocking (for up to
+[`poolTimeout`](#propdbpooltimeout)) while waiting an available pooled
+connection.  It lets you see when the pool is too small.
+
+You may also experience *NJS-040* or *NJS-076* errors if your application is not
+correctly closing connections, or [UV_THREADPOOL_SIZE](#numberofthreads) is too
+small.
 
 Internally the queue is implemented in node-oracledb's JavaScript top
 level.  A queued connection request is dequeued and passed down to
@@ -7820,10 +8820,10 @@ connection is [released](#connectionclose), and the number of
 connections in use drops below the value of
 [`poolMax`](#proppoolpoolmax).
 
-#### <a name="connpoolmonitor"></a> 14.4.5 Connection Pool Monitoring and Throughput
+#### <a name="connpoolmonitor"></a> 15.3.5 Connection Pool Monitoring
 
-Connection pool usage should be monitored to choose the appropriate
-connection pool settings for your workload.
+Connection pool usage should be monitored to choose the appropriate connection
+pool settings for your workload.
 
 The Pool attributes [`connectionsInUse`](#proppoolconnectionsinuse)
 and [`connectionsOpen`](#proppoolconnectionsopen) provide basic
@@ -7856,8 +8856,8 @@ current statistics to the console by calling:
 pool._logStats();
 ```
 
-The current implementation of `_logStats()` displays pool queue
-statistics, pool settings, and related environment variables.
+The output contains pool queue statistics, pool settings, and related
+environment variables.
 
 ##### Statistics
 
@@ -7867,15 +8867,16 @@ Statistic                 | Description
 --------------------------|-------------
 total up time             | The number of milliseconds this pool has been running.
 total connection requests | Number of `getConnection()` requests made by the application to this pool.
-total requests enqueued   | Number of `getConnection()` requests that could not be immediately satisfied because every connection in this pool was already being used, and so they had to be queued waiting for the application to return an in-use connection to the pool.
+total requests enqueued   | Number of `getConnection()` requests that were added to this pool's queue (waiting for the application to return an in-use connection to the pool) because every connection in this pool was already being used.
 total requests dequeued   | Number of `getConnection()` requests that were dequeued when a connection in this pool became available for use.
-total requests failed     | Number of `getConnection()` requests that invoked the underlying C API `getConnection()` callback with an error state. Does not include queue request timeout errors.
-total request timeouts    | Number of queued `getConnection()` requests that were timed out after they had spent [queueTimeout](#propdbqueuetimeout) or longer in this pool's queue.
-max queue length          | Maximum number of `getConnection()` requests that were ever waiting at one time.
-sum of time in queue      | The sum of the time (milliseconds) that dequeued requests spent in the queue.
-min time in queue         | The minimum time (milliseconds) that any dequeued request spent in the queue.
-max time in queue         | The maximum time (milliseconds) that any dequeued request spent in the queue.
-avg time in queue         | The average time (milliseconds) that dequeued requests spent in the queue.
+total requests failed     | Number of `getConnection()` requests that invoked the underlying C API callback with an error state. Does not include queue size limit or queue timeout errors.
+total requests exceeding queueMax | Number of `getConnection()` requests rejected because the number of connections in the queue exceeded [`queueMax`](#propdbqueuemax).
+total request timeouts    | Number of queued `getConnection()` requests that were timed out after they had spent [queueTimeout](#propdbqueuetimeout) or longer in the pool queue.
+max queue length          | Maximum number of `getConnection()` requests that were ever waiting in the queue at one time.
+sum of time in queue      | The sum of the time (milliseconds) that dequeued requests spent in the pool queue.
+min time in queue         | The minimum time (milliseconds) that any dequeued request spent in the pool queue.
+max time in queue         | The maximum time (milliseconds) that any dequeued request spent in the pool queue.
+avg time in queue         | The average time (milliseconds) that dequeued requests spent in the pool queue.
 pool connections in use   | The number of connections from this pool that `getConnection()` returned successfully to the application and have not yet been released back to the pool.
 pool connections open     | The number of connections in this pool that have been established to the database.
 
@@ -7884,6 +8885,10 @@ times in the queue are calculated when requests are removed from the
 queue.  They do not take into account times for connection requests
 still waiting in the queue.
 
+The sum of 'total requests failed', 'total requests exceeding queueMax', and
+'total request timeouts' is the number of `pool.getConnection()` calls that
+failed.
+
 ##### Attribute Values
 
 The `_logStats()` method also shows attribute values of the pool:
@@ -7891,14 +8896,15 @@ The `_logStats()` method also shows attribute values of the pool:
 Attribute                                   |
 --------------------------------------------|
 [`poolAlias`](#createpoolpoolattrspoolalias)|
+[`queueMax`](#propdbqueuemax)           |
 [`queueTimeout`](#propdbqueuetimeout)       |
 [`poolMin`](#propdbpoolmin)                 |
 [`poolMax`](#propdbpoolmax)                 |
 [`poolIncrement`](#propdbpoolincrement)     |
 [`poolTimeout`](#propdbpooltimeout)         |
 [`poolPingInterval`](#propdbpoolpinginterval) |
-[`sessionCallback`](#createpoolpoolattrscallback)|
-[`stmtCacheSize`](#propdbstmtcachesize)     |
+[`sessionCallback`](#proppoolsessioncallback) |
+[`stmtCacheSize`](#proppoolstmtcachesize)     |
 
 ##### Pool Status
 
@@ -7916,11 +8922,11 @@ Environment Variable                                 | Description
 -----------------------------------------------------|-------------
 [`process.env.UV_THREADPOOL_SIZE`](#numberofthreads) | The number of worker threads for this process.  Note this shows the value of the variable, however if this variable was set after the thread pool starts, the thread pool will actually be the default size of 4.
 
-#### <a name="connpoolpinging"></a> 14.4.6 Connection Pool Pinging
+#### <a name="connpoolpinging"></a> 15.3.6 Connection Pool Pinging
 
 Connection pool pinging is a way for node-oracledb to identify
 unusable pooled connections and replace them with usable ones before
-returning them to the application.  Database connections may become
+returning them to the application.  Node-oracledb connections may become
 unusable due to network dropouts, database instance failures,
 exceeding user profile resource limits, or by explicit session closure
 from a DBA.  By default, idle connections in the pool are unaware of
@@ -7938,9 +8944,9 @@ seconds.  Possible values are:
 
 `poolPingInterval` Value     | Behavior of a Pool `getConnection()` Call
 ----------|------------------------------------------
-`n` < `0` | Never checks for connection aliveness
-`n` = `0` | Always checks for connection aliveness
-`n` > `0` | Checks aliveness if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
+`n` < `0` | Never checks for connection validity
+`n` = `0` | Always checks for connection validity
+`n` > `0` | Checks validity if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
 
 A ping has the cost of a [round-trip](#roundtrips) to the database so
 always pinging after each `getConnection()` is not recommended for
@@ -7978,10 +8984,11 @@ user resource profile [`IDLE_TIME`][100], or from an `ALTER SYSTEM
 KILL SESSION` command.  The explicit ping initiated by
 `poolPingInterval` will detect these problems.
 
-For ultimate scalability, use Oracle client 12.2 (or later) libraries,
-disable explicit pool pinging by setting `poolPingInterval` to a
-negative value, and make sure the firewall, database resource manager,
-or user profile is not expiring idle sessions.
+For ultimate scalability, use Oracle client 12.2 (or later) libraries, disable
+explicit pool pinging by setting `poolPingInterval` to a negative value, and
+make sure the firewall, database resource manager, or user profile is not
+expiring idle connections.  See [Preventing Premature Connection
+Closing](#connectionpremclose).
 
 In all cases, when a bad connection is released back to the pool with
 [connection.close()](#connectionclose), the connection is
@@ -7991,7 +8998,7 @@ database to be opened by some subsequent `getConnection()` call.
 Explicit pings can be performed at any time with
 [`connection.ping()`](#connectionping).
 
-#### <a name="connpooltagging"></a> 14.4.7 Connection Tagging and Session State
+#### <a name="connpooltagging"></a> 15.3.7 Connection Tagging and Session State
 
 Applications can set "session" state in each connection.  For all
 practical purposes, connections are synonymous with sessions.
@@ -8029,7 +9036,7 @@ There are three common scenarios for `sessionCallback`:
 - When using [DRCP](#drcp): use a [PL/SQL callback and
   tagging](#sessiontaggingplsql).
 
-###### <a name="sessionfixupnode"></a> 14.4.7.1 Node.js Session Callback
+###### <a name="sessionfixupnode"></a> 15.3.7.1 Node.js Session Callback
 
 This example sets two NLS settings in each pooled connection.  They
 are only set the very first time connections are established to the
@@ -8073,7 +9080,7 @@ See [`sessionfixup.js`][126] for a runnable example.
 Connection tagging and `sessionCallback` are new features in
 node-oracledb 3.1.
 
-###### <a name="sessionfixuptagging"></a> 14.4.7.2 Connection Tagging
+###### <a name="sessionfixuptagging"></a> 15.3.7.2 Connection Tagging
 
 Pooled connections can be tagged to record their session state by
 setting the property [`connection.tag`](#propconntag) to a string.  A
@@ -8119,7 +9126,7 @@ connection's actual properties in [`connection.tag`](#propconntag) to
 determine what exact state to set and what value to update
 `connection.tag` to.
 
-###### <a name="sessiontaggingnode"></a> 14.4.7.3 Node.js Session Tagging Callback
+###### <a name="sessiontaggingnode"></a> 15.3.7.3 Node.js Session Tagging Callback
 
 This example Node.js callback function ensures the connection contains
 valid settings for an application-specific "location=USA" property and
@@ -8174,7 +9181,7 @@ try {
 
 For runnable examples, see [`sessiontagging1.js`][127] and [`sessiontagging2.js`][128].
 
-###### <a name="sessiontaggingplsql"></a> 14.4.7.4 PL/SQL Session Tagging Callback
+###### <a name="sessiontaggingplsql"></a> 15.3.7.4 PL/SQL Session Tagging Callback
 
 When node-oracledb is using Oracle Client libraries 12.2 or later,
 `sessionCallback` can be a string containing the name of a PL/SQL
@@ -8299,7 +9306,7 @@ try {
 }
 ```
 
-#### <a name="connpoolproxy"></a> 14.4.8 Heterogeneous Connection Pools and Pool Proxy Authentication
+#### <a name="connpoolproxy"></a> 15.3.8 Heterogeneous Connection Pools and Pool Proxy Authentication
 
 By default, connection pools are 'homogeneous' meaning that all
 connections use the same database credentials.  However, if the pool
@@ -8433,7 +9440,7 @@ const connection = await pool.getConnection({ user : 'hr' });  // the session us
 await connection.close();
 ```
 
-### <a name="extauth"></a> 14.4 External Authentication
+### <a name="extauth"></a> 15.4 External Authentication
 
 External Authentication allows applications to use an external
 password store (such as an [Oracle Wallet][27]), the [Secure Socket
@@ -8521,7 +9528,7 @@ of open connections exceeds `poolMin` and connections are idle for
 more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
 number of open connections does not fall below `poolMin`.
 
-### <a name="drcp"></a> 14.5 Database Resident Connection Pooling (DRCP)
+### <a name="drcp"></a> 15.5 Database Resident Connection Pooling (DRCP)
 
 [Database Resident Connection Pooling][24] (DRCP) enables database
 resource sharing for applications that run in multiple client
@@ -8564,7 +9571,7 @@ monitor DRCP.  These are discussed in the Oracle documentation and in
 the Oracle white paper [PHP Scalability and High Availability][26].
 This paper also gives more detail on configuring DRCP.
 
-### <a name="privconn"></a> 14.6 Privileged Connections
+### <a name="privconn"></a> 15.6 Privileged Connections
 
 Database privileges such as `SYSDBA` can be obtained when using
 standalone connections.  Use one of the [Privileged Connection
@@ -8610,10 +9617,10 @@ of the operating system [`dba`][96] group allows `SYSDBA` connections.
 Administrative privileges can allow access to a database instance even
 when the database is not open.  Control of these privileges is totally
 outside of the database itself.  Care must be taken with
-authentication to ensure security.  See the [Database Administrators
+authentication to ensure security.  See the [Database Administrator's
 Guide][90] for information.
 
-### <a name="securenetwork"></a> 14.7 Securely Encrypting Network Traffic to Oracle Database
+### <a name="securenetwork"></a> 15.7 Securely Encrypting Network Traffic to Oracle Database
 
 Data transferred between Oracle Database and the Oracle client
 libraries used by node-oracledb can be [encrypted][30] so that
@@ -8680,7 +9687,7 @@ manual also contains information about other important security
 features that Oracle Database provides, such Transparent Data
 Encryption of data-at-rest in the database.
 
-### <a name="changingpassword"></a> 14.8 Changing Passwords and Connecting with an Expired Password
+### <a name="changingpassword"></a> 15.8 Changing Passwords and Connecting with an Expired Password
 
 #### Changing Passwords
 
@@ -8741,59 +9748,98 @@ const connection = await oracledb.getConnection(
   });
 ```
 
-### <a name="connectionha"></a> 14.9 Connections and High Availability
+### <a name="connectionha"></a> 15.9 Connections and High Availability
 
-For applications that need to be highly available, use the latest
-versions of Oracle Client and Database, and use the latest
-node-oracledb driver.
+To make highly available applications, use the latest versions of Oracle Client
+and Database.  Also use the latest node-oracledb driver.  These have improved
+APIs and improved implementations to make connections efficient and available.
+In addition, features like [Connection Pool Pinging](#connpoolpinging), [Fast
+Application Notification (FAN)](#connectionfan), [Application
+Continuity](#appcontinuity), and [Oracle Net Services][37] settings can all help
+high availability, often without the application being aware of any issue.
 
-The immediate usability of connections from a connection pool can be
-aided by tuning
-[`oracledb.poolPingInterval`](#propdbpoolpinginterval).  However note
-this can mask scalability-reducing issues such as firewalls
-terminating idle connections.
+For application high availability, use a [connection pool](#connpooling).  Pools
+provide immediately available connections.  Also the internal pool
+implementation supports a number of Oracle Database high availability features
+for planned and unplanned database instance downtime.  Use a [fixed size
+pool](#conpoolsizing) to avoid connection storms.
 
-You can configure your OS network settings and Oracle Net (which
-handles communication between node-oracledb and the database).
+Configuring TCP timeouts can help avoid application hangs if there is a network
+failure. [FAN](#connectionfan) is also useful.
 
-For Oracle Net configuration, a [`tnsnames.ora`](#tnsnames) file can be used to
-configure the database service settings such as for failover using Oracle RAC or
-a standby database.
+Oracle Net options may be useful for high availability and performance tuning.
+Connection establishment timeouts can be [set](#dbcalltimeouts).  The database's
+`listener.ora` file can have [`RATE_LIMIT`][133] and [`QUEUESIZE`][134]
+parameters that can help handle connection storms.  In the bigger picture,
+Oracle Net can be used to configure database service settings, such as for
+failover using [Oracle RAC][183] or a standby database.
 
-A [`SQLNET.EXPIRE_TIME`][159] or [`ENABLE=BROKEN`][36] option can be used to
-prevent firewalls from terminating connections.  They can also aid detection of
-a terminated remote database server.  With Oracle Client 19c, you can use
-`EXPIRE_TIME` in the [Easy Connect Plus](#easyconnect) connection string.
+[Database Resident Connection Pooling (DRCP)](#drcp) may be useful to reduce
+load on a database host.  It can also help reduce connection time when a number
+of Node.js processes are used to scale up an application.
 
-A [`sqlnet.ora`][136] file can be used to configure settings like
-[`SQLNET.OUTBOUND_CONNECT_TIMEOUT`][33], [`SQLNET.RECV_TIMEOUT`][34]
-and [`SQLNET.SEND_TIMEOUT`][35] to bound the amount of time the
-application will wait for responses from the database service.  Note
-that [`connection.callTimeout`](#dbcalltimeouts) is a newer
-alternative to the latter two options.  On systems that drop (or
-in-line) out-of-band breaks, you may want to add
-[`DISABLE_OOB=ON`][122] to your `sqlnet.ora` file.
+Finally, applications should always check for execution errors, and perform
+appropriate application-specific recovery.
 
-See [Optional Oracle Net Configuration](#tnsadmin) for where to place
-`tnsnames.ora` and `sqlnet.ora`.
+#### <a name="connectionpremclose"></a> 15.9.1 Preventing Premature Connection Closing
 
-Other [Oracle Net Services][37] options may also be useful for high
-availability and performance tuning.  For example the database's
-`listener.ora` file can have [`RATE_LIMIT`][133] and
-[`QUEUESIZE`][134] parameters that can help handle connection storms.
+When connections are idle, external timeouts may disconnect them from the
+database.  This can impact scalability, cause connection storms, and lead to
+application errors when invalid connections are attempted to be used.
 
-#### <a name="connectionfan"></a> 14.9.1 Fast Application Notification (FAN)
+There are three components to a node-oracledb connection:
+
+  1. The memory structure in node-oracledb that is returned by a
+     `getConnection()` call.  It may be stored in a connection pool.
+
+  2. The underlying network connection between the Oracle Client libraries and the database.
+
+  3. A server process, or thread, on the database host to handle database processing.
+
+Node-oracledb connections may become unusable due to network dropouts, database
+instance failures, exceeding user profile resource limits, or by explicit
+session closure of the server process from a DBA.  By default, idle connections
+in connection pools are unaware of these changes, so a `pool.getConnection()`
+call could successfully return a connection to the application that will not be
+usable.  An error would only occur when calling `connection.execute()`, or
+similar.
+
+Disable any firewall that is killing idle connections.  Also disable the
+database [resource manager][101] and any user resource profile
+[`IDLE_TIME`][100] setting so they do not terminate sessions.  These issues can
+be hidden by node-oracledb's automatic connection re-establishment features so
+it is recommended to use [AWR][62] to check the connection rate, and then fix
+underlying causes.
+
+With Oracle Client 19c, [`EXPIRE_TIME`][159] can be used in
+[`tnsnames.ora`](#tnsnames) connect descriptors to prevent firewalls from
+terminating idle connections and to adjust keepalive timeouts.  The general
+recommendation for `EXPIRE_TIME` is to use a value that is slightly less than
+half of the termination period.  In older versions of Oracle Client, a
+tnsnames.ora connect descriptor option [`ENABLE=BROKEN`][36] can be used instead
+of `EXPIRE_TIME`.  These settings can also aid detection of a terminated remote
+database server.  With Oracle Client 19c, the setting can be passed in [Easy
+Connect strings](#easyconnect), for example your connection string could be
+`"mydbmachine.example.com/orclpdb1?expire_time=2"` to send packets every two
+minutes.
+
+If the network or the database server processes used by node-oracledb
+connections cannot be prevented from becoming unusable, tune [Connection Pool
+Pinging](#connpoolpinging).  Another case where this internal pinging is helpful
+is during development, where a laptop may go offline for an extended time.
+
+#### <a name="connectionfan"></a> 15.9.2 Fast Application Notification (FAN)
+
+FAN support is useful for planned and unplanned outages.  It provides
+immediate notification to node-oracledb following outages related to
+the database, computers, and networks.  Without FAN, node-oracledb can
+hang until a TCP timeout occurs and a network error is returned, which might
+be several minutes.
 
 Users of [Oracle Database FAN][64] must connect to a FAN-enabled database
 service.  The application should have [`oracledb.events`](#propdbevents) is set
 to *true*.  This value can also be changed via [Oracle Client
 Configuration](#oraaccess).
-
-FAN support is useful for planned and unplanned outages.  It provides
-immediate notification to node-oracledb following outages related to
-the database, computers, and networks.  Without FAN, node-oracledb can
-hang until a TCP timeout occurs and an error is returned, which might
-be several minutes.
 
 FAN allows node-oracledb to provide high availability features without
 the application being aware of an outage.  Unused, idle connections in
@@ -8802,10 +9848,10 @@ a connection pool will be automatically cleaned up.  A future
 surviving database instance without the application being aware of any
 service disruption.
 
-To handle errors that affect active connections, you can add
-application logic to re-connect (this will connect to a surviving
-database instance) and replay application logic without having to
-return an error to the application user.
+To handle errors that affect active connections, you can add application logic
+to re-connect (this will connect to a surviving database instance) and replay
+application logic without having to return an error to the application user.
+Alternatively, use [Application Continuity](#appcontinuity).
 
 FAN benefits users of Oracle Database's clustering technology ([Oracle
 RAC][93]) because connections to surviving database instances can be
@@ -8813,10 +9859,10 @@ immediately made.  Users of Oracle's Data Guard with a broker will get
 FAN events generated when the standby database goes online.
 Standalone databases will send FAN events when the database restarts.
 
-For a more information on FAN see the [whitepaper on Fast Application
+For a more information on FAN see the [white paper on Fast Application
 Notification][97].
 
-#### <a name="connectionrlb"></a> 14.9.2 Runtime Load Balancing (RLB)
+#### <a name="connectionrlb"></a> 15.9.3 Runtime Load Balancing (RLB)
 
 [Oracle Database RAC][93] users with [Oracle Database (RLB)][65]
 advisory events configured should use node-oracledb [Connection
@@ -8827,21 +9873,56 @@ also be changed via [Oracle Client Configuration](#oraaccess).
 RLB allows optimal use of database resources by balancing database
 requests across RAC instances.
 
-For a more information on RLB, see the [whitepaper on Fast Application
+For a more information on RLB, see the [white paper on Fast Application
 Notification][97].
 
-#### <a name="dbcalltimeouts"></a> 14.9.3 Database Call Timeouts
+#### <a name="appcontinuity"></a> 15.9.4 Application Continuity
 
-When node-oracledb is using Oracle client libraries version 18, or
-later, a millisecond timeout for database calls can be set with
-[`connection.callTimeout`](#propconncalltimeout).
+Node-oracledb applications can take advantage of continuous availability with
+the Oracle Database features Application Continuity and Transparent Application
+Continuity.  These help make unplanned database service downtime transparent to
+applications.  See the white papers [Continuous Availability Application
+Continuity for the Oracle Database][178] and [Continuous Availability Best
+Practices for Applications Using Autonomous Database - Dedicated][190].
 
-The call timeout is on each individual [round-trip](#roundtrips)
-between node-oracledb and Oracle Database.  Each node-oracledb method
-or operation may require zero or more round-trips to Oracle Database.
-The `callTimeout` value applies to each round-trip individually, not
-to the sum of all round-trips.  Time spent processing in node-oracledb
-before or after the completion of each round-trip is not counted.
+When connected to an AC or TAC enabled service, node-oracledb automatically
+supports AC or TAC.
+
+#### <a name="dbcalltimeouts"></a> 15.9.5 Database Call Timeouts
+
+##### Limiting the time to open new connections
+
+To limit the amount of time taken to establish new connections to Oracle
+Database, use Oracle Net options like [`SQLNET.OUTBOUND_CONNECT_TIMEOUT`][33] in
+a [`sqlnet.ora`](#tnsadmin) file or [`CONNECT_TIMEOUT`][185] in a [connection
+string](#easyconnect).  When using a connection pool, these values affect the
+time taken to establish each connection stored in the pool.  The
+[`queueTimeout`](#propdbqueuetimeout) and [`queueMax`](#propdbqueuemax) settings
+control higher-level pool behavior.
+
+With Oracle Client 19c, timeouts can be passed in [Easy Connect
+strings](#easyconnect), for example to timeout after 15 seconds:
+`"mydbmachine.example.com/orclpdb1?connect_timeout=15"`
+
+##### Limiting the time taken to execute statements
+
+To limit the amount of time taken to execute statements on connections, use
+[`connection.callTimeout`](#propconncalltimeout) or Oracle Net settings like
+[`SQLNET.RECV_TIMEOUT`][34] and [`SQLNET.SEND_TIMEOUT`][35] in a `sqlnet.ora`
+file.  The necessary out-of-band break setting is automatically configured when
+using Oracle Client 19 and Oracle Database 19, or later.  With older Oracle
+versions on systems that drop (or in-line) out-of-band breaks, you may need to
+add [`DISABLE_OOB=ON`][122] to a `sqlnet.ora` file.
+
+The [`connection.callTimeout`](#propconncalltimeout) attribute is available when
+node-oracledb is using Oracle client libraries version 18, or later.  It is a
+millisecond timeout for executing database calls on a connection.  The
+`connection.callTimeout` period is on each individual [round-trip](#roundtrips)
+between node-oracledb and Oracle Database.  Each node-oracledb method or
+operation may require zero or more round-trips to Oracle Database.  The
+`callTimeout` value applies to each round-trip individually, not to the sum of
+all round-trips.  Time spent processing in node-oracledb before or after the
+completion of each round-trip is not counted.
 
 - If the time from the start of any one round-trip to the completion
   of that same round-trip exceeds `callTimeout` milliseconds, then the
@@ -8867,11 +9948,7 @@ complete successfully within the additional `callTimeout` period.  In
 this case an *ORA-3114* is returned and the connection will no longer
 be usable.  It should be released.
 
-Users of pre-Oracle 18c client libraries can set call timeouts by
-setting [`SQLNET.RECV_TIMEOUT`][34] and [`SQLNET.SEND_TIMEOUT`][35] in
-a [`sqlnet.ora` file](#tnsadmin).
-
-### <a name="connectionadb"></a> 14.10 Connecting to Oracle Autonomous Database
+### <a name="connectionadb"></a> 15.10 Connecting to Oracle Autonomous Database
 
 To enable connection to Oracle Autonomous Database in Oracle Cloud, a wallet
 needs be downloaded from the cloud GUI, and node-oracledb needs to be configured
@@ -8950,7 +10027,7 @@ for example:
 cjdb1_high = (description= (address=(https_proxy=myproxy.example.com)(https_proxy_port=80)(protocol=tcps)(port=1522)(host=  . . .
 ```
 
-### <a name="sharding"></a> 14.11 Connecting to Sharded Databases
+### <a name="sharding"></a> 15.11 Connecting to Sharded Databases
 
 Sharding can be used to horizontally partition data across independent
 databases.  A database table can be split so each shard contains a table with
@@ -9126,7 +10203,7 @@ const connection = await oracledb.getConnection(
   });
 ```
 
-## <a name="sqlexecution"></a> 15. SQL Execution
+## <a name="sqlexecution"></a> 16. SQL Execution
 
 A single SQL or PL/SQL statement may be executed using the
 *Connection* [`execute()`](#execute) method.  The callback style shown
@@ -9143,29 +10220,23 @@ Caching](#stmtcache) to make re-execution of statements efficient.
 This removes the need for a separate 'prepare' method to parse
 statements.
 
-For queries that return a large number of rows, the network traffic
-for fetching data from Oracle Database can be optimized by increasing
-[`oracledb.fetchArraySize`](#propdbfetcharraysize).  For queries that
-are known to return a small set of rows, reduce
-[`fetchArraySize`](#propdbfetcharraysize) to avoid unnecessary memory
-allocation.  The `execute()` option
-[`fetchArraySize`](#propexecfetcharraysize) can be used to override
-the global property for individual queries.
+Tune query performance by adjusting [`fetchArraySize`](#propexecfetcharraysize)
+and [`prefetchRows`](#propexecprefetchrows), see [Tuning Fetch
+Performance](#rowfetching).
 
 Connections can handle one database operation at a time.  Other
 database operations will block.  Structure your code to avoid starting
-parallel operations on a connection.  For example, instead of using
-`async.parallel` or `async.each()` which calls each of its items in
-parallel, use `async.series` or `async.eachSeries()`.  Also see
-[Connections and Number of Threads](#numberofthreads).
+parallel operations on a connection.  For example avoid using
+`async.parallel` or `Promise.all()` which call each of their items in parallel,
+see [Parallelism on a Connection](#parallelism).
 
 After all database calls on the connection complete, the application
 should use the [`connection.close()`](#connectionclose) call to
 release the connection.
 
-### <a name="select"></a> 15.1 SELECT Statements
+### <a name="select"></a> 16.1 SELECT Statements
 
-#### <a name="fetchingrows"></a> 15.1.1 Fetching Rows with Direct Fetches
+#### <a name="fetchingrows"></a> 16.1.1 Fetching Rows with Direct Fetches
 
 By default, queries are handled as 'direct fetches', meaning all
 results are returned in the callback [`result.rows`](#execrows)
@@ -9183,23 +10254,25 @@ const result = await connection.execute(
 console.log(result.rows);  // print all returned rows
 ```
 
-Any rows beyond the `maxRows` limit are not returned.  If `maxRows` is
-0 (the default), then the number of rows is only limited by Node.js
-memory.
+Any rows beyond the [`maxRows`](#propexecmaxrows) limit are not returned.  If
+`maxRows` is 0 (the default), then all rows will be returned - up to the limit
+by Node.js memory.
 
 To improve database efficiency, SQL queries should use a row limiting
 clause like [`OFFSET` / `FETCH`](#pagingdata) or equivalent. The
 `maxRows` property can be used to stop badly coded queries from
 returning unexpectedly large numbers of rows.
 
-Internally, rows are fetched from Oracle Database in batches.  The
-internal batch size is based on the lesser of `fetchArraySize` and
-`maxRows`.  Each batch is concatenated into the array returned to the
-application.
+Internally, rows are fetched from Oracle Database in batches to improve
+performance.  The internal batch size is based on the lesser of
+[`fetchArraySize`](#propexecfetcharraysize) and `maxRows`.  Row prefetching can
+also be adjusted for tuning, see [Tuning Fetch Performance](#rowfetching).  Each
+internally fetched batch is concatenated into the array eventually returned to
+the application.
 
 For queries expected to return a small number of rows, reduce
-`maxRows` or [`fetchArraySize`](#propexecfetcharraysize) to reduce
-internal memory overhead by node-oracledb.
+[`fetchArraySize`](#propexecfetcharraysize) to reduce internal memory overhead
+by node-oracledb.
 
 For direct fetches, JavaScript memory can become a limitation in two
 cases:
@@ -9208,13 +10281,14 @@ cases:
   JavaScript to hold in a single array.
 
 - the JavaScript heap can be exceeded, or become fragmented, due to
-  concatenation of the buffers of records fetched from the database.
-  To minimize this, use a `fetchArraySize` value determined by tuning.
+  concatenation of the successive buffers of records fetched from the database.
+  To minimize this, use `fetchArraySize` and `prefetchRows` values determined by
+  tuning.
 
 In both cases, use a [ResultSet](#resultsethandling) or [Query
 Stream](#streamingresults) instead of a direct fetch.
 
-#### <a name="resultsethandling"></a> 15.1.2 Fetching Rows with Result Sets
+#### <a name="resultsethandling"></a> 16.1.2 Fetching Rows with Result Sets
 
 When the number of query rows is relatively big, or cannot be
 predicted, it is recommended to use a [ResultSet](#resultsetclass)
@@ -9238,9 +10312,9 @@ continue getting more rows, then the ResultSet should be freed using
 [`close()`](#close).  The ResultSet should also be explicitly closed
 in the cases where no rows will be fetched from it.
 
-REF CURSORS returned from a PL/SQL block via an
-[`oracledb.CURSOR`](#oracledbconstants) OUT binds are also available
-as a ResultSet. See [REF CURSOR Bind Parameters](#refcursors).
+REF CURSORS returned from PL/SQL blocks via
+[`oracledb.CURSOR`](#oracledbconstants) OUT binds are also available as
+ResultSets.  See [REF CURSOR Bind Parameters](#refcursors).
 
 The format of each row will be an array or object, depending on the
 value of [outFormat](#propdboutformat).
@@ -9308,7 +10382,7 @@ do {
 await rs.close();
 ```
 
-#### <a name="streamingresults"></a> 15.1.3 Query Streaming
+#### <a name="streamingresults"></a> 16.1.3 Query Streaming
 
 Streaming of query results allows data to be piped to other streams,
 for example when dealing with HTTP responses.
@@ -9322,21 +10396,24 @@ ResultSets.
 
 With streaming, each row is returned as a `data` event.  Query metadata is
 available via a `metadata` event.  The `end` event indicates the end of the
-query results, however it is generally best to put end-of-fetch logic in the
-`close` event.
+query results.  After the `end` event has been received, the Stream
+[destroy()][92] function should be called to clean up resources properly.  Any
+further end-of-fetch logic, in particular the connection release, should be in
+the `close` event.
 
 Query results should be fetched to completion to avoid resource leaks, or the
-Stream [`destroy()`][92] method can be used to terminate a stream early.  When
+Stream [`destroy()`][92] function can be used to terminate a stream early.  When
 fetching, the connection must remain open until the stream is completely read
 and the `close` event received.  Any returned [Lob](#lobclass) objects should
 also be processed first.
 
 The query stream implementation is a wrapper over the [ResultSet
-Class](#resultsetclass).  In particular, successive calls to
-[getRow()](#getrow) are made internally.  Each row will generate a
-`data` event.  For tuning, adjust the value of
-[`oracledb.fetchArraySize`](#propdbfetcharraysize) or the `execute()`
-option [`fetchArraySize`](#propexecfetcharraysize).
+Class](#resultsetclass).  In particular, successive calls to [getRow()](#getrow)
+are made internally.  Each row will generate a `data` event.  For tuning, adjust
+the values of the `connection.querystream()` options
+[`fetchArraySize`](#propexecfetcharraysize) and
+[`prefetchRows`](#propexecprefetchrows), see [Tuning Fetch
+Performance](#rowfetching).
 
 An example of streaming query results is:
 
@@ -9353,6 +10430,7 @@ stream.on('data', function (data) {
 
 stream.on('end', function () {
   // all data has been fetched...
+  stream.destroy();  // the stream should be closed when it has been finished
 });
 
 stream.on('close', function () {
@@ -9372,7 +10450,7 @@ See [selectstream.js][41] for a runnable example using
 The [REF CURSOR Bind Parameters](#refcursors) section shows using
 `toQueryStream()` to return a stream for a REF CURSOR.
 
-#### <a name="queryoutputformats"></a> 15.1.4 Query Output Formats
+#### <a name="queryoutputformats"></a> 16.1.4 Query Output Formats
 
 Query rows may be returned as an array of column values, or as
 JavaScript objects, depending on the values of
@@ -9438,7 +10516,145 @@ case-insensitive names.
 Prior to node-oracledb 4.0, the constants `oracledb.ARRAY` and `oracledb.OBJECT`
 where used.  These are now deprecated.
 
-#### <a name="querymeta"></a> 15.1.5 Query Column Metadata
+#### <a name="nestedcursors"></a> 16.1.5 Fetching Nested Cursors
+
+Support for queries containing [cursor expressions][176] that return nested
+cursors was added in node-oracledb 5.0.
+
+Each nested cursor in query results is returned as a sub-array of rows in
+[`result.rows`](#execrows).  For example with:
+
+```javascript
+const sql = `SELECT department_name,
+                    CURSOR(SELECT salary, commission_pct
+                           FROM employees e
+                           WHERE e.department_id = d.department_id
+                           ORDER BY salary) as nc
+             FROM departments d
+             ORDER BY department_name`;
+
+const result = await connection.execute(sql);
+console.dir(result.rows, {depth: null});
+```
+
+Output will be:
+
+```
+[
+  [ 'Accounting', [ [ 8300, null ], [ 12008, null ] ] ],
+  [ 'Administration', [ [ 4400, null ] ] ],
+  [ 'Benefits', [] ],
+  [ 'Construction', [] ],
+  [ 'Contracting', [] ],
+  [ 'Control And Credit', [] ],
+  [ 'Corporate Tax', [] ],
+  [
+    'Executive',
+    [ [ 17000, null ], [ 17000, null ], [ 24000, null ] ]
+  ],
+  [
+    'Finance',
+    [
+      [ 6900, null ],
+      [ 7700, null ],
+      [ 7800, null ],
+      [ 8200, null ],
+      [ 9000, null ],
+      [ 12008, null ]
+    ]
+  ],
+  . . .
+```
+
+If [`oracledb.outFormat`](#propdboutformat) is `oracledb.OUT_FORMAT_OBJECT`,
+then each row in the sub-array is an object, for example with:
+
+```javascript
+result = await connection.execute(sql, [], {outFormat: oracledb.OUT_FORMAT_OBJECT});
+```
+
+Output will be:
+
+```
+[
+  {
+    DEPARTMENT_NAME: 'Accounting',
+    NC: [
+      { SALARY: 8300, COMMISSION_PCT: null },
+      { SALARY: 12008, COMMISSION_PCT: null }
+    ]
+  },
+  {
+    DEPARTMENT_NAME: 'Administration',
+    NC: [ { SALARY: 4400, COMMISSION_PCT: null } ]
+  },
+  . . .
+```
+
+The values of [`oracledb.maxRows`](#propdbmaxrows), and
+[`oracledb.fetchArraySize`](#propdbfetcharraysize) used when executing the
+top-level query also apply to each nested cursor that is fetched.  The
+[`oracledb.fetchAsBuffer`](#propdbfetchasbuffer) and
+[`oracledb.fetchAsString`](#propdbfetchasstring) values are also used.
+
+The total number of cursors open is constrained by the [OPEN_CURSORS
+initialization parameter][174] of the database.  With the query above, where
+each row contains a single nested cursor, and when
+[`fetchArraySize`](#propdbfetcharraysize) is 100 (the default), then 101 cursors
+will be open at a time.  One cursor is required for the top level query and one
+cursor is required for each of the 100 rows internally fetched at a time.
+
+If the `connection.execute()` option [`resultSet`](#propexecresultset) is set to
+*true*, or when using [`connection.queryStream()`](#querystream), then each
+nested cursor in a fetched row is returned as a [ResultSet](#resultsetclass)
+object.  You can recursively call [`resultSet.getRow()`](#getrow),
+[`resultSet.getRows()`](#getrows), or
+[`resultSet.toQueryStream()`](#toquerystream) on the ResultSet to fetch each
+nested cursor's data.  You should not concurrently fetch data from nested
+cursors in different data rows because this may give inconsistent results.
+
+For example:
+
+```javascript
+async function traverseResults(resultSet) {
+  const fetchedRows = [];
+  while (true) {
+    const row = await resultSet.getRow();
+    if (!row)
+      break;
+    for (let i = 0; i < row.length; i++) {
+      if (row[i] instanceof oracledb.ResultSet) {
+        const rs = row[i];
+        row[i] = await traverseResults(rs); // replace a cursor with its expansion
+        await rs.close();
+      }
+    }
+    fetchedRows.push(row);
+  }
+  return fetchedRows;
+}
+
+const sql = `SELECT department_name,
+                    CURSOR(SELECT salary, commission_pct
+                           FROM employees e
+                           WHERE e.department_id = d.department_id
+                           ORDER BY salary) as nc
+             FROM departments d
+             ORDER BY department_name`;
+
+const result = await connection.execute(sql, [], { resultSet: true });
+
+const rows = await traverseResults(result.resultSet);
+await result.resultSet.close();
+
+console.dir(rows, {depth: null});
+```
+
+Output is the same as the previous non-resultSet example.
+
+Each ResultSet should be closed when it is no longer needed.
+
+#### <a name="querymeta"></a> 16.1.6 Query Column Metadata
 
 The column names of a query are returned in the `execute()` callback's
 [`result.metaData`](#execmetadata) attribute:
@@ -9451,7 +10667,7 @@ const result = await connection.execute(
   [110]  // bind value for :id
 );
 
-console.log(result.metaData);  // show the metadata
+console.dir(result.metaData, { depth: null });  // show the metadata
 ```
 
 When using a [ResultSet](#resultsetclass), metadata is also available
@@ -9487,7 +10703,7 @@ const result = await connection.execute(
   { extendedMetaData: true }
 );
 
-console.log(result.metaData);  // show the extended metadata
+console.dir(result.metaData, { depth: null });  // show the extended metadata
 ```
 
 The output is:
@@ -9511,7 +10727,7 @@ Description of the properties is given in the
 
 Also see [`connection.getStatementInfo()`](#getstmtinfo).
 
-#### <a name="typemap"></a> 15.1.6 Query Result Type Mapping
+#### <a name="typemap"></a> 16.1.7 Query Result Type Mapping
 
 Oracle number, date, character, ROWID, UROWID, LONG and LONG RAW column types
 are selected as Numbers, Dates, Strings, or Buffers.  BLOBs and CLOBs are
@@ -9530,12 +10746,12 @@ INTERVAL, BFILE and XMLType types.
 
 Details are in the following sections.
 
-##### <a name="stringhandling"></a> 15.1.6.1 Fetching CHAR, VARCHAR2, NCHAR and NVARCHAR
+##### <a name="stringhandling"></a> 16.1.7.1 Fetching CHAR, VARCHAR2, NCHAR and NVARCHAR
 
 Columns of database type CHAR, VARCHAR2, NCHAR and NVARCHAR are
 returned from queries as JavaScript strings.
 
-##### <a name="numberhandling"></a> 15.1.6.2 Fetching Numbers
+##### <a name="numberhandling"></a> 16.1.7.2 Fetching Numbers
 
 By default all numeric columns are mapped to JavaScript numbers.
 Node.js uses double floating point numbers as its native number type.
@@ -9569,7 +10785,7 @@ string format, and then use one of the available third-party
 JavaScript number libraries that handles large values and more
 precision.
 
-##### <a name="datehandling"></a> 15.1.6.3 Fetching Dates and Timestamps
+##### <a name="datehandling"></a> 16.1.7.3 Fetching Dates and Timestamps
 
 By default, date and timestamp columns are mapped to JavaScript Date
 objects.  Internally, DATE, TIMESTAMP, TIMESTAMP WITH LOCAL TIME ZONE,
@@ -9581,11 +10797,11 @@ Note that JavaScript Date has millisecond precision therefore
 timestamps will lose any sub-millisecond fractional part when fetched.
 
 To make applications more portable, it is recommended to always set the session
-time zone to a pre-determined value, such as UTC.  The session timezone should
-generally match the client system timezone, for example the `TZ` environment
-variable or the Windows timezone region.
+time zone to a pre-determined value, such as UTC.  The session time zone should
+generally match the client system time zone, for example the `TZ` environment
+variable or the Windows time zone region.
 
-You can find the current session timezone with:
+You can find the current session time zone with:
 
 ```sql
 SELECT sessiontimezone FROM DUAL;
@@ -9645,7 +10861,7 @@ For more information on time zones, see Oracle Support's [Timestamps & time
 zones - Frequently Asked Questions, Doc ID 340512.1][165].  Also see [Working
 with Dates Using the Node.js Driver][43].
 
-##### <a name="fetchasstringhandling"></a> 15.1.6.4 Fetching Numbers and Dates as String
+##### <a name="fetchasstringhandling"></a> 16.1.7.4 Fetching Numbers and Dates as String
 
 The global [`fetchAsString`](#propdbfetchasstring) property can be used to force
 all number or date columns (and [CLOB columns](#queryinglobs)) queried by an
@@ -9745,7 +10961,7 @@ $ export NLS_NUMERIC_CHARACTERS='.,'
 Note this environment variable is not used unless the `NLS_LANG`
 environment variable is also set.
 
-##### <a name="fetchlob"></a> 15.1.6.5 Fetching BLOB, CLOB and NCLOB
+##### <a name="fetchlob"></a> 16.1.7.5 Fetching BLOB, CLOB and NCLOB
 
 By default BLOB, CLOB and NCLOB columns are fetched into [Lob](#lobclass)
 instances.  For LOBs less than 1 GB in length it can be more efficient and
@@ -9755,7 +10971,7 @@ convenient to fetch them directly into Buffers or Strings by using the global
 [`fetchInfo`](#propexecfetchinfo) setting.  See the section [Working with CLOB,
 NCLOB and BLOB Data](#lobhandling).
 
-##### <a name="fetchlong"></a> 15.1.6.6 Fetching LONG and LONG RAW
+##### <a name="fetchlong"></a> 16.1.7.6 Fetching LONG and LONG RAW
 
 LONG columns in queries will be fetched as Strings.  LONG RAW columns
 will be fetched as Buffers.
@@ -9768,24 +10984,24 @@ the database.  The SQL function [`TO_LOB`][44] can be used to migrate
 data to LOB columns which can be streamed to node-oracledb, however
 `TO_LOB` cannot be used directly in a `SELECT`.
 
-##### <a name="fetchrowid"></a> 15.1.6.7 Fetching ROWID and UROWID
+##### <a name="fetchrowid"></a> 16.1.7.7 Fetching ROWID and UROWID
 
 Queries will return ROWID and UROWID columns as Strings.
 
-##### <a name="fetchxml"></a> 15.1.6.8 Fetching XMLType
+##### <a name="fetchxml"></a> 16.1.7.8 Fetching XMLType
 
 `XMLType` columns queried will returns as Strings.  They can also be
 handled as CLOBs, see [Working with XMLType](#xmltype).
 
-##### <a name="fetchraw"></a> 15.1.6.9 Fetching RAW
+##### <a name="fetchraw"></a> 16.1.7.9 Fetching RAW
 
 Queries will return RAW columns as Node.js Buffers.
 
-##### <a name="fetchobjects"></a> 15.1.6.10 Fetching Oracle Database Objects and Collections
+##### <a name="fetchobjects"></a> 16.1.7.10 Fetching Oracle Database Objects and Collections
 
 See [Oracle Database Objects and Collections](#objects).
 
-#### <a name="pagingdata"></a> 15.1.7 Limiting Rows and Creating Paged Datasets
+#### <a name="pagingdata"></a> 16.1.8 Limiting Rows and Creating Paged Datasets
 
 Query data is commonly broken into one or more sets:
 
@@ -9796,7 +11012,7 @@ Query data is commonly broken into one or more sets:
   or previous, set on demand.
 
 - For fetching of all data in consecutive small sets for batch processing.  This
-  happens because the number of records is too large for Python to handle at the
+  happens because the number of records is too large for Node.js to handle at the
   same time.
 
 The latter can be handled by [ResultSets](#resultsethandling) or
@@ -9821,7 +11037,9 @@ const result = await connection.execute(
    FROM employees
    ORDER BY last_name
    OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`,
-  {offset: myoffset, maxnumrows: mymaxnumrows});
+  { offset: myoffset, maxnumrows: mymaxnumrows },
+  { prefetchRows: mymaxnumrows + 1, fetchArraySize: mymaxnumrows }
+);
 ```
 
 A runnable example is in [rowlimit.js][84].
@@ -9882,7 +11100,7 @@ Refer to [On Top-n and Pagination Queries][85] in Oracle Magazine for
 details. Also review the videos [SQL for pagination queries - memory and
 performance][166] and [SQL for pagination queries - advanced options][167].
 
-#### <a name="autoincrement"></a> 15.1.8 Auto-Increment Columns
+#### <a name="autoincrement"></a> 16.1.9 Auto-Increment Columns
 
 From Oracle Database 12c you can create tables with auto-incremented
 values.  This is useful to generate unique primary keys for your data
@@ -9961,17 +11179,12 @@ const result = await connection.execute(
 console.log(result.outBinds.id);  // print the ID of the inserted row
 ```
 
-### <a name="cursors1000"></a> 15.2 Cursor Management
+### <a name="cursors1000"></a> 16.2 Cursor Management
 
-Developers starting out with Node have to get to grips with the
-'different' programming style of JavaScript that seems to cause
-methods to be called when least expected!  While you are still in the
-initial hacking-around-with-node-oracledb phase you may sometimes
-encounter the error *ORA-01000: maximum open cursors exceeded*.  A
-cursor is a "handle for the session-specific private SQL area that
-holds a parsed SQL statement and other processing information".
-
-Here are things to do when you see an *ORA-1000*:
+A cursor is a "handle for the session-specific private SQL area that holds a
+parsed SQL statement and other processing information".  If your application
+returns the error *ORA-1000: maximum open cursors exceeded* here are possible
+solutions:
 
 - Avoid having too many incompletely processed statements open at one
   time:
@@ -10016,7 +11229,7 @@ Here are things to do when you see an *ORA-1000*:
 
 - Set the database's [*open_cursors*][47] parameter appropriately.
   This parameter specifies the maximum number of cursors that each
-  "session" (i.e each node-oracle connection) can use.  When a
+  "session" (i.e each node-oracledb connection) can use.  When a
   connection exceeds the value, the *ORA-1000* error is thrown.
 
   Along with a cursor per entry in the connection's statement cache,
@@ -10024,18 +11237,17 @@ Here are things to do when you see an *ORA-1000*:
   ResultSets that have not been released (in neither situation are
   these yet cached), will also consume a cursor.  Make sure that
   *open_cursors* is large enough to accommodate the maximum open
-  cursors any connection may have.  The upper bound required is
-  *stmtCacheSize* + the maximum number of executing statements in a
+  cursors any connection may have.  The upper bound required is the sum of
+  *stmtCacheSize* and the maximum number of executing statements in a
   connection.
 
   Remember this is all per connection. Also cache management happens
   when statements are internally released.  The majority of your
   connections may use less than *open_cursors* cursors, but if one
   connection is at the limit and it then tries to execute a new
-  statement, that connection will get *ORA-1000: maximum open cursors
-  exceeded*.
+  statement, that connection will get *ORA-1000*.
 
-## <a name="plsqlexecution"></a> 16. PL/SQL Execution
+## <a name="plsqlexecution"></a> 17. PL/SQL Execution
 
 PL/SQL stored procedures, functions and anonymous blocks can be called
 from node-oracledb using [`execute()`](#execute).
@@ -10043,7 +11255,7 @@ from node-oracledb using [`execute()`](#execute).
 Note the error property of the callback is not set when PL/SQL
 "success with info" warnings such as compilation warnings occur.
 
-### <a name="plsqlproc"></a> 16.1 PL/SQL Stored Procedures
+### <a name="plsqlproc"></a> 17.1 PL/SQL Stored Procedures
 
 The PL/SQL procedure:
 
@@ -10080,7 +11292,7 @@ Binding is required for IN OUT and OUT parameters.  It is strongly
 recommended for IN parameters.  See [Bind Parameters for Prepared
 Statements](#bind).
 
-### <a name="plsqlfunc"></a> 16.2 PL/SQL Stored Functions
+### <a name="plsqlfunc"></a> 17.2 PL/SQL Stored Functions
 
 The PL/SQL function:
 
@@ -10116,7 +11328,7 @@ The output is:
 See [Bind Parameters for Prepared Statements](#bind) for information
 on binding.
 
-### <a name="plsqlanon"></a> 16.3 PL/SQL Anonymous PL/SQL Blocks
+### <a name="plsqlanon"></a> 17.3 PL/SQL Anonymous PL/SQL Blocks
 
 Anonymous PL/SQL blocks can be called from node-oracledb like:
 
@@ -10143,7 +11355,7 @@ The output is:
 See [Bind Parameters for Prepared Statements](#bind) for information
 on binding.
 
-### <a name="dbmsoutput"></a> 16.4 Using DBMS_OUTPUT
+### <a name="dbmsoutput"></a> 17.4 Using DBMS_OUTPUT
 
 The [DBMS_OUTPUT][48] package is the standard way to "print" output
 from PL/SQL.  The way DBMS_OUTPUT works is like a buffer.  Your
@@ -10222,7 +11434,7 @@ The query rows in this example are handled using a
 
 Remember to first enable output using `DBMS_OUTPUT.ENABLE(NULL)`.
 
-### <a name="ebr"></a> 16.5 Edition-Based Redefinition
+### <a name="ebr"></a> 17.5 Edition-Based Redefinition
 
 The [Edition-Based Redefinition][98] (EBR) feature of Oracle Database
 allows multiple versions of views, synonyms, PL/SQL objects and SQL
@@ -10357,7 +11569,7 @@ The output might be like:
 See the Database Development Guide chapter [Using Edition-Based
 Redefinition][98] for more information about EBR.
 
-### <a name="implicitresults"></a> 16.6 Implicit Results
+### <a name="implicitresults"></a> 17.6 Implicit Results
 
 Oracle Implicit Results allow queries in PL/SQL to be returned to
 Node.js without requiring REF CURSORS or bind variables.  Implicit
@@ -10439,7 +11651,7 @@ Implicit Result Set 2
 
 A runnable example is in [impres.js][138].
 
-## <a name="lobhandling"></a> 17. Working with CLOB, NCLOB and BLOB Data
+## <a name="lobhandling"></a> 18. Working with CLOB, NCLOB and BLOB Data
 
 Oracle Database uses LOB data types to store long objects. The CLOB type is used
 for character data and the BLOB type is used for binary data.  NCLOB can hold
@@ -10449,7 +11661,7 @@ class or as Strings and Buffers.
 
 There are runnable LOB examples in the GitHub [examples][3] directory.
 
-### <a name="basiclobinsert"></a> 17.1 Simple Insertion of LOBs
+### <a name="basiclobinsert"></a> 18.1 Simple Insertion of LOBs
 
 Node.js String or Buffer types can be passed into PL/SQL blocks or
 inserted into the database by binding to LOB columns or PL/SQL
@@ -10527,7 +11739,7 @@ const result = await connection.execute(
 );
 ```
 
-### <a name="queryinglobs"></a> 17.2 Simple LOB Queries and PL/SQL OUT Binds
+### <a name="queryinglobs"></a> 18.2 Simple LOB Queries and PL/SQL OUT Binds
 
 #### Querying LOBs
 
@@ -10638,7 +11850,7 @@ streamed to a [Lob](#lobclass), as discussed in [Streaming
 Lobs](#streamsandlobs).  See [LOB Bind Parameters](#lobbinds) for size
 considerations regarding LOB binds.
 
-### <a name="streamsandlobs"></a> 17.3 Streaming Lobs
+### <a name="streamsandlobs"></a> 18.3 Streaming Lobs
 
 The [Lob Class](#lobclass) in node-oracledb implements the [Node.js
 Stream][16] interface to provide streaming access to CLOB, NCLOB and BLOB
@@ -10699,7 +11911,7 @@ At the conclusion of streaming into a Writeable Lob, the `finish` event will
 occur.  It is recommended to put logic such as committing and releasing
 connections in this event (or after it occurs).  See [lobinsert2.js][51].
 
-### <a name="lobinsertdiscussion"></a> 17.4 Using RETURNING INTO to Insert into LOBs
+### <a name="lobinsertdiscussion"></a> 18.4 Using RETURNING INTO to Insert into LOBs
 
 If Strings or Buffers are too large to be directly inserted into the
 database (see [Simple Insertion of LOBs](#basiclobinsert)), use a
@@ -10746,7 +11958,7 @@ been completely streamed, the Lob is automatically closed and the
 
 See [lobinsert2.js][51] for the full example.
 
-### <a name="loboutstream"></a> 17.5 Getting LOBs as Streams from Oracle Database
+### <a name="loboutstream"></a> 18.5 Getting LOBs as Streams from Oracle Database
 
 By default, when a `SELECT` clause contains a LOB column, or a PL/SQL
 OUT parameter returns a LOB, instances of [Lob](#lobclass) are
@@ -10874,7 +12086,7 @@ multiple of `chunkSize`.
 
 See [lobbinds.js][52] for a full example.
 
-### <a name="templobdiscussion"></a> 17.6 Using `createLob()` for PL/SQL IN Binds
+### <a name="templobdiscussion"></a> 18.6 Using `createLob()` for PL/SQL IN Binds
 
 Node-oracledb applications can create Oracle 'temporary LOBs' by
 calling [`connection.createLob()`](#connectioncreatelob).  These are
@@ -10937,7 +12149,7 @@ When the temporary LOB is no longer needed, it must be closed with
 await templob.destroy();
 ```
 
-### <a name="closinglobs"></a> 17.7 Closing Lobs
+### <a name="closinglobs"></a> 18.7 Closing Lobs
 
 Closing a Lob frees up resources. In particular, the temporary
 tablespace storage used by a temporary LOB is released.  Once a Lob is
@@ -10954,7 +12166,7 @@ Automatic closing of returned Lobs occurs when:
 - a stream error occurs
 - the Lob was used as the source for an IN OUT bind
 
-## <a name="jsondatatype"></a> 18. Oracle Database JSON Data type
+## <a name="jsondatatype"></a> 19. Oracle Database JSON Data type
 
 Oracle Database 12.1.0.2 introduced native support for JSON data.  You
 can use JSON with relational database features, including
@@ -11051,7 +12263,7 @@ examples.
 For more information about using JSON in Oracle Database see the
 [Database JSON Developer's Guide][57].
 
-## <a name="xmltype"></a> 19. Working with XMLType
+## <a name="xmltype"></a> 20. Working with XMLType
 
 `XMLType` columns queried will returns as Strings by default, limited
 to the size of a VARCHAR2.
@@ -11094,7 +12306,7 @@ const result = await connection.execute(
 LOB handling as discussed in the section [Working with CLOB, NCLOB and BLOB
 Data](#lobhandling).
 
-## <a name="bind"></a> 20. Bind Parameters for Prepared Statements
+## <a name="bind"></a> 21. Bind Parameters for Prepared Statements
 
 SQL and PL/SQL statements may contain bind parameters, indicated by
 colon-prefixed identifiers or numerals.  These indicate where
@@ -11129,7 +12341,7 @@ Bind variables cannot be used in [DDL][15] statements, for example
 Sets of values can bound for use in [`connection.executeMany()`](#executemany),
 see [Batch Statement Execution and Bulk Loading](#batchexecution).
 
-### <a name="inbind"></a> 20.1 IN Bind Parameters
+### <a name="inbind"></a> 21.1 IN Bind Parameters
 
 For IN binds, a data value is passed into the database and substituted
 into the statement during execution of SQL or PL/SQL.
@@ -11239,9 +12451,7 @@ or to the time zone specified for TIMESTAMP WITH TIME ZONE columns.  If later
 queried, they are returned in the session time zone.  See [Fetching Date and
 Timestamps](#datehandling) for more information.
 
-The type `oracledb.CURSOR` cannot be used with IN binds.
-
-### <a name="outbind"></a> 20.2 OUT and IN OUT Bind Parameters
+### <a name="outbind"></a> 21.2 OUT and IN OUT Bind Parameters
 
 OUT binds are used to retrieve data from the database.  IN OUT binds are passed
 into the database, and may return a different value after the statement
@@ -11372,13 +12582,16 @@ const bindVars = [
 ];
 ```
 
-### <a name="dmlreturn"></a> 20.3 DML RETURNING Bind Parameters
+### <a name="dmlreturn"></a> 21.3 DML RETURNING Bind Parameters
 
-"DML RETURNING" statements (such as `INSERT ... RETURNING ... INTO
-...`) are a way information can be returned about row changes from
-[DML][14] statements.  For example you can use DML RETURNING to get
-the ROWIDs of newly inserted rows.  Another common use case is to
-return [auto incremented column values ](#autoincrement).
+"DML RETURNING" (also known as "RETURNING INTO") statements such as `INSERT INTO
+tab VALUES (:1) RETURNING ROWID INTO :2` are a way information can be returned
+about row changes from [DML][14] statements.  For example you can use DML
+RETURNING to get the ROWIDs of newly inserted rows.  Another common use case is
+to return [auto incremented column values ](#autoincrement).
+
+For statements that affect single rows, you may prefer to use
+[`lastRowid`](#execlastrowid).
 
 Bind parameters for DML RETURNING statements can use `oracledb.BLOB`,
 `oracledb.CLOB`, `oracledb.STRING`, `oracledb.NUMBER` or `oracledb.DATE` for the
@@ -11405,9 +12618,10 @@ returned array length is not greater than one.  This will help
 identify invalid data or an incorrect `WHERE` clause that causes more
 results to be returned.
 
-No duplicate binds are allowed in a DML statement with a `RETURNING`
-clause, and no duplication is allowed between bind parameters in the
-DML section and the `RETURNING` section of the statement.
+Duplicate binds (using the same bind name more than once in the statement) are
+not allowed in a DML statement with a `RETURNING` clause, and no duplication is
+allowed between bind parameters in the DML section and the `RETURNING` section
+of the statement.
 
 An example of DML RETURNING binds is:
 
@@ -11446,13 +12660,13 @@ If the `WHERE` clause matches no rows, the output would be:
 { ids: [], rids: [] }
 ```
 
-### <a name="refcursors"></a> 20.4 REF CURSOR Bind Parameters
+### <a name="refcursors"></a> 21.4 REF CURSOR Bind Parameters
 
-Oracle REF CURSORS can be fetched in node-oracledb by binding a
-`oracledb.CURSOR` to a PL/SQL call.  The resulting bind variable
-becomes a [ResultSet](#resultsetclass), allowing rows to be fetched
-using [`getRow()`](#getrow) or [`getRows()`](#getrows).  The ResultSet
-can also be converted to a Readable Stream by using
+Oracle REF CURSORS can be bound in node-oracledb by using the type
+`oracledb.CURSOR` in PL/SQL calls.  For an OUT bind, the resulting
+bind variable becomes a [ResultSet](#resultsetclass), allowing rows to
+be fetched using [`getRow()`](#getrow) or [`getRows()`](#getrows).
+The ResultSet can also be converted to a Readable Stream by using
 [`toQueryStream()`](#toquerystream).  Oracle [Implicit
 Results](#implicitresults) are an alternative way to return query
 results from PL/SQL.
@@ -11534,7 +12748,40 @@ Query results must be fetched to completion to avoid resource leaks.
 The ResultSet `close()` call for streaming query results will be
 executed internally when all data has been fetched.
 
-### <a name="lobbinds"></a> 20.5 LOB Bind Parameters
+If you want to pass a queried ResultSet into PL/SQL using direction
+`oracledb.BIND_IN`, then set [`prefetchRows`](#propexecprefetchrows)
+to 0 for the query returning the ResultSet.  This stops the first rows
+being silently fetched by node-oracledb and not being available in the
+later receiving PL/SQL code.  For example:
+
+```javascript
+const result = await connection.execute(
+  `SELECT * FROM locations`,
+  [],
+  {
+    resultSet:    true,
+    prefetchRows: 0      // stop node-oracledb internally fetching rows from the ResultSet
+  }
+);
+
+// Pass the ResultSet as a REF CURSOR into PL/SQL
+
+await conn.execute(
+  `BEGIN myproc(:rc); END;`,
+  {
+    rc: { val: result.resultSet, type: oracledb.CURSOR, dir: oracledb.BIND_IN }
+  }
+);
+```
+
+Because the default bind direction is `BIND_IN`, and the type can be inferred
+from `result.resultSet`, the PL/SQL procedure call can be simplified to:
+
+```javascript
+await conn.execute(`BEGIN myproc(:rc); END;`, [result.resultSet]);
+```
+
+### <a name="lobbinds"></a> 21.5 LOB Bind Parameters
 
 Database CLOBs can be bound with `type` set to
 [`oracledb.CLOB`](#oracledbconstants).  Database BLOBs can be bound as
@@ -11584,7 +12831,7 @@ Internally, temporary LOBs are used when binding Strings and Buffers
 larger than 32 KB for PL/SQL calls.  Freeing of the temporary LOB is
 handled automatically.  For SQL calls no temporary LOBs are used.
 
-### <a name="sqlwherein"></a> 20.6 Binding Multiple Values to a SQL `WHERE IN` Clause
+### <a name="sqlwherein"></a> 21.6 Binding Multiple Values to a SQL `WHERE IN` Clause
 
 Binding a single JavaScript value into a SQL `WHERE IN` clause is
 easy:
@@ -11659,10 +12906,10 @@ for really large numbers of items, you might prefer to use a global
 temporary table.  Some solutions are given in [On Cursors, SQL, and
 Analytics][59] and in [this StackOverflow answer][60].
 
-### <a name="sqlbindtablename"></a> 20.7 Binding Column and Table Names in Queries
+### <a name="sqlbindtablename"></a> 21.7 Binding Column and Table Names in Queries
 
 It is not possible to bind table names in queries.  Instead use a
-hardcoded whitelist of names to build the final SQL statement, for
+hard-coded Allow List of names to build the final SQL statement, for
 example:
 
 ```javascript
@@ -11678,7 +12925,7 @@ const query = `SELECT * FROM ` + tableName;
 ```
 
 The same technique can be used to construct the list of selected
-column names.  Make sure to use a whitelist of names to avoid SQL
+column names.  Make sure to use a Allow List of names to avoid SQL
 Injection security risks.
 
 Each final SQL statement will obviously be distinct, and will use a
@@ -11709,12 +12956,17 @@ You should analyze the statement usage patterns and optimizer query
 plan before deciding whether to using binds like this, or to use
 multiple hard-coded SQL statements, each with a different ORDER BY.
 
-## <a name="objects"></a> 21. Oracle Database Objects and Collections
+## <a name="objects"></a> 22. Oracle Database Objects and Collections
 
 You can query and insert most Oracle Database objects and collections,
 with some [limitations](#objectlimitations).
 
-### <a name="objectinsert"></a> 21.1 Inserting Objects
+### <a name="objectinsert"></a> 22.1 Inserting Objects
+
+Performance-sensitive applications should consider using scalar types instead of
+objects. If you do use objects, avoid calling
+[`connection.getDbObjectClass()`](#getdbobjectclass) unnecessarily, and avoid
+objects with large numbers of attributes.
 
 As an example, the Oracle Spatial type [SDO_GEOMETRY][139] can easily
 be used in node-oracledb.  Describing SDO_GEOMETRY in SQL*Plus shows:
@@ -11857,7 +13109,7 @@ connection.close({drop: true})`](#connectionclose), or restart the
 pool.  Then `getDbObjectClass()` can be called again to get the
 updated type information.
 
-### <a name="objectfetch"></a> 21.2 Fetching Objects
+### <a name="objectfetch"></a> 22.2 Fetching Objects
 
 When objects are fetched, they are represented as a
 [DbObject](#dbobjectclass):
@@ -11916,18 +13168,17 @@ LOBs will be fetched as [Lob objects](#lobclass).  The
 the data.  Note it is an asynchronous method and requires a round-trip
 to the database.
 
-### <a name="plsqlcollections"></a> 21.3 PL/SQL Collection Types
+### <a name="plsqlcollections"></a> 22.3 PL/SQL Collection Types
 
 PL/SQL has three collection types: associative arrays, VARRAY
 (variable-size arrays), and nested tables.  See [Collection
 Types][150] in the Database PL/SQL Language Reference.
 
-#### <a name="plsqlindexbybinds"></a> 21.3.1 PL/SQL Collection Associative Arrays (Index-by)
+#### <a name="plsqlindexbybinds"></a> 22.3.1 PL/SQL Collection Associative Arrays (Index-by)
 
-Arrays of strings and numbers can be bound to PL/SQL IN, IN OUT, and
-OUT parameters of PL/SQL INDEX BY associative array types with integer
-keys.  This Oracle type was formerly called PL/SQL tables or index-by
-tables.
+Arrays can be bound to PL/SQL IN, IN OUT, and OUT parameters of PL/SQL INDEX BY
+associative array types with integer keys.  This Oracle type was formerly called
+PL/SQL tables or index-by tables.
 
 While you could bind associative arrays via named types as shown in previous
 examples, it is more efficient to use the method shown below which uses the
@@ -12010,8 +13261,20 @@ After executing either of these `mytab` will contain:
 ```
 
 The [`type`](#executebindparamtype) must be set for PL/SQL array binds.  It can
-be set to [`oracledb.STRING`](#oracledbconstantsnodbtype) or
-[`oracledb.NUMBER`](#oracledbconstantsnodbtype).
+be set to [`oracledb.STRING`](#oracledbconstantsnodbtype),
+[`oracledb.DB_TYPE_VARCHAR`](#oracledbconstantsdbtype),
+[`oracledb.NUMBER`](#oracledbconstantsnodbtype),
+[`oracledb.DB_TYPE_NUMBER`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_NVARCHAR`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_CHAR`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_NCHAR`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_BINARY_FLOAT`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_BINARY_DOUBLE`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_DATE`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_TIMESTAMP`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_TIMESTAMP_LTZ`](#oracledbconstantsdbtype),
+[`oracledb.DB_TYPE_TIMESTAMP_TZ`](#oracledbconstantsdbtype) or
+[`oracledb.DB_TYPE_RAW`](#oracledbconstantsdbtype).
 
 For OUT and IN OUT binds, the [`maxArraySize`](#executebindparammaxarraysize)
 bind property must be set.  Its value is the maximum number of elements that can
@@ -12073,7 +13336,7 @@ Parameters](#executebindParams) for more information about binding.
 
 See [plsqlarray.js][58] for a runnable example.
 
-#### <a name="plsqlvarray"></a> 21.3.2 PL/SQL Collection VARRAY Types
+#### <a name="plsqlvarray"></a> 22.3.2 PL/SQL Collection VARRAY Types
 
 Given a table with a VARRAY column:
 
@@ -12156,7 +13419,7 @@ The Hockey team players are:
 
 See [selectvarray.js][146] for a runnable example.
 
-#### <a name="plsqlnestedtables"></a> 21.3.3 PL/SQL Collection Nested Tables
+#### <a name="plsqlnestedtables"></a> 22.3.3 PL/SQL Collection Nested Tables
 
 Given a nested table `staffList`:
 
@@ -12203,7 +13466,7 @@ Similar with other objects, calling
 [`getDbObjectClass()`](#getdbobjectclass) and using a constructor to
 create a `DbObject` for binding can also be used.
 
-### <a name="plsqlrecords"></a> 21.4 PL/SQL RECORD Types
+### <a name="plsqlrecords"></a> 22.4 PL/SQL RECORD Types
 
 PL/SQL RECORDS can be bound for insertion and retrieval.  This example
 uses the PL/SQL package:
@@ -12256,12 +13519,12 @@ BoatFace 2400
 
 See [plsqlrecord.js][147] for a runnable example.
 
-### <a name="objexecmany"></a> 21.5 Inserting or Passing Multiple Objects of the Same Type
+### <a name="objexecmany"></a> 22.5 Inserting or Passing Multiple Objects of the Same Type
 
 You can use `executeMany()` with objects.  See [Binding Objects with
 `executeMany()`](#executemanyobjects).
 
-### <a name="objectlimitations"></a> 21.6 Oracle Database Object Type Limitations
+### <a name="objectlimitations"></a> 22.6 Oracle Database Object Type Limitations
 
 PL/SQL collections and records can only be bound when both Oracle
 client libraries and Oracle Database are 12.1, or higher.
@@ -12278,7 +13541,7 @@ Where there is no native support, use a PL/SQL wrapper that accepts
 types supported by node-oracledb and converts them to the required
 Oracle Database type.
 
-## <a name="batchexecution"></a> 22. Batch Statement Execution and Bulk Loading
+## <a name="batchexecution"></a> 23. Batch Statement Execution and Bulk Loading
 
 The [`connection.executeMany()`](#executemany) method allows many sets
 of data values to be bound to one DML or PL/SQL statement for
@@ -12596,7 +13859,7 @@ attribute names in the JavaScript objects
 
 See [examples/plsqlrecord.js][141] for a runnable sample.
 
-## <a name="transactionmgt"></a> 23. Transaction Management
+## <a name="transactionmgt"></a> 24. Transaction Management
 
 By default, [DML][14] statements are not committed in node-oracledb.
 
@@ -12623,66 +13886,6 @@ will be rolled back.
 
 Note: Oracle Database will implicitly commit when a [DDL][15]
 statement is executed irrespective of the value of `autoCommit`.
-
-## <a name="stmtcache"></a> 24. Statement Caching
-
-Node-oracledb's [`execute()`](#execute) and
-[`queryStream()`](#querystream) methods use the [Oracle Call Interface
-statement cache][61] to make re-execution of statements efficient.
-This cache removes the need for the separate 'prepare' or 'parse'
-method which is sometimes seen in other Oracle APIs: there is no
-separate method in node-oracledb.
-
-Each non-pooled connection and each session in the connection pool has
-its own cache of statements with a default size of 30.  Statement
-caching lets cursors be used without re-parsing the statement.
-Statement caching also reduces meta data transfer costs between the
-node-oracledb and the database.  Performance and scalability are
-improved.
-
-In general, set the statement cache to the size of the working set of
-statements being executed by the application.
-
-Statement caching can be disabled by setting the size to 0.  Disabling
-the cache may be beneficial when the quantity or order of statements
-causes cache entries to be flushed before they get a chance to be
-reused.  For example if there are more distinct statements than cache
-slots, and the order of statement execution causes older statements to
-be flushed from the cache before the statements are re-executed.
-
-The statement cache size can be set globally with [stmtCacheSize](#propdbstmtcachesize):
-
-```javascript
-oracledb.stmtCacheSize = 40;
-```
-
-The value can be overridden in an `oracledb.getConnection()` call:
-
-```javascript
-const mypw = ... // the hr schema password
-
-const connection = await oracledb.getConnection(
-  {
-    user          : "hr",
-    password      : mypw,
-    connectString : "localhost/XEPDB1",
-    stmtCacheSize : 40
-  }
-);
-```
-
-The value can also be overridden in the `poolAttrs` parameter to
-the [`createPool()`](#createpool) method.
-
-With Oracle Database 12c, or later, the statement cache size can be
-automatically tuned with the [Oracle Client Configuration](#oraaccess)
-`oraaccess.xml` file.
-
-To manually tune the statement cache size, monitor general application
-load and the [Automatic Workload Repository][62] (AWR) "bytes sent via SQL*Net to client" values.  The
-latter statistic should benefit from not shipping statement metadata
-to node-oracledb.  Adjust the statement cache size to your
-satisfaction.
 
 ## <a name="cqn"></a> 25. Continuous Query Notification (CQN)
 
@@ -12720,6 +13923,13 @@ an [`options`](#consubscribeoptions) object that controls notification.  In
 particular `options` contains a valid SQL query and a JavaScript callback:
 
 ```javascript
+const connection = await oracledb.getConnection({
+    user          : "hr",
+    password      : mypw,  // mypw contains the hr schema password
+    connectString : "localhost/XEPDB1",
+    events        : true
+});
+
 function myCallback(message) {
     console.log(message);
 }
@@ -12846,7 +14056,7 @@ try {
       user          : "hr",
       password      : mypw,  // mypw contains the hr schema password
       connectString : "localhost/XEPDB1",
-      events        :  true
+      events        : true
     });
 
     await connection.subscribe('mysub', options);
@@ -13362,7 +14572,7 @@ current values by querying the Oracle data dictionary or using PL/SQL
 procedures such as `DBMS_APPLICATION_INFO.READ_MODULE()` with the
 understanding that these require round-trips to the database.
 
-#### The Add-on Name
+#### <a name="drivernameview"></a> The Add-on Name
 
 The Oracle Database `V$SESSION_CONNECT_INFO` view shows the version of
 node-oracledb in use.  This allows DBAs to verify that applications
@@ -13376,9 +14586,12 @@ SQL> SELECT UNIQUE sid, client_driver
 
        SID CLIENT_DRIVER
 ---------- ------------------------------
-        16 node-oracledb : 4.1.0
-        33 node-oracledb : 4.1.0
+        16 node-oracledb : 5.0.0
+        33 node-oracledb : 5.0.0
 ```
+
+If a [`oracledb.initOracleClient()`](#odbinitoracleclient) call specified
+the `driverName`, then that value will be shown.
 
 Note if [`oracledb.connectionClass`](#propdbconclass) is set for a
 non-pooled connection, the `CLIENT_DRIVER` value will not be set for
@@ -13602,6 +14815,12 @@ Note: to use client-assigned keys, collections must be created with
 custom metadata, see [SODA Client-Assigned Keys and Collection
 Metadata](#sodaclientkeys).
 
+Collections with client-assigned keys can be used for 'upsert' operations using
+[`sodaCollection.save()`](#sodacollsave) and
+[`sodaCollection.saveAndGet()`](#sodacollsaveandget).  These methods are similar
+to the insertion methods, however if an existing document with the same key
+already exists in the collection, it is replaced.
+
 To extract documents from a collection, the [`find()`](#sodacollfind)
 method can be used to build a [SodaOperation](#sodaoperationclass)
 object specifying the keys of desired documents, or searches can be
@@ -13649,8 +14868,13 @@ Other examples of chained read and write operations include:
 
     ```javascript
     docCursor = await collection.find().keys(["k1", "k2"]).getCursor();
+    let myDocument;
+    while ((myDocument = await docCursor.getNext())) {
+      console.log(myDocument.getContent());
+    }
+    docCursor.close();
     ```
-- To remove the documents matching the supplied keys
+- To remove the documents matching the supplied keys:
 
     ```javascript
     await collection.find().keys(["k1", "k2"])).remove();
@@ -13695,6 +14919,19 @@ Other examples of chained read and write operations include:
     const n = collection.find().count();
     ```
 
+- When using [`getCursor()`](#sodaoperationclassgetcursor) and
+  [`getDocuments()`](#sodaoperationclassgetdocuments) to return a number
+  of documents, performance of document retrieval can be tuned by
+  setting [`oracledb.fetchArraySize`](#propdbfetcharraysize) or using
+  the `find()` non-terminal
+  [`fetchArraySize()`](#sodaoperationclassfetcharraysize).  For example,
+  to get all documents in a collection:
+
+    ```javascript
+    const documents = await coll.find().fetchArraySize(500).getDocuments();
+    ```
+
+
 The [`sodaCollection.find()`](#sodacollfind) operators that return documents
 produce complete SodaDocument objects that can be used for reading document
 content and attributes such as the key.  They can also be used for passing to
@@ -13731,6 +14968,7 @@ Some QBE examples are:
     const n = await collection.find().filter({"age": {"$lt": 30},
                                               "address.city": "San Francisco",
                                               "salary": {"$gt": 500000}}).count();
+    console.log(n);
     ```
 
 - To return all documents that have an age less than 30, an address in
@@ -13740,6 +14978,11 @@ Some QBE examples are:
     const docCursor = await collection.find().filter({"age": {"$lt": 30},
                                                       "address.city": "San Francisco",
                                                       "salary": {"$gt": 500000}}).getCursor();
+    let myDocument;
+    while ((myDocument = await docCursor.getNext())) {
+      console.log(myDocument.getContent());
+    }
+    docCursor.close();
     ```
 
 - Same as the previous example, but allowing for pagination of results
@@ -13810,7 +15053,7 @@ To perform text searches through documents, a [JSON search index][149]
 must be defined.  For example:
 
 ```javascript
-await collection.createIndex({ name : "mySearchIdx");
+await collection.createIndex({"name": "mySearchIdx"});
 ```
 
 See [SODA Index Specifications (Reference)][119] for information on
@@ -14007,22 +15250,418 @@ this case) and lengths of the values of these fields are listed.  The
 want to define SQL views over JSON data. They suggest how to name the
 columns of a view.
 
-## <a name="roundtrips"></a> 30. Database Round-trips
+## <a name="startupshutdown"></a> 30. Database Start Up and Shut Down
 
-Along with tuning an application's architecture and tuning its SQL
-statements, a general performance and scalability goal is to minimize
-[round-trips][124].  A round-trip is defined as the trip from the
-Oracle client libraries (used by node-oracledb) to the database and
-back.
+There are two groups of database start up and shut down functions::
+
+- Simple usage: [`oracledb.startup()`](#odbstartup) and [`oracledb.shutdown()`](#odbshutdown)
+
+- Flexible usage: [`connection.startup()`](#constartup) and [`connection.shutdown()`](#conshutdown)
+
+These can be used to control database instances.  With the [Oracle Database
+Multitenant architecture][172], you use these functions on a "CDB" container
+database instance and then use SQL commands to control the pluggable "PDB"
+databases.
+
+### <a name="startupshutdownsimple"></a> 30.1 Simple Database Start Up and Shut Down
+
+The simple methods accept database credentials and perform the requested start
+up or shut down.  Internally a standalone connection with privilege
+[`oracledb.SYSOPER`](#oracledbconstantsprivilege) is created, used, and then
+closed.  The methods require appropriate connection attributes, which will vary
+depending with your database access rights, and if you are connecting over TCP
+or to a local database.  A username, password, connection string and mode to
+specify external authentication can be used.
+
+#### Simple Start Up
+
+The simple [`oracledb.startup()`](#odbstartup) method to start up a local
+database instance, when your operating system user is in the operating system's
+`oper` group, is:
+
+```javascript
+await oracledb.startup( {
+  externalAuth: true
+});
+```
+
+Start up [`options`](#odbstartupattrsoptions) can be specified.  You can use a
+database parameter '[pfile][171]', or indicate that database access should be
+restricted after start up, or force the database instance to be shut down before
+restarting it.  For example:
+
+```javascript
+await oracledb.startup( {
+    externalAuth: true
+  },
+  {
+    force: true,
+    restrict: true
+    pfile: '/my/path/to/my/pfile.ora'
+  }
+);
+```
+
+By default when the options are not specified, the database is opened normally,
+and uses the database parameter file.
+
+To start up a remote database, configure the Oracle Net listener to use [static
+service registration][175] by adding a `SID_LIST_LISTENER` entry to the database
+`listener.ora` file.  Starting the database in node-oracledb would then be like:
+
+```javascript
+await oracledb.startup( {
+  user: 'sys',
+  password: syspw,
+  connectString: 'mymachine.example.com/orclcdb'
+});
+```
+
+#### Simple Shut Down
+
+The simple [`oracledb.shutdown()`](#odbshutdown) method to shut down a remote
+database is:
+
+```javascript
+const syspw = ...  // set syspw to the sys schema password
+
+await oracledb.shutdown( {
+  user: "sys",
+  password: syspw,
+  connectString: "mymachine.example.com/orclcdb"
+});
+```
+
+An optional, [`shutdownMode`](#odbshutdownattrsmode) can be passed, for example
+to terminate uncommitted transactions and roll back:
+
+```javascript
+await oracledb.shutdown( {
+    user: "sys",
+    password: syspw,
+    connectString: "mymachine.example.com/orclpdb1"
+  },
+  oracledb.SHUTDOWN_MODE_IMMEDIATE
+);
+```
+
+The shut down mode should be one of the constants:
+[`oracledb.SHUTDOWN_MODE_ABORT`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_DEFAULT`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_IMMEDIATE`](#oracledbconstantsshutdown),
+[`oracledb.SHUTDOWN_MODE_TRANSACTIONAL`](#oracledbconstantsshutdown), or
+[`oracledb.SHUTDOWN_MODE_TRANSACTIONAL_LOCAL`](#oracledbconstantsshutdown).  If
+a mode is not specified, `oracledb.SHUTDOWN_MODE_DEFAULT` is used.
+
+### <a name="startupshutdownflexible"></a> 30.2 Flexible Database Start Up and Shut Down
+
+The 'flexible' functions for starting and stopping databases allow you more
+control over connection access, for example you can use the `oracledb.SYSDBA`
+privilege instead of `oracledb.SYSOPER`.  The functions also let you, for
+example, do database recovery as part of the database start up.
+
+#### Flexible Start Up
+
+A [`connection.startup()`](#constartup) example that is equivalent to the first
+'simple' start up example above is:
+
+```javascript
+connection = await oracledb.getConnection( {
+  externalAuth: true
+  privilege: oracledb.SYSOPER | oracledb.SYSPRELIM
+});
+
+await connection.startup();  // options could be passed, if required
+
+await connection.close();
+
+connection = await oracledb.getConnection( {
+  externalAuth: true
+  privilege: oracledb.SYSOPER
+});
+
+await connection.execute(`ALTER DATABASE MOUNT`);
+await connection.execute(`ALTER DATABASE OPEN`);
+
+await connection.close();
+```
+
+The `SYSPRELIM` privilege is required for the first connection.  The
+[`connection.startup()`](#constartup) method lets you optionally specify a
+database parameter 'pfile', or indicate the database access should be restricted
+after start up, or force the database instance to be shut down before restarting
+it.
+
+After calling `connection.startup()`, you can use your choice of SQL statements,
+for example to perform database recovery.
+
+#### Flexible Shut Down
+
+The flexible [`connection.shutdown()`](#conshutdown) example equivalent to the
+first 'simple' shut down example above is:
+
+```javascript
+connection = await oracledb.getConnection({
+  user: "sys",
+  password: syspw,
+  connectString: "mymachine.example.com/orclcdb",
+  privilege: oracledb.SYSOPER
+});
+
+await connection.shutdown();  // a shut down mode can be specified, if required
+
+await connection.execute (`ALTER DATABASE CLOSE NORMAL`);
+await connection.execute (`ALTER DATABASE DISMOUNT`);
+
+await connection.shutdown(oracledb.SHUTDOWN_MODE_FINAL);
+
+connection.close();
+```
+
+If the `connection.shutdown()` [`shutdownMode`](#conshutdownmode)
+`oracledb.SHUTDOWN_MODE_ABORT` is used, then `connection.shutdown()` does not
+need to be called a second time.
+
+### <a name="startupshutdownpdb"></a> 30.3 Oracle Multitenant Pluggable and Container Databases
+
+You can use the `startup()` and `shutdown()` methods on Oracle Multitenant
+[container database][172] instances.
+
+Once a CDB is running, you can connect as a privileged user and execute SQL
+`ALTER PLUGGABLE` commands to start or stop PDBs.  Similar commands can also be
+run if you connect directly to a PDB.
+
+For example, when connected to a CDB, you can open the pluggable database in it
+called 'orclpdb1' with:
+
+```sql
+ALTER PLUGGABLE DATABASE orclpdb1 OPEN
+```
+
+or, to open all PDBs:
+
+```sql
+ALTER PLUGGABLE DATABASE ALL OPEN
+```
+
+The command:
+
+```sql
+ALTER PLUGGABLE DATABASE ALL SAVE STATE
+```
+
+can be used so that a subsequent restart of a CDB will automatically open all
+currently open PDBs.
+
+To close a PDB, you can use a command like `ALTER PLUGGABLE DATABASE mypdbname
+CLOSE`.
+
+Refer to the [Oracle Database Administrator's Guide][173] for more options.
+
+## <a name="tuning"></a> 31. Node-oracledb Tuning
+
+Some general tuning tips are:
+
+- Tune your application architecture.
+
+  A general application goal is to reduce the number of
+  [round-trips](#roundtrips) between node-oracledb and the database.
+
+  For multi-user applications, make use of connection pooling.  Create the pool
+  once during application initialization.  Do not oversize the pool, see
+  [Connection Pool Sizing](#conpoolsizing).  Use a session callback function to
+  set session state, see [Connection Tagging and Session
+  State](#connpooltagging).
+
+  Make use of efficient node-oracledb functions.  For example, to insert
+  multiple rows use [`connection.executeMany()`](#executemany) instead of
+  [`connection. execute()`](#execute).
+
+- Tune your SQL statements.  See the [SQL Tuning Guide][95].
+
+  Use [bind variables](#bind) to avoid statement reparsing.
+
+  Tune `fetchArraySize` and `prefetchRows` for each query, see [Tuning Fetch
+  Performance](#rowfetching).
+
+  Do simple optimizations like [limiting the number of rows](#pagingdata) and
+  avoiding selecting columns not used in the application.
+
+  It may be faster to work with simple scalar relational values than to use
+  Oracle named objects or collections.
+
+  Make good use of PL/SQL to avoid executing many individual statements from
+  node-oracledb.
+
+  Tune the [Statement Cache](#stmtcache).
+
+  Enable [Client Result Caching](#clientresultcache) for small lookup tables.
+
+- Tune your database.  See the [Database Performance Tuning Guide][188].
+
+- Tune your network.  For example, when inserting or retrieving a large number
+  of rows (or for large data), or when using a slow network, then tune the
+  Oracle Network Session Data Unit (SDU) and socket buffer sizes, see [Oracle
+  Net Services: Best Practices for Database Performance and High Availability
+  ][186].
+
+- Do not commit or rollback unnecessarily.  Use
+  [`autoCommit`](#propexecautocommit) on the last of a sequence of DML
+  statements.
+
+#### <a name="rowfetching"></a> 31.1 Tuning Fetch Performance
+
+To tune queries you can adjust node-oracledb's internal buffer sizes to improve
+the speed of fetching rows across the network from the database, and to optimize
+memory usage.  Regardless of which node-oracledb function is used to get query
+results, internally all rows are fetched in batches from the database and
+buffered before being returned to the application.  The internal buffer sizes
+can have a significant performance impact.  The sizes do not affect how, or
+when, rows are returned to your application.  They do not affect the minimum or
+maximum number of rows returned by a query.
+
+For best performance, tune "array fetching" with
+[`fetchArraySize`](#propexecfetcharraysize) and "row prefetching" with
+[`prefetchRows`](#propexecprefetchrows) in each
+[`connection.execute()`](#execute) or [`connection.queryStream()`](#querystream)
+call.  Note when using [`getRows()`](#getrows), tuning of "array fetching" is
+done with the function's `numRows` parameter.  Queries that return LOBs and
+similar types will never prefetch rows, so the `prefetchRows` value is ignored
+in those cases.
+
+The common query tuning scenario is for SELECT statements that return a large
+number of rows over a slow network.  Increasing `fetchArraySize` can improve
+performance by reducing the number of [round-trips](#roundtrips) to the
+database.  However increasing this value increases the amount of memory
+required.  Adjusting `prefetchRows` will also affect performance and memory
+usage.
+
+Row prefetching and array fetching are both internal buffering techniques to
+reduce [round-trips](#roundtrips) to the database. The difference is the code
+layer that is doing the buffering, and when the buffering occurs.  The Oracle
+Client libraries used by node-oracledb have separate "execute SQL statement" and
+"fetch data" calls.  Prefetching allows query results to be returned to the
+application when the successful statement execution acknowledgement is returned
+from the database.  This means that a subsequent internal "fetch data" operation
+does not always need to make a round-trip to the database because rows are
+already buffered in the Oracle Client libraries.  Reducing round-trips helps
+performance and scalability.  An overhead of prefetching is the need for an
+additional data copy from Oracle Client's prefetch buffers.
+
+##### Choosing values for `fetchArraySize` and `prefetchRows`
+
+The best `fetchArraySize` and `prefetchRows` values can be found by
+experimenting with your application under the expected load of normal
+application use.  This is because the cost of the extra memory copy
+from the prefetch buffers when fetching a large quantity of rows or
+very "wide" rows may outweigh the cost of a round-trip for a single
+node-oracledb user on a fast network.  However under production
+application load, the reduction of round-trips may help performance
+and overall system scalability.  The documentation in [Database
+Round-trips](#roundtrips) shows how to measure round-trips.
+
+Here are some suggestions for the starting point to being your tuning
+
+- To tune queries that return an unknown number of rows, estimate the
+  number of rows returned and start with an appropriate
+  `fetchArraySize` value.  The default is 100.  Then set
+  `prefetchRows` to the `fetchArraySize` value.  Do not make the sizes
+  unnecessarily large.  For example:
+
+    ```javascript
+    result = await connection.execute(
+      `SELECT * FROM very_big_table`,
+      [],
+      {
+        prefetchRows:   1000,
+        fetchArraySize: 1000,
+        resultSet:      true
+      }
+    );
+    ```
+
+    Adjust the values as needed for performance, memory and round-trip
+    usage.  For a large quantity of rows or very "wide" rows on fast
+    networks you may prefer to leave `prefetchRows` at its default
+    value of 2.  Keep `fetchArraySize` equal to, or bigger than,
+    `prefetchRows`.
+
+- If you are fetching a fixed number of rows, start your tuning by
+  setting `fetchArraySize` to the number of expected rows, and set
+  `prefetchRows` to one greater than this value.  (Adding one removes
+  the need for a round-trip to check for end-of-fetch).  For example,
+  if you are querying 20 rows, perhaps to [display a
+  page](#pagingdata) of data, set `prefetchRows` to 21 and
+  `fetchArraySize` to 20:
+
+    ```javascript
+    const myoffset = 0;       // do not skip any rows (start at row 1)
+    const mymaxnumrows = 20;  // get 20 rows
+
+    sql = `SELECT last_name
+           FROM employees
+           ORDER BY last_name
+           OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`;
+
+    binds = { offset: myoffset, maxnumrows: mymaxnumrows };
+
+    options = { prefetchRows: mymaxnumrows + 1, fetchArraySize: mymaxnumrows };
+
+    result = await connection.execute(sql, binds, options);
+    ```
+
+    This will return all rows for the query in one round-trip.
+
+
+- If you know that a query returns just one row then set
+  `fetchArraySize` to 1 to minimize memory usage.  The default
+  prefetch value of 2 allows minimal round-trips for single-row
+  queries:
+
+    ```javascript
+    result = await connection.execute(`SELECT * FROM mytable WHERE id = 1`, [], {fetchArraySize: 1});
+    ```
+
+There are two cases that will benefit from disabling row prefetching
+by setting `prefetchRows` to 0:
+
+- When a query returns a ResultSet which is then passed into PL/SQL.
+  Set `prefetchRows` to 0 during the initial query so the first rows
+  from the cursor are not prematurely (and silently) fetched by
+  node-oracledb.  This lets all rows be available to the later,
+  receiving PL/SQL code.  See [REF CURSOR Bind
+  Parameters](#refcursors).
+
+- When querying a PL/SQL function that uses PIPE ROW to emit rows at
+  intermittent intervals.  By default, several rows needs to be emitted by the
+  function before node-oracledb can return them to the application.  Setting
+  `prefetchRows` to 0 helps give a consistent flow of data to the application.
+
+Prefetching can also be enabled in an external [`oraaccess.xml`](#oraaccess)
+file, which may be useful for tuning an application when modifying its code is
+not feasible.  Setting the size in `oraaccess.xml` or with the global
+`oracledb.prefetchRow` attribute will affect the whole application, so it should
+not be the first tuning choice.
+
+### <a name="roundtrips"></a> 31.2 Database Round-trips
+
+A round-trip is defined as the trip from the Oracle Client libraries (used by
+node-oracledb) to the database and back.  Calling each node-oracledb function,
+or accessing each attribute, will require zero or more round-trips.  Along with
+tuning an application's architecture and [tuning its SQL statements][95], a
+general performance and scalability goal is to minimize [round-trips][124].
 
 Some general tips for reducing round-trips are:
 
-- Tune [`fetchArraySize`](#propdbfetcharraysize).
+- Tune [`fetchArraySize`](#propexecfetcharraysize) and [`prefetchRows`](#propexecprefetchrows) for each query.
 - Use [`executeMany()`](#executemany) for optimal DML execution.
 - Only commit when necessary.  Use [`autoCommit`](#propexecautocommit) on the last statement of a transaction.
-- Avoid over pinging with [`connection.ping()`](#connectionping) or by setting [`poolPingInterval`](#proppoolpoolpinginterval) too low.
 - For connection pools, use a callback to set connection state, see [Connection Tagging and Session State](#connpooltagging)
 - Make use of PL/SQL procedures which execute multiple SQL statements instead of executing them individually from node-oracledb.
+- Use scalar types instead of [Oracle Database object types](#objects).
+- Avoid overuse of [`connection.ping()`](#connectionping), and avoid setting [`poolPingInterval`](#proppoolpoolpinginterval) too low.
+
+##### Finding the Number of Round-Trips
 
 Oracle's [Automatic Workload Repository][62] (AWR) reports show
 'SQL*Net roundtrips to/from client' and are useful for finding the
@@ -14030,7 +15669,17 @@ overall behavior of a system.
 
 Sometimes you may wish to find the number of round-trips used for a
 specific application.  Snapshots of the `V$SESSTAT` view taken before
-and after doing some work can be used for this.
+and after doing some work can be used for this:
+
+```sql
+SELECT ss.value, sn.display_name
+FROM v$sesstat ss, v$statname sn
+WHERE ss.sid = SYS_CONTEXT('USERENV','SID')
+AND ss.statistic# = sn.statistic#
+AND sn.name LIKE '%roundtrip%client%';
+```
+
+##### Example of finding the number of round-trips
 
 First, find the session id of the current connection:
 
@@ -14127,7 +15776,108 @@ after = await getRT(sid);
 console.log('Round-trips required: ' + (after - before));   // 1 round-trip
 ```
 
-## <a name="bindtrace"></a> <a name="tracingsql"></a> 31. Tracing SQL and PL/SQL Statements
+### <a name="stmtcache"></a> 31.3. Statement Caching
+
+Node-oracledb's [`execute()`](#execute) and
+[`queryStream()`](#querystream) methods use the [Oracle Call Interface
+statement cache][61] to make re-execution of statements efficient.
+This cache removes the need for the separate 'prepare' or 'parse'
+method which is sometimes seen in other Oracle APIs: there is no
+separate method in node-oracledb.
+
+Each non-pooled connection and each session in the connection pool has
+its own cache of statements with a default size of 30.  Statement
+caching lets cursors be used without re-parsing the statement.
+Statement caching also reduces meta data transfer costs between the
+node-oracledb and the database.  Performance and scalability are
+improved.
+
+In general, set the statement cache to the size of the working set of
+statements being executed by the application.
+
+Statement caching can be disabled by setting the size to 0.  Disabling
+the cache may be beneficial when the quantity or order of statements
+causes cache entries to be flushed before they get a chance to be
+reused.  For example if there are more distinct statements than cache
+slots, and the order of statement execution causes older statements to
+be flushed from the cache before the statements are re-executed.
+
+The statement cache size can be set globally with [stmtCacheSize](#propdbstmtcachesize):
+
+```javascript
+oracledb.stmtCacheSize = 40;
+```
+
+The value can be overridden in an `oracledb.getConnection()` call:
+
+```javascript
+const mypw = ... // the hr schema password
+
+const connection = await oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : mypw,
+    connectString : "localhost/XEPDB1",
+    stmtCacheSize : 40
+  }
+);
+```
+
+The value can also be overridden in the `poolAttrs` parameter to
+the [`createPool()`](#createpool) method.
+
+With Oracle Database 12c, or later, the statement cache size can be
+automatically tuned with the [Oracle Client Configuration](#oraaccess)
+`oraaccess.xml` file.
+
+To manually tune the statement cache size, monitor general application
+load and the [Automatic Workload Repository][62] (AWR) "bytes sent via SQL*Net to client" values.  The
+latter statistic should benefit from not shipping statement metadata
+to node-oracledb.  Adjust the statement cache size to your
+satisfaction.
+
+### <a name="clientresultcache"></a> 31.4 Client Result Cache
+
+Node-oracledb applications can use Oracle Database's [Client Result Cache][180].
+The CRC enables client-side caching of SQL query (SELECT statement) results in
+client memory for immediate use when the same query is re-executed.  This is
+useful for reducing the cost of queries for small, mostly static, lookup tables,
+such as for postal codes.  CRC reduces network [round-trips](#roundtrips), and
+also reduces database server CPU usage.
+
+The cache is at the application process level.  Access and invalidation is
+managed by the Oracle Client libraries.  This removes the need for extra
+application logic, or external utilities, to implement a cache.
+
+CRC can be enabled by setting the [database parameters][181]
+`CLIENT_RESULT_CACHE_SIZE` and `CLIENT_RESULT_CACHE_LAG`, and then restarting
+the database, for example:
+
+```sql
+SQL> ALTER SYSTEM SET CLIENT_RESULT_CACHE_LAG = 3000 SCOPE=SPFILE;
+SQL> ALTER SYSTEM SET CLIENT_RESULT_CACHE_SIZE = 64K SCOPE=SPFILE;
+SQL> STARTUP FORCE
+```
+
+CRC can alternatively be configured in an [`oraaccess.xml`](#oraaccess) or
+[`sqlnet.ora`](#tnsadmin) file on the Node.js host, see [Client Configuration
+Parameters][182].
+
+Tables can then be created, or altered, so repeated queries use CRC.  This
+allows existing applications to use CRC without needing modification.  For example:
+
+```sql
+SQL> CREATE TABLE cities (id NUMBER, name VARCHAR2(40)) RESULT_CACHE (MODE FORCE);
+SQL> ALTER TABLE locations RESULT_CACHE (MODE FORCE);
+```
+
+Alternatively, hints can be used in SQL statements.  For example:
+
+```sql
+SELECT /*+ result_cache */ postal_code FROM locations
+```
+
+## <a name="bindtrace"></a> <a name="tracingsql"></a> 32. Tracing SQL and PL/SQL Statements
 
 ####  End-to-End Tracing
 
@@ -14156,8 +15906,8 @@ to 16.  At a Windows command prompt, this could be done with `set
 DPI_DEBUG_LEVEL=16`.  On Linux, you might use:
 
 ```
-export DPI_DEBUG_LEVEL=16
-node myapp.js 2> log.txt
+$ export DPI_DEBUG_LEVEL=16
+$ node myapp.js 2> log.txt
 ```
 
 For an application that does a single query, the log file might
@@ -14184,14 +15934,14 @@ parameters.
 
 PL/SQL users may be interested in using [PL/Scope][78].
 
-## <a name="programstyles"></a> 32. Node.js Programming Styles and node-oracledb
+## <a name="programstyles"></a> 33. Node.js Programming Styles and node-oracledb
 
 Node.oracle supports [callbacks](#callbackoverview),
 [Promises](#promiseoverview), and Node.js 8's
 [async/await](#asyncawaitoverview) styles of programming.  The latter
 is recommended.
 
-### <a name="callbackoverview"></a> <a name="examplequerycb"></a> 32.1 Callbacks and node-oracledb
+### <a name="callbackoverview"></a> <a name="examplequerycb"></a> 33.1 Callbacks and node-oracledb
 
 Node-oracledb supports callbacks.
 
@@ -14244,7 +15994,7 @@ With Oracle's sample HR schema, the output is:
 [ [ 103, 60, 'IT' ] ]
 ```
 
-### <a name="promiseoverview"></a> 32.2 Promises and node-oracledb
+### <a name="promiseoverview"></a> 33.2 Promises and node-oracledb
 
 Node-oracledb supports Promises with all asynchronous methods.  The native Promise
 implementation is used.
@@ -14342,23 +16092,12 @@ Unhandled Rejection at:  Promise {
 For more information, see [How to get, use, and close a DB connection
 using promises][73].
 
-#### <a name="custompromises"></a> 32.2.1 Custom Promise Libraries
+#### <a name="custompromises"></a> 33.2.1 Custom Promise Libraries
 
-The Promise implementation is designed to be overridden, allowing a
-custom Promise library to be used.
+From node-oracledb 5.0, custom Promise libraries can no longer be used.  Use the
+native Node.js Promise implementation instead.
 
-```javascript
-const mylib = require('myfavpromiseimplementation');
-oracledb.Promise = mylib;
-```
-
-Promises can be completely disabled by setting
-
-```javascript
-oracledb.Promise = null;
-```
-
-### <a name="asyncawaitoverview"></a> 32.3 Async/Await and node-oracledb
+### <a name="asyncawaitoverview"></a> 33.3 Async/Await and node-oracledb
 
 Node.js 7.6 supports async functions, also known as Async/Await.  These
 can be used with node-oracledb.  For example:
@@ -14419,7 +16158,7 @@ Buffers.
 For more information, see [How to get, use, and close a DB connection
 using async functions][74].
 
-## <a name="migrate"></a> 33. Migrating from Previous node-oracledb Releases
+## <a name="migrate"></a> 34. Migrating from Previous node-oracledb Releases
 
 Documentation about node-oracledb version 1 is [here][94].
 
@@ -14427,112 +16166,9 @@ Documentation about node-oracledb version 2 is [here][121].
 
 Documentation about node-oracledb version 3 is [here][135].
 
-### <a name="migratev1v2"></a> 33.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
+Documentation about node-oracledb version 4 is [here][170].
 
-When upgrading from node-oracledb version 1.13 to version 2.0:
-
-- Review the [CHANGELOG][83].
-
-- Installation has changed.  Pre-built binaries are available for
-  common platforms.  To build from source code, change your
-  package.json dependency to install from GitHub.  Refer to
-  [INSTALL][80].
-
-- Users of Instant Client RPMs must now always have the Instant Client
-  libraries in the library search path.  Refer to [INSTALL][81].
-
-- Users of macOS must now always have the Instant Client
-  libraries in `~/lib` or `/usr/local/lib`.  Refer to [INSTALL][82].
-
-- For queries and REF CURSORS, the internal buffer sizing and tuning
-  of round-trips to Oracle Database is now done with
-  [`fetchArraySize`](#propdbfetcharraysize).  This replaces
-  [`prefetchRows`](#propdbprefetchrows), which is no longer used.  It
-  also replaces the overloaded use of `maxRows` for
-  [`queryStream()`](#querystream).  To upgrade scripts:
-
-    - Replace the property `prefetchRows` with `fetchArraySize` and make
-      sure all values are greater than 0.
-
-    - Tune `fetchArraySize` instead of `maxRows` for `queryStream()`.
-
-    - For [direct fetches](#fetchingrows), optionally tune
-      `fetchArraySize`.
-
-    - For [direct fetches](#fetchingrows), optionally replace enormously
-      over-sized `maxRows` values with 0, meaning an unlimited number of
-      rows can be returned.
-
-- For [direct fetches](#fetchingrows) that relied on the version 1
-  default value of [`maxRows`](#propdbmaxrows) to limit the number of
-  returned rows to 100, it is recommended to use an [`OFFSET` /
-  `FETCH`](#pagingdata) query clause.  Alternatively explicitly set
-  `maxRows` to 100.
-
-- Review and update code that checks for specific *NJS-XXX* or
-  *DPI-XXX* error messages.
-
-- Ensure that all [ResultSets](#resultsetclass) and [LOBs](#lobclass)
-  are closed prior to calling
-  [`connection.close()`](#connectionclose). Otherwise you will get the
-  error *DPI-1054: connection cannot be closed when open statements or
-  LOBs exist*.  (*Note*: this limitation was removed in node-oracledb 2.1)
-
-- Test applications to check if changes such as the improved property
-  validation uncover latent problems in your code.
-
-### <a name="migratev20v21"></a> 33.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
-
-When upgrading from node-oracledb version 2.0 to version 2.1:
-
-- If using the experimental `_close` method with [Query
-  Streaming](#streamingresults) in Node 8 or later:
-
-    - Change the method name from `_close()` to [`destroy()`][92].
-    - Stop passing a callback.
-    - Optionally pass an error.
-
-### <a name="migratev23v30"></a> 33.3 Migrating from node-oracledb 2.3 to node-oracledb 3.0
-
-When upgrading from node-oracledb version 2.3 to version 3.0:
-
-- Review the [CHANGELOG][83].  Implement new features such as the
-[`pool.close()`](#poolclose) `drainTime` parameter.
-
-- If using a connection pool and Oracle Client libraries 12.2 or
-  later, tune [`oracledb.poolPingInterval`](#propdbpoolpinginterval),
-  since this property is now additionally used with these versions of
-  Oracle Client.
-
-- Before migrating, ensure your application works with the [Connection
-  Pool Queue](#connpoolqueue), since this mode is always enabled in
-  node-oracledb 3.0 and the value of
-  [`oracledb.queueRequests`](#propdbqueuerequests) is ignored.
-
-- Change code that relied on unused properties in objects such as the
-  `execute()` result being set to `undefined`.  These properties are
-  no longer set in node-oracledb 3.
-
-### <a name="migratev30v31"></a> 33.4 Migrating from node-oracledb 3.0 to node-oracledb 3.1
-
-When upgrading from node-oracledb version 3.0 to version 3.1:
-
-- Review the [CHANGELOG][83].  Implement new features such as the
-  Connection Pool
-  [`sessionCallback`](#createpoolpoolattrssessioncallback) to
-  efficiently set session state.
-
-- Code that catches `require('oracledb')` errors to check
-  node-oracledb and the Oracle Client libraries are installed
-  correctly will need to be changed.  In node-oracledb 3.1,
-  `require()` will always succeed if node-oracledb is installed even
-  if Oracle Client is not configured.  To confirm that node-oracle
-  will be usable, access
-  [`oracledb.oracleClientVersion`](#propdboracleclientversion) or
-  [`oracledb.oracleClientVersionString`](#propdboracleclientversionstring),
-  or try opening a connection.
-
-### <a name="migratev31v40"></a> 33.5 Migrating from node-oracledb 3.1 to node-oracledb 4.0
+### <a name="migratev31v40"></a> 34.1 Migrating from node-oracledb 3.1 to node-oracledb 4.0
 
 When upgrading from node-oracledb version 3.1 to version 4.0:
 
@@ -14558,18 +16194,23 @@ When upgrading from node-oracledb version 3.1 to version 4.0:
   [`OUT_FORMAT_ARRAY`](#oracledbconstantsoutformat) and
   [`OUT_FORMAT_OBJECT`](#oracledbconstantsoutformat).
 
-### <a name="migratev40v41"></a> 33.6 Migrating from node-oracledb 4.0 to node-oracledb 4.1
+### <a name="migratev40v41"></a> 34.2 Migrating from node-oracledb 4.0 to node-oracledb 4.1
 
 When upgrading from node-oracledb version 4.0 to version 4.1:
 
 - Review the [CHANGELOG][83] and take advantage of new features.
 
-- Review any programmatic or test use of node-oracledb error messages since some have changed.
+  Choose a sensible value for the new *Pool* [`queueMax`](#propdbqueuemax)
+  attribute, so that applications get the new error only under abnormal
+  connection load.  To allow all pooled connection requests to be queued (the
+  previous behavior), set it to 0.
+
+- Review your application use of node-oracledb error messages since some have changed.
 
 - Note that the default for [`oracledb.events`](#propdbevents) has reverted to
   *false*.  If you relied on it being *true*, then explicitly set it.
 
-### <a name="migratev41v42"></a> 33.7 Migrating from node-oracledb 4.1 to node-oracledb 4.2
+### <a name="migratev41v42"></a> 34.3 Migrating from node-oracledb 4.1 to node-oracledb 4.2
 
 - Review the [CHANGELOG][83] and take advantage of new features.
 
@@ -14581,7 +16222,28 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
   `destroy()` method does not take a callback parameter.  If `destroy()` is
   given an error argument, an `error` event is emitted with this error.
 
-## <a name="otherresources"></a> 34. Useful Resources for Node-oracledb
+### <a name="migratev42v50"></a> 34.4 Migrating from node-oracledb 4.2 to node-oracledb 5.0
+
+- Review the [CHANGELOG][83] and take advantage of new features.
+
+- Review the updated installation and initialization options in the
+  [node-oracledb installation instructions][2] and [Initializing
+  Node-oracledb](#initnodeoracledb), particularly around how node-oracledb can
+  locate Oracle Client libraries.
+
+- Take advantage of the new [`prefetchRows`](#propexecprefetchrows) attribute to
+  re-tune SQL queries.
+
+- Support for custom Promises was necessarily removed due to a refactoring of
+  the module's JavaScript layer.  Code should be migrated to use the native
+  Node.js Promise implementation.
+
+- The function call parameter errors *NJS-005: invalid value for parameter* and
+  *NJS-009: invalid number of parameters* are now passed through the callback,
+  if one is used.  In earlier versions they were thrown without the ability for
+  them to be caught.
+
+## <a name="otherresources"></a> 35. Useful Resources for Node-oracledb
 
 Node-oracledb can be installed on the pre-built [*Database App Development
 VM*][152] for [VirtualBox][153], which has Oracle Database pre-installed on
@@ -14657,7 +16319,7 @@ can be asked at [AskTom][158].
 [56]: https://github.com/oracle/node-oracledb/tree/master/examples/selectjsonblob.js
 [57]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=ADJSN
 [58]: https://github.com/oracle/node-oracledb/tree/master/examples/plsqlarray.js
-[59]: http://www.oracle.com/technetwork/issue-archive/2007/07-mar/o27asktom-084983.html
+[59]: https://blogs.oracle.com/oraclemagazine/on-cursors-sql-and-analytics
 [60]: http://stackoverflow.com/a/43330282/4799035
 [61]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4947CAE8-1F00-4897-BB2B-7F921E495175
 [62]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-56AEF38E-9400-427B-A818-EDEC145F7ACD
@@ -14678,12 +16340,10 @@ can be asked at [AskTom][158].
 [77]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C9054D20-3A70-484F-B11B-CC591A10D609
 [78]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-24109CB5-7BB9-48B2-AD7A-39458AA13C0C
 [79]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7AE9DBE2-5316-4802-99D1-969B72823F02
-[80]: https://oracle.github.io/node-oracledb/INSTALL.html#github
-[81]: https://oracle.github.io/node-oracledb/INSTALL.html#instrpm
 [82]: https://oracle.github.io/node-oracledb/INSTALL.html#instosx
 [83]: https://github.com/oracle/node-oracledb/blob/master/CHANGELOG.md
 [84]: https://github.com/oracle/node-oracledb/tree/master/examples/rowlimit.js
-[85]: http://www.oracle.com/technetwork/issue-archive/2007/07-jan/o17asktom-093877.html
+[85]: https://blogs.oracle.com/oraclemagazine/on-top-n-and-pagination-queries
 [86]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F9CE0CC3-13AE-4744-A43C-EAC7A71AAAB6__CJAHCAFF
 [87]: https://oracle.github.io/node-oracledb/INSTALL.html#quickstart
 [88]: https://nodejs.org/en/download/
@@ -14749,16 +16409,16 @@ can be asked at [AskTom][158].
 [149]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4848E6A0-58A7-44FD-8D6D-A033D0CCF9CB
 [150]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7E9034D5-0D33-43A1-9012-918350FE148C
 [151]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8C85D289-6AF3-41BC-848B-BF39D32648BA
-[152]: https://www.oracle.com/technetwork/community/developer-vm/index.html#dbapp
+[152]: https://www.oracle.com/downloads/developer-vm/community-downloads.html
 [153]: https://www.virtualbox.org
 [154]: http://www.oracle.com/technetwork/database/enterprise-edition/downloads/
 [155]: https://github.com/oracle/docker-images
 [156]: http://yum.oracle.com/
 [157]: https://livesql.oracle.com/
 [158]: https://asktom.oracle.com/
-[159]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1070805B-0703-457C-8D2E-4EEC26193E5F
+[159]: https://docs.oracle.com/en/database/oracle/oracle-database/20/netrf/local-naming-parameters-in-tns-ora-file.html#GUID-6140611A-83FC-4C9C-B31F-A41FC2A5B12D
 [160]: https://github.com/oracle/node-oracledb/issues/699#issuecomment-524009129
-[161]: https://docs.oracle.com/en/cloud/paas/atp-cloud/atpud/manage.html
+[161]: https://docs.oracle.com/en/cloud/paas/atp-cloud/atpud/managing-database-users.html
 [162]: https://www.oracle.com//cloud/free/
 [163]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C672E92D-CE32-4759-9931-92D7960850F7
 [164]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=SHARD
@@ -14766,3 +16426,25 @@ can be asked at [AskTom][158].
 [166]: https://www.youtube.com/watch?v=rhOVF82KY7E
 [167]: https://www.youtube.com/watch?v=0TdqGlA4bxI
 [168]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-AA8D783D-7337-4A61-BD7D-5DB580C46D9A
+[169]: https://oracle.github.io/node-oracledb/#features
+[170]: https://github.com/oracle/node-oracledb/blob/v4.2.0/doc/api.md
+[171]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8BAD86FC-27C5-4103-8151-AC5BADF274E3
+[172]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C5B0AF7D-ABE8-4F69-9552-F4DAF40281F1
+[173]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-0F711EA4-08A8-463F-B4C6-1CE3A24274C8
+[174]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FAFD1247-06E5-4E64-917F-AEBD4703CF40
+[175]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-0203C8FA-A4BE-44A5-9A25-3D1E578E879F
+[176]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-B28362BE-8831-4687-89CF-9F77DB3698D2
+[177]: https://download.oracle.com/ocomdocs/global/Oracle-Net-19c-Easy-Connect-Plus.pdf
+[178]: https://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/adb-continuousavailability-5169724.pdf
+[179]: https://eslint.org/docs/rules/no-await-in-loop
+[180]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-35CB2592-7588-4C2D-9075-6F639F25425E
+[181]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A9D4A5F5-B939-48FF-80AE-0228E7314C7D
+[182]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E63D75A1-FCAA-4A54-A3D2-B068442CE766
+[183]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=RACAD
+[184]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-805AB986-DE12-4FEA-AF56-5AABCD2132DF
+[185]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F20C5DC5-C2FC-4145-9E4E-345CCB8148C7
+[186]: https://static.rainfocus.com/oracle/oow19/sess/1553616880266001WLIh/PF/OOW19_Net_CON4641_1569022126580001esUl.pdf
+[187]: https://support.oracle.com/epmos/faces/DocumentDisplay?id=207303.1
+[188]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=TGDBA
+[189]: https://github.com/oracle/node-oracledb/tree/master/examples/webappawait.js
+[190]: https://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/continuous-service-for-apps-on-atpd-5486113.pdf
