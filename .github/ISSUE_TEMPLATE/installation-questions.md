@@ -47,7 +47,7 @@ Also run node and show the output of:
 
 3. Are you installing into vanilla Node.js, or using something like Electron?
 
-4. Show the directory listing where your Oracle client libraries are installed (e.g. the Instant Client directory).  Is it 64-bit or 32-bit?
+4. Show the directory listing where your Oracle Client libraries are installed (e.g. the Instant Client directory).  Is it 64-bit or 32-bit?
 
 5. Show what the `PATH` environment variable (on Windows) or `LD_LIBRARY_PATH` (on Linux) are set to?
 

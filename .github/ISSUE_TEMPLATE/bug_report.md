@@ -25,7 +25,7 @@ Use Markdown syntax, see https://help.github.com/github/writing-on-github/basic-
 
 Give your database version.
 
-Also run node and show the output of:
+Also run Node.js and show the output of:
 
     process.platform
     process.version
@@ -55,6 +55,10 @@ Include all SQL needed to create the database schema.
 
 Use a gist for long code: see https://gist.github.com/
 
-Format code by using three backticks on a line before and after code snippets.
+Format code by using three backticks on a line before and after code snippets, for example:
+
+```
+const oracledb = require('oracledb');
+```
 
 -->

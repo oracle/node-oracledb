@@ -47,6 +47,10 @@ Include all SQL needed to create the database schema.
 
 Use a gist for long code: see https://gist.github.com/
 
-Format code by using three backticks on a line before and after code snippets.
+Format code by using three backticks on a line before and after code snippets, for example:
+
+```
+const oracledb = require('oracledb');
+```
 
 -->
