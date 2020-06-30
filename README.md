@@ -1,4 +1,6 @@
-# node-oracledb version 5.0
+# node-oracledb version 5.0-dev
+
+**This release is under development**
 
 The node-oracledb add-on for Node.js powers high performance Oracle
 Database applications.
