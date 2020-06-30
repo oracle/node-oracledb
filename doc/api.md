@@ -15567,7 +15567,7 @@ application load, the reduction of round-trips may help performance
 and overall system scalability.  The documentation in [Database
 Round-trips](#roundtrips) shows how to measure round-trips.
 
-Here are some suggestions for the starting point to being your tuning
+Here are some suggestions for the starting point to begin your tuning
 
 - To tune queries that return an unknown number of rows, estimate the
   number of rows returned and start with an appropriate
