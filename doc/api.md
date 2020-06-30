@@ -2709,10 +2709,10 @@ The options parameter and option attributes are optional.  If an attribute is se
 
 Attribute           | Description
 ------------------- |-----------------------------
-`configDir`         | This specifies the directory in which the [Optional Oracle Net Configuration](#tnsadmin) and [Optional Oracle Client Configuration](#oraaccess) files reside.  It is equivalent to setting the Oracle environment variable `TNS_ADMIN` to this value.  Any value in that environment variable prior to the call to `oracledb.initOracleClient()` is ignored.  If this attribute is not set, Oracle's default configuration file [search heuristics](#tnsadmin) are used.
+`configDir`         | This specifies the directory in which the [Optional Oracle Net Configuration](#tnsadmin) and [Optional Oracle Client Configuration](#oraaccess) files reside.  It is equivalent to setting the Oracle environment variable `TNS_ADMIN` to this value.  Any value in that environment variable prior to the call to `oracledb.initOracleClient()` is ignored. On Windows, remember to double each blackslash used as a directory separator.  If `configDir` is not set, Oracle's default configuration file [search heuristics](#tnsadmin) are used.
 `driverName`        | This specifies the driver name value shown in database views, such as `V$SESSION_CONNECT_INFO`.  It can be used by applications to identify themselves for tracing and monitoring purposes.  The convention is to separate the product name from the product version by a colon and single space characters.  If this attribute is not specified, the value "node-oracledb : *version*" is used. See [Other Node-oracledb Initialization](#otherinit).
 `errorUrl`          | This specifies the URL that is included in the node-oracledb exception message if the Oracle Client libraries cannot be loaded.  This allows applications that use node-oracledb to refer users to application-specific installation instructions.  If this attribute is not specified, then the [node-oracledb installation instructions][2] URL is used.  See [Other Node-oracledb Initialization](#otherinit).
-`libDir`            | This specifies the directory containing the Oracle Client libraries.  If `libDir` is not specified, the default library search mechanism is used.  If your client libraries are in a full Oracle Client or Oracle Database installation, such as Oracle Database "XE" Express Edition, then you must have previously set environment variables like `ORACLE_HOME` before calling `initOracleClient()`.  See [Locating the Oracle Client Libraries](#oracleclientloading).
+`libDir`            | This specifies the directory containing the Oracle Client libraries.  If `libDir` is not specified, the default library search mechanism is used.  If your client libraries are in a full Oracle Client or Oracle Database installation, such as Oracle Database "XE" Express Edition, then you must have previously set environment variables like `ORACLE_HOME` before calling `initOracleClient()`.  On Windows, remember to double each blackslash used as a directory separator. See [Locating the Oracle Client Libraries](#oracleclientloading).
 
 
 On Linux, ensure a `libclntsh.so` file exists.  On macOS ensure a
@@ -7750,13 +7750,15 @@ use:
 ```javascript
 const oracledb = require('oracledb');
 try {
-  oracledb.initOracleClient({libDir: 'C:\oracle\instantclient_19_6'});
+  oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_6'});
 } catch (err) {
   console.error('Whoops!');
   console.error(err);
   process.exit(1);
 }
 ```
+
+If you use backslashes in the `libDir` string, you will need to double them.
 
 The `initOracleClient()` function should only be called once.
 
@@ -7794,6 +7796,8 @@ To make node-oracledb use the files you can set
 const oracledb = require('oracledb');
 oracledb.initOracleClient({configDir: '/etc/my-oracle-config'});
 ```
+
+(If you use backslashes in the `configDir` string, you will need to double them.)
 
 This is equivalent to setting the environment variable [`TNS_ADMIN`][8] to
 `/etc/my-oracle-config`.

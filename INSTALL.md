@@ -868,13 +868,15 @@ Client libraries are, see [Initializing Node-oracledb][17]:
     ```javascript
     const oracledb = require('oracledb');
     try {
-      oracledb.initOracleClient({libDir: 'C:\oracle\instantclient_19_6'});
+      oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_6'});
     } catch (err) {
       console.error('Whoops!');
       console.error(err);
       process.exit(1);
     }
     ```
+
+  If you use backslashes in the `libDir` string, you will need to double them.
 
 - Alternatively, copy the Oracle Instant Client libraries to the
   `node_modules/oracledb/build/Release` directory where the `oracledb*.node`
@@ -913,17 +915,19 @@ documentation.
 
 If you use optional Oracle configuration files such as `tnsnames.ora`,
 `sqlnet.ora` or `oraaccess.xml` with Instant Client, then put the files in an
-accessible directory, for example in `C:\oracle\your_config_dir`.  Then use
-[`oracledb.initOracleClient()`][64] in your application:
+accessible directory.  For example if they are in `C:\oracle\your_config_dir`
+then use [`oracledb.initOracleClient()`][64] in your application:
 
 ```javascript
 const oracledb = require('oracledb');
-oracledb.initOracleClient({configDir: 'C:\oracle\your_config_dir'});
+oracledb.initOracleClient({configDir: 'C:\\oracle\\your_config_dir'});
 ```
+
+If you use backslashes in the `configDir` string, you will need to double them.
 
 Or you can set the environment variable `TNS_ADMIN` to that directory name.
 
-Another alternative is to put the files in the `network/admin` subdirectory of
+Another alternative is to put the files in the `network\admin` subdirectory of
 Instant Client, for example in `C:\oracle\instantclient_19_6\network\admin`.
 This is the default Oracle configuration directory for executables linked with
 this Instant Client.
@@ -1025,8 +1029,9 @@ Optional Oracle client configuration files such as [`tnsnames.ora`][15],
 `$ORACLE_HOME\network\admin`.
 
 Alternatively, if you use Oracle client configuration files, they can be put in
-another, accessible directory.  Then use `oracledb.initOracleClient({configDir:
-'C:\oracle\your_config_dir'});` in your application or set the environment
+another, accessible directory.  For example in `C:\oracle\your_config_dir`.
+Then use `oracledb.initOracleClient({configDir:
+'C:\\oracle\\your_config_dir'});` in your application or set the environment
 variable `TNS_ADMIN` to that directory name.
 
 ##### 3.4.2.5 Run an example program
