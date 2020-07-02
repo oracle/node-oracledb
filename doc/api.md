@@ -8082,7 +8082,7 @@ which indicates to connect to the local, default database.
 The `connectionString` property is an alias for `connectString`.
 Use only one of the properties.
 
-`#### <a name="easyconnect"></a> 15.1.1 Easy Connect Syntax for Connection Strings
+#### <a name="easyconnect"></a> 15.1.1 Easy Connect Syntax for Connection Strings
 
 An Easy Connect string is often the simplest to use.  For example, to connect to
 the Oracle Database service `orclpdb1` that is running on the host
