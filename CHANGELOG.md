@@ -10,7 +10,7 @@
 
 - Installation Changes:
 
-    - Added a
+    - Added an
       [`oracledb.initOracleClient()`](https://oracle.github.io/node-oracledb/doc/api.html#odbinitoracleclient)
       function to specify the directories that the Oracle Client libraries and
       optional Oracle configuration files are in, and to specify other
