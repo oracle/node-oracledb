@@ -623,19 +623,23 @@ Node.js and node-oracledb Linux RPM packages are available on
 [Oracle Linux 6][50] and [Oracle Linux 7][51] channels.  This means
 installation is simple, and can be automated.
 
-As an example, to install Node 10 on Oracle Linux 7, run these commands:
+As an example, to install Node 12 on Oracle Linux 7, run these commands:
 
 ```
 sudo yum install -y oracle-nodejs-release-el7 oracle-release-el7
-sudo yum install nodejs node-oracledb-node10
+sudo yum-config-manager --disable ol7_developer_EPEL
+sudo yum install nodejs node-oracledb-node12
 ```
+
+On a vanilla Oracle Linux 7 installation the EPEL repository is not enabled so
+you can omit the `yum-config-manager` command.
 
 For Instant Client 19, the system library search path is automatically
 configured during installation.
 
-For older versions, if there is no other Oracle software on the
-machine that will be impacted, then permanently add Instant Client to
-the run-time link path.  For example, with sudo or as the root user:
+For older Instant Client versions, if there is no other Oracle software on the
+machine that will be impacted, then permanently add Instant Client to the
+run-time link path.  For example, with sudo or as the root user:
 
 ```
 sudo sh -c "echo /usr/lib/oracle/18.3/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf"
@@ -649,6 +653,8 @@ running applications:
 export NODE_PATH=$(npm root -g)
 node myapp.js
 ```
+
+You may prefer to install node-oracledb as a normal npm package dependency.
 
 See [Node.js for Oracle Linux][46] for details.
 
