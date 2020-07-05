@@ -1763,6 +1763,11 @@ to return query results, see [Tuning Fetch Performance](#rowfetching).
 The `prefetchRows` value is ignored in some cases, such as when the query
 involves a LOB.
 
+If you fetch a REF CURSOR and subsequently pass it back to a PL/SQL block, then
+set `prefetchRows` to 0 during the initial query to ensure that rows are not
+internally fetched from the REF CURSOR by node-oracledb thus making them
+unavailable in the PL/SQL code.
+
 The default value is 2.
 
 This property may be overridden in an [`connection.execute()`](#execute) call,
