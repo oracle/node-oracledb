@@ -1660,15 +1660,15 @@ The default value is 0.
 
 This property may be overridden when [creating a connection pool](#createpool).
 
-For pools created with [External Authentication](#extauth) or with
-[`homogeneous`](#createpoolpoolattrshomogeneous) set to *false*, the
-number of connections initially created is zero even if a larger value
-is specified for `poolMin`.  The pool increment is always 1,
-regardless of the value of
-[`poolIncrement`](#createpoolpoolattrspoolincrement).  Once the number
-of open connections exceeds `poolMin` and connections are idle for
-more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
-number of open connections does not fall below `poolMin`.
+For pools created with [External Authentication](#extauth), with
+[`homogeneous`](#createpoolpoolattrshomogeneous) set to *false*, or when using
+[Database Resident Connection Pooling (DRCP)](#drcp), then the number of
+connections initially created is zero even if a larger value is specified for
+`poolMin`.  Also in these cases the pool increment is always 1, regardless of
+the value of [`poolIncrement`](#createpoolpoolattrspoolincrement).  Once the
+number of open connections exceeds `poolMin` and connections are idle for more
+than the [`poolTimeout`](#propdbpooltimeout) seconds, then the number of open
+connections does not fall below `poolMin`.
 
 A fixed pool size where `poolMin` equals `poolMax` [is strongly
 recommended](#conpoolsizing).  This helps prevent connection storms and helps
