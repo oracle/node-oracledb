@@ -9887,12 +9887,13 @@ Notification][97].
 
 #### <a name="appcontinuity"></a> 15.9.4 Application Continuity
 
-Node-oracledb applications can take advantage of continuous availability with
-the Oracle Database features Application Continuity and Transparent Application
-Continuity.  These help make unplanned database service downtime transparent to
-applications.  See the white papers [Continuous Availability Application
-Continuity for the Oracle Database][178] and [Continuous Availability Best
-Practices for Applications Using Autonomous Database - Dedicated][190].
+Node-oracledb OLTP applications can take advantage of continuous availability
+with the Oracle Database features Application Continuity and Transparent
+Application Continuity.  These help make unplanned database service downtime
+transparent to applications.  See the white papers [Continuous Availability
+Application Continuity for the Oracle Database][178] and [Continuous
+Availability Best Practices for Applications Using Autonomous Database -
+Dedicated][190].
 
 When connected to an AC or TAC enabled service, node-oracledb automatically
 supports AC or TAC.
