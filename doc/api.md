@@ -8130,7 +8130,7 @@ version of the Oracle Client libraries.
 If you are using Oracle Client 19c, the latest [Easy Connect Plus][151] syntax
 allows the use of multiple hosts or ports, along with optional entries for the
 wallet location, the distinguished name of the database server, and even lets
-some network configuration options be set.  The white paper [Oracle Database 19c
+some network configuration options be set.  The technical paper [Oracle Database 19c
 Easy Connect Plus Configurable Database Connection Syntax][177] discusses the
 syntax.  The Easy Connect Plus syntax means that [`tnsnames.ora`](#tnsadmin) or
 [`sqlnet.ora`](#tnsadmin) files are not needed for some further common
@@ -9576,7 +9576,7 @@ to use, and when not to use DRCP.
 
 There are a number of Oracle Database `V$` views that can be used to
 monitor DRCP.  These are discussed in the Oracle documentation and in
-the Oracle white paper [PHP Scalability and High Availability][26].
+the Oracle technical paper [PHP Scalability and High Availability][26].
 This paper also gives more detail on configuring DRCP.
 
 ### <a name="privconn"></a> 15.6 Privileged Connections
@@ -9867,7 +9867,7 @@ immediately made.  Users of Oracle's Data Guard with a broker will get
 FAN events generated when the standby database goes online.
 Standalone databases will send FAN events when the database restarts.
 
-For a more information on FAN see the [white paper on Fast Application
+For a more information on FAN see the [technical paper on Fast Application
 Notification][97].
 
 #### <a name="connectionrlb"></a> 15.9.3 Runtime Load Balancing (RLB)
@@ -9881,7 +9881,7 @@ also be changed via [Oracle Client Configuration](#oraaccess).
 RLB allows optimal use of database resources by balancing database
 requests across RAC instances.
 
-For a more information on RLB, see the [white paper on Fast Application
+For a more information on RLB, see the [technical paper on Fast Application
 Notification][97].
 
 #### <a name="appcontinuity"></a> 15.9.4 Application Continuity
@@ -9889,7 +9889,7 @@ Notification][97].
 Node-oracledb OLTP applications can take advantage of continuous availability
 with the Oracle Database features Application Continuity and Transparent
 Application Continuity.  These help make unplanned database service downtime
-transparent to applications.  See the white papers [Continuous Availability
+transparent to applications.  See the technical papers [Continuous Availability
 Application Continuity for the Oracle Database][178] and [Continuous
 Availability Best Practices for Applications Using Autonomous Database -
 Dedicated][190].
