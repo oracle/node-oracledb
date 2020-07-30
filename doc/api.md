@@ -3792,10 +3792,9 @@ returned for each cursor is limited by `maxRows`.
 Number rowsAffected
 ```
 
-For [DML][14] statements (including SELECT FOR UPDATE) this contains
-the number of rows affected, for example the number of rows
-inserted. For non-DML statements such as queries and PL/SQL statements,
-`rowsAffected` is undefined.
+For [DML][14] statements this contains the number of rows affected, for example
+the number of rows inserted. For non-DML statements such as queries and PL/SQL
+statements, `rowsAffected` is undefined.
 
 Due to Node.js type limitations, the largest value shown will be
 2<sup>32</sup> - 1, even if more rows were affected.  Larger values will wrap.
