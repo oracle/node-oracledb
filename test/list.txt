@@ -4671,7 +4671,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     230.3 Negative - client assigned keys are necessary
     230.4 Negative - save without arguments
 
-231. soda12.js
+231. soda13.js
     231.1 example case
     231.2 truncate multiple times
     231.3 Negative - invalid parameters
