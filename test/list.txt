@@ -4739,3 +4739,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 240. errorOffset.js
     240.1 checks the offset value of the error
+    240.2 database error
+    240.3 the offset of system error is 0
+    240.4 PL/SQL syntax error

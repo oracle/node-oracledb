@@ -33,13 +33,24 @@ const dbconfig = require('./dbconfig.js');
 
 describe('240. errorOffset.js', async () => {
 
-  it('240.1 checks the offset value of the error', async () => {
-    let conn;
+  let conn;
+  before(async () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
     } catch (error) {
       should.not.exist(error);
     }
+  });
+
+  after(async () => {
+    try {
+      await conn.close();
+    } catch (error) {
+      should.not.exist(error);
+    }
+  });
+
+  it('240.1 checks the offset value of the error', async () => {
 
     try {
       await conn.execute("begin t_Missing := 5; end;");
@@ -49,10 +60,54 @@ describe('240. errorOffset.js', async () => {
       should.strictEqual(error.errorNum, 6550);
     }
 
+  }); // 240.1
+
+  it('240.2 database error', async () => {
+
+    const plsql = `
+      begin
+          execute immediate ('drop table nodb_table_nonexistent');
+      end;
+    `;
     try {
-      await conn.close();
+      await conn.execute(plsql);
     } catch (error) {
-      should.not.exist(error);
+      should.exist(error);
+      should.strictEqual(error.offset, 0);
+      should.strictEqual(error.errorNum, 942);
     }
-  });
+
+  }); // 240.2
+
+  it('240.3 the offset of system error is 0', async () => {
+    const plsql = `
+      BEGIN
+          DECLARE v_invalid PLS_INTEGER;
+          BEGIN
+              v_invalid := 100/0;
+          END;
+      END;
+    `;
+    try {
+      await conn.execute(plsql);
+    } catch (error) {
+      should.exist(error);
+      should.strictEqual(error.offset, 0);
+      should.strictEqual(error.errorNum, 1476);
+    }
+  });// 240.3
+
+  it('240.4 PL/SQL syntax error', async () => {
+    const plsql = `DECLARE v_missing_semicolon PLS_INTEGER
+      BEGIN
+          v_missing_semicolon := 46;
+      END;`;
+    try {
+      await conn.execute(plsql);
+    } catch (error) {
+      should.exist(error);
+      should.strictEqual(error.offset, 46);
+      should.strictEqual(error.errorNum, 6550);
+    }
+  }); // 240.4
 });
