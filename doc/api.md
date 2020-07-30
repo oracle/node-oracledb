@@ -11680,12 +11680,6 @@ Node.js String or Buffer types can be passed into PL/SQL blocks or
 inserted into the database by binding to LOB columns or PL/SQL
 parameters.
 
-If the data is larger than can be handled as a String or Buffer in
-Node.js or node-oracledb, it will need to be streamed to a
-[Lob](#lobclass), as discussed in [Streaming Lobs](#streamsandlobs).
-See [LOB Bind Parameters](#lobbinds) for size considerations regarding
-LOB binds.
-
 Given the table:
 
 ```sql
@@ -11751,6 +11745,13 @@ const result = await connection.execute(
   }
 );
 ```
+
+See [LOB Bind Parameters](#lobbinds) for size considerations regarding
+LOB binds.
+
+If the data is larger than can be handled as a String or Buffer in
+Node.js or node-oracledb, it will need to be streamed to a
+[Lob](#lobclass), as discussed in [Streaming Lobs](#streamsandlobs).
 
 ### <a name="queryinglobs"></a> 18.2 Simple LOB Queries and PL/SQL OUT Binds
 
