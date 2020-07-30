@@ -38,7 +38,7 @@ const dbConfig = require('./dbconfig.js');
 // On Windows and macOS, you can specify the directory containing your Oracle
 // Client Libraries.  If this is not done, then a standard search heuristic is
 // used, see the node-oracledb documentation.
-// oracledb.initOracleClient({ libDir: 'C:\instantclient_19_3' });                    // Windows
+// oracledb.initOracleClient({ libDir: 'C:\\instantclient_19_3' });                    // Windows
 // oracledb.initOracleClient({ libDir: '/Users/your_username/instantclient_19_3' });  // macOS
 
 async function run() {
