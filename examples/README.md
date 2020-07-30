@@ -108,4 +108,4 @@ File Name                                                 | Description
 [`sessiontagging2.js`](sessiontagging2.js)                | More complex example of pooled connection tagging for setting session state
 [`soda1.js`](soda1.js)                                    | Basic Simple Oracle Document Access (SODA) example
 [`version.js`](version.js)                                | Shows the node-oracledb version attributes
-[`webappawait.js`](webappawait.js)                        | A simple web application using a connection pool
+[`webapp.js`](webapp.js)                                  | A simple web application using a connection pool

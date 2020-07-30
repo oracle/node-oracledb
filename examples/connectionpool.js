@@ -22,7 +22,7 @@
  *   Shows connection pool usage.  Connection pools are recommended
  *   for applications that use a lot of connections for short periods.
  *
- *   Other connection pool examples are in sessionfixup.js and webappawait.js.
+ *   Other connection pool examples are in sessionfixup.js and webapp.js.
  *   For a standalone connection example, see connect.js
  *
  *   In some networks forced pool termination may hang unless you have

@@ -16,7 +16,7 @@
  * limitations under the License.
  *
  * NAME
- *   webappawait.js
+ *   webapp.js
  *
  * DESCRIPTION
  *   A web based application displaying banana harvest details.

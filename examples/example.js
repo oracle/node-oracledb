@@ -21,7 +21,7 @@
  * DESCRIPTION
  *   A basic node-oracledb example using Node.js 8's async/await syntax.
  *
- *   For connection pool examples see connectionpool.js and webappawait.js
+ *   For connection pool examples see connectionpool.js and webapp.js
  *   For a ResultSet example see resultset1.js
  *   For a query stream example see selectstream.js
  *

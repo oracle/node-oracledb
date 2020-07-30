@@ -8523,7 +8523,7 @@ async function handleRequest(request, response) {
 }
 ```
 
-See [webappawait.js][189] for a runnable example.
+See [webapp.js][189] for a runnable example.
 
 #### <a name="conpoolsizing"></a> 15.3.1 Connection Pool Sizing
 
@@ -16459,5 +16459,5 @@ can be asked at [AskTom][158].
 [186]: https://static.rainfocus.com/oracle/oow19/sess/1553616880266001WLIh/PF/OOW19_Net_CON4641_1569022126580001esUl.pdf
 [187]: https://support.oracle.com/epmos/faces/DocumentDisplay?id=207303.1
 [188]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=TGDBA
-[189]: https://github.com/oracle/node-oracledb/tree/master/examples/webappawait.js
+[189]: https://github.com/oracle/node-oracledb/tree/master/examples/webapp.js
 [190]: https://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/continuous-service-for-apps-on-atpd-5486113.pdf
