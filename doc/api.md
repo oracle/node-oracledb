@@ -1831,6 +1831,8 @@ The default value is 500.
 
 This property may be overridden when [creating a connection pool](#createpool).
 
+This property was added in node-oracledb 5.0.
+
 ##### Example
 
 ```javascript
@@ -2242,6 +2244,8 @@ The default value is 500.
 
 This optional property overrides the
 [`oracledb.queueMax`](#propdbqueuemax) property.
+
+This property was added in node-oracledb 5.0.
 
 ###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.15 `queueRequests`
 
@@ -5561,6 +5565,8 @@ The maximum number of pending `pool.getConnection()` calls that can be
 [queued](#connpoolqueue).
 
 See [`oracledb.queueMax`](#propdbqueuemax).
+
+This property was added in node-oracledb 5.0.
 
 #### <a name="proppoolqueuerequests"></a> 8.1.10 `pool.queueRequests`
 
@@ -16213,11 +16219,6 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
 
 - Review the [CHANGELOG][83] and take advantage of new features.
 
-  Choose a sensible value for the new *Pool* [`queueMax`](#propdbqueuemax)
-  attribute, so that applications get the new error only under abnormal
-  connection load.  To allow all pooled connection requests to be queued (the
-  previous behavior), set it to 0.
-
 - Review your application use of node-oracledb error messages since some have changed.
 
 - Note that the default for [`oracledb.events`](#propdbevents) has reverted to
@@ -16243,6 +16244,11 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
   [node-oracledb installation instructions][2] and [Initializing
   Node-oracledb](#initnodeoracledb), particularly around how node-oracledb can
   locate Oracle Client libraries.
+
+- Choose a sensible value for the new *Pool* [`queueMax`](#propdbqueuemax)
+  attribute, so that applications get the new error only under abnormal
+  connection load.  To allow all pooled connection requests to be queued (the
+  previous behavior), set it to -1.
 
 - Take advantage of the new [`prefetchRows`](#propexecprefetchrows) attribute to
   re-tune SQL queries.
