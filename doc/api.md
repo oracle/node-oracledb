@@ -512,7 +512,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
 28. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
 29. [Simple Oracle Document Access (SODA)](#sodaoverview)
     - 29.1 [Node-oracledb SODA Requirements](#sodarequirements)
-    - 29.2 [Creating SODA Collections](#creatingsodacollections)
+    - 29.2 [Creating and Dropping SODA Collections](#creatingsodacollections)
     - 29.3 [Creating and Accessing SODA documents](#accessingsodadocuments)
     - 29.4 [SODA Query-by-Example Searches for JSON Documents](#sodaqbesearches)
     - 29.5 [SODA Text Searches](#sodatextsearches)
@@ -12191,10 +12191,11 @@ Oracle Database 12.1.0.2 introduced native support for JSON data.  You
 can use JSON with relational database features, including
 transactions, indexing, declarative querying, and views.  You can
 project JSON data relationally, making it available for relational
-processes and tools.
+processes and tools.  Also see [node-oracledb's SODA API](#sodaoverview), which
+allows access to JSON documents through a set of NoSQL-style APIs.
 
-JSON data in the database is stored as BLOB, CLOB or VARCHAR2 data.
-This means that node-oracledb can easily insert and query it.
+JSON in relational tables is stored as BLOB, CLOB or VARCHAR2 data.  This means
+that node-oracledb can easily insert and query it.
 
 As an example, the following table has a `PO_DOCUMENT` column that is
 enforced to be JSON:
@@ -14618,29 +14619,25 @@ that connection.
 
 ## <a name="sodaoverview"></a> 29. Simple Oracle Document Access (SODA)
 
-Oracle Database Simple Oracle Document Access (SODA) is available in
-node-oracledb through a set of NoSQL-style APIs.  Documents can be inserted,
-queried, and retrieved from Oracle Database using node-oracledb methods.  By
-default, documents are JSON strings.
+Oracle Database Simple Oracle Document Access (SODA) documents can be inserted,
+queried, and retrieved from Oracle Database through NoSQL-style APIs.  By
+default, documents are JSON strings but can be nearly any kind, including video,
+image, sound, and other binary content.  Create, read, update and delete
+operations can be performed via document key lookups, or by query-by-example
+(QBE) pattern-matching.
 
-The [Oracle Database Introduction to SODA][103] manual contains much
-information relevant to using SODA.  You can use Oracle SODA
-implementations in Node.js, [Python][106], [Java][105], [PL/SQL][104]
-or [Oracle Call Interface][107] to perform operations on documents of
-nearly any kind (including video, image, sound, and other binary
-content).  Create, read, update and delete operations can be performed
-via document key lookups, or by query-by-example (QBE)
-pattern-matching.
+SODA internally uses a SQL schema to store documents but you do not need to know
+SQL or how the documents are stored. However, optional access via SQL does allow
+use of advanced Oracle Database functionality such as analytics for reporting.
+Applications that access a mixture of SODA objects and relational objects (or
+access SODA objects via SQL) are supported.
 
-SODA uses a SQL schema to store documents but you do not need to know
-SQL or how the documents are stored. However, access via SQL does
-allow use of advanced Oracle Database functionality such as analytics
-for reporting.
+Oracle SODA implementations are also available in [Python][106], [Java][105],
+[PL/SQL][104], [Oracle Call Interface][107] and via [REST][191]. The [Simple
+Oracle Document Access][103] homepage contains much information relevant to
+using SODA.
 
-Applications that access a mixture of SODA objects and relational
-objects (or access SODA objects via SQL) are supported, but be aware
-of the commit behavior, since any commit or rollback on a connection
-will affect all work.
+#### Node-oracledb SODA Objects
 
 Node-oracledb uses the following objects for SODA:
 
@@ -14649,8 +14646,8 @@ Node-oracledb uses the following objects for SODA:
   Database connection.  A 'SODA database' is an abstraction, allowing
   access to SODA collections in that 'SODA database', which then allow
   access to documents in those collections.  A SODA database is
-  analogous to an Oracle Database user or schema, a collection is
-  analogous to a table, and a document is analogous to a table row
+  analogous to an Oracle Database user or schema.  A collection is
+  analogous to a table.  A document is analogous to a table row
   with one column for a unique document key, a column for the document
   content, and other columns for various document attributes.
 
@@ -14706,6 +14703,8 @@ The `CREATE TABLE` system privilege is also needed.  Advanced users
 who are using Oracle sequences for keys will also need the `CREATE
 SEQUENCE` privilege.
 
+#### Committing SODA Work
+
 The general recommendation for SODA applications is to turn on
 [`autoCommit`](#propdbisautocommit) globally:
 
@@ -14713,18 +14712,18 @@ The general recommendation for SODA applications is to turn on
 oracledb.autoCommit = true;
 ```
 
-If your SODA document write operations are mostly independent of each
-other, this removes the overhead of explicit
-[`connection.commit()`](#commit) calls.
+If your SODA document write operations are mostly independent of each other,
+this removes the overhead of application transaction management and the need for
+explicit [`connection.commit()`](#commit) calls.
 
 When deciding how to commit transactions, beware of transactional consistency
 and performance requirements.  If you are using individual SODA calls to insert
 or update a large number of documents with individual calls, you should turn
 `autoCommit` off and issue a single, explicit [`connection.commit()`](#commit)
-after all documents have been processed.  (Also consider using
+after all documents have been processed.  Also consider using
 [`sodaCollection.insertMany()`](#sodacollinsertmany) or
 [`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) which have
-performance benefits).
+performance benefits.
 
 If you are not autocommitting, and one of the SODA operations in your
 transaction fails, then previous uncommitted operations will not be rolled back.
@@ -14737,8 +14736,9 @@ Note:
 - SODA DDL operations do not commit an open transaction the way that SQL always does for DDL statements.
 - When [`oracledb.autoCommit`](#propdbisautocommit) is *true*, most SODA methods will issue a commit before successful return.
 - SODA provides optimistic locking, see [`sodaOperation.version()`](#sodaoperationclassversion).
+- When mixing SODA and relational access, any commit or rollback on the connection will affect all work.
 
-### <a name="creatingsodacollections"></a> 29.2 Creating SODA Collections
+### <a name="creatingsodacollections"></a> 29.2 Creating and Dropping SODA Collections
 
 The following examples use Node.js 8's
 [async/await](#asyncawaitoverview) syntax, however callbacks can also
@@ -16380,9 +16380,9 @@ can be asked at [AskTom][158].
 [100]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-ABC7AE4D-64A8-4EA9-857D-BEF7300B64C3
 [101]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2BEF5482-CF97-4A85-BD90-9195E41E74EF
 [102]: https://github.com/oracle/node-oracledb/issues/886
-[103]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=ADSDI
+[103]: https://docs.oracle.com/en/database/oracle/simple-oracle-document-access/index.html
 [104]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=ADSDP
-[105]: https://docs.oracle.com/en/database/oracle/simple-oracle-document-access/java-1/adsda/index.html
+[105]: https://docs.oracle.com/en/database/oracle/simple-oracle-document-access/java/adsda/index.html
 [106]: https://cx-oracle.readthedocs.org/en/latest/index.html
 [107]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-23206C89-891E-43D7-827C-5C6367AD62FD
 [108]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-CB09C4E3-BBB1-40DC-88A8-8417821B0FBE
@@ -16467,3 +16467,4 @@ can be asked at [AskTom][158].
 [188]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=TGDBA
 [189]: https://github.com/oracle/node-oracledb/tree/master/examples/webapp.js
 [190]: https://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/continuous-service-for-apps-on-atpd-5486113.pdf
+[191]: https://docs.oracle.com/en/database/oracle/simple-oracle-document-access/rest/index.html
