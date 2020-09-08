@@ -436,13 +436,21 @@ static bool njsSodaOperation_getOnePostAsync(njsBaton *baton, napi_env env,
 static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
         napi_value *args)
 {
+    dpiVersionInfo versionInfo;
+
     // allocate memory for ODPI-C operations structure
     baton->sodaOperOptions = calloc(1, sizeof(dpiSodaOperOptions));
     if (!baton->sodaOperOptions)
         return njsBaton_setError(baton, errInsufficientMemory);
 
-    // set non-zero defaults
-    baton->sodaOperOptions->fetchArraySize = baton->oracleDb->fetchArraySize;
+    // set fetch array size, but ONLY if the client version exceeds 19.5
+    if (dpiContext_getClientVersion(baton->oracleDb->context,
+            &versionInfo) < 0)
+        return njsUtils_throwErrorDPI(env, baton->oracleDb);
+    if (versionInfo.versionNum > 19 ||
+            (versionInfo.versionNum == 19 && versionInfo.releaseNum >= 5))
+        baton->sodaOperOptions->fetchArraySize =
+                baton->oracleDb->fetchArraySize;
 
     // process each of the options
     if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "fetchArraySize",
