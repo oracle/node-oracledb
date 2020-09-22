@@ -39,6 +39,8 @@
 // If you increase poolMax, you must increase UV_THREADPOOL_SIZE before Node.js
 // starts its thread pool.  If you set UV_THREADPOOL_SIZE too late, the value is
 // ignored and the default size of 4 is used.
+// Note on Windows you must set the UV_THREADPOOL_SIZE environment variable before
+// running your application.
 // process.env.UV_THREADPOOL_SIZE = 4;
 
 const http = require('http');
