@@ -12,16 +12,12 @@ exemptLabels:
   - announcement
   - OCA accepted
 # Label to use when marking an issue as stale
-staleLabel: wontfix
+staleLabel: inactive
 # Comment to post when marking an issue as stale. Set to `false` to disable
 markComment: >
-  This issue has been automatically marked as stale because it has not had
-  recent activity. It will be closed if no further activity occurs. Thank you
+  This issue has been automatically marked as inactive because it has not been
+  updated recently.  It will be closed if no further activity occurs. Thank you
   for your contributions.
 # Comment to post when closing a stale issue. Set to `false` to disable
 closeComment: >
-  This issue has been automatically closed because there has been no response
-  to our request for more information from the original author. With only the
-  information that is currently in the issue, we don't have enough information
-  to take action. Please update the issue if you have or find the answers we
-  need so that we can investigate further.
+  This issue has been automatically closed because it has not been updated in 28 days.
