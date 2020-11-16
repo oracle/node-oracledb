@@ -67,7 +67,7 @@ async function init() {
       // queueTimeout: 60000, // terminate getConnection() calls queued for longer than 60000 milliseconds
       // sessionCallback: myFunction, // function invoked for brand new connections or by a connection tag mismatch
       // stmtCacheSize: 30, // number of statements that are cached in the statement cache of each connection
-      // _enableStats: false // record pool usage statistics that can be output with pool._logStats()
+      // _enableStats: false // record pool usage statistics that can be output with oracledb.getPool()._logStats()
     });
     console.log('Connection pool started');
 
