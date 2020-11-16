@@ -71,11 +71,7 @@
         "variables" : {
           "dpi_check%"    : "<!(INSTURL=\"https://oracle.github.io/node-oracledb/INSTALL.html#github\"; ERR=\"oracledb ERR! Error:\"; if [ -f odpi/include/dpi.h ]; then echo \"Has dpi.h\"; else echo \"$ERR Cannot find odpi/include/dpi.h.  For GitHub ZIP downloads you must separately download the odpi subdirectory from GitHub.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi;)"
         },
-        "xcode_settings": {
-          "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
-          "GCC_ENABLE_CPP_RTTI": "YES"
-        },
-          "libraries"     : ['-ldl', '-lpthread', '-Wl,-rpath,/usr/local/lib']
+        "libraries"     : ['-ldl', '-lpthread', '-Wl,-rpath,/usr/local/lib']
       }
     ],
     [
