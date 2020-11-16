@@ -35,11 +35,14 @@ process.env.ORA_SDTZ = 'UTC';
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 
-// On Windows and macOS, you can specify the directory containing your Oracle
-// Client Libraries.  If this is not done, then a standard search heuristic is
-// used, see the node-oracledb documentation.
-// oracledb.initOracleClient({ libDir: 'C:\\instantclient_19_3' });                    // Windows
-// oracledb.initOracleClient({ libDir: '/Users/your_username/instantclient_19_3' });  // macOS
+// On Windows and macOS, you can specify the directory containing the Oracle
+// Client Libraries at runtime, or before Node.js starts.  On other platforms
+// the system library search path must always be set before Node.js is started.
+// See the node-oracledb installation documentation.
+// If the search path is not correct, you will get a DPI-1047 error.
+//
+// oracledb.initOracleClient({ libDir: 'C:\\instantclient_19_8' });                            // Windows
+// oracledb.initOracleClient({ libDir: '/Users/your_username/Downloads/instantclient_19_8' }); // macOS
 
 async function run() {
   let connection;
