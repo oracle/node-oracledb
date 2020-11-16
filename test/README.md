@@ -1,6 +1,6 @@
 # Test node-oracledb
 
-*Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -45,9 +45,15 @@ for relevant licenses.
 See [INSTALL](https://oracle.github.io/node-oracledb/INSTALL.html)
 for installation details.
 
+On macOS, run a command like:
+
+```
+ln -s $HOME/Downloads/instantclient_19_8/libclntsh.dylib $(npm root)/oracledb/build/Release
+```
+
 Note: the
 [test suite](https://github.com/oracle/node-oracledb/tree/master/test)
-is on GitHub. NPM module had not contained the tests since node-oracledb 1.9.1.
+is on GitHub.
 
 ### <a name="workdir"></a> 1.1 Create a working directory
 

@@ -7682,7 +7682,7 @@ Node-oracledb looks for the Oracle Client libraries as follows:
       in the directory where the `oracledb*.node` binary is.  For example in
       `node_modules/oracledb/build/Release`.  This directory should contain the
       libraries from an unzipped Instant Client 'Basic' or 'Basic Light'
-      package.  For example, use `ln -s ~/instantclient_19_3/libclntsh.dylib
+      package.  For example, use `ln -s ~/Downloads/instantclient_19_8/libclntsh.dylib
       node_modules/oracledb/build/Release/`.  If the libraries are not found, no
       error is thrown and the search continues, see next bullet point.
 

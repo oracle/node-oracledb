@@ -320,7 +320,7 @@ rm -i *jdbc* *occi* *mysql* *mql1* *ipc1* *jar uidrvci genezi adrci
 
 Refer to the Oracle Instant Client documentation for details.
 
-##### 3.2.1.5 Optionally create the Oracle Client configuration directory
+##### 3.2.1.5 Optionally create the Oracle Client configuration file directory
 
 If you use optional Oracle configuration files such as `tnsnames.ora`,
 `sqlnet.ora` or `oraaccess.xml` with Instant Client, then put the files in an
@@ -574,7 +574,7 @@ will need to have the link path set:
 export LD_LIBRARY_PATH=/usr/lib/oracle/18.3/client64/lib
 ```
 
-##### 3.2.3.5 Optionally create the Oracle Client configuration directory
+##### 3.2.3.5 Optionally create the Oracle Client configuration file directory
 
 If you use optional Oracle configuration files such as `tnsnames.ora`,
 `sqlnet.ora` or `oraaccess.xml` with Instant Client, then put the files in an
@@ -668,10 +668,7 @@ Review the generic [prerequisites](#prerequisites).
 
 The pre-built binaries were built on macOS Mojave 10.14.6.
 
-Oracle Instant Client libraries are required on macOS.  Note that Oracle Instant
-Client 19c and earlier are not supported on macOS Catalina 10.15: you will need
-to allow access to several Instant Client libraries from the Security & Privacy
-preference pane.
+Oracle Instant Client libraries are required on macOS.
 
 There is no native Oracle Database for macOS but one can easily be run in a
 Linux virtual machine, see [The Easiest Way to Install Oracle Database on Apple
@@ -701,25 +698,53 @@ If a pre-built node-oracledb binary is not installable, the binary can
 be built from source code, see [Node-oracledb Installation from
 Source Code](#github).
 
-#### 3.3.4 Install the free Oracle Instant Client 'Basic' ZIP file
+#### 3.3.4 Install the free Oracle Instant Client 'Basic' package
 
-Download the free **Basic** 64-bit ZIP from [Oracle Technology Network][22] and
-unzip it.  For example in Terminal you could unzip in your home directory:
+Download the **Basic** 64-bit DMG from [Oracle Technology Network][22].
+
+##### Manual Installation
+
+In Finder, double click on the DMG to mount it.
+
+Open a terminal window and run the install script in the mounted package, for example:
 
 ```
-cd ~
-unzip instantclient-basic-macos.x64-19.3.0.0.0dbru.zip
+$ /Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru/install_ic.sh
 ```
+
+This copies the contents to `$HOME/Downloads/instantclient_19_8`.
+
+In Finder, eject the mounted Instant Client package.
+
+If you have multiple Instant Client DMG packages mounted, you only need to run
+`install_ic.sh` once.  It will copy all mounted Instant Client DMG packages at
+the same time.
+
+##### Scripted Installation
+
+Instant Client installation can alternatively be scripted, for example:
+
+```
+cd $HOME/Downloads
+curl -O https://download.oracle.com/otn_software/mac/instantclient/198000/instantclient-basic-macos.x64-19.8.0.0.0dbru.dmg
+hdiutil mount instantclient-basic-macos.x64-19.8.0.0.0dbru.dmg
+/Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru/install_ic.sh
+hdiutil unmount /Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru
+```
+
+The Instant Client directory will be `$HOME/Downloads/instantclient_19_8`.
+
+##### Configure Instant Client
 
 There are several alternative ways to tell node-oracledb where your Oracle
 Client libraries are, see [Initializing Node-oracledb][17]:
 
-- Use [`oracledb.initOracleClient()`][64] in your application:
+- Use [`oracledb.initOracleClient()`][64] in your application code:
 
     ```javascript
     const oracledb = require('oracledb');
     try {
-      oracledb.initOracleClient({libDir: '/Users/your_username/instantclient_19_3'});
+      oracledb.initOracleClient({libDir: '/Users/your_username/Downloads/instantclient_19_8'});
     } catch (err) {
       console.error('Whoops!');
       console.error(err);
@@ -732,37 +757,41 @@ Client libraries are, see [Initializing Node-oracledb][17]:
   binary is.  For example:
 
     ```
-    ln -s ~/instantclient_19_3/libclntsh.dylib node_modules/oracledb/build/Release
+    ln -s ~/Downloads/instantclient_19_8/libclntsh.dylib node_modules/oracledb/build/Release
+    ```
+
+    This can be added to your `package.json` files:
+
+    ```
+      "scripts": {
+        "postinstall": "ln -s $HOME/Downloads/instantclient_19_8/libclntsh.dylib $(npm root)/oracledb/build/Release"
+       },
     ```
 
     Instead of linking, you can also copy all the required OCI libraries, for example:
 
     ```
-    cp ~/instantclient_19_3/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} node_modules/oracledb/build/Release
+    cp ~/Downloads/instantclient_19_8/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} node_modules/oracledb/build/Release
     cd node_modules/oracledb/build/Release/ && ln -s libclntsh.dylib.19.1 libclntsh.dylib
     ```
 
-- Alternatively, set `DYLD_LIBRARY_PATH` to include the Oracle Instant Client
-  directory.  Note this variable must be set in the terminal or shell that
-  directly invokes Node.js.  The variable will not propagate to sub-shells.
-
 - Alternatively, create a symbolic link for the 'client shared library' in
-  `/usr/local/lib`.  If the `lib` sub-directory does not exist, you can create
-  it.  For example:
+  `/usr/local/lib`.  Note this may not work on all versions of macOS.
+  If the `lib` sub-directory does not exist, you can create it.  For example:
 
     ```
     mkdir /usr/local/lib
-    ln -s ~/instantclient_19_3/libclntsh.dylib /usr/local/lib
+    ln -s ~/Downloads/instantclient_19_8/libclntsh.dylib /usr/local/lib
     ```
 
     Instead of linking, you can also copy all the required OCI libraries, for example:
 
     ```
     mkdir /usr/local/lib
-    cp ~/instantclient_19_3/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} /usr/local/lib/
+    cp ~/Downloads/instantclient_19_8/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} /usr/local/lib/
     ```
 
-#### 3.3.5 Optionally create the Oracle Client configuration directory
+#### 3.3.5 Optionally create the Oracle Client configuration file directory
 
 If you use optional Oracle configuration files such as `tnsnames.ora`,
 `sqlnet.ora` or `oraaccess.xml` with Instant Client, then put the files in an
@@ -778,7 +807,7 @@ Or you can set the environment variable `TNS_ADMIN` to that directory name.
 
 Another alternative is to put the files in the `network/admin` subdirectory of
 Instant Client, for example in
-`/Users/your_username/instantclient_19_3/network/admin`.  This is the default
+`/Users/your_username/Downloads/instantclient_19_8/network/admin`.  This is the default
 Oracle configuration directory for executables linked with this Instant Client.
 
 #### 3.3.6 Run an example program
@@ -795,6 +824,9 @@ module.exports = {
   connectString : "localhost/XEPDB1"
 };
 ```
+
+Make sure Instant Client is configured as shown above.  For example you may want
+to add calls to `oracledb.initOracleClient()` to the scripts.
 
 Run one of the examples, such as [`example.js`][63]:
 
@@ -917,7 +949,7 @@ and files from either the Basic or Basic Light packages.  The exact libraries
 depend on the Instant Client version.  Refer to the Instant Client
 documentation.
 
-##### 3.4.1.5 Optionally create the Oracle Client configuration directory
+##### 3.4.1.5 Optionally create the Oracle Client configuration file directory
 
 If you use optional Oracle configuration files such as `tnsnames.ora`,
 `sqlnet.ora` or `oraaccess.xml` with Instant Client, then put the files in an
@@ -971,6 +1003,9 @@ module.exports = {
   connectString : "localhost/XEPDB1"
 };
 ```
+
+Make sure Instant Client is configured as shown above.  For example you may want
+to add calls to `oracledb.initOracleClient()` to the scripts.
 
 Run one of the examples, such as [`example.js`][63]:
 
@@ -1141,7 +1176,7 @@ To run applications, you will need to set the link path:
 export LIBPATH=/opt/oracle/instantclient_19_6:$LIBPATH
 ```
 
-#### 3.5.5 Optionally create the Oracle Client configuration directory
+#### 3.5.5 Optionally create the Oracle Client configuration file directory
 
 If you use optional Oracle configuration files such as `tnsnames.ora`,
 `sqlnet.ora` or `oraaccess.xml` with Instant Client, then put the files in an
@@ -1265,7 +1300,7 @@ To run applications, you will need to set the link path:
 export LD_LIBRARY_PATH_64=/opt/oracle/instantclient_19_6:$LD_LIBRARY_PATH_64
 ```
 
-#### 3.6.5 Optionally create the Oracle Client configuration directory
+#### 3.6.5 Optionally create the Oracle Client configuration file directory
 
 If you use optional Oracle configuration files such as `tnsnames.ora`,
 `sqlnet.ora` or `oraaccess.xml` with Instant Client, then put the files in an
@@ -1926,8 +1961,6 @@ If creating a connection fails:
 - Do you have multiple copies of Oracle libraries installed?  Is the
   expected version first in `PATH` (on Windows) or `LD_LIBRARY_PATH`
   (on Linux)?
-
-- On macOS, did you install Oracle Instant Client libraries in `/usr/local/lib`?
 
 Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [Slack][48] ([link to join Slack][49]).
