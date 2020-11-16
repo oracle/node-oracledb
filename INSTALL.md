@@ -1986,5 +1986,5 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [62]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-81D364CE-326D-4B3C-8C82-F468FF1AF30C
 [63]: https://github.com/oracle/node-oracledb/tree/master/examples/example.js
 [64]: https://oracle.github.io/node-oracledb/doc/api.html#odbinitoracleclient
-[65]: https://github.com/oracle/docker-images/tree/master/OracleLinuxDevelopers/oraclelinux7/nodejs
+[65]: https://github.com/oracle/docker-images/tree/master/OracleLinuxDevelopers
 [66]: https://github.com/oracle/node-oracledb/blob/v4.2.0/INSTALL.md
