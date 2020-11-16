@@ -25,7 +25,7 @@
  *   For a ResultSet example see resultset1.js
  *   For a query stream example see selectstream.js
  *
- *   This example requires node-oracledb 2.2 or later.
+ *   This example requires node-oracledb 5 or later.
  *
  *****************************************************************************/
 
