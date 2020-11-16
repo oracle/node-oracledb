@@ -7637,13 +7637,15 @@ the Oracle Client and Oracle Database communicate.
 ### <a name="oracleclientloading"></a> 14.1 Locating the Oracle Client Libraries
 
 Node-oracledb dynamically loads the Oracle Client libraries using a search
-heuristic.  Only the first set of libraries found are loaded.  The libraries can
-be in an installation of Oracle Instant Client, in a full Oracle Client
-installation, or in an Oracle Database installation (if Node.js is running on
-the same machine as the database).  The versions of Oracle Client and Oracle
-Database do not have to be the same.  For certified configurations see Oracle
-Support's [Doc ID 207303.1][187] and see the [node-installation
-instructions][2].
+heuristic.  If appropriate libraries cannot be found, node-oracledb will return
+an error like "Error: DPI-1047: Cannot locate a 64-bit Oracle Client library".
+
+Only the first set of libraries found are loaded.  The libraries can be in an
+installation of Oracle Instant Client, in a full Oracle Client installation, or
+in an Oracle Database installation (if Node.js is running on the same machine as
+the database).  The versions of Oracle Client and Oracle Database do not have to
+be the same.  For certified configurations see Oracle Support's [Doc ID
+207303.1][187] and see the [node-installation instructions][2].
 
 Node-oracledb looks for the Oracle Client libraries as follows:
 
