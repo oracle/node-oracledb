@@ -30,11 +30,20 @@
  *
  *   In production applications, set poolMin=poolMax (and poolIncrement=0)
  *
- *   This example requires node-oracledb 3 or later.
+ *   This example requires node-oracledb 5 or later.
  *
  *   This example uses Node 8's async/await syntax.
  *
  *****************************************************************************/
+
+// On Windows and macOS, you can specify the directory containing the Oracle
+// Client Libraries at runtime, or before Node.js starts.  On other platforms
+// the system library search path must always be set before Node.js is started.
+// See the node-oracledb installation documentation.
+// If the search path is not correct, you will get a DPI-1047 error.
+//
+// oracledb.initOracleClient({ libDir: 'C:\\instantclient_19_8' });                            // Windows
+// oracledb.initOracleClient({ libDir: '/Users/your_username/Downloads/instantclient_19_8' }); // macOS
 
 // If you increase poolMax, you must increase UV_THREADPOOL_SIZE before Node.js
 // starts its thread pool.  If you set UV_THREADPOOL_SIZE too late, the value is
@@ -49,6 +58,9 @@ const dbConfig = require('./dbconfig.js');
 const demoSetup = require('./demosetup.js');
 
 const httpPort = 7000;
+
+// If additionally using Database Resident Connection Pooling (DRCP), then set a connection class:
+// oracledb.connectionClass = 'MYAPPNAME';
 
 // Main entry point.  Creates a connection pool and an HTTP server
 // that executes a query based on the URL parameter given.
@@ -71,9 +83,9 @@ async function init() {
       // poolTimeout: 60, // terminate connections that are idle in the pool for 60 seconds
       // queueMax: 500, // don't allow more than 500 unsatisfied getConnection() calls in the pool queue
       // queueTimeout: 60000, // terminate getConnection() calls queued for longer than 60000 milliseconds
-      // sessionCallback: myFunction, // function invoked for brand new connections or by a connection tag mismatch
+      // sessionCallback: initSession, // function invoked for brand new connections or by a connection tag mismatch
       // stmtCacheSize: 30, // number of statements that are cached in the statement cache of each connection
-      // _enableStats: false // record pool usage statistics that can be output with pool._logStats()
+      // _enableStats: false // record pool usage statistics that can be output with oracledb.getPool()._logStats()
     });
 
     // create the demo table
@@ -97,18 +109,20 @@ async function init() {
   }
 }
 
+// initSession() is configured by the pool sessionCallback property.
+// It will be invoked internally when each brand new pooled connection
+// is first used. See the sessionfixup.js and sessiontaggingX.js examples.
+/*
+function initSession(connection, requestedTag, cb) {
+  connection.execute(`ALTER SESSION SET ...'`, cb);
+}
+*/
+
 async function handleRequest(request, response) {
   const urlparts = request.url.split("/");
   const id = urlparts[1];
 
-  htmlHeader(
-    response,
-    "Banana Farmer Demonstration",
-    "Example using node-oracledb driver"
-  );
-
   if (id == 'favicon.ico') {  // ignore requests for the icon
-    htmlFooter(response);
     return;
   }
 
@@ -134,7 +148,12 @@ async function handleRequest(request, response) {
       [id] // bind variable value
     );
 
-    displayResults(response, result, id);
+    displayResults(
+      response,
+      "Banana Farmer Demonstration",
+      "Example using node-oracledb driver",
+      result,
+      id);
 
   } catch (err) {
     handleError(response, "handleRequest() error", err);
@@ -148,24 +167,31 @@ async function handleRequest(request, response) {
       }
     }
   }
-  htmlFooter(response);
-}
-
-// Report an error
-function handleError(response, text, err) {
-  if (err) {
-    text += ": " + err.message;
-  }
-  console.error(text);
-  response.write("<p>Error: " + text + "</p>");
 }
 
 // Display query results
-function displayResults(response, result, id) {
+function displayResults(response, title, caption, result, id) {
+
+  response.writeHead(200, {"Content-Type": "text/html"});
+  response.write("<!DOCTYPE html>");
+  response.write("<html>");
+  response.write("<head>");
+  response.write("<style>" +
+                 "body {background:#FFFFFF;color:#000000;font-family:Arial,sans-serif;margin:40px;padding:10px;font-size:12px;text-align:center;}" +
+                 "h1 {margin:0px;margin-bottom:12px;background:#FF0000;text-align:center;color:#FFFFFF;font-size:28px;}" +
+                 "table {border-collapse: collapse;   margin-left:auto; margin-right:auto;}" +
+                 "td, th {padding:8px;border-style:solid}" +
+                 "</style>\n");
+  response.write("<title>" + caption + "</title>");
+  response.write("</head>");
+  response.write("<body>");
+  response.write("<h1>" + title + "</h1>");
+
   response.write("<h2>" + "Harvest details for farmer " + id + "</h2>");
+
   response.write("<table>");
 
-  // Column Title
+  // Column Titles
   response.write("<tr>");
   for (let col = 0; col < result.metaData.length; col++) {
     response.write("<th>" + result.metaData[col].name + "</th>");
@@ -181,29 +207,20 @@ function displayResults(response, result, id) {
     response.write("</tr>");
   }
   response.write("</table>");
-}
 
-// Prepare HTML header
-function htmlHeader(response, title, caption) {
-  response.writeHead(200, {"Content-Type": "text/html"});
-  response.write("<!DOCTYPE html>");
-  response.write("<html>");
-  response.write("<head>");
-  response.write("<style>" +
-    "body {background:#FFFFFF;color:#000000;font-family:Arial,sans-serif;margin:40px;padding:10px;font-size:12px;text-align:center;}" +
-    "h1 {margin:0px;margin-bottom:12px;background:#FF0000;text-align:center;color:#FFFFFF;font-size:28px;}" +
-    "table {border-collapse: collapse;   margin-left:auto; margin-right:auto;}" +
-    "td, th {padding:8px;border-style:solid}" +
-    "</style>\n");
-  response.write("<title>" + caption + "</title>");
-  response.write("</head>");
-  response.write("<body>");
-  response.write("<h1>" + title + "</h1>");
-}
-
-// Prepare HTML footer
-function htmlFooter(response) {
   response.write("</body>\n</html>");
+  response.end();
+
+}
+
+// Report an error
+function handleError(response, text, err) {
+  if (err) {
+    text += ": " + err.message;
+  }
+  console.error(text);
+  response.writeHead(500, {"Content-Type": "text/html"});
+  response.write(text);
   response.end();
 }
 
