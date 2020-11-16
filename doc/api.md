@@ -6018,7 +6018,7 @@ Then a B-tree index could be created with:
 
 ```javascript
 indexSpec = {name: "myIndex", fields: [{path: "name"}]};
-await createIndex(indexSpec);
+await collection.createIndex(indexSpec);
 ```
 
 This index would improve the performance of QBEs like:
