@@ -42,18 +42,6 @@ var config = {
   }
 };
 
-if (process.env.NODE_ORACLEDB_USER) {
-  config.user = process.env.NODE_ORACLEDB_USER;
-} else {
-  throw new Error("Schema User name is not Set! Try Set Environment Variable NODE_ORACLEDB_USER.");
-}
-
-if (process.env.NODE_ORACLEDB_PASSWORD) {
-  config.password = process.env.NODE_ORACLEDB_PASSWORD;
-} else {
-  throw new Error("Schema User Password is not Set! Try Set Environment Variable NODE_ORACLEDB_PASSWORD.");
-}
-
 if (process.env.NODE_ORACLEDB_CONNECTIONSTRING) {
   config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING;
 } else {
@@ -67,6 +55,21 @@ if (process.env.NODE_ORACLEDB_EXTERNALAUTH) {
   if (eauth == 'true') {
     config.test.externalAuth = true;
   }
+}
+
+if (!config.test.externalAuth){
+  if (process.env.NODE_ORACLEDB_USER) {
+    config.user = process.env.NODE_ORACLEDB_USER;
+  } else {
+    throw new Error("Schema User name is not Set! Try Set Environment Variable NODE_ORACLEDB_USER.");
+  }
+
+  if (process.env.NODE_ORACLEDB_PASSWORD) {
+    config.password = process.env.NODE_ORACLEDB_PASSWORD;
+  } else {
+    throw new Error("Schema User Password is not Set! Try Set Environment Variable NODE_ORACLEDB_PASSWORD.");
+  }
+
 }
 
 if (process.env.NODE_ORACLEDB_QA) {

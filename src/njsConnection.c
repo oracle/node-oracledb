@@ -700,6 +700,7 @@ static bool njsConnection_executeProcessArgs(njsBaton *baton,
 
     // setup defaults and define constructors for use in various checks
     baton->autoCommit = baton->oracleDb->autoCommit;
+    baton->dbObjectAsPojo = baton->oracleDb->dbObjectAsPojo;
     baton->fetchArraySize = baton->oracleDb->fetchArraySize;
     baton->maxRows = baton->oracleDb->maxRows;
     baton->outFormat = baton->oracleDb->outFormat;
@@ -721,10 +722,6 @@ static bool njsConnection_executeProcessArgs(njsBaton *baton,
 
     // get SQL from first argument
     if (!njsUtils_getStringArg(env, args, 0, &baton->sql, &baton->sqlLength))
-        return false;
-
-    // validate binds in second argument
-    if (!njsConnection_processExecuteBinds(baton, env, args[1]))
         return false;
 
     // validate options in third argument
@@ -755,8 +752,16 @@ static bool njsConnection_executeProcessArgs(njsBaton *baton,
     if (!njsBaton_getBoolFromArg(baton, env, args, 2, "extendedMetaData",
             &baton->extendedMetaData, NULL))
         return false;
+    if (!njsBaton_getBoolFromArg(baton, env, args, 2, "dbObjectAsPojo",
+            &baton->dbObjectAsPojo, NULL))
+        return false;
     if (!njsBaton_getFetchInfoFromArg(baton, env, args, 2, "fetchInfo",
             &baton->numFetchInfo, &baton->fetchInfo, NULL))
+        return false;
+
+    // validate binds in second argument; these must be done after options are
+    // processed as those options may influence how bind variables are created
+    if (!njsConnection_processExecuteBinds(baton, env, args[1]))
         return false;
 
     return true;

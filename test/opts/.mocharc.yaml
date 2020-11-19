@@ -226,3 +226,5 @@ spec:
   - test/soda14.js
   - test/plsqlBindCursorsIN.js
   - test/errorOffset.js
+  - test/dbObject18.js
+  - test/dbObject19.js

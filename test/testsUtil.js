@@ -48,42 +48,53 @@ testsUtil.assertThrowsAsync = async function(fn, RegExp) {
 };
 
 testsUtil.sqlCreateTable = function(tableName, sql) {
-  let sqlCreateTab =
-    `BEGIN \n` +
-    `    DECLARE \n` +
-    `        e_table_missing EXCEPTION; \n` +
-    `        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n` +
-    `    BEGIN \n` +
-    `        EXECUTE IMMEDIATE ('DROP TABLE ${tableName} PURGE' ); \n` +
-    `    EXCEPTION \n` +
-    `        WHEN e_table_missing \n` +
-    `        THEN NULL; \n` +
-    `    END; \n` +
-    `    EXECUTE IMMEDIATE (' ${sql} '); \n` +
-    `END;  `;
-  return sqlCreateTab;
+  const dropSql = testsUtil.sqlDropTable(tableName);
+  return `
+    BEGIN
+        ${dropSql}
+        EXECUTE IMMEDIATE ('${sql}');
+    END;
+  `;
+};
+
+testsUtil.sqlDropTable = function(tableName) {
+  return `
+    DECLARE
+        e_table_missing EXCEPTION;
+        PRAGMA EXCEPTION_INIT(e_table_missing, -942);
+    BEGIN
+        EXECUTE IMMEDIATE ('DROP TABLE ${tableName} PURGE');
+    EXCEPTION
+        WHEN e_table_missing THEN NULL;
+    END;
+  `;
+};
+
+testsUtil.sqlDropType = function(typeName) {
+  return `
+    DECLARE
+        e_type_missing EXCEPTION;
+        PRAGMA EXCEPTION_INIT(e_type_missing, -4043);
+    BEGIN
+        EXECUTE IMMEDIATE ('DROP TYPE ${typeName} FORCE');
+    EXCEPTION
+        WHEN e_type_missing THEN NULL;
+    END;
+  `;
 };
 
 testsUtil.createTable = async function(tableName, sql) {
   let plsql = testsUtil.sqlCreateTable(tableName, sql);
-  try {
-    const conn = await oracledb.getConnection(dbconfig);
-    await conn.execute(plsql);
-    await conn.close();
-  } catch(err) {
-    console.log('Error in creating table:\n', err);
-  }
+  const conn = await oracledb.getConnection(dbconfig);
+  await conn.execute(plsql);
+  await conn.close();
 };
 
 testsUtil.dropTable = async function(tableName) {
-  let sql = `DROP TABLE ${tableName} PURGE`;
-  try {
-    const conn = await oracledb.getConnection(dbconfig);
-    await conn.execute(sql);
-    await conn.close();
-  } catch(err) {
-    console.log('Error in creating table:\n', err);
-  }
+  let plsql = testsUtil.sqlDropTable(tableName);
+  const conn = await oracledb.getConnection(dbconfig);
+  await conn.execute(plsql);
+  await conn.close();
 };
 
 testsUtil.checkPrerequisites = async function(clientVersion=1805000000, serverVersion=1805000000) {

@@ -661,6 +661,20 @@ bool njsDbObject_new(njsDbObjectType *objType, dpiObject *objHandle,
 
 
 //-----------------------------------------------------------------------------
+//  njsDbObject_toPojo()
+//    Transforms a database object to a "Plain Old JavaScript Object".
+//-----------------------------------------------------------------------------
+bool njsDbObject_toPojo(napi_value obj, napi_env env, napi_value *pojo)
+{
+    napi_value fn;
+
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, obj, "_toPojo", &fn))
+    NJS_CHECK_NAPI(env, napi_call_function(env, obj, fn, 0, NULL, pojo))
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsDbObject_setAttrValue()
 //   Generic set accessor for attributes.
 //-----------------------------------------------------------------------------

@@ -70,33 +70,34 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 3.2 [Oracledb Properties](#oracledbproperties)
         - 3.2.1 [`autoCommit`](#propdbisautocommit)
         - 3.2.2 [`connectionClass`](#propdbconclass)
-        - 3.2.3 [`edition`](#propdbedition)
-        - 3.2.4 [`events`](#propdbevents)
-        - 3.2.5 [`extendedMetaData`](#propdbextendedmetadata)
-        - 3.2.6 [`externalAuth`](#propdbisexternalauth)
-        - 3.2.7 [`fetchArraySize`](#propdbfetcharraysize)
-        - 3.2.8 [`fetchAsBuffer`](#propdbfetchasbuffer)
-        - 3.2.9 [`fetchAsString`](#propdbfetchasstring)
-        - 3.2.10 [`lobPrefetchSize`](#propdblobprefetchsize)
-        - 3.2.11 [`maxRows`](#propdbmaxrows)
-        - 3.2.12 [`oracleClientVersion`](#propdboracleclientversion)
-        - 3.2.13 [`oracleClientVersionString`](#propdboracleclientversionstring)
-        - 3.2.14 [`outFormat`](#propdboutformat)
-        - 3.2.15 [`poolIncrement`](#propdbpoolincrement)
-        - 3.2.16 [`poolMax`](#propdbpoolmax)
-        - 3.2.17 [`poolMaxPerShard`](#propdbpoolmaxpershard)
-        - 3.2.18 [`poolMin`](#propdbpoolmin)
-        - 3.2.19 [`poolPingInterval`](#propdbpoolpinginterval)
-        - 3.2.20 [`poolTimeout`](#propdbpooltimeout)
-        - 3.2.21 [`prefetchRows`](#propdbprefetchrows)
-        - 3.2.22 [`Promise`](#propdbpromise)
-        - 3.2.23 [`queueMax`](#propdbqueuemax)
-        - 3.2.24 [`queueRequests`](#propdbqueuerequests)
-        - 3.2.25 [`queueTimeout`](#propdbqueuetimeout)
-        - 3.2.26 [`stmtCacheSize`](#propdbstmtcachesize)
-        - 3.2.27 [`version`](#propdbversion)
-        - 3.2.28 [`versionString`](#propdbversionstring)
-        - 3.2.29 [`versionSuffix`](#propdbversionsuffix)
+        - 3.2.3 [`dbObjectAsPojo`](#propdbobjpojo)
+        - 3.2.4 [`edition`](#propdbedition)
+        - 3.2.5 [`events`](#propdbevents)
+        - 3.2.6 [`extendedMetaData`](#propdbextendedmetadata)
+        - 3.2.7 [`externalAuth`](#propdbisexternalauth)
+        - 3.2.8 [`fetchArraySize`](#propdbfetcharraysize)
+        - 3.2.9 [`fetchAsBuffer`](#propdbfetchasbuffer)
+        - 3.2.10 [`fetchAsString`](#propdbfetchasstring)
+        - 3.2.11 [`lobPrefetchSize`](#propdblobprefetchsize)
+        - 3.2.12 [`maxRows`](#propdbmaxrows)
+        - 3.2.13 [`oracleClientVersion`](#propdboracleclientversion)
+        - 3.2.14 [`oracleClientVersionString`](#propdboracleclientversionstring)
+        - 3.2.15 [`outFormat`](#propdboutformat)
+        - 3.2.16 [`poolIncrement`](#propdbpoolincrement)
+        - 3.2.17 [`poolMax`](#propdbpoolmax)
+        - 3.2.18 [`poolMaxPerShard`](#propdbpoolmaxpershard)
+        - 3.2.19 [`poolMin`](#propdbpoolmin)
+        - 3.2.20 [`poolPingInterval`](#propdbpoolpinginterval)
+        - 3.2.21 [`poolTimeout`](#propdbpooltimeout)
+        - 3.2.22 [`prefetchRows`](#propdbprefetchrows)
+        - 3.2.23 [`Promise`](#propdbpromise)
+        - 3.2.24 [`queueMax`](#propdbqueuemax)
+        - 3.2.25 [`queueRequests`](#propdbqueuerequests)
+        - 3.2.26 [`queueTimeout`](#propdbqueuetimeout)
+        - 3.2.27 [`stmtCacheSize`](#propdbstmtcachesize)
+        - 3.2.28 [`version`](#propdbversion)
+        - 3.2.29 [`versionString`](#propdbversionstring)
+        - 3.2.30 [`versionSuffix`](#propdbversionsuffix)
     - 3.3 [Oracledb Methods](#oracledbmethods)
         - 3.3.1 [`createPool()`](#createpool)
             - 3.3.1.1 [`createPool()`: Parameters and Attributes](#createpoolpoolattrs)
@@ -186,13 +187,14 @@ For installation information, see the [Node-oracledb Installation Instructions][
                 - 4.2.6.2.5 [`val`](#executebindparamval)
             - 4.2.6.3 [`execute()`: Options](#executeoptions)
                 - 4.2.6.3.1 [`autoCommit`](#propexecautocommit)
-                - 4.2.6.3.2 [`extendedMetaData`](#propexecextendedmetadata)
-                - 4.2.6.3.3 [`fetchArraySize`](#propexecfetcharraysize)
-                - 4.2.6.3.4 [`fetchInfo`](#propexecfetchinfo)
-                - 4.2.6.3.5 [`maxRows`](#propexecmaxrows)
-                - 4.2.6.3.6 [`outFormat`](#propexecoutformat)
-                - 4.2.6.3.7 [`prefetchRows`](#propexecprefetchrows)
-                - 4.2.6.3.8 [`resultSet`](#propexecresultset)
+                - 4.2.6.3.2 [`dbObjectAsPojo`](#propexecobjpojo)
+                - 4.2.6.3.3 [`extendedMetaData`](#propexecextendedmetadata)
+                - 4.2.6.3.4 [`fetchArraySize`](#propexecfetcharraysize)
+                - 4.2.6.3.5 [`fetchInfo`](#propexecfetchinfo)
+                - 4.2.6.3.6 [`maxRows`](#propexecmaxrows)
+                - 4.2.6.3.7 [`outFormat`](#propexecoutformat)
+                - 4.2.6.3.8 [`prefetchRows`](#propexecprefetchrows)
+                - 4.2.6.3.9 [`resultSet`](#propexecresultset)
             - 4.2.6.4 [`execute()`: Callback Function](#executecallback)
                 - 4.2.6.4.1 [`implicitResults`](#execimplicitresults)
                 - 4.2.6.4.2 [`lastRowid`](#execlastrowid)
@@ -1203,7 +1205,36 @@ const oracledb = require('oracledb');
 oracledb.connectionClass = 'HRPOOL';
 ```
 
-#### <a name="propdbedition"></a> 3.2.3 `oracledb.edition`
+#### <a name="propdbobjpojo"></a> 3.2.3 `oracledb.dbObjectAsPojo`
+
+```
+Boolean dbObjectAsPojo
+```
+
+Specify whether [Oracle Database named objects or collections](#objects)
+that are queried should be returned to the application as "plain old JavaScript
+objects" or kept as database-backed objects.  This option also applies to output
+`BIND_OUT` bind variables.
+
+Note that LOBs in objects will be represented as [Lob](#lobclass) instances and
+will not be String or Buffer, regardless of any `fetchAsString`,
+`fetchAsBuffer`, or `fetchInfo` setting.
+
+The default value for `dbObjectAsPojo` is *false*.
+
+Setting `dbObjectAsPojo` to *true* can avoid overhead if object attributes are
+repeatedly accessed.  It also allows applications to close connections before
+any attributes are accessed unless LOBs are involved.  Regardless of the value,
+the interface to access objects is the same.
+
+##### Example
+
+```javascript
+const oracledb = require('oracledb');
+oracledb.dbObjectAsPojo = false;
+```
+
+#### <a name="propdbedition"></a> 3.2.4 `oracledb.edition`
 
 ```
 String edition
@@ -1222,7 +1253,7 @@ const oracledb = require('oracledb');
 oracledb.edition = 'ed_2';
 ```
 
-#### <a name="propdbevents"></a> 3.2.4 `oracledb.events`
+#### <a name="propdbevents"></a> 3.2.5 `oracledb.events`
 
 ```
 Boolean events
@@ -1252,7 +1283,7 @@ const oracledb = require('oracledb');
 oracledb.events = false;
 ```
 
-#### <a name="propdbextendedmetadata"></a> 3.2.5 `oracledb.extendedMetaData`
+#### <a name="propdbextendedmetadata"></a> 3.2.6 `oracledb.extendedMetaData`
 
 ```
 Boolean extendedMetaData
@@ -1274,7 +1305,7 @@ This property may be overridden in an [`execute()`](#executeoptions) call.
 
 This property was added in node-oracledb 1.10.
 
-#### <a name="propdbisexternalauth"></a> 3.2.6 `oracledb.externalAuth`
+#### <a name="propdbisexternalauth"></a> 3.2.7 `oracledb.externalAuth`
 
 ```
 Boolean externalAuth
@@ -1304,7 +1335,7 @@ const oracledb = require('oracledb');
 oracledb.externalAuth = false;
 ```
 
-#### <a name="propdbfetcharraysize"></a> 3.2.7 `oracledb.fetchArraySize`
+#### <a name="propdbfetcharraysize"></a> 3.2.8 `oracledb.fetchArraySize`
 
 ```
 Number fetchArraySize
@@ -1347,7 +1378,7 @@ const oracledb = require('oracledb');
 oracledb.fetchArraySize = 100;
 ```
 
-#### <a name="propdbfetchasbuffer"></a> 3.2.8 `oracledb.fetchAsBuffer`
+#### <a name="propdbfetchasbuffer"></a> 3.2.9 `oracledb.fetchAsBuffer`
 
 ```
 Array fetchAsBuffer
@@ -1374,7 +1405,7 @@ const oracledb = require('oracledb');
 oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 ```
 
-#### <a name="propdbfetchasstring"></a> 3.2.9 `oracledb.fetchAsString`
+#### <a name="propdbfetchasstring"></a> 3.2.10 `oracledb.fetchAsString`
 
 ```
 Array fetchAsString
@@ -1423,7 +1454,7 @@ const oracledb = require('oracledb');
 oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 ```
 
-#### <a name="propdblobprefetchsize"></a> 3.2.10 `oracledb.lobPrefetchSize`
+#### <a name="propdblobprefetchsize"></a> 3.2.11 `oracledb.lobPrefetchSize`
 
 ```
 Number lobPrefetchSize
@@ -1449,7 +1480,7 @@ const oracledb = require('oracledb');
 oracledb.lobPrefetchSize = 16384;
 ```
 
-#### <a name="propdbmaxrows"></a> 3.2.11 `oracledb.maxRows`
+#### <a name="propdbmaxrows"></a> 3.2.12 `oracledb.maxRows`
 
 ```
 Number maxRows
@@ -1491,7 +1522,7 @@ const oracledb = require('oracledb');
 oracledb.maxRows = 0;
 ```
 
-#### <a name="propdboracleclientversion"></a> 3.2.12 `oracledb.oracleClientVersion`
+#### <a name="propdboracleclientversion"></a> 3.2.13 `oracledb.oracleClientVersion`
 
 ```
 readonly Number oracleClientVersion
@@ -1514,7 +1545,7 @@ const oracledb = require('oracledb');
 console.log("Oracle client library version number is " + oracledb.oracleClientVersion);
 ```
 
-#### <a name="propdboracleclientversionstring"></a> 3.2.13 `oracledb.oracleClientVersionString`
+#### <a name="propdboracleclientversionstring"></a> 3.2.14 `oracledb.oracleClientVersionString`
 
 ```
 readonly String oracleClientVersionString
@@ -1536,7 +1567,7 @@ const oracledb = require('oracledb');
 console.log("Oracle client library version is " + oracledb.oracleClientVersionString);
 ```
 
-#### <a name="propdboutformat"></a> 3.2.14 `oracledb.outFormat`
+#### <a name="propdboutformat"></a> 3.2.15 `oracledb.outFormat`
 
 ```
 Number outFormat
@@ -1575,7 +1606,7 @@ const oracledb = require('oracledb');
 oracledb.outFormat = oracledb.OUT_FORMAT_ARRAY;
 ```
 
-#### <a name="propdbpoolincrement"></a> 3.2.15 `oracledb.poolIncrement`
+#### <a name="propdbpoolincrement"></a> 3.2.16 `oracledb.poolIncrement`
 
 ```
 Number poolIncrement
@@ -1595,7 +1626,7 @@ const oracledb = require('oracledb');
 oracledb.poolIncrement = 1;
 ```
 
-#### <a name="propdbpoolmax"></a> 3.2.16 `oracledb.poolMax`
+#### <a name="propdbpoolmax"></a> 3.2.17 `oracledb.poolMax`
 
 ```
 Number poolMax
@@ -1624,7 +1655,7 @@ const oracledb = require('oracledb');
 oracledb.poolMax = 4;
 ```
 
-#### <a name="propdbpoolmaxpershard"></a> 3.2.17 `oracledb.poolMaxPerShard`
+#### <a name="propdbpoolmaxpershard"></a> 3.2.18 `oracledb.poolMaxPerShard`
 
 ```
 Number poolMaxPerShard
@@ -1650,7 +1681,7 @@ const oracledb = require('oracledb');
 oracledb.poolMaxPerShard = 0;
 ```
 
-#### <a name="propdbpoolmin"></a> 3.2.18 `oracledb.poolMin`
+#### <a name="propdbpoolmin"></a> 3.2.19 `oracledb.poolMin`
 
 ```
 Number poolMin
@@ -1684,7 +1715,7 @@ const oracledb = require('oracledb');
 oracledb.poolMin = 0;
 ```
 
-#### <a name="propdbpoolpinginterval"></a> 3.2.19 `oracledb.poolPingInterval`
+#### <a name="propdbpoolpinginterval"></a> 3.2.20 `oracledb.poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -1722,7 +1753,7 @@ const oracledb = require('oracledb');
 oracledb.poolPingInterval = 60;     // seconds
 ```
 
-#### <a name="propdbpooltimeout"></a> 3.2.20 `oracledb.poolTimeout`
+#### <a name="propdbpooltimeout"></a> 3.2.21 `oracledb.poolTimeout`
 
 ```
 Number poolTimeout
@@ -1744,7 +1775,7 @@ const oracledb = require('oracledb');
 oracledb.poolTimeout = 60;
 ```
 
-#### <a name="propdbprefetchrows"></a> 3.2.21 `oracledb.prefetchRows`
+#### <a name="propdbprefetchrows"></a> 3.2.22 `oracledb.prefetchRows`
 
 ```
 Number prefetchRows
@@ -1783,7 +1814,7 @@ const oracledb = require('oracledb');
 oracledb.prefetchRows = 2;
 ```
 
-#### <a name="propdbpromise"></a> 3.2.22 `oracledb.Promise`
+#### <a name="propdbpromise"></a> 3.2.23 `oracledb.Promise`
 
 ```
 Promise Promise
@@ -1812,7 +1843,7 @@ Prior to node-oracledb 5, Promises could be completely disabled by setting:
 oracledb.Promise = null;
 ```
 
-#### <a name="propdbqueuemax"></a> 3.2.23 `oracledb.queueMax`
+#### <a name="propdbqueuemax"></a> 3.2.24 `oracledb.queueMax`
 
 ```
 Number queueMax
@@ -1840,13 +1871,13 @@ const oracledb = require('oracledb');
 oracledb.queueMax = 500;
 ```
 
-#### <a name="propdbqueuerequests"></a> 3.2.24 `oracledb.queueRequests`
+#### <a name="propdbqueuerequests"></a> 3.2.25 `oracledb.queueRequests`
 
 This property was removed in node-oracledb 3.0 and queuing was always enabled.
 In node-oracledb 5.0, set `queueMax` to 0 to disable queuing.  See [Connection
 Pool Queue](#connpoolqueue) for more information.
 
-#### <a name="propdbqueuetimeout"></a> 3.2.25 `oracledb.queueTimeout`
+#### <a name="propdbqueuetimeout"></a> 3.2.26 `oracledb.queueTimeout`
 
 ```
 Number queueTimeout
@@ -1871,7 +1902,7 @@ const oracledb = require('oracledb');
 oracledb.queueTimeout = 3000; // 3 seconds
 ```
 
-#### <a name="propdbstmtcachesize"></a> 3.2.26 `oracledb.stmtCacheSize`
+#### <a name="propdbstmtcachesize"></a> 3.2.27 `oracledb.stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -1898,7 +1929,7 @@ const oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.27 `oracledb.version`
+#### <a name="propdbversion"></a> 3.2.28 `oracledb.version`
 ```
 readonly Number version
 ```
@@ -1913,7 +1944,7 @@ const oracledb = require('oracledb');
 console.log("Driver version number is " + oracledb.version);
 ```
 
-#### <a name="propdbversionstring"></a> 3.2.28 `oracledb.versionString`
+#### <a name="propdbversionstring"></a> 3.2.29 `oracledb.versionString`
 ```
 readonly String versionString
 ```
@@ -1929,7 +1960,7 @@ const oracledb = require('oracledb');
 console.log("Driver version is " + oracledb.versionString);
 ```
 
-#### <a name="propdbversionsuffix"></a> 3.2.29 `oracledb.versionSuffix`
+#### <a name="propdbversionsuffix"></a> 3.2.30 `oracledb.versionSuffix`
 ```
 readonly String versionSuffix
 ```
@@ -3545,7 +3576,15 @@ Boolean autoCommit
 
 Overrides [`oracledb.autoCommit`](#propdbisautocommit).
 
-###### <a name="propexecextendedmetadata"></a> 4.2.6.3.2 `extendedMetaData`
+###### <a name="propexecobjpojo"></a> 4.2.6.3.2 `dbObjectAsPojo`
+
+```
+Boolean dbObjectAsPojo
+```
+
+Overrides [`oracledb.dbObjectAsPojo`](#propdbobjpojo).
+
+###### <a name="propexecextendedmetadata"></a> 4.2.6.3.3 `extendedMetaData`
 
 ```
 Boolean extendedMetaData
@@ -3553,7 +3592,7 @@ Boolean extendedMetaData
 
 Overrides [`oracledb.extendedMetaData`](#propdbextendedmetadata).
 
-###### <a name="propexecfetcharraysize"></a> 4.2.6.3.3 `fetchArraySize`
+###### <a name="propexecfetcharraysize"></a> 4.2.6.3.4 `fetchArraySize`
 
 ```
 Number fetchArraySize
@@ -3561,7 +3600,7 @@ Number fetchArraySize
 
 Overrides [`oracledb.fetchArraySize`](#propdbfetcharraysize).
 
-###### <a name="propfetchinfo"></a> <a name="propexecfetchinfo"></a> 4.2.6.3.4 `fetchInfo`
+###### <a name="propfetchinfo"></a> <a name="propexecfetchinfo"></a> 4.2.6.3.5 `fetchInfo`
 
 ```
 Object fetchInfo
@@ -3613,7 +3652,7 @@ by Node.js and V8 memory restrictions.
 See [Query Result Type Mapping](#typemap) for more information on query type
 mapping.
 
-###### <a name="propexecmaxrows"></a> 4.2.6.3.5 `maxRows`
+###### <a name="propexecmaxrows"></a> 4.2.6.3.6 `maxRows`
 
 ```
 Number maxRows
@@ -3621,7 +3660,7 @@ Number maxRows
 
 Overrides [`oracledb.maxRows`](#propdbmaxrows).
 
-###### <a name="propexecoutformat"></a> 4.2.6.3.6 `outFormat`
+###### <a name="propexecoutformat"></a> 4.2.6.3.7 `outFormat`
 
 ```
 Number outFormat
@@ -3629,7 +3668,7 @@ Number outFormat
 
 Overrides [`oracledb.outFormat`](#propdboutformat).
 
-###### <a name="propexecprefetchrows"></a> 4.2.6.3.7 `prefetchRows`
+###### <a name="propexecprefetchrows"></a> 4.2.6.3.8 `prefetchRows`
 
 ```
 Number prefetchRows
@@ -3639,7 +3678,7 @@ Overrides [`oracledb.prefetchRows`](#propdbprefetchrows).
 
 This attribute is not used in node-oracledb version 2, 3 or 4.
 
-###### <a name="propexecresultset"></a> 4.2.6.3.8 `resultSet`
+###### <a name="propexecresultset"></a> 4.2.6.3.9 `resultSet`
 
 ```
 Boolean resultSet
@@ -13133,8 +13172,22 @@ updated type information.
 
 ### <a name="objectfetch"></a> 22.2 Fetching Objects
 
-When objects are fetched, they are represented as a
-[DbObject](#dbobjectclass):
+When objects are fetched, they are represented as a [DbObject](#dbobjectclass).
+
+Note that LOBs will be represented as [Lob objects](#lobclass) regardless of any
+`fetchAsString`, `fetchAsBuffer`, or `fetchInfo` setting.
+
+If [`oracledb.dbObjectAsPojo`](#propdbobjpojo) is set to *true*, then queried
+objects and OUT bind objects are returned as "plain old JavaScript objects"
+instead of being database-backed.  The setting can help performance if an
+object's attributes are accessed multiple times.  However if only a few object
+attributes are accessed, or attributes are accessed once, then it may be more
+efficient to keep `dbObjectAsPojo` *false*.  Setting `dbObjectAsPojo` to *true*
+also allows applications to close connections before any attributes are accessed
+unless LOBs are involved.
+
+Accessing a DbObject is the same whichever value of `dbObjectAsPojo` you use.
+For example:
 
 ```javascript
 result = await connection.execute(`SELECT geometry FROM testgeometry WHERE id = 1`);

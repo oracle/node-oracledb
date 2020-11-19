@@ -51,6 +51,7 @@ static NJS_NAPI_GETTER(njsOracleDb_getExtendedMetaData);
 static NJS_NAPI_GETTER(njsOracleDb_getExternalAuth);
 static NJS_NAPI_GETTER(njsOracleDb_getFetchArraySize);
 static NJS_NAPI_GETTER(njsOracleDb_getFetchAsBuffer);
+static NJS_NAPI_GETTER(njsOracleDb_getDbObjectAsPojo);
 static NJS_NAPI_GETTER(njsOracleDb_getFetchAsString);
 static NJS_NAPI_GETTER(njsOracleDb_getLobPrefetchSize);
 static NJS_NAPI_GETTER(njsOracleDb_getMaxRows);
@@ -78,6 +79,7 @@ static NJS_NAPI_SETTER(njsOracleDb_setExtendedMetaData);
 static NJS_NAPI_SETTER(njsOracleDb_setExternalAuth);
 static NJS_NAPI_SETTER(njsOracleDb_setFetchArraySize);
 static NJS_NAPI_SETTER(njsOracleDb_setFetchAsBuffer);
+static NJS_NAPI_SETTER(njsOracleDb_setDbObjectAsPojo);
 static NJS_NAPI_SETTER(njsOracleDb_setFetchAsString);
 static NJS_NAPI_SETTER(njsOracleDb_setLobPrefetchSize);
 static NJS_NAPI_SETTER(njsOracleDb_setMaxRows);
@@ -290,6 +292,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             njsOracleDb_setFetchArraySize, NULL, napi_default, NULL },
     { "fetchAsBuffer", NULL, NULL, njsOracleDb_getFetchAsBuffer,
             njsOracleDb_setFetchAsBuffer, NULL, napi_default, NULL },
+    { "dbObjectAsPojo", NULL, NULL, njsOracleDb_getDbObjectAsPojo,
+            njsOracleDb_setDbObjectAsPojo, NULL, napi_default, NULL },
     { "fetchAsString", NULL, NULL, njsOracleDb_getFetchAsString,
             njsOracleDb_setFetchAsString, NULL, napi_default, NULL },
     { "lobPrefetchSize", NULL, NULL, njsOracleDb_getLobPrefetchSize,
@@ -833,6 +837,21 @@ static napi_value njsOracleDb_getFetchAsBuffer(napi_env env,
             oracleDb->numFetchAsBufferTypes, oracleDb->fetchAsBufferTypes);
 }
 
+
+
+//-----------------------------------------------------------------------------
+// njsOracleDb_getDbObjectAsPojo()
+//   Get accessor of "dbObjectAsPojo" property.
+//-----------------------------------------------------------------------------
+static napi_value njsOracleDb_getDbObjectAsPojo(napi_env env,
+        napi_callback_info info)
+{
+    njsOracleDb *oracleDb;
+
+    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &oracleDb))
+        return NULL;
+    return njsUtils_convertToBoolean(env, oracleDb->dbObjectAsPojo);
+}
 
 //-----------------------------------------------------------------------------
 // njsOracleDb_getFetchAsString()
@@ -1551,6 +1570,27 @@ static napi_value njsOracleDb_setFetchAsBuffer(napi_env env,
     njsUtils_setPropUnsignedIntArray(env, value, "fetchAsBuffer",
             &oracleDb->numFetchAsBufferTypes, &oracleDb->fetchAsBufferTypes,
             validTypes);
+    return NULL;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracleDb_setDbObjectAsPojo()
+//   Set accessor of "dbObjectAsPojo" property.
+//-----------------------------------------------------------------------------
+static napi_value njsOracleDb_setDbObjectAsPojo(napi_env env,
+        napi_callback_info info)
+{
+    njsOracleDb *oracleDb;
+    napi_value value;
+
+    if (!njsUtils_validateSetter(env, info, (njsBaseInstance**) &oracleDb,
+            &value))
+        return NULL;
+    if (!njsUtils_setPropBool(env, value, "dbObjectAsPojo",
+            &oracleDb->dbObjectAsPojo))
+        return NULL;
+
     return NULL;
 }
 

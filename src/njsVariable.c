@@ -97,6 +97,7 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
             var->nativeTypeNum = DPI_NATIVE_TYPE_BOOLEAN;
             break;
         case DPI_ORACLE_TYPE_OBJECT:
+            var->dbObjectAsPojo = baton->dbObjectAsPojo;
             var->nativeTypeNum = DPI_NATIVE_TYPE_OBJECT;
             break;
         default:
@@ -479,6 +480,8 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
             if (!njsDbObject_new(var->objectType, data->value.asObject,
                     env, value))
                 return false;
+            if (var->dbObjectAsPojo && !njsDbObject_toPojo(*value, env, value))
+                return false;
             break;
         default:
             break;
@@ -590,6 +593,7 @@ bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
                 break;
             case DPI_ORACLE_TYPE_OBJECT:
                 vars[i].dpiObjectTypeHandle = queryInfo.typeInfo.objectType;
+                vars[i].dbObjectAsPojo = baton->dbObjectAsPojo;
                 break;
             default:
                 return njsBaton_setError(baton, errUnsupportedDataType,

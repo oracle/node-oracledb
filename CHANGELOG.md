@@ -4,6 +4,15 @@
 
 **This release is under development**
 
+- Added
+  [`oracledb.dbObjectAsPojo`](https://oracle.github.io/node-oracledb/doc/api.html#propdbobjpojo)
+  and a `connection.execute()` option
+  [`dbObjectAsPojo`](https://oracle.github.io/node-oracledb/doc/api.html#propexecobjpojo).
+  These specify whether Oracle Database named objects or collections that are
+  queried should be returned to the application as "plain old JavaScript
+  objects" or kept as database-backed objects.  This option also applies to
+  output `BIND_OUT` bind variables.
+
 - Fixed a compatibility regression affecting SODA "get" operations using older
   Oracle Client releases.
 

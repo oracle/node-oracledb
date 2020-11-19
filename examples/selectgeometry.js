@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -31,6 +31,10 @@
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+
+// If each object's attributes are accessed multiple times, it may be more
+// efficient to fetch as simple JavaScriptobjects.
+// oracledb.dbObjectAsPojo = true;
 
 async function run() {
 

@@ -479,6 +479,7 @@ struct njsBaton {
     bool replaced;
     bool force;
     bool clientInitiated;
+    bool dbObjectAsPojo;
 
     // LOB buffer (requires free only if string was used)
     uint64_t bufferSize;
@@ -612,6 +613,7 @@ struct njsOracleDb {
     bool extendedMetaData;
     bool externalAuth;
     bool events;
+    bool dbObjectAsPojo;
     napi_ref jsAqDeqOptionsConstructor;
     napi_ref jsAqEnqOptionsConstructor;
     napi_ref jsAqMessageConstructor;
@@ -728,6 +730,7 @@ struct njsVariable {
     int8_t scale;
     bool isArray;
     bool isNullable;
+    bool dbObjectAsPojo;
     njsVariableBuffer *buffer;
     uint32_t numDmlReturningBuffers;
     njsVariableBuffer *dmlReturningBuffers;
@@ -848,6 +851,7 @@ bool njsDbObject_new(njsDbObjectType *objType, dpiObject *objHandle,
         napi_env env, napi_value *value);
 bool njsDbObjectType_getFromClass(napi_env env, napi_value cls,
         njsDbObjectType **objType);
+bool njsDbObject_toPojo(napi_value obj, napi_env env, napi_value *pojo);
 
 
 //-----------------------------------------------------------------------------

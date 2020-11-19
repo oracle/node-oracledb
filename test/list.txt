@@ -905,6 +905,7 @@ Overview of node-oracledb functional tests
         58.1.28 Negative - edition
         58.1.29 events
         58.1.30 Negative - events
+        58.1.31 dbObjectAsPojo
     58.2 Pool Class
         58.2.1 poolMin
         58.2.2 poolMax
@@ -4742,3 +4743,44 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     240.2 database error
     240.3 the offset of system error is 0
     240.4 PL/SQL syntax error
+
+242. dbObject18.js
+    242.1 set oracledb.dbObjectAsPojon
+        242.1.1 oracledb.dbObjectAsPojo could be set without connection
+        242.1.2 oracledb.dbObjectAsPojo could be set without connection
+        242.1.3 set oracledb.dbObjectAsPojo to value of oracledb.autoCommit
+        242.1.4 set oracledb.dbObjectAsPojo to value of Boolean("false")
+        242.1.5 set oracledb.dbObjectAsPojo to value of JSON.parse('true')
+        242.1.6 set oracledb.dbObjectAsPojo to value of JSON.parse('false')
+        242.1.7 set oracledb.dbObjectAsPojo to value of Boolean(true)
+        242.1.8 set oracledb.dbObjectAsPojo to value of Boolean('false')
+        242.1.9 set oracledb.dbObjectAsPojo to value of Boolean(false)
+        242.1.10 negative: set oracledb.dbObjectAsPojo to invalid value: null
+        242.1.11 negative: set oracledb.dbObjectAsPojo to invalid value: 0
+        242.1.12 negative: set oracledb.dbObjectAsPojo to invalid value: number
+        242.1.3 negative: set oracledb.dbObjectAsPojo to invalid value: string true
+        242.1.14 negative: set oracledb.dbObjectAsPojo to invalid value: string false
+        242.1.15 negative: set oracledb.dbObjectAsPojo to invalid value: undefined
+        242.1.16 negative: set oracledb.dbObjectAsPojo to invalid value: NaN
+        242.1.17 negative: set oracledb.dbObjectAsPojo to invalid value: empty string
+        242.1.18 negative: set oracledb.dbObjectAsPojo to invalid value: empty json
+        242.1.19 negative: set oracledb.dbObjectAsPojo to invalid value: oracledb.DATE type
+        242.1.20 negative: set oracledb.dbObjectAsPojo to invalid value: array
+    242.2 set dbObjectAsPojo in bind option
+        242.2.1 dbObjectAsPojo returns database objects as plain old JavaScript objects
+    242.3 set dbObjectAsPojo in both oracledb.dbObjectAsPojo and bind option
+        242.3.1 set oracledb.dbObjectAsPojo = true and dbObjectAsPojo:false in bind option
+        242.3.2 connection must remain open when accessing a DbObject
+    242.4 set dbObjectAsPojo using oracledb.dbObjectAsPojo
+        242.4.1 dbObjectAsPojo returns database objects as plain old JavaScript objects
+        242.4.2 connection can be closed when accessing the plain old JavaScript objects
+
+  243. dbObject19.js
+    243.1 set global attribute oracledb.dbObjectAsPojo to true
+        243.1.1 OUT bind DB Object
+        243.1.2 IN OUT bind DB Object
+    243.2 set dbObjectAsPojo in BIND_OUT and BIND_INOUT options
+        243.2.1 OUT bind DB Object 
+        243.2.2 IN OUT bind DB Object
+    243.3 set dbObjectAsPojo in bind variables doesn't work
+        243.3.1 OUT bind DB Object

@@ -48,6 +48,7 @@ describe('58. properties.js', function() {
       defaultValues.maxRows          = oracledb.maxRows;
       defaultValues.fetchArraySize   = oracledb.fetchArraySize;
       defaultValues.autoCommit       = oracledb.autoCommit;
+      defaultValues.dbObjectAsPojo   = oracledb.dbObjectAsPojo;
       defaultValues.connectionClass  = oracledb.connectionClass;
       defaultValues.externalAuth     = oracledb.externalAuth;
       defaultValues.fetchAsString    = oracledb.fetchAsString;
@@ -70,6 +71,7 @@ describe('58. properties.js', function() {
       oracledb.maxRows          = defaultValues.maxRows;
       oracledb.fetchArraySize   = defaultValues.fetchArraySize;
       oracledb.autoCommit       = defaultValues.autoCommit;
+      oracledb.dbObjectAsPojo   = defaultValues.dbObjectAsPojo;
       oracledb.connectionClass  = defaultValues.connectionClass;
       oracledb.externalAuth     = defaultValues.externalAuth;
       oracledb.fetchAsString    = defaultValues.fetchAsString;
@@ -351,6 +353,15 @@ describe('58. properties.js', function() {
         },
         /NJS-004: invalid value for property events/
       );
+    });
+
+    it('58.1.31 dbObjectAsPojo', function() {
+      var t = oracledb.dbObjectAsPojo;
+      oracledb.dbObjectAsPojo = !t;
+
+      t.should.eql(defaultValues.dbObjectAsPojo);
+      (oracledb.dbObjectAsPojo).should.eql( !defaultValues.dbObjectAsPojo );
+
     });
 
   }); // 58.1
