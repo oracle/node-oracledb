@@ -17,6 +17,8 @@ Please answer these questions so we can help you.
 
 Use Markdown syntax, see https://help.github.com/github/writing-on-github/basic-writing-and-formatting-syntax
 
+GitHub issues that are not updated for a month may be automatically closed.  Feel free to update them at any time.
+
 -->
 
 1. What versions are you using?

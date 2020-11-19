@@ -23,6 +23,8 @@ If you have a `DPI-1047`, `DPI-1050` or `DPI-1072` error, re-review the links ab
 
 Please answer these questions so we can help you.
 
+GitHub issues that are not updated for a month may be automatically closed.  Feel free to update them at any time.
+
 -->
 
 1. What versions are you using?
