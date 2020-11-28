@@ -13,6 +13,10 @@
   objects" or kept as database-backed objects.  This option also applies to
   output `BIND_OUT` bind variables.
 
+- Numeric suffixes are now added to duplicate SELECT column names when using
+  `oracledb.OUT_FORMAT_OBJECT` mode, allowing all columns to be represented in
+  the JavaScript object.
+
 - Fixed a compatibility regression affecting SODA "get" operations using older
   Oracle Client releases.
 

@@ -219,6 +219,11 @@ typedef enum {
 #define NJS_SODA_COLL_CREATE_MODE_MAP       5001
 
 
+// max value used for duplicate name composition (requires space for maximum
+// name length (128) and suffix added
+#define NJS_MAX_COL_NAME_BUFFER_LENGTH      200
+
+
 //-----------------------------------------------------------------------------
 // forward declarations
 //-----------------------------------------------------------------------------

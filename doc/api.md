@@ -1593,6 +1593,10 @@ property value set to the respective column value.  The property name follows
 Oracle's standard name-casing rules.  It will commonly be uppercase, since most
 applications create tables using unquoted, case-insensitive names.
 
+From node-oracledb 5.1, when duplicate column names are used in queries, then
+node-oracledb will append numeric suffixes in `oracledb.OUT_FORMAT_OBJECT` mode
+as necessary, so that all columns are represented in the JavaScript object.
+
 This property may be overridden in
 an [`execute()`](#executeoptions)
 or [`queryStream()`](#querystream) call.
