@@ -28,6 +28,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
+const should   = require('should');
 const dbconfig = require('./dbconfig.js');
 
 let sodaUtil = exports;
