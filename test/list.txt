@@ -4745,7 +4745,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     240.4 PL/SQL syntax error
 
 242. dbObject18.js
-    242.1 set oracledb.dbObjectAsPojon
+    242.1 set oracledb.dbObjectAsPojo
         242.1.1 oracledb.dbObjectAsPojo could be set without connection
         242.1.2 oracledb.dbObjectAsPojo could be set without connection
         242.1.3 set oracledb.dbObjectAsPojo to value of oracledb.autoCommit

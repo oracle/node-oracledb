@@ -45,6 +45,7 @@ describe('173. soda5.js', () => {
     }
 
     await sodaUtil.cleanup();
+    await sodaUtil.grantPrivilege();
   });
 
   it('173.1 create index, basic case', async () => {

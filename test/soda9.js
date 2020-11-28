@@ -43,6 +43,7 @@ describe('177. soda9.js', () => {
     }
 
     await sodaUtil.cleanup();
+    await sodaUtil.grantPrivilege();
   });
 
   it('177.1 insertOne() with a document content', async () => {

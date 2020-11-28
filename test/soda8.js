@@ -45,6 +45,7 @@ describe('176. soda8.js', () => {
     }
 
     await sodaUtil.cleanup();
+    await sodaUtil.grantPrivilege();
   });
 
   it('176.1 replaceOne(), basic case with document content', async () => {

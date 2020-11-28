@@ -30,12 +30,20 @@ const oracledb  = require('oracledb');
 const should    = require('should');
 const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
-describe('224. booleanBind.js', () => {
+describe('224. booleanBind.js', function()  {
 
   let conn;
+  let isRunnable = false;
+
   const pkgName = 'NODB_PKG_TEST_BOOLEANS';
-  before(async () => {
+  before(async function() {
+    isRunnable = await testsUtil.checkPrerequisites(1200000000, 1200000000);
+    if(!isRunnable) {
+      this.skip();
+    }
+
     let plsqlPkg =`
       create or replace package ${pkgName} as
 
@@ -140,7 +148,11 @@ describe('224. booleanBind.js', () => {
     }
   }); // before()
 
-  after(async() => {
+  after(async function() {
+    if(!isRunnable) {
+      return;
+    }
+    
     try {
       let plsql = `drop package ${pkgName}`;
       await conn.execute(plsql);
@@ -150,7 +162,7 @@ describe('224. booleanBind.js', () => {
     }
   }); // after()
 
-  it('224.1 IN bind boolean value', async() => {
+  it('224.1 IN bind boolean value', async function() {
 
     let binds = {
       inval: true,
@@ -166,7 +178,7 @@ describe('224. booleanBind.js', () => {
     }
   }); // 224.1
 
-  it('224.2 IN bind value "false"', async () => {
+  it('224.2 IN bind value "false"', async function() {
     let binds = {
       inval: false,
       outval: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 10 }
@@ -181,7 +193,7 @@ describe('224. booleanBind.js', () => {
     }
   }); // 224.2
 
-  it('224.3 IN bind value "null"', async () => {
+  it('224.3 IN bind value "null"', async function() {
     let binds = {
       inval: { type: oracledb.DB_TYPE_BOOLEAN, val: null },
       outval: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 10 }
@@ -196,7 +208,7 @@ describe('224. booleanBind.js', () => {
     }
   }); // 224.3
 
-  it('224.4 Negative - IN bind value type mismatch', async () => {
+  it('224.4 Negative - IN bind value type mismatch', async function() {
     let binds = {
       inval: { type: oracledb.DB_TYPE_BOOLEAN, val: 123 },
       outval: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 10 }
@@ -205,7 +217,7 @@ describe('224. booleanBind.js', () => {
 
     try {
       await assert.rejects(
-        async () => {
+        async function() {
           await conn.execute(sql, binds);
         },
         /NJS-011/
@@ -215,7 +227,7 @@ describe('224. booleanBind.js', () => {
     }
   });
 
-  it('224.5 OUT bind value "false"', async () => {
+  it('224.5 OUT bind value "false"', async function() {
     let binds = {
       inval: 12,
       outval: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN }
@@ -230,7 +242,7 @@ describe('224. booleanBind.js', () => {
     }
   }); // 224.5
 
-  it('224.6 OUT bind value "true"', async () => {
+  it('224.6 OUT bind value "true"', async function() {
     let binds = {
       inval: 9,
       outval: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN }
@@ -245,7 +257,7 @@ describe('224. booleanBind.js', () => {
     }
   }); // 224.6
 
-  it('224.7 IN bind array with boolean data', async () => {
+  it('224.7 IN bind array with boolean data', async function() {
     try {
       const cls = await conn.getDbObjectClass(`${pkgName}.UDT_BOOLEANLIST`);
       const arr = new cls([true, false, true, true, false, true, false, true]);
@@ -261,7 +273,7 @@ describe('224. booleanBind.js', () => {
     }
   }); // 224.7
 
-  it('224.8 OUT bind array with boolean data', async () => {
+  it('224.8 OUT bind array with boolean data', async function() {
     try {
       const cls = await conn.getDbObjectClass(`${pkgName}.UDT_BOOLEANLIST`);
       const arr = new cls([true, false, true, true, false, true, false, true]);
@@ -277,7 +289,7 @@ describe('224. booleanBind.js', () => {
     }
   }); // 224.8
 
-  it('224.9 INOUT bind record with boolean data', async () => {
+  it('224.9 INOUT bind record with boolean data', async function() {
     try {
       const cls = await conn.getDbObjectClass(`${pkgName}.UDT_DEMORECORD`);
       const obj = new cls();

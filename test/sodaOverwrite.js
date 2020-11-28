@@ -53,6 +53,7 @@ describe('189. sodaOverwrite.js', function() {
     }
 
     await sodaUtil.cleanup();
+    await sodaUtil.grantPrivilege();
 
     try {
       conn = await oracledb.getConnection(dbConfig);

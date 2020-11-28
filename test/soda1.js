@@ -40,41 +40,11 @@ describe('164. soda1.js', () => {
     if (!runnable) {
       this.skip();
       return;
-    } else {
-
-      try {
-
-        let credential = {
-          user:          dbconfig.test.DBA_user,
-          password:      dbconfig.test.DBA_password,
-          connectString: dbconfig.connectString,
-          privilege:     oracledb.SYSDBA
-        };
-        const connAsDBA = await oracledb.getConnection(credential);
-
-        let sql = `GRANT SODA_APP TO ${dbconfig.user}`;
-        await connAsDBA.execute(sql);
-        
-        try{
-          sql = `CREATE TABLESPACE tbs_nodesoda DATAFILE 'tbs_nodesoda.dbf' SIZE 300M EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO`;
-          await connAsDBA.execute(sql);
-        } catch(err){
-          // console.log(err);
-        }
-        
-        sql = `ALTER USER ${dbconfig.user} QUOTA UNLIMITED ON tbs_nodesoda`;
-        await connAsDBA.execute(sql);
-
-        sql = `ALTER USER ${dbconfig.user} default tablespace tbs_nodesoda`;
-        await connAsDBA.execute(sql);
-
-      } catch (err) {
-        should.not.exist(err);
-      }
-
-    }
+    } 
 
     await sodaUtil.cleanup();
+
+    await sodaUtil.grantPrivilege();
   });
 
   it('164.1 getSodaDatabase() creates a sodaDatabase Object', async () => {

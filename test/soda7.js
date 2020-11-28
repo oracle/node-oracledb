@@ -45,6 +45,7 @@ describe('175. soda7.js', () => {
     }
 
     await sodaUtil.cleanup();
+    await sodaUtil.grantPrivilege();
   });
 
   it('175.1 count(), basic case', async () => {

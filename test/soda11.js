@@ -45,6 +45,7 @@ describe('179. soda11.js', () => {
     }
 
     await sodaUtil.cleanup();
+    await sodaUtil.grantPrivilege();
   });
 
   it('179.1 create collection with metadata', async () => {

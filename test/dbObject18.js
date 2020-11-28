@@ -32,7 +32,7 @@ const assert    = require('assert');
 
 describe('242. dbObject18.js', () => {
 
-  describe('242.1 set oracledb.dbObjectAsPojon', () => {
+  describe('242.1 set oracledb.dbObjectAsPojo', () => {
 
     before(async () => {
       // Default value of oracledb.dbObjectAsPojo should be false
@@ -82,7 +82,7 @@ describe('242. dbObject18.js', () => {
       } catch (err) {
         should.not.exist(err);
         should.strictEqual(oracledb.dbObjectAsPojo, true);
-        console.log(oracledb.dbObjectAsPojo);
+        // console.log(oracledb.dbObjectAsPojo);
       }
     }); // 242.1.4
 

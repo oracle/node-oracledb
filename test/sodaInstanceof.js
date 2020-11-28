@@ -50,6 +50,7 @@ describe('186. sodaInstanceof.js', function() {
     }
 
     await sodaUtil.cleanup();
+    await sodaUtil.grantPrivilege();
   });
 
   it('186.1 instanceof checks for SODA classes', async function() {
