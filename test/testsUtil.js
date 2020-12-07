@@ -125,6 +125,8 @@ testsUtil.isSodaRunnable = async function() {
 
   if ( (serverVersion >= 2000000000) && (clientVersion < 2000000000) ) return false;
 
+  if ( !dbconfig.test.DBA_PRIVILEGE ) return false;
+
   return true;
 };
 
