@@ -44,6 +44,9 @@ static bool njsVariable_setInvalidBind(njsVariable *var, uint32_t pos,
 bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
         njsBaton *baton)
 {
+    dpiData *data;
+    uint32_t i;
+
     // if the variable is not an array use the bind array size
     if (!var->isArray)
         var->maxArraySize = baton->bindArraySize;
@@ -115,6 +118,20 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
             var->dpiObjectTypeHandle, &var->dpiVarHandle,
             &var->buffer->dpiVarData) < 0)
         return njsBaton_setErrorDPI(baton);
+
+    // for cursors, set the prefetch value, if it differs from the default;
+    // also mark the variable as not null in order for the prefetch rows to
+    // take effect
+    if (var->nativeTypeNum == DPI_NATIVE_TYPE_STMT &&
+            baton->prefetchRows != DPI_DEFAULT_PREFETCH_ROWS) {
+        for (i = 0; i < var->maxArraySize; i++) {
+            data = &var->buffer->dpiVarData[i];
+            data->isNull = 0;
+            if (dpiStmt_setPrefetchRows(data->value.asStmt,
+                    baton->prefetchRows) < 0)
+                return njsBaton_setErrorDPI(baton);
+        }
+    }
 
     return true;
 }

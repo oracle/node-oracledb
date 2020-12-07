@@ -17,6 +17,9 @@
   `oracledb.OUT_FORMAT_OBJECT` mode, allowing all columns to be represented in
   the JavaScript object.
 
+- The value of `prefetchRows` set when getting a REF CURSOR as a BIND_OUT
+  parameter is now used in the subsequent data retrieval from that cursor.
+
 - Fixed a compatibility regression affecting SODA "get" operations using older
   Oracle Client releases.
 

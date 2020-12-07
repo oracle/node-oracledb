@@ -3760,6 +3760,9 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     147.12 Negative - null
     147.13 Negative - random string
     147.14 Negative - Boolean
+    147.15 Query round-trips with no prefetch
+    147.16 Query round-trips with prefetch equal to row count
+    147.17 Query round-trips with prefetch larger than row count
 
 148. fetchArraySize1.js
     148.1 oracledb.fetchArraySize
@@ -4737,6 +4740,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     239.2 prefetchRows is enabled with default value
     239.3 cursor bind OUT then bind IN
     239.4 implicit binding type
+    239.5 check REF CURSOR round-trips with no prefetching
+    239.6 check REF CURSOR round-trips with prefetching
 
 240. errorOffset.js
     240.1 checks the offset value of the error
@@ -4780,7 +4785,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         243.1.1 OUT bind DB Object
         243.1.2 IN OUT bind DB Object
     243.2 set dbObjectAsPojo in BIND_OUT and BIND_INOUT options
-        243.2.1 OUT bind DB Object 
+        243.2.1 OUT bind DB Object
         243.2.2 IN OUT bind DB Object
     243.3 set dbObjectAsPojo in bind variables doesn't work
         243.3.1 OUT bind DB Object

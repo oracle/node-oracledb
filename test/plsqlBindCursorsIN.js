@@ -50,6 +50,7 @@ describe('239. plsqlBindCursorsIN.js', () => {
     select 4, 'String 4' from dual
     union all
     select 5, 'String 5' from dual
+    order by 1
   `;
 
   before(async () => {
@@ -99,7 +100,8 @@ describe('239. plsqlBindCursorsIN.js', () => {
                 union all
                 select 4, 'String 4' from dual
                 union all
-                select 5, 'String 5' from dual;
+                select 5, 'String 5' from dual
+                order by 1;
         end;
       `;
       await conn.execute(plsql);
@@ -235,4 +237,64 @@ describe('239. plsqlBindCursorsIN.js', () => {
       should.not.exist(error);
     }
   }); // 239.4
+
+  it('239.5 check REF CURSOR round-trips with no prefetching', async () => {
+    if (!dbconfig.test.DBA_PRIVILEGE) {
+      it.skip('');
+      return;
+    }
+    try {
+      const sid = await testsUtil.getSid(conn);
+      let rt = await testsUtil.getRoundTripCount(sid);
+      let result = await conn.execute(
+        `begin ${procName2}(:bv); end;`,
+        {
+          bv: {dir: oracledb.BIND_OUT, type: oracledb.CURSOR }
+        },
+        {
+          prefetchRows: 0
+        }
+      );
+      const rc = result.outBinds.bv;
+      await rc.getRows(2);
+      await rc.getRows(2);
+      rt = await testsUtil.getRoundTripCount(sid) - rt;
+
+      should.strictEqual(rt, 3);
+
+    } catch (error) {
+      should.not.exist(error);
+    }
+  }); // 239.5
+
+  it('239.6 check REF CURSOR round-trips with prefetching', async () => {
+    if (!dbconfig.test.DBA_PRIVILEGE) {
+      it.skip('');
+      return;
+    }
+    try {
+      const sid = await testsUtil.getSid(conn);
+      let rt = await testsUtil.getRoundTripCount(sid);
+
+      let result = await conn.execute(
+        `begin ${procName2}(:bv); end;`,
+        {
+          bv: {dir: oracledb.BIND_OUT, type: oracledb.CURSOR }
+        },
+        {
+          prefetchRows: 100
+        }
+      );
+      const rc = result.outBinds.bv;
+      await rc.getRows(2);
+      await rc.getRows(2);
+      rt = await testsUtil.getRoundTripCount(sid) - rt;
+
+      should.strictEqual(rt, 2);
+
+    } catch (error) {
+      should.not.exist(error);
+    }
+  }); // 239.6
+
 });

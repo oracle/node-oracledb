@@ -28,10 +28,23 @@ const oracledb = require('oracledb');
 const should   = require('should');
 const assert   = require('assert');
 const dbconfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe("147. prefetchRows.js", function() {
 
   let conn;
+
+  const sql = `
+    select 1, 'String 1' from dual
+    union all
+    select 2, 'String 2' from dual
+    union all
+    select 3, 'String 3' from dual
+    union all
+    select 4, 'String 4' from dual
+    union all
+    select 5, 'String 5' from dual
+    order by 1`;
 
   const DefaultPrefetchRows = oracledb.prefetchRows;
   before(async () => {
@@ -231,6 +244,60 @@ describe("147. prefetchRows.js", function() {
         },
         /NJS-007/
       );
+    } catch (error) {
+      should.not.exist(error);
+    }
+  });
+
+  it('147.15 Query round-trips with no prefetch', async () => {
+    if (!dbconfig.test.DBA_PRIVILEGE) {
+      return;
+    }
+    try {
+      const sid = await testsUtil.getSid(conn);
+      let rt = await testsUtil.getRoundTripCount(sid);
+
+      await conn.execute(sql, [], { prefetchRows: 0 });
+      rt = await testsUtil.getRoundTripCount(sid) - rt;
+
+      should.strictEqual(rt, 2);
+
+    } catch (error) {
+      should.not.exist(error);
+    }
+  });
+
+  it('147.16 Query round-trips with prefetch equal to row count', async () => {
+    if (!dbconfig.test.DBA_PRIVILEGE) {
+      return;
+    }
+    try {
+      const sid = await testsUtil.getSid(conn);
+      let rt = await testsUtil.getRoundTripCount(sid);
+
+      await conn.execute(sql, [], { prefetchRows: 5 });
+      rt = await testsUtil.getRoundTripCount(sid) - rt;
+
+      should.strictEqual(rt, 2);
+
+    } catch (error) {
+      should.not.exist(error);
+    }
+  });
+
+  it('147.16 Query round-trips with prefetch larger than row count', async () => {
+    if (!dbconfig.test.DBA_PRIVILEGE) {
+      return;
+    }
+    try {
+      const sid = await testsUtil.getSid(conn);
+      let rt = await testsUtil.getRoundTripCount(sid);
+
+      await conn.execute(sql, [], { prefetchRows: 6 });
+      rt = await testsUtil.getRoundTripCount(sid) - rt;
+
+      should.strictEqual(rt, 1);
+
     } catch (error) {
       should.not.exist(error);
     }

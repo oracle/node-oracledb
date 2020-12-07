@@ -212,11 +212,43 @@ testsUtil.measureNetworkRoundTripTime = async function() {
   return new Date() - startTime;
 };
 
+testsUtil.getSid = async function(conn) {
+  const sql = `select sys_context('userenv','sid') from dual`;
+  const result = await conn.execute(sql);
+  return result.rows[0][0];  // session id
+};
+
+testsUtil.getRoundTripCount = async function(sid) {
+  if (!dbconfig.test.DBA_PRIVILEGE) {
+    let msg = "Note: DBA privilege environment variable is not true!\n";
+    msg += "Without DBA privilege the test cannot get the current round trip count!";
+    throw new Error(msg);
+  } else {
+    let dbaCredential = {
+      user:          dbconfig.test.DBA_user,
+      password:      dbconfig.test.DBA_password,
+      connectString: dbconfig.connectString,
+      privilege:     oracledb.SYSDBA
+    };
+
+    const sql = `
+      select ss.value
+      from v$sesstat ss, v$statname sn
+      where ss.sid = :sid
+        and ss.statistic# = sn.statistic#
+        and sn.name like '%roundtrip%client%'`;
+    const conn = await oracledb.getConnection(dbaCredential);
+    const result = await conn.execute(sql, [sid]);
+    await conn.close();
+    return result.rows[0][0];  // number of round-trips executed so far in the session
+  }
+};
+
 testsUtil.createAQtestUser = async function(AQ_USER, AQ_USER_PWD) {
 
   if (!dbconfig.test.DBA_PRIVILEGE) {
-    let msg = "Note: DBA privilege environment variable is false!\n";
-    msg += "Without DBA privilege, it could not create schema!";
+    let msg = "Note: DBA privilege environment variable is not true!\n";
+    msg += "Without DBA privilege, the test cannot create the schema!";
     throw new Error(msg);
   } else {
     let dbaCredential = {
@@ -265,7 +297,8 @@ testsUtil.createAQtestUser = async function(AQ_USER, AQ_USER_PWD) {
 
 testsUtil.dropAQtestUser = async function(AQ_USER) {
   if (!dbconfig.test.DBA_PRIVILEGE) {
-    let msg = "Without DBA privilege, it could not drop schema!\n";
+    let msg = "Note: DBA privilege environment variable is not true!\n";
+    msg += "Without DBA privilege, the test cannot drop the schema!\n";
     throw new Error(msg);
   } else {
     let dbaCredential = {
