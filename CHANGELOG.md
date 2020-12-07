@@ -23,6 +23,9 @@
 - Fixed a compatibility regression affecting SODA "get" operations using older
   Oracle Client releases.
 
+- Fixed a memory leak getting attributes of objects or elements of collections
+  that are themselves objects.
+
 ## node-oracledb v5.0.0 (29 Jun 2020)
 
 - Stated compatibility is now for Node.js 10.16+, 12 and 14.

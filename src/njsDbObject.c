@@ -766,6 +766,7 @@ static bool njsDbObject_transformFromOracle(njsDbObject *obj, napi_env env,
 {
     napi_value global, constructor, temp;
     njsLobBuffer lobBuffer;
+    bool ok;
 
     // handle null values
     if (data->isNull) {
@@ -838,8 +839,10 @@ static bool njsDbObject_transformFromOracle(njsDbObject *obj, napi_env env,
                 return njsUtils_throwErrorDPI(env, obj->type->oracleDb);
             return true;
         case DPI_ORACLE_TYPE_OBJECT:
-            return njsDbObject_new(typeInfo->objectType, data->value.asObject,
+            ok = njsDbObject_new(typeInfo->objectType, data->value.asObject,
                     env, value);
+            dpiObject_release(data->value.asObject);
+            return ok;
         case DPI_ORACLE_TYPE_BOOLEAN:
             NJS_CHECK_NAPI(env, napi_get_boolean(env, data->value.asBoolean,
                     value))
