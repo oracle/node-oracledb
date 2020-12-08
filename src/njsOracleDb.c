@@ -127,6 +127,7 @@ static njsConstant njsClassConstants[] = {
     { "DB_TYPE_DATE", DPI_ORACLE_TYPE_DATE },
     { "DB_TYPE_INTERVAL_DS", DPI_ORACLE_TYPE_INTERVAL_DS },
     { "DB_TYPE_INTERVAL_YM", DPI_ORACLE_TYPE_INTERVAL_YM },
+    { "DB_TYPE_JSON", DPI_ORACLE_TYPE_JSON },
     { "DB_TYPE_LONG", DPI_ORACLE_TYPE_LONG_VARCHAR },
     { "DB_TYPE_LONG_RAW", DPI_ORACLE_TYPE_LONG_RAW },
     { "DB_TYPE_NCHAR", DPI_ORACLE_TYPE_NCHAR },
@@ -1603,7 +1604,7 @@ static napi_value njsOracleDb_setFetchAsString(napi_env env,
         napi_callback_info info)
 {
     const uint32_t validTypes[] = { NJS_DATATYPE_NUM, NJS_DATATYPE_DATE,
-            NJS_DATATYPE_BUFFER, NJS_DATATYPE_CLOB, 0 };
+            NJS_DATATYPE_BUFFER, NJS_DATATYPE_CLOB, NJS_DATATYPE_JSON, 0 };
     njsOracleDb *oracleDb;
     napi_value value;
 

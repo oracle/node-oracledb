@@ -103,6 +103,9 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
             var->dbObjectAsPojo = baton->dbObjectAsPojo;
             var->nativeTypeNum = DPI_NATIVE_TYPE_OBJECT;
             break;
+        case DPI_ORACLE_TYPE_JSON:
+            var->nativeTypeNum = DPI_NATIVE_TYPE_JSON;
+            break;
         default:
             return njsBaton_setError(baton, errInvalidBindDataType, 2);
     }
@@ -259,6 +262,8 @@ static uint32_t njsVariable_getDataType(njsVariable *var)
             return NJS_DATATYPE_OBJECT;
         case DPI_ORACLE_TYPE_STMT:
             return NJS_DATATYPE_CURSOR;
+        case DPI_ORACLE_TYPE_JSON:
+            return NJS_DATATYPE_JSON;
         default:
             break;
     }
@@ -407,6 +412,81 @@ bool njsVariable_getNestedCursorIndices(njsVariable *vars, uint32_t numVars,
 
 
 //-----------------------------------------------------------------------------
+// njsVariable_getJsonNodeValue()
+//   Return an appropriate JavaScript value for the JSON node.
+//-----------------------------------------------------------------------------
+static bool njsVariable_getJsonNodeValue(njsBaton *baton, dpiJsonNode *node,
+        napi_env env, napi_value *value)
+{
+    napi_value key, temp;
+    dpiJsonArray *array;
+    dpiJsonObject *obj;
+    uint32_t i;
+
+    // null is a special case
+    if (node->nativeTypeNum == DPI_NATIVE_TYPE_NULL) {
+        NJS_CHECK_NAPI(env, napi_get_null(env, value))
+        return true;
+    }
+
+    // handle the other types supported in JSON nodes
+    switch (node->oracleTypeNum) {
+        case DPI_ORACLE_TYPE_JSON_ARRAY:
+            array = &node->value->asJsonArray;
+            NJS_CHECK_NAPI(env, napi_create_array_with_length(env,
+                    array->numElements, value))
+            for (i = 0; i < array->numElements; i++) {
+                if (!njsVariable_getJsonNodeValue(baton, &array->elements[i],
+                        env, &temp))
+                    return false;
+                NJS_CHECK_NAPI(env, napi_set_element(env, *value, i, temp))
+            }
+            return true;
+        case DPI_ORACLE_TYPE_JSON_OBJECT:
+            obj = &node->value->asJsonObject;
+            NJS_CHECK_NAPI(env, napi_create_object(env, value))
+            for (i = 0; i< obj->numFields; i++) {
+                NJS_CHECK_NAPI(env, napi_create_string_utf8(env,
+                        obj->fieldNames[i], obj->fieldNameLengths[i], &key))
+                if (!njsVariable_getJsonNodeValue(baton, &obj->fields[i],
+                        env, &temp))
+                    return false;
+                NJS_CHECK_NAPI(env, napi_set_property(env, *value, key, temp))
+            }
+            return true;
+        case DPI_ORACLE_TYPE_VARCHAR:
+            NJS_CHECK_NAPI(env, napi_create_string_utf8(env,
+                    node->value->asBytes.ptr, node->value->asBytes.length,
+                    value))
+            return true;
+        case DPI_ORACLE_TYPE_RAW:
+            NJS_CHECK_NAPI(env, napi_create_buffer_copy(env,
+                    node->value->asBytes.length, node->value->asBytes.ptr,
+                    NULL, value))
+            return true;
+        case DPI_ORACLE_TYPE_NUMBER:
+            NJS_CHECK_NAPI(env, napi_create_double(env, node->value->asDouble,
+                    value))
+            return true;
+        case DPI_ORACLE_TYPE_DATE:
+        case DPI_ORACLE_TYPE_TIMESTAMP:
+            return njsBaton_createDate(baton, env, node->value->asDouble,
+                    value);
+            break;
+        case DPI_ORACLE_TYPE_BOOLEAN:
+            NJS_CHECK_NAPI(env, napi_get_boolean(env, node->value->asBoolean,
+                    value))
+            return true;
+        default:
+            break;
+    }
+
+    return njsBaton_setError(baton, errUnsupportedDataTypeInJson,
+            node->oracleTypeNum);
+}
+
+
+//-----------------------------------------------------------------------------
 // njsVariable_getScalarValue()
 //   Get the value from the variable at the specified position in the variable.
 //-----------------------------------------------------------------------------
@@ -416,6 +496,7 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
 {
     uint32_t bufferRowIndex, rowidValueLength;
     const char *rowidValue;
+    dpiJsonNode *topNode;
     dpiData *data;
 
     // get the value from ODPI-C
@@ -500,6 +581,11 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
             if (var->dbObjectAsPojo && !njsDbObject_toPojo(*value, env, value))
                 return false;
             break;
+        case DPI_NATIVE_TYPE_JSON:
+            if (dpiJson_getValue(data->value.asJson,
+                    DPI_JSON_OPT_DATE_AS_DOUBLE, &topNode) < 0)
+                return njsBaton_setErrorDPI(baton);
+            return njsVariable_getJsonNodeValue(baton, topNode, env, value);
         default:
             break;
     }
@@ -601,16 +687,20 @@ bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
             case DPI_ORACLE_TYPE_LONG_RAW:
                 vars[i].maxSize = (uint32_t) -1;
                 break;
+            case DPI_ORACLE_TYPE_OBJECT:
+                vars[i].dpiObjectTypeHandle = queryInfo.typeInfo.objectType;
+                vars[i].dbObjectAsPojo = baton->dbObjectAsPojo;
+                break;
+
+            // the remaining types are valid but no special processing needs to
+            // be done
             case DPI_ORACLE_TYPE_NUMBER:
             case DPI_ORACLE_TYPE_NATIVE_INT:
             case DPI_ORACLE_TYPE_NATIVE_FLOAT:
             case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
             case DPI_ORACLE_TYPE_ROWID:
             case DPI_ORACLE_TYPE_STMT:
-                break;
-            case DPI_ORACLE_TYPE_OBJECT:
-                vars[i].dpiObjectTypeHandle = queryInfo.typeInfo.objectType;
-                vars[i].dbObjectAsPojo = baton->dbObjectAsPojo;
+            case DPI_ORACLE_TYPE_JSON:
                 break;
             default:
                 return njsBaton_setError(baton, errUnsupportedDataType,
@@ -715,6 +805,12 @@ bool njsVariable_performMapping(njsVariable *var, dpiQueryInfo *queryInfo,
                 break;
             case DPI_ORACLE_TYPE_RAW:
                 if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_BUFFER) {
+                    var->varTypeNum = DPI_ORACLE_TYPE_VARCHAR;
+                    return true;
+                }
+                break;
+            case DPI_ORACLE_TYPE_JSON:
+                if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_JSON) {
                     var->varTypeNum = DPI_ORACLE_TYPE_VARCHAR;
                     return true;
                 }
@@ -988,6 +1084,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
 {
     napi_value asNumber, constructor, temp;
     napi_valuetype valueType;
+    njsJsonBuffer jsonBuffer;
     njsResultSet *resultSet;
     dpiLob *tempLobHandle;
     size_t bufferLength;
@@ -1001,6 +1098,21 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     // initialization
     data = &var->buffer->dpiVarData[pos];
     data->isNull = 0;
+
+    // handle binding to JSON values; the types of values that can be stored in
+    // a JSON value are managed independently
+    if (var->varTypeNum == DPI_ORACLE_TYPE_JSON) {
+        if (!njsJsonBuffer_fromValue(&jsonBuffer, env, value, baton)) {
+            njsJsonBuffer_free(&jsonBuffer);
+            return false;
+        }
+        if (dpiJson_setValue(data->value.asJson, &jsonBuffer.topNode) < 0) {
+            njsJsonBuffer_free(&jsonBuffer);
+            return false;
+        }
+        njsJsonBuffer_free(&jsonBuffer);
+        return true;
+    }
 
     // determine type of object
     NJS_CHECK_NAPI(env, napi_typeof(env, value, &valueType))

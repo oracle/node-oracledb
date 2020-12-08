@@ -152,7 +152,7 @@ describe('224. booleanBind.js', function()  {
     if(!isRunnable) {
       return;
     }
-    
+
     try {
       let plsql = `drop package ${pkgName}`;
       await conn.execute(plsql);

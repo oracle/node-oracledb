@@ -46,7 +46,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 3.1.2 [Oracle Database Type Constants](#oracledbconstantsdbtype)
             - [`DB_TYPE_BFILE`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_DOUBLE`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_FLOAT`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_INTEGER`](#oracledbconstantsdbtype), [`DB_TYPE_BLOB`](#oracledbconstantsdbtype), [`DB_TYPE_BOOLEAN`](#oracledbconstantsdbtype),
 [`DB_TYPE_CHAR`](#oracledbconstantsdbtype), [`DB_TYPE_CLOB`](#oracledbconstantsdbtype), [`DB_TYPE_CURSOR`](#oracledbconstantsdbtype),
-[`DB_TYPE_DATE`](#oracledbconstantsdbtype), [`DB_TYPE_INTERVAL_DS`](#oracledbconstantsdbtype), [`DB_TYPE_INTERVAL_YM`](#oracledbconstantsdbtype), [`DB_TYPE_LONG`](#oracledbconstantsdbtype), [`DB_TYPE_LONG_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_NCHAR`](#oracledbconstantsdbtype), [`DB_TYPE_NCLOB`](#oracledbconstantsdbtype), [`DB_TYPE_NUMBER`](#oracledbconstantsdbtype), [`DB_TYPE_NVARCHAR`](#oracledbconstantsdbtype), [`DB_TYPE_OBJECT`](#oracledbconstantsdbtype), [`DB_TYPE_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_ROWID`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_LTZ`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_TZ`](#oracledbconstantsdbtype), [`DB_TYPE_VARCHAR`](#oracledbconstantsdbtype)
+[`DB_TYPE_DATE`](#oracledbconstantsdbtype), [`DB_TYPE_INTERVAL_DS`](#oracledbconstantsdbtype), [`DB_TYPE_INTERVAL_YM`](#oracledbconstantsdbtype), [`DB_TYPE_JSON`](#oracledbconstantsdbtype), [`DB_TYPE_LONG`](#oracledbconstantsdbtype), [`DB_TYPE_LONG_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_NCHAR`](#oracledbconstantsdbtype), [`DB_TYPE_NCLOB`](#oracledbconstantsdbtype), [`DB_TYPE_NUMBER`](#oracledbconstantsdbtype), [`DB_TYPE_NVARCHAR`](#oracledbconstantsdbtype), [`DB_TYPE_OBJECT`](#oracledbconstantsdbtype), [`DB_TYPE_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_ROWID`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_LTZ`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_TZ`](#oracledbconstantsdbtype), [`DB_TYPE_VARCHAR`](#oracledbconstantsdbtype)
         - 3.1.3 [Node-oracledb Type Constants](#oracledbconstantsnodbtype)
             - [`BLOB`](#oracledbconstantsnodbtype), [`BUFFER`](#oracledbconstantsnodbtype), [`CLOB`](#oracledbconstantsnodbtype), [`CURSOR`](#oracledbconstantsnodbtype), [`DATE`](#oracledbconstantsnodbtype), [`DEFAULT`](#oracledbconstantsnodbtype), [`NCLOB`](#oracledbconstantsnodbtype), [`NUMBER`](#oracledbconstantsnodbtype), [`STRING`](#oracledbconstantsnodbtype)
         - 3.1.4 [Execute Bind Direction Constants](#oracledbconstantsbinddir)
@@ -481,7 +481,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 18.5 [Getting LOBs as Streams from Oracle Database](#loboutstream)
     - 18.6 [Using `createLob()` for PL/SQL IN Binds](#templobdiscussion)
     - 18.7 [Closing Lobs](#closinglobs)
-19. [Oracle Database 12c JSON Data type](#jsondatatype)
+19. [Oracle Database JSON Data Type](#jsondatatype)
 20. [Working with XMLType](#xmltype)
 21. [Bind Parameters for Prepared Statements](#bind)
     - 21.1 [IN Bind Parameters](#inbind)
@@ -876,7 +876,7 @@ Some constants can also be used for:
 - for the [`createLob()`](#connectioncreatelob) `type` parameter
 - for [`fetchAsBuffer`](#propdbfetchasbuffer), [`fetchAsString`](#propdbfetchasstring), and [`fetchInfo`](#propexecfetchinfo)
 
-Constant Name                        | Value | Database Datatype                             |
+Constant Name                        | Value | Database Data type                            |
 -------------------------------------|-------|-----------------------------------------------|
 `oracledb.DB_TYPE_BFILE`             | 2020  | BFILE                                         |
 `oracledb.DB_TYPE_BINARY_DOUBLE`     | 2008  | BINARY_DOUBLE                                 |
@@ -890,6 +890,7 @@ Constant Name                        | Value | Database Datatype                
 `oracledb.DB_TYPE_DATE`              | 2011  | DATE                                          |
 `oracledb.DB_TYPE_INTERVAL_DS`       | 2015  | INTERVAL DAY TO SECOND                        |
 `oracledb.DB_TYPE_INTERVAL_YM`       | 2016  | INTERVAL YEAR TO MONTH                        |
+`oracledb.DB_TYPE_JSON`              | 2027  | JSON (new in node-oracledb 5.1)               |
 `oracledb.DB_TYPE_LONG`              | 2024  | LONG                                          |
 `oracledb.DB_TYPE_LONG_RAW`          | 2025  | LONG RAW                                      |
 `oracledb.DB_TYPE_NCHAR`             | 2004  | NCHAR                                         |
@@ -3542,6 +3543,7 @@ Lob           | BLOB                           | `oracledb.BLOB` or `oracledb.DB
 Lob           | NCLOB                          | `oracledb.NCLOB` or `oracledb.DB_TYPE_NCLOB`        | This combination is supported from node-oracledb 4.2. Binding a String with `type` of `oracledb.DB_TYPE_NVARCHAR` will generally be preferred |
 String        | ROWID                          | `oracledb.STRING` or `oracledb.DB_TYPE_VARCHAR`     |                                                                   |
 String        | UROWID                         | `oracledb.STRING` or `oracledb.DB_TYPE_VARCHAR`     |                                                                   |
+Object        | JSON                           | `oracledb.DB_TYPE_JSON`                             | See [Oracle Database JSON Data Type](#jsondatatype)               |
 String        | XMLType                        | `oracledb.STRING` or `oracledb.DB_TYPE_VARCHAR`     | Size is limited to the maximum database VARCHAR length            |
 Boolean       | BOOLEAN                        | `oracledb.DB_TYPE_BOOLEAN`                          | This combination is supported from node-oracledb 4.2.  Only supported for PL/SQL binds |
 ResultSet     | CURSOR                         | `oracledb.CURSOR` or `oracledb.DB_TYPE_CURSOR`      | Only supported for OUT binds                                      |
@@ -5476,7 +5478,7 @@ Note it is an asynchronous method and requires a round-trip
 to the database:
 
 ```javascript
-const data = async myLob.getData();
+const data = await myLob.getData();
 ```
 
 This method was added in node-oracledb 4.0.
@@ -12231,7 +12233,7 @@ Automatic closing of returned Lobs occurs when:
 - a stream error occurs
 - the Lob was used as the source for an IN OUT bind
 
-## <a name="jsondatatype"></a> 19. Oracle Database JSON Data type
+## <a name="jsondatatype"></a> 19. Oracle Database JSON Data Type
 
 Oracle Database 12.1.0.2 introduced native support for JSON data.  You
 can use JSON with relational database features, including
@@ -12240,72 +12242,225 @@ project JSON data relationally, making it available for relational
 processes and tools.  Also see [node-oracledb's SODA API](#sodaoverview), which
 allows access to JSON documents through a set of NoSQL-style APIs.
 
-JSON in relational tables is stored as BLOB, CLOB or VARCHAR2 data.  This means
-that node-oracledb can easily insert and query it.
+Prior to Oracle Database 21, JSON in relational tables is stored as BLOB, CLOB
+or VARCHAR2 data, allowing easy access with node-oracledb.  Oracle Database 21
+introduced a dedicated JSON data type with a new [binary storage format][194]
+that improves performance and functionality.  To use the new dedicated JSON
+type, the Oracle Database and Oracle Client libraries must be version 21, or
+later.  Also node-oracledb must be 5.1, or later.
 
-As an example, the following table has a `PO_DOCUMENT` column that is
-enforced to be JSON:
+For more information about using JSON in Oracle Database see the
+[Database JSON Developer's Guide][57].
+
+In Oracle Database 21, to create a table with a column called `PO_DOCUMENT` for
+JSON data:
 
 ```sql
-CREATE TABLE j_purchaseorder (po_document VARCHAR2(4000) CHECK (po_document IS JSON));
+CREATE TABLE j_purchaseorder (po_document JSON);
 ```
 
-To insert data using node-oracledb:
+For older Oracle Database versions the syntax is:
+
+```sql
+CREATE TABLE j_purchaseorder (po_document BLOB CHECK (po_document IS JSON));
+```
+
+The check constraint with the clause ``IS JSON`` ensures only JSON data is
+stored in that column.
+
+The older syntax can still be used in Oracle Database 21, however the
+recommendation is to move to the new JSON type.  With the old syntax, the
+storage can be BLOB, CLOB or VARCHAR2.  Of these, BLOB is preferred to avoid
+character set conversion overheads.
+
+Using Oracle Database 21 and Oracle Client 21 with node-oracledb 5.1 (or later),
+you can insert JavaScript objects directly by binding as
+`oracledb.DB_TYPE_JSON`:
+
+```javascript
+const data = { "userId": 1, "userName": "Chris", "location": "Australia" };
+
+await connection.execute(
+  `INSERT INTO j_purchaseorder (po_document) VALUES (:bv)`,
+  { bv: {val: data, type: oracledb.DB_TYPE_JSON} }
+);
+```
+
+With the older BLOB storage, or to insert JSON strings:
 
 ```javascript
 const data = { "userId": 1, "userName": "Chris", "location": "Australia" };
 const s = JSON.stringify(data);  // change JavaScript value to a JSON string
+const b = Buffer.from(s, 'utf8');
 
 const result = await connection.execute(
   `INSERT INTO j_purchaseorder (po_document) VALUES (:bv)`,
-  [s]  // bind the JSON string
+  [b]  // bind the JSON string
 );
 ```
 
-Queries can access JSON with Oracle JSON path expressions.  These
-expressions are matched by Oracle SQL functions and conditions to
-select portions of the JSON data.  Path expressions can use wildcards
-and array ranges.  An example is `$.friends` which is the value of
-JSON field `friends`.
-
-Oracle provides SQL functions and conditions to create, query, and
-operate on JSON data stored in the database.
-
-For example, `j_purchaseorder` can be queried with:
+To query with Oracle Database 21 and Oracle Client 21, or later:
 
 ```
-SELECT po.po_document.location FROM j_purchaseorder po
+const r = await conn.execute(`SELECT po_document FROM j_purchaseorder`);
+console.dir(r.rows, { depth: null });
 ```
 
-With the earlier JSON inserted into the table, the queried value would
-be `Australia`.
+The output is:
 
-The `JSON_EXISTS` tests for the existence of a particular value within
-some JSON data.  To look for JSON entries that have a `quantity`
-field:
-
-```JavaScript
-const result = await connection.execute(
-  `SELECT po_document FROM j_purchaseorder WHERE JSON_EXISTS (po_document, '$.location')`
-);
-const js = JSON.parse(result.rows[0][0]);  // show only first record in this example
-console.log('Query results: ', js);
+```
+[
+  {
+    PO_DOCUMENT: '{"userId":1,"userName":"Chris","location":"Australia"}'
+  }
+]
 ```
 
-This query would display:
+If node-oracledb uses Oracle Client Libraries 19 (or lower), querying an Oracle
+Database 21 (or later) JSON column returns a [Lob Class](#lobclass) BLOB.  You
+can stream the Lob or use [`lob.getData()`](#lobgetdata):
+
+```javascript
+const result = await connection.execute(`SELECT po_document FROM j_purchaseorder`);,
+
+const lob = result.rows[0][0];  // just show first row
+const d = await lob.getData();
+const j = JSON.parse(d);
+console.dir(j,  { depth: null });
+```
+
+The output is:
 
 ```
 { userId: 1, userName: 'Chris', location: 'Australia' }
 ```
 
-In Oracle Database 12.2, or later, the [`JSON_OBJECT` ][54] function
-is a great way to convert relational table data to JSON:
+Note `oracledb.fetchAsBuffer` will not automatically convert the Oracle Database
+21c JSON type to a Buffer.  Using it will give *ORA-40569: Unimplemented JSON
+feature.*  Use `await lob.getData()` as shown.
+
+#### IN Bind Type Mapping
+
+When binding a JavaScript object as `oracledb.DB_TYPE_JSON` for
+`oracledb.BIND_IN` or `oracledb.BIND_INOUT` in Oracle Database 21 (or later),
+JavaScript values are converted to JSON attributes as shown in the following
+table.  The 'SQL Equivalent' syntax can be used in SQL INSERT and UPDATE
+statements if specific attribute types are needed but there is no direct mapping
+from JavaScript.
+
+JavaScript Type or Value | JSON Attribute Type or Value | SQL Equivalent Example
+-------------------------|------------------------------|-----------------------
+null                     | null                         | NULL
+undefined                | null                         | n/a
+true                     | true                         | n/a
+false                    | false                        | n/a
+Number                   | NUMBER                       | `json_scalar(1)`
+String                   | VARCHAR2                     | `json_scalar('String')`
+Date                     | TIMESTAMP                    | `json_scalar(to_timestamp('2020-03-10', 'YYYY-MM-DD'))`
+Buffer                   | RAW                          | `json_scalar(utl_raw.cast_to_raw('A raw value'))`
+Array                    | Array                        | `json_array(1, 2, 3 returning json)`
+Object                   | Object                       | `json_object(key 'Fred' value json_scalar(5), key 'George' value json_scalar('A string') returning json)`
+n/a                      | CLOB                         | `json_scalar(to_clob('A short CLOB'))`
+n/a                      | BLOB                         | `json_scalar(to_blob(utl_raw.cast_to_raw('A short BLOB')))`
+n/a                      | DATE                         | `json_scalar(to_date('2020-03-10', 'YYYY-MM-DD'))`
+n/a                      | INTERVAL YEAR TO MONTH       | `json_scalar(to_yminterval('+5-9'))`
+n/a                      | INTERVAL DAY TO SECOND       | `json_scalar(to_dsinterval('P25DT8H25M'))`
+n/a                      | BINARY_DOUBLE                | `json_scalar(to_binary_double(25))`
+n/a                      | BINARY_FLOAT                 | `json_scalar(to_binary_float(15.5))`
+
+An example of creating a CLOB attribute with key `mydocument `in a JSON column
+using SQL is:
+
+```javascript
+const sql = `INSERT INTO mytab (myjsoncol)
+             VALUES (JSON_OBJECT(key 'mydocument' value JSON_SCALAR(TO_CLOB(:b)) RETURNING JSON))`;
+await connection.execute(sql, ['A short CLOB']);
+```
+
+When `mytab` is queried in node-oracledb, the CLOB data will be returned as a
+JavaScript String, as shown by the following table.  Output might be like:
+
+```
+{ mydocument: 'A short CLOB' }
+```
+
+#### Query and OUT Bind Type Mapping
+
+When getting Oracle Database 21 JSON values from the database, the following
+attribute mapping occurs:
+
+Database JSON Attribute Type or Value | JavaScript Type or Value
+--------------------------------------|------------------------------------
+null                                  | null
+false                                 | false
+true                                  | true
+NUMBER                                | Number
+VARCHAR2                              | String
+RAW                                   | Buffer
+CLOB                                  | String
+BLOB                                  | Buffer
+DATE                                  | Date
+TIMESTAMP                             | Date
+INTERVAL YEAR TO MONTH                | Not supported. Will give an error.
+INTERVAL DAY TO SECOND                | Not supported. Will give an error.
+BINARY_DOUBLE                         | Number
+BINARY_FLOAT                          | Number
+Arrays                                | Array
+Objects                               | A plain JavaScript Object
+
+#### SQL/JSON Path Expressions
+
+Oracle Database provides SQL access to JSON data using SQL/JSON path
+expressions.  A path expression selects zero or more JSON values that match, or
+satisfy, it.  Path expressions can use wildcards and array ranges.  A simple
+path expression is `$.friends` which is the value of the JSON field `friends`.
+
+For example, the previously created `j_purchaseorder` table with JSON column
+`po_document` can be queried like:
+
+```
+SELECT po.po_document.location FROM j_purchaseorder po
+```
+
+With the JSON `'{"userId":1,"userName":"Chris","location":"Australia"}'` stored
+in the table, a queried value would be `Australia`.
+
+The `JSON_EXISTS` function tests for the existence of a particular value within
+some JSON data.  To look for JSON entries that have a `location` field:
+
+```javascript
+const result = await connection.execute(
+  `SELECT po_document FROM j_purchaseorder WHERE JSON_EXISTS (po_document, '$.location')`
+);
+const d = result.rows[0][0];      // show only first record in this example
+console.dir(d, { depth: null });  // assumes Oracle Database and Client 21c
+```
+
+This query displays:
+
+```
+{ userId: 1, userName: 'Chris', location: 'Australia' }
+```
+
+The SQL/JSON functions `JSON_VALUE` and `JSON_QUERY` can also be used.
+
+Note that the default error-handling behavior for these functions is NULL ON
+ERROR, which means that no value is returned if an error occurs.  To ensure that
+an error is raised, use ERROR ON ERROR.
+
+For more information, see [SQL/JSON Path Expressions][193] in the Oracle JSON
+Developer's Guide.
+
+#### Accessing Relational Data as JSON
+
+In Oracle Database 12.2, or later, the [`JSON_OBJECT`][54] function is a great
+way to convert relational table data to JSON:
 
 ```javascript
 const result = await connection.execute(
   `SELECT JSON_OBJECT ('deptId' IS d.department_id, 'name' IS d.department_name) department
    FROM departments d
-   WHERE department_id < :did`
+   WHERE department_id < :did
    ORDER BY d.department_id`,
   [50]
 );
@@ -12323,11 +12478,64 @@ This produces:
 {"deptId":40,"name":"Human Resources"}
 ```
 
-See [selectjson.js][55] and [selectjsonblob.js][56] for runnable
-examples.
+#### Portable JSON
 
-For more information about using JSON in Oracle Database see the
-[Database JSON Developer's Guide][57].
+Writing applications that can handle all the potential JSON storage types and
+potential client-server version combinations requires code that checks the
+Oracle versions and the returned column metadata.  This allows the code to do
+appropropriate streaming or type conversion. It will be simpler to restrict the
+environment and data types supported by the application.  Where possible,
+migrate to the new JSON type to take advantage of its ease of use and
+performance benefits.
+
+Here is an example of code that works with multiple versions, with the
+assumption that older DBs use BLOB storage.
+
+Create a table:
+
+```javascript
+if (connection.oracleServerVersion >= 2100000000) {
+  await connection.execute(`CREATE TABLE mytab (mycol JSON)`);
+} else if (connection.oracleServerVersion >= 1201000200) {
+  await connection.execute(`CREATE TABLE mytab (mycol BLOB CHECK (mycol IS JSON)) LOB (mycol) STORE AS (CACHE)`);
+} else {
+  throw new Error('This application only works with Oracle Database 12.1.0.2 or greater');
+}
+```
+
+Insert data:
+
+```javascript
+const inssql = `INSERT INTO mytab (mycol) VALUES (:bv)`;
+const data = { "userId": 2, "userName": "Anna", "location": "New Zealand" };
+
+if (oracledb.oracleClientVersion >= 2100000000 && connection.oracleServerVersion >= 2100000000 ) {
+  await connection.execute(inssql, { bv: { val: data, type: oracledb.DB_TYPE_JSON } });
+} else {
+  const s = JSON.stringify(data);
+  const b = Buffer.from(s, 'utf8');
+  await connection.execute(inssql, { bv: { val: b } });
+}
+```
+
+Query data:
+
+```javascript
+const qrysql = `SELECT mycol
+                FROM mytab
+                WHERE JSON_EXISTS (mycol, '$.location')
+                OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY`;
+
+result = await connection.execute(qrysql, [], { outFormat: oracledb.OUT_FORMAT_ARRAY });
+if (result.metaData[0].fetchType == oracledb.DB_TYPE_JSON) {
+  j = result.rows[0][0];
+} else {
+  const d = await result.rows[0][0].getData();
+  j = await JSON.parse(d);
+}
+
+console.dir(j, { depth: null });
+```
 
 ## <a name="xmltype"></a> 20. Working with XMLType
 
@@ -14763,6 +14971,48 @@ The `CREATE TABLE` system privilege is also needed.  Advanced users
 who are using Oracle sequences for keys will also need the `CREATE
 SEQUENCE` privilege.
 
+*Note*: if you are using Oracle Database 21 (or later) and you create _new_
+collections, then you need to do one of the following:
+
+- Use Oracle Client libraries 21 (or later).
+
+- Or, explicitly use [collection metadata](#sodaclientkeys) when creating
+  collections and set the data storage type to BLOB, for example:
+
+```
+{
+  "keyColumn":
+  {
+    "name":"ID"
+  },
+  "contentColumn":
+  {
+    "name": "JSON_DOCUMENT",
+    "sqlType": "BLOB"
+  },
+  "versionColumn":
+  {
+    "name": "VERSION",
+    "method": "UUID"
+  },
+  "lastModifiedColumn":
+  {
+    "name": "LAST_MODIFIED"
+  },
+  "creationTimeColumn":
+  {
+    "name": "CREATED_ON"
+  }
+}
+```
+
+- Or, set the database initialization parameter [`compatible`][192] to 19 or
+  lower.
+
+Otherwise you may get errors such as *ORA-40842: unsupported value JSON in the
+metadata for the field sqlType* or *ORA-40659: Data type does not match the
+specification in the collection metadata*.
+
 #### Committing SODA Work
 
 The general recommendation for SODA applications is to turn on
@@ -15181,9 +15431,9 @@ Collection metadata in SODA is represented as a JavaScript object.
 The default collection metadata specifies that a collection stores
 five components for each document: key, JSON content, version,
 last-modified timestamp, and a created-on timestamp.  An example of
-default metadata is:
+default metadata with Oracle Database 19c is:
 
-```javascript
+```
 {
    "schemaName": "mySchemaName",
    "tableName": "myCollectionName",
@@ -15207,6 +15457,41 @@ default metadata is:
    {
      "name": "VERSION",
      "method": "SHA256"
+   },
+   "lastModifiedColumn":
+   {
+     "name": "LAST_MODIFIED"
+   },
+   "creationTimeColumn":
+   {
+      "name": "CREATED_ON"
+   },
+   "readOnly": false
+}
+```
+
+With Oracle Database 21, default metadata might be like:
+
+```
+{
+   "schemaName": "mySchemaName",
+   "tableName": "myCollectionName",
+   "keyColumn":
+   {
+      "name": "ID",
+      "sqlType": "VARCHAR2",
+      "maxLength": 255,
+      "assignmentMethod": "UUID"
+   },
+   "contentColumn":
+   {
+      "name": "JSON_DOCUMENT",
+      "sqlType": "JSON",
+   },
+   "versionColumn":
+   {
+     "name": "VERSION",
+     "method": "UUID"
    },
    "lastModifiedColumn":
    {
@@ -16528,3 +16813,6 @@ can be asked at [AskTom][158].
 [189]: https://github.com/oracle/node-oracledb/tree/master/examples/webapp.js
 [190]: https://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/continuous-service-for-apps-on-atpd-5486113.pdf
 [191]: https://docs.oracle.com/en/database/oracle/simple-oracle-document-access/rest/index.html
+[192]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A2E90F08-BC9F-4688-A9D0-4A948DD3F7A9
+[193]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2DC05D71-3D62-4A14-855F-76E054032494
+[194]: https://blogs.oracle.com/jsondb/osonformat

@@ -46,7 +46,7 @@ describe('242. dbObject18.js', () => {
     }); // after()
 
     it('242.1.1 oracledb.dbObjectAsPojo could be set without connection', async () => {
-      
+
       try {
         oracledb.dbObjectAsPojo = true;
       } catch (err) {
@@ -56,7 +56,7 @@ describe('242. dbObject18.js', () => {
     }); // 242.1.1
 
     it('242.1.2 oracledb.dbObjectAsPojo could be set without connection', async () => {
-      
+
       try {
         oracledb.dbObjectAsPojo = false;
       } catch (err) {
@@ -74,7 +74,7 @@ describe('242. dbObject18.js', () => {
       }
     }); // 242.1.3
 
-    it('242.1.4 set oracledb.dbObjectAsPojo to value of Boolean(\"false\")', async () => {
+    it('242.1.4 set oracledb.dbObjectAsPojo to value of Boolean("false")', async () => {
       const value = Boolean("false");
       console.dir(value);
       try {
@@ -133,7 +133,7 @@ describe('242. dbObject18.js', () => {
 
     it('242.1.10 negative: set oracledb.dbObjectAsPojo to invalid value: null', async () => {
 
-      assert.rejects(
+      await assert.rejects(
         async () => {
           oracledb.dbObjectAsPojo = null;
         },
@@ -145,8 +145,8 @@ describe('242. dbObject18.js', () => {
     }); // 242.1.10
 
     it('242.1.11 negative: set oracledb.dbObjectAsPojo to invalid value: 0', async () => {
-      
-      assert.rejects(
+
+      await assert.rejects(
         async () => {
           oracledb.dbObjectAsPojo = 0;
         },
@@ -158,8 +158,8 @@ describe('242. dbObject18.js', () => {
     }); // 242.1.11
 
     it('242.1.12 negative: set oracledb.dbObjectAsPojo to invalid value: number', async () => {
-      
-      assert.rejects(
+
+      await assert.rejects(
         async () => {
           oracledb.dbObjectAsPojo = -1234567890.0123;
         },
@@ -171,8 +171,8 @@ describe('242. dbObject18.js', () => {
     }); // 242.1.12
 
     it('242.1.3 negative: set oracledb.dbObjectAsPojo to invalid value: string true', async () => {
-      
-      assert.rejects(
+
+      await assert.rejects(
         async () => {
           oracledb.dbObjectAsPojo = 'true';
         },
@@ -184,8 +184,8 @@ describe('242. dbObject18.js', () => {
     }); // 242.1.13
 
     it('242.1.14 negative: set oracledb.dbObjectAsPojo to invalid value: string false', async () => {
-      
-      assert.rejects(
+
+      await assert.rejects(
         async () => {
           oracledb.dbObjectAsPojo = 'false';
         },
@@ -197,8 +197,8 @@ describe('242. dbObject18.js', () => {
     }); // 242.1.14
 
     it('242.1.15 negative: set oracledb.dbObjectAsPojo to invalid value: undefined', async () => {
-      
-      assert.rejects(
+
+      await assert.rejects(
         async () => {
           oracledb.dbObjectAsPojo = undefined;
         },
@@ -210,8 +210,8 @@ describe('242. dbObject18.js', () => {
     }); // 242.1.15
 
     it('242.1.16 negative: set oracledb.dbObjectAsPojo to invalid value: NaN', async () => {
-      
-      assert.rejects(
+
+      await assert.rejects(
         async () => {
           oracledb.dbObjectAsPojo = NaN;
         },
@@ -223,8 +223,8 @@ describe('242. dbObject18.js', () => {
     }); // 242.1.16
 
     it('242.1.17 negative: set oracledb.dbObjectAsPojo to invalid value: empty string', async () => {
-      
-      assert.rejects(
+
+      await assert.rejects(
         async () => {
           oracledb.dbObjectAsPojo = '';
         },
@@ -236,8 +236,8 @@ describe('242. dbObject18.js', () => {
     }); // 242.1.17
 
     it('242.1.18 negative: set oracledb.dbObjectAsPojo to invalid value: empty json', async () => {
-      
-      assert.rejects(
+
+      await assert.rejects(
         async () => {
           oracledb.dbObjectAsPojo = {};
         },
@@ -249,8 +249,8 @@ describe('242. dbObject18.js', () => {
     }); // 242.1.18
 
     it('242.1.19 negative: set oracledb.dbObjectAsPojo to invalid value: oracledb.DATE type', async () => {
-      
-      assert.rejects(
+
+      await assert.rejects(
         async () => {
           oracledb.dbObjectAsPojo = oracledb.DATE;
         },
@@ -262,10 +262,10 @@ describe('242. dbObject18.js', () => {
     }); // 242.1.19
 
     it('242.1.20 negative: set oracledb.dbObjectAsPojo to invalid value: array', async () => {
-      
-      assert.rejects(
+
+      await assert.rejects(
         async () => {
-          oracledb.dbObjectAsPojo = [ true ]
+          oracledb.dbObjectAsPojo = [ true ];
         },
         /NJS-004/
       );
@@ -473,11 +473,11 @@ describe('242. dbObject18.js', () => {
 
       // close the connection
       await conn.close();
-      
+
       const row = result.rows[0];
       should.strictEqual(row.SPORTNAME, 'Frisbee');
 
-      assert.rejects(
+      await assert.rejects(
         async () => {
           row.TEAM[0];
         },
@@ -602,7 +602,7 @@ describe('242. dbObject18.js', () => {
       // close the connection
       await conn.close();
 
-      // accessing results 
+      // accessing results
       const row = result.rows[0];
       should.strictEqual(row.SPORTNAME, 'Frisbee');
       should.deepEqual(row.TEAM, players);

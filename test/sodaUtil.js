@@ -82,7 +82,6 @@ sodaUtil.grantPrivilege=async function(){
 
     let sql = `GRANT SODA_APP TO ${dbconfig.user}`;
     await connAsDBA.execute(sql);
-    
   } catch (err) {
     should.not.exist(err);
   }

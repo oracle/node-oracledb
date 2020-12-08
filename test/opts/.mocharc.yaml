@@ -158,11 +158,11 @@ spec:
   - test/changePassword.js
   - test/getStmtInfo.js
   - test/executeMany1.js
-  - test/poolDrain.js
   - test/soda1.js
   - test/soda2.js
   - test/soda3.js
   - test/soda4.js
+  - test/poolDrain.js
   - test/jsObjectGetter2.js
   - test/executeMany2.js
   - test/soda5.js
@@ -226,5 +226,5 @@ spec:
   - test/soda14.js
   - test/plsqlBindCursorsIN.js
   - test/errorOffset.js
-  - test/dbObject18.js
-  - test/dbObject19.js
+  - test/dbType04.js
+  - test/dataTypeJson.js

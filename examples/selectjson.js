@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -19,10 +19,12 @@
  *   selectjson.js
  *
  * DESCRIPTION
- *   Shows some JSON features of Oracle Database 12c.
- *
- *   Requires at least Oracle Database 12.1.0.2, which has extensive JSON datatype support.
+ *   Shows some JSON features of Oracle Database 21c.
  *   See https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=ADJSN
+ *
+ *   For JSON with older databases see selectjsonblob.js
+ *
+ *   This example requires node-oracledb 5.1 or later.
  *
  *   This example uses Node 8's async/await syntax.
  *
@@ -31,79 +33,97 @@
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 
+oracledb.extendedMetaData = true;
+
 async function run() {
 
   let connection;
 
   try {
+
     connection = await oracledb.getConnection(dbConfig);
 
-    if (connection.oracleServerVersion < 1201000200) {
-      throw new Error('This example only works with Oracle Database 12.1.0.2 or greater');
+    if (connection.oracleServerVersion < 2100000000) {
+      throw new Error('This example requires Oracle Database 21.1 or later. Try selectjsonblob.js.');
     }
 
-    const stmts = [
-      `DROP TABLE no_purchaseorder`,
+    console.log('1. Creating Table');
 
-      // Note if your applications always insert valid JSON, you may delete
-      // the IS JSON check to remove its additional validation overhead.
-      `CREATE TABLE no_purchaseorder (po_document VARCHAR2(4000) CHECK (po_document IS JSON))`
-    ];
-
-    for (const s of stmts) {
-      try {
-        await connection.execute(s);
-      } catch(e) {
-        if (e.errorNum != 942)
-          console.error(e);
-      }
+    try {
+      await connection.execute(`DROP TABLE no_purchaseorder`);
+    } catch(e) {
+      if (e.errorNum != 942)
+        console.error(e);
     }
 
-    let result;
+    connection.execute(`CREATE TABLE no_purchaseorder (po_document JSON)`);
 
-    console.log('Inserting Data');
-    const data = { "userId": 1, "userName": "Chris", "location": "Australia" };
-    const s = JSON.stringify(data);
-    await connection.execute(
-      `INSERT INTO no_purchaseorder (po_document) VALUES (:bv)`,
-      [s], // bind the JSON string for inserting into the JSON column.
-      { autoCommit: true }
-    );
+    console.log('2. Inserting Data');
 
-    console.log('1. Selecting JSON stored in a VARCHAR2 column');
+    const inssql = `INSERT INTO no_purchaseorder (po_document) VALUES (:bv)`;
+    const data = { "userId": 1, "userName": "Anna", "location": "Australia" };
+    if (oracledb.oracleClientVersion >= 2100000000) {
+      await connection.execute(inssql, { bv: { val: data, type: oracledb.DB_TYPE_JSON } });
+    } else {
+      // With older client versions, insert as a JSON string
+      const s = JSON.stringify(data);
+      const b = Buffer.from(s, 'utf8');
+      await connection.execute(inssql, { bv: { val: b } });
+    }
+
+    let result, j;
+
+    console.log('3. Selecting JSON stored in a column');
+
     result = await connection.execute(
       `SELECT po_document
        FROM no_purchaseorder
-       WHERE JSON_EXISTS (po_document, '$.location')`
+       WHERE JSON_EXISTS (po_document, '$.location')
+       OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY`
     );
-    const js = JSON.parse(result.rows[0][0]);  // just show first record
-    console.log('Query results: ', js);
+    if (result.metaData[0].fetchType == oracledb.DB_TYPE_JSON) {
+      j = result.rows[0][0];
+    } else {
+      // Oracle Client libraries < 21 will return a BLOB
+      const d = await result.rows[0][0].getData();
+      j = await JSON.parse(d);
+    }
+    console.log('Query results: ', j);
 
-    console.log('2. Using JSON_VALUE to extract a value from a JSON column');
+    console.log('4. Using JSON_VALUE to extract a value from a JSON column');
+
     result = await connection.execute(
       `SELECT JSON_VALUE(po_document, '$.location')
-       FROM no_purchaseorder`
+       FROM no_purchaseorder
+       OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY`
     );
     console.log('Query results: ', result.rows[0][0]);  // just show first record
 
-    if (connection.oracleServerVersion < 1202000000) {
-      throw new Error('These examples only work with Oracle Database 12.2 or greater');
-    }
+    console.log('5. Using dot-notation to extract a value from a JSON column');
 
-    console.log('3. Using dot-notation to extract a value from a JSON column');
     result = await connection.execute(
       `SELECT po.po_document.location
-       FROM no_purchaseorder po`
+       FROM no_purchaseorder po
+       OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY`
     );
-    console.log('Query results: ', result.rows[0][0]);  // just show first record
+    if (result.metaData[0].fetchType == oracledb.DB_TYPE_JSON) {
+      j = result.rows[0][0];
+    } else {
+      // Oracle Client libraries < 21 will return a BLOB
+      const d = await result.rows[0][0].getData();
+      j = await JSON.parse(d);
+    }
+    console.log('Query results: ', j);
 
-    console.log('4. Using JSON_OBJECT to extract relational data as JSON');
+    console.log('6. Using JSON_OBJECT to extract relational data as JSON');
+
     result = await connection.execute(
       `SELECT JSON_OBJECT('key' IS d.dummy) dummy
        FROM dual d`
     );
-    for (let row of result.rows)
-      console.log(row[0]);
+    for (let row of result.rows) {
+      console.log('Query results: ', row[0]);
+    }
 
   } catch (err) {
     console.error(err);

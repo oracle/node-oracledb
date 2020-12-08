@@ -329,5 +329,5 @@ describe('243. dbObject19.js', () => {
 
   });
 
-  
+
 });

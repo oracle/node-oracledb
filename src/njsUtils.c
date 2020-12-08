@@ -116,6 +116,9 @@ bool njsUtils_addTypeProperties(napi_env env, napi_value obj,
         case DPI_ORACLE_TYPE_STMT:
             typeName = "CURSOR";
             break;
+        case DPI_ORACLE_TYPE_JSON:
+            typeName = "JSON";
+            break;
         default:
             typeName = "UNKNOWN";
             break;

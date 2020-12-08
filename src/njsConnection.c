@@ -2351,7 +2351,8 @@ static bool njsConnection_scanExecuteBinds(njsBaton *baton, napi_env env,
         // specified by the application; for OUT binds, the value from the
         // application must be accepted as is as there is no way to
         // validate it
-        if (var->varTypeNum != DPI_ORACLE_TYPE_OBJECT) {
+        if (var->varTypeNum != DPI_ORACLE_TYPE_OBJECT &&
+                var->varTypeNum != DPI_ORACLE_TYPE_JSON) {
 
             NJS_CHECK_NAPI(env, napi_is_array(env, bindValue, &check))
             if (check) {

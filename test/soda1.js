@@ -40,7 +40,7 @@ describe('164. soda1.js', () => {
     if (!runnable) {
       this.skip();
       return;
-    } 
+    }
 
     await sodaUtil.cleanup();
 

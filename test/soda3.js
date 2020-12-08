@@ -49,7 +49,7 @@ describe('167. soda3.js', () => {
       this.skip();
       return;
     }
-    
+
     await sodaUtil.cleanup();
 
     await sodaUtil.grantPrivilege();

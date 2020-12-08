@@ -138,6 +138,7 @@
 #define NJS_DATATYPE_BLOB               DPI_ORACLE_TYPE_BLOB
 #define NJS_DATATYPE_BOOLEAN            DPI_ORACLE_TYPE_BOOLEAN
 #define NJS_DATATYPE_OBJECT             DPI_ORACLE_TYPE_OBJECT
+#define NJS_DATATYPE_JSON               DPI_ORACLE_TYPE_JSON
 
 // error messages used within the driver
 typedef enum {
@@ -199,6 +200,8 @@ typedef enum {
     errDblConnectionString,
     errQueueMax,
     errClientLibAlreadyInitialized,
+    errUnsupportedDataTypeInJson,
+    errConvertToJsonValue,
 
     // New ones should be added here
 
@@ -240,6 +243,7 @@ typedef struct njsConstant njsConstant;
 typedef struct njsDataTypeInfo njsDataTypeInfo;
 typedef struct njsFetchInfo njsFetchInfo;
 typedef struct njsImplicitResult njsImplicitResult;
+typedef struct njsJsonBuffer njsJsonBuffer;
 typedef struct njsLob njsLob;
 typedef struct njsLobBuffer njsLobBuffer;
 typedef struct njsOracleDb njsOracleDb;
@@ -566,6 +570,15 @@ struct njsImplicitResult {
     njsImplicitResult *next;
 };
 
+// data for values that will be converted to JSON in the database
+struct njsJsonBuffer {
+    dpiJsonNode topNode;
+    dpiDataBuffer topNodeBuffer;
+    uint32_t allocatedBuffers;
+    uint32_t numBuffers;
+    char **buffers;
+};
+
 // data for class Lob exposed to JS.
 struct njsLob {
     NJS_INSTANCE_HEAD
@@ -791,10 +804,18 @@ struct njsDbObjectAttr {
 
 
 //-----------------------------------------------------------------------------
-// definition of functions for error functions
+// definition of error functions
 //-----------------------------------------------------------------------------
 void njsErrors_getMessage(char *buffer, int errNum, ...);
 void njsErrors_getMessageVaList(char *buffer, int errNum, va_list vaList);
+
+
+//-----------------------------------------------------------------------------
+// definition of JSON buffer functions
+//-----------------------------------------------------------------------------
+void njsJsonBuffer_free(njsJsonBuffer *buf);
+bool njsJsonBuffer_fromValue(njsJsonBuffer *buf, napi_env env,
+        napi_value value, njsBaton *baton);
 
 
 //-----------------------------------------------------------------------------

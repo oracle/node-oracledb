@@ -97,7 +97,7 @@ File Name                                                 | Description
 [`select1.js`](select1.js)                                | Executes a basic query without using a connection pool or ResultSet
 [`select2.js`](select2.js)                                | Executes queries to show array and object output formats
 [`selectgeometry.js`](selectgeometry.js)                  | Insert and query Oracle Spatial geometries
-[`selectjson.js`](selectjson.js)                          | Shows some JSON features of Oracle Database
+[`selectjson.js`](selectjson.js)                          | Shows some JSON features of Oracle Database 21c
 [`selectjsonblob.js`](selectjsonblob.js)                  | Shows how to use a BLOB as a JSON column store
 [`selectobject.js`](selectobject.js)                      | Insert and query a named Oracle database object
 [`selectnestedcursor.js`](selectnestedcursor.js)          | Shows selecting from a nested cursor

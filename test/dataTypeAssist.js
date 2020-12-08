@@ -60,7 +60,8 @@ assist.allDataTypeNames =
   "nodb_myblobs"      : "BLOB",
   "nodb_raw"          : "RAW(2000)",
   "nodb_long"         : "LONG",
-  "nodb_longraw"      : "LONG RAW"
+  "nodb_longraw"      : "LONG RAW",
+  "nodb_json"         : "JSON"
 };
 
 assist.data = {
@@ -83,7 +84,7 @@ assist.data = {
     '[',
     ']',
     '{',
-    '}',
+    ' }',
     '_',
     '-',
     '=',
@@ -486,6 +487,43 @@ assist.content =
   ]
 };
 
+assist.jsonValues = [
+  '{ "key1" : 1 }',
+  '{ "key2" : -3.1415 }',
+  '{ "key3" : false }',
+  '{ "key4" : null }',
+  '{ "key5" : "2018/11/01 18:30:00" }',
+  '{ "key6" : [1,2,3,99] }',
+  '{ "key7" : ["json array1", "json array2"], "key8" : [true, false] }',
+  '{ "key9" : "#$%^&*()@!~`-+=" }',
+  '{ "key10" : "_:;?><,.|/" }',
+  '{ "key11" : "Math.pow(2, 53) -1" }',
+  '{ "key12" : "-Math.pow(2, 53) -1" }',
+  '{ "key13" : {"key13-1" : "value13-1", "key13-2" : "value13-2"} }',
+  '{ "#$%^&*()@!~`-+=" : "special key14 name" }',
+  null
+];
+
+assist.jsonExpectedResults = [
+  { key1: 1 },
+  { key2: -3.1415 },
+  { key3: false },
+  { key4: null },
+  { key5: "2018/11/01 18:30:00" },
+  { key6: [ 1, 2, 3, 99 ] },
+  {
+    key7: [ 'json array1', 'json array2' ],
+    key8: [ true, false]
+  },
+  { key9: '#$%^&*()@!~`-+=' },
+  { key10: '_:;?><,.|/' },
+  { key11: 'Math.pow(2, 53) -1' },
+  { key12: '-Math.pow(2, 53) -1' },
+  { key13: { 'key13-1': 'value13-1', 'key13-2': 'value13-2' } },
+  { '#$%^&*()@!~`-+=': 'special key14 name' },
+  null
+];
+
 
 /******************************* Helper Functions ***********************************/
 
@@ -514,7 +552,7 @@ assist.createCharString = function(size) {
   var cIndex = 0;
   for(var i = 0; i < size; i++) {
     if(i % 10 == 0) {
-      buffer.append(assist.data.specialChars[scIndex]);
+      buffer.append(assist.data.specialChars[scIndex].substr(0,1));
       scIndex = (scIndex + 1) % scSize;
     } else {
       cIndex = Math.floor(Math.random() * 52); // generate a random integer among 0-51
@@ -587,6 +625,7 @@ assist.createTable = function(connection, tableName, done)
 assist.insertDataArray = function(connection, tableName, array, done)
 {
   async.forEach(array, function(element, cb) {
+    // console.log(element.length);
     connection.execute(
       "INSERT INTO " + tableName + " VALUES(:no, :bindValue)",
       { no: array.indexOf(element), bindValue: element },
@@ -659,6 +698,7 @@ assist.dataTypeSupport = function(connection, tableName, array, done) {
       should.not.exist(err);
       // console.log(result);
       for(var i = 0; i < array.length; i++) {
+        // console.log(result.rows[i].CONTENT);
         if( (typeof result.rows[i].CONTENT) === 'string' )
           result.rows[i].CONTENT.trim().should.eql(array[result.rows[i].NUM]);
         else if( (typeof result.rows[i].CONTENT) === 'number' )
@@ -667,6 +707,8 @@ assist.dataTypeSupport = function(connection, tableName, array, done) {
           result.rows[i].CONTENT.toString('hex').should.eql(array[result.rows[i].NUM].toString('hex'));
         else if (Object.prototype.toString.call(result.rows[i].CONTENT) === '[object Date]')
           result.rows[i].CONTENT.getTime().should.eql(array[result.rows[i].NUM].getTime());
+        else if (typeof result.rows[i].CONTENT === 'object')
+          should.deepEqual(result.rows[i].CONTENT, assist.jsonExpectedResults[result.rows[i].NUM]);
         else
           should.not.exist(new Error('Uncaught data type!'));
       }
@@ -674,6 +716,7 @@ assist.dataTypeSupport = function(connection, tableName, array, done) {
     }
   );
 };
+
 
 assist.verifyResultSet = function(connection, tableName, array, done)
 {
@@ -748,6 +791,8 @@ function fetchRowsFromRS(rs, array, cb)
           rows[i].CONTENT.toString('hex').should.eql(array[rows[i].NUM].toString('hex'));
         else if (Object.prototype.toString.call(rows[i].CONTENT) === '[object Date]')
           rows[i].CONTENT.getTime().should.eql(array[rows[i].NUM].getTime());
+        else if (typeof rows[i].CONTENT === 'object')
+          should.deepEqual(rows[i].CONTENT, assist.jsonExpectedResults[rows[i].NUM]);
         else
           should.not.exist(new Error('Uncaught data type!'));
       }

@@ -905,7 +905,6 @@ Overview of node-oracledb functional tests
         58.1.28 Negative - edition
         58.1.29 events
         58.1.30 Negative - events
-        58.1.31 dbObjectAsPojo
     58.2 Pool Class
         58.2.1 poolMin
         58.2.2 poolMax
@@ -4222,7 +4221,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     171.2 oracledb.fetchAsString
     171.3 data bind
 
-72. executeMany2.js
+172. executeMany2.js
     172.1 Negative - incorrect parameters
     172.2 Binding tests for invalid binding variables
         172.2.1 Negative - Bind by position and by name cannot be mixed
@@ -4749,6 +4748,34 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     240.3 the offset of system error is 0
     240.4 PL/SQL syntax error
 
+241. dbType04.js
+     241.1 JSON type check
+     241.2 JSON type data binding
+     241.3 query number type from JSON column
+     241.4 query number type from JSON column
+     241.5 query array type
+     241.6 query JSON
+     241.7 query json array
+     241.8 query json object
+     241.9 binding Number gets converted to a JSON NUMBER value
+     241.10 binding String gets converted to JSON VARCHAR2 value
+     241.11 binding Date gets converted to JSON TIMESTAMP value
+     241.12 binding Buffer gets converted to JSON RAW value
+     241.13 binding Array gets converted to JSON Array value
+     241.14 binding simple dbobject with no attributes couldn't get converted to JSON Object value, returns an empty object
+     241.15 null
+     241.16 "undefined" gets converted to a JSON "NULL" value
+     241.17 true
+     241.18 false
+     241.19 empty string
+     241.20 empty json
+     241.21 NaN
+     241.22 Negative - implicitly binding JSON
+     241.23 Negative - type mismatch
+     241.24 Negative - type mismatch
+     241.25 Negative - query INTERVAL YEAR TO MONTH
+     241.26 Negative - query INTERVAL DAY TO SECOND
+
 242. dbObject18.js
     242.1 set oracledb.dbObjectAsPojo
         242.1.1 oracledb.dbObjectAsPojo could be set without connection
@@ -4780,7 +4807,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         242.4.1 dbObjectAsPojo returns database objects as plain old JavaScript objects
         242.4.2 connection can be closed when accessing the plain old JavaScript objects
 
-  243. dbObject19.js
+243. dbObject19.js
     243.1 set global attribute oracledb.dbObjectAsPojo to true
         243.1.1 OUT bind DB Object
         243.1.2 IN OUT bind DB Object
@@ -4789,3 +4816,33 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         243.2.2 IN OUT bind DB Object
     243.3 set dbObjectAsPojo in bind variables doesn't work
         243.3.1 OUT bind DB Object
+
+244.dataTypeJson.js
+    244.1 testing JSON data in various lengths
+        244.1.1 SELECT query
+        244.1.2 resultSet stores JSON data correctly
+        244.1.3 works well with REF Cursor
+        244.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+    244.2 stores null value correctly
+        244.2.1 testing Null, Empty string and Undefined
+    244.3 testing JSON with executeMany()
+        244.3.1 works with executeMany()
+    244.4 testing JSON with PL/SQL procedure BIND_IN and BIND_OUT
+        244.4.1 bind by name
+        244.4.2 bind by position
+    244.5 testing JSON with PL/SQL procedure BIND_INOUT
+        244.5.1 bind by name
+        244.5.2 bind by position
+    244.6 testing JSON with PL/SQL function BIND_IN and BIND_OUT
+        244.6.1 bind by name
+        244.6.2 bind by position
+    244.7 testing JSON with PL/SQL function BIND_INOUT
+        244.7.1 bind by name
+        244.7.2 bind by position
+    244.8 testing JSON with DML returning into
+        244.8.1 bind by name
+        244.8.2 bind by position
+    244.9 testing JSON with oracledb.fetchAsString and fetchInfo oracledb.STRING
+        244.9.1 works with oracledb.fetchAsString
+      - 244.9.2 doesn't work with outFormat: oracledb.DB_TYPE_JSON
+        244.9.3 could work with fetchInfo oracledb.STRING

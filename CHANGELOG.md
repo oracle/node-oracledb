@@ -1,8 +1,6 @@
 # Change Log
 
-## node-oracledb v5.1.0-dev (DD Mon YYYY)
-
-**This release is under development**
+## node-oracledb v5.1.0 (8 Dec 2020)
 
 - Added
   [`oracledb.dbObjectAsPojo`](https://oracle.github.io/node-oracledb/doc/api.html#propdbobjpojo)
@@ -12,6 +10,9 @@
   queried should be returned to the application as "plain old JavaScript
   objects" or kept as database-backed objects.  This option also applies to
   output `BIND_OUT` bind variables.
+
+- Enhanced JSON support to work with Oracle Database 21's native JSON storage
+  format.  A new type `oracledb.DB_TYPE_JSON` was added.
 
 - Numeric suffixes are now added to duplicate SELECT column names when using
   `oracledb.OUT_FORMAT_OBJECT` mode, allowing all columns to be represented in
