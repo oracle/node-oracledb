@@ -227,4 +227,7 @@ spec:
   - test/plsqlBindCursorsIN.js
   - test/errorOffset.js
   - test/dbType04.js
+  - test/dbObject18.js
+  - test/dbObject19.js
   - test/dataTypeJson.js
+  - test/fetchLobAsStrBuf.js

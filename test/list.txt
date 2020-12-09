@@ -4846,3 +4846,10 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         244.9.1 works with oracledb.fetchAsString
       - 244.9.2 doesn't work with outFormat: oracledb.DB_TYPE_JSON
         244.9.3 could work with fetchInfo oracledb.STRING
+
+245. fetchLobAsStrBuf.js
+    245.1 CLOB,BLOB Insert
+        245.1.1 Insert and fetch CLOB,BLOB with EMPTY_CLOB and EMPTY_BLOB
+        245.1.2 Insert and fetch CLOB,BLOB with String and Buffer of length 32K
+        245.1.3 Insert and fetch CLOB,BLOB with String and Buffer of length (1MB + 1)
+
