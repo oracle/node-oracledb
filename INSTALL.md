@@ -1,4 +1,4 @@
-# Installing node-oracledb Version 5.0
+# Installing node-oracledb Version 5.1
 
 *Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.*
 
@@ -94,8 +94,8 @@ guaranteed to be available or usable in your environment.
         - Install a C Compiler such as Xcode, GCC, Visual Studio
           2017, or similar.
 
-        - Run `npm install oracle/node-oracledb.git#v5.0.0`, or add
-          `oracle/node-oracledb.git#v5.0.0` to your `package.json`
+        - Run `npm install oracle/node-oracledb.git#v5.1.0`, or add
+          `oracle/node-oracledb.git#v5.1.0` to your `package.json`
           dependencies.  Substitute your desired [GitHub tag][40].
 
 - Add Oracle 19, 18, 12, or 11.2 client libraries to your operating
@@ -318,7 +318,7 @@ rm -i *jdbc* *occi* *mysql* *mql1* *ipc1* *jar uidrvci genezi adrci
 
 Refer to the Oracle Instant Client documentation for details.
 
-##### 3.2.1.5 Optionally create the Oracle Client configuration directory
+##### 3.2.1.5 Optionally create the Oracle Client configuration file directory
 
 If you use optional Oracle configuration files such as `tnsnames.ora`,
 `sqlnet.ora` or `oraaccess.xml` with Instant Client, then put the files in an
@@ -572,7 +572,7 @@ will need to have the link path set:
 export LD_LIBRARY_PATH=/usr/lib/oracle/18.3/client64/lib
 ```
 
-##### 3.2.3.5 Optionally create the Oracle Client configuration directory
+##### 3.2.3.5 Optionally create the Oracle Client configuration file directory
 
 If you use optional Oracle configuration files such as `tnsnames.ora`,
 `sqlnet.ora` or `oraaccess.xml` with Instant Client, then put the files in an
@@ -666,10 +666,7 @@ Review the generic [prerequisites](#prerequisites).
 
 The pre-built binaries were built on macOS Mojave 10.14.6.
 
-Oracle Instant Client libraries are required on macOS.  Note that Oracle Instant
-Client 19c and earlier are not supported on macOS Catalina 10.15: you will need
-to allow access to several Instant Client libraries from the Security & Privacy
-preference pane.
+Oracle Instant Client libraries are required on macOS.
 
 There is no native Oracle Database for macOS but one can easily be run in a
 Linux virtual machine, see [The Easiest Way to Install Oracle Database on Apple
@@ -699,25 +696,53 @@ If a pre-built node-oracledb binary is not installable, the binary can
 be built from source code, see [Node-oracledb Installation from
 Source Code](#github).
 
-#### 3.3.4 Install the free Oracle Instant Client 'Basic' ZIP file
+#### 3.3.4 Install the free Oracle Instant Client 'Basic' package
 
-Download the free **Basic** 64-bit ZIP from [Oracle Technology Network][22] and
-unzip it.  For example in Terminal you could unzip in your home directory:
+Download the **Basic** 64-bit DMG from [Oracle Technology Network][22].
+
+##### Manual Installation
+
+In Finder, double click on the DMG to mount it.
+
+Open a terminal window and run the install script in the mounted package, for example:
 
 ```
-cd ~
-unzip instantclient-basic-macos.x64-19.3.0.0.0dbru.zip
+$ /Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru/install_ic.sh
 ```
+
+This copies the contents to `$HOME/Downloads/instantclient_19_8`.
+
+In Finder, eject the mounted Instant Client package.
+
+If you have multiple Instant Client DMG packages mounted, you only need to run
+`install_ic.sh` once.  It will copy all mounted Instant Client DMG packages at
+the same time.
+
+##### Scripted Installation
+
+Instant Client installation can alternatively be scripted, for example:
+
+```
+cd $HOME/Downloads
+curl -O https://download.oracle.com/otn_software/mac/instantclient/198000/instantclient-basic-macos.x64-19.8.0.0.0dbru.dmg
+hdiutil mount instantclient-basic-macos.x64-19.8.0.0.0dbru.dmg
+/Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru/install_ic.sh
+hdiutil unmount /Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru
+```
+
+The Instant Client directory will be `$HOME/Downloads/instantclient_19_8`.
+
+##### Configure Instant Client
 
 There are several alternative ways to tell node-oracledb where your Oracle
 Client libraries are, see [Initializing Node-oracledb][17]:
 
-- Use [`oracledb.initOracleClient()`][64] in your application:
+- Use [`oracledb.initOracleClient()`][64] in your application code:
 
     ```javascript
     const oracledb = require('oracledb');
     try {
-      oracledb.initOracleClient({libDir: '/Users/your_username/instantclient_19_3'});
+      oracledb.initOracleClient({libDir: '/Users/your_username/Downloads/instantclient_19_8'});
     } catch (err) {
       console.error('Whoops!');
       console.error(err);
@@ -730,37 +755,41 @@ Client libraries are, see [Initializing Node-oracledb][17]:
   binary is.  For example:
 
     ```
-    ln -s ~/instantclient_19_3/libclntsh.dylib node_modules/oracledb/build/Release
+    ln -s ~/Downloads/instantclient_19_8/libclntsh.dylib node_modules/oracledb/build/Release
+    ```
+
+    This can be added to your `package.json` files:
+
+    ```
+      "scripts": {
+        "postinstall": "ln -s $HOME/Downloads/instantclient_19_8/libclntsh.dylib $(npm root)/oracledb/build/Release"
+       },
     ```
 
     Instead of linking, you can also copy all the required OCI libraries, for example:
 
     ```
-    cp ~/instantclient_19_3/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} node_modules/oracledb/build/Release
+    cp ~/Downloads/instantclient_19_8/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} node_modules/oracledb/build/Release
     cd node_modules/oracledb/build/Release/ && ln -s libclntsh.dylib.19.1 libclntsh.dylib
     ```
 
-- Alternatively, set `DYLD_LIBRARY_PATH` to include the Oracle Instant Client
-  directory.  Note this variable must be set in the terminal or shell that
-  directly invokes Node.js.  The variable will not propagate to sub-shells.
-
 - Alternatively, create a symbolic link for the 'client shared library' in
-  `/usr/local/lib`.  If the `lib` sub-directory does not exist, you can create
-  it.  For example:
+  `/usr/local/lib`.  Note this may not work on all versions of macOS.
+  If the `lib` sub-directory does not exist, you can create it.  For example:
 
     ```
     mkdir /usr/local/lib
-    ln -s ~/instantclient_19_3/libclntsh.dylib /usr/local/lib
+    ln -s ~/Downloads/instantclient_19_8/libclntsh.dylib /usr/local/lib
     ```
 
     Instead of linking, you can also copy all the required OCI libraries, for example:
 
     ```
     mkdir /usr/local/lib
-    cp ~/instantclient_19_3/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} /usr/local/lib/
+    cp ~/Downloads/instantclient_19_8/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} /usr/local/lib/
     ```
 
-#### 3.3.5 Optionally create the Oracle Client configuration directory
+#### 3.3.5 Optionally create the Oracle Client configuration file directory
 
 If you use optional Oracle configuration files such as `tnsnames.ora`,
 `sqlnet.ora` or `oraaccess.xml` with Instant Client, then put the files in an
@@ -776,7 +805,7 @@ Or you can set the environment variable `TNS_ADMIN` to that directory name.
 
 Another alternative is to put the files in the `network/admin` subdirectory of
 Instant Client, for example in
-`/Users/your_username/instantclient_19_3/network/admin`.  This is the default
+`/Users/your_username/Downloads/instantclient_19_8/network/admin`.  This is the default
 Oracle configuration directory for executables linked with this Instant Client.
 
 #### 3.3.6 Run an example program
@@ -793,6 +822,9 @@ module.exports = {
   connectString : "localhost/XEPDB1"
 };
 ```
+
+Make sure Instant Client is configured as shown above.  For example you may want
+to add calls to `oracledb.initOracleClient()` to the scripts.
 
 Run one of the examples, such as [`example.js`][63]:
 
@@ -915,7 +947,7 @@ and files from either the Basic or Basic Light packages.  The exact libraries
 depend on the Instant Client version.  Refer to the Instant Client
 documentation.
 
-##### 3.4.1.5 Optionally create the Oracle Client configuration directory
+##### 3.4.1.5 Optionally create the Oracle Client configuration file directory
 
 If you use optional Oracle configuration files such as `tnsnames.ora`,
 `sqlnet.ora` or `oraaccess.xml` with Instant Client, then put the files in an
@@ -969,6 +1001,9 @@ module.exports = {
   connectString : "localhost/XEPDB1"
 };
 ```
+
+Make sure Instant Client is configured as shown above.  For example you may want
+to add calls to `oracledb.initOracleClient()` to the scripts.
 
 Run one of the examples, such as [`example.js`][63]:
 
@@ -1106,19 +1141,19 @@ export CC=gcc
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v5.0.0`, and use the `npm` package manager (which is
+example `v5.1.0`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v5.0.0
+npm install oracle/node-oracledb.git#v5.1.0
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v5.0.0/oracledb-src-5.0.0.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v5.1.0/oracledb-src-5.1.0.tgz
 ```
 
 #### 3.5.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1139,7 +1174,7 @@ To run applications, you will need to set the link path:
 export LIBPATH=/opt/oracle/instantclient_19_6:$LIBPATH
 ```
 
-#### 3.5.5 Optionally create the Oracle Client configuration directory
+#### 3.5.5 Optionally create the Oracle Client configuration file directory
 
 If you use optional Oracle configuration files such as `tnsnames.ora`,
 `sqlnet.ora` or `oraaccess.xml` with Instant Client, then put the files in an
@@ -1226,19 +1261,19 @@ export MAKE=gmake
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v5.0.0`, and use the `npm` package manager (which is
+example `v5.1.0`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v5.0.0
+npm install oracle/node-oracledb.git#v5.1.0
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v5.0.0/oracledb-src-5.0.0.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v5.1.0/oracledb-src-5.1.0.tgz
 ```
 
 If this fails due to an invalid `cp -a` option, you can download the
@@ -1263,7 +1298,7 @@ To run applications, you will need to set the link path:
 export LD_LIBRARY_PATH_64=/opt/oracle/instantclient_19_6:$LD_LIBRARY_PATH_64
 ```
 
-#### 3.6.5 Optionally create the Oracle Client configuration directory
+#### 3.6.5 Optionally create the Oracle Client configuration file directory
 
 If you use optional Oracle configuration files such as `tnsnames.ora`,
 `sqlnet.ora` or `oraaccess.xml` with Instant Client, then put the files in an
@@ -1372,18 +1407,18 @@ code utility is required for this method.
 
 Build node-oracledb from source code by changing the package specifier so that
 `npm` downloads from GitHub.  For example, to install the code from the GitHub
-tag `v5.0.0`, use a `package.json` dependency like:
+tag `v5.1.0`, use a `package.json` dependency like:
 
 ```
 "dependencies": {
-   "oracledb": "oracle/node-oracledb#v5.0.0"
+   "oracledb": "oracle/node-oracledb#v5.1.0"
 },
 ```
 
 Alternatively, use the command:
 
 ```
-npm install oracle/node-oracledb#v5.0.0
+npm install oracle/node-oracledb#v5.1.0
 ```
 
 To install the current code on the master branch, use
@@ -1398,15 +1433,15 @@ compilation begins.
 Users without the `git` utility can compile pre-bundled source code:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v5.0.0/oracledb-src-5.0.0.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v5.1.0/oracledb-src-5.1.0.tgz
 ```
 
 Due to the slow download of source code from GitHub, it may take some time
 before compilation begins.  You may prefer to download
-`oracledb-src-5.0.0.tgz` and install with:
+`oracledb-src-5.1.0.tgz` and install with:
 
 ```
-npm install your_dir_path/oracledb-src-5.0.0.tgz
+npm install your_dir_path/oracledb-src-5.1.0.tgz
 ```
 
 #### <a name="nogithubaccess"></a> 3.7.5 Installing from Oracle's repository
@@ -1433,10 +1468,10 @@ within your company, or it can be used directly from the file system to install
 node-oracledb.
 
 - Download
-[`oracledb-src-5.0.0.tgz`](https://github.com/oracle/node-oracledb/releases/download/v5.0.0/oracledb-src-5.0.0.tgz)
+[`oracledb-src-5.1.0.tgz`](https://github.com/oracle/node-oracledb/releases/download/v5.1.0/oracledb-src-5.1.0.tgz)
 from GitHub.
 
-- Extract the file: `tar -xzf oracledb-src-5.0.0.tgz`
+- Extract the file: `tar -xzf oracledb-src-5.1.0.tgz`
 
 - Change directory: `cd package`
 
@@ -1451,7 +1486,7 @@ from GitHub.
   architectures.
 
 - Run: `npm run buildpackage`
-  The package `oracledb-5.0.0.tgz` is created.
+  The package `oracledb-5.1.0.tgz` is created.
 
 This package can be shared or self-hosted, see [Hosting your own node-oracledb
 Packages](#selfhost).
@@ -1460,12 +1495,12 @@ Packages](#selfhost).
 
 On a machine with access, download the node-oracledb package from [npm][4], for
 example from
-[`https://registry.npmjs.com/oracledb/-/oracledb-5.0.0.tgz`](https://registry.npmjs.com/oracledb/-/oracledb-5.0.0.tgz)
+[`https://registry.npmjs.com/oracledb/-/oracledb-5.1.0.tgz`](https://registry.npmjs.com/oracledb/-/oracledb-5.1.0.tgz)
 
 This can be transferred to the desired machine and installed, for example with:
 
 ```
-npm install your_dir_path/oracledb-5.0.0.tgz
+npm install your_dir_path/oracledb-5.1.0.tgz
 ```
 
 If you are using an architecture that does not have pre-supplied binaries then
@@ -1523,16 +1558,16 @@ If you see `MSVCR80.dll` then you need the VS 2005 Redistributable.
 You can host node-oracledb packages locally.
 
 Download the node-oracledb package from npm, for example from
-[`https://registry.npmjs.com/oracledb/-/oracledb-5.0.0.tgz`](https://registry.npmjs.com/oracledb/-/oracledb-5.0.0.tgz)
+[`https://registry.npmjs.com/oracledb/-/oracledb-5.1.0.tgz`](https://registry.npmjs.com/oracledb/-/oracledb-5.1.0.tgz)
 Alternatively, if you want to build your own binaries and node-oracledb package,
 see [Creating a node-oracledb package from source code](#compilepackage).
 
 If you make the package accessible on your local web server, for
-example at www.example.com/oracledb-5.0.0.tgz, then your
+example at www.example.com/oracledb-5.1.0.tgz, then your
 install command would be:
 
 ```
-npm install https://www.example.com/oracledb-5.0.0.tgz
+npm install https://www.example.com/oracledb-5.1.0.tgz
 ```
 
 or your `package.json` would contain:
@@ -1540,7 +1575,7 @@ or your `package.json` would contain:
 ```
 . . .
    "dependencies": {
-      "oracledb": "https://www.example.com/oracledb-5.0.0.tgz"
+      "oracledb": "https://www.example.com/oracledb-5.1.0.tgz"
    },
 . . .
 ```
@@ -1925,8 +1960,6 @@ If creating a connection fails:
   expected version first in `PATH` (on Windows) or `LD_LIBRARY_PATH`
   (on Linux)?
 
-- On macOS, did you install Oracle Instant Client libraries in `/usr/local/lib`?
-
 Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [Slack][48] ([link to join Slack][49]).
 
@@ -1984,5 +2017,5 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [62]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-81D364CE-326D-4B3C-8C82-F468FF1AF30C
 [63]: https://github.com/oracle/node-oracledb/tree/master/examples/example.js
 [64]: https://oracle.github.io/node-oracledb/doc/api.html#odbinitoracleclient
-[65]: https://github.com/oracle/docker-images/tree/master/OracleLinuxDevelopers/oraclelinux7/nodejs
+[65]: https://github.com/oracle/docker-images/tree/master/OracleLinuxDevelopers
 [66]: https://github.com/oracle/node-oracledb/blob/v4.2.0/INSTALL.md
