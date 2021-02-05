@@ -1,6 +1,6 @@
 # node-oracledb 5.2-dev Documentation for the Oracle Database Node.js Add-on
 
-*Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -8451,8 +8451,9 @@ If you use ESlint for code validation, and it warns about [await in loops][179]
 for code that is using a single connection, then disable the `no-await-in-loop`
 rule for these cases.
 
-Instead of using `async.parallel()` or `async.each()` which call each of
-their items in parallel, use `async.series()` or `async.eachSeries()`.
+Similarly to the `Promise.all()` recommendation, instead of using
+`async.parallel()` or `async.each()` which call each of their items in parallel,
+use `async.series()` or `async.eachSeries()`.
 
 If you want to repeat a number of INSERT or UPDATE statements, then consider
 using [`connection.executeMany()`](#executemany).
@@ -8491,11 +8492,11 @@ also recommended if you have a long running application, particularly
 if connections are released to the pool while no database work is
 being done.
 
-Pools are created by calling [`oracledb.createPool()`](#createpool).
-Generally applications will create a pool once as part of
-initialization.  After an application finishes using a connection
-pool, it should release all connections and terminate the connection
-pool by calling the [`pool.close()`](#poolclose) method.
+Pools are created by calling [`oracledb.createPool()`](#createpool).  Generally
+applications will create a pool once as part of initialization.  After an
+application finishes using a connection pool, it should release all connections
+and terminate the connection pool by calling the [`pool.close()`](#poolclose)
+method.
 
 Connections from the pool are obtained with
 [`pool.getConnection()`](#getconnectionpool).  If all connections in a pool are
@@ -8513,6 +8514,15 @@ State](#connpooltagging) for more information.
 
 Connections can also be [dropped completely from the pool](#connectionclose).
 
+The default value of [`poolMin`](#propdbpoolmin) is 0, meaning no connections
+are created when `oracledb.createPool()` is called.  This means the credentials
+and connection string are not validated when the pool is created, so problems
+such as invalid passwords will not return an error.  Credentials will be
+validated when a connection is later created, for example with
+`pool.getConnection()`.  Validation will occur when `oracledb.createPool()` is
+called if `poolMin` is greater or equal to 1, since this creates one or more
+connections when the pool is started.
+
 A connection pool should be started during application initialization, for
 example before the web server is started:
 
@@ -8521,7 +8531,7 @@ const oracledb = require('oracledb');
 
 const mypw = ...  // set mypw to the hr schema password
 
-// Start the pool and webserver
+// Start a connection pool (which becomes the default pool) and start the webserver
 async function init() {
   try {
 
@@ -8563,7 +8573,7 @@ async function handleRequest(request, response) {
   let connection;
   try {
 
-    connection = await oracledb.getConnection();
+    connection = await oracledb.getConnection();  // get a connection from the default pool
     const result = await connection.execute(`SELECT * FROM locations`);
 
     displayResults(response, result);  // do something with the results
@@ -8632,13 +8642,13 @@ connections be recreated, which will impact performance and scalability.  See
 
 #### <a name="conpooldraining"></a> 15.3.2 Connection Pool Closing and Draining
 
-Closing a connection pool allows database resources to be freed.  If
-Node.js is killed without [`pool.close()`](#poolclose) being called,
-it may be some time before the unused database-side of connections are
-automatically cleaned up in the database.
+Closing a connection pool allows database resources to be freed.  If Node.js is
+killed without [`pool.close()`](#poolclose) being called successfully, then some
+time may pass before the unused database-side of connections are automatically
+cleaned up in the database.
 
-When `pool.close()` is called, the pool will be closed only if all
-connections have been released to the pool with `connection.close()`.
+When `pool.close()` is called with no parameter, the pool will be closed only if
+all connections have been released to the pool with `connection.close()`.
 Otherwise an error is returned and the pool will not be closed.
 
 An optional `drainTime` parameter can be used to force the pool closed
