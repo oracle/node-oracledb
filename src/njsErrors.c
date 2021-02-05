@@ -86,6 +86,7 @@ static const char *njsErrorMessages[] = {
     "NJS-077: Oracle Client library has already been initialized", // errClientLibAlreadyInitialized
     "NJS-078: unsupported data type %u in JSON value", // errUnsupportedDataTypeInJson
     "NJS-079: cannot convert from JavaScript value to JSON value", // errConvertToJsonValue
+    "NJS-080: only one of user and username can be used", //errDblUsername
 };
 
 

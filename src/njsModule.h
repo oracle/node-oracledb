@@ -202,6 +202,7 @@ typedef enum {
     errClientLibAlreadyInitialized,
     errUnsupportedDataTypeInJson,
     errConvertToJsonValue,
+    errDblUsername,
 
     // New ones should be added here
 

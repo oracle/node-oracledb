@@ -29,6 +29,10 @@ Overview of node-oracledb functional tests
         1.8.2 closed connection
     1.9 connectString & connectionString specified
         1.9.1 both connectString & ConnectionString specified
+    1.10 user & username specified
+        1.10.1 both user & username specified
+        1.10.2 allows username to be used as an alias for user
+        1.10.3 uses username alias to login with SYSDBA privilege
 
   2. pool.js
     2.1 default settting
@@ -73,6 +77,11 @@ Overview of node-oracledb functional tests
         2.11.2 error occurs at getConnection() when poolMin is the default value 0
     2.12 connectionString alias
         2.12.1 allows connectionString to be used as an alias for connectString
+    2.13 connectString & connectionString provided
+        2.13.1 both connectString & connectionString provided
+    2.14 username alias
+        2.14.1 allows username to be used as an alias for user
+        2.14.2 both user and username specified
 
   3. examples.js
     3.1 connect.js

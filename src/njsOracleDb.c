@@ -101,6 +101,8 @@ static bool njsOracleDb_initCommonCreateParams(njsBaton *baton,
         dpiCommonCreateParams *params);
 static bool njsOracleDb_initDPI(njsOracleDb *oracleDb, napi_env env,
         dpiContextCreateParams *params, njsBaton *baton);
+static bool njsOracleDb_commonProcessArgs(njsBaton *baton, napi_env env,
+        napi_value *args);
 
 // define constants exposed to JS
 static njsConstant njsClassConstants[] = {
@@ -347,6 +349,63 @@ const njsClassDef njsClassDefOracleDb = {
 
 
 //-----------------------------------------------------------------------------
+// njsOracleDb_commonProcessArgs()
+// Combines all the process arguments common in getConnectionProcessArgs()
+// and createPoolProcessArgs()
+//
+// PARAMETERS
+//  - options
+//-----------------------------------------------------------------------------
+static bool njsOracleDb_commonProcessArgs(njsBaton *baton, napi_env env, napi_value * args)
+{
+    bool connStrFound, connectionStrFound, userFound, usernameFound;
+
+    baton->stmtCacheSize = baton->oracleDb->stmtCacheSize;
+    baton->externalAuth = baton->oracleDb->externalAuth;
+    baton->events = baton->oracleDb->events;
+    if (!njsUtils_copyString(env, baton->oracleDb->edition,
+            baton->oracleDb->editionLength, &baton->edition,
+            &baton->editionLength))
+        return false;
+
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "user", &baton->user,
+            &baton->userLength, &userFound))
+        return false;
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "username", &baton->user,
+            &baton->userLength, &usernameFound))
+        return false;
+    if (userFound && usernameFound)
+        return njsBaton_setError (baton, errDblUsername);
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "password",
+            &baton->password, &baton->passwordLength, NULL))
+        return false;
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "connectString",
+            &baton->connectString, &baton->connectStringLength, &connStrFound))
+        return false;
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "connectionString",
+            &baton->connectString, &baton->connectStringLength,
+            &connectionStrFound))
+        return false;
+    if (connStrFound && connectionStrFound)
+        return njsBaton_setError (baton, errDblConnectionString );
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "edition",
+            &baton->edition, &baton->editionLength, NULL))
+        return false;
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "stmtCacheSize",
+            &baton->stmtCacheSize, NULL))
+        return false;
+    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "externalAuth",
+            &baton->externalAuth, NULL))
+        return false;
+    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "events", &baton->events,
+            NULL))
+        return false;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsOracleDb_createPool()
 //   Create a standalone connection to the database.
 //
@@ -446,7 +505,6 @@ static bool njsOracleDb_createPoolPostAsync(njsBaton *baton, napi_env env,
 static bool njsOracleDb_createPoolProcessArgs(njsBaton *baton, napi_env env,
         napi_value *args)
 {
-    bool connStrFound, connStrFound1;
 
     // initialize ODPI-C library, if necessary
     if (!njsOracleDb_initDPI(baton->oracleDb, env, NULL, baton))
@@ -460,32 +518,9 @@ static bool njsOracleDb_createPoolProcessArgs(njsBaton *baton, napi_env env,
     baton->poolIncrement = baton->oracleDb->poolIncrement;
     baton->poolTimeout = baton->oracleDb->poolTimeout;
     baton->poolPingInterval = baton->oracleDb->poolPingInterval;
-    baton->stmtCacheSize = baton->oracleDb->stmtCacheSize;
-    baton->externalAuth = baton->oracleDb->externalAuth;
-    baton->events = baton->oracleDb->events;
-    if (!njsUtils_copyString(env, baton->oracleDb->edition,
-            baton->oracleDb->editionLength, &baton->edition,
-            &baton->editionLength))
-        return false;
 
     // check the various options
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "user", &baton->user,
-            &baton->userLength, NULL))
-        return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "password",
-            &baton->password, &baton->passwordLength, NULL))
-        return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "connectString",
-            &baton->connectString, &baton->connectStringLength, &connStrFound))
-        return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "connectionString",
-            &baton->connectString, &baton->connectStringLength,
-            &connStrFound1))
-        return false;
-    if (connStrFound && connStrFound1)
-        return njsBaton_setError (baton, errDblConnectionString);
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "edition",
-            &baton->edition, &baton->editionLength, NULL))
+    if (!njsOracleDb_commonProcessArgs(baton, env, args))
         return false;
     if (!njsBaton_getStringFromArg(baton, env, args, 0, "sessionCallback",
             &baton->plsqlFixupCallback, &baton->plsqlFixupCallbackLength,
@@ -506,20 +541,11 @@ static bool njsOracleDb_createPoolProcessArgs(njsBaton *baton, napi_env env,
     if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolTimeout",
             &baton->poolTimeout, NULL))
         return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "stmtCacheSize",
-            &baton->stmtCacheSize, NULL))
-        return false;
     if (!njsBaton_getIntFromArg(baton, env, args, 0, "poolPingInterval",
             &baton->poolPingInterval, NULL))
         return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "externalAuth",
-            &baton->externalAuth, NULL))
-        return false;
     if (!njsBaton_getBoolFromArg(baton, env, args, 0, "homogeneous",
             &baton->homogeneous, NULL))
-        return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "events",
-            &baton->events, NULL))
         return false;
     if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "queueTimeout",
             &baton->poolWaitTimeout, NULL))
@@ -665,60 +691,25 @@ static bool njsOracleDb_getConnectionPostAsync(njsBaton *baton, napi_env env,
 static bool njsOracleDb_getConnectionProcessArgs(njsBaton *baton,
         napi_env env, napi_value *args)
 {
-    bool connStrFound, connStrFound1;
-
     // initialize ODPI-C library, if necessary
     if (!njsOracleDb_initDPI(baton->oracleDb, env, NULL, baton))
         return false;
 
     // copy items used from the OracleDb class since they may change after
     // the asynchronous function begins
-    baton->stmtCacheSize = baton->oracleDb->stmtCacheSize;
-    baton->externalAuth = baton->oracleDb->externalAuth;
-    baton->events = baton->oracleDb->events;
     if (!njsUtils_copyString(env, baton->oracleDb->connectionClass,
             baton->oracleDb->connectionClassLength, &baton->connectionClass,
             &baton->connectionClassLength))
         return false;
-    if (!njsUtils_copyString(env, baton->oracleDb->edition,
-            baton->oracleDb->editionLength, &baton->edition,
-            &baton->editionLength))
-        return false;
 
     // check the various options
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "user", &baton->user,
-            &baton->userLength, NULL))
+    if (!njsOracleDb_commonProcessArgs(baton, env, args))
         return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "password",
-            &baton->password, &baton->passwordLength, NULL))
-        return false;
-
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "connectString",
-            &baton->connectString, &baton->connectStringLength, &connStrFound))
-        return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "connectionString",
-            &baton->connectString, &baton->connectStringLength,
-            &connStrFound1))
-        return false;
-    if (connStrFound && connStrFound1)
-        return njsBaton_setError (baton, errDblConnectionString );
     if (!njsBaton_getStringFromArg(baton, env, args, 0, "newPassword",
             &baton->newPassword, &baton->newPasswordLength, NULL))
         return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "edition",
-            &baton->edition, &baton->editionLength, NULL))
-        return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "stmtCacheSize",
-            &baton->stmtCacheSize, NULL))
-        return false;
     if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "privilege",
             &baton->privilege, NULL))
-        return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "externalAuth",
-            &baton->externalAuth, NULL))
-        return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "events", &baton->events,
-            NULL))
         return false;
     if (!njsBaton_getShardingKeyColumnsFromArg(baton, env, args, 0,
             "shardingKey", &baton->numShardingKeyColumns,

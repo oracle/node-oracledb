@@ -119,7 +119,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
                 - 3.3.1.1.16 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
                 - 3.3.1.1.17 [`sessionCallback`](#createpoolpoolattrssessioncallback)
                 - 3.3.1.1.18 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
-                - 3.3.1.1.19 [`user`](#createpoolpoolattrsuser)
+                - 3.3.1.1.19 [`user`](#createpoolpoolattrsuser), [`username`](#createpoolpoolattrsuser)
             - 3.3.1.2 [`createPool()`: Callback Function](#createpoolpoolcallback)
         - 3.3.2 [`getConnection()`](#getconnectiondb)
             - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
@@ -138,7 +138,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
                     - 3.3.2.1.2.11 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
                     - 3.3.2.1.2.12 [`superShardingKey`](#getconnectiondbattrssupershardingkey)
                     - 3.3.2.1.2.13 [`tag`](#getconnectiondbattrstag)
-                    - 3.3.2.1.2.14 [`user`](#getconnectiondbattrsuser)
+                    - 3.3.2.1.2.14 [`user`](#getconnectiondbattrsuser), [`username`](#getconnectiondbattrsuser)
             - 3.3.2.2 [`getConnection()`: Callback Function](#getconnectiondbcallback)
         - 3.3.3 [`getPool()`](#getpool)
             - 3.3.3.1 [`getPool()`: Parameters](#getpoolattrs)
@@ -1318,7 +1318,7 @@ more information.
 
 The default value is *false*.
 
-The `user` and `password` properties should not be set when
+The `user` (or `username`) and `password` properties should not be set when
 `externalAuth` is *true*.
 
 This property can be overridden in the
@@ -2103,7 +2103,7 @@ The default is *false*.
 This optional property overrides the
 [`oracledb.externalAuth`](#propdbisexternalauth) property.
 
-The `user` and `password` properties should not be set when
+The `user` (or `username`) and `password` properties should not be set when
 `externalAuth` is *true*.
 
 Note prior to node-oracledb 0.5 this property was called
@@ -2374,11 +2374,14 @@ The number of statements to be cached in the
 This optional property overrides the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.19 `user`
+###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.19 `user`, `username`
 
 ```
 String user
+String username
 ```
+
+The two properties are aliases for each other. Use only one of the properties.
 
 The database user name for connections in the pool.  Can be a simple
 user name or a proxy of the form *alison[fred]*. See the [Client
@@ -2388,6 +2391,8 @@ for more details about proxy authentication.
 If `homogeneous` is *false*, then the pool user name and password need
 to be specified only if the application wants that user to proxy the
 users supplied in subsequent `pool.getConnection()` calls.
+
+The alias `username` was added in node-oracledb 5.2.
 
 #### <a name="createpoolpoolcallback"></a> 3.3.1.2 `createPool()`: Callback Function
 
@@ -2532,7 +2537,7 @@ established using [External Authentication](#extauth).
 This optional property overrides the
 [`oracledb.externalAuth`](#propdbisexternalauth) property.
 
-The `user` and `password` properties should not be set when
+The `user` (or `username`) and `password` properties should not be set when
 `externalAuth` is *true*.
 
 Note prior to node-oracledb 0.5 this property was called
@@ -2664,16 +2669,21 @@ State](#connpooltagging).
 
 This property was added in node-oracledb 3.1.
 
-###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.14 `user`
+###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.14 `user`, `username`
 
 ```
 String user
+String username
 ```
+
+The two properties are aliases for each other. Use only one of the properties.
 
 The database user name.  Can be a simple user name or a proxy of the
 form *alison[fred]*. See the [Client Access Through a Proxy][7]
 section in the Oracle Call Interface manual for more details about
 proxy authentication.
+
+The alias `username` was added in node-oracledb 5.2.
 
 ##### <a name="getconnectiondbcallback"></a> 3.3.2.2 `getConnection()`: Callback Function
 
@@ -2808,7 +2818,7 @@ Object connAttr
 ```
 
 Connection credentials similar to [`oracledb.getConnection()`
-credentials](#getconnectiondbattrsconnattrs).  The properties `user`,
+credentials](#getconnectiondbattrsconnattrs).  The properties `user`, `username`
 `password`, `connectString`, `connectionString`, and `externalAuth` may be
 specified.
 
@@ -5808,7 +5818,7 @@ pools.
     using [database sharding](#sharding).
 
     When getting connections from heterogeneous pools, this parameter can
-    contain `user` and `password` properties for true heterogeneous pool usage,
+    contain `user` (or `username`) and `password` properties for true heterogeneous pool usage,
     or it can contain a `user` property when a pool proxy user is desired.
 
     See [Connection Attributes](#getconnectiondbattrsconnattrs) for

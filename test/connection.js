@@ -787,6 +787,60 @@ describe('1. connection.js', function(){
         );
       }
     );
-  });
+  }); //1.9
+
+  describe('1.10 user & username specified', function() {
+    it('1.10.1 both user & username specified',
+      function (done) {
+        oracledb.getConnection(
+          {
+            user : dbConfig.user,
+            username : dbConfig.user,
+            password : dbConfig.password,
+            connectString : dbConfig.connectString
+          },
+          function(err, conn) {
+            should.not.exist(conn);
+            should.exist(err);
+            (err.message).should.startWith('NJS-080:');
+            done();
+          }
+        );
+      }
+    );
+    it('1.10.2 allows username to be used as an alias for user',
+      function (done) {
+        oracledb.getConnection(
+          {
+            username : dbConfig.user,
+            password : dbConfig.password,
+            connectString : dbConfig.connectString
+          },
+          function(err, conn) {
+            should.exist(conn);
+            should.not.exist(err);
+            done();
+          }
+        );
+      }
+    );
+    it('1.10.3 uses username alias to login with SYSDBA privilege',
+      function (done) {
+        oracledb.getConnection(
+          {
+            username : dbConfig.test.DBA_user,
+            password : dbConfig.test.DBA_password,
+            connectString : dbConfig.connectString,
+            privilege : oracledb.SYSDBA
+          },
+          function(err, conn) {
+            should.exist(conn);
+            should.not.exist(err);
+            done();
+          }
+        );
+      }
+    );
+  }); //1.10
 
 });

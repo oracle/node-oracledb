@@ -306,10 +306,17 @@ static bool njsPool_getConnectionPostAsync(njsBaton *baton, napi_env env,
 static bool njsPool_getConnectionProcessArgs(njsBaton *baton, napi_env env,
         napi_value *args)
 {
+    bool userFound, usernameFound;
+
     // check arguments
     if (!njsBaton_getStringFromArg(baton, env, args, 0, "user", &baton->user,
-            &baton->userLength, NULL))
+            &baton->userLength, &userFound))
         return false;
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "username", &baton->user,
+            &baton->userLength, &usernameFound))
+        return false;
+    if (userFound && usernameFound)
+        return njsBaton_setError (baton, errDblUsername);
     if (!njsBaton_getStringFromArg(baton, env, args, 0, "password",
             &baton->password, &baton->passwordLength, NULL))
         return false;

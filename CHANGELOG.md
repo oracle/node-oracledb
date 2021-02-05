@@ -4,6 +4,8 @@
 
 **This release is under development**
 
+- Added `username` as an alias for `user` in connection properties.
+
 ## node-oracledb v5.1.0 (8 Dec 2020)
 
 - Added

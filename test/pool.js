@@ -1068,5 +1068,52 @@ describe('2. pool.js', function() {
     );  // 2.13.1
   });  // 2.13.1
 
+  describe('2.14 username alias', function() {
+    it('2.14.1 allows username to be used as an alias for user', function(done) {
+      oracledb.createPool(
+        {
+          username: dbConfig.user,
+          password: dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin: 1,
+          poolMax: 1,
+          poolIncrement: 0
+        },
+        function(err, pool) {
+          should.not.exist(err);
+
+          pool.should.be.ok();
+
+          pool.close(function(err) {
+            should.not.exist(err);
+
+            done();
+          });
+        }
+      );
+    });
+    it('2.14.2 both user and username specified',
+      function(done) {
+        oracledb.createPool(
+          {
+            user: dbConfig.user,
+            username: dbConfig.user,
+            password: dbConfig.password,
+            connectString: dbConfig.connectString,
+            poolMin: 1,
+            poolMax: 1,
+            poolIncrement: 0
+          },
+          function(err, pool) {
+            should.not.exist(pool);
+            should.exist(err);
+            (err.message).should.startWith('NJS-080');
+            done();
+          }
+        );
+      }
+    );
+
+  }); // 2.14
 
 });
