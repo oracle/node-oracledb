@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -53,7 +53,7 @@ describe('176. soda8.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_1");
 
       let myKeys = [];
@@ -103,7 +103,7 @@ describe('176. soda8.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_2");
 
       let myKeys = [];
@@ -114,7 +114,7 @@ describe('176. soda8.js', () => {
       }
 
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let inDocument = soda.createDocument(inContent);
+      let inDocument = await soda.createDocument(inContent);
 
       let res = await collection.find().key(myKeys[1]).replaceOne(inDocument);
       should.strictEqual(res.replaced, true);
@@ -155,7 +155,7 @@ describe('176. soda8.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_3");
 
       let myKeys = [];
@@ -204,7 +204,7 @@ describe('176. soda8.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_4");
 
       let myKeys = [];
@@ -254,7 +254,7 @@ describe('176. soda8.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_5");
 
       let myKeys = [];
@@ -304,7 +304,7 @@ describe('176. soda8.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_6");
 
       let myKeys = [];
@@ -315,7 +315,7 @@ describe('176. soda8.js', () => {
       }
 
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let inDocument = soda.createDocument(inContent);
+      let inDocument = await soda.createDocument(inContent);
 
       let updatedDocument = await collection.find().key(myKeys[1]).replaceOneAndGet(inDocument);
       should.exist(updatedDocument);
@@ -356,7 +356,7 @@ describe('176. soda8.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_7");
 
       let myKeys = [];
@@ -397,7 +397,7 @@ describe('176. soda8.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_8");
 
       let myKeys = [];

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -50,8 +50,8 @@ describe('165. soda2.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd1 = conn.getSodaDatabase();
-      let sd2 = conn.getSodaDatabase();
+      let sd1 = await conn.getSodaDatabase();
+      let sd2 = await conn.getSodaDatabase();
       // sd1 creates the collection
       let collName = "soda_test_165_1";
       let coll_create = await sd1.createCollection(collName);
@@ -77,9 +77,9 @@ describe('165. soda2.js', () => {
     let conn1, conn2;
     try {
       conn1 = await oracledb.getConnection(dbconfig);
-      let sd1 = conn1.getSodaDatabase();
+      let sd1 = await conn1.getSodaDatabase();
       conn2 = await oracledb.getConnection(dbconfig);
-      let sd2 = conn1.getSodaDatabase();
+      let sd2 = await conn1.getSodaDatabase();
 
       let t_collname = "soda_test_165_2";
       let coll = await sd1.createCollection(t_collname);
@@ -112,7 +112,7 @@ describe('165. soda2.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
 
       let t_collname = "soda_test_165_3";
       await sd.createCollection(t_collname);
@@ -139,7 +139,7 @@ describe('165. soda2.js', () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
 
       let collName = "";
       await testsUtil.assertThrowsAsync(
@@ -206,7 +206,7 @@ describe('165. soda2.js', () => {
 
       try {
         let conn = await oracledb.getConnection(dbconfig);
-        let soda = conn.getSodaDatabase();
+        let soda = await conn.getSodaDatabase();
         let collection = await soda.createCollection(collName);
         let indexSpec = {
           "name": "OFFICE_IDX",
@@ -232,7 +232,7 @@ describe('165. soda2.js', () => {
 
       try {
         let conn = await pool.getConnection();
-        let soda = conn.getSodaDatabase();
+        let soda = await conn.getSodaDatabase();
         let collection = await soda.openCollection(collName);
 
         await collection.insertOne(content);
@@ -248,7 +248,7 @@ describe('165. soda2.js', () => {
 
       try {
         let conn = await oracledb.getConnection(dbconfig);
-        let soda = conn.getSodaDatabase();
+        let soda = await conn.getSodaDatabase();
         let collection = await soda.openCollection(collName);
 
         let result = await collection.drop();

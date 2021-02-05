@@ -82,6 +82,7 @@ Overview of node-oracledb functional tests
     2.14 username alias
         2.14.1 allows username to be used as an alias for user
         2.14.2 both user and username specified
+        2.14.3 uses username alias to login with SYSDBA privilege
 
   3. examples.js
     3.1 connect.js
@@ -4862,8 +4863,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         245.1.2 Insert and fetch CLOB,BLOB with String and Buffer of length 32K
         245.1.3 Insert and fetch CLOB,BLOB with String and Buffer of length (1MB + 1)
 
-
-
 246. dupColNames1.js
     246.1 Duplicate Column Names, query with simple execution
         246.1.1 Two duplicate columns
@@ -4921,3 +4920,29 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         247.1.15 Duplicate column with non-conflicting alias name using REF cursor
         247.1.16 Duplicate column with case sensitive alias name using REF cursor
         247.1.17 Duplicate column with case sensitive alias name from dual
+
+248. userName.js
+    248.1 test with different size of username
+        248.1.1 test with username size 30
+        248.1.2 test with username size 100
+        248.1.3 test with username size 128
+        248.1.4 test with username size 129
+        248.1.5 negative test: username = null
+        248.1.6 negative test: username = "null"
+        248.1.7 negative test: username = undefined
+        248.1.8 negative test: username = "undefined"
+        248.1.9 negative test: username = empty string
+        248.1.10 negative test: username = NaN
+        248.1.11 negative test: username in array
+    248.2 test with different size of user
+        248.2.1 test with user size 30
+        248.2.2 test with user size 100
+        248.2.3 test with user size 128
+        248.2.4 test with username size 129
+        248.2.5 negative test: user = null
+        248.2.6 negative test: username = "null"
+        248.2.7 negative test: username = undefined
+        248.2.8 negative test: username = "undefined"
+        248.2.9 negative test: username = empty string
+        248.2.10 negative test: username = NaN
+        248.2.11 negative test: username in array

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -53,7 +53,7 @@ describe('173. soda5.js', () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
 
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_173_1");
 
       let indexSpec = {
@@ -104,7 +104,7 @@ describe('173. soda5.js', () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
 
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_173_2");
 
       let indexSpec = {
@@ -164,7 +164,7 @@ describe('173. soda5.js', () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
 
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_173_3");
 
     } catch(err) {
@@ -201,7 +201,7 @@ describe('173. soda5.js', () => {
     let conn, collection;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
 
       let collName = "soda_test_173_4";
       collection = await sd.createCollection(collName);
@@ -227,7 +227,7 @@ describe('173. soda5.js', () => {
     let conn, collection;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
 
       let collName = "soda_test_173_5";
       collection = await sd.createCollection(collName);
@@ -259,7 +259,7 @@ describe('173. soda5.js', () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
 
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_173_6");
 
       let indexSpec = {
@@ -314,7 +314,7 @@ describe('173. soda5.js', () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
 
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_173_7");
 
       let indexSpec = {
@@ -369,7 +369,7 @@ describe('173. soda5.js', () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
 
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_173_8");
 
       let indexSpec = {
@@ -425,7 +425,7 @@ describe('173. soda5.js', () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
 
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_173_9");
 
       let indexSpec = {
@@ -482,7 +482,7 @@ describe('173. soda5.js', () => {
     let conn, collection;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_173_10");
 
       await collection.createIndex({
@@ -526,7 +526,7 @@ describe('173. soda5.js', () => {
     let conn, collection;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_173_11");
 
       await collection.createIndex({
@@ -579,7 +579,7 @@ describe('173. soda5.js', () => {
     try {
 
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection('soda_test_173_12');
 
       let myContent = { name: "Sally", address: {city: "Melbourne"} };

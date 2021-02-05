@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -57,10 +57,10 @@ describe('189. sodaOverwrite.js', function() {
 
     try {
       conn = await oracledb.getConnection(dbConfig);
-      sodaDB = conn.getSodaDatabase();
-      sodaDocument = sodaDB.createDocument({name: "Chris", city: "Melbourne"});
+      sodaDB = await conn.getSodaDatabase();
+      sodaDocument = await sodaDB.createDocument({name: "Chris", city: "Melbourne"});
       sodaCollection = await sodaDB.createCollection("node_test_186_1");
-      sodaOperation = sodaCollection.find();
+      sodaOperation = await sodaCollection.find();
       sodaCursor = await sodaOperation.getCursor();
     } catch (err) {
       should.not.exist(err);

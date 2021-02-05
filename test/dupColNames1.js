@@ -1039,4 +1039,3 @@ describe('246. dupColNames1.js', function () {
   });
 
 });
-

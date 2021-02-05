@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -1091,7 +1091,7 @@ describe('2. pool.js', function() {
           });
         }
       );
-    });
+    }); // 2.14.1
     it('2.14.2 both user and username specified',
       function(done) {
         oracledb.createPool(
@@ -1112,7 +1112,31 @@ describe('2. pool.js', function() {
           }
         );
       }
-    );
+    ); // 2.14.2
+    it('2.14.3 uses username alias to login with SYSDBA privilege',
+      function(done) {
+        if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
+        oracledb.createPool(
+          {
+            username: dbConfig.user,
+            password: dbConfig.password,
+            connectString: dbConfig.connectString,
+            privilege : oracledb.SYSDBA,
+            poolMin: 1,
+            poolMax: 1,
+            poolIncrement: 0
+          },
+          function(err, pool) {
+            should.exist(pool);
+            should.not.exist(err);
+            pool.close(function(err) {
+              should.not.exist(err);
+              done();
+            });
+          }
+        );
+      }
+    ); // 2.14.3
 
   }); // 2.14
 

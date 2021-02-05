@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -826,6 +826,7 @@ describe('1. connection.js', function(){
     );
     it('1.10.3 uses username alias to login with SYSDBA privilege',
       function (done) {
+        if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
         oracledb.getConnection(
           {
             username : dbConfig.test.DBA_user,

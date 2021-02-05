@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -51,7 +51,7 @@ describe('164. soda1.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
       should.exist(sd);
     } catch(err) {
       should.not.exist(err);
@@ -70,7 +70,7 @@ describe('164. soda1.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
 
       let collName = "soda_test_164_2";
       let coll = await sd.createCollection(collName);
@@ -94,7 +94,7 @@ describe('164. soda1.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
       let collName = "soda_test_164_3";
       let coll = await sd.createCollection(collName);
       await conn.commit();
@@ -118,7 +118,7 @@ describe('164. soda1.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
 
       let collNames = [
         "soda_test_164_4_1",
@@ -164,7 +164,7 @@ describe('164. soda1.js', () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
 
       let collName = "soda_test_164_5";
       coll = await sd.createCollection(collName);
@@ -190,7 +190,7 @@ describe('164. soda1.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
 
       let collName = "soda_test_164_6";
       let coll = await sd.createCollection(collName);
@@ -216,7 +216,7 @@ describe('164. soda1.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
       let collectionName = 'soda_test_164_7';
       let coll = await sd.createCollection(collectionName);
       await coll.find().remove();
@@ -229,7 +229,7 @@ describe('164. soda1.js', () => {
       //console.log(docs);
       should.strictEqual(docs.length, 1);
 
-      docs.forEach(function(element) {
+      await docs.forEach(function(element) {
         let content = element.getContent();
         should.strictEqual(content.name, myContent.name);
         should.strictEqual(content.address.city, myContent.address.city);
@@ -256,7 +256,7 @@ describe('164. soda1.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
       let collectionName = 'soda_test_164_8';
       let coll = await sd.createCollection(collectionName);
 
@@ -274,7 +274,7 @@ describe('164. soda1.js', () => {
       let docs = await coll.find().getDocuments();
       should.strictEqual(docs.length, 3);
 
-      docs.forEach(function(element) {
+      await docs.forEach(function(element) {
         let content = element.getContent();
         myContents.should.containEql(content);
       });
@@ -301,7 +301,7 @@ describe('164. soda1.js', () => {
     const indexName = "soda_index_164_9";
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
       let collectionName = 'soda_test_164_9';
       coll = await sd.createCollection(collectionName);
 
@@ -335,7 +335,7 @@ describe('164. soda1.js', () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
       // Create the parent object for SODA
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
 
       // Create a new SODA collection and index
       collection = await soda.createCollection("soda_test_164_10");
@@ -361,10 +361,10 @@ describe('164. soda1.js', () => {
 
       // Fetch the document back
       let doc2 = await collection.find().key(myKey).getOne();
-      let content2 = doc2.getContent(); // A JavaScript object
+      let content2 = await doc2.getContent(); // A JavaScript object
       should.deepEqual(content2, content1);
 
-      let content3 = doc2.getContentAsString(); // A JSON string
+      let content3 = await doc2.getContentAsString(); // A JSON string
       (content3).should.be.a.String();
       should.strictEqual( JSON.stringify(content2), content3 );
 
@@ -386,7 +386,7 @@ describe('164. soda1.js', () => {
         .getDocuments();
 
       for (let i = 0; i < documents.length; i++) {
-        let content = documents[i].getContent();
+        let content = await documents[i].getContent();
         (['Sydney', 'San Francisco']).should.containEql(content.address.city);
       }
 
@@ -430,7 +430,7 @@ describe('164. soda1.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
 
       let t_collname = "soda_test_164_11";
       let options = { metaData: "metaData" };

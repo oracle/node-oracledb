@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2020, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -65,14 +65,14 @@ describe('238. soda14.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      soda = conn.getSodaDatabase();
+      soda = await conn.getSodaDatabase();
       coll = await soda.createCollection(collectionName);
 
       // populate the collection with a number of rows
       for (let i = 0; i < numBatches; i++) {
         const docs = [];
         for (let j = 0; j < numRowsInBatch; j++) {
-          docs.push({fred: 5, george: 10});
+          await docs.push({fred: 5, george: 10});
         }
         await coll.insertMany(docs);
       }

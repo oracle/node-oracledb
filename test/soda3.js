@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -56,7 +56,7 @@ describe('167. soda3.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      sd = conn.getSodaDatabase();
+      sd = await conn.getSodaDatabase();
 
       t_collections = await Promise.all(
         t_collectionNames.map(function(name) {

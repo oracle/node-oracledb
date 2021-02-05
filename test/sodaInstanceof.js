@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -58,11 +58,11 @@ describe('186. sodaInstanceof.js', function() {
     try {
       conn = await oracledb.getConnection(dbConfig);
 
-      let sodaDB = conn.getSodaDatabase();
+      let sodaDB = await conn.getSodaDatabase();
       let isInstanceofCorrect = (sodaDB instanceof oracledb.SodaDatabase);
       isInstanceofCorrect.should.be.true();
 
-      let doc = sodaDB.createDocument({name: "Chris", city: "Melbourne"});
+      let doc = await sodaDB.createDocument({name: "Chris", city: "Melbourne"});
       isInstanceofCorrect = (doc instanceof oracledb.SodaDocument);
       isInstanceofCorrect.should.be.true();
 
@@ -70,7 +70,7 @@ describe('186. sodaInstanceof.js', function() {
       isInstanceofCorrect = (coll instanceof oracledb.SodaCollection);
       isInstanceofCorrect.should.be.true();
 
-      let operation = coll.find();
+      let operation = await coll.find();
       isInstanceofCorrect = (operation instanceof oracledb.SodaOperation);
       isInstanceofCorrect.should.be.true();
 

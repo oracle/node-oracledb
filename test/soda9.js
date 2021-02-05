@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -51,7 +51,7 @@ describe('177. soda9.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_177_1");
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
       await collection.insertOne(inContent);
@@ -87,10 +87,10 @@ describe('177. soda9.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_177_2");
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let inDocument = soda.createDocument(inContent);
+      let inDocument = await soda.createDocument(inContent);
       await collection.insertOne(inDocument);
 
       // fetch back
@@ -123,7 +123,7 @@ describe('177. soda9.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_177_3");
 
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
@@ -162,11 +162,11 @@ describe('177. soda9.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_177_4");
 
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let inDocument = soda.createDocument(inContent);
+      let inDocument = await soda.createDocument(inContent);
       let middleDocument = await collection.insertOneAndGet(inDocument);
       should.exist(middleDocument);
       let middleContent = await middleDocument.getContent();
@@ -203,10 +203,10 @@ describe('177. soda9.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
 
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let inDocument = soda.createDocument(inContent);
+      let inDocument = await soda.createDocument(inContent);
 
       // Get content without being inserted
       let outContent = await inDocument.getContent();

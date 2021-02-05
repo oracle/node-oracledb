@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -73,7 +73,7 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.1 set oracledb.prefetchRows to be 0', async () => {
+  it('147.1 set oracledb.prefetchRows to be 0', async function() {
     try {
       oracledb.prefetchRows = 0;
       await conn.execute("select 'foobar' from dual");
@@ -82,7 +82,7 @@ describe("147. prefetchRows.js", function() {
     }
   }); // 147.1
 
-  it('147.2 Negative - negative value', () => {
+  it('147.2 Negative - negative value', async function() {
     try {
       should.throws(
         function() {
@@ -95,7 +95,7 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.3 Negative - NaN', () => {
+  it('147.3 Negative - NaN', async function() {
     try {
       should.throws(
         function() {
@@ -108,7 +108,7 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.4 Negative - undefined', () => {
+  it('147.4 Negative - undefined', async function() {
     try {
       should.throws(
         function() {
@@ -121,7 +121,7 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.5 Negative - null', () => {
+  it('147.5 Negative - null', async function() {
     try {
       should.throws(
         function() {
@@ -134,7 +134,7 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.6 Negative - random string', () => {
+  it('147.6 Negative - random string', async function() {
     try {
       should.throws(
         function() {
@@ -147,7 +147,7 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.7 Negative - Boolean', () => {
+  it('147.7 Negative - Boolean', async function() {
     try {
       should.throws(
         function() {
@@ -160,7 +160,7 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.8 execute() option, value of 0', async () => {
+  it('147.8 execute() option, value of 0', async function() {
     try {
       const options = { prefetchRows: 0 };
       await conn.execute("select 'prefetchRows' from dual", [], options);
@@ -169,7 +169,7 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.9 Negative - negative value', async () => {
+  it('147.9 Negative - negative value', async function() {
     try {
       const options = { prefetchRows: -10 };
       await assert.rejects(
@@ -184,7 +184,7 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.10 Negative - NaN', async () => {
+  it('147.10 Negative - NaN', async function() {
     try {
       const options = { prefetchRows: NaN };
       await assert.rejects(
@@ -198,7 +198,7 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.11 execute() option, undefined, get overrided by global attribute', async () => {
+  it('147.11 execute() option, undefined, get overrided by global attribute', async function() {
     try {
       const options = { prefetchRows: undefined };
       await conn.execute("select 'prefetchRows' from dual", [], options);
@@ -207,7 +207,7 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.12 Negative - null', async () => {
+  it('147.12 Negative - null', async function() {
     try {
       const options = { prefetchRows: null };
       await assert.rejects(
@@ -221,7 +221,7 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.13 Negative - random string', async () => {
+  it('147.13 Negative - random string', async function() {
     try {
       const options = { prefetchRows: 'random string' };
       await assert.rejects(
@@ -235,7 +235,7 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.14 Negative - Boolean', async () => {
+  it('147.14 Negative - Boolean', async function() {
     try {
       const options = { prefetchRows: true };
       await assert.rejects(
@@ -249,8 +249,9 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.15 Query round-trips with no prefetch', async () => {
+  it('147.15 Query round-trips with no prefetch', async function() {
     if (!dbconfig.test.DBA_PRIVILEGE) {
+      this.skip();
       return;
     }
     try {
@@ -267,8 +268,9 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.16 Query round-trips with prefetch equal to row count', async () => {
+  it('147.16 Query round-trips with prefetch equal to row count', async function() {
     if (!dbconfig.test.DBA_PRIVILEGE) {
+      this.skip();
       return;
     }
     try {
@@ -285,8 +287,9 @@ describe("147. prefetchRows.js", function() {
     }
   });
 
-  it('147.16 Query round-trips with prefetch larger than row count', async () => {
+  it('147.16 Query round-trips with prefetch larger than row count', async function() {
     if (!dbconfig.test.DBA_PRIVILEGE) {
+      this.skip();
       return;
     }
     try {

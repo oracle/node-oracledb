@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -50,7 +50,7 @@ describe('168. soda4.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
       let collectionName = 'soda_test_168_1';
       let coll = await sd.createCollection(collectionName);
 
@@ -69,12 +69,12 @@ describe('168. soda4.js', () => {
       (myKey).should.be.a.String();
       (myDoc).should.be.an.Object();
 
-      let content1 = myDoc.getContent();
+      let content1 = await myDoc.getContent();
       should.not.exist(content1);
 
       // Fetch it back
       let doc2 = await coll.find().key(myKey).getOne();
-      let content2 = doc2.getContent();
+      let content2 = await doc2.getContent();
       should.strictEqual(content2.name, testContent.name);
       should.strictEqual(content2.company, testContent.company);
       should.strictEqual(content2.manager, null);
@@ -100,7 +100,7 @@ describe('168. soda4.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
       let collectionName = 'soda_test_168_2';
       let coll = await sd.createCollection(collectionName);
 
@@ -116,7 +116,7 @@ describe('168. soda4.js', () => {
 
       // Fetch it back
       let doc2 = await coll.find().key(myKey).getOne();
-      let content2 = doc2.getContent();
+      let content2 = await doc2.getContent();
       should.deepEqual(content2, testContent);
 
       await conn.commit();
@@ -140,7 +140,7 @@ describe('168. soda4.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+      let sd = await conn.getSodaDatabase();
       let collectionName = 'soda_test_168_3';
       let coll = await sd.createCollection(collectionName);
 

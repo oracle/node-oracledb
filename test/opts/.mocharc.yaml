@@ -231,3 +231,6 @@ spec:
   - test/dbObject19.js
   - test/dataTypeJson.js
   - test/fetchLobAsStrBuf.js
+  - test/dupColNames1.js
+  - test/dupColNames2.js
+  - test/userName.js

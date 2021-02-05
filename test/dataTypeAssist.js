@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -524,6 +524,57 @@ assist.jsonExpectedResults = [
   null
 ];
 
+assist.schema ={
+  specialChars: [
+    '`',
+    '~',
+    '!',
+    '@',
+    '#',
+    '$',
+    '%',
+    '^',
+    '&',
+    '*',
+    '(',
+    ')',
+    '-',
+    '+',
+    '=',
+    '[',
+    ']',
+    '{',
+    '}',
+    '\\',
+    '|',
+    ';',
+    ':',
+    '\'',
+    '<',
+    '>',
+    ',',
+    '.',
+    '?',
+    '/'
+  ],
+  alphabet: [
+    'A', 'B', 'C', 'D', 'E',
+    'F', 'G', 'H', 'I', 'J',
+    'K', 'L', 'M', 'N', 'O',
+    'P', 'Q', 'R', 'S', 'T',
+    'U', 'V', 'W', 'X', 'Y',
+    'Z', 'a', 'b', 'c', 'd',
+    'e', 'f', 'g', 'h', 'i',
+    'j', 'k', 'l', 'm', 'n',
+    'o', 'p', 'q', 'r', 's',
+    't', 'u', 'v', 'w', 'x',
+    'y', 'z'
+  ],
+  numbers: [
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+  ]
+};
+
 
 /******************************* Helper Functions ***********************************/
 
@@ -570,6 +621,30 @@ assist.createBuffer = function(size) {
   }
   return Buffer.from(array, "utf-8");
 };
+
+assist.createSchemaString = function(size) {
+  var buffer = new StringBuffer();
+  var scIndex = 0;
+  var cIndex = 0;
+  var nIndex = 0;
+  var schema_prefix = "\"";
+
+  for(var i = 0; i < size; i++) {
+    if(i % 3 == 0) {
+      scIndex = Math.floor(Math.random() * 30);
+      buffer.append(assist.schema.specialChars[scIndex]);
+    } else if(i % 3 == 1) {
+      cIndex = Math.floor(Math.random() * 52);
+      buffer.append(assist.schema.alphabet[cIndex]);
+    } else {
+      nIndex = Math.floor(Math.random() * 10);
+      buffer.append(assist.schema.numbers[nIndex]);
+    }
+  }
+  var schema = schema_prefix + buffer.toString() + schema_prefix;
+  return schema;
+};
+
 
 assist.compare2Buffers = function(originalBuf, compareBuf) {
   var node01113plus = true; // assume node runtime version is higher than 0.11.13

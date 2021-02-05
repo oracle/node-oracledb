@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -53,7 +53,7 @@ describe('174. soda6.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_174_1");
 
       await Promise.all(
@@ -92,7 +92,7 @@ describe('174. soda6.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_174_2");
 
       await Promise.all(
@@ -130,7 +130,7 @@ describe('174. soda6.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_174_3");
 
       await Promise.all(
@@ -168,7 +168,7 @@ describe('174. soda6.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_174_4");
 
       await Promise.all(
@@ -185,7 +185,7 @@ describe('174. soda6.js', () => {
 
       // Fetch it back
       let doc2 = await collection.find().key(key1).getOne();
-      let content2 = doc2.getContent();
+      let content2 = await doc2.getContent();
       should.deepEqual(content2, content1);
 
 
@@ -218,7 +218,7 @@ describe('174. soda6.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_174_5");
 
       await Promise.all(
@@ -256,7 +256,7 @@ describe('174. soda6.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_174_6");
 
       await Promise.all(
@@ -293,7 +293,7 @@ describe('174. soda6.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_174_7");
 
       await Promise.all(
@@ -332,7 +332,7 @@ describe('174. soda6.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_174_8");
 
       let myKeys = [];
@@ -376,7 +376,7 @@ describe('174. soda6.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_174_9");
 
       await Promise.all(
@@ -420,7 +420,7 @@ describe('174. soda6.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_174_10");
 
       await Promise.all(
@@ -458,7 +458,7 @@ describe('174. soda6.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_174_11");
 
       await Promise.all(
@@ -497,7 +497,7 @@ describe('174. soda6.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+      let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_174_12");
 
       let myKeys = [];
