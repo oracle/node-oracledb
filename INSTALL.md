@@ -56,10 +56,11 @@ The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
 This node-oracledb release has been tested with Node.js 10, 12 and 14 on 64-bit
-Oracle Linux, Windows and macOS.  Note Node.js 10.16, or later is required.  The
-add-on can also build on some 32-bit Linux, 32-bit Windows, Solaris and AIX
-environments, but these architectures have not been fully tested.  Older
-versions of node-oracledb may work with older versions of Node.js.
+Oracle Linux (releases 6, 7 and 8), Windows and macOS.  Note Node.js 10.16, or
+later is required.  The add-on can also build on some 32-bit Linux, 32-bit
+Windows, Solaris and AIX environments, but these architectures have not been
+fully tested.  Older versions of node-oracledb may work with older versions of
+Node.js.
 
 Node-oracledb requires Oracle Client libraries version 11.2 or later, and
 can connect to Oracle Database 9.2 or later, depending on the Oracle Client library
@@ -228,8 +229,9 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-Pre-built binaries were built on Oracle Linux 6 and will require a
-compatible glibc.
+Pre-built binaries were built on Oracle Linux 6 and will require a compatible
+glibc.  The pre-built binaries are known to be usable on Oracle Linux 6, 7, and
+8.
 
 ##### 3.2.1.2 Install Node.js
 
@@ -263,8 +265,6 @@ included in Node.js:
 ```
 npm install oracledb
 ```
-
-The pre-built binaries were built on Oracle Linux 6.
 
 If a pre-built node-oracledb binary is not installable or depends on an newer
 glibc version, uninstall node-oracledb and build the binary from source code,
@@ -480,8 +480,9 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-Pre-built binaries were built on Oracle Linux 6 and will require a
-compatible glibc.
+Pre-built binaries were built on Oracle Linux 6 and will require a compatible
+glibc.  The pre-built binaries are known to be usable on Oracle Linux 6, 7, and
+8.
 
 ##### 3.2.3.2 Install Node.js
 
