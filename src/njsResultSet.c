@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -73,7 +73,8 @@ static bool njsResultSet_createBaton(napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, njsBaton **baton);
 static bool njsResultSet_getRowsHelper(njsResultSet *rs, njsBaton *baton,
         bool *moreRows);
-
+static bool njsResultSet_makeUniqueColumnNames(napi_env env, njsBaton *baton,
+        njsVariable *queryVars, uint32_t numQueryVars);
 
 //-----------------------------------------------------------------------------
 // njsResultSet_close()
@@ -466,6 +467,11 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
     napi_value callingObj;
     njsResultSet *rs;
 
+    if (baton->outFormat == NJS_ROWS_OBJECT) {
+        if (!njsResultSet_makeUniqueColumnNames (env, baton, vars, numVars))
+            return false;
+    }
+
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefResultSet,
             baton->oracleDb->jsResultSetConstructor, rsObj,
@@ -491,5 +497,78 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
     rs->outFormat = baton->outFormat;
     rs->isNested = (baton->callingInstance != (void*) conn);
 
+    return true;
+}
+
+
+//----------------------------------------------------------------------------
+// njsResultSet_makeUniqueColumnNames()
+//  Check for duplicate column names, and append "_xx" to make names unique
+//
+// Parameters
+//   env          - napi env variable
+//   baton        - baton structure
+//   queryVars    - njsVariables struct for Query SQLs
+//   numQueryVars - number of Query Variables
+//---------------------------------------------------------------------------
+bool njsResultSet_makeUniqueColumnNames(napi_env env, njsBaton *baton,
+        njsVariable *queryVars, uint32_t numQueryVars)
+{
+    char tempName[NJS_MAX_COL_NAME_BUFFER_LENGTH];
+    uint32_t tempNum, col, index;
+    napi_value tempObj, colObj;
+    size_t tempNameLength;
+    bool exists;
+
+    // First loop creates a napi-object(hash table) with unique column name &
+    // column number first appeared for later use.
+    NJS_CHECK_NAPI(env, napi_create_object(env, &tempObj))
+    for (col = 0; col < numQueryVars; col ++) {
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, queryVars[col].name,
+                queryVars[col].nameLength, &queryVars[col].jsName))
+
+        NJS_CHECK_NAPI(env, napi_has_property(env, tempObj,
+                queryVars[col].jsName, &exists))
+        if (!exists) {
+            NJS_CHECK_NAPI(env, napi_create_uint32(env, col, &colObj))
+            NJS_CHECK_NAPI(env, napi_set_property(env, tempObj,
+                    queryVars[col].jsName, colObj))
+        }
+    }
+
+    // Second loop looks for the current column name in the napi-object,
+    // if exists and column number is different, (then it is duplicate),
+    // tries to compose a name to resolve the duplicate name.
+    // The composed name is also checked in the napi-object before updating
+    // to make sure there are no conflicts.
+    for (col = 0; col < numQueryVars; col ++) {
+        NJS_CHECK_NAPI(env, napi_get_property(env, tempObj,
+                queryVars[col].jsName, &colObj))
+        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, colObj, &index))
+
+        if (index != col) {
+            exists = true;
+            tempNum = 0;
+            while (exists) {
+                tempNameLength = (size_t) snprintf(tempName, sizeof (tempName),
+                        "%.*s_%d", (int)queryVars[col].nameLength,
+                        queryVars[col].name, ++tempNum);
+                if (tempNameLength > (sizeof(tempName) - 1))
+                    tempNameLength = sizeof(tempName) - 1;
+
+                NJS_CHECK_NAPI(env, napi_create_string_utf8(env, tempName,
+                        tempNameLength, &queryVars[col].jsName))
+                NJS_CHECK_NAPI(env, napi_has_property(env, tempObj,
+                        queryVars[col].jsName, &exists))
+            }
+            if (!njsUtils_copyStringFromJS(env, queryVars[col].jsName,
+                    &queryVars[col].name, &queryVars[col].nameLength))
+                return false;
+
+            NJS_CHECK_NAPI(env, napi_create_uint32(env, col, &colObj))
+            NJS_CHECK_NAPI(env, napi_set_property(env, tempObj,
+                    queryVars[col].jsName, colObj))
+        }
+    }
     return true;
 }

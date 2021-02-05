@@ -6,6 +6,10 @@
 
 - Added `username` as an alias for `user` in connection properties.
 
+- Enhanced the numeric suffix feature (for duplicate SELECT column names when
+  using `oracledb.OUT_FORMAT_OBJECT` mode) to also support nested cursors and
+  REF CURSORS.
+
 ## node-oracledb v5.1.0 (8 Dec 2020)
 
 - Added

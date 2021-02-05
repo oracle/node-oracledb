@@ -4862,3 +4862,62 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         245.1.2 Insert and fetch CLOB,BLOB with String and Buffer of length 32K
         245.1.3 Insert and fetch CLOB,BLOB with String and Buffer of length (1MB + 1)
 
+
+
+246. dupColNames1.js
+    246.1 Duplicate Column Names, query with simple execution
+        246.1.1 Two duplicate columns
+        246.1.2 Three duplicate columns
+        246.1.3 Duplicate column with conflicting alias name
+        246.1.4 Duplicate column with non-conflicting alias name
+        246.1.5 Negative not-case sensitive
+        246.1.6 Two Dupliate columns using nested cursor
+        246.1.7 Three Dupliate columns using nested cursor
+        246.1.8 Three Dupliate columns using nested cursor
+        246.1.9 Duplicate column with conflicting alias name using nested cursor
+        246.1.10 Duplicate column with non-conflicting alias name using nested cursor
+        246.1.11 Duplicate column with case sensitive alias name using nested cursor
+        246.1.12 Two Dupliate columns using REF cursor
+        246.1.13 Three duplicate columns using REF cursor
+        246.1.14 Duplicate column with Conflicting alias name using REF cursor
+        246.1.15 Duplicate column with non-conflicting alias name using REF cursor
+        246.1.16 Duplicate column with case sensitive alias name using REF cursor
+        246.1.17 Duplicate column with case sensitive alias name from dual
+    246.2 Duplicate Column Names, query with ResultSet
+        246.2.1 Two duplicate columns
+        246.2.2 Three duplicate columns
+        246.2.3 Duplicate column with conflicting alias name
+        246.2.4 Duplicate column with non-conflicting alias name
+        246.2.5 Negative not-case sensitive
+        246.2.6 Two Dupliate columns using nested cursor
+        246.2.7 Three Dupliate columns using nested cursor
+        246.2.8 Three Dupliate columns using nested cursor
+        246.2.9 Duplicate column with conflicting alias name using nested cursor
+        246.2.10 Duplicate column with non-conflicting alias name using nested cursor
+        246.2.11 Duplicate column with case sensitive alias name using nested cursor
+        246.2.12 Two Dupliate columns using REF cursor
+        246.2.13 Three duplicate columns using REF cursor
+        246.2.14 Duplicate column with Conflicting alias name using REF cursor
+        246.2.15 Duplicate column with non-conflicting alias name using REF cursor
+        246.2.16 Duplicate column with case sensitive alias name using REF cursor
+        246.2.17 Duplicate column with case sensitive alias name from dual
+
+247. dupColNames2.js
+    247.1 Duplicate Column Names, query with stream
+        247.1.1 Two duplicate columns
+        247.1.2 Three duplicate columns
+        247.1.3 Duplicate column with conflicting alias name
+        247.1.4 Duplicate columns with non-conflicting alias name
+        247.1.5 Negative not-case sensitive
+        247.1.6 Two Dupliate columns using nested cursor
+        247.1.7 Three Dupliate columns using nested cursor
+        247.1.8 Three Dupliate columns using nested cursor
+        247.1.9 Duplicate column with conflicting alias name using nested cursor
+        247.1.10 Duplicate column with non-conflicting alias name using nested cursor
+        247.1.11 Duplicate column with case sensitive alias name using nested cursor
+        247.1.12 Two Dupliate columns using REF cursor
+        247.1.13 Three duplicate columns using REF cursor
+        247.1.14 Duplicate column with Conflicting alias name using REF cursor
+        247.1.15 Duplicate column with non-conflicting alias name using REF cursor
+        247.1.16 Duplicate column with case sensitive alias name using REF cursor
+        247.1.17 Duplicate column with case sensitive alias name from dual

@@ -1597,6 +1597,8 @@ applications create tables using unquoted, case-insensitive names.
 From node-oracledb 5.1, when duplicate column names are used in queries, then
 node-oracledb will append numeric suffixes in `oracledb.OUT_FORMAT_OBJECT` mode
 as necessary, so that all columns are represented in the JavaScript object.
+This was extended in node-oracledb 5.2 to also cover duplicate columns in nested
+cursors and REF CURSORS.
 
 This property may be overridden in
 an [`execute()`](#executeoptions)
