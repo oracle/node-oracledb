@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -100,7 +100,7 @@ before(function(done) {
     });
     seriesList.push(function (cb) {
       conn.execute(
-        "select * from dual",
+        "select * from dual", [], { outFormat: oracledb.OUT_FORMAT_ARRAY },
         function(err, result) {
           if (!err && result.rows && (result.rows[0][0]==="X")) {
             cb(null, index);
