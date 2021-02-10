@@ -62,7 +62,7 @@ describe('231. soda13.js', () => {
     const TABLE = "soda_test_13_1";
     try {
       const conn = await oracledb.getConnection(dbconfig);
-      const soda = await conn.getSodaDatabase();
+      const soda = conn.getSodaDatabase();
       const coll = await soda.createCollection(TABLE);
 
       // (1)
@@ -91,7 +91,7 @@ describe('231. soda13.js', () => {
     const TABLE = "soda_test_13_2";
     try {
       const conn = await oracledb.getConnection(dbconfig);
-      const soda = await conn.getSodaDatabase();
+      const soda = conn.getSodaDatabase();
       const coll = await soda.createCollection(TABLE);
 
       await coll.insertOne({fred: 5, george: 6});
@@ -122,7 +122,7 @@ describe('231. soda13.js', () => {
     const TABLE = "soda_test_13_3";
     try {
       const conn = await oracledb.getConnection(dbconfig);
-      const soda = await conn.getSodaDatabase();
+      const soda = conn.getSodaDatabase();
       const coll = await soda.createCollection(TABLE);
 
       await coll.insertOne({fred: 1, george: 2});

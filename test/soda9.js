@@ -51,14 +51,14 @@ describe('177. soda9.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_177_1");
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
       await collection.insertOne(inContent);
 
       // fetch back
       let outDocuments = await collection.find().getDocuments();
-      let outContent = await outDocuments[0].getContent();
+      let outContent = outDocuments[0].getContent();
       should.deepEqual(outContent, inContent);
 
     } catch(err) {
@@ -87,15 +87,15 @@ describe('177. soda9.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_177_2");
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let inDocument = await soda.createDocument(inContent);
+      let inDocument = soda.createDocument(inContent);
       await collection.insertOne(inDocument);
 
       // fetch back
       let outDocuments = await collection.find().getDocuments();
-      let outContent = await outDocuments[0].getContent();
+      let outContent = outDocuments[0].getContent();
       should.deepEqual(outContent, inContent);
 
     } catch(err) {
@@ -123,18 +123,18 @@ describe('177. soda9.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_177_3");
 
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
       let middleDocument = await collection.insertOneAndGet(inContent);
       should.exist(middleDocument);
-      let middleContent = await middleDocument.getContent();
+      let middleContent = middleDocument.getContent();
       should.not.exist(middleContent);
 
       // Fetch it back
       let outDocuments = await collection.find().getDocuments();
-      let outContent = await outDocuments[0].getContent();
+      let outContent = outDocuments[0].getContent();
       should.deepEqual(outContent, inContent);
 
     } catch(err) {
@@ -162,19 +162,19 @@ describe('177. soda9.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_177_4");
 
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let inDocument = await soda.createDocument(inContent);
+      let inDocument = soda.createDocument(inContent);
       let middleDocument = await collection.insertOneAndGet(inDocument);
       should.exist(middleDocument);
-      let middleContent = await middleDocument.getContent();
+      let middleContent = middleDocument.getContent();
       should.not.exist(middleContent);
 
       // Fetch it back
       let outDocuments = await collection.find().getDocuments();
-      let outContent = await outDocuments[0].getContent();
+      let outContent = outDocuments[0].getContent();
       should.deepEqual(outContent, inContent);
 
     } catch(err) {
@@ -203,13 +203,13 @@ describe('177. soda9.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
 
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let inDocument = await soda.createDocument(inContent);
+      let inDocument = soda.createDocument(inContent);
 
       // Get content without being inserted
-      let outContent = await inDocument.getContent();
+      let outContent = inDocument.getContent();
       should.deepEqual(outContent, inContent);
 
     } catch(err) {

@@ -47,7 +47,7 @@ describe('178. soda10.js', () => {
       return;
     } else {
       conn = await oracledb.getConnection(dbconfig);
-      soda = await conn.getSodaDatabase();
+      soda = conn.getSodaDatabase();
     }
 
     await sodaUtil.cleanup();
@@ -80,7 +80,7 @@ describe('178. soda10.js', () => {
 
       let inDocuments = [];
       for (let i = 0; i < inContents.length; i++) {
-        inDocuments[i] = await soda.createDocument(inContents[i]); // n.b. synchronous method
+        inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
       }
 
       await collection.insertMany(inDocuments);
@@ -89,7 +89,7 @@ describe('178. soda10.js', () => {
       let outDocuments = await collection.find().getDocuments();
       let outContents = [];
       for (let i = 0; i < outDocuments.length; i++) {
-        outContents[i] = await outDocuments[i].getContent(); // n.b. synchronous method
+        outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
       }
 
       should.deepEqual(outContents, inContents);
@@ -114,7 +114,7 @@ describe('178. soda10.js', () => {
       let outDocuments = await collection.find().getDocuments();
       let outContents = [];
       for (let i = 0; i < outDocuments.length; i++) {
-        outContents[i] = await outDocuments[i].getContent(); // n.b. synchronous method
+        outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
       }
 
       should.deepEqual(outContents, inContents);
@@ -135,13 +135,13 @@ describe('178. soda10.js', () => {
 
       let inDocuments = [];
       for (let i = 0; i < inContents.length; i++) {
-        inDocuments[i] = await soda.createDocument(inContents[i]); // n.b. synchronous method
+        inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
       }
 
       let middleDocuments = await collection.insertManyAndGet(inDocuments);
       let middleContents = [];
       for (let i = 0; i < middleDocuments.length; i++) {
-        middleContents[i] = await middleDocuments[i].getContent();
+        middleContents[i] = middleDocuments[i].getContent();
         should.exist(middleDocuments[i].key);
       }
       should.deepEqual(middleContents, [null, null, null, null]);
@@ -150,7 +150,7 @@ describe('178. soda10.js', () => {
       let outDocuments = await collection.find().getDocuments();
       let outContents = [];
       for (let i = 0; i < outDocuments.length; i++) {
-        outContents[i] = await outDocuments[i].getContent(); // n.b. synchronous method
+        outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
       }
 
       should.deepEqual(outContents, inContents);
@@ -172,7 +172,7 @@ describe('178. soda10.js', () => {
       let middleDocuments = await collection.insertManyAndGet(inContents);
       let middleContents = [];
       for (let i = 0; i < middleDocuments.length; i++) {
-        middleContents[i] = await middleDocuments[i].getContent();
+        middleContents[i] = middleDocuments[i].getContent();
         should.exist(middleDocuments[i].key);
       }
       should.deepEqual(middleContents, [null, null, null, null]);
@@ -181,7 +181,7 @@ describe('178. soda10.js', () => {
       let outDocuments = await collection.find().getDocuments();
       let outContents = [];
       for (let i = 0; i < outDocuments.length; i++) {
-        outContents[i] = await outDocuments[i].getContent(); // n.b. synchronous method
+        outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
       }
 
       should.deepEqual(outContents, inContents);

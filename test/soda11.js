@@ -52,7 +52,7 @@ describe('179. soda11.js', () => {
     let conn, collection;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = await conn.getSodaDatabase();
+      let sd = conn.getSodaDatabase();
 
       let t_tablename = "myTableName";
       let t_metadata = {
@@ -125,7 +125,7 @@ describe('179. soda11.js', () => {
     let conn, collection;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = await conn.getSodaDatabase();
+      let sd = conn.getSodaDatabase();
 
       let t_metadata = {
         "schemaName" : "nonexistent",
@@ -195,7 +195,7 @@ describe('179. soda11.js', () => {
     let collection1;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = await conn.getSodaDatabase();
+      let sd = conn.getSodaDatabase();
 
       let t_metadata1 = {
         "schemaName" : dbconfig.user.toUpperCase(),
@@ -304,7 +304,7 @@ describe('179. soda11.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = await conn.getSodaDatabase();
+      let sd = conn.getSodaDatabase();
       let collectionName = 'soda_test_179_4';
       let testMetaData = {
         "schemaName" : dbconfig.user.toUpperCase(),
@@ -351,13 +351,13 @@ describe('179. soda11.js', () => {
       /* The key must always be a string and is always returned a string as
          well -- even if the "type" in the database is numeric. */
       let testKey = '86755';
-      let testDoc = await sd.createDocument(testContent, { key: testKey } );
+      let testDoc = sd.createDocument(testContent, { key: testKey } );
       should.strictEqual(testDoc.key, testKey);
       await coll.insertOne(testDoc);
 
       // Fetch it back
       let docGot = await coll.find().key(testKey).getOne();
-      let contentGot = await docGot.getContent();
+      let contentGot = docGot.getContent();
       should.strictEqual(contentGot.name, testContent.name);
       should.strictEqual(
         contentGot.address.country,
@@ -386,7 +386,7 @@ describe('179. soda11.js', () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = await conn.getSodaDatabase();
+      let sd = conn.getSodaDatabase();
       let collectionName = 'soda_test_179_5';
       let testMetaData = {
         "schemaName" : dbconfig.user.toUpperCase(),
@@ -464,7 +464,7 @@ describe('179. soda11.js', () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = await conn.getSodaDatabase();
+      let sd = conn.getSodaDatabase();
       let collectionName = 'soda_test_179_6';
       let testMetaData = {
         "schemaName" : dbconfig.user.toUpperCase(),
@@ -511,7 +511,7 @@ describe('179. soda11.js', () => {
       let testContent = {};
       let testMediaType = 'image/png';
       let testKey = '86755';
-      let testDoc = await sd.createDocument(
+      let testDoc = sd.createDocument(
         testContent,
         { mediaType: testMediaType, key: testKey }
       );
@@ -553,7 +553,7 @@ describe('179. soda11.js', () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = await conn.getSodaDatabase();
+      let sd = conn.getSodaDatabase();
       let collectionName = 'soda_test_179_7';
       let testMetaData = {
         "schemaName" : dbconfig.user.toUpperCase(),
@@ -637,7 +637,7 @@ describe('179. soda11.js', () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = await conn.getSodaDatabase();
+      let sd = conn.getSodaDatabase();
       let collectionName = 'soda_test_179_8';
       let testMetaData = {
         "schemaName" : dbconfig.user.toUpperCase(),
@@ -682,7 +682,7 @@ describe('179. soda11.js', () => {
 
       let testContent = {};
       let testKey = '86755';
-      let testDoc = await sd.createDocument(testContent, { key: testKey } );
+      let testDoc = sd.createDocument(testContent, { key: testKey } );
 
       let outDocument = await coll.insertOneAndGet(testDoc);
       should.exist(outDocument);

@@ -53,7 +53,7 @@ describe('175. soda7.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_175_1");
 
       await Promise.all(
@@ -90,7 +90,7 @@ describe('175. soda7.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_175_2");
 
       await Promise.all(
@@ -130,7 +130,7 @@ describe('175. soda7.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_175_3");
 
       await Promise.all(
@@ -170,7 +170,7 @@ describe('175. soda7.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_175_4");
 
       let myKeys = [];
@@ -211,7 +211,7 @@ describe('175. soda7.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_175_5");
 
       await Promise.all(
@@ -231,7 +231,7 @@ describe('175. soda7.js', () => {
         if(!myDocument) {
           hasNext = false;
         } else {
-          myContents[i] = await myDocument.getContent();
+          myContents[i] = myDocument.getContent();
           (myContents[i]).should.be.oneOf(t_contents);
         }
       }
@@ -264,7 +264,7 @@ describe('175. soda7.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_175_6");
 
       await Promise.all(
@@ -285,7 +285,7 @@ describe('175. soda7.js', () => {
         if(!myDocument) {
           hasNext = false;
         } else {
-          myContents[i] = await myDocument.getContent();
+          myContents[i] = myDocument.getContent();
           (myContents[i]).should.be.oneOf(t_contents);
         }
       }
@@ -317,7 +317,7 @@ describe('175. soda7.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_175_7");
 
       await Promise.all(
@@ -358,7 +358,7 @@ describe('175. soda7.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_175_8");
 
       await Promise.all(
@@ -378,7 +378,7 @@ describe('175. soda7.js', () => {
         if(!myDocument) {
           hasNext = false;
         } else {
-          myContents[i] = await myDocument.getContent();
+          myContents[i] = myDocument.getContent();
           (myContents[i]).should.be.oneOf(t_contents);
         }
       }
@@ -415,7 +415,7 @@ describe('175. soda7.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_175_9");
 
       await Promise.all(
@@ -430,7 +430,7 @@ describe('175. soda7.js', () => {
       // Get contents
       let myContents = [];
       for (let i = 0; i < documents.length; i++ ) {
-        myContents[i] = await documents[i].getContent();
+        myContents[i] = documents[i].getContent();
         (myContents[i]).should.be.oneOf(t_contents);
       }
 
@@ -458,7 +458,7 @@ describe('175. soda7.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_175_10");
 
       // Fetch back
@@ -489,7 +489,7 @@ describe('175. soda7.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_175_11");
 
       let myKeys = [];
@@ -501,7 +501,7 @@ describe('175. soda7.js', () => {
 
       // Fetch back
       let document = await collection.find().key(myKeys[1]).getOne();
-      let content = await document.getContent();
+      let content = document.getContent();
       content.should.be.oneOf(t_contents);
 
     } catch(err) {
@@ -528,7 +528,7 @@ describe('175. soda7.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_175_12");
 
       await Promise.all(
@@ -539,7 +539,7 @@ describe('175. soda7.js', () => {
 
       // Fetch back
       let document = await collection.find().getOne();
-      let content = await document.getContent();
+      let content = document.getContent();
       content.should.be.oneOf(t_contents);
 
     } catch(err) {
@@ -566,7 +566,7 @@ describe('175. soda7.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_175_13");
 
       await Promise.all(
@@ -610,7 +610,7 @@ describe('175. soda7.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_175_14");
 
       await Promise.all(
@@ -654,7 +654,7 @@ describe('175. soda7.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let soda = await conn.getSodaDatabase();
+      let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_175_13");
 
       await Promise.all(

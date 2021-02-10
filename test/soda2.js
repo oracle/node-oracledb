@@ -50,8 +50,8 @@ describe('165. soda2.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd1 = await conn.getSodaDatabase();
-      let sd2 = await conn.getSodaDatabase();
+      let sd1 = conn.getSodaDatabase();
+      let sd2 = conn.getSodaDatabase();
       // sd1 creates the collection
       let collName = "soda_test_165_1";
       let coll_create = await sd1.createCollection(collName);
@@ -112,7 +112,7 @@ describe('165. soda2.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = await conn.getSodaDatabase();
+      let sd = conn.getSodaDatabase();
 
       let t_collname = "soda_test_165_3";
       await sd.createCollection(t_collname);
@@ -139,7 +139,7 @@ describe('165. soda2.js', () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbconfig);
-      let sd = await conn.getSodaDatabase();
+      let sd = conn.getSodaDatabase();
 
       let collName = "";
       await testsUtil.assertThrowsAsync(
@@ -206,7 +206,7 @@ describe('165. soda2.js', () => {
 
       try {
         let conn = await oracledb.getConnection(dbconfig);
-        let soda = await conn.getSodaDatabase();
+        let soda = conn.getSodaDatabase();
         let collection = await soda.createCollection(collName);
         let indexSpec = {
           "name": "OFFICE_IDX",
@@ -232,7 +232,7 @@ describe('165. soda2.js', () => {
 
       try {
         let conn = await pool.getConnection();
-        let soda = await conn.getSodaDatabase();
+        let soda = conn.getSodaDatabase();
         let collection = await soda.openCollection(collName);
 
         await collection.insertOne(content);
@@ -248,7 +248,7 @@ describe('165. soda2.js', () => {
 
       try {
         let conn = await oracledb.getConnection(dbconfig);
-        let soda = await conn.getSodaDatabase();
+        let soda = conn.getSodaDatabase();
         let collection = await soda.openCollection(collName);
 
         let result = await collection.drop();

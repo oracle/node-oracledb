@@ -100,12 +100,12 @@ describe('230. soda12.js', () => {
 
     try {
       const conn = await oracledb.getConnection(dbconfig);
-      const soda = await conn.getSodaDatabase();
+      const soda = conn.getSodaDatabase();
       const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
       // (1)
       const content1 = {fred: 5, george: 10};
-      let doc = await soda.createDocument(content1, { key: "1" });
+      let doc = soda.createDocument(content1, { key: "1" });
       await coll.save(doc);
       await conn.commit();
       const docs1 = await coll.find().getDocuments();
@@ -115,7 +115,7 @@ describe('230. soda12.js', () => {
 
       // (2)
       const content2 = {sally: 1, betty: 2};
-      doc = await soda.createDocument(content2, { key: "2" });
+      doc = soda.createDocument(content2, { key: "2" });
       await coll.save(doc);
       await conn.commit();
       const docs2 = await coll.find().getDocuments();
@@ -125,7 +125,7 @@ describe('230. soda12.js', () => {
 
       // (3)
       const content3 = {fred: 8, george: 16};
-      doc = await soda.createDocument(content3, { key: "1" });
+      doc = soda.createDocument(content3, { key: "1" });
       await coll.save(doc);
       await conn.commit();
       const docs3 = await coll.find().getDocuments();
@@ -135,7 +135,7 @@ describe('230. soda12.js', () => {
 
       // (4)
       const content4 = {sally: 3, betty: 5};
-      doc = await soda.createDocument(content4, { key: "2" });
+      doc = soda.createDocument(content4, { key: "2" });
       const returnedDoc = await coll.saveAndGet(doc);
       await conn.commit();
       should.strictEqual(returnedDoc.key, '2');
@@ -162,21 +162,21 @@ describe('230. soda12.js', () => {
     const metadata = await getMetadata(TABLE);
     try {
       const conn = await oracledb.getConnection(dbconfig);
-      const soda = await conn.getSodaDatabase();
+      const soda = conn.getSodaDatabase();
       const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
       const content1 = { id: 1, name: "Paul",  office: "Singapore" };
-      let doc = await soda.createDocument(content1, { key: "3" });
+      let doc = soda.createDocument(content1, { key: "3" });
       await coll.insertOne(doc);
       await conn.commit();
 
       const content2 = {Charlie: 2, David: 20};
-      doc = await soda.createDocument(content2, { key: "4" });
+      doc = soda.createDocument(content2, { key: "4" });
       await coll.save(doc);
       await conn.commit();
 
       const content3 = {Eve: 3, Frank: 30};
-      doc = await soda.createDocument(content3, { key: "3" });
+      doc = soda.createDocument(content3, { key: "3" });
       await coll.save(doc);
       await conn.commit();
 
@@ -203,7 +203,7 @@ describe('230. soda12.js', () => {
     const metadata = await getMetadata(TABLE);
     try {
       const conn = await oracledb.getConnection(dbconfig);
-      const soda = await conn.getSodaDatabase();
+      const soda = conn.getSodaDatabase();
       const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
       /* save() with content directly */
@@ -216,7 +216,7 @@ describe('230. soda12.js', () => {
         /ORA-40661/
       );
 
-      let doc = await soda.createDocument(content);
+      let doc = soda.createDocument(content);
       await assert.rejects(
         async () => {
           await coll.save(doc);
@@ -240,7 +240,7 @@ describe('230. soda12.js', () => {
     const metadata = await getMetadata(TABLE);
     try {
       const conn = await oracledb.getConnection(dbconfig);
-      const soda = await conn.getSodaDatabase();
+      const soda = conn.getSodaDatabase();
       const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
       // NJS-009: invalid number of parameters

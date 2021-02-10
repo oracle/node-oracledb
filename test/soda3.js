@@ -56,7 +56,7 @@ describe('167. soda3.js', () => {
 
     try {
       conn = await oracledb.getConnection(dbconfig);
-      sd = await conn.getSodaDatabase();
+      sd = conn.getSodaDatabase();
 
       t_collections = await Promise.all(
         t_collectionNames.map(function(name) {

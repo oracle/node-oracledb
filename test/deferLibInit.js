@@ -26,7 +26,9 @@
  *   This is a node-oracledb v3.1+ feature.
  *
  *   Note: These tests will not succeed unless LD_LIBRARY_PATH is used to
- *         point to the path of Oracle Instant Client.
+ *         point to the path of Oracle Instant Client. Please also make sure
+ *         you don't have any other Oracle Clients installed except for that
+ *         sepcified by LD_LIBRARY_PATH.
  *
  *****************************************************************************/
 'use strict';
@@ -50,20 +52,30 @@ describe('182. deferLibInit.js', () => {
     }
   });
 
-  it('182.2 Negative: throws error when asking for ODPI-C attributes', async () => {
+  it('182.2 Negative: throws error when asking for ODPI-C attributes without LD_LIBRARY_PATH and ORACLE_HOME set', async () => {
     try {
       delete process.env.LD_LIBRARY_PATH;
       await negativeCase();
     } catch(err) {
+      if(err && err.stdout.includes("failing")){
+        throw new Error("The test will not succeed unless LD_LIBRARY_PATH is used to point to the path of Oracle Instant Client.\n" +
+          "Please also make sure you don't have any other Oracle Clients installed except for that sepcified by LD_LIBRARY_PATH.\n" +
+          err.stdout);
+      }
       should.not.exist(err);
     }
   });
 
-  it('182.3 Negative: call oracledb method', async () => {
+  it('182.3 Negative: throws error when calling oracledb method without LD_LIBRARY_PATH and ORACLE_HOME set', async () => {
     try {
       delete process.env.LD_LIBRARY_PATH;
       await callMethodCase();
     } catch(err) {
+      if(err && err.stdout.includes("failing")){
+        throw new Error("The test will not succeed unless LD_LIBRARY_PATH is used to point to the path of Oracle Instant Client.\n"+
+          "Please also make sure you don't have any other Oracle Clients installed except for that sepcified by LD_LIBRARY_PATH.\n"+
+          err.stdout);
+      }
       should.not.exist(err);
     }
   });
