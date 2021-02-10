@@ -1351,8 +1351,9 @@ The default value is 100.
 
 The property is used during the default [direct
 fetches](#fetchingrows), during ResultSet [`getRow()`](#getrow) calls,
-and for [`queryStream()`](#querystream).  It is not used for
-[`getRows()`](#getrows).
+and for [`queryStream()`](#querystream).  It is used for
+[`getRows()`](#getrows) when no argument (or the value 0) is passed to
+`getRows()`.
 
 Increasing this value reduces the number of [round-trips](#roundtrips)
 to the database but increases memory usage for each data fetch.  For
@@ -1364,11 +1365,13 @@ memory fragmentation may occur in some cases, see [Fetching Rows with
 Direct Fetches](#fetchingrows).
 
 For direct fetches (those using `execute()` option [`resultSet:
-false`](#propexecresultset)), the internal buffer size will be based
-on the lesser of [`maxRows`](#propdbmaxrows) and `fetchArraySize`.
+false`](#propexecresultset)), the internal buffer size will be based on the
+lesser of [`maxRows`](#propdbmaxrows) and `fetchArraySize`.
 
 This property can be overridden by the `execute()` option
 [`fetchArraySize`](#propexecfetcharraysize).
+
+See [Tuning Fetch Performance](#rowfetching) for more information.
 
 The property was introduced in node-oracledb version 2.0.
 
@@ -5925,9 +5928,10 @@ At the end of fetching, the ResultSet should be freed by calling
 
 For tuning, adjust the values of the `connection.execute()` options
 [`fetchArraySize`](#propexecfetcharraysize) and
-[`prefetchRows`](#propexecprefetchrows), see [Tuning Fetch
-Performance](#rowfetching).
-
+[`prefetchRows`](#propexecprefetchrows).  Both values must be set at the time
+the ResultSet is obtained from the database.  Setting them afterwards has no
+effect.  See [Tuning Fetch Performance](#rowfetching) for more information about
+tuning.
 
 #### <a name="getrows"></a> 9.2.3 `resultset.getRows()`
 
@@ -5935,24 +5939,42 @@ Performance](#rowfetching).
 
 Callback:
 ```
-getRows(Number numRows, function(Error error, Array rows){});
+getRows([Number numRows,] function(Error error, Array rows){});
 ```
 Promise:
 ```
-promise = getRows(Number numRows);
+promise = getRows([Number numRows]);
 ```
 
 ##### Description
 
-This call fetches `numRows` rows of the ResultSet as an object or an
-array of column values, depending on the value of [outFormat](#propdboutformat).
+This function fetches `numRows` rows from the ResultSet.  The return value is an
+object or an array of column values, depending on the value of
+[`outFormat`](#propdboutformat).  Successive calls can be made to fetch all
+rows.
 
-At the end of fetching, the ResultSet should be freed by calling [`close()`](#close).
+At the end of fetching, the ResultSet should be freed by calling
+[`resultset.close()`](#close).
+
+If no argument is passed, or `numRows` is zero, then all rows are fetched.
+Technically this fetches all remaining rows from the ResultSet if other calls to
+[`getRow()`](#getrow) or `getRows(numRows)` previously occurred.  Using
+`getRows()` to fetch all rows is convenient for small ResultSets returned as
+bind variables, see [REF CURSOR Bind Parameters](#refcursors).  For normal
+queries known to return a small number of rows, it is easier to _not_ use a
+ResultSet.
 
 Different values of `numRows` may alter the time needed for fetching data from
-Oracle Database.  The value of [`fetchArraySize`](#propexecfetcharraysize) has
-no effect on `getRows()` performance or internal buffering.  The
-[`prefetchRows`](#propexecprefetchrows) can have an effect.
+Oracle Database.  The [`prefetchRows`](#propexecprefetchrows) value will also
+have an effect.  When `numRows` is zero, or no argument is passed to
+`getRows()`, then the value of [`fetchArraySize`](#propexecfetcharraysize) can
+be used for tuning.  Both `prefetchRows` and `fetchArraySize` must be set at the
+time the ResultSet is obtained from the database.  Setting them afterwards has
+no effect.  See [Tuning Fetch Performance](#rowfetching) for more information
+about tuning.
+
+In node-oracledb version 5.2 the `numRows` parameter was made optional, and
+support for the value 0 was added.
 
 #### <a name="toquerystream"></a> 9.2.4 `resultset.toQueryStream()`
 
@@ -10438,7 +10460,6 @@ await rs.close();
 
 To fetch multiple rows at a time, use `getRows()`:
 
-
 ```javascript
 const numRows = 10;
 
@@ -12997,6 +13018,10 @@ const result = await connection.execute(
   {
     sal: 6000,
     cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+  },
+  {
+    prefetchRows:   1000, // tune the internal getRow() data fetch performance
+    fetchArraySize: 1000
   }
 );
 
@@ -13006,10 +13031,36 @@ while ((row = await resultSet.getRow())) {
   console.log(row);
 }
 
-// always close the ResultSet
-await resultSet.close();
-
+await resultSet.close();   // always close the ResultSet
 ```
+
+All rows can be fetched in one operation by calling `getRows()` with no
+argument.  This is useful when the query is known to return a "small" number of
+rows:
+
+```javascript
+const result = await connection.execute(
+  `"BEGIN get_emp_rs(:sal, :cursor); END;`,
+  {
+    sal: 6000,
+    cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+  },
+  {
+    prefetchRows:   200, // tune the getRows() call
+    fetchArraySize: 200
+  }
+);
+
+const resultSet = result.outBinds.cursor;
+const rows = await resultSet.getRows();
+console.log(rows);
+
+await resultSet.close();   // always close the ResultSet
+```
+
+The [`prefetchRows`](#propdbprefetchrows)` and
+[`fetchArraySize`](#propdbfetcharraysize) can be used tune the `getRows()` call.
+The values must be set before, or when, the ResultSet is obtained.
 
 See [refcursor.js][40] for a complete example.
 
@@ -15910,8 +15961,9 @@ For best performance, tune "array fetching" with
 [`fetchArraySize`](#propexecfetcharraysize) and "row prefetching" with
 [`prefetchRows`](#propexecprefetchrows) in each
 [`connection.execute()`](#execute) or [`connection.queryStream()`](#querystream)
-call.  Note when using [`getRows()`](#getrows), tuning of "array fetching" is
-done with the function's `numRows` parameter.  Queries that return LOBs and
+call.  Note when using [`getRows(numRows)`](#getrows), where `numRows` is
+greater than 0, then tuning of "array fetching" is based on the `numRows` value
+instead of `fetchArraySize`.  Also note that queries that return LOBs and
 similar types will never prefetch rows, so the `prefetchRows` value is ignored
 in those cases.
 
@@ -15951,53 +16003,51 @@ Here are some suggestions for the starting point to begin your tuning:
 - To tune queries that return an unknown number of rows, estimate the
   number of rows returned and start with an appropriate
   `fetchArraySize` value.  The default is 100.  Then set
-  `prefetchRows` to the `fetchArraySize` value.  Do not make the sizes
-  unnecessarily large.  For example:
+  `prefetchRows` to the `fetchArraySize` value. For example:
 
     ```javascript
-    result = await connection.execute(
-      `SELECT * FROM very_big_table`,
-      [],
-      {
-        prefetchRows:   1000,
-        fetchArraySize: 1000,
-        resultSet:      true
-      }
-    );
+    const sql = `SELECT *
+                 FROM very_big_table`;
+
+    const binds = [];
+
+    const options = { prefetchRows: 1000, fetchArraySize: 1000, resultSet: true };
+
+    const result = await connection.execute(sql, binds, options);
     ```
 
-    Adjust the values as needed for performance, memory and round-trip
-    usage.  For a large quantity of rows or very "wide" rows on fast
-    networks you may prefer to leave `prefetchRows` at its default
-    value of 2.  Keep `fetchArraySize` equal to, or bigger than,
-    `prefetchRows`.
+  Adjust the values as needed for performance, memory and round-trip usage.  Do
+  not make the sizes unnecessarily large.  In this scenario, keep
+  `fetchArraySize` equal to `prefetchRows`.  However, for a large quantity of
+  rows or very "wide" rows on fast networks you may prefer to leave
+  `prefetchRows` at its default value of 2.
 
 - If you are fetching a fixed number of rows, start your tuning by
   setting `fetchArraySize` to the number of expected rows, and set
-  `prefetchRows` to one greater than this value.  (Adding one removes
-  the need for a round-trip to check for end-of-fetch).  For example,
-  if you are querying 20 rows, perhaps to [display a
-  page](#pagingdata) of data, set `prefetchRows` to 21 and
-  `fetchArraySize` to 20:
+  `prefetchRows` to one greater than this value.  Adding one removes
+  the need for a round-trip to check for end-of-fetch.
+
+  For example, if you are querying 20 rows, perhaps to [display a
+  page](#pagingdata) of data, then set `prefetchRows` to 21 and `fetchArraySize`
+  to 20:
 
     ```javascript
     const myoffset = 0;       // do not skip any rows (start at row 1)
     const mymaxnumrows = 20;  // get 20 rows
 
-    sql = `SELECT last_name
-           FROM employees
-           ORDER BY last_name
-           OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`;
+    const sql = `SELECT last_name
+                 FROM employees
+                 ORDER BY last_name
+                 OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`;
 
-    binds = { offset: myoffset, maxnumrows: mymaxnumrows };
+    const binds = { offset: myoffset, maxnumrows: mymaxnumrows };
 
-    options = { prefetchRows: mymaxnumrows + 1, fetchArraySize: mymaxnumrows };
+    const options = { prefetchRows: mymaxnumrows + 1, fetchArraySize: mymaxnumrows };
 
-    result = await connection.execute(sql, binds, options);
+    const result = await connection.execute(sql, binds, options);
     ```
 
-    This will return all rows for the query in one round-trip.
-
+  This will return all rows for the query in one round-trip.
 
 - If you know that a query returns just one row then set
   `fetchArraySize` to 1 to minimize memory usage.  The default
@@ -16005,7 +16055,15 @@ Here are some suggestions for the starting point to begin your tuning:
   queries:
 
     ```javascript
-    result = await connection.execute(`SELECT * FROM mytable WHERE id = 1`, [], {fetchArraySize: 1});
+    const sql = `SELECT last_name
+                 FROM employees
+                 WHERE employee_id = :bv`;
+
+    const binds = [100];
+
+    const options = { fetchArraySize: 1 };
+
+    const result = await connection.execute(sql, binds, options);
     ```
 
 There are two cases that will benefit from disabling row prefetching

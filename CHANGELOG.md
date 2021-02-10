@@ -4,6 +4,10 @@
 
 **This release is under development**
 
+- Enhanced
+  [`getRows()`](https://oracle.github.io/node-oracledb/doc/api.html#getrows) to
+  be able to return all rows in one call.
+
 - Added `username` as an alias for `user` in connection properties.
 
 - Enhanced the numeric suffix feature (for duplicate SELECT column names when

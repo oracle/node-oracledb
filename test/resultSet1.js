@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -610,7 +610,7 @@ describe('12. resultSet1.js', function() {
       }
     });
 
-    it('12.3.9 Negative - To omit the first parameter', function(done) {
+    it('12.3.9 getRows() without argument returns remaining all rows', function(done) {
       connection.should.be.ok();
 
       connection.execute(
@@ -625,19 +625,15 @@ describe('12. resultSet1.js', function() {
 
       function fetchRowFromRS(rs) {
         rs.getRows(function(err, rows) {
-          should.exist(err);
-          should.not.exist(rows);
-          (err.message).should.startWith('NJS-009:');
-          // NJS-009: invalid number of parameters
-          rs.close(function(err) {
-            should.not.exist(err);
-            done();
-          });
+          should.not.exist(err);
+          should.exist(rows);
+          rows.length.should.be.exactly(rowsAmount);
+          done();
         });
       }
     });
 
-    it('12.3.10 Negative - set the 1st parameter of getRows() to be 0', function(done) {
+    it('12.3.10 getRows(0) returns remaining all rows', function(done) {
       connection.should.be.ok();
       var nRows = 0;
 
@@ -652,14 +648,11 @@ describe('12. resultSet1.js', function() {
       );
 
       function fetchRowFromRS(rs, numRows) {
-        rs.getRows(numRows, function(err) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-005:');
-          // NJS-005: invalid value for parameter 1
-          rs.close(function(err) {
-            should.not.exist(err);
-            done();
-          });
+        rs.getRows(numRows, function(err, rows) {
+          should.not.exist(err);
+          should.exist(rows);
+          rows.length.should.be.exactly(rowsAmount);
+          done();
         });
       }
     });

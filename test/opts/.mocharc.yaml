@@ -234,3 +234,5 @@ spec:
   - test/dupColNames1.js
   - test/dupColNames2.js
   - test/userName.js
+  - test/rsGetAllRows1.js
+  - test/rsGetAllRows2.js

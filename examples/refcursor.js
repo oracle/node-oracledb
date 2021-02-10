@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -29,8 +29,6 @@
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 const demoSetup = require('./demosetup.js');
-
-const numRows = 10;  // number of rows to return from each call to getRows()
 
 async function run() {
 
@@ -75,14 +73,16 @@ async function run() {
     //
     // Fetch rows from the REF CURSOR.
     //
-    //
+
+    const resultSet = result.outBinds.cursor;
+    const numRows = 10;  // number of rows to return from each call to getRows()
+    let rows;
+
     // If getRows(numRows) returns:
     //   Zero rows               => there were no rows, or are no more rows to return
     //   Fewer than numRows rows => this was the last set of rows to get
     //   Exactly numRows rows    => there may be more rows to fetch
 
-    const resultSet = result.outBinds.cursor;
-    let rows;
     do {
       rows = await resultSet.getRows(numRows); // get numRows rows at a time
       if (rows.length > 0) {
@@ -90,6 +90,13 @@ async function run() {
         console.log(rows);
       }
     } while (rows.length === numRows);
+
+    // From node-oracledb 5.2, you can alternatively fetch all rows in one call.
+    // This is useful when the ResultSet is known to contain a small number of
+    // rows that will always fit in memory.
+    //
+    // rows = await resultSet.getRows();  // no parameter means get all rows
+    // console.log(rows);
 
     // always close the ResultSet
     await resultSet.close();
