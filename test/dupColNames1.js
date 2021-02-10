@@ -146,7 +146,7 @@ describe('246. dupColNames1.js', function () {
       await connection.execute("DROP TABLE nodb_dupDepartment PURGE");
       await connection.commit();
       await connection.close();
-      
+
       oracledb.outFormat = outFormatBak;
     } catch (err) {
       should.not.exist(err);
