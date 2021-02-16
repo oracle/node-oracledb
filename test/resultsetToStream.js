@@ -156,95 +156,64 @@ describe('15. resultsetToStream.js', function () {
   });
 
   describe('15.2 Testing ResultSet/QueryStream conversion errors', function () {
-    it('15.2.1 should prevent conversion to stream after getRow is invoked', function (done) {
-      connection.execute(
-        'begin \n' +
-        '  open :cursor for select employees_name from nodb_rs2stream; \n' +
-        'end;',
-        {
-          cursor:  { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-        },
-        function(err, result) {
-          should.not.exist(err);
-
-          var cursor = result.outBinds.cursor;
-
-          cursor.getRow(function(err) {
-            should.not.exist(err);
-
-            cursor.close(function(err) {
-              should.not.exist(err);
-              done();
-            });
-          });
-
-          try {
-            cursor.toQueryStream();
-          } catch (err) {
-            (err.message).should.startWith('NJS-041:');
-            // NJS-041: cannot convert to stream after invoking methods
-          }
-        }
-      );
+    it('15.2.1 should prevent conversion to stream after getRow is invoked', async function () {
+      const sql = `
+        begin
+          open :cursor for select employees_name from nodb_rs2stream;
+        end;`;
+      const binds = {
+        cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+      };
+      const result = await connection.execute(sql, binds);
+      const cursor = result.outBinds.cursor;
+      await cursor.getRow();
+      try {
+        const stream = cursor.toQueryStream();
+        should.not.exist(stream);
+      } catch (err) {
+        (err.message).should.startWith('NJS-041:');
+        // NJS-041: cannot convert to stream after invoking methods
+      }
+      await cursor.close();
     });
 
-    it('15.2.2 should prevent conversion to stream after getRows is invoked', function (done) {
-      connection.execute(
-        'begin \n' +
-        '  open :cursor for select employees_name from nodb_rs2stream; \n' +
-        'end;',
-        {
-          cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
-        },
-        function(err, result) {
-          should.not.exist(err);
-
-          var cursor = result.outBinds.cursor;
-
-          cursor.getRows(5, function(err) {
-            should.not.exist(err);
-
-            cursor.close(function(err) {
-              should.not.exist(err);
-              done();
-            });
-          });
-
-          try {
-            cursor.toQueryStream();
-          } catch (err) {
-            (err.message).should.startWith('NJS-041:');
-          }
-        }
-      );
+    it('15.2.2 should prevent conversion to stream after getRows is invoked', async function () {
+      const sql = `
+        begin
+          open :cursor for select employees_name from nodb_rs2stream;
+        end;`;
+      const binds = {
+        cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+      };
+      const result = await connection.execute(sql, binds);
+      const cursor = result.outBinds.cursor;
+      await cursor.getRows(5);
+      try {
+        const stream = cursor.toQueryStream();
+        should.not.exist(stream);
+      } catch (err) {
+        (err.message).should.startWith('NJS-041:');
+      }
+      await cursor.close();
     });
 
-    it('15.2.3 should prevent conversion to stream after close is invoked', function (done) {
-      connection.execute(
-        'begin \n' +
-        '  open :cursor for select employees_name from nodb_rs2stream; \n' +
-        'end;',
-        {
-          cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
-        },
-        function(err, result) {
-          should.not.exist(err);
-
-          var cursor = result.outBinds.cursor;
-
-          cursor.close(function(err) {
-            should.not.exist(err);
-
-            done();
-          });
-
-          try {
-            cursor.toQueryStream();
-          } catch (err) {
-            (err.message).should.startWith('NJS-041:');
-          }
-        }
-      );
+    it('15.2.3 should prevent conversion to stream after close is invoked', async function () {
+      const sql = `
+        begin
+          open :cursor for select employees_name from nodb_rs2stream;
+        end;`;
+      const binds = {
+        cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+      };
+      const result = await connection.execute(sql, binds);
+      const cursor = result.outBinds.cursor;
+      await cursor.close();
+      try {
+        const stream = cursor.toQueryStream();
+        should.not.exist(stream);
+      } catch (err) {
+        (err.message).should.startWith('NJS-041:');
+      }
     });
 
     it('15.2.4 should prevent invoking getRow after conversion to stream', function (done) {
