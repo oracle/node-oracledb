@@ -16232,7 +16232,7 @@ separate method in node-oracledb.
 Each non-pooled connection and each session in the connection pool has
 its own cache of statements with a default size of 30.  Statement
 caching lets cursors be used without re-parsing the statement.
-Statement caching also reduces meta data transfer costs between the
+Statement caching also reduces meta data transfer costs between
 node-oracledb and the database.  Performance and scalability are
 improved.
 
