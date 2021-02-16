@@ -4363,7 +4363,7 @@ logic, in particular the connection release, should be in the `close` event.
 Alternatively the Stream [`destroy()`][92] method can be used to terminate a
 stream early.
 
-For tuning, adjust the values of the `connection.execute()` options
+For tuning, adjust the values of the options
 [`fetchArraySize`](#propexecfetcharraysize) and
 [`prefetchRows`](#propexecprefetchrows), see [Tuning Fetch
 Performance](#rowfetching).
