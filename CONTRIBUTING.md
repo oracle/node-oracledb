@@ -8,7 +8,7 @@ For bugs or enhancement requests, please file a GitHub issue unless it's securit
 
 ## Contributing Code
 
-We welcome your code contributions. To get started, you will need to sign the [Oracle Contributor Agreement](https://www.oracle.com/technetwork/community/oca-486395.html) (OCA).
+We welcome your code contributions. To get started, you will need to sign the [Oracle Contributor Agreement](https://oca.opensource.oracle.com) (OCA).
 
 For pull requests to be accepted, the bottom of your commit message must have
 the following line using the name and e-mail address you used for the OCA.
