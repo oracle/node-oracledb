@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -45,7 +45,7 @@ async function run() {
 
     connection = await oracledb.getConnection(dbConfig);
     if (oracledb.oracleClientVersion < 1803000000) {
-      throw new Error('node-oracledb SODA requires Oracle Client libaries 18.3 or greater');
+      throw new Error('node-oracledb SODA requires Oracle Client libraries 18.3 or greater');
     }
 
     if (connection.oracleServerVersion < 1803000000) {
@@ -55,9 +55,31 @@ async function run() {
     // Create the parent object for SODA
     const soda = connection.getSodaDatabase();
 
+    // Explicit metadata is used for maximum version portability.
+    // Refer to the documentation.
+    const md = {
+      "keyColumn": {
+        "name":"ID"
+      },
+      "contentColumn": {
+        "name": "JSON_DOCUMENT",
+        "sqlType": "BLOB"
+      },
+      "versionColumn": {
+        "name": "VERSION",
+        "method": "UUID"
+      },
+      "lastModifiedColumn": {
+        "name": "LAST_MODIFIED"
+      },
+      "creationTimeColumn": {
+        "name": "CREATED_ON"
+      }
+    };
+
     // Create a new SODA collection and index
     // This will open an existing collection, if the name is already in use.
-    collection = await soda.createCollection("mycollection");
+    collection = await soda.createCollection("mycollection", { metaData: md });
     const indexSpec = { "name": "CITY_IDX",
       "fields": [ {
         "path": "address.city",
