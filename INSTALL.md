@@ -28,7 +28,7 @@ limitations under the License.
         - 3.2.2 [Node-oracledb Installation on Linux with a Local Database or Full Client](#instoh)
         - 3.2.3 [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
         - 3.2.4 [Installing Node.js and node-oracledb RPMs from yum.oracle.com](#instnoderpms)
-    - 3.3 [Node-oracledb Installation on Apple macOS](#instosx)
+    - 3.3 [Node-oracledb Installation on Apple macOS (Intel x86)](#instosx)
     - 3.4 [Node-oracledb Installation on Microsoft Windows](#windowsinstallation)
         - 3.4.1 [Node-oracledb Installation on Microsoft Windows with Instant Client ZIP files](#instwin)
         - 3.4.2 [Node-oracledb Installation on Microsoft Windows with a Local Database or Full Client](#instwinoh)
@@ -56,7 +56,7 @@ The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
 This node-oracledb release has been tested with Node.js 10, 12 and 14 on 64-bit
-Oracle Linux (releases 6, 7 and 8), Windows and macOS.  Note Node.js 10.16, or
+Oracle Linux (releases 6, 7 and 8), Windows and macOS (Intel x86).  Note Node.js 10.16, or
 later is required.  The add-on can also build on some 32-bit Linux, 32-bit
 Windows, Solaris and AIX environments, but these architectures have not been
 fully tested.  Older versions of node-oracledb may work with older versions of
@@ -146,7 +146,7 @@ I have ... | Follow this ...
 ----------|-----------------
 Windows.  My database is on another machine | [Node-oracledb Installation on Microsoft Windows with Instant Client ZIP files](#instwin)
 Windows.  My database is on the same machine as Node.js | [Node-oracledb Installation on Microsoft Windows with a Local Database or Full Client](#instwinoh)
-Apple macOS | [Node-oracledb Installation on Apple macOS](#instosx)
+Apple macOS (Intel x86) | [Node-oracledb Installation on Apple macOS (Intel x86)](#instosx)
 Linux that uses RPM packages.  My database is on another machine | [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
 Linux that uses Debian packages.   My database is on another machine | [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
 Linux.  My database is on the same machine as Node.js | [Node-oracledb Installation on Linux with a Local Database or Full Client](#instoh)
@@ -659,7 +659,7 @@ You may prefer to install node-oracledb as a normal npm package dependency.
 
 See [Node.js for Oracle Linux][46] for details.
 
-### <a name="instosx"></a> 3.3 Node-oracledb Installation on Apple macOS
+### <a name="instosx"></a> 3.3 Node-oracledb Installation on Apple macOS (Intel x86)
 
 Questions and issues can be posted as [GitHub Issues][10].
 
@@ -667,7 +667,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The pre-built binaries were built on macOS Mojave 10.14.6.
+The pre-built binaries were built on macOS (Intel x86) Catalina 10.15.7.
 
 Oracle Instant Client libraries are required on macOS.
 
@@ -1364,7 +1364,7 @@ Install a C compiler:
 
 - On Linux, GCC 4.4.7 (the default on Oracle Linux 6) is known to work.
 
-- On macOS install Xcode from the Mac App store.
+- On macOS (Intel x86) install Xcode from the Mac App store.
 
 - On Windows, install a C build environment such as Microsoft
   Visual Studio 2017.  Compilers supported by Oracle libraries are
