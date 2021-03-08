@@ -3755,23 +3755,53 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         146.3.3 update with urowid length > 2000
 
 147. prefetchRows.js
-    147.1 set oracledb.prefetchRows to be 0
-    147.2 Negative - negative value
-    147.3 Negative - NaN
-    147.4 Negative - undefined
-    147.5 Negative - null
-    147.6 Negative - random string
-    147.7 Negative - Boolean
-    147.8 execute() option, value of 0
-    147.9 Negative - negative value
-    147.10 Negative - NaN
-    147.11 execute() option, undefined, get overrided by global attribute
-    147.12 Negative - null
-    147.13 Negative - random string
-    147.14 Negative - Boolean
-    147.15 Query round-trips with no prefetch
-    147.16 Query round-trips with prefetch equal to row count
-    147.17 Query round-trips with prefetch larger than row count
+    147.1 prefetchRows with simple execution
+        147.1.1 set oracledb.prefetchRows to be 0
+        147.1.2 Negative - negative value
+        147.1.3 Negative - NaN
+        147.1.4 Negative - undefined
+        147.1.5 Negative - null
+        147.1.6 Negative - random string
+        147.1.7 Negative - Boolean
+        147.1.8 execute() option, value of 0
+        147.1.9 Negative - negative value
+        147.1.10 Negative - NaN
+        147.1.11 execute() option, undefined, get overrided by global attribute
+        147.1.12 Negative - null
+        147.1.13 Negative - random string
+        147.1.14 Negative - Boolean
+        147.1.15 Query round-trips with no prefetch
+        147.1.16 Query round-trips with prefetch equal to row count
+        147.1.17 Query round-trips with prefetch > row count and fetchArraySize > row count
+        147.1.18 Query round-trips with prefetch > row count and fetchArraySize < row count
+        147.1.19 Query round-trips with prefetch < row count and fetchArraySize > total rows
+        147.1.20 Query round-trips with prefetch < row count and fetchArraySize = total rows
+        147.1.21 Query round-trips with prefetch < row count fetchArraySize < total rows
+    147.2 prefetchRows with resultSet
+        147.2.1 set oracledb.prefetchRows to be 0
+        147.2.2 execute() option, value of 0
+        147.2.3 Negative - negative value
+        147.2.4 Negative - NaN
+        147.2.5 execute() option, undefined, get overrided by global attribute
+        147.2.6 Negative - null
+        147.2.7 Negative - random string
+        147.2.8 Negative - Boolean
+        147.2.9 Query round-trips with no prefetch
+        147.2.10 Query round-trips with prefetch equal to row count
+        147.2.11 Query round-trips with prefetch larger than row count
+        147.2.12 Query round-trips with prefetch < row count, fetchArraySize < row count and getRows()
+        147.2.13 Query round-trips with prefetch < row count, fetchArraySize > row count and getRows(n < row count)
+        147.2.14 Query round-trips with prefetch < row count, fetchArraySize > row count and getRows(n > row count)
+        147.2.15 Query round-trips with prefetch < row count, fetchArraySize > row count and getRows()
+    147.3 prefetchRows with queryStream
+        147.3.1 set oracledb.prefetchRows to be 0
+        147.3.2 execute() option, value of 0
+        147.3.3 execute() option, undefined, get overrided by global attribute
+        147.3.4 Query round-trips with no prefetch
+        147.3.5 Query round-trips with prefetch equal to row count
+        147.3.6 Query round-trips with prefetch larger than row count
+        147.3.7 Query round-trips with prefetch < row count and fetchArraySize < row count
+        147.3.8 Query round-trips with prefetch < row count and fetchArraySize > row count
 
 148. fetchArraySize1.js
     148.1 oracledb.fetchArraySize
