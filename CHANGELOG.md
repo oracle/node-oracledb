@@ -4,6 +4,8 @@
 
 **This release is under development**
 
+- Fixed connection pool statistic "min time in queue" calculation.
+
 - Enhanced
   [`getRows()`](https://oracle.github.io/node-oracledb/doc/api.html#getrows) to
   be able to return all rows in one call.
