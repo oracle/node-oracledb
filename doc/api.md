@@ -14804,6 +14804,7 @@ Data will be converted between AL32UTF8 and the
 database character set when it is inserted into, or queried from, the
 database.  The environment variable `NLS_LANG` can be used to
 configure the Oracle 'client' (i.e. node-oracledb) language and territory only.
+For information on `NLS_LANG`, see [NLS_LANG Frequently Asked Questions][195].
 
 Oracle NLS environment variables, or statements like `ALTER SESSION`,
 can be used to configure further aspects of node-oracledb data access
@@ -16896,3 +16897,4 @@ can be asked at [AskTom][158].
 [192]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A2E90F08-BC9F-4688-A9D0-4A948DD3F7A9
 [193]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2DC05D71-3D62-4A14-855F-76E054032494
 [194]: https://blogs.oracle.com/jsondb/osonformat
+[195]: https://www.oracle.com/database/technologies/faq-nls-lang.html
