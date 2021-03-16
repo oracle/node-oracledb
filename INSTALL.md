@@ -1591,7 +1591,8 @@ or your `package.json` would contain:
 have a `Dockerfile` with steps to create a Docker image.  Once created, the
 image can be shared and run.
 
-Sample Dockerfiles for Oracle Linux are available on [GitHub][65].
+Sample Dockerfiles for Oracle Linux are available on [GitHub][65].  Some
+container images are in [Oracle's GitHub Container Registry][67].
 
 #### Installing Node.js in Docker
 
@@ -2024,3 +2025,4 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [64]: https://oracle.github.io/node-oracledb/doc/api.html#odbinitoracleclient
 [65]: https://github.com/oracle/docker-images/tree/master/OracleLinuxDevelopers
 [66]: https://github.com/oracle/node-oracledb/blob/v4.2.0/INSTALL.md
+[67]: https://github.com/orgs/oracle/packages
