@@ -16003,10 +16003,9 @@ Round-trips](#roundtrips) shows how to measure round-trips.
 
 Here are some suggestions for the starting point to begin your tuning:
 
-- To tune queries that return an unknown number of rows, estimate the
-  number of rows returned and start with an appropriate
-  `fetchArraySize` value.  The default is 100.  Then set
-  `prefetchRows` to the `fetchArraySize` value. For example:
+- To tune queries that return an unknown number of rows, estimate the number of
+  rows returned and choose an appropriate value for `fetchArraySize`.  Then set
+  `prefetchRows` to the same value. For example:
 
     ```javascript
     const sql = `SELECT *
@@ -16019,11 +16018,15 @@ Here are some suggestions for the starting point to begin your tuning:
     const result = await connection.execute(sql, binds, options);
     ```
 
-  Adjust the values as needed for performance, memory and round-trip usage.  Do
-  not make the sizes unnecessarily large.  In this scenario, keep
-  `fetchArraySize` equal to `prefetchRows`.  However, for a large quantity of
-  rows or very "wide" rows on fast networks you may prefer to leave
-  `prefetchRows` at its default value of 2.
+  The default `fetchArraySize` is 100 and the default `prefetchRows` is 2.
+  Adjust the values as needed for performance, memory and round-trip usage.  The
+  sizes used will affect memory allocation of buffers, so do not make the sizes
+  unnecessarily large.  For example, if your query always returns under 500
+  rows, then avoid setting `fetchArraySize` to 10000.
+
+  In this scenario, aim to keep `fetchArraySize` equal to `prefetchRows`.
+  However, for a large quantity of rows or very "wide" rows on fast networks you
+  may prefer to leave `prefetchRows` at its default value.
 
 - If you are fetching a fixed number of rows, start your tuning by
   setting `fetchArraySize` to the number of expected rows, and set
