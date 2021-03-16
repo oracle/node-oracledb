@@ -2956,6 +2956,8 @@ See [Database Call Timeouts](#dbcalltimeouts) for more information about
 limiting statement execution time, and also about limiting the time taken to
 open new connections.
 
+The default is 0, meaning that there is no timeout.
+
 This property was added in node-oracledb 3.0.  An exception will occur
 if node-oracledb is not using Oracle client library version 18.1 or
 later.
@@ -10056,7 +10058,7 @@ the application can continue to use the connection.
 For small values of `callTimeout`, the connection cleanup may not
 complete successfully within the additional `callTimeout` period.  In
 this case an *ORA-3114* is returned and the connection will no longer
-be usable.  It should be released.
+be usable.  The application should then close the connection.
 
 ### <a name="connectionadb"></a> 15.10 Connecting to Oracle Autonomous Database
 
