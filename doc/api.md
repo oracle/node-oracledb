@@ -547,6 +547,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
 ## <a name="intro"></a> 1. Introduction
 
 The [*node-oracledb*][1] add-on for Node.js powers high performance Oracle Database applications.
+Applications can be written in TypeScript, or directly in JavaScript.
 
 This document shows how to use node-oracledb.  The API reference is in the first
 sections of this document and the [user manual](#usermanual) in subsequent
