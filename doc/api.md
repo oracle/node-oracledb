@@ -10969,8 +10969,7 @@ console.log(result);
 ```
 
 For more information on time zones, see Oracle Support's [Timestamps & time
-zones - Frequently Asked Questions, Doc ID 340512.1][165].  Also see [Working
-with Dates Using the Node.js Driver][43].
+zones - Frequently Asked Questions, Doc ID 340512.1][165].
 
 ##### <a name="fetchasstringhandling"></a> 16.1.7.4 Fetching Numbers and Dates as String
 
@@ -16539,9 +16538,6 @@ Unhandled Rejection at:  Promise {
 ]
 ```
 
-For more information, see [How to get, use, and close a DB connection
-using promises][73].
-
 #### <a name="custompromises"></a> 33.2.1 Custom Promise Libraries
 
 From node-oracledb 5.0, custom Promise libraries can no longer be used.  Use the
@@ -16604,9 +16600,6 @@ If you are using [Lob instances](#lobclass) for LOB data, then the
 Lobs must be streamed since there is no Promisified interface for
 them.  Alternatively you can work with the data directly as Strings or
 Buffers.
-
-For more information, see [How to get, use, and close a DB connection
-using async functions][74].
 
 ## <a name="migrate"></a> 34. Migrating from Previous node-oracledb Releases
 
@@ -16754,7 +16747,6 @@ can be asked at [AskTom][158].
 [40]: https://github.com/oracle/node-oracledb/tree/master/examples/refcursor.js
 [41]: https://github.com/oracle/node-oracledb/tree/master/examples/selectstream.js
 [42]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-578B5988-31E2-4D0F-ACEA-95C827F6012B
-[43]: https://jsao.io/2016/09/working-with-dates-using-the-nodejs-driver/
 [44]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-35810313-029E-4CB8-8C27-DF432FA3C253
 [45]: https://docs.oracle.com/cd/E17781_01/appdev.112/e18750/xe_locator.htm#XELOC560
 [47]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FAFD1247-06E5-4E64-917F-AEBD4703CF40
@@ -16783,8 +16775,6 @@ can be asked at [AskTom][158].
 [70]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-246A5A52-E666-4DBC-BDF6-98B83260A7AD
 [71]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-14484F86-44F2-4B34-B34E-0C873D323EAD
 [72]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-988EA930-BDFE-4205-A806-E54F05333562
-[73]: https://jsao.io/2017/06/how-to-get-use-and-close-a-db-connection-using-promises/
-[74]: https://jsao.io/2017/07/how-to-get-use-and-close-a-db-connection-using-async-functions/
 [75]: https://oracle.github.io/odpi/doc/user_guide/debugging.html
 [76]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-D353F4BE-5943-4F5B-A99B-BC9505E9579C
 [77]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C9054D20-3A70-484F-B11B-CC591A10D609
