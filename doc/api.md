@@ -9924,16 +9924,15 @@ it is recommended to use [AWR][62] to check the connection rate, and then fix
 underlying causes.
 
 With Oracle Client 19c, [`EXPIRE_TIME`][159] can be used in
-[`tnsnames.ora`](#tnsnames) connect descriptors to prevent firewalls from
-terminating idle connections and to adjust keepalive timeouts.  The general
-recommendation for `EXPIRE_TIME` is to use a value that is slightly less than
-half of the termination period.  In older versions of Oracle Client, a
+[`tnsnames.ora`](#tnsnames) connect descriptors or in [Easy Connect
+strings](#easyconnect) to prevent firewalls from terminating idle connections
+and to adjust keepalive timeouts.  With Oracle Client 21c the setting can
+alternatively be in the application's [`sqlnet.ora`](#tnsadmin) file.  The
+general recommendation for `EXPIRE_TIME` is to use a value that is slightly less
+than half of the termination period.  In older versions of Oracle Client, a
 tnsnames.ora connect descriptor option [`ENABLE=BROKEN`][36] can be used instead
 of `EXPIRE_TIME`.  These settings can also aid detection of a terminated remote
-database server.  With Oracle Client 19c, the setting can be passed in [Easy
-Connect strings](#easyconnect), for example your connection string could be
-`"mydbmachine.example.com/orclpdb1?expire_time=2"` to send packets every two
-minutes.
+database server.
 
 If the network or the database server processes used by node-oracledb
 connections cannot be prevented from becoming unusable, tune [Connection Pool
