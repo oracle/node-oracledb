@@ -14228,7 +14228,7 @@ The node-oracledb add-on implements [`commit()`](#commit) and
 [`rollback()`](#rollback) methods that can be used to explicitly
 control transactions.
 
-If the [`autoCommit`](#propdbisautocommit) flag is set to *true*, then
+If the [`autoCommit`](#propdbisautocommit) property is set to *true*, then
 a commit occurs at the end of each `execute()` call.  Unlike an
 explicit `commit()`, this does not require a [round-trip](#roundtrips)
 to the database.  For maximum efficiency, set `autoCommit` to *true*
