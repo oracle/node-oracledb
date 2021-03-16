@@ -1,6 +1,6 @@
 # Installing node-oracledb Version 5.2-dev
 
-*Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -101,7 +101,7 @@ guaranteed to be available or usable in your environment.
           `oracle/node-oracledb.git#v5.2.0-dev` to your `package.json`
           dependencies.  Substitute your desired [GitHub tag][40].
 
-- Add Oracle 19, 18, 12, or 11.2 client libraries to your operating
+- Add Oracle 21, 19, 18, 12, or 11.2 client libraries to your operating
   system library search path such as `PATH` on Windows or
   `LD_LIBRARY_PATH` on Linux.  On macOS link the libraries to
   `/usr/local/lib`.
@@ -120,10 +120,11 @@ guaranteed to be available or usable in your environment.
       in `$ORACLE_HOME/lib` from a locally installed database such as
       the free [Oracle XE][20] release.
 
-  Oracle Client libraries 19, 18 and 12.2 can connect to Oracle
-  Database 11.2 or greater. Version 12.1 client libraries can connect
-  to Oracle Database 10.2 or greater. Version 11.2 client libraries
-  can connect to Oracle Database 9.2 or greater.
+  Oracle Client libraries 21 can connect to Oracle Database 12.1 or greater.
+  Oracle Client libraries 19, 18 and 12.2 can connect to Oracle Database 11.2 or
+  greater. Version 12.1 client libraries can connect to Oracle Database 10.2 or
+  greater. Version 11.2 client libraries can connect to Oracle Database 9.2 or
+  greater.
 
 - Your Node.js applications can now connect to your database.  The
   database can be on the same machine as Node.js, or on a remote
@@ -154,7 +155,7 @@ Linux. I have the full Oracle client (installed via `runInstaller`) on the same 
 Linux.  I want to install Node.js and node-oracledb RPM packages | [Installing Node.js and node-oracledb RPMs from yum.oracle.com](#instnoderpms)
 AIX on Power Systems | [Node-oracledb Installation on AIX on Power Systems with Instant Client ZIP files](#instaix)
 Solaris x86-64 (64-Bit) | [Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files](#instsolarisx8664)
-Another OS with Oracle Database 19, 18, 12, or  11.2 client libraries available | Update binding.gyp and make any code changes required, sign the [OCA][8], and submit a pull request with your patch.
+Another OS with Oracle Database 21, 19, 18, 12, or  11.2 client libraries available | Update binding.gyp and make any code changes required, sign the [OCA][8], and submit a pull request with your patch.
 Source code from GitHub | [Node-oracledb Installation from Source Code](#github)
 I don't have internet access | [Node-oracledb Installation Without Internet Access](#offline)
 
@@ -162,7 +163,7 @@ I don't have internet access | [Node-oracledb Installation Without Internet Acce
 
 All installations need:
 
-- Oracle 19, 18, 12 or 11.2 client libraries on the machine Node.js is installed on.
+- Oracle 21, 19, 18, 12 or 11.2 client libraries on the machine Node.js is installed on.
 
   Run `node -p "process.arch"` and make sure to use 64-bit or 32-bit
   Oracle client libraries to match the Node.js architecture.
@@ -171,15 +172,16 @@ All installations need:
   RPMs or ZIPs, a full Oracle Client, or a database on the same
   machine.  You only need one of these installations.
 
-  Oracle's standard client-server network interoperability allows
-  connections between different versions of Oracle Client and Oracle
-  Database.  For certified configurations see Oracle Support's [Doc ID
-  207303.1][6].  In summary, Oracle Client 19, 18 and 12.2 can connect
-  to Oracle Database 11.2 or greater. Oracle Client 12.1 can connect
-  to Oracle Database 10.2 or greater. Oracle Client 11.2 can connect
-  to Oracle Database 9.2 or greater.  The technical restrictions on
-  creating connections may be more flexible.  For example Oracle
-  Client 12.2 can successfully connect to Oracle Database 10.2.
+  Oracle's standard client-server network interoperability allows connections
+  between different versions of Oracle Client and Oracle Database.  For
+  supported configurations see Oracle Support's [Doc ID 207303.1][6].  In
+  summary, Oracle Client 21 can connect to Oracle Database 12.1 or greater.
+  Oracle Client 19, 18 and 12.2 can connect to Oracle Database 11.2 or
+  greater. Oracle Client 12.1 can connect to Oracle Database 10.2 or
+  greater. Oracle Client 11.2 can connect to Oracle Database 9.2 or greater.
+  The technical restrictions on creating connections may be more flexible.  For
+  example Oracle Client 21 can successfully connect to Oracle Database 11.2,
+  while Oracle Client 12.2 can successfully connect to Oracle Database 10.2.
 
 - An Oracle Database to test node-oracledb.
 
