@@ -75,6 +75,15 @@ guaranteed to be available or usable in your environment.
 
 ## <a name="quickstart"></a> 2. Quick Start node-oracledb Installation
 
+Simple installation instructions for Windows, macOS (Intel x86) and Linux are
+available:
+
+- [Quick Start: Developing Node.js Applications for Oracle Database][68]
+
+- [Quick Start: Developing Node.js Applications for Oracle Autonomous Database][69]
+
+Alternatively, follow these instructions:
+
 - Install Node.js from [nodejs.org][11].
 
 - Install node-oracledb using the `npm` package manager, which is included in
@@ -2027,3 +2036,5 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [65]: https://github.com/oracle/docker-images/tree/master/OracleLinuxDevelopers
 [66]: https://github.com/oracle/node-oracledb/blob/v4.2.0/INSTALL.md
 [67]: https://github.com/orgs/oracle/packages
+[68]: https://www.oracle.com/database/technologies/appdev/quickstartnodeonprem.html
+[69]: https://www.oracle.com/database/technologies/appdev/quickstartnodejs.html
