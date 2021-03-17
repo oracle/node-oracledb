@@ -16716,8 +16716,8 @@ can be asked at [AskTom][158].
 [9]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-624A4771-58C5-4E2B-8131-E3389F58A0D6
 [10]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8A9F1295-4360-4AC6-99A4-050C5C82E0B0
 [11]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-89DB0C3C-A36F-4254-8C82-020F5F6DE31F
-[12]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8E91CBE9-6CE1-4482-A694-04444C22B288
-[13]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-D3873ED4-5FAD-479F-85F9-EE56D4B18ED5
+[12]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7B3D15D3-A182-4ED1-A265-8EE15E793C46
+[13]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4E9360AA-C610-4341-AAD3-9DCDF82CF085
 [14]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2E008D4A-F6FD-4F34-9071-7E10419CA24D
 [15]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FD9A8CB4-6B9A-44E5-B114-EFB8DA76FC88
 [16]: https://nodejs.org/api/stream.html
@@ -16766,7 +16766,7 @@ can be asked at [AskTom][158].
 [61]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4947CAE8-1F00-4897-BB2B-7F921E495175
 [62]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-56AEF38E-9400-427B-A818-EDEC145F7ACD
 [63]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-9D12F489-EC02-46BE-8CD4-5AECED0E2BA2
-[64]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F3FBE48B-468B-4393-8B0C-D5C8E0E4374D
+[64]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-EB0E1525-D3B3-469C-BE22-A569C76864A6
 [65]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-25F85237-702B-4609-ACE2-1454EBC8284B
 [66]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-D2FA7B29-301B-4AB8-8294-2B1B015899F9
 [67]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-6E21AA56-5BBE-422A-802C-197CAC8AAEA4
@@ -16869,13 +16869,13 @@ can be asked at [AskTom][158].
 [169]: https://oracle.github.io/node-oracledb/#features
 [170]: https://github.com/oracle/node-oracledb/blob/v4.2.0/doc/api.md
 [171]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8BAD86FC-27C5-4103-8151-AC5BADF274E3
-[172]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C5B0AF7D-ABE8-4F69-9552-F4DAF40281F1
+[172]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-AB84D6C9-4BBE-4D36-992F-2BB85739329F
 [173]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-0F711EA4-08A8-463F-B4C6-1CE3A24274C8
 [174]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FAFD1247-06E5-4E64-917F-AEBD4703CF40
 [175]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-0203C8FA-A4BE-44A5-9A25-3D1E578E879F
 [176]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-B28362BE-8831-4687-89CF-9F77DB3698D2
 [177]: https://download.oracle.com/ocomdocs/global/Oracle-Net-19c-Easy-Connect-Plus.pdf
-[178]: https://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/adb-continuousavailability-5169724.pdf
+[178]: https://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/applicationcontinuityformaa-6348196.pdf
 [179]: https://eslint.org/docs/rules/no-await-in-loop
 [180]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-35CB2592-7588-4C2D-9075-6F639F25425E
 [181]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A9D4A5F5-B939-48FF-80AE-0228E7314C7D
