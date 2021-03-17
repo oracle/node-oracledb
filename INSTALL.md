@@ -113,8 +113,9 @@ guaranteed to be available or usable in your environment.
 
       Instant Client on Windows requires an appropriate [Visual Studio
       Redistributable](#winredists).  On Linux, the `libaio` (sometimes called
-      `libaio1`) package is needed.  On recent Linux versions, such as Oracle
-      Linux 8, you may also need to install the `libnsl` package.
+      `libaio1`) package is needed.  When using Instant Client 19 on recent
+      Linux versions, such as Oracle Linux 8, you may also need to install the
+      `libnsl` package.
 
     - Alternatively use the Oracle Client libraries already available
       in `$ORACLE_HOME/lib` from a locally installed database such as
@@ -288,9 +289,9 @@ unzip instantclient-basic-linuxx64.zip
 You will need the operating system `libaio` package installed.  On some
 platforms the package is called `libaio1`.  Run a command like `yum install -y
 libaio` or `apt-get install -y libaio1`, depending on your Linux distribution
-package manager.  On recent Linux versions, such as Oracle Linux 8, you may also
-need to install the `libnsl` package.  Oracle Instant Client 19 will not run on
-Oracle Linux 6.
+package manager.  When using Instant Client 19 on recent Linux versions, such as
+Oracle Linux 8, you may also need to install the `libnsl` package.  Oracle
+Instant Client 19 will not run on Oracle Linux 6.
 
 If there is no other Oracle software on the machine that will be impacted, then
 permanently add Instant Client to the run-time link path.  For example, if the
@@ -556,9 +557,9 @@ install the Basic package after enabling the ol7_x86_64_instantclient or
 ol6_x86_64_instantclient channel, depending on your version of Linux.
 
 Using any of these methods will install the required `libaio` package, if it is
-not already present.  On recent Linux versions, such as Oracle Linux 8, you may
-also need to manually install the `libnsl` package.  Oracle Instant Client 19
-will not run on Oracle Linux 6.
+not already present.  When using Instant Client 19 on recent Linux versions,
+such as Oracle Linux 8, you may also need to manually install the `libnsl`
+package.
 
 For Instant Client 19 RPMs, the system library search path is automatically
 configured during installation.  For older versions, if there is no other Oracle
@@ -1642,8 +1643,8 @@ install Instant Client.  Three methods are shown below.
         rm -rf /var/cache/yum
    ```
 
-   On recent Linux versions, such as Oracle Linux 8, you may also need to
-   manually install the `libnsl` package.
+   When using Instant Client 19 on recent Linux versions, such as Oracle Linux
+   8, you may also need to manually install the `libnsl` package.
 
 2. Automatically downloading an Instant Client ZIP file
 
@@ -1675,8 +1676,8 @@ install Instant Client.  Three methods are shown below.
        echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
    ```
 
-   On recent Linux versions, such as Oracle Linux 8, you may also need to
-   install the `libnsl` package.
+   When using Instant Client 19 on recent Linux versions, such as Oracle Linux
+   8, you may also need to install the `libnsl` package.
 
 3. Copying Instant Client zip files from the host
 
@@ -1715,8 +1716,8 @@ install Instant Client.  Three methods are shown below.
    RUN apt-get update && apt-get install -y libaio1
    ```
 
-   On recent Linux versions, such as Oracle Linux 8, you may also need to
-   install the `libnsl` package.
+   When using Instant Client 19 on recent Linux versions, such as Oracle Linux
+   8, you may also need to install the `libnsl` package.
 
 #### Installing node-oracledb and your application
 
