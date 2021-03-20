@@ -5024,3 +5024,12 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     250.4 Nested Cursor + getRow() + getRows(0) rows ARRAY outformat
     250.5 Nested Cursor + getRows(n) + getRows(0) with fetchArraySize < remaining rows inside nested cursor
     250.6 Nested Cursor + getRows(n) + getRow() + getRows() with fetchArraySize = 1
+
+
+251. fetchNClobAsString.js
+    251.1 NCLOB type in fetchAsString
+    251.2 NCLOB type in fetchAsString and fetch NCLOB data
+    251.3 CLOB type in fetchAsString and fetch NCLOB data
+    251.4 NCLOB type in fetchAsString and fetch CLOB data
+    251.5 CLOB type in fetchAsString and fetch CLOB data
+    251.6 CLOB & NCLOB type in fetchAs String and fetch CLOB & NCLOB

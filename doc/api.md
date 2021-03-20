@@ -1389,17 +1389,17 @@ oracledb.fetchArraySize = 100;
 Array fetchAsBuffer
 ```
 
-An array of types.  Currently the only valid type is
-[`oracledb.BLOB`](#oracledbconstantsnodbtype) (or its equivalent
-[`oracledb.DB_TYPE_BLOB`](#oracledbconstantsdbtype).  When set, and a BLOB
-column is queried with [`execute()`](#execute) or
-[`queryStream()`](#querystream), then the column data is returned as a Buffer
-instead of the default [Lob](#lobclass) instance.
+Allows query columns to be returned as Buffers.
 
-Individual query columns in [`execute()`](#execute)
-or [`queryStream()`](#querystream) calls can override the
-`fetchAsBuffer` global setting by
-using [`fetchInfo`](#executeoptions).
+The property should be an array of type constants.  Currently the only valid
+constant is [`oracledb.BLOB`](#oracledbconstantsnodbtype) or its equivalent
+[`oracledb.DB_TYPE_BLOB`](#oracledbconstantsdbtype).
+
+When set, and a BLOB column is queried with [`execute()`](#execute) or
+[`queryStream()`](#querystream), then the column data is returned as a Buffer
+instead of the default [Lob](#lobclass) instance.  Individual query columns in
+[`execute()`](#execute) or [`queryStream()`](#querystream) calls can override
+the `fetchAsBuffer` global setting by using [`fetchInfo`](#executeoptions).
 
 This property was added in node-oracledb 1.13.
 
@@ -1416,41 +1416,40 @@ oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 Array fetchAsString
 ```
 
-An array of types.  The valid types are
-[`oracledb.DATE`](#oracledbconstantsnodbtype),
+Allows query columns to be returned as Strings instead of the default type.
+
+In node-oracledb, all columns are returned as the closest JavaScript type, or as
+[Lob](#lobclass) instances in the case of CLOB and NCLOB types.  (See [Query
+Result Type Mapping](#typemap)).  The `fetchAsString` property can override this
+default type mapping.
+
+The `fetchAsString` property should be an array of type constants.  The valid
+constants are [`oracledb.DATE`](#oracledbconstantsnodbtype),
 [`oracledb.NUMBER`](#oracledbconstantsnodbtype),
 [`oracledb.BUFFER`](#oracledbconstantsnodbtype),
 [`oracledb.CLOB`](#oracledbconstantsnodbtype), and
-[`oracledb.NCLOB`](#oracledbconstantsnodbtype).
+[`oracledb.NCLOB`](#oracledbconstantsnodbtype).  The equivalent
+[`DB_TYPE_*`](#oracledbconstantsdbtype) constants can also be used.
 
 When any column having one of the types is queried with [`execute()`](#execute)
 or [`queryStream()`](#querystream), the column data is returned as a string
-instead of the default representation.
+instead of the default representation.  Individual query columns in
+[`execute()`](#execute) or [`queryStream()`](#querystream) calls can override
+the `fetchAsString` global setting by using [`fetchInfo`](#executeoptions).
 
 Note:
-- specifying [`oracledb.DATE`](#oracledbconstantsnodbtype) will affect date and timestamp columns
-- specifying [`oracledb.NUMBER`](#oracledbconstantsnodbtype) will affect numeric columns
-- specifying [`oracledb.CLOB`](#oracledbconstantsnodbtype) will affect both CLOB and NCLOB columns
+- specifying [`oracledb.NUMBER`](#oracledbconstantsnodbtype) will affect numeric columns.  The `fetchAsString` property helps avoid situations where using JavaScript types can lead to numeric precision loss.
+- specifying [`oracledb.CLOB`](#oracledbconstantsnodbtype) will affect both CLOB and NCLOB columns.  Similarly, specifying [`oracledb.NCLOB`](#oracledbconstantsnodbtype) will also affect both CLOB and NCLOB columns.  Using `fetchAsString` automatically fetches LOB data directly in query output without requiring streaming.
+- specifying [`oracledb.DATE`](#oracledbconstantsnodbtype) will affect date and timestamp columns.  Using `fetchAsString` can be helpful to avoid date conversions.
 
-By default in node-oracledb, all columns are returned as JavaScript types or as
-[Lob](#lobclass) instances, in the case of CLOB and NCLOB types.  The
-`fetchAsString` property helps avoid situations where using JavaScript types
-can lead to numeric precision loss, or where date conversion is unwanted.  See
-[Query Result Type Mapping](#typemap) for more discussion.
+When [`oracledb.BUFFER`](#oracledbconstantsnodbtype) is used for RAW data,
+Oracle returns the data as a hex-encoded string.  For dates and numbers returned
+as a string, the maximum length of a string created by this mapping is 200
+bytes.  Strings created for CLOB and NCLOB columns will generally be limited by
+Node.js and V8 memory restrictions.
 
-For raw data returned as a string, Oracle returns the data as a hex-encoded
-string.  For dates and numbers returned as a string, the maximum length of a
-string created by this mapping is 200 bytes.  Strings created for CLOB and NCLOB
-columns will generally be limited by Node.js and V8 memory restrictions.
-
-Individual query columns in [`execute()`](#execute)
-or [`queryStream()`](#querystream) calls can override the
-`fetchAsString` global setting by
-using [`fetchInfo`](#executeoptions).
-
-For non-CLOB types, the conversion to string is handled by Oracle
-client libraries and is often referred to as *defining* the fetch
-type.
+For non-CLOB types, the conversion is handled by Oracle Client libraries and is
+often referred to as *defining* the fetch type.
 
 ##### Example
 
@@ -3669,7 +3668,7 @@ The `type` property can be set to one of:
 - [`oracledb.DEFAULT`](#oracledbconstantsnodbtype) overrides any
   global mapping given by [`fetchAsString`](#propdbfetchasstring) or
   [`fetchAsBuffer`](#propdbfetchasbuffer).  The column data is
-  returned in native format.
+  returned in default format for the type.
 
 Strings and Buffers created for LOB columns will generally be limited
 by Node.js and V8 memory restrictions.

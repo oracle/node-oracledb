@@ -12,6 +12,8 @@
 
 - Added `username` as an alias for `user` in connection properties.
 
+- Fixed use of `oracledb.NCLOB` in `fetchAsString`.  See [Issue 1351](https://github.com/oracle/node-oracledb/issues/1351).
+
 - Enhanced the numeric suffix feature (for duplicate SELECT column names when
   using `oracledb.OUT_FORMAT_OBJECT` mode) to also support nested cursors and
   REF CURSORS.

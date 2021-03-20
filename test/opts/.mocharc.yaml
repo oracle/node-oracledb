@@ -236,3 +236,4 @@ spec:
   - test/userName.js
   - test/rsGetAllRows1.js
   - test/rsGetAllRows2.js
+  - test/fetchNClobAsString.js

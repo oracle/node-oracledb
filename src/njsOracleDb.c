@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -1595,7 +1595,8 @@ static napi_value njsOracleDb_setFetchAsString(napi_env env,
         napi_callback_info info)
 {
     const uint32_t validTypes[] = { NJS_DATATYPE_NUM, NJS_DATATYPE_DATE,
-            NJS_DATATYPE_BUFFER, NJS_DATATYPE_CLOB, NJS_DATATYPE_JSON, 0 };
+            NJS_DATATYPE_BUFFER, NJS_DATATYPE_CLOB, NJS_DATATYPE_NCLOB,
+            NJS_DATATYPE_JSON, 0 };
     njsOracleDb *oracleDb;
     napi_value value;
 
