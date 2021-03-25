@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -76,7 +76,7 @@ function done(err) {
     }
 
     log('********************************************************************************');
-    log('** Node-oracledb ' + nodbUtil.PACKAGE_JSON_VERSION + ' installed for Node.js ' + process.versions.node + ' (' + process.platform + ', ' + process.arch +')');
+    log('** Node-oracledb ' + nodbUtil.PACKAGE_JSON_VERSION + ' installed in Node.js ' + process.versions.node + ' (' + process.platform + ', ' + process.arch +')');
     log('**');
     log('** To use node-oracledb:');
     log('** - Oracle Client libraries (' + arch + ') must be available.');
@@ -86,11 +86,12 @@ function done(err) {
   }
 }
 
-// Check for a usable binary file for the node-oracledb module.
-// Node.js 8.16 and 10.16 (and 12.0) contain an important N-API
-// performance regression fix.  If you're using the obsolete Node.js 9
-// or 11 versions, install will work but you're on your own regarding
-// performance and functionality.
+// Check for a usable binary file for the node-oracledb module.  Node.js 8.16
+// and 10.16 (and 12.0) contain an important N-API performance regression fix.
+// Note that the checked versions are the minimum required for N-API
+// compatibility; as new Node.js versions are released, older Node.js versions
+// are dropped from the node-oracledb test plan.  For example, the obsolete
+// Node.js 9 and 11 versions are not tested.
 
 function checkAvailable(cb) {
   let vs = process.version.substring(1).split(".").map(Number);
