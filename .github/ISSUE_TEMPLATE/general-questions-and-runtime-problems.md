@@ -1,5 +1,5 @@
 ---
-name: General Questions and Runtime Problems
+name: Questions and Runtime Problems
 about: For general node-oracledb questions
 title: ''
 labels: question
