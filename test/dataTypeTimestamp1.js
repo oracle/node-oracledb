@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -124,7 +124,7 @@ describe('33. dataTypeTimestamp1.js', function() {
       );
     }); // after
 
-    it('32.3.1 SELECT query - original data', function(done) {
+    it('33.3.1 SELECT query - original data', function(done) {
       assist.selectOriginalData(connection, tableName, timestamps, done);
     });
 

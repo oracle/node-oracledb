@@ -621,7 +621,7 @@ Overview of node-oracledb functional tests
         34.1.3 works well with REF Cursor
         34.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
         34.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
-    34.2 sotres null value correctly
+    34.2 stores null value correctly
         34.2.1 testing Null, Empty string and Undefined
     34.3 testing database TIMESTAMP(p)
         34.3.1 SELECT query - original data

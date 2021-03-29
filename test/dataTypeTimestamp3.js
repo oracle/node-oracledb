@@ -120,7 +120,7 @@ describe('35. dataTypeTimestamp3.js', function() {
       );
     }); // after
 
-    it('32.3.1 SELECT query - original data', function(done) {
+    it('35.3.1 SELECT query - original data', function(done) {
       assist.selectOriginalData(connection, tableName, timestamps, done);
     });
 
