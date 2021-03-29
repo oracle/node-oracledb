@@ -5033,3 +5033,9 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     251.4 NCLOB type in fetchAsString and fetch CLOB data
     251.5 CLOB type in fetchAsString and fetch CLOB data
     251.6 CLOB & NCLOB type in fetchAs String and fetch CLOB & NCLOB
+
+252. sodaMetaDataCache.js
+    252.1 sodaMetaDataCache set to TRUE
+    252.2 sodaMetaDataCache set to FALSE
+    252.3 sodaMetaDataCache not specified
+    252.4 sodaMetaDataCache from closed pool

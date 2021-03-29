@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -66,6 +66,7 @@ async function init() {
       // queueMax: 500, // don't allow more than 500 unsatisfied getConnection() calls in the pool queue
       // queueTimeout: 60000, // terminate getConnection() calls queued for longer than 60000 milliseconds
       // sessionCallback: myFunction, // function invoked for brand new connections or by a connection tag mismatch
+      // sodaMetaDataCache: false, // Set true to improve SODA collection access performance
       // stmtCacheSize: 30, // number of statements that are cached in the statement cache of each connection
       // _enableStats: false // record pool usage statistics that can be output with oracledb.getPool()._logStats()
     });

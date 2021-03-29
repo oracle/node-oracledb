@@ -118,8 +118,9 @@ For installation information, see the [Node-oracledb Installation Instructions][
                 - 3.3.1.1.15 [`queueRequests`](#createpoolpoolattrsqueuerequests)
                 - 3.3.1.1.16 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
                 - 3.3.1.1.17 [`sessionCallback`](#createpoolpoolattrssessioncallback)
-                - 3.3.1.1.18 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
-                - 3.3.1.1.19 [`user`](#createpoolpoolattrsuser), [`username`](#createpoolpoolattrsuser)
+                - 3.3.1.1.18 [`sodaMetaDataCache`](#createpoolpoolattrssodamdcache)
+                - 3.3.1.1.19 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+                - 3.3.1.1.20 [`user`](#createpoolpoolattrsuser), [`username`](#createpoolpoolattrsuser)
             - 3.3.1.2 [`createPool()`: Callback Function](#createpoolpoolcallback)
         - 3.3.2 [`getConnection()`](#getconnectiondb)
             - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
@@ -310,8 +311,9 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 8.1.10 [`queueRequests`](#proppoolqueuerequests)
         - 8.1.11 [`queueTimeout`](#proppoolqueueTimeout)
         - 8.1.12 [`sessionCallback`](#proppoolsessioncallback)
-        - 8.1.13 [`status`](#proppoolstatus)
-        - 8.1.14 [`stmtCacheSize`](#proppoolstmtcachesize)
+        - 8.1.13 [`sodaMetaDataCache`](#proppoolsodamdcache)
+        - 8.1.14 [`status`](#proppoolstatus)
+        - 8.1.15 [`stmtCacheSize`](#proppoolstmtcachesize)
     - 8.2 [Pool Methods](#poolmethods)
         - 8.2.1 [`close()`](#poolclose)
         - 8.2.2 [`getConnection()`](#getconnectionpool)
@@ -520,6 +522,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 29.5 [SODA Text Searches](#sodatextsearches)
     - 29.6 [SODA Client-Assigned Keys and Collection Metadata](#sodaclientkeys)
     - 29.7 [JSON Data Guides in SODA](#sodajsondataguide)
+    - 29.8 [Using the SODA Metadata Cache](#sodamdcache)
 30. [Database Start Up and Shut Down](#startupshutdown)
     - 30.1 [Simple Database Start Up and Shut Down](#startupshutdownsimple)
     - 30.2 [Flexible Database Start Up and Shut Down](#startupshutdownflexible)
@@ -2367,7 +2370,30 @@ information.
 
 This property was added in node-oracledb 3.1.
 
-###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.18 `stmtCacheSize`
+###### <a name="createpoolpoolattrssodamdcache"></a> 3.3.1.1.18 `sodaMetaDataCache`
+
+```
+Boolean sodaMetaDataCache
+```
+
+Indicates whether the pool's connections should share a [cache of SODA
+metadata](#sodamdcache).  This improves SODA performance by reducing
+[round-trips](#roundtrips) to the database when opening collections.  It has no
+effect on non-SODA operations.
+
+The default is *false*.
+
+There is no global equivalent for setting this attribute.  SODA metadata caching
+is restricted to pooled connections only.
+
+Note: if the metadata of a collection is changed, the cache can get out of sync.
+
+This property was added in node-oracledb 5.2.  It requires Oracle Client 21.3
+(or later).  The feature is also available in Oracle Client 19c from 19.11
+onwards.
+
+
+###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.19 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -2379,7 +2405,7 @@ The number of statements to be cached in the
 This optional property overrides the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.19 `user`, `username`
+###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.20 `user`, `username`
 
 ```
 String user
@@ -5659,7 +5685,17 @@ when the connection is brand new.
 
 See [Connection Tagging and Session State](#connpooltagging).
 
-#### <a name="proppoolstatus"></a> 8.1.13 `pool.status`
+#### <a name="proppoolsodamdcache"></a> 8.1.13 `pool.sodaMetaDataCache`
+
+```
+readonly Boolean sodaMetaDataCache
+```
+
+Whether the pool has a metadata cache enabled for SODA collection access.
+
+See [Using the SODA Metadata Cache](#sodamdcache).
+
+#### <a name="proppoolstatus"></a> 8.1.14 `pool.status`
 
 ```
 readonly Number status
@@ -5672,7 +5708,7 @@ pool is open, being drained of in-use connections, or has been closed.
 
 See [Connection Pool Closing and Draining](#conpooldraining).
 
-#### <a name="proppoolstmtcachesize"></a> 8.1.14 `pool.stmtCacheSize`
+#### <a name="proppoolstmtcachesize"></a> 8.1.15 `pool.stmtCacheSize`
 
 ```
 readonly Number stmtCacheSize
@@ -7239,7 +7275,7 @@ collection, and a collection with the same name already exists, then
 that existing collection is opened without error.
 
 Optional metadata allows collection customization.  If metadata is not
-supplied, a default collection will be created
+supplied, a default collection will be created.
 
 By default, `createCollection()` first attempts to create the Oracle Database
 table used internally to store the collection.  If the table exists already, it
@@ -7255,6 +7291,9 @@ If [`oracledb.autoCommit`](#propdbisautocommit) is *true*, and
 `createCollection()` succeeds, then any open transaction on the
 connection is committed.  Note SODA operations do not commit an open
 transaction the way that SQL always does for DDL statements.
+
+Performance of repeated `createCollection()` calls can be improved by enabling
+the SODA [metadata cache](#sodamdcache).
 
 This method was added in node-oracledb 3.0.
 
@@ -7473,6 +7512,9 @@ error. Instead, the returned collection value will be undefined.
 If [`oracledb.autoCommit`](#propdbisautocommit) is *true*, and
 `openCollection()` succeeds, then any open transaction on the
 connection is committed.
+
+Performance of repeated `openCollection()` calls can be improved by enabling the
+SODA [metadata cache](#sodamdcache).
 
 This method was added in node-oracledb 3.0.
 
@@ -9007,7 +9049,7 @@ The `_logStats()` method also shows attribute values of the pool:
 Attribute                                   |
 --------------------------------------------|
 [`poolAlias`](#createpoolpoolattrspoolalias)|
-[`queueMax`](#propdbqueuemax)           |
+[`queueMax`](#propdbqueuemax)               |
 [`queueTimeout`](#propdbqueuetimeout)       |
 [`poolMin`](#propdbpoolmin)                 |
 [`poolMax`](#propdbpoolmax)                 |
@@ -9016,6 +9058,7 @@ Attribute                                   |
 [`poolPingInterval`](#propdbpoolpinginterval) |
 [`sessionCallback`](#proppoolsessioncallback) |
 [`stmtCacheSize`](#proppoolstmtcachesize)     |
+[`sodaMetaDataCache`](#proppoolsodamdcache)   |
 
 ##### Pool Status
 
@@ -15026,6 +15069,41 @@ Node-oracledb uses the following objects for SODA:
   remove documents.  This is an internal object that should not be
   directly accessed.
 
+#### Committing SODA Work
+
+The general recommendation for SODA applications is to turn on
+[`autoCommit`](#propdbisautocommit) globally:
+
+```javascript
+oracledb.autoCommit = true;
+```
+
+If your SODA document write operations are mostly independent of each other,
+this removes the overhead of application transaction management and the need for
+explicit [`connection.commit()`](#commit) calls.
+
+When deciding how to commit transactions, beware of transactional consistency
+and performance requirements.  If you are using individual SODA calls to insert
+or update a large number of documents with individual calls, you should turn
+`autoCommit` off and issue a single, explicit [`connection.commit()`](#commit)
+after all documents have been processed.  Also consider using
+[`sodaCollection.insertMany()`](#sodacollinsertmany) or
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) which have
+performance benefits.
+
+If you are not autocommitting, and one of the SODA operations in your
+transaction fails, then previous uncommitted operations will not be rolled back.
+Your application should explicitly roll back the transaction with
+[`connection.rollback()`](#rollback) to prevent any later commits from
+committing a partial transaction.
+
+Note:
+
+- SODA DDL operations do not commit an open transaction the way that SQL always does for DDL statements.
+- When [`oracledb.autoCommit`](#propdbisautocommit) is *true*, most SODA methods will issue a commit before successful return.
+- SODA provides optimistic locking, see [`sodaOperation.version()`](#sodaoperationclassversion).
+- When mixing SODA and relational access, any commit or rollback on the connection will affect all work.
+
 ### <a name="sodarequirements"></a> 29.1 Node-oracledb SODA Requirements
 
 SODA is available to Node.js applications using Oracle Database 18.3 and above,
@@ -15087,40 +15165,10 @@ Otherwise you may get errors such as *ORA-40842: unsupported value JSON in the
 metadata for the field sqlType* or *ORA-40659: Data type does not match the
 specification in the collection metadata*.
 
-#### Committing SODA Work
-
-The general recommendation for SODA applications is to turn on
-[`autoCommit`](#propdbisautocommit) globally:
-
-```javascript
-oracledb.autoCommit = true;
-```
-
-If your SODA document write operations are mostly independent of each other,
-this removes the overhead of application transaction management and the need for
-explicit [`connection.commit()`](#commit) calls.
-
-When deciding how to commit transactions, beware of transactional consistency
-and performance requirements.  If you are using individual SODA calls to insert
-or update a large number of documents with individual calls, you should turn
-`autoCommit` off and issue a single, explicit [`connection.commit()`](#commit)
-after all documents have been processed.  Also consider using
-[`sodaCollection.insertMany()`](#sodacollinsertmany) or
-[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) which have
-performance benefits.
-
-If you are not autocommitting, and one of the SODA operations in your
-transaction fails, then previous uncommitted operations will not be rolled back.
-Your application should explicitly roll back the transaction with
-[`connection.rollback()`](#rollback) to prevent any later commits from
-committing a partial transaction.
-
-Note:
-
-- SODA DDL operations do not commit an open transaction the way that SQL always does for DDL statements.
-- When [`oracledb.autoCommit`](#propdbisautocommit) is *true*, most SODA methods will issue a commit before successful return.
-- SODA provides optimistic locking, see [`sodaOperation.version()`](#sodaoperationclassversion).
-- When mixing SODA and relational access, any commit or rollback on the connection will affect all work.
+If you use Oracle Client libraries 19 with Oracle Database 21 and accidently
+create a collection with unusable metadata, then you can drop the collection by
+running a command like `SELECT DBMS_SODA.DROP_COLLECTION('myCollection') FROM
+DUAL;` in SQL*Plus.
 
 ### <a name="creatingsodacollections"></a> 29.2 Creating and Dropping SODA Collections
 
@@ -15688,6 +15736,57 @@ this case) and lengths of the values of these fields are listed.  The
 want to define SQL views over JSON data. They suggest how to name the
 columns of a view.
 
+#### <a name="sodamdcache"></a> 29.8 Using the SODA Metadata Cache
+
+SODA metadata can be cached to improve the performance of
+[`sodaDatabase.createCollection()`](#sodadbcreatecollection) and
+[`sodaDatabase.openCollection()`](#sodadbopencollection) by reducing
+[round-trips](#roundtrips) to the database.  Caching is available when using
+node-oracledb 5.2 (or later) with Oracle Client version 21.3 (or later).  It is
+also available in Oracle Client 19 from 19.11 onwards.  Note: if the metadata
+of a collection is changed, the cache can get out of sync.
+
+Caching can be enabled for pooled connections but not standalone connections.
+Each pool has its own cache.  Applications using standalone connections should
+retain and reuse the collection returned from
+[`sodaDatabase.createCollection()`](#sodadbcreatecollection) or
+[`sodaDatabase.openCollection()`](#sodadbopencollection) wherever possible,
+instead of making repeated calls to those methods.
+
+The metadata cache can be turned on with
+[`sodaMetadataCache`](#createpoolpoolattrssodamdcache) when creating a
+connection pool:
+
+```javascript
+await oracledb.createPool({
+  user              : "hr",
+  password          : mypw,               // mypw contains the hr schema password
+  connectString     : "localhost/XEPDB1",
+  sodaMetaDataCache : true
+});
+```
+
+Note the cache is not used by `soda.createCollection()` when explicitly passing
+metadata.  In this case, instead of using only `soda.createCollection()` and
+relying on its behavior of opening an existing collection like:
+
+```javascript
+const mymetadata = { . . . };
+const collection = await soda.createCollection("mycollection", mymetadata);  // open existing or create new collection
+await collection.insertOne(mycontent);
+```
+
+you may find it more efficient to use logic similar to:
+
+```javascript
+let collection = await soda.openCollection("mycollection");
+if (!collection) {
+    const mymetadata = { . . . };
+    collection = await soda.createCollection("mycollection", mymetadata);
+}
+await collection.insertOne(mycontent);
+```
+
 ## <a name="startupshutdown"></a> 30. Database Start Up and Shut Down
 
 There are two groups of database start up and shut down functions::
@@ -16108,6 +16207,7 @@ Some general tips for reducing round-trips are:
 - Make use of PL/SQL procedures which execute multiple SQL statements instead of executing them individually from node-oracledb.
 - Use scalar types instead of [Oracle Database object types](#objects).
 - Avoid overuse of [`connection.ping()`](#connectionping), and avoid setting [`poolPingInterval`](#proppoolpoolpinginterval) too low.
+- When using SODA, use pooled connections and enable the [SODA metadata cache](#sodamdcache).
 
 ##### Finding the Number of Round-Trips
 

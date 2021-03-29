@@ -18,6 +18,15 @@
   using `oracledb.OUT_FORMAT_OBJECT` mode) to also support nested cursors and
   REF CURSORS.
 
+- [SODA](https://oracle.github.io/node-oracledb/doc/api.html#sodaoverview) changes:
+
+    - Added [SODA metadata
+      cache](https://oracle.github.io/node-oracledb/doc/api.html#sodamdcache)
+      support to connection pools.  This significantly improves the performance
+      of opening collections.  Caching is available when using Oracle Client
+      version 21.3 (or later).  It is also available in Oracle Client 19 from
+      19.11 onwards.
+
 ## node-oracledb v5.1.0 (8 Dec 2020)
 
 - Added

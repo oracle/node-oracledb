@@ -237,3 +237,4 @@ spec:
   - test/rsGetAllRows1.js
   - test/rsGetAllRows2.js
   - test/fetchNClobAsString.js
+  - test/sodaMetaDataCache.js

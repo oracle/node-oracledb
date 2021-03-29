@@ -470,6 +470,8 @@ static bool njsOracleDb_createPoolAsync(njsBaton *baton)
         return false;
     commonParams.edition = baton->edition;
     commonParams.editionLength = (uint32_t) baton->editionLength;
+    if (baton->sodaMetadataCache)
+        commonParams.sodaMetadataCache = baton->sodaMetadataCache ? 1 : 0;
 
     // create pool
     if (dpiPool_create(baton->oracleDb->context, baton->user,
@@ -505,7 +507,6 @@ static bool njsOracleDb_createPoolPostAsync(njsBaton *baton, napi_env env,
 static bool njsOracleDb_createPoolProcessArgs(njsBaton *baton, napi_env env,
         napi_value *args)
 {
-
     // initialize ODPI-C library, if necessary
     if (!njsOracleDb_initDPI(baton->oracleDb, env, NULL, baton))
         return false;
@@ -549,6 +550,9 @@ static bool njsOracleDb_createPoolProcessArgs(njsBaton *baton, napi_env env,
         return false;
     if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "queueTimeout",
             &baton->poolWaitTimeout, NULL))
+        return false;
+    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "sodaMetaDataCache",
+            &baton->sodaMetadataCache, NULL))
         return false;
 
     return true;
