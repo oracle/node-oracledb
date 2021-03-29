@@ -568,28 +568,32 @@ describe('247. dupColNames2.js', function () {
       let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
       let result = await connection.execute(plsql, opts);
       let stream = await result.outBinds.cursor.toQueryStream();
-      stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "EMPLOYEE_ID");
-        should.equal(metaData[1].name, "DEPARTMENT_ID");
-        should.equal(metaData[2].name, "DEPARTMENT_ID_1");
-        should.equal(metaData[3].name, "DEPARTMENT_NAME");
-      });
+      await new Promise((resolve, reject) => {
+        stream.on('metadata', function(metaData) {
+          should.equal(metaData[0].name, "EMPLOYEE_ID");
+          should.equal(metaData[1].name, "DEPARTMENT_ID");
+          should.equal(metaData[2].name, "DEPARTMENT_ID_1");
+          should.equal(metaData[3].name, "DEPARTMENT_NAME");
+        });
 
-      stream.on('error', function(error) {
-        should.not.exist(error);
-      });
-      let index = 0;
-      stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.EMPLOYEE_ID, empID[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
-        should.equal(data.DEPARTMENT_ID_1, depID[index]);
-        should.equal(data.DEPARTMENT_NAME, depName[index]);
-        index++;
-      });
+        stream.on('error', function(error) {
+          should.not.exist(error);
+          reject();
+        });
+        let index = 0;
+        stream.on('data', function(data) {
+          should.exist(data);
+          should.equal(data.EMPLOYEE_ID, empID[index]);
+          should.equal(data.DEPARTMENT_ID, depID[index]);
+          should.equal(data.DEPARTMENT_ID_1, depID[index]);
+          should.equal(data.DEPARTMENT_NAME, depName[index]);
+          index++;
+        });
 
-      stream.on('end', function(){
-        stream.destroy();
+        stream.on('end', function(){
+          stream.destroy();
+          resolve();
+        });
       });
     });
 
@@ -614,28 +618,32 @@ describe('247. dupColNames2.js', function () {
       let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
       let result = await connection.execute(plsql, opts);
       let stream = await result.outBinds.cursor.toQueryStream();
-      stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "EMPLOYEE_ID");
-        should.equal(metaData[1].name, "DEPARTMENT_ID");
-        should.equal(metaData[2].name, "DEPARTMENT_ID_1");
-        should.equal(metaData[3].name, "DEPARTMENT_ID_2");
-      });
+      await new Promise((resolve, reject) => {
+        stream.on('metadata', function(metaData) {
+          should.equal(metaData[0].name, "EMPLOYEE_ID");
+          should.equal(metaData[1].name, "DEPARTMENT_ID");
+          should.equal(metaData[2].name, "DEPARTMENT_ID_1");
+          should.equal(metaData[3].name, "DEPARTMENT_ID_2");
+        });
 
-      stream.on('error', function(error) {
-        should.not.exist(error);
-      });
-      let index = 0;
-      stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.EMPLOYEE_ID, empID[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
-        should.equal(data.DEPARTMENT_ID_1, depID[index]);
-        should.equal(data.DEPARTMENT_ID_2, depID[index]);
-        index++;
-      });
+        stream.on('error', function(error) {
+          should.not.exist(error);
+          reject();
+        });
+        let index = 0;
+        stream.on('data', function(data) {
+          should.exist(data);
+          should.equal(data.EMPLOYEE_ID, empID[index]);
+          should.equal(data.DEPARTMENT_ID, depID[index]);
+          should.equal(data.DEPARTMENT_ID_1, depID[index]);
+          should.equal(data.DEPARTMENT_ID_2, depID[index]);
+          index++;
+        });
 
-      stream.on('end', function(){
-        stream.destroy();
+        stream.on('end', function(){
+          stream.destroy();
+          resolve();
+        });
       });
     });
 
@@ -660,28 +668,32 @@ describe('247. dupColNames2.js', function () {
       let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
       let result = await connection.execute(plsql, opts);
       let stream = await result.outBinds.cursor.toQueryStream();
-      stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "EMPLOYEE_ID");
-        should.equal(metaData[1].name, "DEPARTMENT_ID");
-        should.equal(metaData[2].name, "DEPARTMENT_ID_2");
-        should.equal(metaData[3].name, "DEPARTMENT_ID_1");
-      });
+      await new Promise((resolve, reject) => {
+        stream.on('metadata', function(metaData) {
+          should.equal(metaData[0].name, "EMPLOYEE_ID");
+          should.equal(metaData[1].name, "DEPARTMENT_ID");
+          should.equal(metaData[2].name, "DEPARTMENT_ID_2");
+          should.equal(metaData[3].name, "DEPARTMENT_ID_1");
+        });
 
-      stream.on('error', function(error) {
-        should.not.exist(error);
-      });
-      let index = 0;
-      stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.EMPLOYEE_ID, empID[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
-        should.equal(data.DEPARTMENT_ID_1, depID[index]);
-        should.equal(data.DEPARTMENT_ID_2, depID[index]);
-        index++;
-      });
+        stream.on('error', function(error) {
+          should.not.exist(error);
+          reject();
+        });
+        let index = 0;
+        stream.on('data', function(data) {
+          should.exist(data);
+          should.equal(data.EMPLOYEE_ID, empID[index]);
+          should.equal(data.DEPARTMENT_ID, depID[index]);
+          should.equal(data.DEPARTMENT_ID_1, depID[index]);
+          should.equal(data.DEPARTMENT_ID_2, depID[index]);
+          index++;
+        });
 
-      stream.on('end', function(){
-        stream.destroy();
+        stream.on('end', function(){
+          stream.destroy();
+          resolve();
+        });
       });
     });
 
@@ -706,28 +718,32 @@ describe('247. dupColNames2.js', function () {
       let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
       let result = await connection.execute(plsql, opts);
       let stream = await result.outBinds.cursor.toQueryStream();
-      stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "EMPLOYEE_ID");
-        should.equal(metaData[1].name, "DEPARTMENT_ID");
-        should.equal(metaData[2].name, "DEPARTMENT_ID_1");
-        should.equal(metaData[3].name, "DEPARTMENT_ID_5");
-      });
+      await new Promise((resolve, reject) => {
+        stream.on('metadata', function(metaData) {
+          should.equal(metaData[0].name, "EMPLOYEE_ID");
+          should.equal(metaData[1].name, "DEPARTMENT_ID");
+          should.equal(metaData[2].name, "DEPARTMENT_ID_1");
+          should.equal(metaData[3].name, "DEPARTMENT_ID_5");
+        });
 
-      stream.on('error', function(error) {
-        should.not.exist(error);
-      });
-      let index = 0;
-      stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.EMPLOYEE_ID, empID[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
-        should.equal(data.DEPARTMENT_ID_1, depID[index]);
-        should.equal(data.DEPARTMENT_ID_5, depID[index]);
-        index++;
-      });
+        stream.on('error', function(error) {
+          should.not.exist(error);
+          reject();
+        });
+        let index = 0;
+        stream.on('data', function(data) {
+          should.exist(data);
+          should.equal(data.EMPLOYEE_ID, empID[index]);
+          should.equal(data.DEPARTMENT_ID, depID[index]);
+          should.equal(data.DEPARTMENT_ID_1, depID[index]);
+          should.equal(data.DEPARTMENT_ID_5, depID[index]);
+          index++;
+        });
 
-      stream.on('end', function(){
-        stream.destroy();
+        stream.on('end', function(){
+          stream.destroy();
+          resolve();
+        });
       });
     });
 
@@ -751,50 +767,58 @@ describe('247. dupColNames2.js', function () {
       let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
       let result = await connection.execute(plsql, opts);
       let stream = await result.outBinds.cursor.toQueryStream();
-      stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "EMPLOYEE_ID");
-        should.equal(metaData[1].name, "DEPARTMENT_ID");
-        should.equal(metaData[2].name, "DEPARTMENT_ID_1");
-        should.equal(metaData[3].name, "department_id_1");
-      });
+      await new Promise((resolve, reject) => {
+        stream.on('metadata', function(metaData) {
+          should.equal(metaData[0].name, "EMPLOYEE_ID");
+          should.equal(metaData[1].name, "DEPARTMENT_ID");
+          should.equal(metaData[2].name, "DEPARTMENT_ID_1");
+          should.equal(metaData[3].name, "department_id_1");
+        });
 
-      stream.on('error', function(error) {
-        should.not.exist(error);
-      });
-      let index = 0;
-      stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.EMPLOYEE_ID, empID[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
-        should.equal(data.DEPARTMENT_ID_1, depID[index]);
-        should.equal(data.department_id_1, depID[index]);
-        index++;
-      });
+        stream.on('error', function(error) {
+          should.not.exist(error);
+          reject();
+        });
+        let index = 0;
+        stream.on('data', function(data) {
+          should.exist(data);
+          should.equal(data.EMPLOYEE_ID, empID[index]);
+          should.equal(data.DEPARTMENT_ID, depID[index]);
+          should.equal(data.DEPARTMENT_ID_1, depID[index]);
+          should.equal(data.department_id_1, depID[index]);
+          index++;
+        });
 
-      stream.on('end', function(){
-        stream.destroy();
+        stream.on('end', function(){
+          stream.destroy();
+          resolve();
+        });
       });
     });
 
     it('247.1.17 Duplicate column with case sensitive alias name from dual', async function () {
       let stream = await connection.queryStream(`SELECT dummy "abc", dummy "ABC" from dual`);
-      stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "abc");
-        should.equal(metaData[1].name, "ABC");
-      });
+      await new Promise((resolve, reject) => {
+        stream.on('metadata', function(metaData) {
+          should.equal(metaData[0].name, "abc");
+          should.equal(metaData[1].name, "ABC");
+        });
 
-      stream.on('error', function(error) {
-        should.not.exist(error);
-      });
+        stream.on('error', function(error) {
+          should.not.exist(error);
+          reject();
+        });
 
-      stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.abc, "X");
-        should.equal(data.ABC, "X");
-      });
+        stream.on('data', function(data) {
+          should.exist(data);
+          should.equal(data.abc, "X");
+          should.equal(data.ABC, "X");
+        });
 
-      stream.on('end', function(){
-        stream.destroy();
+        stream.on('end', function(){
+          stream.destroy();
+          resolve();
+        });
       });
     });
   });
