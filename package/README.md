@@ -16,8 +16,8 @@ In a clone or copy of the repository:
 
   You can run `npm run buildbinary` on each operating system architecture that
   you want to include in your package.  Copy the node-oracledb binaries and
-  related build metadata information files to the `package/Staging` directory on
-  one machine.
+  related build metadata information files from all `package/Staging`
+  directories to the `package/Staging` directory on one machine.
 
 - Run `npm run buildpackage`.  This calls `buildpackage.js` to make the
   node-oracledb package containing the node-oracledb JavaScript files, the
@@ -28,19 +28,19 @@ In a clone or copy of the repository:
 
 # Package Installation
 
-- As part of an `npm install` that uses the created package, the `package.json`
+- When running `npm install` with the created package, the `package.json`
   install script runs `install.js` to check the availability of a binary module
   for the current Node.js version and operating system architecture.
 
-  If a suitable binary is not available, installation will fail.  Users must
+- If installation succeeds, space conscious users can then run `npm run prune`
+  which removes pre-built binaries for all other architectures.
+
+- If `npm install` fails because a suitable binary is not available, users must
   then compile node-oracledb using source code from GitHub.  Alternatively a
   different version of node-oracledb, Node.js, or different operating system may
   have a suitable pre-built binary available.  See
   https://github.com/oracle/node-oracledb/releases for information about Node.js
   versions and pre-built node-oracledb binaries.
-
-- After install, space conscious users can run `npm run prune` which removes
-  pre-built binaries for all other architectures.
 
 The
 [`package.json`](https://github.com/oracle/node-oracledb/blob/master/package.json)
