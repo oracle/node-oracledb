@@ -81,7 +81,7 @@ sql.createAllTable = function(tableName, dataTypeArray) {
             "        CREATE TABLE " + tableName + " ( \n" +
             "            id    NUMBER, \n" ;
 
-  async.forEach(dataTypeArray, function(element, cb) {
+  async.eachSeries(dataTypeArray, function(element, cb) {
     var index = dataTypeArray.indexOf(element);
     var length = dataTypeArray.length;
     var col_name = "col_" + (index + 1);
