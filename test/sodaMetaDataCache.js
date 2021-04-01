@@ -101,21 +101,9 @@ describe('252. sodaMetaDataCache.js', function() {
 
 
   it('252.4 sodaMetaDataCache from closed pool', async function() {
-    let pool = null;
-
-    try {
-      pool = await oracledb.createPool(dbconfig);
-      await pool.close();
-      should.equal(pool.sodaMetaDataCache, undefined);
-      pool = null;
-    }
-    catch(err) {
-      should.not.exist(err);
-    }
-    finally {
-      if (pool)
-        await pool.close();
-    }
+    const pool = await oracledb.createPool(dbconfig);
+    await pool.close();
+    should.equal(pool.sodaMetaDataCache, undefined);
   });
 
 });

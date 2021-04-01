@@ -78,8 +78,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             napi_default, NULL },
     { "stmtCacheSize", NULL, NULL, njsPool_getStmtCacheSize, NULL, NULL,
             napi_default, NULL },
-    { "_sodaMetaDataCache", NULL, NULL, njsPool_getSodaMetaDataCache,
-            NULL, NULL, napi_default, NULL },
+    { "sodaMetaDataCache", NULL, NULL, njsPool_getSodaMetaDataCache, NULL,
+            NULL, napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
@@ -503,18 +503,17 @@ static napi_value njsPool_getSodaMetaDataCache(napi_env env,
         napi_callback_info info)
 {
     njsPool *pool;
-    int      enabled = 0;
+    int enabled;
 
     if (!njsUtils_validateGetter(env, info, (njsBaseInstance **)&pool))
         return NULL;
-    if (dpiPool_getSodaMetadataCache(pool->handle, &enabled) < 0) {
-        njsUtils_throwErrorDPI(env, pool->oracleDb);
+    if (!pool->handle)
         return NULL;
-    }
+    if (dpiPool_getSodaMetadataCache(pool->handle, &enabled) < 0)
+        enabled = 0;
 
-    return njsUtils_convertToBoolean (env, enabled);
+    return njsUtils_convertToBoolean(env, enabled);
 }
-
 
 
 //-----------------------------------------------------------------------------
