@@ -8864,6 +8864,10 @@ without passing the `poolAlias` parameter:
 const pool = oracledb.getPool();
 console.log(pool.poolAlias); // 'default'
 const connection = await pool.getConnection();
+
+. . . // Use connection
+
+await connection.close();
 ```
 
 ##### Using Multiple Pools
@@ -8889,29 +8893,25 @@ await oracledb.createPool({
 . . .
 ```
 
-To use the methods or attributes of a pool in the cache, a pool can be retrieved
-from the cache by passing its pool alias to [oracledb.getPool()](#getpool):
-
-```javascript
-const pool = oracledb.getPool('hrpool'); // or 'shpool'
-const connection = await pool.getConnection();
-
-. . . // Use connection from the pool and then release it
-```
-
-The [oracledb.getConnection()](#getconnectiondb) shortcut can also be used with a pool alias:
+To get a connection from a pool, pass the pool alias:
 
 ```javascript
 const connection = await oracledb.getConnection('hrpool');
-. . . // Use connection from the pool and then release it
+
+. . . // Use connection from the pool
+
+await connection.close();
 ```
 
-From node-oracledb 3.1.0 you can pass the alias as an attribute of the
-options:
+From node-oracledb 3.1.0 you can alternatively pass the alias as an attribute of
+the options:
 
 ```javascript
 const connection = await oracledb.getConnection({ poolAlias: 'hrpool' });
- . . . // Use connection from the pool and then release it
+
+. . . // Use connection from the pool
+
+await connection.close();
 ```
 
 The presence of the `poolAlias` attribute indicates the previously
@@ -8923,7 +8923,10 @@ tagging](#connpooltagging):
 
 ```javascript
 const connection = await oracledb.getConnection({ poolAlias: 'hrpool', tag: 'loc=cn;p=1 });
- . . . // Use connection from the pool and then release it
+
+. . . // Use connection from the pool
+
+await connection.close();
 ```
 
 To use the default pool in this way you must explicitly pass the alias
@@ -8931,47 +8934,60 @@ To use the default pool in this way you must explicitly pass the alias
 
 ```javascript
 const connection = await oracledb.getConnection({ poolAlias: 'default', tag: 'loc=cn;p=1 });
-. . . // Use connection from the pool and then release it
+
+. . . // Use connection from the pool
+
+await connection.close();
+```
+
+A specific pool can be retrieved from the cache by passing its pool alias to
+[oracledb.getPool()](#getpool):
+
+```javascript
+const pool = oracledb.getPool('hrpool');
+const connection = await pool.getConnection();
+
+. . . // Use connection from the pool
+
+await connection.close();
 ```
 
 #### <a name="connpoolqueue"></a> 15.3.4 Connection Pool Queue
 
-The connection pool queue allows applications to gracefully handle connection
-load spikes without having to set `poolMax` too large for general operation.
-Keeping `poolMax` small allows efficient use of resources.
+The number of users that can be concurrently doing database operations is
+limited by the pool [`poolMax`](#propdbpoolmax) value.  Node-oracledb queues any
+additional connection requests to prevent users from immediately getting errors
+that the database is not available.  The connection pool queue allows
+applications to gracefully handle more users than there are connections in the
+pool, and to handle connection load spikes without having to set `poolMax` too
+large for general operation.
 
-If the application has called `getConnection()` enough times so that all
-connections in the pool are in use, and further
-[`pool.getConnection()`](#getconnectionpool) calls (or
-[`oracledb.getConnection()`](#getconnectiondb) calls that use a pool) are made,
-then each new request will be queued until an in-use connection is released back
-to the pool with [`connection.close()`](#connectionclose).  If `poolMax` has not
-been reached, then connection requests can be satisfied and are not queued.
+If the application has called [`pool.getConnection()`](#getconnectionpool) (or
+[`oracledb.getConnection()`](#getconnectiondb) calls that use a pool) enough
+times so that all connections in the pool are in use, and further
+`getConnection()` calls are made, then each of those new `getConnection()`
+requests will be queued and not return until an in-use connection is released
+back to the pool with [`connection.close()`](#connectionclose).  If `poolMax`
+has not been reached, then connection requests can be immediately satisfied and
+are not queued.
 
-The amount of time that a queued request will wait for a free
-connection can be configured with [queueTimeout](#propdbqueuetimeout).
-When connections are timed out of the queue, they will return the
-error *NJS-040: connection request timeout* to the application.
+The amount of time that a queued request will wait for a free connection can be
+configured with [queueTimeout](#propdbqueuetimeout).  When connections are timed
+out of the queue, the `pool.getConnection()` call returns the error *NJS-040:
+connection request timeout* to the application.
 
 If more than [`oracledb.queueMax`](#propdbqueuemax) pending connection requests
 are in the queue, then `pool.getConnection()` calls will immediately return an
 error *NJS-076: connection request rejected. Pool queue length queueMax reached*
 and will not be queued.  Use this to protect against connection request storms.
-It helps applications return errors early when many connections are requested
-concurrently.  This avoids connection requests blocking (for up to
+The setting helps applications return errors early when many connections are
+requested concurrently.  This avoids connection requests blocking (for up to
 [`poolTimeout`](#propdbpooltimeout)) while waiting an available pooled
 connection.  It lets you see when the pool is too small.
 
 You may also experience *NJS-040* or *NJS-076* errors if your application is not
 correctly closing connections, or [UV_THREADPOOL_SIZE](#numberofthreads) is too
 small.
-
-Internally the queue is implemented in node-oracledb's JavaScript top
-level.  A queued connection request is dequeued and passed down to
-node-oracledb's underlying C API connection pool when an active
-connection is [released](#connectionclose), and the number of
-connections in use drops below the value of
-[`poolMax`](#proppoolpoolmax).
 
 #### <a name="connpoolmonitor"></a> 15.3.5 Connection Pool Monitoring
 
