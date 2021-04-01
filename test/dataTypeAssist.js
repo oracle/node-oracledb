@@ -265,6 +265,41 @@ assist.TIMESTAMP_TZ_STRINGS_2 =
   "TO_TIMESTAMP_TZ('1999-12-01 11:00:00 -8:00', 'YYYY-MM-DD HH:MI:SS TZH:TZM')"
 ];
 
+// for INTERVAL MONTH TO YEAR
+assist.INTERVAL_MONTH_TO_YEAR =
+[
+  "TO_YMINTERVAL('01-02')",
+  "TO_YMINTERVAL('P1Y2M')",
+  "TO_YMINTERVAL('1x-02' DEFAULT '00-00' ON CONVERSION ERROR)",
+  "TO_YMINTERVAL ('22-02')",
+  "TO_YMINTERVAL ('33-03')"
+];
+
+// for INTERVAL DAY TO SECOND
+assist.INTERVAL_DAY_TO_SECOND =
+[
+  "TO_DSINTERVAL('20 00:00:20')",
+  "TO_DSINTERVAL('10 00:00:10')",
+  "TO_DSINTERVAL('1o 1:02:10' DEFAULT '10 8:00:00' ON CONVERSION ERROR)",
+  "TO_DSINTERVAL ('11 00:00:11')",
+  "TO_DSINTERVAL ('12 00:00:22')"
+];
+
+// for RAW
+assist.RAW =
+[
+  "UTL_RAW.cast_to_raw('0x0002')",
+  "UTL_RAW.cast_to_raw('0x48')",
+  "UTL_RAW.cast_to_raw('0x65')",
+  "UTL_RAW.cast_to_raw('0x6c')",
+  "UTL_RAW.cast_to_raw('0x6f')",
+  "UTL_RAW.cast_to_raw('0x2c')",
+  "UTL_RAW.cast_to_raw('0x20')",
+  "UTL_RAW.cast_to_raw('0x4f')",
+  "UTL_RAW.cast_to_raw('0x72')",
+  "UTL_RAW.cast_to_raw('0x21')"
+];
+
 // content serves as reference logs
 assist.content =
 {
