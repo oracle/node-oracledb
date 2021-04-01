@@ -69,7 +69,7 @@ describe('104. dataTypeLongRaw.js', function() {
           assist.createTable(connection, tableName, cb);
         },
         function(cb) {
-          async.forEach(strs, function(element, callback) {
+          async.eachSeries(strs, function(element, callback) {
             connection.execute(
               "insert into " + tableName + " values( :no, utl_raw.cast_to_raw(:bv) )",
               { no: strs.indexOf(element), bv: element},

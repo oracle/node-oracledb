@@ -135,7 +135,7 @@ describe('38. dataTypeTimestamp6.js', function() {
       var sql = "SELECT num, TO_CHAR(content AT TIME ZONE '-8:00', 'DD-MM-YYYY HH24:MI:SS.FF TZR') AS TS_DATA FROM "
                  + tableName + " WHERE num = :no";
 
-      async.forEach(timestamps, function(timestamp, cb) {
+      async.eachSeries(timestamps, function(timestamp, cb) {
         var bv = timestamps.indexOf(timestamp);
         connection.execute(
           sql,

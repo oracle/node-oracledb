@@ -77,7 +77,7 @@ describe('116. fetchUrowidAsString.js', function() {
   });
 
   var insertData = function(connection, tableName, callback) {
-    async.forEach(dataArray, function(element, cb) {
+    async.eachSeries(dataArray, function(element, cb) {
       var sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
       connection.execute(
         sql,
@@ -93,7 +93,7 @@ describe('116. fetchUrowidAsString.js', function() {
   };
 
   var updateDate = function(connection, tableName, callback) {
-    async.forEach(dataArray, function(element, cb) {
+    async.eachSeries(dataArray, function(element, cb) {
       var sql = "UPDATE " + tableName + " T SET content = T.ROWID where num = " + element;
       connection.execute(
         sql,
@@ -580,7 +580,7 @@ describe('116. fetchUrowidAsString.js', function() {
   });
 
   function test1(option, object, array, callback) {
-    async.forEach(dataArray, function(element, cb) {
+    async.eachSeries(dataArray, function(element, cb) {
       var sql = "select content,rowid from " + tableName + " where num = " + element;
       connection.execute(
         sql,
@@ -606,7 +606,7 @@ describe('116. fetchUrowidAsString.js', function() {
   }
 
   function test2(option, object, array, callback) {
-    async.forEach(dataArray, function(element, cb) {
+    async.eachSeries(dataArray, function(element, cb) {
       var sql = "select content,rowid from " + tableName + " where num = " + element;
       connection.execute(
         sql,

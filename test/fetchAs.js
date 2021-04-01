@@ -236,7 +236,7 @@ describe('56. fetchAs.js', function() {
     ];
 
   it('56.8 large numbers with fetchInfo', function(done) {
-    async.forEach(numStrs, function(element, callback) {
+    async.eachSeries(numStrs, function(element, callback) {
       connection.execute(
         "SELECT TO_NUMBER( " + element + " ) AS TS_NUM FROM DUAL",
         [],
@@ -263,7 +263,7 @@ describe('56. fetchAs.js', function() {
   it('56.9 large numbers with setting fetchAsString property', function(done) {
     oracledb.fetchAsString = [ oracledb.NUMBER ];
 
-    async.forEach(numStrs, function(element, callback) {
+    async.eachSeries(numStrs, function(element, callback) {
       connection.execute(
         "SELECT TO_NUMBER( " + element + " ) AS TS_NUM FROM DUAL",
         [],

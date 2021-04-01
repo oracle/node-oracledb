@@ -129,7 +129,7 @@ describe('33. dataTypeTimestamp1.js', function() {
     });
 
     it('33.3.2 SELECT query - formatted data for comparison', function(done) {
-      async.forEach(timestamps, function(timestamp, cb) {
+      async.eachSeries(timestamps, function(timestamp, cb) {
         var bv = timestamps.indexOf(timestamp);
         connection.execute(
           "SELECT num, TO_CHAR(content, 'DD-MM-YYYY HH24:MI:SS.FF') AS TS_DATA FROM " + tableName + " WHERE num = :no",

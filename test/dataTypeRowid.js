@@ -186,7 +186,7 @@ describe('39. dataTypeRowid.js', function() {
 
   var insertData = function(connection, tableName, callback) {
 
-    async.forEach(array, function(element, cb) {
+    async.eachSeries(array, function(element, cb) {
       var sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
       connection.execute(
         sql,
@@ -202,7 +202,7 @@ describe('39. dataTypeRowid.js', function() {
   };
 
   var updateDate = function(connection, tableName, callback) {
-    async.forEach(array, function(element, cb) {
+    async.eachSeries(array, function(element, cb) {
       var sql = "UPDATE " + tableName + " T SET content = T.ROWID where num = " + element;
       connection.execute(
         sql,

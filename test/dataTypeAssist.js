@@ -730,7 +730,7 @@ assist.createTable = function(connection, tableName, done) {
 };
 
 assist.insertDataArray = function(connection, tableName, array, done) {
-  async.forEach(array, function(element, cb) {
+  async.eachSeries(array, function(element, cb) {
     // console.log(element.length);
     connection.execute(
       "INSERT INTO " + tableName + " VALUES(:no, :bindValue)",
@@ -748,7 +748,7 @@ assist.insertDataArray = function(connection, tableName, array, done) {
 };
 
 assist.insertData4sql = function(connection, tableName, array, done) {
-  async.forEach(array, function(element, cb) {
+  async.eachSeries(array, function(element, cb) {
     var sql = "INSERT INTO " + tableName + " VALUES(:no, " + element + " )";
 
     connection.execute(
@@ -908,7 +908,7 @@ function fetchRowsFromRS(rs, array, cb) {
 }
 
 assist.selectOriginalData = function(connection, tableName, array, done) {
-  async.forEach(array, function(element, cb) {
+  async.eachSeries(array, function(element, cb) {
     connection.execute(
       "SELECT * FROM " + tableName + " WHERE num = :no",
       { no: array.indexOf(element) },

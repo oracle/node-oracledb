@@ -135,7 +135,7 @@ describe('32. dataTypeDate.js', function() {
     });
 
     it('32.3.2 SELECT query - formatted data for comparison', function(done) {
-      async.forEach(dates, function(date, cb) {
+      async.eachSeries(dates, function(date, cb) {
         var bv = dates.indexOf(date);
         connection.execute(
           "SELECT num, TO_CHAR(content, 'DD-MM-YYYY') AS TS_DATA FROM " + tableName + " WHERE num = :no",
