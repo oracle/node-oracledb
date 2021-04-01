@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -56,7 +56,7 @@ describe('196. getDataOfLob.js', () => {
         )`;
       plsql = testsUtil.sqlCreateTable(tab2, sql);
       await conn.execute(plsql);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // before()
@@ -70,7 +70,7 @@ describe('196. getDataOfLob.js', () => {
       await conn.execute(sql);
 
       await conn.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // after()
@@ -88,7 +88,7 @@ describe('196. getDataOfLob.js', () => {
 
       should.strictEqual(value, content);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 196.1
@@ -130,7 +130,7 @@ describe('196. getDataOfLob.js', () => {
       const content = await readFile(txtFile);
       should.strictEqual(queryResult, content.toString());
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
@@ -149,7 +149,7 @@ describe('196. getDataOfLob.js', () => {
 
       should.strictEqual(value.toString(), content);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 196.3
@@ -191,7 +191,7 @@ describe('196. getDataOfLob.js', () => {
       let isEqual = content.equals(queryResult);
       (isEqual).should.be.true();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 196.4
@@ -202,7 +202,7 @@ describe('196. getDataOfLob.js', () => {
       const value = await tempLob.getData();
       should.strictEqual(value, null);
       await tempLob.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 196.5
@@ -232,7 +232,7 @@ describe('196. getDataOfLob.js', () => {
       should.strictEqual(queryResult, content.toString());
 
       await tempLob.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 196.6

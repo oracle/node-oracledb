@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -68,7 +68,7 @@ describe('5. externalAuth.js', function() {
         }
       ], function(err, connection) {
         should.not.exist(err);
-        connection.release( function(err) {
+        connection.release(function(err) {
           should.not.exist(err);
           done();
         });
@@ -85,7 +85,7 @@ describe('5. externalAuth.js', function() {
           password:      dbConfig.password,
           connectString: dbConfig.connectString
         },
-        function(err, conn){
+        function(err, conn) {
           should.exist(err);
           (err.message).should.startWith("DPI-1032:");
           // DPI-1032: user and password should not be set when using external authentication
@@ -104,7 +104,7 @@ describe('5. externalAuth.js', function() {
           user:          "[ invalid_user ]",
           connectString: dbConfig.connectString
         },
-        function(err, conn){
+        function(err, conn) {
           should.exist(err);
           (err.message).should.startWith("ORA-01017:");
           // ORA-01017: invalid username/password; logon denied
@@ -123,7 +123,7 @@ describe('5. externalAuth.js', function() {
           password:      dbConfig.password,
           connectString: dbConfig.connectString
         },
-        function(err, conn){
+        function(err, conn) {
           should.exist(err);
           (err.message).should.startWith("DPI-1032:");
           // DPI-1032: user and password should not be set when using external authentication
@@ -167,9 +167,9 @@ describe('5. externalAuth.js', function() {
         }
       ], function(err, connection, pool) {
         should.not.exist(err);
-        connection.close( function(err) {
+        connection.close(function(err) {
           should.not.exist(err);
-          pool.close( function(err) {
+          pool.close(function(err) {
             should.not.exist(err);
             done();
           });
@@ -239,7 +239,7 @@ describe('5. externalAuth.js', function() {
   describe('5.2 tests only work when externalAuth is configured on DB', function() {
 
     before(function() {
-      if ( dbConfig.test.externalAuth !== true) this.skip();
+      if (dbConfig.test.externalAuth !== true) this.skip();
     });
 
     it("5.2.1 can get connection from oracledb with external authentication", function(done) {
@@ -267,7 +267,7 @@ describe('5. externalAuth.js', function() {
         }
       ], function(err, connection) {
         should.not.exist(err);
-        connection.release( function(err) {
+        connection.release(function(err) {
           should.not.exist(err);
           done();
         });
@@ -292,7 +292,7 @@ describe('5. externalAuth.js', function() {
           );
         },
         function(pool, callback) {
-          pool.getConnection( function(err, connection) {
+          pool.getConnection(function(err, connection) {
             callback(err, connection, pool);
           });
         },
@@ -307,7 +307,7 @@ describe('5. externalAuth.js', function() {
         }
       ], function(err, connection, pool) {
         should.not.exist(err);
-        connection.close( function(err) {
+        connection.close(function(err) {
           should.not.exist(err);
           pool.close(function(err) {
             should.not.exist(err);
@@ -458,20 +458,20 @@ describe('5. externalAuth.js', function() {
           );
         },
         function(pool, callback) {
-          pool.getConnection( function(err, conn1) {
+          pool.getConnection(function(err, conn1) {
             (pool.connectionsOpen).should.be.exactly(1);
             callback(err, conn1, pool);
           });
         },
         function(conn1, pool, callback) {
-          pool.getConnection( function(err, conn2) {
+          pool.getConnection(function(err, conn2) {
             (pool.connectionsOpen).should.be.exactly(2);
             callback(err, conn1, conn2, pool);
           });
         }
       ], function(err, conn1, conn2, pool) {
         should.not.exist(err);
-        conn1.close( function(err) {
+        conn1.close(function(err) {
           should.not.exist(err);
           conn2.close(function(err) {
             should.not.exist(err);

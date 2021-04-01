@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -251,7 +251,7 @@ describe('140. jsObjectGetter1.js', function() {
                      "  BEGIN \n" +
                      "    IF beaches.COUNT <> depths.COUNT THEN \n" +
                      "      RAISE_APPLICATION_ERROR(-20000, 'Array lengths must match for this example.');" +
-                     "    END IF; \n"+
+                     "    END IF; \n" +
                      "    FORALL i IN INDICES OF beaches \n" +
                      "      INSERT INTO nodb_tab_waveheight (beach, depth) VALUES (beaches(i), depths(i)); \n" +
                      "  END; \n" +
@@ -648,13 +648,13 @@ describe('140. jsObjectGetter1.js', function() {
 
   }); // 140.7
 
-  describe('140.8 Negative: Get Connection', function ()  {
+  describe('140.8 Negative: Get Connection', function()  {
 
     it('140.8.1 String type: user', function(done) {
 
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'user', {
-        get : function () {
+        get : function() {
           throw new Error('Nope');
         }
       });
@@ -670,7 +670,7 @@ describe('140. jsObjectGetter1.js', function() {
 
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'password', {
-        get : function () {
+        get : function() {
           throw new Error('Nope');
         }
       });
@@ -686,7 +686,7 @@ describe('140. jsObjectGetter1.js', function() {
 
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'connectString', {
-        get : function () {
+        get : function() {
           throw new Error('Nope');
         }
       });
@@ -702,7 +702,7 @@ describe('140. jsObjectGetter1.js', function() {
 
       var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'privilege', {
-        get : function () {
+        get : function() {
           throw new Error('Nope');
         }
       });

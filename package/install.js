@@ -76,7 +76,7 @@ function done(err) {
     }
 
     log('********************************************************************************');
-    log('** Node-oracledb ' + nodbUtil.PACKAGE_JSON_VERSION + ' installed in Node.js ' + process.versions.node + ' (' + process.platform + ', ' + process.arch +')');
+    log('** Node-oracledb ' + nodbUtil.PACKAGE_JSON_VERSION + ' installed in Node.js ' + process.versions.node + ' (' + process.platform + ', ' + process.arch + ')');
     log('**');
     log('** To use node-oracledb:');
     log('** - Oracle Client libraries (' + arch + ') must be available.');

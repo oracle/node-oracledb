@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -83,7 +83,7 @@ describe('81. clobDMLBindAsString.js', function() {
   };
 
   var insertIntoClobTable1 = function(id, content, callback) {
-    if(content == "EMPTY_CLOB") {
+    if (content == "EMPTY_CLOB") {
       connection.execute(
         "INSERT INTO nodb_dml_clob_1 VALUES (:ID, EMPTY_CLOB())",
         [ id ],
@@ -110,11 +110,11 @@ describe('81. clobDMLBindAsString.js', function() {
   };
 
   var updateClobTable1 = function(id, content, callback) {
-    if(content == "EMPTY_CLOB") {
+    if (content == "EMPTY_CLOB") {
       connection.execute(
         "UPDATE nodb_dml_clob_1 set clob = EMPTY_CLOB() where id = :ID",
         { ID: id },
-        function(err, result){
+        function(err, result) {
           should.not.exist(err);
           should.strictEqual(result.rowsAffected, 1);
           callback();
@@ -124,7 +124,7 @@ describe('81. clobDMLBindAsString.js', function() {
       connection.execute(
         "UPDATE nodb_dml_clob_1 set clob = :C where id = :ID",
         { ID: id, C: content },
-        function(err, result){
+        function(err, result) {
           should.not.exist(err);
           should.strictEqual(result.rowsAffected, 1);
           callback();
@@ -140,7 +140,7 @@ describe('81. clobDMLBindAsString.js', function() {
       function(err, result) {
         should.not.exist(err);
         var lob = result.rows[0][0];
-        if(originalString == '' || originalString == undefined || originalString == null) {
+        if (originalString == '' || originalString == undefined || originalString == null) {
           should.not.exist(lob);
           return callback();
         } else {

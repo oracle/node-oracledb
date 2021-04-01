@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -40,7 +40,7 @@ describe('66. writableProperties1.js', function() {
         poolMax           : 1,
         poolIncrement     : 1
       },
-      function(err, pool){
+      function(err, pool) {
         var keys;
         var keysIdx;
         var originalFunction;

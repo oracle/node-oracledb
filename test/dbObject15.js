@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -47,7 +47,7 @@ describe('214. dbObject15.js', () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
 
-      let plsql =`
+      let plsql = `
         CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
           shirtnumber NUMBER,
           name        VARCHAR2(20)
@@ -55,7 +55,7 @@ describe('214. dbObject15.js', () => {
       `;
       await conn.execute(plsql);
 
-      plsql =`
+      plsql = `
         CREATE OR REPLACE TYPE ${TEAM_T} AS VARRAY(10) OF ${PLAYER_T};
       `;
       await conn.execute(plsql);
@@ -63,7 +63,7 @@ describe('214. dbObject15.js', () => {
       const TeamTypeClass = await conn.getDbObjectClass(TEAM_T);
       FrisbeeTeam = new TeamTypeClass(FrisbeePlayers);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // before()
@@ -78,15 +78,15 @@ describe('214. dbObject15.js', () => {
       await conn.execute(sql);
 
       await conn.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // after()
 
-  it('214.1 Getter() - access collection elements directly', async () => {
+  it('214.1 Getter() - access collection elements directly', function() {
     try {
 
-      for(let i = 0, element; i < FrisbeePlayers.length; i++) {
+      for (let i = 0, element; i < FrisbeePlayers.length; i++) {
         element = FrisbeeTeam[i];
         should.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
         should.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
@@ -97,7 +97,7 @@ describe('214. dbObject15.js', () => {
     }
   }); // 214.1
 
-  it('214.2 Setter() - access collection element directly', async () => {
+  it('214.2 Setter() - access collection element directly', function() {
 
     try {
       const substitute = {SHIRTNUMBER: 15, NAME: 'Chris'};
@@ -106,7 +106,7 @@ describe('214. dbObject15.js', () => {
       should.strictEqual(FrisbeeTeam[0].NAME, substitute.NAME);
 
       // Verify that the other elements are not impacted
-      for(let i = 1, element; i < FrisbeePlayers.length; i++) {
+      for (let i = 1, element; i < FrisbeePlayers.length; i++) {
         element = FrisbeeTeam[i];
         should.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
         should.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
@@ -116,7 +116,7 @@ describe('214. dbObject15.js', () => {
     }
   }); // 214.2
 
-  it('214.3 Negative - delete the collection element directly', async () => {
+  it('214.3 Negative - delete the collection element directly', function() {
     should.throws(
       function() {
         delete FrisbeeTeam[1];
@@ -126,7 +126,7 @@ describe('214. dbObject15.js', () => {
     // OCI-22164: delete element operation is not allowed for variable-length array
   }); // 214.3
 
-  it('214.4 Negative - collection.deleteElement()', async () => {
+  it('214.4 Negative - collection.deleteElement()', function() {
     should.throws(
       function() {
         let firstIndex = FrisbeeTeam.getFirstIndex();

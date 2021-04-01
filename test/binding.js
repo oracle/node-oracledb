@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -49,7 +49,7 @@ describe('4. binding.js', function() {
     });
 
     after(function(done) {
-      connection.release( function(err) {
+      connection.release(function(err) {
         should.not.exist(err);
         done();
       });
@@ -588,7 +588,7 @@ describe('4. binding.js', function() {
     });
 
     after(function(done) {
-      connection.release( function(err) {
+      connection.release(function(err) {
         should.not.exist(err);
         done();
       });
@@ -655,7 +655,7 @@ describe('4. binding.js', function() {
       connection.execute(
         "BEGIN :o := lpad('A',201,'x'); END;",
         { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT } },
-        function (err, result) {
+        function(err, result) {
           should.exist(err);
           // ORA-06502: PL/SQL: numeric or value error
           err.message.should.startWith('ORA-06502:');
@@ -685,7 +685,9 @@ describe('4. binding.js', function() {
 
     before(function(done) {
       oracledb.getConnection(dbConfig, function(err, conn) {
-        if(err) { console.error(err.message); return; }
+        if (err) {
+          console.error(err.message); return;
+        }
         connection = conn;
         assist.createTable(connection, tableName, done);
       });
@@ -703,7 +705,7 @@ describe('4. binding.js', function() {
           );
         },
         function(callback) {
-          connection.release( function(err) {
+          connection.release(function(err) {
             should.not.exist(err);
             callback();
           });
@@ -712,7 +714,7 @@ describe('4. binding.js', function() {
     });
 
 
-    it('4.5.1 DML default bind',function(done) {
+    it('4.5.1 DML default bind', function(done) {
       connection.execute(
         "insert into nodb_raw (num) values (:id)",
         { id: { val: 1, type: oracledb.NUMBER } },
@@ -724,14 +726,14 @@ describe('4. binding.js', function() {
     });
 
 
-    it('4.5.2 negative - DML invalid bind direction',function(done) {
+    it('4.5.2 negative - DML invalid bind direction', function(done) {
       connection.execute(
         "insert into nodb_raw (num) values (:id)",
         { id: { val: 1, type: oracledb.NUMBER, dir : 0 } },
-        function(err, result ) {
+        function(err, result) {
           should.exist(err);
-          (err.message).should.startWith ( 'NJS-013' );
-          should.not.exist ( result );
+          (err.message).should.startWith ('NJS-013');
+          should.not.exist (result);
           done();
         }
       );
@@ -755,15 +757,13 @@ describe('4. binding.js', function() {
 
       oracledb.getConnection(
         dbConfig,
-        function(err, connection)
-        {
+        function(err, connection) {
           should.not.exist(err);
           connection.execute(
             sql,
             binds,
             options,
-            function(err, result)
-            {
+            function(err, result) {
               should.not.exist(err);
               result.should.eql({});
               done();
@@ -776,152 +776,152 @@ describe('4. binding.js', function() {
   });
 
   // Test cases involving JSON value as input
-  describe ('4.7 Value as JSON named/unamed test cases', function () {
-    it ( '4.7.1 valid case when numeric values are passed as it is',
-      function (done ) {
+  describe ('4.7 Value as JSON named/unamed test cases', function() {
+    it ('4.7.1 valid case when numeric values are passed as it is',
+      function(done) {
         var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         var binds = [ 1, 456 ];
 
         oracledb.getConnection (
           dbConfig,
-          function (err, connection ){
+          function(err, connection) {
 
-            should.not.exist ( err ) ;
+            should.not.exist (err) ;
             connection.execute (
               sql,
               binds,
-              function ( err, result ) {
+              function(err, result) {
                 (result.rows[0][0]).should.be.a.Date();
-                should.not.exist ( err );
+                should.not.exist (err);
                 done ();
               }
             );
           });
       });
 
-    it ( '4.7.2 Valid values when one of the value is passed as JSON ',
-      function (done ) {
+    it ('4.7.2 Valid values when one of the value is passed as JSON ',
+      function(done) {
         var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         var binds = [ 1, { val : 456 } ];
 
         oracledb.getConnection (
           dbConfig,
-          function (err, connection ){
+          function(err, connection) {
 
-            should.not.exist ( err ) ;
+            should.not.exist (err) ;
             connection.execute (
               sql,
               binds,
-              function ( err, result ) {
+              function(err, result) {
                 (result.rows[0][0]).should.be.a.Date();
-                should.not.exist ( err );
+                should.not.exist (err);
                 done ();
-              } );
+              });
           });
       });
 
-    it ( '4.7.3 Valid test case when one of the value is passed as JSON ',
-      function (done ) {
+    it ('4.7.3 Valid test case when one of the value is passed as JSON ',
+      function(done) {
         var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         var binds = [ {val :  1}, 456 ];
 
         oracledb.getConnection (
           dbConfig,
-          function (err, connection ){
+          function(err, connection) {
 
-            should.not.exist ( err ) ;
+            should.not.exist (err) ;
             connection.execute (
               sql,
               binds,
-              function ( err, result ) {
+              function(err, result) {
                 (result.rows[0][0]).should.be.a.Date();
-                should.not.exist ( err );
+                should.not.exist (err);
                 done ();
-              } );
+              });
           });
       });
 
-    it ( '4.7.4 Valid Test case when both values are passed as JSON',
-      function (done ) {
+    it ('4.7.4 Valid Test case when both values are passed as JSON',
+      function(done) {
         var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         var binds = [ {val : 1}, {val : 456 } ];
 
         oracledb.getConnection (
           dbConfig,
-          function (err, connection ){
+          function(err, connection) {
 
-            should.not.exist ( err ) ;
+            should.not.exist (err) ;
             connection.execute (
               sql,
               binds,
-              function ( err, result ) {
+              function(err, result) {
                 (result.rows[0][0]).should.be.a.Date();
-                should.not.exist ( err );
+                should.not.exist (err);
                 done ();
-              } );
+              });
           });
       });
 
-    it ( '4.7.5 Invalid Test case when value is passed as named JSON',
-      function (done ) {
+    it ('4.7.5 Invalid Test case when value is passed as named JSON',
+      function(done) {
         var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         var binds = [ {val : 1}, { c: {val : 456 } } ];
 
         oracledb.getConnection (
           dbConfig,
-          function (err, connection ){
-            should.not.exist ( err ) ;
+          function(err, connection) {
+            should.not.exist (err) ;
             connection.execute (
               sql,
               binds,
-              function ( err, result ) {
-                should.exist ( err );
-                (err.message).should.startWith ( 'NJS-044:');
+              function(err, result) {
+                should.exist (err);
+                (err.message).should.startWith ('NJS-044:');
                 should.not.exist(result);
                 done ();
-              } );
+              });
           });
       });
 
-    it ( '4.7.6 Invalid Test case when other-value is passed as named JSON',
-      function (done ) {
+    it ('4.7.6 Invalid Test case when other-value is passed as named JSON',
+      function(done) {
         var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         var binds = [ { b: {val : 1} }, {val : 456 } ];
 
         oracledb.getConnection (
           dbConfig,
-          function (err, connection ){
-            should.not.exist ( err ) ;
+          function(err, connection) {
+            should.not.exist (err) ;
             connection.execute (
               sql,
               binds,
-              function ( err, result ) {
-                should.exist ( err );
-                (err.message).should.startWith ( 'NJS-044:');
+              function(err, result) {
+                should.exist (err);
+                (err.message).should.startWith ('NJS-044:');
                 should.not.exist(result);
                 done ();
-              } );
+              });
           });
       });
 
-    it ( '4.7.7 Invalid Test case when all values is passed as named JSON',
-      function (done ) {
+    it ('4.7.7 Invalid Test case when all values is passed as named JSON',
+      function(done) {
         var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         var binds = [ { b: {val : 1} }, { c: {val : 456 } } ];
 
         oracledb.getConnection (
           dbConfig,
-          function (err, connection ){
-            should.not.exist ( err ) ;
+          function(err, connection) {
+            should.not.exist (err) ;
             connection.execute (
               sql,
               binds,
-              function ( err, result ) {
-                should.exist ( err );
-                (err.message).should.startWith ( 'NJS-044:');
+              function(err, result) {
+                should.exist (err);
+                (err.message).should.startWith ('NJS-044:');
                 should.not.exist(result);
                 done ();
-              } );
+              });
           });
       }); // 4.7.7
   }); // 4.7
@@ -946,7 +946,7 @@ describe('4. binding.js', function() {
               cb();
             });
         }
-      ],done);
+      ], done);
     }); // before
 
     after(function(done) {
@@ -990,7 +990,7 @@ describe('4. binding.js', function() {
               // console.log(result);
               (result.outBinds.o1).should.be.a.Date();
 
-              var vdate = new Date( "2016-08-05T00:00:00.000Z" );
+              var vdate = new Date("2016-08-05T00:00:00.000Z");
               (result.outBinds.o2).should.eql(vdate);
               cb();
             }
@@ -1007,7 +1007,7 @@ describe('4. binding.js', function() {
               should.not.exist(err);
               (result.outBinds[0]).should.be.a.Date();
 
-              var vdate = new Date( "2016-08-05T00:00:00.000Z" );
+              var vdate = new Date("2016-08-05T00:00:00.000Z");
               (result.outBinds[1]).should.eql(vdate);
               cb();
             }
@@ -1048,7 +1048,7 @@ describe('4. binding.js', function() {
           );
         },
         function(cb) {
-          var vdate = new Date( Date.UTC( 2016, 7, 5 ) );
+          var vdate = new Date(Date.UTC(2016, 7, 5));
           connection.execute(
             "BEGIN nodb_binddate2(:i, :o); END;",
             {
@@ -1057,7 +1057,7 @@ describe('4. binding.js', function() {
             },
             function(err, result) {
               should.not.exist(err);
-              var vdate = new Date( "2016-08-05T00:00:00.000Z" );
+              var vdate = new Date("2016-08-05T00:00:00.000Z");
               (result.outBinds.o).should.eql(vdate);
               cb();
             }
@@ -1097,7 +1097,7 @@ describe('4. binding.js', function() {
           );
         },
         function(cb) {
-          var vdate = new Date( Date.UTC( 2016, 7, 5 ) );
+          var vdate = new Date(Date.UTC(2016, 7, 5));
           connection.execute(
             "BEGIN nodb_binddate3(:io); END;",
             {
@@ -1105,7 +1105,7 @@ describe('4. binding.js', function() {
             },
             function(err, result) {
               should.not.exist(err);
-              var vdate = new Date( "2016-08-05T00:00:00.000Z" );
+              var vdate = new Date("2016-08-05T00:00:00.000Z");
               (result.outBinds.io).should.eql(vdate);
               cb();
             }

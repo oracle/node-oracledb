@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -90,7 +90,7 @@ describe("155. fetchArraySize8.js", function() {
         function(callback) {
           connection.execute(
             create_table,
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback() ;
             }
@@ -106,8 +106,8 @@ describe("155. fetchArraySize8.js", function() {
             "select * from " + tableName + " where id > " + affectedID + " order by id",
             function(err, result) {
               should.not.exist(err);
-              var resultLenExpected = maxRowsVal > (tableSize-affectedID) ? (tableSize-affectedID) : maxRowsVal;
-              if(maxRowsVal === 0) resultLenExpected = tableSize - affectedID;
+              var resultLenExpected = maxRowsVal > (tableSize - affectedID) ? (tableSize - affectedID) : maxRowsVal;
+              if (maxRowsVal === 0) resultLenExpected = tableSize - affectedID;
               should.strictEqual(result.rows.length, resultLenExpected);
               verifyResult(result.rows, callback);
             }
@@ -116,18 +116,18 @@ describe("155. fetchArraySize8.js", function() {
         function(callback) {
           connection.execute(
             drop_table,
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback();
             }
           );
         }
-      ],cb);
+      ], cb);
     };
 
     it("155.1.1 maxRows > table size > oracledb.fetchArraySize", function(done) {
       var tableSize = 100;
-      var fetchArraySizeVal = tableSize/2;
+      var fetchArraySizeVal = tableSize / 2;
       var maxRowsVal = tableSize * 2;
       var affectedID = 0;
       basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID, done);
@@ -184,7 +184,7 @@ describe("155. fetchArraySize8.js", function() {
     it("155.1.8 maxRows = oracledb.fetchArraySize/10", function(done) {
       var tableSize = 100;
       var fetchArraySizeVal = 30;
-      var maxRowsVal = fetchArraySizeVal/10;
+      var maxRowsVal = fetchArraySizeVal / 10;
       var affectedID = 0;
       basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
@@ -199,7 +199,7 @@ describe("155. fetchArraySize8.js", function() {
 
     it("155.1.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10", function(done) {
       var tableSize = 200;
-      var fetchArraySizeVal = tableSize/10;
+      var fetchArraySizeVal = tableSize / 10;
       var maxRowsVal = fetchArraySizeVal + 50;
       var affectedID = 0;
       basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID, done);
@@ -242,7 +242,7 @@ describe("155. fetchArraySize8.js", function() {
         function(callback) {
           connection.execute(
             create_table,
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback() ;
             }
@@ -261,8 +261,8 @@ describe("155. fetchArraySize8.js", function() {
             },
             function(err, result) {
               should.not.exist(err);
-              var resultLenExpected = maxRowsVal > (tableSize-affectedID) ? (tableSize-affectedID) : maxRowsVal;
-              if(maxRowsVal === 0) resultLenExpected = tableSize - affectedID;
+              var resultLenExpected = maxRowsVal > (tableSize - affectedID) ? (tableSize - affectedID) : maxRowsVal;
+              if (maxRowsVal === 0) resultLenExpected = tableSize - affectedID;
               should.strictEqual(result.rows.length, resultLenExpected);
               verifyResult(result.rows, callback);
             }
@@ -271,13 +271,13 @@ describe("155. fetchArraySize8.js", function() {
         function(callback) {
           connection.execute(
             drop_table,
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback();
             }
           );
         }
-      ],cb);
+      ], cb);
     };
 
     it("155.2.1 maxRows > table size > oracledb.fetchArraySize", function(done) {
@@ -339,7 +339,7 @@ describe("155. fetchArraySize8.js", function() {
     it("155.2.8 maxRows = oracledb.fetchArraySize/10", function(done) {
       var tableSize = 100;
       var fetchArraySizeVal = 30;
-      var maxRowsVal = fetchArraySizeVal/10;
+      var maxRowsVal = fetchArraySizeVal / 10;
       var affectedID = 0;
       basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
@@ -354,7 +354,7 @@ describe("155. fetchArraySize8.js", function() {
 
     it("155.2.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10", function(done) {
       var tableSize = 200;
-      var fetchArraySizeVal = tableSize/10;
+      var fetchArraySizeVal = tableSize / 10;
       var maxRowsVal = fetchArraySizeVal + 50;
       var affectedID = 0;
       basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID, done);
@@ -447,7 +447,7 @@ describe("155. fetchArraySize8.js", function() {
 
     lob.on('end', function(err) {
       should.not.exist(err);
-      should.strictEqual(clobData, "CLOB"+String(id));
+      should.strictEqual(clobData, "CLOB" + String(id));
     });
 
     lob.on('close', function(err) {

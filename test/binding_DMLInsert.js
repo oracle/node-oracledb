@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -59,7 +59,7 @@ describe('92.binding_DMLInsert.js', function() {
   });
 
   after(function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -72,8 +72,8 @@ describe('92.binding_DMLInsert.js', function() {
         dmlInsert(table_name, dbColType, bindVar, bindType, nullBind, largeVal, cb);
       },
       function(cb) {
-        var bindVar =[ { val: content, type: bindType, dir: oracledb.BIND_IN } ];
-        dmlInsert(table_name, dbColType, bindVar, bindType, nullBind, largeVal,cb);
+        var bindVar = [ { val: content, type: bindType, dir: oracledb.BIND_IN } ];
+        dmlInsert(table_name, dbColType, bindVar, bindType, nullBind, largeVal, cb);
       }
     ], callback);
   };
@@ -90,14 +90,14 @@ describe('92.binding_DMLInsert.js', function() {
           "insert into " + table_name + " ( content ) values (:c)",
           bindVar,
           function(err) {
-            if(largeVal === true) {
-              if(bindType === oracledb.STRING) {
+            if (largeVal === true) {
+              if (bindType === oracledb.STRING) {
                 compareErrMsg_string(dbColType, err);
               } else {
                 compareErrMsg_buffer(dbColType, err);
               }
             } else {
-              if(bindType === oracledb.STRING) {
+              if (bindType === oracledb.STRING) {
                 compareErrMsg_dml_string(nullBind, dbColType, err);
               } else {
                 compareErrMsg_dml_buffer(dbColType, err);
@@ -114,21 +114,21 @@ describe('92.binding_DMLInsert.js', function() {
   };
 
   var compareErrMsg_dml_string = function(nullBind, element, err) {
-    if(nullBind === true) {
+    if (nullBind === true) {
       should.not.exist(err);
     } else {
-      if(element.indexOf("CHAR") > -1 || element === "CLOB") {
+      if (element.indexOf("CHAR") > -1 || element === "CLOB") {
         should.not.exist(err);
       }
-      if(element === "NUMBER" || element.indexOf("FLOAT") > -1 || element === "BINARY_DOUBLE") {
+      if (element === "NUMBER" || element.indexOf("FLOAT") > -1 || element === "BINARY_DOUBLE") {
         // ORA-01722: invalid number
         (err.message).should.startWith('ORA-01722:');
       }
-      if(element === "TIMESTAMP" || element === "DATE") {
+      if (element === "TIMESTAMP" || element === "DATE") {
         // ORA-01858: a non-numeric character was found where a numeric was expected
         (err.message).should.startWith('ORA-01858');
       }
-      if(element === "BLOB" || element.indexOf("RAW") > -1) {
+      if (element === "BLOB" || element.indexOf("RAW") > -1) {
         // console.log(element+"======"+err);
         // ORA-01465: invalid hex number
         (err.message).should.startWith('ORA-01465:');
@@ -137,58 +137,58 @@ describe('92.binding_DMLInsert.js', function() {
   };
 
   var compareErrMsg_dml_buffer = function(element, err) {
-    if(element === "NUMBER" || element === "DATE" || element === "TIMESTAMP" || element.indexOf("FLOAT") > -1) {
+    if (element === "NUMBER" || element === "DATE" || element === "TIMESTAMP" || element.indexOf("FLOAT") > -1) {
       // NUMBER: ORA-00932: inconsistent datatypes: expected NUMBER got BINARY
       // DATE: ORA-00932: inconsistent datatypes: expected DATE got BINARY
       // TIMESTAMP: ORA-00932: inconsistent datatypes: expected TIMESTAMP got BINARY
       // FLOAT: ORA-00932: inconsistent datatypes: expected BINARY_FLOAT got BINARY
       (err.message).should.startWith('ORA-00932:');
     }
-    if(element === "BLOB" || element === "CLOB" || element.indexOf("CHAR") > -1 || element.indexOf("RAW") > -1) {
+    if (element === "BLOB" || element === "CLOB" || element.indexOf("CHAR") > -1 || element.indexOf("RAW") > -1) {
       should.not.exist(err);
     }
   };
 
   var compareErrMsg_string = function(element, err) {
-    if(element.indexOf("CHAR") > -1) {
+    if (element.indexOf("CHAR") > -1) {
       // ORA-12899: value too large for column "HR"."TABLE_9250"."CONTENT"
       (err.message).should.startWith('ORA-12899:');
     }
-    if(element === "NUMBER" || element.indexOf("FLOAT") > -1 || element === "BINARY_DOUBLE") {
+    if (element === "NUMBER" || element.indexOf("FLOAT") > -1 || element === "BINARY_DOUBLE") {
       // ORA-01722: invalid number
       (err.message).should.startWith('ORA-01722:');
     }
-    if(element === "DATE") {
+    if (element === "DATE") {
       // ORA-01858: a non-numeric character was found where a numeric was expected
       (err.message).should.startWith('ORA-01858');
     }
-    if(element === "TIMESTAMP") {
+    if (element === "TIMESTAMP") {
       // ORA-01877: string is too long for internal buffer
       (err.message).should.startWith('ORA-01877');
     }
-    if(element === "BLOB" || element.indexOf("RAW") > -1) {
+    if (element === "BLOB" || element.indexOf("RAW") > -1) {
       // console.log(element+"======"+err);
       // ORA-01465: invalid hex number
       (err.message).should.startWith('ORA-01465:');
     }
-    if(element === "CLOB" ) {
+    if (element === "CLOB") {
       should.not.exist(err);
     }
   };
 
   var compareErrMsg_buffer = function(element, err) {
-    if(element === "NUMBER" || element === "DATE" || element === "TIMESTAMP" || element.indexOf("FLOAT") > -1) {
+    if (element === "NUMBER" || element === "DATE" || element === "TIMESTAMP" || element.indexOf("FLOAT") > -1) {
       // NUMBER: ORA-00932: inconsistent datatypes: expected NUMBER got BINARY
       // DATE: ORA-00932: inconsistent datatypes: expected DATE got BINARY
       // TIMESTAMP: ORA-00932: inconsistent datatypes: expected TIMESTAMP got BINARY
       // FLOAT: ORA-00932: inconsistent datatypes: expected BINARY_FLOAT got BINARY
       (err.message).should.startWith('ORA-00932:');
     }
-    if(element.indexOf("CHAR") > -1 || element.indexOf("RAW") > -1) {
+    if (element.indexOf("CHAR") > -1 || element.indexOf("RAW") > -1) {
       // ORA-12899: value too large for column "HR"."TABLE_9250"."CONTENT"
       (err.message).should.startWith('ORA-12899:');
     }
-    if(element === "BLOB" || element === "CLOB") {
+    if (element === "BLOB" || element === "CLOB") {
       should.not.exist(err);
     }
   };

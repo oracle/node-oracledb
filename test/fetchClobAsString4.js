@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -166,7 +166,7 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -198,7 +198,7 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -235,7 +235,7 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -267,7 +267,7 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -333,7 +333,7 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -365,7 +365,7 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -402,7 +402,7 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -434,7 +434,7 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -502,7 +502,7 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -539,7 +539,7 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -571,7 +571,7 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -608,7 +608,7 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -53,7 +53,7 @@ describe('64. sqlWithWarnings.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -76,7 +76,7 @@ describe('64. sqlWithWarnings.js', function() {
         "     THEN NULL; " +
         "   END; " +
         "   EXECUTE IMMEDIATE (' " +
-        "     CREATE TABLE " + tableName +" ( " +
+        "     CREATE TABLE " + tableName + " ( " +
         "       num_col NUMBER " +
         "     )" +
         "   '); " +
@@ -156,8 +156,8 @@ describe('64. sqlWithWarnings.js', function() {
       connection.should.be.an.Object;
       connection.execute (
         plsqlWithWarning,
-        function (err) {
-          should.not.exist ( err );
+        function(err) {
+          should.not.exist (err);
           done();
         }
       );

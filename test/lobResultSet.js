@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -51,7 +51,7 @@ describe('59. lobResultSet.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -76,10 +76,10 @@ describe('59. lobResultSet.js', function() {
     });
 
     function fetchOneRowFromRS(resultSet, rowsFetched, rowsExpected, callback) {
-      resultSet.getRow( function(err, row) {
+      resultSet.getRow(function(err, row) {
         should.not.exist(err);
         if (!row) {
-          resultSet.close( function(err) {
+          resultSet.close(function(err) {
             should.not.exist(err);
             should.strictEqual(rowsFetched, rowsExpected);
             callback();
@@ -94,7 +94,7 @@ describe('59. lobResultSet.js', function() {
           });
 
           lob.on('end', function() {
-            rowsFetched ++;
+            rowsFetched++;
             fs.readFile(inFileName, { encoding: 'utf8' }, function(err, originalData) {
               should.not.exist(err);
               should.strictEqual(text, originalData);
@@ -122,7 +122,7 @@ describe('59. lobResultSet.js', function() {
           inStream.pipe(lob);
 
           lob.on('finish', function() {
-            connection.commit( function(err) {
+            connection.commit(function(err) {
               should.not.exist(err);
               cb(); // insertion done
             });
@@ -297,10 +297,10 @@ describe('59. lobResultSet.js', function() {
     });
 
     function fetchOneRowFromRS(resultSet, rowsFetched, rowsExpected, callback) {
-      resultSet.getRow( function(err, row) {
+      resultSet.getRow(function(err, row) {
         should.not.exist(err);
         if (!row) {
-          resultSet.close( function(err) {
+          resultSet.close(function(err) {
             should.not.exist(err);
             should.strictEqual(rowsFetched, rowsExpected);
             rowsFetched = 0;
@@ -322,12 +322,12 @@ describe('59. lobResultSet.js', function() {
           });
 
           lob.on('end', function() {
-            fs.readFile( jpgFileName, function(err, originalData) {
+            fs.readFile(jpgFileName, function(err, originalData) {
               should.not.exist(err);
               should.strictEqual(totalLength, originalData.length);
               originalData.should.eql(blobData);
             });
-            rowsFetched ++;
+            rowsFetched++;
             fetchOneRowFromRS(resultSet, rowsFetched, rowsExpected, callback);
           });
         }
@@ -346,7 +346,7 @@ describe('59. lobResultSet.js', function() {
           inStream.pipe(lob);
 
           lob.on('finish', function() {
-            connection.commit( function(err) {
+            connection.commit(function(err) {
               should.not.exist(err);
               cb(); // insertion done
             });

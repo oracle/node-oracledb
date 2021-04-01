@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -54,7 +54,7 @@ describe('201. dbObject2.js', () => {
       let plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // before()
@@ -68,7 +68,7 @@ describe('201. dbObject2.js', () => {
       await conn.execute(sql);
 
       await conn.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // after()
@@ -100,7 +100,7 @@ describe('201. dbObject2.js', () => {
       //should.strictEqual(result.rows[0][1]['ENTRY'].getTime(), date1.getTime());
       //should.strictEqual(result.rows[0][1]['EXIT'].getTime(), date2.getTime());
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 201.1
@@ -156,7 +156,7 @@ describe('201. dbObject2.js', () => {
 
       should.strictEqual(result.rows[0][1]['ENTRY'], null);
       should.strictEqual(result.rows[0][1]['EXIT'], null);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 201.2
@@ -182,7 +182,7 @@ describe('201. dbObject2.js', () => {
 
       should.strictEqual(result.rows[0][1]['ENTRY'], null);
       should.strictEqual(result.rows[0][1]['EXIT'], null);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 201.3
@@ -193,7 +193,7 @@ describe('201. dbObject2.js', () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
 
       const objClass = await conn.getDbObjectClass(TYPE);
-      const testObj = new objClass( {} );
+      const testObj = new objClass({});
 
       let result = await conn.execute(sql, [seq, testObj]);
       should.strictEqual(result.rowsAffected, 1);
@@ -204,7 +204,7 @@ describe('201. dbObject2.js', () => {
 
       should.strictEqual(result.rows[0][1]['ENTRY'], null);
       should.strictEqual(result.rows[0][1]['EXIT'], null);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 201.4

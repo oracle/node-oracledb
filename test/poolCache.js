@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -59,7 +59,7 @@ describe('67. poolCache.js', function() {
 
         (defaultPool.poolAlias).should.equal('default');
 
-        pool.close(function(err){
+        pool.close(function(err) {
           should.not.exist(err);
           done();
         });
@@ -72,7 +72,7 @@ describe('67. poolCache.js', function() {
 
         pool.should.be.ok();
 
-        pool.close(function(err){
+        pool.close(function(err) {
           var defaultPool;
 
           should.not.exist(err);
@@ -106,7 +106,7 @@ describe('67. poolCache.js', function() {
 
         should.strictEqual(pool, aliasedPool);
 
-        pool.close(function(err){
+        pool.close(function(err) {
           should.not.exist(err);
           done();
         });
@@ -128,7 +128,7 @@ describe('67. poolCache.js', function() {
           (err.message).should.startWith('NJS-046:');
           should.not.exist(pool2);
 
-          pool1.close(function(err){
+          pool1.close(function(err) {
             should.not.exist(err);
 
             done();
@@ -149,10 +149,10 @@ describe('67. poolCache.js', function() {
 
           pool2.should.be.ok();
 
-          pool1.close(function(err){
+          pool1.close(function(err) {
             should.not.exist(err);
 
-            pool2.close(function(err){
+            pool2.close(function(err) {
               should.not.exist(err);
 
               done();
@@ -223,10 +223,10 @@ describe('67. poolCache.js', function() {
 
           (defaultPool.poolAlias).should.equal('default');
 
-          pool1.close(function(err){
+          pool1.close(function(err) {
             should.not.exist(err);
 
-            pool2.close(function(err){
+            pool2.close(function(err) {
               should.not.exist(err);
 
               done();
@@ -266,13 +266,13 @@ describe('67. poolCache.js', function() {
 
             (secondPool.poolAlias).should.equal(aliasToGet);
 
-            pool1.close(function(err){
+            pool1.close(function(err) {
               should.not.exist(err);
 
-              pool2.close(function(err){
+              pool2.close(function(err) {
                 should.not.exist(err);
 
-                pool3.close(function(err){
+                pool3.close(function(err) {
                   should.not.exist(err);
 
                   done();
@@ -351,7 +351,7 @@ describe('67. poolCache.js', function() {
           conn.release(function(err) {
             should.not.exist(err);
 
-            pool.close(function(err){
+            pool.close(function(err) {
               should.not.exist(err);
 
               done();
@@ -375,7 +375,7 @@ describe('67. poolCache.js', function() {
           conn.release(function(err) {
             should.not.exist(err);
 
-            pool.close(function(err){
+            pool.close(function(err) {
               should.not.exist(err);
 
               done();
@@ -397,7 +397,7 @@ describe('67. poolCache.js', function() {
 
           (err.message).should.startWith('NJS-047:');
 
-          pool.close(function(err){
+          pool.close(function(err) {
             should.not.exist(err);
 
             done();
@@ -417,7 +417,7 @@ describe('67. poolCache.js', function() {
 
           (err.message).should.startWith('NJS-047:');
 
-          pool.close(function(err){
+          pool.close(function(err) {
             should.not.exist(err);
 
             done();
@@ -450,10 +450,10 @@ describe('67. poolCache.js', function() {
             conn.close(function(err) {
               should.not.exist(err);
 
-              pool1.close(function(err){
+              pool1.close(function(err) {
                 should.not.exist(err);
 
-                pool2.close(function(err){
+                pool2.close(function(err) {
                   should.not.exist(err);
 
                   done();
@@ -496,13 +496,13 @@ describe('67. poolCache.js', function() {
               conn.close(function(err) {
                 should.not.exist(err);
 
-                pool1.close(function(err){
+                pool1.close(function(err) {
                   should.not.exist(err);
 
-                  pool2.close(function(err){
+                  pool2.close(function(err) {
                     should.not.exist(err);
 
-                    pool3.close(function(err){
+                    pool3.close(function(err) {
                       should.not.exist(err);
 
                       done();
@@ -537,7 +537,7 @@ describe('67. poolCache.js', function() {
           conn.close(function(err) {
             should.not.exist(err);
 
-            defaultPool.close(function(err){
+            defaultPool.close(function(err) {
               should.not.exist(err);
               done();
             });

@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -34,7 +34,7 @@ module.exports = DevNull;
 
 // step 2 - to call the Writable constructor in our own constructor
 function DevNull(opts) {
-  if ( !(this instanceof DevNull) ) return new DevNull(opts);
+  if (!(this instanceof DevNull)) return new DevNull(opts);
 
   opts = opts || {};
   stream.Writable.call(this, opts);

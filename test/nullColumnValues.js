@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -35,7 +35,7 @@ var dbConfig = require('./dbconfig.js');
 describe('10. nullColumnValues.js', function() {
 
   var connection = null;
-  beforeEach('get connection & create table', function(done){
+  beforeEach('get connection & create table', function(done) {
     var makeTable =
       "BEGIN \
             DECLARE \
@@ -77,12 +77,12 @@ describe('10. nullColumnValues.js', function() {
         password:      dbConfig.password,
         connectString: dbConfig.connectString
       },
-      function(err, conn){
+      function(err, conn) {
         should.not.exist(err);
         connection = conn;
         conn.execute(
           makeTable,
-          function(err){
+          function(err) {
             should.not.exist(err);
             done();
           }
@@ -91,13 +91,17 @@ describe('10. nullColumnValues.js', function() {
     );
   });
 
-  afterEach('drop table and release connection', function(done){
+  afterEach('drop table and release connection', function(done) {
     connection.execute(
       "DROP TABLE nodb_nullcol_dept PURGE",
-      function(err){
-        if(err) { console.error(err.message); return; }
-        connection.release( function(err){
-          if(err) { console.error(err.message); return; }
+      function(err) {
+        if (err) {
+          console.error(err.message); return;
+        }
+        connection.release(function(err) {
+          if (err) {
+            console.error(err.message); return;
+          }
           done();
         });
       }
@@ -111,7 +115,7 @@ describe('10. nullColumnValues.js', function() {
       "SELECT null FROM DUAL",
       function(err, result) {
         should.not.exist(err);
-        result.rows[0].should.eql( [null] );
+        result.rows[0].should.eql([null]);
         done();
       }
     );
@@ -221,7 +225,7 @@ describe('10. nullColumnValues.js', function() {
         should.not.exist(err);
         //console.log(result);
         result.outBinds.should.eql({rdid: [90], rdname: [null], rmid: [null]});
-        result.outBinds.rdid.should.eql( [90] );
+        result.outBinds.rdid.should.eql([90]);
         should.not.exist(result.outBinds.rdname[0]); // null
         should.not.exist(result.outBinds.rmid[0]);  // null
         done();
@@ -263,7 +267,7 @@ describe('10. nullColumnValues.js', function() {
         function fetchRowFromRS(rs) {
           rs.getRow(function(err, row) {
             should.not.exist(err);
-            if(row) {
+            if (row) {
               // console.log(row);
               row.should.eql([50, null, null, 1500]);
               return fetchRowFromRS(rs);

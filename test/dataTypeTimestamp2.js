@@ -55,7 +55,7 @@ describe('34. dataTypeTimestamp2.js', function() {
 
   after('release connection', function(done) {
     oracledb.fetchAsString = [];
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -64,7 +64,7 @@ describe('34. dataTypeTimestamp2.js', function() {
   describe('34.1 Testing JavaScript Date with database TIMESTAMP(p)', function() {
     var dates = assist.data.dates;
 
-    before('create table, insert data',function(done) {
+    before('create table, insert data', function(done) {
       assist.setUp(connection, tableName, dates, done);
     });
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -56,8 +56,7 @@ describe('229. dbType03.js', () => {
     }
   });
 
-  function ApproxEql(v1, v2)
-  {
+  function ApproxEql(v1, v2) {
     const precision = 0.001;
     return Math.abs(v1 - v2) < precision;
   }

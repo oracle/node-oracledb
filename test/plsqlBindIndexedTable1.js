@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -45,15 +45,19 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     before(function(done) {
       oracledb.getConnection(credentials, function(err, conn) {
-        if(err) { console.error(err.message); return; }
+        if (err) {
+          console.error(err.message); return;
+        }
         connection = conn;
         done();
       });
     });
 
     after(function(done) {
-      connection.release( function(err) {
-        if(err) { console.error(err.message); return; }
+      connection.release(function(err) {
+        if (err) {
+          console.error(err.message); return;
+        }
         done();
       });
     });
@@ -567,7 +571,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
     });
 
     it('43.2.10 negative case: incorrect type of array elements - bind by pos 1',
-      function (done ){
+      function(done) {
         var bindvars = [
           { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : ['hello', 1] },
           { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : "hi" }
@@ -575,12 +579,12 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         connection.execute (
           "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;",
           bindvars,
-          function ( err, result ) {
-            should.exist ( err ) ;
-            (err.message).should.startWith ( 'NJS-052:');
+          function(err, result) {
+            should.exist (err) ;
+            (err.message).should.startWith ('NJS-052:');
             (err.message).should.match(/^NJS-052:.*\sindex\s0\s.*\sposition\s1$/);
             // NJS-052: invalid data type at array index 0 for bind position 1
-            should.not.exist ( result );
+            should.not.exist (result);
             done ();
           }
         );
@@ -588,7 +592,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
     );
 
     it('43.2.11 negative case: incorrect type of array elements - bind by pos 2',
-      function (done ){
+      function(done) {
         var bindvars = [
           { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : [1, 2, "hi"] },
           { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : "hi" }
@@ -596,12 +600,12 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         connection.execute (
           "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;",
           bindvars,
-          function ( err, result ) {
-            should.exist ( err ) ;
-            (err.message).should.startWith ( 'NJS-052:');
+          function(err, result) {
+            should.exist (err) ;
+            (err.message).should.startWith ('NJS-052:');
             (err.message).should.match(/^NJS-052:.*\sindex\s2\s.*\sposition\s1$/);
             // NJS-052: invalid data type at array index 2 for bind position 1
-            should.not.exist ( result );
+            should.not.exist (result);
             done ();
           }
         );
@@ -609,7 +613,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
     );
 
     it('43.2.12 negative case: incorrect type of array elements - bind by pos 3',
-      function (done ){
+      function(done) {
         var bindvars = [
           { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : [1, 2] },
           { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : ["hi", 1] }
@@ -617,12 +621,12 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         connection.execute (
           "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;",
           bindvars,
-          function ( err, result ) {
-            should.exist ( err ) ;
-            (err.message).should.startWith ( 'NJS-052:');
+          function(err, result) {
+            should.exist (err) ;
+            (err.message).should.startWith ('NJS-052:');
             (err.message).should.match(/^NJS-052:.*\sindex\s0\s.*\sposition\s2$/);
             // NJS-052: invalid data type at array index 0 for bind position 2
-            should.not.exist ( result );
+            should.not.exist (result);
             done ();
           }
         );
@@ -630,7 +634,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
     );
 
     it('43.2.13 negative case: incorrect type of array elements - bind by pos 4',
-      function (done ){
+      function(done) {
         var bindvars = [
           { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : [1, 2, 3] },
           { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : [1, 2, "hi"] }
@@ -638,12 +642,12 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         connection.execute (
           "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;",
           bindvars,
-          function ( err, result ) {
-            should.exist ( err ) ;
-            (err.message).should.startWith ( 'NJS-052:');
+          function(err, result) {
+            should.exist (err) ;
+            (err.message).should.startWith ('NJS-052:');
             (err.message).should.match(/^NJS-052:.*\sindex\s2\s.*\sposition\s2$/);
             // NJS-052: invalid data type at array index 2 for bind position 2
-            should.not.exist ( result );
+            should.not.exist (result);
             done ();
           }
         );
@@ -656,15 +660,19 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     before(function(done) {
       oracledb.getConnection(credentials, function(err, conn) {
-        if(err) { console.error(err.message); return; }
+        if (err) {
+          console.error(err.message); return;
+        }
         connection = conn;
         done();
       });
     });
 
     after(function(done) {
-      connection.release( function(err) {
-        if(err) { console.error(err.message); return; }
+      connection.release(function(err) {
+        if (err) {
+          console.error(err.message); return;
+        }
         done();
       });
     });

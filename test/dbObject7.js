@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -44,7 +44,7 @@ describe('206. dbObject7.js', () => {
         );`;
       await conn.execute(sql);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // before()
@@ -56,7 +56,7 @@ describe('206. dbObject7.js', () => {
       await conn.execute(sql);
 
       await conn.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // after()
@@ -85,7 +85,7 @@ describe('206. dbObject7.js', () => {
       let sql = `DROP PROCEDURE ${PROC}`;
       await conn.execute(sql);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 206.1

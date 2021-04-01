@@ -61,7 +61,7 @@ describe('177. soda9.js', () => {
       let outContent = outDocuments[0].getContent();
       should.deepEqual(outContent, inContent);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -74,7 +74,7 @@ describe('177. soda9.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -98,7 +98,7 @@ describe('177. soda9.js', () => {
       let outContent = outDocuments[0].getContent();
       should.deepEqual(outContent, inContent);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -111,7 +111,7 @@ describe('177. soda9.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -137,7 +137,7 @@ describe('177. soda9.js', () => {
       let outContent = outDocuments[0].getContent();
       should.deepEqual(outContent, inContent);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -150,7 +150,7 @@ describe('177. soda9.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -177,7 +177,7 @@ describe('177. soda9.js', () => {
       let outContent = outDocuments[0].getContent();
       should.deepEqual(outContent, inContent);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -190,7 +190,7 @@ describe('177. soda9.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -212,14 +212,14 @@ describe('177. soda9.js', () => {
       let outContent = inDocument.getContent();
       should.deepEqual(outContent, inContent);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }

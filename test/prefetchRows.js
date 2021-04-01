@@ -673,7 +673,7 @@ describe("147. prefetchRows.js", function() {
           should.exist(data);
         });
 
-        stream.on('end', function(){
+        stream.on('end', function() {
           stream.destroy();
         });
         rt = await testsUtil.getRoundTripCount(sid) - rt;
@@ -702,7 +702,7 @@ describe("147. prefetchRows.js", function() {
           should.exist(data);
         });
 
-        stream.on('end', function(){
+        stream.on('end', function() {
           stream.destroy();
         });
         rt = await testsUtil.getRoundTripCount(sid) - rt;
@@ -731,7 +731,7 @@ describe("147. prefetchRows.js", function() {
           should.exist(data);
         });
 
-        stream.on('end', function(){
+        stream.on('end', function() {
           stream.destroy();
         });
         rt = await testsUtil.getRoundTripCount(sid) - rt;
@@ -760,7 +760,7 @@ describe("147. prefetchRows.js", function() {
           should.exist(data);
         });
 
-        stream.on('end', function(){
+        stream.on('end', function() {
           stream.destroy();
         });
         rt = await testsUtil.getRoundTripCount(sid) - rt;
@@ -789,7 +789,7 @@ describe("147. prefetchRows.js", function() {
           should.exist(data);
         });
 
-        stream.on('end', function(){
+        stream.on('end', function() {
           stream.destroy();
         });
         rt = await testsUtil.getRoundTripCount(sid) - rt;

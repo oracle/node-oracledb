@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -100,8 +100,8 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
                       "    tmplob BLOB; \n" +
                       "BEGIN \n" +
                       "    FOR i IN 1.." + tableSize + " LOOP \n" +
-                      "         select to_char(i) into tmpchar from dual; \n"+
-                      "         select utl_raw.cast_to_raw(tmpchar) into tmplob from dual; \n"+
+                      "         select to_char(i) into tmpchar from dual; \n" +
+                      "         select utl_raw.cast_to_raw(tmpchar) into tmplob from dual; \n" +
                       "         insert into " + tableName + " values (i, tmplob); \n" +
                       "    END LOOP; \n" +
                       "    commit; \n" +
@@ -144,7 +144,9 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
         async.times(
           numLobs,
           function(n, next) {
-            verifyLob( n, result, function(err, result) { next(err, result); } );
+            verifyLob(n, result, function(err, result) {
+              next(err, result);
+            });
           },
           callback
         );
@@ -171,7 +173,7 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
 
     lob.on('end', function(err) {
       should.not.exist(err);
-      var expected = Buffer.from(String(id-10), "utf-8");
+      var expected = Buffer.from(String(id - 10), "utf-8");
       should.strictEqual(assist.compare2Buffers(blobData, expected), true);
       cb(err, result);
     });

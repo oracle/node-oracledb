@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -184,7 +184,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         });
 
         lob.on('finish', function() {
-          connection.commit( function(err) {
+          connection.commit(function(err) {
             should.not.exist(err);
             return callback();
           });
@@ -215,7 +215,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         });
 
         lob.on('end', function() {
-          fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
+          fs.readFile(inFileName, { encoding: 'utf8' }, function(err, originalData) {
             should.not.exist(err);
             should.strictEqual(clobData, originalData);
             return callback();
@@ -256,7 +256,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
           });
 
           lob.on('end', function() {
-            if(originalString == "") {
+            if (originalString == "") {
               should.strictEqual(clobData, "");
               callback();
             } else {

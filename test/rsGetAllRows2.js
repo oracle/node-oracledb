@@ -1,4 +1,5 @@
 /* Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved. */
+
 /******************************************************************************
  *
  * You may not use the identified files except in compliance with the Apache
@@ -30,7 +31,7 @@ const oracledb = require('oracledb');
 const should   = require('should');
 const dbconfig = require('./dbconfig.js');
 
-describe('250. rsGetAllRows2.js', function () {
+describe('250. rsGetAllRows2.js', function() {
   let conn = null;
   let outFormatBak = oracledb.outFormat;
   const create_table_dept_sql =
@@ -78,24 +79,23 @@ describe('250. rsGetAllRows2.js', function () {
     try {
       oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
       conn = await oracledb.getConnection(dbconfig);
-      await conn.execute(create_table_dept_sql );
+      await conn.execute(create_table_dept_sql);
       await conn.execute(deptInsert, [101, "R&D"]);
       await conn.execute(deptInsert, [201, "Sales"]);
       await conn.execute(deptInsert, [301, "Marketing"]);
 
       await conn.execute(create_table_emp_sql);
-      for(let i = 0; i < 127; i ++) {
+      for (let i = 0; i < 127; i++) {
         await conn.execute(empInsert, [301, 1100 + i, "Marketing " + i ]);
       }
       await conn.execute(empInsert, [101, 1001, "R&D 1"]);
       await conn.commit();
-    }
-    catch( err ) {
+    } catch (err) {
       console.error(err.message);
     }
   });
 
-  after (async function () {
+  after (async function() {
     try {
       await conn.execute('DROP TABLE NODB_RSEMP PURGE');
       await conn.execute('DROP TABLE NODB_RSDEPT PURGE');
@@ -107,7 +107,7 @@ describe('250. rsGetAllRows2.js', function () {
     }
   });
 
-  it('250.1 Nested Cursor + getRows() OBJECT outformat', async function () {
+  it('250.1 Nested Cursor + getRows() OBJECT outformat', async function() {
     try {
       let result = await conn.execute(
         `SELECT
@@ -154,13 +154,12 @@ describe('250. rsGetAllRows2.js', function () {
       should.equal(rows2[2].EMPLOYEE_NAME, "Marketing 2");
       should.equal(rows2[126].EMPLOYEE_NAME, "Marketing 126");
       await result.resultSet.close();
-    }
-    catch (err) {
+    } catch (err) {
       should.not.exist(err);
     }
   });
 
-  it( '250.2 Nested Cursor + getRows(0) rows ARRAY outformat', async function () {
+  it('250.2 Nested Cursor + getRows(0) rows ARRAY outformat', async function() {
     try {
       let result = await conn.execute(
         `SELECT
@@ -201,19 +200,18 @@ describe('250. rsGetAllRows2.js', function () {
 
       rs = rows[2][1];
       rows2 = await rs.getRows(0);
-      should.equal(rows2.length, 127 ) ;
+      should.equal(rows2.length, 127) ;
       should.equal(rows2[0][0], "Marketing 0");
       should.equal(rows2[1][0], "Marketing 1");
       should.equal(rows2[2][0], "Marketing 2");
       should.equal(rows2[126][0], "Marketing 126");
       await result.resultSet.close();
       oracledb.outFormat = outFormatBak;
-    }
-    catch (err) {
+    } catch (err) {
       should.not.exist(err);
     }
   });
-  it('250.3 Nested Cursor + getRows(n) + getRows() OBJECT outformat', async function () {
+  it('250.3 Nested Cursor + getRows(n) + getRows() OBJECT outformat', async function() {
     try {
       oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
       let result = await conn.execute(
@@ -264,13 +262,12 @@ describe('250. rsGetAllRows2.js', function () {
       should.equal(rows2_NC2[1].EMPLOYEE_NAME, "Marketing 2");
       should.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");
       await result.resultSet.close();
-    }
-    catch (err) {
+    } catch (err) {
       should.not.exist(err);
     }
   });
 
-  it( '250.4 Nested Cursor + getRow() + getRows(0) rows ARRAY outformat', async function () {
+  it('250.4 Nested Cursor + getRow() + getRows(0) rows ARRAY outformat', async function() {
     try {
       oracledb.outFormat = oracledb.OUT_FORMAT_ARRAY;
       let result = await conn.execute(
@@ -314,20 +311,19 @@ describe('250. rsGetAllRows2.js', function () {
       rs = rows2[1][1];
       let rows2_NC1 = await rs.getRow();
       let rows2_NC2 = await rs.getRows(0);
-      should.equal(rows2_NC2.length, 126 );
+      should.equal(rows2_NC2.length, 126);
       should.equal(rows2_NC1[0], "Marketing 0");
       should.equal(rows2_NC2[0][0], "Marketing 1");
       should.equal(rows2_NC2[1][0], "Marketing 2");
       should.equal(rows2_NC2[125][0], "Marketing 126");
       await result.resultSet.close();
       oracledb.outFormat = outFormatBak;
-    }
-    catch (err) {
+    } catch (err) {
       should.not.exist(err);
     }
   });
 
-  it('250.5 Nested Cursor + getRows(n) + getRows(0) with fetchArraySize < remaining rows inside nested cursor', async function () {
+  it('250.5 Nested Cursor + getRows(n) + getRows(0) with fetchArraySize < remaining rows inside nested cursor', async function() {
     try {
       oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
       let result = await conn.execute(
@@ -377,13 +373,12 @@ describe('250. rsGetAllRows2.js', function () {
       should.equal(rows2_NC2[0].EMPLOYEE_NAME, "Marketing 1");
       should.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");
       await result.resultSet.close();
-    }
-    catch (err) {
+    } catch (err) {
       should.not.exist(err);
     }
   });
 
-  it('250.6 Nested Cursor + getRows(n) + getRow() + getRows() with fetchArraySize = 1', async function () {
+  it('250.6 Nested Cursor + getRows(n) + getRow() + getRows() with fetchArraySize = 1', async function() {
     try {
       let result = await conn.execute(
         `SELECT
@@ -430,8 +425,7 @@ describe('250. rsGetAllRows2.js', function () {
       should.equal(rows2_NC1.EMPLOYEE_NAME, "Marketing 0");
       should.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");
       await result.resultSet.close();
-    }
-    catch (err) {
+    } catch (err) {
       should.not.exist(err);
     }
   });

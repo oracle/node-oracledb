@@ -1,4 +1,5 @@
 /* Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved. */
+
 /******************************************************************************
  *
  * You may not use the identified files except in compliance with the Apache
@@ -30,12 +31,12 @@ const oracledb = require('oracledb');
 const should   = require('should');
 const dbconfig = require('./dbconfig.js');
 
-describe('247. dupColNames2.js', function () {
+describe('247. dupColNames2.js', function() {
   let connection = null;
   let outFormatBak = oracledb.outFormat;
   const tableNameDept = "nodb_dupDepartment";
   const tableNameEmp = "nodb_dupEmployee";
-  const create_table_sql =`
+  const create_table_sql = `
       BEGIN
             DECLARE
                 e_table_missing EXCEPTION;
@@ -54,7 +55,7 @@ describe('247. dupColNames2.js', function () {
             ');
         END; `;
   const deptInsert = "INSERT INTO " + tableNameDept + " VALUES( :1, :2)";
-  const create_table_emp_sql =`
+  const create_table_emp_sql = `
         BEGIN
              DECLARE
                  e_table_missing EXCEPTION;
@@ -83,7 +84,7 @@ describe('247. dupColNames2.js', function () {
 
       connection = await oracledb.getConnection (dbconfig);
 
-      await connection.execute(create_table_sql );
+      await connection.execute(create_table_sql);
       await connection.execute(deptInsert, [101, "R&D"]);
       await connection.execute(deptInsert, [201, "Sales"]);
       await connection.execute(deptInsert, [301, "Marketing"]);
@@ -113,11 +114,11 @@ describe('247. dupColNames2.js', function () {
     }
   });
 
-  const empID = [1001,2001,3001];
-  const depID = [101,201,301];
+  const empID = [1001, 2001, 3001];
+  const depID = [101, 201, 301];
   const depName = ["R&D", "Sales", "Marketing"];
 
-  describe('247.1 Duplicate column names, query with stream', function(){
+  describe('247.1 Duplicate column names, query with stream', function() {
     it('247.1.1 Two duplicate columns', async function() {
       let sql =
         `SELECT
@@ -148,18 +149,18 @@ describe('247. dupColNames2.js', function () {
         should.exist(data.EMPLOYEE_HISTORY);
         should.equal(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
         data.EMPLOYEE_HISTORY.setEncoding('utf8');
-        data.EMPLOYEE_HISTORY.on('data', function (data) {
+        data.EMPLOYEE_HISTORY.on('data', function(data) {
           should.equal(data, 'abcdefgh');
         });
         index++;
       });
 
-      stream.on('end', function(){
+      stream.on('end', function() {
         stream.destroy();
       });
     });
 
-    it('247.1.2 Three duplicate columns', async function () {
+    it('247.1.2 Three duplicate columns', async function() {
       let sql =
         `SELECT
             A.EMPLOYEE_ID, A.EMPLOYEE_HISTORY, A.DEPARTMENT_ID,
@@ -189,13 +190,13 @@ describe('247. dupColNames2.js', function () {
         should.exist(data.EMPLOYEE_HISTORY);
         should.equal(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
         data.EMPLOYEE_HISTORY.setEncoding('utf8');
-        data.EMPLOYEE_HISTORY.on('data', function (data) {
+        data.EMPLOYEE_HISTORY.on('data', function(data) {
           should.equal(data, 'abcdefgh');
         });
         index++;
       });
 
-      stream.on('end', function(){
+      stream.on('end', function() {
         stream.destroy();
       });
     });
@@ -230,18 +231,18 @@ describe('247. dupColNames2.js', function () {
         should.exist(data.EMPLOYEE_HISTORY);
         should.equal(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
         data.EMPLOYEE_HISTORY.setEncoding('utf8');
-        data.EMPLOYEE_HISTORY.on('data', function (data) {
+        data.EMPLOYEE_HISTORY.on('data', function(data) {
           should.equal(data, 'abcdefgh');
         });
         index++;
       });
 
-      stream.on('end', function(){
+      stream.on('end', function() {
         stream.destroy();
       });
     });
 
-    it('247.1.4 Duplicate columns with non-conflicting alias name', async function () {
+    it('247.1.4 Duplicate columns with non-conflicting alias name', async function() {
       let sql =
         `SELECT
             A.EMPLOYEE_ID, A.EMPLOYEE_HISTORY, A.DEPARTMENT_ID,
@@ -272,18 +273,18 @@ describe('247. dupColNames2.js', function () {
         should.exist(data.EMPLOYEE_HISTORY);
         should.equal(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
         data.EMPLOYEE_HISTORY.setEncoding('utf8');
-        data.EMPLOYEE_HISTORY.on('data', function (data) {
+        data.EMPLOYEE_HISTORY.on('data', function(data) {
           should.equal(data, 'abcdefgh');
         });
         index++;
       });
 
-      stream.on('end', function(){
+      stream.on('end', function() {
         stream.destroy();
       });
     });
 
-    it('247.1.5 Negative not-case sensitive', async function () {
+    it('247.1.5 Negative not-case sensitive', async function() {
       let sql =
         `SELECT
             A.EMPLOYEE_ID, A.EMPLOYEE_HISTORY, A.DEPARTMENT_ID,
@@ -314,19 +315,19 @@ describe('247. dupColNames2.js', function () {
         should.exist(data.EMPLOYEE_HISTORY);
         should.equal(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
         data.EMPLOYEE_HISTORY.setEncoding('utf8');
-        data.EMPLOYEE_HISTORY.on('data', function (data) {
+        data.EMPLOYEE_HISTORY.on('data', function(data) {
           should.equal(data, 'abcdefgh');
         });
         index++;
       });
 
-      stream.on('end', function(){
+      stream.on('end', function() {
         stream.destroy();
       });
     });
 
-    it('247.1.6 Two duplicate columns using nested cursor', async function () {
-      let sql =`
+    it('247.1.6 Two duplicate columns using nested cursor', async function() {
+      let sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID
                        FROM nodb_dupEmployee A
@@ -357,13 +358,13 @@ describe('247. dupColNames2.js', function () {
         index++;
       });
 
-      stream.on('end', function(){
+      stream.on('end', function() {
         stream.destroy();
       });
     });
 
-    it('247.1.7 Three duplicate columns using nested cursor', async function () {
-      let sql =`
+    it('247.1.7 Three duplicate columns using nested cursor', async function() {
+      let sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID
                        FROM nodb_dupEmployee A
@@ -394,13 +395,13 @@ describe('247. dupColNames2.js', function () {
         index++;
       });
 
-      stream.on('end', function(){
+      stream.on('end', function() {
         stream.destroy();
       });
     });
 
-    it('247.1.8 Three duplicate columns using nested cursor', async function () {
-      let sql =`
+    it('247.1.8 Three duplicate columns using nested cursor', async function() {
+      let sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID
                        FROM nodb_dupEmployee A
@@ -430,13 +431,13 @@ describe('247. dupColNames2.js', function () {
         index++;
       });
 
-      stream.on('end', function(){
+      stream.on('end', function() {
         stream.destroy();
       });
     });
 
-    it('247.1.9 duplicate column with conflicting alias name using nested cursor', async function () {
-      let sql =`
+    it('247.1.9 duplicate column with conflicting alias name using nested cursor', async function() {
+      let sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID , A.DEPARTMENT_ID AS DEPARTMENT_ID_1
                        FROM nodb_dupEmployee A
@@ -467,13 +468,13 @@ describe('247. dupColNames2.js', function () {
         index++;
       });
 
-      stream.on('end', function(){
+      stream.on('end', function() {
         stream.destroy();
       });
     });
 
-    it('247.1.10 Duplicate column with non-conflicting alias name using nested cursor', async function () {
-      let sql =`
+    it('247.1.10 Duplicate column with non-conflicting alias name using nested cursor', async function() {
+      let sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID , A.DEPARTMENT_ID AS DEPARTMENT_ID_5
                        FROM nodb_dupEmployee A
@@ -504,13 +505,13 @@ describe('247. dupColNames2.js', function () {
         index++;
       });
 
-      stream.on('end', function(){
+      stream.on('end', function() {
         stream.destroy();
       });
     });
 
-    it('247.1.11 Duplicate column with case sensitive alias name using nested cursor', async function () {
-      let sql =`
+    it('247.1.11 Duplicate column with case sensitive alias name using nested cursor', async function() {
+      let sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID , A.DEPARTMENT_ID AS "department_id_1"
                        FROM nodb_dupEmployee A
@@ -541,13 +542,13 @@ describe('247. dupColNames2.js', function () {
         index++;
       });
 
-      stream.on('end', function(){
+      stream.on('end', function() {
         stream.destroy();
       });
     });
 
 
-    it('247.1.12 Two duplicate columns using REF cursor', async function () {
+    it('247.1.12 Two duplicate columns using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
       let proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
@@ -590,14 +591,14 @@ describe('247. dupColNames2.js', function () {
           index++;
         });
 
-        stream.on('end', function(){
+        stream.on('end', function() {
           stream.destroy();
           resolve();
         });
       });
     });
 
-    it('247.1.13 Three duplicate columns using REF cursor', async function () {
+    it('247.1.13 Three duplicate columns using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
       let proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
@@ -640,14 +641,14 @@ describe('247. dupColNames2.js', function () {
           index++;
         });
 
-        stream.on('end', function(){
+        stream.on('end', function() {
           stream.destroy();
           resolve();
         });
       });
     });
 
-    it('247.1.14 Duplicate column with conflicting alias name using REF cursor', async function () {
+    it('247.1.14 Duplicate column with conflicting alias name using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
       let proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
@@ -690,14 +691,14 @@ describe('247. dupColNames2.js', function () {
           index++;
         });
 
-        stream.on('end', function(){
+        stream.on('end', function() {
           stream.destroy();
           resolve();
         });
       });
     });
 
-    it('247.1.15 Duplicate column with non-conflicting alias name using REF cursor', async function () {
+    it('247.1.15 Duplicate column with non-conflicting alias name using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
       let proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
@@ -740,14 +741,14 @@ describe('247. dupColNames2.js', function () {
           index++;
         });
 
-        stream.on('end', function(){
+        stream.on('end', function() {
           stream.destroy();
           resolve();
         });
       });
     });
 
-    it('247.1.16 Duplicate column with case sensitive alias name using REF cursor', async function () {
+    it('247.1.16 Duplicate column with case sensitive alias name using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
       let proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
@@ -789,14 +790,14 @@ describe('247. dupColNames2.js', function () {
           index++;
         });
 
-        stream.on('end', function(){
+        stream.on('end', function() {
           stream.destroy();
           resolve();
         });
       });
     });
 
-    it('247.1.17 Duplicate column with case sensitive alias name from dual', async function () {
+    it('247.1.17 Duplicate column with case sensitive alias name from dual', async function() {
       let stream = await connection.queryStream(`SELECT dummy "abc", dummy "ABC" from dual`);
       await new Promise((resolve, reject) => {
         stream.on('metadata', function(metaData) {
@@ -815,7 +816,7 @@ describe('247. dupColNames2.js', function () {
           should.equal(data.ABC, "X");
         });
 
-        stream.on('end', function(){
+        stream.on('end', function() {
           stream.destroy();
           resolve();
         });

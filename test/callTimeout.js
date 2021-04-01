@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -108,7 +108,7 @@ describe('222. callTimeout.js', function() {
     }
   }); // 222.3
 
-  it('222.4 callTimeout is a negative value', async () => {
+  it('222.4 callTimeout is a negative value', function() {
     try {
       const TIME_OUT = -5;
 
@@ -123,7 +123,7 @@ describe('222. callTimeout.js', function() {
     }
   }); // 222.4
 
-  it('222.5 callTimeout == NaN', async () => {
+  it('222.5 callTimeout == NaN', function() {
     try {
       const TIME_OUT = NaN;
 
@@ -138,7 +138,7 @@ describe('222. callTimeout.js', function() {
     }
   });
 
-  it('222.6 callTimeout is a String', async () => {
+  it('222.6 callTimeout is a String', function() {
     try {
       const TIME_OUT = 'foobar';
 

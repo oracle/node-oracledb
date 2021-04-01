@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -33,17 +33,17 @@ module.exports = random;
 
 // generate a random string which length is 'length', with specialStr in it's head and tail
 random.getRandomString = function(length, specialStr) {
-  var str='';
+  var str = '';
   var strLength = length - specialStr.length * 2;
-  for( ; str.length < strLength; str += Math.random().toString(36).slice(2));
+  for (; str.length < strLength; str += Math.random().toString(36).slice(2));
   str = str.substr(0, strLength);
   str = specialStr + str + specialStr;
   return str;
 };
 
-random.getRandomLengthString = function (length) {
-  var str='';
-  for( ; str.length < length; str += Math.random().toString(36).slice(2));
+random.getRandomLengthString = function(length) {
+  var str = '';
+  for (; str.length < length; str += Math.random().toString(36).slice(2));
   str = str.substr(0, length);
   return str;
 };
@@ -51,7 +51,7 @@ random.getRandomLengthString = function (length) {
 random.getRandomNumArray = function(size) {
   var numbers = new Array(size);
   for (var i = 0; i < numbers.length; i++) {
-    numbers[i] = this.getRandomInt(1,9999999);
+    numbers[i] = this.getRandomInt(1, 9999999);
   }
   return numbers;
 };
@@ -79,5 +79,7 @@ random.getIntArray = function(N) {
   //     Optional. Value to use as this when executing callback.
   // Return value
   // A new array with each element being the result of the callback function.
-  return arr.map(function (x, i) { return i; });
+  return arr.map(function(x, i) {
+    return i;
+  });
 };

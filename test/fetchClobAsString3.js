@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -81,7 +81,7 @@ describe('86. fetchClobAsString3.js', function() {
     connection.execute(
       "INSERT INTO nodb_clob2 VALUES (:ID, :C1, :C2)",
       [ id, content1, content2 ],
-      function(err, result){
+      function(err, result) {
         should.not.exist(err);
         should.strictEqual(result.rowsAffected, 1);
         callback();
@@ -93,7 +93,7 @@ describe('86. fetchClobAsString3.js', function() {
     before('create Table and populate', function(done) {
       connection.execute(
         proc_create_table2,
-        function(err){
+        function(err) {
           should.not.exist(err);
           done() ;
         }
@@ -104,7 +104,7 @@ describe('86. fetchClobAsString3.js', function() {
       oracledb.fetchAsString = [];
       connection.execute(
         drop_table2,
-        function(err){
+        function(err) {
           should.not.exist(err);
           done();
         }
@@ -137,7 +137,7 @@ describe('86. fetchClobAsString3.js', function() {
         function(cb) {
           connection.execute(
             "SELECT ID, C1, C2 from nodb_clob2",
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               var specialStrLen_1 = specialStr_1.length;
               var resultLen_1 = result.rows[0][1].length;
@@ -175,7 +175,7 @@ describe('86. fetchClobAsString3.js', function() {
           connection.execute(
             "SELECT ID, C1 from nodb_clob2 where ID = :id",
             { id: id },
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               var specialStrLen_1 = specialStr_1.length;
               var resultLen_1 = result.rows[0][1].length;
@@ -192,7 +192,7 @@ describe('86. fetchClobAsString3.js', function() {
           connection.execute(
             "SELECT C2 from nodb_clob2 where ID = :id",
             { id: id },
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               (result.rows.length).should.not.eql(0);
               var lob = result.rows[0][0];
@@ -300,7 +300,7 @@ describe('86. fetchClobAsString3.js', function() {
 
   describe('86.2 types support for fetchAsString property', function() {
 
-    afterEach ('clear the by-type specification', function ( done ) {
+    afterEach ('clear the by-type specification', function(done) {
       oracledb.fetchAsString = [];
       done ();
     });

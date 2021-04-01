@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -42,9 +42,9 @@ async function ShowUserInfo(conn) {
 }
 
 
-describe('180. externalProxyAuth.js', function () {
+describe('180. externalProxyAuth.js', function() {
 
-  before('Check version greater than 1202000000', async function () {
+  before('Check version greater than 1202000000', async function() {
     let preReqSucc = await testsUtil.checkPrerequisites(1202000000, 1202000000);
     if (!preReqSucc) {
       console.log("    Version less than 1202000000, Aborting.");
@@ -52,9 +52,9 @@ describe('180. externalProxyAuth.js', function () {
     }
   });
 
-  describe('180.1 Non-Pool Connect', function () {
+  describe('180.1 Non-Pool Connect', function() {
 
-    it('180.1.1 Non-Pool Connect: Username-Password Auth', async function () {
+    it('180.1.1 Non-Pool Connect: Username-Password Auth', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -67,14 +67,14 @@ describe('180. externalProxyAuth.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('180.1.2 Non-Pool Connect: External Auth', async function () {
+    it('180.1.2 Non-Pool Connect: External Auth', async function() {
       if (!dbconfig.test.externalAuth) {
         this.skip();
       }
@@ -93,14 +93,14 @@ describe('180. externalProxyAuth.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('180.1.3 Non-Pool Connect: Username-Password Auth with proxy', async function () {
+    it('180.1.3 Non-Pool Connect: Username-Password Auth with proxy', async function() {
       if (!dbconfig.test.proxySessionUser) {
         this.skip();
       }
@@ -119,14 +119,14 @@ describe('180. externalProxyAuth.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('180.1.4 Non-Pool Connect: External Auth with proxy', async function () {
+    it('180.1.4 Non-Pool Connect: External Auth with proxy', async function() {
       if (!dbconfig.test.externalAuth || !dbconfig.test.proxySessionUser) {
         this.skip();
       }
@@ -146,14 +146,14 @@ describe('180. externalProxyAuth.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('180.1.5 Non-Pool Connect: External Auth with proxy no brackets', async function () {
+    it('180.1.5 Non-Pool Connect: External Auth with proxy no brackets', async function() {
       if (!dbconfig.test.externalAuth || !dbconfig.test.proxySessionUser) {
         this.skip();
       }
@@ -176,7 +176,7 @@ describe('180. externalProxyAuth.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
@@ -184,9 +184,9 @@ describe('180. externalProxyAuth.js', function () {
     });
   });
 
-  describe('180.2 Pooled Connect', function () {
+  describe('180.2 Pooled Connect', function() {
 
-    it('180.2.1 Pooled Connect: Username-Password Auth', async function () {
+    it('180.2.1 Pooled Connect: Username-Password Auth', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool(dbconfig);
@@ -200,21 +200,21 @@ describe('180. externalProxyAuth.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('180.2.2 Pooled Connect: External Auth', async function () {
+    it('180.2.2 Pooled Connect: External Auth', async function() {
       if (!dbconfig.test.externalAuth) {
         this.skip();
       }
@@ -234,21 +234,21 @@ describe('180. externalProxyAuth.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('180.2.3 Pooled Connect: Username-Password Auth with proxy when create pool', async function () {
+    it('180.2.3 Pooled Connect: Username-Password Auth with proxy when create pool', async function() {
       if (!dbconfig.test.proxySessionUser) {
         this.skip();
       }
@@ -268,21 +268,21 @@ describe('180. externalProxyAuth.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('180.2.4 Pooled Connect: Username-Password Auth with proxy when acquire connection', async function () {
+    it('180.2.4 Pooled Connect: Username-Password Auth with proxy when acquire connection', async function() {
       if (!dbconfig.test.proxySessionUser) {
         this.skip();
       }
@@ -302,21 +302,21 @@ describe('180. externalProxyAuth.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('180.2.5 Pooled Connect: Username-Password Auth with proxy when acquire connection', async function () {
+    it('180.2.5 Pooled Connect: Username-Password Auth with proxy when acquire connection', async function() {
       if (!dbconfig.test.proxySessionUser) {
         this.skip();
       }
@@ -339,21 +339,21 @@ describe('180. externalProxyAuth.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('180.2.6 Pooled Connect: External Auth with proxy when create pool', async function () {
+    it('180.2.6 Pooled Connect: External Auth with proxy when create pool', async function() {
       if (!dbconfig.test.externalAuth || !dbconfig.test.proxySessionUser) {
         this.skip();
       }
@@ -377,21 +377,21 @@ describe('180. externalProxyAuth.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('180.2.7 Pooled Connect: External Auth with proxy no brackets when create pool', async function () {
+    it('180.2.7 Pooled Connect: External Auth with proxy no brackets when create pool', async function() {
       if (!dbconfig.test.externalAuth || !dbconfig.test.proxySessionUser) {
         this.skip();
       }
@@ -415,21 +415,21 @@ describe('180. externalProxyAuth.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('180.2.8 Pooled Connect: External Auth with proxy when acquire connection', async function () {
+    it('180.2.8 Pooled Connect: External Auth with proxy when acquire connection', async function() {
       if (!dbconfig.test.externalAuth || !dbconfig.test.proxySessionUser) {
         this.skip();
       }
@@ -449,21 +449,21 @@ describe('180. externalProxyAuth.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('180.2.9 Pooled Connect: External Auth with proxy no brackets when acquire connection', async function () {
+    it('180.2.9 Pooled Connect: External Auth with proxy no brackets when acquire connection', async function() {
       if (!dbconfig.test.externalAuth || !dbconfig.test.proxySessionUser) {
         this.skip();
       }
@@ -486,14 +486,14 @@ describe('180. externalProxyAuth.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }

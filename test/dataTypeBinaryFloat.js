@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -53,7 +53,7 @@ describe('30. dataTypeBinaryFloat.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -63,7 +63,7 @@ describe('30. dataTypeBinaryFloat.js', function() {
 
     var numbers = assist.data.numbersForBinaryFloat;
 
-    before('create table, insert data',function(done) {
+    before('create table, insert data', function(done) {
       assist.setUp(connection, tableName, numbers, done);
     });
 
@@ -116,7 +116,7 @@ describe('30. dataTypeBinaryFloat.js', function() {
         0.00000123
       ];
 
-    before('create table, insert data',function(done) {
+    before('create table, insert data', function(done) {
       assist.setUp(connection, tableName, nums, done);
     });
 
@@ -138,17 +138,16 @@ describe('30. dataTypeBinaryFloat.js', function() {
         function(err, result) {
           should.not.exist(err);
 
-          for(var i = 0; i < nums.length; i++) {
-            result.rows[i].CONTENT.should.not.be.exactly(nums[ result.rows[i].NUM ]);
-            approxeq(result.rows[i].CONTENT, nums[ result.rows[i].NUM ]).should.be.ok();
+          for (var i = 0; i < nums.length; i++) {
+            result.rows[i].CONTENT.should.not.be.exactly(nums[result.rows[i].NUM]);
+            approxeq(result.rows[i].CONTENT, nums[result.rows[i].NUM]).should.be.ok();
           }
           done();
         }
       );
     });
 
-    function approxeq(v1, v2)
-    {
+    function approxeq(v1, v2) {
       var precision = 0.001;
       return Math.abs(v1 - v2) < precision;
     }

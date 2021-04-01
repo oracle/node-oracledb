@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -54,7 +54,7 @@ describe('29. dataTypeFloat2.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -62,7 +62,7 @@ describe('29. dataTypeFloat2.js', function() {
 
   describe('29.1 testing FLOAT(p) data type', function() {
 
-    before('create table, insert data',function(done) {
+    before('create table, insert data', function(done) {
       assist.setUp(connection, tableName, numbers, done);
     });
 

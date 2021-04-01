@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -50,11 +50,11 @@ describe('244.dataTypeJson.js', function() {
       should.not.exist(err);
     }
 
-    if(oracledb.oracleClientVersion >= 2100000000 && connection.oracleServerVersion >= 2100000000){
+    if (oracledb.oracleClientVersion >= 2100000000 && connection.oracleServerVersion >= 2100000000) {
       isRunnable = true;
     }
 
-    if(!isRunnable) {
+    if (!isRunnable) {
       this.skip();
     }
 
@@ -70,8 +70,8 @@ describe('244.dataTypeJson.js', function() {
 
   describe('244.1 testing JSON data in various lengths', function() {
 
-    before('create table, insert data',function(done) {
-      if(!isRunnable) {
+    before('create table, insert data', function(done) {
+      if (!isRunnable) {
         this.skip();
       }
       oracledb.stmtCacheSize = 0;
@@ -79,7 +79,7 @@ describe('244.dataTypeJson.js', function() {
     });  // before()
 
     after(function(done) {
-      if(!isRunnable) {
+      if (!isRunnable) {
         this.skip();
       }
       connection.execute(
@@ -121,8 +121,8 @@ describe('244.dataTypeJson.js', function() {
 
   describe('244.3 testing JSON with executeMany()', function() {
 
-    before('create table, insert data',function(done) {
-      if(!isRunnable) {
+    before('create table, insert data', function(done) {
+      if (!isRunnable) {
         this.skip();
         return;
       }
@@ -164,7 +164,7 @@ describe('244.dataTypeJson.js', function() {
     }); // before()
 
     after(function(done) {
-      if(!isRunnable) {
+      if (!isRunnable) {
         this.skip();
         return;
       }
@@ -200,7 +200,7 @@ describe('244.dataTypeJson.js', function() {
       const jsonVal8 = { "key3" : false };
       const jsonVal9 = { "key4" : null };
       const jsonVal10 = { "key5" : "2018/11/01 18:30:00" };
-      const jsonVal11 = { "key6" : [1,2,3,99] };
+      const jsonVal11 = { "key6" : [1, 2, 3, 99] };
       const jsonVal12 = { "key7" : ["json array1", "json array2"], "key8" : [true, false] };
       const jsonVal13 = { "key9" : "#$%^&*()@!~`-+=" };
       const jsonVal14 = { "key10" : "_:;?><,.|/" };
@@ -278,8 +278,8 @@ describe('244.dataTypeJson.js', function() {
     var run_proc_out = "BEGIN " + proc_out_name + " (:i, :c); END;";
     var drop_proc_out = "DROP PROCEDURE " + proc_out_name;
 
-    before('create table, insert data',function(done) {
-      if(!isRunnable) {
+    before('create table, insert data', function(done) {
+      if (!isRunnable) {
         this.skip();
         return;
       }
@@ -310,7 +310,7 @@ describe('244.dataTypeJson.js', function() {
     }); // before()
 
     after(function(done) {
-      if(!isRunnable) {
+      if (!isRunnable) {
         this.skip();
         return;
       }
@@ -442,8 +442,8 @@ describe('244.dataTypeJson.js', function() {
     var sqlRun = "BEGIN " + proc_name + " (:i, :c); END;";
     var proc_drop = "DROP PROCEDURE " + proc_name;
 
-    before('create table, insert data',function(done) {
-      if(!isRunnable) {
+    before('create table, insert data', function(done) {
+      if (!isRunnable) {
         this.skip();
         return;
       }
@@ -465,7 +465,7 @@ describe('244.dataTypeJson.js', function() {
     }); // before()
 
     after(function(done) {
-      if(!isRunnable) {
+      if (!isRunnable) {
         this.skip();
         return;
       }
@@ -564,8 +564,8 @@ describe('244.dataTypeJson.js', function() {
     var run_proc_out = "BEGIN :output := " + fun_name_out + " (:i, :c); END;";
     var drop_proc_out = "DROP FUNCTION " + fun_name_out;
 
-    before('create table, insert data',function(done) {
-      if(!isRunnable) {
+    before('create table, insert data', function(done) {
+      if (!isRunnable) {
         this.skip();
         return;
       }
@@ -596,7 +596,7 @@ describe('244.dataTypeJson.js', function() {
     }); // before()
 
     after(function(done) {
-      if(!isRunnable) {
+      if (!isRunnable) {
         this.skip();
         return;
       }
@@ -735,8 +735,8 @@ describe('244.dataTypeJson.js', function() {
     var sqlRun = "BEGIN " + proc_name + " (:i, :c); END;";
     var proc_drop = "DROP PROCEDURE " + proc_name;
 
-    before('create table, insert data',function(done) {
-      if(!isRunnable) {
+    before('create table, insert data', function(done) {
+      if (!isRunnable) {
         this.skip();
         return;
       }
@@ -758,7 +758,7 @@ describe('244.dataTypeJson.js', function() {
     }); // before()
 
     after(function(done) {
-      if(!isRunnable) {
+      if (!isRunnable) {
         this.skip();
         return;
       }
@@ -836,8 +836,8 @@ describe('244.dataTypeJson.js', function() {
 
   describe('244.8 testing JSON with DML returning into', function() {
 
-    before('create table, insert data',function(done) {
-      if(!isRunnable) {
+    before('create table, insert data', function(done) {
+      if (!isRunnable) {
         this.skip();
         return;
       }
@@ -879,7 +879,7 @@ describe('244.dataTypeJson.js', function() {
     }); // before()
 
     after(function(done) {
-      if(!isRunnable) {
+      if (!isRunnable) {
         this.skip();
         return;
       }
@@ -952,8 +952,8 @@ describe('244.dataTypeJson.js', function() {
 
   describe('244.9 testing JSON with oracledb.fetchAsString and fetchInfo oracledb.STRING', function() {
 
-    before('create table, insert data',function(done) {
-      if(!isRunnable) {
+    before('create table, insert data', function(done) {
+      if (!isRunnable) {
         this.skip();
         return;
       }
@@ -995,7 +995,7 @@ describe('244.dataTypeJson.js', function() {
     }); // before()
 
     after(function(done) {
-      if(!isRunnable) {
+      if (!isRunnable) {
         this.skip();
         return;
       }

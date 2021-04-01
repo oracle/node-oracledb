@@ -559,7 +559,7 @@ assist.jsonExpectedResults = [
   null
 ];
 
-assist.schema ={
+assist.schema = {
   specialChars: [
     '`',
     '~',
@@ -636,9 +636,9 @@ assist.createCharString = function(size) {
   var scSize = assist.data.specialChars.length;
   var scIndex = 0;
   var cIndex = 0;
-  for(var i = 0; i < size; i++) {
-    if(i % 10 == 0) {
-      buffer.append(assist.data.specialChars[scIndex].substr(0,1));
+  for (var i = 0; i < size; i++) {
+    if (i % 10 == 0) {
+      buffer.append(assist.data.specialChars[scIndex].substr(0, 1));
       scIndex = (scIndex + 1) % scSize;
     } else {
       cIndex = Math.floor(Math.random() * 52); // generate a random integer among 0-51
@@ -650,7 +650,7 @@ assist.createCharString = function(size) {
 
 assist.createBuffer = function(size) {
   var array = [];
-  for(var i = 0; i < size; i++) {
+  for (var i = 0; i < size; i++) {
     var b = Math.floor(Math.random() * 256); // generate a random integer among 0-255
     array.push(b);
   }
@@ -664,11 +664,11 @@ assist.createSchemaString = function(size) {
   var nIndex = 0;
   var schema_prefix = "\"";
 
-  for(var i = 0; i < size; i++) {
-    if(i % 3 == 0) {
+  for (var i = 0; i < size; i++) {
+    if (i % 3 == 0) {
       scIndex = Math.floor(Math.random() * 30);
       buffer.append(assist.schema.specialChars[scIndex]);
-    } else if(i % 3 == 1) {
+    } else if (i % 3 == 1) {
       cIndex = Math.floor(Math.random() * 52);
       buffer.append(assist.schema.alphabet[cIndex]);
     } else {
@@ -684,20 +684,19 @@ assist.createSchemaString = function(size) {
 assist.compare2Buffers = function(originalBuf, compareBuf) {
   var node01113plus = true; // assume node runtime version is higher than 0.11.13
   var nodeVer = process.versions["node"].split(".");
-  if(nodeVer[0] === "0" && nodeVer[1] === "11" && nodeVer[2] < "13") {
+  if (nodeVer[0] === "0" && nodeVer[1] === "11" && nodeVer[2] < "13") {
     node01113plus = false;
-  } else if(nodeVer[0] === "0" && nodeVer[1] < "11"){
+  } else if (nodeVer[0] === "0" && nodeVer[1] < "11") {
     node01113plus = false;
   }
-  if(node01113plus === true) {
+  if (node01113plus === true) {
     return originalBuf.equals(compareBuf);
   } else {
     return (originalBuf.toString('utf8') === compareBuf.toString('utf8'));
   }
 };
 
-assist.setUp = function(connection, tableName, array, done)
-{
+assist.setUp = function(connection, tableName, array, done) {
   async.series([
     function(callback) {
       assist.createTable(connection, tableName, callback);
@@ -708,8 +707,7 @@ assist.setUp = function(connection, tableName, array, done)
   ], done);
 };
 
-assist.setUp4sql = function(connection, tableName, array, done)
-{
+assist.setUp4sql = function(connection, tableName, array, done) {
   async.series([
     function(callback) {
       assist.createTable(connection, tableName, callback);
@@ -720,8 +718,7 @@ assist.setUp4sql = function(connection, tableName, array, done)
   ], done);
 };
 
-assist.createTable = function(connection, tableName, done)
-{
+assist.createTable = function(connection, tableName, done) {
   var sqlCreate = assist.sqlCreateTable(tableName);
   connection.execute(
     sqlCreate,
@@ -732,8 +729,7 @@ assist.createTable = function(connection, tableName, done)
   );
 };
 
-assist.insertDataArray = function(connection, tableName, array, done)
-{
+assist.insertDataArray = function(connection, tableName, array, done) {
   async.forEach(array, function(element, cb) {
     // console.log(element.length);
     connection.execute(
@@ -751,8 +747,7 @@ assist.insertDataArray = function(connection, tableName, array, done)
   });
 };
 
-assist.insertData4sql = function(connection, tableName, array, done)
-{
+assist.insertData4sql = function(connection, tableName, array, done) {
   async.forEach(array, function(element, cb) {
     var sql = "INSERT INTO " + tableName + " VALUES(:no, " + element + " )";
 
@@ -770,8 +765,7 @@ assist.insertData4sql = function(connection, tableName, array, done)
   });
 };
 
-assist.sqlCreateTable = function(tableName)
-{
+assist.sqlCreateTable = function(tableName) {
   var createTab =
         "BEGIN " +
         "  DECLARE " +
@@ -784,7 +778,7 @@ assist.sqlCreateTable = function(tableName)
         "     THEN NULL; " +
         "   END; " +
         "   EXECUTE IMMEDIATE (' " +
-        "     CREATE TABLE " + tableName +" ( " +
+        "     CREATE TABLE " + tableName + " ( " +
         "       num NUMBER(10), " +
         "       content " + assist.allDataTypeNames[tableName] + ", " +
         "       CONSTRAINT " + tableName + "_pk PRIMARY KEY (num) " +
@@ -807,13 +801,13 @@ assist.dataTypeSupport = function(connection, tableName, array, done) {
     function(err, result) {
       should.not.exist(err);
       // console.log(result);
-      for(var i = 0; i < array.length; i++) {
+      for (var i = 0; i < array.length; i++) {
         // console.log(result.rows[i].CONTENT);
-        if( (typeof result.rows[i].CONTENT) === 'string' )
+        if ((typeof result.rows[i].CONTENT) === 'string')
           result.rows[i].CONTENT.trim().should.eql(array[result.rows[i].NUM]);
-        else if( (typeof result.rows[i].CONTENT) === 'number' )
+        else if ((typeof result.rows[i].CONTENT) === 'number')
           result.rows[i].CONTENT.should.eql(array[result.rows[i].NUM]);
-        else if( Buffer.isBuffer(result.rows[i].CONTENT) )
+        else if (Buffer.isBuffer(result.rows[i].CONTENT))
           result.rows[i].CONTENT.toString('hex').should.eql(array[result.rows[i].NUM].toString('hex'));
         else if (Object.prototype.toString.call(result.rows[i].CONTENT) === '[object Date]')
           result.rows[i].CONTENT.getTime().should.eql(array[result.rows[i].NUM].getTime());
@@ -828,8 +822,7 @@ assist.dataTypeSupport = function(connection, tableName, array, done) {
 };
 
 
-assist.verifyResultSet = function(connection, tableName, array, done)
-{
+assist.verifyResultSet = function(connection, tableName, array, done) {
   connection.execute(
     "SELECT * FROM " + tableName,
     [],
@@ -843,8 +836,7 @@ assist.verifyResultSet = function(connection, tableName, array, done)
   );
 };
 
-assist.verifyRefCursor = function(connection, tableName, array, done)
-{
+assist.verifyRefCursor = function(connection, tableName, array, done) {
   var createProc =
         "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
         "AS " +
@@ -887,17 +879,16 @@ assist.verifyRefCursor = function(connection, tableName, array, done)
   ], done);
 };
 
-function fetchRowsFromRS(rs, array, cb)
-{
+function fetchRowsFromRS(rs, array, cb) {
   var numRows = 3;
   rs.getRows(numRows, function(err, rows) {
-    if(rows.length > 0) {
-      for(var i = 0; i < rows.length; i++) {
-        if( (typeof rows[i].CONTENT) === 'string' )
+    if (rows.length > 0) {
+      for (var i = 0; i < rows.length; i++) {
+        if ((typeof rows[i].CONTENT) === 'string')
           rows[i].CONTENT.trim().should.eql(array[rows[i].NUM]);
-        else if( (typeof rows[i].CONTENT) === 'number' )
+        else if ((typeof rows[i].CONTENT) === 'number')
           rows[i].CONTENT.should.eql(array[rows[i].NUM]);
-        else if( Buffer.isBuffer(rows[i].CONTENT) )
+        else if (Buffer.isBuffer(rows[i].CONTENT))
           rows[i].CONTENT.toString('hex').should.eql(array[rows[i].NUM].toString('hex'));
         else if (Object.prototype.toString.call(rows[i].CONTENT) === '[object Date]')
           rows[i].CONTENT.getTime().should.eql(array[rows[i].NUM].getTime());
@@ -916,8 +907,7 @@ function fetchRowsFromRS(rs, array, cb)
   });
 }
 
-assist.selectOriginalData = function(connection, tableName, array, done)
-{
+assist.selectOriginalData = function(connection, tableName, array, done) {
   async.forEach(array, function(element, cb) {
     connection.execute(
       "SELECT * FROM " + tableName + " WHERE num = :no",
@@ -936,8 +926,7 @@ assist.selectOriginalData = function(connection, tableName, array, done)
 };
 
 /* Null value verfication */
-assist.verifyNullValues = function(connection, tableName, done)
-{
+assist.verifyNullValues = function(connection, tableName, done) {
   var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
 
   connection.should.be.ok();
@@ -1030,8 +1019,7 @@ assist.verifyNullValues = function(connection, tableName, done)
     }
   ], done);
 
-  function verifyNull(id, cb)
-  {
+  function verifyNull(id, cb) {
     connection.execute(
       "SELECT content FROM " + tableName + " WHERE num = :1",
       [id],
@@ -1051,20 +1039,20 @@ assist.compareNodejsVersion = function(nowVersion, comparedVersion) {
   // else return false;
   var now = nowVersion.split(".");
   var compare = comparedVersion.split(".");
-  if(now[0] > compare[0]) {
+  if (now[0] > compare[0]) {
     return true;
-  } else if(now[0] === compare[0] && now[1] > compare[1]) {
+  } else if (now[0] === compare[0] && now[1] > compare[1]) {
     return true;
-  } else if(now[0] === compare[0] && now[1] === compare[1] && now[2] > compare[2]) {
+  } else if (now[0] === compare[0] && now[1] === compare[1] && now[2] > compare[2]) {
     return true;
-  } else if (now[0] === compare[0] && now[1] === compare[1] && now[2] === compare[2]){
+  } else if (now[0] === compare[0] && now[1] === compare[1] && now[2] === compare[2]) {
     return true;
   } else {
     return false;
   }
 };
 
-assist.verifyRefCursorWithFetchInfo = function(connection, tableName, array, done){
+assist.verifyRefCursorWithFetchInfo = function(connection, tableName, array, done) {
   var createProc =
         "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
         "AS " +
@@ -1113,7 +1101,7 @@ assist.verifyRefCursorWithFetchInfo = function(connection, tableName, array, don
   ], done);
 };
 
-assist.verifyRefCursorWithFetchAsString = function(connection, tableName, array, done){
+assist.verifyRefCursorWithFetchAsString = function(connection, tableName, array, done) {
   var createProc =
         "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
         "AS " +

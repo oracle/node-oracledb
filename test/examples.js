@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -35,13 +35,13 @@ var dbConfig = require('./dbconfig.js');
 describe('3. examples.js', function() {
 
   describe('3.1 connect.js', function() {
-    it('3.1.1 tests a basic connection to the database', function(done){
+    it('3.1.1 tests a basic connection to the database', function(done) {
       oracledb.getConnection(
         dbConfig,
-        function(err, connection){
+        function(err, connection) {
           should.not.exist(err);
           connection.should.be.ok();
-          connection.release( function(err){
+          connection.release(function(err) {
             should.not.exist(err);
             done();
           });
@@ -49,8 +49,8 @@ describe('3. examples.js', function() {
     });
   }); // 3.1
 
-  describe('3.2 version.js', function(){
-    it('3.2.1 shows the node-oracledb version attributes', function(done){
+  describe('3.2 version.js', function() {
+    it('3.2.1 shows the node-oracledb version attributes', function(done) {
 
       var addonVer, clientVer, serverVer;
 
@@ -80,10 +80,10 @@ describe('3. examples.js', function() {
     });
   });
 
-  describe('3.3 select1.js & select2.js', function(){
+  describe('3.3 select1.js & select2.js', function() {
     var connection = false;
 
-    before(function(done){
+    before(function(done) {
       oracledb.getConnection(
         dbConfig,
         function(err, conn) {
@@ -94,14 +94,14 @@ describe('3. examples.js', function() {
       );
     });
 
-    after(function(done){
+    after(function(done) {
       connection.close(function(err) {
         should.not.exist(err);
         done();
       });
     });
 
-    it('3.3.1. execute a basic query', function(done){
+    it('3.3.1. execute a basic query', function(done) {
       var script1 =
         "BEGIN \
             DECLARE \
@@ -132,13 +132,13 @@ describe('3. examples.js', function() {
         END; ";
 
       async.series([
-        function(callback){
-          connection.execute( script1, function(err){
+        function(callback) {
+          connection.execute(script1, function(err) {
             should.not.exist(err);
             callback();
           });
         },
-        function(callback){
+        function(callback) {
           connection.execute(
             "SELECT department_id, department_name "
             + "FROM nodb_eg_dept "
@@ -155,7 +155,7 @@ describe('3. examples.js', function() {
 
     });
 
-    it('3.3.2. execute queries to show array and object formats', function(done){
+    it('3.3.2. execute queries to show array and object formats', function(done) {
       var script2 =
         "BEGIN \
             DECLARE \
@@ -191,13 +191,13 @@ describe('3. examples.js', function() {
         END; ";
 
       async.series([
-        function(callback){
-          connection.execute( script2, function(err){
+        function(callback) {
+          connection.execute(script2, function(err) {
             should.not.exist(err);
             callback();
           });
         },
-        function(callback){
+        function(callback) {
           connection.execute(
             "SELECT location_id, city "
             + "FROM nodb_locations "
@@ -212,7 +212,7 @@ describe('3. examples.js', function() {
             }
           );
         },
-        function(callback){
+        function(callback) {
           connection.execute(
             "SELECT location_id, city "
             + "FROM nodb_locations "
@@ -222,7 +222,7 @@ describe('3. examples.js', function() {
             // A bind variable parameter is needed to disambiguate the following options parameter
             // otherwise you will get Error: ORA-01036: illegal variable name/number
             {outFormat: oracledb.OUT_FORMAT_OBJECT}, // outFormat can be OUT_FORMAT_OBJECT and OUT_FORMAT_ARRAY.  The default is OUT_FORMAT_ARRAY
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               // Cities beginning with 'S' (OUT_FORMAT_OBJECT output format)
               // console.log(result);
@@ -238,7 +238,7 @@ describe('3. examples.js', function() {
   });
 
   /* Oracle Database 12.1.0.2 has extensive JSON datatype support */
-  describe('3.4 selectjson.js - 12.1.0.2 feature', function(){
+  describe('3.4 selectjson.js - 12.1.0.2 feature', function() {
 
     var connection = null;
     var testData = { "userId": 1, "userName": "Chris", "location": "Australia" };
@@ -392,7 +392,7 @@ describe('3. examples.js', function() {
 
   describe('3.5 date.js', function() {
 
-    it('3.5.1 inserts and query DATE and TIMESTAMP columns', function(done){
+    it('3.5.1 inserts and query DATE and TIMESTAMP columns', function(done) {
       var conn = null;
 
       var doConnect = function(cb) {
@@ -407,7 +407,7 @@ describe('3. examples.js', function() {
       };
 
       var doRelease = function(cb) {
-        conn.close( function(err) {
+        conn.close(function(err) {
           should.not.exist(err);
           cb();
         });
@@ -536,7 +536,7 @@ describe('3. examples.js', function() {
       };
 
       var doRelease = function(cb) {
-        conn.close( function(err) {
+        conn.close(function(err) {
           should.not.exist(err);
           cb();
         });
@@ -646,26 +646,26 @@ describe('3. examples.js', function() {
     }); // 3.6.1
   }); // 3.6
 
-  describe('3.7 plsqlproc.js and plsqlfun.js', function(){
+  describe('3.7 plsqlproc.js and plsqlfun.js', function() {
 
     var connection = false;
 
-    before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
+    before(function(done) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         should.not.exist(err);
         connection = conn;
         done();
       });
     });
 
-    after(function(done){
-      connection.release( function(err){
+    after(function(done) {
+      connection.release(function(err) {
         should.not.exist(err);
         done();
       });
     });
 
-    it('3.7.1 calling PL/SQL procedure and binding parameters in various ways', function(done){
+    it('3.7.1 calling PL/SQL procedure and binding parameters in various ways', function(done) {
 
       var proc = "CREATE OR REPLACE PROCEDURE nodb_eg_proc7 (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER) \n" +
                  "    AS \n" +
@@ -680,20 +680,20 @@ describe('3. examples.js', function() {
       };
 
       async.series([
-        function(callback){
+        function(callback) {
           connection.execute(
             proc,
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback();
             }
           );
         },
-        function(callback){
+        function(callback) {
           connection.execute(
             "BEGIN nodb_eg_proc7(:i, :io, :o); END;",
             bindVars,
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               (result.outBinds.o).should.be.exactly(101);
               (result.outBinds.io).should.equal('ChrisJones');
@@ -701,10 +701,10 @@ describe('3. examples.js', function() {
             }
           );
         },
-        function(callback){
+        function(callback) {
           connection.execute(
             "DROP PROCEDURE nodb_eg_proc7",
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback();
             }
@@ -727,20 +727,20 @@ describe('3. examples.js', function() {
       };
 
       async.series([
-        function(callback){
+        function(callback) {
           connection.execute(
             proc,
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback();
             }
           );
         },
-        function(callback){
+        function(callback) {
           connection.execute(
             "BEGIN :ret := nodb_eg_func7(:p1, :p2); END;",
             bindVars,
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               // console.log(result);
               (result.outBinds.ret).should.equal('ChrisJones');
@@ -748,10 +748,10 @@ describe('3. examples.js', function() {
             }
           );
         },
-        function(callback){
+        function(callback) {
           connection.execute(
             "DROP FUNCTION nodb_eg_func7",
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback();
             }
@@ -762,7 +762,7 @@ describe('3. examples.js', function() {
 
   });
 
-  describe('3.8 insert1.js', function(){
+  describe('3.8 insert1.js', function() {
     var connection = false;
     var script =
       "BEGIN " +
@@ -783,68 +783,72 @@ describe('3. examples.js', function() {
       "   '); " +
       "END; ";
 
-    before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
-        if(err) { console.error(err.message); return; }
+    before(function(done) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
+        if (err) {
+          console.error(err.message); return;
+        }
         connection = conn;
         done();
       });
     });
 
-    after(function(done){
-      connection.release( function(err){
-        if(err) { console.error(err.message); return; }
+    after(function(done) {
+      connection.release(function(err) {
+        if (err) {
+          console.error(err.message); return;
+        }
         done();
       });
     });
 
-    it('3.8.1 creates a table and inserts data', function(done){
+    it('3.8.1 creates a table and inserts data', function(done) {
       async.series([
-        function(callback){
+        function(callback) {
           connection.execute(
             script,
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback();
             }
           );
         },
-        function(callback){
+        function(callback) {
           connection.execute(
             "INSERT INTO nodb_eg_insert8 VALUES (:id, :nm)",
             [1, 'Chris'],  // Bind values
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               (result.rowsAffected).should.be.exactly(1);
               callback();
             }
           );
         },
-        function(callback){
+        function(callback) {
           connection.execute(
             "INSERT INTO nodb_eg_insert8 VALUES (:id, :nm)",
             [2, 'Alison'],  // Bind values
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               (result.rowsAffected).should.be.exactly(1);
               callback();
             }
           );
         },
-        function(callback){
+        function(callback) {
           connection.execute(
             "UPDATE nodb_eg_insert8 SET name = 'Bambi'",
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               (result.rowsAffected).should.be.exactly(2);
               callback();
             }
           );
         },
-        function(callback){
+        function(callback) {
           connection.execute(
             "DROP TABLE nodb_eg_insert8 PURGE",
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback();
             }
@@ -854,7 +858,7 @@ describe('3. examples.js', function() {
     });
   });
 
-  describe('3.9 insert2.js', function(){
+  describe('3.9 insert2.js', function() {
     var conn1 = false;
     var conn2 = false;
     var script =
@@ -876,67 +880,75 @@ describe('3. examples.js', function() {
       "   '); " +
       "END; ";
 
-    before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
-        if(err) { console.error(err.message); return; }
+    before(function(done) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
+        if (err) {
+          console.error(err.message); return;
+        }
         conn1 = conn;
-        oracledb.getConnection(dbConfig, function(err, conn){
-          if(err) { console.error(err.message); return; }
+        oracledb.getConnection(dbConfig, function(err, conn) {
+          if (err) {
+            console.error(err.message); return;
+          }
           conn2 = conn;
           done();
         });
       });
     });
 
-    after(function(done){
-      conn1.release( function(err){
-        if(err) { console.error(err.message); return; }
-        conn2.release( function(err){
-          if(err) { console.error(err.message); return; }
+    after(function(done) {
+      conn1.release(function(err) {
+        if (err) {
+          console.error(err.message); return;
+        }
+        conn2.release(function(err) {
+          if (err) {
+            console.error(err.message); return;
+          }
           done();
         });
       });
     });
 
-    it('3.9.1 tests the auto commit behavior', function(done){
+    it('3.9.1 tests the auto commit behavior', function(done) {
       async.series([
-        function(callback){
+        function(callback) {
           conn1.execute(
             script,
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback();
             }
           );
         },
-        function(callback){
+        function(callback) {
           conn1.execute(
             "INSERT INTO nodb_eg_commit9 VALUES (:id, :nm)",
             [1, 'Chris'],  // Bind values
             { autoCommit: true },
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               (result.rowsAffected).should.be.exactly(1);
               callback();
             }
           );
         },
-        function(callback){
+        function(callback) {
           conn1.execute(
             "INSERT INTO nodb_eg_commit9 VALUES (:id, :nm)",
             [2, 'Alison'],  // Bind values
             // { autoCommit: true },
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               (result.rowsAffected).should.be.exactly(1);
               callback();
             }
           );
         },
-        function(callback){
+        function(callback) {
           conn2.execute(
             "SELECT * FROM nodb_eg_commit9  ORDER BY id",
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               // This will only show 'Chris' because inserting 'Alison' is not commited by default.
               // Uncomment the autoCommit option above and you will see both rows
@@ -946,10 +958,10 @@ describe('3. examples.js', function() {
             }
           );
         },
-        function(callback){
+        function(callback) {
           conn1.execute(
             "DROP TABLE nodb_eg_commit9 PURGE",
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback();
             }
@@ -994,27 +1006,37 @@ describe('3. examples.js', function() {
           END LOOP; \
        END; ";
 
-    before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
-        if(err) { console.error(err.message); return; }
+    before(function(done) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
+        if (err) {
+          console.error(err.message); return;
+        }
         connection = conn;
-        connection.execute(createTable, function(err){
-          if(err) { console.error(err.message); return; }
-          connection.execute(insertRows, function(err){
-            if(err) { console.error(err.message); return; }
+        connection.execute(createTable, function(err) {
+          if (err) {
+            console.error(err.message); return;
+          }
+          connection.execute(insertRows, function(err) {
+            if (err) {
+              console.error(err.message); return;
+            }
             done();
           });
         });
       });
     });
 
-    after(function(done){
+    after(function(done) {
       connection.execute(
         'DROP TABLE nodb_eg_emp10 PURGE',
-        function(err){
-          if(err) { console.error(err.message); return; }
-          connection.release( function(err){
-            if(err) { console.error(err.message); return; }
+        function(err) {
+          if (err) {
+            console.error(err.message); return;
+          }
+          connection.release(function(err) {
+            if (err) {
+              console.error(err.message); return;
+            }
             done();
           });
         }
@@ -1040,7 +1062,7 @@ describe('3. examples.js', function() {
         rs.getRow(function(err, row) {
           should.not.exist(err);
 
-          if(row) {
+          if (row) {
             // console.log(row);
             row[0].should.be.exactly('staff ' + rowCount);
             rowCount++;
@@ -1074,7 +1096,7 @@ describe('3. examples.js', function() {
       function fetchRowsFromRS(conn, rs) {
         rs.getRows(numRows, function(err, rows) {
           should.not.exist(err);
-          if(rows.length > 0) {
+          if (rows.length > 0) {
             //console.log("length of rows " + rows.length);
             //for(var i = 0; i < rows.length; i++)
             //  console.log(rows[i]);
@@ -1153,7 +1175,7 @@ describe('3. examples.js', function() {
                WHERE salary > p_sal; \
            END; ";
 
-    before(function(done){
+    before(function(done) {
       async.series([
         function(callback) {
           oracledb.getConnection(
@@ -1186,7 +1208,7 @@ describe('3. examples.js', function() {
       ], done);
     });
 
-    after(function(done){
+    after(function(done) {
 
       async.series([
         function(cb) {
@@ -1208,7 +1230,7 @@ describe('3. examples.js', function() {
           );
         },
         function(cb) {
-          connection.release( function(err) {
+          connection.release(function(err) {
             should.not.exist(err);
             cb();
           });
@@ -1241,13 +1263,13 @@ describe('3. examples.js', function() {
           numRows,
           function(err, rows) {
             should.not.exist(err);
-            if(rows.length > 0) {
+            if (rows.length > 0) {
               // console.log("fetchRowsFromRS(): Got " + rows.length + " rows");
               // console.log(rows);
               rows.length.should.be.exactly(5);
               fetchRowsFromRS(resultSet);
             } else {
-              resultSet.close( function(err) {
+              resultSet.close(function(err) {
                 should.not.exist(err);
                 done();
               });

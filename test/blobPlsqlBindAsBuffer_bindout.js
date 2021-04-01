@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -212,7 +212,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
         });
 
         lob.on('finish', function() {
-          connection.commit( function(err) {
+          connection.commit(function(err) {
             should.not.exist(err);
             return callback();
           });
@@ -244,7 +244,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
         });
 
         lob.on('end', function() {
-          fs.readFile( jpgFileName, function(err, originalData) {
+          fs.readFile(jpgFileName, function(err, originalData) {
             should.not.exist(err);
             should.strictEqual(totalLength, originalData.length);
             originalData.should.eql(blobData);
@@ -291,7 +291,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
   // compare the result buffer with the original inserted buffer
   var compareResultBufAndOriginal = function(resultVal, originalBuffer, specialStr) {
-    if(originalBuffer.length > 0 ) {
+    if (originalBuffer.length > 0) {
       var resultLength = resultVal.length;
       var specStrLength = specialStr.length;
       should.strictEqual(resultLength, originalBuffer.length);
@@ -306,7 +306,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
       sqlRun,
       bindVar,
       function(err, result) {
-        if(originalBuf == "EMPTY_LOB" || originalBuf == undefined || originalBuf == null || originalBuf == "") {
+        if (originalBuf == "EMPTY_LOB" || originalBuf == undefined || originalBuf == null || originalBuf == "") {
           should.not.exist(err);
           should.strictEqual(result.outBinds.b, null);
           callback();
@@ -1544,7 +1544,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
               });
 
               lob.on('end', function() {
-                fs.readFile( jpgFileName, function(err, originalData) {
+                fs.readFile(jpgFileName, function(err, originalData) {
                   should.not.exist(err);
                   should.strictEqual(totalLength, originalData.length);
                   originalData.should.eql(blobData);

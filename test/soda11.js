@@ -98,10 +98,10 @@ describe('179. soda11.js', () => {
 
       should.strictEqual(collection.name, t_collname);
 
-      should.strictEqual(typeof(collection.metaData), "object");
+      should.strictEqual(typeof (collection.metaData), "object");
       should.deepEqual(collection.metaData, t_metadata);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -114,7 +114,7 @@ describe('179. soda11.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -170,7 +170,7 @@ describe('179. soda11.js', () => {
       );
       // ORA-01918: user \'nonexistent\' does not exist
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -183,7 +183,7 @@ describe('179. soda11.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -280,20 +280,20 @@ describe('179. soda11.js', () => {
       );
       // ORA-40669: Collection create failed: collection with same name but different metadata exists.
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (collection1) {
         try {
           await collection1.drop();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -351,7 +351,7 @@ describe('179. soda11.js', () => {
       /* The key must always be a string and is always returned a string as
          well -- even if the "type" in the database is numeric. */
       let testKey = '86755';
-      let testDoc = sd.createDocument(testContent, { key: testKey } );
+      let testDoc = sd.createDocument(testContent, { key: testKey });
       should.strictEqual(testDoc.key, testKey);
       await coll.insertOne(testDoc);
 
@@ -368,13 +368,13 @@ describe('179. soda11.js', () => {
       let res = await coll.drop();
       should.strictEqual(res.dropped, true);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -434,18 +434,18 @@ describe('179. soda11.js', () => {
          well -- even if the "type" in the database is numeric. */
       let testKey = 86755;
       await testsUtil.assertThrowsAsync(
-        async () => await sd.createDocument(testContent, { key: testKey } ),
+        async () => await sd.createDocument(testContent, { key: testKey }),
         /NJS-007: invalid value for "key" in parameter 2/
       );
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (coll) {
         try {
           let res = await coll.drop();
           should.strictEqual(res.dropped, true);
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -453,7 +453,7 @@ describe('179. soda11.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -526,7 +526,7 @@ describe('179. soda11.js', () => {
 
       should.strictEqual(myDoc.mediaType, testMediaType);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -534,7 +534,7 @@ describe('179. soda11.js', () => {
         try {
           let res = await coll.drop();
           should.strictEqual(res.dropped, true);
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -542,7 +542,7 @@ describe('179. soda11.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -610,7 +610,7 @@ describe('179. soda11.js', () => {
         /NJS-007: invalid value for "mediaType" in parameter 2/
       );
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -618,7 +618,7 @@ describe('179. soda11.js', () => {
         try {
           let res = await coll.drop();
           should.strictEqual(res.dropped, true);
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -626,7 +626,7 @@ describe('179. soda11.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -682,12 +682,12 @@ describe('179. soda11.js', () => {
 
       let testContent = {};
       let testKey = '86755';
-      let testDoc = sd.createDocument(testContent, { key: testKey } );
+      let testDoc = sd.createDocument(testContent, { key: testKey });
 
       let outDocument = await coll.insertOneAndGet(testDoc);
       should.exist(outDocument);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -695,7 +695,7 @@ describe('179. soda11.js', () => {
         try {
           let res = await coll.drop();
           should.strictEqual(res.dropped, true);
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -703,7 +703,7 @@ describe('179. soda11.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -210,7 +210,7 @@ describe('133. longrawProcedureBind_inout.js', function() {
 
   var longraw_bindinout = function(insertContent, proc_bindinout_exec, callback) {
     var insertBuf, expectedBuf;
-    if(insertContent == null || insertContent == undefined || insertContent.length == 0) {
+    if (insertContent == null || insertContent == undefined || insertContent.length == 0) {
       insertBuf = insertContent;
       expectedBuf = null;
     } else {
@@ -226,7 +226,7 @@ describe('133. longrawProcedureBind_inout.js', function() {
       bind_in_var,
       function(err, result) {
         should.not.exist(err);
-        if(expectedBuf == null) {
+        if (expectedBuf == null) {
           should.strictEqual(result.outBinds.c, expectedBuf);
         } else {
           assist.compare2Buffers(result.outBinds.c, expectedBuf);
@@ -238,7 +238,7 @@ describe('133. longrawProcedureBind_inout.js', function() {
 
   var longraw_bindinout_maxSize = function(insertContent, proc_bindinout_exec, maxsize, callback) {
     var insertBuf, expectedBuf;
-    if(insertContent == null || insertContent == undefined || insertContent.length == 0) {
+    if (insertContent == null || insertContent == undefined || insertContent.length == 0) {
       insertBuf = insertContent;
       expectedBuf = null;
     } else {
@@ -254,7 +254,7 @@ describe('133. longrawProcedureBind_inout.js', function() {
       bind_in_var,
       function(err, result) {
         should.not.exist(err);
-        if(expectedBuf == null) {
+        if (expectedBuf == null) {
           should.strictEqual(result.outBinds.c, expectedBuf);
         } else {
           assist.compare2Buffers(result.outBinds.c, expectedBuf);

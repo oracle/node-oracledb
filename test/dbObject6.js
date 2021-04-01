@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -47,7 +47,7 @@ describe('205. dbObject6.js', () => {
       let plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // before()
@@ -58,7 +58,7 @@ describe('205. dbObject6.js', () => {
       await conn.execute(sql);
 
       await conn.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // after()
@@ -133,7 +133,7 @@ describe('205. dbObject6.js', () => {
       let result = await conn.execute(sql);
 
       for (let i = 0; i < result.rows.length; i++) {
-        should.strictEqual(result.rows[i][0], (i + 1) );
+        should.strictEqual(result.rows[i][0], (i + 1));
         should.strictEqual(result.rows[i][1].SDO_GTYPE, 2003);
         should.strictEqual(result.rows[i][1].SDO_SRID, null);
         should.strictEqual(result.rows[i][1].SDO_POINT, null);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -40,7 +40,7 @@ describe('213. dbObject14.js', () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
 
-      let plsql =`
+      let plsql = `
         CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
           shirtnumber NUMBER,
           name        VARCHAR2(20)
@@ -48,18 +48,18 @@ describe('213. dbObject14.js', () => {
       `;
       await conn.execute(plsql);
 
-      plsql =`
+      plsql = `
         CREATE OR REPLACE TYPE ${TEAM_T} AS VARRAY(10) OF ${PLAYER_T};
       `;
       await conn.execute(plsql);
 
-      let sql =`
+      let sql = `
         CREATE TABLE ${TABLE} (sportname VARCHAR2(20), team ${TEAM_T})
       `;
       plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // before()
@@ -76,7 +76,7 @@ describe('213. dbObject14.js', () => {
       await conn.execute(sql);
 
       await conn.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // after()

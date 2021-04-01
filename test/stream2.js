@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -425,7 +425,7 @@ describe('14. stream2.js', function() {
 
     function genColumns(size) {
       var buffer = [];
-      for(var i = 0; i < size; i++) {
+      for (var i = 0; i < size; i++) {
         buffer[i] = " column_" + i + " NUMBER";
       }
       return buffer.join();
@@ -512,7 +512,7 @@ describe('14. stream2.js', function() {
         "       THEN NULL; \n" +
         "   END; \n" +
         "   EXECUTE IMMEDIATE (' \n" +
-        "       CREATE TABLE " + tableName +" ( \n" +
+        "       CREATE TABLE " + tableName + " ( \n" +
         "           a VARCHAR2(20),  \n" +
         '           b VARCHAR2(20) \n' +
         "       ) \n" +

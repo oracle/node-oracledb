@@ -202,7 +202,7 @@ describe('178. soda10.js', () => {
 
       await testsUtil.assertThrowsAsync(
         async () => {
-          await collection.insertMany( [] );
+          await collection.insertMany([]);
         },
         /NJS-005/
       );
@@ -223,7 +223,7 @@ describe('178. soda10.js', () => {
 
       await testsUtil.assertThrowsAsync(
         async () => {
-          await collection.insertManyAndGet( [] );
+          await collection.insertManyAndGet([]);
         },
         /NJS-005/
       );

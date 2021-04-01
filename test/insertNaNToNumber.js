@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -47,14 +47,14 @@ describe('141. insertNaNToNumber.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
   });
 
   describe('141.1 SQL, stores NaN', function() {
-    before('create table, insert data',function(done) {
+    before('create table, insert data', function(done) {
       assist.createTable(connection, tableName, done);
     });
 
@@ -112,8 +112,8 @@ describe('141. insertNaNToNumber.js', function() {
                       "IS \n" +
                       "    tmpvar NUMBER; \n" +
                       "BEGIN \n" +
-                      "    insert into "+ tableName +" values (id, value);\n" +
-                      "    select content into tmpvar from "+ tableName +" where num = id;\n" +
+                      "    insert into " + tableName + " values (id, value);\n" +
+                      "    select content into tmpvar from " + tableName + " where num = id;\n" +
                       "    return tmpvar; \n" +
                       "END nodb_bindin_fun_NaN;";
     var sqlRun_bindin = "BEGIN :output := nodb_bindin_fun_NaN (:i, :c); END;";
@@ -123,15 +123,15 @@ describe('141. insertNaNToNumber.js', function() {
                          "IS \n" +
                          "    tmpvar NUMBER; \n" +
                          "BEGIN \n" +
-                         "    insert into "+ tableName +" values (id, value);\n" +
-                         "    select content into tmpvar from "+ tableName +" where num = id;\n" +
-                         "    select content into value from "+ tableName +" where num = id;\n" +
+                         "    insert into " + tableName + " values (id, value);\n" +
+                         "    select content into tmpvar from " + tableName + " where num = id;\n" +
+                         "    select content into value from " + tableName + " where num = id;\n" +
                          "    return tmpvar; \n" +
                          "END nodb_bindinout_fun_NaN;";
     var sqlRun_bindinout = "BEGIN :output := nodb_bindinout_fun_NaN (:i, :c); END;";
     var sqlDrop_bindinout = "DROP FUNCTION nodb_bindinout_fun_NaN";
 
-    before('create table, insert data',function(done) {
+    before('create table, insert data', function(done) {
       async.series([
         function(cb) {
           assist.createTable(connection, tableName, cb);
@@ -280,8 +280,8 @@ describe('141. insertNaNToNumber.js', function() {
     var proc_bindin = "CREATE OR REPLACE PROCEDURE nodb_proc_bindin_NaN(id IN NUMBER, c1 IN NUMBER, c2 OUT NUMBER) \n" +
                       "AS \n" +
                       "BEGIN \n" +
-                      "    insert into "+ tableName +" values (id, c1);\n" +
-                      "    select content into c2 from "+ tableName +" where num = id;\n" +
+                      "    insert into " + tableName + " values (id, c1);\n" +
+                      "    select content into c2 from " + tableName + " where num = id;\n" +
                       "END nodb_proc_bindin_NaN;";
     var sqlRun_bindin = "BEGIN nodb_proc_bindin_NaN (:i, :c1, :c2); END;";
     var sqlDrop_bindin = "DROP PROCEDURE nodb_proc_bindin_NaN";
@@ -289,13 +289,13 @@ describe('141. insertNaNToNumber.js', function() {
     var proc_bindinout = "CREATE OR REPLACE PROCEDURE nodb_proc_bindinout_NaN(id IN NUMBER, c1 IN OUT NUMBER) \n" +
                          "AS \n" +
                          "BEGIN \n" +
-                         "    insert into "+ tableName +" values (id, c1);\n" +
-                         "    select content into c1 from "+ tableName +" where num = id;\n" +
+                         "    insert into " + tableName + " values (id, c1);\n" +
+                         "    select content into c1 from " + tableName + " where num = id;\n" +
                          "END nodb_proc_bindinout_NaN;";
     var sqlRun_bindinout = "BEGIN nodb_proc_bindinout_NaN (:i, :c1); END;";
     var sqlDrop_bindinout = "DROP PROCEDURE nodb_proc_bindinout_NaN";
 
-    before('create table, insert data',function(done) {
+    before('create table, insert data', function(done) {
       async.series([
         function(cb) {
           assist.createTable(connection, tableName, cb);
@@ -478,7 +478,7 @@ describe('141. insertNaNToNumber.js', function() {
                             "END;";
     var proc_drop = "DROP PACKAGE nodb_nan_pkg";
 
-    before('create table, insert data',function(done) {
+    before('create table, insert data', function(done) {
       async.series([
         function(cb) {
           connection.execute(

@@ -58,27 +58,23 @@ describe('252. sodaMetaDataCache.js', function() {
     try {
       pool = await oracledb.createPool({...dbconfig, sodaMetaDataCache : true});
       should.equal(pool.sodaMetaDataCache, true);
-    }
-    catch(err) {
+    } catch (err) {
       should.not.exist(err);
-    }
-    finally {
+    } finally {
       if (pool)
         await pool.close();
     }
   });
 
-  it('252.2 sodaMetaDataCache set to FALSE', async function () {
+  it('252.2 sodaMetaDataCache set to FALSE', async function() {
     let pool = null;
 
     try {
       pool = await oracledb.createPool({...dbconfig, sodaMetaDataCache : false});
       should.equal(pool.sodaMetaDataCache, false);
-    }
-    catch(err) {
+    } catch (err) {
       should.not.exist(err);
-    }
-    finally {
+    } finally {
       await pool.close();
     }
   });
@@ -90,11 +86,9 @@ describe('252. sodaMetaDataCache.js', function() {
     try {
       pool = await oracledb.createPool(dbconfig);
       should.equal(pool.sodaMetaDataCache, false);
-    }
-    catch(err) {
+    } catch (err) {
       should.not.exist(err);
-    }
-    finally {
+    } finally {
       await pool.close();
     }
   });

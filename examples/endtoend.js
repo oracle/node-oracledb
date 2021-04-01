@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -46,7 +46,7 @@ async function run() {
     connection.action = "Query departments";
 
     console.log("Use SQL*Plus as SYSTEM (or ADMIN for Oracle Cloud databases) to execute the query:");
-    console.log("  SELECT username, client_identifier, action, module FROM v$session WHERE username = UPPER('" + dbConfig.user +"');");
+    console.log("  SELECT username, client_identifier, action, module FROM v$session WHERE username = UPPER('" + dbConfig.user + "');");
 
     // Sleep 10 seconds to keep the connection open.  This allows
     // external queries on V$SESSION to show the connection

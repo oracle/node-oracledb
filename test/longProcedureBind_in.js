@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -223,7 +223,7 @@ describe('131. longProcedureBind_in.js', function() {
       },
       function(cb) {
         var expected = insertContent;
-        if(insertContent == "" || insertContent == undefined) {
+        if (insertContent == "" || insertContent == undefined) {
           expected = null;
         }
         checkResult(expected, cb);
@@ -249,7 +249,7 @@ describe('131. longProcedureBind_in.js', function() {
       },
       function(cb) {
         var expected = insertContent;
-        if(insertContent == "" || insertContent == undefined) {
+        if (insertContent == "" || insertContent == undefined) {
           expected = null;
         }
         checkResult(expected, cb);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -38,14 +38,14 @@ describe('212. dbObject13.js', function() {
 
   before(async function() {
     isRunnable = await testsUtil.checkPrerequisites();
-    if(!isRunnable) {
+    if (!isRunnable) {
       this.skip();
       return;
     } else {
       try {
         conn = await oracledb.getConnection(dbconfig);
 
-        let plsql =`
+        let plsql = `
           CREATE OR REPLACE PACKAGE ${PKG} AS
             TYPE playerType IS RECORD (name VARCHAR2(40), position VARCHAR2(20), shirtnumber NUMBER);
             TYPE teamType IS VARRAY(10) OF playerType;
@@ -54,7 +54,7 @@ describe('212. dbObject13.js', function() {
         `;
         await conn.execute(plsql);
 
-        plsql =`
+        plsql = `
           CREATE OR REPLACE PACKAGE BODY ${PKG} AS
             PROCEDURE assignShirtNumbers (t_in IN teamType, t_out OUT teamType) AS
               p teamType := teamType();
@@ -71,7 +71,7 @@ describe('212. dbObject13.js', function() {
         `;
         await conn.execute(plsql);
 
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }
@@ -79,7 +79,7 @@ describe('212. dbObject13.js', function() {
   }); // before()
 
   after(async function() {
-    if(!isRunnable) {
+    if (!isRunnable) {
       return;
     } else {
       try {
@@ -87,7 +87,7 @@ describe('212. dbObject13.js', function() {
         await conn.execute(sql);
 
         await conn.close();
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }

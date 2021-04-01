@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021,Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -40,7 +40,7 @@ describe('209. dbObject10.js', () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
 
-      let plsql =`
+      let plsql = `
         CREATE OR REPLACE TYPE ${TYPE} AS OBJECT (
           idno         NUMBER,
           first_name   VARCHAR2(20),
@@ -101,7 +101,7 @@ describe('209. dbObject10.js', () => {
       let sql = `SELECT c.contact.get_idno() FROM ${TABLE} c`;
       let result = await conn.execute(sql);
       should.strictEqual(result.rows[0][0], t_idno);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 209.1

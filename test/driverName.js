@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -48,7 +48,7 @@ describe('69. driverName.js', function() {
       },
       function(pool, cb) {
         pool.should.be.ok();
-        pool.getConnection( function(err, connection) {
+        pool.getConnection(function(err, connection) {
           cb(err, connection, pool);
         });
       },
@@ -63,11 +63,10 @@ describe('69. driverName.js', function() {
 
             // Since 12.1.0.2, OCI_ATTR_DRIVER_NAME with 30 characters has been supported
             // Database server can then return the full driver name, e.g. 'node-oracledb 1.11'
-            if(serverVer >= 1201000200) {
+            if (serverVer >= 1201000200) {
               (result.rows[0][0].trim()).should.equal("node-oracledb : " + oracledb.versionString);
-            }
-            // previous databases only returns the first 8 characters of the driver name
-            else {
+            } else {
+              // previous databases only returns the first 8 characters of the driver name
               (result.rows[0][0]).should.equal("node-ora");
             }
 
@@ -77,7 +76,7 @@ describe('69. driverName.js', function() {
       }
     ], function(err, connection, pool) {
       should.not.exist(err);
-      connection.close( function(err) {
+      connection.close(function(err) {
         should.not.exist(err);
         pool.close(function(err) {
           should.not.exist(err);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -33,16 +33,16 @@ module.exports = sql;
 
 sql.createTable = function(tableName, dataType) {
   var element = dataType;
-  if(dataType === "CHAR") {
+  if (dataType === "CHAR") {
     element = element + "(1000)";
   }
-  if(dataType === "NCHAR") {
+  if (dataType === "NCHAR") {
     element = element + "(1000)";
   }
-  if(dataType === "VARCHAR2") {
+  if (dataType === "VARCHAR2") {
     element = element + "(1000)";
   }
-  if(dataType === "RAW") {
+  if (dataType === "RAW") {
     element = element + "(1000)";
   }
 
@@ -84,20 +84,20 @@ sql.createAllTable = function(tableName, dataTypeArray) {
   async.forEach(dataTypeArray, function(element, cb) {
     var index = dataTypeArray.indexOf(element);
     var length = dataTypeArray.length;
-    var col_name = "col_" + ( index + 1 );
+    var col_name = "col_" + (index + 1);
     var col_type = element;
     var isLast;
 
-    if(col_type === "CHAR") {
+    if (col_type === "CHAR") {
       element = element + "(2000)";
     }
-    if(col_type === "NCHAR") {
+    if (col_type === "NCHAR") {
       element = element + "(1000)";
     }
-    if(col_type === "VARCHAR2") {
+    if (col_type === "VARCHAR2") {
       element = element + "(4000)";
     }
-    if(col_type === "RAW") {
+    if (col_type === "RAW") {
       element = element + "(2000)";
     }
     isLast = (index == (length - 1)) ? true : false;
@@ -169,10 +169,10 @@ sql.createRowid = function(connection, rowid_type, object_number, relative_fno, 
   );
 };
 var appendSql = function(sql, col_name, col_type, isLast) {
-  if(isLast === true) {
+  if (isLast === true) {
     sql = sql + "            " + col_name + " " + col_type + " \n";
   } else {
-    sql = sql + "            " +col_name + " " + col_type + ", \n";
+    sql = sql + "            " + col_name + " " + col_type + ", \n";
   }
   return sql;
 };

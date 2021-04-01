@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -184,7 +184,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         });
 
         lob.on('finish', function() {
-          connection.commit( function(err) {
+          connection.commit(function(err) {
             should.not.exist(err);
             return callback();
           });
@@ -212,7 +212,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
       function(err, result) {
         should.not.exist(err);
         var resultVal = result.outBinds.io;
-        if(originalStr == 'EMPTY_CLOB' || originalStr == null || originalStr == "" || originalStr == undefined) {
+        if (originalStr == 'EMPTY_CLOB' || originalStr == null || originalStr == "" || originalStr == undefined) {
           should.strictEqual(resultVal, null);
         } else {
           compareResultStrAndOriginal(resultVal, originalStr, specialStr);
@@ -1192,7 +1192,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
                   });
 
                   lob.on('end', function() {
-                    fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
+                    fs.readFile(inFileName, { encoding: 'utf8' }, function(err, originalData) {
                       should.not.exist(err);
                       should.strictEqual(clobData, originalData);
                     });
@@ -1252,7 +1252,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
                   });
 
                   lob.on('end', function() {
-                    fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
+                    fs.readFile(inFileName, { encoding: 'utf8' }, function(err, originalData) {
                       should.not.exist(err);
                       should.strictEqual(clobData, originalData);
                     });
@@ -1311,7 +1311,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
                   });
 
                   lob.on('end', function() {
-                    fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
+                    fs.readFile(inFileName, { encoding: 'utf8' }, function(err, originalData) {
                       should.not.exist(err);
                       should.strictEqual(clobData, originalData);
                     });

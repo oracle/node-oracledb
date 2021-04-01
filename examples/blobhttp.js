@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -140,7 +140,7 @@ async function closePoolAndExit() {
     await oracledb.getPool().close(2);
     console.log('Pool closed');
     process.exit(0);
-  } catch(err) {
+  } catch (err) {
     console.error(err.message);
     process.exit(1);
   }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -76,7 +76,7 @@ describe('181. dataTypeXML.js', () => {
       await connection.execute(sql);
       await connection.commit();
       await connection.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
@@ -91,7 +91,7 @@ describe('181. dataTypeXML.js', () => {
       await conn.commit();
       await conn.close();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
@@ -105,7 +105,7 @@ describe('181. dataTypeXML.js', () => {
       await connection.execute(sql);
       await connection.commit();
       await connection.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // after
@@ -122,7 +122,7 @@ describe('181. dataTypeXML.js', () => {
       should.strictEqual(result.rows[0].CONTENT, testXMLData);
       await conn.close();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 181.1
@@ -143,7 +143,7 @@ describe('181. dataTypeXML.js', () => {
 
       await conn.close();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
@@ -165,7 +165,7 @@ describe('181. dataTypeXML.js', () => {
       should.strictEqual(result.rows[0].MYCONTENT, testXMLData);
       await conn.close();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
@@ -188,7 +188,7 @@ describe('181. dataTypeXML.js', () => {
       await conn.commit();
       await conn.close();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
@@ -198,7 +198,7 @@ describe('181. dataTypeXML.js', () => {
   it.skip('181.5 inserts data that larger than 4K', async () => {
 
     let ID = 50;
-    let str = 'a'.repeat(31*1024);
+    let str = 'a'.repeat(31 * 1024);
     let head = '<data>', tail = '</data>\n';
     let xml = head.concat(str).concat(tail);
 
@@ -218,7 +218,7 @@ describe('181. dataTypeXML.js', () => {
       await conn.commit();
       await conn.close();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 181.5

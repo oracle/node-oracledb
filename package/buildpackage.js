@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -78,15 +78,16 @@ async function packageUp() {
     // Build the package
     execSync('npm pack');
 
-  } catch(err) {
+  } catch (err) {
     console.error(err);
   } finally {
     // Undo changes to the repo
     fs.writeFileSync('package.json', origPackageJson);
-    if (origNpmignore)
+    if (origNpmignore) {
       fs.writeFileSync('.npmignore', origNpmignore);
-    else
+    } else {
       fs.unlinkSync('.npmignore');
+    }
   }
 }
 
@@ -97,13 +98,12 @@ function delDir(dir) {
     for (let i = 0; i < f.length; i++) {
       if (fs.lstatSync(dir + '/' + f[i]).isDirectory()) {
         delDir(dir + '/' + f[i]);
-      }
-      else {
+      } else {
         fs.unlinkSync(dir + '/' + f[i]);
       }
     }
     fs.rmdirSync(dir);
-  } catch(err) {
+  } catch (err) {
     if (err && !err.message.match(/ENOENT/))
       console.error(err.message);
   }
@@ -118,7 +118,7 @@ function copyDir(srcDir, destDir) {
       let mode = f[i].match(/\.txt$/) ? 0o644 : 0o755;
       fs.chmodSync(destDir + '/' + f[i], mode);
     }
-  } catch(err) {
+  } catch (err) {
     console.error(err.message);
   }
 }

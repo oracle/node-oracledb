@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -62,7 +62,7 @@ async function run() {
     for (const s of stmts) {
       try {
         await connection.execute(s);
-      } catch(e) {
+      } catch (e) {
         if (e.errorNum != 942)
           console.error(e);
       }
@@ -75,7 +75,7 @@ async function run() {
       `INSERT INTO no_datetab (id, timestampcol, timestamptz, timestampltz, datecol)
        VALUES (1, :ts, :tstz, :tsltz, :td)`,
       { ts: date, tstz: date, tsltz: date, td: date });
-    console.log('Rows inserted: ' + result.rowsAffected );
+    console.log('Rows inserted: ' + result.rowsAffected);
 
     console.log('Query Results:');
     result = await connection.execute(
@@ -94,7 +94,7 @@ async function run() {
       `INSERT INTO no_datetab (id, timestampcol, timestamptz, timestampltz, datecol)
        VALUES (2, :ts, :tstz, :tsltz, :td)`,
       { ts: date, tstz: date, tsltz: date, td: date });
-    console.log('Rows inserted: ' + result.rowsAffected );
+    console.log('Rows inserted: ' + result.rowsAffected);
 
     console.log('Query Results:');
     result = await connection.execute(

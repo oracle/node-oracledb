@@ -68,7 +68,7 @@ describe('175. soda7.js', () => {
 
       await conn.commit();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (collection) {
@@ -78,7 +78,7 @@ describe('175. soda7.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -107,7 +107,7 @@ describe('175. soda7.js', () => {
       );
       // ORA-40748: SKIP and LIMIT attributes cannot be used for count operation.
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -118,7 +118,7 @@ describe('175. soda7.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -147,7 +147,7 @@ describe('175. soda7.js', () => {
       );
       // ORA-40748: SKIP and LIMIT attributes cannot be used for count operation.
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -158,7 +158,7 @@ describe('175. soda7.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -187,7 +187,7 @@ describe('175. soda7.js', () => {
 
       await conn.commit();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -199,7 +199,7 @@ describe('175. soda7.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -228,7 +228,7 @@ describe('175. soda7.js', () => {
       let myDocument;
       for (let i = 0; hasNext; i++) {
         myDocument = await docCursor.getNext();
-        if(!myDocument) {
+        if (!myDocument) {
           hasNext = false;
         } else {
           myContents[i] = myDocument.getContent();
@@ -240,7 +240,7 @@ describe('175. soda7.js', () => {
 
       await docCursor.close();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -252,7 +252,7 @@ describe('175. soda7.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -282,7 +282,7 @@ describe('175. soda7.js', () => {
       let myDocument;
       for (let i = 0; hasNext; i++) {
         myDocument = await docCursor.getNext();
-        if(!myDocument) {
+        if (!myDocument) {
           hasNext = false;
         } else {
           myContents[i] = myDocument.getContent();
@@ -290,10 +290,10 @@ describe('175. soda7.js', () => {
         }
       }
 
-      should.strictEqual( myContents.length, (t_contents.length - numberToSkip) );
+      should.strictEqual(myContents.length, (t_contents.length - numberToSkip));
       await docCursor.close();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -305,7 +305,7 @@ describe('175. soda7.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -334,7 +334,7 @@ describe('175. soda7.js', () => {
       should.strictEqual(myDocument, undefined);
       await docCursor.close();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -346,7 +346,7 @@ describe('175. soda7.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -375,7 +375,7 @@ describe('175. soda7.js', () => {
       let myDocument;
       for (let i = 0; hasNext; i++) {
         myDocument = await docCursor.getNext();
-        if(!myDocument) {
+        if (!myDocument) {
           hasNext = false;
         } else {
           myContents[i] = myDocument.getContent();
@@ -391,7 +391,7 @@ describe('175. soda7.js', () => {
         /NJS-066: invalid SODA document cursor/
       );
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -403,7 +403,7 @@ describe('175. soda7.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -429,12 +429,12 @@ describe('175. soda7.js', () => {
 
       // Get contents
       let myContents = [];
-      for (let i = 0; i < documents.length; i++ ) {
+      for (let i = 0; i < documents.length; i++) {
         myContents[i] = documents[i].getContent();
         (myContents[i]).should.be.oneOf(t_contents);
       }
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -446,7 +446,7 @@ describe('175. soda7.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -465,7 +465,7 @@ describe('175. soda7.js', () => {
       let documents = await collection.find().getDocuments();
       should.deepEqual(documents, []);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -477,7 +477,7 @@ describe('175. soda7.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -504,7 +504,7 @@ describe('175. soda7.js', () => {
       let content = document.getContent();
       content.should.be.oneOf(t_contents);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -516,7 +516,7 @@ describe('175. soda7.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -542,7 +542,7 @@ describe('175. soda7.js', () => {
       let content = document.getContent();
       content.should.be.oneOf(t_contents);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -554,7 +554,7 @@ describe('175. soda7.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -584,9 +584,9 @@ describe('175. soda7.js', () => {
       should.strictEqual(result.count, 2);
 
       let remainingLength = await collection.find().count();
-      should.strictEqual( remainingLength.count, (t_contents.length - result.count) );
+      should.strictEqual(remainingLength.count, (t_contents.length - result.count));
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -598,7 +598,7 @@ describe('175. soda7.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -628,9 +628,9 @@ describe('175. soda7.js', () => {
       should.strictEqual(result.count, 0);
 
       let remainingLength = await collection.find().count();
-      should.strictEqual( remainingLength.count, (t_contents.length - result.count) );
+      should.strictEqual(remainingLength.count, (t_contents.length - result.count));
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -642,7 +642,7 @@ describe('175. soda7.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -672,7 +672,7 @@ describe('175. soda7.js', () => {
       let remainingLength = await collection.find().count();
       should.strictEqual(remainingLength.count, 0);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -684,7 +684,7 @@ describe('175. soda7.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }

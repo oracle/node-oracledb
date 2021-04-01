@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -40,8 +40,10 @@ testsUtil.assertThrowsAsync = async function(fn, RegExp) {
   let f = () => {};
   try {
     await fn();
-  } catch(e) {
-    f = () => { throw e; };
+  } catch (e) {
+    f = () => {
+      throw e;
+    };
   } finally {
     assert.throws(f, RegExp);
   }
@@ -97,14 +99,14 @@ testsUtil.dropTable = async function(tableName) {
   await conn.close();
 };
 
-testsUtil.checkPrerequisites = async function(clientVersion=1805000000, serverVersion=1805000000) {
+testsUtil.checkPrerequisites = async function(clientVersion = 1805000000, serverVersion = 1805000000) {
   if (oracledb.oracleClientVersion < clientVersion) return false;
   try {
     let connection = await oracledb.getConnection(dbconfig);
     if (connection.oracleServerVersion < serverVersion) return false;
     await connection.close();
     return true;
-  } catch(err) {
+  } catch (err) {
     console.log('Error in checking prerequistes:\n', err);
   }
 };
@@ -121,16 +123,16 @@ testsUtil.isSodaRunnable = async function() {
     console.log('Error in checking SODA prerequistes:\n', error);
   }
 
-  if ( (clientVersion < 1805000000) || (serverVersion < 1805000000) ) return false;
+  if ((clientVersion < 1805000000) || (serverVersion < 1805000000)) return false;
 
-  if ( (serverVersion >= 2000000000) && (clientVersion < 2000000000) ) return false;
+  if ((serverVersion >= 2000000000) && (clientVersion < 2000000000)) return false;
 
-  if ( !dbconfig.test.DBA_PRIVILEGE ) return false;
+  if (!dbconfig.test.DBA_PRIVILEGE) return false;
 
   return true;
 };
 
-testsUtil.generateRandomPassword = function(length=6) {
+testsUtil.generateRandomPassword = function(length = 6) {
   let result = "";
   const choices = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   for (let i = 0; i < length; i++) {
@@ -151,7 +153,7 @@ testsUtil.getDBCompatibleVersion = async function() {
       };
       let conn = await oracledb.getConnection(connectionDetails);
       let res = await conn.execute("select name, value from v$parameter where name = 'compatible'");
-      if(res.rows.length > 0) {
+      if (res.rows.length > 0) {
         compatibleVersion = res.rows[0][1];
       }
       await conn.close();
@@ -187,9 +189,9 @@ testsUtil.versionStringCompare = function(version1, version2) {
 testsUtil.getLocalIPAddress = function() {
   const ifaces = os.networkInterfaces();
   let result = [];
-  Object.keys(ifaces).forEach(function (ifname) {
+  Object.keys(ifaces).forEach(function(ifname) {
     var alias = 0;
-    ifaces[ifname].forEach(function (iface) {
+    ifaces[ifname].forEach(function(iface) {
       if ('IPv4' !== iface.family || iface.internal !== false) return undefined;
       if (alias >= 1) {
         result.push({"name": `${ifname}:${alias}`, "address": iface.address});
@@ -203,12 +205,12 @@ testsUtil.getLocalIPAddress = function() {
 };
 
 testsUtil.measureNetworkRoundTripTime = async function() {
-  const startTime = + new Date();
+  const startTime = +new Date();
   try {
     let conn = await oracledb.getConnection(dbconfig);
     await conn.execute("select * from dual");
     await conn.close();
-  } catch(err) {
+  } catch (err) {
     should.not.exist(err);
   }
   return new Date() - startTime;
@@ -312,7 +314,7 @@ testsUtil.dropAQtestUser = async function(AQ_USER) {
 
     try {
       const connAsDBA = await oracledb.getConnection(dbaCredential);
-      let sql =`DROP USER ${AQ_USER} CASCADE`;
+      let sql = `DROP USER ${AQ_USER} CASCADE`;
       await connAsDBA.execute(sql);
     } catch (err) {
       should.not.exist(err);
@@ -320,6 +322,6 @@ testsUtil.dropAQtestUser = async function(AQ_USER) {
   }
 };
 
-testsUtil.sleep = function(ms=1000) {
+testsUtil.sleep = function(ms = 1000) {
   return new Promise(resolve => setTimeout(resolve, ms));
 };

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -130,7 +130,7 @@ async function handleRequest(request, response) {
     //   the desired session state be set.
     connection = await oracledb.getConnection({poolAlias: 'default', tag: sessionTagNeeded /*, matchAnyTag: true */});
     const result = await connection.execute(`SELECT TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') FROM DUAL`);
-    console.log( `getConnection() tag needed was ${sessionTagNeeded}\n  ${result.rows[0][0]}`);
+    console.log(`getConnection() tag needed was ${sessionTagNeeded}\n  ${result.rows[0][0]}`);
   } catch (err) {
     console.error(err.message);
   } finally {
@@ -156,7 +156,7 @@ async function closePoolAndExit() {
     // Database are 19c (or later).
     await oracledb.getPool().close(3);
     process.exit(0);
-  } catch(err) {
+  } catch (err) {
     console.error(err.message);
     process.exit(1);
   }

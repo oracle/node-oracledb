@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -231,7 +231,7 @@ describe('130. longProcedureBind_out.js', function() {
           function(err, result) {
             should.not.exist(err);
             var expected = insertContent;
-            if(insertContent == "" || insertContent == undefined) {
+            if (insertContent == "" || insertContent == undefined) {
               expected = null;
             }
             should.strictEqual(result.outBinds.c, expected);

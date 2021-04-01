@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -33,9 +33,9 @@ const should   = require('should');
 const dbconfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('187. plsqlBindList.js', function () {
+describe('187. plsqlBindList.js', function() {
 
-  async function bindNumberListByPosition (conn, binds) {
+  async function bindNumberListByPosition(conn, binds) {
     const callSql = "begin pkg_bind_number_list_test.TestArrays(:1, :2); end;";
     try {
       return await conn.execute(callSql, binds);
@@ -44,7 +44,7 @@ describe('187. plsqlBindList.js', function () {
     }
   }
 
-  async function bindStringListByPosition (conn, binds) {
+  async function bindStringListByPosition(conn, binds) {
     const callSql = "begin pkg_bind_string_list_test.TestArrays(:1, :2); end;";
     try {
       return await conn.execute(callSql, binds);
@@ -53,7 +53,7 @@ describe('187. plsqlBindList.js', function () {
     }
   }
 
-  async function bindNumberListByName (conn, binds) {
+  async function bindNumberListByName(conn, binds) {
     const callSql = "begin pkg_bind_number_list_test.TestArrays( :bind_arg1 , :bind_arg2 ); end;";
     try {
       return await conn.execute(callSql, binds);
@@ -62,7 +62,7 @@ describe('187. plsqlBindList.js', function () {
     }
   }
 
-  async function bindStringListByName (conn, binds) {
+  async function bindStringListByName(conn, binds) {
     const callSql = "begin pkg_bind_string_list_test.TestArrays( :bind_arg1 , :bind_arg2 ); end;";
     try {
       return await conn.execute(callSql, binds);
@@ -153,9 +153,9 @@ describe('187. plsqlBindList.js', function () {
     }
   });
 
-  describe('187.1 Positive Cases', function () {
+  describe('187.1 Positive Cases', function() {
 
-    it('187.1.1 Bind Object of List by position with type specified', async function () {
+    it('187.1.1 Bind Object of List by position with type specified', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -177,7 +177,7 @@ describe('187. plsqlBindList.js', function () {
       }
     });
 
-    it('187.1.2 Bind Object of List by name with type specified', async function () {
+    it('187.1.2 Bind Object of List by name with type specified', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -199,7 +199,7 @@ describe('187. plsqlBindList.js', function () {
       }
     });
 
-    it('187.1.3 Bind List by position without type specified', async function () {
+    it('187.1.3 Bind List by position without type specified', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -221,7 +221,7 @@ describe('187. plsqlBindList.js', function () {
       }
     });
 
-    it('187.1.4 Bind List by name without type specified', async function () {
+    it('187.1.4 Bind List by name without type specified', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -243,7 +243,7 @@ describe('187. plsqlBindList.js', function () {
       }
     });
 
-    it('187.1.5 Bind STRING List by name without type specified', async function () {
+    it('187.1.5 Bind STRING List by name without type specified', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -265,7 +265,7 @@ describe('187. plsqlBindList.js', function () {
       }
     });
 
-    it('187.1.6 Bind STRING List by position without type specified', async function () {
+    it('187.1.6 Bind STRING List by position without type specified', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -288,9 +288,9 @@ describe('187. plsqlBindList.js', function () {
     });
   });
 
-  describe('187.2 Negative Cases', function () {
+  describe('187.2 Negative Cases', function() {
 
-    it('187.2.1 Bind Empty List by position with type specified', async function () {
+    it('187.2.1 Bind Empty List by position with type specified', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -312,7 +312,7 @@ describe('187. plsqlBindList.js', function () {
       }
     });
 
-    it('187.2.2 Bind Empty List by position without type specified', async function () {
+    it('187.2.2 Bind Empty List by position without type specified', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -336,7 +336,7 @@ describe('187. plsqlBindList.js', function () {
       }
     });
 
-    it('187.2.3 Bind Empty List by name with type specified', async function () {
+    it('187.2.3 Bind Empty List by name with type specified', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -358,7 +358,7 @@ describe('187. plsqlBindList.js', function () {
       }
     });
 
-    it('187.2.4 Bind Empty List by name without type specified', async function () {
+    it('187.2.4 Bind Empty List by name without type specified', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -382,7 +382,7 @@ describe('187. plsqlBindList.js', function () {
       }
     });
 
-    it('187.2.5 Bind NUMBER List by name with STRING as first element', async function () {
+    it('187.2.5 Bind NUMBER List by name with STRING as first element', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -406,7 +406,7 @@ describe('187. plsqlBindList.js', function () {
       }
     });
 
-    it('187.2.6 Bind NUMBER List by position with STRING as second element', async function () {
+    it('187.2.6 Bind NUMBER List by position with STRING as second element', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -430,7 +430,7 @@ describe('187. plsqlBindList.js', function () {
       }
     });
 
-    it('187.2.7 Bind STRING List by name while required type is NUMBER', async function () {
+    it('187.2.7 Bind STRING List by name while required type is NUMBER', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -454,7 +454,7 @@ describe('187. plsqlBindList.js', function () {
       }
     });
 
-    it('187.2.8 Bind STRING List by position while required type is NUMBER', async function () {
+    it('187.2.8 Bind STRING List by position while required type is NUMBER', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -478,7 +478,7 @@ describe('187. plsqlBindList.js', function () {
       }
     });
 
-    it('187.2.9 Bind NUMBER List by name while required type is STRING', async function () {
+    it('187.2.9 Bind NUMBER List by name while required type is STRING', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -502,7 +502,7 @@ describe('187. plsqlBindList.js', function () {
       }
     });
 
-    it('187.2.10 Bind NUMBER List by position while required type is STRING', async function () {
+    it('187.2.10 Bind NUMBER List by position while required type is STRING', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);

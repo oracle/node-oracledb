@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -126,18 +126,18 @@ describe('157. maxRows.js', function() {
   var verifyRows = function(rows, amount) {
     for (var i = 0; i < amount; i++) {
       should.strictEqual(rows[i][0], (i + 1));
-      should.strictEqual(rows[i][1], ("staff " + String(i + 1)) );
+      should.strictEqual(rows[i][1], ("staff " + String(i + 1)));
     }
   };
 
   var sqlQuery = "SELECT * FROM nodb_tab_conn_emp2 ORDER BY id";
 
-  it('157.1 Default maxRows == 0, which means unlimited', function(done){
+  it('157.1 Default maxRows == 0, which means unlimited', function(done) {
     should.strictEqual(oracledb.maxRows, 0);
 
     connection.execute(
       sqlQuery,
-      function(err, result){
+      function(err, result) {
         should.not.exist(err);
         should.exist(result);
         should.strictEqual(result.rows.length, totalAmount);
@@ -147,13 +147,13 @@ describe('157. maxRows.js', function() {
     );
   });
 
-  it("157.2 specify the value at execution", function(done){
+  it("157.2 specify the value at execution", function(done) {
     var fetchAmount = 25;
     connection.execute(
       sqlQuery,
       {},
       { maxRows: fetchAmount },
-      function(err, result){
+      function(err, result) {
         should.not.exist(err);
         should.exist(result);
         should.strictEqual(result.rows.length, fetchAmount);
@@ -163,12 +163,12 @@ describe('157. maxRows.js', function() {
     );
   });
 
-  it('157.3 equals to the total amount of rows', function(done){
+  it('157.3 equals to the total amount of rows', function(done) {
     connection.execute(
       sqlQuery,
       {},
       { maxRows: totalAmount },
-      function(err, result){
+      function(err, result) {
         should.not.exist(err);
         should.exist(result);
         should.strictEqual(result.rows.length, totalAmount);
@@ -178,12 +178,12 @@ describe('157. maxRows.js', function() {
     );
   });
 
-  it('157.4 cannot set it to be a negative number', function(done){
+  it('157.4 cannot set it to be a negative number', function(done) {
     connection.execute(
       sqlQuery,
       {},
       { maxRows: -5 },
-      function(err, result){
+      function(err, result) {
         should.exist(err);
         should.not.exist(result);
         should.strictEqual(
@@ -200,7 +200,7 @@ describe('157. maxRows.js', function() {
       sqlQuery,
       {},
       { maxRows: 500000 },
-      function(err, result){
+      function(err, result) {
         should.not.exist(err);
         should.exist(result);
         verifyRows(result.rows, totalAmount);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -46,8 +46,7 @@ const interval = setInterval(function() {
   console.log("waiting...");
 }, 5000);
 
-function myCallback(message)
-{
+function myCallback(message) {
   // message.type is one of the oracledb.SUBSCR_EVENT_TYPE_* values
   console.log("Message type:", message.type);
   if (message.type == oracledb.SUBSCR_EVENT_TYPE_DEREG) {
@@ -100,7 +99,7 @@ async function setup(connection) {
   for (const s of stmts) {
     try {
       await connection.execute(s);
-    } catch(e) {
+    } catch (e) {
       if (e.errorNum != 942)
         console.error(e);
     }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -83,7 +83,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
     connection.execute(
       "INSERT INTO nodb_blob2 VALUES (:ID, :B1, :B2)",
       [ id, content1, content2 ],
-      function(err, result){
+      function(err, result) {
         should.not.exist(err);
         should.strictEqual(result.rowsAffected, 1);
         callback();
@@ -109,7 +109,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
     before('create Table and populate', function(done) {
       connection.execute(
         proc_create_table2,
-        function(err){
+        function(err) {
           should.not.exist(err);
           done() ;
         }
@@ -119,7 +119,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
     after('drop table', function(done) {
       connection.execute(
         drop_table2,
-        function(err){
+        function(err) {
           should.not.exist(err);
           done();
         }
@@ -154,7 +154,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
         function(cb) {
           connection.execute(
             "SELECT ID, B1, B2 from nodb_blob2",
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
               compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
@@ -187,7 +187,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
           connection.execute(
             "SELECT ID, B1 from nodb_blob2 where ID = :id",
             { id : id },
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
               compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
@@ -201,7 +201,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
           connection.execute(
             "SELECT B2 from nodb_blob2 where ID = :id",
             { id : id },
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               (result.rows.length).should.not.eql(0);
               var lob = result.rows[0][0];
@@ -240,7 +240,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
 
   describe('89.2 types support for fetchAsBuffer property', function() {
 
-    afterEach ('clear the by-type specification', function ( done ) {
+    afterEach ('clear the by-type specification', function(done) {
       oracledb.fetchAsBuffer = [];
       done ();
     });
@@ -393,7 +393,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
     it('89.2.14 negative arbitary buffer value for fetchAsBuffer', function(done) {
       should.throws(
         function() {
-          var buf = assist.createBuffer ( 10 ) ;
+          var buf = assist.createBuffer (10) ;
           oracledb.fetchAsBuffer = buf;
         },
         /NJS-004: invalid value for property [\w]/

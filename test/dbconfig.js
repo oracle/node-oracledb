@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -57,7 +57,7 @@ if (process.env.NODE_ORACLEDB_EXTERNALAUTH) {
   }
 }
 
-if (!config.test.externalAuth){
+if (!config.test.externalAuth) {
   if (process.env.NODE_ORACLEDB_USER) {
     config.user = process.env.NODE_ORACLEDB_USER;
   } else {

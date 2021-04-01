@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -54,7 +54,7 @@ describe('202. dbObject3.js', () => {
       let plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // before()
@@ -68,7 +68,7 @@ describe('202. dbObject3.js', () => {
       await conn.execute(sql);
 
       await conn.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // after()
@@ -97,7 +97,7 @@ describe('202. dbObject3.js', () => {
       should.strictEqual(result.rows[0][1]['ENTRY'].getTime(), date1.getTime());
       should.strictEqual(result.rows[0][1]['EXIT'].getTime(), date2.getTime());
       should.strictEqual(result.rows[0][0], seq);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 202.1
@@ -124,7 +124,7 @@ describe('202. dbObject3.js', () => {
       should.strictEqual(result.rows[0][1]['ENTRY'], null);
       should.strictEqual(result.rows[0][1]['EXIT'], null);
       should.strictEqual(result.rows[0][0], seq);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 202.2
@@ -151,7 +151,7 @@ describe('202. dbObject3.js', () => {
       should.strictEqual(result.rows[0][1]['ENTRY'], null);
       should.strictEqual(result.rows[0][1]['EXIT'], null);
       should.strictEqual(result.rows[0][0], seq);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 202.3
@@ -162,7 +162,7 @@ describe('202. dbObject3.js', () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
 
       const objClass = await conn.getDbObjectClass(TYPE);
-      const testObj = new objClass( {} );
+      const testObj = new objClass({});
 
       let result = await conn.execute(sql, [seq, testObj]);
       should.strictEqual(result.rowsAffected, 1);
@@ -173,7 +173,7 @@ describe('202. dbObject3.js', () => {
 
       should.strictEqual(result.rows[0][1]['ENTRY'], null);
       should.strictEqual(result.rows[0][1]['EXIT'], null);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 202.4

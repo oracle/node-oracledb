@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -31,7 +31,7 @@ const oracledb = require('oracledb');
 const should   = require('should');
 const dbconfig = require('./dbconfig.js');
 
-describe('240. errorOffset.js', async () => {
+describe('240. errorOffset.js', function() {
 
   let conn;
   before(async () => {

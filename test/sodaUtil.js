@@ -56,13 +56,13 @@ sodaUtil.cleanup = async function() {
       }
     }
 
-  } catch(err) {
+  } catch (err) {
     console.log('Error in processing:\n', err);
   } finally {
     if (conn) {
       try {
         await conn.close();
-      } catch(err) {
+      } catch (err) {
         console.log('Error in closing connection:\n', err);
       }
     }
@@ -70,7 +70,7 @@ sodaUtil.cleanup = async function() {
 
 }; // cleanup()
 
-sodaUtil.grantPrivilege=async function(){
+sodaUtil.grantPrivilege = async function() {
   try {
     let credential = {
       user:          dbconfig.test.DBA_user,

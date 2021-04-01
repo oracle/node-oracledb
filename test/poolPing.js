@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -138,7 +138,7 @@ describe("73. poolPing.js", function() {
 
         try {
           pool.poolPingInterval = newInterval;
-        } catch(err) {
+        } catch (err) {
           should.strictEqual(err.name, "TypeError");
         }
         cb();
@@ -248,7 +248,7 @@ describe("73. poolPing.js", function() {
 
     try {
       oracledb.poolPingInterval = Number.MAX_SAFE_INTEGER;
-    } catch(err) {
+    } catch (err) {
       should.exist(err);
       (err.message).should.startWith("NJS-004:");
       // NJS-004: invalid value for property pingPoolInterval
@@ -267,11 +267,11 @@ describe("73. poolPing.js", function() {
         testDefine(upperLimit, cb);
       },
       function(cb) {
-        var upperLimitPlus = upperLimit +1;
+        var upperLimitPlus = upperLimit + 1;
 
-        try{
+        try {
           oracledb.poolPingInterval = upperLimitPlus;
-        } catch(err) {
+        } catch (err) {
           should.exist(err);
           (err.message).should.startWith("NJS-004:");
           cb();
@@ -290,11 +290,11 @@ describe("73. poolPing.js", function() {
         testDefine(lowerLimit, cb);
       },
       function(cb) {
-        var lowerLimitPlus = lowerLimit -1;
+        var lowerLimitPlus = lowerLimit - 1;
 
         try {
           oracledb.poolPingInterval = lowerLimitPlus;
-        } catch(err) {
+        } catch (err) {
           should.exist(err);
           (err.message).should.startWith("NJS-004:");
           cb();
@@ -308,7 +308,7 @@ describe("73. poolPing.js", function() {
 
     try {
       oracledb.poolPingInterval = null;
-    } catch(err) {
+    } catch (err) {
       should.exist(err);
       (err.message).should.startWith("NJS-004:");
 
@@ -322,7 +322,7 @@ describe("73. poolPing.js", function() {
 
     try {
       oracledb.poolPingInterval = NaN;
-    } catch(err) {
+    } catch (err) {
       should.exist(err);
       (err.message).should.startWith("NJS-004:");
 
@@ -335,7 +335,7 @@ describe("73. poolPing.js", function() {
 
     try {
       oracledb.poolPingInterval = undefined;
-    } catch(err) {
+    } catch (err) {
       should.exist(err);
       (err.message).should.startWith("NJS-004:");
 
@@ -348,7 +348,7 @@ describe("73. poolPing.js", function() {
 
     try {
       oracledb.poolPingInterval = 'random-string';
-    } catch(err) {
+    } catch (err) {
       should.exist(err);
       (err.message).should.startWith("NJS-004:");
 
@@ -370,7 +370,7 @@ describe("73. poolPing.js", function() {
             poolPingInterval: userSetInterval
           },
           function(err, pooling) {
-            if(userSetInterval === null) {
+            if (userSetInterval === null) {
               should.not.exist(pooling);
               should.exist(err);
               should.strictEqual(err.message, "NJS-007: invalid value for \"poolPingInterval\" in parameter 1");
@@ -385,7 +385,7 @@ describe("73. poolPing.js", function() {
         );
       },
       function(cb) {
-        if(userSetInterval !== null) {
+        if (userSetInterval !== null) {
           pool.close(function(err) {
             should.not.exist(err);
           });

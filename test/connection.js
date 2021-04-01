@@ -32,7 +32,7 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe('1. connection.js', function(){
+describe('1. connection.js', function() {
 
   var credentials = {
     user:          dbConfig.user,
@@ -40,7 +40,7 @@ describe('1. connection.js', function(){
     connectString: dbConfig.connectString
   };
 
-  describe('1.1 can run SQL query with different output formats', function(){
+  describe('1.1 can run SQL query with different output formats', function() {
 
     var connection = null;
     var script =
@@ -72,7 +72,7 @@ describe('1. connection.js', function(){
           '); \
       END; ";
 
-    before(function(done){
+    before(function(done) {
       oracledb.getConnection(
         credentials,
         function(err, conn) {
@@ -86,13 +86,17 @@ describe('1. connection.js', function(){
       );
     });
 
-    after(function(done){
+    after(function(done) {
       connection.execute(
         'DROP TABLE nodb_conn_dept1 PURGE',
-        function(err){
-          if(err) { console.error(err.message); return; }
-          connection.release( function(err) {
-            if(err) { console.error(err.message); return; }
+        function(err) {
+          if (err) {
+            console.error(err.message); return;
+          }
+          connection.release(function(err) {
+            if (err) {
+              console.error(err.message); return;
+            }
             done();
           });
         }
@@ -108,7 +112,7 @@ describe('1. connection.js', function(){
       defaultFormat.should.be.exactly(oracledb.OUT_FORMAT_ARRAY);
 
       connection.should.be.ok();
-      connection.execute(query, [40], function(err, result){
+      connection.execute(query, [40], function(err, result) {
         should.not.exist(err);
         (result.rows).should.eql([[ 40, 'Human Resources' ]]);
         done();
@@ -119,7 +123,7 @@ describe('1. connection.js', function(){
       connection.should.be.ok();
       connection.execute(
         query, {id: 20}, {outFormat: oracledb.OUT_FORMAT_ARRAY},
-        function(err, result){
+        function(err, result) {
           should.not.exist(err);
           (result.rows).should.eql([[ 20, 'Marketing' ]]);
           done();
@@ -127,11 +131,11 @@ describe('1. connection.js', function(){
       );
     });
 
-    it('1.1.3 OBJECT format', function(done){
+    it('1.1.3 OBJECT format', function(done) {
       connection.should.be.ok();
       connection.execute(
         query, {id: 20}, {outFormat: oracledb.OUT_FORMAT_OBJECT},
-        function(err, result){
+        function(err, result) {
           should.not.exist(err);
           (result.rows).should.eql([{ DEPARTMENT_ID: 20, DEPARTMENT_NAME: 'Marketing' }]);
           done();
@@ -139,11 +143,11 @@ describe('1. connection.js', function(){
       );
     });
 
-    it('1.1.4 Negative test - invalid outFormat value', function(done){
+    it('1.1.4 Negative test - invalid outFormat value', function(done) {
       connection.should.be.ok();
       connection.execute(
         query, {id: 20}, {outFormat:0 },
-        function(err, result){
+        function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-004:');
           // NJS-004: invalid value for property outFormat
@@ -154,7 +158,7 @@ describe('1. connection.js', function(){
     });
   });
 
-  describe('1.2 can call PL/SQL procedures', function(){
+  describe('1.2 can call PL/SQL procedures', function() {
     var connection = false;
 
     var proc = "CREATE OR REPLACE PROCEDURE nodb_bindingtest (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT VARCHAR2) "
@@ -163,31 +167,39 @@ describe('1. connection.js', function(){
                 + "  p_out := p_in || ' ' || p_inout; "
                 + "END; ";
 
-    before(function(done){
+    before(function(done) {
       oracledb.getConnection(credentials, function(err, conn) {
-        if(err) { console.error(err.message); return; }
+        if (err) {
+          console.error(err.message); return;
+        }
         connection = conn;
         connection.execute(proc, function(err) {
-          if(err) { console.error(err.message); return; }
+          if (err) {
+            console.error(err.message); return;
+          }
           done();
         });
       });
     });
 
-    after(function(done){
+    after(function(done) {
       connection.execute(
         "DROP PROCEDURE nodb_bindingtest",
-        function(err){
-          if(err) { console.error(err.message); return; }
+        function(err) {
+          if (err) {
+            console.error(err.message); return;
+          }
           connection.release(function(err) {
-            if(err) { console.error(err.message); return; }
+            if (err) {
+              console.error(err.message); return;
+            }
             done();
           });
         }
       );
     });
 
-    it('1.2.1 bind parameters in various ways', function(done){
+    it('1.2.1 bind parameters in various ways', function(done) {
       var bindValues = {
         i: 'Alan', // default is type STRING and direction Infinity
         io: { val: 'Turing', type: oracledb.STRING, dir: oracledb.BIND_INOUT },
@@ -197,7 +209,7 @@ describe('1. connection.js', function(){
       connection.execute(
         "BEGIN nodb_bindingtest(:i, :io, :o); END;",
         bindValues,
-        function(err, result){
+        function(err, result) {
           should.not.exist(err);
           (result.outBinds.io).should.equal('Turing');
           (result.outBinds.o).should.equal('Alan Turing');
@@ -247,12 +259,16 @@ describe('1. connection.js', function(){
 
     beforeEach('get connection and prepare table', function(done) {
       oracledb.getConnection(credentials, function(err, conn) {
-        if(err) { console.error(err.message); return; }
+        if (err) {
+          console.error(err.message); return;
+        }
         connection = conn;
         conn.execute(
           makeTable,
-          function(err){
-            if(err) { console.error(err.message); return; }
+          function(err) {
+            if (err) {
+              console.error(err.message); return;
+            }
             done();
           }
         );
@@ -263,10 +279,14 @@ describe('1. connection.js', function(){
       oracledb.stmtCacheSize = defaultStmtCache;
       connection.execute(
         "DROP TABLE nodb_conn_emp4 PURGE",
-        function(err){
-          if(err) { console.error(err.message); return; }
-          connection.release( function(err){
-            if(err) { console.error(err.message); return; }
+        function(err) {
+          if (err) {
+            console.error(err.message); return;
+          }
+          connection.release(function(err) {
+            if (err) {
+              console.error(err.message); return;
+            }
             done();
           });
         }
@@ -747,7 +767,7 @@ describe('1. connection.js', function(){
               cb();
             }
           );
-        },function(cb) {
+        }, function(cb) {
           conn.close(function(err) {
             should.not.exist(err);
             cb();
@@ -770,7 +790,7 @@ describe('1. connection.js', function(){
 
   describe('1.9 connectString & connectionString specified', function() {
     it('1.9.1 both connectString & ConnectionString specified',
-      function (done) {
+      function(done) {
         oracledb.getConnection(
           {
             user : dbConfig.user,
@@ -791,7 +811,7 @@ describe('1. connection.js', function(){
 
   describe('1.10 user & username specified', function() {
     it('1.10.1 both user & username specified',
-      function (done) {
+      function(done) {
         oracledb.getConnection(
           {
             user : dbConfig.user,
@@ -809,7 +829,7 @@ describe('1. connection.js', function(){
       }
     );
     it('1.10.2 allows username to be used as an alias for user',
-      function (done) {
+      function(done) {
         oracledb.getConnection(
           {
             username : dbConfig.user,
@@ -825,7 +845,7 @@ describe('1. connection.js', function(){
       }
     );
     it('1.10.3 uses username alias to login with SYSDBA privilege',
-      function (done) {
+      function(done) {
         if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
         oracledb.getConnection(
           {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -109,7 +109,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
         sql.executeSql(connection, drop_table_normal, {}, {}, cb);
       },
       function(cb) {
-        connection.release( function(err) {
+        connection.release(function(err) {
           should.not.exist(err);
           cb();
         });
@@ -290,7 +290,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
           "insert into " + tableName_normal + " (ID, content) values (:i, :c)",
           bindVar,
           function(err, result) {
-            if(urowidLen > 4000) {
+            if (urowidLen > 4000) {
               should.exist(err);
               should.strictEqual(err.message, "ORA-01704: string literal too long");
             } else {
@@ -305,7 +305,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
         connection.execute(
           "select * from " + tableName_normal + " where ID = " + insertID,
           function(err, result) {
-            if(urowidLen < 4000) {
+            if (urowidLen < 4000) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
               should.strictEqual(resultVal, urowid);
@@ -319,7 +319,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
         connection.execute(
           "insert into " + tableName_normal + " (ID, content) values (" + insertID + ", '" + urowid + "')",
           function(err, result) {
-            if(urowidLen > 4000) {
+            if (urowidLen > 4000) {
               should.exist(err);
               should.strictEqual(err.message, "ORA-01704: string literal too long");
             } else {
@@ -334,7 +334,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
         connection.execute(
           "select * from " + tableName_normal + " where ID = " + insertID,
           function(err, result) {
-            if(urowidLen < 4000) {
+            if (urowidLen < 4000) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
               should.strictEqual(resultVal, urowid);
@@ -375,7 +375,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
           "insert into " + tableName_normal + " (ID, content) values (:i, :c)",
           bindVar,
           function(err, result) {
-            if(urowidLen > 4000) {
+            if (urowidLen > 4000) {
               should.exist(err);
               should.strictEqual(err.message, "ORA-01704: string literal too long");
             } else {
@@ -390,7 +390,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
         connection.execute(
           "select * from " + tableName_normal + " where ID = " + insertID,
           function(err, result) {
-            if(urowidLen < 4000) {
+            if (urowidLen < 4000) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
               should.strictEqual(resultVal, urowid);
@@ -404,7 +404,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
         connection.execute(
           "insert into " + tableName_normal + " (ID, content) values (" + insertID + ", '" + urowid + "')",
           function(err, result) {
-            if(urowidLen > 4000) {
+            if (urowidLen > 4000) {
               should.exist(err);
               should.strictEqual(err.message, "ORA-01704: string literal too long");
             } else {
@@ -419,7 +419,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
         connection.execute(
           "select * from " + tableName_normal + " where ID = " + insertID,
           function(err, result) {
-            if(urowidLen < 4000) {
+            if (urowidLen < 4000) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
               should.strictEqual(resultVal, urowid);
@@ -478,7 +478,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
           "update " + tableName_normal + " set content = :c where ID = :i",
           bindVar,
           function(err, result) {
-            if(urowidLen > 4000) {
+            if (urowidLen > 4000) {
               should.exist(err);
               should.strictEqual(err.message, "ORA-01704: string literal too long");
             } else {
@@ -493,7 +493,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
         connection.execute(
           "select * from " + tableName_normal + " where ID = " + id_1,
           function(err, result) {
-            if(urowidLen < 4000) {
+            if (urowidLen < 4000) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
               should.strictEqual(resultVal, urowid);
@@ -506,7 +506,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
         connection.execute(
           "update " + tableName_normal + " set content = '" + urowid + "' where ID = " + id_2,
           function(err, result) {
-            if(urowidLen > 4000) {
+            if (urowidLen > 4000) {
               should.exist(err);
               should.strictEqual(err.message, "ORA-01704: string literal too long");
             } else {
@@ -521,7 +521,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
         connection.execute(
           "select * from " + tableName_normal + " where ID = " + id_2,
           function(err, result) {
-            if(urowidLen < 4000) {
+            if (urowidLen < 4000) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
               should.strictEqual(resultVal, urowid);
@@ -590,7 +590,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
         connection.execute(
           "select * from " + tableName_normal + " where ID = " + id_1,
           function(err, result) {
-            if(urowidLen < 4000) {
+            if (urowidLen < 4000) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
               should.strictEqual(resultVal, urowid);
@@ -783,7 +783,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
           i2: { val : urowid_2, dir : oracledb.BIND_IN, type : oracledb.STRING }
         };
         var stream = connection.queryStream(sql_select, bindVar);
-        stream.on('error', function (error) {
+        stream.on('error', function(error) {
           should.not.exist(error);
         });
 
@@ -791,19 +791,19 @@ describe('115. urowidDMLBindAsString2.js', function() {
           should.exist(data);
           counter++;
           var result_id = data[0];
-          if(result_id === id_1) {
+          if (result_id === id_1) {
             (data).should.deepEqual([ id_1, str, urowid_1 ]);
           } else {
             (data).should.deepEqual([ id_2, str, urowid_2 ]);
           }
         });
 
-        stream.on('metadata', function (metadata) {
+        stream.on('metadata', function(metadata) {
           should.exist(metadata);
           (metadata).should.deepEqual([ { name: 'C1' }, { name: 'C2' }, { name: 'ROWID' } ]);
         });
 
-        stream.on('end', function (err) {
+        stream.on('end', function(err) {
           should.not.exist(err);
           should.equal(counter, 2);
           oracledb.maxRows = maxRowsBak;

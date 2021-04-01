@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -33,7 +33,7 @@ var assist   = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
 var async    = require('async');
 
-describe('22. dataTypeChar.js', function(){
+describe('22. dataTypeChar.js', function() {
 
   var connection = null;
   var tableName = "nodb_char";
@@ -62,7 +62,7 @@ describe('22. dataTypeChar.js', function(){
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -70,7 +70,7 @@ describe('22. dataTypeChar.js', function(){
 
   describe('22.1 testing CHAR data in various lengths', function() {
 
-    before('create table, insert data',function(done) {
+    before('create table, insert data', function(done) {
       assist.setUp(connection, tableName, strs, done);
     });
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -141,7 +141,7 @@ describe('158. insertAll.js', function() {
         var sql = "INSERT ALL \n" +
                   "  INTO nodb_tab_ia1 (id, content) VALUES (100, :a) \n" +
                   "  INTO nodb_tab_ia1 (id, content) VALUES (200, :b) \n" +
-                  "  INTO nodb_tab_ia1 (id, content) VALUES (300, :c) \n"+
+                  "  INTO nodb_tab_ia1 (id, content) VALUES (300, :c) \n" +
                   "SELECT * FROM DUAL";
         conn.execute(
           sql,
@@ -179,7 +179,7 @@ describe('158. insertAll.js', function() {
         var sql = "INSERT ALL \n" +
                   "  INTO nodb_tab_ia1 (id, content) VALUES (100, :a) \n" +
                   "  INTO nodb_tab_ia1 (id, content) VALUES (200, :b) \n" +
-                  "  INTO nodb_tab_ia2 (id, content) VALUES (300, :c) \n"+
+                  "  INTO nodb_tab_ia2 (id, content) VALUES (300, :c) \n" +
                   "SELECT * FROM DUAL";
         conn.execute(
           sql,

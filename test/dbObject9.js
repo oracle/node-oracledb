@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -44,7 +44,7 @@ describe('208. dbObject9.js', function() {
 
   before(async function() {
     isRunnable = await testsUtil.checkPrerequisites();
-    if(!isRunnable) {
+    if (!isRunnable) {
       this.skip();
       return;
     } else {
@@ -94,7 +94,7 @@ describe('208. dbObject9.js', function() {
   }); // before()
 
   after(async function() {
-    if(!isRunnable) {
+    if (!isRunnable) {
       return;
     } else {
       try {
@@ -172,7 +172,7 @@ describe('208. dbObject9.js', function() {
 
   it('208.3 Implicit results that fetch objects with Result Set', async () => {
     try {
-      const result = await conn.execute(queryImpres, [], { resultSet: true} );
+      const result = await conn.execute(queryImpres, [], { resultSet: true});
       let rows = await result.implicitResults[0].getRows(PEOPLE.length);
       for (let i = 0; i < PEOPLE.length; i++) {
         should.deepEqual(rows[i][1]._toPojo(), PEOPLE[i]);

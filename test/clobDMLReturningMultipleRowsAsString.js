@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -106,7 +106,7 @@ describe('136. clobDMLReturningMultipleRowsAsString.js', function() {
         for (var index = 0; index < result.outBinds.lobou.length; index++) {
           var lob = result.outBinds.lobou[index];
           var id = result.outBinds.num[index];
-          should.strictEqual(lob, String(id-10));
+          should.strictEqual(lob, String(id - 10));
         }
         callback();
       }

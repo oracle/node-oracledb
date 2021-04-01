@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -67,7 +67,7 @@ describe('71. lobBind1.js', function() {
 
     before('create the tables', function(done) {
 
-      var proc1 ="BEGIN \n" +
+      var proc1 = "BEGIN \n" +
                  "    DECLARE \n" +
                  "        e_table_missing EXCEPTION; \n" +
                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -85,7 +85,7 @@ describe('71. lobBind1.js', function() {
                  "    '); \n" +
                  "END; ";
 
-      var proc2 ="BEGIN \n" +
+      var proc2 = "BEGIN \n" +
                  "    DECLARE \n" +
                  "        e_table_missing EXCEPTION; \n" +
                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -160,7 +160,7 @@ describe('71. lobBind1.js', function() {
 
           lob.on('finish', function() {
 
-            connection.commit( function(err) {
+            connection.commit(function(err) {
               should.not.exist(err);
 
               return callback();
@@ -212,7 +212,7 @@ describe('71. lobBind1.js', function() {
 
             } else {
 
-              fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
+              fs.readFile(inFileName, { encoding: 'utf8' }, function(err, originalData) {
                 should.not.exist(err);
 
                 should.strictEqual(clobData, originalData);
@@ -548,7 +548,7 @@ describe('71. lobBind1.js', function() {
               });
 
               lob.on('end', function() {
-                fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
+                fs.readFile(inFileName, { encoding: 'utf8' }, function(err, originalData) {
                   should.not.exist(err);
 
                   should.strictEqual(clobData, originalData);
@@ -799,7 +799,7 @@ describe('71. lobBind1.js', function() {
                 clobData += chunk;
               });
 
-              lobout.on('error',function(err) {
+              lobout.on('error', function(err) {
                 should.not.exist(err, "lob.on 'error' event!");
               });
 
@@ -824,7 +824,7 @@ describe('71. lobBind1.js', function() {
 
     before('create the tables', function(done) {
 
-      var proc1 ="BEGIN \n" +
+      var proc1 = "BEGIN \n" +
                  "    DECLARE \n" +
                  "        e_table_missing EXCEPTION; \n" +
                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -842,7 +842,7 @@ describe('71. lobBind1.js', function() {
                  "    '); \n" +
                  "END; ";
 
-      var proc2 ="BEGIN \n" +
+      var proc2 = "BEGIN \n" +
                  "    DECLARE \n" +
                  "        e_table_missing EXCEPTION; \n" +
                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -907,7 +907,7 @@ describe('71. lobBind1.js', function() {
           (result.rowsAffected).should.be.exactly(1);
           (result.outBinds.lobbv.length).should.be.exactly(1);
 
-          var inStream = fs.createReadStream( filepath );
+          var inStream = fs.createReadStream(filepath);
           var lob = result.outBinds.lobbv[0];
 
           lob.on('error', function(err) {
@@ -920,7 +920,7 @@ describe('71. lobBind1.js', function() {
 
           lob.on('finish', function() {
 
-            connection.commit( function(err) {
+            connection.commit(function(err) {
               should.not.exist(err);
 
               return callback();
@@ -992,13 +992,13 @@ describe('71. lobBind1.js', function() {
 
           lob.on('end', function() {
 
-            if ( (sequence == 1) || (sequence == 7) ) {
+            if ((sequence == 1) || (sequence == 7)) {
 
               blobData.should.eql(inlob);
 
             } else {
 
-              fs.readFile( inlob, function(err, originalData) {
+              fs.readFile(inlob, function(err, originalData) {
                 should.not.exist(err);
 
                 should.strictEqual(totalLength, originalData.length);
@@ -1297,7 +1297,7 @@ describe('71. lobBind1.js', function() {
 
               lob.on('end', function() {
 
-                fs.readFile( jpgFileName, function(err, originalData) {
+                fs.readFile(jpgFileName, function(err, originalData) {
                   should.not.exist(err);
 
                   should.strictEqual(totalLength, originalData.length);
@@ -1497,7 +1497,7 @@ describe('71. lobBind1.js', function() {
 
                   lob.on('end', function() {
 
-                    fs.readFile( treeAnotherJPG, function(err, treeData) {
+                    fs.readFile(treeAnotherJPG, function(err, treeData) {
                       should.not.exist(err);
 
                       should.strictEqual(totalLength, treeData.length);

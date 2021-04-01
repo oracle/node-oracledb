@@ -30,7 +30,7 @@ const oracledb = require('oracledb');
 const should   = require('should');
 const dbconfig = require('./dbconfig.js');
 
-describe('249. rsGetAllRows1.js', function () {
+describe('249. rsGetAllRows1.js', function() {
   let conn = null;
   let tableName = "nodb_rsgetRows";
   let outFormatBak = oracledb.outFormat;
@@ -70,7 +70,7 @@ describe('249. rsGetAllRows1.js', function () {
         OPEN p_out FOR SELECT * FROM ` + tableName + ` ORDER BY OBJ_ID;
       END;`;
 
-  before (async function () {
+  before (async function() {
     try {
       oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
       conn = await oracledb.getConnection(dbconfig);
@@ -78,13 +78,13 @@ describe('249. rsGetAllRows1.js', function () {
       await conn.execute(rsInsert);
       await conn.execute(rsProc);
       await conn.commit();
-    } catch (err){
+    } catch (err) {
       should.not.exist(err);
     }
   });
 
-  after (async function () {
-    try{
+  after (async function() {
+    try {
       await conn.execute("DROP PROCEDURE nodb_rsgetRowsOut");
       await conn.execute("DROP TABLE " + tableName + " PURGE");
       await conn.close();
@@ -95,8 +95,8 @@ describe('249. rsGetAllRows1.js', function () {
     }
   });
 
-  describe('249.1 ResultSet & getRows()', function () {
-    it('249.1.1 ResultSet + getRows()', async function () {
+  describe('249.1 ResultSet & getRows()', function() {
+    it('249.1.1 ResultSet + getRows()', async function() {
       try {
         let result = await conn.execute(rsSelect, {}, {resultSet : true});
         let rows = await result.resultSet.getRows();
@@ -105,8 +105,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[1].OBJ_ID, 2);
         should.equal(rows[149].OBJ_ID, 150);
         await result.resultSet.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -121,8 +120,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[99].OBJ_ID, 100);
         should.equal(rows[149].OBJ_ID, 150);
         await result.resultSet.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -136,8 +134,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0][0], 126);
         should.equal(rows[24][0], 150);
         await result.resultSet.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -151,8 +148,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 126);
         should.equal(rows[24].OBJ_ID, 150);
         await result.resultSet.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -166,8 +162,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0][0], 2);
         should.equal(rows[148][0], 150);
         await result.resultSet.close ();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -181,15 +176,14 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 2);
         should.equal(rows[148].OBJ_ID, 150);
         await result.resultSet.close ();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
   });
 
-  describe('249.2 REFCURSOR & getRows()', function () {
-    it('249.2.1 RefCursor getRows()', async function () {
+  describe('249.2 REFCURSOR & getRows()', function() {
+    it('249.2.1 RefCursor getRows()', async function() {
       try {
         const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
         const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
@@ -202,13 +196,12 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[1].OBJ_ID, 2);
         should.equal(rows[149].OBJ_ID, 150);
         await rs.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist (err);
       }
     });
 
-    it('249.2.2 RefCursor + getRows(0) ', async function () {
+    it('249.2.2 RefCursor + getRows(0) ', async function() {
       try {
         const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
         const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
@@ -221,13 +214,12 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[1].OBJ_ID, 2);
         should.equal(rows[149].OBJ_ID, 150);
         await rs.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
 
-    it('249.2.3 RefCursor + getRows(125) & getRows()', async function () {
+    it('249.2.3 RefCursor + getRows(125) & getRows()', async function() {
       try {
         const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
         const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
@@ -239,13 +231,12 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 126);
         should.equal(rows[24].OBJ_ID, 150);
         await rs.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
 
-    it( '249.2.4 RefCursor + getRows(125) & getRows(0)',  async function () {
+    it('249.2.4 RefCursor + getRows(125) & getRows(0)',  async function() {
       try {
         let results = await conn.execute(
           "BEGIN nodb_rsgetRowsOut ( :out ); END;",
@@ -257,13 +248,12 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 126);
         should.equal(rows[24].OBJ_ID, 150);
         await rs.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
 
-    it( '249.2.5 RefCursor + getRow() & getRows()',  async function () {
+    it('249.2.5 RefCursor + getRow() & getRows()',  async function() {
       try {
         let results = await conn.execute(
           "BEGIN nodb_rsgetRowsOut ( :out ); END;",
@@ -275,13 +265,12 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 2);
         should.equal(rows[148].OBJ_ID, 150);
         await rs.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
 
-    it( '249.2.6 RefCursor + getRow() & getRows(0)',  async function () {
+    it('249.2.6 RefCursor + getRow() & getRows(0)',  async function() {
       try {
         let results = await conn.execute(
           "BEGIN nodb_rsgetRowsOut ( :out ); END;",
@@ -293,15 +282,14 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 2);
         should.equal(rows[148].OBJ_ID, 150);
         await rs.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
   });
 
-  describe('249.3 ResultSet & getRows() with fetchArraySize', function () {
-    it('249.3.1 ResultSet + getRows() with fetchArraySize = total rows', async function () {
+  describe('249.3 ResultSet & getRows() with fetchArraySize', function() {
+    it('249.3.1 ResultSet + getRows() with fetchArraySize = total rows', async function() {
       try {
         let result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 150 });
         let rows1 = await result.resultSet.getRows();
@@ -311,8 +299,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows1[0].OBJ_ID, 1);
         should.equal(rows1[149].OBJ_ID, 150);
         await result.resultSet.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -327,13 +314,12 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows1[0].OBJ_ID, 1);
         should.equal(rows1[149].OBJ_ID, 150);
         await result.resultSet.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
 
-    it('249.3.3 ResultSet + getRows() with fetchArraySize > total rows', async function () {
+    it('249.3.3 ResultSet + getRows() with fetchArraySize > total rows', async function() {
       try {
         let result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 200 });
         let rows1 = await result.resultSet.getRows();
@@ -343,8 +329,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows1[0].OBJ_ID, 1);
         should.equal(rows1[149].OBJ_ID, 150);
         await result.resultSet.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -359,13 +344,12 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows1[0].OBJ_ID, 1);
         should.equal(rows1[149].OBJ_ID, 150);
         await result.resultSet.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
 
-    it('249.3.5 ResultSet + getRows() with fetchArraySize < total rows', async function () {
+    it('249.3.5 ResultSet + getRows() with fetchArraySize < total rows', async function() {
       try {
         let result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 100 });
         let rows = await result.resultSet.getRows();
@@ -374,8 +358,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[1].OBJ_ID, 2);
         should.equal(rows[149].OBJ_ID, 150);
         await result.resultSet.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -389,8 +372,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[1].OBJ_ID, 2);
         should.equal(rows[149].OBJ_ID, 150);
         await result.resultSet.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -404,8 +386,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 126);
         should.equal(rows[24].OBJ_ID, 150);
         await result.resultSet.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -419,8 +400,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 126);
         should.equal(rows[24].OBJ_ID, 150);
         await result.resultSet.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -434,8 +414,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 126);
         should.equal(rows[24].OBJ_ID, 150);
         await result.resultSet.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -449,8 +428,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 126);
         should.equal(rows[24].OBJ_ID, 150);
         await result.resultSet.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -464,8 +442,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 2);
         should.equal(rows[148].OBJ_ID, 150);
         await result.resultSet.close ();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -479,8 +456,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 2);
         should.equal(rows[148].OBJ_ID, 150);
         await result.resultSet.close ();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -494,8 +470,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 2);
         should.equal(rows[148].OBJ_ID, 150);
         await result.resultSet.close ();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
@@ -509,15 +484,14 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 2);
         should.equal(rows[148].OBJ_ID, 150);
         await result.resultSet.close ();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
   });
 
-  describe('249.4 REFCURSOR & getRows() with fetchArraySize', function () {
-    it('249.4.1 RefCursor getRows() with fetchArraySize > total rows', async function () {
+  describe('249.4 REFCURSOR & getRows() with fetchArraySize', function() {
+    it('249.4.1 RefCursor getRows() with fetchArraySize > total rows', async function() {
       try {
         const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
         const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
@@ -530,13 +504,12 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[1].OBJ_ID, 2);
         should.equal(rows[149].OBJ_ID, 150);
         await rs.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist (err);
       }
     });
 
-    it('249.4.2 RefCursor + getRows(0) with fetchArraySize > total rows', async function () {
+    it('249.4.2 RefCursor + getRows(0) with fetchArraySize > total rows', async function() {
       try {
         const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
         const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
@@ -549,13 +522,12 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[1].OBJ_ID, 2);
         should.equal(rows[149].OBJ_ID, 150);
         await rs.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
 
-    it('249.4.3 RefCursor getRows() with fetchArraySize < total rows', async function () {
+    it('249.4.3 RefCursor getRows() with fetchArraySize < total rows', async function() {
       try {
         const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
         const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
@@ -567,13 +539,12 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 1);
         should.equal(rows[149].OBJ_ID, 150);
         await rs.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist (err);
       }
     });
 
-    it('249.4.4 RefCursor + getRows(0) with fetchArraySize < total rows', async function () {
+    it('249.4.4 RefCursor + getRows(0) with fetchArraySize < total rows', async function() {
       try {
         const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
         const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
@@ -585,13 +556,12 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 1);
         should.equal(rows[149].OBJ_ID, 150);
         await rs.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
 
-    it('249.4.5 RefCursor + getRows(125) & getRows() with fetchArraySize < remaining rows', async function () {
+    it('249.4.5 RefCursor + getRows(125) & getRows() with fetchArraySize < remaining rows', async function() {
       try {
         const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
         const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
@@ -604,13 +574,12 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 126);
         should.equal(rows[24].OBJ_ID, 150);
         await rs.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
 
-    it( '249.4.6 RefCursor + getRows(125) & getRows(0) with fetchArraySize < remaining rows',  async function () {
+    it('249.4.6 RefCursor + getRows(125) & getRows(0) with fetchArraySize < remaining rows',  async function() {
       try {
         let results = await conn.execute(
           "BEGIN nodb_rsgetRowsOut ( :out ); END;",
@@ -623,13 +592,12 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 126);
         should.equal(rows[24].OBJ_ID, 150);
         await rs.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
 
-    it( '249.4.7 RefCursor + getRow() & getRows() with fetchArraySize < remaining rows',  async function () {
+    it('249.4.7 RefCursor + getRow() & getRows() with fetchArraySize < remaining rows',  async function() {
       try {
         let results = await conn.execute(
           "BEGIN nodb_rsgetRowsOut ( :out ); END;",
@@ -642,13 +610,12 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0].OBJ_ID, 2);
         should.equal(rows[148].OBJ_ID, 150);
         await rs.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });
 
-    it( '249.4.8 RefCursor + getRow() & getRows(0) with fetchArraySize < remaining rows',  async function () {
+    it('249.4.8 RefCursor + getRow() & getRows(0) with fetchArraySize < remaining rows',  async function() {
       try {
         let results = await conn.execute(
           "BEGIN nodb_rsgetRowsOut ( :out ); END;",
@@ -661,8 +628,7 @@ describe('249. rsGetAllRows1.js', function () {
         should.equal(rows[0][0], 2);
         should.equal(rows[148][0], 150);
         await rs.close();
-      }
-      catch (err) {
+      } catch (err) {
         should.not.exist(err);
       }
     });

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018 Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -58,7 +58,7 @@ describe('101.binding_defaultBindInout.js', function() {
   });
 
   after(function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -74,7 +74,7 @@ describe('101.binding_defaultBindInout.js', function() {
         inBind1(table_name, procName, dbColType, bindVar, bindType, cb);
       },
       function(cb) {
-        var bindVar =[ sequence, content ];
+        var bindVar = [ sequence, content ];
         inBind1(table_name, procName, dbColType, bindVar, bindType, cb);
       }
     ], callback);
@@ -129,7 +129,7 @@ describe('101.binding_defaultBindInout.js', function() {
         inBind2(table_name, procPre, dbColType, bindVar, bindType, cb);
       },
       function(cb) {
-        var bindVar =[ { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, sequence, content ];
+        var bindVar = [ { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, sequence, content ];
         inBind2(table_name, procPre, dbColType, bindVar, bindType, cb);
       }
     ], callback);
@@ -176,7 +176,7 @@ describe('101.binding_defaultBindInout.js', function() {
   };
 
   var compareErrMsg = function(element, err) {
-    if(element === "BLOB") {
+    if (element === "BLOB") {
       // ORA-06550: line 1, column 7:
       // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_XX'
       // ORA-06550: line 1, column 7:

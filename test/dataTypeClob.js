@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -64,7 +64,7 @@ describe('40. dataTypeClob.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -112,7 +112,7 @@ describe('40. dataTypeClob.js', function() {
 
               lob.on('finish', function() {
                 // now commit updates
-                connection.commit( function(err) {
+                connection.commit(function(err) {
                   should.not.exist(err);
                   callback();
                 });
@@ -146,10 +146,10 @@ describe('40. dataTypeClob.js', function() {
 
               outStream.on('finish', function() {
 
-                fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
+                fs.readFile(inFileName, { encoding: 'utf8' }, function(err, originalData) {
                   should.not.exist(err);
 
-                  fs.readFile( outFileName, { encoding: 'utf8' }, function(err, generatedData) {
+                  fs.readFile(outFileName, { encoding: 'utf8' }, function(err, generatedData) {
                     should.not.exist(err);
                     originalData.should.equal(generatedData);
 
@@ -178,7 +178,7 @@ describe('40. dataTypeClob.js', function() {
               });
 
               lob.on('end', function() {
-                fs.readFile( inFileName, { encoding: 'utf8' }, function(err, data) {
+                fs.readFile(inFileName, { encoding: 'utf8' }, function(err, data) {
                   should.not.exist(err);
                   data.length.should.be.exactly(clob.length);
                   data.should.equal(clob);
@@ -258,7 +258,7 @@ describe('40. dataTypeClob.js', function() {
 
               lob.on('finish', function() {
                 // now commit updates
-                connection.commit( function(err) {
+                connection.commit(function(err) {
                   should.not.exist(err);
                   callback();
                 });
@@ -278,7 +278,7 @@ describe('40. dataTypeClob.js', function() {
               var lob = result.rows[0][0];
               should.exist(lob);
 
-              fs.readFile( inFileName, { encoding: 'utf8' }, function(err, data) {
+              fs.readFile(inFileName, { encoding: 'utf8' }, function(err, data) {
                 should.not.exist(err);
                 lob.getData(function(err, clob) {
                   should.not.exist(err);

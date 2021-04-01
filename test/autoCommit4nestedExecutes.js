@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -149,7 +149,7 @@ describe('63. autoCommit4nestedExecutes.js', function() {
         );
       },
       function getConn(cb) {
-        pool.getConnection( function(err, connecting) {
+        pool.getConnection(function(err, connecting) {
           should.not.exist(err);
           conn = connecting;
           cb();

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -48,7 +48,7 @@ describe('104. dataTypeLongRaw.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -60,7 +60,7 @@ describe('104. dataTypeLongRaw.js', function() {
     var strLen = [10, 100, 1000];
     var strs = [];
     var specialStr = "104.1";
-    for(var i = 0; i < strLen.length; i++)
+    for (var i = 0; i < strLen.length; i++)
       strs[i] = random.getRandomString(strLen[i], specialStr);
 
     before(function(done) {
@@ -105,8 +105,8 @@ describe('104. dataTypeLongRaw.js', function() {
         function(err, result) {
           should.not.exist(err);
           should.strictEqual(result.rows.length, strs.length);
-          for(var i = 0; i < strs.length; i++) {
-            ( Buffer.isBuffer(result.rows[i].CONTENT) ).should.be.ok();
+          for (var i = 0; i < strs.length; i++) {
+            (Buffer.isBuffer(result.rows[i].CONTENT)).should.be.ok();
           }
           done();
         }
@@ -175,8 +175,8 @@ describe('104. dataTypeLongRaw.js', function() {
       rs.getRows(numRows, function(err, rows) {
         should.not.exist(err);
         if (rows.length > 0) {
-          for(var i = 0; i < rows.length; i++) {
-            ( Buffer.isBuffer(rows[i].CONTENT) ).should.be.ok();
+          for (var i = 0; i < rows.length; i++) {
+            (Buffer.isBuffer(rows[i].CONTENT)).should.be.ok();
           }
           return fetchRowsFromRS(rs, array, callback);
         } else {

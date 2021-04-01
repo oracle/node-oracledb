@@ -84,21 +84,21 @@ describe('186. sodaInstanceof.js', function() {
       if (cursor) {
         try {
           await cursor.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
       if (coll) {
         try {
           await coll.drop();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }

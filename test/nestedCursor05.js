@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2020, 2021,Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -140,7 +140,7 @@ describe('236. nestedCursor05.js', () => {
     }
   }); // after()
 
-  const sqlOne =`
+  const sqlOne = `
         select g.description,
         cursor(select p.description,
                cursor(select c.description

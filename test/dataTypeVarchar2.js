@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -37,9 +37,9 @@ describe('24. dataTypeVarchar2.js', function() {
   var connection = null;
   var tableName = "nodb_varchar2";
 
-  var strLen = [10 ,100, 1000, 2000, 3000, 4000]; // char string length
+  var strLen = [10, 100, 1000, 2000, 3000, 4000]; // char string length
   var strs = [];
-  for(var i = 0; i < strLen.length; i++)
+  for (var i = 0; i < strLen.length; i++)
     strs[i] = assist.createCharString(strLen[i]);
 
   before('get one connection', function(done) {
@@ -58,7 +58,7 @@ describe('24. dataTypeVarchar2.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -66,7 +66,7 @@ describe('24. dataTypeVarchar2.js', function() {
 
   describe('24.1 testing VARCHAR2 data in various lengths', function() {
 
-    before('create table, insert data',function(done) {
+    before('create table, insert data', function(done) {
       assist.setUp(connection, tableName, strs, done);
     });
 

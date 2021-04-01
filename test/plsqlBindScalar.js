@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -54,12 +54,12 @@ describe('70. plsqlBindScalar.js', function() {
             cb();
           });
       }
-    ],done);
+    ], done);
 
   }); // before
 
   after(function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -458,7 +458,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     var sqlrun = "BEGIN :output := nodb_plsqlbindfunc73(:dateValue); END;";
     var resultBind = {type: oracledb.DATE, dir: oracledb.BIND_OUT};
-    var dt = new Date( 2016, 8, 1 );
+    var dt = new Date(2016, 8, 1);
 
     it('70.3.1 basic case', function(done) {
       var bindVar = {
@@ -569,7 +569,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.3.6
 
     it('70.3.7 val: invalid Date Value: Feb 30, 2016', function(done) {
-      var date = new Date ( 2016, 1, 30 );
+      var date = new Date (2016, 1, 30);
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -580,7 +580,7 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var resultDate = new Date ( 2016, 2, 1);
+          var resultDate = new Date (2016, 2, 1);
           (result.outBinds.output).should.eql(resultDate);
           done();
         }
@@ -588,7 +588,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.3.7
 
     it('70.3.8 val: 1969-12-31', function(done) {
-      var date = new Date ( 1969, 11, 31 );
+      var date = new Date (1969, 11, 31);
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -606,7 +606,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.3.8
 
     it('70.3.9 val: epoch date 1970-1-1', function(done) {
-      var date = new Date ( 1970, 0, 1 );
+      var date = new Date (1970, 0, 1);
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -624,7 +624,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.3.9
 
     it('70.3.10 val: create Date value using numeric value: new Date(number)', function(done) {
-      var date = new Date ( 1476780296673 );
+      var date = new Date (1476780296673);
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -636,7 +636,7 @@ describe('70. plsqlBindScalar.js', function() {
         function(err, result) {
           should.not.exist(err);
           //Oracle stores only the fractions up to second in a DATE field.
-          var dateResult = new Date ( 1476780296000 );
+          var dateResult = new Date (1476780296000);
           (result.outBinds.output).should.eql(dateResult);
           done();
         }
@@ -644,7 +644,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.3.10
 
     it('70.3.11 val: create Date value using numeric value: new Date(7 number)', function(done) {
-      var date = new Date ( 2011, 5, 3, 4, 6, 23, 123 );
+      var date = new Date (2011, 5, 3, 4, 6, 23, 123);
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -656,7 +656,7 @@ describe('70. plsqlBindScalar.js', function() {
         function(err, result) {
           should.not.exist(err);
           //Oracle stores only the fractions up to second in a DATE field.
-          var dateResult = new Date ( 2011, 5, 3, 4, 6, 23, 0 );
+          var dateResult = new Date (2011, 5, 3, 4, 6, 23, 0);
           (result.outBinds.output).should.eql(dateResult);
           done();
         }
@@ -665,7 +665,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.3.12 val: create Date value using numeric value: 0', function(done) {
       //Zero time is 01 January 1970 00:00:00 UTC
-      var date = new Date ( 0 );
+      var date = new Date (0);
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -676,7 +676,7 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var dateResult = new Date ( Date.UTC( 1970, 0, 1 ) );
+          var dateResult = new Date (Date.UTC(1970, 0, 1));
           (result.outBinds.output).should.eql(dateResult);
           done();
         }
@@ -1322,7 +1322,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.6.4
 
-    it('70.6.5 val: undefined',function(done) {
+    it('70.6.5 val: undefined', function(done) {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -1562,7 +1562,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // after
 
     var sqlrun = "begin nodb_inoutproc7(p_inout => :p_inout); end;";
-    var daterun = new Date( 2016, 7, 5 );
+    var daterun = new Date(2016, 7, 5);
 
     it('70.7.1 basic case', function(done) {
       var bindVar = {
@@ -1688,7 +1688,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.7.6
 
     it('70.7.7 val: invalid Date Value: Feb 30, 2016', function(done) {
-      var date = new Date ( 2016, 1, 30 );
+      var date = new Date (2016, 1, 30);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -1703,7 +1703,7 @@ describe('70. plsqlBindScalar.js', function() {
         function(err, result) {
           should.not.exist(err);
           //console.log(result);
-          var resultDate = new Date ( 2016, 2, 1 );
+          var resultDate = new Date (2016, 2, 1);
           (result.outBinds.p_inout).should.eql(resultDate);
           done();
         }
@@ -1711,7 +1711,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.7.7
 
     it('70.7.8 val: 1969-12-31', function(done) {
-      var date = new Date ( 1969, 11, 31 );
+      var date = new Date (1969, 11, 31);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -1732,7 +1732,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.7.8
 
     it('70.7.9 val: epoch date 1970-1-1', function(done) {
-      var date = new Date ( 1970, 0, 1 );
+      var date = new Date (1970, 0, 1);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -1783,7 +1783,7 @@ describe('70. plsqlBindScalar.js', function() {
             bindVar,
             function(err, result) {
               should.not.exist(err);
-              var date = new Date( "2016-08-05T00:00:00.000Z" );
+              var date = new Date("2016-08-05T00:00:00.000Z");
               (result.outBinds.p_inout).should.eql(date);
               cb();
             }
@@ -1807,7 +1807,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "BEGIN \n" +
                  "    p_inout := null; \n" +
                  "END nodb_inoutproc711;";
-      var date = new Date( 2011, 0, 12 );
+      var date = new Date(2011, 0, 12);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -1933,7 +1933,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.8.3 val: null', function(done) {
       var emptybuf;
-      emptybuf = Buffer.alloc ( 0 ) ;
+      emptybuf = Buffer.alloc (0) ;
 
       var bindVar = {
         p_inout : {
@@ -1958,7 +1958,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.8.4 val: empty string', function(done) {
       var emptybuf;
-      emptybuf = Buffer.from ("", "utf-8" );
+      emptybuf = Buffer.from ("", "utf-8");
 
       var bindVar = {
         p_inout : {
@@ -2029,7 +2029,7 @@ describe('70. plsqlBindScalar.js', function() {
   describe('70.9 Query the binded data by SQL', function() {
     before(function(done) {
 
-      var proc1 ="BEGIN \n" +
+      var proc1 = "BEGIN \n" +
                  "    DECLARE \n" +
                  "        e_table_missing EXCEPTION; \n" +
                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -2050,7 +2050,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "    '); \n" +
                  "END; ";
 
-      var proc2 ="CREATE OR REPLACE PROCEDURE nodb_inoutproc9 ( \n" +
+      var proc2 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc9 ( \n" +
                  "    p_in IN NUMBER, p_inout1 IN OUT VARCHAR2, \n" +
                  "    p_inout2 IN OUT NUMBER, p_inout3 IN OUT DATE, p_inout4 IN OUT RAW) \n" +
                  "AS \n" +
@@ -2058,7 +2058,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "    insert into nodb_plsqlbindtab(id, str, num, dat, buf) values (p_in, p_inout1, p_inout2, p_inout3, p_inout4); \n" +
                  "END nodb_inoutproc9;";
 
-      var proc3 ="CREATE OR REPLACE PROCEDURE nodb_inoutproc10 ( \n" +
+      var proc3 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc10 ( \n" +
                  "    p_in IN NUMBER, p_str IN VARCHAR2, \n" +
                  "    p_num IN NUMBER, p_dat IN DATE, p_buf IN RAW) \n" +
                  "AS \n" +
@@ -2139,7 +2139,7 @@ describe('70. plsqlBindScalar.js', function() {
       var rowid = 1;
       var bufsize = 201;
       var bufValue = assist.createBuffer(bufsize);
-      var daterun = new Date( 2016, 7, 5 );
+      var daterun = new Date(2016, 7, 5);
 
       var bindVar = {
         p_in: rowid,
@@ -2206,7 +2206,7 @@ describe('70. plsqlBindScalar.js', function() {
 
       var rowid = 2;
       var emptybuf;
-      emptybuf = Buffer.alloc ( 0 ) ;
+      emptybuf = Buffer.alloc (0) ;
 
       var bindVar = {
         p_in: rowid,
@@ -2273,7 +2273,7 @@ describe('70. plsqlBindScalar.js', function() {
 
       var rowid = 3;
       var emptybuf;
-      emptybuf = Buffer.alloc ( 0 ) ;
+      emptybuf = Buffer.alloc (0) ;
 
       var bindVar = {
         p_in: rowid,
@@ -2334,7 +2334,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.9.4 dir: BIND_INOUT, val: undefined', function(done) {
       var rowid = 4;
       var emptybuf;
-      emptybuf = Buffer.alloc ( 0 ) ;
+      emptybuf = Buffer.alloc (0) ;
 
       var bindVar = {
         p_in: rowid,
@@ -2400,7 +2400,7 @@ describe('70. plsqlBindScalar.js', function() {
 
       var rowid = 5;
       var emptybuf;
-      emptybuf = Buffer.alloc ( 0 ) ;
+      emptybuf = Buffer.alloc (0) ;
 
       var bindVar = {
         p_in: rowid,
@@ -3396,7 +3396,7 @@ describe('70. plsqlBindScalar.js', function() {
     var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT};
 
     it('70.12.1 basic case', function(done) {
-      var date = new Date( "2016-09-10T14:10:10.123Z" );
+      var date = new Date("2016-09-10T14:10:10.123Z");
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -3484,7 +3484,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.12.5
 
     it('70.12.7 val: invalid Date Value: Feb 30, 2016', function(done) {
-      var date = new Date( Date.UTC( 2016, 1, 30, 0, 0, 0, 0 ) );
+      var date = new Date(Date.UTC(2016, 1, 30, 0, 0, 0, 0));
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -3503,7 +3503,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.12.7
 
     it('70.12.8 val: 1969-12-31', function(done) {
-      var date = new Date( Date.UTC( 1969, 11, 31, 0, 0, 0, 0 ) );
+      var date = new Date(Date.UTC(1969, 11, 31, 0, 0, 0, 0));
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -3522,7 +3522,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.12.8
 
     it('70.12.9 val: epoch date 1970-1-1', function(done) {
-      var date = new Date( Date.UTC( 1970, 0, 1, 0, 0, 0, 0 ) );
+      var date = new Date(Date.UTC(1970, 0, 1, 0, 0, 0, 0));
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -3541,7 +3541,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.12.9
 
     it('70.12.10 val: create Date value using numeric value: new Date(number)', function(done) {
-      var date = new Date ( 1476780296673 ); //Integer value representing the number of milliseconds since 1 January 1970 00:00:00 UTC
+      var date = new Date (1476780296673); //Integer value representing the number of milliseconds since 1 January 1970 00:00:00 UTC
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -3561,7 +3561,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.12.11 val: create Date value using numeric value: 0', function(done) {
       //Zero time is 01 January 1970 00:00:00 UTC
-      var date = new Date ( 0 );
+      var date = new Date (0);
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -3668,8 +3668,8 @@ describe('70. plsqlBindScalar.js', function() {
 
   });//70.13
 
-  describe('70.14 dir: BIND_INOUT, type:TIMESTAMP', function(){
-    before(function(done){
+  describe('70.14 dir: BIND_INOUT, type:TIMESTAMP', function() {
+    before(function(done) {
       var proc = "CREATE OR REPLACE PROCEDURE nodb_inoutproc714 (p_inout IN OUT TIMESTAMP) \n" +
                  "AS \n" +
                  "BEGIN \n" +
@@ -3685,7 +3685,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     });//before
 
-    after(function(done){
+    after(function(done) {
       var sql = "DROP PROCEDURE nodb_inoutproc714";
       connection.execute(
         sql,
@@ -3698,8 +3698,8 @@ describe('70. plsqlBindScalar.js', function() {
 
     var sqlrun = "begin nodb_inoutproc714(p_inout => :p_inout); end;";
 
-    it('70.14.1 basic case', function(done){
-      var date = new Date( 2016, 7, 5, 12, 13, 14, 123 );
+    it('70.14.1 basic case', function(done) {
+      var date = new Date(2016, 7, 5, 12, 13, 14, 123);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -3719,7 +3719,7 @@ describe('70. plsqlBindScalar.js', function() {
     });//70.14.1
 
     it('70.14.2 auto detect data type', function(done) {
-      var date = new Date( 2016, 7, 5, 12, 13, 14, 123 );
+      var date = new Date(2016, 7, 5, 12, 13, 14, 123);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -3820,7 +3820,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.14.6
 
     it('70.14.7 val: invalid Date Value: Feb 30, 2016', function(done) {
-      var date = new Date ( 2016, 1, 30, 0, 0, 0, 0 );
+      var date = new Date (2016, 1, 30, 0, 0, 0, 0);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -3835,7 +3835,7 @@ describe('70. plsqlBindScalar.js', function() {
         function(err, result) {
           should.not.exist(err);
           //console.log(result);
-          var resultDate = new Date ( 2016, 2, 1, 0, 0, 0, 0 );
+          var resultDate = new Date (2016, 2, 1, 0, 0, 0, 0);
           (result.outBinds.p_inout).should.eql(resultDate);
           done();
         }
@@ -3843,7 +3843,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.14.7
 
     it('70.14.8 val: 1969-12-31', function(done) {
-      var date = new Date ( 1969, 11, 31, 0, 0, 0, 0 );
+      var date = new Date (1969, 11, 31, 0, 0, 0, 0);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -3864,7 +3864,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.14.8
 
     it('70.14.9 val: epoch date 1970-1-1', function(done) {
-      var date = new Date ( 1970, 0, 1, 0, 0, 0, 0 );
+      var date = new Date (1970, 0, 1, 0, 0, 0, 0);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -3938,7 +3938,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "BEGIN \n" +
                  "    p_inout := null; \n" +
                  "END nodb_inoutproc71411;";
-      var date = new Date( 2011, 0, 12, 0, 0, 0, 0 );
+      var date = new Date(2011, 0, 12, 0, 0, 0, 0);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -4194,7 +4194,7 @@ describe('70. plsqlBindScalar.js', function() {
     var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT};
 
     it('70.16.1 basic case', function(done) {
-      var date = new Date( "2016-09-10T14:10:10.123Z" );
+      var date = new Date("2016-09-10T14:10:10.123Z");
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -4282,7 +4282,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.16.5
 
     it('70.16.7 val: invalid Date Value: Feb 30, 2016', function(done) {
-      var date = new Date( Date.UTC( 2016, 1, 30, 0, 0, 0, 0 ) );
+      var date = new Date(Date.UTC(2016, 1, 30, 0, 0, 0, 0));
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -4301,7 +4301,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.16.7
 
     it('70.16.8 val: 1969-12-31', function(done) {
-      var date = new Date( Date.UTC( 1969, 11, 31, 0, 0, 0, 0 ) );
+      var date = new Date(Date.UTC(1969, 11, 31, 0, 0, 0, 0));
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -4320,7 +4320,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.16.8
 
     it('70.16.9 val: epoch date 1970-1-1', function(done) {
-      var date = new Date( Date.UTC( 1970, 0, 1, 0, 0, 0, 0 ) );
+      var date = new Date(Date.UTC(1970, 0, 1, 0, 0, 0, 0));
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -4339,7 +4339,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.16.9
 
     it('70.16.10 val: create Date value using numeric value: new Date(number)', function(done) {
-      var date = new Date ( 1476780296673 );
+      var date = new Date (1476780296673);
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -4359,7 +4359,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.16.11 val: create Date value using numeric value: 0', function(done) {
       //Zero time is 01 January 1970 00:00:00 UTC
-      var date = new Date ( 0 );
+      var date = new Date (0);
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -4465,8 +4465,8 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.17.3
   });//70.17
 
-  describe('70.18 dir: BIND_INOUT, type:TIMESTAMP WITH TIME ZONE', function(){
-    before(function(done){
+  describe('70.18 dir: BIND_INOUT, type:TIMESTAMP WITH TIME ZONE', function() {
+    before(function(done) {
       var proc = "CREATE OR REPLACE PROCEDURE nodb_inoutproc718 (p_inout IN OUT TIMESTAMP WITH TIME ZONE) \n" +
                  "AS \n" +
                  "BEGIN \n" +
@@ -4482,7 +4482,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     });//before
 
-    after(function(done){
+    after(function(done) {
       var sql = "DROP PROCEDURE nodb_inoutproc718";
       connection.execute(
         sql,
@@ -4495,8 +4495,8 @@ describe('70. plsqlBindScalar.js', function() {
 
     var sqlrun = "begin nodb_inoutproc718(p_inout => :p_inout); end;";
 
-    it('70.18.1 basic case', function(done){
-      var date = new Date( 2016, 7, 5, 12, 13, 14, 123 );
+    it('70.18.1 basic case', function(done) {
+      var date = new Date(2016, 7, 5, 12, 13, 14, 123);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -4516,7 +4516,7 @@ describe('70. plsqlBindScalar.js', function() {
     });//70.18.1
 
     it('70.18.2 auto detect data type', function(done) {
-      var date = new Date( 2016, 7, 5, 12, 13, 14, 123 );
+      var date = new Date(2016, 7, 5, 12, 13, 14, 123);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -4617,7 +4617,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.18.6
 
     it('70.18.7 val: invalid Date Value: Feb 30, 2016', function(done) {
-      var date = new Date ( 2016, 1, 30, 0, 0, 0, 0 );
+      var date = new Date (2016, 1, 30, 0, 0, 0, 0);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -4632,7 +4632,7 @@ describe('70. plsqlBindScalar.js', function() {
         function(err, result) {
           should.not.exist(err);
           //console.log(result);
-          var resultDate = new Date ( 2016, 2, 1, 0, 0, 0, 0 );
+          var resultDate = new Date (2016, 2, 1, 0, 0, 0, 0);
           (result.outBinds.p_inout).should.eql(resultDate);
           done();
         }
@@ -4640,7 +4640,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.18.7
 
     it('70.18.8 val: 1969-12-31', function(done) {
-      var date = new Date ( 1969, 11, 31, 0, 0, 0, 0 );
+      var date = new Date (1969, 11, 31, 0, 0, 0, 0);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -4661,7 +4661,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.18.8
 
     it('70.18.9 val: epoch date 1970-1-1', function(done) {
-      var date = new Date ( 1970, 0, 1, 0, 0, 0, 0 );
+      var date = new Date (1970, 0, 1, 0, 0, 0, 0);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -4735,7 +4735,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "BEGIN \n" +
                  "    p_inout := null; \n" +
                  "END nodb_inoutproc71811;";
-      var date = new Date( 2011, 0, 12, 0, 0, 0, 0 );
+      var date = new Date(2011, 0, 12, 0, 0, 0, 0);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -4992,7 +4992,7 @@ describe('70. plsqlBindScalar.js', function() {
     var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT};
 
     it('70.20.1 basic case', function(done) {
-      var date = new Date( "2016-09-10T14:10:10.123Z" );
+      var date = new Date("2016-09-10T14:10:10.123Z");
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -5080,7 +5080,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.20.5
 
     it('70.20.7 val: invalid Date Value: Feb 30, 2016', function(done) {
-      var date = new Date( Date.UTC( 2016, 1, 30, 0, 0, 0, 0 ) );
+      var date = new Date(Date.UTC(2016, 1, 30, 0, 0, 0, 0));
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -5099,7 +5099,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.20.7
 
     it('70.20.8 val: 1969-12-31', function(done) {
-      var date = new Date( Date.UTC( 1969, 11, 31, 0, 0, 0, 0 ) );
+      var date = new Date(Date.UTC(1969, 11, 31, 0, 0, 0, 0));
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -5118,7 +5118,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.20.8
 
     it('70.20.9 val: epoch date 1970-1-1', function(done) {
-      var date = new Date( Date.UTC( 1970, 0, 1, 0, 0, 0, 0 ) );
+      var date = new Date(Date.UTC(1970, 0, 1, 0, 0, 0, 0));
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -5137,7 +5137,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.20.9
 
     it('70.20.10 val: create Date value using numeric value: new Date(number)', function(done) {
-      var date = new Date ( 1476780296673 );
+      var date = new Date (1476780296673);
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -5157,7 +5157,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.20.11 val: create Date value using numeric value: 0', function(done) {
       //Zero time is 01 January 1970 00:00:00 UTC
-      var date = new Date ( 0 );
+      var date = new Date (0);
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -5264,8 +5264,8 @@ describe('70. plsqlBindScalar.js', function() {
 
   });//70.21
 
-  describe('70.22 dir: BIND_INOUT, type:TIMESTAMP WITH LOCAL TIME ZONE', function(){
-    before(function(done){
+  describe('70.22 dir: BIND_INOUT, type:TIMESTAMP WITH LOCAL TIME ZONE', function() {
+    before(function(done) {
       var proc = "CREATE OR REPLACE PROCEDURE nodb_inoutproc722 (p_inout IN OUT TIMESTAMP WITH LOCAL TIME ZONE) \n" +
                  "AS \n" +
                  "BEGIN \n" +
@@ -5281,7 +5281,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     });//before
 
-    after(function(done){
+    after(function(done) {
       var sql = "DROP PROCEDURE nodb_inoutproc722";
       connection.execute(
         sql,
@@ -5294,8 +5294,8 @@ describe('70. plsqlBindScalar.js', function() {
 
     var sqlrun = "begin nodb_inoutproc722(p_inout => :p_inout); end;";
 
-    it('70.22.1 basic case', function(done){
-      var date = new Date( 2016, 7, 5, 12, 13, 14, 123 );
+    it('70.22.1 basic case', function(done) {
+      var date = new Date(2016, 7, 5, 12, 13, 14, 123);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -5315,7 +5315,7 @@ describe('70. plsqlBindScalar.js', function() {
     });//70.22.1
 
     it('70.22.2 auto detect data type', function(done) {
-      var date = new Date( 2016, 7, 5, 12, 13, 14, 123 );
+      var date = new Date(2016, 7, 5, 12, 13, 14, 123);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -5416,7 +5416,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.22.6
 
     it('70.22.7 val: invalid Date Value: Feb 30, 2016', function(done) {
-      var date = new Date ( 2016, 1, 30, 0, 0, 0, 0 );
+      var date = new Date (2016, 1, 30, 0, 0, 0, 0);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -5431,7 +5431,7 @@ describe('70. plsqlBindScalar.js', function() {
         function(err, result) {
           should.not.exist(err);
           //console.log(result);
-          var resultDate = new Date ( 2016, 2, 1, 0, 0, 0, 0 );
+          var resultDate = new Date (2016, 2, 1, 0, 0, 0, 0);
           (result.outBinds.p_inout).should.eql(resultDate);
           done();
         }
@@ -5439,7 +5439,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.22.7
 
     it('70.22.8 val: 1969-12-31', function(done) {
-      var date = new Date ( 1969, 11, 31, 0, 0, 0, 0 );
+      var date = new Date (1969, 11, 31, 0, 0, 0, 0);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -5460,7 +5460,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.22.8
 
     it('70.22.9 val: epoch date 1970-1-1', function(done) {
-      var date = new Date ( 1970, 0, 1, 0, 0, 0, 0 );
+      var date = new Date (1970, 0, 1, 0, 0, 0, 0);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -5534,7 +5534,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "BEGIN \n" +
                  "    p_inout := null; \n" +
                  "END nodb_inoutproc72211;";
-      var date = new Date( 2011, 0, 12, 0, 0, 0, 0 );
+      var date = new Date(2011, 0, 12, 0, 0, 0, 0);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,

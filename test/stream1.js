@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -35,7 +35,7 @@ var dbConfig = require('./dbconfig.js');
 // Need to skip some tests if Node.js version is < 8
 var nodeMajorVersion = Number(process.versions.node.split('.')[0]);
 
-describe('13. stream1.js', function () {
+describe('13. stream1.js', function() {
 
   var connection = null;
   var rowsAmount = 217;
@@ -125,121 +125,121 @@ describe('13. stream1.js', function () {
     ], done);
   }); // after
 
-  describe('13.1 Testing QueryStream', function () {
-    it('13.1.1 stream results for oracle connection', function (done) {
+  describe('13.1 Testing QueryStream', function() {
+    it('13.1.1 stream results for oracle connection', function(done) {
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
-      stream.on('error', function (error) {
+      stream.on('error', function(error) {
         should.fail(error, null, 'Error event should not be triggered');
       });
 
       var counter = 0;
-      stream.on('data', function (data) {
+      stream.on('data', function(data) {
         should.exist(data);
         counter++;
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         should.equal(counter, rowsAmount);
 
         done();
       });
     });
 
-    it('13.1.2 stream results for oracle connection (outFormat: oracledb.OUT_FORMAT_OBJECT)', function (done) {
+    it('13.1.2 stream results for oracle connection (outFormat: oracledb.OUT_FORMAT_OBJECT)', function(done) {
       var stream = connection.queryStream(
         'SELECT employee_name FROM nodb_stream1 ORDER BY employee_name',
         {},
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
 
-      stream.on('error', function (error) {
+      stream.on('error', function(error) {
         should.fail(error, null, 'Error event should not be triggered');
       });
 
       var counter = 0;
-      stream.on('data', function (data) {
+      stream.on('data', function(data) {
         should.exist(data);
         counter++;
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         should.equal(counter, rowsAmount);
         done();
       });
     });
 
-    it('13.1.3 errors in query', function (done) {
+    it('13.1.3 errors in query', function(done) {
       var stream = connection.queryStream('SELECT no_such_column FROM nodb_stream1');
 
-      stream.on('error', function (err) {
+      stream.on('error', function(err) {
         should.exist(err);
         done();
       });
 
-      stream.on('data', function (data) {
+      stream.on('data', function(data) {
         should.fail(data, null, 'Data event should not be triggered');
       });
     });
 
-    it('13.1.4 no result', function (done) {
+    it('13.1.4 no result', function(done) {
 
       var stream = connection.queryStream('SELECT * FROM nodb_stream1 WHERE employee_name = :name', {
         name: 'TEST_NO_RESULT'
       });
 
-      stream.on('error', function (error) {
+      stream.on('error', function(error) {
         should.fail(error, null, 'Error event should not be triggered: ' + error);
       });
 
       var counter = 0;
-      stream.on('data', function (data) {
+      stream.on('data', function(data) {
         should.fail(data, null, 'Data event should not be triggered');
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         should.equal(counter, 0);
         done();
       });
     });
 
-    it('13.1.5 single row', function (done) {
+    it('13.1.5 single row', function(done) {
 
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 WHERE employee_name = :name', {
         name: 'staff 10'
       });
 
-      stream.on('error', function (error) {
+      stream.on('error', function(error) {
         should.fail(error, null, 'Error event should not be triggered: ' + error);
       });
 
       var counter = 0;
-      stream.on('data', function (data) {
+      stream.on('data', function(data) {
         should.exist(data);
         should.deepEqual(data, ['staff 10']);
 
         counter++;
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         should.equal(counter, 1);
         done();
       });
     });
 
-    it('13.1.6 multiple row', function (done) {
+    it('13.1.6 multiple row', function(done) {
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 WHERE employee_id <= :maxId ORDER BY employee_id', {
         maxId: 10
       }, {
         outFormat: oracledb.OUT_FORMAT_OBJECT
       });
 
-      stream.on('error', function (error) {
+      stream.on('error', function(error) {
         should.fail(error, null, 'Error event should not be triggered: ' + error);
       });
 
       var counter = 0;
-      stream.on('data', function (data) {
+      stream.on('data', function(data) {
         should.exist(data);
         should.deepEqual(data, {
           EMPLOYEE_NAME: 'staff ' + (counter + 1)
@@ -247,13 +247,13 @@ describe('13. stream1.js', function () {
         counter++;
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         should.equal(counter, 10);
         done();
       });
     });
 
-    it('13.1.7 invalid SQL', function (done) {
+    it('13.1.7 invalid SQL', function(done) {
       var stream = connection.queryStream(
         'UPDATE nodb_stream1 SET employee_name = :name WHERE rownum < 1',
         {
@@ -264,17 +264,17 @@ describe('13. stream1.js', function () {
         }
       );
 
-      stream.on('error', function (error) {
+      stream.on('error', function(error) {
         should.exist(error);
         done();
       });
 
-      stream.on('data', function (data) {
+      stream.on('data', function(data) {
         should.fail(data, null, 'Data event should not be triggered');
       });
     });
 
-    it('13.1.8 Read CLOBs', function (done) {
+    it('13.1.8 Read CLOBs', function(done) {
       connection.should.be.ok();
 
       var stream = connection.queryStream(
@@ -283,14 +283,14 @@ describe('13. stream1.js', function () {
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
 
-      stream.on('error', function (error) {
+      stream.on('error', function(error) {
         should.fail(error, null, 'Error event should not be triggered: ' + error);
       });
 
       var counter = 0;
       var clobs = [];
       var clobsRead = 0;
-      stream.on('data', function (data) {
+      stream.on('data', function(data) {
         var rowIndex = counter;
 
         should.exist(data);
@@ -301,11 +301,11 @@ describe('13. stream1.js', function () {
 
         var clob = [];
         data.EMPLOYEE_HISTORY.setEncoding('utf8');
-        data.EMPLOYEE_HISTORY.on('data', function (data) {
+        data.EMPLOYEE_HISTORY.on('data', function(data) {
           clob.push(data);
         });
 
-        data.EMPLOYEE_HISTORY.on('end', function () {
+        data.EMPLOYEE_HISTORY.on('end', function() {
           clobs[rowIndex] = clob.join('');
           should.equal(clobs[rowIndex], '12345678901234567890');
 
@@ -320,12 +320,12 @@ describe('13. stream1.js', function () {
         counter++;
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         should.equal(counter, 10);
       });
     });
 
-    it('13.1.9 Read CLOBs after stream close', function (done) {
+    it('13.1.9 Read CLOBs after stream close', function(done) {
 
       var stream = connection.queryStream('SELECT employee_name, employee_history FROM nodb_stream1 where employee_id <= :maxId ORDER BY employee_id', {
         maxId: 10
@@ -333,7 +333,7 @@ describe('13. stream1.js', function () {
         outFormat: oracledb.OUT_FORMAT_OBJECT
       });
 
-      stream.on('error', function (error) {
+      stream.on('error', function(error) {
         should.fail(error, null, 'Error event should not be triggered: ' + error);
       });
 
@@ -341,7 +341,7 @@ describe('13. stream1.js', function () {
       var clobs = [];
       var clobsRead = 0;
 
-      stream.on('data', function (data) {
+      stream.on('data', function(data) {
         var rowIndex = counter;
 
         should.exist(data);
@@ -353,12 +353,12 @@ describe('13. stream1.js', function () {
         var clob = [];
         data.EMPLOYEE_HISTORY.setEncoding('utf8');
 
-        setTimeout(function () {
-          data.EMPLOYEE_HISTORY.on('data', function (data) {
+        setTimeout(function() {
+          data.EMPLOYEE_HISTORY.on('data', function(data) {
             clob.push(data);
           });
 
-          data.EMPLOYEE_HISTORY.on('end', function () {
+          data.EMPLOYEE_HISTORY.on('end', function() {
             clobs[rowIndex] = clob.join('');
             should.equal(clobs[rowIndex], '12345678901234567890');
 
@@ -374,19 +374,19 @@ describe('13. stream1.js', function () {
         counter++;
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         should.equal(counter, 10);
       });
     });
 
-    it('13.1.10 meta data', function (done) {
+    it('13.1.10 meta data', function(done) {
 
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 WHERE employee_name = :name', {
         name: 'staff 10'
       });
 
       var metaDataRead = false;
-      stream.on('metadata', function (metaData) {
+      stream.on('metadata', function(metaData) {
         should.deepEqual(metaData, [
           {
             name: 'EMPLOYEE_NAME'
@@ -395,21 +395,21 @@ describe('13. stream1.js', function () {
         metaDataRead = true;
       });
 
-      stream.on('error', function (error) {
+      stream.on('error', function(error) {
         should.fail(error, null, 'Error event should not be triggered: ' + error);
       });
 
-      stream.on('data', function () {
+      stream.on('data', function() {
         should.equal(metaDataRead, true);
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         should.equal(metaDataRead, true);
         done();
       });
     });
 
-    it('13.1.11 should emit events in the correct order', function (done) {
+    it('13.1.11 should emit events in the correct order', function(done) {
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 WHERE rownum = 1');
       var events = [];
 
@@ -421,11 +421,11 @@ describe('13. stream1.js', function () {
         events.push('metadata');
       });
 
-      stream.on('data', function () {
+      stream.on('data', function() {
         events.push('data');
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         events.push('end');
         stream.destroy();
       });
@@ -440,19 +440,19 @@ describe('13. stream1.js', function () {
         done();
       });
 
-      stream.on('error', function () {
+      stream.on('error', function() {
         done(new Error('Test should not have thrown an error'));
       });
     });
   });
 
-  describe('13.2 Testing QueryStream.destroy', function () {
+  describe('13.2 Testing QueryStream.destroy', function() {
     var it = (nodeMajorVersion >= 8) ? global.it : global.it.skip;
 
-    it('13.2.1 should be able to stop the stream early with destroy', function (done) {
+    it('13.2.1 should be able to stop the stream early with destroy', function(done) {
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
-      stream.on('data', function () {
+      stream.on('data', function() {
         stream.pause();
         stream.destroy();
       });
@@ -461,16 +461,16 @@ describe('13. stream1.js', function () {
         done();
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         done(new Error('Reached the end of the stream'));
       });
 
-      stream.on('error', function (err) {
+      stream.on('error', function(err) {
         done(err);
       });
     });
 
-    it('13.2.2 should be able to stop the stream before any data', function (done) {
+    it('13.2.2 should be able to stop the stream before any data', function(done) {
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
       stream.on('close', function() {
@@ -481,53 +481,53 @@ describe('13. stream1.js', function () {
         stream.destroy();
       });
 
-      stream.on('data', function () {
+      stream.on('data', function() {
         done(new Error('Received data'));
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         done(new Error('Reached the end of the stream'));
       });
 
-      stream.on('error', function (err) {
+      stream.on('error', function(err) {
         done(err);
       });
     });
 
-    it('13.2.3 should invoke an optional callback passed to destroy', function (done) {
+    it('13.2.3 should invoke an optional callback passed to destroy', function(done) {
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
       stream.on('open', function() {
         stream.destroy(null, done); // Not documented, but the second param can be a callback
       });
 
-      stream.on('data', function () {
+      stream.on('data', function() {
         done(new Error('Received data'));
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         done(new Error('Reached the end of the stream'));
       });
 
-      stream.on('error', function (err) {
+      stream.on('error', function(err) {
         done(err);
       });
     });
 
-    it('13.2.4 should work if querystream is destroyed before resultset is opened', function (done) {
+    it('13.2.4 should work if querystream is destroyed before resultset is opened', function(done) {
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1');
 
       stream.destroy();
 
-      stream.on('data', function () {
+      stream.on('data', function() {
         done(new Error('Received a row'));
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         done(new Error('Reached the end of the stream'));
       });
 
-      stream.on('error', function (err) {
+      stream.on('error', function(err) {
         done(err);
       });
 
@@ -536,16 +536,16 @@ describe('13. stream1.js', function () {
       });
     });
 
-    it('13.2.5 should work if querystream is destroyed after end event', function (done) {
+    it('13.2.5 should work if querystream is destroyed after end event', function(done) {
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1');
 
-      stream.on('data', function () {});
+      stream.on('data', function() {});
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         stream.destroy();
       });
 
-      stream.on('error', function (err) {
+      stream.on('error', function(err) {
         done(err);
       });
 
@@ -554,7 +554,7 @@ describe('13. stream1.js', function () {
       });
     });
 
-    it('13.2.6 should emit the error passed in', function (done) {
+    it('13.2.6 should emit the error passed in', function(done) {
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
       var customError = new Error('Ouch!');
 
@@ -562,15 +562,15 @@ describe('13. stream1.js', function () {
         stream.destroy(customError);
       });
 
-      stream.on('data', function () {
+      stream.on('data', function() {
         done(new Error('Received data'));
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         done(new Error('Reached the end of the stream'));
       });
 
-      stream.on('error', function (err) {
+      stream.on('error', function(err) {
         err.should.be.equal(customError);
 
         done();
@@ -578,8 +578,8 @@ describe('13. stream1.js', function () {
     });
   });
 
-  describe('13.3 Testing QueryStream\'s fetchArraySize option', function () {
-    it('13.3.1 should use oracledb.fetchArraySize for fetching', function (done) {
+  describe('13.3 Testing QueryStream\'s fetchArraySize option', function() {
+    it('13.3.1 should use oracledb.fetchArraySize for fetching', function(done) {
       var defaultFetchArraySize;
       var testFetchArraySize = 9;
 
@@ -587,7 +587,7 @@ describe('13. stream1.js', function () {
       oracledb.fetchArraySize = testFetchArraySize;
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
-      stream.on('data', function () {
+      stream.on('data', function() {
         stream.pause();
 
         // Using the internal/private caches to validate
@@ -598,22 +598,22 @@ describe('13. stream1.js', function () {
         done();
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         oracledb.fetchArraySize = defaultFetchArraySize;
         done(new Error('Reached the end of the stream'));
       });
 
-      stream.on('error', function (err) {
+      stream.on('error', function(err) {
         oracledb.fetchArraySize = defaultFetchArraySize;
         done(err);
       });
     });
 
-    it('13.3.2 should use execute options fetchArraySize for fetching', function (done) {
+    it('13.3.2 should use execute options fetchArraySize for fetching', function(done) {
       var testFetchArraySize = 8;
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name', [], {fetchArraySize: testFetchArraySize});
 
-      stream.on('data', function () {
+      stream.on('data', function() {
         stream.pause();
 
         // Using the internal/private caches to validate
@@ -623,18 +623,18 @@ describe('13. stream1.js', function () {
         done();
       });
 
-      stream.on('end', function () {
+      stream.on('end', function() {
         done(new Error('Reached the end of the stream'));
       });
 
-      stream.on('error', function (err) {
+      stream.on('error', function(err) {
         done(err);
       });
     });
   });
 
-  describe('13.4 Testing QueryStream race conditions', function () {
-    it('13.4.1 queryStream from toQueryStream should get open event', function (done) {
+  describe('13.4 Testing QueryStream race conditions', function() {
+    it('13.4.1 queryStream from toQueryStream should get open event', function(done) {
       connection.execute(
         'SELECT employee_name FROM nodb_stream1',
         [],
@@ -654,9 +654,9 @@ describe('13. stream1.js', function () {
             receivedEvent = true;
           });
 
-          stream.on('data', function () {});
+          stream.on('data', function() {});
 
-          stream.on('error', function (err) {
+          stream.on('error', function(err) {
             done(err);
           });
 
@@ -672,7 +672,7 @@ describe('13. stream1.js', function () {
       );
     });
 
-    it('13.4.2 queryStream from toQueryStream should get metadata event', function (done) {
+    it('13.4.2 queryStream from toQueryStream should get metadata event', function(done) {
       connection.execute(
         'SELECT employee_name FROM nodb_stream1',
         [],
@@ -692,9 +692,9 @@ describe('13. stream1.js', function () {
             receivedEvent = true;
           });
 
-          stream.on('data', function () {});
+          stream.on('data', function() {});
 
-          stream.on('error', function (err) {
+          stream.on('error', function(err) {
             done(err);
           });
 

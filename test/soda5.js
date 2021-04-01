@@ -82,7 +82,7 @@ describe('173. soda5.js', () => {
 
       await conn.commit();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (collection) {
@@ -92,7 +92,7 @@ describe('173. soda5.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -124,7 +124,7 @@ describe('173. soda5.js', () => {
           return collection.insertOne(content);
         })
       );
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
@@ -135,14 +135,13 @@ describe('173. soda5.js', () => {
         .count();
       should.strictEqual(empInShenzhen.count, 1);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
     try {
       await conn.commit();
-    }
-    catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
@@ -153,7 +152,7 @@ describe('173. soda5.js', () => {
     if (conn) {
       try {
         await conn.close();
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }
@@ -167,7 +166,7 @@ describe('173. soda5.js', () => {
       let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_173_3");
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
@@ -191,7 +190,7 @@ describe('173. soda5.js', () => {
     if (conn) {
       try {
         await conn.close();
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }
@@ -206,7 +205,7 @@ describe('173. soda5.js', () => {
       let collName = "soda_test_173_4";
       collection = await sd.createCollection(collName);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (collection) {
@@ -216,7 +215,7 @@ describe('173. soda5.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -241,13 +240,13 @@ describe('173. soda5.js', () => {
       res = await collection.drop();
       should.strictEqual(res.dropped, false);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -292,7 +291,7 @@ describe('173. soda5.js', () => {
 
       await conn.commit();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (collection) {
@@ -302,7 +301,7 @@ describe('173. soda5.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -347,7 +346,7 @@ describe('173. soda5.js', () => {
 
       await conn.commit();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (collection) {
@@ -357,7 +356,7 @@ describe('173. soda5.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -403,7 +402,7 @@ describe('173. soda5.js', () => {
       // Does not commit changes
       // await conn.commit();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (collection) {
@@ -413,7 +412,7 @@ describe('173. soda5.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -461,7 +460,7 @@ describe('173. soda5.js', () => {
 
       await conn.commit();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (collection) {
@@ -471,7 +470,7 @@ describe('173. soda5.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -505,7 +504,7 @@ describe('173. soda5.js', () => {
       // drop index
       await collection.dropIndex("OFFICE_IDX_SP", { "force" : true });
       await conn.commit();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (collection) {
@@ -515,7 +514,7 @@ describe('173. soda5.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -555,7 +554,7 @@ describe('173. soda5.js', () => {
       // drop index
       await collection.dropIndex("OFFICE_IDX", { "force" : false });
       await conn.commit();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (collection) {
@@ -565,7 +564,7 @@ describe('173. soda5.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -593,7 +592,7 @@ describe('173. soda5.js', () => {
 
       await conn.commit();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
@@ -613,10 +612,12 @@ describe('173. soda5.js', () => {
         await collection.createIndex(indexSpec);
         let outDocument = await collection.getDataGuide();
         should.exist(outDocument);
-      } else if(isCreateIndexEligible < 0){
-        await testsUtil.assertThrowsAsync(async () => {await collection.createIndex(indexSpec);}, /ORA-00406:/);
+      } else if (isCreateIndexEligible < 0) {
+        await testsUtil.assertThrowsAsync(async () => {
+          await collection.createIndex(indexSpec);
+        }, /ORA-00406:/);
       }
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
@@ -625,7 +626,7 @@ describe('173. soda5.js', () => {
         let result = await collection.dropIndex('TEST_IDX');
         should.strictEqual(result.dropped, true);
         await conn.commit();
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }

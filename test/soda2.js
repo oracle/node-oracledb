@@ -59,13 +59,13 @@ describe('165. soda2.js', () => {
       let coll_open = await sd2.openCollection(collName);
       should.exist(coll_open);
       await coll_create.drop();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -85,23 +85,23 @@ describe('165. soda2.js', () => {
       let coll = await sd1.createCollection(t_collname);
 
       let cNames = await sd2.getCollectionNames();
-      should.deepEqual(cNames, [ t_collname ] );
+      should.deepEqual(cNames, [ t_collname ]);
 
       await coll.drop();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn1) {
         try {
           await conn1.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
       if (conn2) {
         try {
           await conn2.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -119,16 +119,16 @@ describe('165. soda2.js', () => {
       let coll = await sd.createCollection(t_collname);
 
       let cNames = await sd.getCollectionNames();
-      should.deepEqual(cNames, [ t_collname ] );
+      should.deepEqual(cNames, [ t_collname ]);
 
       await coll.drop();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -148,13 +148,13 @@ describe('165. soda2.js', () => {
       );
       // ORA-40658: Collection name cannot be null for this operation.
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (coll) {
         try {
           await coll.drop();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -162,7 +162,7 @@ describe('165. soda2.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -176,7 +176,7 @@ describe('165. soda2.js', () => {
 
     try {
       await prepareCollection(collectionName);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
@@ -192,13 +192,13 @@ describe('165. soda2.js', () => {
 
       await pool.close();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
     try {
       await dropCollection(collectionName);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
@@ -222,7 +222,7 @@ describe('165. soda2.js', () => {
         await conn.commit();
         await conn.close();
 
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
 
@@ -239,7 +239,7 @@ describe('165. soda2.js', () => {
 
         await conn.commit();
         await conn.close();
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     } // insertDocument()
@@ -257,7 +257,7 @@ describe('165. soda2.js', () => {
         await conn.commit();
         await conn.close();
 
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     } // dropCollection()

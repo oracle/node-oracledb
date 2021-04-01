@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -36,7 +36,7 @@ describe('207. dbObject8.js', () => {
   const TYPE2 = 'NODB_FARM_T';
   const TABLE = 'NODB_TAB_FARM';
 
-  before(async() => {
+  before(async () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
 
@@ -63,7 +63,7 @@ describe('207. dbObject8.js', () => {
     }
   }); // before()
 
-  after(async() => {
+  after(async () => {
     try {
       let sql = `DROP TABLE ${TABLE} PURGE`;
       await conn.execute(sql);

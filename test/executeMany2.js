@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -52,7 +52,7 @@ describe('172. executeMany2.js', function() {
         `create table "${schema}"."NODB_TAB_SALES" ("AMOUNT_SOLD" NUMBER(10,2))`
       );
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
@@ -73,7 +73,7 @@ describe('172. executeMany2.js', function() {
       );
       await conn.commit();
       await conn.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 172.1
@@ -90,7 +90,7 @@ describe('172. executeMany2.js', function() {
         await conn.execute(
           `create table nodb_tab_emp (id NUMBER, name VARCHAR2(100))`
         );
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       } finally {
         if (conn) {
@@ -111,7 +111,7 @@ describe('172. executeMany2.js', function() {
           `BEGIN EXECUTE IMMEDIATE 'DROP TABLE nodb_tab_emp'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END; `
         );
         await conn.commit();
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       } finally {
         if (conn) {
@@ -142,7 +142,7 @@ describe('172. executeMany2.js', function() {
           /NJS-055:/
         );
         // NJS-055: binding by position and name cannot be mixed
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       } finally {
         if (conn) {
@@ -168,7 +168,7 @@ describe('172. executeMany2.js', function() {
           },
           /ORA-01008/ //ORA-01008: not all variables bound
         );
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       } finally {
         if (conn) {
@@ -199,7 +199,7 @@ describe('172. executeMany2.js', function() {
           },
           /ORA-01008/ //ORA-01008: not all variables bound
         );
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       } finally {
         if (conn) {
@@ -230,7 +230,7 @@ describe('172. executeMany2.js', function() {
           },
           /TypeError: Cannot convert undefined or null to object/
         );
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       } finally {
         if (conn) {

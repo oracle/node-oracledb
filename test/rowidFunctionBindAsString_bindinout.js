@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -78,7 +78,7 @@ describe('112. rowidFunctionBindAsString_bindinout.js', function() {
         sql.executeSql(connection, drop_table, {}, {}, cb);
       },
       function(cb) {
-        connection.release( function(err) {
+        connection.release(function(err) {
           should.not.exist(err);
           cb();
         });

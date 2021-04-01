@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -57,7 +57,7 @@ describe('170. poolDrain.js', () => {
       let drainTime = 5;
       pool.close(drainTime);
       await pool.getConnection();
-    } catch(err) {
+    } catch (err) {
       should.exist(err);
       should.strictEqual(
         err.message,
@@ -74,7 +74,7 @@ describe('170. poolDrain.js', () => {
       pool = await oracledb.createPool(settings);
       await pool.getConnection();
       await pool.close();
-    } catch(err) {
+    } catch (err) {
       should.exist(err);
       (err.message).should.startWith('ORA-24422:');
     } finally {
@@ -90,7 +90,7 @@ describe('170. poolDrain.js', () => {
       let drainTime = 2;
       pool.close(drainTime);
       should.strictEqual(pool.status, oracledb.POOL_STATUS_DRAINING);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await sleep(3000);
@@ -105,7 +105,7 @@ describe('170. poolDrain.js', () => {
       let drainTime = 2;
       await pool.close(drainTime);
       should.strictEqual(pool.status, oracledb.POOL_STATUS_CLOSED);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 170.4
@@ -123,7 +123,7 @@ describe('170. poolDrain.js', () => {
       await pool.close(drainTime);
 
       conn.execute('select (7+8) from dual');
-    } catch(err) {
+    } catch (err) {
       should.exist(err);
       console.log(err.message);
     }
@@ -142,7 +142,7 @@ describe('170. poolDrain.js', () => {
       await pool.close(drainTime);
 
       pool.close();
-    } catch(err) {
+    } catch (err) {
       should.exist(err);
       console.log(err.message);
     }
@@ -153,7 +153,7 @@ describe('170. poolDrain.js', () => {
       let pool = await oracledb.createPool(settings);
       let drainTime = 2;
       await pool.close(drainTime);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 170.7
@@ -169,7 +169,7 @@ describe('170. poolDrain.js', () => {
       let pool = await oracledb.createPool(cred);
       let drainTime = 2;
       await pool.close(drainTime);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 170.8
@@ -187,7 +187,7 @@ describe('170. poolDrain.js', () => {
       let drainTime = 2;
       pool_1.close(drainTime);
       pool_2.close(drainTime);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await sleep(3000);
@@ -206,7 +206,7 @@ describe('170. poolDrain.js', () => {
         'Cannot set property status of #<Pool> which has only a getter'
       );
       await pool.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 170.10
@@ -222,7 +222,7 @@ describe('170. poolDrain.js', () => {
 
       let drainTime = 0;
       await pool.close(drainTime);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   });
@@ -239,7 +239,7 @@ describe('170. poolDrain.js', () => {
 
       let drainTime = -3;
       await pool.close(drainTime);
-    } catch(err) {
+    } catch (err) {
       should.exist(err);
       should.strictEqual(err.message, "NJS-005: invalid value for parameter 1");
     } finally {
@@ -261,7 +261,7 @@ describe('170. poolDrain.js', () => {
 
       let drainTime = NaN;
       await pool.close(drainTime);
-    } catch(err) {
+    } catch (err) {
       should.exist(err);
       should.strictEqual(err.message, "NJS-005: invalid value for parameter 1");
     } finally {
@@ -287,7 +287,7 @@ describe('170. poolDrain.js', () => {
       let result = await conn.execute('select (3+5) from dual');
       should.strictEqual(result.rows[0][0], 8);
       pool_2.close(1);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await sleep(4000);
@@ -318,7 +318,7 @@ describe('170. poolDrain.js', () => {
       let result = await conn.execute('select (3+5) from dual');
       should.strictEqual(result.rows[0][0], 8);
       pool_2.close(1);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await sleep(4000);

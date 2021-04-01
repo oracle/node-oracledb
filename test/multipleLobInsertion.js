@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -161,7 +161,7 @@ describe('68. multipleLobInsertion.js', function() {
         var lobArr = new Array();
 
         // put lobbv1..5 to lobArr
-        for(var item in result.outBinds) {
+        for (var item in result.outBinds) {
           lobArr.push(result.outBinds[item][0]);
         }
 

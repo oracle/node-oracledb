@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -32,14 +32,14 @@ var should   = require('should');
 var assist   = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
 
-describe('23. dataTypeNchar.js', function(){
+describe('23. dataTypeNchar.js', function() {
 
   var connection = null;
   var tableName = "nodb_nchar";
 
   var strLen = [10, 100, 500, 1000];
   var strs = [];
-  for(var i = 0; i < strLen.length; i++)
+  for (var i = 0; i < strLen.length; i++)
     strs[i] = assist.createCharString(strLen[i]);
 
   before('get one connection', function(done) {
@@ -58,7 +58,7 @@ describe('23. dataTypeNchar.js', function(){
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -66,7 +66,7 @@ describe('23. dataTypeNchar.js', function(){
 
   describe('23.1 testing NCHAR data in various lengths', function() {
 
-    before('create table, insert data',function(done) {
+    before('create table, insert data', function(done) {
       assist.setUp(connection, tableName, strs, done);
     });
 

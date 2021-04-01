@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -186,7 +186,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         });
 
         lob.on('finish', function() {
-          connection.commit( function(err) {
+          connection.commit(function(err) {
             should.not.exist(err);
             return callback();
           });
@@ -198,7 +198,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
 
   // compare the result buffer with the original inserted buffer
   var compareResultBufAndOriginal = function(resultVal, originalBuffer, specialStr) {
-    if(originalBuffer.length > 0 ) {
+    if (originalBuffer.length > 0) {
       var resultLength = resultVal.length;
       var specStrLength = specialStr.length;
       should.strictEqual(resultLength, originalBuffer.length);
@@ -216,7 +216,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
       function(err, result) {
         should.not.exist(err);
         var resultVal = result.outBinds.io;
-        if(originalBuf == 'EMPTY_BLOB' || originalBuf == null || originalBuf == undefined || originalBuf == "") {
+        if (originalBuf == 'EMPTY_BLOB' || originalBuf == null || originalBuf == undefined || originalBuf == "") {
           should.strictEqual(resultVal, null);
         } else {
           compareResultBufAndOriginal(resultVal, originalBuf, specialStr);
@@ -1251,7 +1251,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
                   });
 
                   lob.on('end', function() {
-                    fs.readFile( jpgFileName, function(err, originalData) {
+                    fs.readFile(jpgFileName, function(err, originalData) {
                       should.not.exist(err);
                       should.strictEqual(totalLength, originalData.length);
                       originalData.should.eql(blobData);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -58,7 +58,7 @@ describe('93.binding_procedureBindIn.js', function() {
   });
 
   after(function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -71,7 +71,7 @@ describe('93.binding_procedureBindIn.js', function() {
         inBind(table_name, proc_name, dbColType, bindVar, bindType, nullBind, cb);
       },
       function(cb) {
-        var bindVar =[ { val: content, type: bindType, dir: oracledb.BIND_IN } ];
+        var bindVar = [ { val: content, type: bindType, dir: oracledb.BIND_IN } ];
         inBind(table_name, proc_name, dbColType, bindVar, bindType, nullBind, cb);
       }
     ], callback);
@@ -99,7 +99,7 @@ describe('93.binding_procedureBindIn.js', function() {
           sqlRun,
           bindVar,
           function(err) {
-            if(bindType === oracledb.STRING) {
+            if (bindType === oracledb.STRING) {
               compareErrMsgForString(nullBind, dbColType, err);
             } else {
               compareErrMsgForRAW(dbColType, err);
@@ -118,31 +118,31 @@ describe('93.binding_procedureBindIn.js', function() {
   };
 
   var compareErrMsgForString = function(nullBind, element, err) {
-    if(element === "BLOB") {
+    if (element === "BLOB") {
       // ORA-06550: line 1, column 7:
       // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_XX'
       // ORA-06550: line 1, column 7:
       // PL/SQL: Statement ignored
       (err.message).should.startWith('ORA-06550:');
     } else {
-      if(nullBind === true) {
+      if (nullBind === true) {
         should.not.exist(err);
       } else {
-        if(element.indexOf("CHAR") > -1 || element === "CLOB") {
+        if (element.indexOf("CHAR") > -1 || element === "CLOB") {
           should.not.exist(err);
         }
-        if(element.indexOf("FLOAT") > -1 || element === "NUMBER" || element.indexOf("RAW") > -1) {
+        if (element.indexOf("FLOAT") > -1 || element === "NUMBER" || element.indexOf("RAW") > -1) {
           // FLOAT ORA-06502: PL/SQL: numeric or value error: character to number conversion error
           // BINARY_FLOAT ORA-06502: PL/SQL: numeric or value error
           // NUMBER: ORA-06502: PL/SQL: numeric or value error: character to number conversion error
           // RAW: ORA-06502: PL/SQL: numeric or value error: hex to raw conversion error
           (err.message).should.startWith('ORA-06502:');
         }
-        if(element === "BINARY_DOUBLE") {
+        if (element === "BINARY_DOUBLE") {
           // ORA-01847: ORA-06502: PL/SQL: numeric or value error
           (err.message).should.startWith('ORA-06502:');
         }
-        if(element === "DATE" || element === "TIMESTAMP") {
+        if (element === "DATE" || element === "TIMESTAMP") {
           // ORA-01858: a non-numeric character was found where a numeric was expected
           (err.message).should.startWith('ORA-01858:');
         }
@@ -151,14 +151,14 @@ describe('93.binding_procedureBindIn.js', function() {
   };
 
   var compareErrMsgForRAW = function(element, err) {
-    if(element === "NUMBER" || element.indexOf("FLOAT") > -1 || element === "BINARY_DOUBLE" || element === "DATE" || element === "TIMESTAMP" || element === "CLOB") {
+    if (element === "NUMBER" || element.indexOf("FLOAT") > -1 || element === "BINARY_DOUBLE" || element === "DATE" || element === "TIMESTAMP" || element === "CLOB") {
       // ORA-06550: line 1, column 7:
       // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_XX'
       // ORA-06550: line 1, column 7:
       // PL/SQL: Statement ignored
       (err.message).should.startWith('ORA-06550:');
     }
-    if(element.indexOf("CHAR") > -1 || element.indexOf("RAW") > -1 || element === "BLOB") {
+    if (element.indexOf("CHAR") > -1 || element.indexOf("RAW") > -1 || element === "BLOB") {
       should.not.exist(err);
     }
   };

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -58,7 +58,7 @@ describe('100.binding_defaultBindIn.js', function() {
   });
 
   after(function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -71,7 +71,7 @@ describe('100.binding_defaultBindIn.js', function() {
         inBind1(table_name, proc_name, dbColType, bindVar, bindType, cb);
       },
       function(cb) {
-        var bindVar =[ content ];
+        var bindVar = [ content ];
         inBind1(table_name, proc_name, dbColType, bindVar, bindType, cb);
       }
     ], callback);
@@ -88,7 +88,7 @@ describe('100.binding_defaultBindIn.js', function() {
         inBind2(table_name, procName, dbColType, bindVar, bindType, cb);
       },
       function(cb) {
-        var bindVar =[ { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, sequence, content ];
+        var bindVar = [ { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, sequence, content ];
         inBind2(table_name, procName, dbColType, bindVar, bindType, cb);
       }
     ], callback);
@@ -171,7 +171,7 @@ describe('100.binding_defaultBindIn.js', function() {
   };
 
   var compareErrMsg = function(element, err) {
-    if(element === "BLOB") {
+    if (element === "BLOB") {
       // ORA-06550: line 1, column 7:
       // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_XX'
       // ORA-06550: line 1, column 7:
@@ -189,7 +189,7 @@ describe('100.binding_defaultBindIn.js', function() {
   describe('100.1 PLSQL procedure: bind in null value with default type and dir', function() {
 
     it('100.1.1 oracledb.STRING <--> DB: NUMBER', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -200,7 +200,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.2 oracledb.STRING <--> DB: CHAR', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -211,7 +211,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.3 oracledb.STRING <--> DB: NCHAR', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -222,7 +222,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.4 oracledb.STRING <--> DB: VARCHAR2', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -233,7 +233,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.5 oracledb.STRING <--> DB: FLOAT', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -244,7 +244,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.6 oracledb.STRING <--> DB: BINARY_FLOAT', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -255,7 +255,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -266,7 +266,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.8 oracledb.STRING <--> DB: DATE', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -277,7 +277,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.9 oracledb.STRING <--> DB: TIMESTAMP', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -288,7 +288,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.10 oracledb.STRING <--> DB: RAW', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -299,7 +299,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.11 oracledb.STRING <--> DB: CLOB', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -310,7 +310,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.12 oracledb.STRING <--> DB: BLOB', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -321,7 +321,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.13 oracledb.BUFFER <--> DB: NUMBER', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -332,7 +332,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.14 oracledb.BUFFER <--> DB: CHAR', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -343,7 +343,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.15 oracledb.BUFFER <--> DB: NCHAR', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -354,7 +354,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.16 oracledb.BUFFER <--> DB: VARCHAR2', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -365,7 +365,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.17 oracledb.BUFFER <--> DB: FLOAT', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -376,7 +376,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -387,7 +387,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -398,7 +398,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.20 oracledb.BUFFER <--> DB: DATE', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -409,7 +409,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.21 oracledb.BUFFER <--> DB: TIMESTAMP', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -420,7 +420,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.22 oracledb.BUFFER <--> DB: RAW', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -431,7 +431,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.23 oracledb.BUFFER <--> DB: CLOB', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -442,7 +442,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.1.24 oracledb.BUFFER <--> DB: BLOB', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -456,7 +456,7 @@ describe('100.binding_defaultBindIn.js', function() {
   describe('100.2 PLSQL function: bind in null value with default type and dir', function() {
 
     it('100.2.1 oracledb.STRING <--> DB: NUMBER', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -467,7 +467,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.2 oracledb.STRING <--> DB: CHAR', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -478,7 +478,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.3 oracledb.STRING <--> DB: NCHAR', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -489,7 +489,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.4 oracledb.STRING <--> DB: VARCHAR2', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -500,7 +500,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.5 oracledb.STRING <--> DB: FLOAT', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -511,7 +511,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.6 oracledb.STRING <--> DB: BINARY_FLOAT', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -522,7 +522,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -533,7 +533,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.8 oracledb.STRING <--> DB: DATE', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -544,7 +544,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.9 oracledb.STRING <--> DB: TIMESTAMP', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -555,7 +555,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.10 oracledb.STRING <--> DB: RAW', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -566,7 +566,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.11 oracledb.STRING <--> DB: CLOB', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -577,7 +577,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.12 oracledb.STRING <--> DB: BLOB', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -588,7 +588,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.13 oracledb.BUFFER <--> DB: NUMBER', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -599,7 +599,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.14 oracledb.BUFFER <--> DB: CHAR', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -610,7 +610,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.15 oracledb.BUFFER <--> DB: NCHAR', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -621,7 +621,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.16 oracledb.BUFFER <--> DB: VARCHAR2', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -632,7 +632,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.17 oracledb.BUFFER <--> DB: FLOAT', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -643,7 +643,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -654,7 +654,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -665,7 +665,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.20 oracledb.BUFFER <--> DB: DATE', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -676,7 +676,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.21 oracledb.BUFFER <--> DB: TIMESTAMP', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -687,7 +687,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.22 oracledb.BUFFER <--> DB: RAW', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -698,7 +698,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.23 oracledb.BUFFER <--> DB: CLOB', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;
@@ -709,7 +709,7 @@ describe('100.binding_defaultBindIn.js', function() {
     });
 
     it('100.2.24 oracledb.BUFFER <--> DB: BLOB', function(done) {
-      index ++;
+      index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
       var content = null;

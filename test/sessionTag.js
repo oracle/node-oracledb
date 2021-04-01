@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -58,7 +58,7 @@ async function truncateTable() {
     if (conn) {
       try {
         await conn.close();
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }
@@ -78,14 +78,14 @@ async function dropTable() {
     if (conn) {
       try {
         await conn.close();
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }
   }
 }
 
-describe('184. sessionTag.js', function () {
+describe('184. sessionTag.js', function() {
 
   before(async function() {
     let isRunnable = true;
@@ -98,16 +98,16 @@ describe('184. sessionTag.js', function () {
       if (serverVersion < 1202000100) isRunnable = false;
 
       await connection.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
     if (!isRunnable) this.skip();
   });
 
-  describe('184.1 Remote PL/SQL Callback', function () {
+  describe('184.1 Remote PL/SQL Callback', function() {
 
-    before(async function () {
+    before(async function() {
       let conn;
       try {
         conn = await oracledb.getConnection(dbconfig);
@@ -219,22 +219,22 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    beforeEach(async function () {
+    beforeEach(async function() {
       await truncateTable();
     });
 
-    after(async function () {
+    after(async function() {
       await dropTable();
     });
 
-    it('184.1.1 Acquire connection without tag', async function () {
+    it('184.1.1 Acquire connection without tag', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection({
@@ -249,14 +249,14 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.1.2 Acquire connection from pool without tag', async function () {
+    it('184.1.2 Acquire connection from pool without tag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -273,21 +273,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.1.3 Acquire connection from pool with empty string tag', async function () {
+    it('184.1.3 Acquire connection from pool with empty string tag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -304,21 +304,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.1.4 Acquire connection from pool with valid tag', async function () {
+    it('184.1.4 Acquire connection from pool with valid tag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -336,21 +336,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.1.5 Acquire connection from pool with error in callback', async function () {
+    it('184.1.5 Acquire connection from pool with error in callback', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -371,21 +371,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.1.6 Acquire connection from pool twice with same tag', async function () {
+    it('184.1.6 Acquire connection from pool twice with same tag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -407,21 +407,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.1.7 Acquire connection from pool twice with different tag', async function () {
+    it('184.1.7 Acquire connection from pool twice with different tag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -444,21 +444,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.1.8 Acquire connection from pool twice with different tag using matchAnyTag', async function () {
+    it('184.1.8 Acquire connection from pool twice with different tag using matchAnyTag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -481,21 +481,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.1.9 Acquire connection from pool twice with different multi-tag using matchAnyTag', async function () {
+    it('184.1.9 Acquire connection from pool twice with different multi-tag using matchAnyTag', async function() {
       if (oracledb.oracleClientVersion < 1202000000) this.skip();
       let conn, pool;
       try {
@@ -518,21 +518,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.1.10 Acquire connection from pool twice with empty string tag using matchAnyTag', async function () {
+    it('184.1.10 Acquire connection from pool twice with empty string tag using matchAnyTag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -554,21 +554,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it.skip('184.1.11 Acquire connection from pool twice with first connection\'s tag set to ""', async function () {
+    it.skip('184.1.11 Acquire connection from pool twice with first connection\'s tag set to ""', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -592,21 +592,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.1.12 Acquire connection from pool twice with different tag after setting first connection\'s tag', async function () {
+    it('184.1.12 Acquire connection from pool twice with different tag after setting first connection\'s tag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -629,14 +629,14 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
@@ -645,7 +645,7 @@ describe('184. sessionTag.js', function () {
   });
 
 
-  describe('184.2 Local Javascript Callback', function () {
+  describe('184.2 Local Javascript Callback', function() {
 
     let callbackRequestedTag, callbackActualTag;
 
@@ -695,11 +695,11 @@ describe('184. sessionTag.js', function () {
       callbackActualTag = null;
     }
 
-    beforeEach(function () {
+    beforeEach(function() {
       resetTag();
     });
 
-    it('184.2.1 Acquire connection without tag', async function () {
+    it('184.2.1 Acquire connection without tag', async function() {
       let conn;
       try {
         conn = await oracledb.getConnection({
@@ -714,14 +714,14 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.2.2 Acquire connection from pool without tag', async function () {
+    it('184.2.2 Acquire connection from pool without tag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -737,21 +737,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.2.3 Acquire connection from pool with empty string tag', async function () {
+    it('184.2.3 Acquire connection from pool with empty string tag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -769,21 +769,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.2.4 Acquire connection from default pool with valid tag', async function () {
+    it('184.2.4 Acquire connection from default pool with valid tag', async function() {
       let pool, conn;
       pool = await oracledb.createPool(dbconfig);
       try {
@@ -809,21 +809,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.2.5 Acquire connection from pool with valid tag', async function () {
+    it('184.2.5 Acquire connection from pool with valid tag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -839,21 +839,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.2.6 Acquire connection from pool with bad tag using async session callback', async function () {
+    it('184.2.6 Acquire connection from pool with bad tag using async session callback', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -876,21 +876,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.2.7 Acquire connection from pool with bad tag using sync session callback', async function () {
+    it('184.2.7 Acquire connection from pool with bad tag using sync session callback', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -913,21 +913,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.2.8 Acquire connection from pool twice with same tag', async function () {
+    it('184.2.8 Acquire connection from pool twice with same tag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -948,21 +948,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.2.9 Acquire connection from pool twice with different tag', async function () {
+    it('184.2.9 Acquire connection from pool twice with different tag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -983,21 +983,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.2.10 Acquire connection from pool twice with different tag using matchAnyTag', async function () {
+    it('184.2.10 Acquire connection from pool twice with different tag using matchAnyTag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -1018,21 +1018,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.2.11 Acquire connection from pool twice with different multi-tag using matchAnyTag', async function () {
+    it('184.2.11 Acquire connection from pool twice with different multi-tag using matchAnyTag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -1055,21 +1055,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.2.12 Acquire connection from pool twice with first connection\'s tag set to ""', async function () {
+    it('184.2.12 Acquire connection from pool twice with first connection\'s tag set to ""', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -1091,21 +1091,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.2.13 Acquire connection from pool twice with different tag after setting first connection\'s tag', async function () {
+    it('184.2.13 Acquire connection from pool twice with different tag after setting first connection\'s tag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -1127,14 +1127,14 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
@@ -1142,7 +1142,7 @@ describe('184. sessionTag.js', function () {
     });
   });
 
-  describe('184.3 Change connection\'s tag before the connection is closed', function () {
+  describe('184.3 Change connection\'s tag before the connection is closed', function() {
 
     function tagFixup(conn, requestedTag, cb) {
       if (requestedTag)
@@ -1150,7 +1150,7 @@ describe('184. sessionTag.js', function () {
       cb();
     }
 
-    it('184.3.1 Setting connection\'s tag to undefined triggers error NJS-004', async function () {
+    it('184.3.1 Setting connection\'s tag to undefined triggers error NJS-004', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -1169,21 +1169,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.3.2 Setting connection\'s tag to random object triggers error NJS-004', async function () {
+    it('184.3.2 Setting connection\'s tag to random object triggers error NJS-004', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -1202,21 +1202,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it.skip('184.3.3 Closing randomly tagged connection triggers error ORA-24488', async function () {
+    it.skip('184.3.3 Closing randomly tagged connection triggers error ORA-24488', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -1237,14 +1237,14 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
@@ -1252,7 +1252,7 @@ describe('184. sessionTag.js', function () {
     });
   });
 
-  describe('184.4 Dropping Session From Pool', function () {
+  describe('184.4 Dropping Session From Pool', function() {
 
     let callbackRequestedTag, callbackActualTag;
 
@@ -1298,11 +1298,11 @@ describe('184. sessionTag.js', function () {
       return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    beforeEach(function () {
+    beforeEach(function() {
       resetTag();
     });
 
-    it('184.4.1 Acquire connection from pool, close with tag', async function () {
+    it('184.4.1 Acquire connection from pool, close with tag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -1318,7 +1318,7 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close({tag: tag1});
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           } finally {
             should.strictEqual(pool.connectionsOpen, 1);
@@ -1328,14 +1328,14 @@ describe('184. sessionTag.js', function () {
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.4.2 Acquire connection from pool, drop session', async function () {
+    it('184.4.2 Acquire connection from pool, drop session', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool(dbconfig);
@@ -1348,7 +1348,7 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close({drop: true});
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           } finally {
             should.strictEqual(pool.connectionsOpen, 0);
@@ -1358,14 +1358,14 @@ describe('184. sessionTag.js', function () {
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.4.3 Acquire connection from pool, drop session with tag', async function () {
+    it('184.4.3 Acquire connection from pool, drop session with tag', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -1382,7 +1382,7 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close({tag: tag1, drop: true});
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           } finally {
             should.strictEqual(pool.connectionsOpen, 0);
@@ -1392,14 +1392,14 @@ describe('184. sessionTag.js', function () {
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.4.4 Acquire connection from pool, wait for pool ping to call session fixup', async function () {
+    it('184.4.4 Acquire connection from pool, wait for pool ping to call session fixup', async function() {
       if (!dbconfig.test.DBA_PRIVILEGE) this.skip();
       let conn, pool;
       try {
@@ -1428,21 +1428,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.4.5 Acquire connection from pool, wait for pool timeout to drop', async function () {
+    it('184.4.5 Acquire connection from pool, wait for pool timeout to drop', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -1461,14 +1461,14 @@ describe('184. sessionTag.js', function () {
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.4.6 Drop connection from pool with poolMin=0', async function () {
+    it('184.4.6 Drop connection from pool with poolMin=0', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool({
@@ -1489,21 +1489,21 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.4.7 Close connection from pool with {drop: false}', async function () {
+    it('184.4.7 Close connection from pool with {drop: false}', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool(dbconfig);
@@ -1516,7 +1516,7 @@ describe('184. sessionTag.js', function () {
         if (conn) {
           try {
             await conn.close({drop: false});
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           } finally {
             should.strictEqual(pool.connectionsOpen, 1);
@@ -1526,14 +1526,14 @@ describe('184. sessionTag.js', function () {
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.4.8 Close connection from pool with {drop: randomObject}', async function () {
+    it('184.4.8 Close connection from pool with {drop: randomObject}', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool(dbconfig);
@@ -1551,7 +1551,7 @@ describe('184. sessionTag.js', function () {
               },
               /NJS-007/ //NJS-007: invalid value for %s in parameter
             );
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           } finally {
             should.strictEqual(pool.connectionsOpen, 1);
@@ -1562,14 +1562,14 @@ describe('184. sessionTag.js', function () {
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.4.9 Close connection from pool with {drop: 0}', async function () {
+    it('184.4.9 Close connection from pool with {drop: 0}', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool(dbconfig);
@@ -1587,7 +1587,7 @@ describe('184. sessionTag.js', function () {
               },
               /NJS-007/ //NJS-007: invalid value for %s in parameter
             );
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           } finally {
             should.strictEqual(pool.connectionsOpen, 1);
@@ -1598,14 +1598,14 @@ describe('184. sessionTag.js', function () {
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.4.10 Close connection from pool with empty object', async function () {
+    it('184.4.10 Close connection from pool with empty object', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool(dbconfig);
@@ -1623,7 +1623,7 @@ describe('184. sessionTag.js', function () {
               },
               /NJS-007/ //NJS-007: invalid value for %s in parameter
             );
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           } finally {
             should.strictEqual(pool.connectionsOpen, 1);
@@ -1634,14 +1634,14 @@ describe('184. sessionTag.js', function () {
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }
       }
     });
 
-    it('184.4.11 Close connection from pool with {drop: random string}', async function () {
+    it('184.4.11 Close connection from pool with {drop: random string}', async function() {
       let conn, pool;
       try {
         pool = await oracledb.createPool(dbconfig);
@@ -1659,7 +1659,7 @@ describe('184. sessionTag.js', function () {
               },
               /NJS-007/ //NJS-007: invalid type for %s in parameter
             );
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           } finally {
             should.strictEqual(pool.connectionsOpen, 1);
@@ -1670,7 +1670,7 @@ describe('184. sessionTag.js', function () {
         if (pool) {
           try {
             await pool.close();
-          } catch(err) {
+          } catch (err) {
             should.not.exist(err);
           }
         }

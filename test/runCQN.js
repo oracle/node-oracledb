@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -44,7 +44,7 @@ describe('185. runCQN.js', function() {
   let conn, connAsDBA;
 
   before(async function() {
-    if ( (!dbconfig.test.DBA_PRIVILEGE) || (process.platform == 'darwin') ) {
+    if ((!dbconfig.test.DBA_PRIVILEGE) || (process.platform == 'darwin')) {
       isRunnable = false;
     }
 
@@ -190,7 +190,7 @@ describe('185. runCQN.js', function() {
     }
   }); // 185.2
 
-  it('185.3 Specify the notification only for INSERT operation', async() => {
+  it('185.3 Specify the notification only for INSERT operation', async () => {
     try {
 
       const TABLE = 'nodb_tab_cqn_3';
@@ -238,7 +238,7 @@ describe('185. runCQN.js', function() {
     }
   }); // 185.3
 
-  it('185.4 Negative - provide invalid SQL in CQN option', async() => {
+  it('185.4 Negative - provide invalid SQL in CQN option', async () => {
     try {
       const TABLE = 'nodb_tab_cqn_4';
 

@@ -54,7 +54,7 @@ describe('33. dataTypeTimestamp1.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -63,7 +63,7 @@ describe('33. dataTypeTimestamp1.js', function() {
   describe('33.1 Testing JavaScript Date with database TIMESTAMP', function() {
     var dates = assist.data.dates;
 
-    before('create table, insert data',function(done) {
+    before('create table, insert data', function(done) {
       assist.setUp(connection, tableName, dates, done);
     });
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2020, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -45,10 +45,10 @@ describe('241. dbType04.js', function() {
       should.not.exist(err);
     }
 
-    if(oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000){
+    if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
       isRunnable = true;
     }
-    if(!isRunnable) {
+    if (!isRunnable) {
       this.skip();
     }
 
@@ -69,7 +69,7 @@ describe('241. dbType04.js', function() {
 
   after(async function() {
 
-    if(!isRunnable) {
+    if (!isRunnable) {
       return;
     }
 
@@ -405,7 +405,7 @@ describe('241. dbType04.js', function() {
       should.strictEqual(result2.rows[0][0], jsonId);
       should.deepEqual(result2.rows[0][1], "{\"jsonval\":{}}");
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 241.14

@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -155,7 +155,7 @@ describe('17. extendedMetaData.js', function() {
         { extendedMetaData: true },
         function(err, result) {
           should.not.exist(err);
-          (result.metaData).should.deepEqual( [ { name: 'DT', fetchType: oracledb.DATE, dbType: oracledb.DB_TYPE_DATE, dbTypeName: "DATE", nullable: true } ] );
+          (result.metaData).should.deepEqual([ { name: 'DT', fetchType: oracledb.DATE, dbType: oracledb.DB_TYPE_DATE, dbTypeName: "DATE", nullable: true } ]);
           done();
         }
       );
@@ -273,7 +273,7 @@ describe('17. extendedMetaData.js', function() {
         { extendedMetadata: true },
         function(err, result) {
           should.not.exist(err);
-          (result.metaData).should.deepEqual( [ { name: 'DT' } ] );
+          (result.metaData).should.deepEqual([ { name: 'DT' } ]);
           done();
         }
       );
@@ -1723,7 +1723,7 @@ describe('17. extendedMetaData.js', function() {
     it("17.8.1 works with tables whose column names are case-sensitive", function(done) {
 
       async.series([
-        function(callback){
+        function(callback) {
 
           var proc = "BEGIN \n" +
                      "    DECLARE \n" +
@@ -1745,13 +1745,13 @@ describe('17. extendedMetaData.js', function() {
 
           connection.execute(
             proc,
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback();
             }
           );
         },
-        function(callback){
+        function(callback) {
           connection.execute(
             "SELECT * FROM nodb_md_casesensitive",
             [],
@@ -1779,10 +1779,10 @@ describe('17. extendedMetaData.js', function() {
             }
           );
         },
-        function(callback){
+        function(callback) {
           connection.execute(
             "DROP TABLE nodb_md_casesensitive PURGE",
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback();
             }
@@ -1811,7 +1811,7 @@ describe('17. extendedMetaData.js', function() {
           "       THEN NULL; \n" +
           "   END; \n" +
           "   EXECUTE IMMEDIATE (' \n" +
-          "       CREATE TABLE " + tableName +" ( \n" +
+          "       CREATE TABLE " + tableName + " ( \n" +
           "           a VARCHAR2(20),  \n" +
           '           b VARCHAR2(20) \n' +
           "       ) \n" +
@@ -1824,7 +1824,7 @@ describe('17. extendedMetaData.js', function() {
         function(callback) {
           connection.execute(
             sqlCreate,
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback();
             }
@@ -1835,7 +1835,7 @@ describe('17. extendedMetaData.js', function() {
             sqlSelect,
             [],
             { extendedMetaData: true },
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               (result.metaData).should.deepEqual([
                 { name: 'A',
@@ -1912,7 +1912,7 @@ describe('17. extendedMetaData.js', function() {
 
       function genColumns(size) {
         var buffer = [];
-        for(var i = 0; i < size; i++) {
+        for (var i = 0; i < size; i++) {
           buffer[i] = " column_" + i + " NUMBER";
         }
         return buffer.join();
@@ -1943,7 +1943,7 @@ describe('17. extendedMetaData.js', function() {
         function(callback) {
           connection.execute(
             proc,
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback();
             }
@@ -1956,7 +1956,7 @@ describe('17. extendedMetaData.js', function() {
             { extendedMetaData: true },
             function(err, result) {
               should.not.exist(err);
-              for(var i = 0; i < column_size; i++){
+              for (var i = 0; i < column_size; i++) {
                 result.metaData[i].name.should.eql('COLUMN_' + i);
                 result.metaData[i].fetchType.should.be.exactly(oracledb.NUMBER);
                 result.metaData[i].dbType.should.be.exactly(oracledb.DB_TYPE_NUMBER);
@@ -1971,7 +1971,7 @@ describe('17. extendedMetaData.js', function() {
         function(callback) {
           connection.execute(
             sqlDrop,
-            function(err){
+            function(err) {
               should.not.exist(err);
               callback();
             }
@@ -1985,12 +1985,11 @@ describe('17. extendedMetaData.js', function() {
 
 
   var verifyResult = function(setValue, md) {
-    if(!setValue) {
+    if (!setValue) {
       md.should.deepEqual(
         [ { name: 'NUM' }, { name: 'VCH' }, { name: 'DT' } ]
       );
-    }
-    else {
+    } else {
       md.should.deepEqual([
         { name: 'NUM',
           fetchType: oracledb.NUMBER,

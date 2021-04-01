@@ -70,7 +70,7 @@ describe('174. soda6.js', () => {
 
       await conn.commit();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (collection) {
@@ -80,7 +80,7 @@ describe('174. soda6.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -107,7 +107,7 @@ describe('174. soda6.js', () => {
         /NJS-009: invalid number of parameters/
       );
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -118,7 +118,7 @@ describe('174. soda6.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -145,7 +145,7 @@ describe('174. soda6.js', () => {
         .count();
       should.strictEqual(empInShenzhen.count, t_contents.length);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -156,7 +156,7 @@ describe('174. soda6.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -196,7 +196,7 @@ describe('174. soda6.js', () => {
 
       await conn.commit();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (collection) {
@@ -206,7 +206,7 @@ describe('174. soda6.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -233,7 +233,7 @@ describe('174. soda6.js', () => {
       should.not.exist(doc2);
       await conn.commit();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
 
@@ -244,7 +244,7 @@ describe('174. soda6.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -270,7 +270,7 @@ describe('174. soda6.js', () => {
         /NJS-009: invalid number of parameters/
       );
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -281,7 +281,7 @@ describe('174. soda6.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -309,7 +309,7 @@ describe('174. soda6.js', () => {
         /NJS-005: invalid value for parameter 1/
       );
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -320,7 +320,7 @@ describe('174. soda6.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -347,12 +347,12 @@ describe('174. soda6.js', () => {
 
       // Get contents
       let myContents = [];
-      for (let i = 0; i < documents.length; i++ ) {
+      for (let i = 0; i < documents.length; i++) {
         myContents[i] = documents[i].getContent();
         (myContents[i]).should.be.oneOf(t_contents);
       }
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -364,7 +364,7 @@ describe('174. soda6.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -390,13 +390,13 @@ describe('174. soda6.js', () => {
 
       // Get contents
       let myContents = [];
-      for (let i = 0; i < documents.length; i++ ) {
+      for (let i = 0; i < documents.length; i++) {
         myContents[i] = documents[i].getContent();
         (myContents[i]).should.be.oneOf(t_contents);
       }
 
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -408,7 +408,7 @@ describe('174. soda6.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -434,7 +434,7 @@ describe('174. soda6.js', () => {
         /NJS-009: invalid number of parameters/
       );
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -446,7 +446,7 @@ describe('174. soda6.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -473,7 +473,7 @@ describe('174. soda6.js', () => {
         /NJS-005: invalid value for parameter 1/
       );
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -485,7 +485,7 @@ describe('174. soda6.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -516,7 +516,7 @@ describe('174. soda6.js', () => {
 
       should.strictEqual(result.count, 0);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       await conn.commit();
@@ -528,7 +528,7 @@ describe('174. soda6.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }

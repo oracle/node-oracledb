@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -186,7 +186,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
         });
 
         lob.on('finish', function() {
-          connection.commit( function(err) {
+          connection.commit(function(err) {
             should.not.exist(err);
             return callback();
           });
@@ -218,7 +218,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
         });
 
         lob.on('end', function() {
-          fs.readFile( jpgFileName, function(err, originalData) {
+          fs.readFile(jpgFileName, function(err, originalData) {
             should.not.exist(err);
             should.strictEqual(totalLength, originalData.length);
             originalData.should.eql(blobData);
@@ -262,7 +262,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
   // compare the result buffer with the original inserted buffer
   var compareResultBufAndOriginal = function(resultVal, totalLength, originalBuffer, specialStr, callback) {
-    if(originalBuffer.length > 0 ) {
+    if (originalBuffer.length > 0) {
       var specStrLength = specialStr.length;
       should.strictEqual(resultVal.toString('utf8', 0, specStrLength), specialStr);
       should.strictEqual(resultVal.toString('utf8', (totalLength - specStrLength), totalLength), specialStr);

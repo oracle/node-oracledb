@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -32,7 +32,7 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe('51. poolClose.js', function(){
+describe('51. poolClose.js', function() {
 
   it('51.1 can not get connections from the terminated pool', function(done) {
     oracledb.createPool(

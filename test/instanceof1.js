@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -46,7 +46,7 @@ describe('45. instanceof1.js', function() {
         poolMax           : 1,
         poolIncrement     : 1
       },
-      function(err, pool){
+      function(err, pool) {
         should.not.exist(err);
 
         (pool instanceof oracledb.Pool).should.be.true();

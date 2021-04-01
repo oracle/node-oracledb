@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -121,7 +121,7 @@ describe('161. changePassword.js', function() {
           );
         },
         function(cb) {
-          var sql = "DROP USER " + myUser +" CASCADE";
+          var sql = "DROP USER " + myUser + " CASCADE";
           dbaConn.execute(
             sql,
             function(err) {
@@ -771,7 +771,7 @@ describe('161. changePassword.js', function() {
         });
       },
       function(cb) {
-        var sql = "DROP USER " + tUser +" CASCADE";
+        var sql = "DROP USER " + tUser + " CASCADE";
         dbaConn.execute(
           sql,
           function(err) {

@@ -3,11 +3,38 @@
         "ecmaVersion": 2019
     },
     "rules": {
+        require-await: "error",
+        brace-style: "error",
+        computed-property-spacing: ["error", "never"],
+        comma-spacing: [
+            "error", {
+                "before": false,
+                "after": true
+            }
+        ],
+        no-trailing-spaces: "error",
+        "space-before-function-paren": [
+            "error", {
+                "anonymous": "never",
+                "named": "never",
+                "asyncArrow": "always"
+            }
+        ],
+        space-in-parens: "error",
+        space-infix-ops: "error",
+        "space-unary-ops": [
+            2, {
+                  "words": true,
+                  "nonwords": false
+              }
+        ],
+        space-before-blocks: "error",
+        keyword-spacing: "error",
+        eol-last: "error",
         "indent": [
             2,
             2,
             { "SwitchCase": 1 /*, "VariableDeclarator": { "var": 2} */},
-
         ],
         "quotes": [
             0,

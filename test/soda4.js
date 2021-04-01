@@ -83,13 +83,13 @@ describe('168. soda4.js', () => {
       let res = await coll.drop();
       should.strictEqual(res.dropped, true);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -123,13 +123,13 @@ describe('168. soda4.js', () => {
       let res = await coll.drop();
       should.strictEqual(res.dropped, true);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -162,13 +162,13 @@ describe('168. soda4.js', () => {
       let res = await coll.drop();
       should.strictEqual(res.dropped, true);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }

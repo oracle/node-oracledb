@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -54,7 +54,7 @@ describe('27. dataTypeNumber2.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -62,7 +62,7 @@ describe('27. dataTypeNumber2.js', function() {
 
   describe('27.1 testing NUMBER(p, s) data', function() {
 
-    before('create table, insert data',function(done) {
+    before('create table, insert data', function(done) {
       assist.setUp(connection, tableName, numbers, done);
     });
 
@@ -85,8 +85,8 @@ describe('27. dataTypeNumber2.js', function() {
         function(err, result) {
           should.not.exist(err);
           // console.log(result);
-          for(var j = 0; j < numbers.length; j++) {
-            if(Math.abs( numbers[result.rows[j].NUM] ) == 0.00000123)
+          for (var j = 0; j < numbers.length; j++) {
+            if (Math.abs(numbers[result.rows[j].NUM]) == 0.00000123)
               result.rows[j].CONTENT.should.be.exactly(0);
             else
               result.rows[j].CONTENT.should.be.exactly(numbers[result.rows[j].NUM]);
@@ -114,15 +114,15 @@ describe('27. dataTypeNumber2.js', function() {
       function fetchRowsFromRS(rs) {
         rs.getRows(numRows, function(err, rows) {
           should.not.exist(err);
-          if(rows.length > 0) {
-            for(var i = 0; i < rows.length; i++) {
-              if(Math.abs( numbers[rows[i].NUM] ) == 0.00000123)
+          if (rows.length > 0) {
+            for (var i = 0; i < rows.length; i++) {
+              if (Math.abs(numbers[rows[i].NUM]) == 0.00000123)
                 rows[i].CONTENT.should.be.exactly(0);
               else
                 rows[i].CONTENT.should.be.exactly(numbers[rows[i].NUM]);
             }
             return fetchRowsFromRS(rs);
-          } else if(rows.length == 0) {
+          } else if (rows.length == 0) {
             rs.close(function(err) {
               should.not.exist(err);
               done();

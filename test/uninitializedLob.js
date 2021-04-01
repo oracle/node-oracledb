@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -184,7 +184,7 @@ describe('65. uninitializedLob.js', function() {
   it('65.1 an uninitialized Lob is returned from a PL/SQL block', function(done) {
     // async's times applies a function n times in series.
     async.timesSeries(3, function(n, next) {
-      var string_1 = n%2;
+      var string_1 = n % 2;
       var proc = "DECLARE \n" +
                  "  row_count NUMBER := 0;" +
                  "  negative_one NUMBER := -1;" +
@@ -210,7 +210,7 @@ describe('65. uninitializedLob.js', function() {
         },
         { outFormat: oracledb.OUT_FORMAT_OBJECT, autoCommit: false },
         function(err, result) {
-          if(err) {
+          if (err) {
             console.error(err.message);
             return next(err);
           }
@@ -232,7 +232,7 @@ describe('65. uninitializedLob.js', function() {
               should.not.exist(err);
             });
 
-            result.outBinds.blob_1.on('finish',function(err) {
+            result.outBinds.blob_1.on('finish', function(err) {
               next(err);
             });
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -37,7 +37,7 @@ var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var assist   = require('./dataTypeAssist.js');
 
-describe('6. dmlReturning.js', function(){
+describe('6. dmlReturning.js', function() {
 
   describe('6.1 NUMBER & STRING driver data type', function() {
 
@@ -87,7 +87,7 @@ describe('6. dmlReturning.js', function(){
           connection = conn;
           conn.execute(
             makeTable,
-            function(err){
+            function(err) {
               should.not.exist(err);
               done();
             }
@@ -99,10 +99,14 @@ describe('6. dmlReturning.js', function(){
     afterEach('drop table and release connection', function(done) {
       connection.execute(
         "DROP TABLE nodb_dmlreturn PURGE",
-        function(err){
-          if(err) { console.error(err.message); return; }
-          connection.release( function(err){
-            if(err) { console.error(err.message); return; }
+        function(err) {
+          if (err) {
+            console.error(err.message); return;
+          }
+          connection.release(function(err) {
+            if (err) {
+              console.error(err.message); return;
+            }
             done();
           });
         }
@@ -254,7 +258,7 @@ describe('6. dmlReturning.js', function(){
       );
     });
 
-    it('6.1.8 DELETE statement with Object binding', function(done){
+    it('6.1.8 DELETE statement with Object binding', function(done) {
       connection.should.be.ok();
       connection.execute(
         "DELETE FROM nodb_dmlreturn WHERE name like '%Chris%' RETURNING id, name INTO :rid, :rname",
@@ -274,7 +278,7 @@ describe('6. dmlReturning.js', function(){
       );
     });
 
-    it('6.1.9 DELETE statement with Array binding', function(done){
+    it('6.1.9 DELETE statement with Array binding', function(done) {
       connection.should.be.ok();
       connection.execute(
         "DELETE FROM nodb_dmlreturn WHERE name like '%Chris%' RETURNING id, name INTO :rid, :rname",
@@ -295,12 +299,12 @@ describe('6. dmlReturning.js', function(){
     });
 
     // it currently fails with 11.2 database
-    it('6.1.10 Stress test - support 4k varchars', function(done){
+    it('6.1.10 Stress test - support 4k varchars', function(done) {
 
       /*** Helper functions ***/
       var makeString = function(size) {
         var buffer = new StringBuffer();
-        for(var i = 0; i < size; i++)
+        for (var i = 0; i < size; i++)
           buffer.append('A');
 
         return buffer.toString();
@@ -407,7 +411,7 @@ describe('6. dmlReturning.js', function(){
           );
         },
         function(callback) {
-          connection.release( function(err) {
+          connection.release(function(err) {
             should.not.exist(err);
             callback();
           });
@@ -415,8 +419,7 @@ describe('6. dmlReturning.js', function(){
       ], done);
     });
 
-    function runSQL(sql, bindVar, isSingleMatch, callback)
-    {
+    function runSQL(sql, bindVar, isSingleMatch, callback) {
       var beAffectedRows = (isSingleMatch ? 1 : dates.length);
 
       connection.execute(

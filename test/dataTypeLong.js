@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -47,7 +47,7 @@ describe('103. dataTypeLong.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -59,7 +59,7 @@ describe('103. dataTypeLong.js', function() {
     var strLen = [1000, 4000, 10000, 100000, 1000000];
     var strs = [];
     var specialStr = "103.1";
-    for(var i = 0; i < strLen.length; i++)
+    for (var i = 0; i < strLen.length; i++)
       strs[i] = random.getRandomString(strLen[i], specialStr);
 
     before(function(done) {

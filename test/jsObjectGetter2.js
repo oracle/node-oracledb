@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -44,7 +44,7 @@ describe('171. jsObjectGetter2.js', () => {
 
     try {
       oracledb.fetchAsBuffer = foo;
-    } catch(err) {
+    } catch (err) {
       console.log(err);
     } finally {
       oracledb.fetchAsBuffer = []; // restore
@@ -61,7 +61,7 @@ describe('171. jsObjectGetter2.js', () => {
 
     try {
       oracledb.fetchAsString = foo;
-    } catch(err) {
+    } catch (err) {
       console.log(err);
     } finally {
       oracledb.fetchAsString = []; // restore
@@ -105,13 +105,13 @@ describe('171. jsObjectGetter2.js', () => {
       let sqlDrop = "DROP TABLE " + tableName + " PURGE";
       await conn.execute(sqlDrop);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }

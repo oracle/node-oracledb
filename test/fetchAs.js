@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -47,7 +47,7 @@ describe('56. fetchAs.js', function() {
 
   afterEach('release connection, reset fetchAsString property', function(done) {
     oracledb.fetchAsString = [];
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -57,7 +57,7 @@ describe('56. fetchAs.js', function() {
 
     (oracledb.fetchAsString).should.eql([]);
 
-    oracledb.fetchAsString=[oracledb.DATE];
+    oracledb.fetchAsString = [oracledb.DATE];
     should.deepEqual(oracledb.fetchAsString, [ oracledb.DATE ]);
 
     oracledb.fetchAsString = [ oracledb.NUMBER ];
@@ -198,11 +198,11 @@ describe('56. fetchAs.js', function() {
       function(err, result) {
         should.not.exist(err);
 
-        result.resultSet.getRow( function(err, row) {
+        result.resultSet.getRow(function(err, row) {
           should.not.exist(err);
           // console.log(row);
           row.ROWID.should.be.a.String();
-          result.resultSet.close( function(err) {
+          result.resultSet.close(function(err) {
             should.not.exist(err);
             done();
           });
@@ -283,16 +283,16 @@ describe('56. fetchAs.js', function() {
   });
 
   // FetchInfo format should <columName> : {type : oracledb.<type> }
-  it('56.10 invalid syntax for type should result in error', function (done){
+  it('56.10 invalid syntax for type should result in error', function(done) {
     connection.execute (
       "SELECT SYSDATE AS THE_DATE FROM DUAL",
       { },
       { fetchInfo : { "THE_DATE" : oracledb.STRING }},
-      function ( err ) {
-        should.exist ( err ) ;
+      function(err) {
+        should.exist (err) ;
         should.strictEqual(err.message, 'NJS-015: type was not specified for conversion');
         done ();
-      } );
+      });
   });
 
   it('56.11 assigns an empty array to fetchAsString', function() {
@@ -421,7 +421,7 @@ describe('56. fetchAs.js', function() {
   it('56.22 Negative - invalid type of value, Buffer', function() {
     should.throws(
       function() {
-        var buf = assist.createBuffer ( 10 ) ;  // arbitary sized buffer
+        var buf = assist.createBuffer (10) ;  // arbitary sized buffer
         oracledb.fetchAsString = buf;
       },
       /NJS-004: invalid value for property fetchAsString/

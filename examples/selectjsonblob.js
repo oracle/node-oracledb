@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -52,7 +52,7 @@ async function run() {
 
     try {
       await connection.execute(`DROP TABLE no_purchaseorder_b`);
-    } catch(e) {
+    } catch (e) {
       if (e.errorNum != 942)
         console.error(e);
     }
@@ -66,7 +66,7 @@ async function run() {
     const inssql = `INSERT INTO no_purchaseorder_b (po_document) VALUES (:bv)`;
     const data = { "userId": 1, "userName": "Anna", "location": "Australia" };
 
-    if (oracledb.oracleClientVersion >= 2100000000 && connection.oracleServerVersion >= 2100000000 ) {
+    if (oracledb.oracleClientVersion >= 2100000000 && connection.oracleServerVersion >= 2100000000) {
       // Take advantage of direct binding of JavaScript objects
       await connection.execute(inssql, { bv: { val: data, type: oracledb.DB_TYPE_JSON } });
     } else {

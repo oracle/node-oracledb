@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -137,7 +137,7 @@ describe('62. lobProperties1.js', function() {
                 });
               }
             ], function() {
-              connection.commit( function(err) {
+              connection.commit(function(err) {
                 should.not.exist(err);
                 cb();
               });
@@ -181,7 +181,7 @@ describe('62. lobProperties1.js', function() {
         );
       },
       function(cb) {
-        connection.release( function(err) {
+        connection.release(function(err) {
           should.not.exist(err);
           cb();
         });
@@ -208,7 +208,7 @@ describe('62. lobProperties1.js', function() {
 
         try {
           clob.chunkSize = t1 + 1;
-        } catch(err) {
+        } catch (err) {
           should.exist(err);
           // console.log(err.message);
           // Cannot assign to read only property 'chunkSize' of #<Lob>
@@ -216,7 +216,7 @@ describe('62. lobProperties1.js', function() {
 
         try {
           blob.chunkSize = t2 + 1;
-        } catch(err) {
+        } catch (err) {
           should.exist(err);
           // console.log(err.message);
           // Cannot assign to read only property 'chunkSize' of #<Lob>
@@ -247,7 +247,7 @@ describe('62. lobProperties1.js', function() {
 
         try {
           clob.length = t1 + 1;
-        } catch(err) {
+        } catch (err) {
           should.exist(err);
           //console.log(err.message);
           // Cannot set property length of #<Lob> which has only a getter
@@ -255,7 +255,7 @@ describe('62. lobProperties1.js', function() {
 
         try {
           blob.length = t2 + 1;
-        } catch(err) {
+        } catch (err) {
           should.exist(err);
           //console.log(err.message);
           // Cannot set property length of #<Lob> which has only a getter
@@ -389,7 +389,7 @@ describe('62. lobProperties1.js', function() {
 
         try {
           clob.pieceSize = -100;
-        } catch(err) {
+        } catch (err) {
           should.exist(err);
           (err.message).should.startWith('NJS-004:');
           // NJS-004: invalid value for property pieceSize
@@ -418,7 +418,7 @@ describe('62. lobProperties1.js', function() {
 
         try {
           clob.pieceSize = null;
-        } catch(err) {
+        } catch (err) {
           should.exist(err);
           (err.message).should.startWith('NJS-004:');
           // NJS-004: invalid value for property pieceSize
@@ -447,7 +447,7 @@ describe('62. lobProperties1.js', function() {
 
         try {
           clob.pieceSize = NaN;
-        } catch(err) {
+        } catch (err) {
           should.exist(err);
           (err.message).should.startWith('NJS-004:');
           // NJS-004: invalid value for property pieceSize
@@ -482,7 +482,7 @@ describe('62. lobProperties1.js', function() {
 
         try {
           clob.type = t2;
-        } catch(err) {
+        } catch (err) {
           should.exist(err);
           // console.log(err);
           // [TypeError: Cannot set property type of #<Lob> which has only a getter]
@@ -490,7 +490,7 @@ describe('62. lobProperties1.js', function() {
 
         try {
           blob.type = t1;
-        } catch(err) {
+        } catch (err) {
           should.exist(err);
           // console.log(err);
           // [TypeError: Cannot set property type of #<Lob> which has only a getter]

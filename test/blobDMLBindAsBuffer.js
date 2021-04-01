@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -84,7 +84,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
   };
 
   var insertIntoBlobTable1 = function(id, content, callback) {
-    if(content == "EMPTY_BLOB") {
+    if (content == "EMPTY_BLOB") {
       connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, EMPTY_BLOB())",
         [ id ],
@@ -111,11 +111,11 @@ describe('82.blobDMLBindAsBuffer.js', function() {
   };
 
   var updateBlobTable1 = function(id, content, callback) {
-    if(content == "EMPTY_BLOB") {
+    if (content == "EMPTY_BLOB") {
       connection.execute(
         "UPDATE nodb_dml_blob_1 set blob = EMPTY_BLOB() where id = :ID",
         { ID: id },
-        function(err, result){
+        function(err, result) {
           should.not.exist(err);
           should.strictEqual(result.rowsAffected, 1);
           callback();
@@ -125,7 +125,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       connection.execute(
         "UPDATE nodb_dml_blob_1 set blob = :C where id = :ID",
         { ID: id, C: content },
-        function(err, result){
+        function(err, result) {
           should.not.exist(err);
           should.strictEqual(result.rowsAffected, 1);
           callback();
@@ -141,7 +141,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       function(err, result) {
         should.not.exist(err);
         var lob = result.rows[0][0];
-        if(originalBuffer == '' || originalBuffer == undefined) {
+        if (originalBuffer == '' || originalBuffer == undefined) {
           should.not.exist(lob);
           return callback();
         } else {
@@ -159,7 +159,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           });
 
           lob.on('end', function() {
-            if(originalBuffer == "EMPTY_BLOB") {
+            if (originalBuffer == "EMPTY_BLOB") {
               var nullBuffer = Buffer.from('', "utf-8");
               should.strictEqual(assist.compare2Buffers(blobData, nullBuffer), true);
             } else {

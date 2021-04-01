@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -57,7 +57,7 @@ describe('98.binding_DMLReturningInto.js', function() {
   });
 
   after(function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -74,7 +74,7 @@ describe('98.binding_DMLReturningInto.js', function() {
         dmlInsert(table_name, dbColType, bindVar, bindType, nullBind, cb);
       },
       function(cb) {
-        var bindVar =[ { val: inserted[0], type: inserted[1], dir: oracledb.BIND_IN }, { type: bindType, dir: oracledb.BIND_OUT, maxSize: 2000 } ];
+        var bindVar = [ { val: inserted[0], type: inserted[1], dir: oracledb.BIND_IN }, { type: bindType, dir: oracledb.BIND_OUT, maxSize: 2000 } ];
         dmlInsert(table_name, dbColType, bindVar, bindType, nullBind, cb);
       }
     ], callback);
@@ -82,20 +82,20 @@ describe('98.binding_DMLReturningInto.js', function() {
 
   var getInsertVal = function(element, nullBind) {
     var insertValue = [];
-    if(element.indexOf("CHAR") > -1 || element === "CLOB") {
-      insertValue[0] = (nullBind===true) ? null : "abcsca";
+    if (element.indexOf("CHAR") > -1 || element === "CLOB") {
+      insertValue[0] = (nullBind === true) ? null : "abcsca";
       insertValue[1] = oracledb.STRING;
     }
-    if(element === "BINARY_DOUBLE" || element.indexOf("FLOAT") > -1 || element === "NUMBER") {
-      insertValue[0] = (nullBind===true) ? null :  1;
+    if (element === "BINARY_DOUBLE" || element.indexOf("FLOAT") > -1 || element === "NUMBER") {
+      insertValue[0] = (nullBind === true) ? null :  1;
       insertValue[1] = oracledb.NUMBER;
     }
-    if(element === "TIMESTAMP" || element === "DATE") {
-      insertValue[0] = (nullBind===true) ? null :  new Date(0);
+    if (element === "TIMESTAMP" || element === "DATE") {
+      insertValue[0] = (nullBind === true) ? null :  new Date(0);
       insertValue[1] = oracledb.DATE;
     }
-    if(element === "BLOB" || element.indexOf("RAW") > -1 ) {
-      insertValue[0] = (nullBind===true) ? null :  assist.createBuffer(100);
+    if (element === "BLOB" || element.indexOf("RAW") > -1) {
+      insertValue[0] = (nullBind === true) ? null :  assist.createBuffer(100);
       insertValue[1] = oracledb.BUFFER;
     }
     return insertValue;
@@ -113,7 +113,7 @@ describe('98.binding_DMLReturningInto.js', function() {
           "insert into " + table_name + " ( content ) values (:c) returning content into :output",
           bindVar,
           function(err) {
-            if(bindType === oracledb.STRING) {
+            if (bindType === oracledb.STRING) {
               compareStrErrMsg(dbColType, err);
             } else {
               // oracledb.BUFFER
@@ -150,7 +150,7 @@ describe('98.binding_DMLReturningInto.js', function() {
   };
 
   var compareStrErrMsg = function(element, err) {
-    if(element === "BLOB" && (connection.oracleServerVersion < 1202000100)) {
+    if (element === "BLOB" && (connection.oracleServerVersion < 1202000100)) {
       // ORA-00932: inconsistent datatypes: expected CHAR got BLOB
       (err.message).should.startWith('ORA-00932:');
     } else {

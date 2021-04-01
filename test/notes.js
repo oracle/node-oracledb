@@ -90,19 +90,19 @@ if (dbconfig.test.proxySessionUser) {
 }
 
 before(function(done) {
-  var conn, seriesList=[];
-  configList.map(function (conf, index) {
-    seriesList.push(function (cb) {
-      oracledb.getConnection(conf, function (err, connection) {
+  var conn, seriesList = [];
+  configList.map(function(conf, index) {
+    seriesList.push(function(cb) {
+      oracledb.getConnection(conf, function(err, connection) {
         conn = connection;
         cb(err, index);
       });
     });
-    seriesList.push(function (cb) {
+    seriesList.push(function(cb) {
       conn.execute(
         "select * from dual", [], { outFormat: oracledb.OUT_FORMAT_ARRAY },
         function(err, result) {
-          if (!err && result.rows && (result.rows[0][0]==="X")) {
+          if (!err && result.rows && (result.rows[0][0] === "X")) {
             cb(null, index);
           } else {
             cb(new Error("Query test failed"), index);
@@ -110,8 +110,10 @@ before(function(done) {
         }
       );
     });
-    seriesList.push(function (cb) {
-      conn.close(function (err) {cb(err, index);});
+    seriesList.push(function(cb) {
+      conn.close(function(err) {
+        cb(err, index);
+      });
     });
   });
   async.series(seriesList, function(err, results) {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -49,7 +49,7 @@ describe('227. dbType02.js', () => {
   });
 
   async function CreateTable(TABLE, TYPE) {
-    let sql =`
+    let sql = `
         CREATE TABLE ${TABLE} (id NUMBER, content ${TYPE})
     `;
     let plsql = testsUtil.sqlCreateTable(TABLE, sql);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -92,7 +92,7 @@ describe("150. fetchArraySize3.js", function() {
     before(function(done) {
       connection.execute(
         create_table,
-        function(err){
+        function(err) {
           should.not.exist(err);
           done() ;
         }
@@ -102,7 +102,7 @@ describe("150. fetchArraySize3.js", function() {
     after(function(done) {
       connection.execute(
         drop_table,
-        function(err){
+        function(err) {
           should.not.exist(err);
           done();
         }
@@ -149,7 +149,7 @@ describe("150. fetchArraySize3.js", function() {
     var verifyResult = function(result, affectedRowId) {
       async.forEach(result, function(element, cb) {
         var index = result.indexOf(element);
-        verifyEachRow(index+1+affectedRowId, element);
+        verifyEachRow(index + 1 + affectedRowId, element);
         cb();
       }, function(err) {
         should.not.exist(err);
@@ -166,11 +166,11 @@ describe("150. fetchArraySize3.js", function() {
     });
 
     it("150.1.2 oracledb.fetchArraySize = tableSize/20", function(done) {
-      dmlBinding(tableSize/20, 0, done);
+      dmlBinding(tableSize / 20, 0, done);
     });
 
     it("150.1.3 oracledb.fetchArraySize = tableSize/10", function(done) {
-      dmlBinding(tableSize/10, 2, done);
+      dmlBinding(tableSize / 10, 2, done);
     });
 
     it("150.1.4 oracledb.fetchArraySize = tableSize", function(done) {
@@ -178,7 +178,7 @@ describe("150. fetchArraySize3.js", function() {
     });
 
     it("150.1.5 oracledb.fetchArraySize = (table size - 1)", function(done) {
-      dmlBinding(tableSize - 1 , 0, done);
+      dmlBinding(tableSize - 1, 0, done);
     });
 
   });
@@ -326,7 +326,7 @@ describe("150. fetchArraySize3.js", function() {
     };
 
     var proc_verifyEachRow_out = function(index, element) {
-      should.strictEqual(element, index+1);
+      should.strictEqual(element, index + 1);
     };
 
     it("150.2.1 Bind OUT with oracledb.fetchArraySize = 1", function(done) {
@@ -337,13 +337,13 @@ describe("150. fetchArraySize3.js", function() {
 
     it("150.2.2 Bind OUT with oracledb.fetchArraySize = tableSize/20", function(done) {
       var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize/20;
+      var fetchArraySizeVal = tableSize / 20;
       proc_query_out(maxArraySizeVal, fetchArraySizeVal, done);
     });
 
     it("150.2.3 Bind OUT with oracledb.fetchArraySize = tableSize/10", function(done) {
       var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize/10;
+      var fetchArraySizeVal = tableSize / 10;
       proc_query_out(maxArraySizeVal, fetchArraySizeVal, done);
     });
 
@@ -369,14 +369,14 @@ describe("150. fetchArraySize3.js", function() {
     it("150.2.7 Bind IN OUT with oracledb.fetchArraySize = tableSize/20", function(done) {
       var updateFromId = 0;
       var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize/20;
+      var fetchArraySizeVal = tableSize / 20;
       proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
     });
 
     it("150.2.8 Bind IN OUT with oracledb.fetchArraySize = tableSize/10", function(done) {
       var updateFromId = 0;
       var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize/10;
+      var fetchArraySizeVal = tableSize / 10;
       proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
     });
 
@@ -515,10 +515,10 @@ describe("150. fetchArraySize3.js", function() {
     };
 
     var fun_verifyEachRow_inout = function(index, element, updateFromId) {
-      if(typeof element === "string") {
+      if (typeof element === "string") {
         var expectedTail = index + updateFromId + 1;
         should.strictEqual(element, "something new " + expectedTail);
-      } else if(typeof element === "number") {
+      } else if (typeof element === "number") {
         should.strictEqual(element, index + 1 + updateFromId);
       }
     };
@@ -551,7 +551,7 @@ describe("150. fetchArraySize3.js", function() {
     };
 
     var fun_verifyEachRow_out = function(index, element, affectFromId) {
-      should.strictEqual(element, index+1+affectFromId);
+      should.strictEqual(element, index + 1 + affectFromId);
     };
 
     it("150.3.1 Bind OUT with oracledb.fetchArraySize = 1", function(done) {
@@ -564,14 +564,14 @@ describe("150. fetchArraySize3.js", function() {
     it("150.3.2 Bind OUT with oracledb.fetchArraySize = tableSize/20", function(done) {
       var affectFromId = 0;
       var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize/20;
+      var fetchArraySizeVal = tableSize / 20;
       fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal, done);
     });
 
     it("150.3.3 Bind OUT with oracledb.fetchArraySize = tableSize/10", function(done) {
       var affectFromId = 0;
       var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize/10;
+      var fetchArraySizeVal = tableSize / 10;
       fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal, done);
     });
 
@@ -599,14 +599,14 @@ describe("150. fetchArraySize3.js", function() {
     it("150.3.7 Bind IN OUT with oracledb.fetchArraySize = tableSize/20", function(done) {
       var updateFromId = 0;
       var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize/20;
+      var fetchArraySizeVal = tableSize / 20;
       fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
     });
 
     it("150.3.8 Bind IN OUT with oracledb.fetchArraySize = tableSize/10", function(done) {
       var updateFromId = 0;
       var maxArraySizeVal = tableSize * 2;
-      var fetchArraySizeVal = tableSize/10;
+      var fetchArraySizeVal = tableSize / 10;
       fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
     });
 

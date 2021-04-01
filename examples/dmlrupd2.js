@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -27,7 +27,7 @@
  *
  *****************************************************************************/
 
-const oracledb = require( 'oracledb' );
+const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 
 async function run() {
@@ -54,7 +54,7 @@ async function run() {
     for (const s of stmts) {
       try {
         await connection.execute(s);
-      } catch(e) {
+      } catch (e) {
         if (e.errorNum != 942)
           console.error(e);
       }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -40,9 +40,9 @@ describe('42. dataTypeRaw.js', function() {
   var tableName = "nodb_raw";
   var insertID = 1;
 
-  var bufLen = [10 ,100, 1000, 2000]; // buffer length
+  var bufLen = [10, 100, 1000, 2000]; // buffer length
   var bufs = [];
-  for(var i = 0; i < bufLen.length; i++)
+  for (var i = 0; i < bufLen.length; i++)
     bufs[i] = assist.createBuffer(bufLen[i]);
 
   before('get one connection', function(done) {
@@ -61,7 +61,7 @@ describe('42. dataTypeRaw.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -108,14 +108,13 @@ describe('42. dataTypeRaw.js', function() {
         }
       );
 
-      function fetchOneRowFromRS(rs, cb)
-      {
+      function fetchOneRowFromRS(rs, cb) {
         rs.getRow(function(err, row) {
           should.not.exist(err);
-          if(row) {
+          if (row) {
             fetchOneRowFromRS(rs, cb);
           } else {
-            rs.close( function(err) {
+            rs.close(function(err) {
               should.not.exist(err);
               cb();
             });
@@ -336,7 +335,7 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.not.exist(err);
 
-          ( Buffer.isBuffer(result.outBinds.o) ).should.equal(true, "Error: the bind out data is not a Buffer");
+          (Buffer.isBuffer(result.outBinds.o)).should.equal(true, "Error: the bind out data is not a Buffer");
           (result.outBinds.o.length).should.be.exactly(size);
           done();
         }
@@ -356,7 +355,7 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.not.exist(err);
 
-          ( Buffer.isBuffer(result.outBinds.o) ).should.equal(true, "Error: the bind out data is not a Buffer");
+          (Buffer.isBuffer(result.outBinds.o)).should.equal(true, "Error: the bind out data is not a Buffer");
           (result.outBinds.o.length).should.be.exactly(size);
           done();
         }
@@ -371,7 +370,7 @@ describe('42. dataTypeRaw.js', function() {
         "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
-          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: (size-100) }
+          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: (size - 100) }
         },
         function(err) {
           should.exist(err);

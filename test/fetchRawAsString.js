@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021,Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -253,7 +253,7 @@ describe('188. fetchRowidAsString.js', function() {
 
   it("188.9 Insert a string exceeds maximum lenght of RAW", async function() {
     try {
-      let contentString = random.getRandomLengthString(rawMaxLength+1);
+      let contentString = random.getRandomLengthString(rawMaxLength + 1);
       const sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_to_raw('${contentString}'), 'string')`;
       await testUtil.assertThrowsAsync(async () => {
         await conn.execute(sql);

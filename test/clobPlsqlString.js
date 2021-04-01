@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -78,7 +78,7 @@ describe('60. clobPlsqlString.js', function() {
         );
       },
       function(callback) {
-        connection.release( function(err) {
+        connection.release(function(err) {
           should.not.exist(err);
           callback();
         });

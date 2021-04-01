@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -70,7 +70,7 @@ describe('53. resultSetClose.js', function() {
       function verifyMetaData(cb) {
         should.exist(resultSet.metaData);
         var t = resultSet.metaData;
-        t.should.eql( [ { name: 'NUM' }, { name: 'CONTENT' } ] );
+        t.should.eql([ { name: 'NUM' }, { name: 'CONTENT' } ]);
         cb();
       },
       function closeRS(cb) {

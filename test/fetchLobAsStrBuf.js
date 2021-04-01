@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -83,24 +83,23 @@ describe('245. fetchLobAsStrBuf.js', function() {
     );
   };
 
-  var insertIntoTable = function(id ,contentClob,contentBlob,callback) {
+  var insertIntoTable = function(id, contentClob, contentBlob, callback) {
     if (contentClob == "EMPTY_CLOB" && contentBlob == "EMPTY_BLOB") {
-      connection.execute( "insert INTO fetchLobAsStrBuf_table values(:id, EMPTY_CLOB(), EMPTY_BLOB())",
+      connection.execute("insert INTO fetchLobAsStrBuf_table values(:id, EMPTY_CLOB(), EMPTY_BLOB())",
         [ id ],
         function(err, result) {
           should.not.exist(err);
           should.strictEqual(result.rowsAffected, 1);
           callback();
         });
-    }
-    else {
+    } else {
       var sql = "insert into fetchLobAsStrBuf_table (id, clob_col, blob_col) values(:id, :str, :buf)";
       var bindings = {
         id : { val : id },
         str : {val:contentClob, type:oracledb.STRING, dir:oracledb.BIND_IN},
         buf : {val:contentBlob, type:oracledb.BUFFER,  dir:oracledb.BIND_IN}
       };
-      connection.execute(sql , bindings ,
+      connection.execute(sql, bindings,
         function(err, result) {
           should.not.exist(err);
           should.strictEqual(result.rowsAffected, 1);
@@ -109,15 +108,15 @@ describe('245. fetchLobAsStrBuf.js', function() {
     }
   };
 
-  var checkInsertResult = function(id, contentClob,specialStr,contentBlob,callback) {
+  var checkInsertResult = function(id, contentClob, specialStr, contentBlob, callback) {
     async.series([
       function(cb) {
-        var sql = "select clob_col from fetchLobAsStrBuf_table where id = " +id;
+        var sql = "select clob_col from fetchLobAsStrBuf_table where id = " + id;
         verifyClobValueWithString(sql, contentClob, specialStr, cb);
       },
       function(cb) {
-        var sql = "select blob_col from fetchLobAsStrBuf_table where id = " +id;
-        verifyBlobValueWithBuffer(sql ,contentBlob ,specialStr,cb);
+        var sql = "select blob_col from fetchLobAsStrBuf_table where id = " + id;
+        verifyBlobValueWithBuffer(sql, contentBlob, specialStr, cb);
       }
     ], callback);
   };
@@ -128,7 +127,7 @@ describe('245. fetchLobAsStrBuf.js', function() {
       function(err, result) {
         should.not.exist(err);
         var lob = result.rows[0][0];
-        if(originalString == '' || originalString == undefined || originalString == null) {
+        if (originalString == '' || originalString == undefined || originalString == null) {
           should.not.exist(lob);
           return callback();
         } else {
@@ -169,7 +168,7 @@ describe('245. fetchLobAsStrBuf.js', function() {
       function(err, result) {
         should.not.exist(err);
         var lob = result.rows[0][0];
-        if(originalBuffer == '' || originalBuffer == undefined) {
+        if (originalBuffer == '' || originalBuffer == undefined) {
           should.not.exist(lob);
           return callback();
         } else {
@@ -187,7 +186,7 @@ describe('245. fetchLobAsStrBuf.js', function() {
           });
 
           lob.on('end', function() {
-            if(originalBuffer == "EMPTY_BLOB") {
+            if (originalBuffer == "EMPTY_BLOB") {
               var nullBuffer = Buffer.from('', "utf-8");
               should.strictEqual(assist.compare2Buffers(blobData, nullBuffer), true);
             } else {
@@ -220,10 +219,10 @@ describe('245. fetchLobAsStrBuf.js', function() {
       var contentBlob = "EMPTY_BLOB";
       async.series([
         function(cb) {
-          insertIntoTable(id, contentClob ,contentBlob, cb);
+          insertIntoTable(id, contentClob, contentBlob, cb);
         },
         function(cb) {
-          checkInsertResult(id, contentClob, null, contentBlob,cb);
+          checkInsertResult(id, contentClob, null, contentBlob, cb);
         }
       ], done);
     });
@@ -237,10 +236,10 @@ describe('245. fetchLobAsStrBuf.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoTable(id, contentClob,contentBlob,cb);
+          insertIntoTable(id, contentClob, contentBlob, cb);
         },
         function(cb) {
-          checkInsertResult(id, contentClob, specialStr,contentBlob, cb);
+          checkInsertResult(id, contentClob, specialStr, contentBlob, cb);
         }
       ], done);
 
@@ -255,10 +254,10 @@ describe('245. fetchLobAsStrBuf.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoTable(id, contentClob,contentBlob,cb);
+          insertIntoTable(id, contentClob, contentBlob, cb);
         },
         function(cb) {
-          checkInsertResult(id, contentClob, specialStr,contentBlob, cb);
+          checkInsertResult(id, contentClob, specialStr, contentBlob, cb);
         }
       ], done);
 

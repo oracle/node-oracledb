@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -39,7 +39,7 @@ describe('210. dbObject11.js', () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
 
-      let sql =`
+      let sql = `
         CREATE OR REPLACE TYPE ${TYPE} AS OBJECT (
           field_name     VARCHAR2(20),
           number$$value  NUMBER,
@@ -48,7 +48,7 @@ describe('210. dbObject11.js', () => {
         );`;
       await conn.execute(sql);
 
-      sql =`
+      sql = `
         CREATE TABLE ${TABLE} (
           c1 ${TYPE}
         )`;
@@ -56,7 +56,7 @@ describe('210. dbObject11.js', () => {
       await conn.execute(plsql);
 
       sql = `INSERT INTO ${TABLE} VALUES (:a)`;
-      let binds ={
+      let binds = {
         a: {
           type: TYPE,
           val: {
@@ -70,7 +70,7 @@ describe('210. dbObject11.js', () => {
       let result = await conn.execute(sql, binds);
       should.strictEqual(result.rowsAffected, 1);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // before()
@@ -84,7 +84,7 @@ describe('210. dbObject11.js', () => {
       await conn.execute(sql);
 
       await conn.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // after()
@@ -93,7 +93,7 @@ describe('210. dbObject11.js', () => {
     try {
       const query = `SELECT * FROM ${TABLE}`;
       const opts = { outFormat: oracledb.OBJECT };
-      const result = await conn.execute(query, [], opts );
+      const result = await conn.execute(query, [], opts);
 
       should.strictEqual(result.rows[0].C1.NUMBER$$VALUE, 123);
       should.strictEqual(result.rows[0].C1['NUMBER##VALUE'], 456);

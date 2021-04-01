@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -107,7 +107,9 @@ describe('135. clobDMLReturningMultipleRowsAsStream.js', function() {
         async.times(
           numLobs,
           function(n, next) {
-            verifyLob( n, result, function(err, result) { next(err, result); } );
+            verifyLob(n, result, function(err, result) {
+              next(err, result);
+            });
           },
           callback
         );
@@ -132,7 +134,7 @@ describe('135. clobDMLReturningMultipleRowsAsStream.js', function() {
 
     lob.on('end', function(err) {
       should.not.exist(err);
-      should.strictEqual(clobData, (id-10).toString());
+      should.strictEqual(clobData, (id - 10).toString());
     });
     lob.on('close', function(err) {
       should.not.exist(err);

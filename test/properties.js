@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -139,7 +139,7 @@ describe('58. properties.js', function() {
       oracledb.autoCommit = !t;
 
       t.should.eql(defaultValues.autoCommit);
-      (oracledb.autoCommit).should.eql( !defaultValues.autoCommit );
+      (oracledb.autoCommit).should.eql(!defaultValues.autoCommit);
 
     });
 
@@ -167,7 +167,7 @@ describe('58. properties.js', function() {
       oracledb.externalAuth = !t;
 
       t.should.eql(defaultValues.externalAuth);
-      (oracledb.externalAuth).should.eql( !defaultValues.externalAuth );
+      (oracledb.externalAuth).should.eql(!defaultValues.externalAuth);
     });
 
     it('58.1.11 fetchAsString', function() {
@@ -194,7 +194,7 @@ describe('58. properties.js', function() {
       (oracledb.lobPrefetchSize).should.eql(defaultValues.lobPrefetchSize + 1);
     });
 
-    it('58.1.14 oracleClientVersion (read-only)', function () {
+    it('58.1.14 oracleClientVersion (read-only)', function() {
       var t = oracledb.oracleClientVersion;
       t.should.be.a.Number();
 
@@ -308,7 +308,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.1.26 oracleClientVersionString (read-only)', function () {
+    it('58.1.26 oracleClientVersionString (read-only)', function() {
       var t = oracledb.oracleClientVersionString;
       t.should.be.a.String();
 
@@ -360,7 +360,7 @@ describe('58. properties.js', function() {
       oracledb.dbObjectAsPojo = !t;
 
       t.should.eql(defaultValues.dbObjectAsPojo);
-      (oracledb.dbObjectAsPojo).should.eql( !defaultValues.dbObjectAsPojo );
+      (oracledb.dbObjectAsPojo).should.eql(!defaultValues.dbObjectAsPojo);
 
     });
 
@@ -532,7 +532,7 @@ describe('58. properties.js', function() {
     });
 
     after('release connection', function(done) {
-      connection.release( function(err) {
+      connection.release(function(err) {
         should.not.exist(err);
         done();
       });
@@ -615,7 +615,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.3.6 oracleServerVersion (read-only)', function () {
+    it('58.3.6 oracleServerVersion (read-only)', function() {
       var t = connection.oracleServerVersion;
       t.should.be.a.Number();
 
@@ -627,7 +627,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.3.7 oracleServerVersionString (read-only)', function () {
+    it('58.3.7 oracleServerVersionString (read-only)', function() {
       var t = connection.oracleServerVersionString;
       t.should.be.a.String();
 
@@ -700,13 +700,13 @@ describe('58. properties.js', function() {
       ], done);
     });
 
-    after( function(done) {
+    after(function(done) {
       connection.execute(
         "DROP TABLE " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
 
-          connection.release( function(err) {
+          connection.release(function(err) {
             should.not.exist(err);
             done();
           });
@@ -717,7 +717,7 @@ describe('58. properties.js', function() {
     it('58.4.1 metaData (read-only)', function(done) {
       should.exist(resultSet.metaData);
       var t = resultSet.metaData;
-      t.should.eql( [ { name: 'NUM' }, { name: 'CONTENT' } ] );
+      t.should.eql([ { name: 'NUM' }, { name: 'CONTENT' } ]);
 
       should.throws(
         function() {

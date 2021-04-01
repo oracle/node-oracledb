@@ -34,7 +34,7 @@ const dbConfig  = require('./dbconfig.js');
 const assist    = require('./dataTypeAssist.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('248. userName.js', async function() {
+describe('248. userName.js', function() {
   var dbaCredential = {
     username      : dbConfig.test.DBA_user,
     password      : dbConfig.test.DBA_password,
@@ -44,12 +44,12 @@ describe('248. userName.js', async function() {
 
   var isLongUserRunnable = true;
 
-  before( async function() {
+  before(async function() {
     isLongUserRunnable = await testsUtil.checkPrerequisites(1202000000, 1202000000);
   });
 
   var createUser = async function(userSchema, password) {
-    try{
+    try {
       var dbaConn = await oracledb.getConnection(dbaCredential);
 
       var sql = `create user ${userSchema} identified by ${password}`;
@@ -58,19 +58,19 @@ describe('248. userName.js', async function() {
       sql = `grant create session to ${userSchema}`;
       await dbaConn.execute(sql);
       await dbaConn.close();
-    } catch(err){
+    } catch (err) {
       should.not.exist(err);
     }
   };
 
   var dropUser = async function(userSchema) {
-    try{
+    try {
       var dbaConn = await oracledb.getConnection(dbaCredential);
 
       var sql = `drop user ${userSchema} cascade`;
       await dbaConn.execute(sql);
       await dbaConn.close();
-    } catch(err){
+    } catch (err) {
       should.not.exist(err);
     }
   };
@@ -98,7 +98,7 @@ describe('248. userName.js', async function() {
 
         await dropUser(userSchema);
 
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }); // 248.1.1
@@ -126,7 +126,7 @@ describe('248. userName.js', async function() {
 
         await dropUser(userSchema);
 
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }); // 248.1.2
@@ -154,7 +154,7 @@ describe('248. userName.js', async function() {
 
         await dropUser(userSchema);
 
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
 
@@ -178,7 +178,7 @@ describe('248. userName.js', async function() {
         await dbaConn.execute(sql);
         await dbaConn.close();
 
-      } catch(err) {
+      } catch (err) {
         should.exist(err);
         (err.message).should.startWith('ORA-00972:');
       }
@@ -335,7 +335,7 @@ describe('248. userName.js', async function() {
 
         await dropUser(userSchema);
 
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }); // 248.2.1
@@ -363,7 +363,7 @@ describe('248. userName.js', async function() {
 
         await dropUser(userSchema);
 
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }); // 248.2.2
@@ -391,7 +391,7 @@ describe('248. userName.js', async function() {
 
         await dropUser(userSchema);
 
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
 
@@ -416,7 +416,7 @@ describe('248. userName.js', async function() {
         await dbaConn.execute(sql);
         await dbaConn.close();
 
-      } catch(err) {
+      } catch (err) {
         should.exist(err);
         (err.message).should.startWith('ORA-00972:');
       }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -69,7 +69,7 @@ describe('106. fetchRowidAsString.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -590,7 +590,7 @@ describe('106. fetchRowidAsString.js', function() {
           should.not.exist(err);
           var resultVal_1 = result.rows[0][0];
           var resultVal_2 = result.rows[0][1];
-          if(object === true) {
+          if (object === true) {
             resultVal_1 = result.rows[0].CONTENT;
             resultVal_2 = result.rows[0].ROWID;
           }
@@ -618,7 +618,7 @@ describe('106. fetchRowidAsString.js', function() {
             function(err, row) {
               var resultVal_1 = row[0];
               var resultVal_2 = row[1];
-              if(object === true) {
+              if (object === true) {
                 resultVal_1 = row.CONTENT;
                 resultVal_2 = row.ROWID;
               }

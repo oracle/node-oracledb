@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -76,7 +76,7 @@ describe('7. autoCommit.js', function() {
         );
       },
       function(callback) {
-        pool.getConnection( function(err, conn) {
+        pool.getConnection(function(err, conn) {
           should.not.exist(err);
           connection = conn;
           callback();
@@ -106,7 +106,7 @@ describe('7. autoCommit.js', function() {
         );
       },
       function(callback) {
-        connection.release( function(err) {
+        connection.release(function(err) {
           should.not.exist(err);
           callback();
         });
@@ -181,7 +181,7 @@ describe('7. autoCommit.js', function() {
       function(callback) {
         conn1.execute(
           "UPDATE nodb_commit_dept SET department_id = 101 WHERE department_name = 'Security'",
-          function(err){
+          function(err) {
             should.not.exist(err);
             callback();
           }
@@ -262,7 +262,7 @@ describe('7. autoCommit.js', function() {
       function(callback) {
         conn1.execute(
           "UPDATE nodb_commit_dept SET department_id = 101 WHERE department_name = 'Security'",
-          function(err){
+          function(err) {
             should.not.exist(err);
             callback();
           }

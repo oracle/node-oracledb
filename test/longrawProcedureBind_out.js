@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -218,7 +218,7 @@ describe('134. longrawProcedureBind_out.js', function() {
 
   var longraw_bindout = function(insertContent, proc_bindout_exec, maxsize, callback) {
     var insertBuf, expectedBuf;
-    if(insertContent == null || insertContent == undefined || insertContent.length == 0) {
+    if (insertContent == null || insertContent == undefined || insertContent.length == 0) {
       insertBuf = insertContent;
       expectedBuf = null;
     } else {
@@ -239,7 +239,7 @@ describe('134. longrawProcedureBind_out.js', function() {
           bind_in_var,
           function(err, result) {
             should.not.exist(err);
-            if(expectedBuf == null) {
+            if (expectedBuf == null) {
               should.strictEqual(result.outBinds.c, expectedBuf);
             } else {
               assist.compare2Buffers(result.outBinds.c, expectedBuf);

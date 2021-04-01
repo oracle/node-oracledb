@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -216,7 +216,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
         });
 
         lob.on('finish', function() {
-          connection.commit( function(err) {
+          connection.commit(function(err) {
             should.not.exist(err);
             return callback();
           });
@@ -247,7 +247,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
         });
 
         lob.on('end', function() {
-          fs.readFile( preparedInFileName, { encoding: 'utf8' }, function(err, originalData) {
+          fs.readFile(preparedInFileName, { encoding: 'utf8' }, function(err, originalData) {
             should.not.exist(err);
             should.strictEqual(clobData, originalData);
             return callback();
@@ -271,7 +271,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       sqlRun,
       bindVar,
       function(err, result) {
-        if(originalStr == "EMPTY_LOB" || originalStr == undefined || originalStr == null || originalStr == "") {
+        if (originalStr == "EMPTY_LOB" || originalStr == undefined || originalStr == null || originalStr == "") {
           should.not.exist(err);
           should.strictEqual(result.outBinds.c, null);
           callback();
@@ -1512,7 +1512,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
               });
 
               lob.on('end', function() {
-                fs.readFile( preparedInFileName, { encoding: 'utf8' }, function(err, originalData) {
+                fs.readFile(preparedInFileName, { encoding: 'utf8' }, function(err, originalData) {
                   should.not.exist(err);
                   should.strictEqual(clobData, originalData);
                 });

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -32,7 +32,7 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe('15. resultsetToStream.js', function () {
+describe('15. resultsetToStream.js', function() {
 
   var connection = null;
   var rowsAmount = 217;
@@ -121,8 +121,8 @@ describe('15. resultsetToStream.js', function () {
     ], done);
   }); // after
 
-  describe('15.1 Testing ResultSet.toQueryStream', function () {
-    it('15.1.1 should allow resultsets to be converted to streams', function (done) {
+  describe('15.1 Testing ResultSet.toQueryStream', function() {
+    it('15.1.1 should allow resultsets to be converted to streams', function(done) {
       connection.execute(
         'begin \n' +
         '  open :cursor for select employees_name from nodb_rs2stream; \n' +
@@ -135,18 +135,18 @@ describe('15. resultsetToStream.js', function () {
 
           var stream = result.outBinds.cursor.toQueryStream();
 
-          stream.on('error', function (error) {
+          stream.on('error', function(error) {
             console.log(error);
             should.fail(error, null, 'Error event should not be triggered');
           });
 
           var counter = 0;
-          stream.on('data', function (data) {
+          stream.on('data', function(data) {
             should.exist(data);
             counter++;
           });
 
-          stream.on('end', function () {
+          stream.on('end', function() {
             should.equal(counter, rowsAmount);
             done();
           });
@@ -155,8 +155,8 @@ describe('15. resultsetToStream.js', function () {
     });
   });
 
-  describe('15.2 Testing ResultSet/QueryStream conversion errors', function () {
-    it('15.2.1 should prevent conversion to stream after getRow is invoked', async function () {
+  describe('15.2 Testing ResultSet/QueryStream conversion errors', function() {
+    it('15.2.1 should prevent conversion to stream after getRow is invoked', async function() {
       const sql = `
         begin
           open :cursor for select employees_name from nodb_rs2stream;
@@ -177,7 +177,7 @@ describe('15. resultsetToStream.js', function () {
       await cursor.close();
     });
 
-    it('15.2.2 should prevent conversion to stream after getRows is invoked', async function () {
+    it('15.2.2 should prevent conversion to stream after getRows is invoked', async function() {
       const sql = `
         begin
           open :cursor for select employees_name from nodb_rs2stream;
@@ -197,7 +197,7 @@ describe('15. resultsetToStream.js', function () {
       await cursor.close();
     });
 
-    it('15.2.3 should prevent conversion to stream after close is invoked', async function () {
+    it('15.2.3 should prevent conversion to stream after close is invoked', async function() {
       const sql = `
         begin
           open :cursor for select employees_name from nodb_rs2stream;
@@ -216,7 +216,7 @@ describe('15. resultsetToStream.js', function () {
       }
     });
 
-    it('15.2.4 should prevent invoking getRow after conversion to stream', function (done) {
+    it('15.2.4 should prevent invoking getRow after conversion to stream', function(done) {
       connection.execute(
         'begin \n' +
         '  open :cursor for select employees_name from nodb_rs2stream; \n' +
@@ -244,7 +244,7 @@ describe('15. resultsetToStream.js', function () {
       );
     });
 
-    it('15.2.5 should prevent invoking getRows after conversion to stream', function (done) {
+    it('15.2.5 should prevent invoking getRows after conversion to stream', function(done) {
       connection.execute(
         'begin \n' +
         '  open :cursor for select employees_name from nodb_rs2stream; \n' +
@@ -271,7 +271,7 @@ describe('15. resultsetToStream.js', function () {
       );
     });
 
-    it('15.2.6 should prevent invoking close after conversion to stream', function (done) {
+    it('15.2.6 should prevent invoking close after conversion to stream', function(done) {
       connection.execute(
         'begin \n' +
         '  open :cursor for select employees_name from nodb_rs2stream; \n' +
@@ -298,7 +298,7 @@ describe('15. resultsetToStream.js', function () {
       );
     });
 
-    it('15.2.7 should prevent calling toQueryStream more than once', function (done) {
+    it('15.2.7 should prevent calling toQueryStream more than once', function(done) {
       connection.execute(
         'begin \n' +
         '  open :cursor for select employees_name from nodb_rs2stream; \n' +

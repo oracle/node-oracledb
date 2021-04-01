@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -143,7 +143,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
         });
 
         lob.on('finish', function() {
-          connection.commit( function(err) {
+          connection.commit(function(err) {
             should.not.exist(err);
             return callback();
           });
@@ -180,7 +180,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
         });
 
         lob.on('finish', function() {
-          connection.commit( function(err) {
+          connection.commit(function(err) {
             should.not.exist(err);
             return callback();
           });
@@ -210,7 +210,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
         });
 
         lob.on('end', function() {
-          fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
+          fs.readFile(inFileName, { encoding: 'utf8' }, function(err, originalData) {
             should.not.exist(err);
             should.strictEqual(clobData, originalData);
             return callback();
@@ -279,7 +279,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
         });
 
         lob.on('end', function() {
-          fs.readFile( jpgFileName, function(err, originalData) {
+          fs.readFile(jpgFileName, function(err, originalData) {
             should.not.exist(err);
             should.strictEqual(totalLength, originalData.length);
             originalData.should.eql(blobData);
@@ -466,7 +466,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
         },
         function(cb) {
           var sql_2 = "select blob from nodb_tab_lobs_in where id = " + sequence;
-          verifyBlobValueWithBuffer(sql_2, bigBuffer, specialStr,cb);
+          verifyBlobValueWithBuffer(sql_2, bigBuffer, specialStr, cb);
         }
       ], done);
     }); // 80.1.3
@@ -620,7 +620,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
               });
 
               lob.on('end', function() {
-                fs.readFile( jpgFileName, function(err, originalData) {
+                fs.readFile(jpgFileName, function(err, originalData) {
                   should.not.exist(err);
                   should.strictEqual(totalLength, originalData.length);
                   originalData.should.eql(blobData);
@@ -698,7 +698,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
               });
 
               lob.on('end', function() {
-                fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
+                fs.readFile(inFileName, { encoding: 'utf8' }, function(err, originalData) {
                   should.not.exist(err);
                   should.strictEqual(clobData, originalData);
                   cb();

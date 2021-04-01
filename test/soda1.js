@@ -53,13 +53,13 @@ describe('164. soda1.js', () => {
       conn = await oracledb.getConnection(dbconfig);
       let sd = conn.getSodaDatabase();
       should.exist(sd);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -76,13 +76,13 @@ describe('164. soda1.js', () => {
       let coll = await sd.createCollection(collName);
       await coll.drop();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -101,13 +101,13 @@ describe('164. soda1.js', () => {
       let newColl = await sd.openCollection(collName);
       should.strictEqual(newColl.name, coll.name);
       await newColl.drop();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -147,13 +147,13 @@ describe('164. soda1.js', () => {
       opResults.forEach(function(res) {
         should.strictEqual(res.dropped, true);
       });
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -169,7 +169,7 @@ describe('164. soda1.js', () => {
       let collName = "soda_test_164_5";
       coll = await sd.createCollection(collName);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (coll) {
@@ -179,7 +179,7 @@ describe('164. soda1.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -199,13 +199,13 @@ describe('164. soda1.js', () => {
       let res = await coll.drop();
       should.strictEqual(res.dropped, false);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -239,13 +239,13 @@ describe('164. soda1.js', () => {
       let res = await coll.drop();
       should.strictEqual(res.dropped, true);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -283,13 +283,13 @@ describe('164. soda1.js', () => {
       let res = await coll.drop();
       should.strictEqual(res.dropped, true);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -317,13 +317,13 @@ describe('164. soda1.js', () => {
       await coll.drop();
       await conn.commit();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -366,7 +366,7 @@ describe('164. soda1.js', () => {
 
       let content3 = doc2.getContentAsString(); // A JSON string
       (content3).should.be.a.String();
-      should.strictEqual( JSON.stringify(content2), content3 );
+      should.strictEqual(JSON.stringify(content2), content3);
 
       // Replace document contents
       let content4 = { name: "Matilda", address: {city: "Sydney"} };
@@ -407,7 +407,7 @@ describe('164. soda1.js', () => {
       // Commit changes
       await conn.commit();
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       // Drop the collection
@@ -418,7 +418,7 @@ describe('164. soda1.js', () => {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }
@@ -440,13 +440,13 @@ describe('164. soda1.js', () => {
         /NJS-005:/
       );
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
-        } catch(err) {
+        } catch (err) {
           should.not.exist(err);
         }
       }

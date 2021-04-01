@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -49,7 +49,7 @@ describe('39. dataTypeRowid.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -85,7 +85,7 @@ describe('39. dataTypeRowid.js', function() {
         "SELECT * FROM " + tableName,
         function(err, result) {
           should.not.exist(err);
-          for(var i = 0; i < array.length; i++) {
+          for (var i = 0; i < array.length; i++) {
             var resultVal = result.rows[i][1];
             should.strictEqual(typeof resultVal, "string");
             resultVal.should.not.be.null;
@@ -311,8 +311,8 @@ describe('39. dataTypeRowid.js', function() {
 
   var fetchRowsFromRS = function(rs, cb) {
     rs.getRows(numRows, function(err, rows) {
-      if(rows.length > 0) {
-        for(var i = 0; i < rows.length; i++) {
+      if (rows.length > 0) {
+        for (var i = 0; i < rows.length; i++) {
           var resultVal = rows[i].CONTENT;
           resultVal.should.not.be.null;
           should.exist(resultVal);
@@ -329,8 +329,8 @@ describe('39. dataTypeRowid.js', function() {
 
   var fetchRowsFromRS_fetchas = function(rs, cb) {
     rs.getRows(numRows, function(err, rsrows) {
-      if(rsrows.length > 0) {
-        for(var i = 0; i < rsrows.length; i++) {
+      if (rsrows.length > 0) {
+        for (var i = 0; i < rsrows.length; i++) {
           var resultVal = rsrows[i].CONTENT;
           resultVal.should.not.be.null;
           resultVal.should.be.a.String();
@@ -347,7 +347,7 @@ describe('39. dataTypeRowid.js', function() {
     });
   };
 
-  function verifyFetchValues(connection, num, content, tableName){
+  function verifyFetchValues(connection, num, content, tableName) {
     connection.execute(
       "select ROWID from " + tableName + " where num = " + num,
       function(err, result) {

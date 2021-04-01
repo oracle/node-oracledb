@@ -94,9 +94,13 @@ describe('12. resultSet1.js', function() {
     connection.execute(
       'DROP TABLE nodb_rs1_emp PURGE',
       function(err) {
-        if(err) { console.error(err.message); return; }
+        if (err) {
+          console.error(err.message); return;
+        }
         connection.release(function(err) {
-          if(err) { console.error(err.message); return; }
+          if (err) {
+            console.error(err.message); return;
+          }
           done();
         });
       }
@@ -156,7 +160,7 @@ describe('12. resultSet1.js', function() {
       );
     });
 
-    it('12.1.4 negative - null',function(done) {
+    it('12.1.4 negative - null', function(done) {
       connection.should.be.ok();
 
       connection.execute(
@@ -359,7 +363,7 @@ describe('12. resultSet1.js', function() {
         rs.getRows(numRows, function(err, rows) {
           should.not.exist(err);
 
-          if(rows.length > 0) {
+          if (rows.length > 0) {
             accessCount++;
             return fetchRowFromRS(rs, numRows);
           } else {
@@ -392,7 +396,7 @@ describe('12. resultSet1.js', function() {
         rs.getRows(numRows, function(err, rows) {
           should.not.exist(err);
 
-          if(rows.length > 0) {
+          if (rows.length > 0) {
             accessCount++;
             return fetchRowFromRS(rs, numRows);
           } else {
@@ -408,7 +412,7 @@ describe('12. resultSet1.js', function() {
 
     it('12.3.3 retrieved set is half of the size of result', function(done) {
       connection.should.be.ok();
-      var nRows = Math.ceil(rowsAmount/2);
+      var nRows = Math.ceil(rowsAmount / 2);
       var accessCount = 0;
 
       connection.execute(
@@ -425,7 +429,7 @@ describe('12. resultSet1.js', function() {
         rs.getRows(numRows, function(err, rows) {
           should.not.exist(err);
 
-          if(rows.length > 0) {
+          if (rows.length > 0) {
             accessCount++;
             return fetchRowFromRS(rs, numRows);
           } else {
@@ -441,7 +445,7 @@ describe('12. resultSet1.js', function() {
 
     it('12.3.4 retrieved set is one tenth of the size of the result', function(done) {
       connection.should.be.ok();
-      var nRows = Math.ceil(rowsAmount/10);
+      var nRows = Math.ceil(rowsAmount / 10);
       var accessCount = 0;
 
       connection.execute(
@@ -458,7 +462,7 @@ describe('12. resultSet1.js', function() {
         rs.getRows(numRows, function(err, rows) {
           should.not.exist(err);
 
-          if(rows.length > 0) {
+          if (rows.length > 0) {
             accessCount++;
             return fetchRowFromRS(rs, numRows);
           } else {
@@ -474,7 +478,7 @@ describe('12. resultSet1.js', function() {
 
     it('12.3.5 data in resultSet is array when setting outFormat ARRAY', function(done) {
       connection.should.be.ok();
-      var nRows = Math.ceil(rowsAmount/10);
+      var nRows = Math.ceil(rowsAmount / 10);
       var accessCount = 0;
 
       connection.execute(
@@ -491,9 +495,9 @@ describe('12. resultSet1.js', function() {
         rs.getRows(numRows, function(err, rows) {
           should.not.exist(err);
 
-          if(rows.length > 0) {
+          if (rows.length > 0) {
             accessCount++;
-            for(var i = 0; i < rows.length; i++)
+            for (var i = 0; i < rows.length; i++)
               (rows[i]).should.be.an.Array;
 
             return fetchRowFromRS(rs, numRows);
@@ -510,7 +514,7 @@ describe('12. resultSet1.js', function() {
 
     it('12.3.6 data in resultSet is object when setting outFormat OBJECT', function(done) {
       connection.should.be.ok();
-      var nRows = Math.ceil(rowsAmount/10);
+      var nRows = Math.ceil(rowsAmount / 10);
       var accessCount = 0;
 
       connection.execute(
@@ -527,9 +531,9 @@ describe('12. resultSet1.js', function() {
         rs.getRows(numRows, function(err, rows) {
           should.not.exist(err);
 
-          if(rows.length > 0) {
+          if (rows.length > 0) {
             accessCount++;
-            for(var i = 0; i < rows.length; i++)
+            for (var i = 0; i < rows.length; i++)
               (rows[i]).should.be.an.Object;
 
             return fetchRowFromRS(rs, numRows);
@@ -563,7 +567,7 @@ describe('12. resultSet1.js', function() {
         rs.getRows(numRows, function(err, rows) {
           should.not.exist(err);
 
-          if(rows.length > 0) {
+          if (rows.length > 0) {
             accessCount++;
             return fetchRowFromRS(rs, numRows);
           } else {
@@ -594,7 +598,7 @@ describe('12. resultSet1.js', function() {
       function fetchRowsFromRS(rs, numRows) {
         rs.getRow(function(err, rows) {
           should.not.exist(err);
-          if(rows) {
+          if (rows) {
             accessCount++;
             rows[0].should.eql('staff ' + accessCount);
             rows.should.be.an.Array;
@@ -731,7 +735,7 @@ describe('12. resultSet1.js', function() {
         rs.getRow(function(err, row) {
           should.not.exist(err);
 
-          if(row) {
+          if (row) {
             accessCount++;
             row[0].should.eql('staff ' + accessCount);
             return fetchRowFromRS(rs);
@@ -764,7 +768,7 @@ describe('12. resultSet1.js', function() {
         rs.getRow(function(err, row) {
           should.not.exist(err);
 
-          if(row) {
+          if (row) {
             accessCount++;
             row[0].should.eql('staff ' + accessCount);
             row.should.be.an.Array;
@@ -798,7 +802,7 @@ describe('12. resultSet1.js', function() {
         rs.getRow(function(err, row) {
           should.not.exist(err);
 
-          if(row) {
+          if (row) {
             accessCount++;
             row.EMPLOYEES_NAME.should.eql('staff ' + accessCount);
             row.should.be.an.Object;
@@ -830,7 +834,7 @@ describe('12. resultSet1.js', function() {
       function fetchRowFromRS(rs) {
         rs.getRow(function(err, row) {
           should.not.exist(err);
-          if(row) {
+          if (row) {
             accessCount++;
             row[0].should.eql('staff ' + accessCount);
             row.should.be.an.Array;
@@ -846,7 +850,7 @@ describe('12. resultSet1.js', function() {
       }
     });
 
-    it('12.4.5 Negative - set the first parameter like getRows()', function(done){
+    it('12.4.5 Negative - set the first parameter like getRows()', function(done) {
       connection.should.be.ok();
       var nRows = 2;
 
@@ -878,7 +882,7 @@ describe('12. resultSet1.js', function() {
   describe('12.5 Testing function close()', function() {
     it('12.5.1 does not call close()', function(done) {
       connection.should.be.ok();
-      var nRows = Math.ceil(rowsAmount/10);
+      var nRows = Math.ceil(rowsAmount / 10);
       var accessCount = 0;
 
       connection.execute(
@@ -895,7 +899,7 @@ describe('12. resultSet1.js', function() {
         rs.getRows(numRows, function(err, rows) {
           should.not.exist(err);
 
-          if(rows.length > 0) {
+          if (rows.length > 0) {
             accessCount++;
             return fetchRowFromRS(rs, numRows);
           } else {
@@ -908,7 +912,7 @@ describe('12. resultSet1.js', function() {
 
     it('12.5.2 invokes close() twice', function(done) {
       connection.should.be.ok();
-      var nRows = Math.ceil(rowsAmount/10);
+      var nRows = Math.ceil(rowsAmount / 10);
       var accessCount = 0;
 
       connection.execute(
@@ -925,7 +929,7 @@ describe('12. resultSet1.js', function() {
         rs.getRows(numRows, function(err, rows) {
           should.not.exist(err);
 
-          if(rows.length > 0) {
+          if (rows.length > 0) {
             accessCount++;
             return fetchRowFromRS(rs, numRows);
           } else {
@@ -945,7 +949,7 @@ describe('12. resultSet1.js', function() {
 
     it('12.5.3 uses getRows after calling close()', function(done) {
       connection.should.be.ok();
-      var nRows = Math.ceil(rowsAmount/10);
+      var nRows = Math.ceil(rowsAmount / 10);
 
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
@@ -961,7 +965,7 @@ describe('12. resultSet1.js', function() {
         rs.getRows(numRows, function(err, rows) {
           should.not.exist(err);
 
-          if(rows.length > 0) {
+          if (rows.length > 0) {
             return fetchRowFromRS(rs, numRows);
           } else {
             rs.close(function(err) {
@@ -979,7 +983,7 @@ describe('12. resultSet1.js', function() {
 
     it('12.5.4 closes one resultSet and then open another resultSet', function(done) {
       connection.should.be.ok();
-      var nRows = Math.ceil(rowsAmount/10);
+      var nRows = Math.ceil(rowsAmount / 10);
       var accessCount = 0;
 
       async.series([
@@ -1012,7 +1016,7 @@ describe('12. resultSet1.js', function() {
         rs.getRows(numRows, function(err, rows) {
           should.not.exist(err);
 
-          if(rows.length > 0) {
+          if (rows.length > 0) {
             accessCount++;
             return fetchRowFromRS(rs, numRows, callback);
           } else {
@@ -1055,10 +1059,10 @@ describe('12. resultSet1.js', function() {
         var buffer = new StringBuffer();
         buffer.append("CREATE TABLE nodb_tab_manycolumns( ");
 
-        for(var i = 0; i < size-1; i++) {
+        for (var i = 0; i < size - 1; i++) {
           buffer.append("c" + i + " NUMBER, ");
         }
-        buffer.append("c" + (size-1) + " NUMBER");
+        buffer.append("c" + (size - 1) + " NUMBER");
         buffer.append(" )");
 
         return buffer.toString();
@@ -1077,15 +1081,15 @@ describe('12. resultSet1.js', function() {
             }
           );
         },
-        function(callback){
+        function(callback) {
           connection.execute(
             "SELECT * FROM nodb_tab_manycolumns",
             [],
             { resultSet: true},
-            function(err, result){
+            function(err, result) {
               should.not.exist(err);
               //console.log(result.resultSet.metaData);
-              for(var i = 0; i < columnsAmount; i++) {
+              for (var i = 0; i < columnsAmount; i++) {
                 (result.resultSet.metaData[i].name).should.be.exactly('C' + i);
               }
               result.resultSet.close(callback);
@@ -1296,7 +1300,7 @@ describe('12. resultSet1.js', function() {
       function fetchRowFromRS(rs) {
         rs.getRow(function(err, row) {
           should.not.exist(err);
-          if(row) {
+          if (row) {
             return fetchRowFromRS(rs);
           } else {
             rs.close(function(err) {
@@ -1359,11 +1363,11 @@ describe('12. resultSet1.js', function() {
       function fetchRowFromRS(rs, cb) {
         rs.getRow(function(err, row) {
           should.not.exist(err);
-          if(row) {
+          if (row) {
             rowCount++;
             return fetchRowFromRS(rs, cb);
           } else {
-            rs.close( function(err) {
+            rs.close(function(err) {
               should.not.exist(err);
               rowCount.should.eql(queryAmount);
               cb();

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -43,7 +43,7 @@ file.write = function(filePath, content) {
 };
 
 file.delete = function(filePath) {
-  if(fs.existsSync(filePath) === true) {
+  if (fs.existsSync(filePath) === true) {
     fs.unlink(filePath, function(err) {
       should.not.exist(err);
     });

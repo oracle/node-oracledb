@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -63,7 +63,7 @@ describe('41. dataTypeBlob.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -144,10 +144,10 @@ describe('41. dataTypeBlob.js', function() {
               lob.pipe(outStream);
 
               outStream.on('finish', function() {
-                fs.readFile( inFileName, function(err, originalData) {
+                fs.readFile(inFileName, function(err, originalData) {
                   should.not.exist(err);
 
-                  fs.readFile( outFileName, function(err, generatedData) {
+                  fs.readFile(outFileName, function(err, generatedData) {
                     should.not.exist(err);
                     originalData.should.eql(generatedData);
                     callback();
@@ -182,7 +182,7 @@ describe('41. dataTypeBlob.js', function() {
               });
 
               lob.on('end', function() {
-                fs.readFile( inFileName, function(err, data) {
+                fs.readFile(inFileName, function(err, data) {
                   should.not.exist(err);
                   data.length.should.be.exactly(blob.length);
                   data.should.eql(blob);
@@ -250,7 +250,7 @@ describe('41. dataTypeBlob.js', function() {
               var lob = result.rows[0][0];
               should.exist(lob);
 
-              fs.readFile( inFileName, function(err, data) {
+              fs.readFile(inFileName, function(err, data) {
                 should.not.exist(err);
                 lob.getData(function(err, blob) {
                   data.length.should.be.exactly(blob.length);

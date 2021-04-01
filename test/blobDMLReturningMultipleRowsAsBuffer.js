@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -102,8 +102,8 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
                       "    tmplob BLOB; \n" +
                       "BEGIN \n" +
                       "    FOR i IN 1.." + tableSize + " LOOP \n" +
-                      "         select to_char(i) into tmpchar from dual; \n"+
-                      "         select utl_raw.cast_to_raw(tmpchar) into tmplob from dual; \n"+
+                      "         select to_char(i) into tmpchar from dual; \n" +
+                      "         select utl_raw.cast_to_raw(tmpchar) into tmplob from dual; \n" +
                       "         insert into " + tableName + " values (i, tmplob); \n" +
                       "    END LOOP; \n" +
                       "    commit; \n" +
@@ -143,9 +143,9 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
         should.not.exist(err);
         for (var i = 0; i < tabsize; i++) {
           var outnum = result.outBinds.num[i];
-          var outbuf = Number( result.outBinds.lobou[i] );
-          should.strictEqual(outbuf, i+1);
-          should.strictEqual(outnum, i+11);
+          var outbuf = Number(result.outBinds.lobou[i]);
+          should.strictEqual(outbuf, i + 1);
+          should.strictEqual(outnum, i + 11);
         }
         callback();
       }

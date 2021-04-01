@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -49,7 +49,7 @@ describe('243. dbObject19.js', () => {
         );`;
       await conn.execute(sql);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // before()
@@ -61,7 +61,7 @@ describe('243. dbObject19.js', () => {
       await conn.execute(sql);
 
       await conn.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
 
@@ -96,7 +96,7 @@ describe('243. dbObject19.js', () => {
         let sql = `DROP PROCEDURE ${PROC}`;
         await conn.execute(sql);
 
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }); // 243.1.1
@@ -173,13 +173,13 @@ describe('243. dbObject19.js', () => {
 
   describe('243.2 set dbObjectAsPojo in BIND_OUT and BIND_INOUT options', () => {
 
-    before(async () => {
+    before(function() {
       should.strictEqual(oracledb.dbObjectAsPojo, true);
       // set oracledb.dbObjectAsPojo to false;
       oracledb.dbObjectAsPojo = false;
     }); // before()
 
-    after(async () => {
+    after(function() {
       // restore dbObjectAsPojo to default value
       oracledb.dbObjectAsPojo = false;
     }); // after()
@@ -208,7 +208,7 @@ describe('243. dbObject19.js', () => {
         let sql = `DROP PROCEDURE ${PROC}`;
         await conn.execute(sql);
 
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }); // 243.2.1
@@ -284,13 +284,13 @@ describe('243. dbObject19.js', () => {
   });
 
   describe('243.3 set dbObjectAsPojo in bind variables doesn\'t work', () => {
-    before(async () => {
+    before(function() {
       should.strictEqual(oracledb.dbObjectAsPojo, false);
       // set oracledb.dbObjectAsPojo to true
       oracledb.dbObjectAsPojo = false;
     }); // before()
 
-    after(async () => {
+    after(function() {
       // restore dbObjectAsPojo to default value
       oracledb.dbObjectAsPojo = false;
       should.strictEqual(oracledb.dbObjectAsPojo, false);
@@ -322,7 +322,7 @@ describe('243. dbObject19.js', () => {
         let sql = `DROP PROCEDURE ${PROC}`;
         await conn.execute(sql);
 
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }); // 243.3.1

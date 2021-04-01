@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -51,7 +51,7 @@ async function run() {
 
     try {
       await connection.execute(`DROP TABLE no_purchaseorder`);
-    } catch(e) {
+    } catch (e) {
       if (e.errorNum != 942)
         console.error(e);
     }

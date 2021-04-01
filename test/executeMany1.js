@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -317,8 +317,8 @@ describe('163. executeMany1.js', function() {
 
   it('163.6 shows dmlRowCounts', function(done) {
 
-    if ( (oracledb.oracleClientVersion < 1201000200)
-      || (conn.oracleServerVersion < 1201000200) ) {
+    if ((oracledb.oracleClientVersion < 1201000200)
+      || (conn.oracleServerVersion < 1201000200)) {
       this.skip();
     }
 
@@ -348,8 +348,8 @@ describe('163. executeMany1.js', function() {
 
   it('163.7 shows batchErrors behavior', function(done) {
 
-    if ( (oracledb.oracleClientVersion < 1201000200)
-      || (conn.oracleServerVersion < 1201000200) ) {
+    if ((oracledb.oracleClientVersion < 1201000200)
+      || (conn.oracleServerVersion < 1201000200)) {
       this.skip();
     }
 
@@ -401,7 +401,9 @@ describe('163. executeMany1.js', function() {
 
   it('163.8 Negative - batchErrors with non-DML statement', function(done) {
 
-    if (oracledb.oracleClientVersion < 1201000200) { this.skip(); }
+    if (oracledb.oracleClientVersion < 1201000200) {
+      this.skip();
+    }
 
     async.series([
       function(cb) {
@@ -438,7 +440,9 @@ describe('163. executeMany1.js', function() {
 
   it('163.9 if batchErrors is disabled', function(done) {
 
-    if (oracledb.oracleClientVersion < 1201000200) { this.skip(); }
+    if (oracledb.oracleClientVersion < 1201000200) {
+      this.skip();
+    }
 
     var childTable = "nodb_tab_child_three";
     var parentTable = "nodb_tab_parent_three";
@@ -485,7 +489,9 @@ describe('163. executeMany1.js', function() {
 
   it('163.10 Negative -  dmlRowCounts with non-DML statement', function(done) {
 
-    if (oracledb.oracleClientVersion < 1201000200) { this.skip(); }
+    if (oracledb.oracleClientVersion < 1201000200) {
+      this.skip();
+    }
 
     async.series([
       function(cb) {
@@ -724,7 +730,7 @@ describe('163. executeMany1.js', function() {
         });
       },
       function(cb) {
-        var sql = "CREATE TABLE " + cTab +" ( \n" +
+        var sql = "CREATE TABLE " + cTab + " ( \n" +
                   "    childid     NUMBER NOT NULL, \n" +
                   "    parentid    NUMBER NOT NULL, \n" +
                   "    description VARCHAR2(30) NOT NULL, \n" +

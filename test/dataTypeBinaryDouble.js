@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -53,7 +53,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -63,7 +63,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
 
     var numbers = assist.data.numbersForBinaryFloat.concat(assist.data.numbersForBinaryDouble);
 
-    before('create table, insert data',function(done) {
+    before('create table, insert data', function(done) {
       assist.setUp(connection, tableName, numbers, done);
     });
 
@@ -114,7 +114,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
         98.7654321
       ];
 
-    before('create table, insert data',function(done) {
+    before('create table, insert data', function(done) {
       assist.setUp(connection, tableName, nums, done);
     });
 
@@ -136,8 +136,8 @@ describe('31. dataTypeBinaryDouble.js', function() {
         function(err, result) {
           should.not.exist(err);
 
-          for(var i = 0; i < nums.length; i++) {
-            result.rows[i].CONTENT.should.be.exactly(nums[ result.rows[i].NUM ]);
+          for (var i = 0; i < nums.length; i++) {
+            result.rows[i].CONTENT.should.be.exactly(nums[result.rows[i].NUM]);
           }
           done();
         }

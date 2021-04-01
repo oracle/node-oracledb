@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -104,7 +104,7 @@ describe('192. implicitResults.js', function() {
 
         await conn.commit();
         await conn.close();
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }
@@ -126,7 +126,7 @@ describe('192. implicitResults.js', function() {
         await conn.execute(sql);
 
         await conn.close();
-      } catch(err) {
+      } catch (err) {
         should.not.exist(err);
       }
     }
@@ -139,8 +139,8 @@ describe('192. implicitResults.js', function() {
       const results = await conn.execute(queryImpres);
 
       let rows = results.implicitResults[0];
-      for ( let j = 0; j < rows.length; j++) {
-        should.strictEqual(rows[j][1], `Staff ${j+1}`);
+      for (let j = 0; j < rows.length; j++) {
+        should.strictEqual(rows[j][1], `Staff ${j + 1}`);
       }
 
       rows = results.implicitResults[1];
@@ -148,7 +148,7 @@ describe('192. implicitResults.js', function() {
       should.strictEqual(rows.length, tab2Len);
 
       await conn.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 192.1
@@ -160,14 +160,14 @@ describe('192. implicitResults.js', function() {
 
       // Assert the content of table 1
       let rs = await results.implicitResults[0].getRows(100);
-      for ( let j = 0; j < rs.length; j++) {
-        should.strictEqual(rs[j][1], `Staff ${j+1}`);
+      for (let j = 0; j < rs.length; j++) {
+        should.strictEqual(rs[j][1], `Staff ${j + 1}`);
       }
 
       // Assert the content of table 2
       rs = await results.implicitResults[1];
       let row, len = 0;
-      while ( (row = await rs.getRow()) ) {
+      while ((row = await rs.getRow())) {
         (row[1]).should.be.a.Date();
         len++;
       }
@@ -176,7 +176,7 @@ describe('192. implicitResults.js', function() {
 
       await rs.close();
       await conn.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 192.2
@@ -185,16 +185,16 @@ describe('192. implicitResults.js', function() {
     try {
       const conn = await oracledb.getConnection(dbconfig);
       let opts = { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT };
-      const results = await conn.execute( queryImpres, [], opts );
+      const results = await conn.execute(queryImpres, [], opts);
 
       let rs = await results.implicitResults[0].getRows(100);
-      for ( let j = 0; j < rs.length; j++) {
-        should.strictEqual(rs[j].VALUE, `Staff ${j+1}`);
+      for (let j = 0; j < rs.length; j++) {
+        should.strictEqual(rs[j].VALUE, `Staff ${j + 1}`);
       }
 
       rs = await results.implicitResults[1];
       let row, len = 0;
-      while ( (row = await rs.getRow()) ) {
+      while ((row = await rs.getRow())) {
         (row.TSVAL).should.be.a.Date();
         len++;
       }
@@ -203,7 +203,7 @@ describe('192. implicitResults.js', function() {
 
       await rs.close();
       await conn.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 192.3

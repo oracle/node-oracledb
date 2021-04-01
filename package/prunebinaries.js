@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -46,6 +46,6 @@ try {
       fs.unlinkSync(dir + '/' + f[i]);
     }
   }
-} catch(err) {
+} catch (err) {
   console.error(err.message);
 }

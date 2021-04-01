@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -61,7 +61,7 @@ describe("83. lobProperties2.js", function() {
 
       try {
         lob.chunkSize = t + 1;
-      } catch(err) {
+      } catch (err) {
         should.exist(err);
         // Cannot assign to read only property 'chunkSize' of object '#<Lob>'
       }
@@ -92,7 +92,7 @@ describe("83. lobProperties2.js", function() {
 
       try {
         lob.length = t + 1;
-      } catch(err) {
+      } catch (err) {
         should.exist(err);
         // Cannot set property length of #<Lob> which has only a getter
       }
@@ -122,7 +122,7 @@ describe("83. lobProperties2.js", function() {
 
       try {
         lob.type = oracledb.BUFFER;
-      } catch(err) {
+      } catch (err) {
         should.exist(err);
         // Cannot set property type of #<Lob> which has only a getter
       }
@@ -239,7 +239,7 @@ describe("83. lobProperties2.js", function() {
     it("83.7.5 cannot be less than zero", function(done) {
       try {
         clob.pieceSize = -100;
-      } catch(err) {
+      } catch (err) {
         should.exist(err);
         (err.message).should.startWith('NJS-004:');
         // NJS-004: invalid value for property pieceSize
@@ -255,7 +255,7 @@ describe("83. lobProperties2.js", function() {
     it("83.7.6 cannot be null", function(done) {
       try {
         clob.pieceSize = null;
-      } catch(err) {
+      } catch (err) {
         should.exist(err);
         (err.message).should.startWith('NJS-004:');
         // NJS-004: invalid value for property pieceSize
@@ -271,7 +271,7 @@ describe("83. lobProperties2.js", function() {
     it("83.7.7 must be a number", function(done) {
       try {
         clob.pieceSize = NaN;
-      } catch(err) {
+      } catch (err) {
         should.exist(err);
         (err.message).should.startWith('NJS-004:');
         // NJS-004: invalid value for property pieceSize

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -47,7 +47,7 @@ describe('182. deferLibInit.js', () => {
     try {
       delete process.env.LD_LIBRARY_PATH;
       await positiveCase();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   });
@@ -56,8 +56,8 @@ describe('182. deferLibInit.js', () => {
     try {
       delete process.env.LD_LIBRARY_PATH;
       await negativeCase();
-    } catch(err) {
-      if(err && err.stdout.includes("failing")){
+    } catch (err) {
+      if (err && err.stdout.includes("failing")) {
         throw new Error("The test will not succeed unless LD_LIBRARY_PATH is used to point to the path of Oracle Instant Client.\n" +
           "Please also make sure you don't have any other Oracle Clients installed except for that sepcified by LD_LIBRARY_PATH.\n" +
           err.stdout);
@@ -70,10 +70,10 @@ describe('182. deferLibInit.js', () => {
     try {
       delete process.env.LD_LIBRARY_PATH;
       await callMethodCase();
-    } catch(err) {
-      if(err && err.stdout.includes("failing")){
-        throw new Error("The test will not succeed unless LD_LIBRARY_PATH is used to point to the path of Oracle Instant Client.\n"+
-          "Please also make sure you don't have any other Oracle Clients installed except for that sepcified by LD_LIBRARY_PATH.\n"+
+    } catch (err) {
+      if (err && err.stdout.includes("failing")) {
+        throw new Error("The test will not succeed unless LD_LIBRARY_PATH is used to point to the path of Oracle Instant Client.\n" +
+          "Please also make sure you don't have any other Oracle Clients installed except for that sepcified by LD_LIBRARY_PATH.\n" +
           err.stdout);
       }
       should.not.exist(err);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -54,7 +54,7 @@ describe('200. dbObject1.js', () => {
       let plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // before()
@@ -68,7 +68,7 @@ describe('200. dbObject1.js', () => {
       await conn.execute(sql);
 
       await conn.close();
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // after()
@@ -94,7 +94,7 @@ describe('200. dbObject1.js', () => {
       should.strictEqual(result.rows[0][0], seq);
       should.strictEqual(result.rows[0][1]['ID'], objData.ID);
       should.strictEqual(result.rows[0][1]['NAME'], objData.NAME);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 200.1
@@ -121,7 +121,7 @@ describe('200. dbObject1.js', () => {
       should.strictEqual(result.rows[0][1]['ID'], null);
       should.strictEqual(result.rows[0][1]['NAME'], objData.NAME);
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 200.2
@@ -147,7 +147,7 @@ describe('200. dbObject1.js', () => {
       should.strictEqual(result.rows[0][0], seq);
       should.strictEqual(result.rows[0][1]['ID'], objData.ID);
       should.strictEqual(result.rows[0][1]['NAME'], null);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 200.3
@@ -173,7 +173,7 @@ describe('200. dbObject1.js', () => {
       should.strictEqual(result.rows[0][0], seq);
       should.strictEqual(result.rows[0][1]['ID'], null);
       should.strictEqual(result.rows[0][1]['NAME'], objData.NAME);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 200.4
@@ -199,7 +199,7 @@ describe('200. dbObject1.js', () => {
       should.strictEqual(result.rows[0][0], seq);
       should.strictEqual(result.rows[0][1]['ID'], objData.ID);
       should.strictEqual(result.rows[0][1]['NAME'], null);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 200.5
@@ -222,7 +222,7 @@ describe('200. dbObject1.js', () => {
       should.strictEqual(result.rows[0][0], seq);
       should.not.exist(result.rows[0][1]['ID']);
       should.not.exist(result.rows[0][1]['NAME']);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 200.6
@@ -248,7 +248,7 @@ describe('200. dbObject1.js', () => {
       should.strictEqual(result.rows[0].NUM, seq);
       should.strictEqual(result.rows[0].PERSON['ID'], objData.ID);
       should.strictEqual(result.rows[0].PERSON.NAME, objData.NAME);
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 200.7
@@ -290,12 +290,12 @@ describe('200. dbObject1.js', () => {
       result = await conn.execute(sql);
 
       for (let j = 0; j < objDataArray.length; j++) {
-        should.strictEqual(result.rows[j][0], (initialSeq + j) );
+        should.strictEqual(result.rows[j][0], (initialSeq + j));
         should.strictEqual(result.rows[j][1]['ID'], objDataArray[j].ID);
         should.strictEqual(result.rows[j][1].NAME, objDataArray[j].NAME);
       }
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 200.8
@@ -340,12 +340,12 @@ describe('200. dbObject1.js', () => {
       result = await conn.execute(sql);
 
       for (let j = 0; j < objDataArray.length; j++) {
-        should.strictEqual(result.rows[j][0], (initialSeq + j) );
+        should.strictEqual(result.rows[j][0], (initialSeq + j));
         should.strictEqual(result.rows[j][1]['ID'], objDataArray[j].ID);
         should.strictEqual(result.rows[j][1].NAME, objDataArray[j].NAME);
       }
 
-    } catch(err) {
+    } catch (err) {
       should.not.exist(err);
     }
   }); // 200.9

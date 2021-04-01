@@ -118,7 +118,7 @@ async function closePoolAndExit() {
     await oracledb.getPool().close(10);
     console.log('Pool closed');
     process.exit(0);
-  } catch(err) {
+  } catch (err) {
     console.error(err.message);
     process.exit(1);
   }

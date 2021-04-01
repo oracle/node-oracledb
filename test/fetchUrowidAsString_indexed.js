@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -90,7 +90,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release( function(err) {
+    connection.release(function(err) {
       should.not.exist(err);
       done();
     });
@@ -594,14 +594,14 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
         var strLength = 200;
         var rowidLenExpected = 200;
         var id = insertID++;
-        if(rsFlag === true) fetchRowid_rs(id, strLength, rowidLenExpected, option, object, cb);
+        if (rsFlag === true) fetchRowid_rs(id, strLength, rowidLenExpected, option, object, cb);
         else fetchRowid(id, strLength, rowidLenExpected, option, object, cb);
       },
       function(cb) {
         var strLength = 500;
         var rowidLenExpected = 500;
         var id = insertID++;
-        if(rsFlag === true) fetchRowid_rs(id, strLength, rowidLenExpected, option, object, cb);
+        if (rsFlag === true) fetchRowid_rs(id, strLength, rowidLenExpected, option, object, cb);
         else fetchRowid(id, strLength, rowidLenExpected, option, object, cb);
       }
     ], callback);
@@ -634,7 +634,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
           function(err, result) {
             should.not.exist(err);
             urowid_2 = result.rows[0][0];
-            if(object === true) {
+            if (object === true) {
               urowid_2 = result.rows[0].CONTENT;
             }
             should.strictEqual(typeof urowid_2, "string");
@@ -681,7 +681,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
               function(error, row) {
                 should.not.exist(error);
                 urowid_2 = row[0];
-                if(object === true) {
+                if (object === true) {
                   urowid_2 = row.CONTENT;
                 }
                 should.strictEqual(typeof urowid_2, "string");
@@ -724,12 +724,12 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
           function(err, result) {
             should.not.exist(err);
             rowExpected = (oracledb.maxRows >= 2) ? 2 : oracledb.maxRows;
-            if(rsFlag === true) {
+            if (rsFlag === true) {
               rowExpected = 2;
             }
             should.strictEqual(result.rows.length, rowExpected);
             rowid_1 = result.rows[0][1];
-            if(rowExpected === 2) {
+            if (rowExpected === 2) {
               rowid_2 = result.rows[1][1];
             }
             cb();
@@ -750,7 +750,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
         );
       },
       function(cb) {
-        if(rowExpected === 2) {
+        if (rowExpected === 2) {
           var sql = "select ROWID from " + tableName_indexed + " where c1 = " + id_2;
           connection.execute(
             sql,
@@ -800,7 +800,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
           should.strictEqual(result.length, 2);
           rowid_1 = result[0][0];
           rowid_2 = result[1][0];
-          if(object === true) {
+          if (object === true) {
             rowid_1 = result[0].CONTENT;
             rowid_2 = result[1].CONTENT;
           }

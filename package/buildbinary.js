@@ -45,14 +45,14 @@ const nodeVersion = process.version;
 let njsGitSha;
 try {
   njsGitSha = execSync('git --git-dir=./.git rev-parse --verify HEAD').toString().replace(/[\n\r]/, '');
-} catch(err) {
+} catch (err) {
   njsGitSha = 'unknown NJS SHA';
 }
 
 let odpiGitSha;
 try {
   odpiGitSha = execSync('git --git-dir=./odpi/.git rev-parse --verify HEAD').toString().replace(/[\n\r]/, '');
-} catch(err) {
+} catch (err) {
   odpiGitSha = 'unknown ODPI-C SHA';
 }
 
@@ -62,14 +62,22 @@ const buildInfo = nodbUtil.BINARY_FILE + ' ' + nodeVersion + ' ' + njsGitSha + '
 function buildBinary() {
   console.log('Building binary ' + nodbUtil.BINARY_FILE + ' using Node.js ' + nodeVersion);
   try {
-    fs.mkdir(nodbUtil.STAGING_DIR, function(err) {if (err && !err.message.match(/EEXIST/)) throw(err);} );
-    fs.unlink(buildBinaryFile, function(err) {if (err && !err.message.match(/ENOENT/)) throw(err);});
-    fs.unlink(binaryStagingFile, function(err) {if (err && !err.message.match(/ENOENT/)) throw(err);});
-    fs.unlink(binaryStagingInfoFile, function(err) {if (err && !err.message.match(/ENOENT/)) throw(err);});
+    fs.mkdir(nodbUtil.STAGING_DIR, function(err) {
+      if (err && !err.message.match(/EEXIST/)) throw (err);
+    });
+    fs.unlink(buildBinaryFile, function(err) {
+      if (err && !err.message.match(/ENOENT/)) throw (err);
+    });
+    fs.unlink(binaryStagingFile, function(err) {
+      if (err && !err.message.match(/ENOENT/)) throw (err);
+    });
+    fs.unlink(binaryStagingInfoFile, function(err) {
+      if (err && !err.message.match(/ENOENT/)) throw (err);
+    });
     execSync('node-gyp rebuild');
     fs.renameSync(buildBinaryFile, binaryStagingFile);
     fs.appendFileSync(binaryStagingInfoFile, buildInfo + "\n");
-  } catch(err) {
+  } catch (err) {
     console.error(err.message);
   }
 }
