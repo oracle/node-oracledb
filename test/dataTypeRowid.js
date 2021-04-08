@@ -27,18 +27,17 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var assist   = require('./dataTypeAssist.js');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const should   = require('should');
+const async    = require('async');
+const assist   = require('./dataTypeAssist.js');
+const dbConfig = require('./dbconfig.js');
 
 describe('39. dataTypeRowid.js', function() {
 
-  var connection = null;
-  var tableName = "nodb_rowid";
-  var array = assist.data.numbersForBinaryFloat;
-  var numRows = array.length;  // number of rows to return from each call to getRows()
+  let connection = null;
+  const tableName = "nodb_rowid";
+  const array = assist.data.numbersForBinaryFloat;
 
   before('get one connection', function(done) {
     oracledb.getConnection(dbConfig, function(err, conn) {
@@ -85,8 +84,8 @@ describe('39. dataTypeRowid.js', function() {
         "SELECT * FROM " + tableName,
         function(err, result) {
           should.not.exist(err);
-          for (var i = 0; i < array.length; i++) {
-            var resultVal = result.rows[i][1];
+          for (let i = 0; i < array.length; i++) {
+            const resultVal = result.rows[i][1];
             should.strictEqual(typeof resultVal, "string");
             resultVal.should.not.be.null;
             should.exist(resultVal);
@@ -126,7 +125,7 @@ describe('39. dataTypeRowid.js', function() {
         "select dbms_rowid.rowid_object(ROWID) AS C from " + tableName + " WHERE ROWNUM <=1",
         function(err, result) {
           should.not.exist(err);
-          var resultVal = result.rows[0][0];
+          const resultVal = result.rows[0][0];
           should.strictEqual(typeof resultVal, "number");
           done();
         }
@@ -138,7 +137,7 @@ describe('39. dataTypeRowid.js', function() {
         "select dbms_rowid.rowid_relative_fno(ROWID) AS C from " + tableName + " WHERE ROWNUM <=1",
         function(err, result) {
           should.not.exist(err);
-          var resultVal = result.rows[0][0];
+          const resultVal = result.rows[0][0];
           should.strictEqual(typeof resultVal, "number");
           done();
         }
@@ -150,7 +149,7 @@ describe('39. dataTypeRowid.js', function() {
         "select dbms_rowid.ROWID_BLOCK_NUMBER(ROWID) AS C from " + tableName + " WHERE ROWNUM <=1",
         function(err, result) {
           should.not.exist(err);
-          var resultVal = result.rows[0][0];
+          const resultVal = result.rows[0][0];
           should.strictEqual(typeof resultVal, "number");
           done();
         }
@@ -162,7 +161,7 @@ describe('39. dataTypeRowid.js', function() {
         "select dbms_rowid.rowid_row_number(ROWID) AS C from " + tableName + " WHERE ROWNUM <=1",
         function(err, result) {
           should.not.exist(err);
-          var resultVal = result.rows[0][0];
+          const resultVal = result.rows[0][0];
           should.strictEqual(typeof resultVal, "number");
           done();
         }
@@ -173,8 +172,8 @@ describe('39. dataTypeRowid.js', function() {
       verifyRefCursor(connection, tableName, done);
     });
 
-    it('39.1.9 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
-      verifyRefCursorWithFetchInfo(connection, tableName, done);
+    it('39.1.9 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
+      await verifyRefCursorWithFetchInfo(connection, tableName);
     });
   });
 
@@ -184,10 +183,10 @@ describe('39. dataTypeRowid.js', function() {
     });
   });
 
-  var insertData = function(connection, tableName, callback) {
+  const insertData = function(connection, tableName, callback) {
 
     async.eachSeries(array, function(element, cb) {
-      var sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
+      const sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
       connection.execute(
         sql,
         function(err) {
@@ -201,9 +200,9 @@ describe('39. dataTypeRowid.js', function() {
     });
   };
 
-  var updateDate = function(connection, tableName, callback) {
+  const updateDate = function(connection, tableName, callback) {
     async.eachSeries(array, function(element, cb) {
-      var sql = "UPDATE " + tableName + " T SET content = T.ROWID where num = " + element;
+      const sql = "UPDATE " + tableName + " T SET content = T.ROWID where num = " + element;
       connection.execute(
         sql,
         function(err) {
@@ -217,8 +216,8 @@ describe('39. dataTypeRowid.js', function() {
     });
   };
 
-  var verifyRefCursor = function(connection, tableName, done) {
-    var createProc =
+  const verifyRefCursor = function(connection, tableName, done) {
+    const createProc =
           "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
           "AS " +
           "BEGIN " +
@@ -260,64 +259,48 @@ describe('39. dataTypeRowid.js', function() {
     ], done);
   };
 
-  var verifyRefCursorWithFetchInfo = function(connection, tableName, done) {
-    var createProc =
-          "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
-          "AS " +
-          "BEGIN " +
-          "    OPEN p_out FOR " +
-          "    SELECT * FROM " + tableName  + "; " +
-          "END; ";
-    async.series([
-      function createProcedure(callback) {
-        connection.execute(
-          createProc,
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function verify(callback) {
-        connection.execute(
-          "BEGIN testproc(:o); END;",
-          [
-            { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-          ],
-          {
-            outFormat: oracledb.OUT_FORMAT_OBJECT,
-            fetchInfo:
-            {
-              "CONTENT": { type: oracledb.STRING }
-            }
-          },
-          function(err, result) {
-            should.not.exist(err);
-            fetchRowsFromRS_fetchas(result.outBinds[0], callback);
-          }
-        );
-      },
-      function dropProcedure(callback) {
-        connection.execute(
-          "DROP PROCEDURE testproc",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      }
-    ], done);
-  };
+  async function verifyRefCursorWithFetchInfo(connection, tableName) {
+    const createProc =
+          `CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR)
+           AS
+           BEGIN
+               OPEN p_out FOR SELECT * FROM ` + tableName  + `;
+           END;`;
 
-  var fetchRowsFromRS = function(rs, cb) {
-    rs.getRows(numRows, function(err, rows) {
+    try {
+      await connection.execute(createProc);
+
+      const result = await connection.execute(
+        "BEGIN testproc(:o); END;",
+        [
+          { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        ],
+        {
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo:
+              {
+                "CONTENT": { type: oracledb.STRING }
+              }
+        });
+
+      await fetchRowsFromRS_fetchas(result.outBinds[0]);
+
+      await connection.execute("DROP PROCEDURE testproc");
+
+    } catch (err) {
+      should.not.exist(err);
+    }
+  }
+
+  const fetchRowsFromRS = function(rs, cb) {
+    rs.getRows(function(err, rows) {
       if (rows.length > 0) {
-        for (var i = 0; i < rows.length; i++) {
-          var resultVal = rows[i].CONTENT;
+        for (let i = 0; i < rows.length; i++) {
+          const resultVal = rows[i].CONTENT;
           resultVal.should.not.be.null;
           should.exist(resultVal);
         }
-        return fetchRowsFromRS(rs, cb);
+        cb();
       } else {
         rs.close(function(err) {
           should.not.exist(err);
@@ -327,34 +310,32 @@ describe('39. dataTypeRowid.js', function() {
     });
   };
 
-  var fetchRowsFromRS_fetchas = function(rs, cb) {
-    rs.getRows(numRows, function(err, rsrows) {
-      if (rsrows.length > 0) {
-        for (var i = 0; i < rsrows.length; i++) {
-          var resultVal = rsrows[i].CONTENT;
-          resultVal.should.not.be.null;
-          resultVal.should.be.a.String();
-          should.exist(resultVal);
-          verifyFetchValues(connection, rsrows[i].NUM, rsrows[i].CONTENT, tableName);
-        }
-        return fetchRowsFromRS_fetchas(rs, cb);
-      } else {
-        rs.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
+  async function fetchRowsFromRS_fetchas(rs) {
+    const rsrows = await rs.getRows();
+    if (rsrows.length > 0) {
+      for (let i = 0; i < rsrows.length; i++) {
+        const resultVal = rsrows[i].CONTENT;
+        resultVal.should.not.be.null;
+        resultVal.should.be.a.String();
+        should.exist(resultVal);
+        await verifyFetchValues(connection, rsrows[i].NUM, rsrows[i].CONTENT, tableName);
       }
-    });
-  };
-
-  function verifyFetchValues(connection, num, content, tableName) {
-    connection.execute(
-      "select ROWID from " + tableName + " where num = " + num,
-      function(err, result) {
+    } else {
+      try {
+        await rs.close();
+      } catch (err) {
         should.not.exist(err);
-        content.should.eql(result.rows[0][0]);
       }
-    );
+    }
+  }
+
+  async function verifyFetchValues(connection, num, content, tableName) {
+    try {
+      const result = await connection.execute("SELECT ROWID FROM " + tableName + " WHERE num = " + num);
+      content.should.eql(result.rows[0][0]);
+    } catch (err) {
+      should.not.exist(err);
+    }
   }
 
 });
