@@ -51,7 +51,6 @@ describe('178. soda10.js', () => {
     }
 
     await sodaUtil.cleanup();
-    await sodaUtil.grantPrivilege();
 
   }); // before()
 

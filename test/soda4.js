@@ -43,7 +43,6 @@ describe('168. soda4.js', () => {
     }
 
     await sodaUtil.cleanup();
-    await sodaUtil.grantPrivilege();
   });
 
   it('168.1 insertOneAndGet() fetches attributes without content', async () => {

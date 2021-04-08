@@ -29,9 +29,10 @@
 
 const oracledb = require('oracledb');
 const dbconfig = require('./dbconfig.js');
-const assert = require('assert');
-const should = require('should');
-const os = require('os');
+const sodaUtil = require('./sodaUtil.js');
+const assert   = require('assert');
+const should   = require('should');
+const os       = require('os');
 
 let testsUtil = exports;
 module.exports = testsUtil;
@@ -127,7 +128,8 @@ testsUtil.isSodaRunnable = async function() {
 
   if ((serverVersion >= 2000000000) && (clientVersion < 2000000000)) return false;
 
-  if (!dbconfig.test.DBA_PRIVILEGE) return false;
+  let sodaRole = await sodaUtil.isSodaRoleGranted();
+  if (!sodaRole) return false;
 
   return true;
 };

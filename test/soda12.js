@@ -54,7 +54,6 @@ describe('230. soda12.js', () => {
     }
 
     await sodaUtil.cleanup();
-    await sodaUtil.grantPrivilege();
   }); // before()
 
   function getMetadata(tableName) {

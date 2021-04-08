@@ -43,7 +43,6 @@ describe('165. soda2.js', () => {
     }
 
     await sodaUtil.cleanup();
-    await sodaUtil.grantPrivilege();
   });
 
   it('165.1 create two sodaDatabase objects which point to the same instance', async () => {

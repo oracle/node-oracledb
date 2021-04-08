@@ -54,7 +54,6 @@ describe('231. soda13.js', () => {
     }
 
     await sodaUtil.cleanup();
-    await sodaUtil.grantPrivilege();
   }); // before()
 
   it('231.1 example case', async () => {

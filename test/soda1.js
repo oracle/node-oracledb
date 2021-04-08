@@ -43,8 +43,6 @@ describe('164. soda1.js', () => {
     }
 
     await sodaUtil.cleanup();
-
-    await sodaUtil.grantPrivilege();
   });
 
   it('164.1 getSodaDatabase() creates a sodaDatabase Object', async () => {

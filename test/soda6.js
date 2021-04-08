@@ -45,7 +45,6 @@ describe('174. soda6.js', () => {
     }
 
     await sodaUtil.cleanup();
-    await sodaUtil.grantPrivilege();
   });
 
   it('174.1 filter() basic case', async () => {

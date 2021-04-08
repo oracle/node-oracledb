@@ -36,7 +36,7 @@ describe('193. connProps.js', function() {
 
   before(async function() {
     let preps = await testsUtil.checkPrerequisites();
-    if (preps && process.env.NODE_ORACLEDB_DBA_PRIVILEGE) {
+    if (preps && dbconfig.test.DBA_PRIVILEGE) {
       isRunnable = true;
     }
 

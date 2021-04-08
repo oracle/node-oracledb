@@ -52,8 +52,6 @@ describe('167. soda3.js', () => {
 
     await sodaUtil.cleanup();
 
-    await sodaUtil.grantPrivilege();
-
     try {
       conn = await oracledb.getConnection(dbconfig);
       sd = conn.getSodaDatabase();

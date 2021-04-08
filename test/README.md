@@ -156,6 +156,15 @@ This test aims to test the combined usage of external authentication and proxy a
     export NODE_ORACLEDB_PROXY_SESSION_USER "Your_Proxy_Authenticating_User"
 
     ```
+### <a name="externalproxyauth"></a> 3.2 SODA tests
+To execute SODA tests, Oracle Database users require the SODA_APP role granted to them by a DBA. If SODA_APP is not granted, SODA tests will be skipped.
+
+To grant the SODA_APP role to a Oracle Database user, typically a DBA would execute:
+
+    ```
+    grant SODA_APP to <Oracle Database user>
+
+    ```
 
 ## <a name="addtests"></a> 4. Contribute New Tests
 
