@@ -58,7 +58,7 @@ describe('220. examineOwnedProperties.js', () => {
     try {
       let sql = `DROP TABLE ${TABLE} PURGE`;
       await conn.execute(sql);
-      conn.close();
+      await conn.close();
     } catch (err) {
       should.not.exist(err);
     }

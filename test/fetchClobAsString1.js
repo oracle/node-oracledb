@@ -483,6 +483,10 @@ describe('84. fetchClobAsString1.js', function() {
               lob.on('end', function() {
                 should.not.exist(err);
                 compareClientFetchResult(err, clobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -602,6 +606,10 @@ describe('84. fetchClobAsString1.js', function() {
               lob.on('end', function() {
                 should.not.exist(err);
                 compareClientFetchResult(err, clobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -638,6 +646,10 @@ describe('84. fetchClobAsString1.js', function() {
 
           stream.on('end', function() {
             should.equal(counter, 1);
+            stream.destroy();
+          });
+
+          stream.on('close', function() {
             cb();
           });
         }
@@ -686,6 +698,10 @@ describe('84. fetchClobAsString1.js', function() {
           stream.on('end', function() {
             should.equal(counter, 2);
             oracledb.maxRows = maxRowsBak;
+            stream.destroy();
+          });
+
+          stream.on('close', function() {
             cb();
           });
         }
@@ -734,6 +750,10 @@ describe('84. fetchClobAsString1.js', function() {
           stream.on('end', function() {
             should.equal(counter, 2);
             oracledb.maxRows = maxRowsBak;
+            stream.destroy();
+          });
+
+          stream.on('close', function() {
             cb();
           });
         }
@@ -782,6 +802,10 @@ describe('84. fetchClobAsString1.js', function() {
           stream.on('end', function() {
             should.equal(counter, 2);
             oracledb.maxRows = maxRowsBak;
+            stream.destroy();
+          });
+
+          stream.on('close', function() {
             cb();
           });
         }
@@ -1118,6 +1142,10 @@ describe('84. fetchClobAsString1.js', function() {
               lob.on('end', function() {
                 should.not.exist(err);
                 compareClientFetchResult(err, clobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -1242,6 +1270,10 @@ describe('84. fetchClobAsString1.js', function() {
               lob.on('end', function() {
                 should.not.exist(err);
                 compareClientFetchResult(err, clobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -1580,6 +1612,10 @@ describe('84. fetchClobAsString1.js', function() {
               lob.on('end', function() {
                 should.not.exist(err);
                 compareClientFetchResult(err, clobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -1730,6 +1766,10 @@ describe('84. fetchClobAsString1.js', function() {
               lob.on('end', function() {
                 should.not.exist(err);
                 compareClientFetchResult(err, clobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -2067,6 +2107,10 @@ describe('84. fetchClobAsString1.js', function() {
               lob.on('end', function() {
                 should.not.exist(err);
                 compareClientFetchResult(err, clobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -2191,8 +2235,13 @@ describe('84. fetchClobAsString1.js', function() {
               lob.on('end', function() {
                 should.not.exist(err);
                 compareClientFetchResult(err, clobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
+
             }
           );
         }
@@ -2530,6 +2579,10 @@ describe('84. fetchClobAsString1.js', function() {
               lob.on('end', function() {
                 should.not.exist(err);
                 compareClientFetchResult(err, clobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -2680,6 +2733,10 @@ describe('84. fetchClobAsString1.js', function() {
               lob.on('end', function() {
                 should.not.exist(err);
                 compareClientFetchResult(err, clobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }

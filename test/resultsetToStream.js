@@ -148,6 +148,10 @@ describe('15. resultsetToStream.js', function() {
 
           stream.on('end', function() {
             should.equal(counter, rowsAmount);
+            stream.destroy();
+          });
+
+          stream.on('close', function() {
             done();
           });
         }

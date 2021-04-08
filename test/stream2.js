@@ -132,7 +132,11 @@ describe('14. stream2.js', function() {
       data.should.eql(['staff 40']);
     });
 
-    stream.on('end', done);
+    stream.on('end', function() {
+      stream.destroy();
+    });
+
+    stream.on('close', done);
   });
 
   it('14.2 Bind by name and return an array', function(done) {
@@ -148,7 +152,11 @@ describe('14. stream2.js', function() {
       data.should.eql(['staff 40']);
     });
 
-    stream.on('end', done);
+    stream.on('end', function() {
+      stream.destroy();
+    });
+
+    stream.on('close', done);
   });
 
   it('14.3 Bind by position and return an object', function(done) {
@@ -164,7 +172,11 @@ describe('14. stream2.js', function() {
       (data.EMPLOYEE_NAME).should.eql('staff 40');
     });
 
-    stream.on('end', done);
+    stream.on('end', function() {
+      stream.destroy();
+    });
+
+    stream.on('close', done);
   });
 
   it('14.4 Bind by name and return an object', function(done) {
@@ -180,7 +192,11 @@ describe('14. stream2.js', function() {
       (data.EMPLOYEE_NAME).should.eql('staff 40');
     });
 
-    stream.on('end', done);
+    stream.on('end', function() {
+      stream.destroy();
+    });
+
+    stream.on('close', done);
   });
 
   it('14.5 explicitly setting resultSet option to be false takes no effect', function(done) {
@@ -196,7 +212,11 @@ describe('14. stream2.js', function() {
       data.should.eql(['staff 40']);
     });
 
-    stream.on('end', done);
+    stream.on('end', function() {
+      stream.destroy();
+    });
+
+    stream.on('close', done);
   });
 
   it('14.6 maxRows option is ignored as expect', function(done) {
@@ -215,8 +235,10 @@ describe('14. stream2.js', function() {
 
     stream.on('end', function() {
       rowCount.should.eql(rowsAmount);
-      done();
+      stream.destroy();
     });
+
+    stream.on('close', done);
 
   });
 
@@ -252,7 +274,11 @@ describe('14. stream2.js', function() {
       should.equal(metaDataRead, true);
     });
 
-    stream.on('end', done);
+    stream.on('end', function() {
+      stream.destroy();
+    });
+
+    stream.on('close', done);
   });
 
   it('14.11 metadata event - multiple columns', function(done) {
@@ -279,7 +305,11 @@ describe('14. stream2.js', function() {
       should.equal(metaDataRead, true);
     });
 
-    stream.on('end', done);
+    stream.on('end', function() {
+      stream.destroy();
+    });
+
+    stream.on('close', done);
   });
 
   it('14.12 metadata event - all column names occurring', function(done) {
@@ -307,7 +337,11 @@ describe('14. stream2.js', function() {
       should.equal(metaDataRead, true);
     });
 
-    stream.on('end', done);
+    stream.on('end', function() {
+      stream.destroy();
+    });
+
+    stream.on('close', done);
   });
 
   it('14.13 metadata event - no return rows', function(done) {
@@ -332,7 +366,11 @@ describe('14. stream2.js', function() {
       should.equal(metaDataRead, true);
     });
 
-    stream.on('end', done);
+    stream.on('end', function() {
+      stream.destroy();
+    });
+
+    stream.on('close', done);
   });
 
   it('14.15 metadata event - case sensitive columns', function(done) {
@@ -402,6 +440,10 @@ describe('14. stream2.js', function() {
             resultArray,
             [ [ 'Changjie' ], [ 'Nancy' ], [ 'Chris' ] ]
           );
+          stream.destroy();
+        });
+
+        stream.on('close', function() {
           cb();
         });
 
@@ -482,7 +524,11 @@ describe('14. stream2.js', function() {
           should.equal(metaDataRead, true);
         });
 
-        stream.on('end', cb);
+        stream.on('end', function() {
+          stream.destroy();
+        });
+
+        stream.on('close', cb);
 
       },
       function(cb) {
@@ -551,7 +597,11 @@ describe('14. stream2.js', function() {
           should.equal(metaDataRead, true);
         });
 
-        stream.on('end', cb);
+        stream.on('end', function() {
+          stream.destroy();
+        });
+
+        stream.on('close', cb);
       },
       function(cb) {
         connection.execute(
@@ -588,6 +638,10 @@ describe('14. stream2.js', function() {
       should.equal(metaDataRead, true);
     });
 
-    stream.on('end', done);
+    stream.on('end', function() {
+      stream.destroy();
+    });
+
+    stream.on('close', done);
   });
 });

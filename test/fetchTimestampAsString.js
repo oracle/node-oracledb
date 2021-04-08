@@ -486,6 +486,10 @@ describe('19. fetchTimestampAsString.js', function() {
 
     stream.on('end', function() {
       should.deepEqual(result, want);
+      stream.destroy();
+    });
+
+    stream.on('close', function() {
       callback();
     });
   }

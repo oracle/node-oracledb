@@ -324,6 +324,26 @@ testsUtil.dropAQtestUser = async function(AQ_USER) {
   }
 };
 
+testsUtil.doStream = async function(stream) {
+  const consumeStream = new Promise((resolve, reject) => {
+    stream.on('data', function(data) {
+      should.exist(data);
+    });
+    stream.on('end', function() {
+      stream.destroy();
+    });
+    stream.on('error', function(error) {
+      should.not.exist(error);
+      reject(error);
+    });
+    stream.on('close', function() {
+      resolve();
+    });
+  });
+
+  await consumeStream;
+};
+
 testsUtil.sleep = function(ms = 1000) {
   return new Promise(resolve => setTimeout(resolve, ms));
 };

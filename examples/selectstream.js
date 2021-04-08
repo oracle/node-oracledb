@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -39,7 +39,7 @@ async function run() {
 
     await demoSetup.setupBf(connection);  // create the demo table
 
-    const stream = await connection.queryStream(
+    const stream = connection.queryStream(
       `SELECT farmer, weight
        FROM no_banana_farmer
        ORDER BY id`,

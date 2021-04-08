@@ -457,6 +457,10 @@ describe("152. fetchArraySize5.js", function() {
 
       stream.on('end', function() {
         should.equal(counter, resultLenExpected);
+        stream.destroy();
+      });
+
+      stream.on('close', function() {
         cb();
       });
     };

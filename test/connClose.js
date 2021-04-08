@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -27,9 +27,9 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const should   = require('should');
+const dbConfig = require('./dbconfig.js');
 
 describe('52. connClose.js', function() {
 
@@ -38,7 +38,7 @@ describe('52. connClose.js', function() {
       dbConfig,
       function(err, connection) {
         should.not.exist(err);
-        var defaultSize = 30;
+        const defaultSize = 30;
         should.strictEqual(connection.stmtCacheSize, defaultSize);
 
         connection.release(function(err) {
@@ -216,15 +216,24 @@ describe('52. connClose.js', function() {
         connection.release(function(err) {
           should.not.exist(err);
 
-          var stream = connection.queryStream("select sysdate from dual");
+          const stream = connection.queryStream("select sysdate from dual");
           should.exist(stream);
+
+          let unexpectederr;
 
           stream.on("data", function(data) {
             should.not.exist(data);
+            unexpectederr = new Error("Should not emit 'data' event!");
           });
 
           stream.on("end", function() {
-            done(new Error("should not emit 'end' event!"));
+            should.not.exist("Should not emit 'end' event!");
+            unexpectederr = new Error("Should not emit 'end' event!");
+            stream.destroy();
+          });
+
+          stream.on("close", function() {
+            done(unexpectederr);
           });
 
           stream.on("error", function(err) {
@@ -233,7 +242,6 @@ describe('52. connClose.js', function() {
               err.message,
               "NJS-003: invalid connection"
             );
-            done();
           });
         });
       }

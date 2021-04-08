@@ -4375,7 +4375,7 @@ queryStream(String sql [, Object bindParams, [Object options]]);
 
 ##### Return Value
 
-This method will return a [Readable Stream][16] for queries.
+This synchronous method will return a [Readable Stream][16] for queries.
 
 ##### Description
 
@@ -6022,13 +6022,9 @@ support for the value 0 was added.
 toQueryStream();
 ```
 
-##### Return Value
-
-This method will return a [Readable Stream][16].
-
 ##### Description
 
-This synchronous method converts a ResultSet into a stream.
+This synchronous method converts a ResultSet into a [Readable Stream][16].
 
 It can be used to make ResultSets from top-level queries or from REF
 CURSOR bind variables streamable.  To make top-level queries
@@ -10587,7 +10583,7 @@ Performance](#rowfetching).
 An example of streaming query results is:
 
 ```javascript
-const stream = await connection.queryStream(`SELECT employees_name FROM employees`);
+const stream = connection.queryStream(`SELECT employees_name FROM employees`);
 
 stream.on('error', function (error) {
   // handle any error...

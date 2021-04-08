@@ -669,6 +669,10 @@ describe('116. fetchUrowidAsString.js', function() {
 
     stream.on('end', function() {
       should.strictEqual(result.length, numRows);
+      stream.destroy();
+    });
+
+    stream.on('close', function() {
       callback();
     });
   }

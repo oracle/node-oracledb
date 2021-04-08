@@ -119,7 +119,7 @@ describe('247. dupColNames2.js', function() {
   const depName = ["R&D", "Sales", "Marketing"];
 
   describe('247.1 Duplicate column names, query with stream', function() {
-    it('247.1.1 Two duplicate columns', async function() {
+    it('247.1.1 Two duplicate columns', function(done) {
       let sql =
         `SELECT
             A.EMPLOYEE_ID, A.EMPLOYEE_HISTORY, A.DEPARTMENT_ID,
@@ -127,19 +127,23 @@ describe('247. dupColNames2.js', function() {
          FROM nodb_dupEmployee A, nodb_dupDepartment B
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID`;
 
-      let stream = await connection.queryStream(sql);
+      let stream = connection.queryStream(sql);
+      let index = 0;
+      let metadataseen = 0;
+
       stream.on('metadata', function(metaData) {
         should.equal(metaData[0].name, "EMPLOYEE_ID");
         should.equal(metaData[1].name, "EMPLOYEE_HISTORY");
         should.equal(metaData[2].name, "DEPARTMENT_ID");
         should.equal(metaData[3].name, "DEPARTMENT_ID_1");
         should.equal(metaData[4].name, "DEPARTMENT_NAME");
+        metadataseen = 1;
       });
 
       stream.on('error', function(error) {
         should.not.exist(error);
       });
-      let index = 0;
+
       stream.on('data', function(data) {
         should.exist(data);
         should.equal(data.EMPLOYEE_ID, empID[index]);
@@ -156,11 +160,15 @@ describe('247. dupColNames2.js', function() {
       });
 
       stream.on('end', function() {
+        should.equal(3, index);
+        should.equal(1, metadataseen);
         stream.destroy();
       });
+
+      stream.on('close', done);
     });
 
-    it('247.1.2 Three duplicate columns', async function() {
+    it('247.1.2 Three duplicate columns', function(done) {
       let sql =
         `SELECT
             A.EMPLOYEE_ID, A.EMPLOYEE_HISTORY, A.DEPARTMENT_ID,
@@ -168,7 +176,7 @@ describe('247. dupColNames2.js', function() {
          FROM nodb_dupEmployee A, nodb_dupDepartment B
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID`;
 
-      let stream = await connection.queryStream(sql);
+      let stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
         should.equal(metaData[0].name, "EMPLOYEE_ID");
         should.equal(metaData[1].name, "EMPLOYEE_HISTORY");
@@ -199,9 +207,11 @@ describe('247. dupColNames2.js', function() {
       stream.on('end', function() {
         stream.destroy();
       });
+
+      stream.on('close', done);
     });
 
-    it('247.1.3 Duplicate column with conflicting alias name', async function() {
+    it('247.1.3 Duplicate column with conflicting alias name', function(done) {
       let sql =
         `SELECT
             A.EMPLOYEE_ID, A.EMPLOYEE_HISTORY, A.DEPARTMENT_ID,
@@ -209,7 +219,7 @@ describe('247. dupColNames2.js', function() {
          FROM nodb_dupEmployee A, nodb_dupDepartment B
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID`;
 
-      let stream = await connection.queryStream(sql);
+      let stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
         should.equal(metaData[0].name, "EMPLOYEE_ID");
         should.equal(metaData[1].name, "EMPLOYEE_HISTORY");
@@ -240,9 +250,11 @@ describe('247. dupColNames2.js', function() {
       stream.on('end', function() {
         stream.destroy();
       });
+
+      stream.on('close', done);
     });
 
-    it('247.1.4 Duplicate columns with non-conflicting alias name', async function() {
+    it('247.1.4 Duplicate columns with non-conflicting alias name', function(done) {
       let sql =
         `SELECT
             A.EMPLOYEE_ID, A.EMPLOYEE_HISTORY, A.DEPARTMENT_ID,
@@ -250,7 +262,7 @@ describe('247. dupColNames2.js', function() {
          FROM nodb_dupEmployee A, nodb_dupDepartment B
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID`;
 
-      let stream = await connection.queryStream(sql);
+      let stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
         should.equal(metaData[0].name, "EMPLOYEE_ID");
         should.equal(metaData[1].name, "EMPLOYEE_HISTORY");
@@ -282,9 +294,11 @@ describe('247. dupColNames2.js', function() {
       stream.on('end', function() {
         stream.destroy();
       });
+
+      stream.on('close', done);
     });
 
-    it('247.1.5 Negative not-case sensitive', async function() {
+    it('247.1.5 Negative not-case sensitive', function(done) {
       let sql =
         `SELECT
             A.EMPLOYEE_ID, A.EMPLOYEE_HISTORY, A.DEPARTMENT_ID,
@@ -292,7 +306,7 @@ describe('247. dupColNames2.js', function() {
          FROM nodb_dupEmployee A, nodb_dupDepartment B
          WHERE A.department_id = B.department_id`;
 
-      let stream = await connection.queryStream(sql);
+      let stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
         should.equal(metaData[0].name, "EMPLOYEE_ID");
         should.equal(metaData[1].name, "EMPLOYEE_HISTORY");
@@ -324,9 +338,11 @@ describe('247. dupColNames2.js', function() {
       stream.on('end', function() {
         stream.destroy();
       });
+
+      stream.on('close', done);
     });
 
-    it('247.1.6 Two duplicate columns using nested cursor', async function() {
+    it('247.1.6 Two duplicate columns using nested cursor', function(done) {
       let sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID
@@ -338,7 +354,7 @@ describe('247. dupColNames2.js', function() {
                 ORDER BY B.DEPARTMENT_ID
               `;
 
-      let stream = await connection.queryStream(sql);
+      let stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
         should.equal(metaData[0].name, "DEPARTMENT_NAME");
         should.equal(metaData[1].name, "DEPARTMENT_ID");
@@ -361,9 +377,11 @@ describe('247. dupColNames2.js', function() {
       stream.on('end', function() {
         stream.destroy();
       });
+
+      stream.on('close', done);
     });
 
-    it('247.1.7 Three duplicate columns using nested cursor', async function() {
+    it('247.1.7 Three duplicate columns using nested cursor', function(done) {
       let sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID
@@ -373,7 +391,7 @@ describe('247. dupColNames2.js', function() {
                 FROM nodb_dupDepartment B
               `;
 
-      let stream = await connection.queryStream(sql);
+      let stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
         should.equal(metaData[0].name, "DEPARTMENT_NAME");
         should.equal(metaData[1].name, "DEPARTMENT_ID");
@@ -398,9 +416,11 @@ describe('247. dupColNames2.js', function() {
       stream.on('end', function() {
         stream.destroy();
       });
+
+      stream.on('close', done);
     });
 
-    it('247.1.8 Three duplicate columns using nested cursor', async function() {
+    it('247.1.8 Three duplicate columns using nested cursor', function(done) {
       let sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID
@@ -410,7 +430,7 @@ describe('247. dupColNames2.js', function() {
                 FROM nodb_dupDepartment B
               `;
 
-      let stream = await connection.queryStream(sql);
+      let stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
         should.equal(metaData[0].name, "DEPARTMENT_NAME");
         should.equal(metaData[1].name, "DEPARTMENT_ID");
@@ -434,9 +454,11 @@ describe('247. dupColNames2.js', function() {
       stream.on('end', function() {
         stream.destroy();
       });
+
+      stream.on('close', done);
     });
 
-    it('247.1.9 duplicate column with conflicting alias name using nested cursor', async function() {
+    it('247.1.9 duplicate column with conflicting alias name using nested cursor', function(done) {
       let sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID , A.DEPARTMENT_ID AS DEPARTMENT_ID_1
@@ -446,7 +468,7 @@ describe('247. dupColNames2.js', function() {
                 FROM nodb_dupDepartment B
               `;
 
-      let stream = await connection.queryStream(sql);
+      let stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
         should.equal(metaData[0].name, "DEPARTMENT_NAME");
         should.equal(metaData[1].name, "DEPARTMENT_ID");
@@ -471,9 +493,11 @@ describe('247. dupColNames2.js', function() {
       stream.on('end', function() {
         stream.destroy();
       });
+
+      stream.on('close', done);
     });
 
-    it('247.1.10 Duplicate column with non-conflicting alias name using nested cursor', async function() {
+    it('247.1.10 Duplicate column with non-conflicting alias name using nested cursor', function(done) {
       let sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID , A.DEPARTMENT_ID AS DEPARTMENT_ID_5
@@ -483,7 +507,7 @@ describe('247. dupColNames2.js', function() {
                 FROM nodb_dupDepartment B
               `;
 
-      let stream = await connection.queryStream(sql);
+      let stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
         should.equal(metaData[0].name, "DEPARTMENT_NAME");
         should.equal(metaData[1].name, "DEPARTMENT_ID");
@@ -508,9 +532,11 @@ describe('247. dupColNames2.js', function() {
       stream.on('end', function() {
         stream.destroy();
       });
+
+      stream.on('close', done);
     });
 
-    it('247.1.11 Duplicate column with case sensitive alias name using nested cursor', async function() {
+    it('247.1.11 Duplicate column with case sensitive alias name using nested cursor', function(done) {
       let sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID , A.DEPARTMENT_ID AS "department_id_1"
@@ -520,7 +546,7 @@ describe('247. dupColNames2.js', function() {
                 FROM nodb_dupDepartment B
               `;
 
-      let stream = await connection.queryStream(sql);
+      let stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
         should.equal(metaData[0].name, "DEPARTMENT_NAME");
         should.equal(metaData[1].name, "DEPARTMENT_ID");
@@ -545,6 +571,8 @@ describe('247. dupColNames2.js', function() {
       stream.on('end', function() {
         stream.destroy();
       });
+
+      stream.on('close', done);
     });
 
 
@@ -568,7 +596,7 @@ describe('247. dupColNames2.js', function() {
       let plsql = `BEGIN ${PROC}(:cursor); END;`;
       let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
       let result = await connection.execute(plsql, opts);
-      let stream = await result.outBinds.cursor.toQueryStream();
+      let stream = result.outBinds.cursor.toQueryStream();
       await new Promise((resolve, reject) => {
         stream.on('metadata', function(metaData) {
           should.equal(metaData[0].name, "EMPLOYEE_ID");
@@ -593,6 +621,9 @@ describe('247. dupColNames2.js', function() {
 
         stream.on('end', function() {
           stream.destroy();
+        });
+
+        stream.on('close', function() {
           resolve();
         });
       });
@@ -618,7 +649,7 @@ describe('247. dupColNames2.js', function() {
       let plsql = `BEGIN ${PROC}(:cursor); END;`;
       let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
       let result = await connection.execute(plsql, opts);
-      let stream = await result.outBinds.cursor.toQueryStream();
+      let stream = result.outBinds.cursor.toQueryStream();
       await new Promise((resolve, reject) => {
         stream.on('metadata', function(metaData) {
           should.equal(metaData[0].name, "EMPLOYEE_ID");
@@ -643,6 +674,9 @@ describe('247. dupColNames2.js', function() {
 
         stream.on('end', function() {
           stream.destroy();
+        });
+
+        stream.on('close', function() {
           resolve();
         });
       });
@@ -668,7 +702,7 @@ describe('247. dupColNames2.js', function() {
       let plsql = `BEGIN ${PROC}(:cursor); END;`;
       let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
       let result = await connection.execute(plsql, opts);
-      let stream = await result.outBinds.cursor.toQueryStream();
+      let stream = result.outBinds.cursor.toQueryStream();
       await new Promise((resolve, reject) => {
         stream.on('metadata', function(metaData) {
           should.equal(metaData[0].name, "EMPLOYEE_ID");
@@ -693,6 +727,9 @@ describe('247. dupColNames2.js', function() {
 
         stream.on('end', function() {
           stream.destroy();
+        });
+
+        stream.on('close', function() {
           resolve();
         });
       });
@@ -718,7 +755,7 @@ describe('247. dupColNames2.js', function() {
       let plsql = `BEGIN ${PROC}(:cursor); END;`;
       let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
       let result = await connection.execute(plsql, opts);
-      let stream = await result.outBinds.cursor.toQueryStream();
+      let stream = result.outBinds.cursor.toQueryStream();
       await new Promise((resolve, reject) => {
         stream.on('metadata', function(metaData) {
           should.equal(metaData[0].name, "EMPLOYEE_ID");
@@ -743,6 +780,9 @@ describe('247. dupColNames2.js', function() {
 
         stream.on('end', function() {
           stream.destroy();
+        });
+
+        stream.on('close', function() {
           resolve();
         });
       });
@@ -767,7 +807,7 @@ describe('247. dupColNames2.js', function() {
       let plsql = `BEGIN ${PROC}(:cursor); END;`;
       let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
       let result = await connection.execute(plsql, opts);
-      let stream = await result.outBinds.cursor.toQueryStream();
+      let stream = result.outBinds.cursor.toQueryStream();
       await new Promise((resolve, reject) => {
         stream.on('metadata', function(metaData) {
           should.equal(metaData[0].name, "EMPLOYEE_ID");
@@ -792,13 +832,16 @@ describe('247. dupColNames2.js', function() {
 
         stream.on('end', function() {
           stream.destroy();
+        });
+
+        stream.on('close', function() {
           resolve();
         });
       });
     });
 
     it('247.1.17 Duplicate column with case sensitive alias name from dual', async function() {
-      let stream = await connection.queryStream(`SELECT dummy "abc", dummy "ABC" from dual`);
+      let stream = connection.queryStream(`SELECT dummy "abc", dummy "ABC" from dual`);
       await new Promise((resolve, reject) => {
         stream.on('metadata', function(metaData) {
           should.equal(metaData[0].name, "abc");
@@ -818,6 +861,9 @@ describe('247. dupColNames2.js', function() {
 
         stream.on('end', function() {
           stream.destroy();
+        });
+
+        stream.on('close', function() {
           resolve();
         });
       });

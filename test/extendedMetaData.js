@@ -1540,6 +1540,10 @@ describe('17. extendedMetaData.js', function() {
       });
 
       stream.on('end', function() {
+        stream.destroy();
+      });
+
+      stream.on('close', function() {
         return done();
       });
 

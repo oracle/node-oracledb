@@ -632,7 +632,8 @@ describe("147. prefetchRows.js", function() {
     it('147.3.1 set oracledb.prefetchRows to be 0', async function() {
       try {
         oracledb.prefetchRows = 0;
-        await conn.queryStream("select 'foobar' from dual");
+        const stream = conn.queryStream("select 'foobar' from dual");
+        await testsUtil.doStream(stream);
       } catch (error) {
         should.not.exist(error);
       }
@@ -641,7 +642,8 @@ describe("147. prefetchRows.js", function() {
     it('147.3.2 execute() option, value of 0', async function() {
       try {
         const options = { prefetchRows: 0 };
-        await conn.queryStream("select 'prefetchRows' from dual", [], options);
+        const stream = conn.queryStream("select 'prefetchRows' from dual", [], options);
+        await testsUtil.doStream(stream);
       } catch (error) {
         should.not.exist(error);
       }
@@ -650,7 +652,8 @@ describe("147. prefetchRows.js", function() {
     it('147.3.3 execute() option, undefined, get overrided by global attribute', async function() {
       try {
         const options = { prefetchRows: undefined };
-        await conn.queryStream("select 'prefetchRows' from dual", [], options);
+        const stream = conn.queryStream("select 'prefetchRows' from dual", [], options);
+        await testsUtil.doStream(stream);
       } catch (error) {
         should.not.exist(error);
       }
@@ -664,18 +667,8 @@ describe("147. prefetchRows.js", function() {
         const sid = await testsUtil.getSid(conn);
         let rt = await testsUtil.getRoundTripCount(sid);
 
-        let stream = await conn.queryStream(sql, [], { prefetchRows: 0 });
-        stream.on('error', function(error) {
-          should.not.exist(error);
-        });
-
-        stream.on('data', function(data) {
-          should.exist(data);
-        });
-
-        stream.on('end', function() {
-          stream.destroy();
-        });
+        const stream = conn.queryStream(sql, [], { prefetchRows: 0 });
+        await testsUtil.doStream(stream);
         rt = await testsUtil.getRoundTripCount(sid) - rt;
 
         should.strictEqual(rt, 2);
@@ -693,18 +686,8 @@ describe("147. prefetchRows.js", function() {
         const sid = await testsUtil.getSid(conn);
         let rt = await testsUtil.getRoundTripCount(sid);
 
-        let stream = await conn.queryStream(sql, [], { prefetchRows: 12 });
-        stream.on('error', function(error) {
-          should.not.exist(error);
-        });
-
-        stream.on('data', function(data) {
-          should.exist(data);
-        });
-
-        stream.on('end', function() {
-          stream.destroy();
-        });
+        const stream = conn.queryStream(sql, [], { prefetchRows: 12 });
+        await testsUtil.doStream(stream);
         rt = await testsUtil.getRoundTripCount(sid) - rt;
 
         should.strictEqual(rt, 2);
@@ -722,18 +705,8 @@ describe("147. prefetchRows.js", function() {
         const sid = await testsUtil.getSid(conn);
         let rt = await testsUtil.getRoundTripCount(sid);
 
-        let stream = await conn.queryStream(sql, [], { prefetchRows: 13 });
-        stream.on('error', function(error) {
-          should.not.exist(error);
-        });
-
-        stream.on('data', function(data) {
-          should.exist(data);
-        });
-
-        stream.on('end', function() {
-          stream.destroy();
-        });
+        const stream = conn.queryStream(sql, [], { prefetchRows: 13 });
+        await testsUtil.doStream(stream);
         rt = await testsUtil.getRoundTripCount(sid) - rt;
 
         should.strictEqual(rt, 1);
@@ -751,18 +724,8 @@ describe("147. prefetchRows.js", function() {
         const sid = await testsUtil.getSid(conn);
         let rt = await testsUtil.getRoundTripCount(sid);
 
-        let stream = await conn.queryStream(sql, [], { prefetchRows: 2, fetchArraySize : 2 });
-        stream.on('error', function(error) {
-          should.not.exist(error);
-        });
-
-        stream.on('data', function(data) {
-          should.exist(data);
-        });
-
-        stream.on('end', function() {
-          stream.destroy();
-        });
+        const stream = conn.queryStream(sql, [], { prefetchRows: 2, fetchArraySize : 2 });
+        await testsUtil.doStream(stream);
         rt = await testsUtil.getRoundTripCount(sid) - rt;
 
         should.strictEqual(rt, 7);
@@ -780,18 +743,8 @@ describe("147. prefetchRows.js", function() {
         const sid = await testsUtil.getSid(conn);
         let rt = await testsUtil.getRoundTripCount(sid);
 
-        let stream = await conn.queryStream(sql, [], { prefetchRows: 2, fetchArraySize : 100 });
-        stream.on('error', function(error) {
-          should.not.exist(error);
-        });
-
-        stream.on('data', function(data) {
-          should.exist(data);
-        });
-
-        stream.on('end', function() {
-          stream.destroy();
-        });
+        const stream = conn.queryStream(sql, [], { prefetchRows: 2, fetchArraySize : 100 });
+        await testsUtil.doStream(stream);
         rt = await testsUtil.getRoundTripCount(sid) - rt;
 
         should.strictEqual(rt, 2);

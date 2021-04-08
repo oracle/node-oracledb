@@ -27,6 +27,8 @@
       version 21.3 (or later).  It is also available in Oracle Client 19 from
       19.11 onwards.
 
+- Test and documentation improvements.
+
 ## node-oracledb v5.1.0 (8 Dec 2020)
 
 - Added

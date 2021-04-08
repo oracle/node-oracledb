@@ -477,6 +477,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
               lob.on('end', function() {
                 compareClientFetchResult(err, blobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -597,6 +601,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
               lob.on('end', function() {
                 compareClientFetchResult(err, blobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -606,33 +614,37 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.1.16
 
     it('87.1.17 works with connection.queryStream()', function(done) {
-      var id = insertID++;
-      var specialStr = '87.1.17';
-      var contentLength = 200;
-      var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = Buffer.from(strBuf, "utf-8");
+      let id = insertID++;
+      const specialStr = '87.1.17';
+      const contentLength = 200;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
           insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
-          var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id;
-          var stream = connection.queryStream(sql);
+          const sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id;
+          const stream = connection.queryStream(sql);
           stream.on('error', function(error) {
             should.fail(error, null, 'Error event should not be triggered');
           });
 
-          var counter = 0;
+          let counter = 0;
           stream.on('data', function(data) {
             should.exist(data);
-            var result = data[1];
+            let result = data[1];
             compareBuffers(result, specialStr, content, contentLength);
             counter++;
           });
 
           stream.on('end', function() {
             should.equal(counter, 1);
+            stream.destroy();
+          });
+
+          stream.on('close', function() {
             cb();
           });
         }
@@ -640,17 +652,17 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.1.17
 
     it('87.1.18 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table', function(done) {
-      var id_1 = insertID++;
-      var specialStr_1 = '87.1.18_1';
-      var contentLength_1 = 26;
-      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = Buffer.from(strBuf_1, "utf-8");
-      var id_2 = insertID++;
-      var specialStr_2 = '87.1.18_2';
-      var contentLength_2 = 30;
-      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = Buffer.from(strBuf_2, "utf-8");
-      var maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '87.1.18_1';
+      const contentLength_1 = 26;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const id_2 = insertID++;
+      const specialStr_2 = '87.1.18_2';
+      const contentLength_2 = 30;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 20;
 
       async.series([
@@ -661,16 +673,16 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
-          var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2;
-          var stream = connection.queryStream(sql);
+          const sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2;
+          const stream = connection.queryStream(sql);
           stream.on('error', function(error) {
             should.fail(error, null, 'Error event should not be triggered');
           });
 
-          var counter = 0;
+          let counter = 0;
           stream.on('data', function(data) {
             should.exist(data);
-            var result = data[1];
+            const result = data[1];
             counter++;
             if (counter == 1) {
               compareBuffers(result, specialStr_1, content_1, contentLength_1);
@@ -682,6 +694,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           stream.on('end', function() {
             should.equal(counter, 2);
             oracledb.maxRows = maxRowsBak;
+            stream.destroy();
+          });
+
+          stream.on('close', function() {
             cb();
           });
         }
@@ -689,17 +705,17 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.1.18
 
     it('87.1.19 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table', function(done) {
-      var id_1 = insertID++;
-      var specialStr_1 = '87.1.19_1';
-      var contentLength_1 = 26;
-      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = Buffer.from(strBuf_1, "utf-8");
-      var id_2 = insertID++;
-      var specialStr_2 = '87.1.19_2';
-      var contentLength_2 = 30;
-      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = Buffer.from(strBuf_2, "utf-8");
-      var maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '87.1.19_1';
+      const contentLength_1 = 26;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const id_2 = insertID++;
+      const specialStr_2 = '87.1.19_2';
+      const contentLength_2 = 30;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 2;
 
       async.series([
@@ -710,16 +726,16 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
-          var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2;
-          var stream = connection.queryStream(sql);
+          const sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2;
+          const stream = connection.queryStream(sql);
           stream.on('error', function(error) {
             should.fail(error, null, 'Error event should not be triggered');
           });
 
-          var counter = 0;
+          let counter = 0;
           stream.on('data', function(data) {
             should.exist(data);
-            var result = data[1];
+            const result = data[1];
             counter++;
             if (counter == 1) {
               compareBuffers(result, specialStr_1, content_1, contentLength_1);
@@ -731,6 +747,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           stream.on('end', function() {
             should.equal(counter, 2);
             oracledb.maxRows = maxRowsBak;
+            stream.destroy();
+          });
+
+          stream.on('close', function() {
             cb();
           });
         }
@@ -738,17 +758,17 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.1.19
 
     it('87.1.20 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table', function(done) {
-      var id_1 = insertID++;
-      var specialStr_1 = '87.1.20_1';
-      var contentLength_1 = 26;
-      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = Buffer.from(strBuf_1, "utf-8");
-      var id_2 = insertID++;
-      var specialStr_2 = '87.1.19_2';
-      var contentLength_2 = 30;
-      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = Buffer.from(strBuf_2, "utf-8");
-      var maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '87.1.20_1';
+      const contentLength_1 = 26;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const id_2 = insertID++;
+      const specialStr_2 = '87.1.19_2';
+      const contentLength_2 = 30;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
       async.series([
@@ -759,16 +779,16 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
-          var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2;
-          var stream = connection.queryStream(sql);
+          const sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2;
+          const stream = connection.queryStream(sql);
           stream.on('error', function(error) {
             should.fail(error, null, 'Error event should not be triggered');
           });
 
-          var counter = 0;
+          let counter = 0;
           stream.on('data', function(data) {
             should.exist(data);
-            var result = data[1];
+            const result = data[1];
             counter++;
             if (counter == 1) {
               compareBuffers(result, specialStr_1, content_1, contentLength_1);
@@ -780,6 +800,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           stream.on('end', function() {
             should.equal(counter, 2);
             oracledb.maxRows = maxRowsBak;
+            stream.destroy();
+          });
+
+          stream.on('close', function() {
             cb();
           });
         }
@@ -1124,6 +1148,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
               lob.on('end', function() {
                 compareClientFetchResult(err, blobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -1248,6 +1276,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
               lob.on('end', function() {
                 compareClientFetchResult(err, blobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -1651,6 +1683,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
               lob.on('end', function() {
                 compareClientFetchResult(err, blobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -1803,6 +1839,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
               lob.on('end', function() {
                 compareClientFetchResult(err, blobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -2149,6 +2189,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
               lob.on('end', function() {
                 compareClientFetchResult(err, blobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -2273,6 +2317,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
               lob.on('end', function() {
                 compareClientFetchResult(err, blobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -2678,6 +2726,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
               lob.on('end', function() {
                 compareClientFetchResult(err, blobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }
@@ -2830,6 +2882,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
               lob.on('end', function() {
                 compareClientFetchResult(err, blobData, specialStr, content, contentLength);
+                lob.destroy();
+              });
+
+              lob.on('close', function() {
                 cb();
               });
             }

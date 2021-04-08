@@ -669,6 +669,10 @@ describe('106. fetchRowidAsString.js', function() {
 
     stream.on('end', function() {
       should.strictEqual(result.length, numRows);
+      stream.destroy();
+    });
+
+    stream.on('close', function() {
       callback();
     });
   }
