@@ -7156,7 +7156,7 @@ why `save()` accepts only a [SodaDocument](#sodadocumentclass), unlike
 `insertOne()`.  If the collection is not configured with client-assigned keys,
 then the behavior is exactly the same as `sodaCollection.insertOne()`.
 
-This method was added in node-oracledb 5.0.  It requires Oracle Client 20 or
+This method was added in node-oracledb 5.0.  It requires Oracle Client 19.9 or
 later, and Oracle Database 18.3 or later.
 
 #### <a name="sodacollsaveandget"></a> 10.2.11 `sodaCollection.saveAndGet()`
@@ -7186,7 +7186,7 @@ why `saveAndGet()` accepts only a [SodaDocument](#sodadocumentclass), unlike
 keys, then the behavior is exactly the same as
 `sodaCollection.insertOneAndGet()`.
 
-This method was added in node-oracledb 5.0.  It requires Oracle Client 20 or
+This method was added in node-oracledb 5.0.  It requires Oracle Client 19.9 or
 later, and Oracle Database 18.3 or later.
 
 #### <a name="sodacolltruncate"></a> 10.2.12 `sodaCollection.truncate()`
