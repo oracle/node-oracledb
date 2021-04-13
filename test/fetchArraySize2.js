@@ -277,11 +277,11 @@ describe("149. fetchArraySize2.js", function() {
 
     const testRefCursor = function(fetchArraySizeVal, numRowsVal, cb) {
       const create_ref = `CREATE OR REPLACE PROCEDURE testrefproc (p_out OUT SYS_REFCURSOR)
-			  AS
-			  BEGIN
-			    OPEN p_out FOR
-			    SELECT * FROM ` + tableName  + ` order by id;
-			  END;`;
+                          AS
+                          BEGIN
+                            OPEN p_out FOR
+                            SELECT * FROM ` + tableName  + ` order by id;
+                          END;`;
       const drop_ref = "DROP PROCEDURE testrefproc";
       const exec_ref = "BEGIN testrefproc(:o); END;";
 

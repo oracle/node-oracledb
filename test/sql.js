@@ -70,18 +70,18 @@ sql.createTable = function(tableName, dataType) {
 
 sql.createAllTable = function(tableName, dataTypeArray) {
   let sql = `BEGIN
-		 DECLARE
-		     e_table_missing EXCEPTION;
-		     PRAGMA EXCEPTION_INIT(e_table_missing, -00942);
-		 BEGIN
-		     EXECUTE IMMEDIATE ('DROP TABLE ` + tableName + ` PURGE' );
-		 EXCEPTION
-		     WHEN e_table_missing
-		     THEN NULL;
-		 END;
-		 EXECUTE IMMEDIATE ( '
-		     CREATE TABLE ` + tableName + ` (
-			 id    NUMBER, `;
+                 DECLARE
+                     e_table_missing EXCEPTION;
+                     PRAGMA EXCEPTION_INIT(e_table_missing, -00942);
+                 BEGIN
+                     EXECUTE IMMEDIATE ('DROP TABLE ` + tableName + ` PURGE' );
+                 EXCEPTION
+                     WHEN e_table_missing
+                     THEN NULL;
+                 END;
+                 EXECUTE IMMEDIATE ( '
+                     CREATE TABLE ` + tableName + ` (
+                         id    NUMBER, `;
 
   async.eachSeries(dataTypeArray, function(element, cb) {
     const index = dataTypeArray.indexOf(element);

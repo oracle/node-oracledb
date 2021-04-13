@@ -29,6 +29,7 @@
               }
         ],
         space-before-blocks: "error",
+        no-tabs: "error",
         keyword-spacing: "error",
         eol-last: "error",
         "indent": [
