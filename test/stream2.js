@@ -301,7 +301,7 @@ describe('14. stream2.js', function() {
 
     stream.on('data', function(data) {
       should.exist(data);
-      data[1].close();
+      data[1].destroy(); // close the CLOB
       should.equal(metaDataRead, true);
     });
 
@@ -333,7 +333,7 @@ describe('14. stream2.js', function() {
 
     stream.on('data', function(data) {
       should.exist(data);
-      data[2].close();
+      data[2].destroy();  // close the CLOB
       should.equal(metaDataRead, true);
     });
 
