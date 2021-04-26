@@ -112,6 +112,7 @@ spec:
   - test/urowidDMLBindAsString1.js
   - test/urowidDMLBindAsString2.js
   - test/fetchUrowidAsString.js
+  - test/fetchUrowidAsString_indexed.js
   - test/urowidProcedureBindAsString1.js
   - test/urowidProcedureBindAsString2.js
   - test/urowidProcedureBindAsString3.js
@@ -238,3 +239,5 @@ spec:
   - test/rsGetAllRows2.js
   - test/fetchNClobAsString.js
   - test/sodaMetaDataCache.js
+  - test/jsonBind1.js
+  - test/jsonBind2.js

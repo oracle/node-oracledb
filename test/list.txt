@@ -5039,3 +5039,55 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     252.2 sodaMetaDataCache set to FALSE
     252.3 sodaMetaDataCache not specified
     252.4 sodaMetaDataCache from closed pool
+
+253. jsonBind1.js
+    253.1 Map javascript object directly into JSON
+        253.1.1 Number, String type
+        253.1.2 Boolean and null value
+        253.1.3 Array type
+        253.1.4 Object type
+        253.1.5 Using JSON_VALUE to extract a value from a JSON column
+        253.1.6 Using dot-notation to extract a value from a JSON column
+        253.1.7 Using JSON_OBJECT to extract relational data as JSON
+        253.1.8 Number, String type with BIND_INOUT
+        253.1.9 Boolean and null value with BIND_INOUT
+        253.1.10 Array type with BIND_INOUT
+        253.1.11 Object type with BIND_INOUT
+    253.2 Map javascript object using SQL syntax into JSON
+        253.2.1 Number type
+        253.2.2 String type
+        253.2.3 TIMESTAMP type
+        253.2.4 RAW type
+        253.2.5 Array type
+        253.2.6 Object type
+        253.2.7 CLOB type
+        253.2.8 BLOB type
+        253.2.9 DATE type
+        253.2.10 INTERVAL YEAR TO MONTH type
+        253.2.11 INTERVAL DAY TO SECOND type
+        253.2.12 BINARY_DOUBLE type
+        253.2.13 BINARY_FLOAT type
+        253.2.14 NULL value
+
+254. jsonBind2.js
+    254.1 Map javascript object into BLOB
+        254.1.1 Number, String type
+        254.1.2 Boolean and null value
+        254.1.3 Array type
+        254.1.4 Object type
+        254.1.5 Using JSON_VALUE to extract a value from a BLOB column
+        254.1.6 Using dot-notation to extract a value from a BLOB column
+    254.2 Map javascript object into VARCHAR2
+        254.2.1 Number, String type
+        254.2.2 Boolean and null value
+        254.2.3 Array type
+        254.2.4 Object type
+        254.2.5 Using JSON_VALUE to extract a value from a VARCHAR2 column
+        254.2.6 Using dot-notation to extract a value from a VARCHAR2 column
+    254.3 Map javascript object into CLOB
+        254.3.1 Number, String type (41ms)
+        254.3.2 Boolean and null value
+        254.3.3 Array type
+        254.3.4 Object type
+        254.3.5 Using JSON_VALUE to extract a value from a CLOB column
+        254.3.6 Using dot-notation to extract a value from a CLOB column
