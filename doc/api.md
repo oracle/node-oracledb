@@ -475,6 +475,8 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 17.4 [Using DBMS_OUTPUT](#dbmsoutput)
     - 17.5 [Edition-Based Redefinition](#ebr)
     - 17.6 [Implicit Results](#implicitresults)
+    - 17.7 [Creating PL/SQL Procedures and Functions](#plsqlcreate)
+        - 17.7. [PL/SQL Compilation Warnings](#plsqlcompwarnings)
 18. [Working with CLOB, NCLOB and BLOB Data](#lobhandling)
     - 18.1 [Simple Insertion of LOBs](#basiclobinsert)
     - 18.2 [Simple LOB Queries and PL/SQL OUT Binds](#queryinglobs)
@@ -11416,9 +11418,6 @@ solutions:
 PL/SQL stored procedures, functions and anonymous blocks can be called
 from node-oracledb using [`execute()`](#execute).
 
-Note the error property of the callback is not set when PL/SQL
-"success with info" warnings such as compilation warnings occur.
-
 ### <a name="plsqlproc"></a> 17.1 PL/SQL Stored Procedures
 
 The PL/SQL procedure:
@@ -11814,6 +11813,67 @@ Implicit Result Set 2
 ```
 
 A runnable example is in [impres.js][138].
+
+### <a name="plsqlcreate"></a> 17.7 Creating PL/SQL Procedures and Functions
+
+PL/SQL procedures and functions can easily be created in node-oracledb by
+calling `connection.execute()`, for example:
+
+```javascript
+await connection.execute(
+  `CREATE OR REPLACE PROCEDURE no_proc
+     (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER)
+   AS
+   BEGIN
+     p_inout := p_in || p_inout;
+     p_out := 101;
+   END;`
+);
+
+```
+
+See the examples
+[plsqlproc.js](https://github.com/oracle/node-oracledb/tree/master/examples/plsqlproc.js)
+and
+[plsqlfunc.js](https://github.com/oracle/node-oracledb/tree/master/examples/plsqlfunc.js).
+
+#### <a name="plsqlcompwarnings"></a> 17.7.1 PL/SQL Compilation Warnings
+
+When creating PL/SQL procedures and functions in node-oracledb, compilation
+warnings must be manually checked for.  This can be done by querying
+`USER_ERRORS` like:
+
+```javascript
+await connection.execute(
+  `CREATE OR REPLACE PROCEDURE badproc AS
+   BEGIN
+       INVALID
+   END;`);
+
+const r = await connection.execute(
+  `SELECT line, position, text
+   FROM user_errors
+   WHERE name = 'BADPROC' AND type = 'PROCEDURE'
+   ORDER BY name, type, line, position`,
+  [], { outFormat: oracledb.OUT_FORMAT_OBJECT }
+);
+
+if (r.rows.length) {
+  console.error(r.rows[0].TEXT);
+  console.error('at line', r.rows[0].LINE, 'position', r.rows[0].POSITION);
+}
+```
+
+Output is like:
+
+```
+PLS-00103: Encountered the symbol "END" when expecting one of the following:
+
+   := . ( @ % ;
+The symbol ";" was substituted for "END" to continue.
+
+at line 4 position 8
+```
 
 ## <a name="lobhandling"></a> 18. Working with CLOB, NCLOB and BLOB Data
 
