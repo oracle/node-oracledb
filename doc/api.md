@@ -14903,6 +14903,10 @@ The Connection properties [action](#propconnaction), [module](#propconnmodule),
 be tracked in database views, shown in audit trails, and seen in tools such as
 Enterprise Manager.
 
+Applications should set the properties because they can greatly help
+troubleshooting.  They can help identify and resolve unnecessary database
+resource usage, or improper access.
+
 The `clientId` property can also be used by applications that do their
 own mid-tier authentication but connect to the database using the one
 database schema.  By setting `clientId` to the application's
@@ -14910,10 +14914,6 @@ authenticated user name, the database is aware of who the actual end
 user is.  This can, for example, be used by Oracle [Virtual Private
 Database][11] policies to automatically restrict data access by that
 user.
-
-Applications should set the properties because they can greatly help
-to identify and resolve unnecessary database resource usage, or
-improper access.
 
 The attributes are set on a [connection](#propdbconclass) object and
 sent to the database on the next [round-trip](#roundtrips) from
@@ -14964,12 +14964,10 @@ Applications should be consistent about how, and when,
 they set the end-to-end tracing attributes so that current values are
 recorded by the database.
 
-Idle connections released back to a connection pool will retain the
-previous attribute values of that connection. This avoids the overhead
-of a round-trip to reset the values.  The Oracle design assumption is
-that pools are actively used and have few idle connections. After
-getting a connection from a pool, an application that uses end-to-end
-tracing should set new values appropriately.
+Idle connections released back to a connection pool will retain the previous
+attribute values of that connection. This avoids the overhead of a round-trip to
+reset the values.  After getting a connection from a pool, an application that
+uses end-to-end tracing should set new values appropriately.
 
 When a Connection object is displayed, such as with `console.log()`,
 the end-to-end tracing attributes will show as `null` even if values
