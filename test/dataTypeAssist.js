@@ -664,7 +664,7 @@ assist.createSchemaString = function(size) {
   var nIndex = 0;
   var schema_prefix = "\"";
 
-  for (var i = 0; i < size; i++) {
+  for (var i = 0; i < size - 2; i++) {
     if (i % 3 == 0) {
       scIndex = Math.floor(Math.random() * 30);
       buffer.append(assist.schema.specialChars[scIndex]);

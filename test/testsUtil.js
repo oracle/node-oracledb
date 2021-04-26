@@ -128,6 +128,8 @@ testsUtil.isSodaRunnable = async function() {
 
   if ((serverVersion >= 2000000000) && (clientVersion < 2000000000)) return false;
 
+  if ((clientVersion >= 1909000000) && (serverVersion < 1909000000)) return false;
+
   let sodaRole = await sodaUtil.isSodaRoleGranted();
   if (!sodaRole) return false;
 
@@ -342,6 +344,20 @@ testsUtil.doStream = async function(stream) {
   });
 
   await consumeStream;
+};
+
+testsUtil.isLongUserNameRunnable = async function() {
+  if (!dbconfig.test.DBA_PRIVILEGE) {
+    return false;
+  } else {
+    let checkVersions = await testsUtil.checkPrerequisites(1800000000, 1800000000);
+    let checkCompatible = await testsUtil.versionStringCompare(await testsUtil.getDBCompatibleVersion(), '12.2.0.0.0');
+    if (checkVersions && (checkCompatible >= 0)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 };
 
 testsUtil.sleep = function(ms = 1000) {

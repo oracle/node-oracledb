@@ -149,10 +149,14 @@ describe('181. dataTypeXML.js', () => {
 
   }); // 181.2
 
-  it('181.3 another query as CLOB syntax', async () => {
+  it('181.3 another query as CLOB syntax', async function() {
 
     try {
       const conn = await oracledb.getConnection(dbconfig);
+      if (conn.oracleServerVersion < 1200000000) {
+        await conn.close();
+        this.skip();
+      }
 
       let sql = "select extract(content, '/').getclobval() as mycontent " +
                 "from " + tableName + " where num = :id";
@@ -179,11 +183,20 @@ describe('181. dataTypeXML.js', () => {
 
       let sql = "insert into " + tableName + " ( num, content ) values ( :id, XMLType(:bv) )";
       let bindValues = { id: ID, bv: XML };
-      await testsUtil.assertThrowsAsync(
-        async () => await conn.execute(sql, bindValues),
-        /ORA-01400:/
-      );
-      // ORA-01400: cannot insert NULL into...
+
+      if (conn.oracleServerVersion < 1200000000) {
+        await testsUtil.assertThrowsAsync(
+          async () => await conn.execute(sql, bindValues),
+          /ORA-19032:/
+        );
+        // ORA-19032: Expected XML tag , got no content
+      } else {
+        await testsUtil.assertThrowsAsync(
+          async () => await conn.execute(sql, bindValues),
+          /ORA-01400:/
+        );
+        // ORA-01400: cannot insert NULL into...
+      }
 
       await conn.commit();
       await conn.close();

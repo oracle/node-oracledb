@@ -35,9 +35,12 @@ describe('205. dbObject6.js', () => {
   const TABLE  = 'NODB_TAB_TESTGEOMETRY';
   let initialID = 0;
 
-  before(async () => {
+  before(async function() {
     try {
       conn = await oracledb.getConnection(dbconfig);
+      if (conn.oracleServerVersion < 1200000000) {
+        this.skip();
+      }
 
       let sql =
         `CREATE TABLE ${TABLE} (
@@ -54,7 +57,17 @@ describe('205. dbObject6.js', () => {
 
   after(async () => {
     try {
-      let sql = `DROP TABLE ${TABLE} PURGE`;
+      const sql = `BEGIN \n` +
+          `  DECLARE \n` +
+          `    e_table_missing EXCEPTION; \n` +
+          `    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n` +
+          `    BEGIN \n` +
+          `      EXECUTE IMMEDIATE ('DROP TABLE ${TABLE} PURGE' ); \n` +
+          `    EXCEPTION \n` +
+          `      WHEN e_table_missing \n` +
+          `      THEN NULL; \n` +
+          `    END; \n` +
+          `END;  `;
       await conn.execute(sql);
 
       await conn.close();

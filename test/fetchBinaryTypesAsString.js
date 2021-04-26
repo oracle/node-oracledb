@@ -46,6 +46,7 @@ describe('190. fetchBinaryTypesAsString.js', function() {
   before(async function() {
     try {
       conn = await oracledb.getConnection(dbConfig);
+      if (conn.oracleServerVersion < 1200000000) this.skip();
     } catch (err) {
       should.not.exist(err);
     }

@@ -334,7 +334,8 @@ describe('237. indexedTables01.js', () => {
     }
   }); // 237.7
 
-  it('237.8 DB_TYPE_TIMESTAMP', async () => {
+  it('237.8 DB_TYPE_TIMESTAMP', async function() {
+    if (conn.oracleServerVersion < 1200000000) this.skip();
     try {
       const arr = [ new Date(), new Date(), new Date() ];
       const func = 'test_timestamp';
@@ -351,7 +352,8 @@ describe('237. indexedTables01.js', () => {
     }
   }); // 237.8
 
-  it('237.9 DB_TYPE_TIMESTAMP_LTZ', async () => {
+  it('237.9 DB_TYPE_TIMESTAMP_LTZ', async function() {
+    if (conn.oracleServerVersion < 1200000000) this.skip();
     try {
       const arr = [ new Date(), new Date(), new Date(), new Date() ];
       const func = 'test_timestamp_ltz';
@@ -368,7 +370,8 @@ describe('237. indexedTables01.js', () => {
     }
   }); // 237.9
 
-  it('237.10 DB_TYPE_TIMESTAMP_TZ', async () => {
+  it('237.10 DB_TYPE_TIMESTAMP_TZ', async function() {
+    if (conn.oracleServerVersion < 1200000000) this.skip();
     try {
       const arr = [ new Date(), new Date(), new Date(), new Date(), new Date() ];
       const func = 'test_timestamp_tz';

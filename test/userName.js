@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   248. connection.js
+ *   248. userName.js
  *
  * DESCRIPTION
  *   Testing with username and user.
@@ -41,12 +41,6 @@ describe('248. userName.js', function() {
     connectString : dbConfig.connectString,
     privilege     : oracledb.SYSDBA
   };
-
-  var isLongUserRunnable = true;
-
-  before(async function() {
-    isLongUserRunnable = await testsUtil.checkPrerequisites(1202000000, 1202000000);
-  });
 
   var createUser = async function(userSchema, password) {
     try {
@@ -74,7 +68,6 @@ describe('248. userName.js', function() {
       should.not.exist(err);
     }
   };
-
 
   describe('248.1 test with different size of username', () => {
 
@@ -104,7 +97,8 @@ describe('248. userName.js', function() {
     }); // 248.1.1
 
     it('248.1.2 test with username size 100', async function() {
-      if (!isLongUserRunnable || !dbConfig.test.DBA_PRIVILEGE) {
+      let runnable = await testsUtil.isLongUserNameRunnable();
+      if (!runnable) {
         this.skip();
         return;
       }
@@ -132,7 +126,8 @@ describe('248. userName.js', function() {
     }); // 248.1.2
 
     it('248.1.3 test with username size 128', async function() {
-      if (!isLongUserRunnable || !dbConfig.test.DBA_PRIVILEGE) {
+      let runnable = await testsUtil.isLongUserNameRunnable();
+      if (!runnable) {
         this.skip();
         return;
       }
@@ -161,10 +156,12 @@ describe('248. userName.js', function() {
     }); // 248.1.3
 
     it('248.1.4 test with username size 129', async function() {
-      if (!isLongUserRunnable  || !dbConfig.test.DBA_PRIVILEGE) {
+      let runnable = await testsUtil.isLongUserNameRunnable();
+      if (!runnable) {
         this.skip();
         return;
       }
+
       try {
         var userSchema = await assist.createSchemaString(129);
         var password = "Welcome";
@@ -341,7 +338,8 @@ describe('248. userName.js', function() {
     }); // 248.2.1
 
     it('248.2.2 test with user size 100', async function() {
-      if (!isLongUserRunnable || !dbConfig.test.DBA_PRIVILEGE) {
+      let runnable = await testsUtil.isLongUserNameRunnable();
+      if (!runnable) {
         this.skip();
         return;
       }
@@ -369,7 +367,8 @@ describe('248. userName.js', function() {
     }); // 248.2.2
 
     it('248.2.3 test with user size 128', async function() {
-      if (!isLongUserRunnable || !dbConfig.test.DBA_PRIVILEGE) {
+      let runnable = await testsUtil.isLongUserNameRunnable();
+      if (!runnable) {
         this.skip();
         return;
       }
@@ -398,7 +397,8 @@ describe('248. userName.js', function() {
     }); // 248.2.3
 
     it('248.2.4 test with username size 129', async function() {
-      if (!isLongUserRunnable || !dbConfig.test.DBA_PRIVILEGE) {
+      let runnable = await testsUtil.isLongUserNameRunnable();
+      if (!runnable) {
         this.skip();
         return;
       }
