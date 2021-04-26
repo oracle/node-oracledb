@@ -471,7 +471,8 @@ static bool njsOracleDb_createPoolAsync(njsBaton *baton)
     commonParams.edition = baton->edition;
     commonParams.editionLength = (uint32_t) baton->editionLength;
     if (baton->sodaMetadataCache)
-        commonParams.sodaMetadataCache = baton->sodaMetadataCache ? 1 : 0;
+        commonParams.sodaMetadataCache = 1;
+    commonParams.stmtCacheSize = baton->stmtCacheSize;
 
     // create pool
     if (dpiPool_create(baton->oracleDb->context, baton->user,
@@ -479,9 +480,6 @@ static bool njsOracleDb_createPoolAsync(njsBaton *baton)
             (uint32_t) baton->passwordLength, baton->connectString,
             (uint32_t) baton->connectStringLength, &commonParams,
             &params, &baton->dpiPoolHandle) < 0) {
-        return njsBaton_setErrorDPI(baton);
-    } else if (dpiPool_setStmtCacheSize(baton->dpiPoolHandle,
-            baton->stmtCacheSize) < 0) {
         return njsBaton_setErrorDPI(baton);
     }
 
@@ -661,15 +659,13 @@ static bool njsOracleDb_getConnectionAsync(njsBaton *baton)
 
     commonParams.edition = baton->edition;
     commonParams.editionLength = (uint32_t) baton->editionLength;
+    commonParams.stmtCacheSize = baton->stmtCacheSize;
 
     if (dpiConn_create(baton->oracleDb->context, baton->user,
             (uint32_t) baton->userLength, baton->password,
             (uint32_t) baton->passwordLength, baton->connectString,
             (uint32_t) baton->connectStringLength, &commonParams, &params,
             &baton->dpiConnHandle) < 0) {
-        return njsBaton_setErrorDPI(baton);
-    } else if (dpiConn_setStmtCacheSize(baton->dpiConnHandle,
-            baton->stmtCacheSize) < 0) {
         return njsBaton_setErrorDPI(baton);
     }
 

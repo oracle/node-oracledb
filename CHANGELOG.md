@@ -18,6 +18,9 @@
   indefinitely.  See [Issue
   1338](https://github.com/oracle/node-oracledb/issues/1338).
 
+- Fixed the statement cache size set for the initial `poolMin` connections
+  created by `oracledb.createPool()`.
+
 - Enhanced the numeric suffix feature (for duplicate SELECT column names when
   using `oracledb.OUT_FORMAT_OBJECT` mode) to also support nested cursors and
   REF CURSORS.
