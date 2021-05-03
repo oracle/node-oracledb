@@ -4956,7 +4956,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         248.1.1 test with username size 30
         248.1.2 test with username size 100
         248.1.3 test with username size 128
-        248.1.4 test with username size 129
+        248.1.4 test with username size 1000
         248.1.5 negative test: username = null
         248.1.6 negative test: username = "null"
         248.1.7 negative test: username = undefined
@@ -4968,7 +4968,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         248.2.1 test with user size 30
         248.2.2 test with user size 100
         248.2.3 test with user size 128
-        248.2.4 test with username size 129
+        248.2.4 test with username size 1000
         248.2.5 negative test: user = null
         248.2.6 negative test: username = "null"
         248.2.7 negative test: username = undefined
