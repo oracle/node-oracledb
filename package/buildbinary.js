@@ -58,7 +58,7 @@ try {
 
 const buildInfo = nodbUtil.BINARY_FILE + ' ' + nodeVersion + ' ' + njsGitSha + ' ' + odpiGitSha + ' ' + buildDate.toUTCString();
 
-// Build a binary using the current version of Node.js and move it to the Staging directory
+// Build a binary and move it to the Staging directory
 function buildBinary() {
   console.log('Building binary ' + nodbUtil.BINARY_FILE + ' using Node.js ' + nodeVersion);
   try {
