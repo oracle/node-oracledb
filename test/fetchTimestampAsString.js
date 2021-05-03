@@ -212,7 +212,7 @@ describe('19. fetchTimestampAsString.js', function() {
 
   }); // 19.2
 
-  describe('19.3 testing maxRows setttings and queryStream() to fetch as string', function() {
+  describe('19.3 testing maxRows settings and queryStream() to fetch as string', function() {
     var tableName = "nodb_timestamp3";
     var inData = assist.TIMESTAMP_TZ_STRINGS_1;
     var defaultLimit = oracledb.maxRows;

@@ -35,7 +35,7 @@ Overview of node-oracledb functional tests
         1.10.3 uses username alias to login with SYSDBA privilege
 
   2. pool.js
-    2.1 default settting
+    2.1 default setting
         2.1.1 testing default values of pool properties
     2.2 poolMin
         2.2.1 poolMin cannot be a negative number
@@ -466,7 +466,7 @@ Overview of node-oracledb functional tests
         19.2.6 fetchAsString property and OBJECT outFormat
         19.2.7 fetchAsString property, resultSet
         19.2.8 fetchAsString property, resultSet and OBJECT outFormat
-    19.3 testing maxRows setttings and queryStream() to fetch as string
+    19.3 testing maxRows settings and queryStream() to fetch as string
         19.3.1 works well when setting oracledb.maxRows > actual number of rows
         19.3.2 maxRows = actual num of rows
         19.3.3 works when oracledb.maxRows < actual number of rows

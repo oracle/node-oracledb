@@ -34,7 +34,7 @@ var dbConfig = require('./dbconfig.js');
 
 describe('2. pool.js', function() {
 
-  describe('2.1 default settting', function() {
+  describe('2.1 default setting', function() {
 
     it('2.1.1 testing default values of pool properties', function(done) {
 
