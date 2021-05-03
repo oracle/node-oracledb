@@ -843,8 +843,10 @@ Overview of node-oracledb functional tests
     55.5 the content of resultSet should be consistent
         55.5.1 (1) get RS (2) modify data in that table and commit (3) check RS
     55.6 access resultSet simultaneously
-        55.6.1 concurrent operations on resultSet are not allowed
+        55.6.1 concurrent operations on resultSet are not allowed (using getRows())
         55.6.2 concurrent operation on REF Cursor are not allowed
+        55.6.3 concurrent operations on resultSet are not allowed (using getRow())
+        55.6.4 concurrently closing resultSet not allowed
     55.7 getting multiple resultSets
         55.7.1 can access multiple resultSet on one connection
         55.7.2 can access multiple REF Cursor
@@ -5091,3 +5093,9 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         254.3.4 Object type
         254.3.5 Using JSON_VALUE to extract a value from a CLOB column
         254.3.6 Using dot-notation to extract a value from a CLOB column
+
+256. executeQueue.js
+    256.1 oracledb.errorOnConcurrentExecute
+       256.1.1 property set to false
+       256.1.2 property set to true
+       256.1.3 break() not constrained by queue

@@ -144,11 +144,6 @@ bool njsResultSet_createBaton(napi_env env, napi_callback_info info,
     }
 
     tempBaton->oracleDb = rs->conn->oracleDb;
-    if (rs->activeBaton) {
-        njsBaton_setError(tempBaton, errBusyResultSet);
-        njsBaton_reportError(tempBaton, env);
-        return false;
-    }
     rs->activeBaton = tempBaton;
 
     *baton = tempBaton;
@@ -296,8 +291,8 @@ static bool njsResultSet_getRowsPostAsync(njsBaton *baton, napi_env env,
     uint32_t row, col, i;
     njsVariable *var;
 
-    // create constructors used for various types that might be returned
-    if (!njsBaton_setConstructors(baton, env))
+    // set JavaScript values to simplify creation of returned objects
+    if (!njsBaton_setJsValues(baton, env))
         return false;
 
     // if outFormat is OBJECT, create names for each of the variables
@@ -481,7 +476,7 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
     // store a reference to the parent object (a connection or a parent result
     // set) to ensure that it is not garbage collected during the lifetime of
     // the result set
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
             &callingObj))
     NJS_CHECK_NAPI(env, napi_set_named_property(env, *rsObj, "_parentObj",
             callingObj))

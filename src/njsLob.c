@@ -146,11 +146,6 @@ bool njsLob_createBaton(napi_env env, napi_callback_info info,
         return false;
     }
     tempBaton->oracleDb = lob->oracleDb;
-    if (lob->activeBaton) {
-        njsBaton_setError(tempBaton, errBusyLob);
-        njsBaton_reportError(tempBaton, env);
-        return false;
-    }
     lob->activeBaton = tempBaton;
 
     *baton = tempBaton;
@@ -357,7 +352,7 @@ static bool njsLob_getDataPostAsync(njsBaton *baton, napi_env env,
 //   Creates a new LOB object.
 //-----------------------------------------------------------------------------
 bool njsLob_new(njsOracleDb *oracleDb, njsLobBuffer *buffer, napi_env env,
-        napi_value *lobObj)
+        napi_value parentObj, napi_value *lobObj)
 {
     njsLob *lob;
 
@@ -375,6 +370,10 @@ bool njsLob_new(njsOracleDb *oracleDb, njsLobBuffer *buffer, napi_env env,
     lob->pieceSize = buffer->chunkSize;
     lob->length = buffer->length;
     lob->isAutoClose = buffer->isAutoClose;
+
+    // store a reference to the calling object on the LOB
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *lobObj, "_parentObj",
+            parentObj))
 
     return true;
 }
@@ -595,7 +594,7 @@ static bool njsLob_writeProcessArgs(njsBaton *baton, napi_env env,
     // is not destroyed before we have finished reading from it
     if (isBuffer) {
         NJS_CHECK_NAPI(env, napi_create_reference(env, args[1], 1,
-                &baton->jsBuffer))
+                &baton->jsBufferRef))
         NJS_CHECK_NAPI(env, napi_get_buffer_info(env, args[1],
                 (void**) &baton->bufferPtr, &bufferSize))
 

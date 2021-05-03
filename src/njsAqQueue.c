@@ -300,7 +300,7 @@ bool njsAqQueue_createFromHandle(njsBaton *baton, napi_env env,
     // options objects (for convenience)
     memset(descriptors, 0, sizeof(napi_property_descriptor) * 4);
     descriptors[0].utf8name = "_connection";
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
             &descriptors[0].value))
     descriptors[1].utf8name = "deqOptions";
     descriptors[1].value = deqOptionsObj;

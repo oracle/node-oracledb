@@ -72,32 +72,33 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 3.2.2 [`connectionClass`](#propdbconclass)
         - 3.2.3 [`dbObjectAsPojo`](#propdbobjpojo)
         - 3.2.4 [`edition`](#propdbedition)
-        - 3.2.5 [`events`](#propdbevents)
-        - 3.2.6 [`extendedMetaData`](#propdbextendedmetadata)
-        - 3.2.7 [`externalAuth`](#propdbisexternalauth)
-        - 3.2.8 [`fetchArraySize`](#propdbfetcharraysize)
-        - 3.2.9 [`fetchAsBuffer`](#propdbfetchasbuffer)
-        - 3.2.10 [`fetchAsString`](#propdbfetchasstring)
-        - 3.2.11 [`lobPrefetchSize`](#propdblobprefetchsize)
-        - 3.2.12 [`maxRows`](#propdbmaxrows)
-        - 3.2.13 [`oracleClientVersion`](#propdboracleclientversion)
-        - 3.2.14 [`oracleClientVersionString`](#propdboracleclientversionstring)
-        - 3.2.15 [`outFormat`](#propdboutformat)
-        - 3.2.16 [`poolIncrement`](#propdbpoolincrement)
-        - 3.2.17 [`poolMax`](#propdbpoolmax)
-        - 3.2.18 [`poolMaxPerShard`](#propdbpoolmaxpershard)
-        - 3.2.19 [`poolMin`](#propdbpoolmin)
-        - 3.2.20 [`poolPingInterval`](#propdbpoolpinginterval)
-        - 3.2.21 [`poolTimeout`](#propdbpooltimeout)
-        - 3.2.22 [`prefetchRows`](#propdbprefetchrows)
-        - 3.2.23 [`Promise`](#propdbpromise)
-        - 3.2.24 [`queueMax`](#propdbqueuemax)
-        - 3.2.25 [`queueRequests`](#propdbqueuerequests)
-        - 3.2.26 [`queueTimeout`](#propdbqueuetimeout)
-        - 3.2.27 [`stmtCacheSize`](#propdbstmtcachesize)
-        - 3.2.28 [`version`](#propdbversion)
-        - 3.2.29 [`versionString`](#propdbversionstring)
-        - 3.2.30 [`versionSuffix`](#propdbversionsuffix)
+        - 3.2.5 [`errorOnConcurrentExecute`](#propdberrconexecute)
+        - 3.2.6 [`events`](#propdbevents)
+        - 3.2.7 [`extendedMetaData`](#propdbextendedmetadata)
+        - 3.2.8 [`externalAuth`](#propdbisexternalauth)
+        - 3.2.9 [`fetchArraySize`](#propdbfetcharraysize)
+        - 3.2.10 [`fetchAsBuffer`](#propdbfetchasbuffer)
+        - 3.2.11 [`fetchAsString`](#propdbfetchasstring)
+        - 3.2.12 [`lobPrefetchSize`](#propdblobprefetchsize)
+        - 3.2.13 [`maxRows`](#propdbmaxrows)
+        - 3.2.14 [`oracleClientVersion`](#propdboracleclientversion)
+        - 3.2.15 [`oracleClientVersionString`](#propdboracleclientversionstring)
+        - 3.2.16 [`outFormat`](#propdboutformat)
+        - 3.2.17 [`poolIncrement`](#propdbpoolincrement)
+        - 3.2.18 [`poolMax`](#propdbpoolmax)
+        - 3.2.19 [`poolMaxPerShard`](#propdbpoolmaxpershard)
+        - 3.2.20 [`poolMin`](#propdbpoolmin)
+        - 3.2.21 [`poolPingInterval`](#propdbpoolpinginterval)
+        - 3.2.22 [`poolTimeout`](#propdbpooltimeout)
+        - 3.2.23 [`prefetchRows`](#propdbprefetchrows)
+        - 3.2.24 [`Promise`](#propdbpromise)
+        - 3.2.25 [`queueMax`](#propdbqueuemax)
+        - 3.2.26 [`queueRequests`](#propdbqueuerequests)
+        - 3.2.27 [`queueTimeout`](#propdbqueuetimeout)
+        - 3.2.28 [`stmtCacheSize`](#propdbstmtcachesize)
+        - 3.2.29 [`version`](#propdbversion)
+        - 3.2.30 [`versionString`](#propdbversionstring)
+        - 3.2.31 [`versionSuffix`](#propdbversionsuffix)
     - 3.3 [Oracledb Methods](#oracledbmethods)
         - 3.3.1 [`createPool()`](#createpool)
             - 3.3.1.1 [`createPool()`: Parameters and Attributes](#createpoolpoolattrs)
@@ -1260,7 +1261,47 @@ const oracledb = require('oracledb');
 oracledb.edition = 'ed_2';
 ```
 
-#### <a name="propdbevents"></a> 3.2.5 `oracledb.events`
+#### <a name="propdberrconexecute"></a> 3.2.5 `oracledb.errorOnConcurrentExecute`
+
+```
+Boolean errorOnConcurrentExecute
+```
+
+This property can be set to throw an error if concurrent operations are
+attempted on a single connection.
+
+The default value for `errorOnConcurrentExecute` is *false*.
+
+Each Oracle connection can only interact with the database for one operation at
+a time.  Attempting to do more than one operation concurrently may be a sign of
+an incorrectly coded application, for example an `await` may be missing.
+Examples of operations that cannot be executed in parallel on a single
+connection include `connection.execute()`, `connection.executeMany()`,
+`connection.queryStream()`, `connection.getDbObjectClass()`,
+`connection.commit()`, `connection.close()`, [SODA](#sodaoverview) calls, and
+streaming from [Lobs](#lobclass).
+
+The value of this property does not affect using multiple connections.  These
+may all be in use concurrently, and each can be doing one operation.
+
+Leaving `errorOnConcurrentExecute` set to *false* is recommended for production
+applications.  This will avoid unexpected errors.  Some frameworks may execute
+concurrent statements on a connection by design.  Also some application modules
+may have the expectation that node-oracledb will handle any necessary
+connection usage serialization.
+
+For more discussion, see [Parallelism on a Connection](#parallelism).
+
+This property was added in node-oracledb 5.2.
+
+##### Example
+
+```javascript
+const oracledb = require('oracledb');
+oracledb.errorOnConcurrentExecute = false;
+```
+
+#### <a name="propdbevents"></a> 3.2.6 `oracledb.events`
 
 ```
 Boolean events
@@ -1290,7 +1331,7 @@ const oracledb = require('oracledb');
 oracledb.events = false;
 ```
 
-#### <a name="propdbextendedmetadata"></a> 3.2.6 `oracledb.extendedMetaData`
+#### <a name="propdbextendedmetadata"></a> 3.2.7 `oracledb.extendedMetaData`
 
 ```
 Boolean extendedMetaData
@@ -1312,7 +1353,7 @@ This property may be overridden in an [`execute()`](#executeoptions) call.
 
 This property was added in node-oracledb 1.10.
 
-#### <a name="propdbisexternalauth"></a> 3.2.7 `oracledb.externalAuth`
+#### <a name="propdbisexternalauth"></a> 3.2.8 `oracledb.externalAuth`
 
 ```
 Boolean externalAuth
@@ -1342,7 +1383,7 @@ const oracledb = require('oracledb');
 oracledb.externalAuth = false;
 ```
 
-#### <a name="propdbfetcharraysize"></a> 3.2.8 `oracledb.fetchArraySize`
+#### <a name="propdbfetcharraysize"></a> 3.2.9 `oracledb.fetchArraySize`
 
 ```
 Number fetchArraySize
@@ -1388,7 +1429,7 @@ const oracledb = require('oracledb');
 oracledb.fetchArraySize = 100;
 ```
 
-#### <a name="propdbfetchasbuffer"></a> 3.2.9 `oracledb.fetchAsBuffer`
+#### <a name="propdbfetchasbuffer"></a> 3.2.10 `oracledb.fetchAsBuffer`
 
 ```
 Array fetchAsBuffer
@@ -1415,7 +1456,7 @@ const oracledb = require('oracledb');
 oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 ```
 
-#### <a name="propdbfetchasstring"></a> 3.2.10 `oracledb.fetchAsString`
+#### <a name="propdbfetchasstring"></a> 3.2.11 `oracledb.fetchAsString`
 
 ```
 Array fetchAsString
@@ -1463,7 +1504,7 @@ const oracledb = require('oracledb');
 oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 ```
 
-#### <a name="propdblobprefetchsize"></a> 3.2.11 `oracledb.lobPrefetchSize`
+#### <a name="propdblobprefetchsize"></a> 3.2.12 `oracledb.lobPrefetchSize`
 
 ```
 Number lobPrefetchSize
@@ -1489,7 +1530,7 @@ const oracledb = require('oracledb');
 oracledb.lobPrefetchSize = 16384;
 ```
 
-#### <a name="propdbmaxrows"></a> 3.2.12 `oracledb.maxRows`
+#### <a name="propdbmaxrows"></a> 3.2.13 `oracledb.maxRows`
 
 ```
 Number maxRows
@@ -1531,7 +1572,7 @@ const oracledb = require('oracledb');
 oracledb.maxRows = 0;
 ```
 
-#### <a name="propdboracleclientversion"></a> 3.2.13 `oracledb.oracleClientVersion`
+#### <a name="propdboracleclientversion"></a> 3.2.14 `oracledb.oracleClientVersion`
 
 ```
 readonly Number oracleClientVersion
@@ -1554,7 +1595,7 @@ const oracledb = require('oracledb');
 console.log("Oracle client library version number is " + oracledb.oracleClientVersion);
 ```
 
-#### <a name="propdboracleclientversionstring"></a> 3.2.14 `oracledb.oracleClientVersionString`
+#### <a name="propdboracleclientversionstring"></a> 3.2.15 `oracledb.oracleClientVersionString`
 
 ```
 readonly String oracleClientVersionString
@@ -1576,7 +1617,7 @@ const oracledb = require('oracledb');
 console.log("Oracle client library version is " + oracledb.oracleClientVersionString);
 ```
 
-#### <a name="propdboutformat"></a> 3.2.15 `oracledb.outFormat`
+#### <a name="propdboutformat"></a> 3.2.16 `oracledb.outFormat`
 
 ```
 Number outFormat
@@ -1621,7 +1662,7 @@ const oracledb = require('oracledb');
 oracledb.outFormat = oracledb.OUT_FORMAT_ARRAY;
 ```
 
-#### <a name="propdbpoolincrement"></a> 3.2.16 `oracledb.poolIncrement`
+#### <a name="propdbpoolincrement"></a> 3.2.17 `oracledb.poolIncrement`
 
 ```
 Number poolIncrement
@@ -1641,7 +1682,7 @@ const oracledb = require('oracledb');
 oracledb.poolIncrement = 1;
 ```
 
-#### <a name="propdbpoolmax"></a> 3.2.17 `oracledb.poolMax`
+#### <a name="propdbpoolmax"></a> 3.2.18 `oracledb.poolMax`
 
 ```
 Number poolMax
@@ -1670,7 +1711,7 @@ const oracledb = require('oracledb');
 oracledb.poolMax = 4;
 ```
 
-#### <a name="propdbpoolmaxpershard"></a> 3.2.18 `oracledb.poolMaxPerShard`
+#### <a name="propdbpoolmaxpershard"></a> 3.2.19 `oracledb.poolMaxPerShard`
 
 ```
 Number poolMaxPerShard
@@ -1696,7 +1737,7 @@ const oracledb = require('oracledb');
 oracledb.poolMaxPerShard = 0;
 ```
 
-#### <a name="propdbpoolmin"></a> 3.2.19 `oracledb.poolMin`
+#### <a name="propdbpoolmin"></a> 3.2.20 `oracledb.poolMin`
 
 ```
 Number poolMin
@@ -1730,7 +1771,7 @@ const oracledb = require('oracledb');
 oracledb.poolMin = 0;
 ```
 
-#### <a name="propdbpoolpinginterval"></a> 3.2.20 `oracledb.poolPingInterval`
+#### <a name="propdbpoolpinginterval"></a> 3.2.21 `oracledb.poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -1768,7 +1809,7 @@ const oracledb = require('oracledb');
 oracledb.poolPingInterval = 60;     // seconds
 ```
 
-#### <a name="propdbpooltimeout"></a> 3.2.21 `oracledb.poolTimeout`
+#### <a name="propdbpooltimeout"></a> 3.2.22 `oracledb.poolTimeout`
 
 ```
 Number poolTimeout
@@ -1790,7 +1831,7 @@ const oracledb = require('oracledb');
 oracledb.poolTimeout = 60;
 ```
 
-#### <a name="propdbprefetchrows"></a> 3.2.22 `oracledb.prefetchRows`
+#### <a name="propdbprefetchrows"></a> 3.2.23 `oracledb.prefetchRows`
 
 ```
 Number prefetchRows
@@ -1830,7 +1871,7 @@ const oracledb = require('oracledb');
 oracledb.prefetchRows = 2;
 ```
 
-#### <a name="propdbpromise"></a> 3.2.23 `oracledb.Promise`
+#### <a name="propdbpromise"></a> 3.2.24 `oracledb.Promise`
 
 ```
 Promise Promise
@@ -1859,7 +1900,7 @@ Prior to node-oracledb 5, Promises could be completely disabled by setting:
 oracledb.Promise = null;
 ```
 
-#### <a name="propdbqueuemax"></a> 3.2.24 `oracledb.queueMax`
+#### <a name="propdbqueuemax"></a> 3.2.25 `oracledb.queueMax`
 
 ```
 Number queueMax
@@ -1887,13 +1928,13 @@ const oracledb = require('oracledb');
 oracledb.queueMax = 500;
 ```
 
-#### <a name="propdbqueuerequests"></a> 3.2.25 `oracledb.queueRequests`
+#### <a name="propdbqueuerequests"></a> 3.2.26 `oracledb.queueRequests`
 
 This property was removed in node-oracledb 3.0 and queuing was always enabled.
 In node-oracledb 5.0, set `queueMax` to 0 to disable queuing.  See [Connection
 Pool Queue](#connpoolqueue) for more information.
 
-#### <a name="propdbqueuetimeout"></a> 3.2.26 `oracledb.queueTimeout`
+#### <a name="propdbqueuetimeout"></a> 3.2.27 `oracledb.queueTimeout`
 
 ```
 Number queueTimeout
@@ -1918,7 +1959,7 @@ const oracledb = require('oracledb');
 oracledb.queueTimeout = 3000; // 3 seconds
 ```
 
-#### <a name="propdbstmtcachesize"></a> 3.2.27 `oracledb.stmtCacheSize`
+#### <a name="propdbstmtcachesize"></a> 3.2.28 `oracledb.stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -1945,7 +1986,7 @@ const oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.28 `oracledb.version`
+#### <a name="propdbversion"></a> 3.2.29 `oracledb.version`
 ```
 readonly Number version
 ```
@@ -1960,7 +2001,7 @@ const oracledb = require('oracledb');
 console.log("Driver version number is " + oracledb.version);
 ```
 
-#### <a name="propdbversionstring"></a> 3.2.29 `oracledb.versionString`
+#### <a name="propdbversionstring"></a> 3.2.30 `oracledb.versionString`
 ```
 readonly String versionString
 ```
@@ -1976,7 +2017,7 @@ const oracledb = require('oracledb');
 console.log("Driver version is " + oracledb.versionString);
 ```
 
-#### <a name="propdbversionsuffix"></a> 3.2.30 `oracledb.versionSuffix`
+#### <a name="propdbversionsuffix"></a> 3.2.31 `oracledb.versionSuffix`
 ```
 readonly String versionSuffix
 ```
@@ -8491,14 +8532,30 @@ number of worker threads may improve throughput and prevent [deadlocks][22].
 
 #### <a name="parallelism"></a> 15.2.1 Parallelism on a Connection
 
-Each connection can only execute one statement at a time.  Code will not run
-faster when parallel calls are used with a single connection since statements
-will still be executed sequentially and only one call will be able to use the
-connection at a time.  You may end up blocking many threads.
+Each connection to Oracle Database can only do one operation at a time.
+Examples of operations include `connection.execute()`,
+`connection.executeMany()`, `connection.queryStream()`,
+`connection.getDbObjectClass()`, `connection.commit()`, `connection.close()`,
+[SODA](#sodaoverview) calls, and streaming from [Lobs](#lobclass).  Multiple
+connections may be in concurrent use, but each connection can only do one thing
+at a time.  Code will not run faster when parallel database operations are
+attempted using a single connection because operations can only be executed
+sequentially by node-oracledb.
 
-Structure your code to avoid parallel operations on a single connection.  Do not
-use `Promise.all()` on a single connection.  Instead consider, for example,
-using a basic `for` loop and `async/await` to iterate through each action:
+From node-oracledb 5.2, node-oracledb function calls that use a single
+connection for concurrent database access will be queued in the JavaScript layer
+of node-oracledb.  In earlier node-oracledb versions, locking occurred in the
+Oracle Client libraries, which meant many threads could be blocked.
+
+It is recommended to structure your code to avoid parallel operations on a
+single connection.  For example, avoid using `Promise.all()` on a single
+connection.  Similarly, instead of using `async.parallel()` or `async.each()`
+which call each of their items in parallel, use `async.series()` or
+`async.eachSeries()`.  If you want to repeat a number of INSERT or UPDATE
+statements, then use [`connection.executeMany()`](#executemany).
+
+To rewrite code that uses `Promise.all()` you could, for example, use a basic
+`for` loop with `async/await` to iterate through each action:
 
 ```javascript
 async function myfunc() {
@@ -8517,25 +8574,25 @@ If you use ESlint for code validation, and it warns about [await in loops][179]
 for code that is using a single connection, then disable the `no-await-in-loop`
 rule for these cases.
 
-Similarly to the `Promise.all()` recommendation, instead of using
-`async.parallel()` or `async.each()` which call each of their items in parallel,
-use `async.series()` or `async.eachSeries()`.
+Another alternative rewrite for `Promise.all()` is to wrap the SQL statements in
+a single PL/SQL block.
 
-If you want to repeat a number of INSERT or UPDATE statements, then consider
-using [`connection.executeMany()`](#executemany).
+Note that using functions like `Promise.all()` to fetch rows from [nested cursor
+result sets](#nestedcursors) can result in inconsistent data.
 
-Using functions like `promise.all()` to fetch rows from [nested cursor result
-sets](#nestedcursors) can result in inconsistent data.
-
-When you use parallel calls on a single connection, queuing of each call is done
-in the C layer via a mutex.  However [`libuv`][21] is not aware that a connection can
-only do one thing at a time - it only knows when it has background threads
-available and so it sends off the work to be done.  If your application runs
-operations in parallel on a connection, you could use more than one background
-thread (perhaps all of them) and each could be waiting on the one before it to
-finish its "execute". Of course other users or transactions cannot use the
-threads at that time either.  When you use methods like `async.series` or
-`async.eachSeries()`, the queuing is instead done in the main JavaScript thread.
+During development, you can set
+[`oracledb.errorOnConcurrentExecute`](#propdberrconexecute) to *true* to help
+identify application code that executes concurrent database operations on a
+single connection.  Such uses may be logic errors such as missing `await`
+keywords that could lead to unexpected results.  When `errorOnConcurrentExecute`
+is set to *true* an error will be thrown so you can identify offending code.
+Setting `errorOnConcurrentExecute` is not recommended for production use in case
+it generates errors during normal operation.  For example third-party code such
+as a framework may naturally use `Promise.all()` in its generic code.  Or your
+application may be coded under the assumption that node-oracledb will do any
+necessary serialization.  Note the use of `errorOnConcurrentExecute` will not
+affect parallel use of multiple connections, which may all be in use
+concurrently, and each of which can be doing one operation.
 
 ### <a name="connpooling"></a> 15.3 Connection Pooling
 
@@ -10777,8 +10834,7 @@ nested cursor in a fetched row is returned as a [ResultSet](#resultsetclass)
 object.  You can recursively call [`resultSet.getRow()`](#getrow),
 [`resultSet.getRows()`](#getrows), or
 [`resultSet.toQueryStream()`](#toquerystream) on the ResultSet to fetch each
-nested cursor's data.  You should not concurrently fetch data from nested
-cursors in different data rows because this may give inconsistent results.
+nested cursor's data.
 
 For example:
 
@@ -10820,6 +10876,9 @@ console.dir(rows, {depth: null});
 Output is the same as the previous non-resultSet example.
 
 Each ResultSet should be closed when it is no longer needed.
+
+Warning:  You should not concurrently fetch data from nested
+cursors in different data rows because this may give inconsistent results.
 
 #### <a name="querymeta"></a> 16.1.6 Query Column Metadata
 

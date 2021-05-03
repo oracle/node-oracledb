@@ -289,7 +289,7 @@ static bool njsPool_getConnectionPostAsync(njsBaton *baton, napi_env env,
         return false;
 
     // store a reference to the pool on the connection
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
             &temp))
     NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "_pool", temp))
 

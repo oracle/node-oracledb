@@ -104,7 +104,7 @@ bool njsBaton_create(njsBaton *baton, napi_env env, napi_callback_info info,
     // save a reference to the calling object so that it will not be garbage
     // collected during the asynchronous call
     NJS_CHECK_NAPI(env, napi_create_reference(env, callingObj, 1,
-            &baton->jsCallingObj))
+            &baton->jsCallingObjRef))
 
     return true;
 }
@@ -187,7 +187,7 @@ void njsBaton_free(njsBaton *baton, napi_env env)
         baton->lob = NULL;
     }
     NJS_FREE_AND_CLEAR(baton->sodaCollNames);
-    if (!baton->jsBuffer) {
+    if (!baton->jsBufferRef) {
         NJS_FREE_AND_CLEAR(baton->bufferPtr);
     }
 
@@ -309,9 +309,9 @@ void njsBaton_free(njsBaton *baton, napi_env env)
     NJS_FREE_AND_CLEAR(baton->fetchAsBufferTypes);
 
     // remove references to JS objects
-    NJS_DELETE_REF_AND_CLEAR(baton->jsBuffer);
-    NJS_DELETE_REF_AND_CLEAR(baton->jsCallingObj);
-    NJS_DELETE_REF_AND_CLEAR(baton->jsSubscription);
+    NJS_DELETE_REF_AND_CLEAR(baton->jsBufferRef);
+    NJS_DELETE_REF_AND_CLEAR(baton->jsCallingObjRef);
+    NJS_DELETE_REF_AND_CLEAR(baton->jsSubscriptionRef);
     if (baton->asyncWork) {
         napi_delete_async_work(env, baton->asyncWork);
         baton->asyncWork = NULL;
@@ -792,7 +792,7 @@ bool njsBaton_getSubscription(njsBaton *baton, napi_env env, napi_value name,
     // otherwise, store a reference to the subscription object on the baton
     // to ensure that it does not go out of scope
     NJS_CHECK_NAPI(env, napi_create_reference(env, subscription, 1,
-            &baton->jsSubscription))
+            &baton->jsSubscriptionRef))
 
     return true;
 }
@@ -930,8 +930,8 @@ bool njsBaton_isDate(njsBaton *baton, napi_env env, napi_value value,
     napi_value isDateObj;
 
     if (!baton->jsIsDateObj) {
-        NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
-                &baton->jsIsDateObj))
+        NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+                baton->jsCallingObjRef, &baton->jsIsDateObj))
         NJS_CHECK_NAPI(env, napi_get_named_property(env, baton->jsIsDateObj,
                 "_isDate", &baton->jsIsDateMethod))
     }
@@ -1023,37 +1023,6 @@ void njsBaton_reportError(njsBaton *baton, napi_env env)
 
 
 //-----------------------------------------------------------------------------
-// njsBaton_setConstructors()
-//   Sets the constructors on the baton.
-//-----------------------------------------------------------------------------
-bool njsBaton_setConstructors(njsBaton *baton, napi_env env)
-{
-    napi_value global;
-
-    // acquire the Date constructor
-    NJS_CHECK_NAPI(env, napi_get_global(env, &global))
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, global, "Date",
-            &baton->jsDateConstructor))
-
-    // acquire the LOB constructor
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->oracleDb->jsLobConstructor, &baton->jsLobConstructor))
-
-    // acquire the result set constructor
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->oracleDb->jsResultSetConstructor,
-            &baton->jsResultSetConstructor))
-
-    // acquire the base database object constructor
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->oracleDb->jsBaseDbObjectConstructor,
-            &baton->jsBaseDbObjectConstructor))
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsBaton_setError()
 //   Set the error on the baton to the given error message. False is returned
 // as a convenience to the caller.
@@ -1085,4 +1054,41 @@ bool njsBaton_setErrorDPI(njsBaton *baton)
         baton->hasError = true;
     }
     return false;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsBaton_setJsValues()
+//   Sets the JavaScript values on the baton. These are a number of
+// constructors and also the JavaScript object that is "this" for the method
+// that is currently being executed.
+//-----------------------------------------------------------------------------
+bool njsBaton_setJsValues(njsBaton *baton, napi_env env)
+{
+    napi_value global;
+
+    // acquire the Date constructor
+    NJS_CHECK_NAPI(env, napi_get_global(env, &global))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, global, "Date",
+            &baton->jsDateConstructor))
+
+    // acquire the LOB constructor
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            baton->oracleDb->jsLobConstructor, &baton->jsLobConstructor))
+
+    // acquire the result set constructor
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            baton->oracleDb->jsResultSetConstructor,
+            &baton->jsResultSetConstructor))
+
+    // acquire the base database object constructor
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            baton->oracleDb->jsBaseDbObjectConstructor,
+            &baton->jsBaseDbObjectConstructor))
+
+    // acquire the value for the calling object reference
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
+            &baton->jsCallingObj))
+
+    return true;
 }

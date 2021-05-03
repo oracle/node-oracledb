@@ -729,7 +729,7 @@ bool njsSodaCollection_newFromBaton(njsBaton *baton, napi_env env,
     // store a copy of the database instance on the collection object to
     // ensure that the database object is not collected before the collection
     // object is
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
             &db))
     NJS_CHECK_NAPI(env, napi_set_named_property(env, *collObj, "_database",
             db))

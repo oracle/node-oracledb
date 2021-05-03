@@ -4,6 +4,13 @@
 
 **This release is under development**
 
+- Concurrent operations on a single connection are now queued in the JavaScript
+  layer, which can help reduce thread usage for applications that are unable to
+  do their own queuing.  A new
+  [`oracledb.errorOnConcurrentExecute`](https://oracle.github.io/node-oracledb/doc/api.html#propdberrconexecute)
+  property can be used during development to throw an error if concurrent
+  operations are attempted on any single connection.
+
 - Fixed connection pool statistic "min time in queue" calculation.
 
 - Enhanced

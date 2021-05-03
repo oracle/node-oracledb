@@ -546,7 +546,8 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
             }
             break;
         case DPI_NATIVE_TYPE_LOB:
-            return njsLob_new(baton->oracleDb, &buffer->lobs[pos], env, value);
+            return njsLob_new(baton->oracleDb, &buffer->lobs[pos], env,
+                    baton->jsCallingObj, value);
         case DPI_NATIVE_TYPE_STMT:
             if (dpiStmt_addRef(data->value.asStmt) < 0)
                 return njsBaton_setErrorDPI(baton);

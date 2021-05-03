@@ -510,7 +510,7 @@ bool njsDbObject_getSubClass(njsBaton *baton, dpiObjectType *objectTypeHandle,
             info.schemaLength, &args[0]))
     NJS_CHECK_NAPI(env, napi_create_string_utf8(env, info.name,
             info.nameLength, &args[1]))
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
             &callingObj))
     NJS_CHECK_NAPI(env, napi_get_named_property(env, callingObj,
             "_getDbObjectClassJS", &fn))
@@ -833,7 +833,11 @@ static bool njsDbObject_transformFromOracle(njsDbObject *obj, napi_env env,
                 return njsUtils_throwErrorDPI(env, obj->type->oracleDb);
             if (dpiLob_getSize(lobBuffer.handle, &lobBuffer.length) < 0)
                 return njsUtils_throwErrorDPI(env, obj->type->oracleDb);
-            if (!njsLob_new(obj->type->oracleDb, &lobBuffer, env, value))
+            NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+                    obj->type->jsDbObjectConstructor, &constructor))
+            NJS_CHECK_NAPI(env, napi_get_named_property(env, constructor,
+                    "_connection", &temp))
+            if (!njsLob_new(obj->type->oracleDb, &lobBuffer, env, temp, value))
                 return false;
             if (dpiLob_addRef(data->value.asLOB) < 0)
                 return njsUtils_throwErrorDPI(env, obj->type->oracleDb);

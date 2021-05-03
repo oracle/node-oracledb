@@ -372,8 +372,8 @@ static bool njsSodaDatabase_getCollectionNamesProcessArgs(njsBaton *baton,
 // njsSodaDatabase_createFromHandle()
 //   Creates a new SODA database object given the ODPI-C handle.
 //-----------------------------------------------------------------------------
-bool njsSodaDatabase_createFromHandle(napi_env env, njsConnection *conn,
-        dpiSodaDb *handle, napi_value *dbObj)
+bool njsSodaDatabase_createFromHandle(napi_env env, napi_value connObj,
+        njsConnection *conn, dpiSodaDb *handle, napi_value *dbObj)
 {
     njsSodaDatabase *db;
 
@@ -386,6 +386,12 @@ bool njsSodaDatabase_createFromHandle(napi_env env, njsConnection *conn,
     // perform some initializations
     db->handle = handle;
     db->oracleDb = conn->oracleDb;
+
+    // store a reference to the connection to permit serialization and to
+    // ensure that it is not garbage collected during the lifetime of the SODA
+    // database object
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *dbObj, "_connection",
+            connObj))
 
     return true;
 }

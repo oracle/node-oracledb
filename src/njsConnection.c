@@ -487,7 +487,11 @@ static bool njsConnection_createLobAsync(njsBaton *baton)
 static bool njsConnection_createLobPostAsync(njsBaton *baton, napi_env env,
         napi_value *result)
 {
-    return njsLob_new(baton->oracleDb, baton->lob, env, result);
+    napi_value connObj;
+
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
+            &connObj))
+    return njsLob_new(baton->oracleDb, baton->lob, env, connObj, result);
 }
 
 
@@ -604,8 +608,8 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
     const char *rowidValue;
     dpiRowid *rowid;
 
-    // create constructors used for various types that might be returned
-    if (!njsBaton_setConstructors(baton, env))
+    // set JavaScript values to simplify creation of returned objects
+    if (!njsBaton_setJsValues(baton, env))
         return false;
 
     // create result object
@@ -719,7 +723,7 @@ static bool njsConnection_executeProcessArgs(njsBaton *baton,
             (void**) &baton->fetchAsStringTypes,
             &baton->numFetchAsStringTypes))
         return false;
-    if (!njsBaton_setConstructors(baton, env))
+    if (!njsBaton_setJsValues(baton, env))
         return false;
 
     // get SQL from first argument
@@ -916,9 +920,10 @@ static bool njsConnection_executeManyPostAsync(njsBaton *baton, napi_env env,
 static bool njsConnection_executeManyProcessArgs(njsBaton *baton,
         napi_env env, napi_value *args)
 {
-    // setup defaults and define constructors for use in various checks
+    // setup defaults and set JavaScript values to simplify creation of
+    // returned objects
     baton->autoCommit = baton->oracleDb->autoCommit;
-    if (!njsBaton_setConstructors(baton, env))
+    if (!njsBaton_setJsValues(baton, env))
         return false;
 
     // get SQL from first argument
@@ -1679,11 +1684,11 @@ static bool njsConnection_getRowCounts(njsBaton *baton, napi_env env,
 static napi_value njsConnection_getSodaDatabase(napi_env env,
         napi_callback_info info)
 {
+    napi_value dbObj, connObj;
     njsConnection *conn;
     dpiSodaDb *dbHandle;
-    napi_value dbObj;
 
-    if (!njsUtils_validateArgs(env, info, 0, NULL, NULL,
+    if (!njsUtils_validateArgs(env, info, 0, NULL, &connObj,
             (njsBaseInstance**) &conn))
         return NULL;
     if (!conn->handle) {
@@ -1694,7 +1699,8 @@ static napi_value njsConnection_getSodaDatabase(napi_env env,
         njsUtils_throwErrorDPI(env, conn->oracleDb);
         return NULL;
     }
-    if (!njsSodaDatabase_createFromHandle(env, conn, dbHandle, &dbObj))
+    if (!njsSodaDatabase_createFromHandle(env, connObj, conn, dbHandle,
+            &dbObj))
         return NULL;
 
     return dbObj;
@@ -2433,8 +2439,8 @@ static bool njsConnection_scanExecuteBindUnit(njsBaton *baton,
     } else if (valueType == napi_string) {
 
         // first check to see if the name is already cached
-        NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObj,
-                &connObj))
+        NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+                baton->jsCallingObjRef, &connObj))
         NJS_CHECK_NAPI(env, napi_get_named_property(env, connObj,
                 "_dbObjectClasses", &dbObjectClasses))
         NJS_CHECK_NAPI(env, napi_get_property(env, dbObjectClasses, value,

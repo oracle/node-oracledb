@@ -411,7 +411,31 @@ describe('55. resultSet2.js', function() {
 
     }
 
-    it('55.6.1 concurrent operations on resultSet are not allowed', function(done) {
+    function fetchRowFromRS(rs, cb) {
+      rs.getRow(function(err, row) {
+        if (err) {
+          return cb(err);
+        } else {
+          if (row) {
+            return fetchRowFromRS(rs, cb);
+          } else {
+            rs.close(cb);
+          }
+        }
+      });
+    }
+
+    function resultSetClose(rs, cb) {
+      rs.close(function(err) {
+        if (err) {
+          return cb(err);
+        } else {
+          rs.close(cb);
+        }
+      });
+    }
+
+    it('55.6.1 concurrent operations on resultSet are not allowed (using getRows())', function(done) {
 
       var rset;
       async.series([
@@ -480,6 +504,78 @@ describe('55. resultSet2.js', function() {
             (err.message).should.startWith('NJS-017:');
             // NJS-017: concurrent operations on ResultSet are not allowed
 
+            cb();
+          });
+        }
+      ], done);
+
+    });
+
+    it('55.6.3 concurrent operations on resultSet are not allowed (using getRow())', function(done) {
+
+      var rset;
+      async.series([
+        function(cb) {
+          connection.execute(
+            "SELECT * FROM nodb_rs2_emp ORDER BY employees_id",
+            [],
+            { resultSet: true },
+            function(err, result) {
+              should.not.exist(err);
+              rset = result.resultSet;
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          async.parallel([
+            function(callback) {
+              fetchRowFromRS(rset, callback);
+            },
+            function(callback) {
+              fetchRowFromRS(rset, callback);
+            }
+          ],
+          function(err) {
+            should.exist(err);
+            (err.message).should.startWith('NJS-017:');
+            // NJS-017: concurrent operations on ResultSet are not allowed
+
+            cb();
+          });
+        }
+      ], done);
+
+    });
+
+    it('55.6.4 concurrently closing resultSet not allowed', function(done) {
+
+      var rset;
+      async.series([
+        function(cb) {
+          connection.execute(
+            "SELECT * FROM nodb_rs2_emp ORDER BY employees_id",
+            [],
+            { resultSet: true },
+            function(err, result) {
+              should.not.exist(err);
+              rset = result.resultSet;
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          async.parallel([
+            function(callback) {
+              resultSetClose(rset, callback);
+            },
+            function(callback) {
+              resultSetClose(rset, callback);
+            }
+          ],
+          function(err) {
+            should.exist(err);
+            (err.message).should.startWith('NJS-017:');
             cb();
           });
         }

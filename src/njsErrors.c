@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -87,6 +87,7 @@ static const char *njsErrorMessages[] = {
     "NJS-078: unsupported data type %u in JSON value", // errUnsupportedDataTypeInJson
     "NJS-079: cannot convert from JavaScript value to JSON value", // errConvertToJsonValue
     "NJS-080: only one of user and username can be used", //errDblUsername
+    "NJS-081: concurrent operations on a connection are disabled", //errConcurrentOps
 };
 
 
