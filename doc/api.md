@@ -16536,12 +16536,12 @@ SQL> ALTER SYSTEM SET CLIENT_RESULT_CACHE_SIZE = 64K SCOPE=SPFILE;
 SQL> STARTUP FORCE
 ```
 
-CRC can alternatively be configured in an [`oraaccess.xml`](#oraaccess) or
-[`sqlnet.ora`](#tnsadmin) file on the Node.js host, see [Client Configuration
-Parameters][182].
+Once CRC has been enabled in the database, the values used by the cache in
+Node.js can be tuned in an [`oraaccess.xml`](#oraaccess) file, see [Client
+Configuration Parameters][182].
 
-Tables can then be created, or altered, so repeated queries use CRC.  This
-allows existing applications to use CRC without needing modification.  For example:
+Tables can be created, or altered, so repeated queries use CRC.  This allows
+existing applications to use CRC without needing modification.  For example:
 
 ```sql
 SQL> CREATE TABLE cities (id NUMBER, name VARCHAR2(40)) RESULT_CACHE (MODE FORCE);
@@ -16552,6 +16552,41 @@ Alternatively, hints can be used in SQL statements.  For example:
 
 ```sql
 SELECT /*+ result_cache */ postal_code FROM locations
+```
+
+To verify that CRC is working, you can check the number of executions of your
+query from `V$SQLAREA` and compare it with an uncached query.  When CRC is
+enabled, the number of statement executions is reduced because the statement is
+not sent to the database unnecessarily.
+
+```javascript
+// Run some load
+const q = `SELECT postal_code FROM locations`;
+const qc = `SELECT /*+ RESULT_CACHE */ postal_code FROM locations`;
+for (let i = 0; i < 100; i++) {
+  result = await connection.execute(q);
+  result = await connection.execute(qc);
+}
+
+// Compare behaviors
+const m = `SELECT executions FROM v$sqlarea WHERE sql_text = :q1`;
+result = await systemconn.execute(m, [q]);
+console.log('No CRC:', result.rows[0][0], 'executions');
+result = await systemconn.execute(m, [qc]);
+console.log('CRC:', result.rows[0][0], 'executions');
+```
+
+When CRC is enabled, output will be like:
+
+```
+No CRC: 100 executions
+CRC: 1 executions
+```
+
+If CRC is not enabled, output will be like:
+```
+No CRC: 100 executions
+CRC: 100 executions
 ```
 
 ## <a name="bindtrace"></a> <a name="tracingsql"></a> 32. Tracing SQL and PL/SQL Statements
