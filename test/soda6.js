@@ -534,4 +534,118 @@ describe('174. soda6.js', () => {
     }
   }); // 174.12
 
+  it("174.13 hint(), basic case", async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_174_13");
+
+      let options = {hint: "MONITOR"};
+      for (let i = 0; i < t_contents.length; i++) {
+        let content = t_contents[i];
+        await collection.insertOneAndGet(content, options);
+      }
+
+      // Fetch back
+      await collection
+        .find()
+        .hint("MONITOR");
+
+    } catch (err) {
+      should.not.exist(err);
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        should.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch (err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); //174.13
+
+  it("174.14 Negative - hint() no parameter", async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_174_14");
+
+      let options = {hint: "MONITOR"};
+      for (let i = 0; i < t_contents.length; i++) {
+        let content = t_contents[i];
+        await collection.insertOneAndGet(content, options);
+      }
+
+      // Fetch back
+      await collection
+        .find()
+        .hint();
+
+    } catch (err) {
+      (err.message).should.startWith('NJS-009:');
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        should.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch (err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); //174.14
+
+  it("174.15 Negative - hint() invalid parameter type", async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_174_15");
+
+      let options = {hint: "MONITOR"};
+      for (let i = 0; i < t_contents.length; i++) {
+        let content = t_contents[i];
+        await collection.insertOneAndGet(content, options);
+      }
+
+      // Fetch back
+      await collection
+        .find()
+        .hint(1);
+
+    } catch (err) {
+      (err.message).should.startWith('NJS-005:');
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        should.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch (err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); //174.15
+
 });

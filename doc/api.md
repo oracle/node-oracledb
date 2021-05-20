@@ -348,11 +348,12 @@ For installation information, see the [Node-oracledb Installation Instructions][
                 - 10.2.4.1.1 [Non-terminal SodaOperation Methods](#sodaoperationclassnonterm)
                     - 10.2.4.1.1.1 [`fetchArraySize()`](#sodaoperationclassfetcharraysize)
                     - 10.2.4.1.1.2 [`filter()`](#sodaoperationclassfilter)
-                    - 10.2.4.1.1.3 [`key()`](#sodaoperationclasskey)
-                    - 10.2.4.1.1.4 [`keys()`](#sodaoperationclasskeys)
-                    - 10.2.4.1.1.5 [`limit()`](#sodaoperationclasslimit)
-                    - 10.2.4.1.1.6 [`skip()`](#sodaoperationclassskip)
-                    - 10.2.4.1.1.7 [`version()`](#sodaoperationclassversion)
+                    - 10.2.4.1.1.3 [`hint()`](#sodaoperationclasshint)
+                    - 10.2.4.1.1.4 [`key()`](#sodaoperationclasskey)
+                    - 10.2.4.1.1.5 [`keys()`](#sodaoperationclasskeys)
+                    - 10.2.4.1.1.6 [`limit()`](#sodaoperationclasslimit)
+                    - 10.2.4.1.1.7 [`skip()`](#sodaoperationclassskip)
+                    - 10.2.4.1.1.8 [`version()`](#sodaoperationclassversion)
                 - 10.2.4.1.2 [Terminal SodaOperation Methods](#sodaoperationclassterm)
                     - 10.2.4.1.2.1 [`count()`](#sodaoperationclasscount)
                     - 10.2.4.1.2.2 [`getCursor()`](#sodaoperationclassgetcursor)
@@ -6446,7 +6447,27 @@ JSON Documents](#sodaqbesearches)
 
 This method was added in node-oracledb 3.0.
 
-###### <a name="sodaoperationclasskey"></a> 10.2.4.1.1.3 `sodaOperation.key()`
+###### <a name="sodaoperationclasshint"></a> 10.2.4.1.1.3 `sodaOperation.hint()`
+
+##### Prototype
+
+```
+hint(String hint)
+```
+
+##### Description
+
+The `hint()` value can be used to pass one or more Oracle hints to [terminal
+SodaOperation Methods](#sodaoperationclassterm).  It is string in the same
+format as [SQL hints][196] but without any comment characters, for example
+`"MONITOR"`.  While you could use this to pass any SQL hint, the hints
+`"MONITOR"` (turn on monitoring) and `"NO_MONITOR"` (turn off monitoring) are
+the most useful.  Use of this function requires Oracle Client 21.3 or higher (or
+Oracle Client 19 from 19.11).
+
+This method was added in node-oracledb 5.2.
+
+###### <a name="sodaoperationclasskey"></a> 10.2.4.1.1.4 `sodaOperation.key()`
 
 ##### Prototype
 
@@ -6464,7 +6485,7 @@ SODA document keys are unique.
 
 This method was added in node-oracledb 3.0.
 
-###### <a name="sodaoperationclasskeys"></a> 10.2.4.1.1.4 `sodaOperation.keys()`
+###### <a name="sodaoperationclasskeys"></a> 10.2.4.1.1.5 `sodaOperation.keys()`
 
 ##### Prototype
 
@@ -6484,7 +6505,7 @@ A maximum of 1000 keys can be used.
 
 This method was added in node-oracledb 3.0.
 
-###### <a name="sodaoperationclasslimit"></a> 10.2.4.1.1.5 `sodaOperation.limit()`
+###### <a name="sodaoperationclasslimit"></a> 10.2.4.1.1.6 `sodaOperation.limit()`
 
 ##### Prototype
 
@@ -6506,7 +6527,7 @@ The `limit()` method cannot be used in conjunction with
 
 This method was added in node-oracledb 3.0.
 
-###### <a name="sodaoperationclassskip"></a> 10.2.4.1.1.6 `sodaOperation.skip()`
+###### <a name="sodaoperationclassskip"></a> 10.2.4.1.1.7 `sodaOperation.skip()`
 
 ##### Prototype
 
@@ -6529,7 +6550,7 @@ The `skip()` method only applies to SodaOperation read operations like
 
 This method was added in node-oracledb 3.0.
 
-###### <a name="sodaoperationclassversion"></a> 10.2.4.1.1.7 `sodaOperation.version()`
+###### <a name="sodaoperationclassversion"></a> 10.2.4.1.1.8 `sodaOperation.version()`
 
 ##### Prototype
 
@@ -7004,14 +7025,14 @@ This method was added in node-oracledb 4.0.  It requires Oracle Client 18.5 or h
 
 Callback
 ```
-insertManyAndGet(Array newDocumentContentArray, function(Error error, Array SodaDocuments){});
-insertManyAndGet(Array newSodaDocumentArray, function(Error error, Array SodaDocuments){});
+insertManyAndGet(Array newDocumentContentArray [, Object options ], function(Error error, Array SodaDocuments){});
+insertManyAndGet(Array newSodaDocumentArray [, Object options ], function(Error error, Array SodaDocuments){});
 ```
 
 Promise
 ```
-promise = insertManyAndGet(Array newDocumentContentArray);
-promise = insertManyAndGet(Array newSodaDocumentArray);
+promise = insertManyAndGet(Array newDocumentContentArray [, Object options ]);
+promise = insertManyAndGet(Array newSodaDocumentArray [, Object options ]);
 ```
 
 ##### Description
@@ -7022,9 +7043,18 @@ keys (in default collections), can be found.  Content itself is not returned for
 performance reasons.  When inserting multiple documents, using
 `insertManyAndGet()` is recommended in preference to `insertOneAndGet()`.
 
+The `options` object can have one string property `hint`.  The hints are strings
+without SQL comment characters, for example `{ hint: "MONITOR" }`.  While you
+could use this to pass any [SQL hint][196], the hints `"MONITOR"` (turn on
+monitoring) and `"NO_MONITOR"` (turn off monitoring) are the most useful.  Use
+of the `hint` property requires Oracle Client 21.3 or higher (or Oracle Client
+19 from 19.11).
+
 This method is in Preview status and should not be used in production.
 
 This method was added in node-oracledb 4.0.  It requires Oracle Client 18.5 or higher.
+
+This method accepts an options parameter from node-oracledb 5.2 onwards.
 
 #### <a name="sodacollinsertone"></a> 10.2.8 `sodaCollection.insertOne()`
 
@@ -7112,14 +7142,14 @@ Callback function parameter | Description
 
 Callback
 ```
-insertOneAndGet(Object newDocumentContent, function(Error error, SodaDocument document){});
-insertOneAndGet(SodaDocument newSodaDocument, function(Error error, SodaDocument document){});
+insertOneAndGet(Object newDocumentContent [, Object options ], function(Error error, SodaDocument document){});
+insertOneAndGet(SodaDocument newSodaDocument [, Object options ], function(Error error, SodaDocument document){});
 ```
 
 Promise
 ```
-promise = insertOneAndGet(Object newDocumentContent);
-promise = insertOneAndGet(SodaDocument newSodaDocument);
+promise = insertOneAndGet(Object newDocumentContent [, Object options ]);
+promise = insertOneAndGet(SodaDocument newSodaDocument [, Object options ]);
 ```
 
 ##### Description
@@ -7134,11 +7164,19 @@ If you want to insert the document again, use the original `newDocumentContent`
 or `newSodaDocument`.  Alternatively construct a new object from the returned
 document and add content.
 
+The `options` object can have one string property `hint`.  The hints are strings
+without SQL comment characters, for example `{ hint: "MONITOR" }`.  While you
+could use this to pass any [SQL hint][196], the hints `"MONITOR"` (turn on
+monitoring) and `"NO_MONITOR"` (turn off monitoring) are the most useful.  Use
+of the `hint` property requires Oracle Client 21.3 or higher (or Oracle Client
+19 from 19.11).
+
 If [`oracledb.autoCommit`](#propdbisautocommit) is *true*, and
 `insertOneAndGet()` succeeds, then any open transaction on the
 connection is committed.
 
-This method was added in node-oracledb 3.0.
+This method was added in node-oracledb 3.0.  This method accepts an options
+parameter from node-oracledb 5.2 onwards.
 
 ##### <a name="sodacollinsertoneandgetparams"></a> 10.2.9.1 `insertOneAndGet()`: Parameters
 
@@ -7202,12 +7240,12 @@ later, and Oracle Database 18.3 or later.
 
 Callback
 ```
-saveAndGet(SodaDocument newSodaDocument, function(Error error, SodaDocument document){});
+saveAndGet(SodaDocument newSodaDocument [, Object options ], function(Error error, SodaDocument document){});
 ```
 
 Promise
 ```
-promise = saveAndGet(SodaDocument newSodaDocument);
+promise = saveAndGet(SodaDocument newSodaDocument [, Object options ]);
 ```
 
 ##### Description
@@ -7223,8 +7261,17 @@ why `saveAndGet()` accepts only a [SodaDocument](#sodadocumentclass), unlike
 keys, then the behavior is exactly the same as
 `sodaCollection.insertOneAndGet()`.
 
+The `options` object can have one string property `hint`.  The hints are strings
+without SQL comment characters, for example `{ hint: "MONITOR" }`.  While you
+could use this to pass any [SQL hint][196], the hints `"MONITOR"` (turn on
+monitoring) and `"NO_MONITOR"` (turn off monitoring) are the most useful.  Use
+of the `hint` property requires Oracle Client 21.3 or higher (or Oracle Client
+19 from 19.11).
+
 This method was added in node-oracledb 5.0.  It requires Oracle Client 19.9 or
 later, and Oracle Database 18.3 or later.
+
+This method accepts an options parameter from node-oracledb 5.2 onwards.
 
 #### <a name="sodacolltruncate"></a> 10.2.12 `sodaCollection.truncate()`
 
@@ -17167,3 +17214,4 @@ can be asked at [AskTom][158].
 [193]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2DC05D71-3D62-4A14-855F-76E054032494
 [194]: https://blogs.oracle.com/jsondb/osonformat
 [195]: https://www.oracle.com/database/technologies/faq-nls-lang.html
+[196]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C558F7CF-446E-4078-B045-0B3BB026CB3C

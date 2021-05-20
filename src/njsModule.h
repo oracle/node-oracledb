@@ -379,6 +379,8 @@ struct njsBaton {
     size_t filterLength;
     char *version;
     size_t versionLength;
+    char *hint;
+    size_t hintLength;
     char *pfile;                             // for DB startup
     size_t pfileLength;
 

@@ -4301,6 +4301,9 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     174.10 Negative - keys() no parameter
     174.11 Negative - keys(null)
     174.12 try to query documents with nonexistent keys
+    174.13 hint(), basic case
+    174.14 Negative - no parameter
+    174.15 Negative - invalid parameter type
 
   175. soda7.js
     175.1 count(), basic case
@@ -4341,8 +4344,10 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     178.2 insertMany() with newSodaDocumentContentArray
     178.3 insertManyAndGet() with newDocumentArray
     178.4 insertManyAndGet() with newDocumentContentArray
-    174.5 Negative - insertMany() with an empty array
-    174.6 Negative - insertManyAndGet() with an empty array
+    178.5 Negative - insertMany() with an empty array
+    178.6 Negative - insertManyAndGet() with an empty array
+    178.7 insertManyAndGet() with hint option
+    178.8 Negative - insertManyAndGet() with invalid options parameter
 
 179. soda11.js
    179.1 create collection with metadata
@@ -5100,3 +5105,9 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
        256.1.1 property set to false
        256.1.2 property set to true
        256.1.3 break() not constrained by queue
+
+257. sodahint.js
+    257.1 insertOneAndGet() with hint option
+    257.2 Negative - insertOneAndGet() with invalid options parameter
+    257.3 saveAndGet() with hint option
+    257.4 Negative - saveAndGet() with invalid options parameter

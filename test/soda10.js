@@ -194,7 +194,7 @@ describe('178. soda10.js', () => {
     }
   }); // 178.4
 
-  it('174.5 Negative - insertMany() with an empty array', async () => {
+  it('178.5 Negative - insertMany() with an empty array', async () => {
     try {
       const COLL = "soda_test_178_5";
       const collection = await soda.createCollection(COLL);
@@ -213,9 +213,9 @@ describe('178. soda10.js', () => {
     } catch (err) {
       should.not.exist(err);
     }
-  }); // 174.5
+  }); // 178.5
 
-  it('174.6 Negative - insertManyAndGet() with an empty array', async () => {
+  it('178.6 Negative - insertManyAndGet() with an empty array', async () => {
     try {
       const COLL = "soda_test_178_6";
       const collection = await soda.createCollection(COLL);
@@ -234,6 +234,62 @@ describe('178. soda10.js', () => {
     } catch (err) {
       should.not.exist(err);
     }
-  }); // 174.6
+  }); // 178.6
+
+  it('178.7 insertManyAndGet() with hint option', async () => {
+    const COLL = "soda_test_178_7";
+    const collection = await soda.createCollection(COLL);
+
+    let inDocuments = [];
+    for (let i = 0; i < inContents.length; i++) {
+      inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
+    }
+
+    let options = {hint: "MONITOR"};
+    let middleDocuments = await collection.insertManyAndGet(inDocuments, options);
+    let middleContents = [];
+    for (let i = 0; i < middleDocuments.length; i++) {
+      middleContents[i] = middleDocuments[i].getContent();
+      should.exist(middleDocuments[i].key);
+    }
+    should.deepEqual(middleContents, [null, null, null, null]);
+
+    // Fetch back
+    let outDocuments = await collection.find().hint("MONITOR").getDocuments();
+    let outContents = [];
+    for (let i = 0; i < outDocuments.length; i++) {
+      outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
+    }
+
+    should.deepEqual(outContents, inContents);
+
+    await conn.commit();
+
+    let res = await collection.drop();
+    should.strictEqual(res.dropped, true);
+  }); // 178.7
+
+  it('178.8 Negative - insertManyAndGet() with invalid options parameter', async () => {
+    const COLL = "soda_test_178_8";
+    const collection = await soda.createCollection(COLL);
+
+    let inDocuments = [];
+    for (let i = 0; i < inContents.length; i++) {
+      inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
+    }
+
+    let options = 3;
+    await testsUtil.assertThrowsAsync(
+      async () => {
+        await collection.insertManyAndGet(inDocuments, options);
+      },
+      /NJS-005/
+    );
+
+    await conn.commit();
+
+    let res = await collection.drop();
+    should.strictEqual(res.dropped, true);
+  }); // 178.8
 
 });

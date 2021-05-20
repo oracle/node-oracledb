@@ -1,4 +1,4 @@
-// Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -474,6 +474,9 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
     if (!njsBaton_getStringArrayFromArg(baton, env, args, 0, "keys",
             &baton->numKeys, &baton->keys, &baton->keysLengths, NULL))
         return false;
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "hint",
+            &baton->hint, &baton->hintLength, NULL))
+        return false;
 
     // populate SODDA operations options structure
     baton->sodaOperOptions->filter = baton->filter;
@@ -485,6 +488,8 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
     baton->sodaOperOptions->numKeys = baton->numKeys;
     baton->sodaOperOptions->keys = (const char**) baton->keys;
     baton->sodaOperOptions->keyLengths = baton->keysLengths;
+    baton->sodaOperOptions->hint = baton->hint;
+    baton->sodaOperOptions->hintLength = (uint32_t) baton->hintLength;
 
     return true;
 }

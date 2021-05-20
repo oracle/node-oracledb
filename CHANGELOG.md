@@ -53,6 +53,13 @@
       version 21.3 (or later).  It is also available in Oracle Client 19 from
       19.11 onwards.
 
+    - Added a SODA
+      [`hint()`](https://oracle.github.io/node-oracledb/doc/api.html#sodaoperationclasshint)
+      SodaOperation method and equivalent hint option to SODA
+      `sodaCollection.insertManyAndGet()`, `sodaCollection.insertOneAndGet()`,
+      and `sodaCollection.saveAndGet()` to allow monitoring and passing hints to
+      SODA.
+
 - Fixed crashes seen with Worker threads ([ODPI-C
   change](https://github.com/oracle/odpi/commit/09da0065409702cc28ba622951ca999a6b77d0e9)).
 
