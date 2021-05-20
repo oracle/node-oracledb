@@ -55,12 +55,13 @@ The [*node-oracledb*][4] add-on for Node.js powers high performance Oracle Datab
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
-This node-oracledb release has been tested with Node.js 10, 12 and 14 on 64-bit
-Oracle Linux (releases 6, 7 and 8), Windows and macOS (Intel x86).  Note Node.js 10.16, or
-later is required.  The add-on can also build on some 32-bit Linux, 32-bit
-Windows, Solaris and AIX environments, but these architectures have not been
-fully tested.  Older versions of node-oracledb may work with older versions of
-Node.js.
+This node-oracledb release has been tested with Node.js 12, 14 and 16 on 64-bit
+Oracle Linux (releases 7 and 8), Windows, and macOS (Intel x86).  The add-on can
+also build on some 32-bit Linux, 32-bit Windows, Solaris and AIX environments,
+but these architectures have not been fully tested.  This version of
+node-oracledb may work with older Node.js versions if they are [Node-API][53]
+version 4 compatible.  Older versions of node-oracledb may also work with older
+versions of Node.js.
 
 Node-oracledb requires Oracle Client libraries version 11.2 or later, and
 can connect to Oracle Database 9.2 or later, depending on the Oracle Client library
@@ -1493,7 +1494,7 @@ from GitHub.
 - Run: `npm run buildbinary`
 
   Ignore errors about `git`, which is used to record some basic metadata when
-  this command is run in git clone.
+  this command is run in a git clone.
 
 - Optionally run the above commands on other architectures and copy the
   resulting `package/Staging/*` files to your local `package/Staging` directory.
