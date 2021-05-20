@@ -6371,7 +6371,7 @@ See [Simple Oracle Document Access (SODA)](#sodaoverview) for more examples.
 
 ##### <a name="sodaoperationclass"></a> 10.2.4.1 SodaOperation Class
 
-You can chain together SodaOperation methods, to specify read or write
+You can chain together SodaOperation methods to specify read or write
 operations against a collection.
 
 Non-terminal SodaOperation methods return the same object on which
@@ -7044,15 +7044,6 @@ promise = insertOne(SodaDocument newSodaDocument);
 Inserts a given document to the collection.  The input document can be
 either a JavaScript object representing the data content, or it can be
 an existing [SodaDocument](#sodadocumentclass).
-
-Note SodaDocuments returned from
-[`sodaCollection.insertOneAndGet()`](#sodacollinsertoneandget),
-[`sodaOperation.replaceOneAndGet()`](#sodaoperationclassreplaceoneandget), and
-[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) cannot be
-passed to SODA insert methods, since they do not contain any document content.
-Instead, create a JavaScript object using the desired attribute values, or use
-[`sodaDatabase.createDocument()`](#sodadbcreatedocument), or use a SodaDocument
-returned by a [`sodaCollection.find()`](#sodacollfind) query.
 
 If [`oracledb.autoCommit`](#propdbisautocommit) is *true*, and
 `insertOne()` succeeds, then the new document and any open transaction
@@ -15144,7 +15135,8 @@ SODA internally uses a SQL schema to store documents but you do not need to know
 SQL or how the documents are stored. However, optional access via SQL does allow
 use of advanced Oracle Database functionality such as analytics for reporting.
 Applications that access a mixture of SODA objects and relational objects (or
-access SODA objects via SQL) are supported.
+access SODA objects via SQL) are supported.  Because SODA APIs internally use
+SQL, tuning the [Statement Cache](#stmtcache) can be beneficial.
 
 Oracle SODA implementations are also available in [Python][106], [Java][105],
 [PL/SQL][104], [Oracle Call Interface][107] and via [REST][191]. The [Simple
@@ -15370,6 +15362,8 @@ information.
 For many users, passing your document content directly to the
 [`insertOne()`](#sodacollinsertone),
 [`insertOneAndGet()`](#sodacollinsertoneandget),
+[`save()`](#sodacollsave),
+[`saveAndGet()`](#sodacollsaveandget),
 [`replaceOne()`](#sodaoperationclassreplaceone),
 [`replaceOneAndGet()`](#sodaoperationclassreplaceoneandget),
 [`insertMany()`](#sodacollinsertmany), or
@@ -15511,23 +15505,29 @@ Other examples of chained read and write operations include:
     const documents = await coll.find().fetchArraySize(500).getDocuments();
     ```
 
-
 The [`sodaCollection.find()`](#sodacollfind) operators that return documents
 produce complete SodaDocument objects that can be used for reading document
 content and attributes such as the key.  They can also be used for passing to
 methods like [`sodaCollection.insertOne()`](#sodacollinsertone),
 [`sodaCollection.insertOneAndGet()`](#sodacollinsertoneandget),
-[`sodaOperation.replaceOne()`](#sodaoperationclassreplaceone),
-[`sodaOperation.replaceOneAndGet()`](#sodaoperationclassreplaceoneandget),
-[`sodaCollection.insertMany()`](#sodacollinsertmany), and
+[`sodaCollection.save()`](#sodacollsave),
+[`sodaCollection.saveAndGet()`](#sodacollsaveandget),
+[`sodaCollection.insertMany()`](#sodacollinsertmany),
 [`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget).
+[`sodaOperation.replaceOne()`](#sodaoperationclassreplaceone), and
+[`sodaOperation.replaceOneAndGet()`](#sodaoperationclassreplaceoneandget).
 
 Note that for efficiency, the SodaDocuments returned from
 [`sodaCollection.insertOneAndGet()`](#sodacollinsertoneandget),
+[`sodaCollection.saveAndGet()`](#sodacollsaveandget),
 [`sodaOperation.replaceOneAndGet()`](#sodaoperationclassreplaceoneandget), and
-[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) do not contain
-document content.  These SodaDocuments are useful for getting other document
-components such as the key and version.
+[`sodaCollection.insertManyAndGet()`](#sodacollinsertmanyandget) cannot be
+passed to SODA insert methods, since they do not contain any document content.
+These SodaDocuments are useful for getting other document components such as the
+key and version.  If you need a complete SodaDocument, then create a JavaScript
+object using the desired attribute values, or use
+[`sodaDatabase.createDocument()`](#sodadbcreatedocument), or use a SodaDocument
+returned by a [`sodaCollection.find()`](#sodacollfind) query.
 
 ### <a name="sodaqbesearches"></a> 29.4 SODA Query-by-Example Searches for JSON Documents
 
@@ -16507,11 +16507,14 @@ With Oracle Database 12c, or later, the statement cache size can be
 automatically tuned with the [Oracle Client Configuration](#oraaccess)
 `oraaccess.xml` file.
 
-To manually tune the statement cache size, monitor general application
-load and the [Automatic Workload Repository][62] (AWR) "bytes sent via SQL*Net to client" values.  The
-latter statistic should benefit from not shipping statement metadata
-to node-oracledb.  Adjust the statement cache size to your
+To manually tune the statement cache size, monitor general application load and
+the [Automatic Workload Repository][62] (AWR) "bytes sent via SQL*Net to
+client" values.  The latter statistic should benefit from not shipping
+statement metadata to node-oracledb.  Adjust the statement cache size to your
 satisfaction.
+
+[SODA](#sodaoverview) internally makes SQL calls, so tuning the statement cache
+is also beneficial for SODA applications.
 
 ### <a name="clientresultcache"></a> 31.4 Client Result Cache
 
