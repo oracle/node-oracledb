@@ -46,6 +46,17 @@ const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 const httpPort = 7000;
 
+// On Windows and macOS, you can specify the directory containing the Oracle
+// Client Libraries at runtime, or before Node.js starts.  On other platforms
+// the system library search path must always be set before Node.js is started.
+// See the node-oracledb installation documentation.
+// If the search path is not correct, you will get a DPI-1047 error.
+if (process.platform === 'win32') { // Windows
+  oracledb.initOracleClient({ libDir: 'C:\\oracle\\instantclient_19_11' });
+} else if (process.platform === 'darwin') { // macOS
+  oracledb.initOracleClient({ libDir: process.env.HOME + '/Downloads/instantclient_19_8' });
+}
+
 // initSession() will be invoked internally when each brand new pooled
 // connection is first used.  Its callback function 'cb' should be
 // invoked only when all desired session state has been set.

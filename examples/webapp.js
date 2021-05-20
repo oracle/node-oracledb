@@ -36,26 +36,29 @@
  *
  *****************************************************************************/
 
-// On Windows and macOS, you can specify the directory containing the Oracle
-// Client Libraries at runtime, or before Node.js starts.  On other platforms
-// the system library search path must always be set before Node.js is started.
-// See the node-oracledb installation documentation.
-// If the search path is not correct, you will get a DPI-1047 error.
-//
-// oracledb.initOracleClient({ libDir: 'C:\\instantclient_19_8' });                            // Windows
-// oracledb.initOracleClient({ libDir: '/Users/your_username/Downloads/instantclient_19_8' }); // macOS
-
 // If you increase poolMax, you must increase UV_THREADPOOL_SIZE before Node.js
 // starts its thread pool.  If you set UV_THREADPOOL_SIZE too late, the value is
 // ignored and the default size of 4 is used.
+// process.env.UV_THREADPOOL_SIZE = 10;   // set threadpool size to 10
+//
 // Note on Windows you must set the UV_THREADPOOL_SIZE environment variable before
 // running your application.
-// process.env.UV_THREADPOOL_SIZE = 4;
 
 const http = require('http');
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 const demoSetup = require('./demosetup.js');
+
+// On Windows and macOS, you can specify the directory containing the Oracle
+// Client Libraries at runtime, or before Node.js starts.  On other platforms
+// the system library search path must always be set before Node.js is started.
+// See the node-oracledb installation documentation.
+// If the search path is not correct, you will get a DPI-1047 error.
+if (process.platform === 'win32') { // Windows
+  oracledb.initOracleClient({ libDir: 'C:\\oracle\\instantclient_19_11' });
+} else if (process.platform === 'darwin') { // macOS
+  oracledb.initOracleClient({ libDir: process.env.HOME + '/Downloads/instantclient_19_8' });
+}
 
 const httpPort = 7000;
 
