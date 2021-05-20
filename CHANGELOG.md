@@ -23,6 +23,15 @@
   property can be used during development to throw an error if concurrent
   operations are attempted on any single connection.
 
+- Enhanced dead connection detection.  If an Oracle Database error indicates
+  that a connection is no longer usable, the error `DPI-1080: connection was
+  closed by ORA-%d` is now returned.  The `%d` will be the Oracle error causing
+  the connection to be closed.  Using the connection after this will give
+  `DPI-1010: not connected`.  This behavior also applies for
+  [`oracle.callTimeout`](https://oracle.github.io/node-oracledb/doc/api.html#propconncalltimeout)
+  errors that result in an unusable connection. ([ODPI-C
+  change](https://github.com/oracle/odpi/commit/072739355b8b9d5a4bba3583a79ed53deb15907e)).
+
 - Enhanced
   [`getRows()`](https://oracle.github.io/node-oracledb/doc/api.html#getrows) to
   be able to return all rows in one call.

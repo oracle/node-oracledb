@@ -10171,10 +10171,10 @@ internal connection state.  The cleanup is allowed to take another
 If the cleanup was successful, a *DPI-1067* error will be returned and
 the application can continue to use the connection.
 
-For small values of `callTimeout`, the connection cleanup may not
-complete successfully within the additional `callTimeout` period.  In
-this case an *ORA-3114* is returned and the connection will no longer
-be usable.  The application should then close the connection.
+For small values of `callTimeout`, the connection cleanup may not complete
+successfully within the additional `callTimeout` period.  In this case a
+*DPI-1080* error is returned and the connection will no longer be usable.  The
+application should then close the connection.
 
 ### <a name="connectionadb"></a> 15.10 Connecting to Oracle Autonomous Database
 
