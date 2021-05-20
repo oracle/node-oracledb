@@ -898,6 +898,66 @@ describe('2. pool.js', function() {
         });
     });
 
+    it('2.8.6 request queue never terminate for queueTimeout set to 0', function(done) {
+      oracledb.createPool(
+        {
+          user              : dbConfig.user,
+          password          : dbConfig.password,
+          connectString     : dbConfig.connectString,
+          poolMin           : 0,
+          poolMax           : 1,
+          poolIncrement     : 1,
+          poolTimeout       : 1,
+          queueTimeout      : 0 // 0 seconds
+        },
+        function(err, pool) {
+          should.not.exist(err);
+
+          async.parallel(
+            [
+              function(cb) {
+                pool.getConnection(function(err, conn) {
+                  should.not.exist(err);
+
+                  conn.execute(getBlockingSql(10), function(err) { // This will block for 10 sec
+                    should.not.exist(err);
+
+                    conn.release(function(err) {
+                      should.not.exist(err);
+                      cb();
+                    });
+                  });
+                });
+              },
+              function(cb) {
+                // using setTimeout to help ensure this gets to the db last
+                setTimeout(function() {
+                // queueTimeout is set to 0, but even after waiting for 10 sec
+                // or more in queue, it should get a connection
+                  pool.getConnection(function(err, conn) {
+                    should.not.exist(err);
+                    should.exist(conn);
+                    conn.release(function(err) {
+                      should.not.exist(err);
+
+                      cb();
+                    });
+                  });
+                }, 100);
+              }
+            ],
+            function(err) {
+              should.not.exist(err);
+              pool.close(function(err) {
+                should.not.exist(err);
+                done();
+              });
+            }
+          );
+        }
+      );
+    });
+
   });
 
   describe('2.9 _enableStats & _logStats functionality', function() {
