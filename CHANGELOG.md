@@ -4,14 +4,23 @@
 
 **This release is under development**
 
+- Connection pool changes:
+
+    - Fixed connection pool statistic "min time in queue" calculation.
+
+    - Fixed the statement cache size set for the initial `poolMin` connections
+      created by `oracledb.createPool()`.
+
+    - Fixed `queueTimeout` of 0 to allow pool connection requests to be queued
+      indefinitely.  See [Issue
+      1338](https://github.com/oracle/node-oracledb/issues/1338).
+
 - Concurrent operations on a single connection are now queued in the JavaScript
   layer, which can help reduce thread usage for applications that are unable to
   do their own queuing.  A new
   [`oracledb.errorOnConcurrentExecute`](https://oracle.github.io/node-oracledb/doc/api.html#propdberrconexecute)
   property can be used during development to throw an error if concurrent
   operations are attempted on any single connection.
-
-- Fixed connection pool statistic "min time in queue" calculation.
 
 - Enhanced
   [`getRows()`](https://oracle.github.io/node-oracledb/doc/api.html#getrows) to
@@ -20,13 +29,6 @@
 - Added `username` as an alias for `user` in connection properties.
 
 - Fixed use of `oracledb.NCLOB` in `fetchAsString`.  See [Issue 1351](https://github.com/oracle/node-oracledb/issues/1351).
-
-- Fixed `queueTimeout` of 0 to allow pool connection requests to be queued
-  indefinitely.  See [Issue
-  1338](https://github.com/oracle/node-oracledb/issues/1338).
-
-- Fixed the statement cache size set for the initial `poolMin` connections
-  created by `oracledb.createPool()`.
 
 - Enhanced the numeric suffix feature (for duplicate SELECT column names when
   using `oracledb.OUT_FORMAT_OBJECT` mode) to also support nested cursors and
