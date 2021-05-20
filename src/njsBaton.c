@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -130,8 +130,8 @@ bool njsBaton_createDate(njsBaton *baton, napi_env env, double value,
 // njsBaton_executeAsync()
 //   Callback used during asynchronous processing that takes place on a
 // separate thread. This simply calls the assigned routine directly, passing
-// only the baton. The N-API environment should not be used in these routines.
-// Blocking calls can be made in these routines.
+// only the baton. The Node-API environment should not be used in these
+// routines. Blocking calls can be made in these routines.
 //-----------------------------------------------------------------------------
 static void njsBaton_executeAsync(napi_env env, void *data)
 {

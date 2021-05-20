@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -400,9 +400,9 @@ bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
 
 //-----------------------------------------------------------------------------
 // njsUtils_genericThrowError()
-//   This method is called when the last N-API call was unsuccessful and throws
-// an error if one is not already pending. Returns false as a convenience to
-// the caller.
+//   This method is called when the last Node-API call was unsuccessful and
+// throws an error if one is not already pending. Returns false as a convenience
+// to the caller.
 //-----------------------------------------------------------------------------
 bool njsUtils_genericThrowError(napi_env env)
 {
@@ -512,7 +512,7 @@ bool njsUtils_getIntArg(napi_env env, napi_value *args, int index,
 
 //-----------------------------------------------------------------------------
 // njsUtils_getNull()
-//   Convenience function which returns the N-API null value.
+//   Convenience function which returns the Node-API null value.
 //-----------------------------------------------------------------------------
 napi_value njsUtils_getNull(napi_env env)
 {

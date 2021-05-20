@@ -84,12 +84,12 @@
         var = NULL; \
     }
 
-// define macro for checking the result of an N-API call
+// define macro for checking the result of an Node-API call
 #define NJS_CHECK_NAPI(env, status) \
     if ((status) != napi_ok) \
         return njsUtils_genericThrowError(env);
 
-// define macros for defining N-API functions; many are identical but different
+// define macros for defining Node-API functions; many are identical but different
 // names are used to make it easier to read
 #define NJS_NAPI_GETTER(name) \
     napi_value name(napi_env, napi_callback_info)

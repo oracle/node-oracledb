@@ -87,8 +87,8 @@ function done(err) {
 }
 
 // Check for a usable binary file for the node-oracledb module.  Node.js 8.16
-// and 10.16 (and 12.0) contain an important N-API performance regression fix.
-// Note that the checked versions are the minimum required for N-API
+// and 10.16 (and 12.0) contain an important Node-API performance regression fix.
+// Note that the checked versions are the minimum required for Node-API
 // compatibility; as new Node.js versions are released, older Node.js versions
 // are dropped from the node-oracledb test plan.  For example, the obsolete
 // Node.js 9 and 11 versions are not tested.
