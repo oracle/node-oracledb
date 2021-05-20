@@ -1466,7 +1466,7 @@ Oracle has a mirror of the GitHub repository source code that can be cloned
 with:
 
 ```
-git clone git://oss.oracle.com/git/oracle/node-oracledb.git/
+git clone git://opensource.oracle.com/git/oracle/node-oracledb.git/
 cd node-oracledb
 git submodule init
 git submodule update
