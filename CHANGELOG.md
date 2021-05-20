@@ -6,7 +6,8 @@
 
 - Connection pool changes:
 
-    - Fixed connection pool statistic "min time in queue" calculation.
+    - Fixed connection pool statistics "min time in queue" and "max time in
+      queue" calculations.
 
     - Fixed the statement cache size set for the initial `poolMin` connections
       created by `oracledb.createPool()`.

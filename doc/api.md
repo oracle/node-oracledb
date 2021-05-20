@@ -9095,10 +9095,12 @@ avg time in queue         | The average time (milliseconds) that dequeued reques
 pool connections in use   | The number of connections from this pool that `getConnection()` returned successfully to the application and have not yet been released back to the pool.
 pool connections open     | The number of connections in this pool that have been established to the database.
 
-Note that for efficiency, the minimum, maximum, average, and sum of
-times in the queue are calculated when requests are removed from the
-queue.  They do not take into account times for connection requests
-still waiting in the queue.
+Note that for efficiency, the minimum, maximum, average, and sum of times in
+the queue are calculated when requests are removed from the queue.  They
+include times for connection requests that were dequeued when a pool connection
+became available, and also for connection requests that timed out.  The
+statistics do not include times for connection requests still waiting in the
+queue.
 
 The sum of 'total requests failed', 'total requests exceeding queueMax', and
 'total request timeouts' is the number of `pool.getConnection()` calls that
