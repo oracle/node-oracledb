@@ -44,6 +44,9 @@
       version 21.3 (or later).  It is also available in Oracle Client 19 from
       19.11 onwards.
 
+- Fixed crashes seen with Worker threads ([ODPI-C
+  change](https://github.com/oracle/odpi/commit/09da0065409702cc28ba622951ca999a6b77d0e9)).
+
 - Test and documentation improvements.
 
 ## node-oracledb v5.1.0 (8 Dec 2020)
