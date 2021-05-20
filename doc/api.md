@@ -9569,10 +9569,17 @@ When applications want to use connection pools but are not able to use
 users from database schema owners, a 'heterogeneous' connection pool
 might be an option.
 
-Note heterogeneous pools cannot be used with the [connection pool
-cache](#connpoolcache).  Applications should ensure the pool object is
-explicitly passed between code modules, or use a homogeneous pool and
-make use of [`connection.clientId`](#propconnclientid).
+To use heterogeneous pools with the [connection pool cache](#connpoolcache),
+the alias should be explicity stated, even if it is the default pool:
+
+```javascript
+const connection = await oracledb.getConnection(
+  {
+    poolAlias: 'default',
+    user     : 'hr',
+    password : mypw,  // mypw contains the hr schema password
+  });
+```
 
 For heterogeneous pools, the number of connections initially created
 is zero even if a larger value is specified for
