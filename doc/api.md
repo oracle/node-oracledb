@@ -3970,6 +3970,9 @@ The version of this function which accepts a number of iterations should be
 used when no bind parameters are required or when all bind parameters are OUT
 binds.
 
+When `executeMany()` is used for PL/SQL code that returns OUT binds it will
+have the same performance characteristics as repeated calls to `execute()`.
+
 See [Batch Statement Execution and Bulk Loading](#batchexecution) for more
 information.
 
