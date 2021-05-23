@@ -44,6 +44,12 @@
   using `oracledb.OUT_FORMAT_OBJECT` mode) to also support nested cursors and
   REF CURSORS.
 
+- Added support for caching the database version number in pooled connections
+  with Oracle Client 19 and earlier (later Oracle Clients handle this caching
+  internally).  This optimization eliminates a round-trip previously often
+  required when reusing a pooled connection.  ([ODPI-C
+  change](https://github.com/oracle/odpi/commit/87268e832363083c1e228922ee11e2fa7aaf8880)).
+
 - [SODA](https://oracle.github.io/node-oracledb/doc/api.html#sodaoverview) changes:
 
     - Added [SODA metadata
