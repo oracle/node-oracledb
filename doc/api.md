@@ -2471,7 +2471,7 @@ call to `reconfigure()` should then be made to re-enable the cache.
 
 This property was added in node-oracledb 5.2.  It requires Oracle Client 21.3
 (or later).  The feature is also available in Oracle Client 19c from 19.11
-onwards.
+onward.
 
 ###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.20 `stmtCacheSize`
 
@@ -3673,7 +3673,7 @@ ResultSet     | CURSOR                         | `oracledb.CURSOR` or `oracledb.
 DbObject      | Named type or collection       | A string with the name of the Oracle Database object or collection, or a [DbObject](#dbobjectclass) | This combination is supported from node-oracledb 4.0 |
 
 When binding LONG, LONG RAW, CLOB, NCLOB, and BLOB database types using string
-or buffer bind types, then data is limited to a maxium size of 1 GB.
+or buffer bind types, then data is limited to a maximum size of 1 GB.
 
 Binding Oracle Database INTERVAL types or BFILE not supported.
 
@@ -9859,7 +9859,7 @@ users from database schema owners, a 'heterogeneous' connection pool
 might be an option.
 
 To use heterogeneous pools with the [connection pool cache](#connpoolcache),
-the alias should be explicity stated, even if it is the default pool:
+the alias should be explicitly stated, even if it is the default pool:
 
 ```javascript
 const connection = await oracledb.getConnection(
