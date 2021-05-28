@@ -56,8 +56,6 @@
 
 - Added `username` as an alias for `user` in connection properties.
 
-- Fixed use of `oracledb.NCLOB` in `fetchAsString`.  See [Issue 1351](https://github.com/oracle/node-oracledb/issues/1351).
-
 - Enhanced the numeric suffix feature (for duplicate SELECT column names when
   using `oracledb.OUT_FORMAT_OBJECT` mode) to also support nested cursors and
   REF CURSORS.
@@ -79,10 +77,9 @@
 
     - Added a SODA
       [`hint()`](https://oracle.github.io/node-oracledb/doc/api.html#sodaoperationclasshint)
-      SodaOperation method and equivalent hint option to SODA
+      SodaOperation method and equivalent hint option to
       `sodaCollection.insertManyAndGet()`, `sodaCollection.insertOneAndGet()`,
-      and `sodaCollection.saveAndGet()` to allow monitoring and passing hints to
-      SODA.
+      and `sodaCollection.saveAndGet()` to allow monitoring and passing hints.
 
 - Fixed crashes seen with Worker threads ([ODPI-C
   change](https://github.com/oracle/odpi/commit/09da0065409702cc28ba622951ca999a6b77d0e9)).
@@ -90,6 +87,9 @@
 - Fixed a failure when using JavaScript functions on OUT bind variables from
   `executeMany()` that require the connection, for example accessing database
   objects or streaming LOBs.
+
+- Fixed use of `oracledb.NCLOB` in `fetchAsString`.  See [Issue
+  1351](https://github.com/oracle/node-oracledb/issues/1351).
 
 - Test and documentation improvements.
 
