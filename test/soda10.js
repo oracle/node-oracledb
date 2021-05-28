@@ -33,7 +33,7 @@ const dbconfig = require('./dbconfig.js');
 const sodaUtil = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('178. soda10.js', () => {
+describe('178. soda10.js', function() {
 
   let runnable;
   let conn, soda;
@@ -72,7 +72,7 @@ describe('178. soda10.js', () => {
     { id: 4, name: "Changjie",  office: "Shenzhen" }
   ];
 
-  it('178.1 insertMany() with newSodaDocumentArray', async () => {
+  it('178.1 insertMany() with newSodaDocumentArray', async function() {
     try {
       const COLL = "soda_test_178_1";
       const collection = await soda.createCollection(COLL);
@@ -102,7 +102,7 @@ describe('178. soda10.js', () => {
     }
   }); // 178.1
 
-  it('178.2 insertMany() with newSodaDocumentContentArray', async () => {
+  it('178.2 insertMany() with newSodaDocumentContentArray', async function() {
     try {
       const COLL = "soda_test_178_2";
       const collection = await soda.createCollection(COLL);
@@ -127,7 +127,7 @@ describe('178. soda10.js', () => {
     }
   }); // 178.2
 
-  it('178.3 insertManyAndGet() with newDocumentArray', async () => {
+  it('178.3 insertManyAndGet() with newDocumentArray', async function() {
     try {
       const COLL = "soda_test_178_3";
       const collection = await soda.createCollection(COLL);
@@ -163,7 +163,7 @@ describe('178. soda10.js', () => {
     }
   }); // 178.3
 
-  it('178.4 insertManyAndGet() with newDocumentContentArray', async () => {
+  it('178.4 insertManyAndGet() with newDocumentContentArray', async function() {
     try {
       const COLL = "soda_test_178_4";
       const collection = await soda.createCollection(COLL);
@@ -194,13 +194,13 @@ describe('178. soda10.js', () => {
     }
   }); // 178.4
 
-  it('178.5 Negative - insertMany() with an empty array', async () => {
+  it('178.5 Negative - insertMany() with an empty array', async function() {
     try {
       const COLL = "soda_test_178_5";
       const collection = await soda.createCollection(COLL);
 
       await testsUtil.assertThrowsAsync(
-        async () => {
+        async function() {
           await collection.insertMany([]);
         },
         /NJS-005/
@@ -215,13 +215,13 @@ describe('178. soda10.js', () => {
     }
   }); // 178.5
 
-  it('178.6 Negative - insertManyAndGet() with an empty array', async () => {
+  it('178.6 Negative - insertManyAndGet() with an empty array', async function() {
     try {
       const COLL = "soda_test_178_6";
       const collection = await soda.createCollection(COLL);
 
       await testsUtil.assertThrowsAsync(
-        async () => {
+        async function() {
           await collection.insertManyAndGet([]);
         },
         /NJS-005/
@@ -236,7 +236,16 @@ describe('178. soda10.js', () => {
     }
   }); // 178.6
 
-  it('178.7 insertManyAndGet() with hint option', async () => {
+  it('178.7 insertManyAndGet() with hint option', async function() {
+    // The SODA hint is available with Oracle Client 21.3 and
+    // in 19 from 19.11
+    if (oracledb.oracleClientVersion < 2103000000) {
+      if (oracledb.oracleClientVersion < 1911000000 ||
+          oracledb.oracleClientVersion >= 2000000000) {
+        this.skip();
+        return;
+      }
+    }
     const COLL = "soda_test_178_7";
     const collection = await soda.createCollection(COLL);
 
@@ -269,7 +278,7 @@ describe('178. soda10.js', () => {
     should.strictEqual(res.dropped, true);
   }); // 178.7
 
-  it('178.8 Negative - insertManyAndGet() with invalid options parameter', async () => {
+  it('178.8 Negative - insertManyAndGet() with invalid options parameter', async function() {
     const COLL = "soda_test_178_8";
     const collection = await soda.createCollection(COLL);
 
@@ -280,7 +289,7 @@ describe('178. soda10.js', () => {
 
     let options = 3;
     await testsUtil.assertThrowsAsync(
-      async () => {
+      async function() {
         await collection.insertManyAndGet(inDocuments, options);
       },
       /NJS-005/

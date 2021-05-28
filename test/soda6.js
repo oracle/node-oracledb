@@ -35,7 +35,7 @@ const testsUtil = require('./testsUtil.js');
 
 const t_contents = sodaUtil.t_contents;
 
-describe('174. soda6.js', () => {
+describe('174. soda6.js', function() {
 
   before(async function() {
     const runnable = await testsUtil.isSodaRunnable();
@@ -47,7 +47,7 @@ describe('174. soda6.js', () => {
     await sodaUtil.cleanup();
   });
 
-  it('174.1 filter() basic case', async () => {
+  it('174.1 filter() basic case', async function() {
     let conn, collection;
 
     try {
@@ -86,7 +86,7 @@ describe('174. soda6.js', () => {
     }
   }); // 174.1
 
-  it('174.2 Negative - fiter(filterSpec) when filterSpec is null', async () => {
+  it('174.2 Negative - fiter(filterSpec) when filterSpec is null', async function() {
     let conn, collection;
 
     try {
@@ -124,7 +124,7 @@ describe('174. soda6.js', () => {
     }
   }); // 174.2
 
-  it('174.3 filterSpec is OK to be an empty object', async () => {
+  it('174.3 filterSpec is OK to be an empty object', async function() {
     let conn, collection;
 
     try {
@@ -162,7 +162,7 @@ describe('174. soda6.js', () => {
     }
   }); // 174.3
 
-  it('174.4 Key(), basic case', async () => {
+  it('174.4 Key(), basic case', async function() {
     let conn, collection;
 
     try {
@@ -212,7 +212,7 @@ describe('174. soda6.js', () => {
     }
   }); // 174.4
 
-  it('174.5 Key(), no matched key', async () => {
+  it('174.5 Key(), no matched key', async function() {
     let conn, collection;
 
     try {
@@ -250,7 +250,7 @@ describe('174. soda6.js', () => {
     }
   }); // 174.5
 
-  it('174.6 Negative - Key(null)', async () => {
+  it('174.6 Negative - Key(null)', async function() {
     let conn, collection;
 
     try {
@@ -287,7 +287,7 @@ describe('174. soda6.js', () => {
     }
   }); // 174.6
 
-  it('174.7 Key(), invalid type', async () => {
+  it('174.7 Key(), invalid type', async function() {
     let conn, collection;
 
     try {
@@ -326,7 +326,7 @@ describe('174. soda6.js', () => {
     }
   }); // 174.7
 
-  it('174.8 Keys(), basic case', async () => {
+  it('174.8 Keys(), basic case', async function() {
     let conn, collection;
 
     try {
@@ -370,7 +370,7 @@ describe('174. soda6.js', () => {
     }
   }); // 174.8
 
-  it('174.9 Keys([]) empty array, it selects all documents', async () => {
+  it('174.9 Keys([]) empty array, it selects all documents', async function() {
     let conn, collection;
 
     try {
@@ -414,7 +414,7 @@ describe('174. soda6.js', () => {
     }
   }); // 174.9
 
-  it('174.10 Negative - keys() no parameter', async () => {
+  it('174.10 Negative - keys() no parameter', async function() {
     let conn, collection;
 
     try {
@@ -452,7 +452,7 @@ describe('174. soda6.js', () => {
     }
   }); // 174.10
 
-  it('174.11 Negative - keys(null)', async () => {
+  it('174.11 Negative - keys(null)', async function() {
     let conn, collection;
 
     try {
@@ -491,7 +491,7 @@ describe('174. soda6.js', () => {
     }
   }); // 174.11
 
-  it('174.12 try to query documents with nonexistent keys', async () => {
+  it('174.12 try to query documents with nonexistent keys', async function() {
     let conn, collection;
 
     try {
@@ -534,7 +534,16 @@ describe('174. soda6.js', () => {
     }
   }); // 174.12
 
-  it("174.13 hint(), basic case", async () => {
+  it("174.13 hint(), basic case", async function() {
+    // The SODA hint is available with Oracle Client 21.3 and
+    // in 19 from 19.11
+    if (oracledb.oracleClientVersion < 2103000000) {
+      if (oracledb.oracleClientVersion < 1911000000 ||
+          oracledb.oracleClientVersion >= 2000000000) {
+        this.skip();
+        return;
+      }
+    }
     let conn, collection;
 
     try {
@@ -572,7 +581,16 @@ describe('174. soda6.js', () => {
     }
   }); //174.13
 
-  it("174.14 Negative - hint() no parameter", async () => {
+  it("174.14 Negative - hint() no parameter", async function() {
+    // The SODA hint is available with Oracle Client 21.3 and
+    // in 19 from 19.11
+    if (oracledb.oracleClientVersion < 2103000000) {
+      if (oracledb.oracleClientVersion < 1911000000 ||
+          oracledb.oracleClientVersion >= 2000000000) {
+        this.skip();
+        return;
+      }
+    }
     let conn, collection;
 
     try {
@@ -610,7 +628,16 @@ describe('174. soda6.js', () => {
     }
   }); //174.14
 
-  it("174.15 Negative - hint() invalid parameter type", async () => {
+  it("174.15 Negative - hint() invalid parameter type", async function() {
+    // The SODA hint is available with Oracle Client 21.3 and
+    // in 19 from 19.11
+    if (oracledb.oracleClientVersion < 2103000000) {
+      if (oracledb.oracleClientVersion < 1911000000 ||
+          oracledb.oracleClientVersion >= 2000000000) {
+        this.skip();
+        return;
+      }
+    }
     let conn, collection;
 
     try {
