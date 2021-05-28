@@ -87,6 +87,10 @@
 - Fixed crashes seen with Worker threads ([ODPI-C
   change](https://github.com/oracle/odpi/commit/09da0065409702cc28ba622951ca999a6b77d0e9)).
 
+- Fixed a failure when using JavaScript functions on OUT bind variables from
+  `executeMany()` that require the connection, for example accessing database
+  objects or streaming LOBs.
+
 - Test and documentation improvements.
 
 ## node-oracledb v5.1.0 (8 Dec 2020)

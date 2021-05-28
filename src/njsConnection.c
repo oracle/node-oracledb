@@ -871,6 +871,10 @@ static bool njsConnection_executeManyPostAsync(njsBaton *baton, napi_env env,
     uint32_t numOutBinds;
     napi_value temp;
 
+    // set JavaScript values to simplify creation of returned objects
+    if (!njsBaton_setJsValues(baton, env))
+        return false;
+
     // create object for result
     NJS_CHECK_NAPI(env, napi_create_object(env, result))
 
