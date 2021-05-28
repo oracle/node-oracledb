@@ -43,28 +43,19 @@ sodaUtil.cleanup = async function() {
 
     let cNames = await sd.getCollectionNames();
     if (cNames.length > 0) {
-      console.log("existing collections: ");
-      console.log(cNames);
-
       for (let i = 0; i < cNames.length; i++) {
         let coll = await sd.openCollection(cNames[i]);
-        let res = await coll.drop();
-        if (res.dropped) {
-          console.log("Succeed to drop collection", cNames[i]);
-        } else {
-          console.log("Fail to drop collection", cNames[i]);
-        }
+        await coll.drop();
       }
     }
-
   } catch (err) {
-    console.log('Error in processing:\n', err);
+    console.error('Error in processing:\n', err);
   } finally {
     if (conn) {
       try {
         await conn.close();
       } catch (err) {
-        console.log('Error in closing connection:\n', err);
+        console.error('Error in closing connection:\n', err);
       }
     }
   }
