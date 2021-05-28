@@ -241,5 +241,6 @@ spec:
   - test/sodaMetaDataCache.js
   - test/jsonBind1.js
   - test/jsonBind2.js
+  - test/poolReconfigure.js
   - test/executeQueue.js
   - test/sodahint.js

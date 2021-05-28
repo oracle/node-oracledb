@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -28,10 +28,12 @@
 // class methods
 static NJS_NAPI_METHOD(njsPool_close);
 static NJS_NAPI_METHOD(njsPool_getConnection);
+static NJS_NAPI_METHOD(njsPool_reconfigure);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsPool_closeAsync);
 static NJS_ASYNC_METHOD(njsPool_getConnectionAsync);
+static NJS_ASYNC_METHOD(njsPool_reconfigureAsync);
 
 // post asynchronous methods
 static NJS_ASYNC_POST_METHOD(njsPool_getConnectionPostAsync);
@@ -39,6 +41,7 @@ static NJS_ASYNC_POST_METHOD(njsPool_getConnectionPostAsync);
 // processing arguments methods
 static NJS_PROCESS_ARGS_METHOD(njsPool_closeProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsPool_getConnectionProcessArgs);
+static NJS_PROCESS_ARGS_METHOD(njsPool_reconfigureProcessArgs);
 
 // getters
 static NJS_NAPI_GETTER(njsPool_getConnectionsInUse);
@@ -59,6 +62,8 @@ static NJS_NAPI_FINALIZE(njsPool_finalize);
 static const napi_property_descriptor njsClassProperties[] = {
     { "_close", NULL, njsPool_close, NULL, NULL, NULL, napi_default, NULL },
     { "_getConnection", NULL, njsPool_getConnection, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "_reconfigure", NULL, njsPool_reconfigure, NULL, NULL, NULL,
             napi_default, NULL },
     { "connectionsInUse", NULL, NULL, njsPool_getConnectionsInUse, NULL, NULL,
             napi_default, NULL },
@@ -350,6 +355,148 @@ static bool njsPool_getConnectionProcessArgs(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
+// njsPool_reconfigure()
+//  Change the pool parameters
+//-----------------------------------------------------------------------------
+static napi_value njsPool_reconfigure(napi_env env, napi_callback_info info)
+{
+    napi_value args[1];
+    njsBaton *baton;
+
+    // verify number of arguments and create baton
+    if (!njsPool_createBaton(env, info, 1, args, &baton))
+        return NULL;
+
+    // get information from arguments and store on the baton
+    if (!njsPool_reconfigureProcessArgs(baton, env, args)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
+
+    // queue work
+    return njsBaton_queueWork(baton, env, "Reconfigure",
+            njsPool_reconfigureAsync, NULL);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool_reconfigureAsync()
+//  Worker function for njsPool_reconfigure().
+//-----------------------------------------------------------------------------
+static bool njsPool_reconfigureAsync(njsBaton *baton)
+{
+    njsPool *pool = (njsPool*) baton->callingInstance;
+
+    if ((pool->poolMin != baton->poolMin) ||
+        (pool->poolMax != baton->poolMax) ||
+        (pool->poolIncrement != baton->poolIncrement)) {
+        // reconfigure pool-creation parameters
+        if (dpiPool_reconfigure(pool->handle, baton->poolMin, baton->poolMax,
+                baton->poolIncrement) < 0)
+            return njsBaton_setErrorDPI(baton);
+
+        // Update the pool creation parameters.
+        pool->poolMin = baton->poolMin;
+        pool->poolMax = baton->poolMax;
+        pool->poolIncrement = baton->poolIncrement;
+    }
+
+    // Other pool parameters: poolPingInterval, poolTimeout, poolMaxPerShard,
+    //    stmtCacheSize, sodaMetaDataCache
+
+    if (pool->poolPingInterval != baton->poolPingInterval) {
+        if (dpiPool_setPingInterval(pool->handle, baton->poolPingInterval) < 0)
+            return njsBaton_setErrorDPI(baton);
+        pool->poolPingInterval = baton->poolPingInterval;
+    }
+
+    if (pool->poolTimeout != baton->poolTimeout) {
+        if (dpiPool_setTimeout(pool->handle, baton->poolTimeout) < 0)
+            return njsBaton_setErrorDPI(baton);
+        pool->poolTimeout = baton->poolTimeout;
+    }
+
+    if (pool->poolMaxPerShard != baton->poolMaxPerShard) {
+        if (dpiPool_setMaxSessionsPerShard(pool->handle,
+                baton->poolMaxPerShard) < 0)
+            return njsBaton_setErrorDPI(baton);
+        pool->poolMaxPerShard = baton->poolMaxPerShard;
+    }
+
+    if (pool->stmtCacheSize != baton->stmtCacheSize) {
+        if (dpiPool_setStmtCacheSize(pool->handle, baton->stmtCacheSize) < 0)
+            return njsBaton_setErrorDPI(baton);
+        pool->stmtCacheSize = baton->stmtCacheSize;
+    }
+
+    if (pool->sodaMetadataCache != baton->sodaMetadataCache) {
+        if (dpiPool_setSodaMetadataCache(pool->handle,
+                baton->sodaMetadataCache ? 1 : 0) < 0) {
+            return njsBaton_setErrorDPI(baton);
+        }
+        pool->sodaMetadataCache = baton->sodaMetadataCache;
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool_reconfigureProcessArgs()
+//  Process the arguemnts for njsPool_reconfigure().
+//-----------------------------------------------------------------------------
+static bool njsPool_reconfigureProcessArgs(njsBaton *baton, napi_env env,
+        napi_value *args)
+{
+    njsPool        *pool = (njsPool *) baton->callingInstance;
+
+    baton->poolMin = pool->poolMin;
+    baton->poolMax = pool->poolMax;
+    baton->poolIncrement = pool->poolIncrement;
+    baton->poolPingInterval = pool->poolPingInterval;
+    baton->poolTimeout = pool->poolTimeout;
+    baton->stmtCacheSize = pool->stmtCacheSize;
+    baton->poolMaxPerShard = pool->poolMaxPerShard;
+    baton->sodaMetadataCache = pool->sodaMetadataCache;
+
+    // check arguments
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolMin",
+            &baton->poolMin, NULL))
+        return false;
+
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolMax",
+            &baton->poolMax, NULL))
+        return false;
+
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolIncrement",
+            &baton->poolIncrement, NULL))
+        return false;
+
+    if (!njsBaton_getIntFromArg(baton, env, args, 0, "poolPingInterval",
+            &baton->poolPingInterval, NULL))
+        return false;
+
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolTimeout",
+            &baton->poolTimeout, NULL))
+        return false;
+
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "stmtCacheSize",
+            &baton->stmtCacheSize, NULL))
+        return false;
+
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolMaxPerShard",
+            &baton->poolMaxPerShard, NULL))
+        return false;
+
+    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "sodaMetaDataCache",
+            &baton->sodaMetadataCache, NULL))
+        return false;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsPool_getConnectionsInUse()
 //   Get accessor of "connectionsInUse" property.
 //-----------------------------------------------------------------------------
@@ -543,6 +690,7 @@ bool njsPool_newFromBaton(njsBaton *baton, napi_env env, napi_value *poolObj)
     pool->poolTimeout = baton->poolTimeout;
     pool->poolPingInterval = baton->poolPingInterval;
     pool->stmtCacheSize = baton->stmtCacheSize;
+    pool->sodaMetadataCache = baton->sodaMetadataCache;
 
     return true;
 }

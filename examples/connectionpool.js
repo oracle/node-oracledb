@@ -79,7 +79,7 @@ async function init() {
       // sessionCallback: myFunction, // function invoked for brand new connections or by a connection tag mismatch
       // sodaMetaDataCache: false, // Set true to improve SODA collection access performance
       // stmtCacheSize: 30, // number of statements that are cached in the statement cache of each connection
-      // _enableStats: false // record pool usage statistics that can be output with oracledb.getPool()._logStats()
+      // enableStatistics: false // record pool usage for oracledb.getPool().getStatistics() and logStatistics()
     });
     console.log('Connection pool started');
 
@@ -103,7 +103,7 @@ async function dostuff() {
     const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
     const result = await connection.execute(sql, binds, options);
     console.log(result);
-    // oracledb.getPool()._logStats(); // show pool statistics.  _enableStats must be true
+    // oracledb.getPool().logStatistics(); // show pool statistics.  pool.enableStatistics must be true
   } catch (err) {
     console.error(err);
   } finally {

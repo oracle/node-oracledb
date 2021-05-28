@@ -5100,6 +5100,82 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         254.3.5 Using JSON_VALUE to extract a value from a CLOB column
         254.3.6 Using dot-notation to extract a value from a CLOB column
 
+255. poolReconfigure.js
+    255.1 poolReconfigure - poolMin/poolMax/poolIncrement properties
+        255.1.1 Change poolMin - increase
+        255.1.2 Change poolMin - decrease
+        255.1.3 Change poolMax - increase
+        255.1.4 Change poolMax - decrease
+        255.1.5 Change poolIncrement - increase
+        255.1.6 Change poolIncrement - decrease
+        255.1.7 increase poolMin & poolMax
+        255.1.8 increase poolMin & poolIncrement
+        255.1.9 increase poolMax & poolIncrement
+        255.1.10 increase poolMin/poolMax/poolIncrement
+        255.1.11 Change enableStatistics to true
+        255.1.12 Change enableStatistics to false
+        255.1.13 Decreasing poolMax when all connection are in use
+        255.1.14 reconfigure poolMin/poolMax/poolIncrement multiple times
+        255.1.15 reconfigure poolMin/poolMax/poolIncrement multiple times
+        255.1.16 Connection queuing after decreasing poolMax
+        255.1.17 Connection queuing after increasing poolMax
+    255.2 poolReconfigure - other properties
+        255.2.1 change poolPingInterval
+        255.2.2 change poolTimeout
+        255.2.3 change maxPerShard
+        255.2.4 change stmtCacheSize
+        255.2.5 change resetStatistics with enableStatistics
+        255.2.6 change resetStatistics
+        255.2.7 getStatistics
+    255.3 poolReconfigure JS layer properties
+        255.3.1 change queueMax
+        255.3.2 change queueTimeout
+        255.3.3 change maxSessionsPerShard
+        255.3.4 sodaMetaDataCache set to true
+        255.3.5 sodaMetaDataCache set to false
+    255.4 Pool properties NOT dynamically configurable, they will be ignored
+        255.4.1 connectionsInUse
+        255.4.2 connectionsOpen
+        255.4.3 connectString
+        255.4.4 connectionString
+        255.4.5 edition
+        255.4.6 events
+        255.4.7 homogeneous
+        255.4.8 externalAuth
+        255.4.9 password
+        255.4.10 poolAlias
+        255.4.11 status
+        255.4.12 username
+        255.4.13 user
+        255.4.14 _enableStats
+    255.5 Negative cases
+        255.5.1 passing empty config to pool.reconfigure
+        255.5.2 passing invalid poolMin to pool.reconfigure
+        255.5.3 passing invalid poolMax to pool.reconfigure
+        255.5.4 passing invalid poolIncrement to pool.reconfigure
+        255.5.5 passing invalid enableStatistics to pool.reconfigure
+        255.5.6 passing invalid poolPingInterval to pool.reconfigure
+        255.5.7 passing invalid poolTimeout to pool.reconfigure
+        255.5.8 passing invalid poolMaxPerShard to pool.reconfigure
+        255.5.9 passing invalid queueMax to pool.reconfigure
+        255.5.10 passing invalid queueTimeout to pool.reconfigure
+        255.5.11 passing invalid stmtCacheSize to pool.reconfigure
+        255.5.12 calling pool.reconfigure multiple times with empty config
+        255.5.13 calling pool.reconfigure multiple times
+        255.5.14 reconfigure closed pool
+        255.5.15 get statistics of a closed pool
+    255.6 Pool statistics
+        255.6.1 get pool statistics by setting _enableStats
+        255.6.2 get pool statistics by setting _enableStats
+        255.6.3 set enableStatistics to true, _enableStats will be ignored
+        255.6.4 set enableStatistics to false, _enableStats will be used
+        255.6.5 set multiple enableStatistics
+        255.6.6 set multiple _enableStats
+        255.6.7 get pool statistics by setting enableStatistics
+        255.6.8 get pool statistics by setting enableStatistics
+        255.6.9 get pool statistics by setting enableStatistics and _enableStats
+        255.6.10 logStatistics without enableStatistics
+
 256. executeQueue.js
     256.1 Connection.execute()
         256.1.1 errorOnConcurrentExecute set to false

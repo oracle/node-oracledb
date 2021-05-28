@@ -204,6 +204,8 @@ typedef enum {
     errConvertToJsonValue,
     errDblUsername,
     errConcurrentOps,
+    errPoolReconfiguring,
+    errPoolStatisticsDisabled,
 
     // New ones should be added here
 
@@ -214,6 +216,7 @@ typedef enum {
 #define NJS_POOL_STATUS_OPEN            6000
 #define NJS_POOL_STATUS_DRAINING        6001
 #define NJS_POOL_STATUS_CLOSED          6002
+#define NJS_POOL_STATUS_RECONFIGURING   6003
 
 // values used for "outFormat"
 #define NJS_ROWS_ARRAY                  4001
@@ -670,6 +673,7 @@ struct njsPool {
     uint32_t poolTimeout;
     uint32_t stmtCacheSize;
     int32_t poolPingInterval;
+    bool  sodaMetadataCache;
 };
 
 // data for class ResultSet exposed to JS.

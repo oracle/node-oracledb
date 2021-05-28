@@ -88,6 +88,8 @@ static const char *njsErrorMessages[] = {
     "NJS-079: cannot convert from JavaScript value to JSON value", // errConvertToJsonValue
     "NJS-080: only one of user and username can be used", //errDblUsername
     "NJS-081: concurrent operations on a connection are disabled", //errConcurrentOps
+    "NJS-082: connection pool is being reconfigured", // errPoolReconfiguring
+    "NJS-083: pool statistics not enabled", // errPoolStatisticsDisabled
 };
 
 

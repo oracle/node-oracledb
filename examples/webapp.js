@@ -89,7 +89,7 @@ async function init() {
       // sessionCallback: initSession, // function invoked for brand new connections or by a connection tag mismatch
       // sodaMetaDataCache: false, // Set true to improve SODA collection access performance
       // stmtCacheSize: 30, // number of statements that are cached in the statement cache of each connection
-      // _enableStats: false // record pool usage statistics that can be output with oracledb.getPool()._logStats()
+      // enableStatistics: false // record pool usage for oracledb.getPool().getStatistics() and logStatistics()
     });
 
     // create the demo table

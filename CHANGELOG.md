@@ -6,8 +6,26 @@
 
 - Connection pool changes:
 
-    - Fixed connection pool statistics "min time in queue" and "max time in
-      queue" calculations.
+    - Pool attributes can be changed during application runtime with
+      [`pool.reconfigure()`](https://oracle.github.io/node-oracledb/doc/api.html#poolreconfigure).
+      This lets properties such as the pool size be changed dynamically instead
+      of having to restart the application or create a new pool.
+
+    - Formalized pool statistics with the addition of a pool creation attribute
+      [`enableStatistics`](https://oracle.github.io/node-oracledb/doc/api.html#createpoolpoolattrsstats),
+      and with the functions
+      [`pool.getStatistics()`](https://oracle.github.io/node-oracledb/doc/api.html#poolgetstatistics)
+      and
+      [`pool.logStatistics()`](https://oracle.github.io/node-oracledb/doc/api.html#poollogstatistics).
+      Pool statistics can be be enabled, disabled, or reset with
+      `pool.reconfigure()`.  The older `_enableStats` attribute and
+      `_logStats()` function are aliases for the new functionality but will be
+      removed in a future version of node-oracledb.
+
+    - Added `currentQueueLength` and `poolMaxPerShard` to the pool statistics.
+
+    - Fixed connection pool statistics "minimum time in queue" and "maximum
+      time in queue" calculations.
 
     - Fixed the statement cache size set for the initial `poolMin` connections
       created by `oracledb.createPool()`.

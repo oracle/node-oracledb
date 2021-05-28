@@ -360,6 +360,14 @@ testsUtil.isLongUserNameRunnable = async function() {
   }
 };
 
+testsUtil.getPoolConnection = async function(pool) {
+  if (dbconfig.test.proxySessionUser && dbconfig.test.externalAuth) {
+    return await pool.getConnection({user: dbconfig.test.proxySessionUser});
+  } else {
+    return await pool.getConnection();
+  }
+};
+
 testsUtil.sleep = function(ms = 1000) {
   return new Promise(resolve => setTimeout(resolve, ms));
 };

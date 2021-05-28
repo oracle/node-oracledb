@@ -171,9 +171,11 @@ describe('18. constants.js', function() {
   });
 
   it('18.10 Pool Status Constants', () => {
+    should.strictEqual(6003, oracledb.POOL_STATUS_RECONFIGURING);
     should.strictEqual(6002, oracledb.POOL_STATUS_CLOSED);
     should.strictEqual(6001, oracledb.POOL_STATUS_DRAINING);
     should.strictEqual(6000, oracledb.POOL_STATUS_OPEN);
+
   });
 
   it('18.11 Simple Oracle Document Access (SODA) Constants', () => {

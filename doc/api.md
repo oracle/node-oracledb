@@ -62,7 +62,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 3.1.9 [Continuous Query Notification Constants](#oracledbconstantscqn)
             - [`CQN_OPCODE_ALL_OPS`](#oracledbconstantscqn), [`CQN_OPCODE_ALL_ROWS`](#oracledbconstantscqn), [`CQN_OPCODE_ALTER`](#oracledbconstantscqn), [`CQN_OPCODE_DELETE`](#oracledbconstantscqn), [`CQN_OPCODE_DROP`](#oracledbconstantscqn), [`CQN_OPCODE_INSERT`](#oracledbconstantscqn), [`CQN_OPCODE_UPDATE`](#oracledbconstantscqn)
         - 3.1.10 [Pool Status Constants](#oracledbconstantspool)
-            - [`POOL_STATUS_CLOSED`](#oracledbconstantspool), [`POOL_STATUS_DRAINING`](#oracledbconstantspool), [`POOL_STATUS_OPEN`](#oracledbconstantspool)
+            - [`POOL_STATUS_CLOSED`](#oracledbconstantspool), [`POOL_STATUS_DRAINING`](#oracledbconstantspool), [`POOL_STATUS_OPEN`](#oracledbconstantspool), [`POOL_STATUS_RECONFIGURING`](#oracledbconstantspool)
         - 3.1.11 [Simple Oracle Document Access (SODA) Constants](#oracledbconstantssoda)
             - [`SODA_COLL_MAP_MODE`](#oracledbconstantssoda)
         - 3.1.12 [Database Shutdown Constants](#oracledbconstantsshutdown)
@@ -104,24 +104,25 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - 3.3.1.1 [`createPool()`: Parameters and Attributes](#createpoolpoolattrs)
                 - 3.3.1.1.1 [`connectString`](#createpoolpoolattrsconnectstring), [`connectionString`](#createpoolpoolattrsconnectstring)
                 - 3.3.1.1.2 [`edition`](#createpoolpoolattrsedition)
-                - 3.3.1.1.3 [`events`](#createpoolpoolattrsevents)
-                - 3.3.1.1.4 [`externalAuth`](#createpoolpoolattrsexternalauth)
-                - 3.3.1.1.5 [`homogeneous`](#createpoolpoolattrshomogeneous)
-                - 3.3.1.1.6 [`password`](#createpoolpoolattrspassword)
-                - 3.3.1.1.7 [`poolAlias`](#createpoolpoolattrspoolalias)
-                - 3.3.1.1.8 [`poolIncrement`](#createpoolpoolattrspoolincrement)
-                - 3.3.1.1.9 [`poolMax`](#createpoolpoolattrspoolmax)
-                - 3.3.1.1.10 [`poolMaxPerShard`](#createpoolpoolattrspoolmaxpershard)
-                - 3.3.1.1.11 [`poolMin`](#createpoolpoolattrspoolmin)
-                - 3.3.1.1.12 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
-                - 3.3.1.1.13 [`poolTimeout`](#createpoolpoolattrspooltimeout)
-                - 3.3.1.1.14 [`queueMax`](#createpoolpoolattrsqueuemax)
-                - 3.3.1.1.15 [`queueRequests`](#createpoolpoolattrsqueuerequests)
-                - 3.3.1.1.16 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
-                - 3.3.1.1.17 [`sessionCallback`](#createpoolpoolattrssessioncallback)
-                - 3.3.1.1.18 [`sodaMetaDataCache`](#createpoolpoolattrssodamdcache)
-                - 3.3.1.1.19 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
-                - 3.3.1.1.20 [`user`](#createpoolpoolattrsuser), [`username`](#createpoolpoolattrsuser)
+                - 3.3.1.1.3 [`enableStatistics`](#createpoolpoolattrsstats)
+                - 3.3.1.1.4 [`events`](#createpoolpoolattrsevents)
+                - 3.3.1.1.5 [`externalAuth`](#createpoolpoolattrsexternalauth)
+                - 3.3.1.1.6 [`homogeneous`](#createpoolpoolattrshomogeneous)
+                - 3.3.1.1.7 [`password`](#createpoolpoolattrspassword)
+                - 3.3.1.1.8 [`poolAlias`](#createpoolpoolattrspoolalias)
+                - 3.3.1.1.9 [`poolIncrement`](#createpoolpoolattrspoolincrement)
+                - 3.3.1.1.10 [`poolMax`](#createpoolpoolattrspoolmax)
+                - 3.3.1.1.11 [`poolMaxPerShard`](#createpoolpoolattrspoolmaxpershard)
+                - 3.3.1.1.12 [`poolMin`](#createpoolpoolattrspoolmin)
+                - 3.3.1.1.13 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
+                - 3.3.1.1.14 [`poolTimeout`](#createpoolpoolattrspooltimeout)
+                - 3.3.1.1.15 [`queueMax`](#createpoolpoolattrsqueuemax)
+                - 3.3.1.1.16 [`queueRequests`](#createpoolpoolattrsqueuerequests)
+                - 3.3.1.1.17 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
+                - 3.3.1.1.18 [`sessionCallback`](#createpoolpoolattrssessioncallback)
+                - 3.3.1.1.19 [`sodaMetaDataCache`](#createpoolpoolattrssodamdcache)
+                - 3.3.1.1.20 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+                - 3.3.1.1.21 [`user`](#createpoolpoolattrsuser), [`username`](#createpoolpoolattrsuser)
             - 3.3.1.2 [`createPool()`: Callback Function](#createpoolpoolcallback)
         - 3.3.2 [`getConnection()`](#getconnectiondb)
             - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
@@ -302,23 +303,26 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 8.1 [Pool Properties](#poolproperties)
         - 8.1.1 [`connectionsInUse`](#proppoolconnectionsinuse)
         - 8.1.2 [`connectionsOpen`](#proppoolconnectionsopen)
-        - 8.1.3 [`poolAlias`](#proppoolpoolalias)
-        - 8.1.4 [`poolIncrement`](#proppoolpoolincrement)
-        - 8.1.5 [`poolMax`](#proppoolpoolmax)
-        - 8.1.6 [`poolMin`](#proppoolpoolmin)
-        - 8.1.7 [`poolPingInterval`](#proppoolpoolpinginterval)
-        - 8.1.8 [`poolTimeout`](#proppoolpooltimeout)
-        - 8.1.9 [`queueMax`](#proppoolqueuemax)
-        - 8.1.10 [`queueRequests`](#proppoolqueuerequests)
-        - 8.1.11 [`queueTimeout`](#proppoolqueueTimeout)
-        - 8.1.12 [`sessionCallback`](#proppoolsessioncallback)
-        - 8.1.13 [`sodaMetaDataCache`](#proppoolsodamdcache)
-        - 8.1.14 [`status`](#proppoolstatus)
-        - 8.1.15 [`stmtCacheSize`](#proppoolstmtcachesize)
+        - 8.1.3 [`enableStatistics`](#proppoolenablestatistics)
+        - 8.1.4 [`poolAlias`](#proppoolpoolalias)
+        - 8.1.5 [`poolIncrement`](#proppoolpoolincrement)
+        - 8.1.6 [`poolMax`](#proppoolpoolmax)
+        - 8.1.7 [`poolMin`](#proppoolpoolmin)
+        - 8.1.8 [`poolPingInterval`](#proppoolpoolpinginterval)
+        - 8.1.9 [`poolTimeout`](#proppoolpooltimeout)
+        - 8.1.10 [`queueMax`](#proppoolqueuemax)
+        - 8.1.11 [`queueRequests`](#proppoolqueuerequests)
+        - 8.1.12 [`queueTimeout`](#proppoolqueueTimeout)
+        - 8.1.13 [`sessionCallback`](#proppoolsessioncallback)
+        - 8.1.14 [`sodaMetaDataCache`](#proppoolsodamdcache)
+        - 8.1.15 [`status`](#proppoolstatus)
+        - 8.1.16 [`stmtCacheSize`](#proppoolstmtcachesize)
     - 8.2 [Pool Methods](#poolmethods)
-        - 8.2.1 [`close()`](#poolclose)
+        - 8.2.1 [`close()`](#poolclose), [`terminate()`](#poolclose)
         - 8.2.2 [`getConnection()`](#getconnectionpool)
-        - 8.2.3 [`terminate()`](#terminate)
+        - 8.2.3 [`getStatistics()`](#poolgetstatistics)
+        - 8.2.4 [`logStatistics()`](#poollogstatistics)
+        - 8.2.5 [`reconfigure()`](#poolreconfigure)
 9. [ResultSet Class](#resultsetclass)
     - 9.1 [ResultSet Properties](#resultsetproperties)
         - 9.1.1 [`metaData`](#rsmetadata)
@@ -1111,6 +1115,7 @@ Constant Name                   | Value |Description
 `oracledb.POOL_STATUS_CLOSED`   | 6002  | The connection pool has been closed.
 `oracledb.POOL_STATUS_DRAINING` | 6001  | The connection pool is being drained of in-use connections and will be force closed soon.
 `oracledb.POOL_STATUS_OPEN`     | 6000  | The connection pool is open.
+`oracledb.POOL_STATUS_RECONFIGURING` | 6003 | A [`pool.reconfigure()`](#poolreconfigure) call is processing.
 
 #### <a name="oracledbconstantssoda"></a> 3.1.11 Simple Oracle Document Access (SODA) Constants
 
@@ -1744,12 +1749,17 @@ oracledb.poolMaxPerShard = 0;
 Number poolMin
 ```
 
-The minimum number of connections a connection pool maintains, even
-when there is no activity to the target database.
+The number of connections established to the database when a pool is created.
+Also this is the minimum number of connections that a pool maintains when it
+shrinks, see [`poolTimeout`](#propdbpooltimeout).
 
 The default value is 0.
 
 This property may be overridden when [creating a connection pool](#createpool).
+
+A fixed pool size where `poolMin` equals `poolMax` [is strongly
+recommended](#conpoolsizing).  This helps prevent connection storms and helps
+overall system stability.
 
 For pools created with [External Authentication](#extauth), with
 [`homogeneous`](#createpoolpoolattrshomogeneous) set to *false*, or when using
@@ -1757,13 +1767,8 @@ For pools created with [External Authentication](#extauth), with
 connections initially created is zero even if a larger value is specified for
 `poolMin`.  Also in these cases the pool increment is always 1, regardless of
 the value of [`poolIncrement`](#createpoolpoolattrspoolincrement).  Once the
-number of open connections exceeds `poolMin` and connections are idle for more
-than the [`poolTimeout`](#propdbpooltimeout) seconds, then the number of open
+number of open connections exceeds `poolMin` then the number of open
 connections does not fall below `poolMin`.
-
-A fixed pool size where `poolMin` equals `poolMax` [is strongly
-recommended](#conpoolsizing).  This helps prevent connection storms and helps
-overall system stability.
 
 ##### Example
 
@@ -1816,10 +1821,20 @@ oracledb.poolPingInterval = 60;     // seconds
 Number poolTimeout
 ```
 
-The number of seconds after which idle connections (unused in the
-pool) are terminated.  Idle connections are terminated only when the
-pool is accessed.  If the `poolTimeout` is set to 0, then idle
-connections are never terminated.
+The `poolTimeout` property allows the number of open connections in a pool to
+shrink to [`poolMin`](#propdbpoolmin).
+
+If the application returns connections to the pool with `connection.close()`,
+and the connections are then unused for more than `poolTimeout` seconds, then
+any excess connections above `poolMin` will be closed.  When using Oracle
+Client prior to version 21, this pool shrinkage is only initiated when the pool
+is accessed.
+
+If `poolTimeout` is set to 0, then idle connections are never terminated.
+
+If you wish to change `poolTimeout` with
+[`pool.reconfigure()`](#poolreconfigure), then the initial `poolTimeout` used
+by `oracledb.createPool()` must be non-zero.
 
 The default value is 60.
 
@@ -2128,6 +2143,24 @@ This optional property overrides the
 
 This property was added in node-oracledb 2.2.
 
+###### <a name="createpoolpoolattrsstats"></a> 3.3.1.1.3 `enableStatistics`
+
+```
+Boolean enableStatistics
+```
+
+Recording of pool statistics can be enabled by setting `enableStatistics` to
+*true*.  Statistics can be retrieved with
+[`pool.getStatistics()`](#poolgetstatistics), or
+[`pool.logStatistics()`](#poollogstatistics).  See [Connection Pool
+Monitoring](#connpoolmonitor).
+
+The default value is *false*.
+
+This property was added in node-oracledb 5.2.  The older, equivalent alias
+`_enableStats` can still be used, but it will be removed in a future version of
+node-oracledb.
+
 ###### <a name="createpoolpoolattrsevents"></a> 3.3.1.1.3 `events`
 
 ```
@@ -2141,7 +2174,7 @@ This optional property overrides the
 
 This property was added in node-oracledb 2.2.
 
-###### <a name="createpoolpoolattrsexternalauth"></a> 3.3.1.1.4 `externalAuth`
+###### <a name="createpoolpoolattrsexternalauth"></a> 3.3.1.1.5 `externalAuth`
 
 ```
 Boolean externalAuth
@@ -2161,7 +2194,7 @@ The `user` (or `username`) and `password` properties should not be set when
 Note prior to node-oracledb 0.5 this property was called
 `isExternalAuth`.
 
-###### <a name="createpoolpoolattrshomogeneous"></a> 3.3.1.1.5 `homogeneous`
+###### <a name="createpoolpoolattrshomogeneous"></a> 3.3.1.1.6 `homogeneous`
 
 ```
 Boolean homogeneous
@@ -2192,7 +2225,7 @@ Authentication](#connpoolproxy) for details and examples.
 
 This property was added in node-oracledb 2.3.
 
-###### <a name="createpoolpoolattrspassword"></a> 3.3.1.1.6 `password`
+###### <a name="createpoolpoolattrspassword"></a> 3.3.1.1.7 `password`
 
 ```
 String password
@@ -2204,7 +2237,7 @@ password is also necessary if a proxy user is specified at pool creation.
 If `homogeneous` is *false*, then the password may be omitted at pool
 creation but given in subsequent `pool.getConnection()` calls.
 
-###### <a name="createpoolpoolattrspoolalias"></a> 3.3.1.1.7 `poolAlias`
+###### <a name="createpoolpoolattrspoolalias"></a> 3.3.1.1.8 `poolAlias`
 
 ```
 String poolAlias
@@ -2220,7 +2253,7 @@ See [Connection Pool Cache](#connpoolcache) for details and examples.
 
 This property was added in node-oracledb 1.11.
 
-###### <a name="createpoolpoolattrspoolincrement"></a> 3.3.1.1.8 `poolIncrement`
+###### <a name="createpoolpoolattrspoolincrement"></a> 3.3.1.1.9 `poolIncrement`
 
 ```
 Number poolIncrement
@@ -2234,7 +2267,7 @@ The default value is 1.
 This optional property overrides the
 [`oracledb.poolIncrement`](#propdbpoolincrement) property.
 
-###### <a name="createpoolpoolattrspoolmax"></a> 3.3.1.1.9 `poolMax`
+###### <a name="createpoolpoolattrspoolmax"></a> 3.3.1.1.10 `poolMax`
 
 ```
 Number poolMax
@@ -2253,7 +2286,7 @@ Number of Threads](#numberofthreads).
 
 See [Connection Pooling](#connpooling) for other pool sizing guidelines.
 
-###### <a name="createpoolpoolattrspoolmaxpershard"></a> 3.3.1.1.10 `poolMaxPerShard`
+###### <a name="createpoolpoolattrspoolmaxpershard"></a> 3.3.1.1.11 `poolMaxPerShard`
 
 ```
 Number poolMaxPerShard
@@ -2267,21 +2300,22 @@ This optional property overrides the
 
 This property was added in node-oracledb 4.1.
 
-###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.11 `poolMin`
+###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.12 `poolMin`
 
 ```
 Number poolMin
 ```
 
-The minimum number of connections a connection pool maintains, even
-when there is no activity to the target database.
+The number of connections established to the database when a pool is created.
+Also this is the minimum number of connections that a pool maintains when it
+shrinks.
 
 The default value is 0.
 
-This optional property overrides the
-[`oracledb.poolMin`](#propdbpoolmin) property.
+This optional property overrides the [`oracledb.poolMin`](#propdbpoolmin)
+property.
 
-###### <a name="createpoolpoolattrspoolpinginterval"></a> 3.3.1.1.12 `poolPingInterval`
+###### <a name="createpoolpoolattrspoolpinginterval"></a> 3.3.1.1.13 `poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -2299,7 +2333,7 @@ This optional property overrides the
 
 See [Connection Pool Pinging](#connpoolpinging) for more discussion.
 
-###### <a name="createpoolpoolattrspooltimeout"></a> 3.3.1.1.13 `poolTimeout`
+###### <a name="createpoolpoolattrspooltimeout"></a> 3.3.1.1.14 `poolTimeout`
 
 ```
 Number poolTimeout
@@ -2314,7 +2348,7 @@ The default value is 60.
 This optional property overrides the
 [`oracledb.poolTimeout`](#propdbpooltimeout) property.
 
-###### <a name="createpoolpoolattrsqueuemax"></a> 3.3.1.1.14 `queueMax`
+###### <a name="createpoolpoolattrsqueuemax"></a> 3.3.1.1.15 `queueMax`
 
 ```
 Number queueMax
@@ -2336,13 +2370,13 @@ This optional property overrides the
 
 This property was added in node-oracledb 5.0.
 
-###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.15 `queueRequests`
+###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.16 `queueRequests`
 
 This property was removed in node-oracledb 3.0 and queuing was always enabled.
 In node-oracledb 5.0, set `queueMax` to 0 to disable queuing.  See [Connection
 Pool Queue](#connpoolqueue) for more information.
 
-###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.16 `queueTimeout`
+###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.17 `queueTimeout`
 
 ```
 Number queueTimeout
@@ -2357,7 +2391,7 @@ The default value is 60000.
 This optional property overrides the
 [`oracledb.queueTimeout`](#propdbqueuetimeout) property.
 
-###### <a name="createpoolpoolattrssessioncallback"></a> 3.3.1.1.17 `sessionCallback`
+###### <a name="createpoolpoolattrssessioncallback"></a> 3.3.1.1.18 `sessionCallback`
 
 ```
 String sessionCallback | function sessionCallback(Connection connection, String requestedTag, function callback(Error error, Connection connection){})
@@ -2414,7 +2448,7 @@ information.
 
 This property was added in node-oracledb 3.1.
 
-###### <a name="createpoolpoolattrssodamdcache"></a> 3.3.1.1.18 `sodaMetaDataCache`
+###### <a name="createpoolpoolattrssodamdcache"></a> 3.3.1.1.19 `sodaMetaDataCache`
 
 ```
 Boolean sodaMetaDataCache
@@ -2430,14 +2464,16 @@ The default is *false*.
 There is no global equivalent for setting this attribute.  SODA metadata caching
 is restricted to pooled connections only.
 
-Note: if the metadata of a collection is changed, the cache can get out of sync.
+Note: if the metadata of a collection is changed externally, the cache can get
+out of sync.  If this happens, the cache can be cleared by calling
+[`pool.reconfigure({ sodaMetadataCache: false })`](#poolreconfigure).  A second
+call to `reconfigure()` should then be made to re-enable the cache.
 
 This property was added in node-oracledb 5.2.  It requires Oracle Client 21.3
 (or later).  The feature is also available in Oracle Client 19c from 19.11
 onwards.
 
-
-###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.19 `stmtCacheSize`
+###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.20 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -2449,7 +2485,7 @@ The number of statements to be cached in the
 This optional property overrides the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.20 `user`, `username`
+###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.21 `user`, `username`
 
 ```
 String user
@@ -5625,15 +5661,26 @@ readonly Number connectionsOpen
 The number of currently open connections in the underlying connection
 pool.
 
-#### <a name="proppoolpoolalias"></a> 8.1.3 `pool.poolAlias`
+#### <a name="proppoolenablestatistics"></a> 8.1.3 `pool.enableStatistics`
+
+```
+readonly Boolean enableStatistics
+```
+
+Whether pool usage statistics are being recorded.
+
+#### <a name="proppoolpoolalias"></a> 8.1.4 `pool.poolAlias`
 
 ```
 readonly Number poolAlias
 ```
 
-The alias of this pool in the [connection pool cache](#connpoolcache).  An alias cannot be changed once the pool has been created.  This property will be undefined for the second and subsequent pools that were created without an explicit alias specified.
+The alias of this pool in the [connection pool cache](#connpoolcache).  An
+alias cannot be changed once the pool has been created.  This property will be
+undefined for the second and subsequent pools that were created without an
+explicit alias specified.
 
-#### <a name="proppoolpoolincrement"></a> 8.1.4 `pool.poolIncrement`
+#### <a name="proppoolpoolincrement"></a> 8.1.5 `pool.poolIncrement`
 
 ```
 readonly Number poolIncrement
@@ -5644,7 +5691,7 @@ request exceeds the number of currently open connections.
 
 See [`oracledb.poolIncrement`](#propdbpoolincrement).
 
-#### <a name="proppoolpoolmax"></a> 8.1.5 `pool.poolMax`
+#### <a name="proppoolpoolmax"></a> 8.1.6 `pool.poolMax`
 
 ```
 readonly Number poolMax
@@ -5655,7 +5702,7 @@ pool.
 
 See [`oracledb.poolMax`](#propdbpoolmax).
 
-#### <a name="proppoolpoolmin"></a> 8.1.6 `pool.poolMin`
+#### <a name="proppoolpoolmin"></a> 8.1.7 `pool.poolMin`
 
 ```
 readonly Number poolMin
@@ -5666,7 +5713,7 @@ when there is no activity to the target database.
 
 See [`oracledb.poolMin`](#propdbpoolmin).
 
-#### <a name="proppoolpoolpinginterval"></a> 8.1.7 `pool.poolPingInterval`
+#### <a name="proppoolpoolpinginterval"></a> 8.1.8 `pool.poolPingInterval`
 
 ```
 readonly Number poolPingInterval
@@ -5679,7 +5726,7 @@ returning that connection to the application.
 
 See [`oracledb.poolPingInterval`](#propdbpoolpinginterval).
 
-#### <a name="proppoolpooltimeout"></a> 8.1.8 `pool.poolTimeout`
+#### <a name="proppoolpooltimeout"></a> 8.1.9 `pool.poolTimeout`
 
 ```
 readonly Number poolTimeout
@@ -5691,7 +5738,7 @@ poolMin.
 
 See [`oracledb.poolTimeout`](#propdbpooltimeout).
 
-#### <a name="proppoolqueuemax"></a> 8.1.9 `pool.queueMax`
+#### <a name="proppoolqueuemax"></a> 8.1.10 `pool.queueMax`
 
 ```
 readonly Number queueMax
@@ -5704,12 +5751,12 @@ See [`oracledb.queueMax`](#propdbqueuemax).
 
 This property was added in node-oracledb 5.0.
 
-#### <a name="proppoolqueuerequests"></a> 8.1.10 `pool.queueRequests`
+#### <a name="proppoolqueuerequests"></a> 8.1.11 `pool.queueRequests`
 
 This property was removed in node-oracledb 3.0.  See [Connection Pool
 Queue](#connpoolqueue) for more information.
 
-#### <a name="proppoolqueueTimeout"></a> 8.1.11 `pool.queueTimeout`
+#### <a name="proppoolqueueTimeout"></a> 8.1.12 `pool.queueTimeout`
 
 ```
 readonly Number queueTimeout
@@ -5720,7 +5767,7 @@ the queue before the request is terminated.
 
 See [`oracledb.queueTimeout`](#propdbqueuetimeout).
 
-#### <a name="proppoolsessioncallback"></a> 8.1.12 `pool.sessionCallback`
+#### <a name="proppoolsessioncallback"></a> 8.1.13 `pool.sessionCallback`
 
 ```
 readonly Function sessionCallback
@@ -5732,7 +5779,7 @@ when the connection is brand new.
 
 See [Connection Tagging and Session State](#connpooltagging).
 
-#### <a name="proppoolsodamdcache"></a> 8.1.13 `pool.sodaMetaDataCache`
+#### <a name="proppoolsodamdcache"></a> 8.1.14 `pool.sodaMetaDataCache`
 
 ```
 readonly Boolean sodaMetaDataCache
@@ -5742,7 +5789,7 @@ Whether the pool has a metadata cache enabled for SODA collection access.
 
 See [Using the SODA Metadata Cache](#sodamdcache).
 
-#### <a name="proppoolstatus"></a> 8.1.14 `pool.status`
+#### <a name="proppoolstatus"></a> 8.1.15 `pool.status`
 
 ```
 readonly Number status
@@ -5755,7 +5802,7 @@ pool is open, being drained of in-use connections, or has been closed.
 
 See [Connection Pool Closing and Draining](#conpooldraining).
 
-#### <a name="proppoolstmtcachesize"></a> 8.1.15 `pool.stmtCacheSize`
+#### <a name="proppoolstmtcachesize"></a> 8.1.16 `pool.stmtCacheSize`
 
 ```
 readonly Number stmtCacheSize
@@ -5768,15 +5815,18 @@ See [`oracledb.stmtCacheSize`](#propdbstmtcachesize).
 
 ### <a name="poolmethods"></a> 8.2 Pool Methods
 
-#### <a name="poolclose"></a> 8.2.1 `pool.close()`
+#### <a name="poolclose"></a> <a name="terminate"></a> 8.2.1 `pool.close()`
 
 ##### Prototype
 
 Callback:
+
 ```
 close([Number drainTime,] function(Error error){});
 ```
+
 Promise:
+
 ```
 promise = close([Number drainTime]);
 ```
@@ -5810,6 +5860,9 @@ Net Configuration](#tnsadmin).
 
 When the pool is closed, it will be removed from the [connection pool
 cache](#connpoolcache).
+
+If `pool.close()` is called while the pool is already closed, draining, or
+[reconfiguring](#poolreconfigure), then an error will be thrown.
 
 This method was added to node-oracledb 1.9, replacing the equivalent
 alias `pool.terminate()`.
@@ -5925,9 +5978,165 @@ pools.
     *Error error* | If `getConnection()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
     *Connection connection* | The newly created connection.   If `getConnection()` fails, `connection` will be NULL.  See [Connection class](#connectionclass) for more details.
 
-#### <a name="terminate"></a> 8.2.3 `pool.terminate()`
+#### <a name="poolgetstatistics"></a> 8.2.3 `pool.getStatistics()`
 
-An alias for [pool.close()](#poolclose).
+##### Prototype
+
+Callback:
+```
+getStatistics(function(Error error, Object poolStatistics){});
+```
+
+Promise:
+
+```
+promise = getStatistics();
+```
+
+##### Description
+
+Returns an object containing pool queue statistics, pool settings, and related
+environment variables.  The object is described in [Connection Pool
+Monitoring](#connpoolmonitor).
+
+Recording of statistics must have previously been enabled with
+[`enableStatistics`](#createpoolpoolattrsstats) during pool creation or with
+[`pool.reconfigure()`](#poolreconfigure).  If the pool is open, but
+`enableStatistics` is *false*, then null will be returned.
+
+If `getStatistics()` is called while the pool is closed, draining, or
+[reconfiguring](#poolreconfigure), then an error will be thrown.
+
+This function was added in node-oracledb 5.2.
+
+#### <a name="poollogstatistics"></a> 8.2.4 `pool.logStatistics()`
+
+##### Prototype
+
+Callback:
+```
+logStatistics(function(Error error){});
+```
+
+Promise:
+
+```
+promise = logStatistics();
+```
+
+##### Description
+
+Displays pool queue statistics, pool settings, and related environment
+variables to the console.  Recording of statistics must have previously been
+enabled with [`enableStatistics`](#createpoolpoolattrsstats) during pool
+creation or with [`pool.reconfigure()`](#poolreconfigure).
+
+An error will be thrown if `logStatistics()` is called while the pool is
+closed, draining, [reconfiguring](#poolreconfigure), or when `enableStatistics`
+is *false*.
+
+See [Connection Pool Monitoring](#connpoolmonitor).
+
+This function was added in node-oracledb 5.2.  The older, equivalent function
+`_logStats()` can still be used, but it will be removed in a future version of
+node-oracledb.
+
+#### <a name="poolreconfigure"></a> 8.2.5 `pool.reconfigure()`
+
+##### Prototype
+
+Callback:
+```
+reconfigure(Object poolAttrs, function(Error error){});
+```
+
+Promise:
+
+```
+promise = reconfigure(Object poolAttrs);
+```
+
+##### Description
+
+Allows a subset of pool creation properties to be changed without needing to
+restart the pool or restart the application.  Properties such as the maximum
+number of connections in the pool, or the statement cache size used by
+connections can be changed.
+
+Properties are optional.  Unspecified properties will leave those pool
+properties unchanged.  The properties are processed in two stages.  After any
+size change has been processed, reconfiguration on the other properties is done
+sequentially.  If an error such as an invalid value occurs when changing one
+property, then an error will be thrown but any already changed properties will
+retain their new values.
+
+During reconfiguration, [`pool.status`](#proppoolstatus) will be
+[`POOL_STATUS_RECONFIGURING`](#oracledbconstantspool) and:
+
+- Any `pool.getConnection()` call will be [queued](#connpoolqueue) until after
+  the pool has been reconfigured and a connection is available.  Queuing of
+  these requests is subject to the queue
+  [`queueTimeout`](#createpoolpoolattrsqueuetimeout) and
+  [`queueMax`](#createpoolpoolattrsqueuemax) settings in effect when
+  `pool.getConnection()` is called.
+
+- Closing connections with [`connection.close()`](#connectionclose) will wait
+  until reconfiguration is complete.
+
+- Trying to close the pool during reconfiguration will throw an error.
+
+##### Example
+
+```javascript
+await pool.reconfigure({poolMin: 5, poolMax: 10, increment: 5});
+```
+
+##### Parameters
+
+-   ```
+    Object poolAttrs
+    ```
+
+    The `oracledb.createPool()` properties that can be changed with
+    `pool.reconfigure()` are:
+
+    Property                                            |
+    ----------------------------------------------------|
+    [`enableStatistics`](#createpoolpoolattrsstats)
+    [`poolIncrement`](#createpoolpoolattrspoolincrement)
+    [`poolMax`](#createpoolpoolattrspoolmax)
+    [`poolMaxPerShard`](#createpoolpoolattrspoolmaxpershard)
+    [`poolMin`](#createpoolpoolattrspoolmin)
+    [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
+    [`poolTimeout`](#createpoolpoolattrspooltimeout)
+    [`queueMax`](#createpoolpoolattrsqueuemax)
+    [`queueRequests`](#createpoolpoolattrsqueuerequests)
+    [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
+    [`sodaMetaDataCache`](#createpoolpoolattrssodamdcache)
+    [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+
+    A `resetStatistics` property can also be set to *true*.  This zeros the
+    current pool statistics, with the exception of `queueMax` which is set to
+    the current queue length.  Statistics are also reset when statistics
+    recording is turned on with the `enableStatistics` property.
+
+    Changing `queueMax`, `queueTimeout`, or resetting statistics does not
+    affect any currently queued connection requests.  If connections are not
+    made available to currently queued requests, those queued requests will
+    timeout based on the `queueTimeout` value in effect when they were
+    originally added to the connection pool queue.  If pool statistics are
+    enabled, then these failed requests will be counted in
+    [`requestTimeouts`](#poolstats) and included in the queue time statistics.
+
+-   ```
+    function(Error error)
+    ```
+
+    The parameters of the callback function are:
+
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `reconfigure()` succeeds, `error` is null.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 ## <a name="resultsetclass"></a> 9. ResultSet Class
 
@@ -8553,8 +8762,9 @@ process.env.UV_THREADPOOL_SIZE = 10
 
 If you set `UV_THREADPOOL_SIZE` too late, the setting will be ignored and the
 default thread pool size of 4 will still be used.  Note that
-[`pool._logStats()`](#connpoolmonitor) can only show the value of the variable,
-not the actual size of the thread pool.
+[`pool.getStatistics()`](#poolgetstatistics) and
+[`pool.logStatistics()`](#poollogstatistics) can only give the value of the
+variable, not the actual size of the thread pool created.
 
 The '[libuv][21]' library used by Node.js 12.5 and earlier limits the number of
 threads to 128.  In Node.js 12.6 onward the limit is 1024.  You should restrict
@@ -8660,7 +8870,8 @@ Pools are created by calling [`oracledb.createPool()`](#createpool).  Generally
 applications will create a pool once as part of initialization.  After an
 application finishes using a connection pool, it should release all connections
 and terminate the connection pool by calling the [`pool.close()`](#poolclose)
-method.
+method.  During runtime, some pool properties can be changed with
+[`pool.reconfigure()`](#poolreconfigure).
 
 Connections from the pool are obtained with
 [`pool.getConnection()`](#getconnectionpool).  If all connections in a pool are
@@ -8767,18 +8978,32 @@ See [webapp.js][189] for a runnable example.
 The characteristics of a connection pool are determined by its attributes
 [`poolMin`](#proppoolpoolmin), [`poolMax`](#proppoolpoolmax),
 [`poolIncrement`](#proppoolpoolincrement), and
-[`poolTimeout`](#proppoolpooltimeout).  Pool expansion happens when the
-following are all true: (i) [`pool.getConnection()`](#getconnectionpool) is
-called and (ii) all the currently established connections in the pool are
-"checked out" by previous `pool.getConnection()` calls and are in-use by the
-application, and (iii) the number of those connections is less than the pool's
-`poolMax` setting.  Note that when [external authentication](#extauth) or
-[heterogeneous pools](#connpoolproxy) are used, the pool growth behavior is
-different.
+[`poolTimeout`](#proppoolpooltimeout).
 
-Importantly, if you increase the size of the pool, you must [increase the number
-of threads](#numberofthreads) used by Node.js before Node.js starts its
-threadpool.
+Importantly, if you increase the size of the pool, you must increase the number
+of threads used by Node.js before Node.js starts its threadpool.  See
+[Connections, Threads, and Parallelism](#numberofthreads).
+
+Pool expansion happens when the following are all true: (i)
+[`pool.getConnection()`](#getconnectionpool) is called and (ii) all the
+currently established connections in the pool are "checked out" by previous
+`pool.getConnection()` calls and are in-use by the application, and (iii) the
+number of those connections is less than the pool's `poolMax` setting.
+
+Pool shrinkage happens when the application returns connections to the pool,
+and they are then unused for more than [`poolTimeout`](#propdbpooltimeout)
+seconds.  Any excess connections above `poolMin` will then be closed.  Prior to
+using Oracle Client 21, this pool shrinkage was only initiated when the pool
+was accessed.
+
+For pools created with [External Authentication](#extauth), with
+[`homogeneous`](#createpoolpoolattrshomogeneous) set to *false*, or when using
+[Database Resident Connection Pooling (DRCP)](#drcp), then the number of
+connections initially created is zero even if a larger value is specified for
+`poolMin`.  Also in these cases the pool increment is always 1, regardless of
+the value of [`poolIncrement`](#createpoolpoolattrspoolincrement).  Once the
+number of open connections exceeds `poolMin` then the number of open
+connections does not fall below `poolMin`.
 
 The Oracle Real-World Performance Group's recommendation is to use fixed size
 connection pools.  The values of `poolMin` and `poolMax` should be the same (and
@@ -8795,13 +9020,14 @@ time.
 
 The Real-World Performance Group also recommends keeping pool sizes small, as
 this may perform better than larger pools.  Use
-[`pool._logStats()`](#connpoolmonitor) to monitor pool usage.  The pool
+[`pool.getStatistics()`](#poolgetstatistics) or
+[`pool.logStatistics()`](#poollogstatistics) to monitor pool usage.  The pool
 attributes should be adjusted to handle the desired workload within the bounds
-of available resources in Node.js and the database.
+of resources available to Node.js and the database.
 
 Make sure any firewall, [resource manager][101] or user profile
 [`IDLE_TIME`][100] does not expire idle connections, since this will require
-connections be recreated, which will impact performance and scalability.  See
+connections to be recreated which will impact performance and scalability.  See
 [Preventing Premature Connection Closing](#connectionpremclose).
 
 #### <a name="conpooldraining"></a> 15.3.2 Connection Pool Closing and Draining
@@ -8811,8 +9037,8 @@ killed without [`pool.close()`](#poolclose) being called successfully, then some
 time may pass before the unused database-side of connections are automatically
 cleaned up in the database.
 
-When `pool.close()` is called with no parameter, the pool will be closed only if
-all connections have been released to the pool with `connection.close()`.
+When `pool.close()` is called with no parameter, the pool will be closed only
+if all connections have been released to the pool with `connection.close()`.
 Otherwise an error is returned and the pool will not be closed.
 
 An optional `drainTime` parameter can be used to force the pool closed
@@ -8875,6 +9101,9 @@ process
   .once('SIGINT',  closePoolAndExit);
 ```
 
+If `pool.close()` is called while a [`pool.reconfigure()`](#poolreconfigure) is
+taking place, then an error will be thrown.
+
 #### <a name="connpoolcache"></a> 15.3.3 Connection Pool Cache
 
 When pools are created, they can be given a named alias.  The alias
@@ -8908,12 +9137,20 @@ async function init() {
 There can be multiple pools in the cache if each pool is created with
 a unique alias.
 
-If a pool is created without providing a pool alias, and a pool with
-an alias of 'default' is not in the cache already, this pool will be
-cached using the alias 'default'.  This pool is used by default in
-methods that utilize the connection pool cache.  If subsequent pools
-are created without explicit aliases, they will be not stored in the
-pool cache.
+If a pool is created without providing a pool alias:
+
+- If no other pool in the cache already has the alias of 'default', then the
+  new pool will be cached using the [`pool.poolAlias`](#proppoolpoolalias)
+  'default'.
+
+  This pool is used by default in methods that utilize the connection pool
+  cache.
+
+- If an existing pool in the cache already has the alias 'default', then
+  [`pool.poolAlias`](#proppoolpoolalias) of the new pool will be undefined and
+  the pool will be not stored in the pool cache.  The application must retain a
+  variable for subsequent pool use: `const pool = await oracledb.createPool({
+  . . . })`.
 
 Methods that can affect or use the connection pool cache include:
 - [oracledb.createPool()](#createpool) - can add a pool to the cache
@@ -9050,10 +9287,11 @@ await connection.close();
 
 #### <a name="connpoolqueue"></a> 15.3.4 Connection Pool Queue
 
-The number of users that can be concurrently doing database operations is
-limited by the pool [`poolMax`](#propdbpoolmax) value.  Node-oracledb queues any
-additional connection requests to prevent users from immediately getting errors
-that the database is not available.  The connection pool queue allows
+The number of users that can concurrently do database operations is limited by
+the number of connections in the pool.  The maximum number of connections is
+[`poolMax`](#propdbpoolmax).  Node-oracledb queues any additional
+`pool.getConnection()` requests to prevent users from immediately getting an
+error that the database is not available.  The connection pool queue allows
 applications to gracefully handle more users than there are connections in the
 pool, and to handle connection load spikes without having to set `poolMax` too
 large for general operation.
@@ -9074,12 +9312,13 @@ connection request timeout* to the application.
 
 If more than [`oracledb.queueMax`](#propdbqueuemax) pending connection requests
 are in the queue, then `pool.getConnection()` calls will immediately return an
-error *NJS-076: connection request rejected. Pool queue length queueMax reached*
-and will not be queued.  Use this to protect against connection request storms.
-The setting helps applications return errors early when many connections are
-requested concurrently.  This avoids connection requests blocking (for up to
-[`poolTimeout`](#propdbpooltimeout)) while waiting an available pooled
-connection.  It lets you see when the pool is too small.
+error *NJS-076: connection request rejected. Pool queue length queueMax
+reached* and will not be queued.  Use this to protect against connection
+request storms.  The setting helps applications return errors early when many
+connections are requested concurrently.  This avoids connection requests
+blocking (for up to [`queueTimeout`](#propdbqueuetimeout) seconds) while
+waiting an available pooled connection.  It lets you see when the pool is too
+small.
 
 You may also experience *NJS-040* or *NJS-076* errors if your application is not
 correctly closing connections, or [UV_THREADPOOL_SIZE](#numberofthreads) is too
@@ -9087,78 +9326,82 @@ small.
 
 #### <a name="connpoolmonitor"></a> 15.3.5 Connection Pool Monitoring
 
-Connection pool usage should be monitored to choose the appropriate connection
-pool settings for your workload.
+Connection pool usage should be monitored to choose the appropriate settings
+for your workload.  If the current settings are non optimal, then
+[pool.reconfigure()](#poolreconfigure) can be called to alter the
+configuration.
 
-The Pool attributes [`connectionsInUse`](#proppoolconnectionsinuse)
-and [`connectionsOpen`](#proppoolconnectionsopen) provide basic
-information about an active pool.
+Pool attributes [`connectionsInUse`](#proppoolconnectionsinuse) and
+[`connectionsOpen`](#proppoolconnectionsopen) provide basic information about
+an active pool.  The recording of [pool queue](#connpoolqueue) statistics, pool
+settings, and related environment variables can be enabled by setting
+`enableStatistics` to *true* during [pool creation](#createpool) or [pool
+reconfiguration](#poolreconfigure).
 
-Further statistics can be enabled by setting the
-[`createPool()`](#createpool) `poolAttrs` parameter `_enableStats` to
-*true*.  Statistics can be output to the console by calling the
-`pool._logStats()` method.  The underscore prefixes indicate that
-these are private attributes and methods.  **This interface may be
-altered or enhanced in the future**.
-
-To enable recording of queue statistics:
+To enable recording of queue statistics when creating the pool:
 
 ```javascript
-const pool = await oracledb.createPool (
+const pool = await oracledb.createPool(
   {
-    _enableStats  : true,   // default is false
-    user          : "hr",
-    password      : mypw,   // mypw contains the hr schema password
-    connectString : "localhost/XEPDB1"
+    enableStatistics : true,   // default is false
+    user             : "hr",
+    password         : mypw,   // mypw contains the hr schema password
+    connectString    : "localhost/XEPDB1"
   });
   . . .
 ```
 
-The application can later, on some developer-chosen event, display the
-current statistics to the console by calling:
+Statistics can alternatively be enabled on a running queue with:
 
 ```javascript
-pool._logStats();
+await poolReconfigure({ enableStatistics: true });
 ```
 
-The output contains pool queue statistics, pool settings, and related
-environment variables.
+The application can then get the current statistics by calling
+[`pool.getStatistics()`](#poolgetstatistics) to return an object with the
+statistics, or by calling [`pool.logStatistics()`](#poollogstatistics) to print
+the statistics to the console.
 
-##### Statistics
 
-The statistics displayed by `_logStats()` in this release are:
+##### <a name="poolstats"></a> Pool Statistics
 
-Statistic                 | Description
---------------------------|-------------
-total up time             | The number of milliseconds this pool has been running.
-total connection requests | Number of `getConnection()` requests made by the application to this pool.
-total requests enqueued   | Number of `getConnection()` requests that were added to this pool's queue (waiting for the application to return an in-use connection to the pool) because every connection in this pool was already being used.
-total requests dequeued   | Number of `getConnection()` requests that were dequeued when a connection in this pool became available for use.
-total requests failed     | Number of `getConnection()` requests that invoked the underlying C API callback with an error state. Does not include queue size limit or queue timeout errors.
-total requests exceeding queueMax | Number of `getConnection()` requests rejected because the number of connections in the queue exceeded [`queueMax`](#propdbqueuemax).
-total request timeouts    | Number of queued `getConnection()` requests that were timed out after they had spent [queueTimeout](#propdbqueuetimeout) or longer in the pool queue.
-max queue length          | Maximum number of `getConnection()` requests that were ever waiting in the queue at one time.
-sum of time in queue      | The sum of the time (milliseconds) that dequeued requests spent in the pool queue.
-min time in queue         | The minimum time (milliseconds) that any dequeued request spent in the pool queue.
-max time in queue         | The maximum time (milliseconds) that any dequeued request spent in the pool queue.
-avg time in queue         | The average time (milliseconds) that dequeued requests spent in the pool queue.
-pool connections in use   | The number of connections from this pool that `getConnection()` returned successfully to the application and have not yet been released back to the pool.
-pool connections open     | The number of connections in this pool that have been established to the database.
+Statistics are calculated from the time the pool was created, or since
+[pool.reconfigure()](#poolreconfigure) was used to reset the statistics.
 
-Note that for efficiency, the minimum, maximum, average, and sum of times in
-the queue are calculated when requests are removed from the queue.  They
-include times for connection requests that were dequeued when a pool connection
-became available, and also for connection requests that timed out.  The
-statistics do not include times for connection requests still waiting in the
-queue.
+For efficiency, the minimum, maximum, average, and sum of times in the pool
+queue are calculated when requests are removed from the queue.  They include
+times for connection requests that were dequeued when a pool connection became
+available, and also for connection requests that timed out.  They do not
+include times for connection requests still waiting in the queue.
 
-The sum of 'total requests failed', 'total requests exceeding queueMax', and
-'total request timeouts' is the number of `pool.getConnection()` calls that
+The sum of 'requests failed', 'requests exceeding queueMax', and 'requests
+exceeding queueTimeout' is the number of `pool.getConnection()` calls that
 failed.
 
-##### Attribute Values
+`getStatistics()` attribute | `logStatistics()` description   | Description
+----------------------------|---------------------------------|------------------------------------------------------------------------------------
+`gatheredDate`              | gathered at                     | The time the statistics were taken.
+`upTime`                    | up time                         | The number of milliseconds since this pool was created.
+`upTimeSinceReset`          | up time from last reset         | The number of milliseconds since the statistics were initialized or reset.
+`connectionRequests`        | connection requests             | Number of `getConnection()` requests made to this pool.
+`requestsEnqueued`          | requests enqueued               | Number of `getConnection()` requests that were added to this pool's queue (waiting for the application to return an in-use connection to the pool) because every connection in this pool was already being used.
+`requestsDequeued`          | requests dequeued               | Number of `getConnection()` requests that were dequeued when a connection in this pool became available for use.
+`failedRequests`            | requests failed                 | Number of `getConnection()` requests that failed due to an Oracle Database error. Does not include [`queueMax`](#propdbqueuemax) or [`queueTimeout`](#propdbqueuetimeout) errors.
+`rejectedRequests`          | requests exceeding queueMax     | Number of `getConnection()` requests rejected because the number of connections in the pool queue exceeded the [`queueMax`](#propdbqueuemax) limit.
+`requestTimeouts`           | requests exceeding queueTimeout | Number of queued `getConnection()` requests that were timed out from the pool queue because they exceeded the [`queueTimeout`](#propdbqueuetimeout) time.
+`currentQueueLength`        | current queue length            | Current number of `getConnection()` requests that are waiting in the pool queue.
+`maximumQueueLength`        | maximum queue length            | Maximum number of `getConnection()` requests that were ever waiting in the pool queue at one time.
+`timeInQueue`               | sum of time in queue            | The sum of the time (milliseconds) that dequeued requests spent in the pool queue.
+`minimumTimeInQueue`        | minimum time in queue           | The minimum time (milliseconds) that any dequeued request spent in the pool queue.
+`maximumTimeInQueue`        | maximum time in queue           | The maximum time (milliseconds) that any dequeued request spent in the pool queue.
+`averageTimeInQueue`        | average time in queue           | The average time (milliseconds) that dequeued requests spent in the pool queue.
+`connectionsInUse`          | pool connections in use         | The number of connections from this pool that `getConnection()` returned successfully to the application and have not yet been released back to the pool.
+`connectionsOpen`           | pool connections open           | The number of idle or in-use connections to the database that the pool is currently managing.
 
-The `_logStats()` method also shows attribute values of the pool:
+
+##### Pool Attribute Values
+
+The `getStatistics()` and `logStatistics()` methods record the pool attributes:
 
 Attribute                                   |
 --------------------------------------------|
@@ -9170,25 +9413,19 @@ Attribute                                   |
 [`poolIncrement`](#propdbpoolincrement)     |
 [`poolTimeout`](#propdbpooltimeout)         |
 [`poolPingInterval`](#propdbpoolpinginterval) |
+[`poolMaxPerShard`](#propdbpoolmaxpershard)   |
 [`sessionCallback`](#proppoolsessioncallback) |
 [`stmtCacheSize`](#proppoolstmtcachesize)     |
 [`sodaMetaDataCache`](#proppoolsodamdcache)   |
 
-##### Pool Status
+##### Pool Related Environment Variables
 
-The `_logStats()` method also shows the pool status:
+The `getStatistics()` and `logStatistics()` methods also have one related
+environment variable:
 
-Attribute                   |
-----------------------------|
-[`status`](#proppoolstatus) |
-
-##### Related Environment Variables
-
-One related environment variable is is shown by `_logStats()`:
-
-Environment Variable                                 | Description
------------------------------------------------------|-------------
-[`process.env.UV_THREADPOOL_SIZE`](#numberofthreads) | The number of worker threads for this process.  Note this shows the value of the variable, however if this variable was set after the thread pool starts, the thread pool will actually be the default size of 4.
+`getStatistics()` attribute | `logStatistics()` description   | Description
+----------------------------|---------------------------------|------------------------------------------------------------------------------------
+`threadPoolSize`            | UV_THREADPOOL_SIZE              | The value of [`process.env.UV_THREADPOOL_SIZE`](#numberofthreads) which is the number of worker threads for this process.  Note this shows the value of the variable, however if this variable was set after the thread pool started, the thread pool will still be the default size of 4.
 
 #### <a name="connpoolpinging"></a> 15.3.6 Connection Pool Pinging
 
@@ -15954,6 +16191,11 @@ await oracledb.createPool({
 });
 ```
 
+If the metadata of a collection is changed externally, the cache can get out of
+sync.  If this happens, the cache can be cleared by calling
+[`pool.reconfigure({ sodaMetadataCache: false })`](#poolreconfigure).  A second
+call to `reconfigure()` should then be made to re-enable the cache.
+
 Note the cache is not used by `soda.createCollection()` when explicitly passing
 metadata.  In this case, instead of using only `soda.createCollection()` and
 relying on its behavior of opening an existing collection like:
@@ -16561,6 +16803,15 @@ const connection = await oracledb.getConnection(
 
 The value can also be overridden in the `poolAttrs` parameter to
 the [`createPool()`](#createpool) method.
+
+When using Oracle Client 21 (or later), changing the cache size with
+[`pool.reconfigure()`](#poolreconfigure) does not immediately affect
+connections previously acquired and currently in use.  When those connections
+are subsequently released to the pool and re-acquired, they will then use the
+new value.  When using Oracle Client prior to version 21, changing the pool's
+statement cache size has no effect on connections that already exist in the
+pool but will affect new connections that are subsequently created, for example
+when the pool grows.
 
 With Oracle Database 12c, or later, the statement cache size can be
 automatically tuned with the [Oracle Client Configuration](#oraaccess)
