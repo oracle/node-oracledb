@@ -707,7 +707,9 @@ Open a terminal window and run the install script in the mounted package, for ex
 $ /Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru/install_ic.sh
 ```
 
-This copies the contents to `$HOME/Downloads/instantclient_19_8`.
+This copies the contents to `$HOME/Downloads/instantclient_19_8`.  Applications
+may not have access to the `Downloads` directory, so you should move Instant
+Client somewhere convenient.
 
 In Finder, eject the mounted Instant Client package.
 
@@ -728,6 +730,8 @@ hdiutil unmount /Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru
 ```
 
 The Instant Client directory will be `$HOME/Downloads/instantclient_19_8`.
+Applications may not have access to the `Downloads` directory, so you should
+move Instant Client somewhere convenient.
 
 ##### Configure Instant Client
 
