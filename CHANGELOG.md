@@ -617,7 +617,7 @@ and
   available from GitHub and oss.oracle.com.
 
   The steps for self-hosting a node-oracledb package have changed, see
-  [INSTALL](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#selfhost).
+  [INSTALL](https://oracle.github.io/node-oracledb/INSTALL.html#selfhost).
 
 - Fixed a crash with high frequency notifications from CQN
   ([#1009](https://github.com/oracle/node-oracledb/issues/1009)).

@@ -108,7 +108,7 @@ assist.data = {
     "0",
     "8",
     "http://www.ORACLE.com",
-    "https://github.com/oracle/node-oracledb/blob/master/doc/api.md",
+    "https://github.com/oracle/node-oracledb/blob/main/doc/api.md",
     "1234",
     "9876.54321",
     "1991-06-01",

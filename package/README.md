@@ -43,7 +43,7 @@ In a clone or copy of the repository:
   versions and pre-built node-oracledb binaries.
 
 The
-[`package.json`](https://github.com/oracle/node-oracledb/blob/master/package.json)
+[`package.json`](https://github.com/oracle/node-oracledb/blob/main/package.json)
 in GitHub doesn't have an `install` script target by default.  This means that
 node-gyp will be invoked to compile node-oracledb.  This allows installation
 from GitHub [source

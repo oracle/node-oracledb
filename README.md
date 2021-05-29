@@ -66,10 +66,10 @@ limitations under the License.
 [4]: https://oracle.github.io/node-oracledb
 [5]: https://node-oracledb.slack.com/
 [6]: https://join.slack.com/t/node-oracledb/shared_invite/enQtNDU4Mjc2NzM5OTA2LWMzY2ZlZDY5MDdlMGZiMGRkY2IzYjI5OGU4YTEzZWM5YjQ3ODUzMjcxNWQyNzE4MzM5YjNkYjVmNDk5OWU5NDM
-[30]: https://github.com/oracle/node-oracledb/blob/master/examples
-[31]: https://github.com/oracle/node-oracledb/blob/master/examples/example.js#L32
+[30]: https://github.com/oracle/node-oracledb/blob/main/examples
+[31]: https://github.com/oracle/node-oracledb/blob/main/examples/example.js#L32
 [32]: https://oracle.github.io/node-oracledb/doc/api.html
-[33]: https://github.com/oracle/node-oracledb/blob/master/CHANGELOG.md
-[34]: https://github.com/oracle/node-oracledb/blob/master/test/README.md
-[35]: https://github.com/oracle/node-oracledb/blob/master/CONTRIBUTING.md
+[33]: https://github.com/oracle/node-oracledb/blob/main/CHANGELOG.md
+[34]: https://github.com/oracle/node-oracledb/blob/main/test/README.md
+[35]: https://github.com/oracle/node-oracledb/blob/main/CONTRIBUTING.md
 [36]: http://www.apache.org/licenses/LICENSE-2.0

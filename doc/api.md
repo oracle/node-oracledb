@@ -12179,9 +12179,9 @@ await connection.execute(
 ```
 
 See the examples
-[plsqlproc.js](https://github.com/oracle/node-oracledb/tree/master/examples/plsqlproc.js)
+[plsqlproc.js](https://github.com/oracle/node-oracledb/tree/main/examples/plsqlproc.js)
 and
-[plsqlfunc.js](https://github.com/oracle/node-oracledb/tree/master/examples/plsqlfunc.js).
+[plsqlfunc.js](https://github.com/oracle/node-oracledb/tree/main/examples/plsqlfunc.js).
 
 #### <a name="plsqlcompwarnings"></a> 17.7.1 PL/SQL Compilation Warnings
 
@@ -17283,7 +17283,7 @@ can be asked at [AskTom][158].
 
 [1]: https://www.npmjs.com/package/oracledb
 [2]: https://oracle.github.io/node-oracledb/INSTALL.html
-[3]: https://github.com/oracle/node-oracledb/tree/master/examples
+[3]: https://github.com/oracle/node-oracledb/tree/main/examples
 [4]: https://github.com/oracle/db-sample-schemas
 [5]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-CFA006CA-6FF1-4972-821E-6996142A51C6
 [6]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F9662FFB-EAEF-495C-96FC-49C6D1D9625C
@@ -17318,22 +17318,22 @@ can be asked at [AskTom][158].
 [35]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-48547756-9C0B-4D14-BE85-E7ADDD1A3A66
 [36]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7A18022A-E40D-4880-B3CE-7EE9864756CA
 [37]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=NETRF
-[38]: https://github.com/oracle/node-oracledb/tree/master/examples/resultset1.js
-[39]: https://github.com/oracle/node-oracledb/tree/master/examples/resultset2.js
-[40]: https://github.com/oracle/node-oracledb/tree/master/examples/refcursor.js
-[41]: https://github.com/oracle/node-oracledb/tree/master/examples/selectstream.js
+[38]: https://github.com/oracle/node-oracledb/tree/main/examples/resultset1.js
+[39]: https://github.com/oracle/node-oracledb/tree/main/examples/resultset2.js
+[40]: https://github.com/oracle/node-oracledb/tree/main/examples/refcursor.js
+[41]: https://github.com/oracle/node-oracledb/tree/main/examples/selectstream.js
 [42]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-578B5988-31E2-4D0F-ACEA-95C827F6012B
 [44]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-35810313-029E-4CB8-8C27-DF432FA3C253
 [47]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FAFD1247-06E5-4E64-917F-AEBD4703CF40
 [48]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C1400094-18D5-4F36-A2C9-D28B0E12FD8C
-[49]: https://github.com/oracle/node-oracledb/tree/master/examples/dbmsoutputgetline.js
-[50]: https://github.com/oracle/node-oracledb/tree/master/examples/dbmsoutputpipe.js
-[51]: https://github.com/oracle/node-oracledb/tree/master/examples/lobinsert2.js
-[52]: https://github.com/oracle/node-oracledb/tree/master/examples/lobbinds.js
-[53]: https://github.com/oracle/node-oracledb/tree/master/examples/lobplsqltemp.js
+[49]: https://github.com/oracle/node-oracledb/tree/main/examples/dbmsoutputgetline.js
+[50]: https://github.com/oracle/node-oracledb/tree/main/examples/dbmsoutputpipe.js
+[51]: https://github.com/oracle/node-oracledb/tree/main/examples/lobinsert2.js
+[52]: https://github.com/oracle/node-oracledb/tree/main/examples/lobbinds.js
+[53]: https://github.com/oracle/node-oracledb/tree/main/examples/lobplsqltemp.js
 [54]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1EF347AE-7FDA-4B41-AFE0-DD5A49E8B370
 [57]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=ADJSN
-[58]: https://github.com/oracle/node-oracledb/tree/master/examples/plsqlarray.js
+[58]: https://github.com/oracle/node-oracledb/tree/main/examples/plsqlarray.js
 [59]: https://blogs.oracle.com/oraclemagazine/on-cursors-sql-and-analytics
 [60]: https://stackoverflow.com/a/43330282/4799035
 [61]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4947CAE8-1F00-4897-BB2B-7F921E495175
@@ -17353,13 +17353,13 @@ can be asked at [AskTom][158].
 [77]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C9054D20-3A70-484F-B11B-CC591A10D609
 [78]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-24109CB5-7BB9-48B2-AD7A-39458AA13C0C
 [79]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7AE9DBE2-5316-4802-99D1-969B72823F02
-[83]: https://github.com/oracle/node-oracledb/blob/master/CHANGELOG.md
-[84]: https://github.com/oracle/node-oracledb/tree/master/examples/rowlimit.js
+[83]: https://github.com/oracle/node-oracledb/blob/main/CHANGELOG.md
+[84]: https://github.com/oracle/node-oracledb/tree/main/examples/rowlimit.js
 [85]: https://blogs.oracle.com/oraclemagazine/on-top-n-and-pagination-queries
 [86]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F9CE0CC3-13AE-4744-A43C-EAC7A71AAAB6__CJAHCAFF
 [87]: https://oracle.github.io/node-oracledb/INSTALL.html#quickstart
 [88]: https://nodejs.org/en/download/
-[89]: https://github.com/oracle/node-oracledb/tree/master/examples/dbconfig.js
+[89]: https://github.com/oracle/node-oracledb/tree/main/examples/dbconfig.js
 [90]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C48021EF-6AEA-427F-95B2-37EFCFEA2400
 [91]: https://www.youtube.com/watch?v=WDJacg0NuLo
 [92]: https://nodejs.org/api/stream.html#stream_readable_destroy_error
@@ -17396,9 +17396,9 @@ can be asked at [AskTom][158].
 [123]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8DDB51EB-D80F-4476-9ABF-D6860C6214D1
 [124]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-9B2F05F9-D841-4493-A42D-A7D89694A2D1
 [125]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-DFA21225-E83C-4177-A79A-B8BA29DC662C
-[126]: https://github.com/oracle/node-oracledb/tree/master/examples/sessionfixup.js
-[127]: https://github.com/oracle/node-oracledb/tree/master/examples/sessiontagging1.js
-[128]: https://github.com/oracle/node-oracledb/tree/master/examples/sessiontagging2.js
+[126]: https://github.com/oracle/node-oracledb/tree/main/examples/sessionfixup.js
+[127]: https://github.com/oracle/node-oracledb/tree/main/examples/sessiontagging1.js
+[128]: https://github.com/oracle/node-oracledb/tree/main/examples/sessiontagging2.js
 [129]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=ADQUE
 [130]: https://www.oracle.com/database/technologies/appdev/xe.html
 [132]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-19423B71-3F6C-430F-84CC-18145CC2A818
@@ -17407,16 +17407,16 @@ can be asked at [AskTom][158].
 [135]: https://github.com/oracle/node-oracledb/blob/v3.1.2/doc/api.md
 [136]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2041545B-58D4-48DC-986F-DCC9D0DEC642
 [137]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-DC7B8CDD-4F89-40CC-875F-F70F673711D4
-[138]: https://github.com/oracle/node-oracledb/tree/master/examples/impres.js
+[138]: https://github.com/oracle/node-oracledb/tree/main/examples/impres.js
 [139]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-683FF8C5-A773-4018-932D-2AF6EC8BC119
-[140]: https://github.com/oracle/node-oracledb/tree/master/examples/selectgeometry.js
-[141]: https://github.com/oracle/node-oracledb/tree/master/examples/plsqlrecord.js
-[142]: https://github.com/oracle/node-oracledb/tree/master/examples/aqraw.js
-[143]: https://github.com/oracle/node-oracledb/tree/master/examples/aqobject.js
-[144]: https://github.com/oracle/node-oracledb/tree/master/examples/aqoptions.js
-[145]: https://github.com/oracle/node-oracledb/tree/master/examples/aqmulti.js
-[146]: https://github.com/oracle/node-oracledb/tree/master/examples/selectvarray.js
-[147]: https://github.com/oracle/node-oracledb/tree/master/examples/plsqlrecord.js
+[140]: https://github.com/oracle/node-oracledb/tree/main/examples/selectgeometry.js
+[141]: https://github.com/oracle/node-oracledb/tree/main/examples/plsqlrecord.js
+[142]: https://github.com/oracle/node-oracledb/tree/main/examples/aqraw.js
+[143]: https://github.com/oracle/node-oracledb/tree/main/examples/aqobject.js
+[144]: https://github.com/oracle/node-oracledb/tree/main/examples/aqoptions.js
+[145]: https://github.com/oracle/node-oracledb/tree/main/examples/aqmulti.js
+[146]: https://github.com/oracle/node-oracledb/tree/main/examples/selectvarray.js
+[147]: https://github.com/oracle/node-oracledb/tree/main/examples/plsqlrecord.js
 [148]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C4C426FC-FD23-4B2E-8367-FA5F83F3F23A
 [149]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4848E6A0-58A7-44FD-8D6D-A033D0CCF9CB
 [150]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7E9034D5-0D33-43A1-9012-918350FE148C
@@ -17458,7 +17458,7 @@ can be asked at [AskTom][158].
 [186]: https://static.rainfocus.com/oracle/oow19/sess/1553616880266001WLIh/PF/OOW19_Net_CON4641_1569022126580001esUl.pdf
 [187]: https://support.oracle.com/epmos/faces/DocumentDisplay?id=207303.1
 [188]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=TGDBA
-[189]: https://github.com/oracle/node-oracledb/tree/master/examples/webapp.js
+[189]: https://github.com/oracle/node-oracledb/tree/main/examples/webapp.js
 [190]: https://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/continuous-service-for-apps-on-atpd-5486113.pdf
 [191]: https://docs.oracle.com/en/database/oracle/simple-oracle-document-access/rest/index.html
 [192]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A2E90F08-BC9F-4688-A9D0-4A948DD3F7A9
