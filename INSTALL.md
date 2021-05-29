@@ -1998,12 +1998,10 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [31]: https://www.oracle.com/database/technologies/instant-client/solx8664-downloads.html
 [40]: https://github.com/oracle/node-oracledb/tags
 [41]: https://github.com/oracle/node-oracledb/releases
-[42]: https://oracle.github.io/node-oracledb/doc/api.html#migratev1v2
 [43]: https://github.com/oracle/node-oracledb/blob/main/CHANGELOG.md
 [44]: https://oracle.github.io/node-oracledb/doc/api.html
 [45]: https://www.youtube.com/watch?v=WDJacg0NuLo
 [46]: https://yum.oracle.com/oracle-linux-nodejs.html
-[47]: https://oracle.github.io/node-oracledb/doc/api.html#migrate
 [48]: https://node-oracledb.slack.com/
 [49]: https://join.slack.com/t/node-oracledb/shared_invite/enQtNDU4Mjc2NzM5OTA2LWMzY2ZlZDY5MDdlMGZiMGRkY2IzYjI5OGU4YTEzZWM5YjQ3ODUzMjcxNWQyNzE4MzM5YjNkYjVmNDk5OWU5NDM
 [50]: https://yum.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/x86_64/index.html

@@ -27,7 +27,7 @@ This document contains:
 
 For installation information, see the [Node-oracledb Installation Instructions][2].
 
-##  <a name="contents"></a> Contents
+## <a name="contents"></a> Contents
 
 1. [Introduction](#intro)
     - 1.1 [Node-oracledb Architecture](#architecture)
@@ -550,6 +550,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 34.2 [Migrating from node-oracledb 4.0 to node-oracledb 4.1](#migratev40v41)
     - 34.3 [Migrating from node-oracledb 4.1 to node-oracledb 4.2](#migratev41v42)
     - 34.4 [Migrating from node-oracledb 4.2 to node-oracledb 5.0](#migratev42v50)
+    - 34.5 [Migrating from node-oracledb 5.1 to node-oracledb 5.2](#migratev51v52)
 35. [Useful Resources for Node-oracledb](#otherresources)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
@@ -17258,6 +17259,18 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
   *NJS-009: invalid number of parameters* are now passed through the callback,
   if one is used.  In earlier versions they were thrown without the ability for
   them to be caught.
+
+### <a name="migratev51v52"></a> 34.5 Migrating from node-oracledb 5.1 to node-oracledb 5.2
+
+- Review the [CHANGELOG][83] and take advantage of new features.
+
+- Review the dead connection detection changes and adjust any application error
+  checks to look for the new error *DPI-1080*.
+
+- Replace obsolete uses of `_enableStats` and `_logStats()` with the new
+  functionality [`enableStatistics`](#createpoolpoolattrsstats),
+  [`getStatistics()`](#poolgetstatistics), and
+  [`logStatistics()`](#poollogstatistics).
 
 ## <a name="otherresources"></a> 35. Useful Resources for Node-oracledb
 
