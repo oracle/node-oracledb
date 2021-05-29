@@ -17371,7 +17371,7 @@ can be asked at [AskTom][158].
 [88]: https://nodejs.org/en/download/
 [89]: https://github.com/oracle/node-oracledb/tree/main/examples/dbconfig.js
 [90]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C48021EF-6AEA-427F-95B2-37EFCFEA2400
-[91]: https://www.youtube.com/watch?v=WDJacg0NuLo
+[91]: https://blogs.oracle.com/sql/how-to-create-users-grant-them-privileges-and-remove-them-in-oracle-database
 [92]: https://nodejs.org/api/stream.html#stream_readable_destroy_error
 [93]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-D04AA2A7-2E68-4C5C-BD6E-36C62427B98E
 [94]: https://github.com/oracle/node-oracledb/blob/node-oracledb-v1/doc/api.md

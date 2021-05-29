@@ -23,7 +23,8 @@
  *   to the database.  Production applications should consider using
  *   External Authentication to avoid hard coded credentials.
  *
- *   To create a database user see https://www.youtube.com/watch?v=WDJacg0NuLo
+ *   To create a database user see
+ *   https://blogs.oracle.com/sql/how-to-create-users-grant-them-privileges-and-remove-them-in-oracle-database
  *
  *   Applications can set the connectString value to an Easy Connect
  *   string, or a Net Service Name from a tnsnames.ora file or
