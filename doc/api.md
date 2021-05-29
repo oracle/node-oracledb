@@ -1,4 +1,4 @@
-# node-oracledb 5.2-dev Documentation for the Oracle Database Node.js Add-on
+# node-oracledb 5.2 Documentation for the Oracle Database Node.js Add-on
 
 *Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved.*
 
