@@ -1970,7 +1970,6 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [2]: https://www.python.org/downloads/
 [3]: https://www.oracle.com/database/technologies/instant-client.html
 [4]: https://www.npmjs.com/package/oracledb
-[5]: https://blogs.oracle.com/opal/getting-a-c11-compiler-for-node-4,-5-and-6-on-oracle-linux-6
 [6]: https://support.oracle.com/epmos/faces/DocumentDisplay?id=207303.1
 [7]: https://oracle.github.io/node-oracledb/doc/api.html#connectionstrings
 [8]: https://oca.opensource.oracle.com
@@ -1998,7 +1997,6 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [31]: https://www.oracle.com/database/technologies/instant-client/solx8664-downloads.html
 [40]: https://github.com/oracle/node-oracledb/tags
 [41]: https://github.com/oracle/node-oracledb/releases
-[43]: https://github.com/oracle/node-oracledb/blob/main/CHANGELOG.md
 [44]: https://oracle.github.io/node-oracledb/doc/api.html
 [45]: https://www.youtube.com/watch?v=WDJacg0NuLo
 [46]: https://yum.oracle.com/oracle-linux-nodejs.html
