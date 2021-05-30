@@ -3066,6 +3066,10 @@ round-trips.  The `callTimeout` value applies to each round-trip individually,
 not to the sum of all round-trips.  Time spent processing in node-oracledb
 before or after the completion of each round-trip is not counted.
 
+The `callTimeout` setting has no effect when using IPC connections, i.e. when
+node-oracledb is running on the same host as the Oracle Database Network
+listener.
+
 See [Database Call Timeouts](#dbcalltimeouts) for more information about
 limiting statement execution time, and also about limiting the time taken to
 open new connections.
