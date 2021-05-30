@@ -1366,10 +1366,7 @@ like **'dpi.h' file not found**.
 - When cloning the node-oracledb repository, include ODPI-C by doing:
 
   ```
-  git clone https://github.com/oracle/node-oracledb.git
-  cd node-oracledb
-  git submodule init
-  git submodule update
+  git clone --recursive https://github.com/oracle/node-oracledb.git
   ```
 
 With the node-oracledb source code in `your_dir_path/node-oracledb` use a
@@ -1433,10 +1430,7 @@ Oracle has a mirror of the GitHub repository source code that can be cloned
 with:
 
 ```
-git clone git://opensource.oracle.com/git/oracle/node-oracledb.git/
-cd node-oracledb
-git submodule init
-git submodule update
+git clone --recursive git://opensource.oracle.com/git/oracle/node-oracledb.git/
 ```
 
 With the node-oracledb source code in `your_dir_path/node-oracledb` use a
