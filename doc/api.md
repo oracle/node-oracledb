@@ -1228,7 +1228,7 @@ Boolean dbObjectAsPojo
 Specify whether [Oracle Database named objects or collections](#objects)
 that are queried should be returned to the application as "plain old JavaScript
 objects" or kept as database-backed objects.  This option also applies to output
-`BIND_OUT` bind variables.
+`BIND_OUT` [bind variables](#bind).
 
 Note that LOBs in objects will be represented as [Lob](#lobclass) instances and
 will not be String or Buffer, regardless of any `fetchAsString`,
@@ -4368,7 +4368,7 @@ promise = getStatementInfo(String sql);
 
 Parses a SQL statement and returns information about it.  This is most
 useful for finding column names of queries, and for finding the names
-of bind variables used.
+of [bind variables](#bind) used.
 
 This method performs a [round-trip](#roundtrips) to the database, so
 unnecessary calls should be avoided.
@@ -5486,8 +5486,8 @@ This read-only attribute shows the type of Lob being used.  It will have the
 value of one of the constants [`oracledb.BLOB`](#oracledbconstantsnodbtype),
 [`oracledb.CLOB`](#oracledbconstantsnodbtype) or
 [`oracledb.NCLOB`](#oracledbconstantsnodbtype).  The value is derived from the
-bind type when using LOB bind variables, or from the column type when a LOB is
-returned by a query.
+bind type when using [LOB bind variables](#lobbinds), or from the column type
+when a LOB is returned by a query.
 
 ### <a name="lobmethods"></a> 7.2 Lob Methods
 
@@ -11540,7 +11540,8 @@ discussed in those links.
 'Web pagination' and limiting the maximum number of rows are discussed in this
 section.  For each 'page' of results, a SQL query is executed to get the
 appropriate set of rows from a table.  Since the query will be executed more
-than once, make sure to use bind variables for row numbers and row limits.
+than once, make sure to use [bind variables](#bind) for row numbers and row
+limits.
 
 Oracle Database 12c SQL introduced an `OFFSET` / `FETCH` clause which
 is similar to the `LIMIT` keyword of MySQL.  See [Row Limiting:
@@ -11744,9 +11745,9 @@ solutions:
   For more information, see the [Statement Caching](#stmtcache)
   documentation.
 
-- Use bind variables otherwise each variant of the statement will have
-  its own statement cache entry and cursor.  With appropriate binding
-  only one entry and cursor will be needed.
+- Use [bind variables](#bind) otherwise each variant of the statement will have
+  its own statement cache entry and cursor.  With appropriate binding only one
+  entry and cursor will be needed.
 
 - Set the database's [*open_cursors*][47] parameter appropriately.
   This parameter specifies the maximum number of cursors that each
@@ -12089,10 +12090,10 @@ Redefinition][98] for more information about EBR.
 
 ### <a name="implicitresults"></a> 17.6 Implicit Results
 
-Oracle Implicit Results allow queries in PL/SQL to be returned to
-Node.js without requiring REF CURSORS or bind variables.  Implicit
-Results requires node-oracledb 4.0, Oracle Database 12.1 or later, and
-Oracle Client 12.1 or later.
+Oracle Implicit Results allow queries in PL/SQL to be returned to Node.js
+without requiring REF CURSORS or [bind variables](#bind).  Implicit Results
+requires node-oracledb 4.0, Oracle Database 12.1 or later, and Oracle Client
+12.1 or later.
 
 PL/SQL code uses `DBMS_SQL.RETURN_RESULT()` to return query results.
 These are accessible in the `execute()` callback
