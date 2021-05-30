@@ -1723,15 +1723,20 @@ oracledb.poolMax = 4;
 Number poolMaxPerShard
 ```
 
-Sets the maximum number of connections per [shard](#sharding) for connection
-pools.  This ensures that the pool is balanced towards each shard.
+Sets the maximum number of connection in the pool that can be used for any
+given shard in a sharded database.  This lets connections in the pool be
+balanced across the shards.  A value of zero will not set any maximum number of
+sessions for each shard.
 
 This property may be overridden when [creating a connection pool](#createpool).
 
-When this property is set, and a new connection request would cause the number
-of connections to the target shard to exceed the limit, then that new connection
-request will block until a suitable connection has been released back to the
-pool.  The pending connection request will consume one worker thread.
+When this property is greater than zero, and a new connection request would
+cause the number of connections to the target shard to exceed the limit, then
+that new connection request will block until a suitable connection has been
+released back to the pool.  The pending connection request will consume one
+worker thread.
+
+See [Connecting to Sharded Databases](#sharding) for more information.
 
 This property was added in node-oracledb 4.1.  It is available when
 node-oracledb uses Oracle client libraries 18.3, or later.
