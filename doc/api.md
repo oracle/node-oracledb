@@ -14416,6 +14416,14 @@ the overhead of scanning all records.
 The bind definitions `bindDefs` can also use "bind by position"
 syntax, see the next examples.
 
+Along with using `executeMany()`, [tune your data loads][197] by reviewing your
+schema design and its triggers, sequences, indexes, partitioning, and redo
+generation.
+
+Attempting to use very large data sets may give the error *DPI-1015: array size
+is too large*.  To avoid this, repeatedly call `executeMany()` with subsets of
+the data.
+
 #### Identifying Affected Rows with `executeMany()`
 
 When executing a DML statement the number of database rows affected
@@ -17476,3 +17484,4 @@ can be asked at [AskTom][158].
 [194]: https://blogs.oracle.com/jsondb/osonformat
 [195]: https://www.oracle.com/database/technologies/faq-nls-lang.html
 [196]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C558F7CF-446E-4078-B045-0B3BB026CB3C
+[197]: https://www.youtube.com/watch?v=PWFb7amjqCE
