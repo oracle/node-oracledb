@@ -558,8 +558,10 @@ For installation information, see the [Node-oracledb Installation Instructions][
 
 ## <a name="intro"></a> 1. Introduction
 
-The [*node-oracledb*][1] add-on for Node.js powers high performance Oracle Database applications.
-Applications can be written in TypeScript, or directly in JavaScript.
+The [*node-oracledb*][1] add-on for Node.js powers high performance Oracle
+Database applications.  You can use node-oracledb in your Node.js TypeScript or
+JavaScript code.  This lets you easily write complex applications, or build
+sopisticated web services using [REST][199] or [GraphQL][200].
 
 This document shows how to use node-oracledb.  The API reference is in the first
 sections of this document and the [user manual](#usermanual) in subsequent
@@ -570,6 +572,7 @@ Almost all the functionality described here is common across all
 current Oracle Databases.  However the documentation may describe some
 database features that are in specific Oracle Database versions,
 editions, or require additional database options or packs.
+
 
 #### Node-oracledb Features
 
@@ -8778,7 +8781,10 @@ If you set `UV_THREADPOOL_SIZE` too late, the setting will be ignored and the
 default thread pool size of 4 will still be used.  Note that
 [`pool.getStatistics()`](#poolgetstatistics) and
 [`pool.logStatistics()`](#poollogstatistics) can only give the value of the
-variable, not the actual size of the thread pool created.
+variable, not the actual size of the thread pool created.  On Linux you can use
+`pstack` to see how many threads are actually running.  Note Node.js will
+create a small number of threads in addition to the expected number of worker
+threads.
 
 The '[libuv][21]' library used by Node.js 12.5 and earlier limits the number of
 threads to 128.  In Node.js 12.6 onward the limit is 1024.  You should restrict
@@ -8797,15 +8803,14 @@ number of worker threads may improve throughput and prevent [deadlocks][22].
 
 #### <a name="parallelism"></a> 15.2.1 Parallelism on a Connection
 
-Each connection to Oracle Database can only do one operation at a time.
+Oracle Database can only execute operations one at a time on each connection.
 Examples of operations include `connection.execute()`,
 `connection.executeMany()`, `connection.queryStream()`,
 `connection.getDbObjectClass()`, `connection.commit()`, `connection.close()`,
 [SODA](#sodaoverview) calls, and streaming from [Lobs](#lobclass).  Multiple
 connections may be in concurrent use, but each connection can only do one thing
 at a time.  Code will not run faster when parallel database operations are
-attempted using a single connection because operations can only be executed
-sequentially by node-oracledb.
+attempted using a single connection.
 
 From node-oracledb 5.2, node-oracledb function calls that use a single
 connection for concurrent database access will be queued in the JavaScript layer
@@ -10309,14 +10314,16 @@ appropriate application-specific recovery.
 
 #### <a name="connectionpremclose"></a> 15.9.1 Preventing Premature Connection Closing
 
-When connections are idle, external timeouts may disconnect them from the
-database.  This can impact scalability, cause connection storms, and lead to
-application errors when invalid connections are attempted to be used.
+When connections are idle, external events may disconnect them from the
+database.  Unnecessarily having to re-establish connections can impact
+scalability, cause connection storms, or lead to application errors when
+invalid connections are attempted to be used.
 
 There are three components to a node-oracledb connection:
 
   1. The memory structure in node-oracledb that is returned by a
-     `getConnection()` call.  It may be stored in a connection pool.
+     `getConnection()` call.  It may be a standalone connection or stored in a
+     connection pool.
 
   2. The underlying network connection between the Oracle Client libraries and the database.
 
@@ -10325,17 +10332,19 @@ There are three components to a node-oracledb connection:
 Node-oracledb connections may become unusable due to network dropouts, database
 instance failures, exceeding user profile resource limits, or by explicit
 session closure of the server process from a DBA.  By default, idle connections
-in connection pools are unaware of these changes, so a `pool.getConnection()`
-call could successfully return a connection to the application that will not be
-usable.  An error would only occur when calling `connection.execute()`, or
-similar.
+(the memory structures) in connection pools are unaware of these events.  A
+subsequent `pool.getConnection()` call could successfully return a "connection"
+to the application that will not be usable.  An error would only occur when
+later calling functions like `connection.execute()`.  Similarly, using a standalone
+connection where the network has dropped out, or the database instance is
+unavailable, will return an error.
 
-Disable any firewall that is killing idle connections.  Also disable the
-database [resource manager][101] and any user resource profile
-[`IDLE_TIME`][100] setting so they do not terminate sessions.  These issues can
-be hidden by node-oracledb's automatic connection re-establishment features so
-it is recommended to use [AWR][62] to check the connection rate, and then fix
-underlying causes.
+To avoid the overhead of connection re-creation, disable any firewall that is
+killing idle connections.  Also disable the database [resource manager][101]
+and any user resource profile [`IDLE_TIME`][100] setting so they do not
+terminate sessions.  These issues can be hidden by node-oracledb's automatic
+connection re-establishment features so it is recommended to use [AWR][62] to
+check the connection rate, and then fix underlying causes.
 
 With Oracle Client 19c, [`EXPIRE_TIME`][159] can be used in
 [`tnsnames.ora`](#tnsnames) connect descriptors or in [Easy Connect
@@ -11178,8 +11187,9 @@ Output is the same as the previous non-resultSet example.
 
 Each ResultSet should be closed when it is no longer needed.
 
-Warning:  You should not concurrently fetch data from nested
-cursors in different data rows because this may give inconsistent results.
+Warning: You should not concurrently fetch data from nested cursors, for
+example with `Promise.all()`, in different data rows because this may give
+inconsistent results.
 
 #### <a name="querymeta"></a> 16.1.6 Query Column Metadata
 
@@ -16826,7 +16836,7 @@ Node-oracledb's [`execute()`](#execute) and
 [`queryStream()`](#querystream) methods use the [Oracle Call Interface
 statement cache][61] to make re-execution of statements efficient.
 This cache removes the need for the separate 'prepare' or 'parse'
-method which is sometimes seen in other Oracle APIs: there is no
+methods which are sometimes seen in other Oracle APIs: there is no
 separate method in node-oracledb.
 
 Each non-pooled connection and each session in the connection pool has
@@ -16845,6 +16855,15 @@ causes cache entries to be flushed before they get a chance to be
 reused.  For example if there are more distinct statements than cache
 slots, and the order of statement execution causes older statements to
 be flushed from the cache before the statements are re-executed.
+
+Disabling the statement cache may also be useful in test and development
+environments where database schema objects are being recreated, or where
+identical query text is used with different `fetchAsString` or `fetchInfo` data
+types.  Doing so can lead to the statement cache becoming invalid, and the
+application receiving various errors, for example *ORA-3106*.  After a
+statement execution error is returned to the application, node-oracledb drops
+that statement from the cache.  This allows subsequent re-executions of the
+statement using that connection to succeed.
 
 The statement cache size can be set globally with [stmtCacheSize](#propdbstmtcachesize):
 
@@ -17549,3 +17568,5 @@ can be asked at [AskTom][158].
 [196]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C558F7CF-446E-4078-B045-0B3BB026CB3C
 [197]: https://www.youtube.com/watch?v=PWFb7amjqCE
 [198]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-951568BF-D798-4456-8478-15FEEBA0C78E
+[199]: https://blogs.oracle.com/oraclemagazine/build-rest-apis-for-nodejs-part-1
+[200]: https://blogs.oracle.com/opal/demo:-graphql-with-node-oracledb
