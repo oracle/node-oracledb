@@ -499,7 +499,8 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 21.4 [REF CURSOR Bind Parameters](#refcursors)
     - 21.5 [LOB Bind Parameters](#lobbinds)
     - 21.6 [Binding Multiple Values to a SQL `WHERE IN` Clause](#sqlwherein)
-    - 21.7 [Binding Column and Table Names in Queries](#sqlbindtablename)
+    - 21.7 [Binding in a `LIKE` or `REGEXP_LIKE` Clause](#sqlbindlike)
+    - 21.8 [Binding Column and Table Names in Queries](#sqlbindtablename)
 22. [Oracle Database Objects and Collections](#objects)
     - 22.1 [Inserting Objects](#objectinsert)
     - 22.2 [Fetching Objects](#objectfetch)
@@ -13731,7 +13732,47 @@ for really large numbers of items, you might prefer to use a global
 temporary table.  Some solutions are given in [On Cursors, SQL, and
 Analytics][59] and in [this StackOverflow answer][60].
 
-### <a name="sqlbindtablename"></a> 21.7 Binding Column and Table Names in Queries
+### <a name="sqlbindlike"></a> 21.7 Binding in a `LIKE` or `REGEXP_LIKE` Clause
+
+To do pattern matching with a `LIKE` clause, bind a string containing the
+pattern match wildcards, for example:
+
+```javascript
+const pattern = "%uth%";
+
+result = await connection.execute(
+  `SELECT CITY FROM LOCATIONS WHERE CITY LIKE :bv`,
+  { bv: pattern }
+);
+console.log(result.rows[0]);
+```
+
+Output is like:
+
+```
+[ [ 'South Brunswick' ], [ 'South San Francisco' ], [ 'Southlake' ] ]
+```
+
+The same is true for regular expression functions such as `REGEXP_LIKE` and
+`REGEXP_SUBSTR`.  For example:
+
+```javascript
+const pattern = ',[^,]+,';
+
+result = await connection.execute(
+  `SELECT REGEXP_SUBSTR('500 Oracle Parkway, Redwood Shores, CA', :bv) FROM DUAL`,
+  { bv: pattern }
+);
+console.log(result.rows);
+```
+
+Output is like:
+
+```
+[ [ ', Redwood Shores,' ] ]
+```
+
+### <a name="sqlbindtablename"></a> 21.8 Binding Column and Table Names in Queries
 
 It is not possible to bind table names in queries.  Instead use a
 hard-coded Allow List of names to build the final SQL statement, for
