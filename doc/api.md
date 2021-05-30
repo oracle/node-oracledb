@@ -3862,8 +3862,11 @@ readonly String lastRowid
 ```
 
 The ROWID of a row affected by an INSERT, UPDATE, DELETE or MERGE statement.
-For other statements, or if no row was affected, it is not set.  If more than
-one row was affected, only the ROWID of the last row is returned.
+For other statements, or if no row was affected, it is not set.
+
+If more than one row was affected, only the ROWID of the last row is returned.
+To get all ROWIDs of multiple rows see [DML RETURNING Bind
+Parameters](#dmlreturn).
 
 This property was added in node-oracledb 4.2.
 
@@ -11693,6 +11696,9 @@ const result = await connection.execute(
 
 console.log(result.outBinds.id);  // print the ID of the inserted row
 ```
+
+Instead of using application generated identifiers, you may prefer to use
+ROWIDs, see [`lastRowid`](#execlastrowid).
 
 ### <a name="cursors1000"></a> 16.2 Cursor Management
 

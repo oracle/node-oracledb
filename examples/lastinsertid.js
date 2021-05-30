@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -16,12 +16,11 @@
  * limitations under the License.
  *
  * NAME
- *   dmlrupd2.js
+ *   lastinsertid.js
  *
  * DESCRIPTION
- *   Example of 'DML Returning' with multiple rows matched.
- *   The ROWIDs of the changed records are returned.  This is how to get
- *   the 'last insert id'.
+ *   Example of inserting a row and getting it's ROWID.
+ *   To return application generated identifiers, see dmlrupd.js.
  *
  *   This example uses Node 8's async/await syntax.
  *
@@ -53,13 +52,9 @@ async function run() {
     //
 
     const stmts = [
-      `DROP TABLE no_dmlrupdtab`,
+      `DROP TABLE no_lastinsertid`,
 
-      `CREATE TABLE no_dmlrupdtab (id NUMBER, name VARCHAR2(40))`,
-
-      `INSERT INTO no_dmlrupdtab VALUES (1001, 'Venkat')`,
-
-      `INSERT INTO no_dmlrupdtab VALUES (1002, 'Neeharika')`
+      `CREATE TABLE no_lastinsertid (id NUMBER, name VARCHAR2(40))`,
     ];
 
     for (const s of stmts) {
@@ -72,30 +67,21 @@ async function run() {
     }
 
     //
-    // Show DML Returning
+    // Execute the SQL statement
     //
 
-    // SQL statement.
-    // Note bind names cannot be reused in the DML section and the RETURNING section
-    const sql =
-          `UPDATE no_dmlrupdtab
-           SET name = :name
-           WHERE id IN (:id1, :id2)
-           RETURNING id, ROWID INTO :ids, :rids`;
+    const sql = `INSERT INTO no_lastinsertid VALUES (:id, :name)`;
 
     const result = await connection.execute(
       sql,
       {
-        id1:   1001,
-        id2:   1002,
-        name:  "Chris",
-        ids:   { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-        rids:  { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+        id:    1000,
+        name:  "Chris"
       },
       { autoCommit: true }
     );
 
-    console.log(result.outBinds);
+    console.log("The ROWID is", result.lastRowid);
 
   } catch (err) {
     console.error(err);

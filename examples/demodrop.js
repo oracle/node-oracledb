@@ -63,6 +63,8 @@ async function run() {
 
       `DROP TABLE no_purchaseorder_b PURGE`,
 
+      `DROP TABLE no_lastinsertid PURGE`,
+
       `DROP TABLE no_dmlrupdtab PURGE`,
 
       `DROP TABLE no_lobs PURGE`,
