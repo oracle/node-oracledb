@@ -16975,6 +16975,9 @@ parameters.
 
 #### Other Tracing Utilities
 
+Oracle Database has a number of tracing capabilities and controls, including
+the [DBMS_MONITOR][198] package.
+
 PL/SQL users may be interested in using [PL/Scope][78].
 
 ## <a name="programstyles"></a> 33. Node.js Programming Styles and node-oracledb
@@ -17497,3 +17500,4 @@ can be asked at [AskTom][158].
 [195]: https://www.oracle.com/database/technologies/faq-nls-lang.html
 [196]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C558F7CF-446E-4078-B045-0B3BB026CB3C
 [197]: https://www.youtube.com/watch?v=PWFb7amjqCE
+[198]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-951568BF-D798-4456-8478-15FEEBA0C78E
