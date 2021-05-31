@@ -6682,15 +6682,16 @@ hint(String hint)
 
 ##### Description
 
-The `hint()` value can be used to pass one or more Oracle hints to [terminal
+The `hint()` value can be used to pass an Oracle hint to [terminal
 SodaOperation Methods](#sodaoperationclassterm).  It is string in the same
-format as [SQL hints][196] but without any comment characters, for example
-`"MONITOR"`.  While you could use this to pass any SQL hint, the hints
-`"MONITOR"` (turn on monitoring) and `"NO_MONITOR"` (turn off monitoring) are
-the most useful.  Use of this function requires Oracle Client 21.3 or higher (or
-Oracle Client 19 from 19.11).
+format as a [SQL hint][196] but without any comment characters, for example
+`hint("MONITOR")`.  Pass only the hint `"MONITOR"` (turn on monitoring) or
+`"NO_MONITOR"` (turn off monitoring).  See the Oracle Database SQL Tuning Guide
+documentation [MONITOR and NO_MONITOR Hints][201] and [Monitoring Database
+Operations][202] for more information.
 
-This method was added in node-oracledb 5.2.
+This method was added in node-oracledb 5.2.  It requires Oracle Client 21.3 or
+higher (or Oracle Client 19 from 19.11).
 
 ###### <a name="sodaoperationclasskey"></a> 10.2.4.1.1.4 `sodaOperation.key()`
 
@@ -7268,16 +7269,18 @@ keys (in default collections), can be found.  Content itself is not returned for
 performance reasons.  When inserting multiple documents, using
 `insertManyAndGet()` is recommended in preference to `insertOneAndGet()`.
 
-The `options` object can have one string property `hint`.  The hints are strings
-without SQL comment characters, for example `{ hint: "MONITOR" }`.  While you
-could use this to pass any [SQL hint][196], the hints `"MONITOR"` (turn on
-monitoring) and `"NO_MONITOR"` (turn off monitoring) are the most useful.  Use
-of the `hint` property requires Oracle Client 21.3 or higher (or Oracle Client
-19 from 19.11).
+The `options` object can have one string property `hint`.  Hints are strings
+without SQL comment characters, for example `{ hint: "MONITOR" }`.  Use only
+the hint `"MONITOR"` (turn on monitoring) or `"NO_MONITOR"` (turn off
+monitoring).  See the Oracle Database SQL Tuning Guide documentation [MONITOR
+and NO_MONITOR Hints][201] and [Monitoring Database Operations][202] for more
+information.
 
 This method is in Preview status and should not be used in production.
 
-This method was added in node-oracledb 4.0.  It requires Oracle Client 18.5 or higher.
+This method was added in node-oracledb 4.0.  It requires Oracle Client 18.5 or
+higher.  Use of the `hint` property requires Oracle Client 21.3 or higher (or
+Oracle Client 19 from 19.11).
 
 This method accepts an options parameter from node-oracledb 5.2 onwards.
 
@@ -7389,19 +7392,20 @@ If you want to insert the document again, use the original `newDocumentContent`
 or `newSodaDocument`.  Alternatively construct a new object from the returned
 document and add content.
 
-The `options` object can have one string property `hint`.  The hints are strings
-without SQL comment characters, for example `{ hint: "MONITOR" }`.  While you
-could use this to pass any [SQL hint][196], the hints `"MONITOR"` (turn on
-monitoring) and `"NO_MONITOR"` (turn off monitoring) are the most useful.  Use
-of the `hint` property requires Oracle Client 21.3 or higher (or Oracle Client
-19 from 19.11).
+The `options` object can have one string property `hint`.  Hints are strings
+without SQL comment characters, for example `{ hint: "MONITOR" }`.  Use only
+the hint `"MONITOR"` (turn on monitoring) or `"NO_MONITOR"` (turn off
+monitoring).  See the Oracle Database SQL Tuning Guide documentation [MONITOR
+and NO_MONITOR Hints][201] and [Monitoring Database Operations][202] for more
+information.
 
 If [`oracledb.autoCommit`](#propdbisautocommit) is *true*, and
 `insertOneAndGet()` succeeds, then any open transaction on the
 connection is committed.
 
 This method was added in node-oracledb 3.0.  This method accepts an options
-parameter from node-oracledb 5.2 onwards.
+parameter from node-oracledb 5.2 onwards.  Use of the `hint` property requires
+Oracle Client 21.3 or higher (or Oracle Client 19 from 19.11).
 
 ##### <a name="sodacollinsertoneandgetparams"></a> 10.2.9.1 `insertOneAndGet()`: Parameters
 
@@ -7486,15 +7490,16 @@ why `saveAndGet()` accepts only a [SodaDocument](#sodadocumentclass), unlike
 keys, then the behavior is exactly the same as
 `sodaCollection.insertOneAndGet()`.
 
-The `options` object can have one string property `hint`.  The hints are strings
-without SQL comment characters, for example `{ hint: "MONITOR" }`.  While you
-could use this to pass any [SQL hint][196], the hints `"MONITOR"` (turn on
-monitoring) and `"NO_MONITOR"` (turn off monitoring) are the most useful.  Use
-of the `hint` property requires Oracle Client 21.3 or higher (or Oracle Client
-19 from 19.11).
+The `options` object can have one string property `hint`.  Hints are strings
+without SQL comment characters, for example `{ hint: "MONITOR" }`.  Use only
+the hint `"MONITOR"` (turn on monitoring) or `"NO_MONITOR"` (turn off
+monitoring).  See the Oracle Database SQL Tuning Guide documentation [MONITOR
+and NO_MONITOR Hints][201] and [Monitoring Database Operations][202] for more
+information.
 
 This method was added in node-oracledb 5.0.  It requires Oracle Client 19.9 or
-later, and Oracle Database 18.3 or later.
+later, and Oracle Database 18.3 or later.  Use of the `hint` property requires
+Oracle Client 21.3 or higher (or Oracle Client 19 from 19.11).
 
 This method accepts an options parameter from node-oracledb 5.2 onwards.
 
@@ -17580,3 +17585,5 @@ can be asked at [AskTom][158].
 [198]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-951568BF-D798-4456-8478-15FEEBA0C78E
 [199]: https://blogs.oracle.com/oraclemagazine/build-rest-apis-for-nodejs-part-1
 [200]: https://blogs.oracle.com/opal/demo:-graphql-with-node-oracledb
+[201]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-19E0F73C-A959-41E4-A168-91E436DEE1F1
+[202]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C941CE9D-97E1-42F8-91ED-4949B2B710BF
