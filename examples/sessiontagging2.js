@@ -62,9 +62,9 @@ if (process.platform === 'win32') { // Windows
 
 // initSession() will be invoked internally when each brand new pooled
 // connection is first used, or when a getConnection() call requests a
-// connection tag and a connection without an identical tag is
-// returned.  Its callback function 'cb' should be invoked only when
-// all desired session state has been set.
+// connection tag and a connection without an identical tag is returned.
+// Its callback function 'callbackFn' should be invoked only when all desired
+// session state has been set.
 //
 // This implementation assumes the tag has name-value pairs like
 // "k1=v1;k2=v2" where the pairs can be used in an ALTER SESSION
@@ -75,7 +75,7 @@ if (process.platform === 'win32') { // Windows
 // asked for in requestedTag.  These can be reset, as needed.
 //
 // See sessiontagging1.js for a simpler implementation.
-function initSession(connection, requestedTag, cb) {
+function initSession(connection, requestedTag, callbackFn) {
   console.log(`In initSession. requested tag: ${requestedTag}, actual tag: ${connection.tag}`);
 
   // Split the requested and actual tags into property components
@@ -115,12 +115,12 @@ function initSession(connection, requestedTag, cb) {
         case 'UTC':
           break;
         default:
-          cb(new Error(`Error: Invalid time zone value ${requestedProperties[k]}`));
+          callbackFn(new Error(`Error: Invalid time zone value ${requestedProperties[k]}`));
           return;
       }
       // add Allow Listing code to check other properties and values here
     } else {
-      cb(new Error(`Error: Invalid connection tag property ${k}`));
+      callbackFn(new Error(`Error: Invalid connection tag property ${k}`));
       return;
     }
     s += `${k}='${requestedProperties[k]}' `;
@@ -138,7 +138,7 @@ function initSession(connection, requestedTag, cb) {
         for (let k in actualProperties) {
           connection.tag += `${k}=${actualProperties[k]};`;
         }
-        cb(err);
+        callbackFn(err);
       }
     );
   } else {
@@ -146,7 +146,7 @@ function initSession(connection, requestedTag, cb) {
     // why initSession was called), but the properties that this
     // function validates are already set, so there is no need to call
     // ALTER SESSION
-    cb();
+    callbackFn();
   }
 }
 

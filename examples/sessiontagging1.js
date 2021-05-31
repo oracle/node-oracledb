@@ -63,18 +63,18 @@ if (process.platform === 'win32') { // Windows
 // initSession() will be invoked internally when each brand new pooled
 // connection is first used, or when a getConnection() call requests a
 // connection tag and a connection without an identical tag is
-// returned.  Its callback function 'cb' should be invoked only when
-// all desired session state has been set.
+// returned.  Its callback function 'callbackFn' should be invoked only
+// when all desired session state has been set.
 // This implementation assumes that every pool.getConnection() will
 // request a tag having the format USER_TZ=X, where X is a valid
 // Oracle timezone.  See sessiontagging2.js for a more complete
 // implementation.
-function initSession(connection, requestedTag, cb) {
+function initSession(connection, requestedTag, callbackFn) {
   console.log(`In initSession. requested tag: ${requestedTag}, actual tag: ${connection.tag}`);
 
   const tagParts = requestedTag.split('=');
   if (tagParts[0] != 'USER_TZ') {
-    cb(new Error('Error: Only property USER_TZ is supported'));
+    callbackFn(new Error('Error: Only property USER_TZ is supported'));
     return;
   }
 
@@ -85,7 +85,7 @@ function initSession(connection, requestedTag, cb) {
     `ALTER SESSION SET TIME_ZONE = '${tagParts[1]}'`,
     (err) => {
       connection.tag = requestedTag; // Record the connection's new state
-      cb(err);
+      callbackFn(err);
     }
   );
 }

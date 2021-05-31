@@ -58,15 +58,15 @@ if (process.platform === 'win32') { // Windows
 }
 
 // initSession() will be invoked internally when each brand new pooled
-// connection is first used.  Its callback function 'cb' should be
+// connection is first used.  Its callback function 'callbackFn' should be
 // invoked only when all desired session state has been set.
 // In this example, the requestedTag and actualTag parameters are
 // ignored.  They would be valid if connection tagging was being used.
 // If you have multiple SQL statements to execute, put them in a
 // single, anonymous PL/SQL block for efficiency.
-function initSession(connection, requestedTag, cb) {
+function initSession(connection, requestedTag, callbackFn) {
   console.log('In initSession');
-  connection.execute(`ALTER SESSION SET TIME_ZONE = 'UTC'`, cb);
+  connection.execute(`ALTER SESSION SET TIME_ZONE = 'UTC'`, callbackFn);
 }
 
 async function init() {
