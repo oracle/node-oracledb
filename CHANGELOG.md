@@ -2,8 +2,6 @@
 
 ## node-oracledb v5.2.0 (7 Jun 2021)
 
-**This release is under development**
-
 - Connection pool changes:
 
     - Pool attributes can be changed during application runtime with
