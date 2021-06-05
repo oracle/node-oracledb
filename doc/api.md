@@ -1682,6 +1682,13 @@ request exceeds the number of currently open connections.
 
 The default value is 1.
 
+With fixed-sized [homogeneous](#createpoolpoolattrshomogeneous) pools (where
+`poolMin` equals `poolMax`), and using Oracle Client 18c (or later), you may
+wish to evaluate setting `poolIncrement` greater than 0.  This can expedite
+regrowth when the number of [connections established](#proppoolconnectionsopen)
+has become lower than `poolMin`, for example if network issues have caused
+connections to become unusable and they have been dropped from the pool.
+
 This property may be overridden when [creating a connection pool](#createpool).
 
 ##### Example
@@ -5665,7 +5672,7 @@ readonly Number connectionsInUse
 
 The number of currently active connections in the connection pool
 i.e. the number of connections currently "checked out" using
-`getConnection()`.
+`pool.getConnection()`.
 
 #### <a name="proppoolconnectionsopen"></a> 8.1.2 `pool.connectionsOpen`
 
@@ -5673,8 +5680,13 @@ i.e. the number of connections currently "checked out" using
 readonly Number connectionsOpen
 ```
 
-The number of currently open connections in the underlying connection
-pool.
+The current number of connections in the pool that are connected through to the
+database.  This number is the sum of connections in use by the application, and
+connections idle in the pool.
+
+It may be less than `poolMin` if connections have been dropped, for example
+with `await connection.close({drop: true})`, or if network problems have caused
+connections to become unusable.
 
 #### <a name="proppoolenablestatistics"></a> 8.1.3 `pool.enableStatistics`
 
@@ -8998,14 +9010,20 @@ See [webapp.js][189] for a runnable example.
 
 #### <a name="conpoolsizing"></a> 15.3.1 Connection Pool Sizing
 
-The characteristics of a connection pool are determined by its attributes
+The main characteristics of a connection pool are determined by its attributes
 [`poolMin`](#proppoolpoolmin), [`poolMax`](#proppoolpoolmax),
 [`poolIncrement`](#proppoolpoolincrement), and
 [`poolTimeout`](#proppoolpooltimeout).
 
-Importantly, if you increase the size of the pool, you must increase the number
-of threads used by Node.js before Node.js starts its threadpool.  See
-[Connections, Threads, and Parallelism](#numberofthreads).
+**Importantly, if you increase the size of the pool, you must increase the number
+of threads used by Node.js before Node.js starts its thread pool.  See
+[Connections, Threads, and Parallelism](#numberofthreads)**.
+
+Setting `poolMin` causes the specified number of connections to be established
+to the database during pool creation.  This allows subsequent
+`pool.getConnection()` calls to return quickly for an initial set of users.  An
+appropriate `poolMax` value avoids overloading the database by limiting the
+maximum number of connections ever opened.
 
 Pool expansion happens when the following are all true: (i)
 [`pool.getConnection()`](#getconnectionpool) is called and (ii) all the
@@ -9015,9 +9033,9 @@ number of those connections is less than the pool's `poolMax` setting.
 
 Pool shrinkage happens when the application returns connections to the pool,
 and they are then unused for more than [`poolTimeout`](#propdbpooltimeout)
-seconds.  Any excess connections above `poolMin` will then be closed.  Prior to
+seconds.  Any excess connections above `poolMin` will be closed.  Prior to
 using Oracle Client 21, this pool shrinkage was only initiated when the pool
-was accessed.
+was later accessed.
 
 For pools created with [External Authentication](#extauth), with
 [`homogeneous`](#createpoolpoolattrshomogeneous) set to *false*, or when using
@@ -9029,17 +9047,16 @@ number of open connections exceeds `poolMin` then the number of open
 connections does not fall below `poolMin`.
 
 The Oracle Real-World Performance Group's recommendation is to use fixed size
-connection pools.  The values of `poolMin` and `poolMax` should be the same (and
-`poolIncrement` equal to zero).  This avoids connection storms which can
-decrease throughput.  See [Guideline for Preventing Connection Storms: Use
-Static Pools][23], which contains more details about sizing of pools.  Having a
-fixed size will guarantee that the database can handle the upper pool size.  For
-example, if a pool needs to grow but the database resources are limited, then
-`pool.getConnection()` may return errors such as *ORA-28547*.  With a fixed pool
-size, this class of error will occur when the pool is created, allowing you to
-change the size before users access the application.  With a dynamically growing
-pool, the error may occur much later after the pool has been in use for some
-time.
+connection pools.  The values of `poolMin` and `poolMax` should be the same.
+This avoids connection storms which can decrease throughput.  See [Guideline
+for Preventing Connection Storms: Use Static Pools][23], which contains more
+details about sizing of pools.  Having a fixed size will guarantee that the
+database can handle the upper pool size.  For example, if a pool needs to grow
+but the database resources are limited, then `pool.getConnection()` may return
+errors such as *ORA-28547*.  With a fixed pool size, this class of error will
+occur when the pool is created, allowing you to change the size before users
+access the application.  With a dynamically growing pool, the error may occur
+much later after the pool has been in use for some time.
 
 The Real-World Performance Group also recommends keeping pool sizes small, as
 this may perform better than larger pools.  Use
@@ -9047,6 +9064,20 @@ this may perform better than larger pools.  Use
 [`pool.logStatistics()`](#poollogstatistics) to monitor pool usage.  The pool
 attributes should be adjusted to handle the desired workload within the bounds
 of resources available to Node.js and the database.
+
+When the values of `poolMin` and `poolMax` are the same, and you are using
+Oracle Client 18c (or later), then `poolIncrement` can be set greater than
+zero.  This changes how a [homogeneous pool](#createpoolpoolattrshomogeneous)
+grows when the number of [connections established](#proppoolconnectionsopen)
+has become lower than `poolMin`, for example if network issues have caused
+connections to become unusable and they have been dropped from the pool.
+Setting `poolIncrement` greater than 1 in this scenario means the next
+`pool.getConnection()` call that needs to grow the pool will initiate the
+creation of multiple connections.  That `pool.getConnection()` call will not
+return until the extra connections have been created, so there is an initial
+time cost.  However it can allow subsequent connection requests to be
+immediately satisfied.  In this growth scenario, a `poolIncrement` of 0 is
+treated as 1.
 
 Make sure any firewall, [resource manager][101] or user profile
 [`IDLE_TIME`][100] does not expire idle connections, since this will require
