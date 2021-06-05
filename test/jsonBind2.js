@@ -71,14 +71,19 @@ describe('254. jsonBind2.js', function() {
       END;
       EXECUTE IMMEDIATE ('
         CREATE TABLE ` + tableName + ` (
-          obj_data BLOB CHECK (obj_data IS JSON))
+          obj_data BLOB CHECK (obj_data IS JSON)) LOB (obj_data) STORE AS (CACHE)
       ');
     END;`;
 
     let result, j;
+    let skip = false;
 
     before (async function() {
       try {
+        if (conn.oracleServerVersion < 1202000000) {
+          skip = true;
+          this.skip();
+        }
         await conn.execute(create_table_sql);
       } catch (err) {
         should.not.exist(err);
@@ -87,7 +92,9 @@ describe('254. jsonBind2.js', function() {
 
     after (async function() {
       try {
-        await conn.execute("DROP TABLE " + tableName + " PURGE");
+        if (!skip) {
+          await conn.execute("DROP TABLE " + tableName + " PURGE");
+        }
       } catch (err) {
         should.not.exist(err);
       }
@@ -207,9 +214,6 @@ describe('254. jsonBind2.js', function() {
     });
 
     it('254.1.6 Using dot-notation to extract a value from a BLOB column', async function() {
-      if (conn.oracleServerVersion < 1202000000) {
-        this.skip();
-      }
       try {
         const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
         const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;

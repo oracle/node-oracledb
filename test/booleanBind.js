@@ -39,7 +39,7 @@ describe('224. booleanBind.js', function()  {
 
   const pkgName = 'NODB_PKG_TEST_BOOLEANS';
   before(async function() {
-    isRunnable = await testsUtil.checkPrerequisites(1200000000, 1200000000);
+    isRunnable = await testsUtil.checkPrerequisites(1200000000, 1202000000);
     if (!isRunnable) {
       this.skip();
     }
