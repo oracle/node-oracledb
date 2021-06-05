@@ -538,7 +538,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 31.1 [Tuning Fetch Performance](#rowfetching)
     - 31.2 [Database Round-trips](#roundtrips)
     - 31.3 [Statement Caching](#stmtcache)
-    - 31.4 [Client Result Cache](#clientresultcache)
+    - 31.4 [Client Result Caching (CRC)](#clientresultcache)
 32. [Tracing SQL and PL/SQL Statements](#tracingsql)
 33. [Node.js Programming Styles and node-oracledb](#programstyles)
     - 33.1 [Callbacks and node-oracledb](#callbackoverview)
@@ -16957,35 +16957,56 @@ satisfaction.
 [SODA](#sodaoverview) internally makes SQL calls, so tuning the statement cache
 is also beneficial for SODA applications.
 
-### <a name="clientresultcache"></a> 31.4 Client Result Cache
+### <a name="clientresultcache"></a> 31.4 Client Result Caching (CRC)
 
-Node-oracledb applications can use Oracle Database's [Client Result Cache][180].
-The CRC enables client-side caching of SQL query (SELECT statement) results in
-client memory for immediate use when the same query is re-executed.  This is
-useful for reducing the cost of queries for small, mostly static, lookup tables,
-such as for postal codes.  CRC reduces network [round-trips](#roundtrips), and
-also reduces database server CPU usage.
+Node-oracledb applications can use Oracle Database's [Client Result Cache][180]
+(CRC).  This enables client-side caching of SQL query (SELECT statement)
+results in client memory for immediate use when the same query is re-executed.
+This is useful for reducing the cost of queries for small, mostly static,
+lookup tables, such as for postal codes.  CRC reduces network
+[round-trips](#roundtrips) and also reduces database server CPU usage.
 
 The cache is at the application process level.  Access and invalidation is
 managed by the Oracle Client libraries.  This removes the need for extra
-application logic, or external utilities, to implement a cache.
+application logic, or external utilities, to implement a cache.  Pooled
+connections can use CRC.  Repeated statement execution on a standalone
+connection will also use it, but sequences of calls using standalone
+connections like `oracledb.getConnection({user:
+...})`/`execute()`/`connection.close()` will not.  CRC requires [statement
+caching](#stmtcache) to be enabled, which is true by default.
 
-CRC can be enabled by setting the [database parameters][181]
-`CLIENT_RESULT_CACHE_SIZE` and `CLIENT_RESULT_CACHE_LAG`, and then restarting
-the database, for example:
+##### Configuring CRC
+
+Client Result Caching can be enabled by setting the [database parameters][181]
+`CLIENT_RESULT_CACHE_SIZE` and `CLIENT_RESULT_CACHE_LAG`, for example:
 
 ```sql
 SQL> ALTER SYSTEM SET CLIENT_RESULT_CACHE_LAG = 3000 SCOPE=SPFILE;
 SQL> ALTER SYSTEM SET CLIENT_RESULT_CACHE_SIZE = 64K SCOPE=SPFILE;
+```
+
+Then restart the database:
+
+```
 SQL> STARTUP FORCE
 ```
 
-Once CRC has been enabled in the database, the values used by the cache in
-Node.js can be tuned in an [`oraaccess.xml`](#oraaccess) file, see [Client
-Configuration Parameters][182].
+or restart the [pluggable database](#startupshutdownpdb), for example:
 
-Tables can be created, or altered, so repeated queries use CRC.  This allows
-existing applications to use CRC without needing modification.  For example:
+```
+SQL> ALTER PLUGGABLE DATABASE CLOSE;
+SQL> ALTER PLUGGABLE DATABASE OPEN;
+```
+
+Once CRC has been enabled in the database, the values used by the cache can
+optionally be tuned in an [`oraaccess.xml`](#oraaccess) file, see [Client
+Configuration Parameters][182].  Also see [Tuning the Result Cache][203], which
+discusses CRC and also the Server Result Cache.
+
+##### Using CRC
+
+Tables can be created, or altered, so queries use CRC.  This allows
+applications to use CRC without needing modification.  For example:
 
 ```sql
 SQL> CREATE TABLE cities (id NUMBER, name VARCHAR2(40)) RESULT_CACHE (MODE FORCE);
@@ -16998,39 +17019,51 @@ Alternatively, hints can be used in SQL statements.  For example:
 SELECT /*+ result_cache */ postal_code FROM locations
 ```
 
+##### Verifying CRC
+
 To verify that CRC is working, you can check the number of executions of your
-query from `V$SQLAREA` and compare it with an uncached query.  When CRC is
-enabled, the number of statement executions is reduced because the statement is
-not sent to the database unnecessarily.
+query in `V$SQLAREA`.  When CRC is enabled in the database, the number of
+statement executions is reduced because the statement is not sent to the
+database unnecessarily.
 
 ```javascript
 // Run some load
 const q = `SELECT postal_code FROM locations`;
 const qc = `SELECT /*+ RESULT_CACHE */ postal_code FROM locations`;
+
 for (let i = 0; i < 100; i++) {
+  connection = await oracledb.getConnection();
   result = await connection.execute(q);
-  result = await connection.execute(qc);
+  await connection.close();
 }
 
-// Compare behaviors
+for (let i = 0; i < 100; i++) {
+  connection = await oracledb.getConnection();
+  result = await connection.execute(qc);
+  await connection.close();
+}
+
+// Compare behaviors (using a connection as SYSTEM)
 const m = `SELECT executions FROM v$sqlarea WHERE sql_text = :q1`;
+
 result = await systemconn.execute(m, [q]);
-console.log('No CRC:', result.rows[0][0], 'executions');
+console.log('No hint:', result.rows[0][0], 'executions');
+
 result = await systemconn.execute(m, [qc]);
-console.log('CRC:', result.rows[0][0], 'executions');
+console.log('CRC hint:', result.rows[0][0], 'executions');
 ```
 
 When CRC is enabled, output will be like:
 
 ```
-No CRC: 100 executions
-CRC: 1 executions
+No hint: 100 executions
+CRC hint: 1 executions
 ```
 
 If CRC is not enabled, output will be like:
 ```
-No CRC: 100 executions
-CRC: 100 executions
+No hint: 100 executions
+CRC hint: 100 executions
 ```
 
 ## <a name="bindtrace"></a> <a name="tracingsql"></a> 32. Tracing SQL and PL/SQL Statements
@@ -17618,3 +17651,4 @@ can be asked at [AskTom][158].
 [200]: https://blogs.oracle.com/opal/demo:-graphql-with-node-oracledb
 [201]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-19E0F73C-A959-41E4-A168-91E436DEE1F1
 [202]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C941CE9D-97E1-42F8-91ED-4949B2B710BF
+[203]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-39C521D4-5C6E-44B1-B7C7-DEADD7D9CAF0
