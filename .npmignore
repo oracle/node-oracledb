@@ -34,3 +34,4 @@ Makefile.win32
 /odpi/.git
 /odpi/.github
 /odpi/.gitattributes
+/odpi/util
