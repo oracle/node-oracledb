@@ -445,7 +445,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 15.9.3 [Runtime Load Balancing (RLB)](#connectionrlb)
         - 15.9.4 [Application Continuity](#appcontinuity)
         - 15.9.5 [Database Call Timeouts](#dbcalltimeouts)
-    - 15.10 [Connecting to Oracle Autonomous Database](#connectionadb)
+    - 15.10 [Connecting to Oracle Cloud Autonomous Databases](#connectionadb)
     - 15.11 [Connecting to Sharded Databases](#sharding)
 16. [SQL Execution](#sqlexecution)
     - 16.1 [SELECT Statements](#select)
@@ -8270,7 +8270,8 @@ A wallet configuration file `cwallet.sso` for secure connection can be located
 with, or separately from, the `tnsnames.ora` and `sqlnet.ora` files.  It should
 be securely stored.  The `sqlnet.ora` file's `WALLET_LOCATION` path should be
 set to the directory containing `cwallet.sso`.  For Oracle Autonomous Database
-use of wallets, see [Connecting to Oracle Autonomous Database](#connectionadb).
+use of wallets, see [Connecting to Oracle Cloud Autonomous
+Databases](#connectionadb).
 
 Note the [Easy Connect Plus](#easyconnect) syntax can set many common
 configuration options without needing `tnsnames.ora` or `sqlnet.ora` files.
@@ -10526,12 +10527,13 @@ successfully within the additional `callTimeout` period.  In this case a
 *DPI-1080* error is returned and the connection will no longer be usable.  The
 application should then close the connection.
 
-### <a name="connectionadb"></a> 15.10 Connecting to Oracle Autonomous Database
+### <a name="connectionadb"></a> 15.10 Connecting to Oracle Cloud Autonomous Databases
 
 To enable connection to Oracle Autonomous Database in Oracle Cloud, a wallet
-needs be downloaded from the cloud GUI, and node-oracledb needs to be configured
-to use it.  A database username and password is still required.  The wallet only
-enables SSL/TLS.
+needs be downloaded from the cloud, and node-oracledb needs to be configured to
+use it.  The wallet gives mutual TLS which provides enhanced security for
+authentication and encryption.  A database username and password is still
+required for your application connections.
 
 ##### Install the Wallet and Network Configuration Files
 
@@ -10539,24 +10541,38 @@ From the Oracle Cloud console for the database download the wallet zip file.  It
 contains the wallet and network configuration files.  Note: keep wallet files in
 a secure location and share them only with authorized users.
 
-Unzip the wallet zip file.
-
-For node-oracledb, only these files from the zip are needed:
+Unzip the wallet zip file.  For node-oracledb, only these files from the zip
+are needed:
 
 - `tnsnames.ora` - Maps net service names used for application connection strings to your database services
 - `sqlnet.ora`  - Configures Oracle Network settings
 - `cwallet.sso` - Enables SSL/TLS connections.  Note the cloud wallet does not contain a database username or password.
 
-The other files and the wallet password are not needed.
+There are now two options:
 
-Place these files as shown in [Optional Oracle Net Configuration](#tnsadmin).
-The `sqlnet.ora` file contains a `WALLET_LOCATION` path to the directory where
-`cwallet.sso` will be read from.  By default this path is `"?/network/admin"`.
-This path maps to the `network/admin` subdirectory of Oracle Instant Client , or
-to the `$ORACLE_HOME/network/admin` subdirectory (when node-oracledb is linked
-with the client libraries from a full client or database installation).  If
-`cwallet.sso` is in a different location, then you will need to edit the path in
-`sqlnet.ora` and set it to the directory containing `cwallet.sso`.
+- Move the three files to the `network/admin` directory of the client libraries
+  used by your application.  For example if you are using Instant Client 19c
+  and it is in `$HOME/instantclient_19_11`, then you would put the wallet files
+  in `$HOME/instantclient_19_11/network/admin/`.
+
+- Alternatively, move them to any accessible directory, for example
+  `/opt/OracleCloud/MYDB`.
+
+  Then edit `sqlnet.ora` and change the wallet location directory to the
+  directory containing the `cwallet.sso` file.  For example::
+
+  ```
+  WALLET_LOCATION = (SOURCE = (METHOD = file) (METHOD_DATA = (DIRECTORY="/opt/OracleCloud/MYDB")))
+  SSL_SERVER_DN_MATCH=yes
+  ```
+
+  Since the `tnsnames.ora` and `sqlnet.ora` files are not in the default
+  location, your application needs to indicate where they are, either with the
+  [`configDir`](#odbinitoracleclientattrsopts) parameter to
+  [`initOracleClient()`](#odbinitoracleclient), or using the `TNS_ADMIN`
+  environment variable.  See [Optional Oracle Net Configuration](#tnsadmin).
+  Neither of these settings are needed, and you don't need to edit
+  `sqlnet.ora`, if you have put all the files in the `network/admin` directory.
 
 ##### Run Your Application
 
@@ -10576,8 +10592,8 @@ connection = await oracledb.getConnection({
 });
 ```
 
-Once you have set Oracle environment variables required by your application,
-such as `ORA_SDTZ` or `TNS_ADMIN`, you can start your application.
+Once you have set optional Oracle environment variables required by your
+application, such as `ORA_SDTZ` or `TNS_ADMIN`, you can start your application.
 
 If you need to create a new database schema so you do not login as the privileged
 ADMIN user, refer to the relevant Oracle Cloud documentation, for example see
@@ -17606,7 +17622,7 @@ can be asked at [AskTom][158].
 [158]: https://asktom.oracle.com/
 [159]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-6140611A-83FC-4C9C-B31F-A41FC2A5B12D
 [160]: https://github.com/oracle/node-oracledb/issues/699#issuecomment-524009129
-[161]: https://docs.oracle.com/en/cloud/paas/atp-cloud/atpud/managing-database-users.html
+[161]: https://docs.oracle.com/en/cloud/paas/autonomous-database/adbdu/managing-database-users.html#GUID-5B94EA60-554A-4BA4-96A3-1D5A3ED5878D
 [162]: https://www.oracle.com//cloud/free/
 [163]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C672E92D-CE32-4759-9931-92D7960850F7
 [164]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=SHARD
