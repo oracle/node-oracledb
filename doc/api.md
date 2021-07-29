@@ -10397,7 +10397,7 @@ and to adjust keepalive timeouts.  With Oracle Client 21c the setting can
 alternatively be in the application's [`sqlnet.ora`](#tnsadmin) file.  The
 general recommendation for `EXPIRE_TIME` is to use a value that is slightly less
 than half of the termination period.  In older versions of Oracle Client, a
-tnsnames.ora connect descriptor option [`ENABLE=BROKEN`][36] can be used instead
+`tnsnames.ora` connect descriptor option [`ENABLE=BROKEN`][36] can be used instead
 of `EXPIRE_TIME`.  These settings can also aid detection of a terminated remote
 database server.
 
@@ -10559,7 +10559,7 @@ There are now two options:
   `/opt/OracleCloud/MYDB`.
 
   Then edit `sqlnet.ora` and change the wallet location directory to the
-  directory containing the `cwallet.sso` file.  For example::
+  directory containing the `cwallet.sso` file.  For example:
 
   ```
   WALLET_LOCATION = (SOURCE = (METHOD = file) (METHOD_DATA = (DIRECTORY="/opt/OracleCloud/MYDB")))
@@ -10619,6 +10619,51 @@ for example:
 
 ```
 cjdb1_high = (description= (address=(https_proxy=myproxy.example.com)(https_proxy_port=80)(protocol=tcps)(port=1522)(host=  . . .
+```
+
+##### Using the Easy Connect Syntax with Autonomous Database
+
+When node-oracledb is using Oracle Client libraries 19c or later, you can
+optionally use the [Easy Connect](#easyconnect) syntax to connect to Oracle
+Autonomous Database.
+
+The mapping from an cloud `tnsnames.ora` entry to an Easy Connect Plus string
+is:
+
+```
+protocol://host:port/service_name?wallet_location=/my/dir&retry_count=N&retry_delay=N
+```
+
+For example, if your `tnsnames.ora` file had an entry:
+
+```
+cjjson_high = (description=(retry_count=20)(retry_delay=3)
+	(address=(protocol=tcps)(port=1522)
+	(host=adb.ap-sydney-1.oraclecloud.com))
+	(connect_data=(service_name=abc_cjjson_high.adb.oraclecloud.com))
+	(security=(ssl_server_cert_dn="CN=adb.ap-sydney-1.oraclecloud.com,OU=Oracle ADB SYDNEY,O=Oracle Corporation,L=Redwood City,ST=California,C=US")))
+```
+
+Then your applications can connect using the connection string:
+
+```javascript
+cs = "tcps://adb.ap-sydney-1.oraclecloud.com:1522/abc_cjjson_high.adb.oraclecloud.com?wallet_location=/Users/cjones/Cloud/CJJSON&retry_count=20&retry_delay=3"
+connection = await oracledb.getConnection({
+  user          : "hr",
+  password      : mypw,
+  connectString : cs
+});
+```
+
+The `wallet_location` parameter needs to be set to the directory containing the
+`cwallet.sso` file from the wallet ZIP.  The other wallet files, including
+`tnsnames.ora`, are not needed when you use the Easy Connect Plus syntax.
+
+You can optionally add other Easy Connect parameters to the connection string,
+for example:
+
+```javascript
+cs = cs + "&https_proxy=myproxy.example.com&https_proxy_port=80"
 ```
 
 ### <a name="sharding"></a> 15.11 Connecting to Sharded Databases
@@ -16354,7 +16399,7 @@ await collection.insertOne(mycontent);
 
 ## <a name="startupshutdown"></a> 30. Database Start Up and Shut Down
 
-There are two groups of database start up and shut down functions::
+There are two groups of database start up and shut down functions:
 
 - Simple usage: [`oracledb.startup()`](#odbstartup) and [`oracledb.shutdown()`](#odbshutdown)
 
