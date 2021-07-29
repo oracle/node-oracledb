@@ -10627,7 +10627,7 @@ When node-oracledb is using Oracle Client libraries 19c or later, you can
 optionally use the [Easy Connect](#easyconnect) syntax to connect to Oracle
 Autonomous Database.
 
-The mapping from an cloud `tnsnames.ora` entry to an Easy Connect Plus string
+The mapping from a cloud `tnsnames.ora` entry to an Easy Connect Plus string
 is:
 
 ```
