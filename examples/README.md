@@ -1,15 +1,15 @@
 # Node-oracledb Examples
 
 This directory contains [node-oracledb](https://www.npmjs.com/package/oracledb)
-examples.  Documentation is [here
-](https://oracle.github.io/node-oracledb/doc/api.html).
+examples.  Documentation is
+[here](https://oracle.github.io/node-oracledb/doc/api.html).
 
 To run the examples:
 
 - [Install node-oracledb](https://oracle.github.io/node-oracledb/INSTALL.html#quickstart).
 
 - Edit `dbconfig.js` and set your username and the database connection string,
-for example:
+  for example:
 
   ```
   module.exports = {
@@ -23,13 +23,15 @@ for example:
 - In a terminal window, set the environment variable `NODE_ORACLEDB_PASSWORD` to
   the value of your database password.
 
-- Review the samples and then run them like:
+- Review the samples and then run them individually.  For example, to see what
+  the file `example.js` does, use:
 
   ```
   node example.js
   ```
 
-- After running example, the demonstration objects can be dropped with `demodrop.js`:
+- After running examples, the demonstration objects can be dropped with
+  `demodrop.js`:
 
   ```
   node demodrop.js
