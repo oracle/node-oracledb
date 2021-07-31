@@ -1,5 +1,9 @@
 # Change Log
 
+## node-oracledb v5.3.0 (DD Mon YYYY)
+
+**This release is under development and information may be incomplete**
+
 ## node-oracledb v5.2.0 (7 Jun 2021)
 
 - Connection pool changes:
