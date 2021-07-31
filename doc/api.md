@@ -6011,22 +6011,15 @@ pools.
 
 ##### Prototype
 
-Callback:
 ```
-getStatistics(function(Error error, Object poolStatistics){});
-```
-
-Promise:
-
-```
-promise = getStatistics();
+getStatistics();
 ```
 
 ##### Description
 
 Returns an object containing pool queue statistics, pool settings, and related
 environment variables.  The object is described in [Connection Pool
-Monitoring](#connpoolmonitor).
+Monitoring](#connpoolmonitor).  Note that this is a synchronous method.
 
 Recording of statistics must have previously been enabled with
 [`enableStatistics`](#createpoolpoolattrsstats) during pool creation or with
@@ -6042,15 +6035,8 @@ This function was added in node-oracledb 5.2.
 
 ##### Prototype
 
-Callback:
 ```
-logStatistics(function(Error error){});
-```
-
-Promise:
-
-```
-promise = logStatistics();
+logStatistics();
 ```
 
 ##### Description
@@ -6058,7 +6044,8 @@ promise = logStatistics();
 Displays pool queue statistics, pool settings, and related environment
 variables to the console.  Recording of statistics must have previously been
 enabled with [`enableStatistics`](#createpoolpoolattrsstats) during pool
-creation or with [`pool.reconfigure()`](#poolreconfigure).
+creation or with [`pool.reconfigure()`](#poolreconfigure).  Note that this is a
+synchronous method.
 
 An error will be thrown if `logStatistics()` is called while the pool is
 closed, draining, [reconfiguring](#poolreconfigure), or when `enableStatistics`
