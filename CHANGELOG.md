@@ -4,6 +4,12 @@
 
 **This release is under development and information may be incomplete**
 
+- Added a
+  [`keepInStmtCache`](https://oracle.github.io/node-oracledb/doc/api.html#propexeckeepinstmtcache)
+  option to `execute()`, `executeMany()`, and `queryStream()` to control
+  whether executed statements are retained in the Statement Cache.
+  ([Issue #182](https://github.com/oracle/node-oracledb/issues/182)).
+
 - Encapsulated the connection pool statistics in a [PoolStatistics
   Class](https://oracle.github.io/node-oracledb/doc/api.html#poolstatisticsclass).
   Added a

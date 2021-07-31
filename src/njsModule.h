@@ -497,6 +497,7 @@ struct njsBaton {
     bool clientInitiated;
     bool dbObjectAsPojo;
     bool sodaMetadataCache;
+    bool keepInStmtCache;
 
     // LOB buffer (requires free only if string was used)
     uint64_t bufferSize;

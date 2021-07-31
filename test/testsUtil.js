@@ -252,6 +252,19 @@ testsUtil.getRoundTripCount = async function(sid) {
   }
 };
 
+
+testsUtil.getParseCount = async function(systemconn, sid) {
+  const sql = `
+     select ss.value
+     from v$sesstat ss, v$statname sn
+     where ss.sid = :sid
+       and ss.statistic# = sn.statistic#
+       and sn.name = 'parse count (total)'`;
+  const result = await systemconn.execute(sql, [sid]);
+  return result.rows[0][0];  // parse count so far in the session
+};
+
+
 testsUtil.createAQtestUser = async function(AQ_USER, AQ_USER_PWD) {
 
   if (!dbconfig.test.DBA_PRIVILEGE) {

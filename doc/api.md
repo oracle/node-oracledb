@@ -194,10 +194,11 @@ For installation information, see the [Node-oracledb Installation Instructions][
                 - 4.2.6.3.3 [`extendedMetaData`](#propexecextendedmetadata)
                 - 4.2.6.3.4 [`fetchArraySize`](#propexecfetcharraysize)
                 - 4.2.6.3.5 [`fetchInfo`](#propexecfetchinfo)
-                - 4.2.6.3.6 [`maxRows`](#propexecmaxrows)
-                - 4.2.6.3.7 [`outFormat`](#propexecoutformat)
-                - 4.2.6.3.8 [`prefetchRows`](#propexecprefetchrows)
-                - 4.2.6.3.9 [`resultSet`](#propexecresultset)
+                - 4.2.6.3.6 [`keepInStmtCache`](#propexeckeepinstmtcache)
+                - 4.2.6.3.7 [`maxRows`](#propexecmaxrows)
+                - 4.2.6.3.8 [`outFormat`](#propexecoutformat)
+                - 4.2.6.3.9 [`prefetchRows`](#propexecprefetchrows)
+                - 4.2.6.3.10 [`resultSet`](#propexecresultset)
             - 4.2.6.4 [`execute()`: Callback Function](#executecallback)
                 - 4.2.6.4.1 [`implicitResults`](#execimplicitresults)
                 - 4.2.6.4.2 [`lastRowid`](#execlastrowid)
@@ -216,6 +217,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
                 - 4.2.7.3.3 [`bindDefs`](#executemanyoptbinddefs)
                     - [`dir`](#executemanyoptbinddefs), [`maxSize`](#executemanyoptbinddefs), [`type`](#executemanyoptbinddefs)
                 - 4.2.7.3.4 [`dmlRowCounts`](#executemanyoptdmlrowcounts)
+                - 4.2.7.3.5 [`keepInStmtCache`](#executemanyoptkeepinstmtcache)
             - 4.2.7.4 [`executeMany()`: Callback Function](#executemanycallback)
                 - 4.2.7.4.1 [`batchErrors`](#execmanybatcherrors)
                 - 4.2.7.4.2 [`dmlRowCounts`](#execmanydmlrowscounts)
@@ -3815,7 +3817,23 @@ by Node.js and V8 memory restrictions.
 See [Query Result Type Mapping](#typemap) for more information on query type
 mapping.
 
-###### <a name="propexecmaxrows"></a> 4.2.6.3.6 `maxRows`
+###### <a name="propexeckeepinstmtcache"></a> 4.2.6.3.6 `keepInStmtCache`
+
+```
+Boolean keepInStmtCache
+```
+
+When `keepInStmtCache` is *true*, and statement caching is enabled, then the
+statement will be added to the cache if it is not already present.  This helps
+the performance of re-executed statements.  See [Statement
+Caching](#stmtcache).
+
+The default value is *true*.
+
+This attribute was added in node-oracledb 5.3.  In earlier versions, statements
+were always added to the statement cache, if caching was enabled.
+
+###### <a name="propexecmaxrows"></a> 4.2.6.3.7 `maxRows`
 
 ```
 Number maxRows
@@ -3823,7 +3841,7 @@ Number maxRows
 
 Overrides [`oracledb.maxRows`](#propdbmaxrows).
 
-###### <a name="propexecoutformat"></a> 4.2.6.3.7 `outFormat`
+###### <a name="propexecoutformat"></a> 4.2.6.3.8 `outFormat`
 
 ```
 Number outFormat
@@ -3831,7 +3849,7 @@ Number outFormat
 
 Overrides [`oracledb.outFormat`](#propdboutformat).
 
-###### <a name="propexecprefetchrows"></a> 4.2.6.3.8 `prefetchRows`
+###### <a name="propexecprefetchrows"></a> 4.2.6.3.9 `prefetchRows`
 
 ```
 Number prefetchRows
@@ -3841,7 +3859,7 @@ Overrides [`oracledb.prefetchRows`](#propdbprefetchrows).
 
 This attribute is not used in node-oracledb version 2, 3 or 4.
 
-###### <a name="propexecresultset"></a> 4.2.6.3.9 `resultSet`
+###### <a name="propexecresultset"></a> 4.2.6.3.10 `resultSet`
 
 ```
 Boolean resultSet
@@ -4174,6 +4192,22 @@ The default value is *false*.
 This feature works when node-oracledb is using version 12, or later, of the
 Oracle client library, and using Oracle Database 12, or later.
 
+###### <a name="executemanyoptkeepinstmtcache"></a> 4.2.7.3.5 `keepInStmtCache`
+
+```
+Boolean keepInStmtCache
+```
+
+When `keepInStmtCache` is *true*, and statement caching is enabled, then the
+statement will be added to the cache if it is not already present.  This helps
+the performance of re-executed statements.  See [Statement
+Caching](#stmtcache).
+
+The default value is *true*.
+
+This attribute was added in node-oracledb 5.3.  In earlier versions, statements
+were always added to the statement cache, if caching was enabled.
+
 ##### <a name="executemanycallback"></a> 4.2.7.4 `executeMany()`: Callback Function
 
 ```
@@ -4405,6 +4439,11 @@ limitations.  Some uncommon statements will return the statement type
 as `oracledb.STMT_TYPE_UNKNOWN`.  DDL statements are not parsed, so
 syntax errors in them will not be reported.  The direction and types
 of bind variables cannot be determined.
+
+The statement is always added to the [statement cache](#stmtcache).  This
+improves performance if `getStatementInfo()` is repeatedly called with the same
+statement, or if the statement is used in an [`execute()`](#execute) call or
+similar.
 
 This method was added in node-oracledb 2.2.
 
@@ -13965,7 +14004,7 @@ column names.  Make sure to use a Allow List of names to avoid SQL
 Injection security risks.
 
 Each final SQL statement will obviously be distinct, and will use a
-slot in the [statement cache](#stmtcache).
+slot in the [statement cache](#stmtcache) by default.
 
 It is possible to bind column names used in an ORDER BY:
 
@@ -16992,62 +17031,43 @@ console.log('Round-trips required: ' + (after - before));   // 1 round-trip
 
 ### <a name="stmtcache"></a> 32.3. Statement Caching
 
-Node-oracledb's [`execute()`](#execute) and
-[`queryStream()`](#querystream) methods use the [Oracle Call Interface
-statement cache][61] to make re-execution of statements efficient.
-This cache removes the need for the separate 'prepare' or 'parse'
-methods which are sometimes seen in other Oracle APIs: there is no
-separate method in node-oracledb.
+Node-oracledb's [`execute()`](#execute), [`executeMany()`](#executemany),
+[`getStatementInfo()`](#getstmtinfo), and [`queryStream()`](#querystream)
+methods use the [Oracle Call Interface statement cache][61] to make
+re-execution of statements efficient.  Statement caching lets cursors be used
+without re-parsing the statement.  Each cached statement will retain its
+cursor.  Statement caching also reduces meta data transfer costs between
+node-oracledb and the database.  Performance and scalability are improved.
 
-Each non-pooled connection and each session in the connection pool has
-its own cache of statements with a default size of 30.  Statement
-caching lets cursors be used without re-parsing the statement.
-Statement caching also reduces meta data transfer costs between
-node-oracledb and the database.  Performance and scalability are
-improved.
+Each non-pooled connection and each session in the connection pool has its own
+cache of statements with a default size of 30.  The cache key is the statement
+string.  This means a single cache entry can be reused when a statement is
+re-executed with different bind variable values.
 
-In general, set the statement cache to the size of the working set of
-statements being executed by the application.
+The statement cache removes the need for the separate 'prepare' or 'parse'
+methods which are sometimes seen in other Oracle APIs: there is no separate
+method in node-oracledb.
 
-Statement caching can be disabled by setting the size to 0.  Disabling
-the cache may be beneficial when the quantity or order of statements
-causes cache entries to be flushed before they get a chance to be
-reused.  For example if there are more distinct statements than cache
-slots, and the order of statement execution causes older statements to
-be flushed from the cache before the statements are re-executed.
+##### Setting the Statement Cache
 
-Disabling the statement cache may also be useful in test and development
-environments where database schema objects are being recreated, or where
-identical query text is used with different `fetchAsString` or `fetchInfo` data
-types.  Doing so can lead to the statement cache becoming invalid, and the
-application receiving various errors, for example *ORA-3106*.  After a
-statement execution error is returned to the application, node-oracledb drops
-that statement from the cache.  This allows subsequent re-executions of the
-statement using that connection to succeed.
-
-The statement cache size can be set globally with [stmtCacheSize](#propdbstmtcachesize):
+The statement cache size can be set globally with
+[oracledb.stmtCacheSize](#propdbstmtcachesize):
 
 ```javascript
 oracledb.stmtCacheSize = 40;
 ```
 
-The value can be overridden in an `oracledb.getConnection()` call:
+The value can be overridden in an `oracledb.getConnection()` call, or when
+creating a pool with [`oracledb.createPool()`](#createpool).  For example:
 
 ```javascript
-const mypw = ... // the hr schema password
-
-const connection = await oracledb.getConnection(
-  {
-    user          : "hr",
-    password      : mypw,
-    connectString : "localhost/XEPDB1",
-    stmtCacheSize : 40
-  }
-);
+await oracledb.createPool({
+  user              : "hr",
+  password          : mypw,               // mypw contains the hr schema password
+  connectString     : "localhost/XEPDB1",
+  stmtCacheSize     : 50
+});
 ```
-
-The value can also be overridden in the `poolAttrs` parameter to
-the [`createPool()`](#createpool) method.
 
 When using Oracle Client 21 (or later), changing the cache size with
 [`pool.reconfigure()`](#poolreconfigure) does not immediately affect
@@ -17058,18 +17078,68 @@ statement cache size has no effect on connections that already exist in the
 pool but will affect new connections that are subsequently created, for example
 when the pool grows.
 
-With Oracle Database 12c, or later, the statement cache size can be
+##### Tuning the Statement Cache
+
+In general, set the statement cache to the size of the working set of
+statements being executed by the application.  [SODA](#sodaoverview) internally
+makes SQL calls, so tuning the cache is also beneficial for SODA applications.
+
+With Oracle Client Libraries 12c, or later, the statement cache size can be
 automatically tuned with the [Oracle Client Configuration](#oraaccess)
 `oraaccess.xml` file.
 
-To manually tune the statement cache size, monitor general application load and
-the [Automatic Workload Repository][62] (AWR) "bytes sent via SQL*Net to
-client" values.  The latter statistic should benefit from not shipping
-statement metadata to node-oracledb.  Adjust the statement cache size to your
-satisfaction.
+For manual tuning use views like `V$SYSSTAT`:
 
-[SODA](#sodaoverview) internally makes SQL calls, so tuning the statement cache
-is also beneficial for SODA applications.
+```sql
+SELECT value FROM V$SYSSTAT WHERE name = 'parse count (total)'
+```
+
+Find the value before and after running application load to give the
+number of statement parses during the load test.  Alter the statement cache
+size and repeat the test until you find a minimal number of parses.
+
+If you have [Automatic Workload Repository][62] (AWR) reports you can monitor
+general application load and the "bytes sent via SQL*Net to client" values.
+The latter statistic should benefit from not shipping statement metadata to
+node-oracledb.  Adjust the statement cache size and re-run the test to find the
+best cache size.
+
+##### Disabling the Statement Cache
+
+Individual statements can be excluded from the statement cache by setting the
+attribute [`keepInStmtCache`](#propexeckeepinstmtcache) to *false*.  This will
+prevent a rarely executed statement from flushing a potential more frequently
+executed one from a full cache.  For example, if a statement will only ever be
+executed once:
+
+```javascript
+result = await connection.execute(
+  `SELECT v FROM t WHERE k = 123`,
+  [],
+  { keepInStmtCache: false }
+);
+```
+
+Statement caching can be disabled completely by setting the cache size to 0:
+
+```javascript
+oracledb.stmtCacheSize = 0;
+```
+
+Disabling the cache may be beneficial when the quantity or order of statements
+causes cache entries to be flushed before they get a chance to be reused.  For
+example, if there are more distinct statements than cache slots and the order
+of statement execution causes older statements to be flushed from the cache
+before they are re-executed.
+
+Disabling the statement cache may also be helpful in test and development
+environments.  The statement cache can become invalid if connections remain
+open and database schema objects are recreated.  This can also happen when a
+connection uses identical query text with different `fetchAsString` or
+`fetchInfo` data types.  Applications can receive errors such as *ORA-3106*.
+After a statement execution error is returned once to the application,
+node-oracledb automatically drops that statement from the cache.  This lets
+subsequent re-executions of the statement on that connection to succeed.
 
 ### <a name="clientresultcache"></a> 32.4 Client Result Caching (CRC)
 

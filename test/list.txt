@@ -5231,3 +5231,17 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     257.2 Negative - insertOneAndGet() with invalid options parameter
     257.3 saveAndGet() with hint option
     257.4 Negative - saveAndGet() with invalid options parameter
+
+258. keepInStmtCache.js
+    258.1 tests for keepInStmtCache & execute
+        258.1.1 keepInStmtCache & execute default
+        258.1.2 keepInStmtCache & execute include
+        258.1.3 keepInStmtCache & execute exclude
+    258.2 tests using keepInStmtCache & resultSet
+        257.2.1 keepInStmtCache & resultSet default
+        258.2.2 keepInStmtCache & resultSet include
+        258.2.3 keepInStmtCache & resultSet exclude
+    258.3 tests using keepInStmtCache & queryStream
+        258.3.1 keepInStmtCache & queryStream default
+        258.3.2 keepInStmtCache & queryStream include
+        258.3.3 keepInStmtCache & queryStream exclude

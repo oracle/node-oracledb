@@ -560,6 +560,13 @@ static bool njsConnection_executeAsync(njsBaton *baton)
             return njsBaton_setErrorDPI(baton);
     }
 
+    // mark statement for removal from the cache, if applicable
+    if (!baton->keepInStmtCache) {
+        if (dpiStmt_deleteFromCache(baton->dpiStmtHandle) < 0) {
+            return njsBaton_setErrorDPI(baton);
+        }
+    }
+
     // execute statement
     mode = (baton->autoCommit) ? DPI_MODE_EXEC_COMMIT_ON_SUCCESS :
             DPI_MODE_EXEC_DEFAULT;
@@ -712,6 +719,7 @@ static bool njsConnection_executeProcessArgs(njsBaton *baton,
     baton->outFormat = baton->oracleDb->outFormat;
     baton->extendedMetaData = baton->oracleDb->extendedMetaData;
     baton->prefetchRows = baton->oracleDb->prefetchRows;
+    baton->keepInStmtCache = true;
 
     if (!njsUtils_copyArray(env, baton->oracleDb->fetchAsBufferTypes,
             baton->oracleDb->numFetchAsBufferTypes, sizeof(uint32_t),
@@ -764,6 +772,9 @@ static bool njsConnection_executeProcessArgs(njsBaton *baton,
     if (!njsBaton_getFetchInfoFromArg(baton, env, args, 2, "fetchInfo",
             &baton->numFetchInfo, &baton->fetchInfo, NULL))
         return false;
+    if (!njsBaton_getBoolFromArg(baton, env, args, 2, "keepInStmtCache",
+            &baton->keepInStmtCache, NULL))
+        return false;
 
     // validate binds in second argument; these must be done after options are
     // processed as those options may influence how bind variables are created
@@ -814,6 +825,13 @@ static bool njsConnection_executeManyAsync(njsBaton *baton)
     // prepare statement and perform any binds that are needed
     if (!njsConnection_prepareAndBind(conn, baton))
         return false;
+
+    // mark statement for removal from the cache, if applicable
+    if (!baton->keepInStmtCache) {
+        if (dpiStmt_deleteFromCache(baton->dpiStmtHandle) < 0) {
+            return njsBaton_setErrorDPI(baton);
+        }
+    }
 
     // execute statement
     mode = (baton->autoCommit) ? DPI_MODE_EXEC_COMMIT_ON_SUCCESS :
@@ -926,6 +944,7 @@ static bool njsConnection_executeManyProcessArgs(njsBaton *baton,
 {
     // setup defaults and set JavaScript values to simplify creation of
     // returned objects
+    baton->keepInStmtCache = true;
     baton->autoCommit = baton->oracleDb->autoCommit;
     if (!njsBaton_setJsValues(baton, env))
         return false;
@@ -947,6 +966,9 @@ static bool njsConnection_executeManyProcessArgs(njsBaton *baton,
         return false;
     if (!njsBaton_getBoolFromArg(baton, env, args, 2, "dmlRowCounts",
             &baton->dmlRowCounts, NULL))
+        return false;
+    if (!njsBaton_getBoolFromArg(baton, env, args, 2, "keepInStmtCache",
+            &baton->keepInStmtCache, NULL))
         return false;
 
     return true;
