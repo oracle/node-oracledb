@@ -448,8 +448,9 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 15.9.3 [Runtime Load Balancing (RLB)](#connectionrlb)
         - 15.9.4 [Application Continuity](#appcontinuity)
         - 15.9.5 [Database Call Timeouts](#dbcalltimeouts)
-    - 15.10 [Connecting to Oracle Autonomous Database](#connectionadb)
-    - 15.11 [Connecting to Sharded Databases](#sharding)
+    - 15.10 [Connecting to Oracle Real Application Clusters (RAC)](#connectionrac)
+    - 15.11 [Connecting to Oracle Autonomous Database](#connectionadb)
+    - 15.12 [Connecting to Sharded Databases](#sharding)
 16. [SQL Execution](#sqlexecution)
     - 16.1 [SELECT Statements](#select)
         - 16.1.1 [Fetching Rows with Direct Fetches](#fetchingrows)
@@ -10349,7 +10350,7 @@ Connection establishment timeouts can be [set](#dbcalltimeouts).  The database's
 `listener.ora` file can have [`RATE_LIMIT`][133] and [`QUEUESIZE`][134]
 parameters that can help handle connection storms.  In the bigger picture,
 Oracle Net can be used to configure database service settings, such as for
-failover using [Oracle RAC][183] or a standby database.
+failover using [Oracle RAC](#connectionrac) or a standby database.
 
 [Database Resident Connection Pooling (DRCP)](#drcp) may be useful to reduce
 load on a database host.  It can also help reduce connection time when a number
@@ -10434,7 +10435,7 @@ application logic without having to return an error to the application user.
 Alternatively, use [Application Continuity](#appcontinuity).
 
 FAN benefits users of Oracle Database's clustering technology ([Oracle
-RAC][93]) because connections to surviving database instances can be
+RAC](#connectionrac)) because connections to surviving database instances can be
 immediately made.  Users of Oracle's Data Guard with a broker will get
 FAN events generated when the standby database goes online.
 Standalone databases will send FAN events when the database restarts.
@@ -10444,7 +10445,7 @@ Notification][97].
 
 #### <a name="connectionrlb"></a> 15.9.3 Runtime Load Balancing (RLB)
 
-[Oracle Database RAC][93] users with [Oracle Database (RLB)][65]
+[Oracle Database RAC](#connectionrac) users with [Oracle Database (RLB)][65]
 advisory events configured should use node-oracledb [Connection
 Pooling](#connpooling) and make sure
 [`oracledb.events`](#propdbevents) is *true*.  The events mode can
@@ -10461,8 +10462,9 @@ Notification][97].
 Node-oracledb OLTP applications can take advantage of continuous availability
 with the Oracle Database features Application Continuity and Transparent
 Application Continuity.  These help make unplanned database service downtime
-transparent to applications.  See the technical papers [Continuous Availability
-Application Continuity for the Oracle Database][178] and [Continuous
+transparent to applications.  See the technical papers [Application Checklist
+for Continuous Service for MAA Solutions][204], [Continuous Availability
+Application Continuity for the Oracle Database][178], and [Continuous
 Availability Best Practices for Applications Using Autonomous Database -
 Dedicated][190].
 
@@ -10529,7 +10531,22 @@ successfully within the additional `callTimeout` period.  In this case a
 *DPI-1080* error is returned and the connection will no longer be usable.  The
 application should then close the connection.
 
-### <a name="connectionadb"></a> 15.10 Connecting to Oracle Autonomous Database
+### <a name="connectionrac"></a> 15.10 Connecting to Oracle Real Application Clusters (RAC)
+
+[Oracle Real Application Clusters (RAC)][93] allow a single Oracle Database to
+be run across multiple servers.  This maximizes availability and enables
+horizontal scalability.
+
+Node-oracledb can connect to Oracle RAC by using a standard RAC connection
+string.  Best practice is to use a [Connection Pool](#connpooling) with
+[`events`](#createpoolpoolattrsevents) enabled.  See the section [Connections
+and High Availability](#connectionha).
+
+Also see the technical papers [Application Checklist for Continuous Service for
+MAA Solutions][204] and [Continuous Availability Application Continuity for the
+Oracle Database][178].
+
+### <a name="connectionadb"></a> 15.11 Connecting to Oracle Autonomous Database
 
 To enable connection to Oracle Autonomous Database in Oracle Cloud, a wallet
 needs be downloaded from the cloud GUI, and node-oracledb needs to be configured
@@ -10608,7 +10625,7 @@ for example:
 cjdb1_high = (description= (address=(https_proxy=myproxy.example.com)(https_proxy_port=80)(protocol=tcps)(port=1522)(host=  . . .
 ```
 
-### <a name="sharding"></a> 15.11 Connecting to Sharded Databases
+### <a name="sharding"></a> 15.12 Connecting to Sharded Databases
 
 Sharding can be used to horizontally partition data across independent
 databases.  A database table can be split so each shard contains a table with
@@ -17652,3 +17669,4 @@ can be asked at [AskTom][158].
 [201]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-19E0F73C-A959-41E4-A168-91E436DEE1F1
 [202]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C941CE9D-97E1-42F8-91ED-4949B2B710BF
 [203]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-39C521D4-5C6E-44B1-B7C7-DEADD7D9CAF0
+[204]: https://www.oracle.com/a/tech/docs/application-checklist-for-continuous-availability-for-maa.pdf
