@@ -84,6 +84,30 @@ Overview of node-oracledb functional tests
         2.14.1 allows username to be used as an alias for user
         2.14.2 both user and username specified
         2.14.3 uses username alias to login with SYSDBA privilege
+    2.15 creation time non editable properties
+        2.15.1 default edition value
+        2.15.2 ORA$BASE edition value
+        2.15.3 default value for events - undefined
+        2.15.4 events - false
+        2.15.5 events - true
+        2.15.6 externalAuth - default undefined
+        2.15.7 externalAuth - true
+        2.15.8 externalAuth - false
+        2.15.9 homogeneous - default true
+        2.15.10 homogeneous - true
+        2.15.11 homogeneous - false
+        2.15.12 user name
+        2.15.13 user name - undefined
+        2.15.14 connectString
+
+    2.16 Pool non-configurable properties global/local override
+        2.16.1 edition only globally set
+        2.16.2 edition override
+        2.16.3 edition override to empty string
+        2.16.4 events override to true
+        2.16.5 events override to false
+        2.16.6 externalAuth override to false
+        2.16.7 externalAuth override to true
 
   3. examples.js
     3.1 connect.js
@@ -5127,6 +5151,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         255.2.5 change resetStatistics with enableStatistics
         255.2.6 change resetStatistics
         255.2.7 getStatistics
+        255.2.8 getStatistics - noneditable properties
     255.3 poolReconfigure JS layer properties
         255.3.1 change queueMax
         255.3.2 change queueTimeout

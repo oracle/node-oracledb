@@ -1200,4 +1200,516 @@ describe('2. pool.js', function() {
 
   }); // 2.14
 
+  describe('2.15 creation time non editable properties', function() {
+    it('2.15.1 default edition value', function(done) {
+      oracledb.createPool(
+        {
+          username:      dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin:       1,
+          poolMax:       1,
+          poolIncrement: 0
+        },
+        function(err, pool) {
+          should.exist(pool);
+          should.not.exist(err);
+          should.equal(pool.edition, "");
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });   // 2.15.1
+
+
+    it('2.15.2 ORA$BASE edition value', function(done) {
+      oracledb.createPool(
+        {
+          username:      dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin:       1,
+          poolMax:       1,
+          poolIncrement: 0,
+          edition:       "ORA$BASE"
+        },
+        function(err, pool) {
+          should.not.exist(err);
+          pool.should.be.ok();
+          should.equal(pool.edition, "ORA$BASE");
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });     // 2.15.2
+
+    it('2.15.3 default value for events - false', function(done) {
+      oracledb.createPool(
+        {
+          username:      dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin:       1,
+          poolMax:        1,
+          poolIncrement: 0
+        },
+        function(err, pool) {
+          should.not.exist(err);
+          pool.should.be.ok();
+          should.equal(pool.events, false);
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });  // 2.15.3
+
+    it('2.15.4 events - false', function(done) {
+      oracledb.createPool(
+        {
+          username:      dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin:       1,
+          poolMax:       1,
+          poolIncrement: 0,
+          events:        false
+        },
+        function(err, pool) {
+          should.not.exist(err);
+          pool.should.be.ok();
+          should.equal(pool.events, false);
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });   // 2.15.4
+
+    it('2.15.5 events - true', function(done) {
+      oracledb.createPool(
+        {
+          username:      dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin:       1,
+          poolMax:       1,
+          poolIncrement: 0,
+          events:        true
+        },
+        function(err, pool) {
+          should.not.exist(err);
+          pool.should.be.ok();
+          should.equal(pool.events, true);
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });  // 2.15.5
+
+
+    it('2.15.6 externalAuth - default false', function(done) {
+      oracledb.createPool(
+        {
+          username:      dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin:       1,
+          poolMax:       1,
+          poolIncrement: 0,
+        },
+        function(err, pool) {
+          should.not.exist(err);
+          pool.should.be.ok();
+          should.equal(pool.externalAuth, false);
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });  // 2.15.6
+
+    it('2.15.7 externalAuth - true', function(done) {
+      oracledb.createPool(
+        {
+          connectString: dbConfig.connectString,
+          poolMin:       1,
+          poolMax:       1,
+          poolIncrement: 0,
+          externalAuth:  true
+        },
+        function(err, pool) {
+          should.not.exist(err);
+          pool.should.be.ok();
+          should.equal(pool.externalAuth, true);
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });  // 2.15.7
+
+
+    it('2.15.8 externalAuth - false', function(done) {
+      oracledb.createPool(
+        {
+          username :     dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin:       1,
+          poolMax:       1,
+          poolIncrement: 0,
+          externalAuth:  false
+        },
+        function(err, pool) {
+          should.not.exist(err);
+          pool.should.be.ok();
+          should.equal(pool.externalAuth, false);
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });   // 2.15.8
+
+
+    it('2.15.9 homogeneous - default true', function(done) {
+      oracledb.createPool(
+        {
+          username:      dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin:       1,
+          poolMax:       1,
+          poolIncrement: 0,
+        },
+        function(err, pool) {
+          should.not.exist(err);
+          pool.should.be.ok();
+          should.equal(pool.homogeneous, true);
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });  // 2.15.9
+
+    it('2.15.10 homogeneous - true', function(done) {
+      oracledb.createPool(
+        {
+          username:      dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin:       1,
+          poolMax:       1,
+          poolIncrement: 0,
+          homogeneous:   true
+        },
+        function(err, pool) {
+          should.not.exist(err);
+          pool.should.be.ok();
+          should.equal(pool.homogeneous, true);
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });  // 2.15.10
+
+
+    it('2.15.11 homogeneous - false', function(done) {
+      oracledb.createPool(
+        {
+          username:      dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin:       1,
+          poolMax:       1,
+          poolIncrement: 0,
+          homogeneous:   false
+        },
+        function(err, pool) {
+          should.not.exist(err);
+          pool.should.be.ok();
+          should.equal(pool.homogeneous, false);
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });  // 2.15.11
+
+
+    it('2.15.12 user name', function(done) {
+      oracledb.createPool(
+        {
+          user:          dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin:       1,
+          poolMax:       1,
+          poolIncrement: 0,
+        },
+        function(err, pool) {
+          should.not.exist(err);
+          pool.should.be.ok();
+          should.equal(pool.user, dbConfig.user);
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });  // 2.15.12
+
+    it('2.15.13 user name - undefined', function(done) {
+      // NOTE: An heterogeneous pool is created for testing property with
+      // externalAuth is set to false, the username/password are required
+      // while calling getConnection().  In this case, connections are NOT
+      // required and so, wallet/OS authentication setup is not available.
+      oracledb.createPool(
+        {
+          connectString: dbConfig.connectString,
+          poolMin:       1,
+          poolMax:       1,
+          poolIncrement: 0,
+          externalAuth:  true
+        },
+        function(err, pool) {
+          should.not.exist(err);
+          pool.should.be.ok();
+          should.equal(pool.user, undefined);
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });  // 2.15.13
+
+
+    it('2.15.14 connectString', function(done) {
+      oracledb.createPool(
+        {
+          user:          dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin:       1,
+          poolMax:       1,
+          poolIncrement: 0,
+        },
+        function(err, pool) {
+          should.not.exist(err);
+          pool.should.be.ok();
+          should.equal(pool.connectString, dbConfig.connectString);
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });  // 2.15.14
+
+  });   // 2.15
+
+  describe('2.16 Pool non-configurable properties global/local override', function() {
+    it('2.16.1 edition only globally set', function(done) {
+      oracledb.edition = "ORA$BASE";
+
+      oracledb.createPool(
+        {
+          username: dbConfig.user,
+          password: dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin: 1,
+          poolMax: 1,
+          poolIncrement: 0
+        },
+        function(err, pool) {
+          should.exist(pool);
+          should.not.exist(err);
+          should.equal(pool.edition, "ORA$BASE");
+          oracledb.edition = "";
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });    // 2.16.1
+
+    it('2.16.2 edition override', function(done) {
+      oracledb.edition = "";
+
+      oracledb.createPool(
+        {
+          username: dbConfig.user,
+          password: dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin: 1,
+          poolMax: 1,
+          poolIncrement: 0,
+          edition: "ORA$BASE"
+        },
+        function(err, pool) {
+          should.exist(pool);
+          should.not.exist(err);
+          should.equal(pool.edition, "ORA$BASE");
+          oracledb.edition = "";
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });    // 2.16.2
+
+    it('2.16.3 edition override to empty string', function(done) {
+      oracledb.edition = "ORA$BASE";
+
+      oracledb.createPool(
+        {
+          username: dbConfig.user,
+          password: dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin: 1,
+          poolMax: 1,
+          poolIncrement: 0,
+          edition: ""
+        },
+        function(err, pool) {
+          should.exist(pool);
+          should.not.exist(err);
+          should.equal(pool.edition, "");
+          oracledb.edition = "";
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });    // 2.16.3
+
+
+    it('2.16.4 events override to true', function(done) {
+      oracledb.events = false;
+
+      oracledb.createPool(
+        {
+          username: dbConfig.user,
+          password: dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin: 1,
+          poolMax: 1,
+          poolIncrement: 0,
+          events: true
+        },
+        function(err, pool) {
+          should.exist(pool);
+          should.not.exist(err);
+          should.equal(pool.events, true);
+          oracledb.events = false;
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });    // 2.16.4
+
+
+    it('2.16.5 events override to false', function(done) {
+      oracledb.events = true;
+
+      oracledb.createPool(
+        {
+          username: dbConfig.user,
+          password: dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin: 1,
+          poolMax: 1,
+          poolIncrement: 0,
+          events: false
+        },
+        function(err, pool) {
+          should.exist(pool);
+          should.not.exist(err);
+          should.equal(pool.events, false);
+          oracledb.events = false;
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });    // 2.16.5
+
+    it('2.16.6 externalAuth override to false', function(done) {
+      oracledb.externalAuth = true;
+
+      oracledb.createPool(
+        {
+          username: dbConfig.user,
+          password: dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin: 1,
+          poolMax: 1,
+          poolIncrement: 0,
+          externalAuth: false
+        },
+        function(err, pool) {
+          should.exist(pool);
+          should.not.exist(err);
+          should.equal(pool.externalAuth, false);
+          oracledb.externalAuth = false;
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });    // 2.16.6
+
+
+    it('2.16.7 externalAuth override to true', function(done) {
+      oracledb.externalAuth = false;
+      oracledb.createPool(
+        {
+          connectString: dbConfig.connectString,
+          poolMin: 1,
+          poolMax: 1,
+          poolIncrement: 0,
+          externalAuth: true
+        },
+        function(err, pool) {
+          should.exist(pool);
+          should.not.exist(err);
+          should.equal(pool.externalAuth, true);
+          oracledb.externalAuth = false;
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });    // 2.16.7
+
+
+  });  // 2.16
+
+
 });

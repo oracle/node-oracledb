@@ -734,7 +734,7 @@ describe('255. poolReconfigure.js', function() {
         /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
       );
 
-      let poolStatistics = await pool.getStatistics();
+      let poolStatistics = pool.getStatistics();
       should.strictEqual(poolStatistics, null);
       let timeOfLastResetOriginalVal = pool._timeOfReset;
 
@@ -761,7 +761,7 @@ describe('255. poolReconfigure.js', function() {
         /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
       );
 
-      poolStatistics = await pool.getStatistics();
+      poolStatistics = pool.getStatistics();
 
       (poolStatistics.upTime).should.above(0);
       (poolStatistics.upTimeSinceReset).should.above(0);
@@ -799,6 +799,40 @@ describe('255. poolReconfigure.js', function() {
         await conn.close();
       }
 
+    });
+
+    it('255.2.8 getStatistics - noneditable properties', async function() {
+      await pool.close(0);
+
+      poolConfig = {
+        user             : dbConfig.user,
+        password         : dbConfig.password,
+        connectionString : dbConfig.connectString,
+        poolMin          : poolMinOriginalVal,
+        poolMax          : poolMaxOriginalVal,
+        poolIncrement    : poolIncrementOriginalVal,
+        enableStatistics : enableStatisticsOriginalVal,
+        queueTimeout     : 5,
+        poolAlias        : "255.2.8"
+      };
+      pool = await oracledb.createPool(poolConfig);
+      await pool.reconfigure ({
+        resetStatistics: true,
+        enableStatistics: true
+      });
+
+      let poolStatistics = pool.getStatistics();
+      (poolStatistics instanceof oracledb.PoolStatistics).should.be.true();
+
+      should.strictEqual(poolStatistics.user, dbConfig.user);
+      should.strictEqual(poolStatistics.edition, "");
+      should.strictEqual(poolStatistics.events, false);
+      should.strictEqual(poolStatistics.externalAuth, false);
+      should.strictEqual(poolStatistics.homogeneous, true);
+      should.strictEqual(poolStatistics.connectString, dbConfig.connectString);
+
+      // reconfigure for later use
+      await pool.reconfigure({enableStatistics : false});
     });
 
   });
@@ -956,7 +990,7 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.4.7 homogeneous', async function() {
-      let homogeneousBak = pool.homogeneousl;
+      let homogeneousBak = pool.homogeneous;
       await pool.reconfigure ({homogeneous: false});
       should.strictEqual(pool.homogeneous, homogeneousBak);
     });
@@ -991,7 +1025,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.4.13 user', async function() {
       await pool.reconfigure({user: 'testinguser'});
-      should.strictEqual(pool.user, undefined);
+      should.strictEqual(pool.user, dbConfig.user);
     });
 
     it('255.4.14 _enableStats', async function() {
@@ -1010,7 +1044,7 @@ describe('255. poolReconfigure.js', function() {
         _enableStats    : true
       };
       await pool.reconfigure(config1);
-      let poolStatistics1 = await pool.getStatistics();
+      let poolStatistics1 = pool.getStatistics();
       should.strictEqual(pool._enableStats, false);
       should.strictEqual(pool.enableStatistics, false);
       should.strictEqual(poolStatistics1, null);
@@ -1019,7 +1053,7 @@ describe('255. poolReconfigure.js', function() {
         _enableStats : true
       };
       await pool.reconfigure(config2);
-      let poolStatistics2 = await pool.getStatistics();
+      let poolStatistics2 = pool.getStatistics();
       should.strictEqual(pool._enableStats, false);
       should.strictEqual(pool.enableStatistics, false);
       should.strictEqual(poolStatistics2, null);
@@ -1029,7 +1063,7 @@ describe('255. poolReconfigure.js', function() {
         _enableStats    : true
       };
       await pool.reconfigure(config3);
-      let poolStatistics3 = await pool.getStatistics();
+      let poolStatistics3 = pool.getStatistics();
       should.strictEqual(pool._enableStats, false);
       should.strictEqual(pool.enableStatistics, false);
       should.strictEqual(poolStatistics3, null);
@@ -1502,9 +1536,9 @@ describe('255. poolReconfigure.js', function() {
       await pool.reconfigure(config);
       await pool.close(0);
 
-      await assert.rejects(
-        async function() {
-          await pool.getStatistics();
+      assert.rejects(
+        function() {
+          pool.getStatistics();
         },
         /NJS-065/
         // NJS-065: connection pool was closed
@@ -1545,7 +1579,7 @@ describe('255. poolReconfigure.js', function() {
         /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
       );
 
-      let poolStatistics = await pool.getStatistics();
+      let poolStatistics = pool.getStatistics();
       should.strictEqual(poolStatistics, null);
       let timeOfLastResetOriginalVal = pool._timeOfReset;
 
@@ -1583,7 +1617,7 @@ describe('255. poolReconfigure.js', function() {
         /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
       );
 
-      poolStatistics = await pool.getStatistics();
+      poolStatistics = pool.getStatistics();
 
       (poolStatistics.upTime).should.above(0);
       (poolStatistics.upTimeSinceReset).should.above(0);
@@ -1651,7 +1685,7 @@ describe('255. poolReconfigure.js', function() {
         /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
       );
 
-      let poolStatistics = await pool1.getStatistics();
+      let poolStatistics = pool1.getStatistics();
       should.strictEqual(poolStatistics, null);
       let timeOfLastResetOriginalVal = pool1._timeOfReset;
 
@@ -1687,7 +1721,7 @@ describe('255. poolReconfigure.js', function() {
         /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
       );
 
-      poolStatistics = await pool2.getStatistics();
+      poolStatistics = pool2.getStatistics();
 
       (poolStatistics.gatheredDate).should.above(0);
       (poolStatistics.upTime).should.above(0);
@@ -1744,7 +1778,7 @@ describe('255. poolReconfigure.js', function() {
 
       let pool1 = await oracledb.createPool(poolConfig);
 
-      let poolStatistics1 = await pool1.getStatistics();
+      let poolStatistics1 = pool1.getStatistics();
       should.strictEqual(pool1._enableStats, true);
       should.strictEqual(pool1.enableStatistics, true);
       (poolStatistics1.gatheredDate).should.above(0);
@@ -1763,7 +1797,7 @@ describe('255. poolReconfigure.js', function() {
       };
 
       let pool2 = await oracledb.createPool(poolConfig2);
-      let poolStatistics2 = await pool2.getStatistics();
+      let poolStatistics2 = pool2.getStatistics();
       should.strictEqual(pool2._enableStats, true);
       should.strictEqual(pool2.enableStatistics, true);
       (poolStatistics2.gatheredDate).should.above(0);
@@ -1786,7 +1820,7 @@ describe('255. poolReconfigure.js', function() {
 
       let pool1 = await oracledb.createPool(poolConfig);
 
-      let poolStatistics1 = await pool1.getStatistics();
+      let poolStatistics1 = pool1.getStatistics();
       should.strictEqual(pool1._enableStats, false);
       should.strictEqual(pool1.enableStatistics, false);
       should.strictEqual(poolStatistics1, null);
@@ -1805,7 +1839,7 @@ describe('255. poolReconfigure.js', function() {
       };
 
       let pool2 = await oracledb.createPool(poolConfig2);
-      let poolStatistics2 = await pool2.getStatistics();
+      let poolStatistics2 = pool2.getStatistics();
       should.strictEqual(pool2._enableStats, true);
       should.strictEqual(pool2.enableStatistics, true);
       (poolStatistics2.gatheredDate).should.above(0);
@@ -1828,7 +1862,7 @@ describe('255. poolReconfigure.js', function() {
 
       let pool1 = await oracledb.createPool(poolConfig);
 
-      let poolStatistics1 = await pool1.getStatistics();
+      let poolStatistics1 = pool1.getStatistics();
       should.strictEqual(pool1._enableStats, true);
       should.strictEqual(pool1.enableStatistics, true);
       (poolStatistics1.gatheredDate).should.above(0);
@@ -1847,7 +1881,7 @@ describe('255. poolReconfigure.js', function() {
       };
 
       let pool2 = await oracledb.createPool(poolConfig2);
-      let poolStatistics2 = await pool2.getStatistics();
+      let poolStatistics2 = pool2.getStatistics();
       should.strictEqual(pool2._enableStats, false);
       should.strictEqual(pool2.enableStatistics, false);
       should.strictEqual(poolStatistics2, null);
@@ -1867,7 +1901,7 @@ describe('255. poolReconfigure.js', function() {
       };
 
       let pool3 = await oracledb.createPool(poolConfig3);
-      let poolStatistics3 = await pool3.getStatistics();
+      let poolStatistics3 = pool3.getStatistics();
       should.strictEqual(pool3._enableStats, false);
       should.strictEqual(pool3.enableStatistics, false);
       should.strictEqual(poolStatistics3, null);
@@ -1890,7 +1924,7 @@ describe('255. poolReconfigure.js', function() {
 
       let pool1 = await oracledb.createPool(poolConfig);
 
-      let poolStatistics1 = await pool1.getStatistics();
+      let poolStatistics1 = pool1.getStatistics();
       should.strictEqual(pool1._enableStats, true);
       should.strictEqual(pool1.enableStatistics, true);
       (poolStatistics1.gatheredDate).should.above(0);
@@ -1909,7 +1943,7 @@ describe('255. poolReconfigure.js', function() {
       };
 
       let pool2 = await oracledb.createPool(poolConfig2);
-      let poolStatistics2 = await pool2.getStatistics();
+      let poolStatistics2 = pool2.getStatistics();
       should.strictEqual(pool2._enableStats, false);
       should.strictEqual(pool2.enableStatistics, false);
       should.strictEqual(poolStatistics2, null);
@@ -1929,7 +1963,7 @@ describe('255. poolReconfigure.js', function() {
       };
 
       let pool3 = await oracledb.createPool(poolConfig3);
-      let poolStatistics3 = await pool3.getStatistics();
+      let poolStatistics3 = pool3.getStatistics();
       should.strictEqual(pool3._enableStats, false);
       should.strictEqual(pool3.enableStatistics, false);
       should.strictEqual(poolStatistics3, null);
@@ -1965,7 +1999,7 @@ describe('255. poolReconfigure.js', function() {
         /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
       );
 
-      let poolStatistics = await pool.getStatistics();
+      let poolStatistics = pool.getStatistics();
       should.strictEqual(poolStatistics, null);
       let timeOfLastResetOriginalVal = pool._timeOfReset;
 
@@ -2003,7 +2037,7 @@ describe('255. poolReconfigure.js', function() {
         /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
       );
 
-      poolStatistics = await pool.getStatistics();
+      poolStatistics = pool.getStatistics();
 
       (poolStatistics.upTime).should.above(0);
       (poolStatistics.upTimeSinceReset).should.above(0);
@@ -2071,7 +2105,7 @@ describe('255. poolReconfigure.js', function() {
         /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
       );
 
-      let poolStatistics = await pool1.getStatistics();
+      let poolStatistics = pool1.getStatistics();
       should.strictEqual(poolStatistics, null);
       let timeOfLastResetOriginalVal = pool1._timeOfReset;
 
@@ -2107,7 +2141,7 @@ describe('255. poolReconfigure.js', function() {
         /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
       );
 
-      poolStatistics = await pool2.getStatistics();
+      poolStatistics = pool2.getStatistics();
 
       (poolStatistics.gatheredDate).should.above(0);
       (poolStatistics.upTime).should.above(0);
@@ -2177,7 +2211,7 @@ describe('255. poolReconfigure.js', function() {
         /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
       );
 
-      let poolStatistics = await pool1.getStatistics();
+      let poolStatistics = pool1.getStatistics();
       should.strictEqual(poolStatistics, null);
       let timeOfLastResetOriginalVal = pool1._timeOfReset;
 
@@ -2213,7 +2247,7 @@ describe('255. poolReconfigure.js', function() {
         /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
       );
 
-      poolStatistics = await pool2.getStatistics();
+      poolStatistics = pool2.getStatistics();
 
       (poolStatistics.gatheredDate).should.above(0);
       (poolStatistics.upTime).should.above(0);

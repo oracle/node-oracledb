@@ -4,6 +4,14 @@
 
 **This release is under development and information may be incomplete**
 
+- Encapsulated the connection pool statistics in a [PoolStatistics
+  Class](https://oracle.github.io/node-oracledb/doc/api.html#poolstatisticsclass).
+  Added a
+  [`poolstatistics.logStatistics()`](https://oracle.github.io/node-oracledb/doc/api.html#poolstatisticslogstatistics)
+  function, equivalent to the existing `pool.logStatistics()` function.  Exposed
+  pool properties `user`, `connectString`, `edition`, `events`,
+  `externalAuth`, and `homogeneous` on the Pool and PoolStatistics classes.
+
 ## node-oracledb v5.2.0 (7 Jun 2021)
 
 - Connection pool changes:
