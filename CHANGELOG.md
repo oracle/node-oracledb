@@ -248,7 +248,8 @@ and
 
 - Made an internal change to use an Oracle Client 20 feature to avoid a
   round-trip when accessing
-  [`oracledb.version`](https://oracle.github.io/node-oracledb/doc/api.html#propdbversion)
+  [`connection.oracleServerVersion`](https://oracle.github.io/node-oracledb/doc/api.html#propconnoracleserverversion)
+  or [`connection.oracleServerVersionString`](https://oracle.github.io/node-oracledb/doc/api.html#propconnoracleserverversionstring)
   for the first time.
 
 - Updated examples and documentation to make more use of Node.js 8's Stream
