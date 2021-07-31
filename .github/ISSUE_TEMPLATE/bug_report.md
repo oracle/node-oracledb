@@ -15,7 +15,7 @@ Thank you for using node-oracledb.
 
 Please answer these questions so we can help you.
 
-Use Markdown syntax, see https://help.github.com/github/writing-on-github/basic-writing-and-formatting-syntax
+Use Markdown syntax, see https://docs.github.com/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax
 
 -->
 
