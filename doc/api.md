@@ -8350,7 +8350,7 @@ full Oracle Client software installation, and you want to use a non-default time
 zone file, then set `ORA_TZFILE` to the file name with a directory prefix, for
 example: `export ORA_TZFILE=/opt/oracle/myconfig/timezone_31.dat`.
 
-Oracle Instant Client includes a small and big time zone file, for example
+Oracle Instant Client includes embedded small and big time zone 'files', for example
 `timezone_32.dat` and `timezlrg_32.dat`.  The versions can be shown by running
 the utility `genezi -v` located in the Instant Client directory.  The small file
 contains only the most commonly used time zones.  By default the larger
