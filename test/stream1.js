@@ -483,6 +483,26 @@ describe('13. stream1.js', function() {
         done(new Error('Test should not have thrown an error'));
       });
     });
+
+    it('13.1.12 query with logical error should throw error', function(done) {
+      const sql = 'select 1 from dual union all select 1 from dual union all select 1/0 from dual';
+      let stream = connection.queryStream(sql);
+
+      stream.on('error', function(error) {
+        should.exist(error);
+        should.strictEqual(error.message, 'ORA-01476: divisor is equal to zero');
+      });
+
+      stream.on('data', function(data) {
+        should.not.exist(data);
+      });
+
+      stream.on('end', function() {
+        stream.destroy();
+      });
+
+      stream.on('close', done);
+    });
   });
 
   describe('13.2 Testing QueryStream.destroy', function() {

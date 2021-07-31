@@ -12,6 +12,12 @@
   pool properties `user`, `connectString`, `edition`, `events`,
   `externalAuth`, and `homogeneous` on the Pool and PoolStatistics classes.
 
+- Fixed `queryStream()` logical error handling ([Issue
+  1391](https://github.com/oracle/node-oracledb/issues/1391)).
+
+- Prevent intermingling of `queryStream()` streaming and `getRow()`/`getRows()`
+  calls.
+
 ## node-oracledb v5.2.0 (7 Jun 2021)
 
 - Connection pool changes:

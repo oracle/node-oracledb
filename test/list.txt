@@ -329,6 +329,7 @@ Overview of node-oracledb functional tests
         13.1.9 Read CLOBs after stream close
         13.1.10 meta data
         13.1.11 should emit events in the correct order
+        13.1.12 query with logical error should throw error
     13.2 Testing QueryStream.destroy
         13.2.1 should be able to stop the stream early with destroy
         13.2.2 should be able to stop the stream before any data
