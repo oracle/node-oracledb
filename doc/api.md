@@ -460,7 +460,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 16.9.4 [Application Continuity](#appcontinuity)
         - 16.9.5 [Database Call Timeouts](#dbcalltimeouts)
     - 16.10 [Connecting to Oracle Real Application Clusters (RAC)](#connectionrac)
-    - 16.11 [Connecting to Oracle Autonomous Database](#connectionadb)
+    - 16.11 [Connecting to Oracle Cloud Autonomous Databases](#connectionadb)
     - 16.12 [Connecting to Sharded Databases](#sharding)
 17. [SQL Execution](#sqlexecution)
     - 17.1 [SELECT Statements](#select)
@@ -8387,7 +8387,8 @@ A wallet configuration file `cwallet.sso` for secure connection can be located
 with, or separately from, the `tnsnames.ora` and `sqlnet.ora` files.  It should
 be securely stored.  The `sqlnet.ora` file's `WALLET_LOCATION` path should be
 set to the directory containing `cwallet.sso`.  For Oracle Autonomous Database
-use of wallets, see [Connecting to Oracle Autonomous Database](#connectionadb).
+use of wallets, see [Connecting to Oracle Cloud Autonomous
+Databases](#connectionadb).
 
 Note the [Easy Connect Plus](#easyconnect) syntax can set many common
 configuration options without needing `tnsnames.ora` or `sqlnet.ora` files.
@@ -10536,7 +10537,7 @@ and to adjust keepalive timeouts.  With Oracle Client 21c the setting can
 alternatively be in the application's [`sqlnet.ora`](#tnsadmin) file.  The
 general recommendation for `EXPIRE_TIME` is to use a value that is slightly less
 than half of the termination period.  In older versions of Oracle Client, a
-tnsnames.ora connect descriptor option [`ENABLE=BROKEN`][36] can be used instead
+`tnsnames.ora` connect descriptor option [`ENABLE=BROKEN`][36] can be used instead
 of `EXPIRE_TIME`.  These settings can also aid detection of a terminated remote
 database server.
 
@@ -10682,12 +10683,13 @@ Also see the technical papers [Application Checklist for Continuous Service for
 MAA Solutions][204] and [Continuous Availability Application Continuity for the
 Oracle Database][178].
 
-### <a name="connectionadb"></a> 16.11 Connecting to Oracle Autonomous Database
+### <a name="connectionadb"></a> 16.11 Connecting to Oracle Cloud Autonomous Databases
 
 To enable connection to Oracle Autonomous Database in Oracle Cloud, a wallet
-needs be downloaded from the cloud GUI, and node-oracledb needs to be configured
-to use it.  A database username and password is still required.  The wallet only
-enables SSL/TLS.
+needs be downloaded from the cloud, and node-oracledb needs to be configured to
+use it.  The wallet gives mutual TLS which provides enhanced security for
+authentication and encryption.  A database username and password is still
+required for your application connections.
 
 ##### Install the Wallet and Network Configuration Files
 
@@ -10695,24 +10697,38 @@ From the Oracle Cloud console for the database download the wallet zip file.  It
 contains the wallet and network configuration files.  Note: keep wallet files in
 a secure location and share them only with authorized users.
 
-Unzip the wallet zip file.
-
-For node-oracledb, only these files from the zip are needed:
+Unzip the wallet zip file.  For node-oracledb, only these files from the zip
+are needed:
 
 - `tnsnames.ora` - Maps net service names used for application connection strings to your database services
 - `sqlnet.ora`  - Configures Oracle Network settings
 - `cwallet.sso` - Enables SSL/TLS connections.  Note the cloud wallet does not contain a database username or password.
 
-The other files and the wallet password are not needed.
+There are now two options:
 
-Place these files as shown in [Optional Oracle Net Configuration](#tnsadmin).
-The `sqlnet.ora` file contains a `WALLET_LOCATION` path to the directory where
-`cwallet.sso` will be read from.  By default this path is `"?/network/admin"`.
-This path maps to the `network/admin` subdirectory of Oracle Instant Client , or
-to the `$ORACLE_HOME/network/admin` subdirectory (when node-oracledb is linked
-with the client libraries from a full client or database installation).  If
-`cwallet.sso` is in a different location, then you will need to edit the path in
-`sqlnet.ora` and set it to the directory containing `cwallet.sso`.
+- Move the three files to the `network/admin` directory of the client libraries
+  used by your application.  For example if you are using Instant Client 19c
+  and it is in `$HOME/instantclient_19_11`, then you would put the wallet files
+  in `$HOME/instantclient_19_11/network/admin/`.
+
+- Alternatively, move them to any accessible directory, for example
+  `/opt/OracleCloud/MYDB`.
+
+  Then edit `sqlnet.ora` and change the wallet location directory to the
+  directory containing the `cwallet.sso` file.  For example:
+
+  ```
+  WALLET_LOCATION = (SOURCE = (METHOD = file) (METHOD_DATA = (DIRECTORY="/opt/OracleCloud/MYDB")))
+  SSL_SERVER_DN_MATCH=yes
+  ```
+
+  Since the `tnsnames.ora` and `sqlnet.ora` files are not in the default
+  location, your application needs to indicate where they are, either with the
+  [`configDir`](#odbinitoracleclientattrsopts) parameter to
+  [`initOracleClient()`](#odbinitoracleclient), or using the `TNS_ADMIN`
+  environment variable.  See [Optional Oracle Net Configuration](#tnsadmin).
+  Neither of these settings are needed, and you don't need to edit
+  `sqlnet.ora`, if you have put all the files in the `network/admin` directory.
 
 ##### Run Your Application
 
@@ -10732,8 +10748,8 @@ connection = await oracledb.getConnection({
 });
 ```
 
-Once you have set Oracle environment variables required by your application,
-such as `ORA_SDTZ` or `TNS_ADMIN`, you can start your application.
+Once you have set optional Oracle environment variables required by your
+application, such as `ORA_SDTZ` or `TNS_ADMIN`, you can start your application.
 
 If you need to create a new database schema so you do not login as the privileged
 ADMIN user, refer to the relevant Oracle Cloud documentation, for example see
@@ -10759,6 +10775,51 @@ for example:
 
 ```
 cjdb1_high = (description= (address=(https_proxy=myproxy.example.com)(https_proxy_port=80)(protocol=tcps)(port=1522)(host=  . . .
+```
+
+##### Using the Easy Connect Syntax with Autonomous Database
+
+When node-oracledb is using Oracle Client libraries 19c or later, you can
+optionally use the [Easy Connect](#easyconnect) syntax to connect to Oracle
+Autonomous Database.
+
+The mapping from a cloud `tnsnames.ora` entry to an Easy Connect Plus string
+is:
+
+```
+protocol://host:port/service_name?wallet_location=/my/dir&retry_count=N&retry_delay=N
+```
+
+For example, if your `tnsnames.ora` file had an entry:
+
+```
+cjjson_high = (description=(retry_count=20)(retry_delay=3)
+    (address=(protocol=tcps)(port=1522)
+    (host=adb.ap-sydney-1.oraclecloud.com))
+    (connect_data=(service_name=abc_cjjson_high.adb.oraclecloud.com))
+    (security=(ssl_server_cert_dn="CN=adb.ap-sydney-1.oraclecloud.com,OU=Oracle ADB SYDNEY,O=Oracle Corporation,L=Redwood City,ST=California,C=US")))
+```
+
+Then your applications can connect using the connection string:
+
+```javascript
+cs = "tcps://adb.ap-sydney-1.oraclecloud.com:1522/abc_cjjson_high.adb.oraclecloud.com?wallet_location=/Users/cjones/Cloud/CJJSON&retry_count=20&retry_delay=3"
+connection = await oracledb.getConnection({
+  user          : "hr",
+  password      : mypw,
+  connectString : cs
+});
+```
+
+The `wallet_location` parameter needs to be set to the directory containing the
+`cwallet.sso` file from the wallet ZIP.  The other wallet files, including
+`tnsnames.ora`, are not needed when you use the Easy Connect Plus syntax.
+
+You can optionally add other Easy Connect parameters to the connection string,
+for example:
+
+```javascript
+cs = cs + "&https_proxy=myproxy.example.com&https_proxy_port=80"
 ```
 
 ### <a name="sharding"></a> 16.12 Connecting to Sharded Databases
@@ -16494,7 +16555,7 @@ await collection.insertOne(mycontent);
 
 ## <a name="startupshutdown"></a> 31. Database Start Up and Shut Down
 
-There are two groups of database start up and shut down functions::
+There are two groups of database start up and shut down functions:
 
 - Simple usage: [`oracledb.startup()`](#odbstartup) and [`oracledb.shutdown()`](#odbshutdown)
 
@@ -17793,7 +17854,7 @@ can be asked at [AskTom][158].
 [158]: https://asktom.oracle.com/
 [159]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-6140611A-83FC-4C9C-B31F-A41FC2A5B12D
 [160]: https://github.com/oracle/node-oracledb/issues/699#issuecomment-524009129
-[161]: https://docs.oracle.com/en/cloud/paas/atp-cloud/atpud/managing-database-users.html
+[161]: https://docs.oracle.com/en/cloud/paas/autonomous-database/adbdu/managing-database-users.html#GUID-5B94EA60-554A-4BA4-96A3-1D5A3ED5878D
 [162]: https://www.oracle.com//cloud/free/
 [163]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C672E92D-CE32-4759-9931-92D7960850F7
 [164]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=SHARD
