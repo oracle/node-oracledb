@@ -1,5 +1,0 @@
-This is example text used for node-oracledb CLOB examples.
-
-The Oracle Database Node.js driver powers high performance Node.js applications.
-
-The node-oracledb home page is at http://www.oracle.com/technetwork/database/database-technologies/scripting-languages/node_js/
