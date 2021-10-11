@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -42,7 +42,7 @@ describe('229. dbType03.js', () => {
       let plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
     } catch (error) {
-      should.not.exist(error);
+      assert.fail(error);
     }
   });
 
@@ -52,7 +52,7 @@ describe('229. dbType03.js', () => {
       await conn.execute(sql);
       await conn.close();
     } catch (error) {
-      should.not.exist(error);
+      assert.fail(error);
     }
   });
 
@@ -71,21 +71,21 @@ describe('229. dbType03.js', () => {
         { val: 3.45678, type: oracledb.DB_TYPE_BINARY_DOUBLE }
       ];
       let result = await conn.execute(sql, binds);
-      should.strictEqual(1, result.rowsAffected);
+      assert.strictEqual(1, result.rowsAffected);
 
       sql = `select * from ${TABLE} where id = ${NUM}`;
       result = await conn.execute(sql);
-      should.strictEqual(binds[0], result.rows[0][0]);
+      assert.strictEqual(binds[0], result.rows[0][0]);
 
       let nearlyEqual = false;
       nearlyEqual = ApproxEql(binds[1].val, result.rows[0][1]);
-      (nearlyEqual).should.be.True();
+      assert.strictEqual(nearlyEqual, true);
 
       nearlyEqual = ApproxEql(binds[2].val, result.rows[0][2]);
-      (nearlyEqual).should.be.True();
+      assert.strictEqual(nearlyEqual, true);
 
     } catch (error) {
-      should.not.exist(error);
+      assert.fail(error);
     }
   }); // 229.1
 
@@ -104,16 +104,16 @@ describe('229. dbType03.js', () => {
         { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_DOUBLE }
       ];
       let result = await conn.execute(sql, binds);
-      should.strictEqual(1, result.rowsAffected);
+      assert.strictEqual(1, result.rowsAffected);
 
       let nearlyEqual = false;
       nearlyEqual = ApproxEql(num1, result.outBinds[0][0]);
-      (nearlyEqual).should.be.True();
+      assert.strictEqual(nearlyEqual, true);
 
       nearlyEqual = ApproxEql(num2, result.outBinds[1][0]);
-      (nearlyEqual).should.be.True();
+      assert.strictEqual(nearlyEqual, true);
     } catch (error) {
-      should.not.exist(error);
+      assert.fail(error);
     }
   }); // 229.2
 
@@ -127,16 +127,16 @@ describe('229. dbType03.js', () => {
         { val: -Infinity, type: oracledb.DB_TYPE_BINARY_DOUBLE }
       ];
       let result = await conn.execute(sql, binds);
-      should.strictEqual(1, result.rowsAffected);
+      assert.strictEqual(1, result.rowsAffected);
 
       sql = `select * from ${TABLE} where id = ${NUM}`;
       result = await conn.execute(sql);
 
-      should.strictEqual(Infinity, result.rows[0][1]);
-      should.strictEqual(-Infinity, result.rows[0][2]);
+      assert.strictEqual(Infinity, result.rows[0][1]);
+      assert.strictEqual(-Infinity, result.rows[0][2]);
 
     } catch (error) {
-      should.not.exist(error);
+      assert.fail(error);
     }
   }); // 229.3
 
@@ -154,12 +154,12 @@ describe('229. dbType03.js', () => {
         { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_DOUBLE }
       ];
       let result = await conn.execute(sql, binds);
-      should.strictEqual(1, result.rowsAffected);
+      assert.strictEqual(1, result.rowsAffected);
 
-      should.strictEqual(-Infinity, result.outBinds[0][0]);
-      should.strictEqual(Infinity, result.outBinds[1][0]);
+      assert.strictEqual(-Infinity, result.outBinds[0][0]);
+      assert.strictEqual(Infinity, result.outBinds[1][0]);
     } catch (error) {
-      should.not.exist(error);
+      assert.fail(error);
     }
   }); // 229.4
 
@@ -173,16 +173,15 @@ describe('229. dbType03.js', () => {
         { val: NaN, type: oracledb.DB_TYPE_BINARY_DOUBLE }
       ];
       let result = await conn.execute(sql, binds);
-      should.strictEqual(1, result.rowsAffected);
+      assert.strictEqual(1, result.rowsAffected);
 
       sql = `select * from ${TABLE} where id = ${NUM}`;
       result = await conn.execute(sql);
 
-      (result.rows[0][1]).should.be.NaN();
-      (result.rows[0][2]).should.be.NaN();
-
+      assert.strictEqual(result.rows[0][1], NaN);
+      assert.strictEqual(result.rows[0][2], NaN);
     } catch (error) {
-      should.not.exist(error);
+      assert.fail(error);
     }
   }); // 229.5
 
@@ -200,12 +199,11 @@ describe('229. dbType03.js', () => {
         { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_DOUBLE }
       ];
       let result = await conn.execute(sql, binds);
-      should.strictEqual(1, result.rowsAffected);
-
-      (result.outBinds[0][0]).should.be.NaN();
-      (result.outBinds[1][0]).should.be.NaN();
+      assert.strictEqual(1, result.rowsAffected);
+      assert.strictEqual(result.outBinds[0][0], NaN);
+      assert.strictEqual(result.outBinds[1][0], NaN);
     } catch (error) {
-      should.not.exist(error);
+      assert.fail(error);
     }
   }); // 229.6
 

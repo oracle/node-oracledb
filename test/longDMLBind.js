@@ -28,12 +28,11 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
-var random   = require('./random.js');
-var sql      = require('./sql.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const random   = require('./random.js');
+const sql      = require('./sqlClone.js');
 
 describe('125. longDMLBind.js', function() {
 
@@ -59,203 +58,138 @@ describe('125. longDMLBind.js', function() {
                      "END; ";
   var table_drop = "DROP TABLE " + tableName + " PURGE";
 
-  before(function(done) {
-    async.series([
-      function(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
-      },
-      function(cb) {
-        sql.executeSql(connection, table_create, {}, {}, cb);
-      }
-    ], done);
+  before(async function() {
+    try {
+      connection = await oracledb.getConnection(dbConfig);
+      sql.executeSql(connection, table_create, {}, {});
+    } catch (err) {
+      assert.ifError(err);
+    }
   }); // before
 
-  after(function(done) {
-    async.series([
-      function(cb) {
-        sql.executeSql(connection, table_drop, {}, {}, cb);
-      },
-      function(cb) {
-        connection.release(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+  after(async function() {
+    try {
+      await sql.executeSql(connection, table_drop, {}, {});
+      await connection.release();
+    } catch (err) {
+      assert.ifError(err);
+    }
+
   }); // after
 
-  beforeEach(function(done) {
+  beforeEach(function() {
     insertID++;
-    done();
   });
 
   describe('125.1 INSERT and SELECT', function() {
 
-    it('125.1.1 works with data size 64K - 1', function(done) {
-      var insertedStr = random.getRandomLengthString(65535);
-      test1(insertedStr, 65535, done);
+    it('125.1.1 works with data size 64K - 1', async function() {
+      await test1(random.getRandomLengthString(65535), 65535);
     });
 
-    it('125.1.2 works with data size 64K', function(done) {
-      var insertedStr = random.getRandomLengthString(65536);
-      test1(insertedStr, 65536, done);
+    it('125.1.2 works with data size 64K', async function() {
+      await test1(random.getRandomLengthString(65536), 65536);
     });
 
-    it('125.1.3 works with data size 64K + 1', function(done) {
-      var insertedStr = random.getRandomLengthString(65537);
-      test1(insertedStr, 65537, done);
+    it('125.1.3 works with data size 64K + 1', async function() {
+      await test1(random.getRandomLengthString(65537), 65537);
     });
 
-    it('125.1.4 works with data size 1MB + 1', function(done) {
-      var size = 1 * 1024 * 1024 + 1;
-      var insertedStr = random.getRandomLengthString(size);
-      test1(insertedStr, size, done);
+    it('125.1.4 works with data size 1MB + 1', async function() {
+      const size = 1 * 1024 * 1024 + 1;
+      await test1(random.getRandomLengthString(size), size);
     });
 
   }); // 125.1
 
   describe('125.2 UPDATE', function() {
 
-    it('125.2.1 works with data size 64K - 1', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      var updateStr = random.getRandomLengthString(65535);
-      test2(insertedStr, updateStr, 65535, done);
+    it('125.2.1 works with data size 64K - 1', async function() {
+      await test2(random.getRandomLengthString(100), random.getRandomLengthString(65535), 65535);
     });
 
-    it('125.2.2 works with data size 64K', function(done) {
-      var insertedStr = random.getRandomLengthString(200);
-      var updateStr = random.getRandomLengthString(65536);
-      test2(insertedStr, updateStr, 65536, done);
+    it('125.2.2 works with data size 64K', async function() {
+      await test2(random.getRandomLengthString(200), random.getRandomLengthString(65536), 65536);
     });
 
-    it('125.2.3 works with data size 64K + 1', function(done) {
-      var insertedStr = random.getRandomLengthString(10);
-      var updateStr = random.getRandomLengthString(65537);
-      test2(insertedStr, updateStr, 65537, done);
+    it('125.2.3 works with data size 64K + 1', async function() {
+      await test2(random.getRandomLengthString(10), random.getRandomLengthString(65537), 65537);
     });
 
-    it('125.2.4 works with data size 1MB + 1', function(done) {
-      var size = 1 * 1024 * 1024 + 1;
-      var insertedStr = random.getRandomLengthString(65536);
-      var updateStr = random.getRandomLengthString(size);
-      test2(insertedStr, updateStr, size, done);
+    it('125.2.4 works with data size 1MB + 1', async function() {
+      const size = 1 * 1024 * 1024 + 1;
+      await test2(random.getRandomLengthString(65536), random.getRandomLengthString(size), size);
     });
 
   }); // 125.3
 
   describe('125.3 RETURNING INTO', function() {
 
-    it('125.3.1 do not support in returning into', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      var updateStr = random.getRandomLengthString(65535);
-      test3(insertedStr, updateStr, done);
+    it('125.3.1 do not support in returning into', async function() {
+      await test3(random.getRandomLengthString(100), random.getRandomLengthString(65535));
     });
 
   }); // 125.3
 
-  var test1 = function(content, maxsize, callback) {
-    async.series([
-      function(cb) {
-        insert(content, maxsize, cb);
-      },
-      function(cb) {
-        fetch(content, cb);
-      }
-    ], callback);
+  var test1 = async function(content, maxsize) {
+    await insert(content, maxsize);
+    await fetch(content);
   };
 
-  var test2 = function(insertedStr, updateStr, maxsize, callback) {
-    async.series([
-      function(cb) {
-        insert(insertedStr, insertedStr.length, cb);
-      },
-      function(cb) {
-        update(updateStr, maxsize, cb);
-      },
-      function(cb) {
-        fetch(updateStr, cb);
-      }
-    ], callback);
+  var test2 = async function(insertedStr, updateStr, maxsize) {
+    await insert(insertedStr, insertedStr.length);
+    await update(updateStr, maxsize);
+    await fetch(updateStr);
   };
 
-  var test3 = function(insertedStr, updateStr, callback) {
-    async.series([
-      function(cb) {
-        insert(insertedStr, insertedStr.length, cb);
-      },
-      function(cb) {
-        returning(updateStr, cb);
-      }
-    ], callback);
+  var test3 = async function(insertedStr, updateStr) {
+    await insert(insertedStr, insertedStr.length);
+    await returning(updateStr);
   };
 
-  var insert = function(content, maxsize, callback) {
-    var sql = "insert into " + tableName + " (id, content) values (:i, :c)";
-    var bindVar = {
+  var insert = async function(content, maxsize) {
+    const sql_query = "insert into " + tableName + " (id, content) values (:i, :c)";
+    const bindVar = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING, maxSize: maxsize }
     };
-    connection.execute(
-      sql,
-      bindVar,
-      function(err, result) {
-        should.not.exist(err);
-        (result.rowsAffected).should.be.exactly(1);
-        callback();
-      }
-    );
+    const result = await connection.execute(sql_query, bindVar);
+    assert(result);
+    assert.equal(1, result.rowsAffected);
   };
 
-  var update = function(content, maxsize, callback) {
-    var sql = "update " + tableName + " set content = :c where id = :i";
-    var bindVar = {
+  var update = async function(content, maxsize) {
+    const sql_query = "update " + tableName + " set content = :c where id = :i";
+    const bindVar = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING, maxSize: maxsize }
     };
-    connection.execute(
-      sql,
-      bindVar,
-      function(err, result) {
-        should.not.exist(err);
-        (result.rowsAffected).should.be.exactly(1);
-        callback();
-      }
-    );
+    const result = await connection.execute(sql_query, bindVar);
+    assert(result);
+    assert.equal(1, result.rowsAffected);
   };
 
-  var returning = function(content, callback) {
-    var sql = "update " + tableName + " set content = :c1 where id = :i returning content into :c2";
-    var bindVar = {
+  var returning = async function(content) {
+    const sql_query = "update " + tableName + " set content = :c1 where id = :i returning content into :c2";
+    const bindVar = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       c1: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING },
       c2: { dir: oracledb.BIND_OUT, type: oracledb.STRING }
     };
-    connection.execute(
-      sql,
-      bindVar,
-      function(err) {
-        should.exist(err);
-        // ORA-22816: unsupported feature with RETURNING clause
-        (err.message).should.startWith("ORA-22816:");
-        callback();
-      }
-    );
+    try {
+      await connection.execute(sql_query, bindVar);
+    } catch (err) {
+      assert.equal(err.message.substring(0, 10), "ORA-22816:");
+    }
+    // ORA-22816: unsupported feature with RETURNING clause
   };
 
-  var fetch = function(expected, callback) {
-    var sql = "select content from " + tableName + " where id = " + insertID;
-    connection.execute(
-      sql,
-      function(err, result) {
-        should.not.exist(err);
-        should.strictEqual(result.rows[0][0], expected);
-        callback();
-      }
-    );
+  var fetch = async function(expected) {
+    const sql_query = "select content from " + tableName + " where id = " + insertID;
+    const result = await connection.execute(sql_query);
+    assert(result);
+    assert.strictEqual(result.rows[0][0], expected);
+
   };
 
 });

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
+ * The node-oracledb test suite uses 'mocha'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,12 +28,12 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 const dbconfig = require('./dbconfig.js');
 
 describe('246. dupColNames1.js', function() {
   let connection = null;
-  let outFormatBak = oracledb.outFormat;
+  const outFormatBak = oracledb.outFormat;
   const tableNameDept = "nodb_dupDepartment";
   const tableNameEmp = "nodb_dupEmployee";
   const create_table_sql = `
@@ -76,7 +76,7 @@ describe('246. dupColNames1.js', function() {
          END; `;
   const empInsert = "INSERT INTO " + tableNameEmp + " VALUES ( :1, :2, :3) ";
 
-  var traverse_rows = async function(resultSet) {
+  const traverse_rows = async function(resultSet) {
     const fetchedRows = [];
     try {
       // eslint-disable-next-line no-constant-condition
@@ -89,12 +89,12 @@ describe('246. dupColNames1.js', function() {
       }
       return fetchedRows;
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
   };
 
-  var  traverse_results = async function(resultSet) {
+  const traverse_results = async function(resultSet) {
     const fetchedRows = [];
     try {
       // eslint-disable-next-line no-constant-condition
@@ -103,7 +103,7 @@ describe('246. dupColNames1.js', function() {
         if (!row) {
           break;
         }
-        for (const i in row) {
+        for (let i in row) {
           if (row[i] instanceof oracledb.ResultSet) {
             row[i] = await traverse_results(row[i]);
           }
@@ -112,7 +112,7 @@ describe('246. dupColNames1.js', function() {
       }
       return fetchedRows;
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
   };
@@ -137,7 +137,7 @@ describe('246. dupColNames1.js', function() {
 
       await connection.commit();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -150,13 +150,13 @@ describe('246. dupColNames1.js', function() {
 
       oracledb.outFormat = outFormatBak;
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
   describe('246.1 Duplicate column names, query with simple execution', function() {
     it('246.1.1 Two duplicate columns', async function() {
-      let sql =
+      const sql =
         `SELECT
             A.EMPLOYEE_ID, A.DEPARTMENT_ID,
             B.DEPARTMENT_ID, B.DEPARTMENT_NAME
@@ -164,19 +164,19 @@ describe('246. dupColNames1.js', function() {
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID
          ORDER BY A.EMPLOYEE_ID`;
 
-      let result = await connection.execute(sql);
-      should.equal(result.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.metaData[3].name, "DEPARTMENT_NAME");
-      should.equal(result.rows[0].EMPLOYEE_ID, 1001);
-      should.equal(result.rows[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[1].DEPARTMENT_ID_1, 201);
-      should.equal(result.rows[1].DEPARTMENT_NAME, "Sales");
+      const result = await connection.execute(sql);
+      assert.equal(result.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.metaData[3].name, "DEPARTMENT_NAME");
+      assert.equal(result.rows[0].EMPLOYEE_ID, 1001);
+      assert.equal(result.rows[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[1].DEPARTMENT_ID_1, 201);
+      assert.equal(result.rows[1].DEPARTMENT_NAME, "Sales");
     });
 
     it('246.1.2 Three duplicate columns', async function() {
-      let sql =
+      const sql =
         `SELECT
             A.EMPLOYEE_ID, A.DEPARTMENT_ID,
             B.DEPARTMENT_ID, B.DEPARTMENT_ID
@@ -184,19 +184,19 @@ describe('246. dupColNames1.js', function() {
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID
          ORDER BY A.EMPLOYEE_ID`;
 
-      let result = await connection.execute(sql);
-      should.equal(result.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.metaData[3].name, "DEPARTMENT_ID_2");
-      should.equal(result.rows[0].EMPLOYEE_ID, 1001);
-      should.equal(result.rows[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[0].DEPARTMENT_ID_1, 101);
-      should.equal(result.rows[0].DEPARTMENT_ID_2, 101);
+      const result = await connection.execute(sql);
+      assert.equal(result.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.metaData[3].name, "DEPARTMENT_ID_2");
+      assert.equal(result.rows[0].EMPLOYEE_ID, 1001);
+      assert.equal(result.rows[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].DEPARTMENT_ID_1, 101);
+      assert.equal(result.rows[0].DEPARTMENT_ID_2, 101);
     });
 
     it('246.1.3 Duplicate column with conflicting alias name', async function() {
-      let sql =
+      const sql =
         `SELECT
             A.EMPLOYEE_ID, A.DEPARTMENT_ID,
             B.DEPARTMENT_ID, B.DEPARTMENT_ID AS DEPARTMENT_ID_1
@@ -204,19 +204,19 @@ describe('246. dupColNames1.js', function() {
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID
          ORDER BY A.EMPLOYEE_ID`;
 
-      let result = await connection.execute(sql);
-      should.equal(result.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].name, "DEPARTMENT_ID_2");
-      should.equal(result.metaData[3].name, "DEPARTMENT_ID_1");
-      should.equal(result.rows[0].EMPLOYEE_ID, 1001);
-      should.equal(result.rows[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[0].DEPARTMENT_ID_1, 101);
-      should.equal(result.rows[0].DEPARTMENT_ID_2, 101);
+      const result = await connection.execute(sql);
+      assert.equal(result.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].name, "DEPARTMENT_ID_2");
+      assert.equal(result.metaData[3].name, "DEPARTMENT_ID_1");
+      assert.equal(result.rows[0].EMPLOYEE_ID, 1001);
+      assert.equal(result.rows[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].DEPARTMENT_ID_1, 101);
+      assert.equal(result.rows[0].DEPARTMENT_ID_2, 101);
     });
 
     it('246.1.4 Duplicate column with non-conflicting alias name', async function() {
-      let sql =
+      const sql =
         `SELECT
             A.EMPLOYEE_ID, A.DEPARTMENT_ID,
             B.DEPARTMENT_ID, B.DEPARTMENT_ID AS DEPARTMENT_ID_5
@@ -224,21 +224,21 @@ describe('246. dupColNames1.js', function() {
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID
          ORDER BY A.EMPLOYEE_ID`;
 
-      let result = await connection.execute(sql);
-      should.equal(result.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.metaData[3].name, "DEPARTMENT_ID_5");
-      should.equal(result.rows[0].EMPLOYEE_ID, 1001);
-      should.equal(result.rows[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[0].DEPARTMENT_ID_1, 101);
-      should.equal(result.rows[0].DEPARTMENT_ID_5, 101);
+      const result = await connection.execute(sql);
+      assert.equal(result.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.metaData[3].name, "DEPARTMENT_ID_5");
+      assert.equal(result.rows[0].EMPLOYEE_ID, 1001);
+      assert.equal(result.rows[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].DEPARTMENT_ID_1, 101);
+      assert.equal(result.rows[0].DEPARTMENT_ID_5, 101);
     });
 
     it('246.1.5 Negative not-case sensitive', async function() {
       // alias name is within quotes and so does not match any string
       // comparison
-      let sql =
+      const sql =
         `SELECT
             A.EMPLOYEE_ID, A.DEPARTMENT_ID,
             B.department_id, B.department_id AS "department_id_1"
@@ -246,19 +246,19 @@ describe('246. dupColNames1.js', function() {
          WHERE A.department_id = B.department_id
          ORDER BY A.EMPLOYEE_ID`;
 
-      let result = await connection.execute(sql);
-      should.equal(result.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.metaData[3].name, "department_id_1");
-      should.equal(result.rows[0].EMPLOYEE_ID, 1001);
-      should.equal(result.rows[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[0].DEPARTMENT_ID_1, 101);
-      should.equal(result.rows[0].department_id_1, 101);
+      const result = await connection.execute(sql);
+      assert.equal(result.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.metaData[3].name, "department_id_1");
+      assert.equal(result.rows[0].EMPLOYEE_ID, 1001);
+      assert.equal(result.rows[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].DEPARTMENT_ID_1, 101);
+      assert.equal(result.rows[0].department_id_1, 101);
     });
 
     it('246.1.6 Two Dupliate columns using nested cursor', async function() {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME, B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME, A.DEPARTMENT_ID , A.DEPARTMENT_ID
                        FROM nodb_dupEmployee A
@@ -269,22 +269,22 @@ describe('246. dupColNames1.js', function() {
                 ORDER BY B.DEPARTMENT_ID
               `;
 
-      let result = await connection.execute(sql);
-      should.equal(result.metaData[0].name, "DEPARTMENT_NAME");
-      should.equal(result.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].name, "NC");
-      should.equal(result.metaData[2].metaData[0].name, "EMPLOYEE_NAME");
-      should.equal(result.metaData[2].metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.rows[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[0].DEPARTMENT_NAME, "R&D");
-      should.equal(result.rows[0].NC[0].EMPLOYEE_NAME, "Krishna Mohan");
-      should.equal(result.rows[0].NC[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[0].NC[0].DEPARTMENT_ID_1, 101);
+      const result = await connection.execute(sql);
+      assert.equal(result.metaData[0].name, "DEPARTMENT_NAME");
+      assert.equal(result.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].name, "NC");
+      assert.equal(result.metaData[2].metaData[0].name, "EMPLOYEE_NAME");
+      assert.equal(result.metaData[2].metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.rows[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(result.rows[0].NC[0].EMPLOYEE_NAME, "Krishna Mohan");
+      assert.equal(result.rows[0].NC[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].NC[0].DEPARTMENT_ID_1, 101);
     });
 
     it('246.1.7 Three dupliate columns using nested cursor', async function() {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID
                        FROM nodb_dupEmployee A
@@ -294,22 +294,22 @@ describe('246. dupColNames1.js', function() {
                 ORDER BY B.DEPARTMENT_ID
               `;
 
-      let result = await connection.execute(sql);
-      should.equal(result.metaData[0].name, "DEPARTMENT_NAME");
-      should.equal(result.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.metaData[3].name, "NC");
-      should.equal(result.metaData[3].metaData[0].name, "EMPLOYEE_NAME");
-      should.equal(result.metaData[3].metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.rows[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[0].DEPARTMENT_ID_1, 101);
-      should.equal(result.rows[0].DEPARTMENT_NAME, "R&D");
-      should.equal(result.rows[0].NC[0].EMPLOYEE_NAME, "Krishna Mohan");
-      should.equal(result.rows[0].NC[0].DEPARTMENT_ID, 101);
+      const result = await connection.execute(sql);
+      assert.equal(result.metaData[0].name, "DEPARTMENT_NAME");
+      assert.equal(result.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.metaData[3].name, "NC");
+      assert.equal(result.metaData[3].metaData[0].name, "EMPLOYEE_NAME");
+      assert.equal(result.metaData[3].metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.rows[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].DEPARTMENT_ID_1, 101);
+      assert.equal(result.rows[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(result.rows[0].NC[0].EMPLOYEE_NAME, "Krishna Mohan");
+      assert.equal(result.rows[0].NC[0].DEPARTMENT_ID, 101);
     });
 
     it('246.1.8 Three dupliate columns using nested cursor', async function() {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID , A.DEPARTMENT_ID
                        FROM nodb_dupEmployee A
@@ -319,24 +319,24 @@ describe('246. dupColNames1.js', function() {
                 ORDER BY B.DEPARTMENT_ID
               `;
 
-      let result = await connection.execute(sql);
-      should.equal(result.metaData[0].name, "DEPARTMENT_NAME");
-      should.equal(result.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].name, "NC");
-      should.equal(result.metaData[2].metaData[0].name, "EMPLOYEE_NAME");
-      should.equal(result.metaData[2].metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.metaData[2].metaData[3].name, "DEPARTMENT_ID_2");
-      should.equal(result.rows[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[0].DEPARTMENT_NAME, "R&D");
-      should.equal(result.rows[0].NC[0].EMPLOYEE_NAME, "Krishna Mohan");
-      should.equal(result.rows[0].NC[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[0].NC[0].DEPARTMENT_ID_1, 101);
-      should.equal(result.rows[0].NC[0].DEPARTMENT_ID_2, 101);
+      const result = await connection.execute(sql);
+      assert.equal(result.metaData[0].name, "DEPARTMENT_NAME");
+      assert.equal(result.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].name, "NC");
+      assert.equal(result.metaData[2].metaData[0].name, "EMPLOYEE_NAME");
+      assert.equal(result.metaData[2].metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.metaData[2].metaData[3].name, "DEPARTMENT_ID_2");
+      assert.equal(result.rows[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(result.rows[0].NC[0].EMPLOYEE_NAME, "Krishna Mohan");
+      assert.equal(result.rows[0].NC[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].NC[0].DEPARTMENT_ID_1, 101);
+      assert.equal(result.rows[0].NC[0].DEPARTMENT_ID_2, 101);
     });
 
     it('246.1.9 Duplicate column with conflicting alias name using nested cursor', async function() {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID , A.DEPARTMENT_ID AS DEPARTMENT_ID_1
                        FROM nodb_dupEmployee A
@@ -346,24 +346,24 @@ describe('246. dupColNames1.js', function() {
                 ORDER BY B.DEPARTMENT_ID
               `;
 
-      let result = await connection.execute(sql);
-      should.equal(result.metaData[0].name, "DEPARTMENT_NAME");
-      should.equal(result.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].name, "NC");
-      should.equal(result.metaData[2].metaData[0].name, "EMPLOYEE_NAME");
-      should.equal(result.metaData[2].metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].metaData[2].name, "DEPARTMENT_ID_2");
-      should.equal(result.metaData[2].metaData[3].name, "DEPARTMENT_ID_1");
-      should.equal(result.rows[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[0].DEPARTMENT_NAME, "R&D");
-      should.equal(result.rows[0].NC[0].EMPLOYEE_NAME, "Krishna Mohan");
-      should.equal(result.rows[0].NC[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[0].NC[0].DEPARTMENT_ID_1, 101);
-      should.equal(result.rows[0].NC[0].DEPARTMENT_ID_2, 101);
+      const result = await connection.execute(sql);
+      assert.equal(result.metaData[0].name, "DEPARTMENT_NAME");
+      assert.equal(result.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].name, "NC");
+      assert.equal(result.metaData[2].metaData[0].name, "EMPLOYEE_NAME");
+      assert.equal(result.metaData[2].metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].metaData[2].name, "DEPARTMENT_ID_2");
+      assert.equal(result.metaData[2].metaData[3].name, "DEPARTMENT_ID_1");
+      assert.equal(result.rows[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(result.rows[0].NC[0].EMPLOYEE_NAME, "Krishna Mohan");
+      assert.equal(result.rows[0].NC[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].NC[0].DEPARTMENT_ID_1, 101);
+      assert.equal(result.rows[0].NC[0].DEPARTMENT_ID_2, 101);
     });
 
     it('246.1.10 Duplicate column with non-conflicting alias name using nested cursor', async function() {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID, A.DEPARTMENT_ID , A.DEPARTMENT_ID AS DEPARTMENT_ID_5
                        FROM nodb_dupEmployee A
@@ -373,24 +373,24 @@ describe('246. dupColNames1.js', function() {
                 ORDER BY B.DEPARTMENT_ID
               `;
 
-      let result = await connection.execute(sql);
-      should.equal(result.metaData[0].name, "DEPARTMENT_NAME");
-      should.equal(result.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].name, "NC");
-      should.equal(result.metaData[2].metaData[0].name, "EMPLOYEE_NAME");
-      should.equal(result.metaData[2].metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.metaData[2].metaData[3].name, "DEPARTMENT_ID_5");
-      should.equal(result.rows[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[0].DEPARTMENT_NAME, "R&D");
-      should.equal(result.rows[0].NC[0].EMPLOYEE_NAME, "Krishna Mohan");
-      should.equal(result.rows[0].NC[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[0].NC[0].DEPARTMENT_ID_1, 101);
-      should.equal(result.rows[0].NC[0].DEPARTMENT_ID_5, 101);
+      const result = await connection.execute(sql);
+      assert.equal(result.metaData[0].name, "DEPARTMENT_NAME");
+      assert.equal(result.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].name, "NC");
+      assert.equal(result.metaData[2].metaData[0].name, "EMPLOYEE_NAME");
+      assert.equal(result.metaData[2].metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.metaData[2].metaData[3].name, "DEPARTMENT_ID_5");
+      assert.equal(result.rows[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(result.rows[0].NC[0].EMPLOYEE_NAME, "Krishna Mohan");
+      assert.equal(result.rows[0].NC[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].NC[0].DEPARTMENT_ID_1, 101);
+      assert.equal(result.rows[0].NC[0].DEPARTMENT_ID_5, 101);
     });
 
     it('246.1.11 Duplicate column with case sensitive alias name using nested cursor', async function() {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID AS "department_id_1",
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID
                        FROM nodb_dupEmployee A
@@ -400,24 +400,24 @@ describe('246. dupColNames1.js', function() {
                 ORDER BY B.DEPARTMENT_ID
               `;
 
-      let result = await connection.execute(sql);
-      should.equal(result.metaData[0].name, "DEPARTMENT_NAME");
-      should.equal(result.metaData[1].name, "department_id_1");
-      should.equal(result.metaData[2].name, "NC");
-      should.equal(result.metaData[2].metaData[0].name, "EMPLOYEE_NAME");
-      should.equal(result.metaData[2].metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.rows[0].department_id_1, 101);
-      should.equal(result.rows[0].DEPARTMENT_NAME, "R&D");
-      should.equal(result.rows[0].NC[0].EMPLOYEE_NAME, "Krishna Mohan");
-      should.equal(result.rows[0].NC[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[0].NC[0].DEPARTMENT_ID_1, 101);
+      const result = await connection.execute(sql);
+      assert.equal(result.metaData[0].name, "DEPARTMENT_NAME");
+      assert.equal(result.metaData[1].name, "department_id_1");
+      assert.equal(result.metaData[2].name, "NC");
+      assert.equal(result.metaData[2].metaData[0].name, "EMPLOYEE_NAME");
+      assert.equal(result.metaData[2].metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.rows[0].department_id_1, 101);
+      assert.equal(result.rows[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(result.rows[0].NC[0].EMPLOYEE_NAME, "Krishna Mohan");
+      assert.equal(result.rows[0].NC[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].NC[0].DEPARTMENT_ID_1, 101);
     });
 
 
     it('246.1.12 Two duplicate columns using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
-      let proc = `
+      const proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
           AS
           BEGIN
@@ -432,23 +432,23 @@ describe('246. dupColNames1.js', function() {
         `;
 
       await connection.execute(proc);
-      let plsql = `BEGIN ${PROC}(:cursor); END;`;
-      let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
-      let result = await connection.execute(plsql, opts);
-      let row_data = await traverse_results(result.outBinds.cursor);
-      should.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_NAME");
-      should.equal(row_data[0].EMPLOYEE_ID, 1001);
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].DEPARTMENT_NAME, "R&D");
+      const plsql = `BEGIN ${PROC}(:cursor); END;`;
+      const opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(plsql, opts);
+      const row_data = await traverse_results(result.outBinds.cursor);
+      assert.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_NAME");
+      assert.equal(row_data[0].EMPLOYEE_ID, 1001);
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].DEPARTMENT_NAME, "R&D");
     });
 
     it('246.1.13 Three duplicate columns using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
-      let proc = `
+      const proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
           AS
           BEGIN
@@ -462,23 +462,23 @@ describe('246. dupColNames1.js', function() {
         `;
 
       await connection.execute(proc);
-      let plsql = `BEGIN ${PROC}(:cursor); END;`;
-      let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
-      let result = await connection.execute(plsql, opts);
-      let row_data = await traverse_results(result.outBinds.cursor);
-      should.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_ID_2");
-      should.equal(row_data[0].EMPLOYEE_ID, 1001);
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_2, 101);
+      const plsql = `BEGIN ${PROC}(:cursor); END;`;
+      const opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(plsql, opts);
+      const row_data = await traverse_results(result.outBinds.cursor);
+      assert.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_ID_2");
+      assert.equal(row_data[0].EMPLOYEE_ID, 1001);
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_2, 101);
     });
 
     it('246.1.14 Duplicate column with conflicting alias name using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
-      let proc = `
+      const proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
           AS
           BEGIN
@@ -492,23 +492,23 @@ describe('246. dupColNames1.js', function() {
         `;
 
       await connection.execute(proc);
-      let plsql = `BEGIN ${PROC}(:cursor); END;`;
-      let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
-      let result = await connection.execute(plsql, opts);
-      let row_data = await traverse_results(result.outBinds.cursor);
-      should.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_2");
-      should.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_ID_1");
-      should.equal(row_data[0].EMPLOYEE_ID, 1001);
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_2, 101);
+      const plsql = `BEGIN ${PROC}(:cursor); END;`;
+      const opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(plsql, opts);
+      const row_data = await traverse_results(result.outBinds.cursor);
+      assert.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_2");
+      assert.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_ID_1");
+      assert.equal(row_data[0].EMPLOYEE_ID, 1001);
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_2, 101);
     });
 
     it('246.1.15 Duplicate column with non-conflicting alias name using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
-      let proc = `
+      const proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
           AS
           BEGIN
@@ -522,23 +522,23 @@ describe('246. dupColNames1.js', function() {
         `;
 
       await connection.execute(proc);
-      let plsql = `BEGIN ${PROC}(:cursor); END;`;
-      let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
-      let result = await connection.execute(plsql, opts);
-      let row_data = await traverse_results(result.outBinds.cursor);
-      should.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_ID_5");
-      should.equal(row_data[0].EMPLOYEE_ID, 1001);
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_5, 101);
+      const plsql = `BEGIN ${PROC}(:cursor); END;`;
+      const opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(plsql, opts);
+      const row_data = await traverse_results(result.outBinds.cursor);
+      assert.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_ID_5");
+      assert.equal(row_data[0].EMPLOYEE_ID, 1001);
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_5, 101);
     });
 
     it('246.1.16 Duplicate column with case sensitive alias name using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
-      let proc = `
+      const proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
           AS
           BEGIN
@@ -552,167 +552,167 @@ describe('246. dupColNames1.js', function() {
         `;
 
       await connection.execute(proc);
-      let plsql = `BEGIN ${PROC}(:cursor); END;`;
-      let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
-      let result = await connection.execute(plsql, opts);
-      let row_data = await traverse_results(result.outBinds.cursor);
-      should.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.outBinds.cursor.metaData[3].name, "department_id_1");
-      should.equal(row_data[0].EMPLOYEE_ID, 1001);
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].department_id_1, 101);
+      const plsql = `BEGIN ${PROC}(:cursor); END;`;
+      const opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(plsql, opts);
+      const row_data = await traverse_results(result.outBinds.cursor);
+      assert.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.outBinds.cursor.metaData[3].name, "department_id_1");
+      assert.equal(row_data[0].EMPLOYEE_ID, 1001);
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].department_id_1, 101);
     });
 
     it('246.1.17 Duplicate column with case sensitive alias name from dual', async function() {
-      let result = await connection.execute(`SELECT dummy "abc", dummy "ABC" FROM dual`);
-      should.equal(result.metaData[0].name, "abc");
-      should.equal(result.metaData[1].name, "ABC");
-      should.equal(result.rows[0].abc, "X");
-      should.equal(result.rows[0].ABC, "X");
+      const result = await connection.execute(`SELECT dummy "abc", dummy "ABC" FROM dual`);
+      assert.equal(result.metaData[0].name, "abc");
+      assert.equal(result.metaData[1].name, "ABC");
+      assert.equal(result.rows[0].abc, "X");
+      assert.equal(result.rows[0].ABC, "X");
     });
 
     it('246.1.18 1000 duplicate columns', async function() {
-      let column_size = 1000;
-      let columns_string = genColumns(column_size);
+      const column_size = 1000;
+      const columns_string = genColumns(column_size);
       function genColumns(size) {
-        let buffer = [];
+        const buffer = [];
         for (let i = 0; i < size; i++) {
           buffer[i] = "B.DEPARTMENT_ID";
         }
         return buffer.join();
       }
-      let sql =
+      const sql =
         "SELECT " +
         "    A.EMPLOYEE_ID, A.DEPARTMENT_ID, " +
         columns_string +
         " FROM nodb_dupEmployee A, nodb_dupDepartment B " +
         " WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID " +
         " ORDER BY A.EMPLOYEE_ID";
-      let result = await connection.execute(sql);
+      const result = await connection.execute(sql);
 
-      should.equal(result.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.metaData[3].name, "DEPARTMENT_ID_2");
-      should.equal(result.metaData[100].name, "DEPARTMENT_ID_99");
-      should.equal(result.metaData[500].name, "DEPARTMENT_ID_499");
-      should.equal(result.metaData[1001].name, "DEPARTMENT_ID_1000");
-      should.equal(result.rows[0].EMPLOYEE_ID, 1001);
-      should.equal(result.rows[0].DEPARTMENT_ID, 101);
-      should.equal(result.rows[0].DEPARTMENT_ID_1, 101);
-      should.equal(result.rows[0].DEPARTMENT_ID_2, 101);
-      should.equal(result.rows[0].DEPARTMENT_ID_99, 101);
-      should.equal(result.rows[0].DEPARTMENT_ID_499, 101);
-      should.equal(result.rows[0].DEPARTMENT_ID_1000, 101);
+      assert.equal(result.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.metaData[3].name, "DEPARTMENT_ID_2");
+      assert.equal(result.metaData[100].name, "DEPARTMENT_ID_99");
+      assert.equal(result.metaData[500].name, "DEPARTMENT_ID_499");
+      assert.equal(result.metaData[1001].name, "DEPARTMENT_ID_1000");
+      assert.equal(result.rows[0].EMPLOYEE_ID, 1001);
+      assert.equal(result.rows[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].DEPARTMENT_ID_1, 101);
+      assert.equal(result.rows[0].DEPARTMENT_ID_2, 101);
+      assert.equal(result.rows[0].DEPARTMENT_ID_99, 101);
+      assert.equal(result.rows[0].DEPARTMENT_ID_499, 101);
+      assert.equal(result.rows[0].DEPARTMENT_ID_1000, 101);
     });
   });
 
   describe('246.2 Duplicate column names, query with ResultSet', function() {
     it('246.2.1 Two duplicate columns', async function() {
-      let sql =
+      const sql =
         `SELECT
             A.EMPLOYEE_ID, A.DEPARTMENT_ID,
             B.DEPARTMENT_ID, B.DEPARTMENT_NAME
          FROM nodb_dupEmployee A, nodb_dupDepartment B
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID`;
 
-      let result = await connection.execute(sql, [], { resultSet: true });
-      let row_data = await traverse_results(result.resultSet);
-      should.equal(result.resultSet.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.resultSet.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.resultSet.metaData[3].name, "DEPARTMENT_NAME");
-      should.equal(row_data[0].EMPLOYEE_ID, 1001);
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].DEPARTMENT_NAME, "R&D");
+      const result = await connection.execute(sql, [], { resultSet: true });
+      const row_data = await traverse_results(result.resultSet);
+      assert.equal(result.resultSet.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.resultSet.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.resultSet.metaData[3].name, "DEPARTMENT_NAME");
+      assert.equal(row_data[0].EMPLOYEE_ID, 1001);
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].DEPARTMENT_NAME, "R&D");
     });
 
     it('246.2.2 Three duplicate columns', async function() {
-      let sql =
+      const sql =
         `SELECT
             A.EMPLOYEE_ID, A.DEPARTMENT_ID,
             B.DEPARTMENT_ID, B.DEPARTMENT_ID
          FROM nodb_dupEmployee A, nodb_dupDepartment B
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID`;
 
-      let result = await connection.execute(sql, [], { resultSet: true });
-      let row_data = await traverse_results(result.resultSet);
-      should.equal(result.resultSet.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.resultSet.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.resultSet.metaData[3].name, "DEPARTMENT_ID_2");
-      should.equal(row_data[0].EMPLOYEE_ID, 1001);
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_2, 101);
+      const result = await connection.execute(sql, [], { resultSet: true });
+      const row_data = await traverse_results(result.resultSet);
+      assert.equal(result.resultSet.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.resultSet.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.resultSet.metaData[3].name, "DEPARTMENT_ID_2");
+      assert.equal(row_data[0].EMPLOYEE_ID, 1001);
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_2, 101);
     });
 
     it('246.2.3 Duplicate column with conflicting alias name', async function() {
-      let sql =
+      const sql =
         `SELECT
             A.EMPLOYEE_ID, A.DEPARTMENT_ID,
             B.DEPARTMENT_ID, B.DEPARTMENT_ID AS DEPARTMENT_ID_1
          FROM nodb_dupEmployee A, nodb_dupDepartment B
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID`;
 
-      let result = await connection.execute(sql, [], { resultSet: true });
-      let row_data = await traverse_results(result.resultSet);
-      should.equal(result.resultSet.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.resultSet.metaData[2].name, "DEPARTMENT_ID_2");
-      should.equal(result.resultSet.metaData[3].name, "DEPARTMENT_ID_1");
-      should.equal(row_data[0].EMPLOYEE_ID, 1001);
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_2, 101);
+      const result = await connection.execute(sql, [], { resultSet: true });
+      const row_data = await traverse_results(result.resultSet);
+      assert.equal(result.resultSet.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.resultSet.metaData[2].name, "DEPARTMENT_ID_2");
+      assert.equal(result.resultSet.metaData[3].name, "DEPARTMENT_ID_1");
+      assert.equal(row_data[0].EMPLOYEE_ID, 1001);
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_2, 101);
     });
 
     it('246.2.4 Duplicate column with non-conflicting alias name', async function() {
-      let sql =
+      const sql =
         `SELECT
             A.EMPLOYEE_ID, A.DEPARTMENT_ID,
             B.DEPARTMENT_ID, B.DEPARTMENT_ID AS DEPARTMENT_ID_5
          FROM nodb_dupEmployee A, nodb_dupDepartment B
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID`;
 
-      let result = await connection.execute(sql, [], { resultSet: true });
-      let row_data = await traverse_results(result.resultSet);
-      should.equal(result.resultSet.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.resultSet.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.resultSet.metaData[3].name, "DEPARTMENT_ID_5");
-      should.equal(row_data[0].EMPLOYEE_ID, 1001);
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_5, 101);
+      const result = await connection.execute(sql, [], { resultSet: true });
+      const row_data = await traverse_results(result.resultSet);
+      assert.equal(result.resultSet.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.resultSet.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.resultSet.metaData[3].name, "DEPARTMENT_ID_5");
+      assert.equal(row_data[0].EMPLOYEE_ID, 1001);
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_5, 101);
     });
 
     it('246.2.5 Negative not-case sensitive', async function() {
-      let sql =
+      const sql =
         `SELECT
             A.EMPLOYEE_ID, A.DEPARTMENT_ID,
             B.department_id, B.department_id AS "department_id_1"
          FROM nodb_dupEmployee A, nodb_dupDepartment B
          WHERE A.department_id = B.department_id`;
 
-      let result = await connection.execute(sql, [], { resultSet: true });
-      let row_data = await traverse_results(result.resultSet);
-      should.equal(result.resultSet.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.resultSet.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.resultSet.metaData[3].name, "department_id_1");
-      should.equal(row_data[0].EMPLOYEE_ID, 1001);
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].department_id_1, 101);
+      const result = await connection.execute(sql, [], { resultSet: true });
+      const row_data = await traverse_results(result.resultSet);
+      assert.equal(result.resultSet.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.resultSet.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.resultSet.metaData[3].name, "department_id_1");
+      assert.equal(row_data[0].EMPLOYEE_ID, 1001);
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].department_id_1, 101);
     });
 
     it('246.2.6 Two duplicate columns using nested cursor', async function() {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID
                        FROM nodb_dupEmployee A
@@ -723,24 +723,24 @@ describe('246. dupColNames1.js', function() {
                 ORDER BY B.DEPARTMENT_ID
               `;
 
-      let result = await connection.execute(sql, [], { resultSet: true });
-      let row = await traverse_rows(result.resultSet);
-      let row_data = await traverse_results(row[0].NC);
-      should.equal(result.resultSet.metaData[0].name, "DEPARTMENT_NAME");
-      should.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.resultSet.metaData[2].name, "NC");
-      should.equal(row[0].NC.metaData[0].name, "EMPLOYEE_NAME");
-      should.equal(row[0].NC.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(row[0].NC.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(row[0].DEPARTMENT_ID, 101);
-      should.equal(row[0].DEPARTMENT_NAME, "R&D");
-      should.equal(row_data[0].EMPLOYEE_NAME, "Krishna Mohan");
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      const result = await connection.execute(sql, [], { resultSet: true });
+      const row = await traverse_rows(result.resultSet);
+      const row_data = await traverse_results(row[0].NC);
+      assert.equal(result.resultSet.metaData[0].name, "DEPARTMENT_NAME");
+      assert.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.resultSet.metaData[2].name, "NC");
+      assert.equal(row[0].NC.metaData[0].name, "EMPLOYEE_NAME");
+      assert.equal(row[0].NC.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(row[0].NC.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(row[0].DEPARTMENT_ID, 101);
+      assert.equal(row[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(row_data[0].EMPLOYEE_NAME, "Krishna Mohan");
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
     });
 
     it('246.2.7 Three duplicate columns using nested cursor', async function() {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID
                        FROM nodb_dupEmployee A
@@ -750,24 +750,24 @@ describe('246. dupColNames1.js', function() {
                 ORDER BY B.DEPARTMENT_ID
               `;
 
-      let result = await connection.execute(sql, [], { resultSet: true });
-      let row = await traverse_rows(result.resultSet);
-      let row_data = await traverse_results(row[0].NC);
-      should.equal(result.resultSet.metaData[0].name, "DEPARTMENT_NAME");
-      should.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.resultSet.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.resultSet.metaData[3].name, "NC");
-      should.equal(row[0].NC.metaData[0].name, "EMPLOYEE_NAME");
-      should.equal(row[0.].NC.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(row[0].DEPARTMENT_ID, 101);
-      should.equal(row[0].DEPARTMENT_ID_1, 101);
-      should.equal(row[0].DEPARTMENT_NAME, "R&D");
-      should.equal(row_data[0].EMPLOYEE_NAME, "Krishna Mohan");
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
+      const result = await connection.execute(sql, [], { resultSet: true });
+      const row = await traverse_rows(result.resultSet);
+      const row_data = await traverse_results(row[0].NC);
+      assert.equal(result.resultSet.metaData[0].name, "DEPARTMENT_NAME");
+      assert.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.resultSet.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.resultSet.metaData[3].name, "NC");
+      assert.equal(row[0].NC.metaData[0].name, "EMPLOYEE_NAME");
+      assert.equal(row[0.].NC.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(row[0].DEPARTMENT_ID, 101);
+      assert.equal(row[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(row_data[0].EMPLOYEE_NAME, "Krishna Mohan");
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
     });
 
     it('246.2.8 Three duplicate columns using nested cursor', async function() {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID , A.DEPARTMENT_ID
                        FROM nodb_dupEmployee A
@@ -777,26 +777,26 @@ describe('246. dupColNames1.js', function() {
                 ORDER BY B.DEPARTMENT_ID
               `;
 
-      let result = await connection.execute(sql, [], { resultSet: true });
-      let row = await traverse_rows(result.resultSet);
-      let row_data = await traverse_results(row[0].NC);
-      should.equal(result.resultSet.metaData[0].name, "DEPARTMENT_NAME");
-      should.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.resultSet.metaData[2].name, "NC");
-      should.equal(row[0].NC.metaData[0].name, "EMPLOYEE_NAME");
-      should.equal(row[0].NC.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(row[0].NC.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(row[0].NC.metaData[3].name, "DEPARTMENT_ID_2");
-      should.equal(row[0].DEPARTMENT_ID, 101);
-      should.equal(row[0].DEPARTMENT_NAME, "R&D");
-      should.equal(row_data[0].EMPLOYEE_NAME, "Krishna Mohan");
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_2, 101);
+      const result = await connection.execute(sql, [], { resultSet: true });
+      const row = await traverse_rows(result.resultSet);
+      const row_data = await traverse_results(row[0].NC);
+      assert.equal(result.resultSet.metaData[0].name, "DEPARTMENT_NAME");
+      assert.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.resultSet.metaData[2].name, "NC");
+      assert.equal(row[0].NC.metaData[0].name, "EMPLOYEE_NAME");
+      assert.equal(row[0].NC.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(row[0].NC.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(row[0].NC.metaData[3].name, "DEPARTMENT_ID_2");
+      assert.equal(row[0].DEPARTMENT_ID, 101);
+      assert.equal(row[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(row_data[0].EMPLOYEE_NAME, "Krishna Mohan");
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_2, 101);
     });
 
     it('246.2.9 Duplicate column with conflicting alias name using nested cursor', async function() {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID , A.DEPARTMENT_ID AS DEPARTMENT_ID_1
                        FROM nodb_dupEmployee A
@@ -806,26 +806,26 @@ describe('246. dupColNames1.js', function() {
                 ORDER BY B.DEPARTMENT_ID
               `;
 
-      let result = await connection.execute(sql, [], { resultSet: true });
-      let row = await traverse_rows(result.resultSet);
-      let row_data = await traverse_results(row[0].NC);
-      should.equal(result.resultSet.metaData[0].name, "DEPARTMENT_NAME");
-      should.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.resultSet.metaData[2].name, "NC");
-      should.equal(row[0].NC.metaData[0].name, "EMPLOYEE_NAME");
-      should.equal(row[0].NC.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(row[0].NC.metaData[2].name, "DEPARTMENT_ID_2");
-      should.equal(row[0].NC.metaData[3].name, "DEPARTMENT_ID_1");
-      should.equal(row[0].DEPARTMENT_ID, 101);
-      should.equal(row[0].DEPARTMENT_NAME, "R&D");
-      should.equal(row_data[0].EMPLOYEE_NAME, "Krishna Mohan");
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_2, 101);
+      const result = await connection.execute(sql, [], { resultSet: true });
+      const row = await traverse_rows(result.resultSet);
+      const row_data = await traverse_results(row[0].NC);
+      assert.equal(result.resultSet.metaData[0].name, "DEPARTMENT_NAME");
+      assert.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.resultSet.metaData[2].name, "NC");
+      assert.equal(row[0].NC.metaData[0].name, "EMPLOYEE_NAME");
+      assert.equal(row[0].NC.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(row[0].NC.metaData[2].name, "DEPARTMENT_ID_2");
+      assert.equal(row[0].NC.metaData[3].name, "DEPARTMENT_ID_1");
+      assert.equal(row[0].DEPARTMENT_ID, 101);
+      assert.equal(row[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(row_data[0].EMPLOYEE_NAME, "Krishna Mohan");
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_2, 101);
     });
 
     it('246.2.10 Duplicate column with non-conflicting alias name using nested cursor', async function() {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID , A.DEPARTMENT_ID AS DEPARTMENT_ID_5
                        FROM nodb_dupEmployee A
@@ -835,26 +835,26 @@ describe('246. dupColNames1.js', function() {
                 ORDER BY B.DEPARTMENT_ID
               `;
 
-      let result = await connection.execute(sql, [], { resultSet: true });
-      let row = await traverse_rows(result.resultSet);
-      let row_data = await traverse_results(row[0].NC);
-      should.equal(result.resultSet.metaData[0].name, "DEPARTMENT_NAME");
-      should.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.resultSet.metaData[2].name, "NC");
-      should.equal(row[0].NC.metaData[0].name, "EMPLOYEE_NAME");
-      should.equal(row[0].NC.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(row[0].NC.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(row[0].NC.metaData[3].name, "DEPARTMENT_ID_5");
-      should.equal(row[0].DEPARTMENT_ID, 101);
-      should.equal(row[0].DEPARTMENT_NAME, "R&D");
-      should.equal(row_data[0].EMPLOYEE_NAME, "Krishna Mohan");
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_5, 101);
+      const result = await connection.execute(sql, [], { resultSet: true });
+      const row = await traverse_rows(result.resultSet);
+      const row_data = await traverse_results(row[0].NC);
+      assert.equal(result.resultSet.metaData[0].name, "DEPARTMENT_NAME");
+      assert.equal(result.resultSet.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.resultSet.metaData[2].name, "NC");
+      assert.equal(row[0].NC.metaData[0].name, "EMPLOYEE_NAME");
+      assert.equal(row[0].NC.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(row[0].NC.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(row[0].NC.metaData[3].name, "DEPARTMENT_ID_5");
+      assert.equal(row[0].DEPARTMENT_ID, 101);
+      assert.equal(row[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(row_data[0].EMPLOYEE_NAME, "Krishna Mohan");
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_5, 101);
     });
 
     it('246.2.11 Duplicate column with case sensitive alias name using nested cursor', async function() {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID AS "department_id_1",
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID
                        FROM nodb_dupEmployee A
@@ -864,25 +864,25 @@ describe('246. dupColNames1.js', function() {
                 ORDER BY B.DEPARTMENT_ID
               `;
 
-      let result = await connection.execute(sql, [], { resultSet: true });
-      let row = await traverse_rows(result.resultSet);
-      let row_data = await traverse_results(row[0].NC);
-      should.equal(result.resultSet.metaData[0].name, "DEPARTMENT_NAME");
-      should.equal(result.resultSet.metaData[1].name, "department_id_1");
-      should.equal(result.resultSet.metaData[2].name, "NC");
-      should.equal(row[0].NC.metaData[0].name, "EMPLOYEE_NAME");
-      should.equal(row[0].NC.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(row[0].NC.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(row[0].department_id_1, 101);
-      should.equal(row[0].DEPARTMENT_NAME, "R&D");
-      should.equal(row_data[0].EMPLOYEE_NAME, "Krishna Mohan");
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      const result = await connection.execute(sql, [], { resultSet: true });
+      const row = await traverse_rows(result.resultSet);
+      const row_data = await traverse_results(row[0].NC);
+      assert.equal(result.resultSet.metaData[0].name, "DEPARTMENT_NAME");
+      assert.equal(result.resultSet.metaData[1].name, "department_id_1");
+      assert.equal(result.resultSet.metaData[2].name, "NC");
+      assert.equal(row[0].NC.metaData[0].name, "EMPLOYEE_NAME");
+      assert.equal(row[0].NC.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(row[0].NC.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(row[0].department_id_1, 101);
+      assert.equal(row[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(row_data[0].EMPLOYEE_NAME, "Krishna Mohan");
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
     });
 
     it('246.2.12 Two Duplicate columns using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
-      let proc = `
+      const proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
           AS
           BEGIN
@@ -896,23 +896,23 @@ describe('246. dupColNames1.js', function() {
         `;
 
       await connection.execute(proc);
-      let plsql = `BEGIN ${PROC}(:cursor); END;`;
-      let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
-      let result = await connection.execute(plsql, opts, { resultSet: true });
-      let row_data = await traverse_results(result.outBinds.cursor);
-      should.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_NAME");
-      should.equal(row_data[0].EMPLOYEE_ID, 1001);
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].DEPARTMENT_NAME, "R&D");
+      const plsql = `BEGIN ${PROC}(:cursor); END;`;
+      const opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(plsql, opts, { resultSet: true });
+      const row_data = await traverse_results(result.outBinds.cursor);
+      assert.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_NAME");
+      assert.equal(row_data[0].EMPLOYEE_ID, 1001);
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].DEPARTMENT_NAME, "R&D");
     });
 
     it('246.2.13 Three duplicate columns using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
-      let proc = `
+      const proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
           AS
           BEGIN
@@ -926,23 +926,23 @@ describe('246. dupColNames1.js', function() {
         `;
 
       await connection.execute(proc);
-      let plsql = `BEGIN ${PROC}(:cursor); END;`;
-      let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
-      let result = await connection.execute(plsql, opts, { resultSet: true });
-      let row_data = await traverse_results(result.outBinds.cursor);
-      should.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_ID_2");
-      should.equal(row_data[0].EMPLOYEE_ID, 1001);
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_2, 101);
+      const plsql = `BEGIN ${PROC}(:cursor); END;`;
+      const opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(plsql, opts, { resultSet: true });
+      const row_data = await traverse_results(result.outBinds.cursor);
+      assert.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_ID_2");
+      assert.equal(row_data[0].EMPLOYEE_ID, 1001);
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_2, 101);
     });
 
     it('246.2.14 Duplicate column with conflicting alias name using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
-      let proc = `
+      const proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
           AS
           BEGIN
@@ -956,23 +956,23 @@ describe('246. dupColNames1.js', function() {
         `;
 
       await connection.execute(proc);
-      let plsql = `BEGIN ${PROC}(:cursor); END;`;
-      let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
-      let result = await connection.execute(plsql, opts, { resultSet: true });
-      let row_data = await traverse_results(result.outBinds.cursor);
-      should.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_2");
-      should.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_ID_1");
-      should.equal(row_data[0].EMPLOYEE_ID, 1001);
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_2, 101);
+      const plsql = `BEGIN ${PROC}(:cursor); END;`;
+      const opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(plsql, opts, { resultSet: true });
+      const row_data = await traverse_results(result.outBinds.cursor);
+      assert.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_2");
+      assert.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_ID_1");
+      assert.equal(row_data[0].EMPLOYEE_ID, 1001);
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_2, 101);
     });
 
     it('246.2.15 Duplicate column with non-conflicting alias name using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
-      let proc = `
+      const proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
           AS
           BEGIN
@@ -986,23 +986,23 @@ describe('246. dupColNames1.js', function() {
         `;
 
       await connection.execute(proc);
-      let plsql = `BEGIN ${PROC}(:cursor); END;`;
-      let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
-      let result = await connection.execute(plsql, opts, { resultSet: true });
-      let row_data = await traverse_results(result.outBinds.cursor);
-      should.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_ID_5");
-      should.equal(row_data[0].EMPLOYEE_ID, 1001);
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_5, 101);
+      const plsql = `BEGIN ${PROC}(:cursor); END;`;
+      const opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(plsql, opts, { resultSet: true });
+      const row_data = await traverse_results(result.outBinds.cursor);
+      assert.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.outBinds.cursor.metaData[3].name, "DEPARTMENT_ID_5");
+      assert.equal(row_data[0].EMPLOYEE_ID, 1001);
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_5, 101);
     });
 
     it('246.2.16 Duplicate column with case sensitive alias name using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
-      let proc = `
+      const proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
           AS
           BEGIN
@@ -1016,27 +1016,27 @@ describe('246. dupColNames1.js', function() {
         `;
 
       await connection.execute(proc);
-      let plsql = `BEGIN ${PROC}(:cursor); END;`;
-      let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
-      let result = await connection.execute(plsql, opts, { resultSet: true });
-      let row_data = await traverse_results(result.outBinds.cursor);
-      should.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
-      should.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
-      should.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
-      should.equal(result.outBinds.cursor.metaData[3].name, "department_id_1");
-      should.equal(row_data[0].EMPLOYEE_ID, 1001);
-      should.equal(row_data[0].DEPARTMENT_ID, 101);
-      should.equal(row_data[0].DEPARTMENT_ID_1, 101);
-      should.equal(row_data[0].department_id_1, 101);
+      const plsql = `BEGIN ${PROC}(:cursor); END;`;
+      const opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(plsql, opts, { resultSet: true });
+      const row_data = await traverse_results(result.outBinds.cursor);
+      assert.equal(result.outBinds.cursor.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.outBinds.cursor.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.outBinds.cursor.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.outBinds.cursor.metaData[3].name, "department_id_1");
+      assert.equal(row_data[0].EMPLOYEE_ID, 1001);
+      assert.equal(row_data[0].DEPARTMENT_ID, 101);
+      assert.equal(row_data[0].DEPARTMENT_ID_1, 101);
+      assert.equal(row_data[0].department_id_1, 101);
     });
 
     it('246.2.17 Duplicate column with case sensitive alias name from dual', async function() {
-      let result = await connection.execute(`SELECT dummy "abc", dummy "ABC" from dual`, [], { resultSet: true });
-      let row_data = await traverse_results(result.resultSet);
-      should.equal(result.resultSet.metaData[0].name, "abc");
-      should.equal(result.resultSet.metaData[1].name, "ABC");
-      should.equal(row_data[0].abc, "X");
-      should.equal(row_data[0].ABC, "X");
+      const result = await connection.execute(`SELECT dummy "abc", dummy "ABC" from dual`, [], { resultSet: true });
+      const row_data = await traverse_results(result.resultSet);
+      assert.equal(result.resultSet.metaData[0].name, "abc");
+      assert.equal(result.resultSet.metaData[1].name, "ABC");
+      assert.equal(row_data[0].abc, "X");
+      assert.equal(row_data[0].ABC, "X");
     });
   });
 

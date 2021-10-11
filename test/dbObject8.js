@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -55,11 +55,11 @@ describe('207. dbObject8.js', () => {
           id NUMBER,
           farm ${TYPE2}
         )`;
-      let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+      const plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // before()
 
@@ -76,7 +76,7 @@ describe('207. dbObject8.js', () => {
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // after()
 
@@ -85,16 +85,18 @@ describe('207. dbObject8.js', () => {
     try {
       const FarmType = await conn.getDbObjectClass(TYPE2);
       // Farm Type
-      should.strictEqual(FarmType.prototype.name, TYPE2);
-      (FarmType.prototype.isCollection).should.be.false();
+      assert.strictEqual(FarmType.prototype.name, TYPE2);
+      assert.strictEqual(FarmType.prototype.isCollection, false);
 
       // Nested type
-      should.strictEqual(
+      assert.strictEqual(
         FarmType.prototype.attributes.HARVEST.typeClass.prototype.name,
         TYPE1
       );
-      (FarmType.prototype.attributes.HARVEST.typeClass.prototype.isCollection)
-        .should.be.true();
+      assert.strictEqual(
+        FarmType.prototype.attributes.HARVEST.typeClass.prototype.isCollection,
+        true
+      );
 
       // Insert Method 1: pass a JavaScript object to the constructor
       let crops = [];
@@ -122,7 +124,7 @@ describe('207. dbObject8.js', () => {
       farm2.HARVEST.append('tomatoes');  // extend the collection
       // console.log(farm2.HARVEST.getValues());
       crops[1] = farm2.HARVEST.getValues();
-      should.deepEqual(crops[1], [ 'carrots', 'tomatoes' ]);
+      assert.deepEqual(crops[1], [ 'carrots', 'tomatoes' ]);
 
       await conn.execute(
         `INSERT INTO ${TABLE} (id, farm) VALUES (:id, :f)`,
@@ -181,15 +183,15 @@ describe('207. dbObject8.js', () => {
 
         const farm = row.FARM; // a DbObject for the named Oracle type
 
-        should.strictEqual(farm.FARMERNAME, names[i]);
+        assert.strictEqual(farm.FARMERNAME, names[i]);
 
         const harvests = farm.HARVEST.getValues();
-        should.deepEqual(harvests, crops[i]);
+        assert.deepEqual(harvests, crops[i]);
         i++;
       }
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 207.1
 });

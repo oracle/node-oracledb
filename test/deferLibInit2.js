@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
+ * The node-oracledb test suite uses 'mocha'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -27,7 +27,7 @@
  *****************************************************************************/
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 
 describe('deferLibInit2.js', () => {
 
@@ -35,7 +35,7 @@ describe('deferLibInit2.js', () => {
 
     delete process.env.ORACLE_HOME;
 
-    should.throws(
+    assert.throws(
       () => {
         console.log(oracledb.oracleClientVersion);
       },

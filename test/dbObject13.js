@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -72,7 +72,7 @@ describe('212. dbObject13.js', function() {
         await conn.execute(plsql);
 
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     }
 
@@ -88,7 +88,7 @@ describe('212. dbObject13.js', function() {
 
         await conn.close();
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     }
 
@@ -118,12 +118,12 @@ describe('212. dbObject13.js', function() {
       const result = await conn.execute(CALL, binds);
 
       for (let i = 0, out = result.outBinds.outbv; i < players.length; i++) {
-        should.strictEqual(out[i].NAME, players[i].NAME);
-        should.strictEqual(out[i].POSITION, players[i].POSITION);
-        should.strictEqual(out[i].SHIRTNUMBER, players[i].SHIRTNUMBER);
+        assert.strictEqual(out[i].NAME, players[i].NAME);
+        assert.strictEqual(out[i].POSITION, players[i].POSITION);
+        assert.strictEqual(out[i].SHIRTNUMBER, players[i].SHIRTNUMBER);
       }
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 212.1
 

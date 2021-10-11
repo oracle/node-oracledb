@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
+ * The node-oracledb test suite uses 'mocha'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,7 +28,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 const dbconfig = require('./dbconfig.js');
 
 describe('247. dupColNames2.js', function() {
@@ -97,7 +97,7 @@ describe('247. dupColNames2.js', function() {
 
       await connection.commit();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -110,7 +110,7 @@ describe('247. dupColNames2.js', function() {
 
       oracledb.outFormat = outFormatBak;
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -120,48 +120,48 @@ describe('247. dupColNames2.js', function() {
 
   describe('247.1 Duplicate column names, query with stream', function() {
     it('247.1.1 Two duplicate columns', function(done) {
-      let sql =
+      const sql =
         `SELECT
             A.EMPLOYEE_ID, A.EMPLOYEE_HISTORY, A.DEPARTMENT_ID,
             B.DEPARTMENT_ID, B.DEPARTMENT_NAME
          FROM nodb_dupEmployee A, nodb_dupDepartment B
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID`;
 
-      let stream = connection.queryStream(sql);
+      const stream = connection.queryStream(sql);
       let index = 0;
       let metadataseen = 0;
 
       stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "EMPLOYEE_ID");
-        should.equal(metaData[1].name, "EMPLOYEE_HISTORY");
-        should.equal(metaData[2].name, "DEPARTMENT_ID");
-        should.equal(metaData[3].name, "DEPARTMENT_ID_1");
-        should.equal(metaData[4].name, "DEPARTMENT_NAME");
+        assert.equal(metaData[0].name, "EMPLOYEE_ID");
+        assert.equal(metaData[1].name, "EMPLOYEE_HISTORY");
+        assert.equal(metaData[2].name, "DEPARTMENT_ID");
+        assert.equal(metaData[3].name, "DEPARTMENT_ID_1");
+        assert.equal(metaData[4].name, "DEPARTMENT_NAME");
         metadataseen = 1;
       });
 
       stream.on('error', function(error) {
-        should.not.exist(error);
+        assert.fail(error);
       });
 
       stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.EMPLOYEE_ID, empID[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
-        should.equal(data.DEPARTMENT_ID_1, depID[index]);
-        should.equal(data.DEPARTMENT_NAME, depName[index]);
-        should.exist(data.EMPLOYEE_HISTORY);
-        should.equal(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
+        assert(data);
+        assert.equal(data.EMPLOYEE_ID, empID[index]);
+        assert.equal(data.DEPARTMENT_ID, depID[index]);
+        assert.equal(data.DEPARTMENT_ID_1, depID[index]);
+        assert.equal(data.DEPARTMENT_NAME, depName[index]);
+        assert(data.EMPLOYEE_HISTORY);
+        assert.equal(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
         data.EMPLOYEE_HISTORY.setEncoding('utf8');
         data.EMPLOYEE_HISTORY.on('data', function(data) {
-          should.equal(data, 'abcdefgh');
+          assert.equal(data, 'abcdefgh');
         });
         index++;
       });
 
       stream.on('end', function() {
-        should.equal(3, index);
-        should.equal(1, metadataseen);
+        assert.equal(3, index);
+        assert.equal(1, metadataseen);
         stream.destroy();
       });
 
@@ -169,37 +169,37 @@ describe('247. dupColNames2.js', function() {
     });
 
     it('247.1.2 Three duplicate columns', function(done) {
-      let sql =
+      const sql =
         `SELECT
             A.EMPLOYEE_ID, A.EMPLOYEE_HISTORY, A.DEPARTMENT_ID,
             B.DEPARTMENT_ID, B.DEPARTMENT_ID
          FROM nodb_dupEmployee A, nodb_dupDepartment B
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID`;
 
-      let stream = connection.queryStream(sql);
+      const stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "EMPLOYEE_ID");
-        should.equal(metaData[1].name, "EMPLOYEE_HISTORY");
-        should.equal(metaData[2].name, "DEPARTMENT_ID");
-        should.equal(metaData[3].name, "DEPARTMENT_ID_1");
-        should.equal(metaData[4].name, "DEPARTMENT_ID_2");
+        assert.equal(metaData[0].name, "EMPLOYEE_ID");
+        assert.equal(metaData[1].name, "EMPLOYEE_HISTORY");
+        assert.equal(metaData[2].name, "DEPARTMENT_ID");
+        assert.equal(metaData[3].name, "DEPARTMENT_ID_1");
+        assert.equal(metaData[4].name, "DEPARTMENT_ID_2");
       });
 
       stream.on('error', function(error) {
-        should.not.exist(error);
+        assert.fail(error);
       });
       let index = 0;
       stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.EMPLOYEE_ID, empID[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
-        should.equal(data.DEPARTMENT_ID_1, depID[index]);
-        should.equal(data.DEPARTMENT_ID_2, depID[index]);
-        should.exist(data.EMPLOYEE_HISTORY);
-        should.equal(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
+        assert(data);
+        assert.equal(data.EMPLOYEE_ID, empID[index]);
+        assert.equal(data.DEPARTMENT_ID, depID[index]);
+        assert.equal(data.DEPARTMENT_ID_1, depID[index]);
+        assert.equal(data.DEPARTMENT_ID_2, depID[index]);
+        assert(data.EMPLOYEE_HISTORY);
+        assert.equal(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
         data.EMPLOYEE_HISTORY.setEncoding('utf8');
         data.EMPLOYEE_HISTORY.on('data', function(data) {
-          should.equal(data, 'abcdefgh');
+          assert.equal(data, 'abcdefgh');
         });
         index++;
       });
@@ -212,37 +212,37 @@ describe('247. dupColNames2.js', function() {
     });
 
     it('247.1.3 Duplicate column with conflicting alias name', function(done) {
-      let sql =
+      const sql =
         `SELECT
             A.EMPLOYEE_ID, A.EMPLOYEE_HISTORY, A.DEPARTMENT_ID,
             B.DEPARTMENT_ID, B.DEPARTMENT_ID AS DEPARTMENT_ID_1
          FROM nodb_dupEmployee A, nodb_dupDepartment B
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID`;
 
-      let stream = connection.queryStream(sql);
+      const stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "EMPLOYEE_ID");
-        should.equal(metaData[1].name, "EMPLOYEE_HISTORY");
-        should.equal(metaData[2].name, "DEPARTMENT_ID");
-        should.equal(metaData[3].name, "DEPARTMENT_ID_2");
-        should.equal(metaData[4].name, "DEPARTMENT_ID_1");
+        assert.equal(metaData[0].name, "EMPLOYEE_ID");
+        assert.equal(metaData[1].name, "EMPLOYEE_HISTORY");
+        assert.equal(metaData[2].name, "DEPARTMENT_ID");
+        assert.equal(metaData[3].name, "DEPARTMENT_ID_2");
+        assert.equal(metaData[4].name, "DEPARTMENT_ID_1");
       });
 
       stream.on('error', function(error) {
-        should.not.exist(error);
+        assert.fail(error);
       });
       let index = 0;
       stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.EMPLOYEE_ID, empID[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
-        should.equal(data.DEPARTMENT_ID_1, depID[index]);
-        should.equal(data.DEPARTMENT_ID_2, depID[index]);
-        should.exist(data.EMPLOYEE_HISTORY);
-        should.equal(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
+        assert(data);
+        assert.equal(data.EMPLOYEE_ID, empID[index]);
+        assert.equal(data.DEPARTMENT_ID, depID[index]);
+        assert.equal(data.DEPARTMENT_ID_1, depID[index]);
+        assert.equal(data.DEPARTMENT_ID_2, depID[index]);
+        assert(data.EMPLOYEE_HISTORY);
+        assert.equal(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
         data.EMPLOYEE_HISTORY.setEncoding('utf8');
         data.EMPLOYEE_HISTORY.on('data', function(data) {
-          should.equal(data, 'abcdefgh');
+          assert.equal(data, 'abcdefgh');
         });
         index++;
       });
@@ -255,38 +255,38 @@ describe('247. dupColNames2.js', function() {
     });
 
     it('247.1.4 Duplicate columns with non-conflicting alias name', function(done) {
-      let sql =
+      const sql =
         `SELECT
             A.EMPLOYEE_ID, A.EMPLOYEE_HISTORY, A.DEPARTMENT_ID,
             B.DEPARTMENT_ID, B.DEPARTMENT_ID AS DEPARTMENT_ID_5
          FROM nodb_dupEmployee A, nodb_dupDepartment B
          WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID`;
 
-      let stream = connection.queryStream(sql);
+      const stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "EMPLOYEE_ID");
-        should.equal(metaData[1].name, "EMPLOYEE_HISTORY");
-        should.equal(metaData[2].name, "DEPARTMENT_ID");
-        should.equal(metaData[3].name, "DEPARTMENT_ID_1");
-        should.equal(metaData[4].name, "DEPARTMENT_ID_5");
+        assert.equal(metaData[0].name, "EMPLOYEE_ID");
+        assert.equal(metaData[1].name, "EMPLOYEE_HISTORY");
+        assert.equal(metaData[2].name, "DEPARTMENT_ID");
+        assert.equal(metaData[3].name, "DEPARTMENT_ID_1");
+        assert.equal(metaData[4].name, "DEPARTMENT_ID_5");
       });
 
       stream.on('error', function(error) {
-        should.not.exist(error);
+        assert.fail(error);
       });
 
       let index = 0;
       stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.EMPLOYEE_ID, empID[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
-        should.equal(data.DEPARTMENT_ID_1, depID[index]);
-        should.equal(data.DEPARTMENT_ID_5, depID[index]);
-        should.exist(data.EMPLOYEE_HISTORY);
-        should.equal(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
+        assert(data);
+        assert.equal(data.EMPLOYEE_ID, empID[index]);
+        assert.equal(data.DEPARTMENT_ID, depID[index]);
+        assert.equal(data.DEPARTMENT_ID_1, depID[index]);
+        assert.equal(data.DEPARTMENT_ID_5, depID[index]);
+        assert(data.EMPLOYEE_HISTORY);
+        assert.equal(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
         data.EMPLOYEE_HISTORY.setEncoding('utf8');
         data.EMPLOYEE_HISTORY.on('data', function(data) {
-          should.equal(data, 'abcdefgh');
+          assert.equal(data, 'abcdefgh');
         });
         index++;
       });
@@ -299,38 +299,38 @@ describe('247. dupColNames2.js', function() {
     });
 
     it('247.1.5 Negative not-case sensitive', function(done) {
-      let sql =
+      const sql =
         `SELECT
             A.EMPLOYEE_ID, A.EMPLOYEE_HISTORY, A.DEPARTMENT_ID,
             B.department_id, B.department_id AS "department_id_1"
          FROM nodb_dupEmployee A, nodb_dupDepartment B
          WHERE A.department_id = B.department_id`;
 
-      let stream = connection.queryStream(sql);
+      const stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "EMPLOYEE_ID");
-        should.equal(metaData[1].name, "EMPLOYEE_HISTORY");
-        should.equal(metaData[2].name, "DEPARTMENT_ID");
-        should.equal(metaData[3].name, "DEPARTMENT_ID_1");
-        should.equal(metaData[4].name, "department_id_1");
+        assert.equal(metaData[0].name, "EMPLOYEE_ID");
+        assert.equal(metaData[1].name, "EMPLOYEE_HISTORY");
+        assert.equal(metaData[2].name, "DEPARTMENT_ID");
+        assert.equal(metaData[3].name, "DEPARTMENT_ID_1");
+        assert.equal(metaData[4].name, "department_id_1");
       });
 
       stream.on('error', function(error) {
-        should.not.exist(error);
+        assert.fail(error);
       });
 
       let index = 0;
       stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.EMPLOYEE_ID, empID[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
-        should.equal(data.DEPARTMENT_ID_1, depID[index]);
-        should.equal(data.department_id_1, depID[index]);
-        should.exist(data.EMPLOYEE_HISTORY);
-        should.equal(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
+        assert(data);
+        assert.equal(data.EMPLOYEE_ID, empID[index]);
+        assert.equal(data.DEPARTMENT_ID, depID[index]);
+        assert.equal(data.DEPARTMENT_ID_1, depID[index]);
+        assert.equal(data.department_id_1, depID[index]);
+        assert(data.EMPLOYEE_HISTORY);
+        assert.equal(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
         data.EMPLOYEE_HISTORY.setEncoding('utf8');
         data.EMPLOYEE_HISTORY.on('data', function(data) {
-          should.equal(data, 'abcdefgh');
+          assert.equal(data, 'abcdefgh');
         });
         index++;
       });
@@ -343,7 +343,7 @@ describe('247. dupColNames2.js', function() {
     });
 
     it('247.1.6 Two duplicate columns using nested cursor', function(done) {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID
                        FROM nodb_dupEmployee A
@@ -354,23 +354,23 @@ describe('247. dupColNames2.js', function() {
                 ORDER BY B.DEPARTMENT_ID
               `;
 
-      let stream = connection.queryStream(sql);
+      const stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "DEPARTMENT_NAME");
-        should.equal(metaData[1].name, "DEPARTMENT_ID");
-        should.equal(metaData[2].name, "NC");
+        assert.equal(metaData[0].name, "DEPARTMENT_NAME");
+        assert.equal(metaData[1].name, "DEPARTMENT_ID");
+        assert.equal(metaData[2].name, "NC");
       });
 
       stream.on('error', function(error) {
-        should.not.exist(error);
+        assert.fail(error);
       });
       let index = 0;
       stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.NC.metaData[0].name, "EMPLOYEE_NAME");
-        should.equal(data.NC.metaData[1].name, "DEPARTMENT_ID");
-        should.equal(data.DEPARTMENT_NAME, depName[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
+        assert(data);
+        assert.equal(data.NC.metaData[0].name, "EMPLOYEE_NAME");
+        assert.equal(data.NC.metaData[1].name, "DEPARTMENT_ID");
+        assert.equal(data.DEPARTMENT_NAME, depName[index]);
+        assert.equal(data.DEPARTMENT_ID, depID[index]);
         index++;
       });
 
@@ -382,7 +382,7 @@ describe('247. dupColNames2.js', function() {
     });
 
     it('247.1.7 Three duplicate columns using nested cursor', function(done) {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID
                        FROM nodb_dupEmployee A
@@ -391,25 +391,25 @@ describe('247. dupColNames2.js', function() {
                 FROM nodb_dupDepartment B
               `;
 
-      let stream = connection.queryStream(sql);
+      const stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "DEPARTMENT_NAME");
-        should.equal(metaData[1].name, "DEPARTMENT_ID");
-        should.equal(metaData[2].name, "DEPARTMENT_ID_1");
-        should.equal(metaData[3].name, "NC");
+        assert.equal(metaData[0].name, "DEPARTMENT_NAME");
+        assert.equal(metaData[1].name, "DEPARTMENT_ID");
+        assert.equal(metaData[2].name, "DEPARTMENT_ID_1");
+        assert.equal(metaData[3].name, "NC");
       });
 
       stream.on('error', function(error) {
-        should.not.exist(error);
+        assert.fail(error);
       });
       let index = 0;
       stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.NC.metaData[0].name, "EMPLOYEE_NAME");
-        should.equal(data.NC.metaData[1].name, "DEPARTMENT_ID");
-        should.equal(data.DEPARTMENT_NAME, depName[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
-        should.equal(data.DEPARTMENT_ID_1, depID[index]);
+        assert(data);
+        assert.equal(data.NC.metaData[0].name, "EMPLOYEE_NAME");
+        assert.equal(data.NC.metaData[1].name, "DEPARTMENT_ID");
+        assert.equal(data.DEPARTMENT_NAME, depName[index]);
+        assert.equal(data.DEPARTMENT_ID, depID[index]);
+        assert.equal(data.DEPARTMENT_ID_1, depID[index]);
         index++;
       });
 
@@ -421,7 +421,7 @@ describe('247. dupColNames2.js', function() {
     });
 
     it('247.1.8 Three duplicate columns using nested cursor', function(done) {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID
                        FROM nodb_dupEmployee A
@@ -430,24 +430,24 @@ describe('247. dupColNames2.js', function() {
                 FROM nodb_dupDepartment B
               `;
 
-      let stream = connection.queryStream(sql);
+      const stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "DEPARTMENT_NAME");
-        should.equal(metaData[1].name, "DEPARTMENT_ID");
-        should.equal(metaData[2].name, "NC");
+        assert.equal(metaData[0].name, "DEPARTMENT_NAME");
+        assert.equal(metaData[1].name, "DEPARTMENT_ID");
+        assert.equal(metaData[2].name, "NC");
       });
 
       stream.on('error', function(error) {
-        should.not.exist(error);
+        assert.fail(error);
       });
       let index = 0;
       stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.NC.metaData[0].name, "EMPLOYEE_NAME");
-        should.equal(data.NC.metaData[1].name, "DEPARTMENT_ID");
-        should.equal(data.NC.metaData[2].name, "DEPARTMENT_ID_1");
-        should.equal(data.DEPARTMENT_NAME, depName[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
+        assert(data);
+        assert.equal(data.NC.metaData[0].name, "EMPLOYEE_NAME");
+        assert.equal(data.NC.metaData[1].name, "DEPARTMENT_ID");
+        assert.equal(data.NC.metaData[2].name, "DEPARTMENT_ID_1");
+        assert.equal(data.DEPARTMENT_NAME, depName[index]);
+        assert.equal(data.DEPARTMENT_ID, depID[index]);
         index++;
       });
 
@@ -459,7 +459,7 @@ describe('247. dupColNames2.js', function() {
     });
 
     it('247.1.9 duplicate column with conflicting alias name using nested cursor', function(done) {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID , A.DEPARTMENT_ID AS DEPARTMENT_ID_1
                        FROM nodb_dupEmployee A
@@ -468,25 +468,25 @@ describe('247. dupColNames2.js', function() {
                 FROM nodb_dupDepartment B
               `;
 
-      let stream = connection.queryStream(sql);
+      const stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "DEPARTMENT_NAME");
-        should.equal(metaData[1].name, "DEPARTMENT_ID");
-        should.equal(metaData[2].name, "NC");
+        assert.equal(metaData[0].name, "DEPARTMENT_NAME");
+        assert.equal(metaData[1].name, "DEPARTMENT_ID");
+        assert.equal(metaData[2].name, "NC");
       });
 
       stream.on('error', function(error) {
-        should.not.exist(error);
+        assert.fail(error);
       });
       let index = 0;
       stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.NC.metaData[0].name, "EMPLOYEE_NAME");
-        should.equal(data.NC.metaData[1].name, "DEPARTMENT_ID");
-        should.equal(data.NC.metaData[2].name, "DEPARTMENT_ID_2");
-        should.equal(data.NC.metaData[3].name, "DEPARTMENT_ID_1");
-        should.equal(data.DEPARTMENT_NAME, depName[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
+        assert(data);
+        assert.equal(data.NC.metaData[0].name, "EMPLOYEE_NAME");
+        assert.equal(data.NC.metaData[1].name, "DEPARTMENT_ID");
+        assert.equal(data.NC.metaData[2].name, "DEPARTMENT_ID_2");
+        assert.equal(data.NC.metaData[3].name, "DEPARTMENT_ID_1");
+        assert.equal(data.DEPARTMENT_NAME, depName[index]);
+        assert.equal(data.DEPARTMENT_ID, depID[index]);
         index++;
       });
 
@@ -498,7 +498,7 @@ describe('247. dupColNames2.js', function() {
     });
 
     it('247.1.10 Duplicate column with non-conflicting alias name using nested cursor', function(done) {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID , A.DEPARTMENT_ID AS DEPARTMENT_ID_5
                        FROM nodb_dupEmployee A
@@ -507,25 +507,25 @@ describe('247. dupColNames2.js', function() {
                 FROM nodb_dupDepartment B
               `;
 
-      let stream = connection.queryStream(sql);
+      const stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "DEPARTMENT_NAME");
-        should.equal(metaData[1].name, "DEPARTMENT_ID");
-        should.equal(metaData[2].name, "NC");
+        assert.equal(metaData[0].name, "DEPARTMENT_NAME");
+        assert.equal(metaData[1].name, "DEPARTMENT_ID");
+        assert.equal(metaData[2].name, "NC");
       });
 
       stream.on('error', function(error) {
-        should.not.exist(error);
+        assert.fail(error);
       });
       let index = 0;
       stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.NC.metaData[0].name, "EMPLOYEE_NAME");
-        should.equal(data.NC.metaData[1].name, "DEPARTMENT_ID");
-        should.equal(data.NC.metaData[2].name, "DEPARTMENT_ID_1");
-        should.equal(data.NC.metaData[3].name, "DEPARTMENT_ID_5");
-        should.equal(data.DEPARTMENT_NAME, depName[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
+        assert(data);
+        assert.equal(data.NC.metaData[0].name, "EMPLOYEE_NAME");
+        assert.equal(data.NC.metaData[1].name, "DEPARTMENT_ID");
+        assert.equal(data.NC.metaData[2].name, "DEPARTMENT_ID_1");
+        assert.equal(data.NC.metaData[3].name, "DEPARTMENT_ID_5");
+        assert.equal(data.DEPARTMENT_NAME, depName[index]);
+        assert.equal(data.DEPARTMENT_ID, depID[index]);
         index++;
       });
 
@@ -537,7 +537,7 @@ describe('247. dupColNames2.js', function() {
     });
 
     it('247.1.11 Duplicate column with case sensitive alias name using nested cursor', function(done) {
-      let sql = `
+      const sql = `
          SELECT B.DEPARTMENT_NAME , B.DEPARTMENT_ID,
                cursor(SELECT A.EMPLOYEE_NAME , A.DEPARTMENT_ID , A.DEPARTMENT_ID , A.DEPARTMENT_ID AS "department_id_1"
                        FROM nodb_dupEmployee A
@@ -546,25 +546,25 @@ describe('247. dupColNames2.js', function() {
                 FROM nodb_dupDepartment B
               `;
 
-      let stream = connection.queryStream(sql);
+      const stream = connection.queryStream(sql);
       stream.on('metadata', function(metaData) {
-        should.equal(metaData[0].name, "DEPARTMENT_NAME");
-        should.equal(metaData[1].name, "DEPARTMENT_ID");
-        should.equal(metaData[2].name, "NC");
+        assert.equal(metaData[0].name, "DEPARTMENT_NAME");
+        assert.equal(metaData[1].name, "DEPARTMENT_ID");
+        assert.equal(metaData[2].name, "NC");
       });
 
       stream.on('error', function(error) {
-        should.not.exist(error);
+        assert.fail(error);
       });
       let index = 0;
       stream.on('data', function(data) {
-        should.exist(data);
-        should.equal(data.NC.metaData[0].name, "EMPLOYEE_NAME");
-        should.equal(data.NC.metaData[1].name, "DEPARTMENT_ID");
-        should.equal(data.NC.metaData[2].name, "DEPARTMENT_ID_1");
-        should.equal(data.NC.metaData[3].name, "department_id_1");
-        should.equal(data.DEPARTMENT_NAME, depName[index]);
-        should.equal(data.DEPARTMENT_ID, depID[index]);
+        assert(data);
+        assert.equal(data.NC.metaData[0].name, "EMPLOYEE_NAME");
+        assert.equal(data.NC.metaData[1].name, "DEPARTMENT_ID");
+        assert.equal(data.NC.metaData[2].name, "DEPARTMENT_ID_1");
+        assert.equal(data.NC.metaData[3].name, "department_id_1");
+        assert.equal(data.DEPARTMENT_NAME, depName[index]);
+        assert.equal(data.DEPARTMENT_ID, depID[index]);
         index++;
       });
 
@@ -578,7 +578,7 @@ describe('247. dupColNames2.js', function() {
 
     it('247.1.12 Two duplicate columns using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
-      let proc = `
+      const proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
           AS
           BEGIN
@@ -593,29 +593,29 @@ describe('247. dupColNames2.js', function() {
         `;
 
       await connection.execute(proc);
-      let plsql = `BEGIN ${PROC}(:cursor); END;`;
-      let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
-      let result = await connection.execute(plsql, opts);
-      let stream = result.outBinds.cursor.toQueryStream();
+      const plsql = `BEGIN ${PROC}(:cursor); END;`;
+      const opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(plsql, opts);
+      const stream = result.outBinds.cursor.toQueryStream();
       await new Promise((resolve, reject) => {
         stream.on('metadata', function(metaData) {
-          should.equal(metaData[0].name, "EMPLOYEE_ID");
-          should.equal(metaData[1].name, "DEPARTMENT_ID");
-          should.equal(metaData[2].name, "DEPARTMENT_ID_1");
-          should.equal(metaData[3].name, "DEPARTMENT_NAME");
+          assert.equal(metaData[0].name, "EMPLOYEE_ID");
+          assert.equal(metaData[1].name, "DEPARTMENT_ID");
+          assert.equal(metaData[2].name, "DEPARTMENT_ID_1");
+          assert.equal(metaData[3].name, "DEPARTMENT_NAME");
         });
 
         stream.on('error', function(error) {
-          should.not.exist(error);
+          assert.fail(error);
           reject();
         });
         let index = 0;
         stream.on('data', function(data) {
-          should.exist(data);
-          should.equal(data.EMPLOYEE_ID, empID[index]);
-          should.equal(data.DEPARTMENT_ID, depID[index]);
-          should.equal(data.DEPARTMENT_ID_1, depID[index]);
-          should.equal(data.DEPARTMENT_NAME, depName[index]);
+          assert(data);
+          assert.equal(data.EMPLOYEE_ID, empID[index]);
+          assert.equal(data.DEPARTMENT_ID, depID[index]);
+          assert.equal(data.DEPARTMENT_ID_1, depID[index]);
+          assert.equal(data.DEPARTMENT_NAME, depName[index]);
           index++;
         });
 
@@ -631,7 +631,7 @@ describe('247. dupColNames2.js', function() {
 
     it('247.1.13 Three duplicate columns using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
-      let proc = `
+      const proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
           AS
           BEGIN
@@ -646,29 +646,29 @@ describe('247. dupColNames2.js', function() {
         `;
 
       await connection.execute(proc);
-      let plsql = `BEGIN ${PROC}(:cursor); END;`;
-      let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
-      let result = await connection.execute(plsql, opts);
-      let stream = result.outBinds.cursor.toQueryStream();
+      const plsql = `BEGIN ${PROC}(:cursor); END;`;
+      const opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(plsql, opts);
+      const stream = result.outBinds.cursor.toQueryStream();
       await new Promise((resolve, reject) => {
         stream.on('metadata', function(metaData) {
-          should.equal(metaData[0].name, "EMPLOYEE_ID");
-          should.equal(metaData[1].name, "DEPARTMENT_ID");
-          should.equal(metaData[2].name, "DEPARTMENT_ID_1");
-          should.equal(metaData[3].name, "DEPARTMENT_ID_2");
+          assert.equal(metaData[0].name, "EMPLOYEE_ID");
+          assert.equal(metaData[1].name, "DEPARTMENT_ID");
+          assert.equal(metaData[2].name, "DEPARTMENT_ID_1");
+          assert.equal(metaData[3].name, "DEPARTMENT_ID_2");
         });
 
         stream.on('error', function(error) {
-          should.not.exist(error);
+          assert.fail(error);
           reject();
         });
         let index = 0;
         stream.on('data', function(data) {
-          should.exist(data);
-          should.equal(data.EMPLOYEE_ID, empID[index]);
-          should.equal(data.DEPARTMENT_ID, depID[index]);
-          should.equal(data.DEPARTMENT_ID_1, depID[index]);
-          should.equal(data.DEPARTMENT_ID_2, depID[index]);
+          assert(data);
+          assert.equal(data.EMPLOYEE_ID, empID[index]);
+          assert.equal(data.DEPARTMENT_ID, depID[index]);
+          assert.equal(data.DEPARTMENT_ID_1, depID[index]);
+          assert.equal(data.DEPARTMENT_ID_2, depID[index]);
           index++;
         });
 
@@ -684,7 +684,7 @@ describe('247. dupColNames2.js', function() {
 
     it('247.1.14 Duplicate column with conflicting alias name using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
-      let proc = `
+      const proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
           AS
           BEGIN
@@ -699,29 +699,29 @@ describe('247. dupColNames2.js', function() {
         `;
 
       await connection.execute(proc);
-      let plsql = `BEGIN ${PROC}(:cursor); END;`;
-      let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
-      let result = await connection.execute(plsql, opts);
-      let stream = result.outBinds.cursor.toQueryStream();
+      const plsql = `BEGIN ${PROC}(:cursor); END;`;
+      const opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(plsql, opts);
+      const stream = result.outBinds.cursor.toQueryStream();
       await new Promise((resolve, reject) => {
         stream.on('metadata', function(metaData) {
-          should.equal(metaData[0].name, "EMPLOYEE_ID");
-          should.equal(metaData[1].name, "DEPARTMENT_ID");
-          should.equal(metaData[2].name, "DEPARTMENT_ID_2");
-          should.equal(metaData[3].name, "DEPARTMENT_ID_1");
+          assert.equal(metaData[0].name, "EMPLOYEE_ID");
+          assert.equal(metaData[1].name, "DEPARTMENT_ID");
+          assert.equal(metaData[2].name, "DEPARTMENT_ID_2");
+          assert.equal(metaData[3].name, "DEPARTMENT_ID_1");
         });
 
         stream.on('error', function(error) {
-          should.not.exist(error);
+          assert.fail(error);
           reject();
         });
         let index = 0;
         stream.on('data', function(data) {
-          should.exist(data);
-          should.equal(data.EMPLOYEE_ID, empID[index]);
-          should.equal(data.DEPARTMENT_ID, depID[index]);
-          should.equal(data.DEPARTMENT_ID_1, depID[index]);
-          should.equal(data.DEPARTMENT_ID_2, depID[index]);
+          assert(data);
+          assert.equal(data.EMPLOYEE_ID, empID[index]);
+          assert.equal(data.DEPARTMENT_ID, depID[index]);
+          assert.equal(data.DEPARTMENT_ID_1, depID[index]);
+          assert.equal(data.DEPARTMENT_ID_2, depID[index]);
           index++;
         });
 
@@ -737,7 +737,7 @@ describe('247. dupColNames2.js', function() {
 
     it('247.1.15 Duplicate column with non-conflicting alias name using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
-      let proc = `
+      const proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
           AS
           BEGIN
@@ -752,29 +752,29 @@ describe('247. dupColNames2.js', function() {
         `;
 
       await connection.execute(proc);
-      let plsql = `BEGIN ${PROC}(:cursor); END;`;
-      let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
-      let result = await connection.execute(plsql, opts);
-      let stream = result.outBinds.cursor.toQueryStream();
+      const plsql = `BEGIN ${PROC}(:cursor); END;`;
+      const opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(plsql, opts);
+      const stream = result.outBinds.cursor.toQueryStream();
       await new Promise((resolve, reject) => {
         stream.on('metadata', function(metaData) {
-          should.equal(metaData[0].name, "EMPLOYEE_ID");
-          should.equal(metaData[1].name, "DEPARTMENT_ID");
-          should.equal(metaData[2].name, "DEPARTMENT_ID_1");
-          should.equal(metaData[3].name, "DEPARTMENT_ID_5");
+          assert.equal(metaData[0].name, "EMPLOYEE_ID");
+          assert.equal(metaData[1].name, "DEPARTMENT_ID");
+          assert.equal(metaData[2].name, "DEPARTMENT_ID_1");
+          assert.equal(metaData[3].name, "DEPARTMENT_ID_5");
         });
 
         stream.on('error', function(error) {
-          should.not.exist(error);
+          assert.fail(error);
           reject();
         });
         let index = 0;
         stream.on('data', function(data) {
-          should.exist(data);
-          should.equal(data.EMPLOYEE_ID, empID[index]);
-          should.equal(data.DEPARTMENT_ID, depID[index]);
-          should.equal(data.DEPARTMENT_ID_1, depID[index]);
-          should.equal(data.DEPARTMENT_ID_5, depID[index]);
+          assert(data);
+          assert.equal(data.EMPLOYEE_ID, empID[index]);
+          assert.equal(data.DEPARTMENT_ID, depID[index]);
+          assert.equal(data.DEPARTMENT_ID_1, depID[index]);
+          assert.equal(data.DEPARTMENT_ID_5, depID[index]);
           index++;
         });
 
@@ -790,7 +790,7 @@ describe('247. dupColNames2.js', function() {
 
     it('247.1.16 Duplicate column with case sensitive alias name using REF cursor', async function() {
       const PROC = 'proc_dupColNames';
-      let proc = `
+      const proc = `
           CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
           AS
           BEGIN
@@ -804,29 +804,29 @@ describe('247. dupColNames2.js', function() {
         `;
 
       await connection.execute(proc);
-      let plsql = `BEGIN ${PROC}(:cursor); END;`;
-      let opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
-      let result = await connection.execute(plsql, opts);
-      let stream = result.outBinds.cursor.toQueryStream();
+      const plsql = `BEGIN ${PROC}(:cursor); END;`;
+      const opts = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(plsql, opts);
+      const stream = result.outBinds.cursor.toQueryStream();
       await new Promise((resolve, reject) => {
         stream.on('metadata', function(metaData) {
-          should.equal(metaData[0].name, "EMPLOYEE_ID");
-          should.equal(metaData[1].name, "DEPARTMENT_ID");
-          should.equal(metaData[2].name, "DEPARTMENT_ID_1");
-          should.equal(metaData[3].name, "department_id_1");
+          assert.equal(metaData[0].name, "EMPLOYEE_ID");
+          assert.equal(metaData[1].name, "DEPARTMENT_ID");
+          assert.equal(metaData[2].name, "DEPARTMENT_ID_1");
+          assert.equal(metaData[3].name, "department_id_1");
         });
 
         stream.on('error', function(error) {
-          should.not.exist(error);
+          assert.fail(error);
           reject();
         });
         let index = 0;
         stream.on('data', function(data) {
-          should.exist(data);
-          should.equal(data.EMPLOYEE_ID, empID[index]);
-          should.equal(data.DEPARTMENT_ID, depID[index]);
-          should.equal(data.DEPARTMENT_ID_1, depID[index]);
-          should.equal(data.department_id_1, depID[index]);
+          assert(data);
+          assert.equal(data.EMPLOYEE_ID, empID[index]);
+          assert.equal(data.DEPARTMENT_ID, depID[index]);
+          assert.equal(data.DEPARTMENT_ID_1, depID[index]);
+          assert.equal(data.department_id_1, depID[index]);
           index++;
         });
 
@@ -841,22 +841,22 @@ describe('247. dupColNames2.js', function() {
     });
 
     it('247.1.17 Duplicate column with case sensitive alias name from dual', async function() {
-      let stream = connection.queryStream(`SELECT dummy "abc", dummy "ABC" from dual`);
+      const stream = connection.queryStream(`SELECT dummy "abc", dummy "ABC" from dual`);
       await new Promise((resolve, reject) => {
         stream.on('metadata', function(metaData) {
-          should.equal(metaData[0].name, "abc");
-          should.equal(metaData[1].name, "ABC");
+          assert.equal(metaData[0].name, "abc");
+          assert.equal(metaData[1].name, "ABC");
         });
 
         stream.on('error', function(error) {
-          should.not.exist(error);
+          assert.fail(error);
           reject();
         });
 
         stream.on('data', function(data) {
-          should.exist(data);
-          should.equal(data.abc, "X");
-          should.equal(data.ABC, "X");
+          assert(data);
+          assert.equal(data.abc, "X");
+          assert.equal(data.ABC, "X");
         });
 
         stream.on('end', function() {

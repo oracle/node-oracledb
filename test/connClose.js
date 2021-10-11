@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
+ * The node-oracledb test suite uses 'mocha'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,289 +28,222 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
 describe('52. connClose.js', function() {
 
-  it('52.1 can not set property, stmtCacheSize, after connection closes', function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-        const defaultSize = 30;
-        should.strictEqual(connection.stmtCacheSize, defaultSize);
-
-        connection.release(function(err) {
-          should.not.exist(err);
-          should.throws(
-            function() {
-              connection.stmtCacheSize = 10;
-            },
-            "TypeError: Cannot assign to read only property 'stmtCacheSize' of object '#<Connection>'"
-          );
-          done();
-        });
-      }
-    );
+  it('52.1 can not set property, stmtCacheSize, after connection closes', async function() {
+    try {
+      const connection = await oracledb.getConnection(dbConfig);
+      const defaultSize = 30;
+      assert.strictEqual(connection.stmtCacheSize, defaultSize);
+      await connection.release();
+      assert.throws(
+        function() {
+          connection.stmtCacheSize = 10;
+        },
+        "TypeError: Cannot assign to read only property 'stmtCacheSize' of object '#<Connection>'"
+      );
+    } catch (error) {
+      assert.fail(error);
+    }
   }); // 52.1
 
-  it('52.2 can not set property, clientId, after connection closes', function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-
-        connection.release(function(err) {
-          should.not.exist(err);
-          should.throws(
-            function() {
-              connection.clientId = "52.3";
-            },
-            /NJS-003: invalid connection/
-          );
-          done();
-        });
-      }
-    );
+  it('52.2 can not set property, clientId, after connection closes', async function() {
+    try {
+      const connection = await oracledb.getConnection(dbConfig);
+      assert(connection);
+      await connection.release();
+      assert.throws(
+        function() {
+          connection.clientId = "52.3";
+        },
+        /NJS-003: invalid connection/
+      );
+    } catch (error) {
+      assert.fail(error);
+    }
   }); // 52.2
 
-  it('52.3 can not set property, module', function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-
-        connection.release(function(err) {
-          should.not.exist(err);
-          should.throws(
-            function() {
-              connection.module = "52.4";
-            },
-            /NJS-003: invalid connection/
-          );
-          done();
-        });
-      }
-    );
+  it('52.3 can not set property, module', async function() {
+    try {
+      const connection = await oracledb.getConnection(dbConfig);
+      assert(connection);
+      await connection.release();
+      assert.throws(
+        function() {
+          connection.module = "52.4";
+        },
+        /NJS-003: invalid connection/
+      );
+    } catch (error) {
+      assert.fail(error);
+    }
   }); // 52.3
 
-  it('52.4 can not set property, action', function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-
-        connection.release(function(err) {
-          should.not.exist(err);
-          should.throws(
-            function() {
-              connection.module = "52.5";
-            },
-            /NJS-003: invalid connection/
-          );
-          done();
-        });
-      }
-    );
+  it('52.4 can not set property, action', async function() {
+    try {
+      const connection = await oracledb.getConnection(dbConfig);
+      assert(connection);
+      await connection.release();
+      assert.throws(
+        function() {
+          connection.module = "52.5";
+        },
+        /NJS-003: invalid connection/
+      );
+    } catch (error) {
+      assert.fail(error);
+    }
   }); // 52.4
 
-  it('52.5 can not call method, execute()', function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-
-        connection.release(function(err) {
-          should.not.exist(err);
-          connection.execute(
-            "select sysdate from dual",
-            function(err, result) {
-              should.not.exist(result);
-              should.exist(err);
-              should.strictEqual(
-                err.message,
-                "NJS-003: invalid connection"
-              );
-              done();
-            }
-          );
-        });
-      }
-    );
+  it('52.5 can not call method, execute()', async function() {
+    try {
+      const connection = await oracledb.getConnection(dbConfig);
+      assert(connection);
+      await connection.release();
+      await assert.rejects(
+        async () => {
+          await connection.execute("select sysdate from dual");
+        },
+        /NJS-003: invalid connection/
+      );
+    } catch (error) {
+      assert.fail(error);
+    }
   }); // 52.5
 
-  it('52.6 can not call method, break()', function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-
-        connection.release(function(err) {
-          should.not.exist(err);
-
-          connection.break(function(err) {
-            should.exist(err);
-            should.strictEqual(
-              err.message,
-              "NJS-003: invalid connection"
-            );
-            done();
-          });
-        });
-      }
-    );
+  it('52.6 can not call method, break()', async function() {
+    try {
+      const connection = await oracledb.getConnection(dbConfig);
+      assert(connection);
+      await connection.release();
+      await assert.rejects(
+        async () => {
+          await connection.break();
+        },
+        /NJS-003: invalid connection/
+      );
+    } catch (error) {
+      assert.fail(error);
+    }
   }); // 52.6
 
-  it('52.7 can not call method, commit()', function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-
-        connection.release(function(err) {
-          should.not.exist(err);
-
-          connection.commit(function(err) {
-            should.exist(err);
-            should.strictEqual(
-              err.message,
-              "NJS-003: invalid connection"
-            );
-            done();
-          });
-        });
-      }
-    );
+  it('52.7 can not call method, commit()', async function() {
+    try {
+      const connection = await oracledb.getConnection(dbConfig);
+      assert(connection);
+      await connection.release();
+      await assert.rejects(
+        async () => {
+          await connection.commit();
+        },
+        /NJS-003: invalid connection/
+      );
+    } catch (error) {
+      assert.fail(error);
+    }
   }); // 52.7
 
-  it('52.8 can not call method, createLob()', function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-
-        connection.release(function(err) {
-          should.not.exist(err);
-
-          connection.createLob(oracledb.CLOB, function(err, lob) {
-            should.exist(err);
-            should.not.exist(lob);
-            should.strictEqual(
-              err.message,
-              "NJS-003: invalid connection"
-            );
-            done();
-          });
-        });
-      }
-    );
+  it('52.8 can not call method, createLob()', async function() {
+    try {
+      const connection = await oracledb.getConnection(dbConfig);
+      assert(connection);
+      await connection.release();
+      await assert.rejects(
+        async () => {
+          await connection.createLob(oracledb.CLOB);
+        },
+        /NJS-003: invalid connection/
+      );
+    } catch (error) {
+      assert.fail(error);
+    }
   }); // 52.8
 
-  it('52.9 can not call method, queryStream()', function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
+  it('52.9 can not call method, queryStream()', async function() {
+    try {
+      const connection = await oracledb.getConnection(dbConfig);
+      assert(connection);
+      await connection.release();
+      const stream = await connection.queryStream("select sysdate from dual");
+      assert(stream);
 
-        connection.release(function(err) {
-          should.not.exist(err);
+      var unexpectederr;
+      stream.on("data", function(data) {
+        assert.ifError(data);
+        unexpectederr = new Error("should not emit 'data' event!");
+      });
 
-          const stream = connection.queryStream("select sysdate from dual");
-          should.exist(stream);
+      stream.on("end", function() {
+        assert.ifError("should not emit 'end' event!");
+        unexpectederr = new Error("should not emit 'end' event!");
+        stream.destroy();
+      });
 
-          let unexpectederr;
+      stream.on("close", function() {
+        return unexpectederr;
+      });
 
-          stream.on("data", function(data) {
-            should.not.exist(data);
-            unexpectederr = new Error("Should not emit 'data' event!");
-          });
-
-          stream.on("end", function() {
-            should.not.exist("Should not emit 'end' event!");
-            unexpectederr = new Error("Should not emit 'end' event!");
-            stream.destroy();
-          });
-
-          stream.on("close", function() {
-            done(unexpectederr);
-          });
-
-          stream.on("error", function(err) {
-            should.exist(err);
-            should.strictEqual(
-              err.message,
-              "NJS-003: invalid connection"
-            );
-          });
-        });
-      }
-    );
+      stream.on("error", function(err) {
+        assert(err);
+        assert.strictEqual(
+          err.message,
+          "NJS-003: invalid connection"
+        );
+      });
+    } catch (error) {
+      assert.fail(error);
+    }
   }); // 52.9
 
-  it('52.10 can not call release() multiple times', function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-
-        connection.release(function(err) {
-          should.not.exist(err);
-
-          connection.release(function(err) {
-            should.exist(err);
-            should.strictEqual(
-              err.message,
-              "NJS-003: invalid connection"
-            );
-            done();
-          });
-        });
-      }
-    );
+  it('52.10 can not call release() multiple times', async function() {
+    try {
+      const connection = await oracledb.getConnection(dbConfig);
+      assert(connection);
+      await connection.release();
+      await assert.rejects(
+        async () => {
+          await connection.commit();
+        },
+        /NJS-003: invalid connection/
+      );
+    } catch (error) {
+      assert.fail(error);
+    }
   }); // 52.10
 
-  it('52.11 can not call method, rollback()', function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-
-        connection.release(function(err) {
-          should.not.exist(err);
-
-          connection.rollback(function(err) {
-            should.exist(err);
-            should.strictEqual(
-              err.message,
-              "NJS-003: invalid connection"
-            );
-            done();
-          });
-        });
-      }
-    );
+  it('52.11 can not call method, rollback()', async function() {
+    try {
+      const connection = await oracledb.getConnection(dbConfig);
+      assert(connection);
+      await connection.release();
+      await assert.rejects(
+        async () => {
+          await connection.rollback();
+        },
+        /NJS-003: invalid connection/
+      );
+    } catch (error) {
+      assert.fail(error);
+    }
   }); // 52.11
 
-  it("52.12 can access properties of closed connection without error", function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-
-        connection.release(function(err) {
-          should.not.exist(err);
-
-          should.strictEqual(connection.stmtCacheSize, undefined);
-          should.strictEqual(connection.oracleServerVersion, undefined);
-          should.strictEqual(connection.oracleServerVersionString, undefined);
-          should.strictEqual(connection.action, null);
-          should.strictEqual(connection.clientId, null);
-          should.strictEqual(connection.module, null);
-          done();
-        });
-      }
-    );
+  it("52.12 can access properties of closed connection without error", async function() {
+    try {
+      const connection = await oracledb.getConnection(dbConfig);
+      assert(connection);
+      await connection.release();
+      assert.strictEqual(connection.stmtCacheSize, undefined);
+      assert.strictEqual(connection.oracleServerVersion, undefined);
+      assert.strictEqual(connection.oracleServerVersionString, undefined);
+      assert.strictEqual(connection.action, null);
+      assert.strictEqual(connection.clientId, null);
+      assert.strictEqual(connection.module, null);
+    } catch (error) {
+      assert.fail(error);
+    }
   }); // 52.12
 
 });

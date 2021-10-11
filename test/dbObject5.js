@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -50,11 +50,11 @@ describe('204. dbObject5.js', () => {
           num NUMBER,
           person ${TYPE}
         )`;
-      let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+      const plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // before()
 
@@ -68,7 +68,7 @@ describe('204. dbObject5.js', () => {
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // after()
 
@@ -77,9 +77,9 @@ describe('204. dbObject5.js', () => {
       const seq = 101;
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
 
-      let date1 = new Date (1986, 8, 18);
-      let date2 = new Date (1989, 3, 4);
-      let objData = {
+      const date1 = new Date (1986, 8, 18);
+      const date2 = new Date (1989, 3, 4);
+      const objData = {
         ENTRY: date1,
         EXIT : date2
       };
@@ -87,17 +87,17 @@ describe('204. dbObject5.js', () => {
       const testObj = new objClass(objData);
 
       let result = await conn.execute(sql, [seq, testObj]);
-      should.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.rowsAffected, 1);
       await conn.commit();
 
       sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
       result = await conn.execute(sql);
 
-      should.strictEqual(result.rows[0][1]['ENTRY'].getTime(), date1.getTime());
-      should.strictEqual(result.rows[0][1]['EXIT'].getTime(), date2.getTime());
-      should.strictEqual(result.rows[0][0], seq);
+      assert.strictEqual(result.rows[0][1]['ENTRY'].getTime(), date1.getTime());
+      assert.strictEqual(result.rows[0][1]['EXIT'].getTime(), date2.getTime());
+      assert.strictEqual(result.rows[0][0], seq);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 204.1
 
@@ -106,7 +106,7 @@ describe('204. dbObject5.js', () => {
       const seq = 102;
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
 
-      let objData = {
+      const objData = {
         ENTRY: null,
         EXIT : null
       };
@@ -114,17 +114,17 @@ describe('204. dbObject5.js', () => {
       const testObj = new objClass(objData);
 
       let result = await conn.execute(sql, [seq, testObj]);
-      should.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.rowsAffected, 1);
       await conn.commit();
 
       sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
       result = await conn.execute(sql);
 
-      should.strictEqual(result.rows[0][1]['ENTRY'], null);
-      should.strictEqual(result.rows[0][1]['EXIT'], null);
-      should.strictEqual(result.rows[0][0], seq);
+      assert.strictEqual(result.rows[0][1]['ENTRY'], null);
+      assert.strictEqual(result.rows[0][1]['EXIT'], null);
+      assert.strictEqual(result.rows[0][0], seq);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 204.2
 
@@ -133,7 +133,7 @@ describe('204. dbObject5.js', () => {
       const seq = 102;
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
 
-      let objData = {
+      const objData = {
         ENTRY: null,
         EXIT : null
       };
@@ -141,17 +141,17 @@ describe('204. dbObject5.js', () => {
       const testObj = new objClass(objData);
 
       let result = await conn.execute(sql, [seq, testObj]);
-      should.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.rowsAffected, 1);
       await conn.commit();
 
       sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
       result = await conn.execute(sql);
 
-      should.strictEqual(result.rows[0][1]['ENTRY'], null);
-      should.strictEqual(result.rows[0][1]['EXIT'], null);
-      should.strictEqual(result.rows[0][0], seq);
+      assert.strictEqual(result.rows[0][1]['ENTRY'], null);
+      assert.strictEqual(result.rows[0][1]['EXIT'], null);
+      assert.strictEqual(result.rows[0][0], seq);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 204.3
 
@@ -164,16 +164,16 @@ describe('204. dbObject5.js', () => {
       const testObj = new objClass({});
 
       let result = await conn.execute(sql, [seq, testObj]);
-      should.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.rowsAffected, 1);
       await conn.commit();
 
       sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
       result = await conn.execute(sql);
 
-      should.strictEqual(result.rows[0][1]['ENTRY'], null);
-      should.strictEqual(result.rows[0][1]['EXIT'], null);
+      assert.strictEqual(result.rows[0][1]['ENTRY'], null);
+      assert.strictEqual(result.rows[0][1]['EXIT'], null);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 204.4
 });

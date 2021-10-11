@@ -26,7 +26,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -58,14 +58,14 @@ describe('216. dbObject17.js', () => {
       `;
       await conn.execute(plsql);
 
-      let sql = `
+      const sql = `
         CREATE TABLE ${TABLE} (sportname VARCHAR2(20), team ${TEAM_T})
       `;
       plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // before()
 
@@ -83,7 +83,7 @@ describe('216. dbObject17.js', () => {
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // after()
 
@@ -111,25 +111,25 @@ describe('216. dbObject17.js', () => {
       const FrisbeeTeam = new TeamTypeClass(FrisbeePlayers);
 
       let sql = `INSERT INTO ${TABLE} VALUES (:sn, :t)`;
-      let binds = { sn: "Frisbee", t: FrisbeeTeam };
+      const binds = { sn: "Frisbee", t: FrisbeeTeam };
       const result1 = await conn.execute(sql, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       sql = `SELECT * FROM ${TABLE}`;
       const result = await conn.execute(sql, [], { outFormat:oracledb.OUT_FORMAT_OBJECT });
 
-      should.strictEqual(result.rows[0].SPORTNAME, 'Frisbee');
+      assert.strictEqual(result.rows[0].SPORTNAME, 'Frisbee');
 
       for (let i = 0; i < result.rows[0].TEAM.length; i++) {
-        should.strictEqual(result.rows[0].TEAM[i].SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
-        should.strictEqual(result.rows[0].TEAM[i].NAME, FrisbeePlayers[i].NAME);
-        // should.strictEqual(result.rows[0].TEAM[i].TS.getTime(), FrisbeePlayers[i].TS.getTime());
-        should.strictEqual(result.rows[0].TEAM[i].TSZ.getTime(), FrisbeePlayers[i].TSZ.getTime());
-        should.strictEqual(result.rows[0].TEAM[i].LTZ.getTime(), FrisbeePlayers[i].LTZ.getTime());
+        assert.strictEqual(result.rows[0].TEAM[i].SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
+        assert.strictEqual(result.rows[0].TEAM[i].NAME, FrisbeePlayers[i].NAME);
+        // assert.strictEqual(result.rows[0].TEAM[i].TS.getTime(), FrisbeePlayers[i].TS.getTime());
+        assert.strictEqual(result.rows[0].TEAM[i].TSZ.getTime(), FrisbeePlayers[i].TSZ.getTime());
+        assert.strictEqual(result.rows[0].TEAM[i].LTZ.getTime(), FrisbeePlayers[i].LTZ.getTime());
       }
     } catch (err) {
       console.log(err);
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 216.1
 });

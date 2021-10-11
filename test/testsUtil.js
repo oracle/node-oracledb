@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
+ * The node-oracledb test suite uses 'mocha'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -31,7 +31,6 @@ const oracledb = require('oracledb');
 const dbconfig = require('./dbconfig.js');
 const sodaUtil = require('./sodaUtil.js');
 const assert   = require('assert');
-const should   = require('should');
 const os       = require('os');
 
 let testsUtil = exports;
@@ -162,7 +161,7 @@ testsUtil.getDBCompatibleVersion = async function() {
       }
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }
   return compatibleVersion;
@@ -215,7 +214,7 @@ testsUtil.measureNetworkRoundTripTime = async function() {
     await conn.execute("select * from dual");
     await conn.close();
   } catch (err) {
-    should.not.exist(err);
+    assert.fail(err);
   }
   return new Date() - startTime;
 };
@@ -310,7 +309,7 @@ testsUtil.createAQtestUser = async function(AQ_USER, AQ_USER_PWD) {
       await connAsDBA.execute(plsql);
       await connAsDBA.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
   }
@@ -334,7 +333,7 @@ testsUtil.dropAQtestUser = async function(AQ_USER) {
       let sql = `DROP USER ${AQ_USER} CASCADE`;
       await connAsDBA.execute(sql);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }
 };
@@ -342,13 +341,13 @@ testsUtil.dropAQtestUser = async function(AQ_USER) {
 testsUtil.doStream = async function(stream) {
   const consumeStream = new Promise((resolve, reject) => {
     stream.on('data', function(data) {
-      should.exist(data);
+      assert(data);
     });
     stream.on('end', function() {
       stream.destroy();
     });
     stream.on('error', function(error) {
-      should.not.exist(error);
+      assert.fail(error);
       reject(error);
     });
     stream.on('close', function() {
@@ -383,4 +382,12 @@ testsUtil.getPoolConnection = async function(pool) {
 
 testsUtil.sleep = function(ms = 1000) {
   return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+testsUtil.isDate = function(date) {
+  if (isNaN(Date.parse(date))) {
+    return false;
+  } else {
+    return true;
+  }
 };

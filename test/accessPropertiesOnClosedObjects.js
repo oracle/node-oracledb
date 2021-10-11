@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
+ * The node-oracledb test suite uses 'mocha'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -29,7 +29,7 @@
 
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 
 describe('223. accessPropertiesOnClosedObjects.js', () => {
@@ -37,12 +37,13 @@ describe('223. accessPropertiesOnClosedObjects.js', () => {
   it('223.1 access properties of closed Connection object', async () => {
     try {
       const conn = await oracledb.getConnection(dbconfig);
+      assert(conn);
       await conn.close();
 
-      let closedObjProp = conn.oracleServerVersion;
-      should.not.exist(closedObjProp);
+      const closedObjProp = conn.oracleServerVersion;
+      assert.ifError(closedObjProp);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 223.1
 
@@ -53,14 +54,14 @@ describe('223. accessPropertiesOnClosedObjects.js', () => {
       const Lob = await conn.createLob(oracledb.DB_TYPE_BLOB);
 
       await Lob.close();
-      should.strictEqual(Lob.type, oracledb.DB_TYPE_BLOB);
-      should.strictEqual(Lob.length, 0);
+      assert.strictEqual(Lob.type, oracledb.DB_TYPE_BLOB);
+      assert.strictEqual(Lob.length, 0);
 
       await conn.close();
-      should.strictEqual(Lob.type, oracledb.DB_TYPE_BLOB);
-      should.strictEqual(Lob.length, 0);
+      assert.strictEqual(Lob.type, oracledb.DB_TYPE_BLOB);
+      assert.strictEqual(Lob.length, 0);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 223.2
 });

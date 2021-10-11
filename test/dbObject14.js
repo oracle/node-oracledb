@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -60,7 +60,7 @@ describe('213. dbObject14.js', () => {
       await conn.execute(plsql);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // before()
 
@@ -77,7 +77,7 @@ describe('213. dbObject14.js', () => {
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // after()
 
@@ -96,7 +96,7 @@ describe('213. dbObject14.js', () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:sn, :t)`;
       let binds = { sn: "Hockey", t: hockeyTeam };
       const result1 = await conn.execute(sql, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       // Insert with direct binding
       const badmintonPlayers = [
@@ -107,25 +107,25 @@ describe('213. dbObject14.js', () => {
       ];
       binds = { sn: "Badminton", t: { type: TeamTypeClass, val: badmintonPlayers } };
       const result2 = await conn.execute(sql, binds);
-      should.strictEqual(result2.rowsAffected, 1);
+      assert.strictEqual(result2.rowsAffected, 1);
 
       // Query the data back
       sql = `SELECT * FROM ${TABLE}`;
       const result3 = await conn.execute(sql, [], { outFormat:oracledb.OUT_FORMAT_OBJECT });
-      should.strictEqual(result3.rows[0].SPORTNAME, 'Hockey');
-      should.strictEqual(result3.rows[1].SPORTNAME, 'Badminton');
+      assert.strictEqual(result3.rows[0].SPORTNAME, 'Hockey');
+      assert.strictEqual(result3.rows[1].SPORTNAME, 'Badminton');
 
       for (let i = 0; i < result3.rows[0].TEAM.length; i++) {
-        should.strictEqual(result3.rows[0].TEAM[i].SHIRTNUMBER, hockeyPlayers[i].SHIRTNUMBER);
-        should.strictEqual(result3.rows[0].TEAM[i].NAME, hockeyPlayers[i].NAME);
+        assert.strictEqual(result3.rows[0].TEAM[i].SHIRTNUMBER, hockeyPlayers[i].SHIRTNUMBER);
+        assert.strictEqual(result3.rows[0].TEAM[i].NAME, hockeyPlayers[i].NAME);
       }
 
       for (let i = 0; i < result3.rows[1].TEAM.length; i++) {
-        should.strictEqual(result3.rows[1].TEAM[i].SHIRTNUMBER, badmintonPlayers[i].SHIRTNUMBER);
-        should.strictEqual(result3.rows[1].TEAM[i].NAME, badmintonPlayers[i].NAME);
+        assert.strictEqual(result3.rows[1].TEAM[i].SHIRTNUMBER, badmintonPlayers[i].SHIRTNUMBER);
+        assert.strictEqual(result3.rows[1].TEAM[i].NAME, badmintonPlayers[i].NAME);
       }
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 213.1
 });

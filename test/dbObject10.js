@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -78,7 +78,7 @@ describe('209. dbObject10.js', () => {
       `;
       await conn.execute(sql);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // before()
 
@@ -92,53 +92,53 @@ describe('209. dbObject10.js', () => {
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // after()
 
   it('209.1 DB Objects which contain PL/SQL methods', async () => {
     try {
-      let sql = `SELECT c.contact.get_idno() FROM ${TABLE} c`;
-      let result = await conn.execute(sql);
-      should.strictEqual(result.rows[0][0], t_idno);
+      const sql = `SELECT c.contact.get_idno() FROM ${TABLE} c`;
+      const result = await conn.execute(sql);
+      assert.strictEqual(result.rows[0][0], t_idno);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 209.1
 
   it('209.2 By default, JavaScript Object toString() returns "[object type]"', async () => {
     try {
-      let result = await conn.execute(`SELECT contact FROM ${TABLE}`);
-      let dbObj = result.rows[0][0];
+      const result = await conn.execute(`SELECT contact FROM ${TABLE}`);
+      const dbObj = result.rows[0][0];
 
       let expect = `[object ${dbconfig.user.toUpperCase()}.${TYPE}]`;
-      should.strictEqual(dbObj.toString(), expect);
+      assert.strictEqual(dbObj.toString(), expect);
 
       expect = '[object Object]';
-      should.strictEqual(dbObj._toPojo().toString(), expect);
+      assert.strictEqual(dbObj._toPojo().toString(), expect);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 209.2
 
   it('209.3 The Object literal and JSON.stringify()', async () => {
     try {
-      let result = await conn.execute(`SELECT contact FROM ${TABLE}`);
-      let dbObj = result.rows[0][0];
+      const result = await conn.execute(`SELECT contact FROM ${TABLE}`);
+      const dbObj = result.rows[0][0];
 
-      let schema = dbconfig.user.toUpperCase();
+      const schema = dbconfig.user.toUpperCase();
       let expect = `x[${schema}.NODB_PERSON_TYP] { IDNO: 65, FIRST_NAME: 'Verna',  LAST_NAME: 'Mills',  EMAIL: 'vmills@example.com', PHONE: '1-650-555-0125' }`;
       expect = expect.trim().replace(/[\s\n\r]/g, '');
 
       let actual = 'x' + dbObj;
       actual = actual.trim().replace(/[\s\n\r]/g, '');
-      should.strictEqual(actual, expect);
+      assert.strictEqual(actual, expect);
 
       expect = '{"IDNO":65,"FIRST_NAME":"Verna","LAST_NAME":"Mills","EMAIL":"vmills@example.com","PHONE":"1-650-555-0125"}';
       actual = JSON.stringify(dbObj);
-      should.strictEqual(actual, expect);
+      assert.strictEqual(actual, expect);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 209.3
 });

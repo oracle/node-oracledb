@@ -24,181 +24,138 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
 
 describe('66. writableProperties1.js', function() {
 
-  it('66.1 allows overwriting of public methods on pool instances', function(done) {
-    oracledb.createPool(
+  it('66.1 allows overwriting of public methods on pool instances', async function() {
+    var pool = await oracledb.createPool(dbConfig);
+    assert(pool);
+    var keys;
+    var keysIdx;
+    var originalFunction;
+    keys = Object.keys(pool);
+
+    for (keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
+      if (typeof pool[keys[keysIdx]] === 'function') {
+        try {
+          originalFunction = pool[keys[keysIdx]];
+
+          pool[keys[keysIdx]] = function() {};
+
+          pool[keys[keysIdx]] = originalFunction;
+        } catch (err) {
+          assert.fail(err);
+        }
+      }
+    }
+
+    await pool.terminate();
+
+  });
+
+  it('66.2 allows overwriting of public methods on connection instances', async function() {
+
+    var conn = await oracledb.getConnection(dbConfig);
+    var keys;
+    var keysIdx;
+    var originalFunction;
+
+    keys = Object.keys(conn);
+
+    for (keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
+      if (typeof conn[keys[keysIdx]] === 'function') {
+        try {
+          originalFunction = conn[keys[keysIdx]];
+
+          conn[keys[keysIdx]] = function() {};
+
+          conn[keys[keysIdx]] = originalFunction;
+        } catch (err) {
+          assert.fail(err);
+        }
+      }
+    }
+
+    await conn.release();
+
+  });
+
+  it('66.3 allows overwriting of public methods on resultset instances', async function() {
+
+    var conn = await oracledb.getConnection(dbConfig);
+    var result = await conn.execute(
+      'select 1 from dual union select 2 from dual',
+      [], // no binds
       {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
-        poolMin           : 0,
-        poolMax           : 1,
-        poolIncrement     : 1
-      },
-      function(err, pool) {
-        var keys;
-        var keysIdx;
-        var originalFunction;
-
-        should.not.exist(err);
-
-        keys = Object.keys(pool);
-
-        for (keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
-          if (typeof pool[keys[keysIdx]] === 'function') {
-            try {
-              originalFunction = pool[keys[keysIdx]];
-
-              pool[keys[keysIdx]] = function() {};
-
-              pool[keys[keysIdx]] = originalFunction;
-            } catch (err) {
-              should.not.exist(err);
-            }
-          }
-        }
-
-        pool.terminate(function(err) {
-          should.not.exist(err);
-
-          done();
-        });
-      }
-    );
-  });
-
-  it('66.2 allows overwriting of public methods on connection instances', function(done) {
-
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      var keys;
-      var keysIdx;
-      var originalFunction;
-
-      should.not.exist(err);
-
-      keys = Object.keys(conn);
-
-      for (keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
-        if (typeof conn[keys[keysIdx]] === 'function') {
-          try {
-            originalFunction = conn[keys[keysIdx]];
-
-            conn[keys[keysIdx]] = function() {};
-
-            conn[keys[keysIdx]] = originalFunction;
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
-
-      conn.release(function(err) {
-        should.not.exist(err);
-
-        done();
+        resultSet: true
       });
-    });
+
+    var keys;
+    var keysIdx;
+    var originalFunction;
+
+    keys = Object.keys(result.resultSet);
+
+    for (keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
+      if (typeof result.resultSet[keys[keysIdx]] === 'function') {
+        try {
+          originalFunction = result.resultSet[keys[keysIdx]];
+
+          result.resultSet[keys[keysIdx]] = function() {};
+
+          result.resultSet[keys[keysIdx]] = originalFunction;
+        } catch (err) {
+          assert.fail(err);
+        }
+      }
+    }
+
+    await result.resultSet.close();
+    await conn.release();
   });
 
-  it('66.3 allows overwriting of public methods on resultset instances', function(done) {
+  it('66.4 allows overwriting of public methods on lob instances', async function() {
 
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
+    var conn = await oracledb.getConnection(dbConfig);
+    assert(conn);
+    var result = await conn.execute('select to_clob(dummy) from dual');
+    var keys;
+    var keysIdx;
+    var originalFunction;
+    var lob;
 
-      conn.execute(
-        'select 1 from dual union select 2 from dual',
-        [], // no binds
-        {
-          resultSet: true
-        },
-        function(err, result) {
-          var keys;
-          var keysIdx;
-          var originalFunction;
+    lob = result.rows[0][0];
 
-          should.not.exist(err);
+    keys = Object.keys(lob);
 
-          keys = Object.keys(result.resultSet);
+    for (keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
+      if (typeof lob[keys[keysIdx]] === 'function') {
+        try {
+          originalFunction = lob[keys[keysIdx]];
 
-          for (keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
-            if (typeof result.resultSet[keys[keysIdx]] === 'function') {
-              try {
-                originalFunction = result.resultSet[keys[keysIdx]];
+          lob[keys[keysIdx]] = function() {};
 
-                result.resultSet[keys[keysIdx]] = function() {};
-
-                result.resultSet[keys[keysIdx]] = originalFunction;
-              } catch (err) {
-                should.not.exist(err);
-              }
-            }
-          }
-
-          result.resultSet.close(function(err) {
-            should.not.exist(err);
-
-            conn.release(function(err) {
-              should.not.exist(err);
-
-              done();
-            });
-          });
+          lob[keys[keysIdx]] = originalFunction;
+        } catch (err) {
+          assert.fail(err);
         }
-      );
+      }
+    }
+
+    lob.on("finish", function(err) {
+      assert.fail(err);
     });
-  });
 
-  it('66.4 allows overwriting of public methods on lob instances', function(done) {
-
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-
-      conn.execute(
-        'select to_clob(dummy) from dual',
-        function(err, result) {
-          var keys;
-          var keysIdx;
-          var originalFunction;
-          var lob;
-
-          should.not.exist(err);
-
-          lob = result.rows[0][0];
-
-          keys = Object.keys(lob);
-
-          for (keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
-            if (typeof lob[keys[keysIdx]] === 'function') {
-              try {
-                originalFunction = lob[keys[keysIdx]];
-
-                lob[keys[keysIdx]] = function() {};
-
-                lob[keys[keysIdx]] = originalFunction;
-              } catch (err) {
-                should.not.exist(err);
-              }
-            }
-          }
-
-          lob.on("finish", function(err) {
-            should.not.exist(err);
-          });
-
-          lob.on("error", function(err) {
-            should.not.exist(err, "lob.on 'error' event.");
-          });
-
-          lob.destroy();
-          done();
-        }
-      );
+    lob.on("error", function(err) {
+      assert.fail(err, "lob.on 'error' event.");
     });
+
+    lob.destroy();
+
+
   }); // 66.4
 
   it('66.5 allows overwriting of public methods on oracledb instances', function(done) {
@@ -210,7 +167,7 @@ describe('66. writableProperties1.js', function() {
           oracledb[keys[keysIdx]] = function() {};
           oracledb[keys[keysIdx]] = originalFunction;
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }

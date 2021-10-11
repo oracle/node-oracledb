@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 
 describe('214. dbObject15.js', () => {
@@ -64,7 +64,7 @@ describe('214. dbObject15.js', () => {
       FrisbeeTeam = new TeamTypeClass(FrisbeePlayers);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // before()
 
@@ -79,7 +79,7 @@ describe('214. dbObject15.js', () => {
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // after()
 
@@ -88,12 +88,12 @@ describe('214. dbObject15.js', () => {
 
       for (let i = 0, element; i < FrisbeePlayers.length; i++) {
         element = FrisbeeTeam[i];
-        should.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
-        should.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
+        assert.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
+        assert.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
       }
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 214.1
 
@@ -102,22 +102,22 @@ describe('214. dbObject15.js', () => {
     try {
       const substitute = {SHIRTNUMBER: 15, NAME: 'Chris'};
       FrisbeeTeam[0] = substitute;
-      should.strictEqual(FrisbeeTeam[0].SHIRTNUMBER, substitute.SHIRTNUMBER);
-      should.strictEqual(FrisbeeTeam[0].NAME, substitute.NAME);
+      assert.strictEqual(FrisbeeTeam[0].SHIRTNUMBER, substitute.SHIRTNUMBER);
+      assert.strictEqual(FrisbeeTeam[0].NAME, substitute.NAME);
 
       // Verify that the other elements are not impacted
       for (let i = 1, element; i < FrisbeePlayers.length; i++) {
         element = FrisbeeTeam[i];
-        should.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
-        should.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
+        assert.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
+        assert.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
       }
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 214.2
 
   it('214.3 Negative - delete the collection element directly', function() {
-    should.throws(
+    assert.throws(
       function() {
         delete FrisbeeTeam[1];
       },
@@ -127,7 +127,7 @@ describe('214. dbObject15.js', () => {
   }); // 214.3
 
   it('214.4 Negative - collection.deleteElement()', function() {
-    should.throws(
+    assert.throws(
       function() {
         let firstIndex = FrisbeeTeam.getFirstIndex();
         FrisbeeTeam.deleteElement(firstIndex);

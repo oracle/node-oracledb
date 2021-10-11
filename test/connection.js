@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
+ * The node-oracledb test suite uses 'mocha'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -27,14 +27,13 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
 
 describe('1. connection.js', function() {
 
-  var credentials = {
+  const credentials = {
     user:          dbConfig.user,
     password:      dbConfig.password,
     connectString: dbConfig.connectString
@@ -43,7 +42,7 @@ describe('1. connection.js', function() {
   describe('1.1 can run SQL query with different output formats', function() {
 
     var connection = null;
-    var script =
+    const script =
       "BEGIN \
           DECLARE \
               e_table_missing EXCEPTION; \
@@ -72,155 +71,126 @@ describe('1. connection.js', function() {
           '); \
       END; ";
 
-    before(function(done) {
-      oracledb.getConnection(
-        credentials,
-        function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          connection.execute(script, function(err) {
-            should.not.exist(err);
-            done();
-          });
-        }
-      );
+    before(async function() {
+      try {
+        connection = await oracledb.getConnection(credentials);
+        assert(connection);
+        await connection.execute(script);
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    after(function(done) {
-      connection.execute(
-        'DROP TABLE nodb_conn_dept1 PURGE',
-        function(err) {
-          if (err) {
-            console.error(err.message); return;
-          }
-          connection.release(function(err) {
-            if (err) {
-              console.error(err.message); return;
-            }
-            done();
-          });
-        }
-      );
+    after(async function() {
+      try {
+        await connection.execute('DROP TABLE nodb_conn_dept1 PURGE');
+        await connection.release();
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    var query = "SELECT department_id, department_name " +
+    const query = "SELECT department_id, department_name " +
                 "FROM nodb_conn_dept1 " +
                 "WHERE department_id = :id";
 
-    it('1.1.1 ARRAY format by default', function(done) {
-      var defaultFormat = oracledb.outFormat;
-      defaultFormat.should.be.exactly(oracledb.OUT_FORMAT_ARRAY);
-
-      connection.should.be.ok();
-      connection.execute(query, [40], function(err, result) {
-        should.not.exist(err);
-        (result.rows).should.eql([[ 40, 'Human Resources' ]]);
-        done();
-      });
+    it('1.1.1 ARRAY format by default', async function() {
+      try {
+        const defaultFormat = oracledb.outFormat;
+        assert.strictEqual(defaultFormat, oracledb.OUT_FORMAT_ARRAY);
+        assert(connection);
+        const result = await connection.execute(query, [40]);
+        assert(result);
+        assert.deepStrictEqual(result.rows, [[ 40, 'Human Resources' ]]);
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    it('1.1.2 ARRAY format explicitly', function(done) {
-      connection.should.be.ok();
-      connection.execute(
-        query, {id: 20}, {outFormat: oracledb.OUT_FORMAT_ARRAY},
-        function(err, result) {
-          should.not.exist(err);
-          (result.rows).should.eql([[ 20, 'Marketing' ]]);
-          done();
-        }
-      );
+    it('1.1.2 ARRAY format explicitly', async function() {
+      try {
+        assert(connection);
+        const result = await connection.execute(query, {id: 20}, {outFormat: oracledb.OUT_FORMAT_ARRAY});
+        assert(result);
+        assert.deepStrictEqual(result.rows, [[ 20, 'Marketing' ]]);
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    it('1.1.3 OBJECT format', function(done) {
-      connection.should.be.ok();
-      connection.execute(
-        query, {id: 20}, {outFormat: oracledb.OUT_FORMAT_OBJECT},
-        function(err, result) {
-          should.not.exist(err);
-          (result.rows).should.eql([{ DEPARTMENT_ID: 20, DEPARTMENT_NAME: 'Marketing' }]);
-          done();
-        }
-      );
+    it('1.1.3 OBJECT format', async function() {
+      try {
+        assert(connection);
+        const result = await connection.execute(query, {id: 20}, {outFormat: oracledb.OUT_FORMAT_OBJECT});
+        assert(result);
+        assert.deepStrictEqual(result.rows, [{ DEPARTMENT_ID: 20, DEPARTMENT_NAME: 'Marketing' }]);
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    it('1.1.4 Negative test - invalid outFormat value', function(done) {
-      connection.should.be.ok();
-      connection.execute(
-        query, {id: 20}, {outFormat:0 },
-        function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-004:');
-          // NJS-004: invalid value for property outFormat
-          should.not.exist(result);
-          done();
-        }
-      );
+    it('1.1.4 Negative test - invalid outFormat value', async function() {
+      try {
+        assert(connection);
+        await assert.rejects(
+          async () => {
+            await connection.execute(query, {id: 20}, {outFormat:0 });
+          },
+          /NJS-004:/
+        );
+      } catch (error) {
+        assert.fail(error);
+      }
     });
   });
 
   describe('1.2 can call PL/SQL procedures', function() {
     var connection = false;
 
-    var proc = "CREATE OR REPLACE PROCEDURE nodb_bindingtest (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT VARCHAR2) "
+    const proc = "CREATE OR REPLACE PROCEDURE nodb_bindingtest (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT VARCHAR2) "
                 + "AS "
                 + "BEGIN "
                 + "  p_out := p_in || ' ' || p_inout; "
                 + "END; ";
 
-    before(function(done) {
-      oracledb.getConnection(credentials, function(err, conn) {
-        if (err) {
-          console.error(err.message); return;
-        }
-        connection = conn;
-        connection.execute(proc, function(err) {
-          if (err) {
-            console.error(err.message); return;
-          }
-          done();
-        });
-      });
+    before(async function() {
+      try {
+        connection = await oracledb.getConnection(credentials);
+        await connection.execute(proc);
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    after(function(done) {
-      connection.execute(
-        "DROP PROCEDURE nodb_bindingtest",
-        function(err) {
-          if (err) {
-            console.error(err.message); return;
-          }
-          connection.release(function(err) {
-            if (err) {
-              console.error(err.message); return;
-            }
-            done();
-          });
-        }
-      );
+    after(async function() {
+      try {
+        await connection.execute("DROP PROCEDURE nodb_bindingtest");
+        await connection.release();
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    it('1.2.1 bind parameters in various ways', function(done) {
-      var bindValues = {
-        i: 'Alan', // default is type STRING and direction Infinity
-        io: { val: 'Turing', type: oracledb.STRING, dir: oracledb.BIND_INOUT },
-        o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
-      };
-      connection.should.be.ok();
-      connection.execute(
-        "BEGIN nodb_bindingtest(:i, :io, :o); END;",
-        bindValues,
-        function(err, result) {
-          should.not.exist(err);
-          (result.outBinds.io).should.equal('Turing');
-          (result.outBinds.o).should.equal('Alan Turing');
-          done();
-        }
-      );
+    it('1.2.1 bind parameters in various ways', async function() {
+      try {
+        const bindValues = {
+          i: 'Alan', // default is type STRING and direction Infinity
+          io: { val: 'Turing', type: oracledb.STRING, dir: oracledb.BIND_INOUT },
+          o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+        };
+        assert(connection);
+        const result = await connection.execute("BEGIN nodb_bindingtest(:i, :io, :o); END;", bindValues);
+        assert(result);
+        assert.strictEqual(result.outBinds.io, 'Turing');
+        assert.strictEqual(result.outBinds.o, 'Alan Turing');
+      } catch (error) {
+        assert.fail(error);
+      }
     });
   });
 
   describe('1.3 statementCacheSize controls statement caching', function() {
-    var makeTable =
+    const makeTable =
         "BEGIN \
             DECLARE \
                 e_table_missing EXCEPTION; \
@@ -255,130 +225,69 @@ describe('1. connection.js', function() {
         END; ";
 
     var connection = false;
-    var defaultStmtCache = oracledb.stmtCacheSize; // 30
+    const defaultStmtCache = oracledb.stmtCacheSize; // 30
 
-    beforeEach('get connection and prepare table', function(done) {
-      oracledb.getConnection(credentials, function(err, conn) {
-        if (err) {
-          console.error(err.message); return;
-        }
-        connection = conn;
-        conn.execute(
-          makeTable,
-          function(err) {
-            if (err) {
-              console.error(err.message); return;
-            }
-            done();
-          }
-        );
-      });
+    beforeEach('get connection and prepare table', async function() {
+      try {
+        connection = await oracledb.getConnection(credentials);
+        await connection.execute(makeTable);
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    afterEach('drop table and release connection', function(done) {
-      oracledb.stmtCacheSize = defaultStmtCache;
-      connection.execute(
-        "DROP TABLE nodb_conn_emp4 PURGE",
-        function(err) {
-          if (err) {
-            console.error(err.message); return;
-          }
-          connection.release(function(err) {
-            if (err) {
-              console.error(err.message); return;
-            }
-            done();
-          });
-        }
-      );
+    afterEach('drop table and release connection', async function() {
+      try {
+        oracledb.stmtCacheSize = defaultStmtCache;
+        await connection.execute("DROP TABLE nodb_conn_emp4 PURGE");
+        await connection.release();
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    it('1.3.1 stmtCacheSize = 0, which disable statement caching', function(done) {
-      connection.should.be.ok();
-      oracledb.stmtCacheSize = 0;
+    it('1.3.1 stmtCacheSize = 0, which disable statement caching', async function() {
+      try {
+        assert(connection);
+        oracledb.stmtCacheSize = 0;
 
-      async.series([
-        function(callback) {
-          connection.execute(
-            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
-            { num: 1003, str: 'Robyn Sands' },
-            { autoCommit: true },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          connection.execute(
-            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
-            { num: 1004, str: 'Bryant Lin' },
-            { autoCommit: true },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          connection.execute(
-            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
-            { num: 1005, str: 'Patrick Engebresson' },
-            { autoCommit: true },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        }
-      ], done);
+        await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
+          { num: 1003, str: 'Robyn Sands' },
+          { autoCommit: true });
+        await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
+          { num: 1004, str: 'Bryant Lin' },
+          { autoCommit: true });
+        await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
+          { num: 1005, str: 'Patrick Engebresson' },
+          { autoCommit: true });
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    it('1.3.2 works well when statement cache enabled (stmtCacheSize > 0) ', function(done) {
-      connection.should.be.ok();
-      oracledb.stmtCacheSize = 100;
+    it('1.3.2 works well when statement cache enabled (stmtCacheSize > 0) ', async function() {
+      try {
+        assert(connection);
+        oracledb.stmtCacheSize = 100;
 
-      async.series([
-        function(callback) {
-          connection.execute(
-            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
-            { num: 1003, str: 'Robyn Sands' },
-            { autoCommit: true },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          connection.execute(
-            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
-            { num: 1004, str: 'Bryant Lin' },
-            { autoCommit: true },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          connection.execute(
-            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
-            { num: 1005, str: 'Patrick Engebresson' },
-            { autoCommit: true },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        }
-      ], done);
+        await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
+          { num: 1003, str: 'Robyn Sands' },
+          { autoCommit: true });
+        await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
+          { num: 1004, str: 'Bryant Lin' },
+          { autoCommit: true });
+        await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
+          { num: 1005, str: 'Patrick Engebresson' },
+          { autoCommit: true });
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
   });
 
   describe('1.4 Testing commit() & rollback() functions', function() {
-    var makeTable =
+    const makeTable =
         "BEGIN \
             DECLARE \
                 e_table_missing EXCEPTION; \
@@ -409,459 +318,302 @@ describe('1. connection.js', function() {
 
     var conn1 = false;
     var conn2 = false;
-    beforeEach('get 2 connections and create the table', function(done) {
-      async.series([
-        function(callback) {
-          oracledb.getConnection(credentials, function(err, conn) {
-            should.not.exist(err);
-            conn1 = conn;
-            callback();
-          });
-        },
-        function(callback) {
-          oracledb.getConnection(credentials, function(err, conn) {
-            should.not.exist(err);
-            conn2 = conn;
-            callback();
-          });
-        },
-        function(callback) {
-          conn1.should.be.ok();
-          conn1.execute(
-            makeTable,
-            [],
-            { autoCommit: true },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        }
-      ], done);
+    beforeEach('get 2 connections and create the table', async function() {
+      try {
+        conn1 = await oracledb.getConnection(credentials);
+        conn2 = await oracledb.getConnection(credentials);
+        assert(conn1);
+        await conn1.execute(makeTable, [], { autoCommit: true });
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    afterEach('drop table and release connections', function(done) {
-      conn1.should.be.ok();
-      conn2.should.be.ok();
-      async.series([
-        function(callback) {
-          conn2.execute(
-            "DROP TABLE nodb_conn_emp5 PURGE",
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          conn1.release(function(err) {
-            should.not.exist(err);
-            callback();
-          });
-        },
-        function(callback) {
-          conn2.release(function(err) {
-            should.not.exist(err);
-            callback();
-          });
-        }
-      ], done);
+    afterEach('drop table and release connections', async function() {
+      try {
+        assert(conn1);
+        assert(conn2);
+        await conn2.execute("DROP TABLE nodb_conn_emp5 PURGE");
+        await conn1.release();
+        await conn2.release();
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-
-    it('1.4.1 commit() function works well', function(done) {
-      async.series([
-        function(callback) {
-          conn2.execute(
-            "INSERT INTO nodb_conn_emp5 VALUES (:num, :str)",
-            { num: 1003, str: 'Patrick Engebresson' },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          conn1.execute(
-            "SELECT COUNT(*) FROM nodb_conn_emp5",
-            function(err, result) {
-              should.not.exist(err);
-              result.rows[0][0].should.be.exactly(2);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          conn2.execute(
-            "SELECT COUNT(*) FROM nodb_conn_emp5",
-            function(err, result) {
-              should.not.exist(err);
-              result.rows[0][0].should.be.exactly(3);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          conn2.commit(function(err) {
-            should.not.exist(err);
-            callback();
-          });
-        },
-        function(callback) {
-          conn1.execute(
-            "SELECT COUNT(*) FROM nodb_conn_emp5",
-            function(err, result) {
-              should.not.exist(err);
-              result.rows[0][0].should.be.exactly(3);
-              callback();
-            }
-          );
-        },
-      ], done);
-
+    it('1.4.1 commit() function works well', async function() {
+      try {
+        await conn2.execute("INSERT INTO nodb_conn_emp5 VALUES (:num, :str)",
+          { num: 1003, str: 'Patrick Engebresson' });
+        let result = await conn1.execute("SELECT COUNT(*) FROM nodb_conn_emp5");
+        assert(result);
+        assert.strictEqual(result.rows[0][0], 2);
+        result = await conn2.execute("SELECT COUNT(*) FROM nodb_conn_emp5");
+        assert.strictEqual(result.rows[0][0], 3);
+        await conn2.commit();
+        result = await conn1.execute("SELECT COUNT(*) FROM nodb_conn_emp5");
+        assert.strictEqual(result.rows[0][0], 3);
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    it('1.4.2 rollback() function works well', function(done) {
-      async.series([
-        function(callback) {
-          conn2.execute(
-            "INSERT INTO nodb_conn_emp5 VALUES (:num, :str)",
-            { num: 1003, str: 'Patrick Engebresson' },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          conn1.execute(
-            "SELECT COUNT(*) FROM nodb_conn_emp5",
-            function(err, result) {
-              should.not.exist(err);
-              result.rows[0][0].should.be.exactly(2);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          conn2.execute(
-            "SELECT COUNT(*) FROM nodb_conn_emp5",
-            function(err, result) {
-              should.not.exist(err);
-              result.rows[0][0].should.be.exactly(3);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          conn2.rollback(function(err) {
-            should.not.exist(err);
-            callback();
-          });
-        },
-        function(callback) {
-          conn2.execute(
-            "SELECT COUNT(*) FROM nodb_conn_emp5",
-            function(err, result) {
-              should.not.exist(err);
-              result.rows[0][0].should.be.exactly(2);
-              callback();
-            }
-          );
-        },
-      ], done);
+    it('1.4.2 rollback() function works well', async function() {
+      try {
+        await conn2.execute("INSERT INTO nodb_conn_emp5 VALUES (:num, :str)",
+          { num: 1003, str: 'Patrick Engebresson' });
+
+        var result = await conn1.execute("SELECT COUNT(*) FROM nodb_conn_emp5");
+        assert(result);
+        assert.strictEqual(result.rows[0][0], 2);
+
+        result = await conn2.execute("SELECT COUNT(*) FROM nodb_conn_emp5");
+        assert.strictEqual(result.rows[0][0], 3);
+        await conn2.rollback();
+        result = await conn2.execute("SELECT COUNT(*) FROM nodb_conn_emp5");
+        assert.strictEqual(result.rows[0][0], 2);
+      } catch (error) {
+        assert.fail(error);
+      }
     });
   });
 
   describe('1.5 Close method', function() {
-    it('1.5.1 close can be used as an alternative to release', function(done) {
-      oracledb.getConnection(credentials, function(err, conn) {
-        should.not.exist(err);
 
-        conn.close(function(err) {
-          should.not.exist(err);
-          done();
-        });
-      });
+    it('1.5.1 close can be used as an alternative to release', async function() {
+      try {
+        const conn = await oracledb.getConnection(credentials);
+        await conn.close();
+      } catch (error) {
+        assert.fail(error);
+      }
     });
   });
 
   describe('1.6 connectionString alias', function() {
-    it('1.6.1 allows connectionString to be used as an alias for connectString', function(done) {
-      oracledb.getConnection(
-        {
+
+    it('1.6.1 allows connectionString to be used as an alias for connectString', async function() {
+      try {
+        const connection = await oracledb.getConnection({
           user: dbConfig.user,
           password: dbConfig.password,
           connectionString: dbConfig.connectString
-        },
-        function(err, connection) {
-          should.not.exist(err);
-
-          connection.should.be.ok();
-
-          connection.close(function(err) {
-            should.not.exist(err);
-
-            done();
-          });
-        }
-      );
+        });
+        assert(connection);
+        await connection.close();
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
   });
 
   describe('1.7 privileged connections', function() {
 
-    it('1.7.1 Negative value - null', function(done) {
-
-      oracledb.getConnection(
-        {
+    it('1.7.1 Negative value - null', async function() {
+      try {
+        const credential = {
           user: dbConfig.user,
           password: dbConfig.password,
           connectString: dbConfig.connectString,
           privilege: null
-        },
-        function(err, connection) {
-          should.exist(err);
-          should.strictEqual(
-            err.message,
-            'NJS-007: invalid value for "privilege" in parameter 1'
-          );
-          should.not.exist(connection);
-          done();
-        }
-      );
+        };
+        await assert.rejects(
+          async () => {
+            await oracledb.getConnection(credential);
+          },
+          /NJS-007: invalid value for "privilege" in parameter 1/
+        );
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    it('1.7.2 Negative - invalid type, a String', function(done) {
-
-      oracledb.getConnection(
-        {
+    it('1.7.2 Negative - invalid type, a String', async function() {
+      try {
+        const credential = {
           user: dbConfig.user,
           password: dbConfig.password,
           connectString: dbConfig.connectString,
           privilege: 'sysdba'
-        },
-        function(err, connection) {
-          should.exist(err);
-          should.not.exist(connection);
-          should.strictEqual(
-            err.message,
-            'NJS-007: invalid value for "privilege" in parameter 1'
-          );
-          done();
-        }
-      );
+        };
+        await assert.rejects(
+          async () => {
+            await oracledb.getConnection(credential);
+          },
+          /NJS-007: invalid value for "privilege" in parameter 1/
+        );
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    it('1.7.3 Negative value - random constants', function(done) {
-
-      oracledb.getConnection(
-        {
+    it('1.7.3 Negative value - random constants', async function() {
+      try {
+        const credential = {
           user: dbConfig.user,
           password: dbConfig.password,
           connectString: dbConfig.connectString,
           privilege: 23
-        },
-        function(err, connection) {
-          should.exist(err);
-          (err.message).should.startWith('ORA-24300');
-          // ORA-24300: bad value for mode
-          should.not.exist(connection);
-          done();
-        }
-      );
+        };
+
+        await assert.rejects(
+          async () => {
+            await oracledb.getConnection(credential);
+          },
+          /ORA-24300/
+        );// ORA-24300: bad value for mode
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    it('1.7.4 Negative value - NaN', function(done) {
-
-      oracledb.getConnection(
-        {
+    it('1.7.4 Negative value - NaN', async function() {
+      try {
+        const credential = {
           user: dbConfig.user,
           password: dbConfig.password,
           connectString: dbConfig.connectString,
           privilege: NaN
-        },
-        function(err, connection) {
-          should.exist(err);
-          should.strictEqual(
-            err.message,
-            'NJS-007: invalid value for "privilege" in parameter 1'
-          );
-          should.not.exist(connection);
-          done();
-        }
-      );
+        };
+
+        await assert.rejects(
+          async () => {
+            await oracledb.getConnection(credential);
+          },
+          /NJS-007: invalid value for "privilege" in parameter 1/
+        );
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    it('1.7.5 gets ignored when acquiring a connection from Pool', function(done) {
-
-      oracledb.createPool(
-        {
+    it('1.7.5 gets ignored when acquiring a connection from Pool', async function() {
+      try {
+        const credential = {
           user: dbConfig.user,
           password: dbConfig.password,
           connectString: dbConfig.connectString,
           privilege: null,
           poolMin: 1
-        },
-        function(err, pool) {
-          should.not.exist(err);
-
-          pool.getConnection(function(err, conn) {
-            should.not.exist(err);
-
-            conn.close(function(err) {
-              should.not.exist(err);
-
-              pool.close(function(err) {
-                should.not.exist(err);
-                done();
-              });
-            });
-          });
-        }
-      );
+        };
+        const pool = await oracledb.createPool(credential);
+        const conn = await pool.getConnection();
+        await conn.close();
+        await pool.close();
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
   }); // 1.7
 
   describe('1.8 Ping method', function() {
 
-    it('1.8.1 ping() checks the connection is usable', function(done) {
-      var conn;
-      async.series([
-        function(cb) {
-          oracledb.getConnection(
-            dbConfig,
-            function(err, connection) {
-              should.not.exist(err);
-              conn = connection;
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          conn.ping(function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        },
-        function(cb) {
-          conn.close(function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        }
-      ], done);
+    it('1.8.1 ping() checks the connection is usable', async function() {
+      try {
+        const conn = await oracledb.getConnection(dbConfig);
+        assert(conn);
+        await conn.ping();
+        await conn.close();
+      } catch (error) {
+        assert.fail(error);
+      }
     });
 
-    it('1.8.2 closed connection', function(done) {
-      var conn;
-      async.series([
-        function(cb) {
-          oracledb.getConnection(
-            dbConfig,
-            function(err, connection) {
-              should.not.exist(err);
-              conn = connection;
-              cb();
-            }
-          );
-        }, function(cb) {
-          conn.close(function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        },
-        function(cb) {
-          conn.ping(function(err) {
-            should.exist(err);
-            should.strictEqual(
-              err.message,
-              "NJS-003: invalid connection"
-            );
-            cb();
-          });
-        },
-      ], done);
+    it('1.8.2 closed connection', async function() {
+      try {
+        const conn = await oracledb.getConnection(dbConfig);
+        assert(conn);
+        await conn.close();
+        await assert.rejects(
+          async () => {
+            await conn.ping();
+          },
+          /NJS-003: invalid connection/
+        );
+      } catch (error) {
+        assert.fail(error);
+      }
     });
   }); // 1.8
 
 
   describe('1.9 connectString & connectionString specified', function() {
-    it('1.9.1 both connectString & ConnectionString specified',
-      function(done) {
-        oracledb.getConnection(
-          {
-            user : dbConfig.user,
-            password : dbConfig.password,
-            connectString : dbConfig.connectString,
-            connectionString : dbConfig.connectString
+
+    it('1.9.1 both connectString & ConnectionString specified', async function() {
+      try {
+        const credential = {
+          user : dbConfig.user,
+          password : dbConfig.password,
+          connectString : dbConfig.connectString,
+          connectionString : dbConfig.connectString
+        };
+
+        await assert.rejects(
+          async () => {
+            await oracledb.getConnection(credential);
           },
-          function(err, conn) {
-            should.not.exist(conn);
-            should.exist(err);
-            (err.message).should.startWith('NJS-075:');
-            done();
-          }
+          /NJS-075:/
         );
+      } catch (error) {
+        assert.fail(error);
       }
-    );
+    });
   }); //1.9
 
   describe('1.10 user & username specified', function() {
-    it('1.10.1 both user & username specified',
-      function(done) {
-        oracledb.getConnection(
-          {
-            user : dbConfig.user,
-            username : dbConfig.user,
-            password : dbConfig.password,
-            connectString : dbConfig.connectString
-          },
-          function(err, conn) {
-            should.not.exist(conn);
-            should.exist(err);
-            (err.message).should.startWith('NJS-080:');
-            done();
-          }
-        );
-      }
-    );
-    it('1.10.2 allows username to be used as an alias for user',
-      function(done) {
-        oracledb.getConnection(
-          {
-            username : dbConfig.user,
-            password : dbConfig.password,
-            connectString : dbConfig.connectString
-          },
-          function(err, conn) {
-            should.exist(conn);
-            should.not.exist(err);
-            done();
-          }
-        );
-      }
-    );
-    it('1.10.3 uses username alias to login with SYSDBA privilege',
-      function(done) {
-        if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
-        oracledb.getConnection(
-          {
-            username : dbConfig.test.DBA_user,
-            password : dbConfig.test.DBA_password,
-            connectString : dbConfig.connectString,
-            privilege : oracledb.SYSDBA
-          },
-          function(err, conn) {
-            should.exist(conn);
-            should.not.exist(err);
-            done();
-          }
-        );
-      }
-    );
-  }); //1.10
 
+    it('1.10.1 both user & username specified', async function() {
+      try {
+        const credential = {
+          user : dbConfig.user,
+          username : dbConfig.user,
+          password : dbConfig.password,
+          connectString : dbConfig.connectString
+        };
+
+        await assert.rejects(
+          async () => {
+            await oracledb.getConnection(credential);
+          },
+          /NJS-080:/
+        );
+      } catch (error) {
+        assert.fail(error);
+      }
+    });
+
+    it('1.10.2 allows username to be used as an alias for user', async function() {
+      try {
+        const credential = {
+          username : dbConfig.user,
+          password : dbConfig.password,
+          connectString : dbConfig.connectString
+        };
+
+        const conn = await oracledb.getConnection(credential);
+        assert(conn);
+      } catch (error) {
+        assert.fail(error);
+      }
+    });
+
+    it('1.10.3 uses username alias to login with SYSDBA privilege', async function() {
+      if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
+      try {
+        const credential = {
+          username : dbConfig.test.DBA_user,
+          password : dbConfig.test.DBA_password,
+          connectString : dbConfig.connectString,
+          privilege : oracledb.SYSDBA
+        };
+
+        const conn = await oracledb.getConnection(credential);
+        assert(conn);
+      } catch (error) {
+        assert.fail(error);
+      }
+    });
+  }); //1.10
 });

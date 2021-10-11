@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -35,14 +35,14 @@ describe('243. dbObject19.js', () => {
 
   before(async () => {
     // default value of oracledb.dbObjectAsPojo should be false
-    should.strictEqual(oracledb.dbObjectAsPojo, false);
+    assert.strictEqual(oracledb.dbObjectAsPojo, false);
     // set oracledb.dbObjectAsPojo to true
     oracledb.dbObjectAsPojo = true;
 
     try {
       conn = await oracledb.getConnection(dbconfig);
 
-      let sql =
+      const sql =
         `CREATE OR REPLACE TYPE ${TYPE} AS OBJECT (
           id NUMBER,
           name VARCHAR2(30)
@@ -50,24 +50,24 @@ describe('243. dbObject19.js', () => {
       await conn.execute(sql);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // before()
 
   after(async () => {
     try {
 
-      let sql = `DROP TYPE ${TYPE} FORCE`;
+      const sql = `DROP TYPE ${TYPE} FORCE`;
       await conn.execute(sql);
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
     // restore dbObjectAsPojo to default value
     oracledb.dbObjectAsPojo = false;
-    should.strictEqual(oracledb.dbObjectAsPojo, false);
+    assert.strictEqual(oracledb.dbObjectAsPojo, false);
   }); // after()
 
   describe('243.1 set global attribute oracledb.dbObjectAsPojo to true', () => {
@@ -86,18 +86,18 @@ describe('243. dbObject19.js', () => {
 
         const CLS = await conn.getDbObjectClass(TYPE);
         plsql = `BEGIN ${PROC}( :out ); END;`;
-        let bindVar = { out: { type: CLS, dir: oracledb.BIND_OUT } };
-        let result = await conn.execute(plsql, bindVar, { outFormat: oracledb.OBJECT  });
+        const bindVar = { out: { type: CLS, dir: oracledb.BIND_OUT } };
+        const result = await conn.execute(plsql, bindVar, { outFormat: oracledb.OBJECT  });
 
-        let outData = result.outBinds.out;
+        const outData = result.outBinds.out;
         // console.dir(outData);
-        should.deepEqual(outData, { ID: 101, NAME: 'Test User 1' });
+        assert.deepEqual(outData, { ID: 101, NAME: 'Test User 1' });
 
-        let sql = `DROP PROCEDURE ${PROC}`;
+        const sql = `DROP PROCEDURE ${PROC}`;
         await conn.execute(sql);
 
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     }); // 243.1.1
 
@@ -123,7 +123,7 @@ describe('243. dbObject19.js', () => {
 
         const seqOne = 1;
         let result = await conn.execute(sql, [seqOne, testObj]);
-        should.strictEqual(result.rowsAffected, 1);
+        assert.strictEqual(result.rowsAffected, 1);
 
         const PROC = 'nodb_proc_test2432';
         plsql = `
@@ -143,21 +143,21 @@ describe('243. dbObject19.js', () => {
         testObj = new CLS(objData2);
         const seqTwo = 23;
         plsql = `BEGIN ${PROC} (:i, :a); END;`;
-        let bindVar = {
+        const bindVar = {
           i: seqTwo,
           a: { type: CLS, dir: oracledb.BIND_INOUT, val: testObj }
         };
         result = await conn.execute(plsql, bindVar, { outFormat: oracledb.OBJECT });
         // Verify the OUT-bind value of the IN-OUT-bind variable
         // console.dir(result.outBinds.a);
-        should.deepEqual(result.outBinds.a, objData1);
+        assert.deepEqual(result.outBinds.a, objData1);
 
         sql = `SELECT * FROM ${TABLE} WHERE NUM = ${seqTwo}`;
         result = await conn.execute(sql, [], { outFormat: oracledb.OBJECT });
         // Verify the IN-bind value of the IN-OUT-bind variable
         // console.dir(result.rows[0]);
-        should.strictEqual(result.rows[0].NUM, seqTwo);
-        should.deepEqual(result.rows[0].PERSON, objData2);
+        assert.strictEqual(result.rows[0].NUM, seqTwo);
+        assert.deepEqual(result.rows[0].PERSON, objData2);
 
         sql = `DROP PROCEDURE ${PROC}`;
         await conn.execute(sql);
@@ -165,7 +165,7 @@ describe('243. dbObject19.js', () => {
         sql = `DROP TABLE ${TABLE} PURGE`;
         await conn.execute(sql);
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     }); // 243.1.2
 
@@ -174,7 +174,7 @@ describe('243. dbObject19.js', () => {
   describe('243.2 set dbObjectAsPojo in BIND_OUT and BIND_INOUT options', () => {
 
     before(function() {
-      should.strictEqual(oracledb.dbObjectAsPojo, true);
+      assert.strictEqual(oracledb.dbObjectAsPojo, true);
       // set oracledb.dbObjectAsPojo to false;
       oracledb.dbObjectAsPojo = false;
     }); // before()
@@ -198,18 +198,18 @@ describe('243. dbObject19.js', () => {
 
         const CLS = await conn.getDbObjectClass(TYPE);
         plsql = `BEGIN ${PROC}( :out ); END;`;
-        let bindVar = { out: { type: CLS, dir: oracledb.BIND_OUT } };
-        let result = await conn.execute(plsql, bindVar, { dbObjectAsPojo: true, outFormat: oracledb.OBJECT  });
+        const bindVar = { out: { type: CLS, dir: oracledb.BIND_OUT } };
+        const result = await conn.execute(plsql, bindVar, { dbObjectAsPojo: true, outFormat: oracledb.OBJECT  });
 
-        let outData = result.outBinds.out;
+        const outData = result.outBinds.out;
         // console.dir(outData);
-        should.deepEqual(outData, { ID: 101, NAME: 'Test User 1' });
+        assert.deepEqual(outData, { ID: 101, NAME: 'Test User 1' });
 
-        let sql = `DROP PROCEDURE ${PROC}`;
+        const sql = `DROP PROCEDURE ${PROC}`;
         await conn.execute(sql);
 
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     }); // 243.2.1
 
@@ -235,7 +235,7 @@ describe('243. dbObject19.js', () => {
 
         const seqOne = 1;
         let result = await conn.execute(sql, [seqOne, testObj]);
-        should.strictEqual(result.rowsAffected, 1);
+        assert.strictEqual(result.rowsAffected, 1);
 
         const PROC = 'nodb_proc_test2432';
         plsql = `
@@ -255,21 +255,21 @@ describe('243. dbObject19.js', () => {
         testObj = new CLS(objData2);
         const seqTwo = 23;
         plsql = `BEGIN ${PROC} (:i, :a); END;`;
-        let bindVar = {
+        const bindVar = {
           i: seqTwo,
           a: { type: CLS, dir: oracledb.BIND_INOUT, val: testObj }
         };
         result = await conn.execute(plsql, bindVar, { dbObjectAsPojo: true, outFormat: oracledb.OBJECT });
         // Verify the OUT-bind value of the IN-OUT-bind variable
         // console.dir(result.outBinds.a);
-        should.deepEqual(result.outBinds.a, objData1);
+        assert.deepEqual(result.outBinds.a, objData1);
 
         sql = `SELECT * FROM ${TABLE} WHERE NUM = ${seqTwo}`;
         result = await conn.execute(sql, [], { dbObjectAsPojo: true, outFormat: oracledb.OBJECT });
         // Verify the IN-bind value of the IN-OUT-bind variable
         // console.dir(result.rows[0]);
-        should.strictEqual(result.rows[0].NUM, seqTwo);
-        should.deepEqual(result.rows[0].PERSON, objData2);
+        assert.strictEqual(result.rows[0].NUM, seqTwo);
+        assert.deepEqual(result.rows[0].PERSON, objData2);
 
         sql = `DROP PROCEDURE ${PROC}`;
         await conn.execute(sql);
@@ -277,7 +277,7 @@ describe('243. dbObject19.js', () => {
         sql = `DROP TABLE ${TABLE} PURGE`;
         await conn.execute(sql);
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     }); // 243.2.2
 
@@ -285,7 +285,7 @@ describe('243. dbObject19.js', () => {
 
   describe('243.3 set dbObjectAsPojo in bind variables doesn\'t work', () => {
     before(function() {
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
       // set oracledb.dbObjectAsPojo to true
       oracledb.dbObjectAsPojo = false;
     }); // before()
@@ -293,7 +293,7 @@ describe('243. dbObject19.js', () => {
     after(function() {
       // restore dbObjectAsPojo to default value
       oracledb.dbObjectAsPojo = false;
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // after()
 
     it('243.3.1 OUT bind DB Object ', async () => {
@@ -310,20 +310,20 @@ describe('243. dbObject19.js', () => {
 
         const CLS = await conn.getDbObjectClass(TYPE);
         plsql = `BEGIN ${PROC}( :out ); END;`;
-        let bindVar = { out: { type: CLS, dir: oracledb.BIND_OUT, dbObjectAsPojo: true } };
-        let result = await conn.execute(plsql, bindVar, { outFormat: oracledb.OBJECT  });
+        const bindVar = { out: { type: CLS, dir: oracledb.BIND_OUT, dbObjectAsPojo: true } };
+        const result = await conn.execute(plsql, bindVar, { outFormat: oracledb.OBJECT  });
 
-        let outData = result.outBinds.out;
+        const outData = result.outBinds.out;
         // console.dir(outData);
-        should.strictEqual(outData['ID'], 103);
-        should.strictEqual(outData['NAME'], 'Test User 2');
-        outData.should.be.an.Object();
+        assert.strictEqual(outData['ID'], 103);
+        assert.strictEqual(outData['NAME'], 'Test User 2');
+        assert.strictEqual(typeof (outData), 'object');
 
-        let sql = `DROP PROCEDURE ${PROC}`;
+        const sql = `DROP PROCEDURE ${PROC}`;
         await conn.execute(sql);
 
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     }); // 243.3.1
 

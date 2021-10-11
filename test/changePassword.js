@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
+ * The node-oracledb test suite uses 'mocha'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -27,15 +27,16 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbconfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbconfig = require('./dbconfig.js');
 
 describe('161. changePassword.js', function() {
 
   var DBA_config;
-  var myUser = dbconfig.user + "_cpw";
+  var dbaConn;
+  var sql;
+  const myUser = dbconfig.user + "_cpw";
   if (dbconfig.test.DBA_PRIVILEGE == true) {
     DBA_config = {
       user:          dbconfig.test.DBA_user,
@@ -45,25 +46,9 @@ describe('161. changePassword.js', function() {
     };
   }
 
-  before(function(done) {
-
+  before (async function() {
     if (!dbconfig.test.DBA_PRIVILEGE) this.skip();
-
-    var dbaConn;
-    async.series([
-      // create schema for test
-      function(cb) {
-        oracledb.getConnection(
-          DBA_config,
-          function(err, connection) {
-            should.not.exist(err);
-            dbaConn = connection;
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        var sql = "BEGIN \n" +
+    sql = "BEGIN \n" +
                       "    DECLARE \n" +
                       "        e_user_missing EXCEPTION; \n" +
                       "        PRAGMA EXCEPTION_INIT(e_user_missing, -01918); \n" +
@@ -77,811 +62,368 @@ describe('161. changePassword.js', function() {
                       "        CREATE USER " + myUser + " IDENTIFIED BY " + myUser + "\n" +
                       "    '); \n" +
                       "END; ";
-        dbaConn.execute(
-          sql,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        var sql = "GRANT CREATE SESSION to " + myUser;
-        dbaConn.execute(
-          sql,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        dbaConn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+
+    dbaConn = await oracledb.getConnection(DBA_config);
+    assert(dbaConn);
+    await dbaConn.execute(sql);
+
+    sql = "GRANT CREATE SESSION to " + myUser;
+    await dbaConn.execute(sql);
+    await dbaConn.close();
   }); // before
 
-  after(function(done) {
-    if (!dbconfig.test.DBA_PRIVILEGE) {
-      done();
-    } else {
-      var dbaConn;
-      async.series([
-        function(cb) {
-          oracledb.getConnection(
-            DBA_config,
-            function(err, connection) {
-              should.not.exist(err);
-              dbaConn = connection;
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var sql = "DROP USER " + myUser + " CASCADE";
-          dbaConn.execute(
-            sql,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          dbaConn.close(function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        },
-      ], done);
+  after(async function() {
+    if (dbconfig.test.DBA_PRIVILEGE) {
+      sql = "DROP USER " + myUser + " CASCADE";
+      dbaConn = await oracledb.getConnection(DBA_config);
+      assert(dbaConn);
+      await dbaConn.execute(sql);
+      await dbaConn.close();
     }
   }); // after
 
-  it('161.1 basic case', function(done) {
-
+  it('161.1 basic case', async function() {
     var conn;
-    var tpass = 'secret';
+    const tpass = 'secret';
+    var credential = {
+      user:             myUser,
+      password:         myUser,
+      connectionString: dbconfig.connectString
+    };
+    conn = await oracledb.getConnection(credential);
+    assert(conn);
+    // change password
+    await conn.changePassword(myUser, myUser, tpass);
+    await conn.close();
 
-    async.series([
-      function doconnect(cb) {
-        var credential = {
-          user:             myUser,
-          password:         myUser,
-          connectionString: dbconfig.connectString
-        };
+    // verify with new password
+    credential = {
+      user:             myUser,
+      password:         tpass,
+      connectionString: dbconfig.connectString
+    };
+    conn = await oracledb.getConnection(credential);
+    assert(conn);
 
-        oracledb.getConnection(
-          credential,
-          function(err, connection) {
-            should.not.exist(err);
-            conn = connection;
-            cb();
-          }
-        );
-      },
-      function dochange(cb) {
-        conn.changePassword(myUser, myUser, tpass, function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function(cb) {
-        conn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function doverify(cb) {
-        var credential = {
-          user:             myUser,
-          password:         tpass,
-          connectionString: dbconfig.connectString
-        };
-        oracledb.getConnection(
-          credential,
-          function(err, connection) {
-            should.not.exist(err);
-            conn = connection;
-            cb();
-          }
-        );
-      },
-      function dorestore(cb) {
-        conn.changePassword(myUser, tpass, myUser, function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function(cb) {
-        conn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-    ], done);
+    // restore password
+    await conn.changePassword(myUser, tpass, myUser);
+    await conn.close();
   }); // 161.1
 
-  it('161.2 pooled connection', function(done) {
-
+  it('161.2 pooled connection', async function() {
     var pool, conn;
-    var tpass = 'secret';
+    const tpass = 'secret';
+    var credential = {
+      user:             myUser,
+      password:         myUser,
+      connectionString: dbconfig.connectString
+    };
+    pool = await oracledb.createPool(credential);
+    assert(pool);
+    conn = await pool.getConnection();
+    assert(conn);
+    await conn.changePassword(myUser, myUser, tpass);
+    await conn.close();
+    // Still able to get connections
+    conn = await pool.getConnection();
+    assert(conn);
+    await conn.close();
+    await pool.close();
+    // verify with old password
+    pool = await oracledb.createPool(credential);
 
-    async.series([
-      function dopool(cb) {
-        var credential = {
-          user:             myUser,
-          password:         myUser,
-          connectionString: dbconfig.connectString
-        };
-        oracledb.createPool(
-          credential,
-          function(err, pooling) {
-            should.not.exist(err);
-            pool = pooling;
-            cb();
-          }
-        );
+    await assert.rejects(
+      async () => {
+        await pool.getConnection();
       },
-      function doconnect(cb) {
-        pool.getConnection(function(err, connection) {
-          should.not.exist(err);
-          conn = connection;
-          cb();
-        });
-      },
-      function dochange(cb) {
-        conn.changePassword(myUser, myUser, tpass, function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function(cb) {
-        conn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      // Still able to get connections
-      function(cb) {
-        pool.getConnection(function(err, connection) {
-          should.not.exist(err);
-          conn = connection;
-          cb();
-        });
-      },
-      function(cb) {
-        conn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function(cb) {
-        pool.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function donegative(cb) {
-        var credential = {
-          user:             myUser,
-          password:         myUser,
-          connectionString: dbconfig.connectString
-        };
-        oracledb.createPool(
-          credential,
-          function(err, pooling) {
-            should.not.exist(err);
-            pool = pooling;
-            cb();
-          }
-        );
-      },
-      function errorOut(cb) {
-        pool.getConnection(function(err, connection) {
-          should.exist(err);
-          (err.message).should.startWith('ORA-01017: ');
-          // ORA-01017: invalid username/password
-          should.not.exist(connection);
-          cb();
-        });
-      },
-      function(cb) {
-        pool.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function doverify(cb) {
-        var credential = {
-          user:             myUser,
-          password:         tpass,
-          connectionString: dbconfig.connectString
-        };
-        oracledb.createPool(
-          credential,
-          function(err, pooling) {
-            should.not.exist(err);
-            pool = pooling;
-            cb();
-          }
-        );
-      },
-      function doconnect(cb) {
-        pool.getConnection(function(err, connection) {
-          should.not.exist(err);
-          conn = connection;
-          cb();
-        });
-      },
-      function(cb) {
-        conn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function(cb) {
-        pool.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-    ], done);
+      /ORA-01017/
+    );// ORA-01017: invalid username/password
+
+    await pool.close();
+
+    // verify with new password
+    credential = {
+      user:             myUser,
+      password:         tpass,
+      connectionString: dbconfig.connectString
+    };
+    pool = await oracledb.createPool(credential);
+    conn = await pool.getConnection();
+    assert(conn);
+    await conn.close();
+    await pool.close();
   }); // 161.2
 
-  it('161.3 DBA changes password', function(done) {
-
+  it('161.3 DBA changes password', async function() {
     var dbaConn, conn;
-    var tpass = 'secret';
+    const tpass = 'secret';
 
-    async.series([
-      function(cb) {
-        oracledb.getConnection(
-          DBA_config,
-          function(err, connection) {
-            should.not.exist(err);
-            dbaConn = connection;
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        dbaConn.changePassword(myUser, '', tpass, function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function errorOut(cb) {
-        var credential = {
-          user:             myUser,
-          password:         myUser,
-          connectionString: dbconfig.connectString
-        };
+    dbaConn = await oracledb.getConnection(DBA_config);
+    assert(dbaConn);
+    await dbaConn.changePassword(myUser, '', tpass);
+    var credential = {
+      user:             myUser,
+      password:         myUser,
+      connectionString: dbconfig.connectString
+    };
 
-        oracledb.getConnection(
-          credential,
-          function(err, connection) {
-            should.exist(err);
-            (err.message).should.startWith('ORA-01017: ');
-            // ORA-01017: invalid username/password
-            should.not.exist(connection);
-            cb();
-          }
-        );
+    await assert.rejects(
+      async () => {
+        await oracledb.getConnection(credential);
       },
-      function doverify(cb) {
-        var credential = {
-          user:             myUser,
-          password:         tpass,
-          connectionString: dbconfig.connectString
-        };
-        oracledb.getConnection(
-          credential,
-          function(err, connection) {
-            should.not.exist(err);
-            conn = connection;
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        conn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function dorestore(cb) {
-        dbaConn.changePassword(myUser, '', myUser, function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function(cb) {
-        dbaConn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+      /ORA-01017/
+    );// ORA-01017: invalid username/password
+
+    // verify with changed password
+    credential = {
+      user:             myUser,
+      password:         tpass,
+      connectionString: dbconfig.connectString
+    };
+    conn = await oracledb.getConnection(credential);
+    assert(conn);
+    await conn.close();
+
+    // restore password
+    await dbaConn.changePassword(myUser, '', myUser);
+    await dbaConn.close();
   }); // 161.3
 
-  it('161.4 connects with an expired password', function(done) {
-
+  it('161.4 connects with an expired password', async function() {
     var dbaConn, conn;
-    var tpass = 'secret';
+    const tpass = 'secret';
+    dbaConn = await oracledb.getConnection(DBA_config);
+    assert(dbaConn);
+    const sql = "alter user " + myUser + " password expire";
+    await dbaConn.execute(sql);
 
-    async.series([
-      function(cb) {
-        oracledb.getConnection(
-          DBA_config,
-          function(err, connection) {
-            should.not.exist(err);
-            dbaConn = connection;
-            cb();
-          }
-        );
-      },
-      function doexpire(cb) {
-        var sql = "alter user " + myUser + " password expire";
-        dbaConn.execute(
-          sql,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function doverify(cb) {
-        var credential = {
-          user:             myUser,
-          password:         myUser,
-          connectionString: dbconfig.connectString
-        };
+    var credential = {
+      user:             myUser,
+      password:         myUser,
+      connectionString: dbconfig.connectString
+    };
 
-        oracledb.getConnection(
-          credential,
-          function(err, connection) {
-            should.exist(err);
-            (err.message).should.startWith('ORA-28001:');
-            // ORA-28001: the password has expired
-            should.not.exist(connection);
-            cb();
-          }
-        );
+    await assert.rejects(
+      async () => {
+        await oracledb.getConnection(credential);
       },
-      function dotest(cb) {
-        var credential = {
-          user:             myUser,
-          password:         myUser,
-          newPassword:      tpass,
-          connectionString: dbconfig.connectString
-        };
+      /ORA-28001/
+    );// ORA-28001: the password has expired
 
-        oracledb.getConnection(
-          credential,
-          function(err, connection) {
-            should.not.exist(err);
-            conn = connection;
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        conn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function dorestore(cb) {
-        dbaConn.changePassword(myUser, '', myUser, function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function(cb) {
-        var credential = {
-          user:             myUser,
-          password:         myUser,
-          connectionString: dbconfig.connectString
-        };
+    credential = {
+      user:             myUser,
+      password:         myUser,
+      newPassword:      tpass,
+      connectionString: dbconfig.connectString
+    };
+    conn = await oracledb.getConnection(credential);
+    await conn.close();
 
-        oracledb.getConnection(
-          credential,
-          function(err, connection) {
-            should.not.exist(err);
-            conn = connection;
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        conn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function(cb) {
-        dbaConn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+    // restore password
+    await dbaConn.changePassword(myUser, '', myUser);
+
+    credential = {
+      user:             myUser,
+      password:         myUser,
+      connectionString: dbconfig.connectString
+    };
+
+    conn = await oracledb.getConnection(credential);
+    await conn.close();
+    await dbaConn.close();
   }); // 161.4
 
-  it('161.5 for DBA, the original password is ignored', function(done) {
-
+  it('161.5 for DBA, the original password is ignored', async function() {
     var dbaConn, conn;
-    var tpass = 'secret';
+    const tpass = 'secret';
 
-    async.series([
-      function(cb) {
-        oracledb.getConnection(
-          DBA_config,
-          function(err, connection) {
-            should.not.exist(err);
-            dbaConn = connection;
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        dbaConn.changePassword(myUser, 'foobar', tpass, function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function errorOut(cb) {
-        var credential = {
-          user:             myUser,
-          password:         myUser,
-          connectionString: dbconfig.connectString
-        };
+    dbaConn = await oracledb.getConnection(DBA_config);
+    assert(dbaConn);
+    await dbaConn.changePassword(myUser, 'foobar', tpass);
 
-        oracledb.getConnection(
-          credential,
-          function(err, connection) {
-            should.exist(err);
-            (err.message).should.startWith('ORA-01017: ');
-            // ORA-01017: invalid username/password
-            should.not.exist(connection);
-            cb();
-          }
-        );
+    var credential = {
+      user:             myUser,
+      password:         myUser,
+      connectionString: dbconfig.connectString
+    };
+
+    await assert.rejects(
+      async () => {
+        await oracledb.getConnection(credential);
       },
-      function doverify(cb) {
-        var credential = {
-          user:             myUser,
-          password:         tpass,
-          connectionString: dbconfig.connectString
-        };
-        oracledb.getConnection(
-          credential,
-          function(err, connection) {
-            should.not.exist(err);
-            conn = connection;
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        conn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function dorestore(cb) {
-        dbaConn.changePassword(myUser, '', myUser, function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function(cb) {
-        dbaConn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+      /ORA-01017/
+    );// ORA-01017: invalid username/password
+
+    // verify with new password
+    credential = {
+      user:             myUser,
+      password:         tpass,
+      connectionString: dbconfig.connectString
+    };
+
+    conn = await oracledb.getConnection(credential);
+    assert(conn);
+    await conn.close();
+    await dbaConn.changePassword(myUser, '', myUser);
+    await dbaConn.close();
+
   }); // 161.5
 
-  it('161.6 Negative: basic case, wrong original password', function(done) {
+  it('161.6 Negative: basic case, wrong original password', async function() {
+    const tpass = 'secret';
+    var credential = {
+      user:             myUser,
+      password:         myUser,
+      connectionString: dbconfig.connectString
+    };
+    const conn = await oracledb.getConnection(credential);
+    assert(conn);
+    const wrongOne = 'foobar';
 
-    var conn;
-    var tpass = 'secret';
+    await assert.rejects(
+      async () => {
+        await conn.changePassword(myUser, wrongOne, tpass);
+      },
+      /ORA-28008/
+    );// ORA-28008: invalid old password
 
-    async.series([
-      function doconnect(cb) {
-        var credential = {
-          user:             myUser,
-          password:         myUser,
-          connectionString: dbconfig.connectString
-        };
+    await conn.close();
 
-        oracledb.getConnection(
-          credential,
-          function(err, connection) {
-            should.not.exist(err);
-            conn = connection;
-            cb();
-          }
-        );
-      },
-      function dochange(cb) {
-        var wrongOne = 'foobar';
+    credential = {
+      user:             myUser,
+      password:         tpass,
+      connectionString: dbconfig.connectString
+    };
 
-        conn.changePassword(myUser, wrongOne, tpass, function(err) {
-          should.exist(err);
-          // ORA-28008: invalid old password
-          (err.message).should.startWith('ORA-28008:');
-          cb();
-        });
+    await assert.rejects(
+      async () => {
+        await oracledb.getConnection(credential);
       },
-      function(cb) {
-        conn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function doverify(cb) {
-        var credential = {
-          user:             myUser,
-          password:         tpass,
-          connectionString: dbconfig.connectString
-        };
-        oracledb.getConnection(
-          credential,
-          function(err) {
-            should.exist(err);
-            // ORA-01017: invalid username/password
-            (err.message).should.startWith('ORA-01017: ');
-            cb();
-          }
-        );
-      },
-    ], done);
+      /ORA-01017/
+    );// ORA-01017: invalid username/password
+
   }); // 161.6
 
-  it.skip('161.7 Negative: basic case. invalid parameter', function(done) {
+  it.skip('161.7 Negative: basic case. invalid parameter', async function() {
     var conn;
-    var tpass = 123;
+    const tpass = 123;
+    const credential = {
+      user:             myUser,
+      password:         myUser,
+      connectionString: dbconfig.connectString
+    };
 
-    async.series([
-      function doconnect(cb) {
-        var credential = {
-          user:             myUser,
-          password:         myUser,
-          connectionString: dbconfig.connectString
-        };
+    conn = await oracledb.getConnection(credential);
 
-        oracledb.getConnection(
-          credential,
-          function(err, connection) {
-            should.not.exist(err);
-            conn = connection;
-            cb();
-          }
-        );
+    await assert.rejects(
+      async () => {
+        await conn.changePassword(myUser, myUser, tpass);
       },
-      function dochange(cb) {
-        should.throws(
-          function() {
-            conn.changePassword(myUser, myUser, tpass, function(err) {
-              should.exist(err);
-              console.log(err);
-            });
-          },
-          /NJS-005: invalid value for parameter 3/
-        );
-        cb();
-      },
-      function(cb) {
-        conn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-    ], done);
+      /NJS-005: invalid value for parameter 3/
+    );
+
+    await conn.close();
   }); // 161.7
 
-  it('161.8 Negative: non-DBA tries to change the password', function(done) {
+  it('161.8 Negative: non-DBA tries to change the password', async function() {
+    try {
+      const tUser = dbconfig.user + "_st";
+      var dbaConn, tConn;
+      const tpass = 'secret';
 
-    var tUser = dbconfig.user + "_st";
-    var dbaConn, tConn;
-    var tpass = 'secret';
+      dbaConn = await oracledb.getConnection(DBA_config);
+      assert(dbaConn);
+      sql = "CREATE USER " + tUser + " IDENTIFIED BY " + tUser;
+      await dbaConn.execute(sql);
+      sql = "GRANT CREATE SESSION to " + tUser;
+      await dbaConn.execute(sql);
 
-    async.series([
-      function(cb) {
-        oracledb.getConnection(
-          DBA_config,
-          function(err, connection) {
-            should.not.exist(err);
-            dbaConn = connection;
-            cb();
-          }
-        );
-      },
-      // Create user
-      function(cb) {
-        var sql = "CREATE USER " + tUser + " IDENTIFIED BY " + tUser;
-        dbaConn.execute(
-          sql,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        var sql = "GRANT CREATE SESSION to " + tUser;
-        dbaConn.execute(
-          sql,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function doconnect(cb) {
-        var credential = {
-          user:             tUser,
-          password:         tUser,
-          connectionString: dbconfig.connectString
-        };
+      var credential = {
+        user:             tUser,
+        password:         tUser,
+        connectionString: dbconfig.connectString
+      };
 
-        oracledb.getConnection(
-          credential,
-          function(err, connection) {
-            should.not.exist(err);
-            tConn = connection;
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        tConn.changePassword(myUser, myUser, tpass, function(err) {
-          should.exist(err);
-          // ORA-01031: insufficient privileges
-          (err.message).should.startWith('ORA-01031: ');
-          cb();
-        });
-      },
-      function doverify(cb) {
-        var credential = {
-          user:             myUser,
-          password:         tpass,
-          connectionString: dbconfig.connectString
-        };
-        oracledb.getConnection(
-          credential,
-          function(err) {
-            should.exist(err);
-            // ORA-01017: invalid username/password
-            (err.message).should.startWith('ORA-01017: ');
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        tConn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function(cb) {
-        var sql = "DROP USER " + tUser + " CASCADE";
-        dbaConn.execute(
-          sql,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        dbaConn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+      tConn = await oracledb.getConnection(credential);
 
+      await assert.rejects(
+        async () => {
+          await tConn.changePassword(myUser, myUser, tpass);
+        },
+        /ORA-01031/
+      );
+
+      credential = {
+        user:             myUser,
+        password:         tpass,
+        connectionString: dbconfig.connectString
+      };
+
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /ORA-01017/
+      );// ORA-01017: invalid username/password
+
+      await tConn.close();
+      sql = "DROP USER " + tUser + " CASCADE";
+      await dbaConn.execute(sql);
+      await dbaConn.close();
+    } catch (error) {
+      assert.fail(error);
+    }
   }); // 161.8
 
-  it("161.9 Negative: invalid type of 'newPassword'", function(done) {
-
-    var wrongOne = 123;
-    var credential = {
+  it("161.9 Negative: invalid type of 'newPassword'", async function() {
+    const wrongOne = 123;
+    const credential = {
       user:             myUser,
       password:         myUser,
       newPassword:      wrongOne,
       connectionString: dbconfig.connectString
     };
 
-    oracledb.getConnection(
-      credential,
-      function(err, connection) {
-        should.exist(err);
-        should.not.exist(connection);
-        should.strictEqual(
-          err.message,
-          'NJS-007: invalid value for "newPassword" in parameter 1'
-        );
-        done();
-      }
+    await assert.rejects(
+      async () => {
+        await oracledb.getConnection(credential);
+      },
+      /NJS-007: invalid value for "newPassword" in parameter 1/
     );
   }); // 161.9
 
-  it('161.10 sets "newPassword" to be an empty string. password unchanged', function(done) {
-    var dbaConn;
-    async.series([
-      function(cb) {
-        oracledb.getConnection(
-          DBA_config,
-          function(err, connection) {
-            should.not.exist(err);
-            dbaConn = connection;
-            cb();
-          }
-        );
-      },
-      function doexpire(cb) {
-        var sql = "alter user " + myUser + " password expire";
-        dbaConn.execute(
-          sql,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function dotest(cb) {
-        // set empty string
-        var credential = {
-          user:             myUser,
-          password:         myUser,
-          newPassword:      '',
-          connectionString: dbconfig.connectString
-        };
+  it('161.10 sets "newPassword" to be an empty string. password unchanged', async function() {
+    const dbaConn = await oracledb.getConnection(DBA_config);
+    assert(dbaConn);
+    sql = "alter user " + myUser + " password expire";
+    await dbaConn.execute(sql);
 
-        oracledb.getConnection(
-          credential,
-          function(err, connection) {
-            should.exist(err);
-            (err.message).should.startWith('ORA-28001:');
-            // ORA-28001: the password has expired
-            should.not.exist(connection);
-            cb();
-          }
-        );
-      },
-      function doverify(cb) {
-        var credential = {
-          user:             myUser,
-          password:         myUser,
-          connectionString: dbconfig.connectString
-        };
+    var credential = {
+      user:             myUser,
+      password:         myUser,
+      newPassword:      '',
+      connectionString: dbconfig.connectString
+    };
 
-        oracledb.getConnection(
-          credential,
-          function(err, connection) {
-            should.exist(err);
-            (err.message).should.startWith('ORA-28001:');
-            // ORA-28001: the password has expired
-            should.not.exist(connection);
-            cb();
-          }
-        );
+    await assert.rejects(
+      async () => {
+        await oracledb.getConnection(credential);
       },
-      function(cb) {
-        dbaConn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+      /ORA-28001/
+    );// ORA-28001: the password has expired
+
+    credential = {
+      user:             myUser,
+      password:         myUser,
+      connectionString: dbconfig.connectString
+    };
+
+    await assert.rejects(
+      async () => {
+        await oracledb.getConnection(credential);
+      },
+      /ORA-28001/
+    );// ORA-28001: the password has expired
   }); // 161.10
 
 });

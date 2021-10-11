@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
+ * The node-oracledb test suite uses 'mocha'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -31,7 +31,6 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
 const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
@@ -76,7 +75,7 @@ describe('222. callTimeout.js', function() {
         /DPI-1067/
       );
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
   }); // 222.1
@@ -91,7 +90,7 @@ describe('222. callTimeout.js', function() {
       await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [DB_OP_TIME]);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 222.2
 
@@ -104,7 +103,7 @@ describe('222. callTimeout.js', function() {
 
       await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [DB_OP_TIME]);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 222.3
 
@@ -112,14 +111,14 @@ describe('222. callTimeout.js', function() {
     try {
       const TIME_OUT = -5;
 
-      should.throws(
+      assert.throws(
         () => {
           conn.callTimeout = TIME_OUT;
         },
-        "NJS-004: invalid value for property callTimeout"
+        /NJS-004: invalid value for property callTimeout/
       );
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 222.4
 
@@ -127,14 +126,14 @@ describe('222. callTimeout.js', function() {
     try {
       const TIME_OUT = NaN;
 
-      should.throws(
+      assert.throws(
         () => {
           conn.callTimeout = TIME_OUT;
         },
-        "NJS-004: invalid value for property callTimeout"
+        /NJS-004: invalid value for property callTimeout/
       );
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -142,14 +141,14 @@ describe('222. callTimeout.js', function() {
     try {
       const TIME_OUT = 'foobar';
 
-      should.throws(
+      assert.throws(
         () => {
           conn.callTimeout = TIME_OUT;
         },
-        "NJS-004: invalid value for property callTimeout"
+        /NJS-004: invalid value for property callTimeout/
       );
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -163,7 +162,7 @@ describe('222. callTimeout.js', function() {
       await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [3]);
       await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [2]);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 222.7
 
@@ -182,11 +181,11 @@ describe('222. callTimeout.js', function() {
       );
 
       await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [1]);
-      let result = await conn.execute(`SELECT (1+2) AS SUM FROM DUAL`);
-      should.strictEqual(3, result.rows[0][0]);
+      const result = await conn.execute(`SELECT (1+2) AS SUM FROM DUAL`);
+      assert.strictEqual(3, result.rows[0][0]);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 });

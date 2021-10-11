@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -66,7 +66,7 @@ describe('211. dbObject12.js', function() {
         await conn.execute(plsql);
 
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     }
 
@@ -82,7 +82,7 @@ describe('211. dbObject12.js', function() {
 
         await conn.close();
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     }
 
@@ -101,8 +101,8 @@ describe('211. dbObject12.js', function() {
       };
       const result1 = await conn.execute(CALL, binds);
       let out = result1.outBinds.outbv;
-      should.strictEqual(out.NAME, obj1.NAME);
-      should.strictEqual(out.POS, (obj1.POS * 2));
+      assert.strictEqual(out.NAME, obj1.NAME);
+      assert.strictEqual(out.POS, (obj1.POS * 2));
 
       // Binding the record values directly'
       const obj2 = { NAME: 'Plane', POS: 34 };
@@ -112,8 +112,8 @@ describe('211. dbObject12.js', function() {
       };
       const result2 = await conn.execute(CALL, binds);
       out = result2.outBinds.outbv;
-      should.strictEqual(out.NAME, obj2.NAME);
-      should.strictEqual(out.POS, (obj2.POS * 2));
+      assert.strictEqual(out.NAME, obj2.NAME);
+      assert.strictEqual(out.POS, (obj2.POS * 2));
 
       // Using the type name
       const obj3 = { NAME: 'Car', POS: 56 };
@@ -123,8 +123,8 @@ describe('211. dbObject12.js', function() {
       };
       const result3 = await conn.execute(CALL, binds);
       out = result3.outBinds.outbv;
-      should.strictEqual(out.NAME, obj3.NAME);
-      should.strictEqual(out.POS, (obj3.POS * 2));
+      assert.strictEqual(out.NAME, obj3.NAME);
+      assert.strictEqual(out.POS, (obj3.POS * 2));
 
       // Batch exeuction with executeMany()
       const obj4 = [
@@ -135,7 +135,7 @@ describe('211. dbObject12.js', function() {
         { inbv: obj4[0] },
         { inbv: obj4[1] }
       ];
-      let opts = {
+      const opts = {
         bindDefs: {
           inbv: { type: RecTypeClass },
           outbv: { type: RecTypeClass, dir: oracledb.BIND_OUT },
@@ -143,11 +143,11 @@ describe('211. dbObject12.js', function() {
       };
       const result4 = await conn.executeMany(CALL, binds, opts);
       for (let i = 0, out = result4.outBinds; i < binds.length; i++) {
-        should.strictEqual(out[i].outbv.NAME, obj4[i].NAME);
-        should.strictEqual(out[i].outbv.POS, (obj4[i].POS * 2));
+        assert.strictEqual(out[i].outbv.NAME, obj4[i].NAME);
+        assert.strictEqual(out[i].outbv.POS, (obj4[i].POS * 2));
       }
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 211.1
 });

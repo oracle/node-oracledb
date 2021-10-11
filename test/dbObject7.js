@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -45,7 +45,7 @@ describe('206. dbObject7.js', () => {
       await conn.execute(sql);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // before()
 
@@ -57,7 +57,7 @@ describe('206. dbObject7.js', () => {
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // after()
 
@@ -75,18 +75,17 @@ describe('206. dbObject7.js', () => {
 
       const CLS = await conn.getDbObjectClass(TYPE);
       plsql = `BEGIN ${PROC}( :out ); END;`;
-      let bindVar = { out: { type: CLS, dir: oracledb.BIND_OUT } };
-      let result = await conn.execute(plsql, bindVar);
-      let outData = result.outBinds.out;
-      should.strictEqual(outData['ID'], 101);
-      should.strictEqual(outData['NAME'], 'Christopher Jones');
-      outData.should.be.an.Object();
+      const bindVar = { out: { type: CLS, dir: oracledb.BIND_OUT } };
+      const result = await conn.execute(plsql, bindVar);
+      const outData = result.outBinds.out;
+      assert.strictEqual(outData['ID'], 101);
+      assert.strictEqual(outData['NAME'], 'Christopher Jones');
 
-      let sql = `DROP PROCEDURE ${PROC}`;
+      const sql = `DROP PROCEDURE ${PROC}`;
       await conn.execute(sql);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 206.1
 
@@ -112,7 +111,7 @@ describe('206. dbObject7.js', () => {
 
       const seqOne = 1;
       let result = await conn.execute(sql, [seqOne, testObj]);
-      should.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.rowsAffected, 1);
 
       const PROC = 'nodb_proc_test2062';
       plsql = `
@@ -132,21 +131,21 @@ describe('206. dbObject7.js', () => {
       testObj = new CLS(objData2);
       const seqTwo = 23;
       plsql = `BEGIN ${PROC} (:i, :a); END;`;
-      let bindVar = {
+      const bindVar = {
         i: seqTwo,
         a: { type: CLS, dir: oracledb.BIND_INOUT, val: testObj }
       };
       result = await conn.execute(plsql, bindVar);
       // Verify the OUT-bind value of the IN-OUT-bind variable
-      should.strictEqual(result.outBinds.a.ID, objData1.ID);
-      should.strictEqual(result.outBinds.a['NAME'], objData1.NAME);
+      assert.strictEqual(result.outBinds.a.ID, objData1.ID);
+      assert.strictEqual(result.outBinds.a['NAME'], objData1.NAME);
 
       sql = `SELECT * FROM ${TABLE} WHERE NUM = ${seqTwo}`;
       result = await conn.execute(sql);
       // Verify the IN-bind value of the IN-OUT-bind variable
-      should.strictEqual(result.rows[0][0], seqTwo);
-      should.strictEqual(result.rows[0][1]['ID'], objData2.ID);
-      should.strictEqual(result.rows[0][1]['NAME'], objData2.NAME);
+      assert.strictEqual(result.rows[0][0], seqTwo);
+      assert.strictEqual(result.rows[0][1]['ID'], objData2.ID);
+      assert.strictEqual(result.rows[0][1]['NAME'], objData2.NAME);
 
       sql = `DROP PROCEDURE ${PROC}`;
       await conn.execute(sql);
@@ -154,7 +153,7 @@ describe('206. dbObject7.js', () => {
       sql = `DROP TABLE ${TABLE} PURGE`;
       await conn.execute(sql);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 206.2
 });

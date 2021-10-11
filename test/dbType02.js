@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -36,7 +36,7 @@ describe('227. dbType02.js', () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -44,29 +44,29 @@ describe('227. dbType02.js', () => {
     try {
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
   async function CreateTable(TABLE, TYPE) {
-    let sql = `
+    const sql = `
         CREATE TABLE ${TABLE} (id NUMBER, content ${TYPE})
     `;
-    let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+    const plsql = testsUtil.sqlCreateTable(TABLE, sql);
 
     try {
       await conn.execute(plsql);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   } // CreateTable()
 
   async function DropTable(TABLE) {
-    let sql = `DROP TABLE ${TABLE} PURGE`;
+    const sql = `DROP TABLE ${TABLE} PURGE`;
     try {
       await conn.execute(sql);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   } // DropTable
 
@@ -75,12 +75,12 @@ describe('227. dbType02.js', () => {
       await CreateTable(TABLE, TYPE);
 
       let sql = `INSERT INTO ${TABLE} VALUES (:i, :c)`;
-      let bindArray = [
+      const bindArray = [
         { i: 1, c: 'node-oracledb'},
         { i: 2, c: ''},
         { i: 3, c: null}
       ];
-      let opts = {
+      const opts = {
         autoCommit: true,
         bindDefs: {
           i: { type: oracledb.DB_TYPE_NUMBER },
@@ -93,13 +93,13 @@ describe('227. dbType02.js', () => {
       sql = `SELECT * FROM ${TABLE} ORDER BY ID`;
       const result = await conn.execute(sql);
       const expects = 'node-oracledb';
-      should.strictEqual(result.rows[0][1].trim(), expects);
-      should.strictEqual(result.rows[1][1], null);
-      should.strictEqual(result.rows[1][1], null);
+      assert.strictEqual(result.rows[0][1].trim(), expects);
+      assert.strictEqual(result.rows[1][1], null);
+      assert.strictEqual(result.rows[1][1], null);
 
       await DropTable(TABLE);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   } // VerifyString()
 
@@ -108,12 +108,12 @@ describe('227. dbType02.js', () => {
       await CreateTable(TABLE, TYPE);
 
       let sql = `INSERT INTO ${TABLE} VALUES (:i, :c)`;
-      let dateInVal = new Date();
-      let bindArray = [
+      const dateInVal = new Date();
+      const bindArray = [
         { i: 1, c: dateInVal },
         { i: 2, c: null }
       ];
-      let opts = {
+      const opts = {
         autoCommit: true,
         bindDefs: {
           i: { type: oracledb.DB_TYPE_NUMBER },
@@ -125,12 +125,12 @@ describe('227. dbType02.js', () => {
 
       sql = `SELECT * FROM ${TABLE} ORDER BY ID`;
       const result = await conn.execute(sql);
-      (result.rows[0][1]).should.be.a.Date();
-      should.strictEqual(result.rows[1][1], null);
+      assert.strictEqual(testsUtil.isDate(result.rows[0][1]), true);
+      assert.strictEqual(result.rows[1][1], null);
 
       await DropTable(TABLE);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }
 

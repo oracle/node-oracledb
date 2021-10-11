@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -47,11 +47,11 @@ describe('205. dbObject6.js', () => {
           id NUMBER(9) NOT NULL,
           geometry MDSYS.SDO_GEOMETRY NOT NULL
         )`;
-      let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+      const plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // before()
 
@@ -72,7 +72,7 @@ describe('205. dbObject6.js', () => {
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // after()
 
@@ -146,13 +146,13 @@ describe('205. dbObject6.js', () => {
       let result = await conn.execute(sql);
 
       for (let i = 0; i < result.rows.length; i++) {
-        should.strictEqual(result.rows[i][0], (i + 1));
-        should.strictEqual(result.rows[i][1].SDO_GTYPE, 2003);
-        should.strictEqual(result.rows[i][1].SDO_SRID, null);
-        should.strictEqual(result.rows[i][1].SDO_POINT, null);
+        assert.strictEqual(result.rows[i][0], (i + 1));
+        assert.strictEqual(result.rows[i][1].SDO_GTYPE, 2003);
+        assert.strictEqual(result.rows[i][1].SDO_SRID, null);
+        assert.strictEqual(result.rows[i][1].SDO_POINT, null);
       }
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
   }); // 205.1

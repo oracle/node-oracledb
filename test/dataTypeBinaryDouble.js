@@ -27,10 +27,10 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var assist   = require('./dataTypeAssist.js');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const assist   = require('./dataTypeAssist.js');
+const dbConfig = require('./dbconfig.js');
 
 describe('31. dataTypeBinaryDouble.js', function() {
 
@@ -45,7 +45,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
         connectString: dbConfig.connectString
       },
       function(err, conn) {
-        should.not.exist(err);
+        assert.ifError(err);
         connection = conn;
         done();
       }
@@ -54,7 +54,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
 
   after('release connection', function(done) {
     connection.release(function(err) {
-      should.not.exist(err);
+      assert.ifError(err);
       done();
     });
   });
@@ -72,7 +72,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
       connection.execute(
         "DROP table " + tableName + " PURGE",
         function(err) {
-          should.not.exist(err);
+          assert.ifError(err);
           done();
         }
       );
@@ -122,7 +122,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
       connection.execute(
         "DROP table " + tableName + " PURGE",
         function(err) {
-          should.not.exist(err);
+          assert.ifError(err);
           done();
         }
       );
@@ -134,7 +134,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
         [],
         { outFormat: oracledb.OUT_FORMAT_OBJECT },
         function(err, result) {
-          should.not.exist(err);
+          assert.ifError(err);
 
           for (var i = 0; i < nums.length; i++) {
             result.rows[i].CONTENT.should.be.exactly(nums[result.rows[i].NUM]);

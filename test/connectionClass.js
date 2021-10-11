@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 
 describe('221. connectionClass.js', () => {
@@ -41,13 +41,13 @@ describe('221. connectionClass.js', () => {
       const conn = await pool.getConnection();
 
       const result = await conn.execute('SELECT (1+4) FROM DUAL');
-      should.strictEqual(result.rows[0][0], 5);
+      assert.strictEqual(result.rows[0][0], 5);
 
       await conn.close();
       await pool.close();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 221.1
 
@@ -58,7 +58,7 @@ describe('221. connectionClass.js', () => {
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 221.2
 });

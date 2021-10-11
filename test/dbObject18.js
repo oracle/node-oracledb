@@ -25,10 +25,9 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
-const assert    = require('assert');
 
 describe('242. dbObject18.js', () => {
 
@@ -36,41 +35,39 @@ describe('242. dbObject18.js', () => {
 
     before(function() {
       // Default value of oracledb.dbObjectAsPojo should be false
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // before()
 
     after(function() {
       // Restore to default value
       oracledb.dbObjectAsPojo = false;
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // after()
 
     it('242.1.1 oracledb.dbObjectAsPojo could be set without connection', function() {
-
       try {
         oracledb.dbObjectAsPojo = true;
+        assert.strictEqual(oracledb.dbObjectAsPojo, true);
       } catch (err) {
-        should.not.exist(err);
-        should.strictEqual(oracledb.dbObjectAsPojo, true);
+        assert.fail(err);
       }
     }); // 242.1.1
 
     it('242.1.2 oracledb.dbObjectAsPojo could be set without connection', function() {
-
       try {
         oracledb.dbObjectAsPojo = false;
+        assert.strictEqual(oracledb.dbObjectAsPojo, false);
       } catch (err) {
-        should.not.exist(err);
-        should.strictEqual(oracledb.dbObjectAsPojo, false);
+        assert.fail(err);
       }
     }); // 242.1.2
 
     it('242.1.3 set oracledb.dbObjectAsPojo to value of oracledb.autoCommit', function() {
       try {
         oracledb.dbObjectAsPojo = oracledb.autoCommit;
+        assert.strictEqual(oracledb.dbObjectAsPojo, oracledb.autoCommit);
       } catch (err) {
-        should.not.exist(err);
-        should.strictEqual(oracledb.dbObjectAsPojo, oracledb.autoCommit);
+        assert.fail(err);
       }
     }); // 242.1.3
 
@@ -79,9 +76,9 @@ describe('242. dbObject18.js', () => {
       console.dir(value);
       try {
         oracledb.dbObjectAsPojo = value;
+        assert.strictEqual(oracledb.dbObjectAsPojo, true);
       } catch (err) {
-        should.not.exist(err);
-        should.strictEqual(oracledb.dbObjectAsPojo, true);
+        assert.fail(err);
         // console.log(oracledb.dbObjectAsPojo);
       }
     }); // 242.1.4
@@ -89,50 +86,49 @@ describe('242. dbObject18.js', () => {
     it('242.1.5 set oracledb.dbObjectAsPojo to value of JSON.parse(\'true\')', function() {
       try {
         oracledb.dbObjectAsPojo = JSON.parse('true');
+        assert.strictEqual(oracledb.dbObjectAsPojo, true);
       } catch (err) {
-        should.not.exist(err);
-        should.strictEqual(oracledb.dbObjectAsPojo, true);
+        assert.fail(err);
       }
     }); // 242.1.5
 
     it('242.1.6 set oracledb.dbObjectAsPojo to value of JSON.parse(\'false\')', function() {
       try {
         oracledb.dbObjectAsPojo = JSON.parse('false');
+        assert.strictEqual(oracledb.dbObjectAsPojo, false);
       } catch (err) {
-        should.not.exist(err);
-        should.strictEqual(oracledb.dbObjectAsPojo, false);
+        assert.fail(err);
       }
     }); // 242.1.6
 
     it('242.1.7 set oracledb.dbObjectAsPojo to value of Boolean(true)', function() {
       try {
         oracledb.dbObjectAsPojo = Boolean(true);
+        assert.strictEqual(oracledb.dbObjectAsPojo, true);
       } catch (err) {
-        should.not.exist(err);
-        should.strictEqual(oracledb.dbObjectAsPojo, true);
+        assert.fail(err);
       }
     }); // 242.1.7
 
     it('242.1.8 set oracledb.dbObjectAsPojo to value of Boolean(\'false\')', function() {
       try {
         oracledb.dbObjectAsPojo = Boolean('false');
+        assert.strictEqual(oracledb.dbObjectAsPojo, true);
       } catch (err) {
-        should.not.exist(err);
-        should.strictEqual(oracledb.dbObjectAsPojo, true);
+        assert.fail(err);
       }
     }); // 242.1.8
 
     it('242.1.9 set oracledb.dbObjectAsPojo to value of Boolean(false)', function() {
       try {
         oracledb.dbObjectAsPojo = Boolean(false);
+        assert.strictEqual(oracledb.dbObjectAsPojo, false);
       } catch (err) {
-        should.not.exist(err);
-        should.strictEqual(oracledb.dbObjectAsPojo, false);
+        assert.fail(err);
       }
     }); // 242.1.9
 
     it('242.1.10 negative: set oracledb.dbObjectAsPojo to invalid value: null', async () => {
-
       await assert.rejects(
         async () => { //eslint-disable-line
           oracledb.dbObjectAsPojo = null;
@@ -141,11 +137,10 @@ describe('242. dbObject18.js', () => {
       );
       // NJS-004: invalid value for property dbObjectAsPojo
 
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.10
 
     it('242.1.11 negative: set oracledb.dbObjectAsPojo to invalid value: 0', async () => {
-
       await assert.rejects(
         async () => { //eslint-disable-line
           oracledb.dbObjectAsPojo = 0;
@@ -154,11 +149,10 @@ describe('242. dbObject18.js', () => {
       );
       // NJS-004: invalid value for property dbObjectAsPojo
 
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.11
 
     it('242.1.12 negative: set oracledb.dbObjectAsPojo to invalid value: number', async () => {
-
       await assert.rejects(
         async () => { //eslint-disable-line
           oracledb.dbObjectAsPojo = -1234567890.0123;
@@ -167,11 +161,10 @@ describe('242. dbObject18.js', () => {
       );
       // NJS-004: invalid value for property dbObjectAsPojo
 
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.12
 
     it('242.1.3 negative: set oracledb.dbObjectAsPojo to invalid value: string true', async () => {
-
       await assert.rejects(
         async () => { //eslint-disable-line
           oracledb.dbObjectAsPojo = 'true';
@@ -180,11 +173,10 @@ describe('242. dbObject18.js', () => {
       );
       // NJS-004: invalid value for property dbObjectAsPojo
 
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.13
 
     it('242.1.14 negative: set oracledb.dbObjectAsPojo to invalid value: string false', async () => {
-
       await assert.rejects(
         async () => { //eslint-disable-line
           oracledb.dbObjectAsPojo = 'false';
@@ -193,11 +185,10 @@ describe('242. dbObject18.js', () => {
       );
       // NJS-004: invalid value for property dbObjectAsPojo
 
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.14
 
     it('242.1.15 negative: set oracledb.dbObjectAsPojo to invalid value: undefined', async () => {
-
       await assert.rejects(
         async () => { //eslint-disable-line
           oracledb.dbObjectAsPojo = undefined;
@@ -206,11 +197,10 @@ describe('242. dbObject18.js', () => {
       );
       // NJS-004: invalid value for property dbObjectAsPojo
 
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.15
 
     it('242.1.16 negative: set oracledb.dbObjectAsPojo to invalid value: NaN', async () => {
-
       await assert.rejects(
         async () => { //eslint-disable-line
           oracledb.dbObjectAsPojo = NaN;
@@ -219,11 +209,10 @@ describe('242. dbObject18.js', () => {
       );
       // NJS-004: invalid value for property dbObjectAsPojo
 
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.16
 
     it('242.1.17 negative: set oracledb.dbObjectAsPojo to invalid value: empty string', async () => {
-
       await assert.rejects(
         async () => { //eslint-disable-line
           oracledb.dbObjectAsPojo = '';
@@ -232,11 +221,10 @@ describe('242. dbObject18.js', () => {
       );
       // NJS-004: invalid value for property dbObjectAsPojo
 
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.17
 
     it('242.1.18 negative: set oracledb.dbObjectAsPojo to invalid value: empty json', async () => {
-
       await assert.rejects(
         async () => { //eslint-disable-line
           oracledb.dbObjectAsPojo = {};
@@ -245,11 +233,10 @@ describe('242. dbObject18.js', () => {
       );
       // NJS-004: invalid value for property dbObjectAsPojo
 
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.18
 
     it('242.1.19 negative: set oracledb.dbObjectAsPojo to invalid value: oracledb.DATE type', async () => {
-
       await assert.rejects(
         async () => { //eslint-disable-line
           oracledb.dbObjectAsPojo = oracledb.DATE;
@@ -258,11 +245,10 @@ describe('242. dbObject18.js', () => {
       );
       // NJS-004: invalid value for property dbObjectAsPojo
 
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.19
 
     it('242.1.20 negative: set oracledb.dbObjectAsPojo to invalid value: array', async () => {
-
       await assert.rejects(
         async () => { //eslint-disable-line
           oracledb.dbObjectAsPojo = [ true ];
@@ -271,7 +257,7 @@ describe('242. dbObject18.js', () => {
       );
       // NJS-004: invalid value for property dbObjectAsPojo
 
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.20
 
   });
@@ -285,7 +271,7 @@ describe('242. dbObject18.js', () => {
 
     before(async () => {
       // Default value of oracledb.dbObjectAsPojo should be false
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
 
       conn = await oracledb.getConnection(dbconfig);
 
@@ -326,7 +312,6 @@ describe('242. dbObject18.js', () => {
     }); // after()
 
     it('242.2.1 dbObjectAsPojo returns database objects as plain old JavaScript objects', async () => {
-
       // insert some data
       const TeamTypeClass = await conn.getDbObjectClass(TEAM_T);
       const players = [
@@ -341,7 +326,7 @@ describe('242. dbObject18.js', () => {
       ];
       const team = new TeamTypeClass(players);
       let sql = `INSERT INTO ${TABLE} VALUES (:sn, :t)`;
-      let binds = { sn: "Frisbee", t: team };
+      const binds = { sn: "Frisbee", t: team };
       await conn.execute(sql, binds);
 
       // fetch data and verify it is returned correctly
@@ -349,8 +334,8 @@ describe('242. dbObject18.js', () => {
       const opts = { dbObjectAsPojo: true, outFormat: oracledb.OUT_FORMAT_OBJECT };
       const result = await conn.execute(sql, [], opts);
       const row = result.rows[0];
-      should.strictEqual(row.SPORTNAME, 'Frisbee');
-      should.deepEqual(row.TEAM, players);
+      assert.strictEqual(row.SPORTNAME, 'Frisbee');
+      assert.deepEqual(row.TEAM, players);
       // console.dir(row.TEAM, { depth: null }); -- Output should be: [
       //                                                                  { SHIRTNUMBER: 11, NAME: 'Elizabeth' },
       //                                                                  { SHIRTNUMBER: 22, NAME: 'Frank' }
@@ -370,7 +355,7 @@ describe('242. dbObject18.js', () => {
 
     before(async () => {
       // default value should be false
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
       // set oracledb.dbObjectAsPojo
       oracledb.dbObjectAsPojo = true;
 
@@ -415,7 +400,6 @@ describe('242. dbObject18.js', () => {
     }); // after()
 
     it('242.3.1 set oracledb.dbObjectAsPojo = true and dbObjectAsPojo:false in bind option', async () => {
-
       // insert some data
       const TeamTypeClass = await conn.getDbObjectClass(TEAM_T);
       const players = [
@@ -430,7 +414,7 @@ describe('242. dbObject18.js', () => {
       ];
       const team = new TeamTypeClass(players);
       let sql = `INSERT INTO ${TABLE} VALUES (:sn, :t)`;
-      let binds = { sn: "Frisbee", t: team };
+      const binds = { sn: "Frisbee", t: team };
       await conn.execute(sql, binds);
 
       // fetch data and verify it is returned correctly
@@ -438,17 +422,16 @@ describe('242. dbObject18.js', () => {
       const opts = { dbObjectAsPojo: false, outFormat: oracledb.OUT_FORMAT_OBJECT };
       const result = await conn.execute(sql, [], opts);
       const row = result.rows[0];
-      should.strictEqual(row.SPORTNAME, 'Frisbee');
-      should.strictEqual(row.TEAM[0]['SHIRTNUMBER'], 11);
-      should.strictEqual(row.TEAM[0]['NAME'], 'Elizabeth');
-      should.strictEqual(row.TEAM[1]['SHIRTNUMBER'], 22);
-      should.strictEqual(row.TEAM[1]['NAME'], 'Frank');
+      assert.strictEqual(row.SPORTNAME, 'Frisbee');
+      assert.strictEqual(row.TEAM[0]['SHIRTNUMBER'], 11);
+      assert.strictEqual(row.TEAM[0]['NAME'], 'Elizabeth');
+      assert.strictEqual(row.TEAM[1]['SHIRTNUMBER'], 22);
+      assert.strictEqual(row.TEAM[1]['NAME'], 'Frank');
       // console.dir(row.TEAM, { depth: null }); -- Output should be: DbObject [SYSTEM.NODB_TYP_TEAM_18] {}
 
     }); // 242.3.1
 
     it('242.3.2 connection must remain open when accessing a DbObject', async () => {
-
       // insert some data
       const TeamTypeClass = await conn.getDbObjectClass(TEAM_T);
       const players = [
@@ -463,7 +446,7 @@ describe('242. dbObject18.js', () => {
       ];
       const team = new TeamTypeClass(players);
       let sql = `INSERT INTO ${TABLE} VALUES (:sn, :t)`;
-      let binds = { sn: "Frisbee", t: team };
+      const binds = { sn: "Frisbee", t: team };
       await conn.execute(sql, binds);
 
       // fetch data and verify it is returned correctly
@@ -475,7 +458,7 @@ describe('242. dbObject18.js', () => {
       await conn.close();
 
       const row = result.rows[0];
-      should.strictEqual(row.SPORTNAME, 'Frisbee');
+      assert.strictEqual(row.SPORTNAME, 'Frisbee');
 
       await assert.rejects(
         async () => {  //eslint-disable-line
@@ -501,7 +484,7 @@ describe('242. dbObject18.js', () => {
 
     before(async () => {
       // default value should be false
-      should.strictEqual(oracledb.dbObjectAsPojo, false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
       // set oracledb.dbObjectAsPojo
       oracledb.dbObjectAsPojo = true;
 
@@ -546,7 +529,6 @@ describe('242. dbObject18.js', () => {
     }); // after()
 
     it('242.4.1 dbObjectAsPojo returns database objects as plain old JavaScript objects', async () => {
-
       // insert some data
       const TeamTypeClass = await conn.getDbObjectClass(TEAM_T);
       const players = [
@@ -561,7 +543,7 @@ describe('242. dbObject18.js', () => {
       ];
       const team = new TeamTypeClass(players);
       let sql = `INSERT INTO ${TABLE} VALUES (:sn, :t)`;
-      let binds = { sn: "Frisbee", t: team };
+      const binds = { sn: "Frisbee", t: team };
       await conn.execute(sql, binds);
 
       // fetch data and verify it is returned correctly
@@ -569,14 +551,13 @@ describe('242. dbObject18.js', () => {
       const opts = { outFormat: oracledb.OUT_FORMAT_OBJECT };
       const result = await conn.execute(sql, [], opts);
       const row = result.rows[0];
-      should.strictEqual(row.SPORTNAME, 'Frisbee');
-      should.deepEqual(row.TEAM, players);
+      assert.strictEqual(row.SPORTNAME, 'Frisbee');
+      assert.deepEqual(row.TEAM, players);
       // console.dir(row.TEAM, { depth: null });
 
     }); // 242.4.1
 
     it('242.4.2 connection can be closed when accessing the plain old JavaScript objects', async () => {
-
       // insert some data
       const TeamTypeClass = await conn.getDbObjectClass(TEAM_T);
       const players = [
@@ -591,7 +572,7 @@ describe('242. dbObject18.js', () => {
       ];
       const team = new TeamTypeClass(players);
       let sql = `INSERT INTO ${TABLE} VALUES (:sn, :t)`;
-      let binds = { sn: "Frisbee", t: team };
+      const binds = { sn: "Frisbee", t: team };
       await conn.execute(sql, binds);
 
       // fetch data and verify it is returned correctly
@@ -604,8 +585,8 @@ describe('242. dbObject18.js', () => {
 
       // accessing results
       const row = result.rows[0];
-      should.strictEqual(row.SPORTNAME, 'Frisbee');
-      should.deepEqual(row.TEAM, players);
+      assert.strictEqual(row.SPORTNAME, 'Frisbee');
+      assert.deepEqual(row.TEAM, players);
       // console.dir(row.TEAM, { depth: null });
 
       // restore the connection

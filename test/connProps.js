@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2019, 2021, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -26,7 +26,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -35,7 +35,7 @@ describe('193. connProps.js', function() {
   let isRunnable = false;
 
   before(async function() {
-    let preps = await testsUtil.checkPrerequisites();
+    const preps = await testsUtil.checkPrerequisites();
     if (preps && dbconfig.test.DBA_PRIVILEGE) {
       isRunnable = true;
     }
@@ -45,7 +45,7 @@ describe('193. connProps.js', function() {
       return;
     } else {
       try {
-        let dbaConfig = {
+        const dbaConfig = {
           user          : dbconfig.test.DBA_user,
           password      : dbconfig.test.DBA_password,
           connectString : dbconfig.connectString,
@@ -53,12 +53,12 @@ describe('193. connProps.js', function() {
         };
         const dbaConnection = await oracledb.getConnection(dbaConfig);
 
-        let sql = `GRANT SELECT ANY DICTIONARY TO ${dbconfig.user}`;
+        const sql = `GRANT SELECT ANY DICTIONARY TO ${dbconfig.user}`;
         await dbaConnection.execute(sql);
 
         await dbaConnection.close();
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     }
   }); // before()
@@ -66,11 +66,11 @@ describe('193. connProps.js', function() {
   it('193.1 the default values of clientInfo and dbOp are null', async () => {
     try {
       const conn = await oracledb.getConnection(dbconfig);
-      should.strictEqual(conn.clientInfo, null);
-      should.strictEqual(conn.dbOp, null);
+      assert.strictEqual(conn.clientInfo, null);
+      assert.strictEqual(conn.dbOp, null);
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 193.1
 
@@ -79,11 +79,11 @@ describe('193. connProps.js', function() {
       const conn = await oracledb.getConnection(dbconfig);
       conn.clientInfo = 'nodb_193_2';
       conn.dbOp = 'nodb_193_2';
-      should.strictEqual(conn.clientInfo, null);
-      should.strictEqual(conn.dbOp, null);
+      assert.strictEqual(conn.clientInfo, null);
+      assert.strictEqual(conn.dbOp, null);
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 193.2
 
@@ -99,13 +99,13 @@ describe('193. connProps.js', function() {
 
       const sqlOne = `SELECT sys_context('userenv', 'client_info') FROM dual`;
       let result = await conn.execute(sqlOne);
-      should.strictEqual(result.rows[0][0], t_clientInfo);
+      assert.strictEqual(result.rows[0][0], t_clientInfo);
 
       const sqlTwo = `SELECT dbop_name FROM v$sql_monitor \
              WHERE sid = sys_context('userenv', 'sid') \
              AND status = 'EXECUTING'`;
       result = await conn.execute(sqlTwo);
-      should.strictEqual(result.rows[0][0], t_dbOp);
+      assert.strictEqual(result.rows[0][0], t_dbOp);
 
       // Change the values and check quried results again
       const k_clientInfo = "Demo Two";
@@ -115,14 +115,14 @@ describe('193. connProps.js', function() {
       conn.dbOp       = k_dbOp;
 
       result = await conn.execute(sqlOne);
-      should.strictEqual(result.rows[0][0], k_clientInfo);
+      assert.strictEqual(result.rows[0][0], k_clientInfo);
 
       result = await conn.execute(sqlTwo);
-      should.strictEqual(result.rows[0][0], k_dbOp);
+      assert.strictEqual(result.rows[0][0], k_dbOp);
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 193.3
 
@@ -131,14 +131,14 @@ describe('193. connProps.js', function() {
       const conn = await oracledb.getConnection(dbconfig);
 
       // Numeric values
-      should.throws(
+      assert.throws(
         () => {
           conn.clientInfo = 3;
         },
         /NJS-004/
       );
 
-      should.throws(
+      assert.throws(
         () => {
           conn.dbOp = 4;
         },
@@ -146,14 +146,14 @@ describe('193. connProps.js', function() {
       );
 
       // NaN
-      should.throws(
+      assert.throws(
         () => {
           conn.clientInfo = NaN;
         },
         /NJS-004/
       );
 
-      should.throws(
+      assert.throws(
         () => {
           conn.dbOp = NaN;
         },
@@ -161,14 +161,14 @@ describe('193. connProps.js', function() {
       );
 
       // undefined
-      should.throws(
+      assert.throws(
         () => {
           conn.clientInfo = undefined;
         },
         /NJS-004/
       );
 
-      should.throws(
+      assert.throws(
         () => {
           conn.dbOp = undefined;
         },
@@ -177,7 +177,7 @@ describe('193. connProps.js', function() {
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 193.4
 });

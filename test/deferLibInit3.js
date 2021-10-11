@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
+ * The node-oracledb test suite uses 'mocha'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -27,7 +27,7 @@
  *****************************************************************************/
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 const testsUtil = require('./testsUtil.js');
 const dbconfig = require('./dbconfig.js');
 
@@ -43,6 +43,6 @@ describe('deferLibInit3.js', () => {
     );
     // DPI-1047: 64-bit Oracle Client library cannot be loaded...
 
-    should.not.exist(conn);
+    assert.ifError(conn);
   });
 });

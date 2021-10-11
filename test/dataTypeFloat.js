@@ -27,10 +27,10 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var assist   = require('./dataTypeAssist.js');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const assist   = require('./dataTypeAssist.js');
+const dbConfig = require('./dbconfig.js');
 
 describe('28. dataTypeFloat.js', function() {
 
@@ -46,7 +46,7 @@ describe('28. dataTypeFloat.js', function() {
         connectString: dbConfig.connectString
       },
       function(err, conn) {
-        should.not.exist(err);
+        assert.ifError(err);
         connection = conn;
         done();
       }
@@ -56,7 +56,7 @@ describe('28. dataTypeFloat.js', function() {
   after('release connection', function(done) {
     oracledb.fetchAsString = [];
     connection.release(function(err) {
-      should.not.exist(err);
+      assert.ifError(err);
       done();
     });
   });
@@ -71,7 +71,7 @@ describe('28. dataTypeFloat.js', function() {
       connection.execute(
         "DROP table " + tableName + " PURGE",
         function(err) {
-          should.not.exist(err);
+          assert.ifError(err);
           done();
         }
       );

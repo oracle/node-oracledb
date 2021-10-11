@@ -27,11 +27,11 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
-var assist   = require('./dataTypeAssist.js');
-var random   = require('./random.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const assist   = require('./dataTypeAssist.js');
+const random   = require('./random.js');
 
 describe('103. dataTypeLong.js', function() {
 
@@ -40,7 +40,7 @@ describe('103. dataTypeLong.js', function() {
 
   before('get one connection', function(done) {
     oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
+      assert.ifError(err);
       connection = conn;
       done();
     });
@@ -48,7 +48,7 @@ describe('103. dataTypeLong.js', function() {
 
   after('release connection', function(done) {
     connection.release(function(err) {
-      should.not.exist(err);
+      assert.ifError(err);
       done();
     });
   });
@@ -70,7 +70,7 @@ describe('103. dataTypeLong.js', function() {
       connection.execute(
         "drop table " + tableName + " purge",
         function(err) {
-          should.not.exist(err);
+          assert.ifError(err);
           done();
         }
       );

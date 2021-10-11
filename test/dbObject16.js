@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -62,7 +62,7 @@ describe('215. dbObject16.js', () => {
       await conn.execute(plsql);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // before()
 
@@ -80,7 +80,7 @@ describe('215. dbObject16.js', () => {
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // after()
 
@@ -99,7 +99,7 @@ describe('215. dbObject16.js', () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:sn, :t)`;
       let binds = { sn: "Frisbee", t: FrisbeeTeam };
       const result1 = await conn.execute(sql, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       // Insert with direct binding
       const hockeyPlayers = [
@@ -108,7 +108,7 @@ describe('215. dbObject16.js', () => {
       ];
       binds = { sn: "Hockey", t: { type: TeamTypeClass, val: hockeyPlayers } };
       const result2 = await conn.execute(sql, binds);
-      should.strictEqual(result2.rowsAffected, 1);
+      assert.strictEqual(result2.rowsAffected, 1);
 
       // Use the Oracle type name
       const TennisPlayers = [
@@ -117,33 +117,33 @@ describe('215. dbObject16.js', () => {
       ];
       binds = { sn: "Tennis", t: { type: TEAM_T, val: TennisPlayers } };
       const result3 = await conn.execute(sql, binds);
-      should.strictEqual(result3.rowsAffected, 1);
+      assert.strictEqual(result3.rowsAffected, 1);
 
       sql = `SELECT * FROM ${TABLE}`;
       const result4 = await conn.execute(sql, [], { outFormat:oracledb.OUT_FORMAT_OBJECT });
-      should.strictEqual(result4.rows[0].SPORTNAME, 'Frisbee');
-      should.strictEqual(result4.rows[1].SPORTNAME, 'Hockey');
+      assert.strictEqual(result4.rows[0].SPORTNAME, 'Frisbee');
+      assert.strictEqual(result4.rows[1].SPORTNAME, 'Hockey');
 
       for (let i = 0; i < result4.rows[0].TEAM.length; i++) {
-        should.strictEqual(result4.rows[0].TEAM[i].SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
-        should.strictEqual(result4.rows[0].TEAM[i].NAME, FrisbeePlayers[i].NAME);
-        should.strictEqual(result4.rows[0].TEAM[i].DRAFT.getTime(), FrisbeePlayers[i].DRAFT.getTime());
+        assert.strictEqual(result4.rows[0].TEAM[i].SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
+        assert.strictEqual(result4.rows[0].TEAM[i].NAME, FrisbeePlayers[i].NAME);
+        assert.strictEqual(result4.rows[0].TEAM[i].DRAFT.getTime(), FrisbeePlayers[i].DRAFT.getTime());
       }
 
       for (let i = 0; i < result4.rows[1].TEAM.length; i++) {
-        should.strictEqual(result4.rows[1].TEAM[i].SHIRTNUMBER, hockeyPlayers[i].SHIRTNUMBER);
-        should.strictEqual(result4.rows[1].TEAM[i].NAME, hockeyPlayers[i].NAME);
-        should.strictEqual(result4.rows[1].TEAM[i].DRAFT.getTime(), hockeyPlayers[i].DRAFT.getTime());
+        assert.strictEqual(result4.rows[1].TEAM[i].SHIRTNUMBER, hockeyPlayers[i].SHIRTNUMBER);
+        assert.strictEqual(result4.rows[1].TEAM[i].NAME, hockeyPlayers[i].NAME);
+        assert.strictEqual(result4.rows[1].TEAM[i].DRAFT.getTime(), hockeyPlayers[i].DRAFT.getTime());
       }
 
       for (let i = 0; i < result4.rows[2].TEAM.length; i++) {
-        should.strictEqual(result4.rows[2].TEAM[i].SHIRTNUMBER, TennisPlayers[i].SHIRTNUMBER);
-        should.strictEqual(result4.rows[2].TEAM[i].NAME, TennisPlayers[i].NAME);
-        should.strictEqual(result4.rows[2].TEAM[i].DRAFT.getTime(), TennisPlayers[i].DRAFT.getTime());
+        assert.strictEqual(result4.rows[2].TEAM[i].SHIRTNUMBER, TennisPlayers[i].SHIRTNUMBER);
+        assert.strictEqual(result4.rows[2].TEAM[i].NAME, TennisPlayers[i].NAME);
+        assert.strictEqual(result4.rows[2].TEAM[i].DRAFT.getTime(), TennisPlayers[i].DRAFT.getTime());
       }
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
   }); // 215.1

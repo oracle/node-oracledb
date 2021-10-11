@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -64,7 +64,7 @@ describe('208. dbObject9.js', function() {
             empnum NUMBER,
             person ${TYPE}
           )`;
-        let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+        const plsql = testsUtil.sqlCreateTable(TABLE, sql);
         await conn.execute(plsql);
 
         const PersonType = await conn.getDbObjectClass(TYPE);
@@ -74,20 +74,20 @@ describe('208. dbObject9.js', function() {
           p = new PersonType(PEOPLE[i]);
           bindArr[i] = [num, p];
         }
-        let opts = {
+        const opts = {
           autoCommit: true,
           bindDefs: [ { type: oracledb.NUMBER }, { type: PersonType } ]
         };
-        let result = await conn.executeMany(
+        const result = await conn.executeMany(
           `INSERT INTO ${TABLE} VALUES (:1, :2)`,
           bindArr,
           opts
         );
 
-        should.strictEqual(result.rowsAffected, PEOPLE.length);
+        assert.strictEqual(result.rowsAffected, PEOPLE.length);
 
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     }
 
@@ -106,7 +106,7 @@ describe('208. dbObject9.js', function() {
 
         await conn.close();
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     }
 
@@ -127,22 +127,22 @@ describe('208. dbObject9.js', function() {
       await conn.execute(plsql);
 
       plsql = `BEGIN ${PROC}(:out); END;`;
-      let opts = { out: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_CURSOR } };
-      let result = await conn.execute(plsql, opts);
+      const opts = { out: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_CURSOR } };
+      const result = await conn.execute(plsql, opts);
 
       // Fetch rows from ResultSet
       const RS = result.outBinds.out;
-      let rows = await RS.getRows(PEOPLE.length);
+      const rows = await RS.getRows(PEOPLE.length);
       for (let i = 0; i < PEOPLE.length; i++) {
-        should.deepEqual(rows[i][1]._toPojo(), PEOPLE[i]);
-        should.strictEqual(JSON.stringify(rows[i][1]), JSON.stringify(PEOPLE[i]));
+        assert.deepEqual(rows[i][1]._toPojo(), PEOPLE[i]);
+        assert.strictEqual(JSON.stringify(rows[i][1]), JSON.stringify(PEOPLE[i]));
       }
       await RS.close();
 
-      let sql = `DROP PROCEDURE ${PROC}`;
+      const sql = `DROP PROCEDURE ${PROC}`;
       await conn.execute(sql);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 208.1
 
@@ -160,26 +160,26 @@ describe('208. dbObject9.js', function() {
   it('208.2 Implicit results that fetch objects', async () => {
     try {
       const result = await conn.execute(queryImpres);
-      let rows = result.implicitResults[0];
+      const rows = result.implicitResults[0];
       for (let i = 0; i < PEOPLE.length; i++) {
-        should.deepEqual(rows[i][1]._toPojo(), PEOPLE[i]);
-        should.strictEqual(JSON.stringify(rows[i][1]), JSON.stringify(PEOPLE[i]));
+        assert.deepEqual(rows[i][1]._toPojo(), PEOPLE[i]);
+        assert.strictEqual(JSON.stringify(rows[i][1]), JSON.stringify(PEOPLE[i]));
       }
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 208.2
 
   it('208.3 Implicit results that fetch objects with Result Set', async () => {
     try {
       const result = await conn.execute(queryImpres, [], { resultSet: true});
-      let rows = await result.implicitResults[0].getRows(PEOPLE.length);
+      const rows = await result.implicitResults[0].getRows(PEOPLE.length);
       for (let i = 0; i < PEOPLE.length; i++) {
-        should.deepEqual(rows[i][1]._toPojo(), PEOPLE[i]);
-        should.strictEqual(JSON.stringify(rows[i][1]), JSON.stringify(PEOPLE[i]));
+        assert.deepEqual(rows[i][1]._toPojo(), PEOPLE[i]);
+        assert.strictEqual(JSON.stringify(rows[i][1]), JSON.stringify(PEOPLE[i]));
       }
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 208.3
 
@@ -191,23 +191,23 @@ describe('208. dbObject9.js', function() {
       const staff = { ID: 1123, NAME: 'Changjie', GENDER: 'Male' };
       const staffNo = 23;
       const p = new PersonType(staff);
-      let sql = `INSERT INTO ${TABLE} VALUES (:1, :2) RETURNING empnum, person INTO :3, :4`;
-      let bindVar = [
+      const sql = `INSERT INTO ${TABLE} VALUES (:1, :2) RETURNING empnum, person INTO :3, :4`;
+      const bindVar = [
         staffNo,
         { type: PersonType, val: p },
         { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_NUMBER },
         { dir: oracledb.BIND_OUT, type: PersonType }
       ];
-      let result = await conn.execute(sql, bindVar);
+      const result = await conn.execute(sql, bindVar);
 
-      should.strictEqual(result.rowsAffected, 1);
-      should.strictEqual(result.outBinds[0][0], staffNo);
-      should.deepEqual(
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.outBinds[0][0], staffNo);
+      assert.deepEqual(
         result.outBinds[1][0]._toPojo(),
         staff
       );
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 208.4
 
@@ -218,23 +218,23 @@ describe('208. dbObject9.js', function() {
       const staff = { ID: 23456, NAME: 'Chris', GENDER: 'Male' };
       const staffNo = 101;
       const p = new PersonType(staff);
-      let sql = `INSERT INTO ${TABLE} VALUES (:1, :2) RETURNING empnum, person INTO :3, :4`;
-      let bindVar = [
+      const sql = `INSERT INTO ${TABLE} VALUES (:1, :2) RETURNING empnum, person INTO :3, :4`;
+      const bindVar = [
         staffNo,
         p,
         { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_NUMBER },
         { dir: oracledb.BIND_OUT, type: PersonType }
       ];
-      let result = await conn.execute(sql, bindVar);
+      const result = await conn.execute(sql, bindVar);
 
-      should.strictEqual(result.rowsAffected, 1);
-      should.strictEqual(result.outBinds[0][0], staffNo);
-      should.deepEqual(
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.outBinds[0][0], staffNo);
+      assert.deepEqual(
         result.outBinds[1][0]._toPojo(),
         staff
       );
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 208.5
 
@@ -245,23 +245,23 @@ describe('208. dbObject9.js', function() {
       const staff = { ID: 789, NAME: 'Shelly', GENDER: 'Female' };
       const staffNo = 102;
       const p = new PersonType(staff);
-      let sql = `INSERT INTO ${TABLE} VALUES (:n, :i) RETURNING empnum, person INTO :o1, :o2`;
-      let bindVar = {
+      const sql = `INSERT INTO ${TABLE} VALUES (:n, :i) RETURNING empnum, person INTO :o1, :o2`;
+      const bindVar = {
         n: staffNo,
         i: p,
         o1: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_NUMBER },
         o2: { dir: oracledb.BIND_OUT, type: PersonType }
       };
-      let result = await conn.execute(sql, bindVar);
+      const result = await conn.execute(sql, bindVar);
 
-      should.strictEqual(result.rowsAffected, 1);
-      should.strictEqual(result.outBinds.o1[0], staffNo);
-      should.deepEqual(
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.outBinds.o1[0], staffNo);
+      assert.deepEqual(
         result.outBinds.o2[0]._toPojo(),
         staff
       );
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 208.6
 
@@ -282,7 +282,7 @@ describe('208. dbObject9.js', function() {
         p = new PersonType(staffs[i]);
         bindArr[i] = [num, p];
       }
-      let opts = {
+      const opts = {
         autoCommit: true,
         bindDefs: [
           { type: oracledb.NUMBER },
@@ -291,7 +291,7 @@ describe('208. dbObject9.js', function() {
           { dir: oracledb.BIND_OUT, type: PersonType }
         ]
       };
-      let result = await conn.executeMany(
+      const result = await conn.executeMany(
         `INSERT INTO ${TABLE} VALUES (:1, :2) RETURNING empnum, person INTO :3, :4`,
         bindArr,
         opts
@@ -303,11 +303,11 @@ describe('208. dbObject9.js', function() {
       console.log();
 
       console.log("==== Result in table ========");
-      let res = await conn.execute(`SELECT * FROM ${TABLE} WHERE empnum > 200 AND empnum < 205`);
+      const res = await conn.execute(`SELECT * FROM ${TABLE} WHERE empnum > 200 AND empnum < 205`);
       console.log(res);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 208.7
 

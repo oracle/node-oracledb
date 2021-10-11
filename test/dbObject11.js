@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -52,11 +52,11 @@ describe('210. dbObject11.js', () => {
         CREATE TABLE ${TABLE} (
           c1 ${TYPE}
         )`;
-      let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+      const plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
 
       sql = `INSERT INTO ${TABLE} VALUES (:a)`;
-      let binds = {
+      const binds = {
         a: {
           type: TYPE,
           val: {
@@ -67,11 +67,11 @@ describe('210. dbObject11.js', () => {
           }
         }
       };
-      let result = await conn.execute(sql, binds);
-      should.strictEqual(result.rowsAffected, 1);
+      const result = await conn.execute(sql, binds);
+      assert.strictEqual(result.rowsAffected, 1);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // before()
 
@@ -85,7 +85,7 @@ describe('210. dbObject11.js', () => {
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // after()
 
@@ -95,12 +95,12 @@ describe('210. dbObject11.js', () => {
       const opts = { outFormat: oracledb.OBJECT };
       const result = await conn.execute(query, [], opts);
 
-      should.strictEqual(result.rows[0].C1.NUMBER$$VALUE, 123);
-      should.strictEqual(result.rows[0].C1['NUMBER##VALUE'], 456);
-      should.strictEqual(result.rows[0].C1['hi &coder'], 'node-oracledb');
+      assert.strictEqual(result.rows[0].C1.NUMBER$$VALUE, 123);
+      assert.strictEqual(result.rows[0].C1['NUMBER##VALUE'], 456);
+      assert.strictEqual(result.rows[0].C1['hi &coder'], 'node-oracledb');
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 210.1
 });

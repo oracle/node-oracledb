@@ -1,14 +1,14 @@
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 
 describe('deferLibInit1.js', () => {
 
   it('child process #1 of test/deferLibInit.js', () => {
     delete process.env.ORACLE_HOME;
     const ld = process.env.LD_LIBRARY_PATH;
-    should.not.exist(ld);
+    assert.ifError(ld);
 
-    should.exist(oracledb.versionString);
-    (oracledb.versionString).should.be.a.String();
+    assert(oracledb.versionString);
+    assert.strictEqual(typeof (oracledb.versionString), "string");
   });
 });

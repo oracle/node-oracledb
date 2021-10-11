@@ -27,10 +27,10 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
-var sql      = require('./sql.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const sql      = require('./sqlClone.js');
 
 describe('136. clobDMLReturningMultipleRowsAsString.js', function() {
 
@@ -62,55 +62,61 @@ describe('136. clobDMLReturningMultipleRowsAsString.js', function() {
                           "END; ";
   var clob_table_drop = "DROP TABLE " + tableName + " PURGE";
 
-  before(function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+  before(async function() {
+    try {
+      connection = await oracledb.getConnection(dbConfig);
+      assert(connection);
+    } catch (err) {
+      assert.ifError(err);
+    }
   });
 
-  after(function(done) {
-    connection.release(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after(async function() {
+    try {
+      await connection.release();
+    } catch (err) {
+      assert.ifError(err);
+    }
   });
 
   describe('136.1 CLOB DML returning multiple rows as String', function() {
-    before(function(done) {
-      sql.executeSql(connection, clob_table_create, {}, {}, done);
+    before(async function() {
+      try {
+        await sql.executeSql(connection, clob_table_create, {}, {});
+      } catch (err) {
+        assert.ifError(err);
+      }
     });
-    after(function(done) {
-      sql.executeSql(connection, clob_table_drop, {}, {}, done);
+    after(async function() {
+      try {
+        await sql.executeSql(connection, clob_table_drop, {}, {});
+      } catch (err) {
+        assert.ifError(err);
+      }
     });
 
-    it('136.1.1 CLOB DML returning multiple rows as String', function(done) {
-      updateReturning_string(done);
+    it('136.1.1 CLOB DML returning multiple rows as String', async function() {
+      await updateReturning_string();
     });
 
   });
 
-  var updateReturning_string = function(callback) {
+  var updateReturning_string = async function() {
     var sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, clob into :num, :lobou";
-    connection.execute(
+    const result = await connection.execute(
       sql_update,
       {
         num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
         lobou: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
-      },
-      function(err, result) {
-        should.not.exist(err);
-        var numLobs = result.outBinds.lobou.length;
-        should.strictEqual(numLobs, 10);
-        for (var index = 0; index < result.outBinds.lobou.length; index++) {
-          var lob = result.outBinds.lobou[index];
-          var id = result.outBinds.num[index];
-          should.strictEqual(lob, String(id - 10));
-        }
-        callback();
-      }
-    );
+      });
+    assert(result);
+    const numLobs = result.outBinds.lobou.length;
+    assert.strictEqual(numLobs, 10);
+    for (var index = 0; index < result.outBinds.lobou.length; index++) {
+      var lob = result.outBinds.lobou[index];
+      var id = result.outBinds.num[index];
+      assert.strictEqual(lob, String(id - 10));
+    }
   };
 
 });

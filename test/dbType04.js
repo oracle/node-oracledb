@@ -25,7 +25,6 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
 const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
@@ -42,7 +41,7 @@ describe('241. dbType04.js', function() {
     try {
       conn = await oracledb.getConnection(dbconfig);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
     if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
@@ -53,16 +52,16 @@ describe('241. dbType04.js', function() {
     }
 
     try {
-      let sql = `
+      const sql = `
         create table ${TABLE} (
           id        number(9) not null,
           jsonval   json not null
         )
       `;
-      let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+      const plsql = testsUtil.sqlCreateTable(TABLE, sql);
       await conn.execute(plsql);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
     oracledb.stmtCacheSize = 0;
   }); // before()
@@ -74,11 +73,11 @@ describe('241. dbType04.js', function() {
     }
 
     try {
-      let sql = `drop table ${TABLE} purge`;
+      const sql = `drop table ${TABLE} purge`;
       await conn.execute(sql);
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
     oracledb.stmtCacheSize = default_stmtCacheSize;
   }); // after()
@@ -100,9 +99,9 @@ describe('241. dbType04.js', function() {
     try {
       const result = await conn.execute(SQL,
         [{ val: jsonVal, type: oracledb.DB_TYPE_JSON }]);
-      (result.rows[0][1]).should.startWith('Typ=119');
+      assert.match(result.rows[0][1], /Typ=119/);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.1
 
@@ -126,23 +125,23 @@ describe('241. dbType04.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON }
       ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
       const out = result2.rows[0][1];
 
-      should.strictEqual(out.keyA, jsonVal.keyA);
-      should.strictEqual(out.keyB, jsonVal.keyB);
-      should.strictEqual(out.keyC.toString(), 'A Raw');
-      should.strictEqual(out.keyD, jsonVal.keyD);
-      should.strictEqual(out.keyE, jsonVal.keyE);
-      should.strictEqual(out.keyF, jsonVal.keyF);
-      should.not.exist(out.keyG);
-      should.deepEqual(out.keyH, jsonVal.keyH);
-      (out.keyI).should.be.a.Date();
+      assert.strictEqual(out.keyA, jsonVal.keyA);
+      assert.strictEqual(out.keyB, jsonVal.keyB);
+      assert.strictEqual(out.keyC.toString(), 'A Raw');
+      assert.strictEqual(out.keyD, jsonVal.keyD);
+      assert.strictEqual(out.keyE, jsonVal.keyE);
+      assert.strictEqual(out.keyF, jsonVal.keyF);
+      assert.ifError(out.keyG);
+      assert.deepEqual(out.keyH, jsonVal.keyH);
+      assert.strictEqual(testsUtil.isDate(out.keyI), true);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.2
 
@@ -152,13 +151,13 @@ describe('241. dbType04.js', function() {
       const sqlOne = `insert into ${TABLE} values (:1, '5')`;
       const binds = [ jsonId ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
-      should.strictEqual(result2.rows[0][1], 5);
+      assert.strictEqual(result2.rows[0][1], 5);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.3
 
@@ -168,14 +167,14 @@ describe('241. dbType04.js', function() {
       const sqlOne = `insert into ${TABLE} values (:1, '8.1234567899')`;
       const binds = [ jsonId ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
       const out = result2.rows[0][1];
-      should.strictEqual(out, 8.1234567899);
+      assert.strictEqual(out, 8.1234567899);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.4
 
@@ -185,13 +184,13 @@ describe('241. dbType04.js', function() {
       const sqlOne = `insert into ${TABLE} values (:1, '[1, 2, 3]')`;
       const binds = [ jsonId ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
-      should.deepEqual(result2.rows[0][1], [1, 2, 3]);
+      assert.deepEqual(result2.rows[0][1], [1, 2, 3]);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.5
 
@@ -201,13 +200,13 @@ describe('241. dbType04.js', function() {
       const sqlOne = `insert into ${TABLE} values (:1, '{"fred": 5, "george": 6}')`;
       const binds = [ jsonId ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
-      should.deepEqual(result2.rows[0][1], { fred: 5, george: 6 });
+      assert.deepEqual(result2.rows[0][1], { fred: 5, george: 6 });
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.6
 
@@ -230,24 +229,24 @@ describe('241. dbType04.js', function() {
       `;
       const binds = [ jsonId ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
       const out = result2.rows[0][1];
 
-      should.strictEqual(out[0], 1);
-      should.strictEqual(out[1], -200);
-      should.strictEqual(out[2], 'Fred');
+      assert.strictEqual(out[0], 1);
+      assert.strictEqual(out[1], -200);
+      assert.strictEqual(out[2], 'Fred');
 
-      should.strictEqual(out[3].toString(), 'George');
-      should.strictEqual(out[4], 'A short CLOB');
+      assert.strictEqual(out[3].toString(), 'George');
+      assert.strictEqual(out[4], 'A short CLOB');
 
-      should.strictEqual(out[5].toString(), 'A short BLOB');
-      (out[6]).should.be.a.Date();
-      (out[7]).should.be.a.Date();
+      assert.strictEqual(out[5].toString(), 'A short BLOB');
+      assert.strictEqual(testsUtil.isDate(out[6]), true);
+      assert.strictEqual(testsUtil.isDate(out[7]), true);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.7
 
@@ -261,15 +260,15 @@ describe('241. dbType04.js', function() {
       `;
       const binds = [ jsonId ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
       const out = result2.rows[0][1];
-      should.strictEqual(out['Fred'], 5);
-      should.strictEqual(out['George'], 'A string');
+      assert.strictEqual(out['Fred'], 5);
+      assert.strictEqual(out['George'], 'A string');
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.8
 
@@ -283,13 +282,13 @@ describe('241. dbType04.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON }
       ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
-      should.strictEqual(result2.rows[0][1], jsonVal);
+      assert.strictEqual(result2.rows[0][1], jsonVal);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.9
 
@@ -303,13 +302,13 @@ describe('241. dbType04.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON }
       ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
-      should.strictEqual(result2.rows[0][1], jsonVal);
+      assert.strictEqual(result2.rows[0][1], jsonVal);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.10
 
@@ -323,13 +322,13 @@ describe('241. dbType04.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON }
       ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
-      (result2.rows[0][1]).should.be.a.Date();
+      assert.strictEqual(testsUtil.isDate(result2.rows[0][1]), true);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.11
 
@@ -343,13 +342,13 @@ describe('241. dbType04.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON }
       ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
-      should.strictEqual(result2.rows[0][1].toString(), "A Raw");
+      assert.strictEqual(result2.rows[0][1].toString(), "A Raw");
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.12
 
@@ -363,13 +362,13 @@ describe('241. dbType04.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON }
       ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
-      should.deepEqual(result2.rows[0][1], jsonVal);
+      assert.deepEqual(result2.rows[0][1], jsonVal);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.13
 
@@ -398,15 +397,15 @@ describe('241. dbType04.js', function() {
       ];
 
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select id, json_object(jsonval) from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
-      should.strictEqual(result2.rows[0][0], jsonId);
-      should.deepEqual(result2.rows[0][1], "{\"jsonval\":{}}");
+      assert.strictEqual(result2.rows[0][0], jsonId);
+      assert.deepEqual(result2.rows[0][1], "{\"jsonval\":{}}");
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.14
 
@@ -420,13 +419,13 @@ describe('241. dbType04.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON }
       ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
-      should.strictEqual(result2.rows[0][1], jsonVal);
+      assert.strictEqual(result2.rows[0][1], jsonVal);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.15
 
@@ -440,13 +439,13 @@ describe('241. dbType04.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON }
       ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
-      should.strictEqual(result2.rows[0][1], null);
+      assert.strictEqual(result2.rows[0][1], null);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.16
 
@@ -460,13 +459,13 @@ describe('241. dbType04.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON }
       ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
-      should.strictEqual(result2.rows[0][1], jsonVal);
+      assert.strictEqual(result2.rows[0][1], jsonVal);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.17
 
@@ -480,13 +479,13 @@ describe('241. dbType04.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON }
       ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
-      should.strictEqual(result2.rows[0][1], jsonVal);
+      assert.strictEqual(result2.rows[0][1], jsonVal);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.18
 
@@ -500,13 +499,13 @@ describe('241. dbType04.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON }
       ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
-      should.strictEqual(result2.rows[0][1], jsonVal);
+      assert.strictEqual(result2.rows[0][1], jsonVal);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.19
 
@@ -520,13 +519,13 @@ describe('241. dbType04.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON }
       ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       const result2 = await conn.execute(sqlTwo);
-      should.deepEqual(result2.rows[0][1], jsonVal);
+      assert.deepEqual(result2.rows[0][1], jsonVal);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.20
 
@@ -540,14 +539,14 @@ describe('241. dbType04.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON }
       ];
       const result1 = await conn.execute(sqlOne, binds);
-      //should.strictEqual(result1.rowsAffected, 1);
+      //assert.strictEqual(result1.rowsAffected, 1);
       console.log(result1);
       // const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       // const result2 = await conn.execute(sqlTwo);
       // console.log(result2.rows[0][1]);
-      // should.strictEqual(result2.rows[0][1], jsonVal);
+      // assert.strictEqual(result2.rows[0][1], jsonVal);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.21
 
@@ -567,7 +566,7 @@ describe('241. dbType04.js', function() {
       // NJS-044: bind object must contain one of the following keys: "dir", "type", "maxSize", or "val"
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.22
 
@@ -590,7 +589,7 @@ describe('241. dbType04.js', function() {
       // NJS-012: encountered invalid bind data type in parameter 2
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.23
 
@@ -613,7 +612,7 @@ describe('241. dbType04.js', function() {
       // NJS-011: encountered bind value and type mismatch
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.24
 
@@ -623,7 +622,7 @@ describe('241. dbType04.js', function() {
       const sqlOne = `insert into ${TABLE} values (:1, json_scalar(to_yminterval('+5-9')))`;
       const binds = [ jsonId ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       await assert.rejects(
@@ -635,7 +634,7 @@ describe('241. dbType04.js', function() {
       // NJS-078: unsupported data type 2016 in JSON value
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.25
 
@@ -645,7 +644,7 @@ describe('241. dbType04.js', function() {
       const sqlOne = `insert into ${TABLE} values (:1, json_scalar(to_dsinterval('P25DT8H25M')))`;
       const binds = [ jsonId ];
       const result1 = await conn.execute(sqlOne, binds);
-      should.strictEqual(result1.rowsAffected, 1);
+      assert.strictEqual(result1.rowsAffected, 1);
 
       const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
       await assert.rejects(
@@ -656,7 +655,7 @@ describe('241. dbType04.js', function() {
       );
       // NJS-078: unsupported data type 2016 in JSON value
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 241.26
 

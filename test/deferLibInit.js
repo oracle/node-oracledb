@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
+ * The node-oracledb test suite uses 'mocha'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -33,7 +33,7 @@
  *****************************************************************************/
 'use strict';
 
-const should   = require('should');
+const assert   = require('assert');
 const util     = require('util');
 const execFile = util.promisify(require('child_process').execFile);
 
@@ -48,7 +48,7 @@ describe('182. deferLibInit.js', () => {
       delete process.env.LD_LIBRARY_PATH;
       await positiveCase();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -62,7 +62,7 @@ describe('182. deferLibInit.js', () => {
           "Please also make sure you don't have any other Oracle Clients installed except for that sepcified by LD_LIBRARY_PATH.\n" +
           err.stdout);
       }
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -76,7 +76,7 @@ describe('182. deferLibInit.js', () => {
           "Please also make sure you don't have any other Oracle Clients installed except for that sepcified by LD_LIBRARY_PATH.\n" +
           err.stdout);
       }
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -84,15 +84,15 @@ describe('182. deferLibInit.js', () => {
 
 async function positiveCase() {
   const { stdout } = await execFile(process.argv[1], ['test/deferLibInit1.js']);
-  should.exist(stdout);
+  assert(stdout);
 }
 
 async function negativeCase() {
   const { stdout } = await execFile(process.argv[1], ['test/deferLibInit2.js']);
-  should.exist(stdout);
+  assert(stdout);
 }
 
 async function callMethodCase() {
   const { stdout } = await execFile(process.argv[1], ['test/deferLibInit3.js']);
-  should.exist(stdout);
+  assert(stdout);
 }

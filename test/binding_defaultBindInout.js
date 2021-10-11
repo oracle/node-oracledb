@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
+ * The node-oracledb test suite uses 'mocha'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -30,698 +30,601 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var sql      = require('./sql.js');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const sql      = require('./sql.js');
+const dbConfig = require('./dbconfig.js');
 
 describe('101.binding_defaultBindInout.js', function() {
 
   var connection = null;
-  var executeSql = function(sql, callback) {
-    connection.execute(
-      sql,
-      function(err) {
-        should.not.exist(err);
-        return callback();
-      }
-    );
+  const executeSql = async function(sql) {
+    await connection.execute(sql);
   };
 
-  before(function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
+    assert(connection);
   });
 
-  after(function(done) {
-    connection.release(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after(async function() {
+    await connection.release();
   });
 
-  var doTest1 = function(table_name, procName, bindType, dbColType, content, sequence, callback) {
-    async.series([
-      function(cb) {
-        var bindVar = {
-          i: sequence,
-          c: content
-        };
-        inBind1(table_name, procName, dbColType, bindVar, bindType, cb);
-      },
-      function(cb) {
-        var bindVar = [ sequence, content ];
-        inBind1(table_name, procName, dbColType, bindVar, bindType, cb);
-      }
-    ], callback);
+  const doTest1 = async function(table_name, procName, dbColType, content, sequence) {
+
+    var bindconst = {
+      i: sequence,
+      c: content
+    };
+    await inBind1(table_name, procName, dbColType, bindconst);
+    bindconst = [ sequence, content ];
+    await inBind1(table_name, procName, dbColType, bindconst);
   };
 
-  var inBind1 = function(table_name, proc_name, dbColType, bindVar, bindType, callback) {
-    var createTable = sql.createTable(table_name, dbColType);
-    var drop_table = "DROP TABLE " + table_name + " PURGE";
-    var proc = "CREATE OR REPLACE PROCEDURE " + proc_name + " (ID IN NUMBER, inValue IN OUT " + dbColType + ")\n" +
+  const inBind1 = async function(table_name, proc_name, dbColType, bindconst) {
+    const createTable = sql.createTable(table_name, dbColType);
+    const drop_table = "DROP TABLE " + table_name + " PURGE";
+    const proc = "CREATE OR REPLACE PROCEDURE " + proc_name + " (ID IN NUMBER, inValue IN OUT " + dbColType + ")\n" +
                "AS \n" +
                "BEGIN \n" +
                "    insert into " + table_name + " ( id, content ) values (ID, inValue); \n" +
                "    select content into inValue from " + table_name + " where id = ID; \n" +
                "END " + proc_name + "; ";
-    var sqlRun = "BEGIN " + proc_name + " (:i, :c); END;";
-    var proc_drop = "DROP PROCEDURE " + proc_name;
+    const sqlRun = "BEGIN " + proc_name + " (:i, :c); END;";
+    const proc_drop = "DROP PROCEDURE " + proc_name;
     // console.log(proc);
-    async.series([
-      function(cb) {
-        executeSql(createTable, cb);
-      },
-      function(cb) {
-        executeSql(proc, cb);
-      },
-      function(cb) {
-        connection.execute(
-          sqlRun,
-          bindVar,
-          function(err) {
-            compareErrMsg(dbColType, err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        executeSql(proc_drop, cb);
-      },
-      function(cb) {
-        executeSql(drop_table, cb);
-      }
-    ], callback);
+
+    await executeSql(createTable);
+    await executeSql(proc);
+    if (dbColType === "BLOB") {
+      await assert.rejects(
+        async () => {
+          await connection.execute(sqlRun, bindconst);
+        },
+        /ORA-06550:/
+      );
+    } else {
+      await connection.execute(sqlRun, bindconst);
+    }
+    await executeSql(proc_drop);
+    await executeSql(drop_table);
   };
 
-  var doTest2 = function(table_name, procPre, bindType, dbColType, content, sequence, callback) {
-    async.series([
-      function(cb) {
-        var bindVar = {
-          i: sequence,
-          c: content,
-          output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
-        };
-        inBind2(table_name, procPre, dbColType, bindVar, bindType, cb);
-      },
-      function(cb) {
-        var bindVar = [ { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, sequence, content ];
-        inBind2(table_name, procPre, dbColType, bindVar, bindType, cb);
-      }
-    ], callback);
+  const doTest2 = async function(table_name, procPre, dbColType, content, sequence) {
+
+    var bindconst = {
+      i: sequence,
+      c: content,
+      output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
+    };
+
+    await inBind2(table_name, procPre, dbColType, bindconst);
+
+    bindconst = [ { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, sequence, content ];
+    await inBind2(table_name, procPre, dbColType, bindconst);
   };
 
-  var inBind2 = function(table_name, fun_name, dbColType, bindVar, bindType, callback) {
-    var createTable = sql.createTable(table_name, dbColType);
-    var drop_table = "DROP TABLE " + table_name + " PURGE";
-    var proc = "CREATE OR REPLACE FUNCTION " + fun_name + " (ID IN NUMBER, inValue IN OUT " + dbColType + ") RETURN NUMBER\n" +
+  const inBind2 = async function(table_name, fun_name, dbColType, bindconst) {
+    const createTable = sql.createTable(table_name, dbColType);
+    const drop_table = "DROP TABLE " + table_name + " PURGE";
+    const proc = "CREATE OR REPLACE FUNCTION " + fun_name + " (ID IN NUMBER, inValue IN OUT " + dbColType + ") RETURN NUMBER\n" +
                "IS \n" +
-               "    tmpvar NUMBER; \n" +
+               "    tmpconst NUMBER; \n" +
                "BEGIN \n" +
                "    insert into " + table_name + " ( id, content ) values (ID, inValue); \n" +
-               "    select id, content into tmpvar, inValue from " + table_name + " where id = ID; \n" +
-               "    RETURN tmpvar; \n" +
+               "    select id, content into tmpconst, inValue from " + table_name + " where id = ID; \n" +
+               "    RETURN tmpconst; \n" +
                "END ; ";
-    var sqlRun = "BEGIN :output := " + fun_name + " (:i, :c); END;";
-    var proc_drop = "DROP FUNCTION " + fun_name;
+    const sqlRun = "BEGIN :output := " + fun_name + " (:i, :c); END;";
+    const proc_drop = "DROP FUNCTION " + fun_name;
     // console.log(proc);
-    async.series([
-      function(cb) {
-        executeSql(createTable, cb);
-      },
-      function(cb) {
-        executeSql(proc, cb);
-      },
-      function(cb) {
-        connection.execute(
-          sqlRun,
-          bindVar,
-          function(err) {
-            compareErrMsg(dbColType, err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        executeSql(proc_drop, cb);
-      },
-      function(cb) {
-        executeSql(drop_table, cb);
-      }
-    ], callback);
-  };
 
-  var compareErrMsg = function(element, err) {
-    if (element === "BLOB") {
-      // ORA-06550: line 1, column 7:
-      // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_XX'
-      // ORA-06550: line 1, column 7:
-      // PL/SQL: Statement ignored
-      (err.message).should.startWith('ORA-06550:');
+    await executeSql(createTable);
+    await executeSql(proc);
+
+    if (dbColType === "BLOB") {
+      await assert.rejects(
+        async () => {
+          await connection.execute(sqlRun, bindconst);
+        },
+        /ORA-06550:/
+      );
     } else {
-      should.not.exist(err);
+      await connection.execute(sqlRun, bindconst);
     }
+
+    await executeSql(proc_drop);
+    await executeSql(drop_table);
   };
 
-  var tableNamePre = "table_101";
-  var procPre = "proc_101";
+  const tableNamePre = "table_101";
+  const procPre = "proc_101";
   var index = 1;
 
   describe('101.1 PLSQL procedure: bind out null value with default type and dir', function() {
 
-    it('101.1.1 oracledb.STRING <--> DB: NUMBER', function(done) {
+    it('101.1.1 oracledb.STRING <--> DB: NUMBER', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "NUMBER";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "NUMBER";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.2 oracledb.STRING <--> DB: CHAR', function(done) {
+    it('101.1.2 oracledb.STRING <--> DB: CHAR', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "CHAR";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "CHAR";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.3 oracledb.STRING <--> DB: NCHAR', function(done) {
+    it('101.1.3 oracledb.STRING <--> DB: NCHAR', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "NCHAR";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "NCHAR";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.4 oracledb.STRING <--> DB: VARCHAR2', function(done) {
+    it('101.1.4 oracledb.STRING <--> DB: VARCHAR2', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "VARCHAR2";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "VARCHAR2";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.5 oracledb.STRING <--> DB: FLOAT', function(done) {
+    it('101.1.5 oracledb.STRING <--> DB: FLOAT', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "FLOAT";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "FLOAT";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.6 oracledb.STRING <--> DB: BINARY_FLOAT', function(done) {
+    it('101.1.6 oracledb.STRING <--> DB: BINARY_FLOAT', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "BINARY_FLOAT";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "BINARY_FLOAT";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE', function(done) {
+    it('101.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "BINARY_DOUBLE";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "BINARY_DOUBLE";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.8 oracledb.STRING <--> DB: DATE', function(done) {
+    it('101.1.8 oracledb.STRING <--> DB: DATE', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "DATE";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "DATE";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.9 oracledb.STRING <--> DB: TIMESTAMP', function(done) {
+    it('101.1.9 oracledb.STRING <--> DB: TIMESTAMP', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "TIMESTAMP";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "TIMESTAMP";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.10 oracledb.STRING <--> DB: RAW', function(done) {
+    it('101.1.10 oracledb.STRING <--> DB: RAW', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "RAW";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "RAW";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.11 oracledb.STRING <--> DB: CLOB', function(done) {
+    it('101.1.11 oracledb.STRING <--> DB: CLOB', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "CLOB";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "CLOB";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.12 oracledb.STRING <--> DB: BLOB', function(done) {
+    it('101.1.12 oracledb.STRING <--> DB: BLOB', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "BLOB";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "BLOB";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.13 oracledb.BUFFER <--> DB: NUMBER', function(done) {
+    it('101.1.13 oracledb.BUFFER <--> DB: NUMBER', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "NUMBER";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "NUMBER";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.14 oracledb.BUFFER <--> DB: CHAR', function(done) {
+    it('101.1.14 oracledb.BUFFER <--> DB: CHAR', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "CHAR";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "CHAR";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.15 oracledb.BUFFER <--> DB: NCHAR', function(done) {
+    it('101.1.15 oracledb.BUFFER <--> DB: NCHAR', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "NCHAR";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "NCHAR";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.16 oracledb.BUFFER <--> DB: VARCHAR2', function(done) {
+    it('101.1.16 oracledb.BUFFER <--> DB: VARCHAR2', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "VARCHAR2";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "VARCHAR2";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.17 oracledb.BUFFER <--> DB: FLOAT', function(done) {
+    it('101.1.17 oracledb.BUFFER <--> DB: FLOAT', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "FLOAT";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "FLOAT";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT', function(done) {
+    it('101.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "BINARY_FLOAT";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "BINARY_FLOAT";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE', function(done) {
+    it('101.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "BINARY_DOUBLE";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "BINARY_DOUBLE";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.20 oracledb.BUFFER <--> DB: DATE', function(done) {
+    it('101.1.20 oracledb.BUFFER <--> DB: DATE', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "DATE";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "DATE";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.21 oracledb.BUFFER <--> DB: TIMESTAMP', function(done) {
+    it('101.1.21 oracledb.BUFFER <--> DB: TIMESTAMP', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "TIMESTAMP";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "TIMESTAMP";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.22 oracledb.BUFFER <--> DB: RAW', function(done) {
+    it('101.1.22 oracledb.BUFFER <--> DB: RAW', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "RAW";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "RAW";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.23 oracledb.BUFFER <--> DB: CLOB', function(done) {
+    it('101.1.23 oracledb.BUFFER <--> DB: CLOB', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "CLOB";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "CLOB";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.1.24 oracledb.BUFFER <--> DB: BLOB', function(done) {
+    it('101.1.24 oracledb.BUFFER <--> DB: BLOB', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "BLOB";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "BLOB";
 
-      doTest1(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest1(table_name, proc_name, dbColType, content, index);
     });
   });
 
   describe('101.2 PLSQL function: bind out null value with default type and dir', function() {
 
-    it('101.2.1 oracledb.STRING <--> DB: NUMBER', function(done) {
+    it('101.2.1 oracledb.STRING <--> DB: NUMBER', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "NUMBER";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "NUMBER";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.2 oracledb.STRING <--> DB: CHAR', function(done) {
+    it('101.2.2 oracledb.STRING <--> DB: CHAR', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "CHAR";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "CHAR";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.3 oracledb.STRING <--> DB: NCHAR', function(done) {
+    it('101.2.3 oracledb.STRING <--> DB: NCHAR', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "NCHAR";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "NCHAR";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.4 oracledb.STRING <--> DB: VARCHAR2', function(done) {
+    it('101.2.4 oracledb.STRING <--> DB: VARCHAR2', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "VARCHAR2";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "VARCHAR2";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.5 oracledb.STRING <--> DB: FLOAT', function(done) {
+    it('101.2.5 oracledb.STRING <--> DB: FLOAT', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "FLOAT";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "FLOAT";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.6 oracledb.STRING <--> DB: BINARY_FLOAT', function(done) {
+    it('101.2.6 oracledb.STRING <--> DB: BINARY_FLOAT', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "BINARY_FLOAT";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "BINARY_FLOAT";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE', function(done) {
+    it('101.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "BINARY_DOUBLE";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "BINARY_DOUBLE";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.8 oracledb.STRING <--> DB: DATE', function(done) {
+    it('101.2.8 oracledb.STRING <--> DB: DATE', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "DATE";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "DATE";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.9 oracledb.STRING <--> DB: TIMESTAMP', function(done) {
+    it('101.2.9 oracledb.STRING <--> DB: TIMESTAMP', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "TIMESTAMP";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "TIMESTAMP";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.10 oracledb.STRING <--> DB: RAW', function(done) {
+    it('101.2.10 oracledb.STRING <--> DB: RAW', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "RAW";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "RAW";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.11 oracledb.STRING <--> DB: CLOB', function(done) {
+    it('101.2.11 oracledb.STRING <--> DB: CLOB', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "CLOB";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "CLOB";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.12 oracledb.STRING <--> DB: BLOB', function(done) {
+    it('101.2.12 oracledb.STRING <--> DB: BLOB', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.STRING;
-      var dbColType = "BLOB";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "BLOB";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.13 oracledb.BUFFER <--> DB: NUMBER', function(done) {
+    it('101.2.13 oracledb.BUFFER <--> DB: NUMBER', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "NUMBER";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "NUMBER";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.14 oracledb.BUFFER <--> DB: CHAR', function(done) {
+    it('101.2.14 oracledb.BUFFER <--> DB: CHAR', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "CHAR";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "CHAR";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.15 oracledb.BUFFER <--> DB: NCHAR', function(done) {
+    it('101.2.15 oracledb.BUFFER <--> DB: NCHAR', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "NCHAR";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "NCHAR";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.16 oracledb.BUFFER <--> DB: VARCHAR2', function(done) {
+    it('101.2.16 oracledb.BUFFER <--> DB: VARCHAR2', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "VARCHAR2";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "VARCHAR2";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.17 oracledb.BUFFER <--> DB: FLOAT', function(done) {
+    it('101.2.17 oracledb.BUFFER <--> DB: FLOAT', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "FLOAT";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "FLOAT";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT', function(done) {
+    it('101.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "BINARY_FLOAT";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "BINARY_FLOAT";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE', function(done) {
+    it('101.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "BINARY_DOUBLE";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "BINARY_DOUBLE";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.20 oracledb.BUFFER <--> DB: DATE', function(done) {
+    it('101.2.20 oracledb.BUFFER <--> DB: DATE', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "DATE";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "DATE";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.21 oracledb.BUFFER <--> DB: TIMESTAMP', function(done) {
+    it('101.2.21 oracledb.BUFFER <--> DB: TIMESTAMP', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "TIMESTAMP";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "TIMESTAMP";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.22 oracledb.BUFFER <--> DB: RAW', function(done) {
+    it('101.2.22 oracledb.BUFFER <--> DB: RAW', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "RAW";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "RAW";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.23 oracledb.BUFFER <--> DB: CLOB', function(done) {
+    it('101.2.23 oracledb.BUFFER <--> DB: CLOB', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "CLOB";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "CLOB";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
 
-    it('101.2.24 oracledb.BUFFER <--> DB: BLOB', function(done) {
+    it('101.2.24 oracledb.BUFFER <--> DB: BLOB', async function() {
       index++;
-      var table_name = tableNamePre + index;
-      var proc_name = procPre + index;
-      var content = null;
-      var bindType = oracledb.BUFFER;
-      var dbColType = "BLOB";
+      const table_name = tableNamePre + index;
+      const proc_name = procPre + index;
+      const content = null;
+      const dbColType = "BLOB";
 
-      doTest2(table_name, proc_name, bindType, dbColType, content, index, done);
+      await doTest2(table_name, proc_name, dbColType, content, index);
     });
   });
 

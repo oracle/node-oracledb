@@ -27,12 +27,11 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
-var sql      = require('./sql.js');
-var random   = require('./random.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const sql      = require('./sqlClone.js');
+const random   = require('./random.js');
 
 describe('146. urowidProcedureBindAsString6.js', function() {
   var connection = null;
@@ -80,44 +79,28 @@ describe('146. urowidProcedureBindAsString6.js', function() {
   var drop_table_indexed = "DROP TABLE " + tableName_indexed + " PURGE";
   var drop_table_normal = "DROP TABLE " + tableName_normal + " PURGE";
 
-  before('get connection and create table', function(done) {
-    async.series([
-      function(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
-      },
-      function(cb) {
-        sql.executeSql(connection, table_indexed, {}, {}, cb);
-      },
-      function(cb) {
-        sql.executeSql(connection, table_normal, {}, {}, cb);
-      }
-    ], done);
+  before('get connection and create table', async function() {
+    try {
+      connection = await oracledb.getConnection(dbConfig);
+      await sql.executeSql(connection, table_indexed, {}, {});
+      await sql.executeSql(connection, table_normal, {}, {});
+    } catch (err) {
+      assert.ifError(err);
+    }
   });
 
-  after('release connection', function(done) {
-    async.series([
-      function(cb) {
-        sql.executeSql(connection, drop_table_indexed, {}, {}, cb);
-      },
-      function(cb) {
-        sql.executeSql(connection, drop_table_normal, {}, {}, cb);
-      },
-      function(cb) {
-        connection.release(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+  after('release connection', async function() {
+    try {
+      await sql.executeSql(connection, drop_table_indexed, {}, {});
+      await sql.executeSql(connection, drop_table_normal, {}, {});
+      await connection.release();
+    } catch (err) {
+      assert.ifError(err);
+    }
   });
 
-  beforeEach(function(done) {
+  beforeEach(function() {
     insertID++;
-    done();
   });
 
   describe('146.1 PROCEDURE BIND_INOUT as UROWID', function() {
@@ -130,27 +113,32 @@ describe('146. urowidProcedureBindAsString6.js', function() {
     var proc_execute = "BEGIN nodb_rowid_bind_inout_1461 (:i, :c); END;";
     var proc_drop = "DROP PROCEDURE nodb_rowid_bind_inout_1461";
 
-    before('create procedure', function(done) {
-      sql.executeSql(connection, proc_create, {}, {}, done);
+    before('create procedure', async function() {
+      try {
+        await sql.executeSql(connection, proc_create, {}, {});
+      } catch (err) {
+        assert.ifError(err);
+      }
     });
 
-    after('drop procedure', function(done) {
-      sql.executeSql(connection, proc_drop, {}, {}, done);
+    after('drop procedure', async function() {
+      try {
+        await sql.executeSql(connection, proc_drop, {}, {});
+      } catch (err) {
+        assert.ifError(err);
+      }
     });
 
-    it('146.1.1 urowid length > 500', function(done) {
-      var expectedLength = 500;
-      procedureBindInout(proc_execute, expectedLength, done);
+    it('146.1.1 urowid length > 500', async function() {
+      await procedureBindInout(proc_execute, 500);
     });
 
-    it('146.1.2 urowid length > 1000', function(done) {
-      var expectedLength = 1000;
-      procedureBindInout(proc_execute, expectedLength, done);
+    it('146.1.2 urowid length > 1000', async function() {
+      await procedureBindInout(proc_execute, 1000);
     });
 
-    it('146.1.3 urowid length > 2000', function(done) {
-      var expectedLength = 2000;
-      procedureBindInout(proc_execute, expectedLength, done);
+    it('146.1.3 urowid length > 2000', async function() {
+      await procedureBindInout(proc_execute, 2000);
     });
 
   });
@@ -165,27 +153,32 @@ describe('146. urowidProcedureBindAsString6.js', function() {
     var proc_execute = "BEGIN nodb_rowid_bind_inout_1462 (:i, :c); END;";
     var proc_drop = "DROP PROCEDURE nodb_rowid_bind_inout_1462";
 
-    before('create procedure', function(done) {
-      sql.executeSql(connection, proc_create, {}, {}, done);
+    before('create procedure', async function() {
+      try {
+        await sql.executeSql(connection, proc_create, {}, {});
+      } catch (err) {
+        assert.ifError(err);
+      }
     });
 
-    after('drop procedure', function(done) {
-      sql.executeSql(connection, proc_drop, {}, {}, done);
+    after('drop procedure', async function() {
+      try {
+        await sql.executeSql(connection, proc_drop, {}, {});
+      } catch (err) {
+        assert.ifError(err);
+      }
     });
 
-    it('146.2.1 urowid length > 500', function(done) {
-      var expectedLength = 500;
-      procedureBindInout(proc_execute, expectedLength, done);
+    it('146.2.1 urowid length > 500', async function() {
+      await procedureBindInout(proc_execute, 500);
     });
 
-    it('146.2.2 urowid length > 1000', function(done) {
-      var expectedLength = 1000;
-      procedureBindInout(proc_execute, expectedLength, done);
+    it('146.2.2 urowid length > 1000', async function() {
+      await procedureBindInout(proc_execute, 1000);
     });
 
-    it('146.2.3 urowid length > 2000', function(done) {
-      var expectedLength = 2000;
-      procedureBindInout(proc_execute, expectedLength, done);
+    it('146.2.3 urowid length > 2000', async function() {
+      await procedureBindInout(proc_execute, 2000);
     });
 
   });
@@ -202,138 +195,85 @@ describe('146. urowidProcedureBindAsString6.js', function() {
     var proc_execute = "BEGIN nodb_rowid_bind_inout_1463 (:i, :c1, :c2); END;";
     var proc_drop = "DROP PROCEDURE nodb_rowid_bind_inout_1463";
 
-    before('create procedure', function(done) {
-      sql.executeSql(connection, proc_create, {}, {}, done);
+    before('create procedure', async function() {
+      try {
+        await sql.executeSql(connection, proc_create, {}, {});
+      } catch (err) {
+        assert.ifError(err);
+      }
     });
 
-    after('drop procedure', function(done) {
-      sql.executeSql(connection, proc_drop, {}, {}, done);
+    after('drop procedure', async function() {
+      try {
+        await sql.executeSql(connection, proc_drop, {}, {});
+      } catch (err) {
+        assert.ifError(err);
+      }
     });
 
-    it('146.3.1 update with urowid length > 500', function(done) {
-      var expectedLength_1 = 20;
-      var expectedLength_2 = 500;
-      procedureBindInout_update(proc_execute, expectedLength_1, expectedLength_2, done);
+    it('146.3.1 update with urowid length > 500', async function() {
+      await procedureBindInout_update(proc_execute, 20, 500);
     });
 
-    it('146.3.2 update with urowid length > 1000', function(done) {
-      var expectedLength_1 = 20;
-      var expectedLength_2 = 1000;
-      procedureBindInout_update(proc_execute, expectedLength_1, expectedLength_2, done);
+    it('146.3.2 update with urowid length > 1000', async function() {
+      await procedureBindInout_update(proc_execute, 20, 1000);
     });
 
-    it('146.3.3 update with urowid length > 2000', function(done) {
-      var expectedLength_1 = 20;
-      var expectedLength_2 = 2000;
-      procedureBindInout_update(proc_execute, expectedLength_1, expectedLength_2, done);
+    it('146.3.3 update with urowid length > 2000', async function() {
+      await procedureBindInout_update(proc_execute, 20, 2000);
     });
 
   });
 
-  var procedureBindInout = function(proc_execute, expectedLength, callback) {
-    var str = random.getRandomLengthString(expectedLength);
+  var procedureBindInout = async function(proc_execute, expectedLength) {
+    const str = random.getRandomLengthString(expectedLength);
     var urowid, urowidLen;
-    async.series([
-      function(cb) {
-        var sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
-        sql.executeInsert(connection, sql_insert, {}, {}, cb);
-      },
-      function(cb) {
-        connection.execute(
-          "select ROWID from " + tableName_indexed + " where c1 = " + insertID,
-          function(err, result) {
-            should.not.exist(err);
-            urowid = result.rows[0][0];
-            urowidLen = urowid.length;
-            urowidLen.should.be.above(expectedLength);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        var bindVar_inout = {
-          i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-          c: { val: urowid, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 5000 }
-        };
-        connection.execute(
-          proc_execute,
-          bindVar_inout,
-          function(err, result) {
-            should.not.exist(err);
-            var resultVal = result.outBinds.c;
-            should.strictEqual(resultVal, urowid);
-            cb();
-          }
-        );
-      }
-    ], callback);
+    var sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
+    await sql.executeInsert(connection, sql_insert, {}, {});
+    var result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
+    urowid = result.rows[0][0];
+    urowidLen = urowid.length;
+    assert(urowidLen > expectedLength);
+
+    const bindVar_inout = {
+      i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+      c: { val: urowid, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 5000 }
+    };
+    result = await connection.execute(proc_execute, bindVar_inout);
+    const resultVal = result.outBinds.c;
+    assert.strictEqual(resultVal, urowid);
   };
 
-  var procedureBindInout_update = function(proc_execute, contentLen_1, contentLen_2, callback) {
-    var str_1 = random.getRandomLengthString(contentLen_1);
-    var str_2 = random.getRandomLengthString(contentLen_2);
+  var procedureBindInout_update = async function(proc_execute, contentLen_1, contentLen_2) {
+    const str_1 = random.getRandomLengthString(contentLen_1);
+    const str_2 = random.getRandomLengthString(contentLen_2);
     var urowid_1, urowid_2, urowidLen_1, urowidLen_2, id_1, id_2;
-    async.series([
-      function(cb) {
-        id_1 = insertID;
-        var sql_insert = "insert into " + tableName_indexed + " values (" + id_1 + ", '" + str_1 + "')";
-        sql.executeInsert(connection, sql_insert, {}, {}, cb);
-      },
-      function(cb) {
-        connection.execute(
-          "select ROWID from " + tableName_indexed + " where c1 = " + id_1,
-          function(err, result) {
-            should.not.exist(err);
-            urowid_1 = result.rows[0][0];
-            urowidLen_1 = urowid_1.length;
-            urowidLen_1.should.be.above(contentLen_1);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        id_2 = insertID + 1;
-        var sql_insert = "insert into " + tableName_indexed + " values (" + id_2 + ", '" + str_2 + "')";
-        connection.execute(
-          sql_insert,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.execute(
-          "select ROWID from " + tableName_indexed + " where c1 = " + id_2,
-          function(err, result) {
-            should.not.exist(err);
-            urowid_2 = result.rows[0][0];
-            urowidLen_2 = urowid_2.length;
-            urowidLen_2.should.be.above(contentLen_2);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        var bindVar_inout = {
-          i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-          c1: { val: urowid_1, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 5000 },
-          c2: { val: urowid_2, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 5000 }
-        };
-        connection.execute(
-          proc_execute,
-          bindVar_inout,
-          function(err, result) {
-            should.not.exist(err);
-            var resultVal_1 = result.outBinds.c1;
-            var resultVal_2 = result.outBinds.c2;
-            should.strictEqual(resultVal_1, urowid_2);
-            should.strictEqual(resultVal_2, urowid_2);
-            insertID = insertID + 10;
-            cb();
-          }
-        );
-      }
-    ], callback);
+    id_1 = insertID;
+    var sql_insert = "insert into " + tableName_indexed + " values (" + id_1 + ", '" + str_1 + "')";
+    await sql.executeInsert(connection, sql_insert, {}, {});
+    var result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + id_1);
+    urowid_1 = result.rows[0][0];
+    urowidLen_1 = urowid_1.length;
+    assert(urowidLen_1 > contentLen_1);
+    id_2 = insertID + 1;
+    sql_insert = "insert into " + tableName_indexed + " values (" + id_2 + ", '" + str_2 + "')";
+    result = await connection.execute(sql_insert);
+    result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + id_2);
+    urowid_2 = result.rows[0][0];
+    urowidLen_2 = urowid_2.length;
+    assert(urowidLen_2 > contentLen_2);
+
+    var bindVar_inout = {
+      i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+      c1: { val: urowid_1, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 5000 },
+      c2: { val: urowid_2, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 5000 }
+    };
+    result = await connection.execute(proc_execute, bindVar_inout);
+    assert(result);
+    const resultVal_1 = result.outBinds.c1;
+    const resultVal_2 = result.outBinds.c2;
+    assert.strictEqual(resultVal_1, urowid_2);
+    assert.strictEqual(resultVal_2, urowid_2);
+    insertID = insertID + 10;
   };
 });
