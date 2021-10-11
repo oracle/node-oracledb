@@ -24,6 +24,9 @@
 - Prevent intermingling of `queryStream()` streaming and `getRow()`/`getRows()`
   calls.
 
+- Made an internal change for TypeScript 4.4's imported function behavior with
+  'this' ([Issue 1408](https://github.com/oracle/node-oracledb/issues/1408)).
+
 ## node-oracledb v5.2.0 (7 Jun 2021)
 
 - Connection pool changes:
