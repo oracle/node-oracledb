@@ -186,7 +186,7 @@ spec:
   - test/implicitResults.js
   - test/connProps.js
   - test/getDataOfLob.js
-  - test/dbObjectsNestTbl.js
+  - test/dbObjectsNestedTable.js
   - test/dbObject1.js
   - test/dbObject2.js
   - test/dbObject3.js
