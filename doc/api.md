@@ -11807,103 +11807,106 @@ See [Oracle Database Objects and Collections](#objects).
 
 #### <a name="pagingdata"></a> 17.1.8 Limiting Rows and Creating Paged Datasets
 
-Query data is commonly broken into one or more sets:
+Query data is commonly fetched in one or more batches of rows:
 
-- To give an upper bound on the number of rows that a query has to process,
-  which can help improve database scalability.
+- For fetching all data in small sets to process when the number of records is
+  too large for Node.js to handle at the same time. This can be handled by
+  [ResultSets](#resultsethandling) or [`queryStream()`](#querystream) with one
+  execution of the SQL query.
 
 - To perform 'Web pagination' that allows moving from one set of rows to a next,
   or previous, set on demand.
 
-- For fetching of all data in consecutive small sets for batch processing.  This
-  happens because the number of records is too large for Node.js to handle at the
-  same time.
-
-The latter can be handled by [ResultSets](#resultsethandling) or
-[`queryStream()`](#querystream) with one execution of the SQL query as
-discussed in those links.
+- To give an upper bound on the number of rows that a query has to process,
+  which can help improve database scalability.
 
 'Web pagination' and limiting the maximum number of rows are discussed in this
 section.  For each 'page' of results, a SQL query is executed to get the
 appropriate set of rows from a table.  Since the query will be executed more
-than once, make sure to use [bind variables](#bind) for row numbers and row
-limits.
+than once, make sure to use [bind variables](#bind) for the starting row and
+the number of rows.
 
-Oracle Database 12c SQL introduced an `OFFSET` / `FETCH` clause which
-is similar to the `LIMIT` keyword of MySQL.  See [Row Limiting:
-Examples][5] in the Oracle documentation.  A node-oracledb example is:
+Techniques include:
 
-```javascript
-const myoffset = 0;       // do not skip any rows (start at row 1)
-const mymaxnumrows = 20;  // get 20 rows
+- For Oracle Database 12c, use the `OFFSET` / `FETCH` syntax.  This is similar
+  to the `LIMIT` keyword of MySQL.  See [Row Limiting: Examples][5] in the
+  Oracle documentation.  A node-oracledb example is:
 
-const result = await connection.execute(
-  `SELECT last_name
-   FROM employees
-   ORDER BY last_name
-   OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`,
-  { offset: myoffset, maxnumrows: mymaxnumrows },
-  { prefetchRows: mymaxnumrows + 1, fetchArraySize: mymaxnumrows }
-);
-```
+  ```javascript
+  const myoffset = 0;       // do not skip any rows (start at row 1)
+  const mymaxnumrows = 20;  // get 20 rows
 
-A runnable example is in [rowlimit.js][84].
+  const sql = `SELECT last_name
+               FROM employees
+               ORDER BY last_name
+               OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`;
 
-You can use a basic [`execute()`](#execute) or a
-[ResultSet](#resultsetclass), or [`queryStream()`](#querystream) with
-your query.  For basic `execute()` fetches, make sure that
-`oracledb.maxRows` is greater than the value bound to `:maxnumrows`,
-or set to 0 (meaning unlimited).
+  const result = await connection.execute(
+    sql,
+    { offset: myoffset, maxnumrows: mymaxnumrows },
+    { prefetchRows: mymaxnumrows + 1, fetchArraySize: mymaxnumrows }
+  );
+  ```
 
-In applications where the SQL query is not known in advance, this
-method sometimes involves appending the `OFFSET` clause to the 'real'
-user query. Be very careful to avoid SQL injection security issues.
+  A runnable example is in [rowlimit.js][84].
+
+  You can use a basic [`execute()`](#execute) or a
+  [ResultSet](#resultsetclass), or [`queryStream()`](#querystream) with
+  your query.  For basic `execute()` fetches, make sure that
+  `oracledb.maxRows` is greater than the value bound to `:maxnumrows`,
+  or set to 0 (meaning unlimited).
+
+  In applications where the SQL query is not known in advance, this
+  method sometimes involves appending the `OFFSET` clause to the 'real'
+  user query. Be very careful to avoid SQL injection security issues.
+
+- For Oracle Database 11g and earlier there are several alternative ways
+  to limit the number of rows returned.  The old, canonical paging query
+  is:
+
+  ```SQL
+  SELECT *
+  FROM (SELECT a.*, ROWNUM AS rnum
+        FROM (YOUR_QUERY_GOES_HERE -- including the order by) a
+        WHERE ROWNUM <= MAX_ROW)
+  WHERE rnum >= MIN_ROW
+  ```
+
+  Here, `MIN_ROW` is the row number of first row and `MAX_ROW` is the row number
+  of the last row to return.  Using the same bind values definitions as
+  previously, an example is:
+
+  ```javascript
+  const sql = `SELECT *
+               FROM (SELECT a.*, ROWNUM AS rnum
+                     FROM (SELECT last_name FROM employees ORDER BY last_name) a
+                     WHERE ROWNUM <= :maxnumrows + :offset)
+               WHERE rnum >= :offset + 1`;
+  ```
+
+  This always has an 'extra' column, here called RNUM.
+
+- An alternative, preferred query syntax for Oracle Database 11g uses the
+  analytic `ROW_NUMBER()` function. For example:
+
+  ```javascript
+  const sql = `SELECT last_name
+               FROM (SELECT last_name,
+                     ROW_NUMBER() OVER (ORDER BY last_name) AS myr
+                     FROM employees)
+               WHERE myr BETWEEN :offset + 1 and :maxnumrows + :offset`;
+  ```
+
+  Refer to [On Top-n and Pagination Queries][85] in Oracle Magazine for
+  details.
 
 As an anti-example, another way to limit the number of rows returned
 involves setting [`maxRows`](#propdbmaxrows).  However it is more
 efficient to let Oracle Database do the row selection in the SQL query
-and only return the exact number of rows required to node-oracledb.
+and only fetch the exact number of rows required from the database.
 
-For Oracle Database 11g and earlier there are several alternative ways
-to limit the number of rows returned.  The old, canonical paging query
-is:
-
-```SQL
-SELECT *
-FROM (SELECT a.*, ROWNUM AS rnum
-      FROM (YOUR_QUERY_GOES_HERE -- including the order by) a
-      WHERE ROWNUM <= MAX_ROW)
-WHERE rnum >= MIN_ROW
-```
-
-Here, `MIN_ROW` is the row number of first row and `MAX_ROW` is the
-row number of the last row to return.  For example:
-
-```SQL
-SELECT *
-FROM (SELECT a.*, ROWNUM AS rnum
-      FROM (SELECT last_name FROM employees ORDER BY last_name) a
-      WHERE ROWNUM <= 20)
-WHERE rnum >= 1
-```
-
-This always has an 'extra' column, here called RNUM.
-
-An alternative and preferred query syntax for Oracle Database 11g uses
-the analytic `ROW_NUMBER()` function. For example to get the 1st to
-20th names the query is:
-
-```SQL
-SELECT last_name FROM
-(SELECT last_name,
-        ROW_NUMBER() OVER (ORDER BY last_name) AS myr
-        FROM employees)
-WHERE myr BETWEEN 1 and 20
-```
-
-Refer to [On Top-n and Pagination Queries][85] in Oracle Magazine for
-details. Also review the videos [SQL for pagination queries - memory and
-performance][166] and [SQL for pagination queries - advanced options][167].
+The videos [SQL for pagination queries - memory and performance][166] and [SQL
+  for pagination queries - advanced options][167] are worth reviewing.
 
 #### <a name="autoincrement"></a> 17.1.9 Auto-Increment Columns
 
