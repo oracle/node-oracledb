@@ -27,6 +27,7 @@
  *
  *****************************************************************************/
 
+const fs = require('fs');
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 const demoSetup = require('./demosetup.js');
@@ -36,10 +37,14 @@ const demoSetup = require('./demosetup.js');
 // the system library search path must always be set before Node.js is started.
 // See the node-oracledb installation documentation.
 // If the search path is not correct, you will get a DPI-1047 error.
-if (process.platform === 'win32') { // Windows
-  oracledb.initOracleClient({ libDir: 'C:\\oracle\\instantclient_19_11' });
-} else if (process.platform === 'darwin') { // macOS
-  oracledb.initOracleClient({ libDir: process.env.HOME + '/Downloads/instantclient_19_8' });
+let libPath;
+if (process.platform === 'win32') {           // Windows
+  libPath = 'C:\\oracle\\instantclient_19_12';
+} else if (process.platform === 'darwin') {   // macOS
+  libPath = process.env.HOME + '/Downloads/instantclient_19_8';
+}
+if (libPath && fs.existsSync(libPath)) {
+  oracledb.initOracleClient({ libDir: libPath });
 }
 
 const sql = "INSERT INTO no_em_tab values (:1, :2)";
