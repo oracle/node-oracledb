@@ -643,7 +643,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The pre-built binaries were built on macOS (Intel x86) Catalina 10.15.7.
+The pre-built binaries were built on macOS (Intel x86) Big Sur 11.6
 
 Oracle Instant Client libraries are required on macOS.
 
