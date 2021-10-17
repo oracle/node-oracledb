@@ -11506,17 +11506,25 @@ console.dir(result.metaData, { depth: null });  // show the extended metadata
 The output is:
 
 ```
-[ { name: 'DEPARTMENT_ID',
-    fetchType: 2002,
-    dbType: 2,
+[
+  {
+    name: 'DEPARTMENT_ID',
+    fetchType: 2010,
+    dbType: 2010,
+    dbTypeName: 'NUMBER',
+    nullable: false,
     precision: 4,
-    scale: 0,
-    nullable: false },
-  { name: 'DEPARTMENT_NAME',
+    scale: 0
+  },
+  {
+    name: 'DEPARTMENT_NAME',
     fetchType: 2001,
-    dbType: 1,
-    byteSize: 30,
-    nullable: false } ]
+    dbType: 2001,
+    dbTypeName: 'VARCHAR2',
+    nullable: false,
+    byteSize: 30
+  }
+]
 ```
 
 Description of the properties is given in the
