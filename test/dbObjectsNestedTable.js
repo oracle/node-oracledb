@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   197. dbObjectsNestTbl.js
+ *   197. dbObjectsNestedTable.js
  *
  * DESCRIPTION
  *    Testing Oracle Database Nested Table Object Collection type(s)
