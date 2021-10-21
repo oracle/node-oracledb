@@ -13940,44 +13940,40 @@ handled automatically.  For SQL calls no temporary LOBs are used.
 
 ### <a name="sqlwherein"></a> 22.6 Binding Multiple Values to a SQL `WHERE IN` Clause
 
-Binding a single JavaScript value into a SQL `WHERE IN` clause is
-easy:
+Binding a single JavaScript value into a SQL `WHERE IN` clause is easy:
 
 ```javascript
-sql = `SELECT last_name FROM employees WHERE first_name IN (:bv)`;
+sql = `SELECT first_name, last_name FROM employees WHERE first_name IN (:bv)`;
 binds = ['Christopher'];
 await connection.execute(sql, binds, function(...));
 ```
 
-But a common use case for a query `WHERE IN` clause is for multiple
-values, for example when a web user selects multiple check-box options
-and the query should match all chosen values.
+But a common use case for a SQL `WHERE IN` clause is for multiple values, for
+example when a web user selects multiple check-box options and the query should
+match all chosen values.
 
-Trying to associate multiple data values with a single bind parameter
-will not work.  To use a fixed, small number of values in an `WHERE
-IN` bind clause, the SQL query should have individual bind parameters,
-for example:
+To use a fixed, small number of values in an `WHERE IN` bind clause, the SQL
+query should have individual bind parameters, for example:
 
 ```javascript
-const sql = `SELECT last_name FROM employees WHERE first_name IN (:bv1, :bv2, :bv3, :bv4)`;
+const sql = `SELECT first_name, last_name FROM employees WHERE first_name IN (:bv1, :bv2, :bv3, :bv4)`;
 const binds = ['Alyssa', 'Christopher', 'Hazel', 'Samuel'];
 const result = await connection.execute(sql, binds);
 ```
 
-If you sometimes execute the query with a smaller number of items, a
-null can be bound for the 'missing' values:
+If you sometimes execute the query with a smaller number of items, then null
+can be bound for each 'missing' value:
 
 ```javascript
 const binds = ['Alyssa', 'Christopher', 'Hazel', null];
 ```
 
-When the exact same statement text is re-executed many times
-regardless of the number of user supplied values, you get performance
-and scaling benefits from not having multiple, unique SQL statements
-being run.
+When the exact same statement text is re-executed many times regardless of the
+number of user supplied values, this provides performance and scaling benefits
+from not having multiple, unique SQL statements being run.
 
-Another solution when the number of data items is only known at
-runtime is to build up an exact SQL string like:
+If the statement is not going to be re-executed, or the number of values is
+only going to be known at runtime, then a SQL statement can be built up:
 
 ```javascript
 const binds = ['Christopher', 'Hazel', 'Samuel'];
@@ -13999,19 +13995,41 @@ and how changeable the number of bind values is, you can end up with lots of
 'unique' query strings being executed.  You might not get the statement caching
 benefits that re-executing a fixed SQL statement would have.
 
-Another solution for a larger number of values is to construct a SQL
+A general solution for a larger number of values is to construct a SQL
 statement like:
 
 ```
-SELECT ... WHERE col IN ( <something that returns a list of rows> )
+SELECT ... WHERE col IN ( <something that returns a list of values> )
 ```
 
-The easiest way to do the `<something that returns a list of rows>`
-will depend on how the data is initially represented and the number of
-items.  You might look at using `CONNECT BY` or nested tables.  Or,
-for really large numbers of items, you might prefer to use a global
-temporary table.  Some solutions are given in [On Cursors, SQL, and
-Analytics][59] and in [this StackOverflow answer][60].
+The best way to do the `<something that returns a list of values>` will depend
+on how the data is initially represented and the number of items. You might
+look at using CONNECT BY or at using a global temporary table.
+
+One method is to use an Oracle collection with the ``TABLE()`` clause. For
+example, if the following type was created::
+
+```
+SQL> CREATE OR REPLACE TYPE name_array AS TABLE OF VARCHAR2(20);
+  2  /
+```
+
+then the application could do:
+
+```javascript
+const sql = `SELECT first_name, last_name
+             FROM employees
+             WHERE first_name IN (SELECT * FROM TABLE(:bv))`;
+
+const inlist = ['Christopher', 'Hazel', 'Samuel'];
+
+const binds = { bv: { type: "NAME_ARRAY", val: inlist } };
+
+const result = await connection.execute(sql, binds, options);
+```
+
+Some general references are [On Cursors, SQL, and Analytics][59] and in [this
+StackOverflow answer][60].
 
 ### <a name="sqlbindlike"></a> 22.7 Binding in a `LIKE` or `REGEXP_LIKE` Clause
 
@@ -17769,7 +17787,7 @@ can be asked at [AskTom][158].
 [54]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1EF347AE-7FDA-4B41-AFE0-DD5A49E8B370
 [57]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=ADJSN
 [58]: https://github.com/oracle/node-oracledb/tree/main/examples/plsqlarray.js
-[59]: https://blogs.oracle.com/oraclemagazine/on-cursors-sql-and-analytics
+[59]: https://blogs.oracle.com/oraclemagazine/post/on-cursors-sql-and-analytics
 [60]: https://stackoverflow.com/a/43330282/4799035
 [61]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4947CAE8-1F00-4897-BB2B-7F921E495175
 [62]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-56AEF38E-9400-427B-A818-EDEC145F7ACD
