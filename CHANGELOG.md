@@ -1,8 +1,6 @@
 # Change Log
 
-## node-oracledb v5.3.0 (DD Mon YYYY)
-
-**This release is under development and information may be incomplete**
+## node-oracledb v5.3.0 (22 Oct 2021)
 
 - Added a
   [`keepInStmtCache`](https://oracle.github.io/node-oracledb/doc/api.html#propexeckeepinstmtcache)
