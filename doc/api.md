@@ -67,6 +67,8 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - [`SODA_COLL_MAP_MODE`](#oracledbconstantssoda)
         - 3.1.12 [Database Shutdown Constants](#oracledbconstantsshutdown)
             - [`SHUTDOWN_MODE_ABORT`](#oracledbconstantsshutdown), [`SHUTDOWN_MODE_DEFAULT`](#oracledbconstantsshutdown), [`SHUTDOWN_MODE_FINAL`](#oracledbconstantsshutdown), [`SHUTDOWN_MODE_IMMEDIATE`](#oracledbconstantsshutdown), [`SHUTDOWN_MODE_TRANSACTIONAL`](#oracledbconstantsshutdown), [`SHUTDOWN_MODE_TRANSACTIONAL_LOCAL`](#oracledbconstantsshutdown)
+        - 3.1.13 [Two-Phase Commit Constants](#oracledbconstantstpc)
+            - [`TPC_BEGIN_JOIN`](#oracledbconstantstpc), [`TPC_BEGIN_NEW`](#oracledbconstantstpc), [`TPC_BEGIN_PROMOTE`](#oracledbconstantstpc), [`TPC_BEGIN_RESUME`](#oracledbconstantstpc), [`TPC_END_NORMAL`](#oracledbconstantstpc), [`TPC_END_SUSPEND`](#oracledbconstantstpc)
     - 3.2 [Oracledb Properties](#oracledbproperties)
         - 3.2.1 [`autoCommit`](#propdbisautocommit)
         - 3.2.2 [`connectionClass`](#propdbconclass)
@@ -169,11 +171,14 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 4.1.4 [`clientInfo`](#propconnclientinfo)
         - 4.1.5 [`currentSchema`](#propconncurrentschema)
         - 4.1.6 [`dbOp`](#propconndbop)
-        - 4.1.7 [`module`](#propconnmodule)
-        - 4.1.8 [`oracleServerVersion`](#propconnoracleserverversion)
-        - 4.1.9 [`oracleServerVersionString`](#propconnoracleserverversionstring)
-        - 4.1.10 [`stmtCacheSize`](#propconnstmtcachesize)
-        - 4.1.11 [`tag`](#propconntag)
+        - 4.1.7 [`ecId`](#propconnecid)
+        - 4.1.8 [`module`](#propconnmodule)
+        - 4.1.9 [`oracleServerVersion`](#propconnoracleserverversion)
+        - 4.1.10 [`oracleServerVersionString`](#propconnoracleserverversionstring)
+        - 4.1.11 [`stmtCacheSize`](#propconnstmtcachesize)
+        - 4.1.12 [`tag`](#propconntag)
+        - 4.1.13 [`tpcInternalName`](#propconntpcinternalname)
+        - 4.1.14 [`tpcExternalName`](#propconntpcexternalname)
     - 4.2 [Connection Methods](#connectionmethods)
         - 4.2.1 [`break()`](#break)
         - 4.2.2 [`changePassword()`](#changepassword)
@@ -256,7 +261,14 @@ For installation information, see the [Node-oracledb Installation Instructions][
                 - 4.2.17.1.2 [`pfile`](#constartupoptionspfile)
                 - 4.2.17.1.3 [`restrict`](#constartupoptionsrestrict)
             - 4.2.17.2 [`startup()`: Callback Function](#constartupcallback)
-        - 4.2.18 [`unsubscribe()`](#conunsubscribe)
+        - 4.2.18 [`tpcBegin()`](#contpcbegin)
+        - 4.2.19 [`tpcCommit()`](#contpccommit)
+        - 4.2.20 [`tpcEnd()`](#contpcend)
+        - 4.2.21 [`tpcForget()`](#contpcforget)
+        - 4.2.22 [`tpcPrepare()`](#contpcprepare)
+        - 4.2.23 [`tpcRecover()`](#contpcrecover)
+        - 4.2.24 [`tpcRollback()`](#contpcrollback)
+        - 4.2.25 [`unsubscribe()`](#conunsubscribe)
 5. [AqQueue Class](#aqqueueclass)
     - 5.1 [AqQueue Properties](#aqqueueproperties)
         - 5.1.1 [`name`](#aqqueuename)
@@ -552,18 +564,19 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 32.3 [Statement Caching](#stmtcache)
     - 32.4 [Client Result Caching (CRC)](#clientresultcache)
 33. [Tracing SQL and PL/SQL Statements](#tracingsql)
-34. [Node.js Programming Styles and node-oracledb](#programstyles)
-    - 34.1 [Callbacks and node-oracledb](#callbackoverview)
-    - 34.2 [Promises and node-oracledb](#promiseoverview)
-        - 34.2.1 [Custom Promise Libraries](#custompromises)
-    - 34.3 [Async/Await and node-oracledb](#asyncawaitoverview)
-35. [Migrating from Previous node-oracledb Releases](#migrate)
-    - 35.1 [Migrating from node-oracledb 3.1 to node-oracledb 4.0](#migratev31v40)
-    - 35.2 [Migrating from node-oracledb 4.0 to node-oracledb 4.1](#migratev40v41)
-    - 35.3 [Migrating from node-oracledb 4.1 to node-oracledb 4.2](#migratev41v42)
-    - 35.4 [Migrating from node-oracledb 4.2 to node-oracledb 5.0](#migratev42v50)
-    - 35.5 [Migrating from node-oracledb 5.1 to node-oracledb 5.2](#migratev51v52)
-36. [Useful Resources for Node-oracledb](#otherresources)
+34. [Two-Phase Commits (TPC)](#twopc)
+35. [Node.js Programming Styles and node-oracledb](#programstyles)
+    - 35.1 [Callbacks and node-oracledb](#callbackoverview)
+    - 35.2 [Promises and node-oracledb](#promiseoverview)
+        - 35.2.1 [Custom Promise Libraries](#custompromises)
+    - 35.3 [Async/Await and node-oracledb](#asyncawaitoverview)
+36. [Migrating from Previous node-oracledb Releases](#migrate)
+    - 36.1 [Migrating from node-oracledb 3.1 to node-oracledb 4.0](#migratev31v40)
+    - 36.2 [Migrating from node-oracledb 4.0 to node-oracledb 4.1](#migratev40v41)
+    - 36.3 [Migrating from node-oracledb 4.1 to node-oracledb 4.2](#migratev41v42)
+    - 36.4 [Migrating from node-oracledb 4.2 to node-oracledb 5.0](#migratev42v50)
+    - 36.5 [Migrating from node-oracledb 5.1 to node-oracledb 5.2](#migratev51v52)
+37. [Useful Resources for Node-oracledb](#otherresources)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
 
@@ -1155,6 +1168,23 @@ Constant Name                                 | Value | Description
 `oracledb.SHUTDOWN_MODE_TRANSACTIONAL`        | 1     | Further connections to the database are prohibited and no new transactions are allowed to be started.  Wait for active transactions to complete.
 `oracledb.SHUTDOWN_MODE_TRANSACTIONAL_LOCAL`  | 2     | Behaves the same way as SHUTDOWN_MODE_TRANSACTIONAL, but only waits for local transactions to complete.
 
+#### <a name="oracledbconstantstpc"></a> 3.1.12 Two-Phase Commit Constants
+
+Constants for two-phase commit (TPC) functions
+[`connection.tpcBegin()`](#contpcbegin) and
+[`connection.tpcEnd()`](#contpcend).
+
+These are new in node-oracledb 5.3.
+
+Constant Name                   | Value   | Description
+--------------------------------|---------|---------------------------------------------------
+`oracledb.TPC_BEGIN_JOIN`       | 2       | Join an existing two-phase commit (TPC) transaction.
+`oracledb.TPC_BEGIN_NEW`        | 1       | Create a new TPC transaction.
+`oracledb.TPC_BEGIN_RESUME`     | 4       | Resume an existing TPC transaction.
+`oracledb.TPC_BEGIN_PROMOTE`    | 8       | Promote a local transaction to a TPC transaction.
+`oracledb.TPC_END_NORMAL`       | 0       | End the TPC transaction participation normally.
+`oracledb.TPC_END_SUSPEND`      | 1048576 | Suspend the TPC transaction.
+
 ### <a name="oracledbproperties"></a> 3.2 Oracledb Properties
 
 The properties of the *Oracledb* object are used for setting up
@@ -1187,6 +1217,9 @@ execution.
 The default value is *false*.
 
 This property may be overridden in an [`execute()`](#executeoptions) call.
+
+When using an external transaction manager with [two-phase commits](#twopc),
+`autoCommit` should be *false*.
 
 Note prior to node-oracledb 0.5 this property was called
 `isAutoCommit`.
@@ -3166,7 +3199,20 @@ Auditing](#endtoend).
 
 This property was added in node-oracledb 4.1.  It is available with Oracle 12c.
 
-#### <a name="propconnmodule"></a> 4.1.7 `connection.module`
+#### <a name="propconnecid"></a> 4.1.7 `connection.ecId`
+
+```
+writeonly String ecId
+```
+
+Sets the execution context identifier.
+
+The value is available in the `ECID` column of the `V$SESSION` view.  It is
+also shown in audit logs.
+
+This property was added in node-oracledb 5.3.
+
+#### <a name="propconnmodule"></a> 4.1.8 `connection.module`
 
 ```
 writeonly String module
@@ -3178,7 +3224,7 @@ This is a write-only property.  Displaying `Connection.module` will show a value
 of `null`.  See [End-to-end Tracing, Mid-tier Authentication, and
 Auditing](#endtoend).
 
-#### <a name="propconnoracleserverversion"></a> 4.1.8 `connection.oracleServerVersion`
+#### <a name="propconnoracleserverversion"></a> 4.1.9 `connection.oracleServerVersion`
 
 ```
 readonly Number oracleServerVersion
@@ -3194,7 +3240,7 @@ release such as 1800000000 instead of 1803000000.
 
 This property was added in node-oracledb 1.3.
 
-#### <a name="propconnoracleserverversionstring"></a> 4.1.9 `connection.oracleServerVersionString`
+#### <a name="propconnoracleserverversionstring"></a> 4.1.10 `connection.oracleServerVersionString`
 
 ```
 readonly String oracleServerVersionString
@@ -3209,7 +3255,7 @@ release such as "18.0.0.0.0" instead of "18.3.0.0.0".
 
 This property was added in node-oracledb 2.2.
 
-#### <a name="propconnstmtcachesize"></a> 4.1.10 `connection.stmtCacheSize`
+#### <a name="propconnstmtcachesize"></a> 4.1.11 `connection.stmtCacheSize`
 
 ```
 readonly Number stmtCacheSize
@@ -3220,7 +3266,7 @@ The number of statements to be cached in the
 the `stmtCacheSize` property in effect in the *Pool* object when the
 connection is created in the pool.
 
-#### <a name="propconntag"></a> 4.1.11 `connection.tag`
+#### <a name="propconntag"></a> 4.1.12 `connection.tag`
 
 ```
 String tag
@@ -3278,6 +3324,28 @@ Node.js `sessionCallback` function is being used, the best practice
 recommendation is to set the tag in the callback function.
 
 To clear a connection's tag, set `connection.tag = ""`.
+
+#### <a name="propconntpcinternalname"></a> 4.1.13 `connection.tpcInternalName`
+
+```
+readwrite String tpcInternalName
+```
+
+This read-write attribute specifies the internal name that is used by the
+connection when logging two-phase commit transactions.
+
+This property was added in node-oracledb 5.3.
+
+#### <a name="propconntpcexternalname"></a> 4.1.14 `connection.tpcExternalName`
+
+```
+readwrite String tpcExternalName
+```
+
+This read-write attribute specifies the external name that is used by the
+connection when logging two-phase commit transactions.
+
+This property was added in node-oracledb 5.3.
 
 ### <a name="connectionmethods"></a> 4.2 Connection Methods
 
@@ -4976,7 +5044,391 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error*               | If `startup()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="conunsubscribe"></a> 4.2.18 `connection.unsubscribe()`
+#### <a name="contpcbegin"></a> 4.2.18 `connection.tpcBegin()`
+
+##### Prototype
+
+Callback:
+
+```
+tpcBegin(Object xid, [Number flag, [Number transactionTimeout, ]] function(Error error){});
+```
+
+Promise:
+
+```
+promise = tpcBegin(Object xid [, Number flag [, Number transactionTimeout]]);
+```
+
+##### Description
+
+Explicitly begin a new two-phase commit (TPC) transaction using the specified
+transaction identifier (XID).  The XID is made up of a format identifier, a
+transaction identifier and a branch identifier.
+
+See [Two-Phase Commits (TPC)](#twopc).
+
+This function was added in node-oracledb 5.3.
+
+##### Parameters
+
+-   ```
+    Object xid
+    ```
+
+    The transaction identifier (XID).  It should be an object with the
+    following three attributes:
+
+    - `Number formatId` - the XID format.
+
+    - `String | Buffer globalTransactionId` - the global transaction identifier of the XID.
+
+    - `String | Buffer branchQualifier` - the branch identifier of the XID.
+
+-   ```
+    Number flag
+    ```
+
+    One of the constants [`oracledb.TPC_BEGIN_JOIN`](#oracledbconstantstpc),
+    [`oracledb.TPC_BEGIN_NEW`](#oracledbconstantstpc),
+    [`oracledb.TPC_BEGIN_PROMOTE`](#oracledbconstantstpc), or
+    [`oracledb.TPC_BEGIN_RESUME`](#oracledbconstantstpc).
+
+    The default is `oracledb.TPC_BEGIN_NEW`.
+
+    The flag `oracledb.TPC_BEGIN_RESUME` can be used to resume a transaction
+    previously suspended by [`connection.tpcEnd()`](#contpcend).
+
+-   ```
+    Number transactionTimeout
+    ```
+
+    When `flag` is `oracledb.TPC_BEGIN_RESUME` or `oracledb.TPC_BEGIN_JOIN`,
+    the `transactionTimeout` value is the number of seconds to wait for a
+    transaction to become available.
+
+    When `flag` is `oracledb.TPC_BEGIN_NEW`, the `transactionTimeout` value is
+    the number of seconds the transaction can be inactive before it is
+    automatically terminated by the system.  A transaction is inactive between
+    the time it is detached with `tpcEnd()` and the time it is resumed with
+    `tpcBegin()`.
+
+    The default value is 60 seconds.
+
+-   ```
+    function(Error error)
+    ```
+
+    The parameters of the callback function are:
+
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error*               | If `tpcBegin()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="contpccommit"></a> 4.2.19 `connection.tpcCommit()`
+
+##### Prototype
+
+Callback:
+
+```
+tpcCommit([Object xid,] [Boolean onePhase,] function(Error error){});
+```
+
+Promise:
+
+```
+promise = tpcCommit([Object xid,] [Boolean onePhase]);
+```
+
+##### Description
+
+Commits the transaction previously prepared with
+[`connection.tpcPrepare()`](#contpcprepare).
+
+If `xid` is not passed then the `onePhase` parameter value is ignored and
+`tpcCommit()` has the same behavior as a regular `connection.commit()` call.
+
+Note: When using an external transaction manager with two-phase commits,
+[autocommitting](#propdbisautocommit) should be disabled.
+
+This function was added in node-oracledb 5.3.
+
+##### Parameters
+
+-   ```
+    Object xid
+    ```
+
+    The transaction identifier previously passed to
+    [`tpcBegin()`](#contpcbegin) when starting the transaction branch.
+
+-   ```
+    Boolean onePhase
+    ```
+
+    If `onePhase` is *true*, a single-phase commit is performed.
+
+    The default is *false*.
+
+-   ```
+    function(Error error)
+    ```
+
+    The parameters of the callback function are:
+
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error*               | If `tpcCommit()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="contpcend"></a> 4.2.20 `connection.tpcEnd()`
+
+##### Prototype
+
+Callback:
+
+```
+tpcEnd([Object xid,] [Number flag,] function(Error error){});
+```
+
+Promise:
+
+```
+promise = tpcEnd([Object xid] [, Number flag]);
+```
+
+##### Description
+
+Detaches a two-phase commit transaction from the connection when an application
+needs to end or suspend work on a transaction branch.  The transaction becomes
+inactive at the end of this call but the branch still exists.
+
+If `xid` is not passed, the transaction identifier used by the previous
+`connection.tpcBegin()` call is used.
+
+This function was added in node-oracledb 5.3.
+
+##### Parameters
+
+-   ```
+    Object xid
+    ```
+
+    The transaction identifier previously passed to
+    [`tpcBegin()`](#contpcbegin) when starting the transaction branch.
+
+-   ```
+    Number flag
+    ```
+
+    One of the constants [`oracledb.TPC_END_NORMAL`](#oracledbconstantstpc) or
+    [`oracledb.TPC_END_SUSPEND`](#oracledbconstantstpc).
+
+    The default is `oracledb.TPC_END_NORMAL`.
+
+    If the flag is `oracledb.TPC_END_SUSPEND` then the transaction may be
+    resumed later by calling [`tpcBegin()`](#contpcbegin) with the flag
+    `oracledb.TPC_BEGIN_RESUME`.
+
+-   ```
+    function(Error error)
+    ```
+
+    The parameters of the callback function are:
+
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error*               | If `tpcEnd()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="contpcforget"></a> 4.2.21 `connection.tpcForget()`
+
+##### Prototype
+
+Callback:
+
+```
+tpcForget(Object xid, function(Error error){});
+```
+
+Promise:
+
+```
+promise = tpcForget(Object xid);
+```
+
+##### Description
+
+Causes the database to forget a heuristically completed two-phase commit
+transaction.
+
+This function was added in node-oracledb 5.3.
+
+##### Parameters
+
+-   ```
+    Object xid
+    ```
+
+    The transaction identifier previously passed to
+    [`tpcBegin()`](#contpcbegin) when starting the transaction branch.
+
+-   ```
+    function(Error error)
+    ```
+
+    The parameters of the callback function are:
+
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error*               | If `tpcForget()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="contpcprepare"></a> 4.2.22 `connection.tpcPrepare()`
+
+##### Prototype
+
+Callback:
+
+```
+tpcPrepare([Object xid,] function(Error error, Boolean commitNeeded){});
+```
+
+Promise:
+
+```
+promise = tpcPrepare([Object xid]);
+```
+
+##### Description
+
+Prepares a two-phase commit transaction for commit.
+
+Returns a boolean indicating the transaction requires a commit.
+
+After calling this function, no further activity should take place on this
+connection until either [`connection.tpcCommit()`](#contpccommit) or
+[`connection.tpcRollback()`](#contpcrollback) have been called.
+
+If `xid` is not passed, the transaction identifier used by the previous
+`connection.tpcBegin()` call is used.
+
+This function was added in node-oracledb 5.3.
+
+##### Example
+
+```javascript
+const commitNeeded = await connection.tpcPrepare(xid);
+```
+
+##### Parameters
+
+-   ```
+    Object xid
+    ```
+
+    The transaction identifier previously passed to
+    [`tpcBegin()`](#contpcbegin) when starting the transaction branch.
+
+-   ```
+    function(Error error, Boolean commitNeeded)
+    ```
+
+    The parameters of the callback function are:
+
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error*               | If `tpcPrepare()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    *Boolean commitNeeded*      | If *true*, the branch was prepared and needs to be committed.  Read-only branches will set this to *false* as there is no commit needed for the branch.
+
+#### <a name="contpcrecover"></a> 4.2.23 `connection.tpcRecover()`
+
+##### Prototype
+
+Callback:
+
+```
+tpcRecover([Boolean asString,] function(Error error);
+```
+
+Promise:
+
+```
+promise = tpcRecover([Boolean asString]);
+```
+
+##### Description
+
+Returns an array of pending two-phase commit transaction identifiers (XIDs)
+suitable for use with [`connection.tpcCommit()`](#contpccommit) or
+[`connection.tpcRollback()`](#contpcrollback)
+
+If `asString` is *true*, then the `globalTransactionId` and `branchQualifier`
+attributes will be converted to Strings.  Otherwise the values are returned as
+Buffers.
+
+The default value for `asString` is *true*.
+
+This function is a convenience wrapper that queries the view
+`DBA_PENDING_TRANSACTIONS`.  It requires SELECT privilege on that view.
+
+This function was added in node-oracledb 5.3.
+
+##### Parameters
+
+-   ```
+    function(Error error)
+    ```
+
+    The parameters of the callback function are:
+
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error*               | If `tpcRollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="contpcrollback"></a> 4.2.24 `connection.tpcRollback()`
+
+##### Prototype
+
+Callback:
+
+```
+tpcRollback([Object xid,] function(Error error);
+```
+
+Promise:
+
+```
+promise = tpcRollback([Object xid]);
+```
+
+##### Description
+
+Rolls back the specified transaction.
+
+If `xid` is not passed, the transaction associated with the connection is
+rolled back making it equivalent to `connection.rollback()`.
+
+This function was added in node-oracledb 5.3.
+
+##### Parameters
+
+-   ```
+    Object xid
+    ```
+
+    The transaction identifier previously passed to
+    [`tpcBegin()`](#contpcbegin) when starting the transaction branch.
+
+-   ```
+    function(Error error)
+    ```
+
+    The parameters of the callback function are:
+
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error*               | If `tpcRollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="conunsubscribe"></a> 4.2.25 `connection.unsubscribe()`
 
 ##### Prototype
 
@@ -15669,10 +16121,10 @@ In node-oracledb this will always show AL32UTF8.
 ## <a name="endtoend"></a> 29. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
 The Connection properties [action](#propconnaction), [module](#propconnmodule),
-[clientId](#propconnclientid), [clientInfo](#propconnclientinfo) and
-[dbOp](#propconndbop) set metadata for [end-to-end tracing][70].  The values can
-be tracked in database views, shown in audit trails, and seen in tools such as
-Enterprise Manager.
+[clientId](#propconnclientid), [clientInfo](#propconnclientinfo),
+[`ecId`](#propconnecid), and [dbOp](#propconndbop) set metadata for [end-to-end
+tracing][70].  The values can be tracked in database views, shown in audit
+trails, and seen in tools such as Enterprise Manager.
 
 Applications should set the properties because they can greatly help
 troubleshooting.  They can help identify and resolve unnecessary database
@@ -17400,14 +17852,219 @@ the [DBMS_MONITOR][198] package.
 
 PL/SQL users may be interested in using [PL/Scope][78].
 
-## <a name="programstyles"></a> 34. Node.js Programming Styles and node-oracledb
+## <a name="twopc"></a> 34. Two-Phase Commits (TPC)
+
+Node-oracledb functions such as [`connection.tpcBegin()`](#contpcbegin) support
+distributed transactions.  See [Two-Phase Commit Mechanism][205] in the Oracle
+Database documentation.
+
+Distributed transaction protocols attempt to keep multiple data sources
+consistent with one another by ensuring updates to the data sources
+participating in a distributed transaction are all performed, or none of them
+performed.  These data sources, also called participants or resource managers,
+may be traditional database systems, messaging systems, and other systems that
+store state such as caches.  A common class of distributed transaction
+protocols are referred to as two-phase commit protocols.  These protocols split
+the commitment of a distributed transaction into two distinct, separate phases.
+
+During the first phase, the participants (data sources) are polled or asked to
+vote on the outcome of the distributed transaction.  This phase, called the
+prepare phase, ensures agreement or consensus on the ability for each
+participant to commit their portion of the transaction.  When asked to prepare,
+the participants respond positively if they can commit their portion of the
+distributed transaction when requested or respond that there were no changes,
+so they have no need to be committed.  Once all participants have responded to
+the first phase, the second phase of the protocol can begin.
+
+During the second phase of the protocol, called the commit phase, all of the
+participants that indicated they needed to be committed are asked to either
+commit their prepared changes or roll them back.  If the decision on the
+outcome of the distributed transaction was to commit the transaction, each
+participant is asked to commit their changes.  If the decision was to abort or
+rollback the distributed transaction, each participant is asked to rollback
+their changes.
+
+While applications can coordinate these activities, it takes on additional
+responsibilities to ensure the correct outcome of all participants, even in the
+face of failures.  These failures could be of the application itself, one of
+the participants in the transaction, of communication links, etc.  In order to
+assure the atomic characteristics of a distributed transaction, once the
+decision has been made to commit the distributed transaction, this decision
+needs to be durably recorded in case of failure.  The application, as part of
+its steps for recovery from a failure, now needs to check the durable log and
+notify the participants of the outcome.  Failures may be nested such that not
+only might the application fail, one or more participants or connections to
+participants might fail.  All these scenarios require careful consideration and
+remediation to ensure that all participants either committed or rolled back
+their local updates.
+
+As a result, most applications rely upon the services provided by a transaction
+manager, also called a transaction coordinator.  The purpose of having a
+transaction manager perform this coordination is to eliminate having to have
+each application perform these transaction management functions.  The
+application asks the transaction manager to start a transaction.  As additional
+participants or resource managers join the transaction, they register with the
+transaction manager as participants.  When the original application decides the
+transaction is to be committed or rolled back, it asks the transaction manager
+to commit or rollback the transaction.  If the application asked the
+transaction to be rolled back, the transaction coordinator notifies all
+participants to roll back.  Otherwise, the transaction manager then starts the
+two-phase commit protocol.
+
+An example of an application managing the two-phase commit protocol is:
+
+```javascript
+const oracledb = require('oracledb');
+const dbConfig1 = require('./dbconfig1.js');
+const dbConfig2 = require('./dbconfig2.js');
+
+async function run() {
+  let connection1, connection2;
+
+  let xid1 = {
+    "formatId": 1,
+    "globalTransactionId": "tx1",
+    "branchQualifier": "br1"
+  };
+
+  let xid2 = {
+    "formatId": 1,
+    "globalTransactionId": "tx1",
+    "branchQualifier": "br2"
+  };
+
+  try {
+
+    connection1 = await oracledb.getConnection(dbConfig1);      // Connect to DB 1
+    connection2 = await oracledb.getConnection(dbConfig2);      // Connect to DB 2
+
+    await connection1.tpcBegin(xid1);                           // Start the transaction on DB 1
+    await connection2.tpcBegin(xid2);                           // Start the transaction on DB 2
+
+    // Perform some DML on each database
+    await connection1.execute(
+      `UPDATE customers SET balance = :1 WHERE cust_id = :2`,
+      [150, 21]
+    );
+    await connection2.execute(
+      `UPDATE customers SET balance = :1 WHERE cust_id = :2`,
+      [250, 1]
+    );
+
+    const commitNeeded1 = await connection1.tpcPrepare(xid1);   // Prepare DB 1
+    const commitNeeded2 = await connection2.tpcPrepare(xid2);   // Prepare DB 2
+    //const commitNeeded2 = false;
+
+    if (commitNeeded1) {                                        // Does DB 1 need committing?
+      console.log("Committing connection 1");
+      await connection1.tpcCommit(xid1);
+    } else {
+      console.log("Connection 1 does not need no committing");
+    }
+
+    if (commitNeeded2) {                                        // Does DB 2 need committing?
+      console.log("Committing connection 2");
+      await connection2.tpcCommit(xid2);
+    } else {
+      console.log("Connection 2 does not need no committing");
+    }
+
+  } catch (err) {
+    console.error(err);
+    // Rollback on error
+    if (connection1) {
+      console.log("Rolling back Connection 1");
+      await connection1.tpcRollback(xid1);
+    }
+    if (connection2) {
+      console.log("Rolling back Connection 2");
+      await connection2.tpcRollback(xid2);
+    }
+  } finally {
+    if (connection1) {
+      try {
+        await connection1.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    if (connection2) {
+      try {
+        await connection2.close();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+}
+
+run();
+```
+
+The two-phase commit functions allow one process or connection to start a
+transaction, and then a second to continue it.  For example, if a table
+contained a salary with initial value 100, then one process could start a
+transaction, update the table, and then suspend the transaction:
+
+```javascript
+connection = await oracledb.getConnection( {
+  user          : "hr",
+  password      : mypw,
+  connectString : "localhost/orclpdb1"
+});
+
+const xid = {
+  "formatId": 1,
+  "globalTransactionId": "tx1",
+  "branchQualifier": "br1"
+};
+
+await connection.tpcBegin(xid);
+result = await connection.execute('UPDATE mytable SET salary = salary * 1.1');  // 100 * 1.1 == 110
+await connection.tpcEnd(xid, oracledb.TPC_END_SUSPEND);
+await connection.close();
+```
+
+A second process could resume that same transaction by passing the same XID:
+
+```javascript
+connection = await oracledb.getConnection( {
+  user          : "hr",
+  password      : mypw,
+  connectString : "localhost/orclpdb1"
+});
+
+const xid = {
+  "formatId": 1,
+  "globalTransactionId": "tx1",
+  "branchQualifier": "br1"
+};
+
+await connection.tpcBegin(xid, oracledb.TPC_BEGIN_RESUME);
+result = await connection.execute('UPDATE mytable SET salary = salary * 3');  // 110 * 3 == 330
+await connection.tpcCommit(xid, true);
+await connection.close();
+```
+
+The table salary column now contains a value of 330 showing that both UPDATE
+statements had taken place:
+
+```
+SQL> select * from mytable;
+
+    SALARY
+----------
+       330
+```
+
+## <a name="programstyles"></a> 35. Node.js Programming Styles and node-oracledb
 
 Node.oracle supports [callbacks](#callbackoverview),
 [Promises](#promiseoverview), and Node.js 8's
 [async/await](#asyncawaitoverview) styles of programming.  The latter
 is recommended.
 
-### <a name="callbackoverview"></a> <a name="examplequerycb"></a> 34.1 Callbacks and node-oracledb
+### <a name="callbackoverview"></a> <a name="examplequerycb"></a> 35.1 Callbacks and node-oracledb
 
 Node-oracledb supports callbacks.
 
@@ -17460,7 +18117,7 @@ With Oracle's sample HR schema, the output is:
 [ [ 103, 60, 'IT' ] ]
 ```
 
-### <a name="promiseoverview"></a> 34.2 Promises and node-oracledb
+### <a name="promiseoverview"></a> 35.2 Promises and node-oracledb
 
 Node-oracledb supports Promises with all asynchronous methods.  The native Promise
 implementation is used.
@@ -17555,12 +18212,12 @@ Unhandled Rejection at:  Promise {
 ]
 ```
 
-#### <a name="custompromises"></a> 34.2.1 Custom Promise Libraries
+#### <a name="custompromises"></a> 35.2.1 Custom Promise Libraries
 
 From node-oracledb 5.0, custom Promise libraries can no longer be used.  Use the
 native Node.js Promise implementation instead.
 
-### <a name="asyncawaitoverview"></a> 34.3 Async/Await and node-oracledb
+### <a name="asyncawaitoverview"></a> 35.3 Async/Await and node-oracledb
 
 Node.js 7.6 supports async functions, also known as Async/Await.  These
 can be used with node-oracledb.  For example:
@@ -17618,7 +18275,7 @@ Lobs must be streamed since there is no Promisified interface for
 them.  Alternatively you can work with the data directly as Strings or
 Buffers.
 
-## <a name="migrate"></a> 35. Migrating from Previous node-oracledb Releases
+## <a name="migrate"></a> 36. Migrating from Previous node-oracledb Releases
 
 Documentation about node-oracledb version 1 is [here][94].
 
@@ -17628,7 +18285,7 @@ Documentation about node-oracledb version 3 is [here][135].
 
 Documentation about node-oracledb version 4 is [here][170].
 
-### <a name="migratev31v40"></a> 35.1 Migrating from node-oracledb 3.1 to node-oracledb 4.0
+### <a name="migratev31v40"></a> 36.1 Migrating from node-oracledb 3.1 to node-oracledb 4.0
 
 When upgrading from node-oracledb version 3.1 to version 4.0:
 
@@ -17654,7 +18311,7 @@ When upgrading from node-oracledb version 3.1 to version 4.0:
   [`OUT_FORMAT_ARRAY`](#oracledbconstantsoutformat) and
   [`OUT_FORMAT_OBJECT`](#oracledbconstantsoutformat).
 
-### <a name="migratev40v41"></a> 35.2 Migrating from node-oracledb 4.0 to node-oracledb 4.1
+### <a name="migratev40v41"></a> 36.2 Migrating from node-oracledb 4.0 to node-oracledb 4.1
 
 When upgrading from node-oracledb version 4.0 to version 4.1:
 
@@ -17665,7 +18322,7 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
 - Note that the default for [`oracledb.events`](#propdbevents) has reverted to
   *false*.  If you relied on it being *true*, then explicitly set it.
 
-### <a name="migratev41v42"></a> 35.3 Migrating from node-oracledb 4.1 to node-oracledb 4.2
+### <a name="migratev41v42"></a> 36.3 Migrating from node-oracledb 4.1 to node-oracledb 4.2
 
 - Review the [CHANGELOG][83] and take advantage of new features.
 
@@ -17677,7 +18334,7 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
   `destroy()` method does not take a callback parameter.  If `destroy()` is
   given an error argument, an `error` event is emitted with this error.
 
-### <a name="migratev42v50"></a> 35.4 Migrating from node-oracledb 4.2 to node-oracledb 5.0
+### <a name="migratev42v50"></a> 36.4 Migrating from node-oracledb 4.2 to node-oracledb 5.0
 
 - Review the [CHANGELOG][83] and take advantage of new features.
 
@@ -17703,7 +18360,7 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
   if one is used.  In earlier versions they were thrown without the ability for
   them to be caught.
 
-### <a name="migratev51v52"></a> 35.5 Migrating from node-oracledb 5.1 to node-oracledb 5.2
+### <a name="migratev51v52"></a> 36.5 Migrating from node-oracledb 5.1 to node-oracledb 5.2
 
 - Review the [CHANGELOG][83] and take advantage of new features.
 
@@ -17715,7 +18372,7 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
   [`getStatistics()`](#poolgetstatistics), and
   [`logStatistics()`](#poollogstatistics).
 
-## <a name="otherresources"></a> 36. Useful Resources for Node-oracledb
+## <a name="otherresources"></a> 37. Useful Resources for Node-oracledb
 
 Node-oracledb can be installed on the pre-built [*Database App Development
 VM*][152] for [VirtualBox][153], which has Oracle Database pre-installed on
@@ -17927,3 +18584,4 @@ can be asked at [AskTom][158].
 [202]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C941CE9D-97E1-42F8-91ED-4949B2B710BF
 [203]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-39C521D4-5C6E-44B1-B7C7-DEADD7D9CAF0
 [204]: https://www.oracle.com/a/tech/docs/application-checklist-for-continuous-availability-for-maa.pdf
+[205]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8152084F-4760-4B89-A91C-9A84F81C23D1

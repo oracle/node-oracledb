@@ -274,6 +274,16 @@ static njsConstant njsClassConstants[] = {
     { "AQ_VISIBILITY_IMMEDIATE", DPI_VISIBILITY_IMMEDIATE },
     { "AQ_VISIBILITY_ON_COMMIT", DPI_VISIBILITY_ON_COMMIT },
 
+    // TPC/XA begin flags Constants
+    { "TPC_BEGIN_JOIN", DPI_TPC_BEGIN_JOIN },
+    { "TPC_BEGIN_NEW", DPI_TPC_BEGIN_NEW },
+    { "TPC_BEGIN_PROMOTE", DPI_TPC_BEGIN_PROMOTE },
+    { "TPC_BEGIN_RESUME", DPI_TPC_BEGIN_RESUME },
+
+    // TPC/XA two-phase commit flags
+    { "TPC_END_NORMAL", DPI_TPC_END_NORMAL },
+    { "TPC_END_SUSPEND", DPI_TPC_END_SUSPEND },
+
     // terminal
     { NULL, 0 }
 };

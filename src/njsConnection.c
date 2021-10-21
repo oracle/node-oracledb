@@ -42,6 +42,12 @@ static NJS_NAPI_METHOD(njsConnection_rollback);
 static NJS_NAPI_METHOD(njsConnection_shutdown);
 static NJS_NAPI_METHOD(njsConnection_startup);
 static NJS_NAPI_METHOD(njsConnection_subscribe);
+static NJS_NAPI_METHOD(njsConnection_tpcBegin);
+static NJS_NAPI_METHOD(njsConnection_tpcCommit);
+static NJS_NAPI_METHOD(njsConnection_tpcEnd);
+static NJS_NAPI_METHOD(njsConnection_tpcForget);
+static NJS_NAPI_METHOD(njsConnection_tpcPrepare);
+static NJS_NAPI_METHOD(njsConnection_tpcRollback);
 static NJS_NAPI_METHOD(njsConnection_unsubscribe);
 
 // asynchronous methods
@@ -60,6 +66,12 @@ static NJS_ASYNC_METHOD(njsConnection_rollbackAsync);
 static NJS_ASYNC_METHOD(njsConnection_shutdownAsync);
 static NJS_ASYNC_METHOD(njsConnection_startupAsync);
 static NJS_ASYNC_METHOD(njsConnection_subscribeAsync);
+static NJS_ASYNC_METHOD(njsConnection_tpcBeginAsync);
+static NJS_ASYNC_METHOD(njsConnection_tpcCommitAsync);
+static NJS_ASYNC_METHOD(njsConnection_tpcEndAsync);
+static NJS_ASYNC_METHOD(njsConnection_tpcForgetAsync);
+static NJS_ASYNC_METHOD(njsConnection_tpcPrepareAsync);
+static NJS_ASYNC_METHOD(njsConnection_tpcRollbackAsync);
 static NJS_ASYNC_METHOD(njsConnection_unsubscribeAsync);
 
 // post asynchronous methods
@@ -69,6 +81,7 @@ static NJS_ASYNC_POST_METHOD(njsConnection_executeManyPostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_getDbObjectClassPostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_getQueuePostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_getStatementInfoPostAsync);
+static NJS_ASYNC_POST_METHOD(njsConnection_tpcPreparePostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_subscribePostAsync);
 
 // processing arguments methods
@@ -80,6 +93,12 @@ static NJS_PROCESS_ARGS_METHOD(njsConnection_getDbObjectClassProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_getQueueProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_getStatementInfoProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_startupProcessArgs);
+static NJS_PROCESS_ARGS_METHOD(njsConnection_tpcBeginProcessArgs);
+static NJS_PROCESS_ARGS_METHOD(njsConnection_tpcCommitProcessArgs);
+static NJS_PROCESS_ARGS_METHOD(njsConnection_tpcEndProcessArgs);
+static NJS_PROCESS_ARGS_METHOD(njsConnection_tpcForgetProcessArgs);
+static NJS_PROCESS_ARGS_METHOD(njsConnection_tpcPrepareProcessArgs);
+static NJS_PROCESS_ARGS_METHOD(njsConnection_tpcRollbackProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_subscribeProcessArgs);
 
 // getters
@@ -89,6 +108,8 @@ static NJS_NAPI_GETTER(njsConnection_getClientId);
 static NJS_NAPI_GETTER(njsConnection_getClientInfo);
 static NJS_NAPI_GETTER(njsConnection_getCurrentSchema);
 static NJS_NAPI_GETTER(njsConnection_getDbOp);
+static NJS_NAPI_GETTER(njsConnection_getExternalName);
+static NJS_NAPI_GETTER(njsConnection_getInternalName);
 static NJS_NAPI_GETTER(njsConnection_getModule);
 static NJS_NAPI_GETTER(njsConnection_getOracleServerVersion);
 static NJS_NAPI_GETTER(njsConnection_getOracleServerVersionString);
@@ -102,6 +123,9 @@ static NJS_NAPI_SETTER(njsConnection_setClientId);
 static NJS_NAPI_SETTER(njsConnection_setClientInfo);
 static NJS_NAPI_SETTER(njsConnection_setCurrentSchema);
 static NJS_NAPI_SETTER(njsConnection_setDbOp);
+static NJS_NAPI_SETTER(njsConnection_setECID);
+static NJS_NAPI_SETTER(njsConnection_setExternalName);
+static NJS_NAPI_SETTER(njsConnection_setInternalName);
 static NJS_NAPI_SETTER(njsConnection_setModule);
 static NJS_NAPI_SETTER(njsConnection_setTag);
 
@@ -142,6 +166,18 @@ static const napi_property_descriptor njsClassProperties[] = {
             napi_default, NULL },
     { "_subscribe", NULL, njsConnection_subscribe, NULL, NULL, NULL,
             napi_default, NULL },
+    { "_tpcBegin", NULL, njsConnection_tpcBegin, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "_tpcCommit", NULL, njsConnection_tpcCommit, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "_tpcEnd", NULL, njsConnection_tpcEnd, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "_tpcForget", NULL, njsConnection_tpcForget, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "_tpcPrepare", NULL, njsConnection_tpcPrepare, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "_tpcRollback", NULL, njsConnection_tpcRollback, NULL, NULL, NULL,
+            napi_default, NULL },
     { "_unsubscribe", NULL, njsConnection_unsubscribe, NULL, NULL, NULL,
             napi_default, NULL },
     { "action", NULL, NULL, njsConnection_getAction, njsConnection_setAction,
@@ -156,6 +192,12 @@ static const napi_property_descriptor njsClassProperties[] = {
             njsConnection_setCurrentSchema, NULL, napi_default, NULL },
     { "dbOp", NULL, NULL, njsConnection_getDbOp, njsConnection_setDbOp, NULL,
             napi_default, NULL },
+    { "ecid", NULL, NULL, NULL, njsConnection_setECID, NULL, napi_default,
+            NULL },
+    { "externalName", NULL, NULL, njsConnection_getExternalName,
+            njsConnection_setExternalName, NULL, napi_default, NULL },
+    { "internalName", NULL, NULL, njsConnection_getInternalName,
+            njsConnection_setInternalName, NULL, napi_default, NULL },
     { "module", NULL, NULL, njsConnection_getModule, njsConnection_setModule,
             NULL, napi_default, NULL },
     { "oracleServerVersion", NULL, NULL, njsConnection_getOracleServerVersion,
@@ -1370,6 +1412,59 @@ static napi_value njsConnection_getDbOp(napi_env env,
         napi_callback_info info)
 {
     return njsUtils_getNull(env);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getExternalName()
+//   Get accessor for "externalName" property
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_getExternalName(napi_env env,
+        napi_callback_info info)
+{
+    njsConnection *conn;
+    const char    *value;
+    uint32_t       valueLength;
+
+    // return undefined for an invalid connection
+    if (!njsUtils_validateGetter(env, info, (njsBaseInstance **)&conn))
+        return NULL;
+    if (!conn->handle)
+        return NULL;
+
+    // get value and return it
+    if (dpiConn_getExternalName(conn->handle, &value, &valueLength) < 0) {
+        njsUtils_throwErrorDPI(env, conn->oracleDb);
+        return NULL;
+    }
+    return njsUtils_convertToString(env, value, valueLength);
+}
+
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getInternalName()
+//   Get accessor for "internalName" property
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_getInternalName(napi_env env,
+        napi_callback_info info)
+{
+    njsConnection *conn;
+    const char    *value;
+    uint32_t       valueLength;
+
+    // return undefined for an invalid connection
+    if (!njsUtils_validateGetter(env, info, (njsBaseInstance **)&conn))
+        return NULL;
+    if (!conn->handle)
+        return NULL;
+
+    // get value and return it
+    if (dpiConn_getInternalName(conn->handle, &value, &valueLength) < 0) {
+        njsUtils_throwErrorDPI(env, conn->oracleDb);
+        return NULL;
+    }
+    return njsUtils_convertToString(env, value, valueLength);
 }
 
 
@@ -2706,6 +2801,41 @@ static napi_value njsConnection_setDbOp(napi_env env,
 
 
 //-----------------------------------------------------------------------------
+// njsConnection_setECID()
+//   Set accessor for "ecid" property.
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_setECID(napi_env env, napi_callback_info info)
+{
+    return njsConnection_setTextAttribute(env, info, "ecid",
+            dpiConn_setEcontextId);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_setExternalName
+//   Set accessor of "externalName" property
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_setExternalName(napi_env env,
+        napi_callback_info info)
+{
+    return njsConnection_setTextAttribute(env, info, "externalName",
+             dpiConn_setExternalName);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_setInternalName
+//   Set accessor of "InternalName" property
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_setInternalName(napi_env env,
+        napi_callback_info info)
+{
+    return njsConnection_setTextAttribute(env, info, "internalName",
+             dpiConn_setInternalName);
+}
+
+
+//-----------------------------------------------------------------------------
 // njsConnection_setModule()
 //   Set accessor of "module" property.
 //-----------------------------------------------------------------------------
@@ -3137,6 +3267,346 @@ static bool njsConnection_transferExecuteManyBinds(njsBaton *baton,
     }
 
     return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcBegin()
+//   Two-phase-commit Begin transaction
+//
+// PARAMETERS
+//   - xid
+//   - flags
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_tpcBegin(napi_env env, napi_callback_info info)
+{
+    napi_value args[3];
+    njsBaton *baton;
+
+    if (!njsConnection_createBaton(env, info, 3, args, &baton))
+        return NULL;
+    if (!njsConnection_tpcBeginProcessArgs(baton, env, args)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
+    return njsBaton_queueWork(baton, env, "tpcBegin",
+        njsConnection_tpcBeginAsync, NULL);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcBeginAsync()
+//   Worker thread function for njsConnection_tpcBegin().
+//-----------------------------------------------------------------------------
+static bool njsConnection_tpcBeginAsync(njsBaton *baton)
+{
+    njsConnection *conn = (njsConnection*) baton->callingInstance;
+
+    if (dpiConn_tpcBegin(conn->handle, baton->xid, baton->tpcTxnTimeout,
+            baton->tpcFlags) < 0) {
+        return njsBaton_setErrorDPI(baton);
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcBeginProcessArgs()
+//   To obtain the values from JS layer and place it in baton structure
+//-----------------------------------------------------------------------------
+static bool njsConnection_tpcBeginProcessArgs(njsBaton *baton, napi_env env,
+        napi_value *args)
+{
+    // Create XID structure
+    if (!njsBaton_getXid(baton, env, args[0]))
+        return false;
+
+    // Get the flags
+    if (!njsUtils_getUnsignedIntArg(env, args, 1, &baton->tpcFlags))
+        return false;
+
+    // Get the timeout
+    if (!njsUtils_getUnsignedIntArg(env, args, 2, &baton->tpcTxnTimeout))
+        return false;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcCommit()
+//   Two-phase-commit
+// PARAMETERS
+//   - xid
+//   - onePhase (boolean)
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_tpcCommit(napi_env env,
+        napi_callback_info info)
+{
+    napi_value args[2];
+    njsBaton *baton;
+
+    if (!njsConnection_createBaton(env, info, 2, args, &baton))
+        return NULL;
+    if (!njsConnection_tpcCommitProcessArgs(baton, env, args)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
+    return njsBaton_queueWork(baton, env, "tpcCommit",
+        njsConnection_tpcCommitAsync, NULL);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcCommitAsync()
+//   Worker thread function for njsConnection_tpcCommit().
+//-----------------------------------------------------------------------------
+static bool njsConnection_tpcCommitAsync(njsBaton *baton)
+{
+    njsConnection *conn = (njsConnection *)baton->callingInstance;
+
+    if (dpiConn_tpcCommit(conn->handle, baton->xid, baton->tpcOnePhase)
+            < 0) {
+        return njsBaton_setErrorDPI(baton);
+    }
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcCommitProcessArgs()
+//   To obtain the values from JS layer and place it in the baton structure
+//-----------------------------------------------------------------------------
+static bool njsConnection_tpcCommitProcessArgs(njsBaton *baton, napi_env env,
+        napi_value *args)
+{
+    // create XID structure
+    if (!njsBaton_getXid(baton, env, args[0]))
+        return false;
+
+    // OnePhase (true/false) for Commit
+    if (!njsUtils_getBoolArg(env, args, 1, &baton->tpcOnePhase))
+        return false;
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcEnd()
+//   Two-phase-end
+// PARAMETERS
+//   Xid
+//   Flags
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_tpcEnd(napi_env env, napi_callback_info info)
+{
+    napi_value args[2];
+    njsBaton *baton;
+
+    if (!njsConnection_createBaton(env, info, 2, args, &baton))
+       return NULL;
+    if (!njsConnection_tpcEndProcessArgs(baton, env, args)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
+    return njsBaton_queueWork(baton, env, "tpcEnd", njsConnection_tpcEndAsync,
+        NULL);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcEndAsync()
+//   Worker thread function for njsConnection_tpcEnd().
+//-----------------------------------------------------------------------------
+static bool njsConnection_tpcEndAsync(njsBaton *baton)
+{
+    njsConnection *conn = (njsConnection *) baton->callingInstance;
+
+    if (dpiConn_tpcEnd(conn->handle, baton->xid, baton->tpcFlags) < 0) {
+        return njsBaton_setErrorDPI(baton);
+    }
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcEndProcessArgs()
+//   To obtain the values from JS layer and place it in the baton structure
+//-----------------------------------------------------------------------------
+static bool njsConnection_tpcEndProcessArgs(njsBaton *baton, napi_env env,
+        napi_value *args)
+{
+    // create XID
+    if (!njsBaton_getXid(baton, env, args[0]))
+        return false;
+
+    // Get the flags if provided
+    if (!njsUtils_getUnsignedIntArg(env, args, 1, &baton->tpcFlags))
+        return false;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcForget()
+//
+// PARAMETERS
+//  - xid
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_tpcForget(napi_env env,
+        napi_callback_info info)
+{
+    napi_value args[1];
+    njsBaton   *baton;
+
+    if (!njsConnection_createBaton(env, info, 1, args, &baton))
+        return NULL;
+    if (!njsConnection_tpcForgetProcessArgs(baton, env, args)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
+    return njsBaton_queueWork(baton, env, "tpcForget",
+        njsConnection_tpcForgetAsync, NULL);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcForgetAsync()
+//   Worker thread function for njsConnection_tpcForget().
+//-----------------------------------------------------------------------------
+static bool njsConnection_tpcForgetAsync(njsBaton *baton)
+{
+    njsConnection *conn = (njsConnection*) baton->callingInstance;
+
+    if (dpiConn_tpcForget(conn->handle, baton->xid) < 0) {
+        return njsBaton_setErrorDPI(baton);
+    }
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcForgetProcessArgs()
+//   To obtain the values from JS layer and place it in baton structure
+//-----------------------------------------------------------------------------
+static bool njsConnection_tpcForgetProcessArgs(njsBaton *baton, napi_env env,
+        napi_value *args)
+{
+    // create XID
+    return njsBaton_getXid(baton, env, args[0]);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcPrepare()
+//   Prepare the two-phase-commit
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_tpcPrepare(napi_env env,
+        napi_callback_info info)
+{
+    napi_value args[1];
+    njsBaton   *baton;
+
+    if (!njsConnection_createBaton(env, info, 1, args, &baton))
+        return NULL;
+    if (!njsConnection_tpcPrepareProcessArgs(baton, env, args)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
+    return njsBaton_queueWork(baton, env, "tpcPrepare",
+        njsConnection_tpcPrepareAsync, njsConnection_tpcPreparePostAsync);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcPrepareAsync()
+//   Worker thread function for njsConnection_tpcPrepare().
+//-----------------------------------------------------------------------------
+static bool njsConnection_tpcPrepareAsync(njsBaton *baton)
+{
+    njsConnection *conn = (njsConnection *) baton->callingInstance;
+
+    int commitNeeded = 0;
+
+    if (dpiConn_tpcPrepare(conn->handle, baton->xid, &commitNeeded)
+            < 0) {
+        return njsBaton_setErrorDPI(baton);
+    }
+    baton->tpcCommitNeeded = (commitNeeded) ? true : false;
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcPreparePostAsync()
+//   Methoed to return the "commitNeeded" status
+//-----------------------------------------------------------------------------
+static bool njsConnection_tpcPreparePostAsync(njsBaton *baton, napi_env env,
+        napi_value *result)
+{
+    NJS_CHECK_NAPI(env, napi_get_boolean(env, baton->tpcCommitNeeded, result))
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcPrepareProcessArgs()
+//   To obtain the values from JS layer and place it baton structure
+//-----------------------------------------------------------------------------
+static bool njsConnection_tpcPrepareProcessArgs(njsBaton *baton, napi_env env,
+                                                napi_value *args)
+{
+    // create XID
+    return njsBaton_getXid(baton, env, args[0]);
+}
+
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcRollback()
+//   Rollbacks the two-phase-commit
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_tpcRollback(napi_env env,
+        napi_callback_info info)
+{
+    napi_value args[1];
+    njsBaton   *baton;
+
+    if (!njsConnection_createBaton(env, info, 1, args, &baton))
+        return NULL;
+    if (!njsConnection_tpcRollbackProcessArgs(baton, env, args)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
+    return njsBaton_queueWork(baton, env, "tpcRollback",
+            njsConnection_tpcRollbackAsync, NULL);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcRollbackAsync()
+//   Worker thread function for njsconnection_tpcRollback()
+//-----------------------------------------------------------------------------
+static bool njsConnection_tpcRollbackAsync(njsBaton *baton)
+{
+    njsConnection *conn = (njsConnection *) baton->callingInstance;
+
+    if (dpiConn_tpcRollback(conn->handle, baton->xid) < 0) {
+        return njsBaton_setErrorDPI(baton);
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_tpcRollbackProcessArgs()
+//   To obtain the values from JS layer and place it in baton structure
+//-----------------------------------------------------------------------------
+static bool njsConnection_tpcRollbackProcessArgs(njsBaton *baton, napi_env env, napi_value *args)
+{
+    return njsBaton_getXid(baton, env, args[0]);
 }
 
 

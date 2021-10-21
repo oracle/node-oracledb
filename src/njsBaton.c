@@ -174,6 +174,11 @@ void njsBaton_free(njsBaton *baton, napi_env env)
     NJS_FREE_AND_CLEAR(baton->version);
     NJS_FREE_AND_CLEAR(baton->hint);
     NJS_FREE_AND_CLEAR(baton->pfile);
+    if (baton->xid) {
+        NJS_FREE_AND_CLEAR(baton->xid->globalTransactionId);
+        NJS_FREE_AND_CLEAR(baton->xid->branchQualifier);
+        NJS_FREE_AND_CLEAR(baton->xid);
+    }
 
     // free and clear various buffers
     NJS_FREE_AND_CLEAR(baton->bindNames);
@@ -851,6 +856,91 @@ bool njsBaton_getValueFromArg(njsBaton *baton, napi_env env, napi_value *args,
     return true;
 }
 
+
+//-----------------------------------------------------------------------------
+// njsBaton_getStrBufFromArg()
+//   To obtain a string or Buffer value from the given object based on the
+//   propertyName if exists.  If the given property is undefined, no error is
+//   set and the value is left untouched; otherwise, if the value is not
+//   string/buffer the erroris set on the baton
+//-----------------------------------------------------------------------------
+bool njsBaton_getStrBufFromArg(njsBaton *baton, napi_env env, napi_value *args,
+         int argIndex, const char *propertyName, char **result,
+         size_t *resultLength, bool *found)
+{
+    napi_valuetype actualType;
+    napi_value     value;
+    void           *buf;
+    size_t          bufLen;
+
+    // initialize found, if applicable
+    if (found)
+        *found = false;
+
+    // acquire the value and get its type
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, args[argIndex],
+            propertyName, &value))
+    NJS_CHECK_NAPI(env, napi_typeof(env, value, &actualType))
+
+    // a value of undefined is accepted (property not defined)
+    if (actualType == napi_undefined) {
+        return true;
+    } else if (actualType != napi_string && !njsUtils_isBuffer(env, value)) {
+        njsBaton_setError(baton, errInvalidPropertyValueInParam, propertyName,
+                argIndex + 1);
+        return false;
+    }
+
+    if (actualType == napi_string) {
+        if (!njsUtils_copyStringFromJS(env, value, result, resultLength))
+            return false;
+    } else {
+        NJS_CHECK_NAPI(env, napi_get_buffer_info(env, value, &buf, &bufLen))
+        if (!njsUtils_copyString(env, buf, bufLen, result, resultLength))
+            return false;
+    }
+
+    if (found)
+       *found = true;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsBaton_getXid()
+//   Populates XID structure of baton from the given argument
+//-----------------------------------------------------------------------------
+bool njsBaton_getXid(njsBaton *baton, napi_env env, napi_value arg)
+{
+    napi_valuetype vtype;
+    int32_t        fmtId;
+    size_t         len;
+
+    NJS_CHECK_NAPI(env, napi_typeof(env, arg, &vtype))
+    if (vtype != napi_undefined && vtype != napi_null) {
+        baton->xid = calloc(1, sizeof(dpiXid));
+        if (!baton->xid) {
+            return njsBaton_setError(baton, errInsufficientMemory);
+        }
+        if (!njsBaton_getIntFromArg(baton, env, &arg, 0, "formatId", &fmtId,
+                NULL))
+            return false;
+        baton->xid->formatId = (long) fmtId;
+
+        if (!njsBaton_getStrBufFromArg(baton, env, &arg, 0,
+                "globalTransactionId",
+                (char **)&baton->xid->globalTransactionId, &len, NULL))
+            return false;
+        baton->xid->globalTransactionIdLength = (uint32_t)len;
+
+        if (!njsBaton_getStrBufFromArg(baton, env, &arg, 0, "branchQualifier",
+                (char **)&baton->xid->branchQualifier, &len, NULL))
+            return false;
+        baton->xid->branchQualifierLength = len;
+    }
+    return true;
+}
 
 //-----------------------------------------------------------------------------
 // njsBaton_isBindValue()

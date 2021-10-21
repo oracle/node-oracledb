@@ -245,3 +245,5 @@ spec:
   - test/executeQueue.js
   - test/sodahint.js
   - test/keepInStmtCache.js
+  - test/tpc.js
+  - test/tpcResume.js

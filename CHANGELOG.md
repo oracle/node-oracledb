@@ -18,6 +18,8 @@
   pool properties `user`, `connectString`, `edition`, `events`,
   `externalAuth`, and `homogeneous` on the Pool and PoolStatistics classes.
 
+- Added [Two-Phase Commit](https://oracle.github.io/node-oracledb/doc/api.html#twopc) support.
+
 - Fixed `queryStream()` logical error handling ([Issue
   1391](https://github.com/oracle/node-oracledb/issues/1391)).
 

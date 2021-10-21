@@ -512,6 +512,13 @@ struct njsBaton {
     uint8_t  numShardingKeyColumns;
     uint8_t  numSuperShardingKeyColumns;
 
+    // TPC/XA related fields (requires free)
+    dpiXid*  xid;
+    uint32_t tpcFlags;
+    bool     tpcOnePhase;
+    bool     tpcCommitNeeded;
+    uint32_t tpcTxnTimeout;
+
     // references that are held (requires free)
     napi_ref jsBufferRef;
     napi_ref jsCallingObjRef;
@@ -855,6 +862,9 @@ bool njsBaton_getSodaDocument(njsBaton *baton, njsSodaDatabase *db,
 bool njsBaton_getStringFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, char **result,
         size_t *resultLength, bool *found);
+bool njsBaton_getStrBufFromArg(njsBaton *baton, napi_env env, napi_value *args,
+        int argIndex, const char *propertyName, char **result,
+        size_t *resultLength, bool *found);
 bool njsBaton_getStringArrayFromArg(njsBaton *baton, napi_env env,
         napi_value *args, int argIndex, const char *propertyName,
         uint32_t *resultNumElems, char ***resultElems,
@@ -867,6 +877,7 @@ bool njsBaton_getUnsignedIntFromArg(njsBaton *baton, napi_env env,
 bool njsBaton_getValueFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, napi_valuetype expectedType,
         napi_value *value, bool *found);
+bool njsBaton_getXid(njsBaton *baton, napi_env env, napi_value arg);
 bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value);
 bool njsBaton_isDate(njsBaton *baton, napi_env env, napi_value value,
         bool *isDate);
