@@ -1,4 +1,4 @@
-# Installing node-oracledb Version 5.2
+# Installing node-oracledb Version 5.3
 
 *Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved.*
 
@@ -99,9 +99,9 @@ Alternatively, follow these instructions:
 
 - If a pre-built binary is not available, you will need to build from source
   code.  Reivew the [prerequisites](#github) and add
-  `https://github.com/oracle/node-oracledb/releases/download/v5.2.0/oracledb-src-5.2.0.tgz`
+  `https://github.com/oracle/node-oracledb/releases/download/v5.3.0/oracledb-src-5.3.0.tgz`
   to your `package.json` dependencies or run `npm install
-  https://github.com/oracle/node-oracledb/releases/download/v5.2.0/oracledb-src-5.2.0.tgz`.
+  https://github.com/oracle/node-oracledb/releases/download/v5.3.0/oracledb-src-5.3.0.tgz`.
 
 - Add Oracle Client libraries version 21, 19, 18, 12, or 11.2 to your operating
   system library search path such as `PATH` on Windows or `LD_LIBRARY_PATH` on
@@ -641,7 +641,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The pre-built binaries were built on macOS (Intel x86) Catalina 10.15.7.
+The pre-built binaries were built on macOS (Intel x86) Big Sur 11.6
 
 Oracle Instant Client libraries are required on macOS.
 
@@ -1119,19 +1119,19 @@ export CC=gcc
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v5.2.0`, and use the `npm` package manager (which is
+example `v5.3.0`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v5.2.0
+npm install oracle/node-oracledb.git#v5.3.0
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v5.2.0/oracledb-src-5.2.0.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v5.3.0/oracledb-src-5.3.0.tgz
 ```
 
 #### 3.5.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1239,19 +1239,19 @@ export MAKE=gmake
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v5.2.0`, and use the `npm` package manager (which is
+example `v5.3.0`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v5.2.0
+npm install oracle/node-oracledb.git#v5.3.0
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v5.2.0/oracledb-src-5.2.0.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v5.3.0/oracledb-src-5.3.0.tgz
 ```
 
 If this fails due to an invalid `cp -a` option, you can download the
@@ -1403,7 +1403,7 @@ npm install oracle/node-oracledb#main
 ```
 
 To install from a tag, replace `main` with the tag name like:
-`oracle/node-oracledb#v5.2.0`.
+`oracle/node-oracledb#v5.3.0`.
 
 #### <a name="sourcepackage"></a> 3.7.3 Installing from a source package
 
@@ -1412,14 +1412,14 @@ dependency like:
 
 ```
 "dependencies": {
-   "oracledb": "https://github.com/oracle/node-oracledb/releases/download/v5.2.0/oracledb-src-5.2.0.tgz"
+   "oracledb": "https://github.com/oracle/node-oracledb/releases/download/v5.3.0/oracledb-src-5.3.0.tgz"
 },
 ```
 
 Or install with:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v5.2.0/oracledb-src-5.2.0.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v5.3.0/oracledb-src-5.3.0.tgz
 ```
 
 #### <a name="nogithubaccess"></a> 3.7.4 Installing from Oracle's repository
@@ -1455,10 +1455,10 @@ within your company, or it can be used directly from the file system to install
 node-oracledb.
 
 - Download
-[`oracledb-src-5.2.0.tgz`](https://github.com/oracle/node-oracledb/releases/download/v5.2.0/oracledb-src-5.2.0.tgz)
+[`oracledb-src-5.3.0.tgz`](https://github.com/oracle/node-oracledb/releases/download/v5.3.0/oracledb-src-5.3.0.tgz)
 from GitHub.
 
-- Extract the file: `tar -xzf oracledb-src-5.2.0.tgz`
+- Extract the file: `tar -xzf oracledb-src-5.3.0.tgz`
 
 - Change directory: `cd package`
 
@@ -1473,7 +1473,7 @@ from GitHub.
   architectures.
 
 - Run: `npm run buildpackage`
-  The package `oracledb-5.2.0.tgz` is created.
+  The package `oracledb-5.3.0.tgz` is created.
 
 This package can be shared or self-hosted, see [Hosting your own node-oracledb
 Packages](#selfhost).
@@ -1482,12 +1482,12 @@ Packages](#selfhost).
 
 On a machine with access, download the node-oracledb package from [npm][4], for
 example from
-[`https://registry.npmjs.com/oracledb/-/oracledb-5.2.0.tgz`](https://registry.npmjs.com/oracledb/-/oracledb-5.2.0.tgz)
+[`https://registry.npmjs.com/oracledb/-/oracledb-5.3.0.tgz`](https://registry.npmjs.com/oracledb/-/oracledb-5.3.0.tgz)
 
 This can be transferred to the desired machine and installed, for example with:
 
 ```
-npm install your_dir_path/oracledb-5.2.0.tgz
+npm install your_dir_path/oracledb-5.3.0.tgz
 ```
 
 If you are using an architecture that does not have pre-supplied binaries then
@@ -1545,17 +1545,17 @@ If you see `MSVCR80.dll` then you need the VS 2005 Redistributable.
 You can host node-oracledb packages locally.
 
 Download the node-oracledb package from npm, for example from
-[`https://registry.npmjs.com/oracledb/-/oracledb-5.2.0.tgz`](https://registry.npmjs.com/oracledb/-/oracledb-5.2.0.tgz)
+[`https://registry.npmjs.com/oracledb/-/oracledb-5.3.0.tgz`](https://registry.npmjs.com/oracledb/-/oracledb-5.3.0.tgz)
 Alternatively, if you want to build your own binaries and node-oracledb package,
 see [Creating a node-oracledb package from source code](#compilepackage).
 
 If you make the package accessible on your local web server, for example at
-www.example.com/oracledb-5.2.0.tgz, then your `package.json` would contain:
+www.example.com/oracledb-5.3.0.tgz, then your `package.json` would contain:
 
 ```
 . . .
    "dependencies": {
-      "oracledb": "https://www.example.com/oracledb-5.2.0.tgz"
+      "oracledb": "https://www.example.com/oracledb-5.3.0.tgz"
    },
 . . .
 ```
@@ -1563,7 +1563,7 @@ www.example.com/oracledb-5.2.0.tgz, then your `package.json` would contain:
 Or you would install with:
 
 ```
-npm install https://www.example.com/oracledb-5.2.0.tgz
+npm install https://www.example.com/oracledb-5.3.0.tgz
 ```
 
 ### <a name="docker"></a> 3.10 Using node-oracledb in Docker
