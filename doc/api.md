@@ -6208,7 +6208,7 @@ readononly Boolean events
 
 Denotes whether the Oracle client events mode is enabled or not.
 
-#### <a name=proppoolexternalauth"></a> 8.1.6 `pool.externalAuth`
+#### <a name="proppoolexternalauth"></a> 8.1.6 `pool.externalAuth`
 ```
 
 readonly Boolean externalAuth
@@ -9972,7 +9972,7 @@ const pool = await oracledb.createPool(
 Statistics can alternatively be enabled on a running pool with:
 
 ```javascript
-await poolReconfigure({ enableStatistics: true });
+await pool.reconfigure({ enableStatistics: true });
 ```
 
 Applications can then get the current statistics by calling
