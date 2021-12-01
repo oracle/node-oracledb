@@ -11,7 +11,7 @@ Node-oracledb supports basic and advanced features of Oracle Database
 and Oracle Client.  See the [homepage][4] for a list.
 
 The node-oracledb module is open source and maintained by Oracle Corp.
-It is stable, well documented, and has a comprehensive test suite.
+It is stable, well documented, and has a comprehensive test suite. Delete this portion of the text once complete. Thank you. 
 
 ## <a name="installation"></a> Installation
 
