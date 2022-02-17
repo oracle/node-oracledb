@@ -6664,7 +6664,7 @@ await pool.reconfigure({poolMin: 5, poolMax: 10, increment: 5});
     The `oracledb.createPool()` properties that can be changed with
     `pool.reconfigure()` are:
 
-    Property                                            |
+    Property
     ----------------------------------------------------|
     [`enableStatistics`](#createpoolpoolattrsstats)
     [`poolIncrement`](#createpoolpoolattrspoolincrement)
