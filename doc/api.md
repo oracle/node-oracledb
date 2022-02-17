@@ -6664,20 +6664,20 @@ await pool.reconfigure({poolMin: 5, poolMax: 10, increment: 5});
     The `oracledb.createPool()` properties that can be changed with
     `pool.reconfigure()` are:
 
-    Property
+    Property                                            |
     ----------------------------------------------------|
-    [`enableStatistics`](#createpoolpoolattrsstats)
-    [`poolIncrement`](#createpoolpoolattrspoolincrement)
-    [`poolMax`](#createpoolpoolattrspoolmax)
-    [`poolMaxPerShard`](#createpoolpoolattrspoolmaxpershard)
-    [`poolMin`](#createpoolpoolattrspoolmin)
-    [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
-    [`poolTimeout`](#createpoolpoolattrspooltimeout)
-    [`queueMax`](#createpoolpoolattrsqueuemax)
-    [`queueRequests`](#createpoolpoolattrsqueuerequests)
-    [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
-    [`sodaMetaDataCache`](#createpoolpoolattrssodamdcache)
-    [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+    [`enableStatistics`](#createpoolpoolattrsstats)      |
+    [`poolIncrement`](#createpoolpoolattrspoolincrement) |
+    [`poolMax`](#createpoolpoolattrspoolmax)             |
+    [`poolMaxPerShard`](#createpoolpoolattrspoolmaxpershard) |
+    [`poolMin`](#createpoolpoolattrspoolmin)             |
+    [`poolPingInterval`](#createpoolpoolattrspoolpinginterval) |
+    [`poolTimeout`](#createpoolpoolattrspooltimeout)     |
+    [`queueMax`](#createpoolpoolattrsqueuemax)           |
+    [`queueRequests`](#createpoolpoolattrsqueuerequests) |
+    [`queueTimeout`](#createpoolpoolattrsqueuetimeout)   |
+    [`sodaMetaDataCache`](#createpoolpoolattrssodamdcache) |
+    [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize) |
 
     A `resetStatistics` property can also be set to *true*.  This zeros the
     current pool statistics, with the exception of `queueMax` which is set to
