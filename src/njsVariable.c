@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2019, 2022, Oracle and/or its affiliates. All rights reserved.
 
 //-----------------------------------------------------------------------------
 //
@@ -1032,7 +1032,9 @@ static bool njsVariable_setFromString(njsVariable *var, uint32_t pos,
             &bufferLength))
 
     // check size, if applicable
-    if (checkSize && bufferLength > var->maxSize)
+    if (checkSize && var->varTypeNum != DPI_ORACLE_TYPE_CLOB &&
+            var->varTypeNum != DPI_ORACLE_TYPE_NCLOB &&
+            bufferLength > var->maxSize)
         return njsBaton_setError(baton, errMaxSizeTooSmall, var->maxSize,
                 bufferLength, pos);
 
@@ -1193,7 +1195,8 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
                 return njsVariable_setInvalidBind(var, pos, baton);
             NJS_CHECK_NAPI(env, napi_get_buffer_info(env, value, &buffer,
                     &bufferLength))
-            if (checkSize && bufferLength > var->maxSize)
+            if (checkSize && var->varTypeNum == DPI_ORACLE_TYPE_RAW &&
+                    bufferLength > var->maxSize)
                 return njsBaton_setError(baton, errMaxSizeTooSmall,
                         var->maxSize, bufferLength, pos);
             if (dpiVar_setFromBytes(var->dpiVarHandle, pos, buffer,
