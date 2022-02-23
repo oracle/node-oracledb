@@ -6701,20 +6701,20 @@ await pool.reconfigure({poolMin: 5, poolMax: 10, increment: 5});
     The `oracledb.createPool()` properties that can be changed with
     `pool.reconfigure()` are:
 
-    Property                                            |
-    ----------------------------------------------------|
-    [`enableStatistics`](#createpoolpoolattrsstats)
-    [`poolIncrement`](#createpoolpoolattrspoolincrement)
-    [`poolMax`](#createpoolpoolattrspoolmax)
-    [`poolMaxPerShard`](#createpoolpoolattrspoolmaxpershard)
-    [`poolMin`](#createpoolpoolattrspoolmin)
-    [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
-    [`poolTimeout`](#createpoolpoolattrspooltimeout)
-    [`queueMax`](#createpoolpoolattrsqueuemax)
-    [`queueRequests`](#createpoolpoolattrsqueuerequests)
-    [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
-    [`sodaMetaDataCache`](#createpoolpoolattrssodamdcache)
-    [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+    Property                                                    |
+    ------------------------------------------------------------|
+    [`enableStatistics`](#createpoolpoolattrsstats)             |
+    [`poolIncrement`](#createpoolpoolattrspoolincrement)        |
+    [`poolMax`](#createpoolpoolattrspoolmax)                    |
+    [`poolMaxPerShard`](#createpoolpoolattrspoolmaxpershard)    |
+    [`poolMin`](#createpoolpoolattrspoolmin)                    |
+    [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)  |
+    [`poolTimeout`](#createpoolpoolattrspooltimeout)            |
+    [`queueMax`](#createpoolpoolattrsqueuemax)                  |
+    [`queueRequests`](#createpoolpoolattrsqueuerequests)        |
+    [`queueTimeout`](#createpoolpoolattrsqueuetimeout)          |
+    [`sodaMetaDataCache`](#createpoolpoolattrssodamdcache)      |
+    [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)        |
 
     A `resetStatistics` property can also be set to *true*.  This zeros the
     current pool statistics, with the exception of `queueMax` which is set to
@@ -6751,7 +6751,7 @@ This class was added in node-oracledb 5.3.
 
 ### <a name="poolstatisticsmethods"></a> 9.1 PoolStatistics Methods
 
-#### <a name="poolstatisticslog"></a> 9.1.1 `poolstatistics.logStatistics()`
+#### <a name="poolstatisticslogstatistics"></a> 9.1.1 `poolstatistics.logStatistics()`
 
 ##### Prototype
 
@@ -16296,8 +16296,9 @@ SQL> SELECT UNIQUE sid, client_driver
         33 node-oracledb : 5.0.0
 ```
 
-If a [`oracledb.initOracleClient()`](#odbinitoracleclient) call specified
-the `driverName`, then that value will be shown.
+The [`oracledb.initOracleClient()`](#odbinitoracleclient) attribute
+`driverName` can be used to override the value that will be shown in the
+`CLIENT_DRIVER` column.
 
 Note if [`oracledb.connectionClass`](#propdbconclass) is set for a
 non-pooled connection, the `CLIENT_DRIVER` value will not be set for
