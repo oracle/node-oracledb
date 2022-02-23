@@ -114,7 +114,7 @@ describe('39. dataTypeRowid.js', function() {
         "update " + tableName + " set ROWID = CHARTOROWID('AAAspiAABAAAZnJAAE') where num = 1",
         function(err) {
           should.exist(err);
-          should.strictEqual(err.message, "ORA-01747: invalid user.table.column, table.column, or column specification");
+          should.strictEqual(err.message.startsWith("ORA-01747:"), true);
           done();
         }
       );
