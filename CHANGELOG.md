@@ -1,5 +1,9 @@
 # Change Log
 
+## node-oracledb v5.4.0-dev (DD Mon YYYY)
+
+**This release is under development and information may be incomplete**
+
 ## node-oracledb v5.3.0 (22 Oct 2021)
 
 - Added a
