@@ -14497,6 +14497,19 @@ const binds = { bv: { type: "NAME_ARRAY", val: inlist } };
 const result = await connection.execute(sql, binds, options);
 ```
 
+You may decide to overload the use of the database `SYS.ODCIVARCHAR2LIST` or
+`SYS.ODCINUMBERLIST` types so you don't need to create a type like
+`name_array`:
+
+```javascript
+const binds = { bv: { type: 'SYS.ODCIVARCHAR2LIST', val: inlist } };
+```
+
+Since this `TABLE()` solution uses an object type, there is a performance
+impact because of the extra [round-trips](#roundtrips) required to get the type
+information.  Unless you have a large number of binds you may prefer one of the
+previous solutions.
+
 Some general references are [On Cursors, SQL, and Analytics][59] and in [this
 StackOverflow answer][60].
 
