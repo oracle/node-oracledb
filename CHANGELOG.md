@@ -4,6 +4,8 @@
 
 **This release is under development and information may be incomplete**
 
+- Added missing support for binding as `oracledb.DB_TYPE_BINARY_INTEGER`.
+
 ## node-oracledb v5.3.0 (22 Oct 2021)
 
 - Added a

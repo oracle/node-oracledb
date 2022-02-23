@@ -106,6 +106,9 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
         case DPI_ORACLE_TYPE_JSON:
             var->nativeTypeNum = DPI_NATIVE_TYPE_JSON;
             break;
+        case DPI_ORACLE_TYPE_NATIVE_INT:
+            var->nativeTypeNum = DPI_NATIVE_TYPE_INT64;
+            break;
         default:
             return njsBaton_setError(baton, errInvalidBindDataType, 2);
     }
@@ -1140,12 +1143,15 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     // handle binding numbers
     if (valueType == napi_number) {
         if (var->varTypeNum != DPI_ORACLE_TYPE_NUMBER &&
+                var->varTypeNum != DPI_ORACLE_TYPE_NATIVE_INT &&
                 var->varTypeNum != DPI_ORACLE_TYPE_NATIVE_FLOAT &&
                 var->varTypeNum != DPI_ORACLE_TYPE_NATIVE_DOUBLE)
             return njsVariable_setInvalidBind(var, pos, baton);
         NJS_CHECK_NAPI(env, napi_get_value_double(env, value, &tempDouble))
         if (var->varTypeNum == DPI_ORACLE_TYPE_NATIVE_FLOAT) {
             data->value.asFloat = (float) tempDouble;
+        } else if (var->varTypeNum == DPI_ORACLE_TYPE_NATIVE_INT) {
+            data->value.asInt64 = (int64_t) tempDouble;
         } else {
             data->value.asDouble = tempDouble;
         }
