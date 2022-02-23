@@ -15512,18 +15512,23 @@ See [examples/plsqlrecord.js][141] for a runnable sample.
 
 ## <a name="transactionmgt"></a> 25. Transaction Management
 
-By default, [DML][14] statements are not committed in node-oracledb.
+By default, [DML][14] statements like INSERT, UPDATE and DELETE are not
+committed.
 
-The node-oracledb add-on implements [`commit()`](#commit) and
-[`rollback()`](#rollback) methods that can be used to explicitly
+The node-oracledb add-on implements [`connection.commit()`](#commit) and
+[`connection.rollback()`](#rollback) methods that can be used to explicitly
 control transactions.
 
-If the [`autoCommit`](#propdbisautocommit) property is set to *true*, then
-a commit occurs at the end of each `execute()` call.  Unlike an
-explicit `commit()`, this does not require a [round-trip](#roundtrips)
-to the database.  For maximum efficiency, set `autoCommit` to *true*
-for the last `execute()` call of a transaction in preference to using
-an additional, explicit `commit()` call.
+If the [`autoCommit`](#propdbisautocommit) property is set to *true*, then a
+commit occurs at the end of each `execute()` or `executeMany()` call.  Unlike
+an explicit `commit()`, this does not require a [round-trip](#roundtrips) to
+the database.  For maximum efficiency, set `autoCommit` to *true* for the last
+`execute()` or `executeMany()` call of a transaction in preference to using an
+additional, explicit `commit()` call.
+
+When [`connection.executeMany()`](#executemany) is used with the
+[`batchErrors`](#executemanyoptbatcherrors) flag, `autoCommit` will be ignored
+if there are data errors.  See [Handling Data Errors](#handlingbatcherrors)
 
 When a connection is released, any ongoing transaction will be rolled
 back.  Therefore if a released, pooled connection is re-used by a
@@ -15535,8 +15540,11 @@ always in a new transaction.
 When an application ends, any uncommitted transaction on a connection
 will be rolled back.
 
-Note: Oracle Database will implicitly commit when a [DDL][15]
-statement is executed irrespective of the value of `autoCommit`.
+Support for distributed transactions is discussed in [Two-Phase Commits
+(TPC)](#twopc).
+
+Note: Oracle Database will implicitly commit when a [DDL][15] statement like
+CREATE is executed irrespective of the value of `autoCommit`.
 
 ## <a name="cqn"></a> 26. Continuous Query Notification (CQN)
 
