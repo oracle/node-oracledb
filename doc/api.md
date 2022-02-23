@@ -615,12 +615,16 @@ A complete list of features can be seen [here][169].
 ### <a name="architecture"></a> 1.1 Node-oracledb Architecture
 
 Node-oracledb is a Node.js add-on that allows Node.js applications to access
-Oracle Database.  Node.js programs call node-oracledb functions. Internally
-node-oracledb dynamically loads Oracle Client libraries.  Connections are made
-from node-oracledb to Oracle Database so [SQL](#sqlexecution),
-[PL/SQL](#plsqlexecution), and [SODA](#sodaoverview) can be used.
+Oracle Database.
 
-![node-oracledb Architecture](./images/node-oracledb-architecture.png)
+![Architecture diagram of Node.js, node-oracledb and Oracle Database. It is described in the next paragraph](./images/node-oracledb-architecture.png)
+
+The diagram shows one deployment scenario.  Users interact with a Node.js
+application, for example by making web requests.  The application program makes
+calls to node-oracledb functions.  Internally node-oracledb dynamically loads
+Oracle Client libraries.  Connections are established from node-oracledb to
+Oracle Database.  This allows [SQL](#sqlexecution), [PL/SQL](#plsqlexecution),
+and [SODA](#sodaoverview) to be used by the application.
 
 Node-oracledb is typically installed from the [npm registry][1].  The Oracle
 Client libraries need to be installed separately.  The libraries can be obtained
