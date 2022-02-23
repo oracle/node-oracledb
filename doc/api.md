@@ -6211,7 +6211,7 @@ readononly Boolean events
 
 Denotes whether the Oracle client events mode is enabled or not.
 
-#### <a name=proppoolexternalauth"></a> 8.1.6 `pool.externalAuth`
+#### <a name="proppoolexternalauth"></a> 8.1.6 `pool.externalAuth`
 ```
 
 readonly Boolean externalAuth
@@ -9953,10 +9953,22 @@ for your workload.  If the current settings are non optimal, then
 configuration.
 
 Pool attributes [`connectionsInUse`](#proppoolconnectionsinuse) and
-[`connectionsOpen`](#proppoolconnectionsopen) provide basic information about
-an active pool.  The recording of [pool queue](#connpoolqueue) statistics, pool
-settings, and related environment variables can be enabled by setting
-`enableStatistics` to *true* during [pool creation](#createpool) or [pool
+[`connectionsOpen`](#proppoolconnectionsopen) always provide basic information
+about an active pool:
+
+
+```javascript
+const pool = await oracledb.createPool(...);
+
+. . .
+
+console.log(pool.connectionsOpen);   // how big the pool actually is
+console.log(pool.connectionsInUse);  // how many of those connections are held by the application
+```
+
+The recording of [pool queue](#connpoolqueue) statistics, pool settings, and
+related environment variables can be enabled by setting `enableStatistics` to
+*true* during [pool creation](#createpool) or [pool
 reconfiguration](#poolreconfigure).
 
 To enable recording of queue statistics when creating the pool:
@@ -9975,7 +9987,7 @@ const pool = await oracledb.createPool(
 Statistics can alternatively be enabled on a running pool with:
 
 ```javascript
-await poolReconfigure({ enableStatistics: true });
+await pool.reconfigure({ enableStatistics: true });
 ```
 
 Applications can then get the current statistics by calling
@@ -10049,17 +10061,17 @@ Attribute                                   |
 [`externalAuth`](#proppoolexternalauth)     |
 [`homogeneous`](#proppoolhomogeneous)       |
 [`poolAlias`](#createpoolpoolattrspoolalias)|
+[`poolIncrement`](#propdbpoolincrement)     |
+[`poolMax`](#propdbpoolmax)                 |
+[`poolMaxPerShard`](#propdbpoolmaxpershard)   |
+[`poolMin`](#propdbpoolmin)                 |
+[`poolPingInterval`](#propdbpoolpinginterval) |
+[`poolTimeout`](#propdbpooltimeout)         |
 [`queueMax`](#propdbqueuemax)               |
 [`queueTimeout`](#propdbqueuetimeout)       |
-[`poolMin`](#propdbpoolmin)                 |
-[`poolMax`](#propdbpoolmax)                 |
-[`poolIncrement`](#propdbpoolincrement)     |
-[`poolTimeout`](#propdbpooltimeout)         |
-[`poolPingInterval`](#propdbpoolpinginterval) |
-[`poolMaxPerShard`](#propdbpoolmaxpershard)   |
 [`sessionCallback`](#proppoolsessioncallback) |
-[`stmtCacheSize`](#proppoolstmtcachesize)     |
 [`sodaMetaDataCache`](#proppoolsodamdcache)   |
+[`stmtCacheSize`](#proppoolstmtcachesize)     |
 [`user`](#proppooluser)                       |
 
 ##### Pool Related Environment Variables
@@ -10067,7 +10079,7 @@ Attribute                                   |
 The [PoolStatistics object](#poolstatisticsclass) and `logStatistics()`
 function also have one related environment variable:
 
-`getStatistics()` attribute | `logStatistics()` description   | Description
+[PoolStatistics Class](#poolstatisticsclass) attribute | `logStatistics()` description   | Description
 ----------------------------|---------------------------------|------------------------------------------------------------------------------------
 `threadPoolSize`            | UV_THREADPOOL_SIZE              | The value of [`process.env.UV_THREADPOOL_SIZE`](#numberofthreads) which is the number of worker threads for this process.  Note this shows the value of the variable, however if this variable was set after the thread pool started, the thread pool will still be the default size of 4.
 
