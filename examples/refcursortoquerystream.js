@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -21,7 +21,7 @@
  * DESCRIPTION
  *   Converts a refcursor returned from execute() to a query stream.
  *   This is an alternative means of processing instead of using
- *   resultSet.getRows().
+ *   resultSet.getRows() shown in refcursor.js.
  *
  *   This example requires node-oracledb 1.9 or later.
  *

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -20,7 +20,7 @@
  *
  * DESCRIPTION
  *   Shows using a ResultSet to fetch rows from a REF CURSOR using getRows().
- *   Streaming is also possible (this is not shown).
+ *   Streaming is also possible, see refcursortoquerystream.js
  *
  *   This example uses Node 8's async/await syntax.
  *
@@ -60,62 +60,81 @@ async function run() {
     //
 
     await connection.execute(
-      `CREATE OR REPLACE PROCEDURE no_get_rs (p_id IN NUMBER, p_recordset OUT SYS_REFCURSOR)
+      `CREATE OR REPLACE PROCEDURE no_get_rs (p_maxid IN NUMBER, p_recordset OUT SYS_REFCURSOR)
        AS
        BEGIN
          OPEN p_recordset FOR
            SELECT farmer, weight, ripeness
            FROM   no_banana_farmer
-           WHERE  id < p_id;
+           WHERE  id < p_maxid;
        END;`
     );
 
     //
-    // Get a REF CURSOR result set
+    // Fetch rows from a REF CURSOR using one getRows() call.
     //
+    // This is useful when the ResultSet is known to contain a small number of rows
+    // that will always fit in memory.
+    //
+
+    console.log('Single getRows() call:');
 
     const result = await connection.execute(
       `BEGIN
-         no_get_rs(:id, :cursor);
+         no_get_rs(:maxid, :cursor);
        END;`,
       {
-        id:     3,
+        maxid:  3,
         cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       });
 
+    const resultSet1 = result.outBinds.cursor;
+
     console.log("Cursor metadata:");
-    console.log(result.outBinds.cursor.metaData);
+    console.log(resultSet1.metaData);
+
+    const rows1 = await resultSet1.getRows();  // no parameter means get all rows
+    console.log(rows1);
+
+    await resultSet1.close();                 // always close the ResultSet
 
     //
-    // Fetch rows from the REF CURSOR.
+    // Fetch rows from a REF CURSOR using multiple getRows() calls to fetch
+    // batches of rows.
     //
 
-    const resultSet = result.outBinds.cursor;
-    const numRows = 10;  // number of rows to return from each call to getRows()
-    let rows;
+    console.log('\nLooping getRows() calls:');
+
+    const result2 = await connection.execute(
+      `BEGIN
+         OPEN :cursor FOR
+           SELECT 'row ' || level
+           FROM dual
+           CONNECT BY LEVEL <= :nr;
+       END;`,
+      {
+        nr:     23, // number of rows to fetch
+        cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+      });
+
+    const resultSet2 = result2.outBinds.cursor;
 
     // If getRows(numRows) returns:
-    //   Zero rows               => there were no rows, or are no more rows to return
+    //   Zero rows               => the table was empty, or there are no more rows
     //   Fewer than numRows rows => this was the last set of rows to get
     //   Exactly numRows rows    => there may be more rows to fetch
 
+    const numRows = 10;  // number of rows to return from each call to getRows()
+    let rows2;
     do {
-      rows = await resultSet.getRows(numRows); // get numRows rows at a time
-      if (rows.length > 0) {
-        console.log("getRows(): Got " + rows.length + " rows");
-        console.log(rows);
+      rows2 = await resultSet2.getRows(numRows); // get numRows rows at a time
+      if (rows2.length > 0) {
+        console.log("getRows(): Got " + rows2.length + " rows");
+        console.log(rows2);
       }
-    } while (rows.length === numRows);
+    } while (rows2.length === numRows);
 
-    // From node-oracledb 5.2, you can alternatively fetch all rows in one call.
-    // This is useful when the ResultSet is known to contain a small number of
-    // rows that will always fit in memory.
-    //
-    // rows = await resultSet.getRows();  // no parameter means get all rows
-    // console.log(rows);
-
-    // always close the ResultSet
-    await resultSet.close();
+    await resultSet2.close();                    // always close the ResultSet
 
   } catch (err) {
     console.error(err);
