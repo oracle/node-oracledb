@@ -8,11 +8,11 @@
 - Added a [`connection.isHealthy()`](https://oracle.github.io/node-oracledb/doc/api.html#ishealthy)
   function to perform a local connection health check
 
+- Added missing support for binding as `oracledb.DB_TYPE_BINARY_INTEGER`.
+
 - Fixed numeric suffix feature (for duplicate SELECT column names when using
   `oracledb.OUT_FORMAT_OBJECT` mode) when the column name is also a JavaScript
   property or method name.
-
-- Added missing support for binding as `oracledb.DB_TYPE_BINARY_INTEGER`.
 
 - Fixed binding string or buffer data when explicitly specifying the type as
   `oracledb.DB_TYPE_BLOB`, `oracledb.DB_TYPE_CLOB` or `oracledb.DB_TYPE_NCLOB`.
