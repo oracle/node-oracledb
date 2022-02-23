@@ -950,9 +950,10 @@ this Instant Client.
 ##### <a name="winredists"> </a> 3.4.1.6 Install the Visual Studio Redistributables
 
 The `PATH` variable needs to include the appropriate VS Redistributable:
+- Oracle client 21 requires the [Visual Studio 2019 Redistributable][27] or later.
 - Oracle client 19 requires the [Visual Studio 2017 Redistributable][27].
-- Oracle client 18 and 12.2 require the [Visual Studio 2013 Redistributable][27].
-- Oracle client 12.1 requires the [Visual Studio 2010 Redistributable][27].
+- Oracle client 18 and 12.2 require the [Visual Studio 2013 Redistributable][32].
+- Oracle client 12.1 requires the [Visual Studio 2010 Redistributable][28].
 - Oracle client 11.2 requires the [Visual Studio 2005 Redistributable][29].
 
 You can also find out the version required by locating the library
@@ -962,9 +963,10 @@ You can also find out the version required by locating the library
 dumpbin /dependents oci.dll
 ```
 
-If you see `MSVCR120.dll` then you need the VS 2013 Redistributable.
-If you see `MSVCR100.dll` then you need the VS 2010 Redistributable.
-If you see `MSVCR80.dll` then you need the VS 2005 Redistributable.
+For example, if you see `MSVCR120.dll` then you need the VS 2013
+Redistributable.  If you see `MSVCR100.dll` then you need the VS 2010
+Redistributable.  If you see `MSVCR80.dll` then you need the VS 2005
+Redistributable.
 
 ##### 3.4.1.7 Run an example program
 
@@ -1984,10 +1986,12 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [24]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=NTCLI
 [25]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
 [26]: https://www.oracle.com/database/technologies/instant-client/microsoft-windows-32-downloads.html
-[27]: https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads
-[29]: https://www.microsoft.com/en-us/download/details.aspx?id=3387
+[27]: https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170
+[28]: https://docs.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2010-vc-100-sp1-no-longer-supported
+[29]: https://docs.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2005-vc-80-sp1-no-longer-supported
 [30]: https://www.oracle.com/database/technologies/instant-client/aix-ppc64-downloads.html
 [31]: https://www.oracle.com/database/technologies/instant-client/solx8664-downloads.html
+[32]: https://docs.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2013-vc-120
 [40]: https://github.com/oracle/node-oracledb/tags
 [41]: https://github.com/oracle/node-oracledb/releases
 [44]: https://oracle.github.io/node-oracledb/doc/api.html
