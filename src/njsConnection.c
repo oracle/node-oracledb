@@ -37,6 +37,7 @@ static NJS_NAPI_METHOD(njsConnection_getDbObjectClass);
 static NJS_NAPI_METHOD(njsConnection_getQueue);
 static NJS_NAPI_METHOD(njsConnection_getSodaDatabase);
 static NJS_NAPI_METHOD(njsConnection_getStatementInfo);
+static NJS_NAPI_METHOD(njsConnection_isHealthy);
 static NJS_NAPI_METHOD(njsConnection_ping);
 static NJS_NAPI_METHOD(njsConnection_rollback);
 static NJS_NAPI_METHOD(njsConnection_shutdown);
@@ -156,6 +157,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             NULL, napi_default, NULL },
     { "_getStatementInfo", NULL, njsConnection_getStatementInfo, NULL,
             NULL, NULL, napi_default, NULL },
+    { "_isHealthy", NULL, njsConnection_isHealthy, NULL, NULL, NULL,
+            napi_default, NULL },
     { "_ping", NULL, njsConnection_ping, NULL, NULL, NULL, napi_default,
             NULL },
     { "_rollback", NULL, njsConnection_rollback, NULL, NULL, NULL,
@@ -2105,6 +2108,28 @@ bool njsConnection_newFromBaton(njsBaton *baton, napi_env env,
     conn->oracleDb = baton->oracleDb;
 
     return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_isHealthy()
+//   Get the Health status - whether the current connection is usable or not
+//   NOTE: If this function returns FALSE, conn.close() has to be called
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_isHealthy(napi_env env,
+        napi_callback_info info)
+{
+    int              value = 0;
+    napi_value       connObj;
+    njsConnection    *conn;
+
+    if (njsUtils_validateArgs(env, info, 0, NULL, &connObj,
+            (njsBaseInstance **)&conn)) {
+        if (conn->handle) {
+            dpiConn_getIsHealthy(conn->handle, &value);
+        }
+    }
+    return njsUtils_convertToBoolean(env, value);
 }
 
 

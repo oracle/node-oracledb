@@ -4,6 +4,10 @@
 
 **This release is under development and information may be incomplete**
 
+
+- Added a [`connection.isHealthy()`](https://oracle.github.io/node-oracledb/doc/api.html#ishealthy)
+  function to perform a local connection health check
+
 - Fixed numeric suffix feature (for duplicate SELECT column names when using
   `oracledb.OUT_FORMAT_OBJECT` mode) when the column name is also a JavaScript
   property or method name.

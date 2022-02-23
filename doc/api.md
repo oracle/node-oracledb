@@ -1,6 +1,6 @@
 # node-oracledb 5.4.0-dev Documentation for the Oracle Database Node.js Add-on
 
-*Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2015, 2022, Oracle and/or its affiliates. All rights reserved.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -232,43 +232,44 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 4.2.9 [`getQueue()`](#getqueue)
         - 4.2.10 [`getSodaDatabase()`](#getsodadatabase)
         - 4.2.11 [`getStatementInfo()`](#getstmtinfo)
-        - 4.2.12 [`ping()`](#connectionping)
-        - 4.2.13 [`queryStream()`](#querystream)
-        - 4.2.14 [`rollback()`](#rollback)
-        - 4.2.15 [`shutdown()`](#conshutdown)
-            - 4.2.15.1 [`shutdown()`: shutdownMode](#conshutdownmode)
-            - 4.2.15.2 [`shutdown()`: Callback Function](#conshutdowncallback)
-        - 4.2.16 [`subscribe()`](#consubscribe)
-            - 4.2.16.1 [`subscribe()`: Name](#consubscribename)
-            - 4.2.16.2 [`subscribe()`: Options](#consubscribeoptions)
-                - 4.2.16.2.1 [`binds`](#consubscribeoptbinds)
-                - 4.2.16.2.2 [`callback`](#consubscribeoptcallback)
-                - 4.2.16.2.3 [`clientInitiated`](#consubscribeoptclientinitiated)
-                - 4.2.16.2.4 [`groupingClass`](#consubscribeoptgroupingclass)
-                - 4.2.16.2.5 [`groupingType`](#consubscribeoptgroupingtype)
-                - 4.2.16.2.6 [`groupingValue`](#consubscribeoptgroupingvalue)
-                - 4.2.16.2.7 [`ipAddress`](#consubscribeoptipaddress)
-                - 4.2.16.2.8 [`namespace`](#consubscribeoptnamespace)
-                - 4.2.16.2.9 [`operations`](#consubscribeoptoperations)
-                - 4.2.16.2.10 [`port`](#consubscribeoptport)
-                - 4.2.16.2.11 [`qos`](#consubscribeoptqos)
-                - 4.2.16.2.12 [`sql`](#consubscribeoptsql)
-                - 4.2.16.2.13 [`timeout`](#consubscribeopttimeout)
-            - 4.2.16.3 [`subscribe()`: Callback Function](#consubscribecallback)
-        - 4.2.17 [`startup()`](#constartup)
-            - 4.2.17.1 [`startup()`: Options](#constartupoptions)
-                - 4.2.17.1.1 [`force`](#constartupoptionsforce)
-                - 4.2.17.1.2 [`pfile`](#constartupoptionspfile)
-                - 4.2.17.1.3 [`restrict`](#constartupoptionsrestrict)
-            - 4.2.17.2 [`startup()`: Callback Function](#constartupcallback)
-        - 4.2.18 [`tpcBegin()`](#contpcbegin)
-        - 4.2.19 [`tpcCommit()`](#contpccommit)
-        - 4.2.20 [`tpcEnd()`](#contpcend)
-        - 4.2.21 [`tpcForget()`](#contpcforget)
-        - 4.2.22 [`tpcPrepare()`](#contpcprepare)
-        - 4.2.23 [`tpcRecover()`](#contpcrecover)
-        - 4.2.24 [`tpcRollback()`](#contpcrollback)
-        - 4.2.25 [`unsubscribe()`](#conunsubscribe)
+        - 4.2.12 [`isHealthy()`](#ishealthy)
+        - 4.2.13 [`ping()`](#connectionping)
+        - 4.2.14 [`queryStream()`](#querystream)
+        - 4.2.15 [`rollback()`](#rollback)
+        - 4.2.16 [`shutdown()`](#conshutdown)
+            - 4.2.16.1 [`shutdown()`: shutdownMode](#conshutdownmode)
+            - 4.2.16.2 [`shutdown()`: Callback Function](#conshutdowncallback)
+        - 4.2.17 [`subscribe()`](#consubscribe)
+            - 4.2.17.1 [`subscribe()`: Name](#consubscribename)
+            - 4.2.17.2 [`subscribe()`: Options](#consubscribeoptions)
+                - 4.2.17.2.1 [`binds`](#consubscribeoptbinds)
+                - 4.2.17.2.2 [`callback`](#consubscribeoptcallback)
+                - 4.2.17.2.3 [`clientInitiated`](#consubscribeoptclientinitiated)
+                - 4.2.17.2.4 [`groupingClass`](#consubscribeoptgroupingclass)
+                - 4.2.17.2.5 [`groupingType`](#consubscribeoptgroupingtype)
+                - 4.2.17.2.6 [`groupingValue`](#consubscribeoptgroupingvalue)
+                - 4.2.17.2.7 [`ipAddress`](#consubscribeoptipaddress)
+                - 4.2.17.2.8 [`namespace`](#consubscribeoptnamespace)
+                - 4.2.17.2.9 [`operations`](#consubscribeoptoperations)
+                - 4.2.17.2.10 [`port`](#consubscribeoptport)
+                - 4.2.17.2.11 [`qos`](#consubscribeoptqos)
+                - 4.2.17.2.12 [`sql`](#consubscribeoptsql)
+                - 4.2.17.2.13 [`timeout`](#consubscribeopttimeout)
+            - 4.2.17.3 [`subscribe()`: Callback Function](#consubscribecallback)
+        - 4.2.18 [`startup()`](#constartup)
+            - 4.2.18.1 [`startup()`: Options](#constartupoptions)
+                - 4.2.18.1.1 [`force`](#constartupoptionsforce)
+                - 4.2.18.1.2 [`pfile`](#constartupoptionspfile)
+                - 4.2.18.1.3 [`restrict`](#constartupoptionsrestrict)
+            - 4.2.18.2 [`startup()`: Callback Function](#constartupcallback)
+        - 4.2.19 [`tpcBegin()`](#contpcbegin)
+        - 4.2.20 [`tpcCommit()`](#contpccommit)
+        - 4.2.21 [`tpcEnd()`](#contpcend)
+        - 4.2.22 [`tpcForget()`](#contpcforget)
+        - 4.2.23 [`tpcPrepare()`](#contpcprepare)
+        - 4.2.24 [`tpcRecover()`](#contpcrecover)
+        - 4.2.25 [`tpcRollback()`](#contpcrollback)
+        - 4.2.26 [`unsubscribe()`](#conunsubscribe)
 5. [AqQueue Class](#aqqueueclass)
     - 5.1 [AqQueue Properties](#aqqueueproperties)
         - 5.1.1 [`name`](#aqqueuename)
@@ -4551,7 +4552,36 @@ This method was added in node-oracledb 2.2.
       Statement Type Constants](#oracledbconstantsstmttype).
 
 
-#### <a name="connectionping"></a> 4.2.12 `connection.ping()`
+#### <a name="ishealthy"></a> 4.2.12 `connection.isHealthy()`
+
+##### Prototype
+
+```
+isHealthy()
+```
+
+##### Description
+
+This synchronous function returns a boolean indicating the health status of a
+connection.
+
+Connections may become unusable in several cases, such as if the network socket
+is broken, if an Oracle error indicates the connection is unusable or after
+receiving a planned down notification from the database.
+
+This function is best used before starting a new database request on an
+existing standalone connection. Pooled connections internally perform this
+check before returning a connection to the application.
+
+If this function returns false, the connection should be closed by the
+application and a new connection should be established instead.
+
+This function performs a local check. To fully check a connection's health,
+use [`ping()`](#connectionping) which performs a round-trip to the database.
+
+This function was added in node-oracledb 5.4.
+
+#### <a name="connectionping"></a> 4.2.13 `connection.ping()`
 
 ##### Prototype
 
@@ -4595,7 +4625,7 @@ This method was added in node-oracledb 2.2.
     ----------------------------|-------------
     *Error error* | If `ping()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="querystream"></a> 4.2.13 `connection.queryStream()`
+#### <a name="querystream"></a> 4.2.14 `connection.queryStream()`
 
 ##### Prototype
 
@@ -4637,7 +4667,7 @@ This method was added in node-oracledb 1.8.
 
 See [execute()](#execute).
 
-#### <a name="rollback"></a> 4.2.14 `connection.rollback()`
+#### <a name="rollback"></a> 4.2.15 `connection.rollback()`
 
 ##### Prototype
 
@@ -4667,7 +4697,7 @@ connection.
     ----------------------------|-------------
     *Error error* | If `rollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="conshutdown"></a> 4.2.15 `connection.shutdown()`
+#### <a name="conshutdown"></a> 4.2.16 `connection.shutdown()`
 
 ##### Prototype
 
@@ -4701,7 +4731,7 @@ See [Database Start Up and Shut Down](#startupshutdown).
 
 This method was added in node-oracledb 5.0.
 
-##### <a name="conshutdownmode"></a> 4.2.15.1 `shutdown()`: shutdownMode
+##### <a name="conshutdownmode"></a> 4.2.16.1 `shutdown()`: shutdownMode
 
 ```
 Number shutdownMode
@@ -4721,7 +4751,7 @@ need to be called a second time.
 Only the second invocation of `connection.shutdown()` should use
 `oracledb.SHUTDOWN_MODE_FINAL`.
 
-##### <a name="conshutdowncallback"></a> 4.2.15.2 `shutdown()`: Callback Function
+##### <a name="conshutdowncallback"></a> 4.2.16.2 `shutdown()`: Callback Function
 
 ```
 function(Error error)
@@ -4733,7 +4763,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error*               | If `shutdown()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="consubscribe"></a> 4.2.16 `connection.subscribe()`
+#### <a name="consubscribe"></a> 4.2.17 `connection.subscribe()`
 
 ##### Prototype
 
@@ -4777,7 +4807,7 @@ added in node-oracledb 4.0
 
 The [`result`](#consubscribecallback) callback parameter was added in node-oracledb 4.0.
 
-##### <a name="consubscribename"></a> 4.2.16.1 `subscribe()`: Name
+##### <a name="consubscribename"></a> 4.2.17.1 `subscribe()`: Name
 
 ```
 String name
@@ -4787,7 +4817,7 @@ For Continuous Query Notification this is an arbitrary name given to
 the subscription.  For Advanced Queuing notifications this must be the
 queue name.
 
-##### <a name="consubscribeoptions"></a> 4.2.16.2 `subscribe()`: Options
+##### <a name="consubscribeoptions"></a> 4.2.17.2 `subscribe()`: Options
 
 ```
 Object options
@@ -4804,7 +4834,7 @@ Object binds
 An array (bind by position) or object (bind by name) containing the
 bind values to use in the [`sql`](#consubscribeoptsql) property.
 
-###### <a name="consubscribeoptcallback"></a> 4.2.16.2.2 `callback`
+###### <a name="consubscribeoptcallback"></a> 4.2.17.2.2 `callback`
 
 ```
 function callback(Object message)
@@ -4844,7 +4874,7 @@ The `message` parameter in the notification callback is an object containing the
     - [`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription) - object-level notifications are being used (Database Change Notification).
     - [`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription) - query-level notifications are being used (Continuous Query Notification).
 
-###### <a name="consubscribeoptclientinitiated"></a> 4.2.16.2.3 `clientInitiated`
+###### <a name="consubscribeoptclientinitiated"></a> 4.2.17.2.3 `clientInitiated`
 
 ```
 Boolean clientInitiated
@@ -4860,7 +4890,7 @@ The default is *false*.
 
 This property was added in node-oracledb 4.2.  It is available when Oracle Database and the Oracle client libraries are version 19.4 or higher.
 
-###### <a name="consubscribeoptgroupingclass"></a> 4.2.16.2.4 `groupingClass`
+###### <a name="consubscribeoptgroupingclass"></a> 4.2.17.2.4 `groupingClass`
 
 ```
 Number groupingClass
@@ -4871,7 +4901,7 @@ An integer mask which currently, if set, can only contain the value
 this value is set then notifications are grouped by time into a single
 notification.
 
-###### <a name="consubscribeoptgroupingtype"></a> 4.2.16.2.5 `groupingType`
+###### <a name="consubscribeoptgroupingtype"></a> 4.2.17.2.5 `groupingType`
 
 ```
 Number groupingType
@@ -4884,7 +4914,7 @@ or
 [`oracledb.SUBSCR_GROUPING_TYPE_LAST`](#oracledbconstantssubscription)
 indicating the last notification in the group should be sent.
 
-###### <a name="consubscribeoptgroupingvalue"></a> 4.2.16.2.6 `groupingValue`
+###### <a name="consubscribeoptgroupingvalue"></a> 4.2.17.2.6 `groupingValue`
 
 ```
 Number groupingValue
@@ -4896,7 +4926,7 @@ then `groupingValue` can be used to set the number of seconds over
 which notifications will be grouped together, invoking `callback`
 once.  If `groupingClass` is not set, then `groupingValue` is ignored.
 
-###### <a name="consubscribeoptipaddress"></a> 4.2.16.2.7 `ipAddress`
+###### <a name="consubscribeoptipaddress"></a> 4.2.17.2.7 `ipAddress`
 
 ```
 String ipAddress
@@ -4906,7 +4936,7 @@ A string containing an IPv4 or IPv6 address on which the subscription
 should listen to receive notifications.  If not specified, then the
 Oracle Client library will select an IP address.
 
-###### <a name="consubscribeoptnamespace"></a> 4.2.16.2.8 `namespace`
+###### <a name="consubscribeoptnamespace"></a> 4.2.17.2.8 `namespace`
 
 ```
 Number namespace
@@ -4921,7 +4951,7 @@ You can use `oracledb.SUBSCR_NAMESPACE_AQ` to get notifications that
 Advanced Queuing messages are available to be dequeued, see
 [Advanced Queuing Notifications](#aqnotifications).
 
-###### <a name="consubscribeoptoperations"></a> 4.2.16.2.9 `operations`
+###### <a name="consubscribeoptoperations"></a> 4.2.17.2.9 `operations`
 
 ```
 Number operations
@@ -4931,7 +4961,7 @@ An integer mask containing one or more of the operation type
 [`oracledb.CQN_OPCODE_*`](#oracledbconstantscqn) constants to indicate
 what types of database change should generation notifications.
 
-###### <a name="consubscribeoptport"></a> 4.2.16.2.10 `port`
+###### <a name="consubscribeoptport"></a> 4.2.17.2.10 `port`
 
 ```
 Number port
@@ -4941,7 +4971,7 @@ The port number on which the subscription should listen to receive
 notifications.  If not specified, then the Oracle Client library will
 select a port number.
 
-###### <a name="consubscribeoptqos"></a> 4.2.16.2.11 `qos`
+###### <a name="consubscribeoptqos"></a> 4.2.17.2.11 `qos`
 
 ```
 Number qos
@@ -4950,7 +4980,7 @@ Number qos
 An integer mask containing one or more of the quality of service
 [`oracledb.SUBSCR_QOS_*`](#oracledbconstantssubscription) constants.
 
-###### <a name="consubscribeoptsql"></a> 4.2.16.2.12 `sql`
+###### <a name="consubscribeoptsql"></a> 4.2.17.2.12 `sql`
 
 ```
 String sql
@@ -4958,13 +4988,13 @@ String sql
 
 The SQL query string to use for notifications.
 
-###### <a name="consubscribeopttimeout"></a> 4.2.16.2.13 `timeout`
+###### <a name="consubscribeopttimeout"></a> 4.2.17.2.13 `timeout`
 
 The number of seconds the subscription should remain active.  Once
 this length of time has been reached, the subscription is
 automatically unregistered and a deregistration notification is sent.
 
-##### <a name="consubscribecallback"></a> 4.2.16.3 `subscribe()`: Callback Function
+##### <a name="consubscribecallback"></a> 4.2.17.3 `subscribe()`: Callback Function
 
 ##### Prototype
 
@@ -4981,7 +5011,7 @@ Callback function parameter | Description
 
 The `result` callback parameter was added in node-oracledb 4.0.
 
-#### <a name="constartup"></a> 4.2.17 `connection.startup()`
+#### <a name="constartup"></a> 4.2.18 `connection.startup()`
 
 ##### Prototype
 
@@ -5017,24 +5047,24 @@ See [Database Start Up and Shut Down](#startupshutdown).
 
 This method was added in node-oracledb 5.0.
 
-##### <a name="constartupoptions"></a> 4.2.17.1 `startup()`: options
+##### <a name="constartupoptions"></a> 4.2.18.1 `startup()`: options
 
-##### <a name="constartupoptionsforce"></a> 4.2.17.1.1.1 `force`
+##### <a name="constartupoptionsforce"></a> 4.2.18.1.1.1 `force`
 
 Shuts down a running database using
 [`oracledb.SHUTDOWN_MODE_ABORT`](#oracledbconstantsshutdown) before restarting
 the database instance.  The next database start up may require instance recovery.
 The default for `force` is *false*.
 
-##### <a name="constartupoptionspfile"></a> 4.2.17.1.1.2 `pfile`
+##### <a name="constartupoptionspfile"></a> 4.2.18.1.1.2 `pfile`
 
 After the database is started, access is restricted to users who have the CREATE_SESSION and RESTRICTED SESSION privileges.  The default is *false*.
 
-##### <a name="constartupoptionsrestrict"></a> 4.2.17.1.1.3 `restrict`
+##### <a name="constartupoptionsrestrict"></a> 4.2.18.1.1.3 `restrict`
 
 The path and filename for a local text file containing [Oracle Database initialization parameters][171].  If `pfile` is not set, then the database server-side parameter file is used.
 
-##### <a name="constartupcallback"></a> 4.2.17.2 `startup()`: Callback Function
+##### <a name="constartupcallback"></a> 4.2.18.2 `startup()`: Callback Function
 
 ##### Prototype
 
@@ -5048,7 +5078,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error*               | If `startup()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="contpcbegin"></a> 4.2.18 `connection.tpcBegin()`
+#### <a name="contpcbegin"></a> 4.2.19 `connection.tpcBegin()`
 
 ##### Prototype
 
@@ -5129,7 +5159,7 @@ This function was added in node-oracledb 5.3.
     ----------------------------|-------------
     *Error error*               | If `tpcBegin()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="contpccommit"></a> 4.2.19 `connection.tpcCommit()`
+#### <a name="contpccommit"></a> 4.2.20 `connection.tpcCommit()`
 
 ##### Prototype
 
@@ -5185,7 +5215,7 @@ This function was added in node-oracledb 5.3.
     ----------------------------|-------------
     *Error error*               | If `tpcCommit()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="contpcend"></a> 4.2.20 `connection.tpcEnd()`
+#### <a name="contpcend"></a> 4.2.21 `connection.tpcEnd()`
 
 ##### Prototype
 
@@ -5244,7 +5274,7 @@ This function was added in node-oracledb 5.3.
     ----------------------------|-------------
     *Error error*               | If `tpcEnd()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="contpcforget"></a> 4.2.21 `connection.tpcForget()`
+#### <a name="contpcforget"></a> 4.2.22 `connection.tpcForget()`
 
 ##### Prototype
 
@@ -5286,7 +5316,7 @@ This function was added in node-oracledb 5.3.
     ----------------------------|-------------
     *Error error*               | If `tpcForget()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="contpcprepare"></a> 4.2.22 `connection.tpcPrepare()`
+#### <a name="contpcprepare"></a> 4.2.23 `connection.tpcPrepare()`
 
 ##### Prototype
 
@@ -5343,7 +5373,7 @@ const commitNeeded = await connection.tpcPrepare(xid);
     *Error error*               | If `tpcPrepare()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
     *Boolean commitNeeded*      | If *true*, the branch was prepared and needs to be committed.  Read-only branches will set this to *false* as there is no commit needed for the branch.
 
-#### <a name="contpcrecover"></a> 4.2.23 `connection.tpcRecover()`
+#### <a name="contpcrecover"></a> 4.2.24 `connection.tpcRecover()`
 
 ##### Prototype
 
@@ -5388,7 +5418,7 @@ This function was added in node-oracledb 5.3.
     ----------------------------|-------------
     *Error error*               | If `tpcRollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="contpcrollback"></a> 4.2.24 `connection.tpcRollback()`
+#### <a name="contpcrollback"></a> 4.2.25 `connection.tpcRollback()`
 
 ##### Prototype
 
@@ -5432,7 +5462,7 @@ This function was added in node-oracledb 5.3.
     ----------------------------|-------------
     *Error error*               | If `tpcRollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="conunsubscribe"></a> 4.2.25 `connection.unsubscribe()`
+#### <a name="conunsubscribe"></a> 4.2.26 `connection.unsubscribe()`
 
 ##### Prototype
 

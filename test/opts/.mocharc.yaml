@@ -247,3 +247,4 @@ spec:
   - test/keepInStmtCache.js
   - test/tpc.js
   - test/tpcResume.js
+  - test/connHealthy.js

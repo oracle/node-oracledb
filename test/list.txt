@@ -5291,3 +5291,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 260. tpcResume.js
     260.1 TPC suspend and resume
+
+261. connHealthy.js
+    261.1 connection health on stand alone connections
+        261.1.1 connection health on good connection
+        261.1.2 connection health on closed connection
