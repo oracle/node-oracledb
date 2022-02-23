@@ -4945,6 +4945,9 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         246.1.15 Duplicate column with non-conflicting alias name using REF cursor
         246.1.16 Duplicate column with case sensitive alias name using REF cursor
         246.1.17 Duplicate column with case sensitive alias name from dual
+        246.1.18 1000 duplicate columns
+        246.1.19 Negative not-case sensitive prop name
+
     246.2 Duplicate Column Names, query with ResultSet
         246.2.1 Two duplicate columns
         246.2.2 Three duplicate columns

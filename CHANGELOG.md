@@ -4,6 +4,10 @@
 
 **This release is under development and information may be incomplete**
 
+- Fixed numeric suffix feature (for duplicate SELECT column names when using
+  `oracledb.OUT_FORMAT_OBJECT` mode) when the column name is also a JavaScript
+  property or method name.
+
 - Added missing support for binding as `oracledb.DB_TYPE_BINARY_INTEGER`.
 
 ## node-oracledb v5.3.0 (22 Oct 2021)

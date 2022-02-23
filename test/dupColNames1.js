@@ -608,6 +608,30 @@ describe('246. dupColNames1.js', function() {
       assert.equal(result.rows[0].DEPARTMENT_ID_499, 101);
       assert.equal(result.rows[0].DEPARTMENT_ID_1000, 101);
     });
+
+
+    it('246.1.19 Negative not-case sensitive prop name', async function() {
+      // alias name is within quotes and so does not match any string
+      // comparison
+      const sql =
+        `SELECT
+            A.EMPLOYEE_ID, A.DEPARTMENT_ID,
+            B.department_id, B.department_id AS "toString"
+         FROM nodb_dupEmployee A, nodb_dupDepartment B
+         WHERE A.department_id = B.department_id
+         ORDER BY A.EMPLOYEE_ID`;
+
+      const result = await connection.execute(sql);
+      assert.equal(result.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.metaData[3].name, "toString");
+      assert.equal(result.rows[0].EMPLOYEE_ID, 1001);
+      assert.equal(result.rows[0].DEPARTMENT_ID, 101);
+      assert.equal(result.rows[0].DEPARTMENT_ID_1, 101);
+      assert.equal(result.rows[0].toString, 101);
+    });
+
   });
 
   describe('246.2 Duplicate column names, query with ResultSet', function() {

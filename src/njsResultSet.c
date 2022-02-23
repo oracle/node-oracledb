@@ -522,7 +522,7 @@ bool njsResultSet_makeUniqueColumnNames(napi_env env, njsBaton *baton,
         NJS_CHECK_NAPI(env, napi_create_string_utf8(env, queryVars[col].name,
                 queryVars[col].nameLength, &queryVars[col].jsName))
 
-        NJS_CHECK_NAPI(env, napi_has_property(env, tempObj,
+        NJS_CHECK_NAPI(env, napi_has_own_property(env, tempObj,
                 queryVars[col].jsName, &exists))
         if (!exists) {
             NJS_CHECK_NAPI(env, napi_create_uint32(env, col, &colObj))
