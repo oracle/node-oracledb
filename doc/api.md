@@ -12532,9 +12532,9 @@ from node-oracledb using [`execute()`](#execute).
 The PL/SQL procedure:
 
 ```sql
-CREATE OR REPLACE PROCEDURE myproc (id IN NUMBER, name OUT VARCHAR2) AS
+CREATE OR REPLACE PROCEDURE myproc (id IN NUMBER, name OUT VARCHAR2, salary OUT NUMBER) AS
 BEGIN
-  SELECT last_name INTO name FROM employees WHERE employee_id = id;
+  SELECT last_name, salary INTO name, salary FROM employees WHERE employee_id = id;
 END;
 ```
 
@@ -12543,11 +12543,12 @@ can be called:
 ```javascript
 const result = await connection.execute(
   `BEGIN
-     myproc(:id, :name);
+     myproc(:id, :name, :salary);
    END;`,
   {  // bind variables
     id:   159,
     name: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 40 },
+    salary: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
   }
 );
 
@@ -12557,7 +12558,7 @@ console.log(result.outBinds);
 The output is:
 
 ```
-{ name: 'Smith' }
+{ name: 'Smith', salary: 8000 }
 ```
 
 Binding is required for IN OUT and OUT parameters.  It is strongly
