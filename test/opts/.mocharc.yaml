@@ -248,3 +248,4 @@ spec:
   - test/tpc.js
   - test/tpcResume.js
   - test/connHealthy.js
+  - test/dbObjectOutBind.js

@@ -5296,3 +5296,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     261.1 connection health on stand alone connections
         261.1.1 connection health on good connection
         261.1.2 connection health on closed connection
+
+262. dbObjectOutBind.js
+    262.1 call procedure with 2 OUT binds of DbObject

@@ -921,12 +921,15 @@ bool njsVariable_processJS(njsVariable *vars, uint32_t numVars, napi_env env,
         if (var->bindDir != NJS_BIND_OUT &&
                 var->varTypeNum != DPI_ORACLE_TYPE_STMT)
             continue;
-        if (!var->dmlReturningBuffers)
-            return njsVariable_processBufferJS(var, var->buffer, env, baton);
-        for (j = 0; j < var->numDmlReturningBuffers; j++) {
-            buffer = &var->dmlReturningBuffers[j];
-            if (!njsVariable_processBufferJS(var, buffer, env, baton))
+        if (!var->dmlReturningBuffers) {
+            if (!njsVariable_processBufferJS(var, var->buffer, env, baton))
                 return false;
+        } else {
+            for (j = 0; j < var->numDmlReturningBuffers; j++) {
+                buffer = &var->dmlReturningBuffers[j];
+                if (!njsVariable_processBufferJS(var, buffer, env, baton))
+                    return false;
+            }
         }
     }
 
