@@ -2407,9 +2407,8 @@ See [Connection Pool Pinging](#connpoolpinging) for more discussion.
 Number poolTimeout
 ```
 
-The number of seconds after which idle connections (unused in the
-pool) may be terminated.  Idle connections are terminated only when
-the pool is accessed.
+The number of seconds after which idle connections (unused in the pool) may be
+terminated.  Refer to [`oracledb.poolTimeout`](#propdbpooltimeout) for details.
 
 The default value is 60.
 
