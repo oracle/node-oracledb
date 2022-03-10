@@ -10,6 +10,9 @@
 
 - Added missing support for binding as `oracledb.DB_TYPE_BINARY_INTEGER`.
 
+- Fixed calling `initOracleClient()` with TypeScript 4.4 ([Issue
+  1462](https://github.com/oracle/node-oracledb/issues/1462)).
+
 - Fixed numeric suffix feature (for duplicate SELECT column names when using
   `oracledb.OUT_FORMAT_OBJECT` mode) when the column name is also a JavaScript
   property or method name.
