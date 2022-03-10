@@ -28,10 +28,9 @@
 'use strict';
 
 var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
+var assert   = require('assert');
 var dbConfig = require('./dbconfig.js');
-var sql      = require('./sql.js');
+var sql      = require('./sqlClone.js');
 
 describe('122. urowidFunctionBindAsString2.js', function() {
   var connection = null;
@@ -57,33 +56,25 @@ describe('122. urowidFunctionBindAsString2.js', function() {
                           "END;  ";
   var drop_table = "DROP TABLE " + tableName + " PURGE";
 
-  before('get connection and create table', function(done) {
-    async.series([
-      function(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
-      },
-      function(cb) {
-        sql.executeSql(connection, fun_create_table, {}, {}, cb);
-      }
-    ], done);
+  before('get connection and create table', async function() {
+    try {
+      connection = await oracledb.getConnection(dbConfig);
+      assert(connection);
+      await sql.executeSql(connection, fun_create_table, {}, {});
+    } catch (err) {
+      assert.ifError(err);
+    }
+
   });
 
-  after('release connection', function(done) {
-    async.series([
-      function(cb) {
-        sql.executeSql(connection, drop_table, {}, {}, cb);
-      },
-      function(cb) {
-        connection.release(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+  after('release connection', async function() {
+    try {
+      await sql.executeSql(connection, drop_table, {}, {});
+      await connection.release();
+    } catch (err) {
+      assert.ifError(err);
+    }
+
   });
 
   beforeEach(function(done) {
@@ -104,118 +95,127 @@ describe('122. urowidFunctionBindAsString2.js', function() {
     var fun_execute = "BEGIN :o := nodb_rowid_bind_inout_1121 (:i, :c); END;";
     var fun_drop = "DROP FUNCTION nodb_rowid_bind_inout_1121";
 
-    before('create procedure', function(done) {
-      sql.executeSql(connection, fun_create, {}, {}, done);
+    before('create procedure', async function() {
+      try {
+        await sql.executeSql(connection, fun_create, {}, {});
+      } catch (err) {
+        assert.ifError(err);
+      }
     });
 
-    after('drop procedure', function(done) {
-      sql.executeSql(connection, fun_drop, {}, {}, done);
+    after('drop procedure', async function() {
+      try {
+        await sql.executeSql(connection, fun_drop, {}, {});
+      } catch (err) {
+        assert.ifError(err);
+      }
     });
 
-    it('122.1.1 works with null', function(done) {
-      var content = null;
-      funBindInOut(fun_execute, content, content, done);
+    it('122.1.1 works with null', async function() {
+      await funBindInOut(fun_execute, null, null);
     });
 
-    it('122.1.2 works with empty string', function(done) {
-      var content = "";
-      funBindInOut(fun_execute, content, null, done);
+    it('122.1.2 works with empty string', async function() {
+      await funBindInOut(fun_execute, "", null);
     });
 
-    it('122.1.3 works with undefined', function(done) {
-      var content = undefined;
-      funBindInOut(fun_execute, content, null, done);
+    it('122.1.3 works with undefined', async function() {
+
+      await funBindInOut(fun_execute, undefined, null);
     });
 
-    it('122.1.4 works with NaN', function(done) {
-      var content = NaN;
-      var bindVar = {
+    it('122.1.4 works with NaN', async function() {
+      const content = NaN;
+      const bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, fun_create, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-        done();
-      });
+      try {
+        await sql.executeSqlWithErr(connection, fun_create, bindVar, {});
+      } catch (err) {
+        assert.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
+      }
     });
 
-    it('122.1.5 works with extended ROWID', function(done) {
-      var content = "AAAB12AADAAAAwPAAA";
-      funBindInOut(fun_execute, content, content, done);
+    it('122.1.5 works with extended ROWID', async function() {
+
+      await funBindInOut(fun_execute, "AAAB12AADAAAAwPAAA", "AAAB12AADAAAAwPAAA");
     });
 
-    it('122.1.6 works with restricted ROWID', function(done) {
-      var content = "00000DD5.0000.0101";
-      funBindInOut(fun_execute, content, content, done);
+    it('122.1.6 works with restricted ROWID', async function() {
+      await funBindInOut(fun_execute, "00000DD5.0000.0101", "00000DD5.0000.0101");
     });
 
-    it('122.1.7 works with string 0', function(done) {
-      var content = "0";
+    it('122.1.7 works with string 0', async function() {
+      const content = "0";
 
-      var bindVar = {
+      const bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
-        (err.message).should.startWith("ORA-01410:");
-        // ORA-01410: invalid ROWID
-        done();
-      });
+      try {
+        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
+      } catch (err) {
+        assert.equal(err.message.substring(0, 10), "ORA-01410:");
+      }
     });
 
-    it('122.1.8 works with number 0', function(done) {
-      var content = 0;
-      var bindVar = {
+    it('122.1.8 works with number 0', async function() {
+      const content = 0;
+      const bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-        done();
-      });
+      try {
+        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
+      } catch (err) {
+        assert.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
+      }
+
+
     });
 
-    it('122.1.9 works with default bind type/dir - extended ROWID', function(done) {
-      var content = "AAAB1+AADAAAAwPAAA";
-      funBindInOut_default(fun_execute, content, content, done);
+    it('122.1.9 works with default bind type/dir - extended ROWID', async function() {
+
+      await funBindInOut_default(fun_execute, "AAAB1+AADAAAAwPAAA", "AAAB1+AADAAAAwPAAA");
     });
 
-    it('122.1.10 works with default bind type/dir - null value', function(done) {
-      var content = null;
-      funBindInOut_default(fun_execute, content, content, done);
+    it('122.1.10 works with default bind type/dir - null value', async function() {
+      await funBindInOut_default(fun_execute, null, null);
     });
 
-    it('122.1.11 works with default bind type/dir - empty string', function(done) {
-      var content = "";
-      funBindInOut_default(fun_execute, content, null, done);
+    it('122.1.11 works with default bind type/dir - empty string', async function() {
+      await funBindInOut_default(fun_execute, "", null);
     });
 
-    it('122.1.12 works with default bind type/dir - undefined', function(done) {
-      var content = undefined;
-      funBindInOut_default(fun_execute, content, null, done);
+    it('122.1.12 works with default bind type/dir - undefined', async function() {
+      await funBindInOut_default(fun_execute, undefined, null);
     });
 
-    it('122.1.13 bind error: NJS-037', function(done) {
-      var bindVar = {
+    it('122.1.13 bind error: NJS-037', async function() {
+      const bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxArraySize: 1000 },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-037: invalid data type at array index 0 for bind ":c"');
-        done();
-      });
+      try {
+        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
+      } catch (err) {
+        assert.strictEqual(err.message, 'NJS-037: invalid data type at array index 0 for bind ":c"');
+      }
     });
 
-    it('122.1.14 bind error: NJS-052', function(done) {
-      var bindVar = [ { type: oracledb.STRING, dir: oracledb.BIND_OUT }, insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxArraySize: 1000 } ];
-      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 3');
-        done();
-      });
+    it('122.1.14 bind error: NJS-052', async function() {
+      const bindVar = [ { type: oracledb.STRING, dir: oracledb.BIND_OUT }, insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxArraySize: 1000 } ];
+
+      try {
+        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
+      } catch (err) {
+        assert.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 3');
+      }
     });
 
   });
@@ -233,108 +233,111 @@ describe('122. urowidFunctionBindAsString2.js', function() {
     var fun_execute = "BEGIN :o := nodb_rowid_bind_inout_1121 (:i, :c); END;";
     var fun_drop = "DROP FUNCTION nodb_rowid_bind_inout_1121";
 
-    before('create procedure', function(done) {
-      sql.executeSql(connection, fun_create, {}, {}, done);
+    before('create procedure', async function() {
+      try {
+        await sql.executeSql(connection, fun_create, {}, {});
+      } catch (err) {
+        assert.ifError(err);
+      }
     });
 
-    after('drop procedure', function(done) {
-      sql.executeSql(connection, fun_drop, {}, {}, done);
+    after('drop procedure', async function() {
+      try {
+        await sql.executeSql(connection, fun_drop, {}, {});
+      } catch (err) {
+        assert.ifError(err);
+      }
+
     });
 
-    it('122.2.1 works with null', function(done) {
-      var content = null;
-      funBindInOut(fun_execute, content, content, done);
+    it('122.2.1 works with null', async function() {
+      await funBindInOut(fun_execute, null, null);
     });
 
-    it('122.2.2 works with empty string', function(done) {
-      var content = "";
-      funBindInOut(fun_execute, content, null, done);
+    it('122.2.2 works with empty string', async function() {
+      await funBindInOut(fun_execute, "", null);
     });
 
-    it('122.2.3 works with undefined', function(done) {
-      var content = undefined;
-      funBindInOut(fun_execute, content, null, done);
+    it('122.2.3 works with undefined', async function() {
+      await funBindInOut(fun_execute, undefined, null);
     });
 
-    it('122.2.4 works with NaN', function(done) {
-      var content = NaN;
-      var bindVar = {
+    it('122.2.4 works with NaN', async function() {
+      const content = NaN;
+      const bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-        done();
-      });
+      try {
+        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
+      } catch (err) {
+        assert.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
+      }
     });
 
-    it('122.2.5 works with extended ROWID', function(done) {
-      var content = "AAAB12AADAAAAwPAAA";
-      funBindInOut(fun_execute, content, content, done);
+    it('122.2.5 works with extended ROWID', async function() {
+      await funBindInOut(fun_execute, "AAAB12AADAAAAwPAAA", "AAAB12AADAAAAwPAAA");
     });
 
-    it('122.2.6 works with restricted ROWID', function(done) {
-      var content = "00000DD5.0000.0101";
-      funBindInOut(fun_execute, content, content, done);
+    it('122.2.6 works with restricted ROWID', async function() {
+      await funBindInOut(fun_execute, "00000DD5.0000.0101", "00000DD5.0000.0101");
     });
 
-    it('122.2.7 works with string 0', function(done) {
-      var content = "0";
-      funBindInOut(fun_execute, content, "00000000.0000.0000", done);
+    it('122.2.7 works with string 0', async function() {
+      await funBindInOut(fun_execute, "0", "00000000.0000.0000");
     });
 
-    it('122.2.8 works with number 0', function(done) {
-      var content = 0;
-      var bindVar = {
+    it('122.2.8 works with number 0', async function() {
+      const content = 0;
+      const bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-        done();
-      });
+      try {
+        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
+      } catch (err) {
+        assert.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
+      }
     });
 
-    it('122.2.9 works with default bind type/dir - extended ROWID', function(done) {
-      var content = "AAAB1+AADAAAAwPAAA";
-      funBindInOut_default(fun_execute, content, content, done);
+    it('122.2.9 works with default bind type/dir - extended ROWID', async function() {
+      await funBindInOut_default(fun_execute, "AAAB1+AADAAAAwPAAA", "AAAB1+AADAAAAwPAAA");
     });
 
-    it('122.2.10 works with default bind type/dir - null value', function(done) {
-      var content = null;
-      funBindInOut_default(fun_execute, content, content, done);
+    it('122.2.10 works with default bind type/dir - null value', async function() {
+      await funBindInOut_default(fun_execute, null, null);
     });
 
-    it('122.2.11 works with default bind type/dir - empty string', function(done) {
-      var content = "";
-      funBindInOut_default(fun_execute, content, null, done);
+    it('122.2.11 works with default bind type/dir - empty string', async function() {
+      await funBindInOut_default(fun_execute, "", null);
     });
 
-    it('122.2.12 works with default bind type/dir - undefined', function(done) {
-      var content = undefined;
-      funBindInOut_default(fun_execute, content, null, done);
+    it('122.2.12 works with default bind type/dir - undefined', async function() {
+      await funBindInOut_default(fun_execute, undefined, null);
     });
 
-    it('122.2.13 bind error: NJS-037', function(done) {
-      var bindVar = {
+    it('122.2.13 bind error: NJS-037', async function() {
+      const bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxArraySize: 1000 },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-037: invalid data type at array index 0 for bind ":c"');
-        done();
-      });
+      try {
+        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
+      } catch (err) {
+        assert.strictEqual(err.message, 'NJS-037: invalid data type at array index 0 for bind ":c"');
+      }
     });
 
-    it('122.2.14 bind error: NJS-052', function(done) {
-      var bindVar = [ { type: oracledb.STRING, dir: oracledb.BIND_OUT }, insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxArraySize: 1000 } ];
-      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 3');
-        done();
-      });
+    it('122.2.14 bind error: NJS-052', async function() {
+      const bindVar = [ { type: oracledb.STRING, dir: oracledb.BIND_OUT }, insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxArraySize: 1000 } ];
+      try {
+        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
+      } catch (err) {
+        assert.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 3');
+      }
     });
 
   });
@@ -353,149 +356,135 @@ describe('122. urowidFunctionBindAsString2.js', function() {
     var fun_execute = "BEGIN :o := nodb_rowid_bind_1083 (:i, :c1, :c2); END;";
     var fun_drop = "DROP FUNCTION nodb_rowid_bind_1083";
 
-    before('create procedure', function(done) {
-      sql.executeSql(connection, fun_create, {}, {}, done);
+    before('create procedure', async function() {
+      try {
+        await sql.executeSql(connection, fun_create, {}, {});
+      } catch (err) {
+        assert.ifError(err);
+      }
     });
 
-    after('drop procedure', function(done) {
-      sql.executeSql(connection, fun_drop, {}, {}, done);
+    after('drop procedure', async function() {
+      try {
+        await sql.executeSql(connection, fun_drop, {}, {});
+      } catch (err) {
+        assert.ifError(err);
+      }
     });
 
-    it('122.3.1 update null with UROWID', function(done) {
-      var content_1 = null;
-      var content_2 = "AAAB12AADAAAAwPAAA";
-      funBindInOut_update(fun_execute, content_1, content_2, content_2, done);
+    it('122.3.1 update null with UROWID', async function() {
+      await funBindInOut_update(fun_execute, null, "AAAB12AADAAAAwPAAA", "AAAB12AADAAAAwPAAA");
     });
 
-    it('122.3.2 update empty string with UROWID', function(done) {
-      var content_1 = "";
-      var content_2 = "AAAB12AADAAAAwPAAA";
-      funBindInOut_update(fun_execute, content_1, content_2, content_2, done);
+    it('122.3.2 update empty string with UROWID', async function() {
+      await funBindInOut_update(fun_execute, "", "AAAB12AADAAAAwPAAA", "AAAB12AADAAAAwPAAA");
     });
 
-    it('122.3.3 update undefined with UROWID', function(done) {
-      var content_1 = undefined;
-      var content_2 = "AAAB12AADAAAAwPAAA";
-      funBindInOut_update(fun_execute, content_1, content_2, content_2, done);
+    it('122.3.3 update undefined with UROWID', async function() {
+      await funBindInOut_update(fun_execute, undefined, "AAAB12AADAAAAwPAAA", "AAAB12AADAAAAwPAAA");
     });
 
-    it('122.3.4 works with default bind type/dir', function(done) {
-      var content_1 = "AAAB1+AADAAAAwPAAA";
-      var content_2 = "0";
-      var bindVar = {
+    it('122.3.4 works with default bind type/dir', async function() {
+      const content_1 = "AAAB1+AADAAAAwPAAA";
+      const content_2 = "0";
+      const bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: content_1, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
         c2: { val: content_2, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
 
-      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
-        (err.message).should.startWith("ORA-01410:");
-        // ORA-01410: invalid ROWID
-        done();
-      });
+      try {
+        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
+      } catch (err) {
+        assert.equal(err.message.substring(0, 10), "ORA-01410:");
+      }
+      // ORA-01410: invalid ROWID
     });
 
-    it('122.3.5 works with default bind type/dir - null value', function(done) {
-      var content_1 = "AAAB12AADAAAAwPAAA";
-      var content_2 = null;
-      funBindInOut_update_default(fun_execute, content_1, content_2, null, done);
+    it('122.3.5 works with default bind type/dir - null value', async function() {
+      await funBindInOut_update_default(fun_execute, "AAAB12AADAAAAwPAAA", null, null);
     });
 
-    it('122.3.6 works with default bind type/dir - empty string', function(done) {
-      var content_1 = "AAAB12AADAAAAwPAAA";
-      var content_2 = "";
-      funBindInOut_update_default(fun_execute, content_1, content_2, null, done);
+    it('122.3.6 works with default bind type/dir - empty string', async function() {
+      await funBindInOut_update_default(fun_execute, "AAAB12AADAAAAwPAAA", "", null);
     });
 
-    it('122.3.7 works with default bind type/dir - undefined', function(done) {
-      var content_1 = "AAAB12AADAAAAwPAAA";
-      var content_2 = undefined;
-      funBindInOut_update_default(fun_execute, content_1, content_2, null, done);
+    it('122.3.7 works with default bind type/dir - undefined', async function() {
+      await funBindInOut_update_default(fun_execute, "AAAB12AADAAAAwPAAA", undefined, null);
     });
 
   });
 
-  var funBindInOut = function(fun_exec, content_in, expected, callback) {
-    var bindVar_in = {
+  var funBindInOut = async function(fun_exec, content_in, expected) {
+    const bindVar_in = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
       o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
     };
-    connection.execute(
-      fun_exec,
-      bindVar_in,
-      function(err, result) {
-        should.not.exist(err);
-        var resultVal_1 = result.outBinds.c;
-        var resultVal_2 = result.outBinds.o;
-        should.strictEqual(resultVal_2, expected);
-        should.strictEqual(resultVal_1, "AAACiZAAFAAAAJEAAA");
-        callback();
-      }
-    );
+    try {
+      const result = await connection.execute(fun_exec, bindVar_in);
+      const resultVal_1 = result.outBinds.c;
+      const resultVal_2 = result.outBinds.o;
+      assert.strictEqual(resultVal_2, expected);
+      assert.strictEqual(resultVal_1, "AAACiZAAFAAAAJEAAA");
+    } catch (err) {
+      assert.ifError(err);
+    }
+
   };
 
-  var funBindInOut_default = function(fun_exec, content_in, expected, callback) {
-    var bindVar_in = {
+  var funBindInOut_default = async function(fun_exec, content_in, expected) {
+    const bindVar_in = {
       i: insertID,
       c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
       o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
     };
-    connection.execute(
-      fun_exec,
-      bindVar_in,
-      function(err, result) {
-        should.not.exist(err);
-        var resultVal_1 = result.outBinds.c;
-        var resultVal_2 = result.outBinds.o;
-        should.strictEqual(resultVal_2, expected);
-        should.strictEqual(resultVal_1, "AAACiZAAFAAAAJEAAA");
-        callback();
-      }
-    );
+    try {
+      const result = await connection.execute(fun_exec, bindVar_in);
+      const resultVal_1 = result.outBinds.c;
+      const resultVal_2 = result.outBinds.o;
+      assert.strictEqual(resultVal_2, expected);
+      assert.strictEqual(resultVal_1, "AAACiZAAFAAAAJEAAA");
+    } catch (err) {
+      assert.ifError(err);
+    }
   };
 
-  var funBindInOut_update = function(fun_exec, content_1, content_2, expected, callback) {
-    var bindVar_in = {
+  var funBindInOut_update = async function(fun_exec, content_1, content_2, expected) {
+    const bindVar_in = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c1: { val: content_1, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
       c2: { val: content_2, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
       o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
     };
-    connection.execute(
-      fun_exec,
-      bindVar_in,
-      function(err, result) {
-        should.not.exist(err);
-        var resultVal_1 = result.outBinds.c1;
-        var resultVal_2 = result.outBinds.o;
-        should.strictEqual(resultVal_2, expected);
-        should.strictEqual(resultVal_1, "AAACiZAAFAAAAJEAAA");
-        callback();
-      }
-    );
+    try {
+      const result = await connection.execute(fun_exec, bindVar_in);
+      const resultVal_1 = result.outBinds.c1;
+      const resultVal_2 = result.outBinds.o;
+      assert.strictEqual(resultVal_2, expected);
+      assert.strictEqual(resultVal_1, "AAACiZAAFAAAAJEAAA");
+    } catch (err) {
+      assert.ifError(err);
+    }
   };
 
-  var funBindInOut_update_default = function(fun_exec, content_1, content_2, expected, callback) {
-    var bindVar_in = {
+  var funBindInOut_update_default = async function(fun_exec, content_1, content_2, expected) {
+    const bindVar_in = {
       i: insertID,
       c1: { val: content_1, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
       c2: { val: content_2, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
       o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
     };
-    connection.execute(
-      fun_exec,
-      bindVar_in,
-      function(err, result) {
-        should.not.exist(err);
-        var resultVal_1 = result.outBinds.c1;
-        var resultVal_2 = result.outBinds.o;
-        should.strictEqual(resultVal_2, expected);
-        should.strictEqual(resultVal_1, "AAACiZAAFAAAAJEAAA");
-        callback();
-      }
-    );
+    try {
+      const result = await connection.execute(fun_exec, bindVar_in);
+      const resultVal_1 = result.outBinds.c1;
+      const resultVal_2 = result.outBinds.o;
+      assert.strictEqual(resultVal_2, expected);
+      assert.strictEqual(resultVal_1, "AAACiZAAFAAAAJEAAA");
+    } catch (err) {
+      assert.ifError(err);
+    }
   };
 
 });
