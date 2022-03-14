@@ -1,5 +1,7 @@
 # node-oracledb version 5.4.0-dev
 
+As an asynchronous event-driven JavaScript runtime, Node.js is designed to build scalable network applications
+
 **This release is under development and information may be incomplete**
 
 The node-oracledb add-on for Node.js powers high performance Oracle Database
