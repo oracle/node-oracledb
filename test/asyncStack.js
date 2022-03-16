@@ -29,29 +29,24 @@
 
 const oracledb = require('oracledb');
 const {strictEqual, ok} = require('assert');
+const {promisify} = require('util');
+
+const asyncMiddleware = async () => {
+  await promisify(setTimeout)(1);
+  await oracledb.getConnection({connectString:'unexists.example.com'});
+};
 
 describe('263. asyncStack.js', () => {
 
   it('263.1 await getConnection()', async () => {
+    await promisify(setTimeout)(1);
     try {
-      await oracledb.getConnection({connectString:'unexists.example.com'});
+      await asyncMiddleware();
     } catch (e) {
       strictEqual(e.errorNum, 12154); //  TNS:could not resolve the connect identifier specified
-      ok(e.stack.includes('asyncStack.js:37:22'), e.stack);
+      ok(e.stack.includes('asyncStack.js:44:'), e.stack);
+      ok(e.stack.includes('asyncStack.js:36:'), e.stack);
     }
-  });
-
-  it('263.2 getConnection(cb)', (doneTest) => {
-    oracledb.getConnection({connectString:'unexists.example.com'}, (e, conn) => {
-      try {
-        ok(!conn, conn);
-        strictEqual(e.errorNum, 12154); //  TNS:could not resolve the connect identifier specified
-        ok(e.stack.includes('asyncStack.js:45:14'), e.stack);
-        doneTest();
-      } catch (e2) {
-        doneTest(e2);
-      }
-    });
   });
 
 });
