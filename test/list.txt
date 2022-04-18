@@ -5300,6 +5300,10 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 262. dbObjectOutBind.js
     262.1 call procedure with 2 OUT binds of DbObject
 
+263. asyncStack.js
+    263.1 stack on error in getConnection
+    263.2 stack on error in createPool
+    263.3 stack on error in execute
 
 264. methodName.js
     264.1 check for methodName getConnection

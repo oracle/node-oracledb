@@ -4,6 +4,8 @@
 
 **This release is under development and information may be incomplete**
 
+- Added code to capture the error stack. PR#1467 (Slawomir Osoba)
+
 - Added code to keep the method name in internally bound functions.
   PR #1466 (Slawomir Osoba)
 

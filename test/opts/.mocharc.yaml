@@ -249,4 +249,5 @@ spec:
   - test/tpcResume.js
   - test/connHealthy.js
   - test/dbObjectOutBind.js
+  - test/asyncStack.js
   - test/methodName.js
