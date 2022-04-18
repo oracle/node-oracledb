@@ -89,9 +89,10 @@ describe('191. currentSchema.js', function() {
 
     await testsUtil.assertThrowsAsync(
       async () => await setInvalidSchema(),
-      /ORA-01435/
+      /ORA-01435|ORA-28726/
     );
     // ORA-01435: user does not exist
+    // ORA-28726: set current schema operation failed
 
   }); // 191.3
 
