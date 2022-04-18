@@ -4,6 +4,9 @@
 
 **This release is under development and information may be incomplete**
 
+- Added code to keep the method name in internally bound functions.
+  PR #1466 (Slawomir Osoba)
+
 - Added code to handle multiple out-binds with ([DbObject](https://oracle.github.io/node-oracledb/doc/api.html#dbobjectclass)) correctly, earlier only
   the first one was processed and was resulting in a crash.
   ([Issue #1464](https://github.com/oracle/node-oracledb/issues/1464))

@@ -249,3 +249,4 @@ spec:
   - test/tpcResume.js
   - test/connHealthy.js
   - test/dbObjectOutBind.js
+  - test/methodName.js
