@@ -1,6 +1,6 @@
 # node-oracledb 5.4.0-dev Documentation for the Oracle Database Node.js Add-on
 
-*Copyright (c) 2015, 2022, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2015, 2022, Oracle and/or its affiliates.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -15477,7 +15477,7 @@ The returned bind values are:
 ```
 
 The variant of `executeMany()` that accepts a number of iterations is
-useful when there no bind values, or only OUT bind values.  This
+useful when there are no bind values, or only OUT bind values.  This
 example calls a PL/SQL block eight times:
 
 ```javascript
