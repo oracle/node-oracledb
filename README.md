@@ -46,7 +46,7 @@ have been made by the community.
 
 ## <a name="license"></a> License
 
-Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved.
+Copyright (c) 2015, 2022, Oracle and/or its affiliates.
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -60,7 +60,10 @@ CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-
+Developers choosing to distribute a binary implementation of this project are
+responsible for obtaining and providing all required licenses and copyright
+notices for the third-party code used in order to ensure compliance with their
+respective open source licenses.
 
 [1]: https://oracle.github.io/node-oracledb/doc/api.html#getstarted
 [2]: https://oracle.github.io/node-oracledb/INSTALL.html#quickstart

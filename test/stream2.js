@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -14,9 +14,6 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
- * See LICENSE.md for relevant licenses.
  *
  * NAME
  *   14. stream2.js

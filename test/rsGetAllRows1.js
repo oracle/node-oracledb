@@ -1,4 +1,5 @@
-/* Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+
 /******************************************************************************
  *
  * You may not use the identified files except in compliance with the Apache
@@ -13,9 +14,6 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
- * See LICENSE.md for relevant licenses.
  *
  * NAME
  *   249. rsGetAllRows1.js

@@ -1,4 +1,4 @@
-/* Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2022, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -14,8 +14,6 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License
- * The node-oracledb test suite uses 'mocha', 'assert' and 'async'.
- * See LICENSE.md for relevant licenses.
  *
  * NAME
  *   262. dbObjectOutBind.js
@@ -180,4 +178,3 @@ describe('262. dbObjectOutBind.js', function() {
     }
   });
 });
-

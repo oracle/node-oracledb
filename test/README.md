@@ -15,10 +15,6 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-The node-oracledb test suite uses 'mocha', 'should' and 'async'.  See
-[LICENSE](https://github.com/oracle/node-oracledb/blob/main/LICENSE.md)
-for relevant licenses.
-
 ##  <a name="contents"></a> Contents
 
 1. [Preparations](#preparations)

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -14,9 +14,6 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * The node-oracledb test suite uses 'mocha'.
- * See LICENSE.md for relevant licenses.
  *
  * NAME
  *   102. bindTimestamp.js

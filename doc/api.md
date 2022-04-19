@@ -15,6 +15,11 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
+See
+[LICENSE.txt](https://github.com/oracle/node-oracledb/blob/main/LICENSE.txt)
+and
+[THIRD_PARTY_LICENSES.txt](https://github.com/oracle/node-oracledb/blob/main/THIRD_PARTY_LICENSES.txt).
+
 ##
 ## ===> *** Note: Go to [https://oracle.github.io/node-oracledb/doc/api.html](https://oracle.github.io/node-oracledb/doc/api.html) for production documentation ***
 
