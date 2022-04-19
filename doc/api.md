@@ -44,6 +44,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 2.1.1 [`errorNum`](#properrerrornum)
         - 2.1.2 [`message`](#properrmessage)
         - 2.1.3 [`offset`](#properroffset)
+        - 2.1.4 [`stack`](#properrstack)
 3. [Oracledb Class](#oracledbclass)
     - 3.1 [Oracledb Constants](#oracledbconstants)
         - 3.1.1 [Query `outFormat` Constants](#oracledbconstantsoutformat)
@@ -817,9 +818,23 @@ same is true for invalid operations on read-only or write-only
 properties.  If an unrecognized property name is used, it will be
 ignored.
 
+An example of catching an error is:
+
+```javascript
+async function run(connection) {
+  try {
+    const sql = `SELECT * FROM DOESNOTEXIST`;
+    result = await connection.execute(sql);
+    return result;
+  } catch (err) {
+    console.error(err);
+  }
+}
+```
+
 ### <a name="properror"></a> 2.1 Error Properties
 
-The *Error* object contains `errorNum`, `message` and `offset` properties.
+The *Error* object contains `errorNum`, `message`, `offset` and `stack` properties.
 
 #### <a name="properrerrornum"></a> 2.1.1 `errorNum`
 
@@ -875,6 +890,21 @@ corresponding to the `executeMany()` [binds parameter](#executemanybinds) array,
 indicating which record could not be processed. See [Handling Data
 Errors](#handlingbatcherrors).  In node-oracledb 4.2, the maximum `offset` value
 was changed from (2^16)-1 to (2^32)-1.
+
+#### <a name="properrstack"></a> 2.1.4 `stack`
+
+```
+String stack
+```
+
+When using Promises or Async/Await, the *Error* object includes a stack trace,
+for example:
+
+```
+Error: ORA-00942: table or view does not exist
+    at async Object.myDoQuery (/Users/cjones/db.js:5:20)
+    at async run (/Users/cjones/test.js:51:14)}
+```
 
 ## <a name="oracledbclass"></a> 3. Oracledb Class
 
