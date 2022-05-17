@@ -2,7 +2,7 @@
 
 Thanks for contributing!
 
-Before submitting PRs for node-oracledb you must have your signed *Oracle Contributor Agreement* accepted.  See https://www.oracle.com/technetwork/community/oca-486395.html
+Before submitting PRs for node-oracledb you must have your signed *Oracle Contributor Agreement* accepted.  See https://oca.opensource.oracle.com
 
 If the problem solved is small, you may find it easier to open an Issue describing the problem and its cause so we can create the fix.
 
