@@ -4572,6 +4572,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     200.7 insert data via binding by object
     200.8 insert multiple rows using executeMany() with inferred data type
     200.9 insert multiple rows using executeMany() with explicit data type
+    200.10 call procedure with 2 OUT binds of DbObject
 
 201. dbObject2.js
     - 201.1 insert an object with timestamp attributes
@@ -4579,24 +4580,28 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     201.2 insert null values for timestamp attribute
     201.3 insert undefined values for timestamp attribute
     201.4 insert an empty JSON for timestamp attribute
+    201.5 call procedure with 2 OUT binds of DbObject
 
 202. dbObject3.js
     - 202.1 insert an object with TSZ type attributes
     202.2 insert null value for TSZ type attribute
     202.3 insert undefined value for TSZ type attribute
     202.4 insert an empty JSON
+    202.5 call procedure with 2 OUT binds of DbObject
 
 203. dbObject4.js
     203.1 insert an object with LTZ type attribute
     203.2 insert null value for LTZ type attribute
     203.3 insert undefined value for LTZ type attribute
     203.4 insert an empty JSON
+    203.5 call procedure with 2 OUT binds of DbObject
 
 204. dbObject5.js
     204.1 insert an object with DATE type attribute
     204.2 insert null value for DATE type attribute
     204.3 insert undefined value for DATE type attribute
     204.4 insert an empty JSON
+    204.5 call procedure with 2 OUT binds of DbObject
 
 205. dbObject6.js
     205.1 205.1 examples/selectgeometry.js

@@ -35,6 +35,36 @@ describe('201. dbObject2.js', () => {
   const TYPE = 'NODB_TYP_OBJ_2';
   const TABLE  = 'NODB_TAB_OBJ2';
 
+  let proc1 =
+    `create or replace procedure nodb_getDataCursor1(p_cur out sys_refcursor) is
+      begin
+        open p_cur for
+          SELECT
+            * FROM
+            ${TABLE}
+        WHERE num >= 100;
+      end; `;
+
+  let proc2 =
+    `create or replace procedure nodb_getDataCursor2(p_cur out sys_refcursor) is
+       begin
+         open p_cur for
+           SELECT
+             * FROM
+             ${TABLE}
+         WHERE num >= 101;
+       end; `;
+
+  let proc3 =
+      `create or replace procedure nodb_getDataCursor3(
+          p_cur1 out sys_refcursor,
+          p_cur2 out sys_refcursor
+       ) is
+       begin
+         nodb_getDataCursor1(p_cur1);
+         nodb_getDataCursor2(p_cur2);
+       end;`;
+
   before(async () => {
     try {
       conn = await oracledb.getConnection(dbconfig);
@@ -66,6 +96,10 @@ describe('201. dbObject2.js', () => {
 
       sql = `DROP TYPE ${TYPE}`;
       await conn.execute(sql);
+
+      await conn.execute(`DROP PROCEDURE nodb_getDataCursor3`);
+      await conn.execute(`DROP PROCEDURE nodb_getDataCursor2`);
+      await conn.execute(`DROP PROCEDURE nodb_getDataCursor1`);
 
       await conn.close();
     } catch (err) {
@@ -208,4 +242,32 @@ describe('201. dbObject2.js', () => {
       assert.fail(err);
     }
   }); // 201.4
+
+  it('201.5 call procedure with 2 OUT binds of DbObject', async function() {
+    try {
+      await conn.execute(proc1);
+      await conn.execute(proc2);
+      await conn.execute(proc3);
+
+      let result = await conn.execute(
+        `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,
+            p_cur2 => :p_cur2); end;`,
+        {
+          p_cur1: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT},
+          p_cur2: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}
+        }
+      );
+
+      let resultSet = await result.outBinds.p_cur1.getRows();
+      assert.equal(resultSet.length, 3);
+      result.outBinds.p_cur1.close();
+
+      resultSet = await result.outBinds.p_cur2.getRows();
+      assert.equal(resultSet.length, 3);
+      result.outBinds.p_cur2.close();
+    } catch (e) {
+      assert.fail(e);
+    }
+  }); // 201.5;
+
 });
