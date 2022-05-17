@@ -4640,7 +4640,7 @@ since network or database failure may occur in the interval between
 `ping()` and `execute()` calls.
 
 Pinging requires a [round-trip](#roundtrips) to the database so unnecessary
-ping calls should be avoided.
+`ping()` calls should be avoided.
 
 If `ping()` returns an error, the application should close the
 connection.
