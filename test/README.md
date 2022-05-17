@@ -1,6 +1,6 @@
 # Test node-oracledb
 
-*Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2015, 2022, Oracle and/or its affiliates.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")

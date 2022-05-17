@@ -1,4 +1,4 @@
-// Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2020, 2022, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //

@@ -1,6 +1,6 @@
 # Installing node-oracledb Version 5.4.0-dev
 
-*Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2015, 2022, Oracle and/or its affiliates.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
