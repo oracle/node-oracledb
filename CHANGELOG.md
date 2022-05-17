@@ -4,19 +4,22 @@
 
 **This release is under development and information may be incomplete**
 
-- Added code to capture the error stack. PR#1467 (Slawomir Osoba)
+- Added code to capture the [error
+  stack](https://oracle.github.io/node-oracledb/doc/api.html#properrstack). PR#1467
+  (Slawomir Osoba).
 
 - Added code to keep the method name in internally bound functions.
-  PR #1466 (Slawomir Osoba)
+  PR #1466 (Slawomir Osoba).
 
-- Added code to handle multiple out-binds with ([DbObject](https://oracle.github.io/node-oracledb/doc/api.html#dbobjectclass)) correctly, earlier only
-  the first one was processed and was resulting in a crash.
-  ([Issue #1464](https://github.com/oracle/node-oracledb/issues/1464))
-
-- Added a [`connection.isHealthy()`](https://oracle.github.io/node-oracledb/doc/api.html#ishealthy)
-  function to perform a local connection health check
+- Added a
+  [`connection.isHealthy()`](https://oracle.github.io/node-oracledb/doc/api.html#ishealthy)
+  function to perform a local connection health check.
 
 - Added missing support for binding as `oracledb.DB_TYPE_BINARY_INTEGER`.
+
+- Fixed crash with multiple
+  [DbObject](https://oracle.github.io/node-oracledb/doc/api.html#dbobjectclass)
+  OUT binds ([Issue #1464](https://github.com/oracle/node-oracledb/issues/1464)).
 
 - Fixed calling `initOracleClient()` with TypeScript 4.4 ([Issue
   1462](https://github.com/oracle/node-oracledb/issues/1462)).
