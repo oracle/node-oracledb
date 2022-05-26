@@ -31,7 +31,7 @@
 - Fixed binding string or buffer data when explicitly specifying the type as
   `oracledb.DB_TYPE_BLOB`, `oracledb.DB_TYPE_CLOB` or `oracledb.DB_TYPE_NCLOB`.
 
-## node-oracledb v5.3.0 (22 Oct 2021)
+## node-oracledb [v5.3.0](https://github.com/oracle/node-oracledb/compare/v5.2.0...v5.3.0) (22 Oct 2021)
 
 - Added a
   [`keepInStmtCache`](https://oracle.github.io/node-oracledb/doc/api.html#propexeckeepinstmtcache)
