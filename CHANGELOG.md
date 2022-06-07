@@ -2,11 +2,11 @@
 
 ## node-oracledb v5.4.0 (9 Jun 2022)
 
-- Stated compatibility is now for Node.js 14, 16 and 18, though older releases
+- Stated compatibility is now for Node.js 14, 16 and 18.  Older releases
   back to Node.js 10.16 should still work.
 
 - Added code to capture the [error
-  stack](https://oracle.github.io/node-oracledb/doc/api.html#properrstack). PR#1467
+  stack](https://oracle.github.io/node-oracledb/doc/api.html#properrstack). PR #1467
   (Slawomir Osoba).
 
 - Added support for [token based
@@ -35,6 +35,13 @@
 
 - Fixed binding string or buffer data when explicitly specifying the type as
   `oracledb.DB_TYPE_BLOB`, `oracledb.DB_TYPE_CLOB` or `oracledb.DB_TYPE_NCLOB`.
+
+- Fixed a crash when certain errors occur during binding. ([ODPI-C
+  change](https://github.com/oracle/odpi/commit/13899afcbdf51998863d48752debc3f239f3d655)).
+
+- Fixed a bug causing ORA-25263 when dequeuing a message with a specific
+  message ID. ([ODPI-C
+  change](https://github.com/oracle/odpi/commit/68c438dd3b779e8f5eb146a0762d6cd149cdf9f1)).
 
 ## node-oracledb v5.3.0 (22 Oct 2021)
 
