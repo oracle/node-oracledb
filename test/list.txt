@@ -5256,43 +5256,43 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 259. tpc.js
     259.1 TPC constants
-	259.1.1 tpc constant TPC_BEGIN_JOIN
-	259.1.2 tpc constant TPC_BEGIN_NEW
-	259.1.3 tpc constant TPC_RESUME
-	259.1.4 tpc constant TPC_PROMOTE
-	259.1.5 tpc constant TPC_END_NORMAL
-	259.1.6 tpc constant TPC_END_SUSPEND
+        259.1.1 tpc constant TPC_BEGIN_JOIN
+        259.1.2 tpc constant TPC_BEGIN_NEW
+        259.1.3 tpc constant TPC_RESUME
+        259.1.4 tpc constant TPC_PROMOTE
+        259.1.5 tpc constant TPC_END_NORMAL
+        259.1.6 tpc constant TPC_END_SUSPEND
     259.2 TPC Functions
-	259.2.1 test tpcBegin, tpcPrepare, tpcRollback
-	259.2.2 test tpcBegin, tpcPrepare, tpcCommit
-	259.2.3 test multiple global transactions on same connection
-	259.2.4 test tpcPrepare with no xid
-	259.2.5 negative - missing formatId in XID
-	259.2.6 negative missing globalTxnId in XID
-	259.2.7 negative missing branchQualifier in XID
+        259.2.1 test tpcBegin, tpcPrepare, tpcRollback
+        259.2.2 test tpcBegin, tpcPrepare, tpcCommit
+        259.2.3 test multiple global transactions on same connection
+        259.2.4 test tpcPrepare with no xid
+        259.2.5 negative - missing formatId in XID
+        259.2.6 negative missing globalTxnId in XID
+        259.2.7 negative missing branchQualifier in XID
     259.3 TPC Functions with no default values
-	259.3.1 test tpcBegin, tpcPrepare, tpcRollback
-	259.3.2 test tpcBegin, tpcPrepare, tpcCommit
-	259.3.3 test multiple global transactions on same connection
-	259.3.4 test tpcPrepare with no xid
-	259.3.5 negative - missing formatId in XID
-	259.3.6 negative missing globalTxnId in XID
-	259.3.7 negative missing branchQualifier in XID
+        259.3.1 test tpcBegin, tpcPrepare, tpcRollback
+        259.3.2 test tpcBegin, tpcPrepare, tpcCommit
+        259.3.3 test multiple global transactions on same connection
+        259.3.4 test tpcPrepare with no xid
+        259.3.5 negative - missing formatId in XID
+        259.3.6 negative missing globalTxnId in XID
+        259.3.7 negative missing branchQualifier in XID
     259.4 TPC Properties
-	259.4.1 set and get externalName
-	259.4.2 set and get internalName
-	259.4.3 set and query ecid
+        259.4.1 set and get externalName
+        259.4.2 set and get internalName
+        259.4.3 set and query ecid
     259.5 TPC Functions using Buffer type
-	259.5.1 test tpcBegin, tpcPrepare, tpcRollback using Buffer type
-	259.5.2 test tpcBegin, tpcPrepare, tpcRollback using Buffer type 2
+        259.5.1 test tpcBegin, tpcPrepare, tpcRollback using Buffer type
+        259.5.2 test tpcBegin, tpcPrepare, tpcRollback using Buffer type 2
     259.6 TPC Functions with invalid # of parameters
-	259.6.1 tpcBegin invalid number of arguments
-	259.6.2 tpcCommit invalid number of arguments
-	259.6.3 tpcEnd invalid number of arguments
-	259.6.4 tpcForget invalid number of arguments
-	259.6.5 tpcPrepare invalid number of args
-	259.6.6 tpcRecover invalid number of args
-	259.6.7 tpcRollback invalid number of args
+        259.6.1 tpcBegin invalid number of arguments
+        259.6.2 tpcCommit invalid number of arguments
+        259.6.3 tpcEnd invalid number of arguments
+        259.6.4 tpcForget invalid number of arguments
+        259.6.5 tpcPrepare invalid number of args
+        259.6.6 tpcRecover invalid number of args
+        259.6.7 tpcRollback invalid number of args
 
 260. tpcResume.js
     260.1 TPC suspend and resume
