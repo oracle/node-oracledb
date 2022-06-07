@@ -1,6 +1,6 @@
 # Change Log
 
-## node-oracledb v5.4.0 (9 Jun 2022)
+## node-oracledb [v5.4.0](https://github.com/oracle/node-oracledb/compare/v5.3.0...v5.4.0) (9 Jun 2022)
 
 - Stated compatibility is now for Node.js 14, 16 and 18.  Older releases
   back to Node.js 10.16 should still work.
@@ -43,7 +43,7 @@
   message ID. ([ODPI-C
   change](https://github.com/oracle/odpi/commit/68c438dd3b779e8f5eb146a0762d6cd149cdf9f1)).
 
-## node-oracledb v5.3.0 (22 Oct 2021)
+## node-oracledb [v5.3.0](https://github.com/oracle/node-oracledb/compare/v5.2.0...v5.3.0) (22 Oct 2021)
 
 - Added a
   [`keepInStmtCache`](https://oracle.github.io/node-oracledb/doc/api.html#propexeckeepinstmtcache)
@@ -70,7 +70,7 @@
 - Made an internal change for TypeScript 4.4's imported function behavior with
   'this' ([Issue 1408](https://github.com/oracle/node-oracledb/issues/1408)).
 
-## node-oracledb v5.2.0 (7 Jun 2021)
+## node-oracledb [v5.2.0](https://github.com/oracle/node-oracledb/compare/v5.1.0...v5.2.0) (7 Jun 2021)
 
 - Connection pool changes:
 
@@ -161,7 +161,7 @@
 
 - Test and documentation improvements.
 
-## node-oracledb v5.1.0 (8 Dec 2020)
+## node-oracledb [v5.1.0](https://github.com/oracle/node-oracledb/compare/v5.0.0...v5.1.0) (8 Dec 2020)
 
 - Added
   [`oracledb.dbObjectAsPojo`](https://oracle.github.io/node-oracledb/doc/api.html#propdbobjpojo)
@@ -188,7 +188,7 @@
 - Fixed a memory leak getting attributes of objects or elements of collections
   that are themselves objects.
 
-## node-oracledb v5.0.0 (29 Jun 2020)
+## node-oracledb [v5.0.0](https://github.com/oracle/node-oracledb/compare/v4.2.0...v5.0.0) (29 Jun 2020)
 
 - Stated compatibility is now for Node.js 10.16+, 12 and 14.
 
@@ -323,7 +323,7 @@ and
 
 - Test and documentation improvements.
 
-## node-oracledb v4.2.0 (24 Jan 2020)
+## node-oracledb [v4.2.0](https://github.com/oracle/node-oracledb/compare/v4.1.0...v4.2.0) (24 Jan 2020)
 
 - Added support for binding using the node-oracledb [Database Type
   Constants](https://oracle.github.io/node-oracledb/doc/api.html#oracledbconstantsdbtype)
@@ -376,7 +376,7 @@ and
 
 - Test and documentation improvements.
 
-## node-oracledb v4.1.0 (26 Nov 2019)
+## node-oracledb [v4.1.0](https://github.com/oracle/node-oracledb/compare/v4.0.1...v4.1.0) (26 Nov 2019)
 
 - Added end-to-end tracing attributes
   [`connection.clientInfo`](https://oracle.github.io/node-oracledb/doc/api.html#propconnclientinfo)
@@ -422,7 +422,7 @@ and
 
 - Test and documentation improvements.
 
-## node-oracledb v4.0.1 (19 Aug 2019)
+## node-oracledb [v4.0.1](https://github.com/oracle/node-oracledb/compare/v4.0.0...v4.0.1) (19 Aug 2019)
 
 - Fixed a regression causing a segfault when setting `oracledb.connectionClass`
   and not creating a pool ([ODPI-C change](https://github.com/oracle/odpi/commit/f945355f3e58e7337dd798cba0404ab5755f0692)).
@@ -450,7 +450,7 @@ and
 
 - Improve portability of buildbinary.js, a package creation script ([#1129](https://github.com/oracle/node-oracledb/issues/1129)).
 
-## node-oracledb v4.0.0 (25 Jul 2019)
+## node-oracledb [v4.0.0](https://github.com/oracle/node-oracledb/compare/v3.1.2...v4.0.0) (25 Jul 2019)
 
 - Refactored the node-oracledb implementation to use
   [N-API](https://nodejs.org/api/n-api.html) in place of
@@ -596,7 +596,7 @@ and
 
 - Added new examples.  Updated existing examples to the Node.js 8 Async/Await style of programming.
 
-## node-oracledb v3.1.2 (22 Feb 2019)
+## node-oracledb [v3.1.2](https://github.com/oracle/node-oracledb/compare/v3.1.1...v3.1.2) (22 Feb 2019)
 
 - Fixed a bug causing CQN crashes when multiple queries are registered
   ([ODPI-C change](https://github.com/oracle/odpi/issues/96)).
@@ -618,11 +618,11 @@ and
 - Use a relative URL for the ODPI-C submodule to make cloning from
   oss.oracle.com also use ODPI-C from oss.oracle.com
 
-## node-oracledb v3.1.1 (25 Jan 2019)
+## node-oracledb [v3.1.1](https://github.com/oracle/node-oracledb/compare/v3.1.0...v3.1.1) (25 Jan 2019)
 
 - Rebuild npm package to resolve Linux binary build issue.
 
-## node-oracledb v3.1.0 (22 Jan 2019)
+## node-oracledb [v3.1.0](https://github.com/oracle/node-oracledb/compare/v3.0.1...v3.1.0) (22 Jan 2019)
 
 - Support tagging of pooled connections when releasing them to the
   connection pool.  When using Oracle Client libraries 12.2 or later,
@@ -712,7 +712,7 @@ and
 - Made internal changes to fix V8 deprecation compilation warnings
   with Node.js 10.12, and fixed other static analysis warnings.
 
-## node-oracledb v3.0.1 (15 Nov 2018)
+## node-oracledb [v3.0.1](https://github.com/oracle/node-oracledb/compare/v3.0.0...v3.0.1) (15 Nov 2018)
 
 - Improve validation for SODA `createDocument()` arguments.
 
@@ -720,7 +720,7 @@ and
 
 - Upgraded NAN dependency from 2.10 to 2.11.1.
 
-## node-oracledb v3.0.0 (1 Oct 2018)
+## node-oracledb [v3.0.0](https://github.com/oracle/node-oracledb/compare/v2.3.0...v3.0.0) (1 Oct 2018)
 
 - Added new APIs for Simple Oracle Document Access
   ([SODA](https://oracle.github.io/node-oracledb/doc/api.html#sodaoverview)),
@@ -782,7 +782,7 @@ and
 
 - Examples were added and updated.
 
-## node-oracledb v2.3.0 (7 Jun 2018)
+## node-oracledb [v2.3.0](https://github.com/oracle/node-oracledb/compare/v2.2.0...v2.3.0) (7 Jun 2018)
 
 - The stated compatibility is now for Node.js 6, 8, and 10 due to EOL
   of Node.js 4, and the release of Node 10.
@@ -826,7 +826,7 @@ and
   future version; connection pool queuing will always be enabled in
   that future version.
 
-## node-oracledb v2.2.0 (3 Apr 2018)
+## node-oracledb [v2.2.0](https://github.com/oracle/node-oracledb/compare/v2.1.2...v2.2.0) (3 Apr 2018)
 
 - Added
   [`oracledb.oracleClientVersionString`](https://oracle.github.io/node-oracledb/doc/api.html#propdboracleclientversionstring)
@@ -886,18 +886,18 @@ and
 
 - Updated the node-oracledb implementation to replace V8 deprecations.
 
-## node-oracledb v2.1.2 (21 Feb 2018)
+## node-oracledb [v2.1.2](https://github.com/oracle/node-oracledb/compare/v2.1.1...v2.1.2) (21 Feb 2018)
 
 - Fixed regression with end-to-end tracing attributes not being set.
 
 - Fix binary installer proxy 403 (Bruno Jouhier)
 
-## node-oracledb v2.1.1 (16 Feb 2018)
+## node-oracledb [v2.1.1](https://github.com/oracle/node-oracledb/compare/v2.1.0...v2.1.1) (16 Feb 2018)
 
 - Fixed regression with `queryStream()` in Node 4 & 6
   ([#847](https://github.com/oracle/node-oracledb/issues/847)).
 
-## node-oracledb v2.1.0 (15 Feb 2018)
+## node-oracledb [v2.1.0](https://github.com/oracle/node-oracledb/compare/v2.0.15...v2.1.0) (15 Feb 2018)
 
 - Added support for [privileged standalone
   connections](https://oracle.github.io/node-oracledb/doc/api.html#privconn):
@@ -959,7 +959,7 @@ and
 
 - Correct the error message text when attempting to set `oracledb.oracleClientVersion`.
 
-## node-oracledb v2.0.15 (15 Dec 2017) changes since node-oracledb version 1
+## node-oracledb [v2.0.15](https://github.com/oracle/node-oracledb/compare/v1.13.1...v2.0.15) (15 Dec 2017) changes since node-oracledb version 1
 
 - Release testing is now done for Node.js 4, 6, 8 and 9.
 
@@ -1111,7 +1111,7 @@ and
 
 - Documentation has been updated and improved.
 
-## node-oracledb v2.0.15 (15 Dec 2017)
+## node-oracledb [v2.0.15](https://github.com/oracle/node-oracledb/compare/v2.0.14...v2.0.15) (15 Dec 2017)
 
 - The stated compatibility is now for Node.js 4, 6, 8 and 9.
 
@@ -1145,7 +1145,7 @@ and
 
 - Fixed compiler deprecation warnings regarding `Nan::ForceSet`.
 
-## node-oracledb v2.0.14 Development (20 Nov 2017)
+## node-oracledb [v2.0.14 Development](https://github.com/oracle/node-oracledb/compare/v2.0.13-dev...v2.0.14-dev) (20 Nov 2017)
 
 - Added infrastructure to /package for creating binary installs.
   Updated INSTALL.md.
@@ -1241,7 +1241,7 @@ and
 
 - Fix support for `connectionClass` (regression from v1).
 
-## node-oracledb v2.0.13 Development (19 Jun 2017)
+## node-oracledb [v2.0.13 Development](https://github.com/oracle/node-oracledb/compare/v1.13.1...v2.0.13-dev) (19 Jun 2017)
 
 - Node-oracledb now uses the [ODPI-C](https://github.com/oracle/odpi)
   database abstraction library.
@@ -1326,11 +1326,11 @@ and
 
 - Upgraded NAN dependency from 2.5 to 2.6.
 
-## node-oracledb v1.13.1 (12 Apr 2017)
+## node-oracledb [v1.13.1](https://github.com/oracle/node-oracledb/compare/v1.13.0...v1.13.1) (12 Apr 2017)
 
 - Fix regression with NULL values to PL/SQL procedures with multiple parameters.
 
-## node-oracledb v1.13.0 (15 Mar 2017)
+## node-oracledb [v1.13.0](https://github.com/oracle/node-oracledb/compare/v1.12.2...v1.13.0) (15 Mar 2017)
 
 - Added support for fetching BLOBs as Buffers, using `fetchAsBuffer` and `fetchInfo`.
 
@@ -1344,17 +1344,17 @@ and
 
 - Updated NAN dependency from 2.4 to 2.5.
 
-## node-oracledb v1.12.2 (21 Dec 2016)
+## node-oracledb [v1.12.2](https://github.com/oracle/node-oracledb/compare/v1.12.1-dev...v1.12.2) (21 Dec 2016)
 
 - Fix memory allocation with Oracle 11g client libraries when querying CLOBs using `fetchAsString` and `fetchInfo`.
 
-## node-oracledb v1.12.1 Development (16 Dec 2016)
+## node-oracledb [v1.12.1](https://github.com/oracle/node-oracledb/compare/v1.12.0-dev...v1.12.1-dev) Development (16 Dec 2016)
 
 - Added support for fetching CLOBs as Strings, using `fetchAsString` and `fetchInfo`.
 
 - Added `BIND_INOUT` support for temporary LOBs.
 
-## node-oracledb v1.12.0 Development (3 Dec 2016)
+## node-oracledb [v1.12.0](https://github.com/oracle/node-oracledb/compare/v1.11.0...v1.12.0-dev) Development (3 Dec 2016)
 
 - Significantly enhanced LOB support:
     - Added `BIND_IN` support for DML
@@ -1402,7 +1402,7 @@ and
   and fix session tagging.  These are not visible / exposed through
   node-oracledb.
 
-## node-oracledb v1.11.0 (19 Aug 2016)
+## node-oracledb [v1.11.0](https://github.com/oracle/node-oracledb/compare/v1.10.1...v1.11.0) (19 Aug 2016)
 
 - Added a connection pool cache feature allowing pools to have aliases and be more easily used.
 
@@ -1418,7 +1418,7 @@ and
 
 - Made an internal change to remove an unused parameter from the `NJS_SET_EXCEPTION` macro.
 
-## node-oracledb v1.10.1 (21 Jul 2016)
+## node-oracledb [v1.10.1](https://github.com/oracle/node-oracledb/compare/v1.10.0...v1.10.1) (21 Jul 2016)
 
 - Fixed a bug that prevented a null value being passed from JavaScript into an IN OUT bind.
 
@@ -1434,7 +1434,7 @@ and
 
 - Added a mocha configuration file for the test suite.
 
-## node-oracledb v1.10.0 (8 Jul 2016)
+## node-oracledb [v1.10.0](https://github.com/oracle/node-oracledb/compare/v1.9.3...v1.10.0) (8 Jul 2016)
 
 - Enhanced query and REF CURSOR metadata is available when a new
   `oracledb.extendedMetaData` or `execute()` option `extendedMetaData`
@@ -1473,11 +1473,11 @@ and
     - Allow the character set and national character set to be specified via parameters to the DPI layer.
     - Support heterogeneous pools (in addition to existing homogeneous pools)
 
-## node-oracledb v1.9.3 (24 May 2016)
+## node-oracledb [v1.9.3](https://github.com/oracle/node-oracledb/compare/v1.9.2...v1.9.3) (24 May 2016)
 
 - Fix error with `OCI_ERROR_MAXMSG_SIZE2` when building with Oracle client 11.2.0.1 and 11.2.0.2.
 
-## node-oracledb v1.9.2 (23 May 2016)
+## node-oracledb [v1.9.2](https://github.com/oracle/node-oracledb/compare/v1.9.1...v1.9.2) (23 May 2016)
 
 - Fix `results.metaData` for queries with `{resultSet: true}`.
 
@@ -1540,7 +1540,7 @@ and
 
 - Regularized NJS error message capitalization.
 
-## node-oracledb v1.8.0 (24 Mar 2016)
+## node-oracledb [v1.8.0](https://github.com/oracle/node-oracledb/compare/v1.7.1...v1.8.0) (24 Mar 2016)
 
 - Added `connection.queryStream()` for returning query results using a
   Node Readable Stream (Sagie Gur-Ari).
@@ -1564,11 +1564,11 @@ and
 
 - Improved some parameter checks for `maxArraySize` and `maxSize`.
 
-## node-oracledb v1.7.1 (1 Mar 2016)
+## node-oracledb [v1.7.1](https://github.com/oracle/node-oracledb/compare/v1.7.0...v1.7.1) (1 Mar 2016)
 
 - Made public methods over-writable in the new JavaScript layer
 
-## node-oracledb v1.7.0 (29 Feb 2016)
+## node-oracledb [v1.7.0](https://github.com/oracle/node-oracledb/compare/v1.6.0...v1.7.0) (29 Feb 2016)
 
 - Added a JavaScript wrapper around the C++ API to allow for easier
   extension.
@@ -1590,7 +1590,7 @@ and
 
 - Fixed some compilation warnings with some Windows compilers.
 
-## node-oracledb v1.6.0 (30 Jan 2016)
+## node-oracledb [v1.6.0](https://github.com/oracle/node-oracledb/compare/v1.5.0...v1.6.0) (30 Jan 2016)
 
 - Added support for binding PL/SQL Collection Associative Array
   (Index-by) types containing numbers and strings (Dieter Oberkofler).
@@ -1612,7 +1612,7 @@ and
 
 - README updates (Kevin Sheedy)
 
-## node-oracledb v1.5.0 (21 Dec 2015)
+## node-oracledb [v1.5.0](https://github.com/oracle/node-oracledb/compare/v1.4.0...v1.5.0) (21 Dec 2015)
 
 - Treat Oracle Database 'Success With Info' warnings as success (Francisco Trevino).
 
@@ -1626,7 +1626,7 @@ and
 
 - Fixed crash when trying to set invalid values for connection properties.
 
-## node-oracledb v1.4.0 (17 Nov 2015)
+## node-oracledb [v1.4.0](https://github.com/oracle/node-oracledb/compare/v1.3.0...v1.4.0) (17 Nov 2015)
 
 - Upgraded NAN dependency to version 2 allowing node-oracledb to build
   with Node 0.10, 0.12, 4 and 5 (Richard Natal).  Note: a compiler supporting C++11 is required to build with Node 4 and 5.
@@ -1639,7 +1639,7 @@ and
 
 - Fixed compilation warnings with recent compilers.
 
-## node-oracledb v1.3.0 (15 Oct 2015)
+## node-oracledb [v1.3.0](https://github.com/oracle/node-oracledb/compare/v1.2.0...v1.3.0) (15 Oct 2015)
 
 - Added a `oracledb.oracleClientVersion` property giving the version of the Oracle
   client library, and a `connection.oracleServerVersion` property giving the Oracle
@@ -1651,7 +1651,7 @@ and
 
 - Fixed default bind direction to be `BIND_IN`.
 
-## node-oracledb v1.2.0 (25 Sep 2015)
+## node-oracledb [v1.2.0](https://github.com/oracle/node-oracledb/compare/v1.1.0...v1.2.0) (25 Sep 2015)
 
 - Added support for RAW data type (Bruno Jouhier).
 
@@ -1687,7 +1687,7 @@ and
 
 - Windows install instruction updates (Bill Christo)
 
-## node-oracledb v1.1.0 (3 Sep 2015)
+## node-oracledb [v1.1.0](https://github.com/oracle/node-oracledb/compare/v1.0.0...v1.1.0) (3 Sep 2015)
 
 - Enhanced pool.release() to drop the session if it is known to be unusable, allowing a new session to be created.
 
@@ -1707,7 +1707,7 @@ and
 
 - Temporarily disabling setting lobPrefetchSize
 
-## node-oracledb v1.0.0 (17 Aug 2015)
+## node-oracledb [v1.0.0](https://github.com/oracle/node-oracledb/compare/v0.7.0...v1.0.0) (17 Aug 2015)
 
 - Implemented Stream interface for CLOB and BLOB types, adding support for
   LOB queries, inserts, and PL/SQL LOB bind variables
@@ -1738,7 +1738,7 @@ and
 
 - Correctly throw an error when array and named bind syntaxes are mixed together.
 
-## node-oracledb v0.7.0 (20 Jul 2015)
+## node-oracledb [v0.7.0](https://github.com/oracle/node-oracledb/compare/v0.6.0...v0.7.0) (20 Jul 2015)
 
 - Added result set support for fetching large data sets.
 
@@ -1754,13 +1754,13 @@ and
 
 - Renumbered the values used by the Oracledb Constants.
 
-## node-oracledb v0.6.0 (26 May 2015)
+## node-oracledb [v0.6.0](https://github.com/oracle/node-oracledb/compare/v0.5.0...v0.6.0) (26 May 2015)
 
 - Node-oracledb now builds with Node.js 0.10, Node.js 0.12 and io.js (Richard Natal).
 
 - Fixed naming of `autoCommit` in examples.
 
-## node-oracledb v0.5.0 (5 May 2015)
+## node-oracledb [v0.5.0](https://github.com/oracle/node-oracledb/compare/v0.4.2...v0.5.0) (5 May 2015)
 
 - Changed the `isAutoCommit` attribute name to `autoCommit`.
 
@@ -1772,7 +1772,7 @@ and
 
 - Rectified the error message for invalid type properties.
 
-## node-oracledb v0.4.2 (28 Mar 2015)
+## node-oracledb [v0.4.2](https://github.com/oracle/node-oracledb/compare/v0.4.1...v0.4.2) (28 Mar 2015)
 
 - node-oracledb is now officially installable from https://www.npmjs.com/package/oracledb (Tim Branyen)
 
@@ -1782,7 +1782,7 @@ and
 
 - Changed the default Instant Client directory on AIX from /opt/oracle/instantclient_12_1 to /opt/oracle/instantclient.
 
-## node-oracledb v0.4.1 (13 Mar 2015)
+## node-oracledb [v0.4.1](https://github.com/oracle/node-oracledb/compare/v0.3.1...v0.4.1) (13 Mar 2015)
 
 - Added support for External Authentication.
 
@@ -1796,7 +1796,7 @@ and
 
 - Some code refactoring (Krishna Narasimhan).
 
-## node-oracledb v0.3.1 (16 Feb 2015)
+## node-oracledb [v0.3.1](https://github.com/oracle/node-oracledb/compare/v0.2.4...v0.3.1) (16 Feb 2015)
 
 - Added Windows build configuration (Rinie Kervel).
 
