@@ -9019,7 +9019,7 @@ directories are searched for the configuration files.  They include:
 - `$TNS_ADMIN`
 - `/opt/oracle/instantclient_19_6/network/admin` if Instant Client is in `/opt/oracle/instantclient_19_6`.
 - `/usr/lib/oracle/19.6/client64/lib/network/admin` if Oracle 19.6 Instant Client RPMs are used on Linux.
-- `$ORACLE_HOME/network/admin` if node-oracledb is using libraries from the database installation.
+- `$ORACLE_HOME/network/admin` or `$ORACLE_BASE_HOME/network/admin` if node-oracledb is using libraries from the database installation.
 
 A wallet configuration file `cwallet.sso` for secure connection can be located
 with, or separately from, the `tnsnames.ora` and `sqlnet.ora` files.  It should
