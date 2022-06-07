@@ -29,11 +29,13 @@
 static NJS_NAPI_METHOD(njsPool_close);
 static NJS_NAPI_METHOD(njsPool_getConnection);
 static NJS_NAPI_METHOD(njsPool_reconfigure);
+static NJS_NAPI_METHOD(njsPool_setAccessToken);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsPool_closeAsync);
 static NJS_ASYNC_METHOD(njsPool_getConnectionAsync);
 static NJS_ASYNC_METHOD(njsPool_reconfigureAsync);
+static NJS_ASYNC_METHOD(njsPool_setAccessTokenAsync);
 
 // post asynchronous methods
 static NJS_ASYNC_POST_METHOD(njsPool_getConnectionPostAsync);
@@ -64,6 +66,8 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "_getConnection", NULL, njsPool_getConnection, NULL, NULL, NULL,
             napi_default, NULL },
     { "_reconfigure", NULL, njsPool_reconfigure, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "_setAccessToken", NULL, njsPool_setAccessToken, NULL, NULL, NULL,
             napi_default, NULL },
     { "connectionsInUse", NULL, NULL, njsPool_getConnectionsInUse, NULL, NULL,
             napi_default, NULL },
@@ -118,6 +122,8 @@ static napi_value njsPool_close(napi_env env, napi_callback_info info)
         return NULL;
     }
     pool = (njsPool*) baton->callingInstance;
+    baton->accessTokenCallback = pool->accessTokenCallback;
+    pool->accessTokenCallback = NULL;
     baton->dpiPoolHandle = pool->handle;
     pool->handle = NULL;
     return njsBaton_queueWork(baton, env, "Close", njsPool_closeAsync, NULL);
@@ -134,6 +140,11 @@ static bool njsPool_closeAsync(njsBaton *baton)
             DPI_MODE_POOL_CLOSE_DEFAULT;
     njsPool *pool = (njsPool*) baton->callingInstance;
 
+    pool->accessTokenCallback = baton->accessTokenCallback;
+    if (baton->accessTokenCallback) {
+        njsTokenCallback_stopNotifications(baton->accessTokenCallback);
+        baton->accessTokenCallback = NULL;
+    }
     if (dpiPool_close(baton->dpiPoolHandle, mode) < 0) {
         njsBaton_setErrorDPI(baton);
         pool->handle = baton->dpiPoolHandle;
@@ -197,6 +208,7 @@ static void njsPool_finalize(napi_env env, void *finalizeData,
     njsPool *pool = (njsPool*) finalizeData;
 
     if (pool->handle) {
+        NJS_FREE_AND_CLEAR(pool->accessTokenCallback);
         dpiPool_release(pool->handle);
         pool->handle = NULL;
     }
@@ -691,6 +703,59 @@ bool njsPool_newFromBaton(njsBaton *baton, napi_env env, napi_value *poolObj)
     pool->poolPingInterval = baton->poolPingInterval;
     pool->stmtCacheSize = baton->stmtCacheSize;
     pool->sodaMetadataCache = baton->sodaMetadataCache;
+
+    // token based authentication initialization
+    if (baton->accessTokenCallback) {
+        pool->accessTokenCallback = baton->accessTokenCallback;
+        if (!njsTokenCallback_startNotifications(pool->accessTokenCallback,
+                env))
+            return false;
+    }
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool_setAccessToken() [PUBLIC]
+//   set access token and private key for existing pool in token
+// based authentication
+//-----------------------------------------------------------------------------
+static napi_value njsPool_setAccessToken(napi_env env, napi_callback_info info)
+{
+    napi_value args[1];
+    njsBaton *baton;
+
+    if (!njsPool_createBaton(env, info, 1, args, &baton))
+        return NULL;
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "token",
+            &baton->token, &baton->tokenLength, NULL))
+        return false;
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "privateKey",
+            &baton->privateKey, &baton->privateKeyLength,
+            NULL))
+        return false;
+
+    return njsBaton_queueWork(baton, env, "token",
+            njsPool_setAccessTokenAsync, NULL);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool_setAccessTokenAsync() [PUBLIC]
+//   set access token and private key for existing pool in token
+// based authentication
+//-----------------------------------------------------------------------------
+static bool njsPool_setAccessTokenAsync(njsBaton *baton)
+{
+    njsPool *pool = (njsPool*) baton->callingInstance;
+    dpiAccessToken tokenInfo;
+    tokenInfo.token = baton->token;
+    tokenInfo.tokenLength = baton->tokenLength;
+    tokenInfo.privateKey = baton->privateKey;
+    tokenInfo.privateKeyLength = baton->privateKeyLength;
+
+    if (dpiPool_setAccessToken(pool->handle, &tokenInfo) < 0)
+        return njsBaton_setErrorDPI(baton);
 
     return true;
 }

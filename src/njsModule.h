@@ -206,6 +206,9 @@ typedef enum {
     errConcurrentOps,
     errPoolReconfiguring,
     errPoolStatisticsDisabled,
+    errTokenBasedAuth,
+    errPoolTokenBasedAuth,
+    errStandaloneTokenBasedAuth,
 
     // New ones should be added here
 
@@ -265,6 +268,7 @@ typedef struct njsVariableBuffer njsVariableBuffer;
 typedef struct njsDbObject njsDbObject;
 typedef struct njsDbObjectType njsDbObjectType;
 typedef struct njsDbObjectAttr njsDbObjectAttr;
+typedef struct njsTokenCallback njsTokenCallback;
 
 
 //-----------------------------------------------------------------------------
@@ -386,6 +390,10 @@ struct njsBaton {
     size_t hintLength;
     char *pfile;                             // for DB startup
     size_t pfileLength;
+    char *token;
+    size_t tokenLength;
+    char *privateKey;
+    size_t privateKeyLength;
 
     // various buffers (requires free)
     uint32_t numBindNames;
@@ -505,6 +513,9 @@ struct njsBaton {
 
     // subscriptions (no free required)
     njsSubscription *subscription;
+
+    // njsCallback (no free required)
+    njsTokenCallback *accessTokenCallback;
 
     // sharding (requires free)
     dpiShardingKeyColumn *shardingKeyColumns;
@@ -682,6 +693,7 @@ struct njsPool {
     uint32_t stmtCacheSize;
     int32_t poolPingInterval;
     bool  sodaMetadataCache;
+    njsTokenCallback *accessTokenCallback;
 };
 
 // data for class ResultSet exposed to JS.
@@ -820,6 +832,18 @@ struct njsDbObjectAttr {
     njsDataTypeInfo typeInfo;
     const char *name;
     uint32_t nameLength;
+};
+
+
+// data for managing callback
+struct njsTokenCallback {
+    dpiAccessToken *accessToken;
+    uv_async_t async;
+    uv_mutex_t mutex;
+    uv_barrier_t barrier;
+    napi_ref jsCallback;
+    napi_env env;
+    bool result;
 };
 
 
@@ -1106,4 +1130,14 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
 bool njsVariable_setValue(njsVariable *var, napi_env env, napi_value value,
         njsBaton *baton);
 
+
+//-----------------------------------------------------------------------------
+// definition of functions for njsTokenCallback class
+//-----------------------------------------------------------------------------
+int njsTokenCallback_eventHandler(njsTokenCallback *callback,
+        dpiAccessToken *accessToken);
+bool njsTokenCallback_new(njsBaton *baton, napi_env env);
+bool njsTokenCallback_startNotifications(njsTokenCallback *callback,
+        napi_env env);
+bool njsTokenCallback_stopNotifications(njsTokenCallback *callback);
 #endif                                               /* __NJSMODULE_H__ */

@@ -8,6 +8,7 @@
              "src/njsAqMessage.c",
              "src/njsAqQueue.c",
              "src/njsBaton.c",
+             "src/njsTokenCallback.c",
              "src/njsConnection.c",
              "src/njsDbObject.c",
              "src/njsErrors.c",

@@ -37,6 +37,7 @@
   },
   "scripts": {
     "test": "mocha --config test/opts/.mocharc.yaml",
+    "testtoken": "mocha --config test/opts/.mocharctoken.yaml",
     "posttest": "node test/opts/version.js",
     "buildbinary": "node package/buildbinary.js",
     "buildpackage": "node package/buildpackage.js"

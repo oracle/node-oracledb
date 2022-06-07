@@ -174,6 +174,9 @@ void njsBaton_free(njsBaton *baton, napi_env env)
     NJS_FREE_AND_CLEAR(baton->version);
     NJS_FREE_AND_CLEAR(baton->hint);
     NJS_FREE_AND_CLEAR(baton->pfile);
+    NJS_FREE_AND_CLEAR(baton->token);
+    NJS_FREE_AND_CLEAR(baton->privateKey);
+
     if (baton->xid) {
         NJS_FREE_AND_CLEAR(baton->xid->globalTransactionId);
         NJS_FREE_AND_CLEAR(baton->xid->branchQualifier);

@@ -8,6 +8,10 @@
   stack](https://oracle.github.io/node-oracledb/doc/api.html#properrstack). PR#1467
   (Slawomir Osoba).
 
+- Added support for [token based
+  authentication](https://oracle.github.io/node-oracledb/doc/api.html#tokenbasedauth)
+  when establishing pool based connections and standalone connections.
+
 - Added code to keep the method name in internally bound functions.
   PR #1466 (Slawomir Osoba).
 
