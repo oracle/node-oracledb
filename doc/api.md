@@ -9944,7 +9944,7 @@ other attributes to a pooled `getConnection()` call, such as for
 tagging](#connpooltagging):
 
 ```javascript
-const connection = await oracledb.getConnection({ poolAlias: 'hrpool', tag: 'loc=cn;p=1 });
+const connection = await oracledb.getConnection({ poolAlias: 'hrpool', tag: 'loc=cn;p=1' });
 
 . . . // Use connection from the pool
 
@@ -9955,7 +9955,7 @@ To use the default pool in this way you must explicitly pass the alias
 `default`:
 
 ```javascript
-const connection = await oracledb.getConnection({ poolAlias: 'default', tag: 'loc=cn;p=1 });
+const connection = await oracledb.getConnection({ poolAlias: 'default', tag: 'loc=cn;p=1' });
 
 . . . // Use connection from the pool
 
