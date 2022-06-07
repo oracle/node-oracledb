@@ -35,6 +35,7 @@
  *   NODE_ORACLEDB_PASSWORD,
  *   NODE_ORACLEDB_CONNECTIONSTRING,
  *   NODE_ORACLEDB_ACCESS_TOKEN_LOC
+ *   NODE_ORACLEDB_EXPIRED_ACCESS_TOKEN_LOC
  *
 ******************************************************************************/
 
@@ -76,6 +77,12 @@ if (process.env.NODE_ORACLEDB_PASSWORD) {
   throw new Error('Password is not Set! Try Set Environment Variable NODE_ORACLEDB_PASSWORD.');
 }
 
+if (process.env.NODE_ORACLEDB_EXPIRED_ACCESS_TOKEN_LOC) {
+  config.expiredToken = process.env.NODE_ORACLEDB_EXPIRED_ACCESS_TOKEN_LOC;
+} else {
+  throw new Error('Expired token location is not Set! Try Set Environment Variable NODE_ORACLEDB_EXPIRED_ACCESS_TOKEN_LOC.');
+}
+
 if (process.env.NODE_PRINT_DEBUG_MESSAGE) {
   var printDebugMsg = process.env.NODE_PRINT_DEBUG_MESSAGE;
   printDebugMsg = String(printDebugMsg);
@@ -89,9 +96,9 @@ if (process.env.NODE_PRINT_DEBUG_MESSAGE) {
 // the OCI-CLI.
 // NODE_ORACLEDB_DBTOKEN_LOC environment variable is used to provide directory
 // path where token and private key files are stored.
-function getToken() {
-  const tokenPath = process.env.NODE_ORACLEDB_ACCESS_TOKEN_LOC + 'token';
-  const privateKeyPath = process.env.NODE_ORACLEDB_ACCESS_TOKEN_LOC + 'oci_db_key.pem';
+function getToken(envName) {
+  const tokenPath = process.env[envName] + '/' + 'token';
+  const privateKeyPath = process.env[envName] + '/' + 'oci_db_key.pem';
 
   let token = '';
   let privateKey = '';
@@ -116,16 +123,19 @@ function getToken() {
   return tokenBasedAuthData;
 }
 
+config.accessToken = getToken('NODE_ORACLEDB_ACCESS_TOKEN_LOC');
+config.expiredAccessToken = getToken('NODE_ORACLEDB_EXPIRED_ACCESS_TOKEN_LOC');
+
 // callback function with vlid data
 // privateKey and token having valid data
 function callbackValid() {
-  return getToken();
+  return config.accessToken;
 }
 
 // callback function with invalid data
 // privateKey and token having invalid data
 function callbackInvalid1() {
-  const obj1 = getToken();
+  const obj1 = config.accessToken;
   const obj2 = {
     token       : obj1.privateKey,
     privateKey  : obj1.token
@@ -136,7 +146,7 @@ function callbackInvalid1() {
 // callback function with invalid data
 // dbtoken attribute is missing
 function callbackInvalid2() {
-  const obj1 = getToken();
+  const obj1 = config.accessToken;
   const obj2 = {
     privateKey  : obj1.privateKey
   };
@@ -146,7 +156,7 @@ function callbackInvalid2() {
 // callback function with invalid data
 // dbtoken is empty
 function callbackInvalid3() {
-  const obj1 = getToken();
+  const obj1 = config.accessToken;
   const obj2 = {
     token         : '',
     privateKey    : obj1.privateKey
@@ -157,7 +167,7 @@ function callbackInvalid3() {
 // callback function with invalid data
 // dbtokenPrivateKeyattribute is missing
 function callbackInvalid4() {
-  const obj1 = getToken();
+  const obj1 = config.accessToken;
   const obj2 = {
     token: obj1.token
   };
@@ -167,7 +177,7 @@ function callbackInvalid4() {
 // callback function with invalid data
 // dbtokenPrivateKey is empty
 function callbackInvalid5() {
-  const obj1 = getToken();
+  const obj1 = config.accessToken;
   const obj2 = {
     token       : obj1.token,
     privateKey  : ''
@@ -175,7 +185,6 @@ function callbackInvalid5() {
   return obj2;
 }
 
-config.accessToken = getToken();
 config.callbackValid = callbackValid();
 config.callbackInvalid1 = callbackInvalid1();
 config.callbackInvalid2 = callbackInvalid2();

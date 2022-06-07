@@ -6554,7 +6554,7 @@ This method can be used to set an access token and private key after pool
 creation.  It is useful if the token is known to have expired, and you are not
 using [`accessTokenCallback`](#createpoolpoolattrsaccesstokencallback).
 
-It can also be useful in tests to set an invalid token so that token expiry
+It can also be useful in tests to set an expired token so that token expiry
 code paths can be tested.
 
 See [Explicitly Refreshing Pool Access Tokens](#settingpooltokens) for an example.

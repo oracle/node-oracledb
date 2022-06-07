@@ -30,9 +30,9 @@ var dbConfig = require('./tokenBasedAuthenticationConfig.js');
 
 describe('265. Token based authentication', function() {
 
-  describe('265.1. Pool', function() {
+  describe('265.1 Pool', function() {
 
-    it('265.1.1. create pool connection', async () => {
+    it('265.1.1 create pool connection', async () => {
       let pool;
       try {
         pool = await oracledb.createPool({
@@ -57,7 +57,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.2. acquire multiple sessions from pool', async () => {
+    it('265.1.2 acquire multiple sessions from pool', async () => {
       let pool, conn1, conn2;
       try {
         pool = await oracledb.createPool({
@@ -94,7 +94,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.3. acquire multiple sessions from multiple pool', async () => {
+    it('265.1.3 acquire multiple sessions from multiple pool', async () => {
       let pool1, conn1, conn2;
       try {
         pool1 = await oracledb.createPool({
@@ -166,7 +166,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.4. query execution', async () => {
+    it('265.1.4 query execution', async () => {
       let pool, conn;
       try {
         pool = await oracledb.createPool({
@@ -203,7 +203,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.5. homogenous should be true', async () => {
+    it('265.1.5 homogenous should be true', async () => {
       let pool;
       try {
         pool = await oracledb.createPool({
@@ -217,7 +217,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-085:/, 'regexp matches');
+        assert.match(err.message, /^NJS-085:/, 'regexp does not match');
       } finally {
         try {
           if (pool)
@@ -228,7 +228,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.6. externalAuth should be true', async () => {
+    it('265.1.6 externalAuth should be true', async () => {
       let pool;
       try {
         pool = await oracledb.createPool({
@@ -242,7 +242,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-085:/, 'regexp matches');
+        assert.match(err.message, /^NJS-085:/, 'regexp does not match');
       } finally {
         try {
           if (pool)
@@ -253,7 +253,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.7. token should be set in accessToken', async () => {
+    it('265.1.7 token should be set in accessToken', async () => {
       let pool;
       const ResObj = {
         privateKey   : dbConfig.accessToken.privateKey
@@ -270,7 +270,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-084:/, 'regexp matches');
+        assert.match(err.message, /^NJS-084:/, 'regexp does not match');
       } finally {
         try {
           if (pool)
@@ -281,7 +281,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.8. token length should be not be 0 in accessToken', async () => {
+    it('265.1.8 token length should be not be 0 in accessToken', async () => {
       let pool;
       const ResObj = {
         privateKey   : dbConfig.accessToken.privateKey,
@@ -299,7 +299,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-084:/, 'regexp matches');
+        assert.match(err.message, /^NJS-084:/, 'regexp does not match');
       } finally {
         try {
           if (pool)
@@ -310,7 +310,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.9. privateKey should be set in accessToken', async () => {
+    it('265.1.9 privateKey should be set in accessToken', async () => {
       let pool;
       const ResObj = {
         token             : dbConfig.accessToken.token
@@ -327,7 +327,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-084:/, 'regexp matches');
+        assert.match(err.message, /^NJS-084:/, 'regexp does not match');
       } finally {
         try {
           if (pool)
@@ -356,7 +356,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-084:/, 'regexp matches');
+        assert.match(err.message, /^NJS-084:/, 'regexp does not match');
       } finally {
         try {
           if (pool)
@@ -367,7 +367,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.11. with callback having valid token', async () => {
+    it('265.1.11 with callback having valid token', async () => {
       function callback() {
         return dbConfig.callbackValid;
       }
@@ -391,10 +391,7 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(pool.connectionsInUse, 1);
 
         // invalidate token to test callback
-        pool.setAccessToken({
-          token      : dbConfig.accessToken.privateKey,
-          privateKey : dbConfig.accessToken.token
-        });
+        pool.setAccessToken(dbConfig.expiredAccessToken);
 
         conn2 = await pool.getConnection();
         assert.deepEqual(pool.connectionsOpen, 2);
@@ -416,7 +413,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.12. no callback and expired token', async () => {
+    it('265.1.12 no callback and expired token', async () => {
       let pool, conn1, conn2;
       try {
         pool = await oracledb.createPool({
@@ -435,16 +432,13 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(pool.connectionsInUse, 1);
 
         // invalidate token to test callback
-        pool.setAccessToken({
-          token            : dbConfig.accessToken.privateKey,
-          privateKey       : dbConfig.accessToken.token
-        });
+        pool.setAccessToken(dbConfig.expiredAccessToken);
 
         conn2 = await pool.getConnection();
 
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^ORA-01017:/, 'regexp matches');
+        assert.match(err.message, /^ORA-25708:/, 'regexp does not match');
       } finally {
         try {
           if (conn1)
@@ -459,7 +453,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.13. with callback having invalid token', async () => {
+    it('265.1.13 with callback having invalid token', async () => {
       function callback() {
         // returns invalid token parameters values
         // invalid token and private key values
@@ -485,16 +479,13 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(pool.connectionsInUse, 1);
 
         // invalidate token to test callback
-        pool.setAccessToken({
-          token      : dbConfig.accessToken.privateKey,
-          privateKey : dbConfig.accessToken.token
-        });
+        pool.setAccessToken(dbConfig.expiredAccessToken);
 
         conn2 = await pool.getConnection();
 
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^ORA-01017:/, 'regexp matches');
+        assert.match(err.message, /^ORA-25707:/, 'regexp does not match');
       } finally {
         try {
           if (conn1)
@@ -509,7 +500,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.14. with callback having missing token', async () => {
+    it('265.1.14 with callback having missing token', async () => {
       function callback() {
         // missing token
         return dbConfig.callbackInvalid2;
@@ -534,16 +525,13 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(pool.connectionsInUse, 1);
 
         // invalidate token to test callback
-        pool.setAccessToken({
-          token       : dbConfig.accessToken.privateKey,
-          privateKey  : dbConfig.accessToken.token
-        });
+        pool.setAccessToken(dbConfig.expiredAccessToken);
 
         conn2 = await pool.getConnection();
 
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^Error: NJS-004:/, 'regexp matches');
+        assert.match(err.message, /^Error: NJS-004:/, 'regexp does not match');
       } finally {
         try {
           if (conn1)
@@ -558,7 +546,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.15. with callback having 0 length token', async () => {
+    it('265.1.15 with callback having 0 length token', async () => {
       function callback() {
         // empty token
         return dbConfig.callbackInvalid3;
@@ -583,16 +571,13 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(pool.connectionsInUse, 1);
 
         // invalidate token to test callback
-        pool.setAccessToken({
-          token           : dbConfig.accessToken.privateKey,
-          privateKey      : dbConfig.accessToken.token
-        });
+        pool.setAccessToken(dbConfig.expiredAccessToken);
 
         conn2 = await pool.getConnection();
 
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^ORA-01017:/, 'regexp matches');
+        assert.match(err.message, /^ORA-01017:/, 'regexp does not match');
       } finally {
         try {
           if (conn1)
@@ -607,7 +592,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.16. with callback having missing privateKey', async () => {
+    it('265.1.16 with callback having missing privateKey', async () => {
       function callback() {
         // missing tokenprivatekey attribute
         return dbConfig.callbackInvalid4;
@@ -632,16 +617,13 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(pool.connectionsInUse, 1);
 
         // invalidate token to test callback
-        pool.setAccessToken({
-          token      : dbConfig.accessToken.privateKey,
-          privateKey : dbConfig.accessToken.token
-        });
+        pool.setAccessToken(dbConfig.expiredAccessToken);
 
         conn2 = await pool.getConnection();
 
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^Error: NJS-004:/, 'regexp matches');
+        assert.match(err.message, /^Error: NJS-004:/, 'regexp does not match');
       } finally {
         try {
           if (conn1)
@@ -656,7 +638,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.17. with callback having 0 length privateKey', async () => {
+    it('265.1.17 with callback having 0 length privateKey', async () => {
       function callback() {
         // empty tokenPrivatekey parameter
         return dbConfig.callbackInvalid5;
@@ -681,16 +663,13 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(pool.connectionsInUse, 1);
 
         // invalidate token to test callback
-        pool.setAccessToken({
-          token           : dbConfig.accessToken.privateKey,
-          privateKey      : dbConfig.accessToken.token
-        });
+        pool.setAccessToken(dbConfig.expiredAccessToken);
 
         conn2 = await pool.getConnection();
 
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^ORA-01017:/, 'regexp matches');
+        assert.match(err.message, /^ORA-01017:/, 'regexp does not match');
       } finally {
         try {
           if (conn1)
@@ -705,7 +684,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.18. user/password without tokens and externalAuth set to true', async () => {
+    it('265.1.18 user/password without tokens and externalAuth set to true', async () => {
       let pool;
       try {
         pool = await oracledb.createPool({
@@ -721,7 +700,7 @@ describe('265. Token based authentication', function() {
         assert.ok(pool);
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^DPI-1032:/, 'regexp matches');
+        assert.match(err.message, /^DPI-1032:/, 'regexp does not match');
       } finally {
         try {
           if (pool)
@@ -732,7 +711,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.19. user/password with tokens', async () => {
+    it('265.1.19 user/password with tokens', async () => {
       let pool;
       try {
         pool = await oracledb.createPool({
@@ -749,7 +728,7 @@ describe('265. Token based authentication', function() {
         assert.ok(pool);
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-084:/, 'regexp matches');
+        assert.match(err.message, /^NJS-084:/, 'regexp does not match');
       } finally {
         try {
           if (pool)
@@ -760,9 +739,9 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.20. invalidate tokens using setAccessToken with missing token', async () => {
+    it('265.1.20 invalidate tokens using setAccessToken with missing token', async () => {
       function callback() {
-        // valid token and DbTokenPrivateKey
+        // valid token and privateKey
         return dbConfig.callbackValid;
       }
 
@@ -786,7 +765,7 @@ describe('265. Token based authentication', function() {
 
         // invalidate token to test callback
         pool.setAccessToken({
-          privateKey : dbConfig.accessToken.token
+          privateKey : dbConfig.expiredAccessToken.privateKey
         });
 
         conn2 = await pool.getConnection();
@@ -809,7 +788,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.21. invalidate tokens using setAccessToken with empty token', async () => {
+    it('265.1.21 invalidate tokens using setAccessToken with empty token', async () => {
       function callback() {
         // valid token and privateKey values
         return dbConfig.callbackValid;
@@ -836,7 +815,7 @@ describe('265. Token based authentication', function() {
         // invalidate token to test callback
         pool.setAccessToken({
           token       : '',
-          privateKey  : dbConfig.accessToken.token
+          privateKey  : dbConfig.expiredAccessToken.privateKey
         });
 
         conn2 = await pool.getConnection();
@@ -859,7 +838,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.22. invalidate tokens using setAccessToken with empty privateKey', async () => {
+    it('265.1.22 invalidate tokens using setAccessToken with empty privateKey', async () => {
       function callback() {
         // valid token and privateKey values
         return dbConfig.callbackValid;
@@ -885,7 +864,7 @@ describe('265. Token based authentication', function() {
 
         // invalidate token to test callback
         pool.setAccessToken({
-          token           : dbConfig.accessToken.privateKey,
+          token           : dbConfig.expiredAccessToken.token,
           privateKey      : ''
         });
 
@@ -909,7 +888,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.23. invalidate tokens using setAccessToken with missing privateKey', async () => {
+    it('265.1.23 invalidate tokens using setAccessToken with missing privateKey', async () => {
       function callback() {
         // valid token and privateKey values
         return dbConfig.callbackValid;
@@ -935,7 +914,7 @@ describe('265. Token based authentication', function() {
 
         // invalidate token to test callback
         pool.setAccessToken({
-          token  : dbConfig.accessToken.privateKey
+          token  : dbConfig.expiredAccessToken.token
         });
 
         conn2 = await pool.getConnection();
@@ -958,7 +937,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.24. with callback having valid tokens in multiple pool', async () => {
+    it('265.1.24 with callback having valid tokens in multiple pool', async () => {
       function callback() {
         // valid token and privateKey values
         return dbConfig.callbackValid;
@@ -983,7 +962,7 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(pool1.connectionsInUse, 1);
 
         pool1.setAccessToken({
-          token: dbConfig.accessToken.privateKey
+          token: dbConfig.expiredAccessToken.token
         });
 
         conn2 = await pool1.getConnection();
@@ -1023,7 +1002,7 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(pool2.connectionsInUse, 1);
 
         pool2.setAccessToken({
-          token   : dbConfig.accessToken.privateKey
+          token   : dbConfig.expiredAccessToken.token
         });
 
         conn4 = await pool2.getConnection();
@@ -1045,7 +1024,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.25. with callback having valid and invalid tokens in multiple pool', async () => {
+    it('265.1.25 with callback having valid and invalid tokens in multiple pool', async () => {
       function callback1() {
         // valid token and privateKey values
         return dbConfig.callbackValid;
@@ -1074,7 +1053,7 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(pool1.connectionsInUse, 1);
 
         pool1.setAccessToken({
-          token   : dbConfig.accessToken.privateKey
+          token   : dbConfig.expiredAccessToken.token
         });
 
         conn2 = await pool1.getConnection();
@@ -1114,13 +1093,13 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(pool2.connectionsInUse, 1);
 
         pool2.setAccessToken({
-          token  : dbConfig.accessToken.privateKey
+          token  : dbConfig.expiredAccessToken.token
         });
 
         conn4 = await pool2.getConnection();
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^ORA-01017:/, 'regexp matches');
+        assert.match(err.message, /^ORA-01017:/, 'regexp does not match');
       } finally {
         try {
           if (conn3)
@@ -1135,7 +1114,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.26. acquiring released session after token expiry', async () => {
+    it('265.1.26 acquiring released session after token expiry', async () => {
       let pool, conn1;
       try {
         pool = await oracledb.createPool({
@@ -1155,10 +1134,7 @@ describe('265. Token based authentication', function() {
         await conn1.close();
 
         // invalidate tokens
-        pool.setAccessToken({
-          token      : dbConfig.accessToken.privateKey,
-          privateKey : dbConfig.accessToken.token
-        });
+        pool.setAccessToken(dbConfig.expiredAccessToken);
 
         conn1 = await pool.getConnection();
         assert.deepEqual(pool.connectionsOpen, 1);
@@ -1178,7 +1154,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.27. acquiring released session with existing tag, with token expiry', async () => {
+    it('265.1.27 acquiring released session with existing tag, with token expiry', async () => {
       function initSession(connection, requestedTag, callbackFn) {
         const tagParts = requestedTag.split('=');
         if (tagParts[0] != 'USER_TZ') {
@@ -1229,10 +1205,7 @@ describe('265. Token based authentication', function() {
           await conn2.close();
 
         // invalidate tokens
-        pool.setAccessToken({
-          token: dbConfig.accessToken.privateKey,
-          privateKey: dbConfig.accessToken.token
-        });
+        pool.setAccessToken(dbConfig.expiredAccessToken);
 
         // acquire session with existing tag
         // doen't need token refresh
@@ -1255,7 +1228,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.28. acquiring released session without existing tag, with token expiry', async () => {
+    it('265.1.28 acquiring released session without existing tag, with token expiry', async () => {
       function initSession(connection, requestedTag, callbackFn) {
         const tagParts = requestedTag.split('=');
         if (tagParts[0] != 'USER_TZ') {
@@ -1305,10 +1278,7 @@ describe('265. Token based authentication', function() {
           await conn2.close();
 
         // invalidate tokens
-        pool.setAccessToken({
-          token      : dbConfig.accessToken.privateKey,
-          privateKey : dbConfig.accessToken.token
-        });
+        pool.setAccessToken(dbConfig.expiredAccessToken);
 
         conn3 = await pool.getConnection({
           poolAlias : 'default',
@@ -1316,7 +1286,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^ORA-01017:/, 'regexp matches');
+        assert.match(err.message, /^ORA-25708:/, 'regexp does not match');
       } finally {
         try {
           if (conn3)
@@ -1329,7 +1299,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.29. user/password without tokens and externalAuth set to false', async () => {
+    it('265.1.29 user/password without tokens and externalAuth set to false', async () => {
       let pool;
       try {
         pool = await oracledb.createPool({
@@ -1355,7 +1325,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.30. token and private key should be private', async () => {
+    it('265.1.30 token and private key should be private', async () => {
       let pool;
       try {
         pool = await oracledb.createPool({
@@ -1382,7 +1352,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.31. token and private key value should not be shown in logs', async () => {
+    it('265.1.31 token and private key value should not be shown in logs', async () => {
       let pool;
       try {
         pool = await oracledb.createPool({
@@ -1411,7 +1381,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.32. not readable token and private key value', async () => {
+    it('265.1.32 not readable token and private key value', async () => {
       const testData = {
         token       :  '1Àè&ýÿÿ¿',
         privateKey  :  '1Àè&ýÿÿ¿'
@@ -1430,7 +1400,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^ORA-01017:/, 'regexp matches');
+        assert.match(err.message, /^ORA-25707:/, 'regexp does not match');
       } finally {
         try {
           if (pool)
@@ -1441,7 +1411,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.33. pool creation with 0 connection', async () => {
+    it('265.1.33 pool creation with 0 connection', async () => {
       let pool;
       try {
         pool = await oracledb.createPool({
@@ -1466,7 +1436,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.34. token expires before creating connection', async () => {
+    it('265.1.34 token expires before creating connection', async () => {
       function callback() {
         return dbConfig.callbackValid;
       }
@@ -1486,10 +1456,7 @@ describe('265. Token based authentication', function() {
         assert.ok(pool);
 
         // invalidate token to test callback
-        pool.setAccessToken({
-          token      : dbConfig.accessToken.privateKey,
-          privateKey : dbConfig.accessToken.token
-        });
+        pool.setAccessToken(dbConfig.expiredAccessToken);
 
         conn1 = await pool.getConnection();
         assert.deepEqual(pool.connectionsOpen, 1);
@@ -1510,7 +1477,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.35. undefined token and private key value', async () => {
+    it('265.1.35 undefined token and private key value', async () => {
       const testData = {
         token       :  undefined,
         privateKey  :  undefined
@@ -1529,7 +1496,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-084:/, 'regexp matches');
+        assert.match(err.message, /^NJS-084:/, 'regexp does not match');
       } finally {
         try {
           if (pool)
@@ -1540,7 +1507,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.36. user/password with accessTokenCallback', async () => {
+    it('265.1.36 user/password with accessTokenCallback', async () => {
       function callback() {
         return dbConfig.callbackValid;
       }
@@ -1560,7 +1527,34 @@ describe('265. Token based authentication', function() {
         assert.ok(pool);
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-084:/, 'regexp matches');
+        assert.match(err.message, /^NJS-084:/, 'regexp does not match');
+      } finally {
+        try {
+          if (pool)
+            await pool.close(0);
+        } catch (err) {
+          assert.deepEqual(err, {});
+        }
+      }
+    });
+
+    it('265.1.37 create pool connection using expired token', async () => {
+      let pool;
+
+      try {
+        pool = await oracledb.createPool({
+          accessToken       : dbConfig.expiredAccessToken,
+          connectString     : dbConfig.connectString,
+          poolMin           : 1,
+          poolMax           : 1,
+          poolIncrement     : 1,
+          externalAuth      : true,
+          homogeneous       : true
+        });
+        assert.ok(pool);
+      } catch (err) {
+        assert.notDeepEqual(err, {});
+        assert.match(err.message, /^ORA-25708:/, 'regexp does not match');
       } finally {
         try {
           if (pool)
@@ -1572,9 +1566,9 @@ describe('265. Token based authentication', function() {
     });
   });
 
-  describe('265.2. Standalone', function() {
+  describe('265.2 Standalone', function() {
 
-    it('265.2.1. create standalone connection', async () => {
+    it('265.2.1 create standalone connection', async () => {
       let conn;
       try {
         conn = await oracledb.getConnection({
@@ -1594,7 +1588,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.2.2. standalone connection with invalid data', async () => {
+    it('265.2.2 standalone connection with invalid data', async () => {
       let conn;
       const ResObj = {
         token        : dbConfig.accessToken.privateKey,
@@ -1608,7 +1602,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^ORA-01017:/, 'regexp matches');
+        assert.match(err.message, /^ORA-25707:/, 'regexp does not match');
       } finally {
         try {
           if (conn)
@@ -1619,7 +1613,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.2.3. standalone connection with missing data', async () => {
+    it('265.2.3 standalone connection with missing data', async () => {
       let conn;
       const ResObj = {
         privateKey   : dbConfig.accessToken.token
@@ -1632,7 +1626,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-084:/, 'regexp matches');
+        assert.match(err.message, /^NJS-084:/, 'regexp does not match');
       } finally {
         try {
           if (conn)
@@ -1643,7 +1637,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.2.4. standalone connection with missing data', async () => {
+    it('265.2.4 standalone connection with missing data', async () => {
       let conn;
       const ResObj = {
         token: dbConfig.accessToken.privateKey
@@ -1656,7 +1650,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-084:/, 'regexp matches');
+        assert.match(err.message, /^NJS-084:/, 'regexp does not match');
       } finally {
         try {
           if (conn)
@@ -1667,7 +1661,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.2.5. standalone connection with empty data', async () => {
+    it('265.2.5 standalone connection with empty data', async () => {
       let conn;
       const ResObj = {
         token        : dbConfig.accessToken.token,
@@ -1681,7 +1675,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-084:/, 'regexp matches');
+        assert.match(err.message, /^NJS-084:/, 'regexp does not match');
       } finally {
         try {
           if (conn)
@@ -1693,7 +1687,7 @@ describe('265. Token based authentication', function() {
     });
 
 
-    it('265.2.6. standalone connection with empty data', async () => {
+    it('265.2.6 standalone connection with empty data', async () => {
       let conn;
       const ResObj = {
         token        : '',
@@ -1707,7 +1701,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-084:/, 'regexp matches');
+        assert.match(err.message, /^NJS-084:/, 'regexp does not match');
       } finally {
         try {
           if (conn)
@@ -1718,7 +1712,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.2.7. externalAuth must be set to true', async () => {
+    it('265.2.7 externalAuth must be set to true', async () => {
       let conn;
       try {
         conn = await oracledb.getConnection({
@@ -1728,7 +1722,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-086:/, 'regexp matches');
+        assert.match(err.message, /^NJS-086:/, 'regexp does not match');
       } finally {
         try {
           if (conn)
@@ -1739,7 +1733,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.2.8. user/password with tokens', async () => {
+    it('265.2.8 user/password with tokens', async () => {
       let conn;
       try {
         conn = await oracledb.getConnection({
@@ -1751,7 +1745,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-084:/, 'regexp matches');
+        assert.match(err.message, /^NJS-084:/, 'regexp does not match');
       } finally {
         try {
           if (conn)
@@ -1762,7 +1756,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.2.9. user/password without tokens', async () => {
+    it('265.2.9 user/password without tokens', async () => {
       let conn;
       try {
         conn = await oracledb.getConnection({
@@ -1773,7 +1767,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-084:/, 'regexp matches');
+        assert.match(err.message, /^NJS-084:/, 'regexp does not match');
       } finally {
         try {
           if (conn)
@@ -1784,7 +1778,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.2.10. standalone connection with undefined private key and token', async () => {
+    it('265.2.10 standalone connection with undefined private key and token', async () => {
       let conn;
       const ResObj = {
         token        : undefined,
@@ -1798,7 +1792,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^NJS-084:/, 'regexp matches');
+        assert.match(err.message, /^NJS-084:/, 'regexp does not match');
       } finally {
         try {
           if (conn)
@@ -1809,7 +1803,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.2.11. standalone connection with not readable data', async () => {
+    it('265.2.11 standalone connection with not readable data', async () => {
       let conn;
       const ResObj = {
         token        : '1Àè&ýÿÿ¿',
@@ -1823,7 +1817,7 @@ describe('265. Token based authentication', function() {
         });
       } catch (err) {
         assert.notDeepEqual(err, {});
-        assert.match(err.message, /^ORA-01017:/, 'regexp matches');
+        assert.match(err.message, /^ORA-25707:/, 'regexp does not match');
       } finally {
         try {
           if (conn)
@@ -1834,7 +1828,7 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.2.12. token and private key are private', async () => {
+    it('265.2.12 token and private key are private', async () => {
       let conn;
       const ResObj = {
         token        : dbConfig.accessToken.token,
@@ -1850,6 +1844,31 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(conn.privateKey, undefined);
       } catch (err) {
         assert.deepEqual(err, {});
+      } finally {
+        try {
+          if (conn)
+            await conn.close();
+        } catch (err) {
+          assert.deepEqual(err, {});
+        }
+      }
+    });
+
+    it('265.2.13 standalone connection with expired token', async () => {
+      let conn;
+      const ResObj = {
+        token        : dbConfig.expiredAccessToken.token,
+        privateKey   : dbConfig.expiredAccessToken.privateKey
+      };
+      try {
+        conn = await oracledb.getConnection({
+          accessToken       : ResObj,
+          connectString     : dbConfig.connectString,
+          externalAuth      : true
+        });
+      } catch (err) {
+        assert.notDeepEqual(err, {});
+        assert.match(err.message, /^ORA-25708:/, 'regexp does not match');
       } finally {
         try {
           if (conn)
