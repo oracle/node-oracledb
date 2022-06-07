@@ -57,7 +57,7 @@ Architecture][60].
 The steps below create a Node.js installation with node-oracledb.  Adjust the
 steps for your environment.
 
-This node-oracledb release has been tested with Node.js 12, 14 and 16 on Oracle
+This node-oracledb release has been tested with Node.js 14, 16 and 18 on Oracle
 Linux x86_64 (releases 7 and 8), Windows, and macOS (Intel x86).  The add-on
 may also build on Linux ARM (aarch64), Windows 32-bit, Solaris and AIX
 environments, but these architectures have not been tested.  This version of

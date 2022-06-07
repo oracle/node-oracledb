@@ -4,6 +4,9 @@
 
 **This release is under development and information may be incomplete**
 
+- Stated compatibility is now for Node.js 14, 16 and 18, though older releases
+  back to Node.js 10.16 should still work.
+
 - Added code to capture the [error
   stack](https://oracle.github.io/node-oracledb/doc/api.html#properrstack). PR#1467
   (Slawomir Osoba).

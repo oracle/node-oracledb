@@ -623,7 +623,7 @@ editions, or require additional database options or packs.
 The node-oracledb feature highlights are:
 
 - Easily installed from [npm][1]
-- Support for Node.js 10 and later, and for multiple Oracle Database versions.  (Note: older versions of node-oracledb supported older versions of Node.js)
+- Support for Node.js 14 and later, and for multiple Oracle Database versions.  (Note: older versions of node-oracledb supported older versions of Node.js)
 - Execution of SQL and PL/SQL statements, and access to [SODA](#sodaoverview) document-style access APIs.
 - Extensive Oracle data type support, including large objects (CLOB and BLOB) and binding of SQL objects
 - Connection management, including connection pooling
