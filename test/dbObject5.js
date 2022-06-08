@@ -37,7 +37,7 @@ describe('204. dbObject5.js', () => {
   let proc1 =
     `create or replace procedure nodb_getDataCursor1(p_cur out sys_refcursor) is      begin
         open p_cur for
-          SELECT 
+          SELECT
             * FROM
             ${TABLE}
         WHERE num >= 100;

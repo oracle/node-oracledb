@@ -1,4 +1,4 @@
-This product calls the top level APIs of Node.js. 
+This product calls the top level APIs of Node.js.
 
 Node.js is licensed for use as follows:
 
