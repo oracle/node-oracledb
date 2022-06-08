@@ -1381,10 +1381,10 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.1.32 not readable token and private key value', async () => {
+    it('265.1.32 random token and private key value', async () => {
       const testData = {
-        token       :  '1Àè&ýÿÿ¿',
-        privateKey  :  '1Àè&ýÿÿ¿'
+        token       :  'Hello',
+        privateKey  :  'World'
       };
 
       let pool;
@@ -1803,11 +1803,11 @@ describe('265. Token based authentication', function() {
       }
     });
 
-    it('265.2.11 standalone connection with not readable data', async () => {
+    it('265.2.11 standalone connection with random token and private key', async () => {
       let conn;
       const ResObj = {
-        token        : '1Àè&ýÿÿ¿',
-        privateKey   : '1Àè&ýÿÿ¿'
+        token        : 'Hello',
+        privateKey   : 'World'
       };
       try {
         conn = await oracledb.getConnection({

@@ -5346,7 +5346,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         265.1.29 user/password without tokens with externalAuth set to false
         265.1.30 token and private key should be private
         265.1.31 token and private key value should not be shown in logs
-        265.1.32 not readable token and private key value
+        265.1.32 random token and private key value
         265.1.33 pool creation with 0 connection
         265.1.34 token expires before creating connection
         265.1.35 undefined token and private key value
@@ -5364,6 +5364,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         265.2.8 user/password with tokens
         265.2.9 user/password without tokens
         265.2.10 standalone connection with undefined private key and token
-        265.2.11 standalone connection with not readable data
+        265.2.11 standalone connection with random token and private key
         265.2.12 token and private key are private
         265.2.13 standalone connection with expired token
