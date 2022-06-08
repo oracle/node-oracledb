@@ -5,13 +5,13 @@
 - Stated compatibility is now for Node.js 14, 16 and 18.  Older releases
   back to Node.js 10.16 should still work.
 
-- Added code to capture the [error
-  stack](https://oracle.github.io/node-oracledb/doc/api.html#properrstack). PR #1467
-  (Slawomir Osoba).
-
 - Added support for [token based
   authentication](https://oracle.github.io/node-oracledb/doc/api.html#tokenbasedauth)
   when establishing pool based connections and standalone connections.
+
+- Added code to capture the [error
+  stack](https://oracle.github.io/node-oracledb/doc/api.html#properrstack). PR #1467
+  (Slawomir Osoba).
 
 - Added code to keep the method name in internally bound functions.
   PR #1466 (Slawomir Osoba).
@@ -22,16 +22,16 @@
 
 - Added missing support for binding as `oracledb.DB_TYPE_BINARY_INTEGER`.
 
-- Fixed crash with multiple
+- Fixed a crash using multiple
   [DbObject](https://oracle.github.io/node-oracledb/doc/api.html#dbobjectclass)
   OUT binds ([Issue #1464](https://github.com/oracle/node-oracledb/issues/1464)).
 
 - Fixed calling `initOracleClient()` with TypeScript 4.4 ([Issue
   1462](https://github.com/oracle/node-oracledb/issues/1462)).
 
-- Fixed numeric suffix feature (for duplicate SELECT column names when using
-  `oracledb.OUT_FORMAT_OBJECT` mode) when the column name is also a JavaScript
-  property or method name.
+- Fixed the numeric suffix feature (for duplicate SELECT column names when
+  using `oracledb.OUT_FORMAT_OBJECT` mode) when the column name is also a
+  JavaScript property or method name.
 
 - Fixed binding string or buffer data when explicitly specifying the type as
   `oracledb.DB_TYPE_BLOB`, `oracledb.DB_TYPE_CLOB` or `oracledb.DB_TYPE_NCLOB`.
