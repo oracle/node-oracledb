@@ -1,6 +1,6 @@
-# node-oracledb 5.3 Documentation for the Oracle Database Node.js Add-on
+# node-oracledb 5.4.0 Documentation for the Oracle Database Node.js Add-on
 
-*Copyright (c) 2015, 2021, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2015, 2022, Oracle and/or its affiliates.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -14,6 +14,11 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
 See the License for the specific language governing permissions and
 limitations under the License.
+
+See
+[LICENSE.txt](https://github.com/oracle/node-oracledb/blob/main/LICENSE.txt)
+and
+[THIRD_PARTY_LICENSES.txt](https://github.com/oracle/node-oracledb/blob/main/THIRD_PARTY_LICENSES.txt).
 
 ## Manual Sections
 
@@ -36,6 +41,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 2.1.1 [`errorNum`](#properrerrornum)
         - 2.1.2 [`message`](#properrmessage)
         - 2.1.3 [`offset`](#properroffset)
+        - 2.1.4 [`stack`](#properrstack)
 3. [Oracledb Class](#oracledbclass)
     - 3.1 [Oracledb Constants](#oracledbconstants)
         - 3.1.1 [Query `outFormat` Constants](#oracledbconstantsoutformat)
@@ -101,46 +107,51 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 3.3 [Oracledb Methods](#oracledbmethods)
         - 3.3.1 [`createPool()`](#createpool)
             - 3.3.1.1 [`createPool()`: Parameters and Attributes](#createpoolpoolattrs)
-                - 3.3.1.1.1 [`connectString`](#createpoolpoolattrsconnectstring), [`connectionString`](#createpoolpoolattrsconnectstring)
-                - 3.3.1.1.2 [`edition`](#createpoolpoolattrsedition)
-                - 3.3.1.1.3 [`enableStatistics`](#createpoolpoolattrsstats)
-                - 3.3.1.1.4 [`events`](#createpoolpoolattrsevents)
-                - 3.3.1.1.5 [`externalAuth`](#createpoolpoolattrsexternalauth)
-                - 3.3.1.1.6 [`homogeneous`](#createpoolpoolattrshomogeneous)
-                - 3.3.1.1.7 [`password`](#createpoolpoolattrspassword)
-                - 3.3.1.1.8 [`poolAlias`](#createpoolpoolattrspoolalias)
-                - 3.3.1.1.9 [`poolIncrement`](#createpoolpoolattrspoolincrement)
-                - 3.3.1.1.10 [`poolMax`](#createpoolpoolattrspoolmax)
-                - 3.3.1.1.11 [`poolMaxPerShard`](#createpoolpoolattrspoolmaxpershard)
-                - 3.3.1.1.12 [`poolMin`](#createpoolpoolattrspoolmin)
-                - 3.3.1.1.13 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
-                - 3.3.1.1.14 [`poolTimeout`](#createpoolpoolattrspooltimeout)
-                - 3.3.1.1.15 [`queueMax`](#createpoolpoolattrsqueuemax)
-                - 3.3.1.1.16 [`queueRequests`](#createpoolpoolattrsqueuerequests)
-                - 3.3.1.1.17 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
-                - 3.3.1.1.18 [`sessionCallback`](#createpoolpoolattrssessioncallback)
-                - 3.3.1.1.19 [`sodaMetaDataCache`](#createpoolpoolattrssodamdcache)
-                - 3.3.1.1.20 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
-                - 3.3.1.1.21 [`user`](#createpoolpoolattrsuser), [`username`](#createpoolpoolattrsuser)
+                - 3.3.1.1.1 [`accessToken`](#createpoolpoolattrsaccesstoken)
+                    - [`token`](#createpoolpoolattrsaccesstoken), [`privateKey`](#createpoolpoolattrsaccesstoken)
+                - 3.3.1.1.2 [`connectString`](#createpoolpoolattrsconnectstring), [`connectionString`](#createpoolpoolattrsconnectstring)
+                - 3.3.1.1.3 [`accessTokenCallback`](#createpoolpoolattrsaccesstokencallback)
+                - 3.3.1.1.4 [`edition`](#createpoolpoolattrsedition)
+                - 3.3.1.1.5 [`enableStatistics`](#createpoolpoolattrsstats)
+                - 3.3.1.1.6 [`events`](#createpoolpoolattrsevents)
+                - 3.3.1.1.7 [`externalAuth`](#createpoolpoolattrsexternalauth)
+                - 3.3.1.1.8 [`homogeneous`](#createpoolpoolattrshomogeneous)
+                - 3.3.1.1.9 [`password`](#createpoolpoolattrspassword)
+                - 3.3.1.1.10 [`poolAlias`](#createpoolpoolattrspoolalias)
+                - 3.3.1.1.11 [`poolIncrement`](#createpoolpoolattrspoolincrement)
+                - 3.3.1.1.12 [`poolMax`](#createpoolpoolattrspoolmax)
+                - 3.3.1.1.13 [`poolMaxPerShard`](#createpoolpoolattrspoolmaxpershard)
+                - 3.3.1.1.14 [`poolMin`](#createpoolpoolattrspoolmin)
+                - 3.3.1.1.15 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
+                - 3.3.1.1.16 [`poolTimeout`](#createpoolpoolattrspooltimeout)
+                - 3.3.1.1.17 [`queueMax`](#createpoolpoolattrsqueuemax)
+                - 3.3.1.1.18 [`queueRequests`](#createpoolpoolattrsqueuerequests)
+                - 3.3.1.1.19 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
+                - 3.3.1.1.20 [`sessionCallback`](#createpoolpoolattrssessioncallback)
+                - 3.3.1.1.21 [`sodaMetaDataCache`](#createpoolpoolattrssodamdcache)
+                - 3.3.1.1.22 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+                - 3.3.1.1.23 [`user`](#createpoolpoolattrsuser), [`username`](#createpoolpoolattrsuser)
             - 3.3.1.2 [`createPool()`: Callback Function](#createpoolpoolcallback)
         - 3.3.2 [`getConnection()`](#getconnectiondb)
             - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
                 - 3.3.2.1.1 [Pool Alias](#getconnectionpoolalias)
                 - 3.3.2.1.2 [`getConnection()`: Attributes](#getconnectiondbattrsconnattrs)
-                    - 3.3.2.1.2.1 [`connectString`](#getconnectiondbattrsconnectstring), [`connectionString`](#getconnectiondbattrsconnectstring)
-                    - 3.3.2.1.2.2 [`edition`](#getconnectiondbattrsedition)
-                    - 3.3.2.1.2.3 [`events`](#getconnectiondbattrsevents)
-                    - 3.3.2.1.2.4 [`externalAuth`](#getconnectiondbattrsexternalauth)
-                    - 3.3.2.1.2.5 [`matchAny`](#getconnectiondbattrsmatchany)
-                    - 3.3.2.1.2.6 [`newPassword`](#getconnectiondbattrsnewpassword)
-                    - 3.3.2.1.2.7 [`poolAlias`](#getconnectiondbattrspoolalias)
-                    - 3.3.2.1.2.8 [`password`](#getconnectiondbattrspassword)
-                    - 3.3.2.1.2.9 [`privilege`](#getconnectiondbattrsprivilege)
-                    - 3.3.2.1.2.10 [`shardingKey`](#getconnectiondbattrsshardingkey)
-                    - 3.3.2.1.2.11 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
-                    - 3.3.2.1.2.12 [`superShardingKey`](#getconnectiondbattrssupershardingkey)
-                    - 3.3.2.1.2.13 [`tag`](#getconnectiondbattrstag)
-                    - 3.3.2.1.2.14 [`user`](#getconnectiondbattrsuser), [`username`](#getconnectiondbattrsuser)
+                    - 3.3.2.1.2.1 [`accessToken`](#getconnectiondbattrsaccesstoken)
+                        - [`token`](#getconnectiondbattrsaccesstoken), [`privateKey`](#getconnectiondbattrsaccesstoken)
+                    - 3.3.2.1.2.2 [`connectString`](#getconnectiondbattrsconnectstring), [`connectionString`](#getconnectiondbattrsconnectstring)
+                    - 3.3.2.1.2.3 [`edition`](#getconnectiondbattrsedition)
+                    - 3.3.2.1.2.4 [`events`](#getconnectiondbattrsevents)
+                    - 3.3.2.1.2.5 [`externalAuth`](#getconnectiondbattrsexternalauth)
+                    - 3.3.2.1.2.6 [`matchAny`](#getconnectiondbattrsmatchany)
+                    - 3.3.2.1.2.7 [`newPassword`](#getconnectiondbattrsnewpassword)
+                    - 3.3.2.1.2.8 [`poolAlias`](#getconnectiondbattrspoolalias)
+                    - 3.3.2.1.2.9 [`password`](#getconnectiondbattrspassword)
+                    - 3.3.2.1.2.10 [`privilege`](#getconnectiondbattrsprivilege)
+                    - 3.3.2.1.2.11 [`shardingKey`](#getconnectiondbattrsshardingkey)
+                    - 3.3.2.1.2.12 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
+                    - 3.3.2.1.2.13 [`superShardingKey`](#getconnectiondbattrssupershardingkey)
+                    - 3.3.2.1.2.14 [`tag`](#getconnectiondbattrstag)
+                    - 3.3.2.1.2.15 [`user`](#getconnectiondbattrsuser), [`username`](#getconnectiondbattrsuser)
             - 3.3.2.2 [`getConnection()`: Callback Function](#getconnectiondbcallback)
         - 3.3.3 [`getPool()`](#getpool)
             - 3.3.3.1 [`getPool()`: Parameters](#getpoolattrs)
@@ -229,43 +240,44 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 4.2.9 [`getQueue()`](#getqueue)
         - 4.2.10 [`getSodaDatabase()`](#getsodadatabase)
         - 4.2.11 [`getStatementInfo()`](#getstmtinfo)
-        - 4.2.12 [`ping()`](#connectionping)
-        - 4.2.13 [`queryStream()`](#querystream)
-        - 4.2.14 [`rollback()`](#rollback)
-        - 4.2.15 [`shutdown()`](#conshutdown)
-            - 4.2.15.1 [`shutdown()`: shutdownMode](#conshutdownmode)
-            - 4.2.15.2 [`shutdown()`: Callback Function](#conshutdowncallback)
-        - 4.2.16 [`subscribe()`](#consubscribe)
-            - 4.2.16.1 [`subscribe()`: Name](#consubscribename)
-            - 4.2.16.2 [`subscribe()`: Options](#consubscribeoptions)
-                - 4.2.16.2.1 [`binds`](#consubscribeoptbinds)
-                - 4.2.16.2.2 [`callback`](#consubscribeoptcallback)
-                - 4.2.16.2.3 [`clientInitiated`](#consubscribeoptclientinitiated)
-                - 4.2.16.2.4 [`groupingClass`](#consubscribeoptgroupingclass)
-                - 4.2.16.2.5 [`groupingType`](#consubscribeoptgroupingtype)
-                - 4.2.16.2.6 [`groupingValue`](#consubscribeoptgroupingvalue)
-                - 4.2.16.2.7 [`ipAddress`](#consubscribeoptipaddress)
-                - 4.2.16.2.8 [`namespace`](#consubscribeoptnamespace)
-                - 4.2.16.2.9 [`operations`](#consubscribeoptoperations)
-                - 4.2.16.2.10 [`port`](#consubscribeoptport)
-                - 4.2.16.2.11 [`qos`](#consubscribeoptqos)
-                - 4.2.16.2.12 [`sql`](#consubscribeoptsql)
-                - 4.2.16.2.13 [`timeout`](#consubscribeopttimeout)
-            - 4.2.16.3 [`subscribe()`: Callback Function](#consubscribecallback)
-        - 4.2.17 [`startup()`](#constartup)
-            - 4.2.17.1 [`startup()`: Options](#constartupoptions)
-                - 4.2.17.1.1 [`force`](#constartupoptionsforce)
-                - 4.2.17.1.2 [`pfile`](#constartupoptionspfile)
-                - 4.2.17.1.3 [`restrict`](#constartupoptionsrestrict)
-            - 4.2.17.2 [`startup()`: Callback Function](#constartupcallback)
-        - 4.2.18 [`tpcBegin()`](#contpcbegin)
-        - 4.2.19 [`tpcCommit()`](#contpccommit)
-        - 4.2.20 [`tpcEnd()`](#contpcend)
-        - 4.2.21 [`tpcForget()`](#contpcforget)
-        - 4.2.22 [`tpcPrepare()`](#contpcprepare)
-        - 4.2.23 [`tpcRecover()`](#contpcrecover)
-        - 4.2.24 [`tpcRollback()`](#contpcrollback)
-        - 4.2.25 [`unsubscribe()`](#conunsubscribe)
+        - 4.2.12 [`isHealthy()`](#ishealthy)
+        - 4.2.13 [`ping()`](#connectionping)
+        - 4.2.14 [`queryStream()`](#querystream)
+        - 4.2.15 [`rollback()`](#rollback)
+        - 4.2.16 [`shutdown()`](#conshutdown)
+            - 4.2.16.1 [`shutdown()`: shutdownMode](#conshutdownmode)
+            - 4.2.16.2 [`shutdown()`: Callback Function](#conshutdowncallback)
+        - 4.2.17 [`subscribe()`](#consubscribe)
+            - 4.2.17.1 [`subscribe()`: Name](#consubscribename)
+            - 4.2.17.2 [`subscribe()`: Options](#consubscribeoptions)
+                - 4.2.17.2.1 [`binds`](#consubscribeoptbinds)
+                - 4.2.17.2.2 [`callback`](#consubscribeoptcallback)
+                - 4.2.17.2.3 [`clientInitiated`](#consubscribeoptclientinitiated)
+                - 4.2.17.2.4 [`groupingClass`](#consubscribeoptgroupingclass)
+                - 4.2.17.2.5 [`groupingType`](#consubscribeoptgroupingtype)
+                - 4.2.17.2.6 [`groupingValue`](#consubscribeoptgroupingvalue)
+                - 4.2.17.2.7 [`ipAddress`](#consubscribeoptipaddress)
+                - 4.2.17.2.8 [`namespace`](#consubscribeoptnamespace)
+                - 4.2.17.2.9 [`operations`](#consubscribeoptoperations)
+                - 4.2.17.2.10 [`port`](#consubscribeoptport)
+                - 4.2.17.2.11 [`qos`](#consubscribeoptqos)
+                - 4.2.17.2.12 [`sql`](#consubscribeoptsql)
+                - 4.2.17.2.13 [`timeout`](#consubscribeopttimeout)
+            - 4.2.17.3 [`subscribe()`: Callback Function](#consubscribecallback)
+        - 4.2.18 [`startup()`](#constartup)
+            - 4.2.18.1 [`startup()`: Options](#constartupoptions)
+                - 4.2.18.1.1 [`force`](#constartupoptionsforce)
+                - 4.2.18.1.2 [`pfile`](#constartupoptionspfile)
+                - 4.2.18.1.3 [`restrict`](#constartupoptionsrestrict)
+            - 4.2.18.2 [`startup()`: Callback Function](#constartupcallback)
+        - 4.2.19 [`tpcBegin()`](#contpcbegin)
+        - 4.2.20 [`tpcCommit()`](#contpccommit)
+        - 4.2.21 [`tpcEnd()`](#contpcend)
+        - 4.2.22 [`tpcForget()`](#contpcforget)
+        - 4.2.23 [`tpcPrepare()`](#contpcprepare)
+        - 4.2.24 [`tpcRecover()`](#contpcrecover)
+        - 4.2.25 [`tpcRollback()`](#contpcrollback)
+        - 4.2.26 [`unsubscribe()`](#conunsubscribe)
 5. [AqQueue Class](#aqqueueclass)
     - 5.1 [AqQueue Properties](#aqqueueproperties)
         - 5.1.1 [`name`](#aqqueuename)
@@ -334,11 +346,12 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 8.1.21 [`stmtCacheSize`](#proppoolstmtcachesize)
         - 8.1.22 [`user`](#proppooluser)
     - 8.2 [Pool Methods](#poolmethods)
-        - 8.2.1 [`close()`](#poolclose), [`terminate()`](#poolclose)
-        - 8.2.2 [`getConnection()`](#getconnectionpool)
-        - 8.2.3 [`getStatistics()`](#poolgetstatistics)
-        - 8.2.4 [`logStatistics()`](#poollogstatistics)
-        - 8.2.5 [`reconfigure()`](#poolreconfigure)
+        - 8.2.1 [`setAccessToken()`](#poolsetaccesstoken)
+        - 8.2.2 [`close()`](#poolclose), [`terminate()`](#poolclose)
+        - 8.2.3 [`getConnection()`](#getconnectionpool)
+        - 8.2.4 [`getStatistics()`](#poolgetstatistics)
+        - 8.2.5 [`logStatistics()`](#poollogstatistics)
+        - 8.2.6 [`reconfigure()`](#poolreconfigure)
 9. [PoolStatistics Class](#poolstatisticsclass)
     - 9.1 [PoolStatistics Methods](#poolstatisticsmethods)
         - 9.1.1 [`logStatistics()`](#poolstatisticslogstatistics)
@@ -443,6 +456,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 16.1.2 [Embedded Connect Descriptor Strings](#embedtns)
         - 16.1.3 [Net Service Names for Connection Strings](#tnsnames)
         - 16.1.4 [JDBC and Oracle SQL Developer Connection Strings](#notjdbc)
+        - 16.1.5 [Token Based Authentication Connection Strings](#tokenbasedconnstrings)
     - 16.2 [Connections, Threads, and Parallelism](#numberofthreads)
         - 16.2.1 [Parallelism on a Connection](#parallelism)
     - 16.3 [Connection Pooling](#connpooling)
@@ -458,19 +472,25 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - 16.3.7.3 [PL/SQL Session Tagging Callback](#sessiontaggingplsql)
         - 16.3.8 [Heterogeneous Connection Pools and Pool Proxy Authentication](#connpoolproxy)
     - 16.4 [External Authentication](#extauth)
-    - 16.5 [Database Resident Connection Pooling (DRCP)](#drcp)
-    - 16.6 [Privileged Connections](#privconn)
-    - 16.7 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
-    - 16.8 [Changing Passwords and Connecting with an Expired Password](#changingpassword)
-    - 16.9 [Connections and High Availability](#connectionha)
-        - 16.9.1 [Preventing Premature Connection Closing](#connectionpremclose)
-        - 16.9.2 [Fast Application Notification (FAN)](#connectionfan)
-        - 16.9.3 [Runtime Load Balancing (RLB)](#connectionrlb)
-        - 16.9.4 [Application Continuity](#appcontinuity)
-        - 16.9.5 [Database Call Timeouts](#dbcalltimeouts)
-    - 16.10 [Connecting to Oracle Real Application Clusters (RAC)](#connectionrac)
-    - 16.11 [Connecting to Oracle Cloud Autonomous Databases](#connectionadb)
-    - 16.12 [Connecting to Sharded Databases](#sharding)
+    - 16.5 [Token Based Authentication](#tokenbasedauth)
+        - 16.5.1 [Token Generation using the OCI CLI](#tokengen)
+        - 16.5.2 [Token and Private Key Extraction from a File](#tokenread)
+        - 16.5.3 [Standalone Connection Creation with Access Tokens](#tokenbasedstandaloneconn)
+        - 16.5.4 [Connection Pool Creation with Access Tokens](#tokenbasedpool)
+        - 16.5.5 [Explicitly Refreshing Pool Access Tokens](#settingpooltokens)
+    - 16.6 [Database Resident Connection Pooling (DRCP)](#drcp)
+    - 16.7 [Privileged Connections](#privconn)
+    - 16.8 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
+    - 16.9 [Changing Passwords and Connecting with an Expired Password](#changingpassword)
+    - 16.10 [Connections and High Availability](#connectionha)
+        - 16.10.1 [Preventing Premature Connection Closing](#connectionpremclose)
+        - 16.10.2 [Fast Application Notification (FAN)](#connectionfan)
+        - 16.10.3 [Runtime Load Balancing (RLB)](#connectionrlb)
+        - 16.10.4 [Application Continuity](#appcontinuity)
+        - 16.10.5 [Database Call Timeouts](#dbcalltimeouts)
+    - 16.11 [Connecting to Oracle Real Application Clusters (RAC)](#connectionrac)
+    - 16.12 [Connecting to Oracle Cloud Autonomous Databases](#connectionadb)
+    - 16.13 [Connecting to Sharded Databases](#sharding)
 17. [SQL Execution](#sqlexecution)
     - 17.1 [SELECT Statements](#select)
         - 17.1.1 [Fetching Rows with Direct Fetches](#fetchingrows)
@@ -600,7 +620,7 @@ editions, or require additional database options or packs.
 The node-oracledb feature highlights are:
 
 - Easily installed from [npm][1]
-- Support for Node.js 10 and later, and for multiple Oracle Database versions.  (Note: older versions of node-oracledb supported older versions of Node.js)
+- Support for Node.js 14 and later, and for multiple Oracle Database versions.  (Note: older versions of node-oracledb supported older versions of Node.js)
 - Execution of SQL and PL/SQL statements, and access to [SODA](#sodaoverview) document-style access APIs.
 - Extensive Oracle data type support, including large objects (CLOB and BLOB) and binding of SQL objects
 - Connection management, including connection pooling
@@ -612,12 +632,16 @@ A complete list of features can be seen [here][169].
 ### <a name="architecture"></a> 1.1 Node-oracledb Architecture
 
 Node-oracledb is a Node.js add-on that allows Node.js applications to access
-Oracle Database.  Node.js programs call node-oracledb functions. Internally
-node-oracledb dynamically loads Oracle Client libraries.  Connections are made
-from node-oracledb to Oracle Database so [SQL](#sqlexecution),
-[PL/SQL](#plsqlexecution), and [SODA](#sodaoverview) can be used.
+Oracle Database.
 
-![node-oracledb Architecture](./images/node-oracledb-architecture.png)
+![Architecture diagram of Node.js, node-oracledb and Oracle Database. It is described in the next paragraph](./images/node-oracledb-architecture.png)
+
+The diagram shows one deployment scenario.  Users interact with a Node.js
+application, for example by making web requests.  The application program makes
+calls to node-oracledb functions.  Internally node-oracledb dynamically loads
+Oracle Client libraries.  Connections are established from node-oracledb to
+Oracle Database.  This allows [SQL](#sqlexecution), [PL/SQL](#plsqlexecution),
+and [SODA](#sodaoverview) to be used by the application.
 
 Node-oracledb is typically installed from the [npm registry][1].  The Oracle
 Client libraries need to be installed separately.  The libraries can be obtained
@@ -804,9 +828,23 @@ same is true for invalid operations on read-only or write-only
 properties.  If an unrecognized property name is used, it will be
 ignored.
 
+An example of catching an error is:
+
+```javascript
+async function run(connection) {
+  try {
+    const sql = `SELECT * FROM DOESNOTEXIST`;
+    result = await connection.execute(sql);
+    return result;
+  } catch (err) {
+    console.error(err);
+  }
+}
+```
+
 ### <a name="properror"></a> 2.1 Error Properties
 
-The *Error* object contains `errorNum`, `message` and `offset` properties.
+The *Error* object contains `errorNum`, `message`, `offset` and `stack` properties.
 
 #### <a name="properrerrornum"></a> 2.1.1 `errorNum`
 
@@ -862,6 +900,21 @@ corresponding to the `executeMany()` [binds parameter](#executemanybinds) array,
 indicating which record could not be processed. See [Handling Data
 Errors](#handlingbatcherrors).  In node-oracledb 4.2, the maximum `offset` value
 was changed from (2^16)-1 to (2^32)-1.
+
+#### <a name="properrstack"></a> 2.1.4 `stack`
+
+```
+String stack
+```
+
+When using Promises or Async/Await, the *Error* object includes a stack trace,
+for example:
+
+```
+Error: ORA-00942: table or view does not exist
+    at async Object.myDoQuery (/Users/cjones/db.js:5:20)
+    at async run (/Users/cjones/test.js:51:14)}
+```
 
 ## <a name="oracledbclass"></a> 3. Oracledb Class
 
@@ -2173,7 +2226,34 @@ ignored.
 
 The properties of `poolAttrs` are described below.
 
-###### <a name="createpoolpoolattrsconnectstring"></a> 3.3.1.1.1 `connectString`, `connectionString`
+###### <a name="createpoolpoolattrsaccesstoken"></a> 3.3.1.1.1 `accessToken`: Attributes
+
+```
+Object accessToken
+```
+
+The `accessToken` parameter object provides token based authentication
+configuration properties.
+
+The properties of the `accessToken` object are described below. Both properties
+must be set.  The values can be obtained using the Oracle Cloud Infrastructure
+(OCI) Command Line Interface (CLI).
+
+Attribute           | Description
+------------------- |------------------------------------------------
+`token`             | The database authentication token string.
+`privateKey`        | The database authentication private key string.
+
+The `externalAuth` and `homogeneous` connection or pool attributes must be set
+to *true* while using token based authentication. The `user` (or `username`)
+and `password` properties should not be set.
+
+See [Token Based Authentication](#tokenbasedauth) for more information.
+
+The `accessToken` parameter was added in node-oracledb 5.4.  It should be used
+with Oracle Client libraries 19.14 (or later), or 21.5 (or later).
+
+###### <a name="createpoolpoolattrsconnectstring"></a> 3.3.1.1.2 `connectString`, `connectionString`
 
 ```
 String connectString
@@ -2189,7 +2269,25 @@ See [Connection Strings](#connectionstrings) for examples.
 
 The alias `connectionString` was added in node-oracledb 2.1.
 
-###### <a name="createpoolpoolattrsedition"></a> 3.3.1.1.2 `edition`
+###### <a name="createpoolpoolattrsaccesstokencallback"></a> 3.3.1.1.3 `accessTokenCallback`
+
+```
+Object accessTokenCallback
+```
+
+The optional `accessTokenCallback` attribute is a Node.js callback function. It
+gets called by the connection pool if the pool needs to grow and create new
+connections but the current token has expired.
+
+The callback function must return a JavaScript object with attributes `token`
+and `privateKey`, equivalent to the
+[`accessToken`](#createpoolpoolattrsaccesstoken) object.  See [Connection Pool
+Creation with Access Tokens](#tokenbasedpool).
+
+The `accessTokenCallback` attribute was added in node-oracledb 5.4.  It should be
+used with Oracle Client libraries 19.14 (or later), or 21.5 (or later).
+
+###### <a name="createpoolpoolattrsedition"></a> 3.3.1.1.4 `edition`
 
 ```
 String edition
@@ -2203,7 +2301,7 @@ This optional property overrides the
 
 This property was added in node-oracledb 2.2.
 
-###### <a name="createpoolpoolattrsstats"></a> 3.3.1.1.3 `enableStatistics`
+###### <a name="createpoolpoolattrsstats"></a> 3.3.1.1.5 `enableStatistics`
 
 ```
 Boolean enableStatistics
@@ -2221,7 +2319,7 @@ This property was added in node-oracledb 5.2.  The obsolete property
 `_enableStats` can still be used, but it will be removed in a future version of
 node-oracledb.
 
-###### <a name="createpoolpoolattrsevents"></a> 3.3.1.1.3 `events`
+###### <a name="createpoolpoolattrsevents"></a> 3.3.1.1.6 `events`
 
 ```
 Boolean events
@@ -2234,7 +2332,7 @@ This optional property overrides the
 
 This property was added in node-oracledb 2.2.
 
-###### <a name="createpoolpoolattrsexternalauth"></a> 3.3.1.1.5 `externalAuth`
+###### <a name="createpoolpoolattrsexternalauth"></a> 3.3.1.1.7 `externalAuth`
 
 ```
 Boolean externalAuth
@@ -2254,7 +2352,7 @@ The `user` (or `username`) and `password` properties should not be set when
 Note prior to node-oracledb 0.5 this property was called
 `isExternalAuth`.
 
-###### <a name="createpoolpoolattrshomogeneous"></a> 3.3.1.1.6 `homogeneous`
+###### <a name="createpoolpoolattrshomogeneous"></a> 3.3.1.1.8 `homogeneous`
 
 ```
 Boolean homogeneous
@@ -2285,7 +2383,7 @@ Authentication](#connpoolproxy) for details and examples.
 
 This property was added in node-oracledb 2.3.
 
-###### <a name="createpoolpoolattrspassword"></a> 3.3.1.1.7 `password`
+###### <a name="createpoolpoolattrspassword"></a> 3.3.1.1.9 `password`
 
 ```
 String password
@@ -2297,7 +2395,7 @@ password is also necessary if a proxy user is specified at pool creation.
 If `homogeneous` is *false*, then the password may be omitted at pool
 creation but given in subsequent `pool.getConnection()` calls.
 
-###### <a name="createpoolpoolattrspoolalias"></a> 3.3.1.1.8 `poolAlias`
+###### <a name="createpoolpoolattrspoolalias"></a> 3.3.1.1.10 `poolAlias`
 
 ```
 String poolAlias
@@ -2313,7 +2411,7 @@ See [Connection Pool Cache](#connpoolcache) for details and examples.
 
 This property was added in node-oracledb 1.11.
 
-###### <a name="createpoolpoolattrspoolincrement"></a> 3.3.1.1.9 `poolIncrement`
+###### <a name="createpoolpoolattrspoolincrement"></a> 3.3.1.1.11 `poolIncrement`
 
 ```
 Number poolIncrement
@@ -2327,7 +2425,7 @@ The default value is 1.
 This optional property overrides the
 [`oracledb.poolIncrement`](#propdbpoolincrement) property.
 
-###### <a name="createpoolpoolattrspoolmax"></a> 3.3.1.1.10 `poolMax`
+###### <a name="createpoolpoolattrspoolmax"></a> 3.3.1.1.12 `poolMax`
 
 ```
 Number poolMax
@@ -2346,7 +2444,7 @@ Number of Threads](#numberofthreads).
 
 See [Connection Pooling](#connpooling) for other pool sizing guidelines.
 
-###### <a name="createpoolpoolattrspoolmaxpershard"></a> 3.3.1.1.11 `poolMaxPerShard`
+###### <a name="createpoolpoolattrspoolmaxpershard"></a> 3.3.1.1.13 `poolMaxPerShard`
 
 ```
 Number poolMaxPerShard
@@ -2360,7 +2458,7 @@ This optional property overrides the
 
 This property was added in node-oracledb 4.1.
 
-###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.12 `poolMin`
+###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.14 `poolMin`
 
 ```
 Number poolMin
@@ -2375,7 +2473,7 @@ The default value is 0.
 This optional property overrides the [`oracledb.poolMin`](#propdbpoolmin)
 property.
 
-###### <a name="createpoolpoolattrspoolpinginterval"></a> 3.3.1.1.13 `poolPingInterval`
+###### <a name="createpoolpoolattrspoolpinginterval"></a> 3.3.1.1.15 `poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -2393,22 +2491,21 @@ This optional property overrides the
 
 See [Connection Pool Pinging](#connpoolpinging) for more discussion.
 
-###### <a name="createpoolpoolattrspooltimeout"></a> 3.3.1.1.14 `poolTimeout`
+###### <a name="createpoolpoolattrspooltimeout"></a> 3.3.1.1.16 `poolTimeout`
 
 ```
 Number poolTimeout
 ```
 
-The number of seconds after which idle connections (unused in the
-pool) may be terminated.  Idle connections are terminated only when
-the pool is accessed.
+The number of seconds after which idle connections (unused in the pool) may be
+terminated.  Refer to [`oracledb.poolTimeout`](#propdbpooltimeout) for details.
 
 The default value is 60.
 
 This optional property overrides the
 [`oracledb.poolTimeout`](#propdbpooltimeout) property.
 
-###### <a name="createpoolpoolattrsqueuemax"></a> 3.3.1.1.15 `queueMax`
+###### <a name="createpoolpoolattrsqueuemax"></a> 3.3.1.1.17 `queueMax`
 
 ```
 Number queueMax
@@ -2430,13 +2527,13 @@ This optional property overrides the
 
 This property was added in node-oracledb 5.0.
 
-###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.16 `queueRequests`
+###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.18 `queueRequests`
 
 This property was removed in node-oracledb 3.0 and queuing was always enabled.
 In node-oracledb 5.0, set `queueMax` to 0 to disable queuing.  See [Connection
 Pool Queue](#connpoolqueue) for more information.
 
-###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.17 `queueTimeout`
+###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.19 `queueTimeout`
 
 ```
 Number queueTimeout
@@ -2451,7 +2548,7 @@ The default value is 60000.
 This optional property overrides the
 [`oracledb.queueTimeout`](#propdbqueuetimeout) property.
 
-###### <a name="createpoolpoolattrssessioncallback"></a> 3.3.1.1.18 `sessionCallback`
+###### <a name="createpoolpoolattrssessioncallback"></a> 3.3.1.1.20 `sessionCallback`
 
 ```
 String sessionCallback | function sessionCallback(Connection connection, String requestedTag, function callback(Error error, Connection connection){})
@@ -2508,7 +2605,7 @@ information.
 
 This property was added in node-oracledb 3.1.
 
-###### <a name="createpoolpoolattrssodamdcache"></a> 3.3.1.1.19 `sodaMetaDataCache`
+###### <a name="createpoolpoolattrssodamdcache"></a> 3.3.1.1.21 `sodaMetaDataCache`
 
 ```
 Boolean sodaMetaDataCache
@@ -2533,7 +2630,7 @@ This property was added in node-oracledb 5.2.  It requires Oracle Client 21.3
 (or later).  The feature is also available in Oracle Client 19c from 19.11
 onward.
 
-###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.20 `stmtCacheSize`
+###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.22 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -2545,7 +2642,7 @@ The number of statements to be cached in the
 This optional property overrides the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.21 `user`, `username`
+###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.23 `user`, `username`
 
 ```
 String user
@@ -2654,7 +2751,34 @@ method are ignored.
 
 The properties of the `connAttrs` object are described below.
 
-###### <a name="getconnectiondbattrsconnectstring"></a> 3.3.2.1.2.1 `connectString`, `connectionString`
+###### <a name="getconnectiondbattrsaccesstoken"></a> 3.3.2.1.2.1 `accessToken`: Attributes
+
+```
+Object accessToken
+```
+
+The `accessToken` parameter object provides token based authentication
+configuration properties.
+
+The properties of the `accessToken` object are described below. Both properties
+must be set.  The values can be obtained using the Oracle Cloud Infrastructure
+(OCI) Command Line Interface (CLI).
+
+Attribute           | Description
+------------------- |------------------------------------------------
+`token`             | The database authentication token string.
+`privateKey`        | The database authentication private key string.
+
+The `externalAuth` connection attribute must be set to *true* while using token
+based authentication. The `user` (or `username`) and `password` properties
+should not be set.
+
+See [Token Based Authentication](#tokenbasedauth) for more information.
+
+The `accessToken` parameter was added in node-oracledb 5.4.  It should be used
+with Oracle Client libraries 19.14 (or later), or 21.5 (or later).
+
+###### <a name="getconnectiondbattrsconnectstring"></a> 3.3.2.1.2.2 `connectString`, `connectionString`
 
 ```
 String connectString
@@ -2670,7 +2794,7 @@ Oracle database instance.  See
 
 The alias `connectionString` was added in node-oracledb 2.1.
 
-###### <a name="getconnectiondbattrsedition"></a> 3.3.2.1.2.2 `edition`
+###### <a name="getconnectiondbattrsedition"></a> 3.3.2.1.2.3 `edition`
 
 ```
 String edition
@@ -2683,7 +2807,7 @@ This optional property overrides the
 
 This property was added in node-oracledb 2.2.
 
-###### <a name="getconnectiondbattrsevents"></a> 3.3.2.1.2.3 `events`
+###### <a name="getconnectiondbattrsevents"></a> 3.3.2.1.2.4 `events`
 
 ```
 Boolean events
@@ -2696,7 +2820,7 @@ This optional property overrides the
 
 This property was added in node-oracledb 2.2.
 
-###### <a name="getconnectiondbattrsexternalauth"></a> 3.3.2.1.2.4 `externalAuth`
+###### <a name="getconnectiondbattrsexternalauth"></a> 3.3.2.1.2.5 `externalAuth`
 
 ```
 Boolean externalAuth
@@ -2714,7 +2838,7 @@ The `user` (or `username`) and `password` properties should not be set when
 Note prior to node-oracledb 0.5 this property was called
 `isExternalAuth`.
 
-###### <a name="getconnectiondbattrsmatchany"></a> 3.3.2.1.2.5 `matchAny`
+###### <a name="getconnectiondbattrsmatchany"></a> 3.3.2.1.2.6 `matchAny`
 
 ```
 Boolean matchAny
@@ -2730,7 +2854,7 @@ See [Connection Tagging and Session State](#connpooltagging).
 
 This property was added in node-oracledb 3.1.
 
-###### <a name="getconnectiondbattrsnewpassword"></a> 3.3.2.1.2.6 `newPassword`
+###### <a name="getconnectiondbattrsnewpassword"></a> 3.3.2.1.2.7 `newPassword`
 
 ```
 String newPassword
@@ -2748,7 +2872,7 @@ See [Changing Passwords and Connecting with an Expired Password](#changingpasswo
 
 This property was added in node-oracledb 2.2.
 
-###### <a name="getconnectiondbattrspoolalias"></a> 3.3.2.1.2.7 `poolAlias`
+###### <a name="getconnectiondbattrspoolalias"></a> 3.3.2.1.2.8 `poolAlias`
 
 ```
 String poolAlias
@@ -2758,7 +2882,7 @@ Specifies which previously created pool in the [connection pool
 cache](#connpoolcache) to obtain the connection from.  See [Pool
 Alias](#getconnectionpoolalias).
 
-###### <a name="getconnectiondbattrspassword"></a> 3.3.2.1.2.8 `password`
+###### <a name="getconnectiondbattrspassword"></a> 3.3.2.1.2.9 `password`
 
 ```
 String password
@@ -2767,7 +2891,7 @@ String password
 The password of the database user. A password is also necessary if a
 proxy user is specified.
 
-###### <a name="getconnectiondbattrsprivilege"></a> 3.3.2.1.2.9 `privilege`
+###### <a name="getconnectiondbattrsprivilege"></a> 3.3.2.1.2.10 `privilege`
 
 ```
 Number privilege
@@ -2784,7 +2908,7 @@ Note only non-pooled connections can be privileged.
 
 This property was added in node-oracledb 2.1.
 
-###### <a name="getconnectiondbattrsshardingkey"></a> 3.3.2.1.2.10 `shardingKey`
+###### <a name="getconnectiondbattrsshardingkey"></a> 3.3.2.1.2.11 `shardingKey`
 
 ```
 Array shardingKey
@@ -2799,7 +2923,7 @@ array.  Sharding keys TIMESTAMP type are not supported.
 
 This property was added in node-oracledb 4.1.
 
-###### <a name="getconnectiondbattrsstmtcachesize"></a> 3.3.2.1.2.11 `stmtCacheSize`
+###### <a name="getconnectiondbattrsstmtcachesize"></a> 3.3.2.1.2.12 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -2810,7 +2934,7 @@ The number of statements to be cached in the
 property may be used to override the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="getconnectiondbattrssupershardingkey"></a> 3.3.2.1.2.12 `superShardingKey`
+###### <a name="getconnectiondbattrssupershardingkey"></a> 3.3.2.1.2.13 `superShardingKey`
 
 ```
 Array superShardingKey
@@ -2825,7 +2949,7 @@ array.  Sharding keys TIMESTAMP type are not supported.
 
 This property was added in node-oracledb 4.1.
 
-###### <a name="getconnectiondbattrstag"></a> 3.3.2.1.2.13 `tag`
+###### <a name="getconnectiondbattrstag"></a> 3.3.2.1.2.14 `tag`
 
 ```
 String tag
@@ -2840,7 +2964,7 @@ State](#connpooltagging).
 
 This property was added in node-oracledb 3.1.
 
-###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.14 `user`, `username`
+###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.15 `user`, `username`
 
 ```
 String user
@@ -4544,7 +4668,36 @@ This method was added in node-oracledb 2.2.
       Statement Type Constants](#oracledbconstantsstmttype).
 
 
-#### <a name="connectionping"></a> 4.2.12 `connection.ping()`
+#### <a name="ishealthy"></a> 4.2.12 `connection.isHealthy()`
+
+##### Prototype
+
+```
+isHealthy()
+```
+
+##### Description
+
+This synchronous function returns a boolean indicating the health status of a
+connection.
+
+Connections may become unusable in several cases, such as if the network socket
+is broken, if an Oracle error indicates the connection is unusable or after
+receiving a planned down notification from the database.
+
+This function is best used before starting a new database request on an
+existing standalone connection. Pooled connections internally perform this
+check before returning a connection to the application.
+
+If this function returns false, the connection should be closed by the
+application and a new connection should be established instead.
+
+This function performs a local check. To fully check a connection's health,
+use [`ping()`](#connectionping) which performs a round-trip to the database.
+
+This function was added in node-oracledb 5.4.
+
+#### <a name="connectionping"></a> 4.2.13 `connection.ping()`
 
 ##### Prototype
 
@@ -4569,7 +4722,7 @@ since network or database failure may occur in the interval between
 `ping()` and `execute()` calls.
 
 Pinging requires a [round-trip](#roundtrips) to the database so unnecessary
-ping calls should be avoided.
+`ping()` calls should be avoided.
 
 If `ping()` returns an error, the application should close the
 connection.
@@ -4588,7 +4741,7 @@ This method was added in node-oracledb 2.2.
     ----------------------------|-------------
     *Error error* | If `ping()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="querystream"></a> 4.2.13 `connection.queryStream()`
+#### <a name="querystream"></a> 4.2.14 `connection.queryStream()`
 
 ##### Prototype
 
@@ -4630,7 +4783,7 @@ This method was added in node-oracledb 1.8.
 
 See [execute()](#execute).
 
-#### <a name="rollback"></a> 4.2.14 `connection.rollback()`
+#### <a name="rollback"></a> 4.2.15 `connection.rollback()`
 
 ##### Prototype
 
@@ -4660,7 +4813,7 @@ connection.
     ----------------------------|-------------
     *Error error* | If `rollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="conshutdown"></a> 4.2.15 `connection.shutdown()`
+#### <a name="conshutdown"></a> 4.2.16 `connection.shutdown()`
 
 ##### Prototype
 
@@ -4694,7 +4847,7 @@ See [Database Start Up and Shut Down](#startupshutdown).
 
 This method was added in node-oracledb 5.0.
 
-##### <a name="conshutdownmode"></a> 4.2.15.1 `shutdown()`: shutdownMode
+##### <a name="conshutdownmode"></a> 4.2.16.1 `shutdown()`: shutdownMode
 
 ```
 Number shutdownMode
@@ -4714,7 +4867,7 @@ need to be called a second time.
 Only the second invocation of `connection.shutdown()` should use
 `oracledb.SHUTDOWN_MODE_FINAL`.
 
-##### <a name="conshutdowncallback"></a> 4.2.15.2 `shutdown()`: Callback Function
+##### <a name="conshutdowncallback"></a> 4.2.16.2 `shutdown()`: Callback Function
 
 ```
 function(Error error)
@@ -4726,7 +4879,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error*               | If `shutdown()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="consubscribe"></a> 4.2.16 `connection.subscribe()`
+#### <a name="consubscribe"></a> 4.2.17 `connection.subscribe()`
 
 ##### Prototype
 
@@ -4770,7 +4923,7 @@ added in node-oracledb 4.0
 
 The [`result`](#consubscribecallback) callback parameter was added in node-oracledb 4.0.
 
-##### <a name="consubscribename"></a> 4.2.16.1 `subscribe()`: Name
+##### <a name="consubscribename"></a> 4.2.17.1 `subscribe()`: Name
 
 ```
 String name
@@ -4780,7 +4933,7 @@ For Continuous Query Notification this is an arbitrary name given to
 the subscription.  For Advanced Queuing notifications this must be the
 queue name.
 
-##### <a name="consubscribeoptions"></a> 4.2.16.2 `subscribe()`: Options
+##### <a name="consubscribeoptions"></a> 4.2.17.2 `subscribe()`: Options
 
 ```
 Object options
@@ -4797,7 +4950,7 @@ Object binds
 An array (bind by position) or object (bind by name) containing the
 bind values to use in the [`sql`](#consubscribeoptsql) property.
 
-###### <a name="consubscribeoptcallback"></a> 4.2.16.2.2 `callback`
+###### <a name="consubscribeoptcallback"></a> 4.2.17.2.2 `callback`
 
 ```
 function callback(Object message)
@@ -4837,7 +4990,7 @@ The `message` parameter in the notification callback is an object containing the
     - [`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription) - object-level notifications are being used (Database Change Notification).
     - [`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription) - query-level notifications are being used (Continuous Query Notification).
 
-###### <a name="consubscribeoptclientinitiated"></a> 4.2.16.2.3 `clientInitiated`
+###### <a name="consubscribeoptclientinitiated"></a> 4.2.17.2.3 `clientInitiated`
 
 ```
 Boolean clientInitiated
@@ -4853,7 +5006,7 @@ The default is *false*.
 
 This property was added in node-oracledb 4.2.  It is available when Oracle Database and the Oracle client libraries are version 19.4 or higher.
 
-###### <a name="consubscribeoptgroupingclass"></a> 4.2.16.2.4 `groupingClass`
+###### <a name="consubscribeoptgroupingclass"></a> 4.2.17.2.4 `groupingClass`
 
 ```
 Number groupingClass
@@ -4864,7 +5017,7 @@ An integer mask which currently, if set, can only contain the value
 this value is set then notifications are grouped by time into a single
 notification.
 
-###### <a name="consubscribeoptgroupingtype"></a> 4.2.16.2.5 `groupingType`
+###### <a name="consubscribeoptgroupingtype"></a> 4.2.17.2.5 `groupingType`
 
 ```
 Number groupingType
@@ -4877,7 +5030,7 @@ or
 [`oracledb.SUBSCR_GROUPING_TYPE_LAST`](#oracledbconstantssubscription)
 indicating the last notification in the group should be sent.
 
-###### <a name="consubscribeoptgroupingvalue"></a> 4.2.16.2.6 `groupingValue`
+###### <a name="consubscribeoptgroupingvalue"></a> 4.2.17.2.6 `groupingValue`
 
 ```
 Number groupingValue
@@ -4889,7 +5042,7 @@ then `groupingValue` can be used to set the number of seconds over
 which notifications will be grouped together, invoking `callback`
 once.  If `groupingClass` is not set, then `groupingValue` is ignored.
 
-###### <a name="consubscribeoptipaddress"></a> 4.2.16.2.7 `ipAddress`
+###### <a name="consubscribeoptipaddress"></a> 4.2.17.2.7 `ipAddress`
 
 ```
 String ipAddress
@@ -4899,7 +5052,7 @@ A string containing an IPv4 or IPv6 address on which the subscription
 should listen to receive notifications.  If not specified, then the
 Oracle Client library will select an IP address.
 
-###### <a name="consubscribeoptnamespace"></a> 4.2.16.2.8 `namespace`
+###### <a name="consubscribeoptnamespace"></a> 4.2.17.2.8 `namespace`
 
 ```
 Number namespace
@@ -4914,7 +5067,7 @@ You can use `oracledb.SUBSCR_NAMESPACE_AQ` to get notifications that
 Advanced Queuing messages are available to be dequeued, see
 [Advanced Queuing Notifications](#aqnotifications).
 
-###### <a name="consubscribeoptoperations"></a> 4.2.16.2.9 `operations`
+###### <a name="consubscribeoptoperations"></a> 4.2.17.2.9 `operations`
 
 ```
 Number operations
@@ -4924,7 +5077,7 @@ An integer mask containing one or more of the operation type
 [`oracledb.CQN_OPCODE_*`](#oracledbconstantscqn) constants to indicate
 what types of database change should generation notifications.
 
-###### <a name="consubscribeoptport"></a> 4.2.16.2.10 `port`
+###### <a name="consubscribeoptport"></a> 4.2.17.2.10 `port`
 
 ```
 Number port
@@ -4934,7 +5087,7 @@ The port number on which the subscription should listen to receive
 notifications.  If not specified, then the Oracle Client library will
 select a port number.
 
-###### <a name="consubscribeoptqos"></a> 4.2.16.2.11 `qos`
+###### <a name="consubscribeoptqos"></a> 4.2.17.2.11 `qos`
 
 ```
 Number qos
@@ -4943,7 +5096,7 @@ Number qos
 An integer mask containing one or more of the quality of service
 [`oracledb.SUBSCR_QOS_*`](#oracledbconstantssubscription) constants.
 
-###### <a name="consubscribeoptsql"></a> 4.2.16.2.12 `sql`
+###### <a name="consubscribeoptsql"></a> 4.2.17.2.12 `sql`
 
 ```
 String sql
@@ -4951,13 +5104,13 @@ String sql
 
 The SQL query string to use for notifications.
 
-###### <a name="consubscribeopttimeout"></a> 4.2.16.2.13 `timeout`
+###### <a name="consubscribeopttimeout"></a> 4.2.17.2.13 `timeout`
 
 The number of seconds the subscription should remain active.  Once
 this length of time has been reached, the subscription is
 automatically unregistered and a deregistration notification is sent.
 
-##### <a name="consubscribecallback"></a> 4.2.16.3 `subscribe()`: Callback Function
+##### <a name="consubscribecallback"></a> 4.2.17.3 `subscribe()`: Callback Function
 
 ##### Prototype
 
@@ -4974,7 +5127,7 @@ Callback function parameter | Description
 
 The `result` callback parameter was added in node-oracledb 4.0.
 
-#### <a name="constartup"></a> 4.2.17 `connection.startup()`
+#### <a name="constartup"></a> 4.2.18 `connection.startup()`
 
 ##### Prototype
 
@@ -5010,24 +5163,24 @@ See [Database Start Up and Shut Down](#startupshutdown).
 
 This method was added in node-oracledb 5.0.
 
-##### <a name="constartupoptions"></a> 4.2.17.1 `startup()`: options
+##### <a name="constartupoptions"></a> 4.2.18.1 `startup()`: options
 
-##### <a name="constartupoptionsforce"></a> 4.2.17.1.1.1 `force`
+##### <a name="constartupoptionsforce"></a> 4.2.18.1.1.1 `force`
 
 Shuts down a running database using
 [`oracledb.SHUTDOWN_MODE_ABORT`](#oracledbconstantsshutdown) before restarting
 the database instance.  The next database start up may require instance recovery.
 The default for `force` is *false*.
 
-##### <a name="constartupoptionspfile"></a> 4.2.17.1.1.2 `pfile`
+##### <a name="constartupoptionspfile"></a> 4.2.18.1.1.2 `pfile`
 
 After the database is started, access is restricted to users who have the CREATE_SESSION and RESTRICTED SESSION privileges.  The default is *false*.
 
-##### <a name="constartupoptionsrestrict"></a> 4.2.17.1.1.3 `restrict`
+##### <a name="constartupoptionsrestrict"></a> 4.2.18.1.1.3 `restrict`
 
 The path and filename for a local text file containing [Oracle Database initialization parameters][171].  If `pfile` is not set, then the database server-side parameter file is used.
 
-##### <a name="constartupcallback"></a> 4.2.17.2 `startup()`: Callback Function
+##### <a name="constartupcallback"></a> 4.2.18.2 `startup()`: Callback Function
 
 ##### Prototype
 
@@ -5041,7 +5194,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error*               | If `startup()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="contpcbegin"></a> 4.2.18 `connection.tpcBegin()`
+#### <a name="contpcbegin"></a> 4.2.19 `connection.tpcBegin()`
 
 ##### Prototype
 
@@ -5122,7 +5275,7 @@ This function was added in node-oracledb 5.3.
     ----------------------------|-------------
     *Error error*               | If `tpcBegin()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="contpccommit"></a> 4.2.19 `connection.tpcCommit()`
+#### <a name="contpccommit"></a> 4.2.20 `connection.tpcCommit()`
 
 ##### Prototype
 
@@ -5178,7 +5331,7 @@ This function was added in node-oracledb 5.3.
     ----------------------------|-------------
     *Error error*               | If `tpcCommit()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="contpcend"></a> 4.2.20 `connection.tpcEnd()`
+#### <a name="contpcend"></a> 4.2.21 `connection.tpcEnd()`
 
 ##### Prototype
 
@@ -5237,7 +5390,7 @@ This function was added in node-oracledb 5.3.
     ----------------------------|-------------
     *Error error*               | If `tpcEnd()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="contpcforget"></a> 4.2.21 `connection.tpcForget()`
+#### <a name="contpcforget"></a> 4.2.22 `connection.tpcForget()`
 
 ##### Prototype
 
@@ -5279,7 +5432,7 @@ This function was added in node-oracledb 5.3.
     ----------------------------|-------------
     *Error error*               | If `tpcForget()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="contpcprepare"></a> 4.2.22 `connection.tpcPrepare()`
+#### <a name="contpcprepare"></a> 4.2.23 `connection.tpcPrepare()`
 
 ##### Prototype
 
@@ -5336,7 +5489,7 @@ const commitNeeded = await connection.tpcPrepare(xid);
     *Error error*               | If `tpcPrepare()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
     *Boolean commitNeeded*      | If *true*, the branch was prepared and needs to be committed.  Read-only branches will set this to *false* as there is no commit needed for the branch.
 
-#### <a name="contpcrecover"></a> 4.2.23 `connection.tpcRecover()`
+#### <a name="contpcrecover"></a> 4.2.24 `connection.tpcRecover()`
 
 ##### Prototype
 
@@ -5381,7 +5534,7 @@ This function was added in node-oracledb 5.3.
     ----------------------------|-------------
     *Error error*               | If `tpcRollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="contpcrollback"></a> 4.2.24 `connection.tpcRollback()`
+#### <a name="contpcrollback"></a> 4.2.25 `connection.tpcRollback()`
 
 ##### Prototype
 
@@ -5425,7 +5578,7 @@ This function was added in node-oracledb 5.3.
     ----------------------------|-------------
     *Error error*               | If `tpcRollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="conunsubscribe"></a> 4.2.25 `connection.unsubscribe()`
+#### <a name="conunsubscribe"></a> 4.2.26 `connection.unsubscribe()`
 
 ##### Prototype
 
@@ -6390,7 +6543,40 @@ The database username for connections in the pool.
 
 ### <a name="poolmethods"></a> 8.2 Pool Methods
 
-#### <a name="poolclose"></a> <a name="terminate"></a> 8.2.1 `pool.close()`
+#### <a name="poolsetaccesstoken"></a> 8.2.1 `pool.setAccessToken()`
+
+##### Description
+
+This method can be used to set an access token and private key after pool
+creation.  It is useful if the token is known to have expired, and you are not
+using [`accessTokenCallback`](#createpoolpoolattrsaccesstokencallback).
+
+It can also be useful in tests to set an expired token so that token expiry
+code paths can be tested.
+
+See [Explicitly Refreshing Pool Access Tokens](#settingpooltokens) for an example.
+
+##### Parameters
+
+```
+Object tokenAttrs
+```
+
+The `tokenAttrs` parameter object provides token based authentication
+configuration properties.
+
+The properties of the `tokenAttrs` object are described below. Both properties
+must be set.  The values can be obtained using the Oracle Cloud Infrastructure
+(OCI) Command Line Interface (CLI).
+
+Attribute           | Description
+------------------- |------------------------------------------------
+`token`             | The database authentication token string.
+`privateKey`        | The database authentication private key string.
+
+This function was added in node-oracledb 5.4.
+
+#### <a name="poolclose"></a> <a name="terminate"></a> 8.2.2 `pool.close()`
 
 ##### Prototype
 
@@ -6466,7 +6652,7 @@ The `drainTime` parameter was added in node-oracledb 3.0.
     *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 
-#### <a name="getconnectionpool"></a> 8.2.2 `pool.getConnection()`
+#### <a name="getconnectionpool"></a> 8.2.3 `pool.getConnection()`
 
 ##### Prototype
 
@@ -6554,7 +6740,7 @@ pools.
     *Error error* | If `getConnection()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
     *Connection connection* | The newly created connection.   If `getConnection()` fails, `connection` will be NULL.  See [Connection class](#connectionclass) for more details.
 
-#### <a name="poolgetstatistics"></a> 8.2.3 `pool.getStatistics()`
+#### <a name="poolgetstatistics"></a> 8.2.4 `pool.getStatistics()`
 
 ##### Prototype
 
@@ -6579,7 +6765,7 @@ If `getStatistics()` is called while the pool is closed, draining, or
 
 This function was added in node-oracledb 5.2.
 
-#### <a name="poollogstatistics"></a> 8.2.4 `pool.logStatistics()`
+#### <a name="poollogstatistics"></a> 8.2.5 `pool.logStatistics()`
 
 ##### Prototype
 
@@ -6605,7 +6791,7 @@ This function was added in node-oracledb 5.2.  The obsolete function
 `_logStats()` can still be used, but it will be removed in a future version of
 node-oracledb.
 
-#### <a name="poolreconfigure"></a> 8.2.5 `pool.reconfigure()`
+#### <a name="poolreconfigure"></a> 8.2.6 `pool.reconfigure()`
 
 ##### Prototype
 
@@ -6664,20 +6850,20 @@ await pool.reconfigure({poolMin: 5, poolMax: 10, increment: 5});
     The `oracledb.createPool()` properties that can be changed with
     `pool.reconfigure()` are:
 
-    Property                                            |
-    ----------------------------------------------------|
-    [`enableStatistics`](#createpoolpoolattrsstats)      |
-    [`poolIncrement`](#createpoolpoolattrspoolincrement) |
-    [`poolMax`](#createpoolpoolattrspoolmax)             |
-    [`poolMaxPerShard`](#createpoolpoolattrspoolmaxpershard) |
-    [`poolMin`](#createpoolpoolattrspoolmin)             |
-    [`poolPingInterval`](#createpoolpoolattrspoolpinginterval) |
-    [`poolTimeout`](#createpoolpoolattrspooltimeout)     |
-    [`queueMax`](#createpoolpoolattrsqueuemax)           |
-    [`queueRequests`](#createpoolpoolattrsqueuerequests) |
-    [`queueTimeout`](#createpoolpoolattrsqueuetimeout)   |
-    [`sodaMetaDataCache`](#createpoolpoolattrssodamdcache) |
-    [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize) |
+    Property                                                    |
+    ------------------------------------------------------------|
+    [`enableStatistics`](#createpoolpoolattrsstats)             |
+    [`poolIncrement`](#createpoolpoolattrspoolincrement)        |
+    [`poolMax`](#createpoolpoolattrspoolmax)                    |
+    [`poolMaxPerShard`](#createpoolpoolattrspoolmaxpershard)    |
+    [`poolMin`](#createpoolpoolattrspoolmin)                    |
+    [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)  |
+    [`poolTimeout`](#createpoolpoolattrspooltimeout)            |
+    [`queueMax`](#createpoolpoolattrsqueuemax)                  |
+    [`queueRequests`](#createpoolpoolattrsqueuerequests)        |
+    [`queueTimeout`](#createpoolpoolattrsqueuetimeout)          |
+    [`sodaMetaDataCache`](#createpoolpoolattrssodamdcache)      |
+    [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)        |
 
     A `resetStatistics` property can also be set to *true*.  This zeros the
     current pool statistics, with the exception of `queueMax` which is set to
@@ -6714,7 +6900,7 @@ This class was added in node-oracledb 5.3.
 
 ### <a name="poolstatisticsmethods"></a> 9.1 PoolStatistics Methods
 
-#### <a name="poolstatisticslog"></a> 9.1.1 `poolstatistics.logStatistics()`
+#### <a name="poolstatisticslogstatistics"></a> 9.1.1 `poolstatistics.logStatistics()`
 
 ##### Prototype
 
@@ -8830,7 +9016,7 @@ directories are searched for the configuration files.  They include:
 - `$TNS_ADMIN`
 - `/opt/oracle/instantclient_19_6/network/admin` if Instant Client is in `/opt/oracle/instantclient_19_6`.
 - `/usr/lib/oracle/19.6/client64/lib/network/admin` if Oracle 19.6 Instant Client RPMs are used on Linux.
-- `$ORACLE_HOME/network/admin` if node-oracledb is using libraries from the database installation.
+- `$ORACLE_HOME/network/admin` or `$ORACLE_BASE_HOME/network/admin` if node-oracledb is using libraries from the database installation.
 
 A wallet configuration file `cwallet.sso` for secure connection can be located
 with, or separately from, the `tnsnames.ora` and `sqlnet.ora` files.  It should
@@ -9311,6 +9497,64 @@ const connection = await oracledb.getConnection(
   }
 );
 ```
+
+#### <a name="tokenbasedconnstrings"></a> 16.1.5 Token Based Authentication Connection Strings
+
+Token based authentication allows Oracle Cloud Infrastruction users to
+authenticate to Oracle Database with Oracle Identity Access Manager (IAM)
+tokens. Token authentication can be performed when node-oracledb uses Oracle
+Client libraries 19.14 (or later), or 21.5 (or later).
+
+The Oracle Cloud Infrastructure command line interface (OCI-CLI) can be used
+externally to get tokens and private keys from IAM, for example with `oci iam
+db-token get`.
+
+The connection string used by node-oracledb can specify the directory where the
+token and private key files are located.  This syntax is usable with older
+versions of node-oracledb however it is recommended to use connection and pool
+creation parameters introduced in node-oracledb 5.4 instead, see [Token Based
+Authentication](#tokenbasedauth).
+
+If you need to use the connection string syntax then the Oracle Net parameter
+`TOKEN_AUTH` must be set.  Also the `PROTOCOL` parameter must be `tcps` and
+`SSL_SERVER_CERT_DN` should be `ON`.
+
+You can set `TOKEN_AUTH=OCI_TOKEN` in a [sqlnet.ora](#tnsadmin) file.
+Alternatively you can specify it in a connect descriptor, for example:
+
+```
+db_alias =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCPS)(PORT = 1522)(HOST = adb.us-ashburn-1.oraclecloud.com))
+    (CONNECT_DATA = (SERVICE_NAME = adb.oraclecloud.com))
+    (SECURITY =
+      (SSL_SERVER_CERT_DN = "CN=adwc.uscom-east-1.oraclecloud.com, OU=Oracle BMCS US,
+           O=Oracle Corporation, L=Redwood City, ST=California, C=US")
+      (TOKEN_AUTH = OCI_TOKEN)))
+```
+
+The default location for the token and private key is the same default location
+that the OCI-CLI tool writes to.  For example `~/.oci/db-token/` on Linux.
+
+If the token and private key files are not in the default location then their
+directory must be specified with the `TOKEN_LOCATION` parameter in a
+`sqlnet.ora` file or in a connection string.  For example in a `tnsnames.ora`
+file:
+
+```
+db_alias =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCPS)(PORT = 1522)(HOST = adb.us-ashburn-1.oraclecloud.com))
+    (CONNECT_DATA = (SERVICE_NAME = adb.oraclecloud.com))
+    (SECURITY =
+      (SSL_SERVER_CERT_DN = "CN=adwc.uscom-east-1.oraclecloud.com, OU=Oracle BMCS US,
+           O=Oracle Corporation, L=Redwood City, ST=California, C=US")
+      (TOKEN_AUTH = OCI_TOKEN)
+      (TOKEN_LOCATION = '~/.oci/db-token')))
+```
+
+The `TOKEN_AUTH` and `TOKEN_LOCATION` values in a connection string take
+precedence over the `sqlnet.ora` settings.
 
 ### <a name="numberofthreads"></a> 16.2 Connections, Threads, and Parallelism
 
@@ -9873,7 +10117,7 @@ other attributes to a pooled `getConnection()` call, such as for
 tagging](#connpooltagging):
 
 ```javascript
-const connection = await oracledb.getConnection({ poolAlias: 'hrpool', tag: 'loc=cn;p=1 });
+const connection = await oracledb.getConnection({ poolAlias: 'hrpool', tag: 'loc=cn;p=1' });
 
 . . . // Use connection from the pool
 
@@ -9884,7 +10128,7 @@ To use the default pool in this way you must explicitly pass the alias
 `default`:
 
 ```javascript
-const connection = await oracledb.getConnection({ poolAlias: 'default', tag: 'loc=cn;p=1 });
+const connection = await oracledb.getConnection({ poolAlias: 'default', tag: 'loc=cn;p=1' });
 
 . . . // Use connection from the pool
 
@@ -9950,10 +10194,22 @@ for your workload.  If the current settings are non optimal, then
 configuration.
 
 Pool attributes [`connectionsInUse`](#proppoolconnectionsinuse) and
-[`connectionsOpen`](#proppoolconnectionsopen) provide basic information about
-an active pool.  The recording of [pool queue](#connpoolqueue) statistics, pool
-settings, and related environment variables can be enabled by setting
-`enableStatistics` to *true* during [pool creation](#createpool) or [pool
+[`connectionsOpen`](#proppoolconnectionsopen) always provide basic information
+about an active pool:
+
+
+```javascript
+const pool = await oracledb.createPool(...);
+
+. . .
+
+console.log(pool.connectionsOpen);   // how big the pool actually is
+console.log(pool.connectionsInUse);  // how many of those connections are held by the application
+```
+
+The recording of [pool queue](#connpoolqueue) statistics, pool settings, and
+related environment variables can be enabled by setting `enableStatistics` to
+*true* during [pool creation](#createpool) or [pool
 reconfiguration](#poolreconfigure).
 
 To enable recording of queue statistics when creating the pool:
@@ -10046,17 +10302,17 @@ Attribute                                   |
 [`externalAuth`](#proppoolexternalauth)     |
 [`homogeneous`](#proppoolhomogeneous)       |
 [`poolAlias`](#createpoolpoolattrspoolalias)|
+[`poolIncrement`](#propdbpoolincrement)     |
+[`poolMax`](#propdbpoolmax)                 |
+[`poolMaxPerShard`](#propdbpoolmaxpershard)   |
+[`poolMin`](#propdbpoolmin)                 |
+[`poolPingInterval`](#propdbpoolpinginterval) |
+[`poolTimeout`](#propdbpooltimeout)         |
 [`queueMax`](#propdbqueuemax)               |
 [`queueTimeout`](#propdbqueuetimeout)       |
-[`poolMin`](#propdbpoolmin)                 |
-[`poolMax`](#propdbpoolmax)                 |
-[`poolIncrement`](#propdbpoolincrement)     |
-[`poolTimeout`](#propdbpooltimeout)         |
-[`poolPingInterval`](#propdbpoolpinginterval) |
-[`poolMaxPerShard`](#propdbpoolmaxpershard)   |
 [`sessionCallback`](#proppoolsessioncallback) |
-[`stmtCacheSize`](#proppoolstmtcachesize)     |
 [`sodaMetaDataCache`](#proppoolsodamdcache)   |
+[`stmtCacheSize`](#proppoolstmtcachesize)     |
 [`user`](#proppooluser)                       |
 
 ##### Pool Related Environment Variables
@@ -10064,7 +10320,7 @@ Attribute                                   |
 The [PoolStatistics object](#poolstatisticsclass) and `logStatistics()`
 function also have one related environment variable:
 
-`getStatistics()` attribute | `logStatistics()` description   | Description
+[PoolStatistics Class](#poolstatisticsclass) attribute | `logStatistics()` description   | Description
 ----------------------------|---------------------------------|------------------------------------------------------------------------------------
 `threadPoolSize`            | UV_THREADPOOL_SIZE              | The value of [`process.env.UV_THREADPOOL_SIZE`](#numberofthreads) which is the number of worker threads for this process.  Note this shows the value of the variable, however if this variable was set after the thread pool started, the thread pool will still be the default size of 4.
 
@@ -10692,7 +10948,166 @@ of open connections exceeds `poolMin` and connections are idle for
 more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
 number of open connections does not fall below `poolMin`.
 
-### <a name="drcp"></a> 16.5 Database Resident Connection Pooling (DRCP)
+### <a name="tokenbasedauth"></a> 16.5 Token Based Authentication
+
+Token based authentication allows Oracle Cloud Infrastruction users to
+authenticate to Oracle Database with Oracle Identity Access Manager (IAM)
+tokens. Token authentication can be performed when node-oracledb uses Oracle
+Client libraries 19.14 (or later), or 21.5 (or later).
+
+Token based authentication can be used for both standalone connections and
+connection pools. Tokens can be specified using connection attributes
+introduced in node-oracledb 5.4.  Users of earlier node-oracledb versions can
+alternatively use [Token Based Authentication Connection
+Strings](#tokenbasedconnstrings).
+
+#### <a name="tokengen"></a> 16.5.1 Token Generation using the OCI CLI
+
+Authentication tokens are generated through execution of an Oracle Cloud
+Infrastructure command line interface (OCI-CLI) command run externally to
+Node.js:
+
+```
+oci iam db-token get
+```
+
+On Linux a folder `.oci/db-token` will be created in your home directory.  It
+will contain the token and private key files needed by node-oracledb.
+
+#### <a name="tokenread"></a> 16.5.2 Token and Private Key Extraction from a File
+
+Token and private key files created externally can be read by your application,
+for example like:
+
+```javascript
+function getToken() {
+  const tokenPath = '/home/cjones/.oci/db-token/token';
+  const privateKeyPath = '/home/cjones/.oci/db-token/oci_db_key.pem';
+
+  let token = '';
+  let privateKey = '';
+  try {
+    // Read token file
+    token = fs.readFileSync(tokenPath, 'utf8');
+    // Read private key file
+    const privateKeyFileContents = fs.readFileSync(privateKeyPath, 'utf-8');
+    privateKeyFileContents.split(/\r?\n/).forEach(line => {
+    if (line != '-----BEGIN PRIVATE KEY-----' &&
+        line != '-----END PRIVATE KEY-----')
+      privateKey = privateKey.concat(line);
+    });
+  } catch (err) {
+    console.error(err);
+  } finally {
+    const tokenBasedAuthData = {
+      token           : token,
+      privateKey      : privateKey
+    };
+    return tokenBasedAuthData;
+  }
+}
+```
+
+The token and key can be used subsequently during authentication.
+
+#### <a name="tokenbasedstandaloneconn"></a> 16.5.3 Standalone Connection Creation with Access Tokens
+
+Standalone connections can be created using token based authentication, for
+example:
+
+```javascript
+async function init() {
+
+  const accessTokenData = getToken();
+
+  try {
+    await oracledb.getConnection({
+      accessToken         : accessTokenData,
+      externalAuth        : true,
+      connectString       : connect_string
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
+```
+
+For a runnable example, see [`tokenbasedauth.js`][206].
+
+#### <a name="tokenbasedpool"></a> 16.5.4 Connection Pool Creation with Access Tokens
+
+An example creating a pool using token based authentication is:
+
+```javascript
+async function init() {
+
+  const accessTokenData = getToken();
+
+  try {
+    await oracledb.createPool({
+      accessToken         : accessTokenData,
+      accessTokenCallback : tokenCallback
+      externalAuth        : true,
+      homogeneous         : true,
+      connectString       : connect_string,
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
+```
+
+The callback will be called if the connection pool needs to grow and create new
+connections but the current token is invalid.  The callback should return the
+new, valid token:
+
+```javascript
+function tokenCallback() {
+  ...
+  // Code to get the refreshed token and private key should be here.
+  // For example, make an external call to 'oci iam db-token get' and then
+  // read the token and private key values, see getToken()
+  ...
+
+  const refreshTokenData = {
+    token           : token,
+    privateKey      : privateKey
+  };
+
+  return refreshTokenData;
+}
+```
+
+For a runnable example, see [`tokenbasedauthpool.js`][207].
+
+#### <a name="settingpooltokens"></a> 16.5.5 Explicitly Refreshing Pool Access Tokens
+
+If you did not set an access token callback with
+[`accessTokenCallback`](#createpoolpoolattrsaccesstokencallback) to
+automatically update an expired token, you can explicitly call
+[`pool.setAccessToken()`](#poolsetaccesstoken).  For example:
+
+```javascript
+let accessTokenData = getToken();
+
+let pool = await oracledb.createPool({
+  accessToken         : accessTokenData,
+  externalAuth        : true,
+  homogeneous         : true,
+  connectString       : connect_string,
+});
+
+. . . // do some work, during which the token expires
+
+// Get and set an updated token
+accessTokenData = getToken();
+pool.setAccessToken({
+  token               : accessTokenData.token,
+  privateKey          : accessTokenData.privateKey
+)};
+```
+
+### <a name="drcp"></a> 16.6 Database Resident Connection Pooling (DRCP)
 
 [Database Resident Connection Pooling][24] (DRCP) enables database
 resource sharing for applications that run in multiple client
@@ -10735,7 +11150,7 @@ monitor DRCP.  These are discussed in the Oracle documentation and in
 the Oracle technical paper [PHP Scalability and High Availability][26].
 This paper also gives more detail on configuring DRCP.
 
-### <a name="privconn"></a> 16.6 Privileged Connections
+### <a name="privconn"></a> 16.7 Privileged Connections
 
 Database privileges such as `SYSDBA` can be obtained when using
 standalone connections.  Use one of the [Privileged Connection
@@ -10784,7 +11199,7 @@ outside of the database itself.  Care must be taken with
 authentication to ensure security.  See the [Database Administrator's
 Guide][90] for information.
 
-### <a name="securenetwork"></a> 16.7 Securely Encrypting Network Traffic to Oracle Database
+### <a name="securenetwork"></a> 16.8 Securely Encrypting Network Traffic to Oracle Database
 
 Data transferred between Oracle Database and the Oracle client
 libraries used by node-oracledb can be [encrypted][30] so that
@@ -10851,7 +11266,7 @@ manual also contains information about other important security
 features that Oracle Database provides, such Transparent Data
 Encryption of data-at-rest in the database.
 
-### <a name="changingpassword"></a> 16.8 Changing Passwords and Connecting with an Expired Password
+### <a name="changingpassword"></a> 16.9 Changing Passwords and Connecting with an Expired Password
 
 #### Changing Passwords
 
@@ -10912,7 +11327,7 @@ const connection = await oracledb.getConnection(
   });
 ```
 
-### <a name="connectionha"></a> 16.9 Connections and High Availability
+### <a name="connectionha"></a> 16.10 Connections and High Availability
 
 To make highly available applications, use the latest versions of Oracle Client
 and Database.  Also use the latest node-oracledb driver.  These have improved
@@ -10945,7 +11360,7 @@ of Node.js processes are used to scale up an application.
 Finally, applications should always check for execution errors, and perform
 appropriate application-specific recovery.
 
-#### <a name="connectionpremclose"></a> 16.9.1 Preventing Premature Connection Closing
+#### <a name="connectionpremclose"></a> 16.10.1 Preventing Premature Connection Closing
 
 When connections are idle, external events may disconnect them from the
 database.  Unnecessarily having to re-establish connections can impact
@@ -10995,7 +11410,7 @@ connections cannot be prevented from becoming unusable, tune [Connection Pool
 Pinging](#connpoolpinging).  Another case where this internal pinging is helpful
 is during development, where a laptop may go offline for an extended time.
 
-#### <a name="connectionfan"></a> 16.9.2 Fast Application Notification (FAN)
+#### <a name="connectionfan"></a> 16.10.2 Fast Application Notification (FAN)
 
 FAN support is useful for planned and unplanned outages.  It provides
 immediate notification to node-oracledb following outages related to
@@ -11029,7 +11444,7 @@ Standalone databases will send FAN events when the database restarts.
 For a more information on FAN see the [technical paper on Fast Application
 Notification][97].
 
-#### <a name="connectionrlb"></a> 16.9.3 Runtime Load Balancing (RLB)
+#### <a name="connectionrlb"></a> 16.10.3 Runtime Load Balancing (RLB)
 
 [Oracle Database RAC](#connectionrac) users with [Oracle Database (RLB)][65]
 advisory events configured should use node-oracledb [Connection
@@ -11043,7 +11458,7 @@ requests across RAC instances.
 For a more information on RLB, see the [technical paper on Fast Application
 Notification][97].
 
-#### <a name="appcontinuity"></a> 16.9.4 Application Continuity
+#### <a name="appcontinuity"></a> 16.10.4 Application Continuity
 
 Node-oracledb OLTP applications can take advantage of continuous availability
 with the Oracle Database features Application Continuity and Transparent
@@ -11057,7 +11472,7 @@ Dedicated][190].
 When connected to an AC or TAC enabled service, node-oracledb automatically
 supports AC or TAC.
 
-#### <a name="dbcalltimeouts"></a> 16.9.5 Database Call Timeouts
+#### <a name="dbcalltimeouts"></a> 16.10.5 Database Call Timeouts
 
 ##### Limiting the time to open new connections
 
@@ -11117,7 +11532,7 @@ successfully within the additional `callTimeout` period.  In this case a
 *DPI-1080* error is returned and the connection will no longer be usable.  The
 application should then close the connection.
 
-### <a name="connectionrac"></a> 16.10 Connecting to Oracle Real Application Clusters (RAC)
+### <a name="connectionrac"></a> 16.11 Connecting to Oracle Real Application Clusters (RAC)
 
 [Oracle Real Application Clusters (RAC)][93] allow a single Oracle Database to
 be run across multiple servers.  This maximizes availability and enables
@@ -11132,7 +11547,7 @@ Also see the technical papers [Application Checklist for Continuous Service for
 MAA Solutions][204] and [Continuous Availability Application Continuity for the
 Oracle Database][178].
 
-### <a name="connectionadb"></a> 16.11 Connecting to Oracle Cloud Autonomous Databases
+### <a name="connectionadb"></a> 16.12 Connecting to Oracle Cloud Autonomous Databases
 
 To enable connection to Oracle Autonomous Database in Oracle Cloud, a wallet
 needs be downloaded from the cloud, and node-oracledb needs to be configured to
@@ -11271,7 +11686,7 @@ for example:
 cs = cs + "&https_proxy=myproxy.example.com&https_proxy_port=80"
 ```
 
-### <a name="sharding"></a> 16.12 Connecting to Sharded Databases
+### <a name="sharding"></a> 16.13 Connecting to Sharded Databases
 
 Sharding can be used to horizontally partition data across independent
 databases.  A database table can be split so each shard contains a table with
@@ -12517,9 +12932,9 @@ from node-oracledb using [`execute()`](#execute).
 The PL/SQL procedure:
 
 ```sql
-CREATE OR REPLACE PROCEDURE myproc (id IN NUMBER, name OUT VARCHAR2) AS
+CREATE OR REPLACE PROCEDURE myproc (id IN NUMBER, name OUT VARCHAR2, salary OUT NUMBER) AS
 BEGIN
-  SELECT last_name INTO name FROM employees WHERE employee_id = id;
+  SELECT last_name, salary INTO name, salary FROM employees WHERE employee_id = id;
 END;
 ```
 
@@ -12528,11 +12943,12 @@ can be called:
 ```javascript
 const result = await connection.execute(
   `BEGIN
-     myproc(:id, :name);
+     myproc(:id, :name, :salary);
    END;`,
   {  // bind variables
     id:   159,
     name: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 40 },
+    salary: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
   }
 );
 
@@ -12542,7 +12958,7 @@ console.log(result.outBinds);
 The output is:
 
 ```
-{ name: 'Smith' }
+{ name: 'Smith', salary: 8000 }
 ```
 
 Binding is required for IN OUT and OUT parameters.  It is strongly
@@ -14477,6 +14893,19 @@ const binds = { bv: { type: "NAME_ARRAY", val: inlist } };
 const result = await connection.execute(sql, binds, options);
 ```
 
+You may decide to overload the use of the database `SYS.ODCIVARCHAR2LIST` or
+`SYS.ODCINUMBERLIST` types so you don't need to create a type like
+`name_array`:
+
+```javascript
+const binds = { bv: { type: 'SYS.ODCIVARCHAR2LIST', val: inlist } };
+```
+
+Since this `TABLE()` solution uses an object type, there is a performance
+impact because of the extra [round-trips](#roundtrips) required to get the type
+information.  Unless you have a large number of binds you may prefer one of the
+previous solutions.
+
 Some general references are [On Cursors, SQL, and Analytics][59] and in [this
 StackOverflow answer][60].
 
@@ -15415,7 +15844,7 @@ The returned bind values are:
 ```
 
 The variant of `executeMany()` that accepts a number of iterations is
-useful when there no bind values, or only OUT bind values.  This
+useful when there are no bind values, or only OUT bind values.  This
 example calls a PL/SQL block eight times:
 
 ```javascript
@@ -15497,18 +15926,23 @@ See [examples/plsqlrecord.js][141] for a runnable sample.
 
 ## <a name="transactionmgt"></a> 25. Transaction Management
 
-By default, [DML][14] statements are not committed in node-oracledb.
+By default, [DML][14] statements like INSERT, UPDATE and DELETE are not
+committed.
 
-The node-oracledb add-on implements [`commit()`](#commit) and
-[`rollback()`](#rollback) methods that can be used to explicitly
+The node-oracledb add-on implements [`connection.commit()`](#commit) and
+[`connection.rollback()`](#rollback) methods that can be used to explicitly
 control transactions.
 
-If the [`autoCommit`](#propdbisautocommit) property is set to *true*, then
-a commit occurs at the end of each `execute()` call.  Unlike an
-explicit `commit()`, this does not require a [round-trip](#roundtrips)
-to the database.  For maximum efficiency, set `autoCommit` to *true*
-for the last `execute()` call of a transaction in preference to using
-an additional, explicit `commit()` call.
+If the [`autoCommit`](#propdbisautocommit) property is set to *true*, then a
+commit occurs at the end of each `execute()` or `executeMany()` call.  Unlike
+an explicit `commit()`, this does not require a [round-trip](#roundtrips) to
+the database.  For maximum efficiency, set `autoCommit` to *true* for the last
+`execute()` or `executeMany()` call of a transaction in preference to using an
+additional, explicit `commit()` call.
+
+When [`connection.executeMany()`](#executemany) is used with the
+[`batchErrors`](#executemanyoptbatcherrors) flag, `autoCommit` will be ignored
+if there are data errors.  See [Handling Data Errors](#handlingbatcherrors)
 
 When a connection is released, any ongoing transaction will be rolled
 back.  Therefore if a released, pooled connection is re-used by a
@@ -15520,8 +15954,11 @@ always in a new transaction.
 When an application ends, any uncommitted transaction on a connection
 will be rolled back.
 
-Note: Oracle Database will implicitly commit when a [DDL][15]
-statement is executed irrespective of the value of `autoCommit`.
+Support for distributed transactions is discussed in [Two-Phase Commits
+(TPC)](#twopc).
+
+Note: Oracle Database will implicitly commit when a [DDL][15] statement like
+CREATE is executed irrespective of the value of `autoCommit`.
 
 ## <a name="cqn"></a> 26. Continuous Query Notification (CQN)
 
@@ -16225,8 +16662,9 @@ SQL> SELECT UNIQUE sid, client_driver
         33 node-oracledb : 5.0.0
 ```
 
-If a [`oracledb.initOracleClient()`](#odbinitoracleclient) call specified
-the `driverName`, then that value will be shown.
+The [`oracledb.initOracleClient()`](#odbinitoracleclient) attribute
+`driverName` can be used to override the value that will be shown in the
+`CLIENT_DRIVER` column.
 
 Note if [`oracledb.connectionClass`](#propdbconclass) is set for a
 non-pooled connection, the `CLIENT_DRIVER` value will not be set for
@@ -18462,13 +18900,13 @@ can be asked at [AskTom][158].
 [79]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7AE9DBE2-5316-4802-99D1-969B72823F02
 [83]: https://github.com/oracle/node-oracledb/blob/main/CHANGELOG.md
 [84]: https://github.com/oracle/node-oracledb/tree/main/examples/rowlimit.js
-[85]: https://blogs.oracle.com/oraclemagazine/on-top-n-and-pagination-queries
+[85]: https://blogs.oracle.com/oraclemagazine/post/on-top-n-and-pagination-queries
 [86]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F9CE0CC3-13AE-4744-A43C-EAC7A71AAAB6__CJAHCAFF
 [87]: https://oracle.github.io/node-oracledb/INSTALL.html#quickstart
 [88]: https://nodejs.org/en/download/
 [89]: https://github.com/oracle/node-oracledb/tree/main/examples/dbconfig.js
 [90]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C48021EF-6AEA-427F-95B2-37EFCFEA2400
-[91]: https://blogs.oracle.com/sql/how-to-create-users-grant-them-privileges-and-remove-them-in-oracle-database
+[91]: https://blogs.oracle.com/sql/post/how-to-create-users-grant-them-privileges-and-remove-them-in-oracle-database
 [92]: https://nodejs.org/api/stream.html#stream_readable_destroy_error
 [93]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-D04AA2A7-2E68-4C5C-BD6E-36C62427B98E
 [94]: https://github.com/oracle/node-oracledb/blob/node-oracledb-v1/doc/api.md
@@ -18559,7 +18997,6 @@ can be asked at [AskTom][158].
 [180]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-35CB2592-7588-4C2D-9075-6F639F25425E
 [181]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A9D4A5F5-B939-48FF-80AE-0228E7314C7D
 [182]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E63D75A1-FCAA-4A54-A3D2-B068442CE766
-[183]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=RACAD
 [184]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-805AB986-DE12-4FEA-AF56-5AABCD2132DF
 [185]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F20C5DC5-C2FC-4145-9E4E-345CCB8148C7
 [186]: https://static.rainfocus.com/oracle/oow19/sess/1553616880266001WLIh/PF/OOW19_Net_CON4641_1569022126580001esUl.pdf
@@ -18570,15 +19007,17 @@ can be asked at [AskTom][158].
 [191]: https://docs.oracle.com/en/database/oracle/simple-oracle-document-access/rest/index.html
 [192]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A2E90F08-BC9F-4688-A9D0-4A948DD3F7A9
 [193]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2DC05D71-3D62-4A14-855F-76E054032494
-[194]: https://blogs.oracle.com/jsondb/osonformat
+[194]: https://blogs.oracle.com/database/post/autonomous-json-database-under-the-covers-oson-format
 [195]: https://www.oracle.com/database/technologies/faq-nls-lang.html
 [196]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C558F7CF-446E-4078-B045-0B3BB026CB3C
 [197]: https://www.youtube.com/watch?v=PWFb7amjqCE
 [198]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-951568BF-D798-4456-8478-15FEEBA0C78E
-[199]: https://blogs.oracle.com/oraclemagazine/build-rest-apis-for-nodejs-part-1
-[200]: https://blogs.oracle.com/opal/demo:-graphql-with-node-oracledb
+[199]: https://blogs.oracle.com/oraclemagazine/post/build-rest-apis-for-nodejs-part-1
+[200]: https://blogs.oracle.com/opal/post/demo-graphql-with-oracle-database-and-node-oracledb
 [201]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-19E0F73C-A959-41E4-A168-91E436DEE1F1
 [202]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-C941CE9D-97E1-42F8-91ED-4949B2B710BF
 [203]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-39C521D4-5C6E-44B1-B7C7-DEADD7D9CAF0
 [204]: https://www.oracle.com/a/tech/docs/application-checklist-for-continuous-availability-for-maa.pdf
 [205]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8152084F-4760-4B89-A91C-9A84F81C23D1
+[206]: https://github.com/oracle/node-oracledb/tree/main/examples/tokenbasedauth.js
+[207]: https://github.com/oracle/node-oracledb/tree/main/examples/tokenbasedauthpool.js
