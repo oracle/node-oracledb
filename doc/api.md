@@ -14274,8 +14274,9 @@ statements contain hard coded values instead of bind parameters,
 Oracle sees the statement text is different and will be less
 efficient.
 
-Bind parameters can be used to substitute data but not the text of the
-statement.
+Bind parameters can be used to substitute data values. They cannot be used for
+direct substitution of column or table names in dynamically constructed
+statements, see [Binding Column and Table Names in Queries](#sqlbindtablename).
 
 Bind variables cannot be used in [DDL][15] statements, for example
 `CREATE TABLE` or `ALTER` commands.
@@ -14968,7 +14969,7 @@ const query = `SELECT * FROM ` + tableName;
 ```
 
 The same technique can be used to construct the list of selected
-column names.  Make sure to use a Allow List of names to avoid SQL
+column names.  Make sure to use an Allow List of names to avoid SQL
 Injection security risks.
 
 Each final SQL statement will obviously be distinct, and will use a
