@@ -14971,7 +14971,7 @@ const query = `SELECT * FROM ` + tableName;
 ```
 
 The same technique can be used to construct the list of selected
-column names.  Make sure to use a Allow List of names to avoid SQL
+column names.  Make sure to use an Allow List of names to avoid SQL
 Injection security risks.
 
 Each final SQL statement will obviously be distinct, and will use a
