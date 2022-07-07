@@ -12702,7 +12702,7 @@ Techniques include:
 
   const sql = `SELECT last_name
                FROM employees
-               ORDER BY last_name
+               ORDER BY last_name, id -- See below
                OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`;
 
   const result = await connection.execute(
@@ -12713,6 +12713,8 @@ Techniques include:
   ```
 
   A runnable example is in [rowlimit.js][84].
+  
+  It is very important to ensure that the query returns an unambiguous and repeatable order. Employees can have the same surnames and it is necessary to indicate the next order field, e.g. id.
 
   You can use a basic [`execute()`](#execute) or a
   [ResultSet](#resultsetclass), or [`queryStream()`](#querystream) with
