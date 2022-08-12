@@ -83,7 +83,7 @@ describe('241. dbType04.js', function() {
   }); // after()
 
   it('241.1 JSON type check', async () => {
-    const SQL = `SELECT :1, DUMP(:1) FROM dual`;
+    const SQL = `SELECT :1 FROM dual`;
     const jsonVal = {
       keyA: 8,
       keyB: "A String",
@@ -96,10 +96,15 @@ describe('241. dbType04.js', function() {
       keyI: new Date()
     };
 
+    oracledb.extendedMetaData = true;
     try {
       const result = await conn.execute(SQL,
         [{ val: jsonVal, type: oracledb.DB_TYPE_JSON }]);
-      assert.match(result.rows[0][1], /Typ=119/);
+
+      // check to see if the column type is JSON
+      assert.strictEqual(result.metaData[0].dbTypeName, "JSON");
+      assert.strictEqual(result.metaData[0].dbType, oracledb.DB_TYPE_JSON);
+      assert.strictEqual(result.metaData[0].fetchType, oracledb.DB_TYPE_JSON);
     } catch (err) {
       assert.fail(err);
     }
