@@ -4408,11 +4408,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     181.3 another query as CLOB syntax
     181.4 Negative - try to insert Null
 
-182. deferLibInit.js
-    182.1 defers initializatiion of ODPI-C
-    182.2 Negative: throws error when asking for ODPI-C attributes without LD_LIBRARY_PATH and ORACLE_HOME set
-    182.3 Negative: throws error when calling oracledb method without LD_LIBRARY_PATH and ORACLE_HOME set
-
 184. sessionTag.js
     184.1 Remote PL/SQL Callback
         184.1.1 Acquire connection without tag

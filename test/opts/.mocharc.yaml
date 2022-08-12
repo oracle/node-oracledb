@@ -175,7 +175,6 @@ spec:
   - test/soda11.js
   - test/externalProxyAuth.js
   - test/dataTypeXML.js
-  - test/deferLibInit.js
   - test/sessionTag.js
   - test/sodaInstanceof.js
   - test/plsqlBindList.js
