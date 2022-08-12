@@ -4,6 +4,8 @@
 
 **This release is under development and information may be incomplete**
 
+- Added support for AQ recipient lists
+
 - Fixed a regression that could cause a pool alias to be recorded in the
   internal list of aliases even if pool creation failed.
 

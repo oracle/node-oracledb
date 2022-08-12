@@ -5362,3 +5362,16 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         265.2.11 standalone connection with random token and private key
         265.2.12 token and private key are private
         265.2.13 standalone connection with expired token
+
+    267.  aq4.js
+       267.1 empty array or no recipients
+       267.2 single element in array
+       267.3 Negative - numbers as recipients
+       267.4 Negative - number, string, date as recipients
+       267.5 Negative - null value for recipient
+       267.6 Negative - undefined value for recipeint
+       267.7 Negative - dequeue non-existent name
+       267.8 empty recipient list with enqMany
+       267.9 recipient list with enqMany
+       267.10 recipient list with enqMany non-existent in dequeue
+       267.11 recipient list with enqMany invalid datatype in dequeue

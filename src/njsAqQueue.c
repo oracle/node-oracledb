@@ -73,6 +73,36 @@ static bool njsAqQueue_createBaton(napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, njsBaton **baton);
 static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
         napi_env env, napi_value value, dpiMsgProps **handle);
+static bool njsAqQueue_setRecipients(njsBaton *baton, dpiMsgProps *handle,
+        char **recipArr, uint32_t *recipLengths, uint32_t recipCount);
+
+
+//----------------------------------------------------------------------------
+// njsAqQueue_setRecipients()
+//   To process the recipient list
+//----------------------------------------------------------------------------
+bool njsAqQueue_setRecipients(njsBaton *baton, dpiMsgProps *handle,
+        char **recipArr, uint32_t *recipLengths, uint32_t recipCount)
+{
+    uint32_t i;
+    int      status;
+
+    dpiMsgRecipient *recipients = malloc(sizeof(dpiMsgRecipient) * recipCount);
+    if (!recipients)
+        return njsBaton_setError(baton, errInsufficientMemory);
+
+    for (i = 0; i < recipCount; i++) {
+        recipients[i].name = recipArr[i];
+        recipients[i].nameLength = recipLengths[i];
+    }
+    status = dpiMsgProps_setRecipients(handle, recipients, recipCount);
+
+    free(recipients);
+    if (status < 0)
+        return njsBaton_setErrorDPI(baton);
+
+    return true;
+}
 
 
 //-----------------------------------------------------------------------------
@@ -115,8 +145,13 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
     size_t bufferLength;
     njsDbObject *obj;
     int32_t intValue;
+    uint32_t recipCount = 0;
+    char **recipArr = NULL;
+    uint32_t *recipLengths = NULL;
     char *buffer;
     int status;
+    bool ok = true;
+    uint32_t i;
 
     // determine payload exists and is a string or buffer
     NJS_CHECK_NAPI(env, napi_typeof(env, value, &valueType))
@@ -238,7 +273,22 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
     if (found && dpiMsgProps_setPriority(tempHandle, intValue) < 0)
         return njsBaton_setErrorDPI(baton);
 
-    return true;
+    // set recipient list, if applicable
+    if (!njsBaton_getStringArrayFromArg(baton, env, &value, 0, "recipients",
+            &recipCount, &recipArr, &recipLengths, &found))
+        return false;
+
+    if (found && (recipCount > 0)) {
+        ok = njsAqQueue_setRecipients(baton, tempHandle, recipArr,
+                 recipLengths, recipCount);
+        for (i = 0; i < recipCount; i ++) {
+            free(recipArr[i]);
+        }
+        free(recipArr);
+        free(recipLengths);
+    }
+
+    return ok;
 }
 
 

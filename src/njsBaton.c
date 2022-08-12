@@ -742,7 +742,7 @@ bool njsBaton_getStringArrayFromArg(njsBaton *baton, napi_env env,
     *resultNumElems = arrayLength;
     for (i = 0; i < arrayLength; i++) {
         NJS_CHECK_NAPI(env, napi_get_element(env, array, i, &element))
-        if (!njsUtils_copyStringFromJS(env, element, &tempStrings[i],
+        if (!njsUtils_getStringArg(env, &element, 0, &tempStrings[i],
                 &tempLength))
             return false;
         tempLengths[i] = (uint32_t) tempLength;
