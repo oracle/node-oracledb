@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -46,15 +46,15 @@ describe('191. currentSchema.js', function() {
 
     try {
       const conn = await oracledb.getConnection(dbconfig);
-      should.strictEqual(conn.currentSchema, '');
+      assert.strictEqual(conn.currentSchema, '');
 
       let schema = dbconfig.user;
       conn.currentSchema = schema;
-      should.strictEqual(conn.currentSchema, schema);
+      assert.strictEqual(conn.currentSchema, schema);
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     }
 
   }); // 191.1
@@ -67,11 +67,11 @@ describe('191. currentSchema.js', function() {
       let schema = dbconfig.user.toUpperCase();
       let query = "ALTER SESSION SET CURRENT_SCHEMA = " + schema;
       await conn.execute(query);
-      should.strictEqual(conn.currentSchema, schema);
+      assert.strictEqual(conn.currentSchema, schema);
 
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     }
 
   }); // 191.2
