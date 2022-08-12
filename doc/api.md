@@ -12705,7 +12705,7 @@ Techniques include:
 
   const sql = `SELECT last_name
                FROM employees
-               ORDER BY last_name, id -- See below
+               ORDER BY last_name, employee_id -- See below
                OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`;
 
   const result = await connection.execute(
@@ -12717,7 +12717,13 @@ Techniques include:
 
   A runnable example is in [rowlimit.js][84].
 
-  It is very important to ensure that the query returns an unambiguous and repeatable order. Employees can have the same surnames and it is necessary to indicate the next order field, e.g. id.
+  It is generally important to ensure that the query returns an unambiguous and
+  repeatable order.  In the example above, employees can have the same last
+  names so it is necessary to also indicate the next order field or the primary
+  key, for example ``employee_id``.  In some applications, where the table data
+  is being changed by other users, this may not be possible.  However the use
+  of an `AS OF` query flashback clause in the statement can be considered,
+  depending on the application requirements.
 
   You can use a basic [`execute()`](#execute) or a
   [ResultSet](#resultsetclass), or [`queryStream()`](#querystream) with
