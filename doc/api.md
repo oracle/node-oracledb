@@ -6920,20 +6920,20 @@ This function was added in node-oracledb 5.3.
 
 ## <a name="resultsetclass"></a> 10. ResultSet Class
 
-ResultSets allow query results to fetched from the database one at a
-time, or in groups of rows.  They can also be converted to Readable
-Streams.  ResultSets enable applications to process very large data
-sets.
-
-ResultSets should also be used where the number of query rows cannot
-be predicted and may be larger than Node.js can handle in a single
+ResultSets allow query results to fetched from the database one at a time, or
+in groups of rows.  ResultSets should be used where the number of query rows
+cannot be predicted and may be larger than Node.js can handle in a single
 array.
+
+ResultSets can optionally be converted to Readable Streams.  Also, from
+node-oracledb 5.5, the ResultSet class implements the `asyncIterator()` symbol
+to support asynchonous iteration.
 
 A *ResultSet* object is obtained by setting `resultSet: true` in the
 `options` parameter of the *Connection* [`execute()`](#execute) method
 when executing a query.  A *ResultSet* is also returned to
 node-oracledb when binding as type [`oracledb.CURSOR`](#oracledbconstantsnodbtype) to a
-PL/SQL REF CURSOR bind parameter.
+PL/SQL REF CURSOR "out" bind parameter.
 
 See [Fetching Rows with Result Sets](#resultsethandling) for more information on ResultSets.
 
@@ -11952,19 +11952,18 @@ Stream](#streamingresults) instead of a direct fetch.
 
 #### <a name="resultsethandling"></a> 17.1.2 Fetching Rows with Result Sets
 
-When the number of query rows is relatively big, or cannot be
-predicted, it is recommended to use a [ResultSet](#resultsetclass)
-with callbacks, as described in this section, or via query streaming,
-as described [later](#streamingresults).  This prevents query results
-being unexpectedly truncated by the [`maxRows`](#propdbmaxrows) limit,
-or exceeding Node.js memory constraints.  Otherwise, for queries that
-return a known small number of rows, non-ResultSet queries may have
-less overhead.
+When the number of query rows is relatively big, or cannot be predicted, it is
+recommended to use a [ResultSet](#resultsetclass), as described in this
+section, or alternatively use query streaming, as described
+[later](#streamingresults).  These methods prevent query results exceeding
+Node.js memory constraints.  Otherwise, for queries that return a known small
+number of rows, non-ResultSet queries may have less overhead.
 
 A ResultSet is created when the `execute()` option property
-[`resultSet`](#executeoptions) is *true*.  ResultSet rows can be
-fetched using [`getRow()`](#getrow) or [`getRows()`](#getrows) on the
-`execute()` callback function's `result.resultSet` property.
+[`resultSet`](#executeoptions) is *true*.  ResultSet rows can be fetched using
+[`getRow()`](#getrow) or [`getRows()`](#getrows) on the `execute()` callback
+function's `result.resultSet` property.  This property can also be iterated
+over.
 
 For ResultSets, the [`maxRows`](#propdbmaxrows) limit is ignored.  All
 rows can be fetched.
@@ -11988,10 +11987,7 @@ To fetch one row at a time use getRow() :
 
 ```javascript
 const result = await connection.execute(
-  `SELECT employee_id, last_name
-   FROM employees
-   WHERE ROWNUM < 5
-   ORDER BY employee_id`,
+  `SELECT city, postal_code FROM locations`,
   [], // no bind variables
   {
     resultSet: true // return a ResultSet (default is false)
@@ -12018,7 +12014,6 @@ const numRows = 10;
 const result = await connection.execute(
   `SELECT employee_id, last_name
    FROM   employees
-   WHERE ROWNUM < 25
    ORDER BY employee_id`,
   [], // no bind variables
   {
@@ -12038,6 +12033,26 @@ do {
     console.log(rows);
   }
 } while (rows.length === numRows);
+
+// always close the ResultSet
+await rs.close();
+```
+
+From node-oracledb 5.5, you can iterate over ResultSets:
+
+```javascript
+const result = await connection.execute(
+  `SELECT city, postal_code FROM locations`,
+  [], // no bind variables
+  {
+    resultSet: true // return a ResultSet (default is false)
+  }
+);
+
+const rs = result.resultSet;
+for await (const row of rs) {
+  console.log(row);
+}
 
 // always close the ResultSet
 await rs.close();

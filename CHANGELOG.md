@@ -4,6 +4,9 @@
 
 **This release is under development and information may be incomplete**
 
+- ResultSets now implement the `asyncIterator()` symbol to support asynchonous
+  iteration.
+
 - Added support for AQ recipient lists
 
 - Fixed a regression that could cause a pool alias to be recorded in the
