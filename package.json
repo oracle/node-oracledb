@@ -1,6 +1,6 @@
 {
   "name": "oracledb",
-  "version": "5.4.0",
+  "version": "5.5.0-dev",
   "description": "A Node.js module for Oracle Database access from JavaScript and TypeScript",
   "license": "Apache-2.0",
   "homepage": "http://oracle.github.io/node-oracledb/",
