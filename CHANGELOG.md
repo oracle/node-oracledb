@@ -4,6 +4,8 @@
 
 **This release is under development and information may be incomplete**
 
+- Fixed a regression that could cause a pool alias to be recorded in the
+  internal list of aliases even if pool creation failed.
 
 ## node-oracledb [v5.4.0](https://github.com/oracle/node-oracledb/compare/v5.3.0...v5.4.0) (9 Jun 2022)
 

@@ -913,9 +913,7 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(pool.connectionsInUse, 1);
 
         // invalidate token to test callback
-        pool.setAccessToken({
-          token  : dbConfig.expiredAccessToken.token
-        });
+        pool.setAccessToken(dbConfig.expiredAccessToken);
 
         conn2 = await pool.getConnection();
         assert.deepEqual(pool.connectionsOpen, 2);
@@ -961,9 +959,7 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(pool1.connectionsOpen, 1);
         assert.deepEqual(pool1.connectionsInUse, 1);
 
-        pool1.setAccessToken({
-          token: dbConfig.expiredAccessToken.token
-        });
+        pool1.setAccessToken(dbConfig.expiredAccessToken);
 
         conn2 = await pool1.getConnection();
         assert.deepEqual(pool1.connectionsOpen, 2);
@@ -1001,9 +997,7 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(pool2.connectionsOpen, 1);
         assert.deepEqual(pool2.connectionsInUse, 1);
 
-        pool2.setAccessToken({
-          token   : dbConfig.expiredAccessToken.token
-        });
+        pool2.setAccessToken(dbConfig.expiredAccessToken);
 
         conn4 = await pool2.getConnection();
         assert.deepEqual(pool2.connectionsOpen, 2);
@@ -1052,9 +1046,7 @@ describe('265. Token based authentication', function() {
         assert.deepEqual(pool1.connectionsOpen, 1);
         assert.deepEqual(pool1.connectionsInUse, 1);
 
-        pool1.setAccessToken({
-          token   : dbConfig.expiredAccessToken.token
-        });
+        pool1.setAccessToken(dbConfig.expiredAccessToken);
 
         conn2 = await pool1.getConnection();
         assert.deepEqual(pool1.connectionsOpen, 2);
