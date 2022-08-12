@@ -33,7 +33,7 @@ describe('267. aq4.js', function() {
   let conn           = null;
 
   const AQ_USER      = 'NODB_SCHEMA_AQTEST4';
-  const AQ_USER_PWD  = 'nodb_schema_aqtest4';
+  const AQ_USER_PWD  = testsUtil.generateRandomPassword();
 
   const objQueueName = "NODB_ADDR_QUEUE";
   const objType      = "NODB_ADDR_TYP";
