@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
@@ -62,22 +62,22 @@ describe('174. soda6.js', function() {
       let empInShenzhen = await collection.find()
         .filter({ "office": {"$like": "Shenzhen"} })
         .count();
-      should.strictEqual(empInShenzhen.count, 2);
+      assert.strictEqual(empInShenzhen.count, 2);
 
       await conn.commit();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.ifError(err);
         }
       }
     }
@@ -104,18 +104,18 @@ describe('174. soda6.js', function() {
       );
 
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     } finally {
       await conn.commit();
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.ifError(err);
         }
       }
     }
@@ -139,21 +139,21 @@ describe('174. soda6.js', function() {
       let empInShenzhen = await collection.find()
         .filter({})
         .count();
-      should.strictEqual(empInShenzhen.count, t_contents.length);
+      assert.strictEqual(empInShenzhen.count, t_contents.length);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     } finally {
       await conn.commit();
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.ifError(err);
         }
       }
     }
@@ -177,33 +177,33 @@ describe('174. soda6.js', function() {
       let content1 = { id: 1008, name: "Justin", office: "Shenzhen" };
       let doc1 = await collection.insertOneAndGet(content1);
       let key1 = doc1.key;
-      (key1).should.be.a.String();
+      assert.strictEqual(typeof (key1), "string");
 
       // Fetch it back
       let doc2 = await collection.find().key(key1).getOne();
       let content2 = doc2.getContent();
-      should.deepEqual(content2, content1);
+      assert.deepEqual(content2, content1);
 
 
       let empInShenzhen = await collection.find()
         .filter({ "office": {"$like": "Shenzhen"} })
         .count();
-      should.strictEqual(empInShenzhen.count, 3);
+      assert.strictEqual(empInShenzhen.count, 3);
 
       await conn.commit();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.ifError(err);
         }
       }
     }
@@ -226,22 +226,22 @@ describe('174. soda6.js', function() {
       // Fetch it back
       let key1 = 'C2478535C4404F9DBFE1B2BC2B137079';
       let doc2 = await collection.find().key(key1).getOne();
-      should.not.exist(doc2);
+      assert.ifError(doc2);
       await conn.commit();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     } finally {
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.ifError(err);
         }
       }
     }
@@ -267,18 +267,18 @@ describe('174. soda6.js', function() {
       );
 
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     } finally {
       await conn.commit();
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.ifError(err);
         }
       }
     }
@@ -306,18 +306,18 @@ describe('174. soda6.js', function() {
       );
 
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     } finally {
       await conn.commit();
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.ifError(err);
         }
       }
     }
@@ -345,23 +345,23 @@ describe('174. soda6.js', function() {
       let myContents = [];
       for (let i = 0; i < documents.length; i++) {
         myContents[i] = documents[i].getContent();
-        (myContents[i]).should.be.oneOf(t_contents);
+        (t_contents).includes(myContents[i]);
       }
 
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.ifError(err);
         }
       }
     }
@@ -388,24 +388,24 @@ describe('174. soda6.js', function() {
       let myContents = [];
       for (let i = 0; i < documents.length; i++) {
         myContents[i] = documents[i].getContent();
-        (myContents[i]).should.be.oneOf(t_contents);
+        (t_contents).includes(myContents[i]);
       }
 
 
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.ifError(err);
         }
       }
     }
@@ -431,19 +431,19 @@ describe('174. soda6.js', function() {
       );
 
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.ifError(err);
         }
       }
     }
@@ -470,19 +470,19 @@ describe('174. soda6.js', function() {
       );
 
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.ifError(err);
         }
       }
     }
@@ -510,22 +510,22 @@ describe('174. soda6.js', function() {
         .keys(nonexistentKeys)
         .count();
 
-      should.strictEqual(result.count, 0);
+      assert.strictEqual(result.count, 0);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.ifError(err);
         }
       }
     }
@@ -560,19 +560,19 @@ describe('174. soda6.js', function() {
         .hint("MONITOR");
 
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.ifError(err);
         }
       }
     }
@@ -607,19 +607,19 @@ describe('174. soda6.js', function() {
         .hint();
 
     } catch (err) {
-      (err.message).should.startWith('NJS-009:');
+      assert.match(err.message, /NJS-009:/);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.ifError(err);
         }
       }
     }
@@ -654,19 +654,19 @@ describe('174. soda6.js', function() {
         .hint(1);
 
     } catch (err) {
-      (err.message).should.startWith('NJS-005:');
+      assert.match(err.message, /NJS-005:/);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.ifError(err);
         }
       }
     }

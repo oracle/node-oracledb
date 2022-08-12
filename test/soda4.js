@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert    = require('assert');
 const dbconfig = require('./dbconfig.js');
 const sodaUtil = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
@@ -61,32 +61,32 @@ describe('168. soda4.js', () => {
 
       let myDoc = await coll.insertOneAndGet(testContent);
       let myKey = myDoc.key;
-      should.exist(myKey);
-      (myKey).should.be.a.String();
-      (myDoc).should.be.an.Object();
+      assert(myKey);
+      assert.strictEqual(typeof (myKey), "string");
+      assert.strictEqual(typeof (myDoc), "object");
 
       let content1 = myDoc.getContent();
-      should.not.exist(content1);
+      assert.ifError(content1);
 
       // Fetch it back
       let doc2 = await coll.find().key(myKey).getOne();
       let content2 = doc2.getContent();
-      should.strictEqual(content2.name, testContent.name);
-      should.strictEqual(content2.company, testContent.company);
-      should.strictEqual(content2.manager, null);
+      assert.strictEqual(content2.name, testContent.name);
+      assert.strictEqual(content2.company, testContent.company);
+      assert.strictEqual(content2.manager, null);
 
       await conn.commit();
       let res = await coll.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -106,27 +106,27 @@ describe('168. soda4.js', () => {
 
       let myDoc = await coll.insertOneAndGet(testContent);
       let myKey = myDoc.key;
-      should.exist(myKey);
-      (myKey).should.be.a.String();
-      (myDoc).should.be.an.Object();
+      assert(myKey);
+      assert.strictEqual(typeof (myKey), "string");
+      assert.strictEqual(typeof (myDoc), "object");
 
       // Fetch it back
       let doc2 = await coll.find().key(myKey).getOne();
       let content2 = doc2.getContent();
-      should.deepEqual(content2, testContent);
+      assert.deepEqual(content2, testContent);
 
       await conn.commit();
       let res = await coll.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -146,26 +146,26 @@ describe('168. soda4.js', () => {
 
       let myDoc = await coll.insertOneAndGet(testContent);
       let myMediaType = myDoc.mediaType;
-      should.exist(myMediaType);
-      should.strictEqual(myMediaType, 'application/json');
+      assert(myMediaType);
+      assert.strictEqual(myMediaType, 'application/json');
       let myKey = myDoc.key;
 
       // Fetch it back
       let doc2 = await coll.find().key(myKey).getOne();
-      should.strictEqual(doc2.mediaType, 'application/json');
+      assert.strictEqual(doc2.mediaType, 'application/json');
 
       await conn.commit();
       let res = await coll.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }

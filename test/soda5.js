@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
@@ -74,22 +74,22 @@ describe('173. soda5.js', () => {
       let empInShenzhen = await collection.find()
         .filter({ "office": {"$like": "Shenzhen"} })
         .count();
-      should.strictEqual(empInShenzhen.count, 2);
+      assert.strictEqual(empInShenzhen.count, 2);
 
       await conn.commit();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -121,7 +121,7 @@ describe('173. soda5.js', () => {
         })
       );
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
     try {
@@ -129,27 +129,27 @@ describe('173. soda5.js', () => {
       let empInShenzhen = await collection.find()
         .filter({ "name": {"$like": "Changjie"} })
         .count();
-      should.strictEqual(empInShenzhen.count, 1);
+      assert.strictEqual(empInShenzhen.count, 1);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
     try {
       await conn.commit();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
     if (collection) {
       let res = await collection.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
     }
     if (conn) {
       try {
         await conn.close();
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     }
   }); // 173.2
@@ -163,7 +163,7 @@ describe('173. soda5.js', () => {
       collection = await soda.createCollection("soda_test_173_3");
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
     let indexSpec = { "foo": "bar" };
@@ -181,13 +181,13 @@ describe('173. soda5.js', () => {
 
     if (collection) {
       let res = await collection.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
     }
     if (conn) {
       try {
         await conn.close();
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     }
   }); // 173.3
@@ -202,17 +202,17 @@ describe('173. soda5.js', () => {
       collection = await sd.createCollection(collName);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -228,22 +228,22 @@ describe('173. soda5.js', () => {
       collection = await sd.createCollection(collName);
 
       let res = await collection.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
 
       res = await collection.drop();
-      should.strictEqual(res.dropped, false);
+      assert.strictEqual(res.dropped, false);
 
       res = await collection.drop();
-      should.strictEqual(res.dropped, false);
+      assert.strictEqual(res.dropped, false);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -279,7 +279,7 @@ describe('173. soda5.js', () => {
       let empInShenzhen = await collection.find()
         .filter({ "office": {"$like": "Shenzhen"} })
         .count();
-      should.strictEqual(empInShenzhen.count, 2);
+      assert.strictEqual(empInShenzhen.count, 2);
 
       // drop index
       let indexName = indexSpec.name;
@@ -288,17 +288,17 @@ describe('173. soda5.js', () => {
       await conn.commit();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -338,22 +338,22 @@ describe('173. soda5.js', () => {
       let empInShenzhen = await collection.find()
         .filter({ "office": {"$like": "Shenzhen"} })
         .count();
-      should.strictEqual(empInShenzhen.count, 2);
+      assert.strictEqual(empInShenzhen.count, 2);
 
       await conn.commit();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -389,7 +389,7 @@ describe('173. soda5.js', () => {
       let empInShenzhen = await collection.find()
         .filter({ "office": {"$like": "Shenzhen"} })
         .count();
-      should.strictEqual(empInShenzhen.count, 2);
+      assert.strictEqual(empInShenzhen.count, 2);
 
       // drop index
       let indexName = indexSpec.name;
@@ -399,17 +399,17 @@ describe('173. soda5.js', () => {
       // await conn.commit();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -445,7 +445,7 @@ describe('173. soda5.js', () => {
       let empInShenzhen = await collection.find()
         .filter({ "office": {"$like": "Shenzhen"} })
         .count();
-      should.strictEqual(empInShenzhen.count, 2);
+      assert.strictEqual(empInShenzhen.count, 2);
 
       // drop index multiple times
       let indexName = indexSpec.name;
@@ -457,17 +457,17 @@ describe('173. soda5.js', () => {
       await conn.commit();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -495,23 +495,23 @@ describe('173. soda5.js', () => {
       let empInShenzhen = await collection.find()
         .filter({ "office": {"$like": "Shenzhen"} })
         .count();
-      should.strictEqual(empInShenzhen.count, 2);
+      assert.strictEqual(empInShenzhen.count, 2);
 
       // drop index
       await collection.dropIndex("OFFICE_IDX_SP", { "force" : true });
       await conn.commit();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -545,23 +545,23 @@ describe('173. soda5.js', () => {
       let empInShenzhen = await collection.find()
         .filter({ "office": {"$like": "Shenzhen"} })
         .count();
-      should.strictEqual(empInShenzhen.count, 2);
+      assert.strictEqual(empInShenzhen.count, 2);
 
       // drop index
       await collection.dropIndex("OFFICE_IDX", { "force" : false });
       await conn.commit();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -589,7 +589,7 @@ describe('173. soda5.js', () => {
       await conn.commit();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
     /*
@@ -607,35 +607,35 @@ describe('173. soda5.js', () => {
       if (isCreateIndexEligible >= 0) {
         await collection.createIndex(indexSpec);
         let outDocument = await collection.getDataGuide();
-        should.exist(outDocument);
+        assert(outDocument);
       } else if (isCreateIndexEligible < 0) {
         await testsUtil.assertThrowsAsync(async () => {
           await collection.createIndex(indexSpec);
         }, /ORA-00406:/);
       }
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
     if (isCreateIndexEligible >= 0) {
       try {
         let result = await collection.dropIndex('TEST_IDX');
-        should.strictEqual(result.dropped, true);
+        assert.strictEqual(result.dropped, true);
         await conn.commit();
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     }
 
     try {
       if (collection) await collection.drop();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
     try {
       if (conn) await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
   }); // 173.12

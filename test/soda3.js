@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
@@ -59,7 +59,7 @@ describe('167. soda3.js', () => {
         })
       );
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // before
 
@@ -76,17 +76,17 @@ describe('167. soda3.js', () => {
       }
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // after
 
   it('167.1 get collection names', async () => {
     try {
       let cNames = await sd.getCollectionNames();
-      should.strictEqual(cNames.length, t_collectionNames.length);
-      should.deepEqual(cNames, t_collectionNames.sort());
+      assert.strictEqual(cNames.length, t_collectionNames.length);
+      assert.deepEqual(cNames, t_collectionNames.sort());
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -94,10 +94,10 @@ describe('167. soda3.js', () => {
     try {
       let options = { limit: 1 };
       let cNames = await sd.getCollectionNames(options);
-      should.strictEqual(cNames.length, 1);
-      should.deepEqual(cNames, t_collectionNames.sort().slice(0, 1));
+      assert.strictEqual(cNames.length, 1);
+      assert.deepEqual(cNames, t_collectionNames.sort().slice(0, 1));
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -105,10 +105,10 @@ describe('167. soda3.js', () => {
     try {
       let options = { limit: undefined };
       let cNames = await sd.getCollectionNames(options);
-      should.strictEqual(cNames.length, t_collectionNames.length);
-      should.deepEqual(cNames, t_collectionNames.sort());
+      assert.strictEqual(cNames.length, t_collectionNames.length);
+      assert.deepEqual(cNames, t_collectionNames.sort());
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -116,10 +116,10 @@ describe('167. soda3.js', () => {
     try {
       let options = { limit: 0 };
       let cNames = await sd.getCollectionNames(options);
-      should.strictEqual(cNames.length, t_collectionNames.length);
-      should.deepEqual(cNames, t_collectionNames.sort());
+      assert.strictEqual(cNames.length, t_collectionNames.length);
+      assert.deepEqual(cNames, t_collectionNames.sort());
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -131,7 +131,7 @@ describe('167. soda3.js', () => {
         /NJS-007: invalid value for "limit" in parameter 1/
       );
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -143,7 +143,7 @@ describe('167. soda3.js', () => {
         /NJS-007: invalid value for "limit" in parameter 1/
       );
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -151,10 +151,10 @@ describe('167. soda3.js', () => {
     try {
       let options = { limit: -7 };
       let cNames = await sd.getCollectionNames(options);
-      should.strictEqual(cNames.length, t_collectionNames.length);
-      should.deepEqual(cNames, t_collectionNames.sort());
+      assert.strictEqual(cNames.length, t_collectionNames.length);
+      assert.deepEqual(cNames, t_collectionNames.sort());
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -162,9 +162,9 @@ describe('167. soda3.js', () => {
     try {
       let options = { startsWith: "changjie" };
       let cNames = await sd.getCollectionNames(options);
-      should.deepEqual(cNames, t_collectionNames.sort().slice(2));
+      assert.deepEqual(cNames, t_collectionNames.sort().slice(2));
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -172,10 +172,10 @@ describe('167. soda3.js', () => {
     try {
       let options = { startsWith: "Changjie" };
       let cNames = await sd.getCollectionNames(options);
-      should.strictEqual(cNames.length, t_collectionNames.length);
-      should.deepEqual(cNames, t_collectionNames.sort());
+      assert.strictEqual(cNames.length, t_collectionNames.length);
+      assert.deepEqual(cNames, t_collectionNames.sort());
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -183,10 +183,10 @@ describe('167. soda3.js', () => {
     try {
       let options = { startsWith: "" };
       let cNames = await sd.getCollectionNames(options);
-      should.strictEqual(cNames.length, t_collectionNames.length);
-      should.deepEqual(cNames, t_collectionNames.sort());
+      assert.strictEqual(cNames.length, t_collectionNames.length);
+      assert.deepEqual(cNames, t_collectionNames.sort());
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -198,7 +198,7 @@ describe('167. soda3.js', () => {
         /NJS-007: invalid value for "startsWith" in parameter 1/
       );
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -210,7 +210,7 @@ describe('167. soda3.js', () => {
         /NJS-007: invalid value for "startsWith" in parameter 1/
       );
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -218,9 +218,9 @@ describe('167. soda3.js', () => {
     try {
       let candidate = "Changjie_3";
       let coll = await sd.openCollection(candidate);
-      should.strictEqual(coll.name, candidate);
+      assert.strictEqual(coll.name, candidate);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -228,9 +228,9 @@ describe('167. soda3.js', () => {
     try {
       let candidate = "chris_1";
       let coll = await sd.openCollection(candidate);
-      should.strictEqual(coll.name, candidate);
+      assert.strictEqual(coll.name, candidate);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -238,9 +238,9 @@ describe('167. soda3.js', () => {
     try {
       let candidate = "nonexistent_collection";
       let coll = await sd.openCollection(candidate);
-      should.strictEqual(coll, undefined);
+      assert.strictEqual(coll, undefined);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 
@@ -248,9 +248,9 @@ describe('167. soda3.js', () => {
     try {
       let candidate = "changjie_3";
       let coll = await sd.openCollection(candidate);
-      should.strictEqual(coll, undefined);
+      assert.strictEqual(coll, undefined);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   });
 

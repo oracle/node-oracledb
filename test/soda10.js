@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert    = require('assert');
 const dbconfig = require('./dbconfig.js');
 const sodaUtil = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
@@ -58,7 +58,7 @@ describe('178. soda10.js', function() {
     try {
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // after()
 
@@ -88,14 +88,14 @@ describe('178. soda10.js', function() {
         outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
       }
 
-      should.deepEqual(outContents, inContents);
+      assert.deepEqual(outContents, inContents);
 
       await conn.commit();
 
       let res = await collection.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 178.1
 
@@ -113,14 +113,14 @@ describe('178. soda10.js', function() {
         outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
       }
 
-      should.deepEqual(outContents, inContents);
+      assert.deepEqual(outContents, inContents);
 
       await conn.commit();
 
       let res = await collection.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 178.2
 
@@ -138,9 +138,9 @@ describe('178. soda10.js', function() {
       let middleContents = [];
       for (let i = 0; i < middleDocuments.length; i++) {
         middleContents[i] = middleDocuments[i].getContent();
-        should.exist(middleDocuments[i].key);
+        assert(middleDocuments[i].key);
       }
-      should.deepEqual(middleContents, [null, null, null, null]);
+      assert.deepEqual(middleContents, [null, null, null, null]);
 
       // Fetch back
       let outDocuments = await collection.find().getDocuments();
@@ -149,14 +149,14 @@ describe('178. soda10.js', function() {
         outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
       }
 
-      should.deepEqual(outContents, inContents);
+      assert.deepEqual(outContents, inContents);
 
       await conn.commit();
 
       let res = await collection.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 178.3
 
@@ -169,9 +169,9 @@ describe('178. soda10.js', function() {
       let middleContents = [];
       for (let i = 0; i < middleDocuments.length; i++) {
         middleContents[i] = middleDocuments[i].getContent();
-        should.exist(middleDocuments[i].key);
+        assert(middleDocuments[i].key);
       }
-      should.deepEqual(middleContents, [null, null, null, null]);
+      assert.deepEqual(middleContents, [null, null, null, null]);
 
       // Fetch back
       let outDocuments = await collection.find().getDocuments();
@@ -180,14 +180,14 @@ describe('178. soda10.js', function() {
         outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
       }
 
-      should.deepEqual(outContents, inContents);
+      assert.deepEqual(outContents, inContents);
 
       await conn.commit();
 
       let res = await collection.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 178.4
 
@@ -206,9 +206,9 @@ describe('178. soda10.js', function() {
       await conn.commit();
 
       let res = await collection.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 178.5
 
@@ -227,9 +227,9 @@ describe('178. soda10.js', function() {
       await conn.commit();
 
       let res = await collection.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
   }); // 178.6
 
@@ -256,9 +256,9 @@ describe('178. soda10.js', function() {
     let middleContents = [];
     for (let i = 0; i < middleDocuments.length; i++) {
       middleContents[i] = middleDocuments[i].getContent();
-      should.exist(middleDocuments[i].key);
+      assert(middleDocuments[i].key);
     }
-    should.deepEqual(middleContents, [null, null, null, null]);
+    assert.deepEqual(middleContents, [null, null, null, null]);
 
     // Fetch back
     let outDocuments = await collection.find().hint("MONITOR").getDocuments();
@@ -267,12 +267,12 @@ describe('178. soda10.js', function() {
       outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
     }
 
-    should.deepEqual(outContents, inContents);
+    assert.deepEqual(outContents, inContents);
 
     await conn.commit();
 
     let res = await collection.drop();
-    should.strictEqual(res.dropped, true);
+    assert.strictEqual(res.dropped, true);
   }); // 178.7
 
   it('178.8 Negative - insertManyAndGet() with invalid options parameter', async function() {
@@ -295,7 +295,7 @@ describe('178. soda10.js', function() {
     await conn.commit();
 
     let res = await collection.drop();
-    should.strictEqual(res.dropped, true);
+    assert.strictEqual(res.dropped, true);
   }); // 178.8
 
 });

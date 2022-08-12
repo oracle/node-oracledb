@@ -27,7 +27,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
@@ -92,26 +92,26 @@ describe('179. soda11.js', () => {
 
       await conn.commit();
 
-      should.strictEqual(collection.name, t_collname);
+      assert.strictEqual(collection.name, t_collname);
 
-      should.strictEqual(typeof (collection.metaData), "object");
-      should.deepEqual(collection.metaData, t_metadata);
+      assert.strictEqual(typeof (collection.metaData), "object");
+      assert.deepEqual(collection.metaData, t_metadata);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
 
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -167,20 +167,20 @@ describe('179. soda11.js', () => {
       // ORA-01918: user \'nonexistent\' does not exist
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
 
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -277,20 +277,20 @@ describe('179. soda11.js', () => {
       // ORA-40669: Collection create failed: collection with same name but different metadata exists.
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (collection1) {
         try {
           await collection1.drop();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -348,30 +348,30 @@ describe('179. soda11.js', () => {
          well -- even if the "type" in the database is numeric. */
       let testKey = '86755';
       let testDoc = sd.createDocument(testContent, { key: testKey });
-      should.strictEqual(testDoc.key, testKey);
+      assert.strictEqual(testDoc.key, testKey);
       await coll.insertOne(testDoc);
 
       // Fetch it back
       let docGot = await coll.find().key(testKey).getOne();
       let contentGot = docGot.getContent();
-      should.strictEqual(contentGot.name, testContent.name);
-      should.strictEqual(
+      assert.strictEqual(contentGot.name, testContent.name);
+      assert.strictEqual(
         contentGot.address.country,
         testContent.address.country
       );
 
       await conn.commit();
       let res = await coll.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -435,14 +435,14 @@ describe('179. soda11.js', () => {
       );
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (coll) {
         try {
           let res = await coll.drop();
-          should.strictEqual(res.dropped, true);
+          assert.strictEqual(res.dropped, true);
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
 
@@ -450,7 +450,7 @@ describe('179. soda11.js', () => {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -511,7 +511,7 @@ describe('179. soda11.js', () => {
         testContent,
         { mediaType: testMediaType, key: testKey }
       );
-      should.strictEqual(testDoc.mediaType, testMediaType);
+      assert.strictEqual(testDoc.mediaType, testMediaType);
 
       let myKey = testDoc.key;
 
@@ -520,18 +520,18 @@ describe('179. soda11.js', () => {
       // Fetch the document back
       let myDoc = await coll.find().key(myKey).getOne();
 
-      should.strictEqual(myDoc.mediaType, testMediaType);
+      assert.strictEqual(myDoc.mediaType, testMediaType);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
       if (coll) {
         try {
           let res = await coll.drop();
-          should.strictEqual(res.dropped, true);
+          assert.strictEqual(res.dropped, true);
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
 
@@ -539,7 +539,7 @@ describe('179. soda11.js', () => {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -607,15 +607,15 @@ describe('179. soda11.js', () => {
       );
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
       if (coll) {
         try {
           let res = await coll.drop();
-          should.strictEqual(res.dropped, true);
+          assert.strictEqual(res.dropped, true);
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
 
@@ -623,7 +623,7 @@ describe('179. soda11.js', () => {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -681,18 +681,18 @@ describe('179. soda11.js', () => {
       let testDoc = sd.createDocument(testContent, { key: testKey });
 
       let outDocument = await coll.insertOneAndGet(testDoc);
-      should.exist(outDocument);
+      assert(outDocument);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
       if (coll) {
         try {
           let res = await coll.drop();
-          should.strictEqual(res.dropped, true);
+          assert.strictEqual(res.dropped, true);
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
 
@@ -700,7 +700,7 @@ describe('179. soda11.js', () => {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }

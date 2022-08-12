@@ -16,23 +16,23 @@
  * limitations under the License.
  *
  * NAME
- *   176. soda8.js
+ *   175. soda7.js
  *
  * DESCRIPTION
- *   More tests for terminal methods of SodaOperation class
+ *   Tests for terminal methods of SodaOperation class
  *
  *****************************************************************************/
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
 const t_contents = sodaUtil.t_contents;
 
-describe('176. soda8.js', () => {
+describe('175. soda7.js', () => {
 
   before(async function() {
     const runnable = await testsUtil.isSodaRunnable();
@@ -44,164 +44,130 @@ describe('176. soda8.js', () => {
     await sodaUtil.cleanup();
   });
 
-  it('176.1 replaceOne(), basic case with document content', async () => {
+  it('175.1 count(), basic case', async () => {
     let conn, collection;
 
     try {
       conn = await oracledb.getConnection(dbconfig);
       let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_1");
+      collection = await soda.createCollection("soda_test_175_1");
 
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let res = await collection.find().key(myKeys[1]).replaceOne(inContent);
-      should.strictEqual(res.replaced, true);
+      // Fetch back
+      let emps = await collection.find().count();
+      assert.strictEqual(emps.count, t_contents.length);
 
-      // Fetch all back
-      let outDocuments = await collection.find().getDocuments();
-      let contents = [];
-      for (let i = 0; i < outDocuments.length; i++) {
-        contents[i] = outDocuments[i].getContent();
-        if (i == 1) {
-          should.deepEqual(contents[i], inContent);
-        } else {
-          (contents[i]).should.be.oneOf(t_contents);
-        }
-      }
-
-    } catch (err) {
-      should.not.exist(err);
-    } finally {
       await conn.commit();
 
+    } catch (err) {
+      assert.fail(err);
+    } finally {
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
-  }); // 176.1
+  }); // 175.1
 
-  it('176.2 replaceOne(), basic case with document object', async () => {
+  it('175.2 Negative - skip().count()', async () => {
     let conn, collection;
 
     try {
       conn = await oracledb.getConnection(dbconfig);
       let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_2");
+      collection = await soda.createCollection("soda_test_175_2");
 
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let inDocument = soda.createDocument(inContent);
-
-      let res = await collection.find().key(myKeys[1]).replaceOne(inDocument);
-      should.strictEqual(res.replaced, true);
-
-      // Fetch all back
-      let documents = await collection.find().getDocuments();
-      let contents = [];
-      for (let i = 0; i < documents.length; i++) {
-        contents[i] = documents[i].getContent();
-        if (i == 1) {
-          should.deepEqual(contents[i], inContent);
-        } else {
-          (contents[i]).should.be.oneOf(t_contents);
-        }
-      }
+      // Fetch back
+      let numberToSkip = 3;
+      await testsUtil.assertThrowsAsync(
+        async () => await collection.find().skip(numberToSkip).count(),
+        /ORA-40748:/
+      );
+      // ORA-40748: SKIP and LIMIT attributes cannot be used for count operation.
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
-
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
-  }); // 176.2
+  }); // 175.2
 
-  it('175.3 replaceOne(), no error is reported if the query criteria do not match any document', async () => {
+  it('175.3 Negative - limit().count()', async () => {
     let conn, collection;
 
     try {
       conn = await oracledb.getConnection(dbconfig);
       let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_3");
+      collection = await soda.createCollection("soda_test_175_3");
 
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let res = await collection
-        .find()
-        .key('4A5AF2AAEB124FD4BFF80BC3630CB048')
-        .replaceOne(inContent);
-      should.strictEqual(res.replaced, false);
-
-      // Fetch all back
-      let outDocuments = await collection.find().getDocuments();
-      let contents = [];
-      for (let i = 0; i < outDocuments.length; i++) {
-        contents[i] = outDocuments[i].getContent();
-        (contents[i]).should.be.oneOf(t_contents);
-      }
+      // Fetch back
+      let numberToLimit = 5;
+      await testsUtil.assertThrowsAsync(
+        async () => await collection.find().skip(numberToLimit).count(),
+        /ORA-40748:/
+      );
+      // ORA-40748: SKIP and LIMIT attributes cannot be used for count operation.
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
-
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
   }); // 175.3
 
-  it('175.4 Negative - replaceOne(), the key() method must be used', async () => {
+  it('175.4 keys().count()', async () => {
     let conn, collection;
 
     try {
       conn = await oracledb.getConnection(dbconfig);
       let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_4");
+      collection = await soda.createCollection("soda_test_175_4");
 
       let myKeys = [];
       for (let i = 0; i < t_contents.length; i++) {
@@ -210,191 +176,317 @@ describe('176. soda8.js', () => {
         myKeys[i] = doc.key;
       }
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      await testsUtil.assertThrowsAsync(
-        async () => await collection.find().replaceOne(inContent),
-        /ORA-40734:/
-      );
-      // ORA-40734: key for the document to replace must be specified using the key attribute
+      // Fetch back
+      let keysToCount = [ myKeys[2], myKeys[3] ];
+      let emps = await collection.find().keys(keysToCount).count();
+      assert.strictEqual(emps.count, keysToCount.length);
 
-      // Fetch all back
-      let outDocuments = await collection.find().keys([myKeys[0]]).getDocuments();
-
-      let contents = [];
-      for (let i = 0; i < outDocuments.length; i++) {
-        contents[i] = outDocuments[i].getContent();
-        (contents[i]).should.be.oneOf(t_contents);
-      }
+      await conn.commit();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
   }); // 175.4
 
-  it('175.5 replaceOneAndGet(), basic case with document content', async () => {
+  it('175.5 getCursor(), basic case', async () => {
     let conn, collection;
 
     try {
       conn = await oracledb.getConnection(dbconfig);
       let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_5");
+      collection = await soda.createCollection("soda_test_175_5");
 
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let updatedDocument = await collection.find().key(myKeys[1]).replaceOneAndGet(inContent);
-      should.exist(updatedDocument);
+      // Fetch back
+      let docCursor = await collection.find().getCursor();
 
-      // Fetch all back
-      let outDocuments = await collection.find().getDocuments();
-      let contents = [];
-      for (let i = 0; i < outDocuments.length; i++) {
-        contents[i] = outDocuments[i].getContent();
-        if (i == 1) {
-          should.deepEqual(contents[i], inContent);
+      let myContents = [];
+      let hasNext = true;
+      let myDocument;
+      for (let i = 0; hasNext; i++) {
+        myDocument = await docCursor.getNext();
+        if (!myDocument) {
+          hasNext = false;
         } else {
-          (contents[i]).should.be.oneOf(t_contents);
+          myContents[i] = myDocument.getContent();
+          (t_contents).includes(myContents[i]);
         }
       }
 
+      assert.strictEqual(myContents.length, t_contents.length);
+
+      await docCursor.close();
+
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
   }); // 175.5
 
-  it('175.6 replaceOneAndGet(), basic case with document object', async () => {
+  it('175.6 skip().getCursor()', async () => {
     let conn, collection;
 
     try {
       conn = await oracledb.getConnection(dbconfig);
       let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_6");
+      collection = await soda.createCollection("soda_test_175_6");
 
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let inDocument = soda.createDocument(inContent);
+      // Fetch back
+      let numberToSkip = 3;
+      let docCursor = await collection.find().skip(numberToSkip).getCursor();
 
-      let updatedDocument = await collection.find().key(myKeys[1]).replaceOneAndGet(inDocument);
-      should.exist(updatedDocument);
-
-      // Fetch all back
-      let documents = await collection.find().getDocuments();
-      let contents = [];
-      for (let i = 0; i < documents.length; i++) {
-        contents[i] = documents[i].getContent();
-        if (i == 1) {
-          should.deepEqual(contents[i], inContent);
+      let myContents = [];
+      let hasNext = true;
+      let myDocument;
+      for (let i = 0; hasNext; i++) {
+        myDocument = await docCursor.getNext();
+        if (!myDocument) {
+          hasNext = false;
         } else {
-          (contents[i]).should.be.oneOf(t_contents);
+          myContents[i] = myDocument.getContent();
+          (t_contents).includes(myContents[i]);
         }
       }
 
+      assert.strictEqual(myContents.length, (t_contents.length - numberToSkip));
+      await docCursor.close();
+
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
   }); // 175.6
 
-  it('175.7 replaceOneAndGet(), updatedDocument does not have document content', async () => {
+  it('175.7 getCursor(), empty document matched', async () => {
     let conn, collection;
 
     try {
       conn = await oracledb.getConnection(dbconfig);
       let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_7");
+      collection = await soda.createCollection("soda_test_175_7");
 
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let updatedDocument = await collection.find().key(myKeys[1]).replaceOneAndGet(inContent);
-      should.exist(updatedDocument);
+      // Fetch back
+      let numberToSkip = t_contents.length + 3;
+      let docCursor = await collection.find().skip(numberToSkip).getCursor();
 
-      let outContent = updatedDocument.getContent();
-      should.not.exist(outContent);
+      let myDocument = await docCursor.getNext();
+      assert.strictEqual(myDocument, undefined);
+      await docCursor.close();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
   }); // 175.7
 
-  it('175.8 replaceOneAndGet(), no error is reported if it does not match any document', async () => {
+  it('175.8 Negative - close document cursor two times', async () => {
     let conn, collection;
 
     try {
       conn = await oracledb.getConnection(dbconfig);
       let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_8");
+      collection = await soda.createCollection("soda_test_175_8");
+
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
+
+      // Fetch back
+      let docCursor = await collection.find().getCursor();
+
+      let myContents = [];
+      let hasNext = true;
+      let myDocument;
+      for (let i = 0; hasNext; i++) {
+        myDocument = await docCursor.getNext();
+        if (!myDocument) {
+          hasNext = false;
+        } else {
+          myContents[i] = myDocument.getContent();
+          (t_contents).includes(myContents[i]);
+        }
+      }
+
+      assert.strictEqual(myContents.length, t_contents.length);
+
+      await docCursor.close();
+      await testsUtil.assertThrowsAsync(
+        async () => await docCursor.close(),
+        /NJS-066: invalid SODA document cursor/
+      );
+
+    } catch (err) {
+      assert.fail(err);
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        assert.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch (err) {
+          assert.fail(err);
+        }
+      }
+    }
+  }); // 175.8
+
+  it('175.9 getDocuments(), basic case', async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_175_9");
+
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
+
+      // Fetch back
+      let documents = await collection.find().getDocuments();
+
+      // Get contents
+      let myContents = [];
+      for (let i = 0; i < documents.length; i++) {
+        myContents[i] = documents[i].getContent();
+        (t_contents).includes(myContents[i]);
+      }
+
+    } catch (err) {
+      assert.fail(err);
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        assert.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch (err) {
+          assert.fail(err);
+        }
+      }
+    }
+  }); // 175.9
+
+  it('175.10 getDocuments(), no documents matched', async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_175_10");
+
+      // Fetch back
+      let documents = await collection.find().getDocuments();
+      assert.deepEqual(documents, []);
+
+    } catch (err) {
+      assert.fail(err);
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        assert.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch (err) {
+          assert.fail(err);
+        }
+      }
+    }
+  }); // 175.10
+
+  it('175.11 getOne(), basic case', async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_175_11");
 
       let myKeys = [];
       for (let i = 0; i < t_contents.length; i++) {
@@ -403,31 +495,195 @@ describe('176. soda8.js', () => {
         myKeys[i] = doc.key;
       }
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let updatedDocument = await collection
-        .find()
-        .key('4A5AF2AAEB124FD4BFF80BC3630CB048')
-        .replaceOneAndGet(inContent);
-      should.not.exist(updatedDocument);
+      // Fetch back
+      let document = await collection.find().key(myKeys[1]).getOne();
+      let content = document.getContent();
+      (t_contents).includes(content);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
-  }); // 175.8
+  }); // 175.11
 
+  it('175.12 getOne(), the filter matches multiple documents', async () => {
+    let conn, collection;
 
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_175_12");
+
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
+
+      // Fetch back
+      let document = await collection.find().getOne();
+      let content = document.getContent();
+      (t_contents).includes(content);
+
+    } catch (err) {
+      assert.fail(err);
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        assert.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch (err) {
+          assert.fail(err);
+        }
+      }
+    }
+  }); // 175.12
+
+  it('175.13 remove(), basic case', async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_175_13");
+
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
+
+      // Fetch back
+      let result = await collection
+        .find()
+        .filter({ "office": {"$like": "Shenzhen"} })
+        .remove();
+
+      assert.strictEqual(result.count, 2);
+
+      let remainingLength = await collection.find().count();
+      assert.strictEqual(remainingLength.count, (t_contents.length - result.count));
+
+    } catch (err) {
+      assert.fail(err);
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        assert.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch (err) {
+          assert.fail(err);
+        }
+      }
+    }
+  }); // 175.13
+
+  it('175.14 remove(), remove zero document', async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_175_14");
+
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
+
+      // Fetch back
+      let result = await collection
+        .find()
+        .key('4A5AF2AAEB124FD4BFF80BC3630CB048')
+        .remove();
+
+      assert.strictEqual(result.count, 0);
+
+      let remainingLength = await collection.find().count();
+      assert.strictEqual(remainingLength.count, (t_contents.length - result.count));
+
+    } catch (err) {
+      assert.fail(err);
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        assert.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch (err) {
+          assert.fail(err);
+        }
+      }
+    }
+  }); // 175.14
+
+  it('175.15 remove(), remove multiple times', async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_175_13");
+
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
+
+      // Fetch back
+      let result = await collection.find().remove();
+      result = await collection.find().remove();
+
+      assert.strictEqual(result.count, 0);
+
+      let remainingLength = await collection.find().count();
+      assert.strictEqual(remainingLength.count, 0);
+
+    } catch (err) {
+      assert.fail(err);
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        assert.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch (err) {
+          assert.fail(err);
+        }
+      }
+    }
+  }); // 175.15
 });

@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert    = require('assert');
 const dbconfig = require('./dbconfig.js');
 const sodaUtil = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
@@ -55,23 +55,23 @@ describe('177. soda9.js', () => {
       // fetch back
       let outDocuments = await collection.find().getDocuments();
       let outContent = outDocuments[0].getContent();
-      should.deepEqual(outContent, inContent);
+      assert.deepEqual(outContent, inContent);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
 
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -92,23 +92,23 @@ describe('177. soda9.js', () => {
       // fetch back
       let outDocuments = await collection.find().getDocuments();
       let outContent = outDocuments[0].getContent();
-      should.deepEqual(outContent, inContent);
+      assert.deepEqual(outContent, inContent);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
 
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -124,30 +124,30 @@ describe('177. soda9.js', () => {
 
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
       let middleDocument = await collection.insertOneAndGet(inContent);
-      should.exist(middleDocument);
+      assert(middleDocument);
       let middleContent = middleDocument.getContent();
-      should.not.exist(middleContent);
+      assert.ifError(middleContent);
 
       // Fetch it back
       let outDocuments = await collection.find().getDocuments();
       let outContent = outDocuments[0].getContent();
-      should.deepEqual(outContent, inContent);
+      assert.deepEqual(outContent, inContent);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
 
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -164,30 +164,30 @@ describe('177. soda9.js', () => {
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
       let inDocument = soda.createDocument(inContent);
       let middleDocument = await collection.insertOneAndGet(inDocument);
-      should.exist(middleDocument);
+      assert(middleDocument);
       let middleContent = middleDocument.getContent();
-      should.not.exist(middleContent);
+      assert.ifError(middleContent);
 
       // Fetch it back
       let outDocuments = await collection.find().getDocuments();
       let outContent = outDocuments[0].getContent();
-      should.deepEqual(outContent, inContent);
+      assert.deepEqual(outContent, inContent);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
 
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -206,17 +206,17 @@ describe('177. soda9.js', () => {
 
       // Get content without being inserted
       let outContent = inDocument.getContent();
-      should.deepEqual(outContent, inContent);
+      assert.deepEqual(outContent, inContent);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }

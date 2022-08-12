@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
@@ -60,22 +60,22 @@ describe('175. soda7.js', () => {
 
       // Fetch back
       let emps = await collection.find().count();
-      should.strictEqual(emps.count, t_contents.length);
+      assert.strictEqual(emps.count, t_contents.length);
 
       await conn.commit();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -104,18 +104,18 @@ describe('175. soda7.js', () => {
       // ORA-40748: SKIP and LIMIT attributes cannot be used for count operation.
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -144,18 +144,18 @@ describe('175. soda7.js', () => {
       // ORA-40748: SKIP and LIMIT attributes cannot be used for count operation.
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -179,24 +179,24 @@ describe('175. soda7.js', () => {
       // Fetch back
       let keysToCount = [ myKeys[2], myKeys[3] ];
       let emps = await collection.find().keys(keysToCount).count();
-      should.strictEqual(emps.count, keysToCount.length);
+      assert.strictEqual(emps.count, keysToCount.length);
 
       await conn.commit();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -228,28 +228,28 @@ describe('175. soda7.js', () => {
           hasNext = false;
         } else {
           myContents[i] = myDocument.getContent();
-          (myContents[i]).should.be.oneOf(t_contents);
+          (t_contents).includes(myContents[i]);
         }
       }
 
-      should.strictEqual(myContents.length, t_contents.length);
+      assert.strictEqual(myContents.length, t_contents.length);
 
       await docCursor.close();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -282,27 +282,27 @@ describe('175. soda7.js', () => {
           hasNext = false;
         } else {
           myContents[i] = myDocument.getContent();
-          (myContents[i]).should.be.oneOf(t_contents);
+          (t_contents).includes(myContents[i]);
         }
       }
 
-      should.strictEqual(myContents.length, (t_contents.length - numberToSkip));
+      assert.strictEqual(myContents.length, (t_contents.length - numberToSkip));
       await docCursor.close();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -327,23 +327,23 @@ describe('175. soda7.js', () => {
       let docCursor = await collection.find().skip(numberToSkip).getCursor();
 
       let myDocument = await docCursor.getNext();
-      should.strictEqual(myDocument, undefined);
+      assert.strictEqual(myDocument, undefined);
       await docCursor.close();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -375,11 +375,11 @@ describe('175. soda7.js', () => {
           hasNext = false;
         } else {
           myContents[i] = myDocument.getContent();
-          (myContents[i]).should.be.oneOf(t_contents);
+          (t_contents).includes(myContents[i]);
         }
       }
 
-      should.strictEqual(myContents.length, t_contents.length);
+      assert.strictEqual(myContents.length, t_contents.length);
 
       await docCursor.close();
       await testsUtil.assertThrowsAsync(
@@ -388,19 +388,19 @@ describe('175. soda7.js', () => {
       );
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -427,23 +427,23 @@ describe('175. soda7.js', () => {
       let myContents = [];
       for (let i = 0; i < documents.length; i++) {
         myContents[i] = documents[i].getContent();
-        (myContents[i]).should.be.oneOf(t_contents);
+        (t_contents).includes(myContents[i]);
       }
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -459,22 +459,22 @@ describe('175. soda7.js', () => {
 
       // Fetch back
       let documents = await collection.find().getDocuments();
-      should.deepEqual(documents, []);
+      assert.deepEqual(documents, []);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -498,22 +498,22 @@ describe('175. soda7.js', () => {
       // Fetch back
       let document = await collection.find().key(myKeys[1]).getOne();
       let content = document.getContent();
-      content.should.be.oneOf(t_contents);
+      (t_contents).includes(content);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -536,22 +536,22 @@ describe('175. soda7.js', () => {
       // Fetch back
       let document = await collection.find().getOne();
       let content = document.getContent();
-      content.should.be.oneOf(t_contents);
+      (t_contents).includes(content);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -577,25 +577,25 @@ describe('175. soda7.js', () => {
         .filter({ "office": {"$like": "Shenzhen"} })
         .remove();
 
-      should.strictEqual(result.count, 2);
+      assert.strictEqual(result.count, 2);
 
       let remainingLength = await collection.find().count();
-      should.strictEqual(remainingLength.count, (t_contents.length - result.count));
+      assert.strictEqual(remainingLength.count, (t_contents.length - result.count));
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -621,25 +621,25 @@ describe('175. soda7.js', () => {
         .key('4A5AF2AAEB124FD4BFF80BC3630CB048')
         .remove();
 
-      should.strictEqual(result.count, 0);
+      assert.strictEqual(result.count, 0);
 
       let remainingLength = await collection.find().count();
-      should.strictEqual(remainingLength.count, (t_contents.length - result.count));
+      assert.strictEqual(remainingLength.count, (t_contents.length - result.count));
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -663,25 +663,25 @@ describe('175. soda7.js', () => {
       let result = await collection.find().remove();
       result = await collection.find().remove();
 
-      should.strictEqual(result.count, 0);
+      assert.strictEqual(result.count, 0);
 
       let remainingLength = await collection.find().count();
-      should.strictEqual(remainingLength.count, 0);
+      assert.strictEqual(remainingLength.count, 0);
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       await conn.commit();
 
       if (collection) {
         let res = await collection.drop();
-        should.strictEqual(res.dropped, true);
+        assert.strictEqual(res.dropped, true);
       }
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }

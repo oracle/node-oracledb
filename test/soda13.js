@@ -25,7 +25,6 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
 const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
@@ -65,20 +64,20 @@ describe('231. soda13.js', () => {
       await coll.insertOne({fred: 5, george: 6});
       await coll.insertOne({fred: 8, george: 9});
       const docs1 = await coll.find().getDocuments();
-      should.strictEqual(docs1.length, 2);
+      assert.strictEqual(docs1.length, 2);
 
       // (2)
       await coll.truncate();
       const docs2 = await coll.find().getDocuments();
-      should.strictEqual(docs2.length, 0);
+      assert.strictEqual(docs2.length, 0);
 
       await conn.commit();
       let res = await coll.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
       await conn.close();
 
     } catch (error) {
-      should.not.exist(error);
+      assert.fail(error);
     }
   }); // 231.1
 
@@ -95,21 +94,21 @@ describe('231. soda13.js', () => {
       await coll.truncate();
       await coll.truncate();
       const docs1 = await coll.find().getDocuments();
-      should.strictEqual(docs1.length, 0);
+      assert.strictEqual(docs1.length, 0);
 
       await coll.insertOne({fred: 1, george: 2});
       await coll.insertOne({fred: 3, george: 4});
       await coll.insertOne({fred: 5, george: 6});
       const docs2 = await coll.find().getDocuments();
-      should.strictEqual(docs2.length, 3);
+      assert.strictEqual(docs2.length, 3);
 
       await conn.commit();
       let res = await coll.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
       await conn.close();
 
     } catch (error) {
-      should.not.exist(error);
+      assert.fail(error);
     }
   }); // 231.2
 
@@ -133,11 +132,11 @@ describe('231. soda13.js', () => {
 
       await conn.commit();
       let res = await coll.drop();
-      should.strictEqual(res.dropped, true);
+      assert.strictEqual(res.dropped, true);
       await conn.close();
 
     } catch (error) {
-      should.not.exist(error);
+      assert.fail(error);
     }
   }); // 231.3
 });

@@ -25,7 +25,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
@@ -53,16 +53,16 @@ describe('165. soda2.js', () => {
       let coll_create = await sd1.createCollection(collName);
       // sd2 opens the collection
       let coll_open = await sd2.openCollection(collName);
-      should.exist(coll_open);
+      assert(coll_open);
       await coll_create.drop();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -81,24 +81,24 @@ describe('165. soda2.js', () => {
       let coll = await sd1.createCollection(t_collname);
 
       let cNames = await sd2.getCollectionNames();
-      should.deepEqual(cNames, [ t_collname ]);
+      assert.deepEqual(cNames, [ t_collname ]);
 
       await coll.drop();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (conn1) {
         try {
           await conn1.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
       if (conn2) {
         try {
           await conn2.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -115,17 +115,17 @@ describe('165. soda2.js', () => {
       let coll = await sd.createCollection(t_collname);
 
       let cNames = await sd.getCollectionNames();
-      should.deepEqual(cNames, [ t_collname ]);
+      assert.deepEqual(cNames, [ t_collname ]);
 
       await coll.drop();
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (conn) {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -145,13 +145,13 @@ describe('165. soda2.js', () => {
       // ORA-40658: Collection name cannot be null for this operation.
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     } finally {
       if (coll) {
         try {
           await coll.drop();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
 
@@ -159,7 +159,7 @@ describe('165. soda2.js', () => {
         try {
           await conn.close();
         } catch (err) {
-          should.not.exist(err);
+          assert.fail(err);
         }
       }
     }
@@ -169,11 +169,10 @@ describe('165. soda2.js', () => {
   it('165.5 connections from a pool concurrently insert documents into the same collection', async () => {
 
     const collectionName = "soda_test_165.5";
-
     try {
       await prepareCollection(collectionName);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
     try {
@@ -185,17 +184,16 @@ describe('165. soda2.js', () => {
           return insertDocument(pool, collectionName, content);
         })
       );
-
       await pool.close();
 
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
     try {
       await dropCollection(collectionName);
     } catch (err) {
-      should.not.exist(err);
+      assert.fail(err);
     }
 
     async function prepareCollection(collName) {
@@ -219,7 +217,7 @@ describe('165. soda2.js', () => {
         await conn.close();
 
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
 
     } // prepareCollection()
@@ -232,11 +230,10 @@ describe('165. soda2.js', () => {
         let collection = await soda.openCollection(collName);
 
         await collection.insertOne(content);
-
         await conn.commit();
         await conn.close();
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     } // insertDocument()
 
@@ -248,13 +245,13 @@ describe('165. soda2.js', () => {
         let collection = await soda.openCollection(collName);
 
         let result = await collection.drop();
-        should.strictEqual(result.dropped, true);
+        assert.strictEqual(result.dropped, true);
 
         await conn.commit();
         await conn.close();
 
       } catch (err) {
-        should.not.exist(err);
+        assert.fail(err);
       }
     } // dropCollection()
 

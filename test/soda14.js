@@ -25,7 +25,6 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
 const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
@@ -75,7 +74,7 @@ describe('238. soda14.js', () => {
 
       await conn.commit();
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     }
   }); // before()
 
@@ -83,11 +82,11 @@ describe('238. soda14.js', () => {
     if (conn) {
       try {
         let result = await coll.drop();
-        should.strictEqual(result.dropped, true);
+        assert.strictEqual(result.dropped, true);
 
         await conn.close();
       } catch (err) {
-        should.not.exist(err);
+        assert.ifError(err);
       }
     }
   }); // after()
@@ -97,9 +96,9 @@ describe('238. soda14.js', () => {
       const SIZE = 100;
       const docs = await coll.find().fetchArraySize(SIZE).getDocuments();
 
-      should.strictEqual(docs.length, DocSize);
+      assert.strictEqual(docs.length, DocSize);
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     }
   }); // 238.1
 
@@ -108,9 +107,9 @@ describe('238. soda14.js', () => {
       const SIZE = 10000;
       const docs = await coll.find().fetchArraySize(SIZE).getDocuments();
 
-      should.strictEqual(docs.length, DocSize);
+      assert.strictEqual(docs.length, DocSize);
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     }
   }); // 238.2
 
@@ -123,9 +122,9 @@ describe('238. soda14.js', () => {
         },
         /NJS-009/
       );
-      should.not.exist(docs);
+      assert.ifError(docs);
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     }
   }); // 238.3
 
@@ -134,9 +133,9 @@ describe('238. soda14.js', () => {
       const SIZE = 0;
       const docs = await coll.find().fetchArraySize(SIZE).getDocuments();
 
-      should.strictEqual(docs.length, DocSize);
+      assert.strictEqual(docs.length, DocSize);
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     }
   }); // 238.4
 
@@ -151,9 +150,9 @@ describe('238. soda14.js', () => {
         /NJS-007/
       );
 
-      should.not.exist(docs);
+      assert.ifError(docs);
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     }
   }); // 238.5
 });
