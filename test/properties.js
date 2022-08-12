@@ -25,17 +25,16 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
-var assist   = require('./dataTypeAssist.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const assist   = require('./dataTypeAssist.js');
 
 describe('58. properties.js', function() {
 
   describe('58.1 Oracledb Class', function() {
 
-    var defaultValues = {};
+    const defaultValues = {};
 
     before('save the default values', function() {
       defaultValues.poolMin          = oracledb.poolMin;
@@ -84,65 +83,65 @@ describe('58. properties.js', function() {
     });
 
     it('58.1.1 poolMin', function() {
-      var t = oracledb.poolMin;
+      const t = oracledb.poolMin;
       oracledb.poolMin = t + 1;
 
-      t.should.eql(defaultValues.poolMin);
-      (oracledb.poolMin).should.eql(defaultValues.poolMin + 1);
+      assert.equal(t, defaultValues.poolMin);
+      assert.equal(oracledb.poolMin, defaultValues.poolMin + 1);
     });
 
     it('58.1.2 poolMax', function() {
-      var t = oracledb.poolMax;
+      const t = oracledb.poolMax;
       oracledb.poolMax = t + 1;
 
-      t.should.eql(defaultValues.poolMax);
-      (oracledb.poolMax).should.eql(defaultValues.poolMax + 1);
+      assert.equal(t, defaultValues.poolMax);
+      assert.equal(oracledb.poolMax, defaultValues.poolMax + 1);
     });
 
     it('58.1.3 poolIncrement', function() {
-      var t = oracledb.poolIncrement;
+      const t = oracledb.poolIncrement;
       oracledb.poolIncrement = t + 1;
 
-      t.should.eql(defaultValues.poolIncrement);
-      (oracledb.poolIncrement).should.eql(defaultValues.poolIncrement + 1);
+      assert.equal(t, defaultValues.poolIncrement);
+      assert.equal(oracledb.poolIncrement, defaultValues.poolIncrement + 1);
     });
 
     it('58.1.4 poolTimeout', function() {
-      var t = oracledb.poolTimeout;
+      const t = oracledb.poolTimeout;
       oracledb.poolTimeout = t + 1;
 
-      t.should.eql(defaultValues.poolTimeout);
-      (oracledb.poolTimeout).should.eql(defaultValues.poolTimeout + 1);
+      assert.equal(t, defaultValues.poolTimeout);
+      assert.equal(oracledb.poolTimeout, defaultValues.poolTimeout + 1);
     });
 
     it('58.1.5 maxRows', function() {
-      var t = oracledb.maxRows;
+      const t = oracledb.maxRows;
       oracledb.maxRows = t + 1;
 
-      t.should.eql(defaultValues.maxRows);
-      (oracledb.maxRows).should.eql(defaultValues.maxRows + 1);
+      assert.equal(t, defaultValues.maxRows);
+      assert.equal(oracledb.maxRows, defaultValues.maxRows + 1);
     });
 
     it('58.1.6 fetchArraySize', function() {
-      var t = oracledb.fetchArraySize;
+      const t = oracledb.fetchArraySize;
       oracledb.fetchArraySize = t + 1;
 
-      t.should.eql(defaultValues.fetchArraySize);
-      (oracledb.fetchArraySize).should.eql(defaultValues.fetchArraySize + 1);
+      assert.equal(t, defaultValues.fetchArraySize);
+      assert.equal(oracledb.fetchArraySize, defaultValues.fetchArraySize + 1);
     });
 
     it('58.1.7 autoCommit', function() {
-      var t = oracledb.autoCommit;
+      const t = oracledb.autoCommit;
       oracledb.autoCommit = !t;
 
-      t.should.eql(defaultValues.autoCommit);
-      (oracledb.autoCommit).should.eql(!defaultValues.autoCommit);
+      assert.equal(t, defaultValues.autoCommit);
+      assert.equal(oracledb.autoCommit, !defaultValues.autoCommit);
 
     });
 
     it('58.1.8 version (read-only)', function() {
-      (oracledb.version).should.be.a.Number();
-      should.throws(
+      assert.equal(typeof oracledb.version, 'number');
+      assert.throws(
         function() {
           oracledb.version = 5;
         },
@@ -151,51 +150,51 @@ describe('58. properties.js', function() {
     });
 
     it('58.1.9 connectionClass', function() {
-      var t = oracledb.connectionClass;
+      const t = oracledb.connectionClass;
       oracledb.connectionClass = 'DEVPOOL';
-      var cclass = oracledb.connectionClass;
+      const cclass = oracledb.connectionClass;
 
-      should.equal(t, '');
-      should.strictEqual(cclass, 'DEVPOOL');
+      assert.equal(t, '');
+      assert.strictEqual(cclass, 'DEVPOOL');
     });
 
     it('58.1.10 externalAuth', function() {
-      var t = oracledb.externalAuth;
+      const t = oracledb.externalAuth;
       oracledb.externalAuth = !t;
 
-      t.should.eql(defaultValues.externalAuth);
-      (oracledb.externalAuth).should.eql(!defaultValues.externalAuth);
+      assert.equal(t, defaultValues.externalAuth);
+      assert.equal(oracledb.externalAuth, !defaultValues.externalAuth);
     });
 
     it('58.1.11 fetchAsString', function() {
-      var t = oracledb.fetchAsString;
+      const t = oracledb.fetchAsString;
       oracledb.fetchAsString = [oracledb.DATE];
 
-      t.should.eql(defaultValues.fetchAsString);
-      (oracledb.fetchAsString).should.not.eql(defaultValues.fetchAsString);
+      assert.deepEqual(t, defaultValues.fetchAsString);
+      assert.notEqual(oracledb.fetchAsString, defaultValues.fetchAsString);
     });
 
     it('58.1.12 outFormat', function() {
-      var t = oracledb.outFormat;
+      const t = oracledb.outFormat;
       oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
-      t.should.eql(oracledb.OUT_FORMAT_ARRAY);
-      (oracledb.outFormat).should.not.eql(defaultValues.outFormat);
+      assert.equal(t, oracledb.OUT_FORMAT_ARRAY);
+      assert.notEqual(oracledb.outFormat, defaultValues.outFormat);
     });
 
     it('58.1.13 lobPrefetchSize', function() {
-      var t = oracledb.lobPrefetchSize;
+      const t = oracledb.lobPrefetchSize;
       oracledb.lobPrefetchSize = t + 1;
 
-      t.should.eql(defaultValues.lobPrefetchSize);
-      (oracledb.lobPrefetchSize).should.eql(defaultValues.lobPrefetchSize + 1);
+      assert.equal(t, defaultValues.lobPrefetchSize);
+      assert.equal(oracledb.lobPrefetchSize, defaultValues.lobPrefetchSize + 1);
     });
 
     it('58.1.14 oracleClientVersion (read-only)', function() {
-      var t = oracledb.oracleClientVersion;
-      t.should.be.a.Number();
+      const t = oracledb.oracleClientVersion;
+      assert.equal(typeof t, 'number');
 
-      should.throws(
+      assert.throws(
         function() {
           oracledb.oracleClientVersion = t + 1;
         },
@@ -204,86 +203,86 @@ describe('58. properties.js', function() {
     });
 
     it('58.1.15 queueTimeout', function() {
-      var t = oracledb.queueTimeout;
+      const t = oracledb.queueTimeout;
       oracledb.queueTimeout = t + 1000;
 
-      should.equal(t, defaultValues.queueTimeout);
-      should.notEqual(oracledb.queueTimeout, defaultValues.queueTimeout);
+      assert.equal(t, defaultValues.queueTimeout);
+      assert.notEqual(oracledb.queueTimeout, defaultValues.queueTimeout);
     });
 
     it('58.1.16 queueMax', function() {
-      var t = oracledb.queueMax;
+      const t = oracledb.queueMax;
       oracledb.queueMax = t + 1000;
 
-      should.equal(t, defaultValues.queueMax);
-      should.notEqual(oracledb.queueMax, defaultValues.queueMax);
+      assert.equal(t, defaultValues.queueMax);
+      assert.notEqual(oracledb.queueMax, defaultValues.queueMax);
     });
 
     it('58.1.17 stmtCacheSize', function() {
-      var t = oracledb.stmtCacheSize;
+      const t = oracledb.stmtCacheSize;
       oracledb.stmtCacheSize = t + 5;
 
-      should.equal(t, defaultValues.stmtCacheSize);
-      should.notEqual(oracledb.stmtCacheSize, defaultValues.stmtCacheSize);
+      assert.equal(t, defaultValues.stmtCacheSize);
+      assert.notEqual(oracledb.stmtCacheSize, defaultValues.stmtCacheSize);
     });
 
     it('58.1.18 poolPingInterval', function() {
-      var t = oracledb.poolPingInterval;
+      const t = oracledb.poolPingInterval;
       oracledb.poolPingInterval = t + 100;
 
-      should.equal(t, defaultValues.poolPingInterval);
-      should.notEqual(oracledb.poolPingInterval, defaultValues.poolPingInterval);
+      assert.equal(t, defaultValues.poolPingInterval);
+      assert.notEqual(oracledb.poolPingInterval, defaultValues.poolPingInterval);
     });
 
     it('58.1.19 fetchAsBuffer', function() {
-      var t = oracledb.fetchAsBuffer;
+      const t = oracledb.fetchAsBuffer;
       oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 
-      t.should.eql(defaultValues.fetchAsBuffer);
-      (oracledb.fetchAsBuffer).should.not.eql(defaultValues.fetchAsBuffer);
+      assert.deepEqual(t, defaultValues.fetchAsBuffer);
+      assert.notEqual(oracledb.fetchAsBuffer, defaultValues.fetchAsBuffer);
     });
 
     it('58.1.20 Negative - connectionClass ', function() {
-      should.throws(
+      assert.throws(
         function() {
           oracledb.connectionClass = NaN;
         },
-        /NJS-004: invalid value for property [\w]/
+        /NJS-004:/
       );
     });
 
     it('58.1.21 Negative - autoCommit', function() {
-      should.throws(
+      assert.throws(
         function() {
           oracledb.autoCommit = 2017;
         },
-        /NJS-004: invalid value for property [\w]/
+        /NJS-004:/
       );
     });
 
     it('58.1.22 Negative - outFormat', function() {
-      should.throws(
+      assert.throws(
         function() {
           oracledb.outFormat = 'abc';
         },
-        /NJS-004: invalid value for property [\w]/
+        /NJS-004:/
       );
     });
 
     it('58.1.23 Negative - externalAuth', function() {
-      should.throws(
+      assert.throws(
         function() {
           oracledb.externalAuth = 2017;
         },
-        /NJS-004: invalid value for property [\w]/
+        /NJS-004:/
       );
     });
 
     it('58.1.24 versionString (read-only)', function() {
-      var t = oracledb.versionString;
-      t.should.be.a.String();
+      const t = oracledb.versionString;
+      assert.equal(typeof t, 'string');
 
-      should.throws(
+      assert.throws(
         function() {
           oracledb.versionString = t + "foobar";
         },
@@ -292,12 +291,12 @@ describe('58. properties.js', function() {
     });
 
     it('58.1.25 versionSuffix (read-only)', function() {
-      var t = oracledb.versionSuffix;
+      const t = oracledb.versionSuffix;
 
       if (t) // it could be a String, or undefined
-        t.should.be.a.String();
+        assert.equal(typeof t, 'string');
 
-      should.throws(
+      assert.throws(
         function() {
           oracledb.versionSuffix = t + "foobar";
         },
@@ -306,10 +305,10 @@ describe('58. properties.js', function() {
     });
 
     it('58.1.26 oracleClientVersionString (read-only)', function() {
-      var t = oracledb.oracleClientVersionString;
-      t.should.be.a.String();
+      const t = oracledb.oracleClientVersionString;
+      assert.equal(typeof t, 'string');
 
-      should.throws(
+      assert.throws(
         function() {
           oracledb.oracleClientVersion = t + "foobar";
         },
@@ -318,81 +317,165 @@ describe('58. properties.js', function() {
     });
 
     it('58.1.27 edition', function() {
-      var t = oracledb.edition;
+      const t = oracledb.edition;
       oracledb.edition = 'foobar';
-      var e = oracledb.edition;
+      const e = oracledb.edition;
 
-      should.equal(t, '');
-      should.strictEqual(e, 'foobar');
+      assert.equal(t, '');
+      assert.strictEqual(e, 'foobar');
     });
 
     it('58.1.28 Negative - edition', function() {
-      should.throws(
+      assert.throws(
         function() {
           oracledb.edition = 123;
         },
-        /NJS-004: invalid value for property edition/
+        /NJS-004: */
       );
     });
 
     it('58.1.29 events', function() {
-      var t = oracledb.events;
+      const t = oracledb.events;
       oracledb.events = true;
 
-      should.strictEqual(t, false);
-      should.strictEqual(oracledb.events, true);
+      assert.strictEqual(t, false);
+      assert.strictEqual(oracledb.events, true);
     });
 
     it('58.1.30 Negative - events', function() {
-      should.throws(
+      assert.throws(
         function() {
           oracledb.events = 'hello';
         },
-        /NJS-004: invalid value for property events/
+        /NJS-004: */
       );
     });
 
     it('58.1.31 dbObjectAsPojo', function() {
-      var t = oracledb.dbObjectAsPojo;
+      const t = oracledb.dbObjectAsPojo;
       oracledb.dbObjectAsPojo = !t;
 
-      t.should.eql(defaultValues.dbObjectAsPojo);
-      (oracledb.dbObjectAsPojo).should.eql(!defaultValues.dbObjectAsPojo);
+      assert.equal(t, defaultValues.dbObjectAsPojo);
+      assert.equal(oracledb.dbObjectAsPojo, !defaultValues.dbObjectAsPojo);
 
     });
 
-  }); // 58.1
-
-  describe('58.2 Pool Class', function() {
-    var pool = null;
-
-    before(function(done) {
-      oracledb.createPool(
-        {
-          user:          dbConfig.user,
-          password:      dbConfig.password,
-          connectString: dbConfig.connectString
+    it('58.1.32 Negative - fetchArraySize', function() {
+      assert.throws(
+        function() {
+          oracledb.fetchArraySize = -2017;
         },
-        function(err, p) {
-          should.not.exist(err);
-          pool = p;
-          done();
-        }
+        /NJS-004:/
       );
     });
 
-    after(function(done) {
-      pool.terminate(function(err) {
-        should.not.exist(err);
-        done();
-      });
+    it('58.1.33 Negative - dbObjectAsPojo', function() {
+      assert.throws(
+        function() {
+          oracledb.dbObjectAsPojo = "oracle";
+        },
+        /NJS-004:/
+      );
+    });
+
+    it('58.1.34 Negative - fetchAsString', function() {
+      assert.throws(
+        function() {
+          oracledb.fetchAsString = 2022;
+        },
+        /NJS-004:/
+      );
+
+      assert.throws(
+        function() {
+          oracledb.fetchAsString = [2022];
+        },
+        /NJS-021:/
+      );
+    });
+
+    it('58.1.35 Negative - lobPrefetchSize', function() {
+      assert.throws(
+        function() {
+          oracledb.lobPrefetchSize = -2022;
+        },
+        /NJS-004:/
+      );
+    });
+
+    it('58.1.36 Negative - maxRows', function() {
+      assert.throws(
+        function() {
+          oracledb.maxRows = -2022;
+        },
+        /NJS-004:/
+      );
+    });
+
+    it('58.1.37 Negative - poolIncrement', function() {
+      assert.throws(
+        function() {
+          oracledb.poolIncrement = -2022;
+        },
+        /NJS-004:/
+      );
+    });
+
+    it('58.1.38 Negative - poolMin', function() {
+      assert.throws(
+        function() {
+          oracledb.poolMin = -2022;
+        },
+        /NJS-004:/
+      );
+    });
+
+    it('58.1.39 Negative - poolMax', function() {
+      assert.throws(
+        function() {
+          oracledb.poolMax = -2022;
+        },
+        /NJS-004:/
+      );
+    });
+
+    it('58.1.40 Negative - poolTimeout', function() {
+      assert.throws(
+        function() {
+          oracledb.poolTimeout = -2022;
+        },
+        /NJS-004:/
+      );
+    });
+
+    it('58.1.41 Negative - stmtCacheSize', function() {
+      assert.throws(
+        function() {
+          oracledb.stmtCacheSize = -2022;
+        },
+        /NJS-004:/
+      );
+    });
+  }); // 58.1
+
+  describe('58.2 Pool Class', function() {
+    let pool;
+
+    before(async function() {
+      pool = await oracledb.createPool(dbConfig);
+    });
+
+    after(async function() {
+      if (pool) {
+        await pool.close();
+      }
     });
 
     it('58.2.1 poolMin', function() {
-      var t = pool.poolMin;
-      t.should.be.a.Number();
+      const t = pool.poolMin;
+      assert.equal(typeof t, 'number');
 
-      should.throws(
+      assert.throws(
         function() {
           pool.poolMin = t + 1;
         },
@@ -401,10 +484,10 @@ describe('58. properties.js', function() {
     });
 
     it('58.2.2 poolMax', function() {
-      var t = pool.poolMax;
-      t.should.be.a.Number();
+      const t = pool.poolMax;
+      assert.equal(typeof t, 'number');
 
-      should.throws(
+      assert.throws(
         function() {
           pool.poolMax = t + 1;
         },
@@ -413,10 +496,10 @@ describe('58. properties.js', function() {
     });
 
     it('58.2.3 poolIncrement', function() {
-      var t = pool.poolIncrement;
-      t.should.be.a.Number();
+      const t = pool.poolIncrement;
+      assert.equal(typeof t, 'number');
 
-      should.throws(
+      assert.throws(
         function() {
           pool.poolIncrement = t + 1;
         },
@@ -425,10 +508,10 @@ describe('58. properties.js', function() {
     });
 
     it('58.2.4 poolTimeout', function() {
-      var t = pool.poolTimeout;
-      t.should.be.a.Number();
+      const t = pool.poolTimeout;
+      assert.equal(typeof t, 'number');
 
-      should.throws(
+      assert.throws(
         function() {
           pool.poolTimeout = t + 1;
         },
@@ -437,10 +520,10 @@ describe('58. properties.js', function() {
     });
 
     it('58.2.5 stmtCacheSize', function() {
-      var t = pool.stmtCacheSize;
-      t.should.be.a.Number();
+      const t = pool.stmtCacheSize;
+      assert.equal(typeof t, 'number');
 
-      should.throws(
+      assert.throws(
         function() {
           pool.stmtCacheSize = t + 1;
         },
@@ -449,10 +532,10 @@ describe('58. properties.js', function() {
     });
 
     it('58.2.6 connectionsInUse', function() {
-      var t = pool.connectionsInUse;
-      t.should.be.a.Number();
+      const t = pool.connectionsInUse;
+      assert.equal(typeof t, 'number');
 
-      should.throws(
+      assert.throws(
         function() {
           pool.connectionsInUse = t + 1;
         },
@@ -461,10 +544,10 @@ describe('58. properties.js', function() {
     });
 
     it('58.2.7 connectionsOpen', function() {
-      var t = pool.connectionsOpen;
-      t.should.be.a.Number();
+      const t = pool.connectionsOpen;
+      assert.equal(typeof t, 'number');
 
-      should.throws(
+      assert.throws(
         function() {
           pool.connectionsOpen = t + 1;
         },
@@ -473,10 +556,10 @@ describe('58. properties.js', function() {
     });
 
     it('58.2.8 queueTimeout', function() {
-      var t = pool.queueTimeout;
-      t.should.be.a.Number();
+      const t = pool.queueTimeout;
+      assert.equal(typeof t, 'number');
 
-      should.throws(
+      assert.throws(
         function() {
           pool.queueTimeout = t + 1000;
         },
@@ -485,10 +568,10 @@ describe('58. properties.js', function() {
     });
 
     it('58.2.9 poolPingInterval', function() {
-      var t = pool.poolPingInterval;
-      t.should.be.a.Number();
+      const t = pool.poolPingInterval;
+      assert.equal(typeof t, 'number');
 
-      should.throws(
+      assert.throws(
         function() {
           pool.poolPingInterval = t + 100;
         },
@@ -497,10 +580,10 @@ describe('58. properties.js', function() {
     });
 
     it('58.2.10 queueMax', function() {
-      var t = pool.queueMax;
-      t.should.be.a.Number();
+      const t = pool.queueMax;
+      assert.equal(typeof t, 'number');
 
-      should.throws(
+      assert.throws(
         function() {
           pool.queueMax = t + 1000;
         },
@@ -511,46 +594,34 @@ describe('58. properties.js', function() {
   }); // 58.2
 
   describe('58.3 Connection Class', function() {
-    var connection = null;
+    let connection;
 
-    before('get one connection', function(done) {
-      oracledb.getConnection(
-        {
-          user:          dbConfig.user,
-          password:      dbConfig.password,
-          connectString: dbConfig.connectString
-        },
-        function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          done();
-        }
-      );
+    before('get one connection', async function() {
+      connection = await oracledb.getConnection(dbConfig);
     });
 
-    after('release connection', function(done) {
-      connection.release(function(err) {
-        should.not.exist(err);
-        done();
-      });
+    after('release connection', async function() {
+      if (connection) {
+        await connection.close();
+      }
     });
 
     it('58.3.1 Connection object initial toString values', function() {
-      connection.should.be.an.Object;
+      assert.equal(typeof connection, 'object');
 
-      should.equal(connection.action, null);
-      should.equal(connection.module, null);
-      should.equal(connection.clientId, null);
+      assert.equal(connection.action, null);
+      assert.equal(connection.module, null);
+      assert.equal(connection.clientId, null);
 
-      (connection.stmtCacheSize).should.be.a.Number();
-      (connection.stmtCacheSize).should.be.greaterThan(0);
+      assert.equal(typeof connection.stmtCacheSize, 'number');
+      assert.ok(connection.stmtCacheSize > 0);
     });
 
     it('58.3.2 stmtCacheSize (read-only)', function() {
-      var t = connection.stmtCacheSize;
-      t.should.be.a.Number();
+      const t = connection.stmtCacheSize;
+      assert.equal(typeof t, 'number');
 
-      should.throws(
+      assert.throws(
         function() {
           connection.stmtCacheSize = t + 1;
         },
@@ -559,17 +630,17 @@ describe('58. properties.js', function() {
     });
 
     it('58.3.3 clientId (write-only)', function() {
-      var t = connection.clientId;
-      should.strictEqual(t, null);
+      const t = connection.clientId;
+      assert.strictEqual(t, null);
 
-      should.throws(
+      assert.throws(
         function() {
           connection.clientId = 4;
         },
-        /NJS-004: invalid value for property [\w]/
+        /NJS-004:/
       );
 
-      should.doesNotThrow(
+      assert.doesNotThrow(
         function() {
           connection.clientId = "103.3";
         }
@@ -577,17 +648,17 @@ describe('58. properties.js', function() {
     });
 
     it('58.3.4 action (write-only)', function() {
-      var t = connection.action;
-      should.strictEqual(t, null);
+      const t = connection.action;
+      assert.strictEqual(t, null);
 
-      should.throws(
+      assert.throws(
         function() {
           connection.action = 4;
         },
-        /NJS-004: invalid value for property [\w]/
+        /NJS-004:/
       );
 
-      should.doesNotThrow(
+      assert.doesNotThrow(
         function() {
           connection.action = "103.3 action";
         }
@@ -595,17 +666,17 @@ describe('58. properties.js', function() {
     });
 
     it('58.3.5 module (write-only)', function() {
-      var t = connection.module;
-      should.strictEqual(t, null);
+      const t = connection.module;
+      assert.strictEqual(t, null);
 
-      should.throws(
+      assert.throws(
         function() {
           connection.module = 4;
         },
-        /NJS-004: invalid value for property [\w]/
+        /NJS-004:/
       );
 
-      should.doesNotThrow(
+      assert.doesNotThrow(
         function() {
           connection.clientId = "103.3 module";
         }
@@ -613,10 +684,10 @@ describe('58. properties.js', function() {
     });
 
     it('58.3.6 oracleServerVersion (read-only)', function() {
-      var t = connection.oracleServerVersion;
-      t.should.be.a.Number();
+      const t = connection.oracleServerVersion;
+      assert.equal(typeof t, 'number');
 
-      should.throws(
+      assert.throws(
         function() {
           connection.oracleServerVersion = t + 1;
         },
@@ -625,10 +696,10 @@ describe('58. properties.js', function() {
     });
 
     it('58.3.7 oracleServerVersionString (read-only)', function() {
-      var t = connection.oracleServerVersionString;
-      t.should.be.a.String();
+      const t = connection.oracleServerVersionString;
+      assert.equal(typeof t, 'string');
 
-      should.throws(
+      assert.throws(
         function() {
           connection.oracleServerVersion = t + "foobar";
         },
@@ -637,17 +708,17 @@ describe('58. properties.js', function() {
     });
 
     it('58.3.8 currentSchema', function() {
-      var t = connection.currentSchema;
-      should.strictEqual(t, '');
+      const t = connection.currentSchema;
+      assert.strictEqual(t, '');
 
-      should.throws(
+      assert.throws(
         function() {
           connection.currentSchema = 4;
         },
-        /NJS-004: invalid value for property [\w]/
+        /NJS-004:/
       );
 
-      should.doesNotThrow(
+      assert.doesNotThrow(
         function() {
           connection.currentSchema = dbConfig.user;
         }
@@ -658,71 +729,39 @@ describe('58. properties.js', function() {
 
   describe('58.4 ResultSet Class', function() {
 
-    var tableName = "nodb_number";
-    var numbers = assist.data.numbers;
-    var connection = null;
-    var resultSet = null;
+    const tableName = "nodb_number";
+    const numbers = assist.data.numbers;
+    let connection;
+    let resultSet;
+    let result;
 
-    before('get resultSet class', function(done) {
-      async.series([
-        function(callback) {
-          oracledb.getConnection(
-            {
-              user:          dbConfig.user,
-              password:      dbConfig.password,
-              connectString: dbConfig.connectString
-            },
-            function(err, conn) {
-              should.not.exist(err);
-              connection = conn;
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          assist.setUp(connection, tableName, numbers, callback);
-        },
-        function(callback) {
-          connection.execute(
-            "SELECT * FROM " + tableName + " ORDER BY num",
-            [],
-            { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT },
-            function(err, result) {
-              should.not.exist(err);
-              resultSet = result.resultSet;
-              callback();
-            }
-          );
-        }
-      ], done);
+    before('get resultSet class', async function() {
+      connection = await oracledb.getConnection(dbConfig);
+      await assist.setUp(connection, tableName, numbers);
+      result = await connection.execute(
+        "SELECT * FROM " + tableName + " ORDER BY num",
+        [],
+        { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT });
+      resultSet = result.resultSet;
     });
 
-    after(function(done) {
-      connection.execute(
-        "DROP TABLE " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-
-          connection.release(function(err) {
-            should.not.exist(err);
-            done();
-          });
-        }
-      );
+    after(async function() {
+      await connection.execute("DROP TABLE " + tableName + " PURGE");
+      await connection.release();
     });
 
-    it('58.4.1 metaData (read-only)', function(done) {
-      should.exist(resultSet.metaData);
-      var t = resultSet.metaData;
-      t.should.eql([ { name: 'NUM' }, { name: 'CONTENT' } ]);
+    it('58.4.1 metaData (read-only)', async function() {
+      assert(resultSet.metaData);
+      const t = resultSet.metaData;
+      assert.deepEqual(t, [ { name: 'NUM' }, { name: 'CONTENT' } ]);
 
-      should.throws(
+      assert.throws(
         function() {
           resultSet.metaData = {"foo": "bar"};
         },
         "TypeError: Cannot assign to read only property 'metaData' of object '#<ResultSet>"
       );
-      resultSet.close(done);
+      await resultSet.close();
     });
 
   }); // 58.4
