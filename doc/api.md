@@ -502,6 +502,8 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 16.10.5 [Database Call Timeouts](#dbcalltimeouts)
     - 16.11 [Connecting to Oracle Real Application Clusters (RAC)](#connectionrac)
     - 16.12 [Connecting to Oracle Cloud Autonomous Databases](#connectionadb)
+        - 16.12.1 [TLS Connections to Oracle Cloud Autonomous Databases](#connectionadbtls)
+        - 16.12.2 [Mutual TLS Connections to Oracle Cloud Autonomous Databases](#connectionadbmtls)
     - 16.13 [Connecting to Sharded Databases](#sharding)
 17. [SQL Execution](#sqlexecution)
     - 17.1 [SELECT Statements](#select)
@@ -11864,11 +11866,52 @@ Oracle Database][178].
 
 ### <a name="connectionadb"></a> 16.12 Connecting to Oracle Cloud Autonomous Databases
 
-To enable connection to Oracle Autonomous Database in Oracle Cloud, a wallet
-needs be downloaded from the cloud, and node-oracledb needs to be configured to
-use it.  The wallet gives mutual TLS which provides enhanced security for
-authentication and encryption.  A database username and password is still
-required for your application connections.
+To enable connection to Oracle Autonomous Database (ADB) in Oracle Cloud, you
+can use TLS (aka "1-way" TLS) or mutual TLS (mTLS) connections.
+
+#### <a name="connectionadbtls"></a> 16.12.1 TLS Connections to Oracle Cloud Autonomous Database
+
+Node-oracledb does not need any additional configuration to use TLS connections
+to ADB.  However you must use Oracle Client libraries versions 19.14 (or
+later), or 21.5 (or later).
+
+Configure ADB through the cloud console settings 'Allow secure access from
+specified IPs and VCNs' to allow connections from your Node.js host.  In your
+applications use the correct TLS connection string (available in the cloud
+console).  The connection strings for TLS and mTLS are different.
+
+For example:
+
+```javascript
+const cs = `(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)
+            (host=abc.oraclecloud.com))(connect_data=(service_name=xyz.adb.oraclecloud.com))
+            (security=(ssl_server_dn_match=yes)))`;
+
+connection = await oracledb.getConnection({
+  user: "scott",
+  password: mypw,  // mypw contains the scott schema password
+  connectString: cs
+});
+```
+
+A database username and password is required for your application connections.
+If you need to create a new database schema so you do not login as the
+privileged ADMIN user, refer to the relevant Oracle Cloud documentation, for
+example see [Create Database Users][161] in the Oracle Autonomous Transaction
+Processing Dedicated Deployments manual.
+
+If you have downloaded the 'wallet' zip used for mTLS file, then remove the
+`sqlnet.ora` file, or comment out its `WALLET_LOCATION` line, or set a valid
+directory name for `WALLET_LOCATION` (see the mTLS discussion below).
+Otherwise an incorrect path can cause a connection error when the file is
+parsed.
+
+#### <a name="connectionadbmtls"></a> 16.12.2 Mutal TLS connections to Oracle Cloud Autonomous Database
+
+For Mutal TLS (mTLS) connections to ADB, a wallet needs be downloaded from the
+cloud console, and node-oracledb needs to be configured to use it.  Mutual TLS
+provides enhanced security for authentication and encryption.  A database
+username and password is still required for your application connections.
 
 ##### Install the Wallet and Network Configuration Files
 
