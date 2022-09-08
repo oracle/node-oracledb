@@ -1,4 +1,4 @@
-# node-oracledb 5.4.0 Documentation for the Oracle Database Node.js Add-on
+# node-oracledb 5.5.0 Documentation for the Oracle Database Node.js Add-on
 
 *Copyright (c) 2015, 2022, Oracle and/or its affiliates.*
 
@@ -109,8 +109,8 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - 3.3.1.1 [`createPool()`: Parameters and Attributes](#createpoolpoolattrs)
                 - 3.3.1.1.1 [`accessToken`](#createpoolpoolattrsaccesstoken)
                     - [`token`](#createpoolpoolattrsaccesstoken), [`privateKey`](#createpoolpoolattrsaccesstoken)
-                - 3.3.1.1.2 [`connectString`](#createpoolpoolattrsconnectstring), [`connectionString`](#createpoolpoolattrsconnectstring)
-                - 3.3.1.1.3 [`accessTokenCallback`](#createpoolpoolattrsaccesstokencallback)
+                - 3.3.1.1.2 [`accessTokenCallback`](#createpoolpoolattrsaccesstokencallback)
+                - 3.3.1.1.3 [`connectString`](#createpoolpoolattrsconnectstring), [`connectionString`](#createpoolpoolattrsconnectstring)
                 - 3.3.1.1.4 [`edition`](#createpoolpoolattrsedition)
                 - 3.3.1.1.5 [`enableStatistics`](#createpoolpoolattrsstats)
                 - 3.3.1.1.6 [`events`](#createpoolpoolattrsevents)
@@ -346,12 +346,12 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 8.1.21 [`stmtCacheSize`](#proppoolstmtcachesize)
         - 8.1.22 [`user`](#proppooluser)
     - 8.2 [Pool Methods](#poolmethods)
-        - 8.2.1 [`setAccessToken()`](#poolsetaccesstoken)
-        - 8.2.2 [`close()`](#poolclose), [`terminate()`](#poolclose)
-        - 8.2.3 [`getConnection()`](#getconnectionpool)
-        - 8.2.4 [`getStatistics()`](#poolgetstatistics)
-        - 8.2.5 [`logStatistics()`](#poollogstatistics)
-        - 8.2.6 [`reconfigure()`](#poolreconfigure)
+        - 8.2.1 [`close()`](#poolclose), [`terminate()`](#poolclose)
+        - 8.2.2 [`getConnection()`](#getconnectionpool)
+        - 8.2.3 [`getStatistics()`](#poolgetstatistics)
+        - 8.2.4 [`logStatistics()`](#poollogstatistics)
+        - 8.2.5 [`reconfigure()`](#poolreconfigure)
+        - 8.2.6 [`setAccessToken()`](#poolsetaccesstoken)
 9. [PoolStatistics Class](#poolstatisticsclass)
     - 9.1 [PoolStatistics Methods](#poolstatisticsmethods)
         - 9.1.1 [`logStatistics()`](#poolstatisticslogstatistics)
@@ -445,7 +445,11 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 14.1.1 [`close()`](#sodadoccursorclose)
         - 14.1.2 [`getNext()`](#sodadoccursorgetnext)
 15. [Initializing Node-oracledb](#initnodeoracledb)
-    - 15.1 [Locating the Oracle Client Libraries](#oracleclientloading)
+    - 15.1 [Setting the Oracle Client Library Directory](#oracleclientloading)
+        - 15.1.1 [Setting the Oracle Client Directory on Windows](#oracleclientloadingwindows)
+        - 15.1.2 [Setting the Oracle Client Directory on macOS](#oracleclientloadingmacos)
+        - 15.1.3 [Setting the Oracle Client Directory on Linux and Related Platforms](#oracleclientloadinglinux)
+        - 15.1.4 [Calling `initOracleClient()` to set the Oracle Client Directory](#oracleclientcallinginit)
     - 15.2 [Optional Oracle Net Configuration](#tnsadmin)
     - 15.3 [Optional Oracle Client Configuration](#oraaccess)
     - 15.4 [Oracle Environment Variables](#environmentvariables)
@@ -456,9 +460,9 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 16.1.2 [Embedded Connect Descriptor Strings](#embedtns)
         - 16.1.3 [Net Service Names for Connection Strings](#tnsnames)
         - 16.1.4 [JDBC and Oracle SQL Developer Connection Strings](#notjdbc)
-        - 16.1.5 [Token Based Authentication Connection Strings](#tokenbasedconnstrings)
     - 16.2 [Connections, Threads, and Parallelism](#numberofthreads)
-        - 16.2.1 [Parallelism on a Connection](#parallelism)
+        - 16.2.1 [Connections and Worker Threads](#workerthreads)
+        - 16.2.2 [Parallelism on Each Connection](#parallelism)
     - 16.3 [Connection Pooling](#connpooling)
         - 16.3.1 [Connection Pool Sizing](#conpoolsizing)
         - 16.3.2 [Connection Pool Closing and Draining](#conpooldraining)
@@ -472,12 +476,18 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - 16.3.7.3 [PL/SQL Session Tagging Callback](#sessiontaggingplsql)
         - 16.3.8 [Heterogeneous Connection Pools and Pool Proxy Authentication](#connpoolproxy)
     - 16.4 [External Authentication](#extauth)
-    - 16.5 [Token Based Authentication](#tokenbasedauth)
-        - 16.5.1 [Token Generation using the OCI CLI](#tokengen)
-        - 16.5.2 [Token and Private Key Extraction from a File](#tokenread)
-        - 16.5.3 [Standalone Connection Creation with Access Tokens](#tokenbasedstandaloneconn)
-        - 16.5.4 [Connection Pool Creation with Access Tokens](#tokenbasedpool)
-        - 16.5.5 [Explicitly Refreshing Pool Access Tokens](#settingpooltokens)
+    - 16.5 [Token-Based Authentication](#tokenbasedauthentication)
+        - 16.5.1 [OAuth 2.0 Token-Based Authentication](#oauthtokenbasedauthentication)
+            - 16.5.1.1 [OAuth 2.0 Token generation](#oauthtokengeneration)
+            - 16.5.1.2 [OAuth 2.0 Standalone Connections](#oauthstandalone)
+            - 16.5.1.3 [OAuth 2.0 Connection Pooling](#oauthpool)
+            - 16.5.1.4 [OAuth 2.0 Connection Strings](#oauthconnectstring)
+        - 16.5.2 [IAM Token-Based Authentication](#iamtokenbasedauthentication)
+            - 16.5.2.1 [IAM Token Generation](#iamtokengeneration)
+            - 16.5.2.2 [IAM Token and Private Key Extraction](#iamtokenextraction)
+            - 16.5.2.3 [IAM Standalone Connections](#iamstandalone)
+            - 16.5.2.4 [IAM Connection Pooling](#iampool)
+            - 16.5.2.5 [IAM Connection Strings](#iamconnectstring)
     - 16.6 [Database Resident Connection Pooling (DRCP)](#drcp)
     - 16.7 [Privileged Connections](#privconn)
     - 16.8 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
@@ -490,6 +500,8 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 16.10.5 [Database Call Timeouts](#dbcalltimeouts)
     - 16.11 [Connecting to Oracle Real Application Clusters (RAC)](#connectionrac)
     - 16.12 [Connecting to Oracle Cloud Autonomous Databases](#connectionadb)
+        - 16.12.1 [TLS Connections to Oracle Cloud Autonomous Databases](#connectionadbtls)
+        - 16.12.2 [Mutual TLS Connections to Oracle Cloud Autonomous Databases](#connectionadbmtls)
     - 16.13 [Connecting to Sharded Databases](#sharding)
 17. [SQL Execution](#sqlexecution)
     - 17.1 [SELECT Statements](#select)
@@ -560,6 +572,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 27.3 [Changing AQ options](#aqoptions)
     - 27.4 [Enqueuing and Dequeuing Multiple Messages](#aqmultiplemessages)
     - 27.5 [Advanced Queuing Notifications](#aqnotifications)
+    - 27.6 [Recipient Lists](#aqrecipientlists)
 28. [Globalization and National Language Support (NLS)](#nls)
 29. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
 30. [Simple Oracle Document Access (SODA)](#sodaoverview)
@@ -1170,7 +1183,7 @@ Constant Name                                           | Value      | Descripti
 
 #### <a name="oracledbconstantscqn"></a> 3.1.9 Continuous Query Notification Constants
 
-Constants for the Continuous Query Notification
+Constants for the [Continuous Query Notification (CQN)](#cqn)
 `connection.subscribe()` option [`operations`](#consubscribeoptoperations), and for the
 notification message [`operation`](#consubscribeoptcallback) properties.
 
@@ -1394,7 +1407,7 @@ concurrent statements on a connection by design.  Also some application modules
 may have the expectation that node-oracledb will handle any necessary
 connection usage serialization.
 
-For more discussion, see [Parallelism on a Connection](#parallelism).
+For more discussion, see [Parallelism on Each Connection](#parallelism).
 
 This property was added in node-oracledb 5.2.
 
@@ -2229,31 +2242,92 @@ The properties of `poolAttrs` are described below.
 ###### <a name="createpoolpoolattrsaccesstoken"></a> 3.3.1.1.1 `accessToken`: Attributes
 
 ```
-Object accessToken
+function accessToken(boolean refresh) | String accessToken | Object accessToken
 ```
 
-The `accessToken` parameter object provides token based authentication
-configuration properties.
+- For Microsoft Azure Active Directory OAuth 2.0 token-based authentication
+  `accessToken` can be:
+  - a callback function returning the token as a string
+  - an object with a `token` attribute containing the token as a string
+  - or the token as a string
 
-The properties of the `accessToken` object are described below. Both properties
-must be set.  The values can be obtained using the Oracle Cloud Infrastructure
-(OCI) Command Line Interface (CLI).
+  Tokens can be obtained using various approaches.  For example, using the
+  Azure Active Directory API.
 
-Attribute           | Description
-------------------- |------------------------------------------------
-`token`             | The database authentication token string.
-`privateKey`        | The database authentication private key string.
+- For Oracle Cloud Infrastructure Identity and Access Management (IAM)
+  token-based authentication `accessToken` can be:
+  - a callback function returning an object containing `token` and `privateKey` attributes
+  - or an object containing `token` and `privateKey` attributes
 
-The `externalAuth` and `homogeneous` connection or pool attributes must be set
-to *true* while using token based authentication. The `user` (or `username`)
-and `password` properties should not be set.
+  The properties of the `accessToken` object are described below.
 
-See [Token Based Authentication](#tokenbasedauth) for more information.
+  Attribute           | Description
+  ------------------- |------------------------------------------------
+  `token`             | The database authentication token.
+  `privateKey`        | The database authentication private key.
 
-The `accessToken` parameter was added in node-oracledb 5.4.  It should be used
-with Oracle Client libraries 19.14 (or later), or 21.5 (or later).
+  The `token` and `privateKey` values can be obtained using various approaches.
+  For example the Oracle Cloud Infrastructure Command Line Interface can be
+  used.
 
-###### <a name="createpoolpoolattrsconnectstring"></a> 3.3.1.1.2 `connectString`, `connectionString`
+When `accessToken` is a callback function, it will be invoked at the time the
+pool is created (even if `poolMin` is 0).  It is also called when the pool
+needs to expand (causing new connections to be created) and the current token
+has expired.  The returned token is used by node-oracledb for authentication.
+The `refresh` parameter is described below.
+
+`refresh` value    | Description
+-------------------|------------------------------------------------
+*false*            | The application can return a token from an application-specific cache.  If there is no cached token, the application must externally acquire one.
+*true*             | The token previously passed to driver is known to be expired, the application should externally acquire a new token.
+
+When the callback is first invoked, the `refresh` parameter will be set to
+*false*.  This indicates that the application can provide a token from its own
+application managed cache, or it can generate a new token if there is no cached
+value.  Node-oracledb checks whether the returned token has expired. If it has
+expired, then the callback function will be invoked a second time with
+`refresh` set to *true*.  In this case the function must externally acquire a
+token, optionally add it to the application's cache, and return the token.
+
+For token-based authentication, the `externalAuth` and `homogeneous` pool
+attributes must be set to *true* .  The `user` (or `username`) and `password`
+attributes should not be set.
+
+See [Token-Based Authentication](#tokenbasedauthentication) for more information.
+
+The `accessToken` attribute was added in node-oracledb 5.4 to support IAM
+token-based authentication.  In this release the attribute must be an Object.
+Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for
+IAM token-based authentication.
+
+The `accessToken` attribute was extended to allow OAuth 2.0 token-based
+authentication in node-oracledb 5.5.  For OAuth 2.0, the attribute should be a
+string, or a callback.  Also Oracle Client libraries 19.15 (or later), or 21.7
+(or later) must be used.  The callback usage supports both OAuth 2.0 and IAM
+token-based authentication.
+
+###### <a name="createpoolpoolattrsaccesstokencallback"></a> 3.3.1.1.2 `accessTokenCallback`
+
+```
+Object accessTokenCallback
+```
+
+The optional `accessTokenCallback` attribute is a Node.js callback function. It
+gets called by the connection pool if the pool needs to grow and create new
+connections but the current token has expired.
+
+The callback function must return a JavaScript object with attributes `token`
+and `privateKey` for IAM.  See [Connection Pool Creation with Access Tokens for
+IAM](#tokenbasedpool).
+
+The `accessTokenCallback` attribute was added in node-oracledb 5.4.  It should be
+used with Oracle Client libraries 19.14 (or later), or 21.5 (or later).
+
+The `accessTokenCallback` attribute is deprecated from node-oracledb 5.5.  Use
+[`accessToken`](#createpoolpoolattrsaccesstoken) instead, which was enhanced to
+support a callback.
+
+###### <a name="createpoolpoolattrsconnectstring"></a> 3.3.1.1.3 `connectString`, `connectionString`
 
 ```
 String connectString
@@ -2268,24 +2342,6 @@ string can be an Easy Connect string, or a Net Service Name from a
 See [Connection Strings](#connectionstrings) for examples.
 
 The alias `connectionString` was added in node-oracledb 2.1.
-
-###### <a name="createpoolpoolattrsaccesstokencallback"></a> 3.3.1.1.3 `accessTokenCallback`
-
-```
-Object accessTokenCallback
-```
-
-The optional `accessTokenCallback` attribute is a Node.js callback function. It
-gets called by the connection pool if the pool needs to grow and create new
-connections but the current token has expired.
-
-The callback function must return a JavaScript object with attributes `token`
-and `privateKey`, equivalent to the
-[`accessToken`](#createpoolpoolattrsaccesstoken) object.  See [Connection Pool
-Creation with Access Tokens](#tokenbasedpool).
-
-The `accessTokenCallback` attribute was added in node-oracledb 5.4.  It should be
-used with Oracle Client libraries 19.14 (or later), or 21.5 (or later).
 
 ###### <a name="createpoolpoolattrsedition"></a> 3.3.1.1.4 `edition`
 
@@ -2754,29 +2810,65 @@ The properties of the `connAttrs` object are described below.
 ###### <a name="getconnectiondbattrsaccesstoken"></a> 3.3.2.1.2.1 `accessToken`: Attributes
 
 ```
-Object accessToken
+function accessToken(boolean refresh) | String accessToken | Object accessToken
 ```
 
-The `accessToken` parameter object provides token based authentication
-configuration properties.
+- For Microsoft Azure Active Directory OAuth 2.0 token-based authentication
+  `accessToken` can be:
+  - a callback function returning the token as a string
+  - or the token as a string
 
-The properties of the `accessToken` object are described below. Both properties
-must be set.  The values can be obtained using the Oracle Cloud Infrastructure
-(OCI) Command Line Interface (CLI).
+  Tokens can be obtained using various approaches.  For example, using the
+  Azure Active Directory API.
 
-Attribute           | Description
-------------------- |------------------------------------------------
-`token`             | The database authentication token string.
-`privateKey`        | The database authentication private key string.
+- For Oracle Cloud Infrastructure Identity and Access Management (IAM)
+  token-based authentication `accessToken` can be:
+  - an object containing `token` and `privateKey` attributes
+  - or a callback function returning an object containing `token` and `privateKey` attributes
 
-The `externalAuth` connection attribute must be set to *true* while using token
-based authentication. The `user` (or `username`) and `password` properties
-should not be set.
+  The `token` and `privateKey` values can be obtained using various approaches.
+  For example the Oracle Cloud Infrastructure Command Line Interface can be
+  used.
 
-See [Token Based Authentication](#tokenbasedauth) for more information.
+  The properties of the `accessToken` object are described below.
 
-The `accessToken` parameter was added in node-oracledb 5.4.  It should be used
-with Oracle Client libraries 19.14 (or later), or 21.5 (or later).
+  Attribute           | Description
+  ------------------- |------------------------------------------------
+  `token`             | The database authentication token.
+  `privateKey`        | The database authentication private key.
+
+When `accessToken` is a callback function, the returned token is used by
+node-oracledb for authentication.  The `refresh` parameter is described below.
+
+`refresh` value    | Description
+-------------------|------------------------------------------------
+*false*            | The application can return a token from an application-specific cache.  If there is no cached token, the application must externally acquire one.
+*true*             | The token previously passed to driver is known to be expired, the application should externally acquire a new token.
+
+For each connection, the callback is invoked with the `refresh` parameter set
+to *false*.  This indicates that the application can provide a token from its
+own application managed cache, or it can generate a new token if there is no
+cached value.  Node-oracledb checks whether the returned token has expired. If
+it has expired, then the callback function will be invoked a second time with
+`refresh` set to *true*.  In this case the function must externally acquire a
+token, optionally add it to the application's cache, and return the token.
+
+For token-based authentication, the `externalAuth` connection attribute must be
+set to *true* .  The `user` (or `username`) and `password` attributes should
+not be set.
+
+See [Token-Based Authentication](#tokenbasedauthentication) for more information.
+
+The `accessToken` attribute was added in node-oracledb 5.4 to support IAM
+token-based authentication.  In this release the attribute must be an Object.
+Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for
+IAM token-based authentication.
+
+The `accessToken` attribute was extended to allow OAuth 2.0 token-based
+authentication in node-oracledb 5.5.  For OAuth 2.0, the attribute should be a
+string, or a callback.  Also Oracle Client libraries 19.15 (or later), or 21.7
+(or later) must be used.  The callback usage supports both OAuth 2.0 and IAM
+token-based authentication.
 
 ###### <a name="getconnectiondbattrsconnectstring"></a> 3.3.2.1.2.2 `connectString`, `connectionString`
 
@@ -3063,7 +3155,7 @@ Attribute           | Description
 `configDir`         | This specifies the directory in which the [Optional Oracle Net Configuration](#tnsadmin) and [Optional Oracle Client Configuration](#oraaccess) files reside.  It is equivalent to setting the Oracle environment variable `TNS_ADMIN` to this value.  Any value in that environment variable prior to the call to `oracledb.initOracleClient()` is ignored. On Windows, remember to double each backslash used as a directory separator.  If `configDir` is not set, Oracle's default configuration file [search heuristics](#tnsadmin) are used.
 `driverName`        | This specifies the driver name value shown in database views, such as `V$SESSION_CONNECT_INFO`.  It can be used by applications to identify themselves for tracing and monitoring purposes.  The convention is to separate the product name from the product version by a colon and single space characters.  If this attribute is not specified, the value "node-oracledb : *version*" is used. See [Other Node-oracledb Initialization](#otherinit).
 `errorUrl`          | This specifies the URL that is included in the node-oracledb exception message if the Oracle Client libraries cannot be loaded.  This allows applications that use node-oracledb to refer users to application-specific installation instructions.  If this attribute is not specified, then the [node-oracledb installation instructions][2] URL is used.  See [Other Node-oracledb Initialization](#otherinit).
-`libDir`            | This specifies the directory containing the Oracle Client libraries.  If `libDir` is not specified, the default library search mechanism is used.  If your client libraries are in a full Oracle Client or Oracle Database installation, such as [Oracle Database "XE" Express Edition][130], then you must have previously set environment variables like `ORACLE_HOME` before calling `initOracleClient()`.  On Windows, remember to double each backslash used as a directory separator. See [Locating the Oracle Client Libraries](#oracleclientloading).
+`libDir`            | This specifies the directory containing the Oracle Client libraries.  If `libDir` is not specified, the default library search mechanism is used.  If your client libraries are in a full Oracle Client or Oracle Database installation, such as [Oracle Database "XE" Express Edition][130], then you must have previously set environment variables like `ORACLE_HOME` before calling `initOracleClient()`.  On Windows, remember to double each backslash used as a directory separator. See [Setting the Oracle Client Library Directory](#oracleclientloading).
 
 
 On Linux, ensure a `libclntsh.so` file exists.  On macOS ensure a
@@ -5496,7 +5588,7 @@ const commitNeeded = await connection.tpcPrepare(xid);
 Callback:
 
 ```
-tpcRecover([Boolean asString,] function(Error error);
+tpcRecover([Boolean asString,] function(Error error));
 ```
 
 Promise:
@@ -5532,7 +5624,7 @@ This function was added in node-oracledb 5.3.
 
     Callback function parameter | Description
     ----------------------------|-------------
-    *Error error*               | If `tpcRollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    *Error error*               | If `tpcRecover()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 #### <a name="contpcrollback"></a> 4.2.25 `connection.tpcRollback()`
 
@@ -5938,9 +6030,11 @@ some attributes controlling the behavior of the queued message.
         `expiration`      | The number of seconds the message is available to be dequeued before it expires.
         `payload`         | A String, Buffer or [DbObject](#dbobjectclass) that is the actual message to be queued.  This property must be specified.
         `priority`        | An integer priority of the message.
+        `recipients`      | An array of strings where each string is a recipients name.
 
         See [Oracle Advanced Queuing Documentation][129] for more information about attributes.
 
+        The `recipients` attribute was added in node-oracledb 5.5.
 
 -   ```
     function(Error error)
@@ -6543,40 +6637,7 @@ The database username for connections in the pool.
 
 ### <a name="poolmethods"></a> 8.2 Pool Methods
 
-#### <a name="poolsetaccesstoken"></a> 8.2.1 `pool.setAccessToken()`
-
-##### Description
-
-This method can be used to set an access token and private key after pool
-creation.  It is useful if the token is known to have expired, and you are not
-using [`accessTokenCallback`](#createpoolpoolattrsaccesstokencallback).
-
-It can also be useful in tests to set an expired token so that token expiry
-code paths can be tested.
-
-See [Explicitly Refreshing Pool Access Tokens](#settingpooltokens) for an example.
-
-##### Parameters
-
-```
-Object tokenAttrs
-```
-
-The `tokenAttrs` parameter object provides token based authentication
-configuration properties.
-
-The properties of the `tokenAttrs` object are described below. Both properties
-must be set.  The values can be obtained using the Oracle Cloud Infrastructure
-(OCI) Command Line Interface (CLI).
-
-Attribute           | Description
-------------------- |------------------------------------------------
-`token`             | The database authentication token string.
-`privateKey`        | The database authentication private key string.
-
-This function was added in node-oracledb 5.4.
-
-#### <a name="poolclose"></a> <a name="terminate"></a> 8.2.2 `pool.close()`
+#### <a name="poolclose"></a> <a name="terminate"></a> 8.2.1 `pool.close()`
 
 ##### Prototype
 
@@ -6652,7 +6713,7 @@ The `drainTime` parameter was added in node-oracledb 3.0.
     *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 
-#### <a name="getconnectionpool"></a> 8.2.3 `pool.getConnection()`
+#### <a name="getconnectionpool"></a> 8.2.2 `pool.getConnection()`
 
 ##### Prototype
 
@@ -6740,7 +6801,7 @@ pools.
     *Error error* | If `getConnection()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
     *Connection connection* | The newly created connection.   If `getConnection()` fails, `connection` will be NULL.  See [Connection class](#connectionclass) for more details.
 
-#### <a name="poolgetstatistics"></a> 8.2.4 `pool.getStatistics()`
+#### <a name="poolgetstatistics"></a> 8.2.3 `pool.getStatistics()`
 
 ##### Prototype
 
@@ -6765,7 +6826,7 @@ If `getStatistics()` is called while the pool is closed, draining, or
 
 This function was added in node-oracledb 5.2.
 
-#### <a name="poollogstatistics"></a> 8.2.5 `pool.logStatistics()`
+#### <a name="poollogstatistics"></a> 8.2.4 `pool.logStatistics()`
 
 ##### Prototype
 
@@ -6791,7 +6852,7 @@ This function was added in node-oracledb 5.2.  The obsolete function
 `_logStats()` can still be used, but it will be removed in a future version of
 node-oracledb.
 
-#### <a name="poolreconfigure"></a> 8.2.6 `pool.reconfigure()`
+#### <a name="poolreconfigure"></a> 8.2.5 `pool.reconfigure()`
 
 ##### Prototype
 
@@ -6888,6 +6949,37 @@ await pool.reconfigure({poolMin: 5, poolMax: 10, increment: 5});
     ----------------------------|-------------
     *Error error* | If `reconfigure()` succeeds, `error` is null.  If an error occurs, then `error` contains the [error message](#errorobj).
 
+#### <a name="poolsetaccesstoken"></a> 8.2.6 `pool.setAccessToken()`
+
+##### Description
+
+This method can be used to set an IAM access token and private key after pool
+creation.  It is useful if the IAM token is known to have expired, and you are
+not using [`accessTokenCallback`](#createpoolpoolattrsaccesstokencallback).
+
+It can also be useful in tests to set an expired token so that token expiry
+code paths can be tested.
+
+##### Parameters
+
+```
+Object tokenAttrs
+```
+
+The `tokenAttrs` parameter object provides IAM token-based authentication
+properties.
+
+The properties of the `tokenAttrs` object are described below. Both properties
+must be set.  The values can be obtained, for example, using the Oracle Cloud
+Infrastructure Command Line Interface (OCI CLI).
+
+Attribute           | Description
+------------------- |------------------------------------------------
+`token`             | The database authentication token string.
+`privateKey`        | The database authentication private key string.
+
+This function was added in node-oracledb 5.4 and deprecated in node-oracledb 5.5.
+
 
 ## <a name="poolstatisticsclass"></a> 9. PoolStatistics Class
 
@@ -6917,20 +7009,20 @@ This function was added in node-oracledb 5.3.
 
 ## <a name="resultsetclass"></a> 10. ResultSet Class
 
-ResultSets allow query results to fetched from the database one at a
-time, or in groups of rows.  They can also be converted to Readable
-Streams.  ResultSets enable applications to process very large data
-sets.
-
-ResultSets should also be used where the number of query rows cannot
-be predicted and may be larger than Node.js can handle in a single
+ResultSets allow query results to fetched from the database one at a time, or
+in groups of rows.  ResultSets should be used where the number of query rows
+cannot be predicted and may be larger than Node.js can handle in a single
 array.
+
+ResultSets can optionally be converted to Readable Streams.  Also, from
+node-oracledb 5.5, the ResultSet class implements the `asyncIterator()` symbol
+to support asynchonous iteration.
 
 A *ResultSet* object is obtained by setting `resultSet: true` in the
 `options` parameter of the *Connection* [`execute()`](#execute) method
 when executing a query.  A *ResultSet* is also returned to
 node-oracledb when binding as type [`oracledb.CURSOR`](#oracledbconstantsnodbtype) to a
-PL/SQL REF CURSOR bind parameter.
+PL/SQL REF CURSOR "out" bind parameter.
 
 See [Fetching Rows with Result Sets](#resultsethandling) for more information on ResultSets.
 
@@ -8829,102 +8921,159 @@ the Oracle Client and Oracle Database communicate.
 
 ![node-oracledb Architecture](./images/node-oracledb-architecture.png)
 
-### <a name="oracleclientloading"></a> 15.1 Locating the Oracle Client Libraries
+### <a name="oracleclientloading"></a> 15.1 Setting the Oracle Client Library Directory
 
 Node-oracledb dynamically loads the Oracle Client libraries using a search
-heuristic.  If appropriate libraries cannot be found, node-oracledb will return
-an error like "Error: DPI-1047: Cannot locate a 64-bit Oracle Client library".
+heuristic.  Only the first set of libraries found are loaded.  If appropriate
+libraries cannot be found, node-oracledb will return an error like *DPI-1047:
+Cannot locate a 64-bit Oracle Client library*.
 
-Only the first set of libraries found are loaded.  The libraries can be in an
-installation of Oracle Instant Client, in a full Oracle Client installation, or
-in an Oracle Database installation (if Node.js is running on the same machine as
-the database).  The versions of Oracle Client and Oracle Database do not have to
-be the same.  For certified configurations see Oracle Support's [Doc ID
-207303.1][187] and see the [node-installation instructions][2].
+The libraries can be:
 
-Node-oracledb looks for the Oracle Client libraries as follows:
+- in an installation of Oracle Instant Client.
 
-- On Windows:
+- or in a full Oracle Client installation from running the Oracle Universal
+  installer `runInstaller`.
 
-    - In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
-      call to [`oracledb.initOracleClient()`](#odbinitoracleclient).  This
-      directory should contain the libraries from an unzipped Instant Client
-      'Basic' or 'Basic Light' package.  If you pass the library directory from
-      a full client or database installation, such as [Oracle Database "XE"
-      Express Edition][130], then you will need to have previously set your
-      environment to use that software installation otherwise files such as
-      message files will not be located.  If the Oracle Client libraries cannot
-      be loaded from `libDir`, then an error is thrown.
+- or in an Oracle Database installation, if Node.js is running on the same
+  machine as the database.
 
-    - If `libDir` was not specified, then Oracle Client libraries are looked for
-      in the directory where the `oracledb*.node` binary is.  For example in
-      `node_modules\oracledb\build\Release`.  This directory should contain the
-      libraries from an unzipped Instant Client 'Basic' or 'Basic Light'
-      package.  If the libraries are not found, no error is thrown and the
-      search continues, see next bullet point.
+The versions of Oracle Client and Oracle Database do not have to be the same.
+For certified configurations see Oracle Support's [Doc ID 207303.1][187] and
+see the [node-installation instructions][2].
 
-    - In the directories on the system library search path, e.g. the `PATH`
-      environment variable.  If the Oracle Client libraries cannot be loaded,
-      then an error is thrown.
+#### <a name="oracleclientloadingwindows"></a> 15.1.1 Setting the Oracle Client Directory on Windows
 
-- On macOS:
+On Windows, node-oracledb looks for the Oracle Client libraries as follows:
 
-    - In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
-      call to [`oracledb.initOracleClient()`](#odbinitoracleclient).  This
-      directory should contain the libraries from an unzipped Instant Client
-      'Basic' or 'Basic Light' package.  If the Oracle Client libraries cannot
-      be loaded from `libDir`, then an error is thrown.
+- In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
+  call to [`oracledb.initOracleClient()`](#oracleclientcallinginit).  This
+  directory should contain the libraries from an unzipped Instant Client
+  'Basic' or 'Basic Light' package.  If you pass the library directory from a
+  full client or database installation, such as [Oracle Database "XE" Express
+  Edition][130], then you will need to have previously set your environment to
+  use that software installation otherwise files such as message files will not
+  be located.  If the Oracle Client libraries cannot be loaded from `libDir`,
+  then an error like *DPI-1047: Cannot locate a 64-bit Oracle Client library*
+  is thrown.
 
-    - If `libDir` was not specified, then Oracle Client libraries are looked for
-      in the directory where the `oracledb*.node` binary is.  For example in
-      `node_modules/oracledb/build/Release`.  This directory should contain the
-      libraries from an unzipped Instant Client 'Basic' or 'Basic Light'
-      package.  For example, use `ln -s ~/Downloads/instantclient_19_8/libclntsh.dylib
-      node_modules/oracledb/build/Release/`.  If the libraries are not found, no
-      error is thrown and the search continues, see next bullet point.
+- If `libDir` was not specified, then Oracle Client libraries are looked for
+  in the directory where the `oracledb*.node` binary is.  For example in
+  `node_modules\oracledb\build\Release`.  This directory should contain the
+  libraries from an unzipped Instant Client 'Basic' or 'Basic Light'
+  package.  If the libraries are not found, no error is thrown and the
+  search continues, see next bullet point.
 
-    - In the library search path such as set in `DYLD_LIBRARY_PATH` (note this
-      variable does not propagate to sub-shells) or in `/usr/local/lib`.  If the
-      Oracle Client libraries cannot be loaded, then an error is thrown.
+- In the directories on the system library search path, e.g. the `PATH`
+  environment variable.  If the Oracle Client libraries cannot be loaded, then
+  an error like *DPI-1047: Cannot locate a 64-bit Oracle Client library* is
+  thrown.
 
-- On Linux and related platforms:
+#### <a name="oracleclientloadingmacos"></a> 15.1.2 Setting the Oracle Client Directory on macOS
 
-    - In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
-      call to [`oracledb.initOracleClient()`](#odbinitoracleclient).  Note on
-      Linux this is only useful to force immediate loading of the libraries
-      because the libraries must also be in the system library search path,
-      i.e. configured with `ldconfig` or set in `LD_LIBRARY_PATH`.  This
-      directory should contain the libraries from an unzipped Instant Client
-      'Basic' or 'Basic Light' package.  If you pass the library directory from
-      a full client or database installation, such as [Oracle Database "XE"
-      Express Edition][130] then you will need to have previously set the
-      `ORACLE_HOME` environment variable.  If the Oracle Client libraries cannot
-      be loaded from `libDir`, then an error is thrown.
+On macOS, node-oracledb looks for the Oracle Client libraries as follows:
 
-    - If `libDir` was not specified, then Oracle Client libraries are looked for
-      in the operating system library search path, such as configured with
-      `ldconfig` or set in the environment variable `LD_LIBRARY_PATH`.  On some
-      UNIX platforms an OS specific equivalent, such as `LIBPATH` or
-      `SHLIB_PATH` is used instead of `LD_LIBRARY_PATH`.  If the libraries are
-      not found, no error is thrown and the search continues, see next bullet
-      point.
+- In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
+  call to [`oracledb.initOracleClient()`](#oracleclientcallinginit).  This
+  directory should contain the libraries from an unzipped Instant Client
+  'Basic' or 'Basic Light' package.  If the Oracle Client libraries cannot be
+  loaded from `libDir`, then an error like *DPI-1047: Cannot locate a 64-bit
+  Oracle Client library* is thrown.
 
-    - In `$ORACLE_HOME/lib`.  Note the environment variable `ORACLE_HOME` should
-      only ever be set when you have a full database installation or full client
-      installation.  It should not be set if you are using Oracle Instant
-      Client.  The `ORACLE_HOME` variable, and other necessary variables, should
-      be set before starting Node.js.  See [Oracle Environment
-      Variables](#environmentvariables).  If the Oracle Client libraries cannot
-      be loaded, then an error is thrown.
+- If `libDir` was not specified, then Oracle Client libraries are looked for
+  in the directory where the `oracledb*.node` binary is.  For example in
+  `node_modules/oracledb/build/Release`.  This directory should contain the
+  libraries from an unzipped Instant Client 'Basic' or 'Basic Light'
+  package.  For example, use `ln -s ~/Downloads/instantclient_19_8/libclntsh.dylib
+  node_modules/oracledb/build/Release/`.  If the libraries are not found, no
+  error is thrown and the search continues, see next bullet point.
+
+- In the library search path such as set in `DYLD_LIBRARY_PATH` (note this
+  variable does not propagate to sub-shells) or in `/usr/local/lib`.  If the
+  Oracle Client libraries cannot be loaded, then an error like *DPI-1047:
+  Cannot locate a 64-bit Oracle Client library* is thrown.
+
+#### <a name="oracleclientloadinglinux"></a> 15.1.3 Setting the Oracle Client Directory on Linux and Related Platforms
+
+On Linux and related platforms, node-oracledb looks for the Oracle Client
+libraries as follows:
+
+- In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
+  call to [`oracledb.initOracleClient()`](#oracleclientcallinginit).  This
+  directory should contain the libraries from an unzipped Instant Client
+  'Basic' or 'Basic Light' package.  If you pass the library directory from a
+  full client or database installation, such as [Oracle Database "XE" Express
+  Edition][130] then you will need to have previously set the `ORACLE_HOME`
+  environment variable.  If the Oracle Client libraries cannot be loaded from
+  `libDir`, then an error is thrown.
+
+  **Note on Linux `initOracleClient()` is only useful to force immediate
+  loading of the libraries because the libraries must also be in the system
+  library search path, i.e. configured with `ldconfig` or set in
+  `LD_LIBRARY_PATH`, before Node.js is started**.
+
+- If `libDir` was not specified, then Oracle Client libraries are looked for
+  in the operating system library search path, such as configured with
+  `ldconfig` or set in the environment variable `LD_LIBRARY_PATH`.  On some
+  UNIX platforms an OS specific equivalent, such as `LIBPATH` or
+  `SHLIB_PATH` is used instead of `LD_LIBRARY_PATH`.  If the libraries are
+  not found, no error is thrown and the search continues, see next bullet
+  point.
+
+- In `$ORACLE_HOME/lib`.  Note the environment variable `ORACLE_HOME` should
+  only ever be set when you have a full database installation or full client
+  installation.  It should not be set if you are using Oracle Instant Client.
+  The `ORACLE_HOME` variable, and other necessary variables, should be set
+  before starting Node.js.  See [Oracle Environment
+  Variables](#environmentvariables).  If the Oracle Client libraries cannot be
+  loaded, then an error like *DPI-1047: Cannot locate a 64-bit Oracle Client
+  library* is thrown.
+
+#### <a name="oracleclientcallinginit"></a> 15.1.4 Calling `initOracleClient()` to set the Oracle Client Directory
+
+Applications can call the synchronous function
+[`oracledb.initOracleClient()`](#odbinitoracleclient) to specify the directory
+containing Oracle Instant Client libraries.  The libraries are loaded when
+`initOracleClient()` is called.  For example:
+
+```javascript
+const oracledb = require('oracledb');
+
+if (process.platform === 'win32') {
+  // Windows
+  oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_6'});
+} else if (process.platform === 'darwin') {
+  // macOS
+  oracledb.initOracleClient({libDir: process.env.HOME + '/Downloads/instantclient_19_8'});
+}
+// else on other platforms like Linux the system library search path MUST always be
+// set before Node.js is started, for example with ldconfig or LD_LIBRARY_PATH.
+```
+
+If you use backslashes in the `libDir` string, you will need to double them.
+
+The `initOracleClient()` function should only be called once.
+
+**Note**: If you set `libDir` on Linux and related platforms, you must still have
+configured the system library search path to include that directory before
+starting Node.js.
+
+On any operating system, if you set `libDir` to the library directory of a full
+database or full client installation (such as from running `runInstaller`), you
+will need to have previously set the Oracle environment, for example by setting
+the `ORACLE_HOME` environment variable.  Otherwise you will get errors like
+*ORA-1804*.  You should set this variable, and other Oracle environment
+variables, before starting Node.js, as shown in [Oracle Environment
+Variables](#environmentvariables).
 
 If you call `initOracleClient()` with a `libDir` attribute, the Oracle Client
 libraries are loaded immediately from that directory.  If you call
 `initOracleClient()` but do *not* set the `libDir` attribute, the Oracle Client
-libraries are loaded immediately using the search heuristic above.  If you do
-not call `initOracleClient()`, then the libraries are loaded using the search
-heuristic when the first node-oracledb function that depends on the libraries is
-called, for example when a connection pool is created.  If there is a problem
-loading the libraries, then an error is thrown.
+libraries are loaded immediately using the search heuristic discussed in
+earlier sections.  If you do not call `initOracleClient()`, then the libraries
+are loaded using the search heuristic when the first node-oracledb function
+that depends on the libraries is called, for example when a connection pool is
+created.  If there is a problem loading the libraries, then an error is thrown.
 
 Make sure the Node.js process has directory and file access permissions for the
 Oracle Client libraries.  On Linux ensure a `libclntsh.so` file exists.  On
@@ -8932,6 +9081,11 @@ macOS ensure a `libclntsh.dylib` file exists.  Node-oracledb will not directly
 load `libclntsh.*.XX.1` files in `libDir` or from the directory where the
 `oracledb*.node` binary is.  Note other libraries used by `libclntsh*` are also
 required.
+
+The `oracledb.initOracleClient()` method and searching of the directory where
+the `oracledb*.node` binary is located were added in node-oracledb 5.0.
+
+##### Tracing Oracle Client libraries loading
 
 To trace the loading of Oracle Client libraries, the environment variable
 `DPI_DEBUG_LEVEL` can be set to 64 before starting Node.js.  For example, on
@@ -8941,44 +9095,6 @@ Linux, you might use:
 $ export DPI_DEBUG_LEVEL=64
 $ node myapp.js 2> log.txt
 ```
-
-The `oracledb.initOracleClient()` method and searching of the directory where
-the `oracledb*.node` binary is located were added in node-oracledb 5.0.
-
-##### Using `initOracleClient()` to set the Oracle Client directory
-
-Applications can call the synchronous function
-[`oracledb.initOracleClient()`](#odbinitoracleclient) to specify the directory
-containing Oracle Instant Client libraries.  The Oracle Client Libraries are
-loaded when `initOracleClient()` is called.  For example, if the Oracle Instant
-Client Libraries are in `C:\oracle\instantclient_19_6` on Windows, then you can
-use:
-
-```javascript
-const oracledb = require('oracledb');
-try {
-  oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_6'});
-} catch (err) {
-  console.error('Whoops!');
-  console.error(err);
-  process.exit(1);
-}
-```
-
-If you use backslashes in the `libDir` string, you will need to double them.
-
-The `initOracleClient()` function should only be called once.
-
-If you set `libDir` on Linux and related platforms, you must still have
-configured the system library search path to include that directory before
-starting Node.js.
-
-On any operating system, if you set `libDir` to the library directory of a full
-database or full client installation, you will need to have previously set the
-Oracle environment, for example by setting the `ORACLE_HOME` environment
-variable.  Otherwise you will get errors like *ORA-1804*.  You should set this,
-and other Oracle environment variables, before starting Node.js, as shown in
-[Oracle Environment Variables](#environmentvariables).
 
 ### <a name="tnsadmin"></a> 15.2 Optional Oracle Net Configuration
 
@@ -9337,11 +9453,11 @@ version of the Oracle Client libraries.
 If you are using Oracle Client 19c, the latest [Easy Connect Plus][151] syntax
 allows the use of multiple hosts or ports, along with optional entries for the
 wallet location, the distinguished name of the database server, and even lets
-some network configuration options be set.  The technical paper [Oracle Database 19c
-Easy Connect Plus Configurable Database Connection Syntax][177] discusses the
-syntax.  The Easy Connect Plus syntax means that [`tnsnames.ora`](#tnsadmin) or
-[`sqlnet.ora`](#tnsadmin) files are not needed for some further common
-connection scenarios.
+some network configuration options be set.  The technical paper [Oracle
+Database 21c Easy Connect Plus Configurable Database Connection Syntax][177]
+discusses the syntax.  The Easy Connect Plus syntax means that
+[`tnsnames.ora`](#tnsadmin) or [`sqlnet.ora`](#tnsadmin) files are not needed
+for some further common connection scenarios.
 
 For example, if a firewall terminates idle connections every five minutes, you
 may decide it is more efficient to keep connections alive instead of having the
@@ -9498,71 +9614,32 @@ const connection = await oracledb.getConnection(
 );
 ```
 
-#### <a name="tokenbasedconnstrings"></a> 16.1.5 Token Based Authentication Connection Strings
-
-Token based authentication allows Oracle Cloud Infrastruction users to
-authenticate to Oracle Database with Oracle Identity Access Manager (IAM)
-tokens. Token authentication can be performed when node-oracledb uses Oracle
-Client libraries 19.14 (or later), or 21.5 (or later).
-
-The Oracle Cloud Infrastructure command line interface (OCI-CLI) can be used
-externally to get tokens and private keys from IAM, for example with `oci iam
-db-token get`.
-
-The connection string used by node-oracledb can specify the directory where the
-token and private key files are located.  This syntax is usable with older
-versions of node-oracledb however it is recommended to use connection and pool
-creation parameters introduced in node-oracledb 5.4 instead, see [Token Based
-Authentication](#tokenbasedauth).
-
-If you need to use the connection string syntax then the Oracle Net parameter
-`TOKEN_AUTH` must be set.  Also the `PROTOCOL` parameter must be `tcps` and
-`SSL_SERVER_CERT_DN` should be `ON`.
-
-You can set `TOKEN_AUTH=OCI_TOKEN` in a [sqlnet.ora](#tnsadmin) file.
-Alternatively you can specify it in a connect descriptor, for example:
-
-```
-db_alias =
-  (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCPS)(PORT = 1522)(HOST = adb.us-ashburn-1.oraclecloud.com))
-    (CONNECT_DATA = (SERVICE_NAME = adb.oraclecloud.com))
-    (SECURITY =
-      (SSL_SERVER_CERT_DN = "CN=adwc.uscom-east-1.oraclecloud.com, OU=Oracle BMCS US,
-           O=Oracle Corporation, L=Redwood City, ST=California, C=US")
-      (TOKEN_AUTH = OCI_TOKEN)))
-```
-
-The default location for the token and private key is the same default location
-that the OCI-CLI tool writes to.  For example `~/.oci/db-token/` on Linux.
-
-If the token and private key files are not in the default location then their
-directory must be specified with the `TOKEN_LOCATION` parameter in a
-`sqlnet.ora` file or in a connection string.  For example in a `tnsnames.ora`
-file:
-
-```
-db_alias =
-  (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCPS)(PORT = 1522)(HOST = adb.us-ashburn-1.oraclecloud.com))
-    (CONNECT_DATA = (SERVICE_NAME = adb.oraclecloud.com))
-    (SECURITY =
-      (SSL_SERVER_CERT_DN = "CN=adwc.uscom-east-1.oraclecloud.com, OU=Oracle BMCS US,
-           O=Oracle Corporation, L=Redwood City, ST=California, C=US")
-      (TOKEN_AUTH = OCI_TOKEN)
-      (TOKEN_LOCATION = '~/.oci/db-token')))
-```
-
-The `TOKEN_AUTH` and `TOKEN_LOCATION` values in a connection string take
-precedence over the `sqlnet.ora` settings.
-
 ### <a name="numberofthreads"></a> 16.2 Connections, Threads, and Parallelism
 
-If you open more than four connections, such as via increasing
-[`poolMax`](#proppoolpoolmax), you should increase the number of worker threads
-available to node-oracledb.  A thread pool that is too small can cause
-connection requests to fail with the error *NJS-040: connection request
-timeout* or *NJS-076: connection request rejected*.
+To scale and optimize your applications it is useful to understand how
+connections interact with Node.js worker threads, and to know that each
+connection can only execute one database operation at a time.
+
+#### <a name="workerthreads"></a> 16.2.1 Connections and Worker Threads
+
+Node.js has four background worker threads by default (not to be confused with
+the newer user space worker_threads module).  If you open more than four
+[standalone connections](#connectionhandling) or pooled connections, such as by
+increasing [`poolMax`](#proppoolpoolmax), then you must increase the number of
+worker threads available to node-oracledb.
+
+A worker thread pool that is too small can cause a decrease in application
+performance, can cause [deadlocks][22], or can cause connection requests to
+fail with the error *NJS-040: connection request timeout* or *NJS-076:
+connection request rejected*.
+
+A Node.js worker thread is used by each connection to execute a database
+statement.  Each thread will wait until all [round-trips](#roundtrips) between
+node-oracledb and the database for the statement are complete.  When an
+application handles a sustained number of user requests, and database
+operations take some time to execute or the network is slow, then all available
+threads may be held in use.  This prevents other connections from beginning
+work and stops Node.js from handling more user load.
 
 The thread pool size should be equal to, or greater than, the maximum number of
 connections.  If the application does database and non-database work
@@ -9588,7 +9665,8 @@ Or, on Windows:
 . . .
 ```
 
-With these, you can start your application with `npm start`.
+With these, you can start your application with `npm start`.  This will allow
+up to 10 connections to be actively excuting SQL statements in parallel.
 
 On non-Windows platforms, the value can also be set inside the application.  It
 must be set prior to any asynchronous Node.js call that uses the thread pool:
@@ -9601,14 +9679,14 @@ process.env.UV_THREADPOOL_SIZE = 10
 // ... rest of code
 ```
 
-If you set `UV_THREADPOOL_SIZE` too late, the setting will be ignored and the
-default thread pool size of 4 will still be used.  Note that
+If you set `UV_THREADPOOL_SIZE` too late in the application, or try to set it
+this way on Windows, then the setting will be ignored and the default thread
+pool size of 4 will still be used.  Note that
 [`pool.getStatistics()`](#poolgetstatistics) and
 [`pool.logStatistics()`](#poollogstatistics) can only give the value of the
 variable, not the actual size of the thread pool created.  On Linux you can use
-`pstack` to see how many threads are actually running.  Note Node.js will
-create a small number of threads in addition to the expected number of worker
-threads.
+`pstack` to see how many threads are actually running.  Node.js will create a
+small number of threads in addition to the expected number of worker threads.
 
 The '[libuv][21]' library used by Node.js 12.5 and earlier limits the number of
 threads to 128.  In Node.js 12.6 onward the limit is 1024.  You should restrict
@@ -9617,15 +9695,7 @@ i.e. [`poolMax`](#createpoolpoolattrspoolmax), to a value lower than
 `UV_THREADPOOL_SIZE`.  If you have multiple pools, make sure the sum of all
 `poolMax` values is no larger than `UV_THREADPOOL_SIZE`.
 
-Node.js worker threads executing database statements on a connection will wait
-until [round-trips](#roundtrips) between node-oracledb and the database are
-complete.  When an application handles a sustained number of user requests, and
-database operations take some time to execute or the network is slow, then all
-available threads may be held in use.  This prevents other connections from
-beginning work and stops Node.js from handling more user load.  Increasing the
-number of worker threads may improve throughput and prevent [deadlocks][22].
-
-#### <a name="parallelism"></a> 16.2.1 Parallelism on a Connection
+#### <a name="parallelism"></a> 16.2.2 Parallelism on Each Connection
 
 Oracle Database can only execute operations one at a time on each connection.
 Examples of operations include `connection.execute()`,
@@ -9694,7 +9764,8 @@ When applications use a lot of connections for short periods, Oracle recommends
 using a connection pool for efficiency.  Each connection in a pool should be
 used for a given unit of work, such as a transaction or a set of sequentially
 executed statements.  Statements should be [executed sequentially, not in
-parallel](#numberofthreads) on each connection.
+parallel](#parallelism) on each connection.  The number of [worker
+threads](#workerthreads) should be increased for large pools.
 
 Each node-oracledb process can use one or more connection pools.  Each pool can
 contain zero or more connections.  In addition to providing an immediately
@@ -9823,9 +9894,9 @@ The main characteristics of a connection pool are determined by its attributes
 [`poolIncrement`](#proppoolpoolincrement), and
 [`poolTimeout`](#proppoolpooltimeout).
 
-**Importantly, if you increase the size of the pool, you must increase the number
-of threads used by Node.js before Node.js starts its thread pool.  See
-[Connections, Threads, and Parallelism](#numberofthreads)**.
+**Note: If you increase the size of the connection pool, you must increase the
+number of threads in the Node.js worker thread pool.  See [Connections and
+Worker Threads](#workerthreads)**.
 
 Setting `poolMin` causes the specified number of connections to be established
 to the database during pool creation.  This allows subsequent
@@ -9833,11 +9904,14 @@ to the database during pool creation.  This allows subsequent
 appropriate `poolMax` value avoids overloading the database by limiting the
 maximum number of connections ever opened.
 
-Pool expansion happens when the following are all true: (i)
-[`pool.getConnection()`](#getconnectionpool) is called and (ii) all the
-currently established connections in the pool are "checked out" by previous
-`pool.getConnection()` calls and are in-use by the application, and (iii) the
-number of those connections is less than the pool's `poolMax` setting.
+Pool expansion happens when [`pool.getConnection()`](#getconnectionpool) is
+called and both the following are true:
+
+- all the currently established connections in the pool are "checked out" of
+  the pool by previous `pool.getConnection()` calls
+
+- the number of those currently established connections is less than the pool's
+  `poolMax` setting.
 
 Pool shrinkage happens when the application returns connections to the pool,
 and they are then unused for more than [`poolTimeout`](#propdbpooltimeout)
@@ -10163,9 +10237,9 @@ If the application has called [`pool.getConnection()`](#getconnectionpool) (or
 times so that all connections in the pool are in use, and further
 `getConnection()` calls are made, then each of those new `getConnection()`
 requests will be queued and not return until an in-use connection is released
-back to the pool with [`connection.close()`](#connectionclose).  If `poolMax`
-has not been reached, then connection requests can be immediately satisfied and
-are not queued.
+back to the pool with [`connection.close()`](#connectionclose).  If, instead,
+`poolMax` has not been reached, then connection requests can be immediately
+satisfied and are not queued.
 
 The amount of time that a queued request will wait for a free connection can be
 configured with [queueTimeout](#propdbqueuetimeout).  When connections are timed
@@ -10182,9 +10256,9 @@ blocking (for up to [`queueTimeout`](#propdbqueuetimeout) seconds) while
 waiting an available pooled connection.  It lets you see when the pool is too
 small.
 
-You may also experience *NJS-040* or *NJS-076* errors if your application is not
-correctly closing connections, or [UV_THREADPOOL_SIZE](#numberofthreads) is too
-small.
+You may also experience *NJS-040* or *NJS-076* errors if your application is
+not correctly closing connections, or if [UV_THREADPOOL_SIZE](#numberofthreads)
+is too small.
 
 #### <a name="connpoolmonitor"></a> 16.3.5 Connection Pool Monitoring
 
@@ -10948,24 +11022,233 @@ of open connections exceeds `poolMin` and connections are idle for
 more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
 number of open connections does not fall below `poolMin`.
 
-### <a name="tokenbasedauth"></a> 16.5 Token Based Authentication
+### <a name="tokenbasedauthentication"></a> 16.5 Token-Based Authentication
 
-Token based authentication allows Oracle Cloud Infrastruction users to
-authenticate to Oracle Database with Oracle Identity Access Manager (IAM)
-tokens. Token authentication can be performed when node-oracledb uses Oracle
-Client libraries 19.14 (or later), or 21.5 (or later).
+Token-Based Authentication allows users to connect to a database by using an
+encrypted authentication token without having to enter a database username and
+password.  The authentication token must be valid and not expired for the
+connection to be successful.  Users already connected will be able to continue
+work after their token has expired but they will not be able to reconnect
+without getting a new token.
 
-Token based authentication can be used for both standalone connections and
-connection pools. Tokens can be specified using connection attributes
-introduced in node-oracledb 5.4.  Users of earlier node-oracledb versions can
-alternatively use [Token Based Authentication Connection
-Strings](#tokenbasedconnstrings).
+The two authentication methods supported by node-oracledb are Open
+Authorization [OAuth 2.0](#oauthtokenbasedauthentication) and Oracle Cloud
+Infrastructure (OCI) Identity and Access Management
+[IAM](#iamtokenbasedauthentication).
 
-#### <a name="tokengen"></a> 16.5.1 Token Generation using the OCI CLI
+Token-based authentication can be used for both standalone connections and
+connection pools.
 
-Authentication tokens are generated through execution of an Oracle Cloud
-Infrastructure command line interface (OCI-CLI) command run externally to
-Node.js:
+#### <a name="oauthtokenbasedauthentication"></a> 16.5.1 OAuth 2.0 Token-Based Authentication
+
+Oracle Cloud Infrastructure (OCI) users can be centrally managed in a Microsoft
+Azure Active Directory (Azure AD) service.  Open Authorization (OAuth 2.0)
+token-based authentication allows users to authenticate to Oracle Database
+using Azure AD OAuth 2.0 tokens.  Your Oracle Database must be registered with
+Azure AD.
+
+See [Authenticating and Authorizing Microsoft Azure Active Directory Users for
+Oracle Autonomous Databases][206] for more information.
+
+OAuth 2.0 token authentication can be performed when node-oracledb uses Oracle
+Client libraries 19.15 (or later), or 21.7 (or later).
+
+##### <a name="oauthtokengeneration"></a> 16.5.1.1 OAuth 2.0 Token Generation
+
+Authentication tokens can be obtained in several ways.  For example you can use
+a curl command against the Azure Active Directory API such as:
+
+```
+curl -X POST -H 'Content-Type: application/x-www-form-urlencoded'
+https://login.microsoftonline.com/[<TENANT_ID>]/oauth2/v2.0/token
+-d 'client_id = <APP_ID>'
+-d 'scope = <SCOPES>'
+-d 'username = <USER_NAME>'
+-d 'password = <PASSWORD>'
+-d 'grant_type = password'
+-d 'client_secret = <SECRET_KEY>'
+```
+
+Substitute your own values as appropriate for each argument.
+
+This returns a JSON response containing an `access_token` attribute.  See
+[Microsoft identity platform and OAuth 2.0 authorization code flow][208] for
+more details.  This attribute can be passed as the `oracledb.getConnection()`
+attribute [`accessToken`](#getconnectiondbattrsaccesstoken) or as the
+`oracledb.createPool()` attribute
+[`accessToken`](#createpoolpoolattrsaccesstoken).
+
+Alternatively authentication tokens can be generated by calling the Azure
+Active Directory REST API, for example:
+
+```javascript
+function getOauthToken() {
+  const requestParams = {
+    client_id     : <CLIENT_ID>,
+    client_secret : <CLIENT_SECRET>,
+    grant_type    : 'client_credentials',
+    scope         : <SCOPES>,
+  };
+  const tenantId = <TENANT_ID>;
+  const url = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
+  return new Promise(function(resolve, reject) {
+    request.post({
+      url       : url,
+      body      : queryString.stringify(requestParams),
+      headers   : { 'Content-Type': 'application/x-www-form-urlencoded' }
+    }, function(err, response, body) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(JSON.parse(body).access_token);
+      }
+    });
+  });
+}
+```
+
+Substitute your own values as appropriate for each argument.
+
+Use of `getOauthToken()` is shown in subsequent examples.
+
+##### <a name="oauthstandalone"></a> 16.5.1.2 OAuth 2.0 Standalone Connections
+
+Standalone connections can be created using OAuth2 token-based authentication,
+for example:
+
+```javascript
+let accessTokenStr;  // the token string. In this app it is also the token "cache"
+
+async function tokenCallback(refresh) {
+  if (refresh || !acccessTokenStr) {
+    accessTokenStr = await getOauthToken(); // getOauthToken() was shown earlier
+  }
+  return acccessTokenStr;
+}
+
+async function init() {
+  try {
+    await oracledb.getConnection({
+      accessToken   : tokenCallback,    // the callback returning the token
+      externalAuth  : true,             // must specify external authentication
+      connectString : connect_string    // Oracle Autonomous Database connection string
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
+```
+
+In this example, the global variable `accessTokenStr` is used to "cache" the
+access token string so any subsequent callback invocation will not necessarily
+have to incur the expense of externally getting a token.  For example, if the
+application opens two connections for the same user, the token acquired for the
+first connection can be reused without needing to make a second REST call.
+
+The `getConnection()` function's
+[`accessToken`](#getconnectiondbattrsaccesstoken) attribute in this example is
+set to the callback function that returns an OAuth 2.0 token used by
+node-oracledb for authentication.  This function `tokenCallback()` will be
+invoked when `getConnection()` is called.  If the returned token is found to
+have expired, then `tokenCallback()` will be called a second time.  If the
+second invocation of `tokenCallback()` also returns an expired token, then the
+connection will fail.  The value of the `refresh` parameter will be different
+each of the times the callback is invoked:
+
+- When `refresh` is *true*, the token is known to have expired so the
+  application must get a new token.  This is then stored in the global variable
+  `accessTokenStr` and returned.
+
+- When `refresh` is *false*, the application can return the token stored in
+  `accessTokenStr`, if it is set.  But if it is not set (meaning there is no
+  token cached), then the application externally acquires a token, stores it in
+  `accessTokenStr`, and returns it.
+
+##### <a name="oauthpool"></a> 16.5.1.3 OAuth 2.0 Connection Pooling
+
+Pooled connections can be created using OAuth 2.0 token-based authentication,
+for example:
+
+```javascript
+let accessTokenStr;  // The token string. In this app it is also the token "cache"
+
+async function tokenCallback(refresh) {
+  if (refresh || !acccessTokenStr) {
+    accessTokenStr = await getOauthToken(); // getOauthToken() was shown earlier
+  }
+  return acccessToken;
+}
+
+async function init() {
+  try {
+    await oracledb.createPool({
+      accessToken   : tokenCallback,        // the callback returning the token
+      externalAuth  : true,                 // must specify external authentication
+      homogeneous   : true,                 // must use an homogeneous pool
+      connectString : '...'                 // Oracle Autonomous Database connection string
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
+```
+
+See [OAuth 2.0 Standalone Connections](#oauthstandalone) for a description of
+the callback and `refresh` parameter.  With connection pools, the
+[`accessToken`](#createpoolpoolattrsaccesstoken) attribute sets a callback
+function which will be invoked at the time the pool is created (even if
+`poolMin` is 0).  It is also called when the pool needs to expand (causing new
+connections to be created) and the current token has expired.
+
+##### <a name="oauthconnectstring"></a> 16.5.1.4 OAuth 2.0 Connection Strings
+
+Applications built with node-oracledb 5.5, or later, should use the connection
+or pool creation parameters described earlier.  However, if you cannot use
+them, you can use OAuth 2.0 Token Authentication by configuring Oracle Net
+options.  This still requires Oracle Client libraries 19.15 (or later), or 21.7
+(or later).
+
+Save the generated access token to a file and set the connect descriptor
+`TOKEN_LOCATION` option to the directory containing the token file.  The
+connect descriptor parameter `TOKEN_AUTH` must be set to `OAUTH`, the
+`PROTOCOL` value must be `TCPS`, the `SSL_SERVER_DN_MATCH` value should be
+`ON`, and the parameter `SSL_SERVER_CERT_DN` should be set.  For example, your
+[`tnsnames.ora`](#tnsnames) file might contain:
+
+```
+db_alias =
+  (DESCRIPTION=(ADDRESS=(PROTOCOL=TCPS)(PORT=1522)(HOST=abc.oraclecloud.com))
+    (CONNECT_DATA=(SERVICE_NAME=db_low.adb.oraclecloud.com))
+      (SECURITY=
+        (SSL_SERVER_DN_MATCH=ON)
+        (SSL_SERVER_CERT_DN="CN=efg.oraclecloud.com, OU=Oracle BMCS US, O=Oracle Corporation, L=Redwood City, ST=California, C=US")
+        (TOKEN_AUTH=OAUTH)
+        (TOKEN_LOCATION='/opt/oracle/token')
+        ))
+```
+
+You can alternatively set `TOKEN_AUTH` and `TOKEN_LOCATION` in a
+[`sqlnet.ora`](#tnsadmin) file.  The `TOKEN_AUTH` and `TOKEN_LOCATION` values
+in a connection string take precedence over the `sqlnet.ora` settings.
+
+See [Oracle Net Services documentation][37] for more information.
+
+
+#### <a name="tokenbasedauth"></a> <a name="iamtokenbasedauthentication"></a> 16.5.2 IAM Token-Based Authentication
+
+Token-based authentication allows Oracle Cloud Infrastructure users to
+authenticate to Oracle Database with Oracle Identity Access Management (IAM)
+tokens.  This token authentication can be performed when node-oracledb uses
+Oracle Client libraries 19.14 (or later), or 21.5 (or later).
+
+See [Configuring the Oracle Autonomous Database for IAM Integration][207] for
+more information.
+
+##### <a name="tokengen"></a> <a name="iamtokengeneration"></a> 16.5.2.1 IAM Token Generation
+
+Authentication tokens can be obtained in several ways.  For example you can use
+the Oracle Cloud Infrastructure command line interface (OCI CLI) command run
+externally to Node.js:
 
 ```
 oci iam db-token get
@@ -10974,22 +11257,25 @@ oci iam db-token get
 On Linux a folder `.oci/db-token` will be created in your home directory.  It
 will contain the token and private key files needed by node-oracledb.
 
-#### <a name="tokenread"></a> 16.5.2 Token and Private Key Extraction from a File
+See [Working with the Command Line Interface ][209] for more information on the
+OCI CLI.
 
-Token and private key files created externally can be read by your application,
-for example like:
+##### <a name="tokenread"></a> <a name="iamtokenextraction"></a> 16.5.2.2 IAM Token and Private Key Extraction
+
+Token and private key files created externally can be read by Node.js
+applications, for example like:
 
 ```javascript
-function getToken() {
+function getIAMToken() {
   const tokenPath = '/home/cjones/.oci/db-token/token';
   const privateKeyPath = '/home/cjones/.oci/db-token/oci_db_key.pem';
 
   let token = '';
   let privateKey = '';
   try {
-    // Read token file
+    // Read the token file
     token = fs.readFileSync(tokenPath, 'utf8');
-    // Read private key file
+    // Read the private key file
     const privateKeyFileContents = fs.readFileSync(privateKeyPath, 'utf-8');
     privateKeyFileContents.split(/\r?\n/).forEach(line => {
     if (line != '-----BEGIN PRIVATE KEY-----' &&
@@ -11000,31 +11286,37 @@ function getToken() {
     console.error(err);
   } finally {
     const tokenBasedAuthData = {
-      token           : token,
-      privateKey      : privateKey
+      token       : token,
+      privateKey  : privateKey
     };
     return tokenBasedAuthData;
   }
 }
 ```
 
-The token and key can be used subsequently during authentication.
+The token and key can be used during subsequent authentication.
 
-#### <a name="tokenbasedstandaloneconn"></a> 16.5.3 Standalone Connection Creation with Access Tokens
+##### <a name="tokenbasedstandaloneconn"></a> <a name="iamstandalone"></a> 16.5.2.3 IAM Standalone Connections
 
-Standalone connections can be created using token based authentication, for
+Standalone connections can be created using IAM token-based authentication, for
 example:
 
 ```javascript
+let accessTokenObj;  // the token object. In this app it is also the token "cache"
+
+function tokenCallback(refresh) {
+  if (refresh || !acccessTokenObj) {
+    accessTokenObj = getIAMToken();     // getIAMToken() was shown earlier
+  }
+  return acccessTokenObj;
+}
+
 async function init() {
-
-  const accessTokenData = getToken();
-
   try {
     await oracledb.getConnection({
-      accessToken         : accessTokenData,
-      externalAuth        : true,
-      connectString       : connect_string
+      accessToken    : tokenCallback,  // the callback returns the token object
+      externalAuth   : true,           // must specify external authentication
+      connectString  : '...'           // Oracle Autonomous Database connection string
     });
   } catch (err) {
     console.error(err);
@@ -11032,24 +11324,54 @@ async function init() {
 }
 ```
 
-For a runnable example, see [`tokenbasedauth.js`][206].
+In this example, the global object `accessTokenObj` is used to "cache" the IAM
+access token and private key (using the attributes `token` and `privateKey`) so
+any subsequent callback invocation will not necessarily have to incur the
+expense of externally getting them.  For example, if the application opens two
+connections for the same user, the token and private key acquired for the first
+connection can be reused without needing to make a second REST call.
 
-#### <a name="tokenbasedpool"></a> 16.5.4 Connection Pool Creation with Access Tokens
+The `getConnection()` function's
+[`accessToken`](#getconnectiondbattrsaccesstoken) attribute in this example is
+set to the callback function that returns an IAM token and private key used by
+node-oracledb for authentication.  This function `tokenCallback()` will be
+invoked when `getConnection()` is called.  If the returned token is found to
+have expired, then `tokenCallback()` will be called a second time.  If the
+second invocation of `tokenCallback()` also returns an expired token, then the
+connection will fail.  The value of the `refresh` parameter will be different
+each of the times the callback is invoked:
 
-An example creating a pool using token based authentication is:
+- When `refresh` is *true*, the token is known to have expired so the
+  application must get a new token and private key.  These are then stored in
+  the global object `accessTokenObj` and returned.
+
+- When `refresh` is *false*, the application can return the token and private
+  key stored in `accessTokenObj`, if it is set.  But if it is not set (meaning
+  there is no token or key cached), then the application externally acquires a
+  token and private key, stores them in `accessTokenObj`, and returns it.
+
+##### <a name="settingpooltokens"></a> <a name="tokenbasedpool"></a> <a name="iampool"></a> 16.5.2.4 IAM Connection Pooling
+
+Pooled connections can be created using IAM token-based authentication, for
+example:
 
 ```javascript
+let accessTokenObj;  // The token string. In this app it is also the token "cache"
+
+function tokenCallback(refresh) {
+  if (refresh || !acccessTokenObj) {
+    accessTokenObj = getIAMToken();      // getIAMToken() was shown earlier
+  }
+  return acccessToken;
+}
+
 async function init() {
-
-  const accessTokenData = getToken();
-
   try {
     await oracledb.createPool({
-      accessToken         : accessTokenData,
-      accessTokenCallback : tokenCallback
-      externalAuth        : true,
-      homogeneous         : true,
-      connectString       : connect_string,
+      accessToken   : tokenCallback,     // the callback returning the token
+      externalAuth  : true,              // must specify external authentication
+      homogeneous   : true,              // must use an homogeneous pool
+      connectString : connect_string     // Oracle Autonomous Database connection string
     });
   } catch (err) {
     console.error(err);
@@ -11057,55 +11379,64 @@ async function init() {
 }
 ```
 
-The callback will be called if the connection pool needs to grow and create new
-connections but the current token is invalid.  The callback should return the
-new, valid token:
+See [IAM Standalone Connections](#iamstandalone) for a description of the
+callback and `refresh` parameter.  With connection pools, the
+[`accessToken`](#createpoolpoolattrsaccesstoken) attribute sets a callback
+function which will be invoked at the time the pool is created (even if
+`poolMin` is 0).  It is also called when the pool needs to expand (causing new
+connections to be created) and the current token has expired.
 
-```javascript
-function tokenCallback() {
-  ...
-  // Code to get the refreshed token and private key should be here.
-  // For example, make an external call to 'oci iam db-token get' and then
-  // read the token and private key values, see getToken()
-  ...
+##### <a name="tokenbasedconnstrings"></a> <a name="iamconnectstring"></a> 16.5.2.5 IAM Connection Strings
 
-  const refreshTokenData = {
-    token           : token,
-    privateKey      : privateKey
-  };
+Applications built with node-oracledb 5.4, or later, should use the connection
+or pool creation parameters described earlier.  However, if you cannot use
+them, you can use IAM Token Authentication by configuring Oracle Net options.
+This still requires Oracle Client libraries 19.14 (or later), or 21.5 (or
+later).
 
-  return refreshTokenData;
-}
+Save the generated access token to a file and set the connect descriptor
+`TOKEN_LOCATION` option to the directory containing the token file.  The
+connect descriptor parameter `TOKEN_AUTH` must be set to `OCI_TOKEN`, the
+`PROTOCOL` value must be `TCPS`, the `SSL_SERVER_DN_MATCH` value should be
+`ON`, and the parameter `SSL_SERVER_CERT_DN` should be set.  For example, if
+the token and private key are in the default location used by the [OCI
+CLI][209], your [`tnsnames.ora`](#tnsnames) file might contain:
+
+```
+db_alias =
+  (DESCRIPTION=(ADDRESS=(PROTOCOL=TCPS)(PORT=1522)(HOST=abc.oraclecloud.com))
+    (CONNECT_DATA=(SERVICE_NAME=db_low.adb.oraclecloud.com))
+      (SECURITY=
+        (SSL_SERVER_DN_MATCH=ON)
+        (SSL_SERVER_CERT_DN="CN=efg.oraclecloud.com, OU=Oracle BMCS US, O=Oracle Corporation, L=Redwood City, ST=California, C=US")
+        (TOKEN_AUTH=OCI_TOKEN)
+        ))
 ```
 
-For a runnable example, see [`tokenbasedauthpool.js`][207].
+This reads the IAM token and private key from the default location, for example
+`~/.oci/db-token/` on Linux.
 
-#### <a name="settingpooltokens"></a> 16.5.5 Explicitly Refreshing Pool Access Tokens
+If the token and private key files are not in the default location then their
+directory must be specified with the `TOKEN_LOCATION` parameter.  For example
+in a `tnsnames.ora` file:
 
-If you did not set an access token callback with
-[`accessTokenCallback`](#createpoolpoolattrsaccesstokencallback) to
-automatically update an expired token, you can explicitly call
-[`pool.setAccessToken()`](#poolsetaccesstoken).  For example:
-
-```javascript
-let accessTokenData = getToken();
-
-let pool = await oracledb.createPool({
-  accessToken         : accessTokenData,
-  externalAuth        : true,
-  homogeneous         : true,
-  connectString       : connect_string,
-});
-
-. . . // do some work, during which the token expires
-
-// Get and set an updated token
-accessTokenData = getToken();
-pool.setAccessToken({
-  token               : accessTokenData.token,
-  privateKey          : accessTokenData.privateKey
-)};
 ```
+db_alias =
+  (DESCRIPTION=(ADDRESS=(PROTOCOL=TCPS)(PORT=1522)(HOST=abc.oraclecloud.com))
+    (CONNECT_DATA=(SERVICE_NAME=db_low.adb.oraclecloud.com))
+      (SECURITY=
+        (SSL_SERVER_DN_MATCH=ON)
+        (SSL_SERVER_CERT_DN="CN=efg.oraclecloud.com, OU=Oracle BMCS US, O=Oracle Corporation, L=Redwood City, ST=California, C=US")
+        (TOKEN_AUTH=OCI_TOKEN)
+        (TOKEN_LOCATION='/opt/oracle/token')
+        ))
+```
+
+You can alternatively set `TOKEN_AUTH` and `TOKEN_LOCATION` in a
+[`sqlnet.ora`](#tnsadmin) file.  The `TOKEN_AUTH` and `TOKEN_LOCATION` values
+in a connection string take precedence over the `sqlnet.ora` settings.
+
+See [Oracle Net Services documentation][37] for more information.
 
 ### <a name="drcp"></a> 16.6 Database Resident Connection Pooling (DRCP)
 
@@ -11549,11 +11880,52 @@ Oracle Database][178].
 
 ### <a name="connectionadb"></a> 16.12 Connecting to Oracle Cloud Autonomous Databases
 
-To enable connection to Oracle Autonomous Database in Oracle Cloud, a wallet
-needs be downloaded from the cloud, and node-oracledb needs to be configured to
-use it.  The wallet gives mutual TLS which provides enhanced security for
-authentication and encryption.  A database username and password is still
-required for your application connections.
+To enable connection to Oracle Autonomous Database (ADB) in Oracle Cloud, you
+can use TLS (aka "1-way" TLS) or mutual TLS (mTLS) connections.
+
+#### <a name="connectionadbtls"></a> 16.12.1 TLS Connections to Oracle Cloud Autonomous Database
+
+Node-oracledb does not need any additional configuration to use TLS connections
+to ADB.  However you must use Oracle Client libraries versions 19.14 (or
+later), or 21.5 (or later).
+
+Configure ADB through the cloud console settings 'Allow secure access from
+specified IPs and VCNs' to allow connections from your Node.js host.  In your
+applications use the correct TLS connection string (available in the cloud
+console).  The connection strings for TLS and mTLS are different.
+
+For example:
+
+```javascript
+const cs = `(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)
+            (host=abc.oraclecloud.com))(connect_data=(service_name=xyz.adb.oraclecloud.com))
+            (security=(ssl_server_dn_match=yes)))`;
+
+connection = await oracledb.getConnection({
+  user: "scott",
+  password: mypw,  // mypw contains the scott schema password
+  connectString: cs
+});
+```
+
+A database username and password is required for your application connections.
+If you need to create a new database schema so you do not login as the
+privileged ADMIN user, refer to the relevant Oracle Cloud documentation, for
+example see [Create Database Users][161] in the Oracle Autonomous Transaction
+Processing Dedicated Deployments manual.
+
+If you have downloaded the 'wallet' zip used for mTLS file, then remove the
+`sqlnet.ora` file, or comment out its `WALLET_LOCATION` line, or set a valid
+directory name for `WALLET_LOCATION` (see the mTLS discussion below).
+Otherwise an incorrect path can cause a connection error when the file is
+parsed.
+
+#### <a name="connectionadbmtls"></a> 16.12.2 Mutal TLS connections to Oracle Cloud Autonomous Database
+
+For Mutal TLS (mTLS) connections to ADB, a wallet needs be downloaded from the
+cloud console, and node-oracledb needs to be configured to use it.  Mutual TLS
+provides enhanced security for authentication and encryption.  A database
+username and password is still required for your application connections.
 
 ##### Install the Wallet and Network Configuration Files
 
@@ -11887,7 +12259,7 @@ Connections can handle one database operation at a time.  Other
 database operations will block.  Structure your code to avoid starting
 parallel operations on a connection.  For example avoid using
 `async.parallel` or `Promise.all()` which call each of their items in parallel,
-see [Parallelism on a Connection](#parallelism).
+see [Parallelism on Each Connection](#parallelism).
 
 After all database calls on the connection complete, the application
 should use the [`connection.close()`](#connectionclose) call to
@@ -11949,19 +12321,18 @@ Stream](#streamingresults) instead of a direct fetch.
 
 #### <a name="resultsethandling"></a> 17.1.2 Fetching Rows with Result Sets
 
-When the number of query rows is relatively big, or cannot be
-predicted, it is recommended to use a [ResultSet](#resultsetclass)
-with callbacks, as described in this section, or via query streaming,
-as described [later](#streamingresults).  This prevents query results
-being unexpectedly truncated by the [`maxRows`](#propdbmaxrows) limit,
-or exceeding Node.js memory constraints.  Otherwise, for queries that
-return a known small number of rows, non-ResultSet queries may have
-less overhead.
+When the number of query rows is relatively big, or cannot be predicted, it is
+recommended to use a [ResultSet](#resultsetclass), as described in this
+section, or alternatively use query streaming, as described
+[later](#streamingresults).  These methods prevent query results exceeding
+Node.js memory constraints.  Otherwise, for queries that return a known small
+number of rows, non-ResultSet queries may have less overhead.
 
 A ResultSet is created when the `execute()` option property
-[`resultSet`](#executeoptions) is *true*.  ResultSet rows can be
-fetched using [`getRow()`](#getrow) or [`getRows()`](#getrows) on the
-`execute()` callback function's `result.resultSet` property.
+[`resultSet`](#executeoptions) is *true*.  ResultSet rows can be fetched using
+[`getRow()`](#getrow) or [`getRows()`](#getrows) on the `execute()` callback
+function's `result.resultSet` property.  This property can also be iterated
+over.
 
 For ResultSets, the [`maxRows`](#propdbmaxrows) limit is ignored.  All
 rows can be fetched.
@@ -11985,10 +12356,7 @@ To fetch one row at a time use getRow() :
 
 ```javascript
 const result = await connection.execute(
-  `SELECT employee_id, last_name
-   FROM employees
-   WHERE ROWNUM < 5
-   ORDER BY employee_id`,
+  `SELECT city, postal_code FROM locations`,
   [], // no bind variables
   {
     resultSet: true // return a ResultSet (default is false)
@@ -12015,7 +12383,6 @@ const numRows = 10;
 const result = await connection.execute(
   `SELECT employee_id, last_name
    FROM   employees
-   WHERE ROWNUM < 25
    ORDER BY employee_id`,
   [], // no bind variables
   {
@@ -12035,6 +12402,26 @@ do {
     console.log(rows);
   }
 } while (rows.length === numRows);
+
+// always close the ResultSet
+await rs.close();
+```
+
+From node-oracledb 5.5, you can iterate over ResultSets:
+
+```javascript
+const result = await connection.execute(
+  `SELECT city, postal_code FROM locations`,
+  [], // no bind variables
+  {
+    resultSet: true // return a ResultSet (default is false)
+  }
+);
+
+const rs = result.resultSet;
+for await (const row of rs) {
+  console.log(row);
+}
 
 // always close the ResultSet
 await rs.close();
@@ -12702,7 +13089,7 @@ Techniques include:
 
   const sql = `SELECT last_name
                FROM employees
-               ORDER BY last_name
+               ORDER BY last_name, employee_id -- See below
                OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`;
 
   const result = await connection.execute(
@@ -12713,6 +13100,14 @@ Techniques include:
   ```
 
   A runnable example is in [rowlimit.js][84].
+
+  It is generally important to ensure that the query returns an unambiguous and
+  repeatable order.  In the example above, employees can have the same last
+  names so it is necessary to also indicate the next order field or the primary
+  key, for example ``employee_id``.  In some applications, where the table data
+  is being changed by other users, this may not be possible.  However the use
+  of an `AS OF` query flashback clause in the statement can be considered,
+  depending on the application requirements.
 
   You can use a basic [`execute()`](#execute) or a
   [ResultSet](#resultsetclass), or [`queryStream()`](#querystream) with
@@ -16009,8 +16404,9 @@ function myCallback(message) {
 }
 
 const options = {
-    sql      : `SELECT * FROM mytable`,  // query of interest
-    callback : myCallback                // method called by notifications
+    sql             : `SELECT * FROM mytable`, // query of interest
+    callback        : myCallback,              // method called by notifications
+    clientInitiated : true                     // For Oracle DB & Client 19.4 or later
 };
 
 await connection.subscribe('mysub', options);
@@ -16506,6 +16902,44 @@ about subscriptions and notifications.
 AQ notifications require the same configuration as CQN.  Specifically
 the database must be able to connect back to node-oracledb.
 
+### <a name="aqrecipientlists"></a> 27.6 Recipient Lists
+
+A list of recipient names can be associated with a message at the time a
+message is enqueued.  This allows a limited set of recipients to dequeue each
+message.  The recipient list associated with the message overrides the queue
+subscriber list, if there is one.  The recipient names need not be in the
+subscriber list but can be, if desired.
+
+To dequeue a message, the `consumerName` attribute can be set to one of the
+recipient names.  The original message recipient list is not available on
+dequeued messages.  All recipients have to dequeue a message before it gets
+removed from the queue.
+
+Subscribing to a queue is like subscribing to a magazine: each subscriber can
+dequeue all the messages placed into a specific queue, just as each magazine
+subscriber has access to all its articles.  Being a recipient, however, is like
+getting a letter: each recipient is a designated target of a particular
+message.
+
+For example, to enqueue a message meant for "payroll" recipients:
+
+```
+await queue.enqOne({
+  payload: "Message 1",
+  recipients: [ "payroll" ]
+});
+```
+
+Later, when dequeuing messages, the "payroll" recipient can be set using the
+`consumerName` property to get the message:
+
+```
+Object.assign(
+  queue.deqOptions,
+  { consumerName: "payroll" }
+);
+const msg = await queue.deqOne();
+```
 
 ## <a name="nls"></a> 28. Globalization and National Language Support (NLS)
 
@@ -18992,7 +19426,7 @@ can be asked at [AskTom][158].
 [174]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FAFD1247-06E5-4E64-917F-AEBD4703CF40
 [175]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-0203C8FA-A4BE-44A5-9A25-3D1E578E879F
 [176]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-B28362BE-8831-4687-89CF-9F77DB3698D2
-[177]: https://download.oracle.com/ocomdocs/global/Oracle-Net-19c-Easy-Connect-Plus.pdf
+[177]: https://download.oracle.com/ocomdocs/global/Oracle-Net-21c-Easy-Connect-Plus.pdf
 [178]: https://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/applicationcontinuityformaa-6348196.pdf
 [179]: https://eslint.org/docs/rules/no-await-in-loop
 [180]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-35CB2592-7588-4C2D-9075-6F639F25425E
@@ -19020,5 +19454,7 @@ can be asked at [AskTom][158].
 [203]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-39C521D4-5C6E-44B1-B7C7-DEADD7D9CAF0
 [204]: https://www.oracle.com/a/tech/docs/application-checklist-for-continuous-availability-for-maa.pdf
 [205]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8152084F-4760-4B89-A91C-9A84F81C23D1
-[206]: https://github.com/oracle/node-oracledb/tree/main/examples/tokenbasedauth.js
-[207]: https://github.com/oracle/node-oracledb/tree/main/examples/tokenbasedauthpool.js
+[206]: https://docs.oracle.com/en/database/oracle/oracle-database/19/dbseg/authenticating-and-authorizing-microsoft-azure-active-directory-users-oracle-autonomous-datab.html#GUID-2712902B-DD07-4A61-B336-31C504781D0F
+[207]: https://docs.oracle.com/en/database/oracle/oracle-database/19/dbseg/authenticating-and-authorizing-iam-users-oracle-autonomous-databases.html#GUID-466A8800-5AF1-4202-BAFF-5AE727D242E8
+[208]: https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow
+[209]: https://docs.oracle.com/en-us/iaas/Content/API/Concepts/cliconcepts.htm
