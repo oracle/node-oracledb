@@ -1183,7 +1183,7 @@ Constant Name                                           | Value      | Descripti
 
 #### <a name="oracledbconstantscqn"></a> 3.1.9 Continuous Query Notification Constants
 
-Constants for the Continuous Query Notification
+Constants for the [Continuous Query Notification (CQN)](#cqn)
 `connection.subscribe()` option [`operations`](#consubscribeoptoperations), and for the
 notification message [`operation`](#consubscribeoptcallback) properties.
 
@@ -16347,8 +16347,9 @@ function myCallback(message) {
 }
 
 const options = {
-    sql      : `SELECT * FROM mytable`,  // query of interest
-    callback : myCallback                // method called by notifications
+    sql             : `SELECT * FROM mytable`, // query of interest
+    callback        : myCallback,              // method called by notifications
+    clientInitiated : true                     // For Oracle DB & Client 19.4 or later
 };
 
 await connection.subscribe('mysub', options);

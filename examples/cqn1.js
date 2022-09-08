@@ -25,7 +25,7 @@
  *   The user must have been granted CHANGE NOTIFICATION.
  *   The node-oracledb host must be resolvable by the database host.
  *
- *   Run this script and when the subscription has been created, run
+ *   Run this script and then, after the subscription has been created, run
  *   these statements in a SQL*Plus session:
  *      INSERT INTO NO_CQNTABLE VALUES (101);
  *      COMMIT;
@@ -98,11 +98,13 @@ const options = {
   callback : myCallback,
   sql: `SELECT * FROM no_cqntable WHERE k > :bv`,
   binds: { bv : 100 },
-  timeout : 60, // Stop after 60 seconds
-  // ipAddress: '127.0.0.1',
-  // SUBSCR_QOS_QUERY: generate notifications when rows with k > 100 are changed
-  // SUBSCR_QOS_ROWIDS: Return ROWIDs in the notification message
-  qos : oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
+  timeout: 60,               // stop after 60 seconds
+  clientInitiated: true,     // for Oracle Database & Client 19.4 or later
+  // ipAddress: '127.0.0.1', // where Node.js runs (when not using clientInitiated)
+  // qos flags:
+  //    SUBSCR_QOS_QUERY:  generate notifications when rows with k > 100 are changed
+  //    SUBSCR_QOS_ROWIDS: return ROWIDs in the notification message
+  qos: oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
 };
 
 async function setup(connection) {
