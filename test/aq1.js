@@ -26,7 +26,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -49,17 +49,15 @@ describe('217. aq1.js', function() {
       this.skip();
       return;
     } else {
-      try {
-        await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
+      await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
+      let credential = {
+        user:          AQ_USER,
+        password:      AQ_USER_PWD,
+        connectString: dbconfig.connectString
+      };
+      conn = await oracledb.getConnection(credential);
 
-        let credential = {
-          user:          AQ_USER,
-          password:      AQ_USER_PWD,
-          connectString: dbconfig.connectString
-        };
-        conn = await oracledb.getConnection(credential);
-
-        let plsql = `
+      let plsql = `
           BEGIN
             DBMS_AQADM.CREATE_QUEUE_TABLE(
               QUEUE_TABLE        =>  '${AQ_USER}.${RAW_TABLE}',
@@ -74,11 +72,7 @@ describe('217. aq1.js', function() {
             );
           END;
         `;
-        await conn.execute(plsql);
-
-      } catch (err) {
-        should.not.exist(err);
-      }
+      await conn.execute(plsql);
     }
 
   }); // before()
@@ -87,103 +81,86 @@ describe('217. aq1.js', function() {
     if (!isRunnable) {
       return;
     } else {
-      try {
-        await conn.close();
-        await testsUtil.dropAQtestUser(AQ_USER);
-      } catch (err) {
-        should.not.exist(err);
-      }
+      await conn.close();
+      await testsUtil.dropAQtestUser(AQ_USER);
     }
   }); // after()
 
   it('217.1 examples/aqraw.js', async () => {
 
-    try {
-      // Enqueue
-      const queue1 = await conn.getQueue(rawQueueName);
-      const messageString = 'This is my message';
-      await queue1.enqOne(messageString);
-      await conn.commit();
+    // Enqueue
+    const queue1 = await conn.getQueue(rawQueueName);
+    const messageString = 'This is my message';
+    await queue1.enqOne(messageString);
+    await conn.commit();
 
-      // Dequeue
-      const queue2 = await conn.getQueue(rawQueueName);
-      const msg = await queue2.deqOne();
-      await conn.commit();
+    // Dequeue
+    const queue2 = await conn.getQueue(rawQueueName);
+    const msg = await queue2.deqOne();
+    await conn.commit();
 
-      should.exist(msg);
-      should.strictEqual(msg.payload.toString(), messageString);
-
-    } catch (err) {
-      should.not.exist(err);
-    }
+    assert(msg);
+    assert.strictEqual(msg.payload.toString(), messageString);
 
   }); // 217.1
 
   it('217.2 examples/aqoptions.js', async () => {
-    try {
-      /* Enqueue */
-      let queue1 = await conn.getQueue(rawQueueName);
+    /* Enqueue */
+    let queue1 = await conn.getQueue(rawQueueName);
 
-      // Send a message immediately without requiring a commit
-      queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    // Send a message immediately without requiring a commit
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 
-      const messageString = 'This is my other message';
-      const message = {
-        payload: messageString, // the message itself
-        expiration: 10           // seconds the message will remain in the queue if not dequeued
-      };
-      await queue1.enqOne(message);
+    const messageString = 'This is my other message';
+    const message = {
+      payload: messageString, // the message itself
+      expiration: 10           // seconds the message will remain in the queue if not dequeued
+    };
+    await queue1.enqOne(message);
 
-      /* Dequeue */
-      let queue2 = await conn.getQueue(rawQueueName);
-      Object.assign(
-        queue2.deqOptions,
-        {
-          visibility: oracledb.AQ_VISIBILITY_IMMEDIATE, // Change the visibility so no explicit commit is required
-          wait: 25                                       // seconds it will wait if there are no messages
-        }
-      );
-      const msg = await queue2.deqOne();
-      if (msg) {
-        should.strictEqual(msg.payload.toString(), messageString);
+    /* Dequeue */
+    let queue2 = await conn.getQueue(rawQueueName);
+    Object.assign(
+      queue2.deqOptions,
+      {
+        visibility: oracledb.AQ_VISIBILITY_IMMEDIATE, // Change the visibility so no explicit commit is required
+        wait: 25                                       // seconds it will wait if there are no messages
       }
-
-    } catch (err) {
-      should.not.exist(err);
+    );
+    const msg = await queue2.deqOne();
+    if (msg) {
+      assert.strictEqual(msg.payload.toString(), messageString);
     }
+
   }); // 217.2
 
   it('217.3 examples/aqmulti.js', async () => {
-    try {
-      /* Enqueue */
-      let queue1 = await conn.getQueue(rawQueueName);
-      queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 
-      const messages1 = [
-        "Message 1",
-        "Message 2",
-        {
-          expiration: 10,
-          payload: "Message 3"
-        },
-        "Message 4"
-      ];
-      await queue1.enqMany(messages1);
+    /* Enqueue */
+    let queue1 = await conn.getQueue(rawQueueName);
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 
-      /* Dequeue */
-      const queue2 = await conn.getQueue(rawQueueName);
-      queue2.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    const messages1 = [
+      "Message 1",
+      "Message 2",
+      {
+        expiration: 10,
+        payload: "Message 3"
+      },
+      "Message 4"
+    ];
+    await queue1.enqMany(messages1);
 
-      const messages2 = await queue2.deqMany(5);  // get at most 5 messages
-      if (messages2) {
-        should.strictEqual(messages2.length, messages1.length);
-        should.strictEqual(messages2[0].payload.toString(), messages1[0]);
-        should.strictEqual(messages2[3].payload.toString(), messages1[3]);
-        should.strictEqual(messages2[2].expiration, 10);
-      }
+    /* Dequeue */
+    const queue2 = await conn.getQueue(rawQueueName);
+    queue2.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 
-    } catch (err) {
-      should.not.exist(err);
+    const messages2 = await queue2.deqMany(5);  // get at most 5 messages
+    if (messages2) {
+      assert.strictEqual(messages2.length, messages1.length);
+      assert.strictEqual(messages2[0].payload.toString(), messages1[0]);
+      assert.strictEqual(messages2[3].payload.toString(), messages1[3]);
+      assert.strictEqual(messages2[2].expiration, 10);
     }
   }); // 217.3
 });

@@ -24,18 +24,17 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
 
 describe('7. autoCommit.js', function() {
 
-  var pool = null;
-  var connection  = null;
+  let pool = null;
+  let connection  = null;
 
-  before('create pool, get one connection, create table', function(done) {
-    var script =
+  before('create pool, get one connection, create table', async function() {
+    let script =
         "BEGIN \
             DECLARE \
                 e_table_missing EXCEPTION; \
@@ -54,339 +53,166 @@ describe('7. autoCommit.js', function() {
             '); \
         END; ";
 
-    async.series([
-      function(callback) {
-        oracledb.createPool(
-          {
-            user          : dbConfig.user,
-            password      : dbConfig.password,
-            connectString : dbConfig.connectString,
-            poolMin       : 3,
-            poolMax       : 7,
-            poolIncrement : 1
-          },
-          function(err, connectionPool) {
-            should.not.exist(err);
-            pool = connectionPool;
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        pool.getConnection(function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          callback();
-        });
-      },
-      function(callback) {
-        connection.execute(
-          script,
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      }
-    ], done);
+    pool = await oracledb.createPool(
+      {
+        user          : dbConfig.user,
+        password      : dbConfig.password,
+        connectString : dbConfig.connectString,
+        poolMin       : 3,
+        poolMax       : 7,
+        poolIncrement : 1
+      });
+
+    connection = await pool.getConnection();
+    await connection.execute(script);
   });
 
-  after('drop table, release connection, terminate pool', function(done) {
-    async.series([
-      function(callback) {
-        connection.execute(
-          "DROP TABLE nodb_commit_dept purge",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.release(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      },
-      function(callback) {
-        pool.terminate(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      }
-    ], done);
+  after('drop table, release connection, terminate pool', async function() {
+    await connection.execute("DROP TABLE nodb_commit_dept purge");
+    await connection.release();
+    await pool.terminate();
   });
 
-  afterEach('truncate table, reset the oracledb properties', function(done) {
+  afterEach('truncate table, reset the oracledb properties', async function() {
     oracledb.autoCommit = false;  /* Restore to default value */
-
-    connection.execute(
-      "TRUNCATE TABLE nodb_commit_dept",
-      function(err) {
-        should.not.exist(err);
-        done();
-      }
-    );
+    await connection.execute("TRUNCATE TABLE nodb_commit_dept");
   });
 
-  it('7.1 autoCommit takes effect when setting oracledb.autoCommit before connecting', function(done) {
-    var conn1 = null;
-    var conn2 = null;
+  it('7.1 autoCommit takes effect when setting oracledb.autoCommit before connecting', async function() {
+    let conn1 = null;
+    let conn2 = null;
+    let result = null;
 
     oracledb.autoCommit = true;
+    conn1 = await pool.getConnection();
+    await conn1.execute("INSERT INTO nodb_commit_dept VALUES (82, 'Security')");
 
-    async.series([
-      function(callback) {
-        pool.getConnection(
-          function(err, conn) {
-            should.not.exist(err);
-            conn1 = conn;
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        conn1.execute(
-          "INSERT INTO nodb_commit_dept VALUES (82, 'Security')",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {           // get another connection
-        pool.getConnection(
-          function(err, conn) {
-            should.not.exist(err);
-            conn2 = conn;
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        conn2.execute(
-          "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
-          [],
-          { outFormat: oracledb.OUT_FORMAT_OBJECT },
-          function(err, result) {
-            should.not.exist(err);
-            result.rows[0].DEPARTMENT_ID.should.eql(82).and.be.a.Number();
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        conn1.execute(
-          "UPDATE nodb_commit_dept SET department_id = 101 WHERE department_name = 'Security'",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        conn2.execute(
-          "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
-          [],
-          { outFormat: oracledb.OUT_FORMAT_OBJECT },
-          function(err, result) {
-            should.not.exist(err);
-            result.rows[0].DEPARTMENT_ID.should.eql(101).and.be.a.Number();
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        conn1.release(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      },
-      function(callback) {
-        conn2.release(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      }
-    ], done);
+    // get another connection
+    conn2 = await pool.getConnection();
+
+    try {
+      result = await conn2.execute(
+        "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
+        [],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    } catch (err) {
+      assert.ifError(err);
+      assert.strictEqual(result.rows[0].DEPARTMENT_ID, 82);
+      assert.strictEqual(typeof (result.rows[0].DEPARTMENT_ID), "number");
+    }
+
+    await conn1.execute(
+      "UPDATE nodb_commit_dept SET department_id = 101 WHERE department_name = 'Security'");
+
+    try {
+      result = await conn2.execute(
+        "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
+        [],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    } catch (err) {
+      assert.ifError(err);
+      assert.strictEqual(result.rows[0].DEPARTMENT_ID, 101);
+      assert.strictEqual(typeof (result.rows[0].DEPARTMENT_ID), "number");
+    }
+
+    await conn1.release();
+    await conn2.release();
+
   });
 
-  it('7.2 autoCommit takes effect when setting oracledb.autoCommit after connecting', function(done) {
-    var conn1 = null;
-    var conn2 = null;
+  it('7.2 autoCommit takes effect when setting oracledb.autoCommit after connecting', async function() {
+    let conn1 = null;
+    let conn2 = null;
+    let result = null;
 
-    async.series([
-      function(callback) {
-        pool.getConnection(
-          function(err, conn) {
-            should.not.exist(err);
-            conn1 = conn;
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        oracledb.autoCommit = true;   // change autoCommit after connection
-        conn1.execute(
-          "INSERT INTO nodb_commit_dept VALUES (82, 'Security')",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        pool.getConnection(
-          function(err, conn) {
-            should.not.exist(err);
-            conn2 = conn;
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        conn2.execute(
-          "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
-          [],
-          { outFormat: oracledb.OUT_FORMAT_OBJECT },
-          function(err, result) {
-            should.not.exist(err);
-            result.rows[0].DEPARTMENT_ID.should.eql(82).and.be.a.Number();
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        conn1.execute(
-          "UPDATE nodb_commit_dept SET department_id = 101 WHERE department_name = 'Security'",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        conn2.execute(
-          "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
-          [],
-          { outFormat: oracledb.OUT_FORMAT_OBJECT },
-          function(err, result) {
-            should.not.exist(err);
-            result.rows[0].DEPARTMENT_ID.should.eql(101).and.be.a.Number();
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        conn1.release(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      },
-      function(callback) {
-        conn2.release(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      }
-    ], done);
+    conn1 = await pool.getConnection();
+
+    oracledb.autoCommit = true;   // change autoCommit after connection
+    await conn1.execute("INSERT INTO nodb_commit_dept VALUES (82, 'Security')");
+
+    conn2 = await pool.getConnection();
+
+    try {
+      result = await conn2.execute(
+        "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
+        [],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    } catch (err) {
+      assert.ifError(err);
+      assert.strictEqual(result.rows[0].DEPARTMENT_ID, 82);
+      assert.strictEqual(typeof (result.rows[0].DEPARTMENT_ID), "number");
+    }
+
+    await conn1.execute("UPDATE nodb_commit_dept SET department_id = 101 WHERE department_name = 'Security'");
+
+
+    try {
+      result = await conn2.execute(
+        "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
+        [],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    } catch (err) {
+      assert.ifError(err);
+      assert.strictEqual(result.rows[0].DEPARTMENT_ID, 101);
+      assert.strictEqual(typeof (result.rows[0].DEPARTMENT_ID), "number");
+    }
+
+    await conn1.release();
+    await conn2.release();
+
   });
 
-  it('7.3 autoCommit setting does not affect previous SQL result', function(done) {
-    var conn1 = null;
-    var conn2 = null;
+  it('7.3 autoCommit setting does not affect previous SQL result', async function() {
+    let conn1 = null;
+    let conn2 = null;
+    let result = null;
 
-    async.series([
-      function(callback) {
-        pool.getConnection(
-          function(err, conn) {
-            should.not.exist(err);
-            conn1 = conn;
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        conn1.execute(
-          "INSERT INTO nodb_commit_dept VALUES (82, 'Security')",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        pool.getConnection(
-          function(err, conn) {
-            should.not.exist(err);
-            conn2 = conn;
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        oracledb.autoCommit = true;   // change autoCommit after connection
-        conn2.execute(
-          "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
-          [],
-          { outFormat: oracledb.OUT_FORMAT_OBJECT },
-          function(err, result) {
-            should.not.exist(err);
-            (result.rows).should.eql([]);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        conn2.execute(
-          "INSERT INTO nodb_commit_dept VALUES (99, 'Marketing')",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        conn2.execute(
-          "SELECT COUNT(*) as amount FROM nodb_commit_dept",
-          [],
-          { outFormat: oracledb.OUT_FORMAT_OBJECT },
-          function(err, result) {
-            should.not.exist(err);
-            result.rows[0].AMOUNT.should.eql(1);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        conn1.execute(
-          "SELECT COUNT(*) as amount FROM nodb_commit_dept",
-          [],
-          { outFormat: oracledb.OUT_FORMAT_OBJECT },
-          function(err, result) {
-            should.not.exist(err);
-            result.rows[0].AMOUNT.should.eql(2);   // autoCommit for SELECT
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        conn1.release(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      },
-      function(callback) {
-        conn2.release(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      }
-    ], done);
+    conn1 = await pool.getConnection();
+
+    await conn1.execute("INSERT INTO nodb_commit_dept VALUES (82, 'Security')");
+
+    conn2 = await pool.getConnection();
+
+    try {
+      oracledb.autoCommit = true;   // change autoCommit after connection
+      result = await conn2.execute(
+        "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
+        [],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    } catch (err) {
+      assert.ifError(err);
+      assert.strictEqual(result.rows, []);
+    }
+
+    await conn2.execute(
+      "INSERT INTO nodb_commit_dept VALUES (99, 'Marketing')");
+
+    try {
+      result = await conn2.execute(
+        "SELECT COUNT(*) as amount FROM nodb_commit_dept",
+        [],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    } catch (err) {
+      assert.ifError(err);
+      assert.strictEqual(result.rows[0].AMOUNT, 1);
+    }
+
+    try {
+      result = await conn1.execute(
+        "SELECT COUNT(*) as amount FROM nodb_commit_dept",
+        [],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    } catch (err) {
+      assert.ifError(err);
+      assert.strictEqual(result.rows[0].AMOUNT, 2);   // autoCommit for SELECT
+    }
+
+    await conn1.release();
+    await conn2.release();
   });
 
   describe('7.4 global option - oracledb.autoCommit', function() {
-    var defaultValue;
+    let defaultValue;
     beforeEach(function() {
       defaultValue = oracledb.autoCommit;
     });
@@ -394,79 +220,77 @@ describe('7. autoCommit.js', function() {
       oracledb.autoCommit = defaultValue;
     });
 
-    it('7.4.1 Negative - 0', function(done) {
-      setAsGlobalOption(0, done);
+    it('7.4.1 Negative - 0', async function() {
+      await setAsGlobalOption(0);
     });
 
-    it('7.4.2 Negative - negative number', function(done) {
-      setAsGlobalOption(-1, done);
+    it('7.4.2 Negative - negative number', async function() {
+      await setAsGlobalOption(-1);
     });
 
-    it('7.4.3 Negative - positive number', function(done) {
-      setAsGlobalOption(-1, done);
+    it('7.4.3 Negative - positive number', async function() {
+      await setAsGlobalOption(-1);
     });
 
-    it('7.4.4 Negative - NaN', function(done) {
-      setAsGlobalOption(NaN, done);
+    it('7.4.4 Negative - NaN', async function() {
+      await setAsGlobalOption(NaN);
     });
 
-    it('7.4.5 Negative - undefined', function(done) {
-      setAsGlobalOption(undefined, done);
+    it('7.4.5 Negative - undefined', async function() {
+      await setAsGlobalOption(undefined);
     });
 
-    var setAsGlobalOption = function(setValue, callback) {
-      should.throws(
+    let setAsGlobalOption = function(setValue) {
+      assert.throws(
         function() {
           oracledb.autoCommit = setValue;
         },
-        /NJS-004: invalid value for property autoCommit/
+        /NJS-004:*/
       );
-      callback();
     };
   });
 
   describe('7.5 set autoCommit as an execute() option', function() {
 
-    it('7.5.1 Negative - 0', function(done) {
-      setAsExecOption(0, done);
+    it('7.5.1 Negative - 0', function() {
+      setAsExecOption(0);
     });
 
-    it('7.5.2 Negative - negative number', function(done) {
-      setAsExecOption(-1, done);
+    it('7.5.2 Negative - negative number', function() {
+      setAsExecOption(-1);
     });
 
-    it('7.5.3 Negative - positive number', function(done) {
-      setAsExecOption(-1, done);
+    it('7.5.3 Negative - positive number', function() {
+      setAsExecOption(-1);
     });
 
-    it('7.5.4 Negative - NaN', function(done) {
-      setAsExecOption(NaN, done);
+    it('7.5.4 Negative - NaN', function() {
+      setAsExecOption(NaN);
     });
 
-    it("7.5.5 works as 'false' when setting to 'undefined'", function(done) {
-      connection.execute(
+    it("7.5.5 works as 'false' when setting to 'undefined'", function() {
+      let result = null;
+
+      result = connection.execute(
         "select user from dual",
         [],
-        { autoCommit: undefined },
-        function(err, result) {
-          should.not.exist(err);
-          should.exist(result);
-          done();
-        }
-      );
+        { autoCommit: undefined });
+
+      assert(result);
     });
 
-    var setAsExecOption = function(setValue, callback) {
-      connection.execute(
-        "select user from dual",
-        {},
-        { autoCommit: setValue },
-        function(err, result) {
-          should.not.exist(result);
-          should.exist(err);
-          should.strictEqual(err.message, "NJS-007: invalid value for \"autoCommit\" in parameter 3");
-          callback();
-        });
+    let setAsExecOption = async function(setValue) {
+      let result = null;
+      try {
+        result = await connection.execute(
+          "select user from dual",
+          {},
+          { autoCommit: setValue });
+      } catch (err) {
+        assert.ifError(result);
+        assert(err);
+        assert.strictEqual(err.message, "NJS-007: invalid value for \"autoCommit\" in parameter 3");
+      }
     };
   });
 

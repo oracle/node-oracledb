@@ -29,20 +29,19 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
 
 describe('63. autoCommit4nestedExecutes.js', function() {
 
-  var tableName  = "nodb_issue269tab";
-  var procName   = "issue269proc";
-  var connection = null;
+  let tableName  = "nodb_issue269tab";
+  let procName   = "issue269proc";
+  let connection = null;
 
-  before('prepare table and procedure', function(done) {
+  before('prepare table and procedure', async function() {
 
-    var sqlCreateTab =
+    let sqlCreateTab =
         " BEGIN "
       + "   DECLARE "
       + "     e_table_missing EXCEPTION; "
@@ -61,7 +60,7 @@ describe('63. autoCommit4nestedExecutes.js', function() {
       + "   '); "
       + " END; ";
 
-    var sqlCreateProc =
+    let sqlCreateProc =
         " CREATE OR REPLACE PROCEDURE " + procName + "(p_iname IN VARCHAR2, "
       + "   p_short_name IN VARCHAR2, p_comments IN VARCHAR2, p_new_id OUT NUMBER, p_status OUT NUMBER, "
       + "   p_description OUT VARCHAR2) "
@@ -73,167 +72,87 @@ describe('63. autoCommit4nestedExecutes.js', function() {
       + "   insert into " + tableName + " values (systimestamp, p_iname, p_short_name, p_comments); "
       + " END; ";
 
-    async.series([
-      function(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
-      },
-      function(cb) {
-        connection.execute(
-          sqlCreateTab,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.execute(
-          sqlCreateProc,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      }
-    ], done);
+    connection = await oracledb.getConnection(dbConfig);
+    await connection.execute(sqlCreateTab);
+
+    await connection.execute(sqlCreateProc);
   }); // before
 
-  after('drop table and procedure', function(done) {
-    async.series([
-      function(cb) {
-        connection.execute(
-          "DROP PROCEDURE " + procName,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.execute(
-          "DROP TABLE " + tableName + " PURGE",
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      }
-    ], done);
+  after('drop table and procedure', async function() {
+    await connection.execute("DROP PROCEDURE " + procName);
+    await connection.execute("DROP TABLE " + tableName + " PURGE");
   }); // after
 
-  it('63.1 nested execute() functions', function(done) {
+  it('63.1 nested execute() functions', async function() {
 
-    var pool = null,
+    let pool = null,
       conn = null;
+    let result = null;
+
     // sql will be the same for both execute calls
-    var procSql = "BEGIN " + procName + "(p_iname=>:p_iname, p_short_name=>:p_short_name, "
+    let procSql = "BEGIN " + procName + "(p_iname=>:p_iname, p_short_name=>:p_short_name, "
                   + " p_comments=>:p_comments, p_new_id=>:p_new_id, p_status=>:p_status, "
                   + " p_description=>:p_description); END;";
 
-    async.series([
-      function getPool(cb) {
-        oracledb.createPool(
-          dbConfig,
-          function(err, pooling) {
-            should.not.exist(err);
-            pool = pooling;
-            cb();
-          }
-        );
-      },
-      function getConn(cb) {
-        pool.getConnection(function(err, connecting) {
-          should.not.exist(err);
-          conn = connecting;
-          cb();
-        });
-      },
-      function excute1(cb) {
-        conn.execute(
-          procSql,
-          {
-            p_iname: "Test iname",
-            p_short_name: "TST",
-            p_comments: "Test comments",
-            p_new_id: {
-              type: oracledb.NUMBER,
-              dir: oracledb.BIND_OUT
-            },
-            p_status: {
-              type: oracledb.NUMBER,
-              dir: oracledb.BIND_OUT
-            },
-            p_description: {
-              type: oracledb.STRING,
-              dir: oracledb.BIND_OUT
-            }
-          },
-          { autoCommit: false },
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function execute2(cb) {
-        conn.execute(
-          procSql,
-          {
-            p_iname123: "Test iname", // specify wrong bind parameter name to cause an error
-            p_short_name: "TST",
-            p_comments: "Test comments",
-            p_new_id: {
-              type: oracledb.NUMBER,
-              dir: oracledb.BIND_OUT
-            },
-            p_status: {
-              type: oracledb.NUMBER,
-              dir: oracledb.BIND_OUT
-            },
-            p_description: {
-              type: oracledb.STRING,
-              dir: oracledb.BIND_OUT
-            }
-          },
-          { autoCommit: false },
-          function(err, result) {
-            should.exist(err);
-            // ORA-01036: illegal variable name/number
-            (err.message).should.startWith('ORA-01036:');
-            should.not.exist(result);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        conn.release(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function(cb) {
-        pool.terminate(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function verifyTabContent(cb) {
-        connection.execute(
-          "SELECT count(*) as amount FROM " + tableName,
-          [],
-          { outFormat: oracledb.OUT_FORMAT_OBJECT },
-          function(err, result) {
-            should.not.exist(err);
-            (result.rows[0].AMOUNT).should.be.exactly(0);
-            cb();
-          }
-        );
-      }
-    ], done);
-  });
+    pool = await oracledb.createPool(dbConfig);
+    conn = await pool.getConnection();
 
+    await conn.execute(
+      procSql,
+      {
+        p_iname: "Test iname",
+        p_short_name: "TST",
+        p_comments: "Test comments",
+        p_new_id: {
+          type: oracledb.NUMBER,
+          dir: oracledb.BIND_OUT
+        },
+        p_status: {
+          type: oracledb.NUMBER,
+          dir: oracledb.BIND_OUT
+        },
+        p_description: {
+          type: oracledb.STRING,
+          dir: oracledb.BIND_OUT
+        }
+      },
+      { autoCommit: false });
+
+
+    try {
+      result = await conn.execute(
+        procSql,
+        {
+          p_iname123: "Test iname", // specify wrong bind parameter name to cause an error
+          p_short_name: "TST",
+          p_comments: "Test comments",
+          p_new_id: {
+            type: oracledb.NUMBER,
+            dir: oracledb.BIND_OUT
+          },
+          p_status: {
+            type: oracledb.NUMBER,
+            dir: oracledb.BIND_OUT
+          },
+          p_description: {
+            type: oracledb.STRING,
+            dir: oracledb.BIND_OUT
+          }
+        },
+        { autoCommit: false });
+    } catch (err) {
+      assert(err);
+      // ORA-01036: illegal variable name/number
+      assert.equal(err.message.substring(0, 10), `ORA-01036:`);
+    }
+
+    await conn.release();
+    await pool.terminate();
+
+    result = await connection.execute(
+      "SELECT count(*) as amount FROM " + tableName,
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    assert.strictEqual(result.rows[0].AMOUNT, 0);
+  });
 });

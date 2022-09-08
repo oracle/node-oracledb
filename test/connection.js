@@ -38,7 +38,7 @@ describe('1. connection.js', function() {
 
   describe('1.1 can run SQL query with different output formats', function() {
 
-    var connection = null;
+    let connection = null;
     const script =
       "BEGIN \
           DECLARE \
@@ -69,22 +69,14 @@ describe('1. connection.js', function() {
       END; ";
 
     before(async function() {
-      try {
-        connection = await oracledb.getConnection(credentials);
-        assert(connection);
-        await connection.execute(script);
-      } catch (error) {
-        assert.fail(error);
-      }
+      connection = await oracledb.getConnection(credentials);
+      assert(connection);
+      await connection.execute(script);
     });
 
     after(async function() {
-      try {
-        await connection.execute('DROP TABLE nodb_conn_dept1 PURGE');
-        await connection.release();
-      } catch (error) {
-        assert.fail(error);
-      }
+      await connection.execute('DROP TABLE nodb_conn_dept1 PURGE');
+      await connection.release();
     });
 
     const query = "SELECT department_id, department_name " +
@@ -92,57 +84,41 @@ describe('1. connection.js', function() {
                 "WHERE department_id = :id";
 
     it('1.1.1 ARRAY format by default', async function() {
-      try {
-        const defaultFormat = oracledb.outFormat;
-        assert.strictEqual(defaultFormat, oracledb.OUT_FORMAT_ARRAY);
-        assert(connection);
-        const result = await connection.execute(query, [40]);
-        assert(result);
-        assert.deepStrictEqual(result.rows, [[ 40, 'Human Resources' ]]);
-      } catch (error) {
-        assert.fail(error);
-      }
+      const defaultFormat = oracledb.outFormat;
+      assert.strictEqual(defaultFormat, oracledb.OUT_FORMAT_ARRAY);
+      assert(connection);
+      const result = await connection.execute(query, [40]);
+      assert(result);
+      assert.deepStrictEqual(result.rows, [[ 40, 'Human Resources' ]]);
     });
 
     it('1.1.2 ARRAY format explicitly', async function() {
-      try {
-        assert(connection);
-        const result = await connection.execute(query, {id: 20}, {outFormat: oracledb.OUT_FORMAT_ARRAY});
-        assert(result);
-        assert.deepStrictEqual(result.rows, [[ 20, 'Marketing' ]]);
-      } catch (error) {
-        assert.fail(error);
-      }
+      assert(connection);
+      const result = await connection.execute(query, {id: 20}, {outFormat: oracledb.OUT_FORMAT_ARRAY});
+      assert(result);
+      assert.deepStrictEqual(result.rows, [[ 20, 'Marketing' ]]);
     });
 
     it('1.1.3 OBJECT format', async function() {
-      try {
-        assert(connection);
-        const result = await connection.execute(query, {id: 20}, {outFormat: oracledb.OUT_FORMAT_OBJECT});
-        assert(result);
-        assert.deepStrictEqual(result.rows, [{ DEPARTMENT_ID: 20, DEPARTMENT_NAME: 'Marketing' }]);
-      } catch (error) {
-        assert.fail(error);
-      }
+      assert(connection);
+      const result = await connection.execute(query, {id: 20}, {outFormat: oracledb.OUT_FORMAT_OBJECT});
+      assert(result);
+      assert.deepStrictEqual(result.rows, [{ DEPARTMENT_ID: 20, DEPARTMENT_NAME: 'Marketing' }]);
     });
 
     it('1.1.4 Negative test - invalid outFormat value', async function() {
-      try {
-        assert(connection);
-        await assert.rejects(
-          async () => {
-            await connection.execute(query, {id: 20}, {outFormat:0 });
-          },
-          /NJS-004:/
-        );
-      } catch (error) {
-        assert.fail(error);
-      }
+      assert(connection);
+      await assert.rejects(
+        async () => {
+          await connection.execute(query, {id: 20}, {outFormat:0 });
+        },
+        /NJS-004:/
+      );
     });
   });
 
   describe('1.2 can call PL/SQL procedures', function() {
-    var connection = false;
+    let connection = false;
 
     const proc = "CREATE OR REPLACE PROCEDURE nodb_bindingtest (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT VARCHAR2) "
                 + "AS "
@@ -151,38 +127,26 @@ describe('1. connection.js', function() {
                 + "END; ";
 
     before(async function() {
-      try {
-        connection = await oracledb.getConnection(credentials);
-        await connection.execute(proc);
-      } catch (error) {
-        assert.fail(error);
-      }
+      connection = await oracledb.getConnection(credentials);
+      await connection.execute(proc);
     });
 
     after(async function() {
-      try {
-        await connection.execute("DROP PROCEDURE nodb_bindingtest");
-        await connection.release();
-      } catch (error) {
-        assert.fail(error);
-      }
+      await connection.execute("DROP PROCEDURE nodb_bindingtest");
+      await connection.release();
     });
 
     it('1.2.1 bind parameters in various ways', async function() {
-      try {
-        const bindValues = {
-          i: 'Alan', // default is type STRING and direction Infinity
-          io: { val: 'Turing', type: oracledb.STRING, dir: oracledb.BIND_INOUT },
-          o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
-        };
-        assert(connection);
-        const result = await connection.execute("BEGIN nodb_bindingtest(:i, :io, :o); END;", bindValues);
-        assert(result);
-        assert.strictEqual(result.outBinds.io, 'Turing');
-        assert.strictEqual(result.outBinds.o, 'Alan Turing');
-      } catch (error) {
-        assert.fail(error);
-      }
+      const bindValues = {
+        i: 'Alan', // default is type STRING and direction Infinity
+        io: { val: 'Turing', type: oracledb.STRING, dir: oracledb.BIND_INOUT },
+        o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+      };
+      assert(connection);
+      const result = await connection.execute("BEGIN nodb_bindingtest(:i, :io, :o); END;", bindValues);
+      assert(result);
+      assert.strictEqual(result.outBinds.io, 'Turing');
+      assert.strictEqual(result.outBinds.o, 'Alan Turing');
     });
   });
 
@@ -221,64 +185,48 @@ describe('1. connection.js', function() {
             '); \
         END; ";
 
-    var connection = false;
+    let connection = false;
     const defaultStmtCache = oracledb.stmtCacheSize; // 30
 
     beforeEach('get connection and prepare table', async function() {
-      try {
-        connection = await oracledb.getConnection(credentials);
-        await connection.execute(makeTable);
-      } catch (error) {
-        assert.fail(error);
-      }
+      connection = await oracledb.getConnection(credentials);
+      await connection.execute(makeTable);
     });
 
     afterEach('drop table and release connection', async function() {
-      try {
-        oracledb.stmtCacheSize = defaultStmtCache;
-        await connection.execute("DROP TABLE nodb_conn_emp4 PURGE");
-        await connection.release();
-      } catch (error) {
-        assert.fail(error);
-      }
+      oracledb.stmtCacheSize = defaultStmtCache;
+      await connection.execute("DROP TABLE nodb_conn_emp4 PURGE");
+      await connection.release();
     });
 
     it('1.3.1 stmtCacheSize = 0, which disable statement caching', async function() {
-      try {
-        assert(connection);
-        oracledb.stmtCacheSize = 0;
+      assert(connection);
+      oracledb.stmtCacheSize = 0;
 
-        await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
-          { num: 1003, str: 'Robyn Sands' },
-          { autoCommit: true });
-        await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
-          { num: 1004, str: 'Bryant Lin' },
-          { autoCommit: true });
-        await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
-          { num: 1005, str: 'Patrick Engebresson' },
-          { autoCommit: true });
-      } catch (error) {
-        assert.fail(error);
-      }
+      await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
+        { num: 1003, str: 'Robyn Sands' },
+        { autoCommit: true });
+      await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
+        { num: 1004, str: 'Bryant Lin' },
+        { autoCommit: true });
+      await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
+        { num: 1005, str: 'Patrick Engebresson' },
+        { autoCommit: true });
     });
 
     it('1.3.2 works well when statement cache enabled (stmtCacheSize > 0) ', async function() {
-      try {
-        assert(connection);
-        oracledb.stmtCacheSize = 100;
+      assert(connection);
+      oracledb.stmtCacheSize = 100;
 
-        await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
-          { num: 1003, str: 'Robyn Sands' },
-          { autoCommit: true });
-        await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
-          { num: 1004, str: 'Bryant Lin' },
-          { autoCommit: true });
-        await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
-          { num: 1005, str: 'Patrick Engebresson' },
-          { autoCommit: true });
-      } catch (error) {
-        assert.fail(error);
-      }
+      await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
+        { num: 1003, str: 'Robyn Sands' },
+        { autoCommit: true });
+      await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
+        { num: 1004, str: 'Bryant Lin' },
+        { autoCommit: true });
+      await connection.execute("INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
+        { num: 1005, str: 'Patrick Engebresson' },
+        { autoCommit: true });
     });
 
   });
@@ -313,8 +261,8 @@ describe('1. connection.js', function() {
             '); \
         END; ";
 
-    var conn1 = false;
-    var conn2 = false;
+    let conn1 = false;
+    let conn2 = false;
     beforeEach('get 2 connections and create the table', async function() {
       try {
         conn1 = await oracledb.getConnection(credentials);
@@ -360,7 +308,7 @@ describe('1. connection.js', function() {
         await conn2.execute("INSERT INTO nodb_conn_emp5 VALUES (:num, :str)",
           { num: 1003, str: 'Patrick Engebresson' });
 
-        var result = await conn1.execute("SELECT COUNT(*) FROM nodb_conn_emp5");
+        let result = await conn1.execute("SELECT COUNT(*) FROM nodb_conn_emp5");
         assert(result);
         assert.strictEqual(result.rows[0][0], 2);
 

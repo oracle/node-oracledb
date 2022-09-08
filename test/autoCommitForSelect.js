@@ -24,17 +24,16 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
 
 describe('8. autoCommitForSelect.js', function() {
 
-  var connection = null;
-  var anotherConnection = null;
+  let connection = null;
+  let anotherConnection = null;
 
-  var script =
+  let script =
       "BEGIN \
           DECLARE \
               e_table_missing EXCEPTION; \
@@ -63,296 +62,124 @@ describe('8. autoCommitForSelect.js', function() {
           '); \
       END; ";
 
-  before(function(done) {
-
-    async.parallel([
-      function(callback) {
-        oracledb.getConnection(
-          {
-            user:          dbConfig.user,
-            password:      dbConfig.password,
-            connectString: dbConfig.connectString
-          },
-          function(err, conn) {
-            should.not.exist(err);
-            connection = conn;
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        oracledb.getConnection(
-          {
-            user:          dbConfig.user,
-            password:      dbConfig.password,
-            connectString: dbConfig.connectString
-          },
-          function(err, conn) {
-            should.not.exist(err);
-            anotherConnection = conn;
-            callback();
-          }
-        );
-      }
-    ], done);
-  });
-
-  after(function(done) {
-    async.parallel([
-      function(callback) {
-        connection.release(function(err) {
-          if (err) {
-            console.error(err.message); return;
-          }
-          callback();
-        });
-      },
-      function(callback) {
-        anotherConnection.release(function(err) {
-          if (err) {
-            console.error(err.message); return;
-          }
-          callback();
-        });
-      }
-    ], done);
-  });
-
-  beforeEach(function(done) {
-    connection.execute(script, function(err) {
-      if (err) {
-        console.error(err.message); return;
-      }
-      // DML 'insert' statement does not commit automatically.
-      // So the explicit commit is added.
-      connection.commit(function(err) {
-        should.not.exist(err);
-        done();
+  before(async function() {
+    connection = await oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
       });
-    });
+    anotherConnection = await oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
+      });
   });
 
-  afterEach(function(done) {
-    connection.execute(
-      'DROP TABLE nodb_commit4_dept purge',
-      function(err) {
-        if (err) {
-          console.error(err.message); return;
-        }
-        done();
-      }
-    );
+  after(async function() {
+    await connection.release();
+    await anotherConnection.release();
   });
 
-  it('8.1 should return previous value when autoCommit is false', function(done) {
-    connection.should.be.ok();
+  beforeEach(async function() {
+    await connection.execute(script);
+
+    // DML 'insert' statement does not commit automatically.
+    // So the explicit commit is added.
+    await connection.commit();
+  });
+
+  afterEach(async function() {
+    await connection.execute('DROP TABLE nodb_commit4_dept purge');
+  });
+
+  it('8.1 should return previous value when autoCommit is false', async function() {
+    assert.ok(connection);
     oracledb.autoCommit = false;
+    let result = null;
 
-    async.series([
-      function(callback) {
-        connection.execute(
-          "INSERT INTO nodb_commit4_dept VALUES (180, 'Construction')",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "UPDATE nodb_commit4_dept SET department_id = 99 WHERE department_name = 'Marketing'",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "SELECT * FROM nodb_commit4_dept ORDER BY department_id",
-          function(err, result) {
-            should.not.exist(err);
-            (result.rows).should.containEql([180, 'Construction']);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        anotherConnection.execute(
-          "SELECT * FROM nodb_commit4_dept ORDER BY department_id",
-          function(err, result) {
-            should.not.exist(err);
-            (result.rows).should.not.containEql([180, 'Construction']);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'",
-          function(err, result) {
-            should.not.exist(err);
-            (result.rows[0][0]).should.eql(99);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        anotherConnection.execute(
-          "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'",
-          function(err, result) {
-            should.not.exist(err);
-            (result.rows[0][0]).should.eql(20);
-            callback();
-          }
-        );
-      }
-    ], done);
+    await connection.execute(
+      "INSERT INTO nodb_commit4_dept VALUES (180, 'Construction')");
+
+    await connection.execute(
+      "UPDATE nodb_commit4_dept SET department_id = 99 WHERE department_name = 'Marketing'");
+
+    result = await connection.execute(
+      "SELECT * FROM nodb_commit4_dept ORDER BY department_id");
+    assert((result.rows[2]).includes(180, 'Construction'));
+
+    result = await anotherConnection.execute(
+      "SELECT * FROM nodb_commit4_dept ORDER BY department_id");
+    assert.strictEqual((result.rows).includes(180, 'Construction'), false);
+
+    result = await connection.execute(
+      "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'");
+    assert.strictEqual(result.rows[0][0], 99);
+
+    result = await anotherConnection.execute(
+      "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'");
+    assert.strictEqual(result.rows[0][0], 20);
   });
 
-  it('8.2 can use explicit commit() to keep data consistent', function(done) {
-    connection.should.be.ok();
+  it('8.2 can use explicit commit() to keep data consistent', async function() {
+    assert.ok(connection);
     oracledb.autoCommit = false;
+    let result = null;
+    await connection.execute(
+      "INSERT INTO nodb_commit4_dept VALUES (180, 'Construction')");
 
-    async.series([
-      function(callback) {
-        connection.execute(
-          "INSERT INTO nodb_commit4_dept VALUES (180, 'Construction')",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "UPDATE nodb_commit4_dept SET department_id = 99 WHERE department_name = 'Marketing'",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.commit(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      },
-      function(callback) {
-        connection.execute(
-          "SELECT * FROM nodb_commit4_dept ORDER BY department_id",
-          function(err, result) {
-            should.not.exist(err);
-            (result.rows).should.containEql([180, 'Construction']);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        anotherConnection.execute(
-          "SELECT * FROM nodb_commit4_dept ORDER BY department_id",
-          function(err, result) {
-            should.not.exist(err);
-            (result.rows).should.containEql([180, 'Construction']);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'",
-          function(err, result) {
-            should.not.exist(err);
-            (result.rows[0][0]).should.eql(99);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        anotherConnection.execute(
-          "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'",
-          function(err, result) {
-            should.not.exist(err);
-            (result.rows[0][0]).should.eql(99);
-            callback();
-          }
-        );
-      }
-    ], done);
+    await connection.execute(
+      "UPDATE nodb_commit4_dept SET department_id = 99 WHERE department_name = 'Marketing'");
+
+    await connection.commit();
+
+    result = await connection.execute(
+      "SELECT * FROM nodb_commit4_dept ORDER BY department_id");
+    assert((result.rows[2]).includes(180, 'Construction'));
+
+    result = await anotherConnection.execute(
+      "SELECT * FROM nodb_commit4_dept ORDER BY department_id");
+    assert((result.rows[2]).includes(180, 'Construction'));
+
+    result = await connection.execute(
+      "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'");
+    assert.strictEqual(result.rows[0][0], 99);
+
+    result = await anotherConnection.execute(
+      "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'");
+    assert.strictEqual(result.rows[0][0], 99);
   });
 
-  it('8.3 can also use the autoCommit for SELECTs feature', function(done) {
-    connection.should.be.ok();
+  it('8.3 can also use the autoCommit for SELECTs feature', async function() {
+    assert.ok(connection);
     oracledb.autoCommit = false;
+    let result = null;
 
-    async.series([
-      function(callback) {
-        connection.execute(
-          "INSERT INTO nodb_commit4_dept VALUES (180, 'Construction')",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "UPDATE nodb_commit4_dept SET department_id = 99 WHERE department_name = 'Marketing'",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.commit(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      },
-      function(callback) {
-        connection.execute(
-          "SELECT * FROM nodb_commit4_dept ORDER BY department_id",
-          {},
-          {autoCommit: true},
-          function(err, result) {
-            should.not.exist(err);
-            (result.rows).should.containEql([180, 'Construction']);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        anotherConnection.execute(
-          "SELECT * FROM nodb_commit4_dept ORDER BY department_id",
-          function(err, result) {
-            should.not.exist(err);
-            (result.rows).should.containEql([180, 'Construction']);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'",
-          function(err, result) {
-            should.not.exist(err);
-            (result.rows[0][0]).should.eql(99);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        anotherConnection.execute(
-          "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'",
-          function(err, result) {
-            should.not.exist(err);
-            (result.rows[0][0]).should.eql(99);
-            callback();
-          }
-        );
-      }
-    ], done);
+    await connection.execute(
+      "INSERT INTO nodb_commit4_dept VALUES (180, 'Construction')");
+
+    await connection.execute(
+      "UPDATE nodb_commit4_dept SET department_id = 99 WHERE department_name = 'Marketing'");
+
+    await connection.commit();
+
+    result = await connection.execute(
+      "SELECT * FROM nodb_commit4_dept ORDER BY department_id",
+      {},
+      {autoCommit: true});
+    assert((result.rows[2]).includes(180, 'Construction'));
+
+    result = await anotherConnection.execute(
+      "SELECT * FROM nodb_commit4_dept ORDER BY department_id");
+    assert((result.rows[2]).includes(180, 'Construction'));
+
+    result = await connection.execute(
+      "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'");
+    assert.strictEqual(result.rows[0][0], 99);
+
+    result = await anotherConnection.execute(
+      "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'");
+    assert.strictEqual(result.rows[0][0], 99);
   });
 });
