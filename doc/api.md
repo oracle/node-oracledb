@@ -563,6 +563,7 @@ For installation information, see the [Node-oracledb Installation Instructions][
     - 27.3 [Changing AQ options](#aqoptions)
     - 27.4 [Enqueuing and Dequeuing Multiple Messages](#aqmultiplemessages)
     - 27.5 [Advanced Queuing Notifications](#aqnotifications)
+    - 27.6 [Recipient Lists](#aqrecipientlists)
 28. [Globalization and National Language Support (NLS)](#nls)
 29. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
 30. [Simple Oracle Document Access (SODA)](#sodaoverview)
@@ -5941,9 +5942,11 @@ some attributes controlling the behavior of the queued message.
         `expiration`      | The number of seconds the message is available to be dequeued before it expires.
         `payload`         | A String, Buffer or [DbObject](#dbobjectclass) that is the actual message to be queued.  This property must be specified.
         `priority`        | An integer priority of the message.
+        `recipients`      | An array of strings where each string is a recipients name.
 
         See [Oracle Advanced Queuing Documentation][129] for more information about attributes.
 
+        The `recipients` attribute was added in node-oracledb 5.5.
 
 -   ```
     function(Error error)
@@ -16532,6 +16535,44 @@ about subscriptions and notifications.
 AQ notifications require the same configuration as CQN.  Specifically
 the database must be able to connect back to node-oracledb.
 
+### <a name="aqrecipientlists"></a> 27.6 Recipient Lists
+
+A list of recipient names can be associated with a message at the time a
+message is enqueued.  This allows a limited set of recipients to dequeue each
+message.  The recipient list associated with the message overrides the queue
+subscriber list, if there is one.  The recipient names need not be in the
+subscriber list but can be, if desired.
+
+To dequeue a message, the `consumerName` attribute can be set to one of the
+recipient names.  The original message recipient list is not available on
+dequeued messages.  All recipients have to dequeue a message before it gets
+removed from the queue.
+
+Subscribing to a queue is like subscribing to a magazine: each subscriber can
+dequeue all the messages placed into a specific queue, just as each magazine
+subscriber has access to all its articles.  Being a recipient, however, is like
+getting a letter: each recipient is a designated target of a particular
+message.
+
+For example, to enqueue a message meant for "payroll" recipients:
+
+```
+await queue.enqOne({
+  payload: "Message 1",
+  recipients: [ "payroll" ]
+});
+```
+
+Later, when dequeuing messages, the "payroll" recipient can be set using the
+`consumerName` property to get the message:
+
+```
+Object.assign(
+  queue.deqOptions,
+  { consumerName: "payroll" }
+);
+const msg = await queue.deqOne();
+```
 
 ## <a name="nls"></a> 28. Globalization and National Language Support (NLS)
 

@@ -7,7 +7,8 @@
 - ResultSets now implement the `asyncIterator()` symbol to support asynchonous
   iteration.
 
-- Added support for AQ recipient lists
+- Added support for Oracle Advanced Queuing (AQ) [recipient
+  lists](https://oracle.github.io/node-oracledb/doc/api.html#aqrecipientlists).
 
 - Fixed a regression that could cause a pool alias to be recorded in the
   internal list of aliases even if pool creation failed.
