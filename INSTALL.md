@@ -1933,6 +1933,12 @@ If creating a connection fails:
   messages, the installation instructions, and see [Initializing
   Node-oracledb][17].
 
+  Note that on Linux, calling [`initOracleClient()`](#odbinitoracleclient) is
+  not sufficient for setting the Oracle Client library path.  Those libraries
+  still need to be in the operating system search path, such as from running
+  `ldconfig` or set in the environment variable `LD_LIBRARY_PATH` before your
+  Node.js process starts.
+
 - If you got *DPI-1072: the Oracle Client library version is unsupported*, then
   review the installation requirements.  Node-oracledb needs Oracle client
   libraries 11.2 or later.  Note that version 19 is not supported on Windows 7.

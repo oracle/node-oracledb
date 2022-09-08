@@ -448,7 +448,11 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 14.1.1 [`close()`](#sodadoccursorclose)
         - 14.1.2 [`getNext()`](#sodadoccursorgetnext)
 15. [Initializing Node-oracledb](#initnodeoracledb)
-    - 15.1 [Locating the Oracle Client Libraries](#oracleclientloading)
+    - 15.1 [Setting the Oracle Client Library Directory](#oracleclientloading)
+        - 15.1.1 [Setting the Oracle Client Directory on Windows](#oracleclientloadingwindows)
+        - 15.1.2 [Setting the Oracle Client Directory on macOS](#oracleclientloadingmacos)
+        - 15.1.3 [Setting the Oracle Client Directory on Linux and Related Platforms](#oracleclientloadinglinux)
+        - 15.1.4 [Calling `initOracleClient()` to set the Oracle Client Directory](#oracleclientcallinginit)
     - 15.2 [Optional Oracle Net Configuration](#tnsadmin)
     - 15.3 [Optional Oracle Client Configuration](#oraaccess)
     - 15.4 [Oracle Environment Variables](#environmentvariables)
@@ -3067,7 +3071,7 @@ Attribute           | Description
 `configDir`         | This specifies the directory in which the [Optional Oracle Net Configuration](#tnsadmin) and [Optional Oracle Client Configuration](#oraaccess) files reside.  It is equivalent to setting the Oracle environment variable `TNS_ADMIN` to this value.  Any value in that environment variable prior to the call to `oracledb.initOracleClient()` is ignored. On Windows, remember to double each backslash used as a directory separator.  If `configDir` is not set, Oracle's default configuration file [search heuristics](#tnsadmin) are used.
 `driverName`        | This specifies the driver name value shown in database views, such as `V$SESSION_CONNECT_INFO`.  It can be used by applications to identify themselves for tracing and monitoring purposes.  The convention is to separate the product name from the product version by a colon and single space characters.  If this attribute is not specified, the value "node-oracledb : *version*" is used. See [Other Node-oracledb Initialization](#otherinit).
 `errorUrl`          | This specifies the URL that is included in the node-oracledb exception message if the Oracle Client libraries cannot be loaded.  This allows applications that use node-oracledb to refer users to application-specific installation instructions.  If this attribute is not specified, then the [node-oracledb installation instructions][2] URL is used.  See [Other Node-oracledb Initialization](#otherinit).
-`libDir`            | This specifies the directory containing the Oracle Client libraries.  If `libDir` is not specified, the default library search mechanism is used.  If your client libraries are in a full Oracle Client or Oracle Database installation, such as [Oracle Database "XE" Express Edition][130], then you must have previously set environment variables like `ORACLE_HOME` before calling `initOracleClient()`.  On Windows, remember to double each backslash used as a directory separator. See [Locating the Oracle Client Libraries](#oracleclientloading).
+`libDir`            | This specifies the directory containing the Oracle Client libraries.  If `libDir` is not specified, the default library search mechanism is used.  If your client libraries are in a full Oracle Client or Oracle Database installation, such as [Oracle Database "XE" Express Edition][130], then you must have previously set environment variables like `ORACLE_HOME` before calling `initOracleClient()`.  On Windows, remember to double each backslash used as a directory separator. See [Setting the Oracle Client Library Directory](#oracleclientloading).
 
 
 On Linux, ensure a `libclntsh.so` file exists.  On macOS ensure a
@@ -8835,102 +8839,159 @@ the Oracle Client and Oracle Database communicate.
 
 ![node-oracledb Architecture](./images/node-oracledb-architecture.png)
 
-### <a name="oracleclientloading"></a> 15.1 Locating the Oracle Client Libraries
+### <a name="oracleclientloading"></a> 15.1 Setting the Oracle Client Library Directory
 
 Node-oracledb dynamically loads the Oracle Client libraries using a search
-heuristic.  If appropriate libraries cannot be found, node-oracledb will return
-an error like "Error: DPI-1047: Cannot locate a 64-bit Oracle Client library".
+heuristic.  Only the first set of libraries found are loaded.  If appropriate
+libraries cannot be found, node-oracledb will return an error like *DPI-1047:
+Cannot locate a 64-bit Oracle Client library*.
 
-Only the first set of libraries found are loaded.  The libraries can be in an
-installation of Oracle Instant Client, in a full Oracle Client installation, or
-in an Oracle Database installation (if Node.js is running on the same machine as
-the database).  The versions of Oracle Client and Oracle Database do not have to
-be the same.  For certified configurations see Oracle Support's [Doc ID
-207303.1][187] and see the [node-installation instructions][2].
+The libraries can be:
 
-Node-oracledb looks for the Oracle Client libraries as follows:
+- in an installation of Oracle Instant Client.
 
-- On Windows:
+- or in a full Oracle Client installation from running the Oracle Universal
+  installer `runInstaller`.
 
-    - In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
-      call to [`oracledb.initOracleClient()`](#odbinitoracleclient).  This
-      directory should contain the libraries from an unzipped Instant Client
-      'Basic' or 'Basic Light' package.  If you pass the library directory from
-      a full client or database installation, such as [Oracle Database "XE"
-      Express Edition][130], then you will need to have previously set your
-      environment to use that software installation otherwise files such as
-      message files will not be located.  If the Oracle Client libraries cannot
-      be loaded from `libDir`, then an error is thrown.
+- or in an Oracle Database installation, if Node.js is running on the same
+  machine as the database.
 
-    - If `libDir` was not specified, then Oracle Client libraries are looked for
-      in the directory where the `oracledb*.node` binary is.  For example in
-      `node_modules\oracledb\build\Release`.  This directory should contain the
-      libraries from an unzipped Instant Client 'Basic' or 'Basic Light'
-      package.  If the libraries are not found, no error is thrown and the
-      search continues, see next bullet point.
+The versions of Oracle Client and Oracle Database do not have to be the same.
+For certified configurations see Oracle Support's [Doc ID 207303.1][187] and
+see the [node-installation instructions][2].
 
-    - In the directories on the system library search path, e.g. the `PATH`
-      environment variable.  If the Oracle Client libraries cannot be loaded,
-      then an error is thrown.
+#### <a name="oracleclientloadingwindows"></a> 15.1.1 Setting the Oracle Client Directory on Windows
 
-- On macOS:
+On Windows, node-oracledb looks for the Oracle Client libraries as follows:
 
-    - In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
-      call to [`oracledb.initOracleClient()`](#odbinitoracleclient).  This
-      directory should contain the libraries from an unzipped Instant Client
-      'Basic' or 'Basic Light' package.  If the Oracle Client libraries cannot
-      be loaded from `libDir`, then an error is thrown.
+- In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
+  call to [`oracledb.initOracleClient()`](#oracleclientcallinginit).  This
+  directory should contain the libraries from an unzipped Instant Client
+  'Basic' or 'Basic Light' package.  If you pass the library directory from a
+  full client or database installation, such as [Oracle Database "XE" Express
+  Edition][130], then you will need to have previously set your environment to
+  use that software installation otherwise files such as message files will not
+  be located.  If the Oracle Client libraries cannot be loaded from `libDir`,
+  then an error like *DPI-1047: Cannot locate a 64-bit Oracle Client library*
+  is thrown.
 
-    - If `libDir` was not specified, then Oracle Client libraries are looked for
-      in the directory where the `oracledb*.node` binary is.  For example in
-      `node_modules/oracledb/build/Release`.  This directory should contain the
-      libraries from an unzipped Instant Client 'Basic' or 'Basic Light'
-      package.  For example, use `ln -s ~/Downloads/instantclient_19_8/libclntsh.dylib
-      node_modules/oracledb/build/Release/`.  If the libraries are not found, no
-      error is thrown and the search continues, see next bullet point.
+- If `libDir` was not specified, then Oracle Client libraries are looked for
+  in the directory where the `oracledb*.node` binary is.  For example in
+  `node_modules\oracledb\build\Release`.  This directory should contain the
+  libraries from an unzipped Instant Client 'Basic' or 'Basic Light'
+  package.  If the libraries are not found, no error is thrown and the
+  search continues, see next bullet point.
 
-    - In the library search path such as set in `DYLD_LIBRARY_PATH` (note this
-      variable does not propagate to sub-shells) or in `/usr/local/lib`.  If the
-      Oracle Client libraries cannot be loaded, then an error is thrown.
+- In the directories on the system library search path, e.g. the `PATH`
+  environment variable.  If the Oracle Client libraries cannot be loaded, then
+  an error like *DPI-1047: Cannot locate a 64-bit Oracle Client library* is
+  thrown.
 
-- On Linux and related platforms:
+#### <a name="oracleclientloadingmacos"></a> 15.1.2 Setting the Oracle Client Directory on macOS
 
-    - In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
-      call to [`oracledb.initOracleClient()`](#odbinitoracleclient).  Note on
-      Linux this is only useful to force immediate loading of the libraries
-      because the libraries must also be in the system library search path,
-      i.e. configured with `ldconfig` or set in `LD_LIBRARY_PATH`.  This
-      directory should contain the libraries from an unzipped Instant Client
-      'Basic' or 'Basic Light' package.  If you pass the library directory from
-      a full client or database installation, such as [Oracle Database "XE"
-      Express Edition][130] then you will need to have previously set the
-      `ORACLE_HOME` environment variable.  If the Oracle Client libraries cannot
-      be loaded from `libDir`, then an error is thrown.
+On macOS, node-oracledb looks for the Oracle Client libraries as follows:
 
-    - If `libDir` was not specified, then Oracle Client libraries are looked for
-      in the operating system library search path, such as configured with
-      `ldconfig` or set in the environment variable `LD_LIBRARY_PATH`.  On some
-      UNIX platforms an OS specific equivalent, such as `LIBPATH` or
-      `SHLIB_PATH` is used instead of `LD_LIBRARY_PATH`.  If the libraries are
-      not found, no error is thrown and the search continues, see next bullet
-      point.
+- In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
+  call to [`oracledb.initOracleClient()`](#oracleclientcallinginit).  This
+  directory should contain the libraries from an unzipped Instant Client
+  'Basic' or 'Basic Light' package.  If the Oracle Client libraries cannot be
+  loaded from `libDir`, then an error like *DPI-1047: Cannot locate a 64-bit
+  Oracle Client library* is thrown.
 
-    - In `$ORACLE_HOME/lib`.  Note the environment variable `ORACLE_HOME` should
-      only ever be set when you have a full database installation or full client
-      installation.  It should not be set if you are using Oracle Instant
-      Client.  The `ORACLE_HOME` variable, and other necessary variables, should
-      be set before starting Node.js.  See [Oracle Environment
-      Variables](#environmentvariables).  If the Oracle Client libraries cannot
-      be loaded, then an error is thrown.
+- If `libDir` was not specified, then Oracle Client libraries are looked for
+  in the directory where the `oracledb*.node` binary is.  For example in
+  `node_modules/oracledb/build/Release`.  This directory should contain the
+  libraries from an unzipped Instant Client 'Basic' or 'Basic Light'
+  package.  For example, use `ln -s ~/Downloads/instantclient_19_8/libclntsh.dylib
+  node_modules/oracledb/build/Release/`.  If the libraries are not found, no
+  error is thrown and the search continues, see next bullet point.
+
+- In the library search path such as set in `DYLD_LIBRARY_PATH` (note this
+  variable does not propagate to sub-shells) or in `/usr/local/lib`.  If the
+  Oracle Client libraries cannot be loaded, then an error like *DPI-1047:
+  Cannot locate a 64-bit Oracle Client library* is thrown.
+
+#### <a name="oracleclientloadinglinux"></a> 15.1.3 Setting the Oracle Client Directory on Linux and Related Platforms
+
+On Linux and related platforms, node-oracledb looks for the Oracle Client
+libraries as follows:
+
+- In the [`libDir`](#odbinitoracleclientattrsopts) directory specified in a
+  call to [`oracledb.initOracleClient()`](#oracleclientcallinginit).  This
+  directory should contain the libraries from an unzipped Instant Client
+  'Basic' or 'Basic Light' package.  If you pass the library directory from a
+  full client or database installation, such as [Oracle Database "XE" Express
+  Edition][130] then you will need to have previously set the `ORACLE_HOME`
+  environment variable.  If the Oracle Client libraries cannot be loaded from
+  `libDir`, then an error is thrown.
+
+  **Note on Linux `initOracleClient()` is only useful to force immediate
+  loading of the libraries because the libraries must also be in the system
+  library search path, i.e. configured with `ldconfig` or set in
+  `LD_LIBRARY_PATH`, before Node.js is started**.
+
+- If `libDir` was not specified, then Oracle Client libraries are looked for
+  in the operating system library search path, such as configured with
+  `ldconfig` or set in the environment variable `LD_LIBRARY_PATH`.  On some
+  UNIX platforms an OS specific equivalent, such as `LIBPATH` or
+  `SHLIB_PATH` is used instead of `LD_LIBRARY_PATH`.  If the libraries are
+  not found, no error is thrown and the search continues, see next bullet
+  point.
+
+- In `$ORACLE_HOME/lib`.  Note the environment variable `ORACLE_HOME` should
+  only ever be set when you have a full database installation or full client
+  installation.  It should not be set if you are using Oracle Instant Client.
+  The `ORACLE_HOME` variable, and other necessary variables, should be set
+  before starting Node.js.  See [Oracle Environment
+  Variables](#environmentvariables).  If the Oracle Client libraries cannot be
+  loaded, then an error like *DPI-1047: Cannot locate a 64-bit Oracle Client
+  library* is thrown.
+
+#### <a name="oracleclientcallinginit"></a> 15.1.4 Calling `initOracleClient()` to set the Oracle Client Directory
+
+Applications can call the synchronous function
+[`oracledb.initOracleClient()`](#odbinitoracleclient) to specify the directory
+containing Oracle Instant Client libraries.  The libraries are loaded when
+`initOracleClient()` is called.  For example:
+
+```javascript
+const oracledb = require('oracledb');
+
+if (process.platform === 'win32') {
+  // Windows
+  oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_6'});
+} else if (process.platform === 'darwin') {
+  // macOS
+  oracledb.initOracleClient({libDir: process.env.HOME + '/Downloads/instantclient_19_8'});
+}
+// else on other platforms like Linux the system library search path MUST always be
+// set before Node.js is started, for example with ldconfig or LD_LIBRARY_PATH.
+```
+
+If you use backslashes in the `libDir` string, you will need to double them.
+
+The `initOracleClient()` function should only be called once.
+
+**Note**: If you set `libDir` on Linux and related platforms, you must still have
+configured the system library search path to include that directory before
+starting Node.js.
+
+On any operating system, if you set `libDir` to the library directory of a full
+database or full client installation (such as from running `runInstaller`), you
+will need to have previously set the Oracle environment, for example by setting
+the `ORACLE_HOME` environment variable.  Otherwise you will get errors like
+*ORA-1804*.  You should set this variable, and other Oracle environment
+variables, before starting Node.js, as shown in [Oracle Environment
+Variables](#environmentvariables).
 
 If you call `initOracleClient()` with a `libDir` attribute, the Oracle Client
 libraries are loaded immediately from that directory.  If you call
 `initOracleClient()` but do *not* set the `libDir` attribute, the Oracle Client
-libraries are loaded immediately using the search heuristic above.  If you do
-not call `initOracleClient()`, then the libraries are loaded using the search
-heuristic when the first node-oracledb function that depends on the libraries is
-called, for example when a connection pool is created.  If there is a problem
-loading the libraries, then an error is thrown.
+libraries are loaded immediately using the search heuristic discussed in
+earlier sections.  If you do not call `initOracleClient()`, then the libraries
+are loaded using the search heuristic when the first node-oracledb function
+that depends on the libraries is called, for example when a connection pool is
+created.  If there is a problem loading the libraries, then an error is thrown.
 
 Make sure the Node.js process has directory and file access permissions for the
 Oracle Client libraries.  On Linux ensure a `libclntsh.so` file exists.  On
@@ -8938,6 +8999,11 @@ macOS ensure a `libclntsh.dylib` file exists.  Node-oracledb will not directly
 load `libclntsh.*.XX.1` files in `libDir` or from the directory where the
 `oracledb*.node` binary is.  Note other libraries used by `libclntsh*` are also
 required.
+
+The `oracledb.initOracleClient()` method and searching of the directory where
+the `oracledb*.node` binary is located were added in node-oracledb 5.0.
+
+##### Tracing Oracle Client libraries loading
 
 To trace the loading of Oracle Client libraries, the environment variable
 `DPI_DEBUG_LEVEL` can be set to 64 before starting Node.js.  For example, on
@@ -8947,44 +9013,6 @@ Linux, you might use:
 $ export DPI_DEBUG_LEVEL=64
 $ node myapp.js 2> log.txt
 ```
-
-The `oracledb.initOracleClient()` method and searching of the directory where
-the `oracledb*.node` binary is located were added in node-oracledb 5.0.
-
-##### Using `initOracleClient()` to set the Oracle Client directory
-
-Applications can call the synchronous function
-[`oracledb.initOracleClient()`](#odbinitoracleclient) to specify the directory
-containing Oracle Instant Client libraries.  The Oracle Client Libraries are
-loaded when `initOracleClient()` is called.  For example, if the Oracle Instant
-Client Libraries are in `C:\oracle\instantclient_19_6` on Windows, then you can
-use:
-
-```javascript
-const oracledb = require('oracledb');
-try {
-  oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_6'});
-} catch (err) {
-  console.error('Whoops!');
-  console.error(err);
-  process.exit(1);
-}
-```
-
-If you use backslashes in the `libDir` string, you will need to double them.
-
-The `initOracleClient()` function should only be called once.
-
-If you set `libDir` on Linux and related platforms, you must still have
-configured the system library search path to include that directory before
-starting Node.js.
-
-On any operating system, if you set `libDir` to the library directory of a full
-database or full client installation, you will need to have previously set the
-Oracle environment, for example by setting the `ORACLE_HOME` environment
-variable.  Otherwise you will get errors like *ORA-1804*.  You should set this,
-and other Oracle environment variables, before starting Node.js, as shown in
-[Oracle Environment Variables](#environmentvariables).
 
 ### <a name="tnsadmin"></a> 15.2 Optional Oracle Net Configuration
 
