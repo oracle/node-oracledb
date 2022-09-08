@@ -5591,7 +5591,7 @@ const commitNeeded = await connection.tpcPrepare(xid);
 Callback:
 
 ```
-tpcRecover([Boolean asString,] function(Error error);
+tpcRecover([Boolean asString,] function(Error error));
 ```
 
 Promise:
@@ -5627,7 +5627,7 @@ This function was added in node-oracledb 5.3.
 
     Callback function parameter | Description
     ----------------------------|-------------
-    *Error error*               | If `tpcRollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    *Error error*               | If `tpcRecover()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 #### <a name="contpcrollback"></a> 4.2.25 `connection.tpcRollback()`
 
@@ -9628,8 +9628,8 @@ connection can only execute one database operation at a time.
 Node.js has four background worker threads by default (not to be confused with
 the newer user space worker_threads module).  If you open more than four
 [standalone connections](#connectionhandling) or pooled connections, such as by
-increasing [`poolMax`](#proppoolpoolmax), then you should increase the number
-of worker threads available to node-oracledb.
+increasing [`poolMax`](#proppoolpoolmax), then you must increase the number of
+worker threads available to node-oracledb.
 
 A worker thread pool that is too small can cause a decrease in application
 performance, can cause [deadlocks][22], or can cause connection requests to
@@ -9767,7 +9767,8 @@ When applications use a lot of connections for short periods, Oracle recommends
 using a connection pool for efficiency.  Each connection in a pool should be
 used for a given unit of work, such as a transaction or a set of sequentially
 executed statements.  Statements should be [executed sequentially, not in
-parallel](#numberofthreads) on each connection.
+parallel](#parallelism) on each connection.  The number of [worker
+threads](#workerthreads) should be increased for large pools.
 
 Each node-oracledb process can use one or more connection pools.  Each pool can
 contain zero or more connections.  In addition to providing an immediately
@@ -9896,9 +9897,9 @@ The main characteristics of a connection pool are determined by its attributes
 [`poolIncrement`](#proppoolpoolincrement), and
 [`poolTimeout`](#proppoolpooltimeout).
 
-**Importantly, if you increase the size of the pool, you must increase the number
-of threads used by Node.js before Node.js starts its thread pool.  See
-[Connections, Threads, and Parallelism](#numberofthreads)**.
+**Note: If you increase the size of the connection pool, you must increase the
+number of threads in the Node.js worker thread pool.  See [Connections and
+Worker Threads](#workerthreads)**.
 
 Setting `poolMin` causes the specified number of connections to be established
 to the database during pool creation.  This allows subsequent
@@ -9906,11 +9907,14 @@ to the database during pool creation.  This allows subsequent
 appropriate `poolMax` value avoids overloading the database by limiting the
 maximum number of connections ever opened.
 
-Pool expansion happens when the following are all true: (i)
-[`pool.getConnection()`](#getconnectionpool) is called and (ii) all the
-currently established connections in the pool are "checked out" by previous
-`pool.getConnection()` calls and are in-use by the application, and (iii) the
-number of those connections is less than the pool's `poolMax` setting.
+Pool expansion happens when [`pool.getConnection()`](#getconnectionpool) is
+called and both the following are true:
+
+- all the currently established connections in the pool are "checked out" of
+  the pool by previous `pool.getConnection()` calls
+
+- the number of those currently established connections is less than the pool's
+  `poolMax` setting.
 
 Pool shrinkage happens when the application returns connections to the pool,
 and they are then unused for more than [`poolTimeout`](#propdbpooltimeout)
@@ -10236,9 +10240,9 @@ If the application has called [`pool.getConnection()`](#getconnectionpool) (or
 times so that all connections in the pool are in use, and further
 `getConnection()` calls are made, then each of those new `getConnection()`
 requests will be queued and not return until an in-use connection is released
-back to the pool with [`connection.close()`](#connectionclose).  If `poolMax`
-has not been reached, then connection requests can be immediately satisfied and
-are not queued.
+back to the pool with [`connection.close()`](#connectionclose).  If, instead,
+`poolMax` has not been reached, then connection requests can be immediately
+satisfied and are not queued.
 
 The amount of time that a queued request will wait for a free connection can be
 configured with [queueTimeout](#propdbqueuetimeout).  When connections are timed
