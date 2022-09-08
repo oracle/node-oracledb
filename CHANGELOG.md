@@ -1,8 +1,6 @@
 # Change Log
 
-## node-oracledb [v5.5.0](https://github.com/oracle/node-oracledb/compare/v5.4.0...v5.5.0) (DD MON YYYY)
-
-**This release is under development and information may be incomplete**
+## node-oracledb [v5.5.0](https://github.com/oracle/node-oracledb/compare/v5.4.0...v5.5.0) (7 Sep 2022)
 
 - Token-based Authentication changes:
 
