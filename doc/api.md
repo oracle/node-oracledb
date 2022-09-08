@@ -9343,11 +9343,11 @@ version of the Oracle Client libraries.
 If you are using Oracle Client 19c, the latest [Easy Connect Plus][151] syntax
 allows the use of multiple hosts or ports, along with optional entries for the
 wallet location, the distinguished name of the database server, and even lets
-some network configuration options be set.  The technical paper [Oracle Database 19c
-Easy Connect Plus Configurable Database Connection Syntax][177] discusses the
-syntax.  The Easy Connect Plus syntax means that [`tnsnames.ora`](#tnsadmin) or
-[`sqlnet.ora`](#tnsadmin) files are not needed for some further common
-connection scenarios.
+some network configuration options be set.  The technical paper [Oracle
+Database 21c Easy Connect Plus Configurable Database Connection Syntax][177]
+discusses the syntax.  The Easy Connect Plus syntax means that
+[`tnsnames.ora`](#tnsadmin) or [`sqlnet.ora`](#tnsadmin) files are not needed
+for some further common connection scenarios.
 
 For example, if a firewall terminates idle connections every five minutes, you
 may decide it is more efficient to keep connections alive instead of having the
@@ -19059,7 +19059,7 @@ can be asked at [AskTom][158].
 [174]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FAFD1247-06E5-4E64-917F-AEBD4703CF40
 [175]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-0203C8FA-A4BE-44A5-9A25-3D1E578E879F
 [176]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-B28362BE-8831-4687-89CF-9F77DB3698D2
-[177]: https://download.oracle.com/ocomdocs/global/Oracle-Net-19c-Easy-Connect-Plus.pdf
+[177]: https://download.oracle.com/ocomdocs/global/Oracle-Net-21c-Easy-Connect-Plus.pdf
 [178]: https://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/applicationcontinuityformaa-6348196.pdf
 [179]: https://eslint.org/docs/rules/no-await-in-loop
 [180]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-35CB2592-7588-4C2D-9075-6F639F25425E
