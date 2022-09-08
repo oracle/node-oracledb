@@ -114,7 +114,7 @@ describe('267. aq4.js', function() {
     await testsUtil.dropAQtestUser(AQ_USER);
   });  // after
 
-  it('267.1 empty arry or no recipients', async () => {
+  it('267.1 empty array or no recipients', async () => {
     try {
       // Enqueue
       const queue1 = await conn.getQueue(
@@ -146,7 +146,7 @@ describe('267. aq4.js', function() {
     }
   });
 
-  it('267.2 single element in arry', async () => {
+  it('267.2 single element in array', async () => {
     // Enqueue
     const queue1 = await conn.getQueue(
       objQueueName,
