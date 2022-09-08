@@ -31,7 +31,7 @@ static void njsTokenCallback_onStopNotifications(uv_handle_t *handle);
 static bool njsTokenCallback_onStopNotificationsHelper(napi_env env,
         njsTokenCallback *callback);
 static void njsTokenCallback_processNotification(uv_async_t *handle);
-static bool njsTokenCallback_processNotificationHelper(napi_env env,
+static bool njsTokenCallback_processNotificationHelper(
         njsTokenCallback *callback);
 static void njsTokenCallback_waitOnBarrier(njsTokenCallback *callback);
 
@@ -48,23 +48,18 @@ int njsTokenCallback_eventHandler(njsTokenCallback *callback,
 {
     uv_mutex_lock(&callback->mutex);
     uv_barrier_init(&callback->barrier, 2);
-    uv_mutex_unlock(&callback->mutex);
-
-    if (uv_async_send(&callback->async) < 0) {
-         njsTokenCallback_waitOnBarrier(callback);
-         return -1;
-    }
-
+    callback->result = false;
+    uv_async_send(&callback->async);
     njsTokenCallback_waitOnBarrier(callback);
     if (!callback->result)
-        return -1;
+        return DPI_FAILURE;
     tokenRefresh->token = callback->accessToken->token;
     tokenRefresh->tokenLength = callback->accessToken->tokenLength;
-    tokenRefresh->privateKey =
-            callback->accessToken->privateKey;
-    tokenRefresh->privateKeyLength
-        = callback->accessToken->privateKeyLength;
-    return 0;
+    tokenRefresh->privateKey = callback->accessToken->privateKey;
+    tokenRefresh->privateKeyLength = callback->accessToken->privateKeyLength;
+    uv_mutex_unlock(&callback->mutex);
+
+    return DPI_SUCCESS;
 }
 
 
@@ -81,6 +76,7 @@ bool njsTokenCallback_new(njsBaton *baton, napi_env env)
     if (!baton->accessTokenCallback->accessToken)
         return njsBaton_setError(baton, errInsufficientMemory);
     baton->accessTokenCallback->env = env;
+    baton->accessTokenCallback->oracleDb = baton->oracleDb;
 
     return true;
 }
@@ -118,14 +114,13 @@ static void njsTokenCallback_processNotification(uv_async_t *handle)
 {
     njsTokenCallback *callback = (njsTokenCallback*) handle->data;
     napi_handle_scope scope;
+    bool result;
+
     if (napi_open_handle_scope(callback->env, &scope) != napi_ok)
         return;
-
-    uv_mutex_lock(&callback->mutex);
-    callback->result = njsTokenCallback_processNotificationHelper(callback->env,
-            callback);
-    njsTokenCallback_waitOnBarrier(callback);
-    uv_mutex_unlock(&callback->mutex);
+    result = njsTokenCallback_processNotificationHelper(callback);
+    if (!result)
+        njsTokenCallback_waitOnBarrier(callback);
     napi_close_handle_scope(callback->env, scope);
 }
 
@@ -135,38 +130,90 @@ static void njsTokenCallback_processNotification(uv_async_t *handle)
 //   Helper method for processing notifications so that the scope that is
 // opened can be easily destroyed.
 //-----------------------------------------------------------------------------
-static bool njsTokenCallback_processNotificationHelper(napi_env env,
+static bool njsTokenCallback_processNotificationHelper(
         njsTokenCallback *callback)
 {
-    dpiAccessToken *accessToken = callback->accessToken;
-    napi_value callbackRef, global, message, result, payloadObj;
-    size_t tempLength;
+    napi_value jsCallback, jsCallbackHandler, global, refresh, result;
+    napi_value jsCallbackArgs[3], externalObj;
+    napi_env env = callback->env;
 
-    // acquire callback and refreshed tokens
     NJS_CHECK_NAPI(env, napi_get_global(env, &global))
     NJS_CHECK_NAPI(env, napi_get_reference_value(env, callback->jsCallback,
-            &callbackRef))
+            &jsCallback))
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            callback->oracleDb->jsTokenCallbackHandler, &jsCallbackHandler))
+    NJS_CHECK_NAPI(env, napi_create_external(env, callback, NULL, NULL,
+            &externalObj))
+    NJS_CHECK_NAPI(env, napi_get_boolean(env, true, &refresh))
+    jsCallbackArgs[0] = jsCallback;
+    jsCallbackArgs[1] = externalObj;
+    jsCallbackArgs[2] = refresh;
+    NJS_CHECK_NAPI(env, napi_make_callback(env, NULL, global,
+            jsCallbackHandler, 3, jsCallbackArgs, &result));
 
-    // perform callback
-    NJS_CHECK_NAPI(env, napi_make_callback(env, NULL, global, callbackRef,
-            1, &message, &result));
+    return true;
+}
 
-    // Read "token" property
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, result, "token",
-            &payloadObj))
-    if (!njsUtils_setPropString(env, payloadObj, "token",
-            (char**) &accessToken->token, &tempLength))
-        return false;
-    accessToken->tokenLength = (uint32_t) tempLength;
 
-    // Read "privateKey" property
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, result, "privateKey",
-            &payloadObj))
-    if (!njsUtils_setPropString(env, payloadObj, "privateKey",
-            (char**) &accessToken->privateKey, &tempLength))
-        return false;
-    accessToken->privateKeyLength = (uint32_t) tempLength;
+//-----------------------------------------------------------------------------
+// njsTokenCallback_returnAccessTokenHelper()
+//   Helper function for njsTokenCallback_returnAccessToken().
+//-----------------------------------------------------------------------------
+static bool njsTokenCallback_returnAccessTokenHelper(njsTokenCallback *callback,
+        napi_env env, napi_value payloadObj)
+{
+    dpiAccessToken *accessToken = callback->accessToken;
+    napi_valuetype actualType;
+    size_t tempLength;
+    napi_value temp;
 
+    NJS_CHECK_NAPI(env, napi_typeof(env, payloadObj, &actualType))
+    if (actualType == napi_undefined) {
+        accessToken->token = NULL;
+        accessToken->tokenLength = 0;
+        accessToken->privateKey = NULL;
+        accessToken->privateKeyLength = 0;
+    } else if (actualType == napi_string) {
+        if (!njsUtils_setPropString(env, payloadObj, "token",
+                (char**) &accessToken->token, &tempLength))
+            return false;
+        accessToken->tokenLength = (uint32_t) tempLength;
+    } else if (actualType == napi_object) {
+
+        // Read "token" property
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, payloadObj, "token",
+                &temp))
+        if (!njsUtils_setPropString(env, temp, "token",
+                (char**) &accessToken->token, &tempLength))
+            return false;
+        accessToken->tokenLength = (uint32_t) tempLength;
+
+        // Read "privateKey" property
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, payloadObj,
+                "privateKey", &temp))
+        if (!njsUtils_setPropString(env, temp, "privateKey",
+                (char**) &accessToken->privateKey, &tempLength))
+            return false;
+        accessToken->privateKeyLength = (uint32_t) tempLength;
+
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsTokenCallback_returnAccessToken()
+//   Called by the JavaScript callback handler when it has completed. If an
+// error has taken place, the value returned is the "undefined" Javascript
+// value.
+//-----------------------------------------------------------------------------
+bool njsTokenCallback_returnAccessToken(njsTokenCallback *callback,
+        napi_env env, napi_value payloadObj)
+{
+    callback->result = njsTokenCallback_returnAccessTokenHelper(callback, env,
+            payloadObj);
+    njsTokenCallback_waitOnBarrier(callback);
     return true;
 }
 

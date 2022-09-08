@@ -112,8 +112,8 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - 3.3.1.1 [`createPool()`: Parameters and Attributes](#createpoolpoolattrs)
                 - 3.3.1.1.1 [`accessToken`](#createpoolpoolattrsaccesstoken)
                     - [`token`](#createpoolpoolattrsaccesstoken), [`privateKey`](#createpoolpoolattrsaccesstoken)
-                - 3.3.1.1.2 [`connectString`](#createpoolpoolattrsconnectstring), [`connectionString`](#createpoolpoolattrsconnectstring)
-                - 3.3.1.1.3 [`accessTokenCallback`](#createpoolpoolattrsaccesstokencallback)
+                - 3.3.1.1.2 [`accessTokenCallback`](#createpoolpoolattrsaccesstokencallback)
+                - 3.3.1.1.3 [`connectString`](#createpoolpoolattrsconnectstring), [`connectionString`](#createpoolpoolattrsconnectstring)
                 - 3.3.1.1.4 [`edition`](#createpoolpoolattrsedition)
                 - 3.3.1.1.5 [`enableStatistics`](#createpoolpoolattrsstats)
                 - 3.3.1.1.6 [`events`](#createpoolpoolattrsevents)
@@ -349,12 +349,12 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 8.1.21 [`stmtCacheSize`](#proppoolstmtcachesize)
         - 8.1.22 [`user`](#proppooluser)
     - 8.2 [Pool Methods](#poolmethods)
-        - 8.2.1 [`setAccessToken()`](#poolsetaccesstoken)
-        - 8.2.2 [`close()`](#poolclose), [`terminate()`](#poolclose)
-        - 8.2.3 [`getConnection()`](#getconnectionpool)
-        - 8.2.4 [`getStatistics()`](#poolgetstatistics)
-        - 8.2.5 [`logStatistics()`](#poollogstatistics)
-        - 8.2.6 [`reconfigure()`](#poolreconfigure)
+        - 8.2.1 [`close()`](#poolclose), [`terminate()`](#poolclose)
+        - 8.2.2 [`getConnection()`](#getconnectionpool)
+        - 8.2.3 [`getStatistics()`](#poolgetstatistics)
+        - 8.2.4 [`logStatistics()`](#poollogstatistics)
+        - 8.2.5 [`reconfigure()`](#poolreconfigure)
+        - 8.2.6 [`setAccessToken()`](#poolsetaccesstoken)
 9. [PoolStatistics Class](#poolstatisticsclass)
     - 9.1 [PoolStatistics Methods](#poolstatisticsmethods)
         - 9.1.1 [`logStatistics()`](#poolstatisticslogstatistics)
@@ -463,7 +463,6 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 16.1.2 [Embedded Connect Descriptor Strings](#embedtns)
         - 16.1.3 [Net Service Names for Connection Strings](#tnsnames)
         - 16.1.4 [JDBC and Oracle SQL Developer Connection Strings](#notjdbc)
-        - 16.1.5 [Token Based Authentication Connection Strings](#tokenbasedconnstrings)
     - 16.2 [Connections, Threads, and Parallelism](#numberofthreads)
         - 16.2.1 [Parallelism on a Connection](#parallelism)
     - 16.3 [Connection Pooling](#connpooling)
@@ -479,12 +478,18 @@ For installation information, see the [Node-oracledb Installation Instructions][
             - 16.3.7.3 [PL/SQL Session Tagging Callback](#sessiontaggingplsql)
         - 16.3.8 [Heterogeneous Connection Pools and Pool Proxy Authentication](#connpoolproxy)
     - 16.4 [External Authentication](#extauth)
-    - 16.5 [Token Based Authentication](#tokenbasedauth)
-        - 16.5.1 [Token Generation using the OCI CLI](#tokengen)
-        - 16.5.2 [Token and Private Key Extraction from a File](#tokenread)
-        - 16.5.3 [Standalone Connection Creation with Access Tokens](#tokenbasedstandaloneconn)
-        - 16.5.4 [Connection Pool Creation with Access Tokens](#tokenbasedpool)
-        - 16.5.5 [Explicitly Refreshing Pool Access Tokens](#settingpooltokens)
+    - 16.5 [Token-Based Authentication](#tokenbasedauthentication)
+        - 16.5.1 [OAuth 2.0 Token-Based Authentication](#oauthtokenbasedauthentication)
+            - 16.5.1.1 [OAuth 2.0 Token generation](#oauthtokengeneration)
+            - 16.5.1.2 [OAuth 2.0 Standalone Connections](#oauthstandalone)
+            - 16.5.1.3 [OAuth 2.0 Connection Pooling](#oauthpool)
+            - 16.5.1.4 [OAuth 2.0 Connection Strings](#oauthconnectstring)
+        - 16.5.2 [IAM Token-Based Authentication](#iamtokenbasedauthentication)
+            - 16.5.2.1 [IAM Token Generation](#iamtokengeneration)
+            - 16.5.2.2 [IAM Token and Private Key Extraction](#iamtokenextraction)
+            - 16.5.2.3 [IAM Standalone Connections](#iamstandalone)
+            - 16.5.2.4 [IAM Connection Pooling](#iampool)
+            - 16.5.2.5 [IAM Connection Strings](#iamconnectstring)
     - 16.6 [Database Resident Connection Pooling (DRCP)](#drcp)
     - 16.7 [Privileged Connections](#privconn)
     - 16.8 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
@@ -2237,31 +2242,92 @@ The properties of `poolAttrs` are described below.
 ###### <a name="createpoolpoolattrsaccesstoken"></a> 3.3.1.1.1 `accessToken`: Attributes
 
 ```
-Object accessToken
+function accessToken(boolean refresh) | String accessToken | Object accessToken
 ```
 
-The `accessToken` parameter object provides token based authentication
-configuration properties.
+- For Microsoft Azure Active Directory OAuth 2.0 token-based authentication
+  `accessToken` can be:
+  - a callback function returning the token as a string
+  - an object with a `token` attribute containing the token as a string
+  - or the token as a string
 
-The properties of the `accessToken` object are described below. Both properties
-must be set.  The values can be obtained using the Oracle Cloud Infrastructure
-(OCI) Command Line Interface (CLI).
+  Tokens can be obtained using various approaches.  For example, using the
+  Azure Active Directory API.
 
-Attribute           | Description
-------------------- |------------------------------------------------
-`token`             | The database authentication token string.
-`privateKey`        | The database authentication private key string.
+- For Oracle Cloud Infrastructure Identity and Access Management (IAM)
+  token-based authentication `accessToken` can be:
+  - a callback function returning an object containing `token` and `privateKey` attributes
+  - or an object containing `token` and `privateKey` attributes
 
-The `externalAuth` and `homogeneous` connection or pool attributes must be set
-to *true* while using token based authentication. The `user` (or `username`)
-and `password` properties should not be set.
+  The properties of the `accessToken` object are described below.
 
-See [Token Based Authentication](#tokenbasedauth) for more information.
+  Attribute           | Description
+  ------------------- |------------------------------------------------
+  `token`             | The database authentication token.
+  `privateKey`        | The database authentication private key.
 
-The `accessToken` parameter was added in node-oracledb 5.4.  It should be used
-with Oracle Client libraries 19.14 (or later), or 21.5 (or later).
+  The `token` and `privateKey` values can be obtained using various approaches.
+  For example the Oracle Cloud Infrastructure Command Line Interface can be
+  used.
 
-###### <a name="createpoolpoolattrsconnectstring"></a> 3.3.1.1.2 `connectString`, `connectionString`
+When `accessToken` is a callback function, it will be invoked at the time the
+pool is created (even if `poolMin` is 0).  It is also called when the pool
+needs to expand (causing new connections to be created) and the current token
+has expired.  The returned token is used by node-oracledb for authentication.
+The `refresh` parameter is described below.
+
+`refresh` value    | Description
+-------------------|------------------------------------------------
+*false*            | The application can return a token from an application-specific cache.  If there is no cached token, the application must externally acquire one.
+*true*             | The token previously passed to driver is known to be expired, the application should externally acquire a new token.
+
+When the callback is first invoked, the `refresh` parameter will be set to
+*false*.  This indicates that the application can provide a token from its own
+application managed cache, or it can generate a new token if there is no cached
+value.  Node-oracledb checks whether the returned token has expired. If it has
+expired, then the callback function will be invoked a second time with
+`refresh` set to *true*.  In this case the function must externally acquire a
+token, optionally add it to the application's cache, and return the token.
+
+For token-based authentication, the `externalAuth` and `homogeneous` pool
+attributes must be set to *true* .  The `user` (or `username`) and `password`
+attributes should not be set.
+
+See [Token-Based Authentication](#tokenbasedauthentication) for more information.
+
+The `accessToken` attribute was added in node-oracledb 5.4 to support IAM
+token-based authentication.  In this release the attribute must be an Object.
+Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for
+IAM token-based authentication.
+
+The `accessToken` attribute was extended to allow OAuth 2.0 token-based
+authentication in node-oracledb 5.5.  For OAuth 2.0, the attribute should be a
+string, or a callback.  Also Oracle Client libraries 19.15 (or later), or 21.7
+(or later) must be used.  The callback usage supports both OAuth 2.0 and IAM
+token-based authentication.
+
+###### <a name="createpoolpoolattrsaccesstokencallback"></a> 3.3.1.1.2 `accessTokenCallback`
+
+```
+Object accessTokenCallback
+```
+
+The optional `accessTokenCallback` attribute is a Node.js callback function. It
+gets called by the connection pool if the pool needs to grow and create new
+connections but the current token has expired.
+
+The callback function must return a JavaScript object with attributes `token`
+and `privateKey` for IAM.  See [Connection Pool Creation with Access Tokens for
+IAM](#tokenbasedpool).
+
+The `accessTokenCallback` attribute was added in node-oracledb 5.4.  It should be
+used with Oracle Client libraries 19.14 (or later), or 21.5 (or later).
+
+The `accessTokenCallback` attribute is deprecated from node-oracledb 5.5.  Use
+[`accessToken`](#createpoolpoolattrsaccesstoken) instead, which was enhanced to
+support a callback.
+
+###### <a name="createpoolpoolattrsconnectstring"></a> 3.3.1.1.3 `connectString`, `connectionString`
 
 ```
 String connectString
@@ -2276,24 +2342,6 @@ string can be an Easy Connect string, or a Net Service Name from a
 See [Connection Strings](#connectionstrings) for examples.
 
 The alias `connectionString` was added in node-oracledb 2.1.
-
-###### <a name="createpoolpoolattrsaccesstokencallback"></a> 3.3.1.1.3 `accessTokenCallback`
-
-```
-Object accessTokenCallback
-```
-
-The optional `accessTokenCallback` attribute is a Node.js callback function. It
-gets called by the connection pool if the pool needs to grow and create new
-connections but the current token has expired.
-
-The callback function must return a JavaScript object with attributes `token`
-and `privateKey`, equivalent to the
-[`accessToken`](#createpoolpoolattrsaccesstoken) object.  See [Connection Pool
-Creation with Access Tokens](#tokenbasedpool).
-
-The `accessTokenCallback` attribute was added in node-oracledb 5.4.  It should be
-used with Oracle Client libraries 19.14 (or later), or 21.5 (or later).
 
 ###### <a name="createpoolpoolattrsedition"></a> 3.3.1.1.4 `edition`
 
@@ -2762,29 +2810,65 @@ The properties of the `connAttrs` object are described below.
 ###### <a name="getconnectiondbattrsaccesstoken"></a> 3.3.2.1.2.1 `accessToken`: Attributes
 
 ```
-Object accessToken
+function accessToken(boolean refresh) | String accessToken | Object accessToken
 ```
 
-The `accessToken` parameter object provides token based authentication
-configuration properties.
+- For Microsoft Azure Active Directory OAuth 2.0 token-based authentication
+  `accessToken` can be:
+  - a callback function returning the token as a string
+  - or the token as a string
 
-The properties of the `accessToken` object are described below. Both properties
-must be set.  The values can be obtained using the Oracle Cloud Infrastructure
-(OCI) Command Line Interface (CLI).
+  Tokens can be obtained using various approaches.  For example, using the
+  Azure Active Directory API.
 
-Attribute           | Description
-------------------- |------------------------------------------------
-`token`             | The database authentication token string.
-`privateKey`        | The database authentication private key string.
+- For Oracle Cloud Infrastructure Identity and Access Management (IAM)
+  token-based authentication `accessToken` can be:
+  - an object containing `token` and `privateKey` attributes
+  - or a callback function returning an object containing `token` and `privateKey` attributes
 
-The `externalAuth` connection attribute must be set to *true* while using token
-based authentication. The `user` (or `username`) and `password` properties
-should not be set.
+  The `token` and `privateKey` values can be obtained using various approaches.
+  For example the Oracle Cloud Infrastructure Command Line Interface can be
+  used.
 
-See [Token Based Authentication](#tokenbasedauth) for more information.
+  The properties of the `accessToken` object are described below.
 
-The `accessToken` parameter was added in node-oracledb 5.4.  It should be used
-with Oracle Client libraries 19.14 (or later), or 21.5 (or later).
+  Attribute           | Description
+  ------------------- |------------------------------------------------
+  `token`             | The database authentication token.
+  `privateKey`        | The database authentication private key.
+
+When `accessToken` is a callback function, the returned token is used by
+node-oracledb for authentication.  The `refresh` parameter is described below.
+
+`refresh` value    | Description
+-------------------|------------------------------------------------
+*false*            | The application can return a token from an application-specific cache.  If there is no cached token, the application must externally acquire one.
+*true*             | The token previously passed to driver is known to be expired, the application should externally acquire a new token.
+
+For each connection, the callback is invoked with the `refresh` parameter set
+to *false*.  This indicates that the application can provide a token from its
+own application managed cache, or it can generate a new token if there is no
+cached value.  Node-oracledb checks whether the returned token has expired. If
+it has expired, then the callback function will be invoked a second time with
+`refresh` set to *true*.  In this case the function must externally acquire a
+token, optionally add it to the application's cache, and return the token.
+
+For token-based authentication, the `externalAuth` connection attribute must be
+set to *true* .  The `user` (or `username`) and `password` attributes should
+not be set.
+
+See [Token-Based Authentication](#tokenbasedauthentication) for more information.
+
+The `accessToken` attribute was added in node-oracledb 5.4 to support IAM
+token-based authentication.  In this release the attribute must be an Object.
+Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for
+IAM token-based authentication.
+
+The `accessToken` attribute was extended to allow OAuth 2.0 token-based
+authentication in node-oracledb 5.5.  For OAuth 2.0, the attribute should be a
+string, or a callback.  Also Oracle Client libraries 19.15 (or later), or 21.7
+(or later) must be used.  The callback usage supports both OAuth 2.0 and IAM
+token-based authentication.
 
 ###### <a name="getconnectiondbattrsconnectstring"></a> 3.3.2.1.2.2 `connectString`, `connectionString`
 
@@ -6553,40 +6637,7 @@ The database username for connections in the pool.
 
 ### <a name="poolmethods"></a> 8.2 Pool Methods
 
-#### <a name="poolsetaccesstoken"></a> 8.2.1 `pool.setAccessToken()`
-
-##### Description
-
-This method can be used to set an access token and private key after pool
-creation.  It is useful if the token is known to have expired, and you are not
-using [`accessTokenCallback`](#createpoolpoolattrsaccesstokencallback).
-
-It can also be useful in tests to set an expired token so that token expiry
-code paths can be tested.
-
-See [Explicitly Refreshing Pool Access Tokens](#settingpooltokens) for an example.
-
-##### Parameters
-
-```
-Object tokenAttrs
-```
-
-The `tokenAttrs` parameter object provides token based authentication
-configuration properties.
-
-The properties of the `tokenAttrs` object are described below. Both properties
-must be set.  The values can be obtained using the Oracle Cloud Infrastructure
-(OCI) Command Line Interface (CLI).
-
-Attribute           | Description
-------------------- |------------------------------------------------
-`token`             | The database authentication token string.
-`privateKey`        | The database authentication private key string.
-
-This function was added in node-oracledb 5.4.
-
-#### <a name="poolclose"></a> <a name="terminate"></a> 8.2.2 `pool.close()`
+#### <a name="poolclose"></a> <a name="terminate"></a> 8.2.1 `pool.close()`
 
 ##### Prototype
 
@@ -6662,7 +6713,7 @@ The `drainTime` parameter was added in node-oracledb 3.0.
     *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 
-#### <a name="getconnectionpool"></a> 8.2.3 `pool.getConnection()`
+#### <a name="getconnectionpool"></a> 8.2.2 `pool.getConnection()`
 
 ##### Prototype
 
@@ -6750,7 +6801,7 @@ pools.
     *Error error* | If `getConnection()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
     *Connection connection* | The newly created connection.   If `getConnection()` fails, `connection` will be NULL.  See [Connection class](#connectionclass) for more details.
 
-#### <a name="poolgetstatistics"></a> 8.2.4 `pool.getStatistics()`
+#### <a name="poolgetstatistics"></a> 8.2.3 `pool.getStatistics()`
 
 ##### Prototype
 
@@ -6775,7 +6826,7 @@ If `getStatistics()` is called while the pool is closed, draining, or
 
 This function was added in node-oracledb 5.2.
 
-#### <a name="poollogstatistics"></a> 8.2.5 `pool.logStatistics()`
+#### <a name="poollogstatistics"></a> 8.2.4 `pool.logStatistics()`
 
 ##### Prototype
 
@@ -6801,7 +6852,7 @@ This function was added in node-oracledb 5.2.  The obsolete function
 `_logStats()` can still be used, but it will be removed in a future version of
 node-oracledb.
 
-#### <a name="poolreconfigure"></a> 8.2.6 `pool.reconfigure()`
+#### <a name="poolreconfigure"></a> 8.2.5 `pool.reconfigure()`
 
 ##### Prototype
 
@@ -6897,6 +6948,37 @@ await pool.reconfigure({poolMin: 5, poolMax: 10, increment: 5});
     Callback function parameter | Description
     ----------------------------|-------------
     *Error error* | If `reconfigure()` succeeds, `error` is null.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="poolsetaccesstoken"></a> 8.2.6 `pool.setAccessToken()`
+
+##### Description
+
+This method can be used to set an IAM access token and private key after pool
+creation.  It is useful if the IAM token is known to have expired, and you are
+not using [`accessTokenCallback`](#createpoolpoolattrsaccesstokencallback).
+
+It can also be useful in tests to set an expired token so that token expiry
+code paths can be tested.
+
+##### Parameters
+
+```
+Object tokenAttrs
+```
+
+The `tokenAttrs` parameter object provides IAM token-based authentication
+properties.
+
+The properties of the `tokenAttrs` object are described below. Both properties
+must be set.  The values can be obtained, for example, using the Oracle Cloud
+Infrastructure Command Line Interface (OCI CLI).
+
+Attribute           | Description
+------------------- |------------------------------------------------
+`token`             | The database authentication token string.
+`privateKey`        | The database authentication private key string.
+
+This function was added in node-oracledb 5.4 and deprecated in node-oracledb 5.5.
 
 
 ## <a name="poolstatisticsclass"></a> 9. PoolStatistics Class
@@ -9532,64 +9614,6 @@ const connection = await oracledb.getConnection(
 );
 ```
 
-#### <a name="tokenbasedconnstrings"></a> 16.1.5 Token Based Authentication Connection Strings
-
-Token based authentication allows Oracle Cloud Infrastruction users to
-authenticate to Oracle Database with Oracle Identity Access Manager (IAM)
-tokens. Token authentication can be performed when node-oracledb uses Oracle
-Client libraries 19.14 (or later), or 21.5 (or later).
-
-The Oracle Cloud Infrastructure command line interface (OCI-CLI) can be used
-externally to get tokens and private keys from IAM, for example with `oci iam
-db-token get`.
-
-The connection string used by node-oracledb can specify the directory where the
-token and private key files are located.  This syntax is usable with older
-versions of node-oracledb however it is recommended to use connection and pool
-creation parameters introduced in node-oracledb 5.4 instead, see [Token Based
-Authentication](#tokenbasedauth).
-
-If you need to use the connection string syntax then the Oracle Net parameter
-`TOKEN_AUTH` must be set.  Also the `PROTOCOL` parameter must be `tcps` and
-`SSL_SERVER_CERT_DN` should be `ON`.
-
-You can set `TOKEN_AUTH=OCI_TOKEN` in a [sqlnet.ora](#tnsadmin) file.
-Alternatively you can specify it in a connect descriptor, for example:
-
-```
-db_alias =
-  (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCPS)(PORT = 1522)(HOST = adb.us-ashburn-1.oraclecloud.com))
-    (CONNECT_DATA = (SERVICE_NAME = adb.oraclecloud.com))
-    (SECURITY =
-      (SSL_SERVER_CERT_DN = "CN=adwc.uscom-east-1.oraclecloud.com, OU=Oracle BMCS US,
-           O=Oracle Corporation, L=Redwood City, ST=California, C=US")
-      (TOKEN_AUTH = OCI_TOKEN)))
-```
-
-The default location for the token and private key is the same default location
-that the OCI-CLI tool writes to.  For example `~/.oci/db-token/` on Linux.
-
-If the token and private key files are not in the default location then their
-directory must be specified with the `TOKEN_LOCATION` parameter in a
-`sqlnet.ora` file or in a connection string.  For example in a `tnsnames.ora`
-file:
-
-```
-db_alias =
-  (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCPS)(PORT = 1522)(HOST = adb.us-ashburn-1.oraclecloud.com))
-    (CONNECT_DATA = (SERVICE_NAME = adb.oraclecloud.com))
-    (SECURITY =
-      (SSL_SERVER_CERT_DN = "CN=adwc.uscom-east-1.oraclecloud.com, OU=Oracle BMCS US,
-           O=Oracle Corporation, L=Redwood City, ST=California, C=US")
-      (TOKEN_AUTH = OCI_TOKEN)
-      (TOKEN_LOCATION = '~/.oci/db-token')))
-```
-
-The `TOKEN_AUTH` and `TOKEN_LOCATION` values in a connection string take
-precedence over the `sqlnet.ora` settings.
-
 ### <a name="numberofthreads"></a> 16.2 Connections, Threads, and Parallelism
 
 If you open more than four connections, such as via increasing
@@ -10982,24 +11006,233 @@ of open connections exceeds `poolMin` and connections are idle for
 more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
 number of open connections does not fall below `poolMin`.
 
-### <a name="tokenbasedauth"></a> 16.5 Token Based Authentication
+### <a name="tokenbasedauthentication"></a> 16.5 Token-Based Authentication
 
-Token based authentication allows Oracle Cloud Infrastruction users to
-authenticate to Oracle Database with Oracle Identity Access Manager (IAM)
-tokens. Token authentication can be performed when node-oracledb uses Oracle
-Client libraries 19.14 (or later), or 21.5 (or later).
+Token-Based Authentication allows users to connect to a database by using an
+encrypted authentication token without having to enter a database username and
+password.  The authentication token must be valid and not expired for the
+connection to be successful.  Users already connected will be able to continue
+work after their token has expired but they will not be able to reconnect
+without getting a new token.
 
-Token based authentication can be used for both standalone connections and
-connection pools. Tokens can be specified using connection attributes
-introduced in node-oracledb 5.4.  Users of earlier node-oracledb versions can
-alternatively use [Token Based Authentication Connection
-Strings](#tokenbasedconnstrings).
+The two authentication methods supported by node-oracledb are Open
+Authorization [OAuth 2.0](#oauthtokenbasedauthentication) and Oracle Cloud
+Infrastructure (OCI) Identity and Access Management
+[IAM](#iamtokenbasedauthentication).
 
-#### <a name="tokengen"></a> 16.5.1 Token Generation using the OCI CLI
+Token-based authentication can be used for both standalone connections and
+connection pools.
 
-Authentication tokens are generated through execution of an Oracle Cloud
-Infrastructure command line interface (OCI-CLI) command run externally to
-Node.js:
+#### <a name="oauthtokenbasedauthentication"></a> 16.5.1 OAuth 2.0 Token-Based Authentication
+
+Oracle Cloud Infrastructure (OCI) users can be centrally managed in a Microsoft
+Azure Active Directory (Azure AD) service.  Open Authorization (OAuth 2.0)
+token-based authentication allows users to authenticate to Oracle Database
+using Azure AD OAuth 2.0 tokens.  Your Oracle Database must be registered with
+Azure AD.
+
+See [Authenticating and Authorizing Microsoft Azure Active Directory Users for
+Oracle Autonomous Databases][206] for more information.
+
+OAuth 2.0 token authentication can be performed when node-oracledb uses Oracle
+Client libraries 19.15 (or later), or 21.7 (or later).
+
+##### <a name="oauthtokengeneration"></a> 16.5.1.1 OAuth 2.0 Token Generation
+
+Authentication tokens can be obtained in several ways.  For example you can use
+a curl command against the Azure Active Directory API such as:
+
+```
+curl -X POST -H 'Content-Type: application/x-www-form-urlencoded'
+https://login.microsoftonline.com/[<TENANT_ID>]/oauth2/v2.0/token
+-d 'client_id = <APP_ID>'
+-d 'scope = <SCOPES>'
+-d 'username = <USER_NAME>'
+-d 'password = <PASSWORD>'
+-d 'grant_type = password'
+-d 'client_secret = <SECRET_KEY>'
+```
+
+Substitute your own values as appropriate for each argument.
+
+This returns a JSON response containing an `access_token` attribute.  See
+[Microsoft identity platform and OAuth 2.0 authorization code flow][208] for
+more details.  This attribute can be passed as the `oracledb.getConnection()`
+attribute [`accessToken`](#getconnectiondbattrsaccesstoken) or as the
+`oracledb.createPool()` attribute
+[`accessToken`](#createpoolpoolattrsaccesstoken).
+
+Alternatively authentication tokens can be generated by calling the Azure
+Active Directory REST API, for example:
+
+```javascript
+function getOauthToken() {
+  const requestParams = {
+    client_id     : <CLIENT_ID>,
+    client_secret : <CLIENT_SECRET>,
+    grant_type    : 'client_credentials',
+    scope         : <SCOPES>,
+  };
+  const tenantId = <TENANT_ID>;
+  const url = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
+  return new Promise(function(resolve, reject) {
+    request.post({
+      url       : url,
+      body      : queryString.stringify(requestParams),
+      headers   : { 'Content-Type': 'application/x-www-form-urlencoded' }
+    }, function(err, response, body) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(JSON.parse(body).access_token);
+      }
+    });
+  });
+}
+```
+
+Substitute your own values as appropriate for each argument.
+
+Use of `getOauthToken()` is shown in subsequent examples.
+
+##### <a name="oauthstandalone"></a> 16.5.1.2 OAuth 2.0 Standalone Connections
+
+Standalone connections can be created using OAuth2 token-based authentication,
+for example:
+
+```javascript
+let accessTokenStr;  // the token string. In this app it is also the token "cache"
+
+async function tokenCallback(refresh) {
+  if (refresh || !acccessTokenStr) {
+    accessTokenStr = await getOauthToken(); // getOauthToken() was shown earlier
+  }
+  return acccessTokenStr;
+}
+
+async function init() {
+  try {
+    await oracledb.getConnection({
+      accessToken   : tokenCallback,    // the callback returning the token
+      externalAuth  : true,             // must specify external authentication
+      connectString : connect_string    // Oracle Autonomous Database connection string
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
+```
+
+In this example, the global variable `accessTokenStr` is used to "cache" the
+access token string so any subsequent callback invocation will not necessarily
+have to incur the expense of externally getting a token.  For example, if the
+application opens two connections for the same user, the token acquired for the
+first connection can be reused without needing to make a second REST call.
+
+The `getConnection()` function's
+[`accessToken`](#getconnectiondbattrsaccesstoken) attribute in this example is
+set to the callback function that returns an OAuth 2.0 token used by
+node-oracledb for authentication.  This function `tokenCallback()` will be
+invoked when `getConnection()` is called.  If the returned token is found to
+have expired, then `tokenCallback()` will be called a second time.  If the
+second invocation of `tokenCallback()` also returns an expired token, then the
+connection will fail.  The value of the `refresh` parameter will be different
+each of the times the callback is invoked:
+
+- When `refresh` is *true*, the token is known to have expired so the
+  application must get a new token.  This is then stored in the global variable
+  `accessTokenStr` and returned.
+
+- When `refresh` is *false*, the application can return the token stored in
+  `accessTokenStr`, if it is set.  But if it is not set (meaning there is no
+  token cached), then the application externally acquires a token, stores it in
+  `accessTokenStr`, and returns it.
+
+##### <a name="oauthpool"></a> 16.5.1.3 OAuth 2.0 Connection Pooling
+
+Pooled connections can be created using OAuth 2.0 token-based authentication,
+for example:
+
+```javascript
+let accessTokenStr;  // The token string. In this app it is also the token "cache"
+
+async function tokenCallback(refresh) {
+  if (refresh || !acccessTokenStr) {
+    accessTokenStr = await getOauthToken(); // getOauthToken() was shown earlier
+  }
+  return acccessToken;
+}
+
+async function init() {
+  try {
+    await oracledb.createPool({
+      accessToken   : tokenCallback,        // the callback returning the token
+      externalAuth  : true,                 // must specify external authentication
+      homogeneous   : true,                 // must use an homogeneous pool
+      connectString : '...'                 // Oracle Autonomous Database connection string
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
+```
+
+See [OAuth 2.0 Standalone Connections](#oauthstandalone) for a description of
+the callback and `refresh` parameter.  With connection pools, the
+[`accessToken`](#createpoolpoolattrsaccesstoken) attribute sets a callback
+function which will be invoked at the time the pool is created (even if
+`poolMin` is 0).  It is also called when the pool needs to expand (causing new
+connections to be created) and the current token has expired.
+
+##### <a name="oauthconnectstring"></a> 16.5.1.4 OAuth 2.0 Connection Strings
+
+Applications built with node-oracledb 5.5, or later, should use the connection
+or pool creation parameters described earlier.  However, if you cannot use
+them, you can use OAuth 2.0 Token Authentication by configuring Oracle Net
+options.  This still requires Oracle Client libraries 19.15 (or later), or 21.7
+(or later).
+
+Save the generated access token to a file and set the connect descriptor
+`TOKEN_LOCATION` option to the directory containing the token file.  The
+connect descriptor parameter `TOKEN_AUTH` must be set to `OAUTH`, the
+`PROTOCOL` value must be `TCPS`, the `SSL_SERVER_DN_MATCH` value should be
+`ON`, and the parameter `SSL_SERVER_CERT_DN` should be set.  For example, your
+[`tnsnames.ora`](#tnsnames) file might contain:
+
+```
+db_alias =
+  (DESCRIPTION=(ADDRESS=(PROTOCOL=TCPS)(PORT=1522)(HOST=abc.oraclecloud.com))
+    (CONNECT_DATA=(SERVICE_NAME=db_low.adb.oraclecloud.com))
+      (SECURITY=
+        (SSL_SERVER_DN_MATCH=ON)
+        (SSL_SERVER_CERT_DN="CN=efg.oraclecloud.com, OU=Oracle BMCS US, O=Oracle Corporation, L=Redwood City, ST=California, C=US")
+        (TOKEN_AUTH=OAUTH)
+        (TOKEN_LOCATION='/opt/oracle/token')
+        ))
+```
+
+You can alternatively set `TOKEN_AUTH` and `TOKEN_LOCATION` in a
+[`sqlnet.ora`](#tnsadmin) file.  The `TOKEN_AUTH` and `TOKEN_LOCATION` values
+in a connection string take precedence over the `sqlnet.ora` settings.
+
+See [Oracle Net Services documentation][37] for more information.
+
+
+#### <a name="tokenbasedauth"></a> <a name="iamtokenbasedauthentication"></a> 16.5.2 IAM Token-Based Authentication
+
+Token-based authentication allows Oracle Cloud Infrastructure users to
+authenticate to Oracle Database with Oracle Identity Access Management (IAM)
+tokens.  This token authentication can be performed when node-oracledb uses
+Oracle Client libraries 19.14 (or later), or 21.5 (or later).
+
+See [Configuring the Oracle Autonomous Database for IAM Integration][207] for
+more information.
+
+##### <a name="tokengen"></a> <a name="iamtokengeneration"></a> 16.5.2.1 IAM Token Generation
+
+Authentication tokens can be obtained in several ways.  For example you can use
+the Oracle Cloud Infrastructure command line interface (OCI CLI) command run
+externally to Node.js:
 
 ```
 oci iam db-token get
@@ -11008,22 +11241,25 @@ oci iam db-token get
 On Linux a folder `.oci/db-token` will be created in your home directory.  It
 will contain the token and private key files needed by node-oracledb.
 
-#### <a name="tokenread"></a> 16.5.2 Token and Private Key Extraction from a File
+See [Working with the Command Line Interface ][209] for more information on the
+OCI CLI.
 
-Token and private key files created externally can be read by your application,
-for example like:
+##### <a name="tokenread"></a> <a name="iamtokenextraction"></a> 16.5.2.2 IAM Token and Private Key Extraction
+
+Token and private key files created externally can be read by Node.js
+applications, for example like:
 
 ```javascript
-function getToken() {
+function getIAMToken() {
   const tokenPath = '/home/cjones/.oci/db-token/token';
   const privateKeyPath = '/home/cjones/.oci/db-token/oci_db_key.pem';
 
   let token = '';
   let privateKey = '';
   try {
-    // Read token file
+    // Read the token file
     token = fs.readFileSync(tokenPath, 'utf8');
-    // Read private key file
+    // Read the private key file
     const privateKeyFileContents = fs.readFileSync(privateKeyPath, 'utf-8');
     privateKeyFileContents.split(/\r?\n/).forEach(line => {
     if (line != '-----BEGIN PRIVATE KEY-----' &&
@@ -11034,31 +11270,37 @@ function getToken() {
     console.error(err);
   } finally {
     const tokenBasedAuthData = {
-      token           : token,
-      privateKey      : privateKey
+      token       : token,
+      privateKey  : privateKey
     };
     return tokenBasedAuthData;
   }
 }
 ```
 
-The token and key can be used subsequently during authentication.
+The token and key can be used during subsequent authentication.
 
-#### <a name="tokenbasedstandaloneconn"></a> 16.5.3 Standalone Connection Creation with Access Tokens
+##### <a name="tokenbasedstandaloneconn"></a> <a name="iamstandalone"></a> 16.5.2.3 IAM Standalone Connections
 
-Standalone connections can be created using token based authentication, for
+Standalone connections can be created using IAM token-based authentication, for
 example:
 
 ```javascript
+let accessTokenObj;  // the token object. In this app it is also the token "cache"
+
+function tokenCallback(refresh) {
+  if (refresh || !acccessTokenObj) {
+    accessTokenObj = getIAMToken();     // getIAMToken() was shown earlier
+  }
+  return acccessTokenObj;
+}
+
 async function init() {
-
-  const accessTokenData = getToken();
-
   try {
     await oracledb.getConnection({
-      accessToken         : accessTokenData,
-      externalAuth        : true,
-      connectString       : connect_string
+      accessToken    : tokenCallback,  // the callback returns the token object
+      externalAuth   : true,           // must specify external authentication
+      connectString  : '...'           // Oracle Autonomous Database connection string
     });
   } catch (err) {
     console.error(err);
@@ -11066,24 +11308,54 @@ async function init() {
 }
 ```
 
-For a runnable example, see [`tokenbasedauth.js`][206].
+In this example, the global object `accessTokenObj` is used to "cache" the IAM
+access token and private key (using the attributes `token` and `privateKey`) so
+any subsequent callback invocation will not necessarily have to incur the
+expense of externally getting them.  For example, if the application opens two
+connections for the same user, the token and private key acquired for the first
+connection can be reused without needing to make a second REST call.
 
-#### <a name="tokenbasedpool"></a> 16.5.4 Connection Pool Creation with Access Tokens
+The `getConnection()` function's
+[`accessToken`](#getconnectiondbattrsaccesstoken) attribute in this example is
+set to the callback function that returns an IAM token and private key used by
+node-oracledb for authentication.  This function `tokenCallback()` will be
+invoked when `getConnection()` is called.  If the returned token is found to
+have expired, then `tokenCallback()` will be called a second time.  If the
+second invocation of `tokenCallback()` also returns an expired token, then the
+connection will fail.  The value of the `refresh` parameter will be different
+each of the times the callback is invoked:
 
-An example creating a pool using token based authentication is:
+- When `refresh` is *true*, the token is known to have expired so the
+  application must get a new token and private key.  These are then stored in
+  the global object `accessTokenObj` and returned.
+
+- When `refresh` is *false*, the application can return the token and private
+  key stored in `accessTokenObj`, if it is set.  But if it is not set (meaning
+  there is no token or key cached), then the application externally acquires a
+  token and private key, stores them in `accessTokenObj`, and returns it.
+
+##### <a name="settingpooltokens"></a> <a name="tokenbasedpool"></a> <a name="iampool"></a> 16.5.2.4 IAM Connection Pooling
+
+Pooled connections can be created using IAM token-based authentication, for
+example:
 
 ```javascript
+let accessTokenObj;  // The token string. In this app it is also the token "cache"
+
+function tokenCallback(refresh) {
+  if (refresh || !acccessTokenObj) {
+    accessTokenObj = getIAMToken();      // getIAMToken() was shown earlier
+  }
+  return acccessToken;
+}
+
 async function init() {
-
-  const accessTokenData = getToken();
-
   try {
     await oracledb.createPool({
-      accessToken         : accessTokenData,
-      accessTokenCallback : tokenCallback
-      externalAuth        : true,
-      homogeneous         : true,
-      connectString       : connect_string,
+      accessToken   : tokenCallback,     // the callback returning the token
+      externalAuth  : true,              // must specify external authentication
+      homogeneous   : true,              // must use an homogeneous pool
+      connectString : connect_string     // Oracle Autonomous Database connection string
     });
   } catch (err) {
     console.error(err);
@@ -11091,55 +11363,64 @@ async function init() {
 }
 ```
 
-The callback will be called if the connection pool needs to grow and create new
-connections but the current token is invalid.  The callback should return the
-new, valid token:
+See [IAM Standalone Connections](#iamstandalone) for a description of the
+callback and `refresh` parameter.  With connection pools, the
+[`accessToken`](#createpoolpoolattrsaccesstoken) attribute sets a callback
+function which will be invoked at the time the pool is created (even if
+`poolMin` is 0).  It is also called when the pool needs to expand (causing new
+connections to be created) and the current token has expired.
 
-```javascript
-function tokenCallback() {
-  ...
-  // Code to get the refreshed token and private key should be here.
-  // For example, make an external call to 'oci iam db-token get' and then
-  // read the token and private key values, see getToken()
-  ...
+##### <a name="tokenbasedconnstrings"></a> <a name="iamconnectstring"></a> 16.5.2.5 IAM Connection Strings
 
-  const refreshTokenData = {
-    token           : token,
-    privateKey      : privateKey
-  };
+Applications built with node-oracledb 5.4, or later, should use the connection
+or pool creation parameters described earlier.  However, if you cannot use
+them, you can use IAM Token Authentication by configuring Oracle Net options.
+This still requires Oracle Client libraries 19.14 (or later), or 21.5 (or
+later).
 
-  return refreshTokenData;
-}
+Save the generated access token to a file and set the connect descriptor
+`TOKEN_LOCATION` option to the directory containing the token file.  The
+connect descriptor parameter `TOKEN_AUTH` must be set to `OCI_TOKEN`, the
+`PROTOCOL` value must be `TCPS`, the `SSL_SERVER_DN_MATCH` value should be
+`ON`, and the parameter `SSL_SERVER_CERT_DN` should be set.  For example, if
+the token and private key are in the default location used by the [OCI
+CLI][209], your [`tnsnames.ora`](#tnsnames) file might contain:
+
+```
+db_alias =
+  (DESCRIPTION=(ADDRESS=(PROTOCOL=TCPS)(PORT=1522)(HOST=abc.oraclecloud.com))
+    (CONNECT_DATA=(SERVICE_NAME=db_low.adb.oraclecloud.com))
+      (SECURITY=
+        (SSL_SERVER_DN_MATCH=ON)
+        (SSL_SERVER_CERT_DN="CN=efg.oraclecloud.com, OU=Oracle BMCS US, O=Oracle Corporation, L=Redwood City, ST=California, C=US")
+        (TOKEN_AUTH=OCI_TOKEN)
+        ))
 ```
 
-For a runnable example, see [`tokenbasedauthpool.js`][207].
+This reads the IAM token and private key from the default location, for example
+`~/.oci/db-token/` on Linux.
 
-#### <a name="settingpooltokens"></a> 16.5.5 Explicitly Refreshing Pool Access Tokens
+If the token and private key files are not in the default location then their
+directory must be specified with the `TOKEN_LOCATION` parameter.  For example
+in a `tnsnames.ora` file:
 
-If you did not set an access token callback with
-[`accessTokenCallback`](#createpoolpoolattrsaccesstokencallback) to
-automatically update an expired token, you can explicitly call
-[`pool.setAccessToken()`](#poolsetaccesstoken).  For example:
-
-```javascript
-let accessTokenData = getToken();
-
-let pool = await oracledb.createPool({
-  accessToken         : accessTokenData,
-  externalAuth        : true,
-  homogeneous         : true,
-  connectString       : connect_string,
-});
-
-. . . // do some work, during which the token expires
-
-// Get and set an updated token
-accessTokenData = getToken();
-pool.setAccessToken({
-  token               : accessTokenData.token,
-  privateKey          : accessTokenData.privateKey
-)};
 ```
+db_alias =
+  (DESCRIPTION=(ADDRESS=(PROTOCOL=TCPS)(PORT=1522)(HOST=abc.oraclecloud.com))
+    (CONNECT_DATA=(SERVICE_NAME=db_low.adb.oraclecloud.com))
+      (SECURITY=
+        (SSL_SERVER_DN_MATCH=ON)
+        (SSL_SERVER_CERT_DN="CN=efg.oraclecloud.com, OU=Oracle BMCS US, O=Oracle Corporation, L=Redwood City, ST=California, C=US")
+        (TOKEN_AUTH=OCI_TOKEN)
+        (TOKEN_LOCATION='/opt/oracle/token')
+        ))
+```
+
+You can alternatively set `TOKEN_AUTH` and `TOKEN_LOCATION` in a
+[`sqlnet.ora`](#tnsadmin) file.  The `TOKEN_AUTH` and `TOKEN_LOCATION` values
+in a connection string take precedence over the `sqlnet.ora` settings.
+
+See [Oracle Net Services documentation][37] for more information.
 
 ### <a name="drcp"></a> 16.6 Database Resident Connection Pooling (DRCP)
 
@@ -19115,5 +19396,7 @@ can be asked at [AskTom][158].
 [203]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-39C521D4-5C6E-44B1-B7C7-DEADD7D9CAF0
 [204]: https://www.oracle.com/a/tech/docs/application-checklist-for-continuous-availability-for-maa.pdf
 [205]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8152084F-4760-4B89-A91C-9A84F81C23D1
-[206]: https://github.com/oracle/node-oracledb/tree/main/examples/tokenbasedauth.js
-[207]: https://github.com/oracle/node-oracledb/tree/main/examples/tokenbasedauthpool.js
+[206]: https://docs.oracle.com/en/database/oracle/oracle-database/19/dbseg/authenticating-and-authorizing-microsoft-azure-active-directory-users-oracle-autonomous-datab.html#GUID-2712902B-DD07-4A61-B336-31C504781D0F
+[207]: https://docs.oracle.com/en/database/oracle/oracle-database/19/dbseg/authenticating-and-authorizing-iam-users-oracle-autonomous-databases.html#GUID-466A8800-5AF1-4202-BAFF-5AE727D242E8
+[208]: https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow
+[209]: https://docs.oracle.com/en-us/iaas/Content/API/Concepts/cliconcepts.htm

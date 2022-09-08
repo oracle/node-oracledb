@@ -90,9 +90,11 @@ static const char *njsErrorMessages[] = {
     "NJS-081: concurrent operations on a connection are disabled", //errConcurrentOps
     "NJS-082: connection pool is being reconfigured", // errPoolReconfiguring
     "NJS-083: pool statistics not enabled", // errPoolStatisticsDisabled
-    "NJS-084: invalid or missing parameter with token based authentication. The token and privateKey attributes must contain values. Other credentials cannot be specified", // errTokenBasedAuth
+    "NJS-084: invalid access token", // errTokenBasedAuth
     "NJS-085: invalid connection pool configuration with token based authentication. The homogeneous and externalAuth attributes must be set to true", // errPoolTokenBasedAuth
     "NJS-086: invalid standalone configuration with token based authentication. The externalAuth attribute must be set to true", // errStandaloneTokenBasedAuth
+    "NJS-087: access token has expired", //errExpiredToken
+    "NJS-088: accessTokenCallback cannot be specified when accessToken is a function" //errAccessTokenCallback
 };
 
 

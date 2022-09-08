@@ -29,6 +29,7 @@
 static NJS_NAPI_METHOD(njsOracleDb_createPool);
 static NJS_NAPI_METHOD(njsOracleDb_getConnection);
 static NJS_NAPI_METHOD(njsOracleDb_initOracleClient);
+static NJS_NAPI_METHOD(njsOracleDb_returnAccessToken);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsOracleDb_createPoolAsync);
@@ -349,6 +350,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             napi_default, NULL },
     { "_initOracleClient", NULL, njsOracleDb_initOracleClient, NULL, NULL,
             NULL, napi_default, NULL },
+    { "_returnAccessToken", NULL, njsOracleDb_returnAccessToken, NULL, NULL,
+            NULL, napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
@@ -500,7 +503,7 @@ static bool njsOracleDb_createPoolAsync(njsBaton *baton)
     commonParams.stmtCacheSize = baton->stmtCacheSize;
 
     // set token based auth parameters
-    if (baton->token && baton->privateKey) {
+    if (baton->token) {
         accessToken.token = baton->token;
         accessToken.tokenLength = baton->tokenLength;
         accessToken.privateKey = baton->privateKey;
@@ -623,6 +626,7 @@ static void njsOracleDb_finalize(napi_env env, void *finalizeData,
     NJS_DELETE_REF_AND_CLEAR(oracleDb->jsSodaDocumentConstructor);
     NJS_DELETE_REF_AND_CLEAR(oracleDb->jsSodaOperationConstructor);
     NJS_DELETE_REF_AND_CLEAR(oracleDb->jsSubscriptions);
+    NJS_DELETE_REF_AND_CLEAR(oracleDb->jsTokenCallbackHandler);
     if (oracleDb->context) {
         dpiContext_destroy(oracleDb->context);
         oracleDb->context = NULL;
@@ -706,7 +710,7 @@ static bool njsOracleDb_getConnectionAsync(njsBaton *baton)
     commonParams.stmtCacheSize = baton->stmtCacheSize;
 
     // set token based auth parameters
-    if (baton->token && baton->privateKey) {
+    if (baton->token) {
         accessToken.token = baton->token;
         accessToken.tokenLength = baton->tokenLength;
         accessToken.privateKey = baton->privateKey;
@@ -1238,6 +1242,43 @@ static napi_value njsOracleDb_initOracleClient(napi_env env,
 
 
 //-----------------------------------------------------------------------------
+// njsOracleDb_returnAccessTokenHelper()
+//   Helper method that performs the work of njsOracleDb_returnAccessToken().
+//-----------------------------------------------------------------------------
+static bool njsOracleDb_returnAccessTokenHelper(napi_env env,
+        napi_callback_info info)
+{
+    njsBaseInstance *callingInstance;
+    napi_value callingObj, args[2];
+    njsTokenCallback *callback;
+
+    if (!njsUtils_validateArgs(env, info, 2, args, &callingObj,
+            &callingInstance))
+        return false;
+    NJS_CHECK_NAPI(env, napi_get_value_external(env, args[0],
+            (void**) &callback))
+    return njsTokenCallback_returnAccessToken(callback, env, args[1]);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracleDb_returnAccessToken()
+//   Returns the access token through to the callback. This needs to be done
+// independently in order to handle possible asynchronous Javascript code.
+//
+// PARAMETERS
+//   - externalObj (contains native njsAccessToken structure)
+//   - accessToken (value to be returned through callback)
+//-----------------------------------------------------------------------------
+static napi_value njsOracleDb_returnAccessToken(napi_env env,
+        napi_callback_info info)
+{
+    njsOracleDb_returnAccessTokenHelper(env, info);
+    return NULL;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsOracleDb_initCommonCreateParams()
 //   Initialize common creation parameters for pools and standalone
 // connection creation.
@@ -1444,6 +1485,13 @@ bool njsOracleDb_prepareClass(njsOracleDb *oracleDb, napi_env env,
     // keep a reference to it, if requested
     if (clsRef) {
         NJS_CHECK_NAPI(env, napi_create_reference(env, cls, 1, clsRef))
+
+    // otherwise, acquire access token callback handler and store reference
+    } else {
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, instance,
+                "_accessTokenHandler", &tempResult))
+        NJS_CHECK_NAPI(env, napi_create_reference(env, tempResult, 1,
+                &oracleDb->jsTokenCallbackHandler))
     }
 
     return true;

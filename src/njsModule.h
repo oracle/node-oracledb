@@ -209,6 +209,8 @@ typedef enum {
     errTokenBasedAuth,
     errPoolTokenBasedAuth,
     errStandaloneTokenBasedAuth,
+    errExpiredToken,
+    errAccessTokenCallback,
 
     // New ones should be added here
 
@@ -678,6 +680,8 @@ struct njsOracleDb {
     napi_ref jsSodaDocumentConstructor;
     napi_ref jsSodaOperationConstructor;
     napi_ref jsSubscriptions;
+    napi_ref jsTokenCallbackHandler;
+
 };
 
 // data for class Pool exposed to JS.
@@ -838,6 +842,7 @@ struct njsDbObjectAttr {
 // data for managing callback
 struct njsTokenCallback {
     dpiAccessToken *accessToken;
+    njsOracleDb *oracleDb;
     uv_async_t async;
     uv_mutex_t mutex;
     uv_barrier_t barrier;
@@ -1139,5 +1144,7 @@ int njsTokenCallback_eventHandler(njsTokenCallback *callback,
 bool njsTokenCallback_new(njsBaton *baton, napi_env env);
 bool njsTokenCallback_startNotifications(njsTokenCallback *callback,
         napi_env env);
+bool njsTokenCallback_returnAccessToken(njsTokenCallback *callback,
+        napi_env env, napi_value accessToken);
 bool njsTokenCallback_stopNotifications(njsTokenCallback *callback);
 #endif                                               /* __NJSMODULE_H__ */

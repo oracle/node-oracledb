@@ -4,6 +4,21 @@
 
 **This release is under development and information may be incomplete**
 
+- Token-based Authentication changes:
+
+    - Added support for [token-based
+      authentication](https://oracle.github.io/node-oracledb/doc/api.html#oauthtokenbasedauthentication)
+      using Microsoft Azure Active Directory OAuth 2.0 tokens.
+
+    - The `accessToken` attribute for connection and connection pool creation
+      can now be a string, a callback function, or an object.
+
+    - Fixed a bug that prevented async functions from being used in token callbacks.
+
+    - Deprecated the connection pool creation attribute `accessTokenCallback`.
+
+    - Deprecated `pool.setAccessToken()`.
+
 - ResultSets now implement the `asyncIterator()` symbol to support asynchonous
   iteration.
 
@@ -18,7 +33,7 @@
 - Stated compatibility is now for Node.js 14, 16 and 18.  Older releases
   back to Node.js 10.16 should still work.
 
-- Added support for [token based
+- Added support for [token-based
   authentication](https://oracle.github.io/node-oracledb/doc/api.html#tokenbasedauth)
   when establishing pool based connections and standalone connections.
 

@@ -109,7 +109,5 @@ File Name                                                 | Description
 [`sessiontagging1.js`](sessiontagging1.js)                | Simple pooled connection tagging for setting session state
 [`sessiontagging2.js`](sessiontagging2.js)                | More complex example of pooled connection tagging for setting session state
 [`soda1.js`](soda1.js)                                    | Basic Simple Oracle Document Access (SODA) example
-[`tokenbasedauth.js`](tokenbasedauth.js)                  | Shows standalone connection using token based authentication
-[`tokenbasedauthpool.js`](tokenbasedauthpool.js)          | Shows connection pooling using token based authentication
 [`version.js`](version.js)                                | Shows the node-oracledb version attributes
 [`webapp.js`](webapp.js)                                  | A simple web application using a connection pool

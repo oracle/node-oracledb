@@ -1,8 +1,0 @@
-# Mocha options
-
-timeout: 0
-require: ['assert']
-retries: 1
-trace-warnings: true
-spec:
-  - test/tokenBasedAuthentication.js
