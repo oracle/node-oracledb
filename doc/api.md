@@ -464,7 +464,8 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 16.1.3 [Net Service Names for Connection Strings](#tnsnames)
         - 16.1.4 [JDBC and Oracle SQL Developer Connection Strings](#notjdbc)
     - 16.2 [Connections, Threads, and Parallelism](#numberofthreads)
-        - 16.2.1 [Parallelism on a Connection](#parallelism)
+        - 16.2.1 [Connections and Worker Threads](#workerthreads)
+        - 16.2.2 [Parallelism on Each Connection](#parallelism)
     - 16.3 [Connection Pooling](#connpooling)
         - 16.3.1 [Connection Pool Sizing](#conpoolsizing)
         - 16.3.2 [Connection Pool Closing and Draining](#conpooldraining)
@@ -1409,7 +1410,7 @@ concurrent statements on a connection by design.  Also some application modules
 may have the expectation that node-oracledb will handle any necessary
 connection usage serialization.
 
-For more discussion, see [Parallelism on a Connection](#parallelism).
+For more discussion, see [Parallelism on Each Connection](#parallelism).
 
 This property was added in node-oracledb 5.2.
 
@@ -9618,11 +9619,30 @@ const connection = await oracledb.getConnection(
 
 ### <a name="numberofthreads"></a> 16.2 Connections, Threads, and Parallelism
 
-If you open more than four connections, such as via increasing
-[`poolMax`](#proppoolpoolmax), you should increase the number of worker threads
-available to node-oracledb.  A thread pool that is too small can cause
-connection requests to fail with the error *NJS-040: connection request
-timeout* or *NJS-076: connection request rejected*.
+To scale and optimize your applications it is useful to understand how
+connections interact with Node.js worker threads, and to know that each
+connection can only execute one database operation at a time.
+
+#### <a name="workerthreads"></a> 16.2.1 Connections and Worker Threads
+
+Node.js has four background worker threads by default (not to be confused with
+the newer user space worker_threads module).  If you open more than four
+[standalone connections](#connectionhandling) or pooled connections, such as by
+increasing [`poolMax`](#proppoolpoolmax), then you should increase the number
+of worker threads available to node-oracledb.
+
+A worker thread pool that is too small can cause a decrease in application
+performance, can cause [deadlocks][22], or can cause connection requests to
+fail with the error *NJS-040: connection request timeout* or *NJS-076:
+connection request rejected*.
+
+A Node.js worker thread is used by each connection to execute a database
+statement.  Each thread will wait until all [round-trips](#roundtrips) between
+node-oracledb and the database for the statement are complete.  When an
+application handles a sustained number of user requests, and database
+operations take some time to execute or the network is slow, then all available
+threads may be held in use.  This prevents other connections from beginning
+work and stops Node.js from handling more user load.
 
 The thread pool size should be equal to, or greater than, the maximum number of
 connections.  If the application does database and non-database work
@@ -9648,7 +9668,8 @@ Or, on Windows:
 . . .
 ```
 
-With these, you can start your application with `npm start`.
+With these, you can start your application with `npm start`.  This will allow
+up to 10 connections to be actively excuting SQL statements in parallel.
 
 On non-Windows platforms, the value can also be set inside the application.  It
 must be set prior to any asynchronous Node.js call that uses the thread pool:
@@ -9661,14 +9682,14 @@ process.env.UV_THREADPOOL_SIZE = 10
 // ... rest of code
 ```
 
-If you set `UV_THREADPOOL_SIZE` too late, the setting will be ignored and the
-default thread pool size of 4 will still be used.  Note that
+If you set `UV_THREADPOOL_SIZE` too late in the application, or try to set it
+this way on Windows, then the setting will be ignored and the default thread
+pool size of 4 will still be used.  Note that
 [`pool.getStatistics()`](#poolgetstatistics) and
 [`pool.logStatistics()`](#poollogstatistics) can only give the value of the
 variable, not the actual size of the thread pool created.  On Linux you can use
-`pstack` to see how many threads are actually running.  Note Node.js will
-create a small number of threads in addition to the expected number of worker
-threads.
+`pstack` to see how many threads are actually running.  Node.js will create a
+small number of threads in addition to the expected number of worker threads.
 
 The '[libuv][21]' library used by Node.js 12.5 and earlier limits the number of
 threads to 128.  In Node.js 12.6 onward the limit is 1024.  You should restrict
@@ -9677,15 +9698,7 @@ i.e. [`poolMax`](#createpoolpoolattrspoolmax), to a value lower than
 `UV_THREADPOOL_SIZE`.  If you have multiple pools, make sure the sum of all
 `poolMax` values is no larger than `UV_THREADPOOL_SIZE`.
 
-Node.js worker threads executing database statements on a connection will wait
-until [round-trips](#roundtrips) between node-oracledb and the database are
-complete.  When an application handles a sustained number of user requests, and
-database operations take some time to execute or the network is slow, then all
-available threads may be held in use.  This prevents other connections from
-beginning work and stops Node.js from handling more user load.  Increasing the
-number of worker threads may improve throughput and prevent [deadlocks][22].
-
-#### <a name="parallelism"></a> 16.2.1 Parallelism on a Connection
+#### <a name="parallelism"></a> 16.2.2 Parallelism on Each Connection
 
 Oracle Database can only execute operations one at a time on each connection.
 Examples of operations include `connection.execute()`,
@@ -10242,9 +10255,9 @@ blocking (for up to [`queueTimeout`](#propdbqueuetimeout) seconds) while
 waiting an available pooled connection.  It lets you see when the pool is too
 small.
 
-You may also experience *NJS-040* or *NJS-076* errors if your application is not
-correctly closing connections, or [UV_THREADPOOL_SIZE](#numberofthreads) is too
-small.
+You may also experience *NJS-040* or *NJS-076* errors if your application is
+not correctly closing connections, or if [UV_THREADPOOL_SIZE](#numberofthreads)
+is too small.
 
 #### <a name="connpoolmonitor"></a> 16.3.5 Connection Pool Monitoring
 
@@ -12245,7 +12258,7 @@ Connections can handle one database operation at a time.  Other
 database operations will block.  Structure your code to avoid starting
 parallel operations on a connection.  For example avoid using
 `async.parallel` or `Promise.all()` which call each of their items in parallel,
-see [Parallelism on a Connection](#parallelism).
+see [Parallelism on Each Connection](#parallelism).
 
 After all database calls on the connection complete, the application
 should use the [`connection.close()`](#connectionclose) call to
