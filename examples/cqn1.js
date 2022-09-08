@@ -149,11 +149,11 @@ async function runTest() {
 }
 
 process
-  .on('SIGTERM', function() {
+  .once('SIGTERM', function() {
     console.log("\nTerminating");
     process.exit(0);
   })
-  .on('SIGINT', function() {
+  .once('SIGINT', function() {
     console.log("\nTerminating");
     process.exit(0);
   });
