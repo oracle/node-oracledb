@@ -1,0 +1,9 @@
+/* Added code to display tables without horizontal scrollbars */
+.wy-table-responsive table td, .wy-table-responsive table th {
+    white-space: normal;
+}
+
+/* Added code to maintain consistency of font size for all styles in the list tables */
+.wy-table-responsive td p{
+    font-size: 11pt;
+}
