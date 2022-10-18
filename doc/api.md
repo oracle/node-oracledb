@@ -337,17 +337,18 @@ For installation information, see the [Node-oracledb Installation Instructions][
         - 8.1.9 [`poolAlias`](#proppoolpoolalias)
         - 8.1.10 [`poolIncrement`](#proppoolpoolincrement)
         - 8.1.11 [`poolMax`](#proppoolpoolmax)
-        - 8.1.12 [`poolMin`](#proppoolpoolmin)
-        - 8.1.13 [`poolPingInterval`](#proppoolpoolpinginterval)
-        - 8.1.14 [`poolTimeout`](#proppoolpooltimeout)
-        - 8.1.15 [`queueMax`](#proppoolqueuemax)
-        - 8.1.16 [`queueRequests`](#proppoolqueuerequests)
-        - 8.1.17 [`queueTimeout`](#proppoolqueueTimeout)
-        - 8.1.18 [`sessionCallback`](#proppoolsessioncallback)
-        - 8.1.19 [`sodaMetaDataCache`](#proppoolsodamdcache)
-        - 8.1.20 [`status`](#proppoolstatus)
-        - 8.1.21 [`stmtCacheSize`](#proppoolstmtcachesize)
-        - 8.1.22 [`user`](#proppooluser)
+        - 8.1.12 [`poolMaxPerShard`](#proppoolpoolmaxpershard)
+        - 8.1.13 [`poolMin`](#proppoolpoolmin)
+        - 8.1.14 [`poolPingInterval`](#proppoolpoolpinginterval)
+        - 8.1.15 [`poolTimeout`](#proppoolpooltimeout)
+        - 8.1.16 [`queueMax`](#proppoolqueuemax)
+        - 8.1.17 [`queueRequests`](#proppoolqueuerequests)
+        - 8.1.18 [`queueTimeout`](#proppoolqueueTimeout)
+        - 8.1.19 [`sessionCallback`](#proppoolsessioncallback)
+        - 8.1.20 [`sodaMetaDataCache`](#proppoolsodamdcache)
+        - 8.1.21 [`status`](#proppoolstatus)
+        - 8.1.22 [`stmtCacheSize`](#proppoolstmtcachesize)
+        - 8.1.23 [`user`](#proppooluser)
     - 8.2 [Pool Methods](#poolmethods)
         - 8.2.1 [`close()`](#poolclose), [`terminate()`](#poolclose)
         - 8.2.2 [`getConnection()`](#getconnectionpool)
@@ -6518,7 +6519,19 @@ pool.
 
 See [`oracledb.poolMax`](#propdbpoolmax).
 
-#### <a name="proppoolpoolmin"></a> 8.1.12 `pool.poolMin`
+#### <a name="proppoolpoolmaxpershard"></a> 8.1.12 `pool.poolMaxPerShard`
+
+```
+readonly Number poolMaxPerShard
+```
+
+The maximum number of connections in the pool that can be used for any given
+shard in a sharded database. This lets connections in the pool be balanced
+across the shards.
+
+See [`oracledb.poolMaxPerShard`](#propdbpoolmaxpershard).
+
+#### <a name="proppoolpoolmin"></a> 8.1.13 `pool.poolMin`
 
 ```
 readonly Number poolMin
@@ -6529,7 +6542,7 @@ when there is no activity to the target database.
 
 See [`oracledb.poolMin`](#propdbpoolmin).
 
-#### <a name="proppoolpoolpinginterval"></a> 8.1.13 `pool.poolPingInterval`
+#### <a name="proppoolpoolpinginterval"></a> 8.1.14 `pool.poolPingInterval`
 
 ```
 readonly Number poolPingInterval
@@ -6542,7 +6555,7 @@ returning that connection to the application.
 
 See [`oracledb.poolPingInterval`](#propdbpoolpinginterval).
 
-#### <a name="proppoolpooltimeout"></a> 8.1.14 `pool.poolTimeout`
+#### <a name="proppoolpooltimeout"></a> 8.1.15 `pool.poolTimeout`
 
 ```
 readonly Number poolTimeout
@@ -6554,7 +6567,7 @@ poolMin.
 
 See [`oracledb.poolTimeout`](#propdbpooltimeout).
 
-#### <a name="proppoolqueuemax"></a> 8.1.15 `pool.queueMax`
+#### <a name="proppoolqueuemax"></a> 8.1.16 `pool.queueMax`
 
 ```
 readonly Number queueMax
@@ -6567,12 +6580,12 @@ See [`oracledb.queueMax`](#propdbqueuemax).
 
 This property was added in node-oracledb 5.0.
 
-#### <a name="proppoolqueuerequests"></a> 8.1.16 `pool.queueRequests`
+#### <a name="proppoolqueuerequests"></a> 8.1.17 `pool.queueRequests`
 
 This property was removed in node-oracledb 3.0.  See [Connection Pool
 Queue](#connpoolqueue) for more information.
 
-#### <a name="proppoolqueueTimeout"></a> 8.1.17 `pool.queueTimeout`
+#### <a name="proppoolqueueTimeout"></a> 8.1.18 `pool.queueTimeout`
 
 ```
 readonly Number queueTimeout
@@ -6583,7 +6596,7 @@ the queue before the request is terminated.
 
 See [`oracledb.queueTimeout`](#propdbqueuetimeout).
 
-#### <a name="proppoolsessioncallback"></a> 8.1.18 `pool.sessionCallback`
+#### <a name="proppoolsessioncallback"></a> 8.1.19 `pool.sessionCallback`
 
 ```
 readonly Function sessionCallback
@@ -6595,7 +6608,7 @@ when the connection is brand new.
 
 See [Connection Tagging and Session State](#connpooltagging).
 
-#### <a name="proppoolsodamdcache"></a> 8.1.19 `pool.sodaMetaDataCache`
+#### <a name="proppoolsodamdcache"></a> 8.1.20 `pool.sodaMetaDataCache`
 
 ```
 readonly Boolean sodaMetaDataCache
@@ -6605,7 +6618,7 @@ Whether the pool has a metadata cache enabled for SODA collection access.
 
 See [Using the SODA Metadata Cache](#sodamdcache).
 
-#### <a name="proppoolstatus"></a> 8.1.20 `pool.status`
+#### <a name="proppoolstatus"></a> 8.1.21 `pool.status`
 
 ```
 readonly Number status
@@ -6618,7 +6631,7 @@ pool is open, being drained of in-use connections, or has been closed.
 
 See [Connection Pool Closing and Draining](#conpooldraining).
 
-#### <a name="proppoolstmtcachesize"></a> 8.1.21 `pool.stmtCacheSize`
+#### <a name="proppoolstmtcachesize"></a> 8.1.22 `pool.stmtCacheSize`
 
 ```
 readonly Number stmtCacheSize
@@ -6629,7 +6642,7 @@ The number of statements to be cached in the
 
 See [`oracledb.stmtCacheSize`](#propdbstmtcachesize).
 
-#### <a name="proppooluser"></a> 8.1.22 `pool.user`
+#### <a name="proppooluser"></a> 8.1.23 `pool.user`
 
 ```
 readonly String user
