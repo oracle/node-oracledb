@@ -8,6 +8,8 @@ GPATH
 GRTAGS
 GTAGS
 oracle_private/specs/*.pdf
+__pycache__/
+doc/build
 
 # macOS Ignores
 .DS_Store

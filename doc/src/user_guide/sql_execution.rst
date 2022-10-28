@@ -46,7 +46,7 @@ Fetching Rows with Direct Fetches
 By default, queries are handled as ‘direct fetches’, meaning all results
 are returned in the callback :ref:`result.rows <execrows>` property:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const result = await connection.execute(
      `SELECT department_id, department_name
@@ -136,7 +136,7 @@ for full examples.
 
 To fetch one row at a time use getRow() :
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `SELECT city, postal_code FROM locations`,
@@ -159,7 +159,7 @@ To fetch one row at a time use getRow() :
 
 To fetch multiple rows at a time, use ``getRows()``:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const numRows = 10;
 
@@ -191,7 +191,7 @@ To fetch multiple rows at a time, use ``getRows()``:
 
 From node-oracledb 5.5, you can iterate over ResultSets:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `SELECT city, postal_code FROM locations`,
@@ -252,7 +252,7 @@ Performance <rowfetching>`.
 
 An example of streaming query results is:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const stream = connection.queryStream(`SELECT employees_name FROM employees`);
 
@@ -298,7 +298,7 @@ JavaScript objects, depending on the values of
 The default format for each row is an array of column values. For
 example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `SELECT department_id, department_name
@@ -318,13 +318,13 @@ Using this format is recommended for efficiency.
 Alternatively, rows may be fetched as JavaScript objects. To do so,
 specify the ``outFormat`` option to be ``oracledb.OUT_FORMAT_OBJECT``:
 
-.. code:: javascript
+.. code-block:: javascript
 
   oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
 The value can also be set as an ``execute()`` option:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `SELECT department_id, department_name
@@ -363,7 +363,7 @@ that return nested cursors was added in node-oracledb 5.0.
 Each nested cursor in query results is returned as a sub-array of rows
 in :ref:`result.rows <execrows>`. For example with:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const sql = `SELECT department_name,
                CURSOR(SELECT salary, commission_pct
@@ -406,7 +406,7 @@ Output will be::
 If :attr:`oracledb.outFormat` is ``oracledb.OUT_FORMAT_OBJECT``, then each
 row in the sub-array is an object, for example with:
 
-.. code:: javascript
+.. code-block:: javascript
 
   result = await connection.execute(sql, [], {outFormat: oracledb.OUT_FORMAT_OBJECT});
 
@@ -453,7 +453,7 @@ fetch each nested cursor’s data.
 
 For example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   async function traverseResults(resultSet) {
     const fetchedRows = [];
@@ -504,7 +504,7 @@ Query Column Metadata
 The column names of a query are returned in the ``execute()`` callback’s
 :ref:`result.metaData <execmetadata>` attribute:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `SELECT department_id, department_name
@@ -538,7 +538,7 @@ More metadata is included when the :attr:`oracledb.extendedMetaData` or
 ``connection.execute()`` option :ref:`extendedMetaData
 <propexecextendedmetadata>` is *true*. For example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `SELECT department_id, department_name
@@ -618,7 +618,7 @@ When numbers are fetched from the database, conversion to JavaScript’s
 less precise binary number format can result in “unexpected”
 representations. For example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(`SELECT 38.73 FROM dual`);
   console.log(result.rows[0]); // gives 38.730000000000004
@@ -626,7 +626,7 @@ representations. For example:
 Similar issues can occur with binary floating-point arithmetic purely in
 Node.js, for example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   console.log(0.2 + 0.7); // gives 0.8999999999999999
 
@@ -664,7 +664,7 @@ example the ``TZ`` environment variable or the Windows time zone region.
 
 You can find the current session time zone with:
 
-.. code:: sql
+.. code-block:: sql
 
   SELECT sessiontimezone FROM DUAL;
 
@@ -680,7 +680,7 @@ before starting Node.js, for example:
 If this variable is set in the application, it must be set before the
 first connection is established:
 
-.. code:: javascript
+.. code-block:: javascript
 
   process.env.ORA_SDTZ = 'UTC';
 
@@ -690,7 +690,7 @@ first connection is established:
 The session time zone can also be changed at runtime for each connection
 by executing:
 
-.. code:: javascript
+.. code-block:: javascript
 
   await connection.execute(`ALTER SESSION SET TIME_ZONE='UTC'`);
 
@@ -702,7 +702,7 @@ To set the time zone without requiring the overhead of a
 :ref:`round-trip <roundtrips>` to execute the ``ALTER`` statement, you
 could use a PL/SQL trigger:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE OR REPLACE TRIGGER my_logon_trigger
     AFTER LOGON
@@ -714,7 +714,7 @@ could use a PL/SQL trigger:
 A query that returns the node-oracledb client-side date and timestamp
 is:
 
-.. code:: sql
+.. code-block:: sql
 
   oracledb.fetchAsString = [oracledb.DATE];
   result = await connection.execute(`SELECT current_date, current_timestamp FROM DUAL`);
@@ -740,7 +740,7 @@ method can be used for CLOBs up to 1 GB in length.
 For example, to force all dates and numbers used by queries in an
 application to be fetched as strings:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const oracledb = require('oracledb');
   oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
@@ -754,7 +754,7 @@ columns to strings without affecting other columns or other queries. Any
 global ``fetchAsString`` setting can be overridden to allow specific
 columns to have data returned in native format:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const oracledb = require('oracledb');
 
@@ -809,7 +809,7 @@ to explicitly use ``NLS_NUMERIC_CHARACTERS`` to override your NLS
 settings and force the decimal separator to be a period. This can be
 done for each connection by executing the statement:
 
-.. code:: javascript
+.. code-block:: javascript
 
   await connection.execute(`ALTER SESSION SET NLS_NUMERIC_CHARACTERS = '.,'`);
 
@@ -914,7 +914,7 @@ Techniques include:
    CFA006CA-6FF1-4972-821E-6996142A51C6>`__ in the Oracle documentation.
    A node-oracledb example is:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     const myoffset = 0;       // do not skip any rows (start at row 1)
     const mymaxnumrows = 20;  // get 20 rows
@@ -958,7 +958,7 @@ Techniques include:
    ways to limit the number of rows returned. The old, canonical paging
    query is:
 
-   .. code:: sql
+   .. code-block:: sql
 
     SELECT *
     FROM (SELECT a.*, ROWNUM AS rnum
@@ -970,7 +970,7 @@ Techniques include:
    the row number of the last row to return. Using the same bind values
    definitions as previously, an example is:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     const sql = `SELECT *
                  FROM (SELECT a.*, ROWNUM AS rnum
@@ -983,7 +983,7 @@ Techniques include:
 -  An alternative, preferred query syntax for Oracle Database 11g uses
    the analytic ``ROW_NUMBER()`` function. For example:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     const sql = `SELECT last_name
                  FROM (SELECT last_name,
@@ -1017,7 +1017,7 @@ when ROWID or UROWID are not preferred.
 
 In SQL*Plus execute:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE TABLE mytable
     (myid NUMBER(11) GENERATED BY DEFAULT ON NULL AS IDENTITY (START WITH 1),
@@ -1031,7 +1031,7 @@ Refer to the `CREATE TABLE identity column documentation
 If you already have a sequence ``myseq`` you can use values from it to
 auto-increment a column value like this:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE TABLE mytable
     (myid NUMBER DEFAULT myseq.NEXTVAL,
@@ -1058,7 +1058,7 @@ insert is made to a table.
 
 In SQL*Plus run:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE SEQUENCE myseq;
   CREATE TABLE mytable (myid NUMBER PRIMARY KEY, mydata VARCHAR2(20));
@@ -1071,7 +1071,7 @@ In SQL*Plus run:
 Prior to Oracle Database 11g replace the trigger assignment with a
 SELECT like:
 
-.. code:: sql
+.. code-block:: sql
 
   SELECT myseq.NEXTVAL INTO :new.myid FROM dual;
 
@@ -1081,7 +1081,7 @@ Getting the Last Insert ID
 To get the automatically inserted identifier in node-oracledb, use a
 :ref:`DML RETURNING <dmlreturn>` clause:
 
-.. code:: javascript
+.. code-block:: javascript
 
   . . .
   const result = await connection.execute(

@@ -44,7 +44,7 @@ The properties of a DbObject object are listed below.
 
     For example:
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         attributes: {
           STREET_NUMBER: { type: 2, typeName: 'NUMBER' },

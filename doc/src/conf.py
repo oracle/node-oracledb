@@ -46,15 +46,7 @@ author = 'Oracle'
 #
 # The short X.Y version.
 version = '5.5'
-# global_vars = {}
-# local_vars = {}
-# version_file_name = os.path.join("..", "..", "src", "oracledb", "version.py")
-# with open(version_file_name) as f:
-#    exec(f.read(), global_vars, local_vars)
-# version = ".".join(local_vars["__version__"].split(".")[:2])
-# The full version, including alpha/beta/rc tags.
 release = '5.5.0'
-# release = local_vars["__version__"]
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:

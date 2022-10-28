@@ -125,7 +125,7 @@ Here are some suggestions for the starting point to begin your tuning:
    ``fetchArraySize``. Then set ``prefetchRows`` to the same value. For
    example:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     const sql = `SELECT *
                  FROM very_big_table`;
@@ -157,7 +157,7 @@ Here are some suggestions for the starting point to begin your tuning:
    page <pagingdata>` of data, then set ``prefetchRows`` to 21 and
    ``fetchArraySize`` to 20:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     const myoffset = 0;       // do not skip any rows (start at row 1)
     const mymaxnumrows = 20;  // get 20 rows
@@ -180,7 +180,7 @@ Here are some suggestions for the starting point to begin your tuning:
    prefetch value of 2 allows minimal round-trips for single-row
    queries:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     const sql = `SELECT last_name
                  FROM employees
@@ -259,7 +259,7 @@ Sometimes you may wish to find the number of round-trips used for a
 specific application. Snapshots of the ``V$SESSTAT`` view taken before
 and after doing some work can be used for this:
 
-.. code:: sql
+.. code-block:: sql
 
   SELECT ss.value, sn.display_name
   FROM v$sesstat ss, v$statname sn
@@ -272,7 +272,7 @@ Example of finding the number of round-trips
 
 First, find the session id of the current connection:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const r = await connection.execute(`SELECT sys_context('userenv','sid') FROM dual`);
   const sid = r.rows[0][0];  // session id
@@ -282,7 +282,7 @@ round-trips. A second connection is used to avoid affecting the count.
 If your user does not have access to the V$ views, then use a SYSTEM
 connection:
 
-.. code:: javascript
+.. code-block:: javascript
 
   async function getRT(sid) {
     let systemconnection;
@@ -314,7 +314,7 @@ connection:
 The main part of the application performs the “work” and calls
 ``getRT()`` to calculate the number of round-trips the work takes:
 
-.. code:: javascript
+.. code-block:: javascript
 
   let before, after;
 
@@ -395,7 +395,7 @@ Setting the Statement Cache
 
 The statement cache size can be set globally with :attr:`oracledb.stmtCacheSize`:
 
-.. code:: javascript
+.. code-block:: javascript
 
   oracledb.stmtCacheSize = 40;
 
@@ -403,7 +403,7 @@ The value can be overridden in an ``oracledb.getConnection()`` call, or
 when creating a pool with :meth:`oracledb.createPool()`.
 For example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   await oracledb.createPool({
     user              : "hr",
@@ -436,7 +436,7 @@ Configuration <oraaccess>` ``oraaccess.xml`` file.
 
 For manual tuning use views like ``V$SYSSTAT``:
 
-.. code:: sql
+.. code-block:: sql
 
   SELECT value FROM V$SYSSTAT WHERE name = 'parse count (total)'
 
@@ -461,7 +461,7 @@ to *false*. This will prevent a rarely executed statement from flushing
 a potential more frequently executed one from a full cache. For example,
 if a statement will only ever be executed once:
 
-.. code:: javascript
+.. code-block:: javascript
 
   result = await connection.execute(
     `SELECT v FROM t WHERE k = 123`,
@@ -472,7 +472,7 @@ if a statement will only ever be executed once:
 Statement caching can be disabled completely by setting the cache size
 to 0:
 
-.. code:: javascript
+.. code-block:: javascript
 
   oracledb.stmtCacheSize = 0;
 
@@ -524,7 +524,7 @@ parameters <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
 GUID-A9D4A5F5-B939-48FF-80AE-0228E7314C7D>`__ ``CLIENT_RESULT_CACHE_SIZE``
 and ``CLIENT_RESULT_CACHE_LAG``, for example:
 
-.. code:: sql
+.. code-block:: sql
 
   SQL> ALTER SYSTEM SET CLIENT_RESULT_CACHE_LAG = 3000 SCOPE=SPFILE;
   SQL> ALTER SYSTEM SET CLIENT_RESULT_CACHE_SIZE = 64K SCOPE=SPFILE;
@@ -554,14 +554,14 @@ Using CRC
 Tables can be created, or altered, so queries use CRC. This allows
 applications to use CRC without needing modification. For example:
 
-.. code:: sql
+.. code-block:: sql
 
   SQL> CREATE TABLE cities (id NUMBER, name VARCHAR2(40)) RESULT_CACHE (MODE FORCE);
   SQL> ALTER TABLE locations RESULT_CACHE (MODE FORCE);
 
 Alternatively, hints can be used in SQL statements. For example:
 
-.. code:: sql
+.. code-block:: sql
 
   SELECT /*+ result_cache */ postal_code FROM locations
 
@@ -573,7 +573,7 @@ your query in ``V$SQLAREA``. When CRC is enabled in the database, the
 number of statement executions is reduced because the statement is not
 sent to the database unnecessarily.
 
-.. code:: javascript
+.. code-block:: javascript
 
   // Run some load
   const q = `SELECT postal_code FROM locations`;

@@ -36,7 +36,7 @@ In Node.js, a call to :meth:`connection.getDbObjectClass()` returns a
 :ref:`DbObject prototype object <dbobjectclass>` representing the
 database type:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const GeomType = await connection.getDbObjectClass("MDSYS.SDO_GEOMETRY");
   console.log(GeomType.prototype);
@@ -71,7 +71,7 @@ Now the object prototype has been found, an object can be created by
 passing a JavaScript object to the constructor. The case of the
 attributes is important:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const geom = new GeomType(
     {
@@ -89,7 +89,7 @@ set that are not present in the database object will be ignored.
 An alternative to instantiating the whole object at once is to set
 individual attributes:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const geom = new GeomType();
   geom.S_GTYPE = 2003;
@@ -98,13 +98,13 @@ individual attributes:
 Once created, the DbObject in ``geom`` can then be bound for insertion.
 For example, if TESTGEOMETRY was created as:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE TABLE testgeometry (id NUMBER, geometry MDSYS.SDO_GEOMETRY)
 
 Then the INSERT statement would be:
 
-.. code:: javascript
+.. code-block:: javascript
 
   await connection.execute(
     `INSERT INTO testgeometry (id, geometry) VALUES (:id, :g)`,
@@ -117,7 +117,7 @@ Insertion can be simplified by setting the bind parameter ``type`` to
 the name of the Oracle Database object and passing a JavaScript object
 as the bind value:
 
-.. code:: javascript
+.. code-block:: javascript
 
   await connection.execute(
     `INSERT INTO testgeometry (id, geometry) VALUES (:id, :g)`,
@@ -183,7 +183,7 @@ involved.
 Accessing a DbObject is the same whichever value of ``dbObjectAsPojo``
 you use. For example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   result = await connection.execute(`SELECT geometry FROM testgeometry WHERE id = 1`);
   o = result.rows[0][0];
@@ -199,7 +199,7 @@ This gives::
 
 The SDO_ELEM_INFO attribute is itself a DbObject. The following code
 
-.. code:: javascript
+.. code-block:: javascript
 
   console.log(o.SDO_ELEM_INFO);
 
@@ -213,7 +213,7 @@ If a DbObject is for an Oracle Database collection, the
 :attr:`dbObject.isCollection` attribute
 will be true.
 
-.. code:: javascript
+.. code-block:: javascript
 
   console.log(o.isCollection);                // false
   console.log(o.SDO_ELEM_INFO.isCollection);  // true
@@ -221,7 +221,7 @@ will be true.
 For DbObjects representing Oracle collections, methods such as
 :meth:`dbObject.getKeys()` and :meth:`dbObject.getValues()` can be used:
 
-.. code:: javascript
+.. code-block:: javascript
 
   console.log(o.SDO_ELEM_INFO.getKeys());    // [ 0, 1, 2 ]
   console.log(o.SDO_ELEM_INFO.getValues());  // [ 1, 1003, 3 ]
@@ -264,7 +264,7 @@ nested tables and VARRAYs results in indexes starting from 1).
 
 Given this table and PL/SQL package:
 
-.. code:: sql
+.. code-block:: sql
 
   DROP TABLE mytab;
 
@@ -296,7 +296,7 @@ Given this table and PL/SQL package:
 To bind an array in node-oracledb using “bind by name” syntax for
 insertion into ``mytab`` use:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `BEGIN mypkg.myinproc(:id, :vals); END;`,
@@ -310,7 +310,7 @@ insertion into ``mytab`` use:
 
 Alternatively, “bind by position” syntax can be used:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
    `BEGIN mypkg.myinproc(:id, :vals); END;`,
@@ -376,7 +376,7 @@ allocation, do not let the size be larger than needed.
 The next example fetches an array of values from a table. First, insert
 these values:
 
-.. code:: sql
+.. code-block:: sql
 
   INSERT INTO mytab (id, numcol) VALUES (99, 10);
   INSERT INTO mytab (id, numcol) VALUES (99, 25);
@@ -386,7 +386,7 @@ these values:
 With these values, the following node-oracledb code will print
 ``[ 10, 25, 50 ]``.
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `BEGIN mypkg.myoutproc(:id, :vals); END;`,
@@ -420,7 +420,7 @@ PL/SQL Collection VARRAY Types
 
 Given a table with a VARRAY column:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE TYPE playertype AS OBJECT (
       shirtnumber  NUMBER,
@@ -434,7 +434,7 @@ Given a table with a VARRAY column:
 
 You can insert values using:
 
-.. code:: javascript
+.. code-block:: javascript
 
   await connection.execute(
     `INSERT INTO sports (sportname, team) VALUES (:sn, :t)`,
@@ -472,7 +472,7 @@ You can insert values using:
 
 Querying the table could be done like:
 
-.. code:: javascript
+.. code-block:: javascript
 
   result = await connection.execute(
     `SELECT sportname, team FROM sports`,
@@ -504,7 +504,7 @@ PL/SQL Collection Nested Tables
 
 Given a nested table ``staffList``:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE TABLE bonuses (id NUMBER, name VARCHAR2(20));
 
@@ -525,7 +525,7 @@ Given a nested table ``staffList``:
 
 you can call ``awardBonuses()`` like:
 
-.. code:: javascript
+.. code-block:: javascript
 
   plsql = `CALL personnel.awardBonuses(:gsbv)`;
 
@@ -555,7 +555,7 @@ PL/SQL RECORD Types
 PL/SQL RECORDS can be bound for insertion and retrieval. This example
 uses the PL/SQL package:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE OR REPLACE PACKAGE seachange AS
     TYPE shiptype IS RECORD (shipname VARCHAR2(40), weight NUMBER);
@@ -581,7 +581,7 @@ ship. This is bound for input when calling the BIGGERSHIP procedure. To
 retrieve a SHIPTYPE record back from the the PL/SQL, the prototype
 object class is passed for the output bind ``type``:
 
-.. code:: javascript
+.. code-block:: javascript
 
   ShipTypeClass = await connection.getDbObjectClass("SEACHANGE.SHIPTYPE");
 

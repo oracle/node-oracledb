@@ -49,45 +49,23 @@ AqQueue Properties
         * - Attribute Name
           - Description
         * - ``condition``
-          - A string that defines the condition that must be satisfied in order
-            for a message to be dequeued.
+          - A String that defines the condition that must be satisfied in order for a message to be dequeued.
         * - ``consumerName``
-          - A string that defines the name of the consumer that is dequeuing
-            messages.
+          - A String that defines the name of the consumer that is dequeuing messages.
         * - ``correlation``
-          - A string that defines the correlation to use when dequeuing.
+          - A String that defines the correlation to use when dequeuing.
         * - ``mode``
-          - An integer value that defines the mode to use for dequeuing
-            messages. It can be one of the following constants:
-            :ref:`oracledb.AQ_DEQ_MODE_BROWSE <oracledbconstantsaq>`,
-            :ref:`oracledb.AQ_DEQ_MODE_LOCKED <oracledbconstantsaq>`,
-            :ref:`oracledb.AQ_DEQ_MODE_REMOVE <oracledbconstantsaq>`,
-            :ref:`oracledb.AQ_DEQ_MODE_REMOVE_NO_DATA <oracledbconstantsaq>`.
+          - An integer value that defines the mode to use for dequeuing messages. It can be one of the following constants: :ref:`oracledb.AQ_DEQ_MODE_BROWSE <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_MODE_LOCKED <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_MODE_REMOVE <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_MODE_REMOVE_NO_DATA <oracledbconstantsaq>`.
         * - ``msgId``
-          - A buffer containing a unique identifier specifying the message to
-            be dequeued.
+          - A Buffer containing a unique identifier specifying the message to be dequeued.
         * - ``navigation``
-          - An integer value that defines the position in the queue of the
-            message that is to be dequeued. It can be one of the following
-            constants:
-            :ref:`oracledb.AQ_DEQ_NAV_FIRST_MSG <oracledbconstantsaq>`,
-            :ref:`oracledb.AQ_DEQ_NAV_NEXT_TRANSACTION <oracledbconstantsaq>`,
-            :ref:`oracledb.AQ_DEQ_NAV_NEXT_MSG <oracledbconstantsaq>`.
+          - An integer value that defines the position in the queue of the message that is to be dequeued. It can be one of the following constants: :ref:`oracledb.AQ_DEQ_NAV_FIRST_MSG <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_NAV_NEXT_TRANSACTION <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_NAV_NEXT_MSG <oracledbconstantsaq>`.
         * - ``transformation``
-          - A string that defines the transformation that will take place on
-            messages when they are dequeued.
+          - A String that defines the transformation that will take place on messages when they are dequeued.
         * - ``visibility``
-          - An integer value that defines whether the dequeue occurs in the
-            current transaction or as a separate transaction. It can be one
-            of the following constants:
-            :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>`,
-            :ref:`oracledb.AQ_VISIBILITY_ON_COMMIT <oracledbconstantsaq>`.
+          - An integer value that defines whether the dequeue occurs in the current transaction or as a separate transaction. It can be one of the following constants: :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>`, :ref:`oracledb.AQ_VISIBILITY_ON_COMMIT <oracledbconstantsaq>`.
         * - ``wait``
-          - An integer defining the number of seconds to wait for a message
-            matching the search criteria to become available. It can
-            alternatively be one of the following constants:
-            :ref:`oracledb.AQ_DEQ_NO_WAIT <oracledbconstantsaq>`,
-            :ref:`oracledb.AQ_DEQ_WAIT_FOREVER <oracledbconstantsaq>`.
+          - An integer defining the number of seconds to wait for a message matching the search criteria to become available. It can alternatively be one of the following constants: :ref:`oracledb.AQ_DEQ_NO_WAIT <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_WAIT_FOREVER <oracledbconstantsaq>`.
 
     See `Oracle Advanced Queuing Documentation <https://www.oracle.com/pls
     /topic/lookup?ctx=dblatest&id=ADQUE>`__ for more information about
@@ -122,23 +100,13 @@ AqQueue Properties
           - Description
         * - ``deliveryMode``
           - Integer
-          - Defines the delivery mode when enqueuing messages. It
-            can be one of the following constants:
-            :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT <oracledbconstantsaq>`,
-            :ref:`oracledb.AQ_MSG_DELIV_MODE_BUFFERED <oracledbconstantsaq>`,
-            :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED
-            <oracledbconstantsaq>`.
+          - Defines the delivery mode when enqueuing messages. It can be one of the following constants: :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_DELIV_MODE_BUFFERED <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED <oracledbconstantsaq>`.
         * - ``transformation``
           - String
-          - Defines the transformation that will take place when messages are
-            enqueued.
+          - Defines the transformation that will take place when messages are enqueued.
         * - ``visibility``
           - Integer
-          - Defines whether the enqueue occurs in the current transaction or
-            as a separate transaction. It can be one of the following
-            constants:
-            :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>`,
-            :ref:`oracledb.AQ_VISIBILITY_ON_COMMIT <oracledbconstantsaq>`.
+          - Defines whether the enqueue occurs in the current transaction or as a separate transaction. It can be one of the following constants: :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>`, :ref:`oracledb.AQ_VISIBILITY_ON_COMMIT <oracledbconstantsaq>`.
 
     See `Oracle Advanced Queuing Documentation <https://www.oracle.com/pls/
     topic/lookup?ctx=dblatest&id=ADQUE>`__ for more information about
@@ -196,13 +164,11 @@ AqQueue Methods
           - Description
         * - ``maxMessages``
           - Number
-          - Dequeue at most this many messages. Depending on the dequeue
-            options, the number of messages returned will be between zero and
-            ``maxMessages``.
+          - Dequeue at most this many messages. Depending on the dequeue options, the number of messages returned will be between zero and ``maxMessages``.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         deqMany(Number maxMessages, function(Error error, Array messages));
 
@@ -224,8 +190,7 @@ AqQueue Methods
         * - Array ``messages``
           - An array of :ref:`AqMessage objects <aqmessageclass>`.
         * - Error ``error``
-          - If ``deqMany()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the :ref:`error message <errorobj>`.
+          - If ``deqMany()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
 .. method:: aqQueue.deqOne()
 
@@ -237,9 +202,9 @@ AqQueue Methods
     Depending on the dequeue options, the message may also be returned as
     undefined if no message is available.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         deqOne(function(Error error, AqMessage message));
 
@@ -257,11 +222,9 @@ AqQueue Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``deqOne()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the :ref:`error message <errorobj>`.
+          - If ``deqOne()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - AqMessage ``message``
-          - The message that is dequeued. See :ref:`AqMessage Class
-            <aqmessageclass>`.
+          - The message that is dequeued. See :ref:`AqMessage Class <aqmessageclass>`.
 
     Dequeued messages are returned as AqMessage objects. Note AqMessage
     objects are not used for enqueuing.
@@ -279,39 +242,27 @@ AqQueue Methods
         * - Attribute Name
           - Description
         * - ``correlation``
-          - A string containing the correlation that was used during enqueue.
+          - A String containing the correlation that was used during enqueue.
         * - ``delay``
-          - An integer containing the number of seconds the message was delayed
-            before it could be dequeued.
+          - An integer containing the number of seconds the message was delayed before it could be dequeued.
         * - ``deliveryMode``
           - An integer containing the delivery mode the messages was enqueued with.
         * - ``exceptionQueue``
-          - A string containing the name of the exception queue defined when the
-            message was enqueued.
+          - A String containing the name of the exception queue defined when the message was enqueued.
         * - ``expiration``
-          - The number of seconds until expiration defined when the message was
-            enqueued.
+          - The number of seconds until expiration defined when the message was enqueued.
         * - ``msgId``
-          - A buffer containing the unique identifier of the message.
+          - A Buffer containing the unique identifier of the message.
         * - ``numAttempts``
-          - An integer containing the number of attempts that were made to dequeue
-            the message.
+          - An integer containing the number of attempts that were made to dequeue the message.
         * - ``originalMsgId``
-          - A buffer containing the unique identifier of the message in the last
-            queue that generated it.
+          - A Buffer containing the unique identifier of the message in the last queue that generated it.
         * - ``payload``
-          - A buffer or DbObject containing the payload of the message, depending
-            on the value of ``queue.payloadType``. Note that enqueued Strings are
-            returned as UTF-8 encoded Buffers.
+          - A Buffer or DbObject containing the payload of the message, depending on the value of ``queue.payloadType``. Note that enqueued Strings are returned as UTF-8 encoded Buffers.
         * - ``priority``
           - An integer containing the priority of the message when it was enqueued.
         * - ``state``
-          - An integer representing the state of the message. It is one of the
-            following constants:
-            :ref:`oracledb.AQ_MSG_STATE_READY <oracledbconstantsaq>`,
-            :ref:`oracledb.AQ_MSG_STATE_WAITING <oracledbconstantsaq>`,
-            :ref:`oracledb.AQ_MSG_STATE_PROCESSED <oracledbconstantsaq>`,
-            :ref:`oracledb.AQ_MSG_STATE_EXPIRED <oracledbconstantsaq>`.
+          - An integer representing the state of the message. It is one of the following constants: :ref:`oracledb.AQ_MSG_STATE_READY <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_STATE_WAITING <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_STATE_PROCESSED <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_STATE_EXPIRED <oracledbconstantsaq>`.
 
     See `Oracle Advanced Queuing
     Documentation <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=ADQUE>`__
@@ -333,9 +284,9 @@ AqQueue Methods
       connections <connectionhandling>`, or make multiple calls to
       ``enqOne()``. The ``deqMany()`` method is not affected.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         enqMany(Array messages, function(Error error));
 
@@ -357,9 +308,7 @@ AqQueue Methods
           - Description
         * - ``messages``
           - Array
-          - Each element of the array must be a String, a Buffer, a
-            :ref:`DbObject <dbobjectclass>`, or a JavaScript Object as used by
-            :meth:`enqOne() <aqQueue.enqOne()>`.
+          - Each element of the array must be a String, a Buffer, a :ref:`DbObject <dbobjectclass>`, or a JavaScript Object as used by :meth:`enqOne() <aqQueue.enqOne()>`.
 
     The parameters of the callback function ``function(Error error)`` are:
 
@@ -374,8 +323,7 @@ AqQueue Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``enqMany()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the :ref:`error message <errorobj>`.
+          - If ``enqMany()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
 .. method:: aqQueue.enqOne()
 
@@ -389,9 +337,9 @@ AqQueue Methods
     containing the actual message and some attributes controlling the
     behavior of the queued message.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         enqOne(String message, function(Error error));
         enqOne(Buffer message, function(Error error));
@@ -416,14 +364,10 @@ AqQueue Methods
           - Description
         * - ``message``
           - String, Buffer, DbObject, or Object
-          -  - String: If the message is a String, it will be converted to a buffer using
-               the UTF-8 encoding.
+          -  - String: If the message is a String, it will be converted to a buffer using the UTF-8 encoding.
              - Buffer: If the message is a Buffer, it will be transferred as it is.
              - DbObject: An object of the :ref:`DbObject Class <dbobjectclass>`.
-             - Object message: A JavaScript object can be used to alter the message
-               properties. It must contain a ``payload`` property with the actual
-               message content. It may contain other attributes as noted in the
-               :ref:`objmsgattr` table.
+             - Object message: A JavaScript object can be used to alter the message properties. It must contain a ``payload`` property with the actual message content. It may contain other attributes as noted in the :ref:`objmsgattr` table.
 
     .. _objmsgattr:
 
@@ -444,16 +388,13 @@ AqQueue Methods
           - The correlation of the message to be enqueued.
         * - ``delay``
           - Number
-          - The number of seconds to delay the message before it can be
-            dequeued.
+          - The number of seconds to delay the message before it can be dequeued.
         * - ``exceptionQueue``
           - String
-          - The name of an exception queue in which to place the message if
-            an exception takes place.
+          - The name of an exception queue in which to place the message if an exception takes place.
         * - ``expiration``
           - Number
-          - The number of seconds the message is available to be dequeued
-            before it expires.
+          - The number of seconds the message is available to be dequeued before it expires.
         * - ``payload``
           - String, Buffer, :ref:`DbObject <dbobjectclass>`
           - The actual message to be queued. This property must be specified.
@@ -483,5 +424,4 @@ AqQueue Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``enqOne()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the :ref:`error message <errorobj>`.
+          - If ``enqOne()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.

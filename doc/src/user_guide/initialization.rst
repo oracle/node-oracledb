@@ -161,7 +161,7 @@ Applications can call the synchronous function
 Oracle Instant Client libraries. The libraries are loaded when
 ``initOracleClient()`` is called. For example:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const oracledb = require('oracledb');
 
@@ -239,27 +239,16 @@ files are:
     :header-rows: 1
     :class: wy-table-responsive
     :align: center
+    :widths: 10 40
     :summary: The first column displays the name of the file. The second column
        displays the description of the file.
 
     * - Name
       - Description
     * - ``tnsnames.ora``
-      - Contains net service names and Oracle Net options for databases that
-        can be connected to, see :ref:`Net Service Names for Connection Strings
-        <tnsnames>`. This file is only needed for advanced configuration. Not
-        needed if connection strings use the :ref:`Easy Connect syntax
-        <easyconnect>`. The `Oracle Net documentation on tnsnames.ora
-        <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7F967CE5
-        -5498-427C-9390-4A5C6767ADAA>`__ has more information.
+      - Contains net service names and Oracle Net options for databases that can be connected to, see :ref:`Net Service Names for Connection Strings <tnsnames>`. This file is only needed for advanced configuration. Not needed if connection strings use the :ref:`Easy Connect syntax <easyconnect>`. The `Oracle Net documentation on tnsnames.ora <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7F967CE5-5498-427C-9390-4A5C6767ADAA>`__ has more information.
     * - ``sqlnet.ora``
-      - A configuration file controlling the network transport behavior. For
-        example it can set call timeouts for :ref:`high availability
-        <connectionha>`, or be used to :ref:`encrypt network traffic
-        <securenetwork>`, or be used to configure logging and tracing.
-        The `Oracle Net documentation on sqlnet.ora <https://www.oracle.com/
-        pls/topic/lookup?ctx=dblatest&id=GUID-19423B71-3F6C-430F-84CC-18145CC2A
-        818>`__ has more information.
+      - A configuration file controlling the network transport behavior. For example it can set call timeouts for :ref:`high availability <connectionha>`, or be used to :ref:`encrypt network traffic <securenetwork>`, or be used to configure logging and tracing. The `Oracle Net documentation on sqlnet.ora <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-19423B71-3F6C-430F-84CC-18145CC2A818>`__ has more information.
 
 The files should be in a directory accessible to Node.js, not on the
 database server host.
@@ -270,7 +259,7 @@ To make node-oracledb use the files you can set
 if the file ``/etc/my-oracle-config/tnsnames.ora`` should be used, then
 your code could be:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const oracledb = require('oracledb');
    oracledb.initOracleClient({configDir: '/etc/my-oracle-config'});
@@ -377,51 +366,31 @@ before Node.js starts.
 .. list-table-with-summary:: Common Oracle Environment Variables
     :header-rows: 1
     :class: wy-table-responsive
+    :align: center
+    :widths: 20 30
     :summary: The first column displays the common Oracle Environment Variable. The second column, Purpose, describes what the environment variable is used for.
 
     * - Oracle Environment Variables
       - Purpose
     * - ``LD_LIBRARY_PATH``
-      - Used on Linux and some UNIX platforms. Set this to the directory
-        containing the Oracle Client libraries, for example
-        ``/opt/oracle/instantclient_19_6`` or ``$ORACLE_HOME/lib``. The
-        variable needs to be set in the environment before Node.js is invoked.
-        The variable is not needed if the libraries are located by an
-        alternative method, such as from running ``ldconfig``. On some UNIX
-        platforms an OS specific equivalent, such as ``LIBPATH`` or
-        ``SHLIB_PATH`` is used instead of ``LD_LIBRARY_PATH``.
+      - Used on Linux and some UNIX platforms. Set this to the directory containing the Oracle Client libraries, for example ``/opt/oracle/instantclient_19_6`` or ``$ORACLE_HOME/lib``. The variable needs to be set in the environment before Node.js is invoked. The variable is not needed if the libraries are located by an alternative method, such as from running ``ldconfig``. On some UNIX platforms an OS specific equivalent, such as ``LIBPATH`` or ``SHLIB_PATH`` is used instead of ``LD_LIBRARY_PATH``.
     * - ``PATH``
-      - The library search path for Windows should include the location where
-        ``OCI.DLL`` is found. Not needed if you pass
-        :ref:`libDir <odbinitoracleclientattrsopts>` when calling
-        :meth:`oracledb.initOracleClient()`.
+      - The library search path for Windows should include the location where ``OCI.DLL`` is found. Not needed if you pass :ref:`libDir <odbinitoracleclientattrsopts>` when calling :meth:`oracledb.initOracleClient()`.
     * - ``TNS_ADMIN``
-      - The location of the optional :ref:`Oracle Net configuration files
-        <tnsadmin>` and :ref:`Oracle Client configuration files <oraaccess>`,
-        including ``tnsnames.ora``, ``sqlnet.ora``, and ``oraaccess.xml``, if
-        they are not in a default location. The :ref:`configDir
-        <odbinitoracleclientattrsopts>` value in a call to
-        :meth:`oracledb.initOracleClient()` overrides ``TNS_ADMIN``.
+      - The location of the optional :ref:`Oracle Net configuration files <tnsadmin>` and :ref:`Oracle Client configuration files <oraaccess>`, including ``tnsnames.ora``, ``sqlnet.ora``, and ``oraaccess.xml``, if they are not in a default location. The :ref:`configDir <odbinitoracleclientattrsopts>` value in a call to :meth:`oracledb.initOracleClient()` overrides ``TNS_ADMIN``.
     * - ``ORA_SDTZ``
-      - The default session time zone, see :ref:`Fetching Dates and Timestamps
-        <datehandling>`.
+      - The default session time zone, see :ref:`Fetching Dates and Timestamps <datehandling>`.
     * - ``ORA_TZFILE``
       - The name of the Oracle time zone file to use. See the notes below.
     * - ``ORACLE_HOME``
-      - The directory containing the Oracle Database software. This directory
-        must be accessible by the Node.js process. This variable should *not*
-        be set if node-oracledb uses Oracle Instant Client.
+      - The directory containing the Oracle Database software. This directory must be accessible by the Node.js process. This variable should *not* be set if node-oracledb uses Oracle Instant Client.
     * - ``NLS_LANG``
-      - Determines the ‘national language support’ globalization options for
-        node-oracledb. If not set, a default value will be chosen by Oracle.
-        Note that node-oracledb will always uses the AL32UTF8 character set.
-        See :ref:`Globalization and National Language Support (NLS) <nls>`.
+      - Determines the ‘national language support’ globalization options for node-oracledb. If not set, a default value will be chosen by Oracle.
+        Note that node-oracledb will always uses the AL32UTF8 character set. See :ref:`Globalization and National Language Support (NLS) <nls>`.
     * - ``NLS_DATE_FORMAT``, ``NLS_TIMESTAMP_FORMAT``
-      - See :ref:`Fetching Numbers and Dates as String <fetchasstringhandling>`.
-        The variables are ignored if ``NLS_LANG`` is not set.
+      - See :ref:`Fetching Numbers and Dates as String <fetchasstringhandling>`. The variables are ignored if ``NLS_LANG`` is not set.
     * - ``NLS_NUMERIC_CHARACTERS``
-      - See :ref:`Fetching Numbers and Dates as String <fetchasstringhandling>`.
-        The variables are ignored if ``NLS_LANG`` is not set.
+      - See :ref:`Fetching Numbers and Dates as String <fetchasstringhandling>`. The variables are ignored if ``NLS_LANG`` is not set.
 
 Time Zone File
 --------------
@@ -485,7 +454,7 @@ allows :ref:`driverName <odbinitoracleclientattrsopts>` and
 These are useful for applications whose end-users are not aware
 node-oracledb is being used. An example of setting the attributes is:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const oracledb = require('oracledb');
    oracledb.initOracleClient({

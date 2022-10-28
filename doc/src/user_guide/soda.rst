@@ -85,7 +85,7 @@ Committing SODA Work
 The general recommendation for SODA applications is to turn on
 :attr:`oracledb.autoCommit` globally:
 
-.. code:: javascript
+.. code-block:: javascript
 
   oracledb.autoCommit = true;
 
@@ -130,7 +130,7 @@ and :meth:`sodaCollection.insertManyAndGet()` are in Preview status.
 To execute SODA operations, Oracle Database users require the SODA_APP
 role granted to them by a DBA:
 
-.. code:: sql
+.. code-block:: sql
 
   GRANT SODA_APP TO hr;
 
@@ -199,7 +199,7 @@ directory.
 
 Collections can be created like:
 
-.. code:: javascript
+.. code-block:: javascript
 
   oracledb.autoCommit = true;
 
@@ -245,7 +245,7 @@ To insert a document into an opened collection, a JavaScript object that
 is the document content can be used directly. In the following example,
 it is the object myContent:
 
-.. code:: javascript
+.. code-block:: javascript
 
   try {
     const myContent = {name: "Sally", address: {city: "Melbourne"}};
@@ -273,7 +273,7 @@ SodaDocument, such as to use a client-assigned key, then you can call
 the :meth:`sodaDatabase.createDocument()` method
 and pass its result to an insert or replace method, for example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   try {
     myContent = {name: "Sally", address: {city: "Melbourne"}};
@@ -300,7 +300,7 @@ desired documents, or searches can be performed on JSON documents using
 query-by-example (QBE) methods. Each document has a unique key. If the
 key for a document is “k1”, the document can be fetched like:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const myKey = "k1";
   try {
@@ -330,7 +330,7 @@ Other examples of chained read and write operations include:
 
 -  To see if a document exists:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     c = await col.find().key("k1").getOne();
     if (c) then { . . .}
@@ -338,7 +338,7 @@ Other examples of chained read and write operations include:
 -  To return a cursor that can be iterated over to get documents with
    keys “k1” and “k2”:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     docCursor = await collection.find().keys(["k1", "k2"]).getCursor();
     let myDocument;
@@ -349,13 +349,13 @@ Other examples of chained read and write operations include:
 
 -  To remove the documents matching the supplied keys:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     await collection.find().keys(["k1", "k2"])).remove();
 
 -  To remove the document with the key ‘k1’ and version ‘v1’:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     await collection.find().key("k1").version("v1").remove();
 
@@ -373,14 +373,14 @@ Other examples of chained read and write operations include:
 -  To update a document with a given key and version. The new document
    content will be the ``newContent`` object:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     newContent = {name: "Fred", address: {city: "Melbourne"}};
     await collection.find().key("k1").version("v1").replaceOne(newContent);
 
 -  To find the new version of an updated document:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     const newContent = {name: "Fred", address: {city: "Melbourne"}};
     const updatedDoc = await collection.find().key("k1").version("v1").replaceOneAndGet(newContent);
@@ -388,7 +388,7 @@ Other examples of chained read and write operations include:
 
 -  To count all documents, no keys are needed:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     const n = collection.find().count();
 
@@ -400,7 +400,7 @@ Other examples of chained read and write operations include:
    :meth:`~sodaOperation.fetchArraySize()`. For
    example, to get all documents in a collection:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     const documents = await coll.find().fetchArraySize(500).getDocuments();
 
@@ -448,7 +448,7 @@ Some QBE examples are:
 -  To find the number of documents where ‘age’ is less than 30, the city
    is San Francisco and the salary is greater than 500000:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     const n = await collection.find().filter({"age": {"$lt": 30},
                                               "address.city": "San Francisco",
@@ -458,7 +458,7 @@ Some QBE examples are:
 -  To return all documents that have an age less than 30, an address in
    San Francisco, and a salary greater than 500000:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     const docCursor = await collection.find().filter({"age": {"$lt": 30},
                                                       "address.city": "San Francisco",
@@ -472,7 +472,7 @@ Some QBE examples are:
 -  Same as the previous example, but allowing for pagination of results
    by only getting 10 documents:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     const docCursor = await collection.find().filter({"age": {"$lt": 30},
                                                       "address.city": "San Francisco",
@@ -485,7 +485,7 @@ Some QBE examples are:
    than 60, and where either the name is “Max” or where tea or coffee is
    drunk.
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     const filterSpec = {"$and": [{"age": {"$gt": 60} },
                           {"$or": [{"name": "Max"},
@@ -495,7 +495,7 @@ Some QBE examples are:
 -  The ``$orderby`` specification can be used to order any returned
    documents:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     const filterSpec = {"$query": {"salary": {$between [10000, 20000]}},
                         "$orderby": {"age": -1, "name": 2}};
@@ -518,14 +518,14 @@ Some QBE examples are:
    searched. For example if the collection contained documents of the
    form:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     {"location": {"type": "Point", "coordinates": [33.7243, -118.1579]}}
 
    Then a Spatial QBE like the following could be used to find documents
    within a 50 km range of a specified point:
 
-   .. code:: javascript
+   .. code-block:: javascript
 
     const filterSpec = {"location" :
       {"$near" :
@@ -546,7 +546,7 @@ To perform text searches through documents, a `JSON search index
 <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4848E6A0-
 58A7-44FD-8D6D-A033D0CCF9CB>`__ must be defined. For example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   await collection.createIndex({"name": "mySearchIdx"});
 
@@ -558,7 +558,7 @@ Documents in the indexed collection can be searched by running a filter
 (QBE) using the `$contains <https://www.oracle.com/pls/topic/lookup?ctx=
 dblatest&id=GUID-C4C426FC-FD23-4B2E-8367-FA5F83F3F23A>`__ operator:
 
-.. code:: javascript
+.. code-block:: javascript
 
   let documents = await collection.find().filter({item : { $contains : "books"}}).getDocuments();
 
@@ -687,7 +687,7 @@ becomes NUMBER and the `assignment method <https://www.oracle.com/pls/topic/
 lookup?ctx=dblatest&id=GUID-53AA7D85-80A9-4F98-994F-E3BD91769146>`__
 is noted as client-assigned:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const mymetadata = { . . . };   // the default metadata shown above
 
@@ -704,7 +704,7 @@ is noted as client-assigned:
 
 This custom metadata is then used when creating the collection:
 
-.. code:: javascript
+.. code-block:: javascript
 
   oracledb.autoCommit = true;
 
@@ -724,7 +724,7 @@ This custom metadata is then used when creating the collection:
 To insert a document into the collection, a key must be supplied by the
 application. Note it is set to a string:
 
-.. code:: javascript
+.. code-block:: javascript
 
   try {
     const myContent = {name: "Sally", address: {city: "Melbourne"}};
@@ -759,7 +759,7 @@ As an example, suppose a collection was created with default settings,
 meaning it can store JSON content. If the collection contained these
 documents:
 
-.. code:: javascript
+.. code-block:: javascript
 
   {"name": "max", "country": "ukraine"}
   {"name": "chris", "country": "australia"}
@@ -768,7 +768,7 @@ documents:
 
 Then the following code:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const await createIndex({"name": "myIndex"});  // dataguide is "on" by default
   const doc = await sodaCollection.getDataGuide();
@@ -777,7 +777,7 @@ Then the following code:
 
 Will display the data guide:
 
-.. code:: javascript
+.. code-block:: javascript
 
   {"type":"object","properties":{
     "name":{"type":"string","o:length":8,"o:preferred_column_name":"JSON_DOCUMENT$name"},
@@ -815,7 +815,7 @@ The metadata cache can be turned on with
 :ref:`sodaMetadataCache <createpoolpoolattrssodamdcache>` when
 creating a connection pool:
 
-.. code:: javascript
+.. code-block:: javascript
 
   await oracledb.createPool({
     user              : "hr",
@@ -835,7 +835,7 @@ explicitly passing metadata. In this case, instead of using only
 ``soda.createCollection()`` and relying on its behavior of opening an
 existing collection like:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const mymetadata = { . . . };
   const collection = await soda.createCollection("mycollection", mymetadata);  // open existing or create new collection
@@ -843,7 +843,7 @@ existing collection like:
 
 you may find it more efficient to use logic similar to:
 
-.. code:: javascript
+.. code-block:: javascript
 
   let collection = await soda.openCollection("mycollection");
   if (!collection) {

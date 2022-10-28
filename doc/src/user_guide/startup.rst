@@ -38,7 +38,7 @@ The simple :meth:`oracledb.startup()` method to start up a
 local database instance, when your operating system user is in the
 operating system’s ``oper`` group, is:
 
-.. code:: javascript
+.. code-block:: javascript
 
    await oracledb.startup( {
      externalAuth: true
@@ -51,7 +51,7 @@ or indicate that database access should be restricted after start up, or
 force the database instance to be shut down before restarting it. For
 example:
 
-.. code:: javascript
+.. code-block:: javascript
 
    await oracledb.startup( {
        externalAuth: true
@@ -72,7 +72,7 @@ ctx=dblatest&id=GUID-0203C8FA-A4BE-44A5-9A25-3D1E578E879F>`__
 by adding a ``SID_LIST_LISTENER`` entry to the database ``listener.ora``
 file. Starting the database in node-oracledb would then be like:
 
-.. code:: javascript
+.. code-block:: javascript
 
    await oracledb.startup( {
      user: 'sys',
@@ -86,7 +86,7 @@ Simple Shut Down
 The simple :meth:`oracledb.shutdown()` method to shut down a remote database
 is:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const syspw = ...  // set syspw to the sys schema password
 
@@ -99,7 +99,7 @@ is:
 An optional, :ref:`shutdownMode <odbshutdownattrsmode>` can be passed,
 for example to terminate uncommitted transactions and roll back:
 
-.. code:: javascript
+.. code-block:: javascript
 
    await oracledb.shutdown( {
        user: "sys",
@@ -135,7 +135,7 @@ Flexible Start Up
 A :meth:`connection.startup()` example that is equivalent
 to the first ‘simple’ start up example above is:
 
-.. code:: javascript
+.. code-block:: javascript
 
    connection = await oracledb.getConnection( {
      externalAuth: true
@@ -171,7 +171,7 @@ Flexible Shut Down
 The flexible :meth:`connection.shutdown()` example
 equivalent to the first ‘simple’ shut down example above is:
 
-.. code:: javascript
+.. code-block:: javascript
 
    connection = await oracledb.getConnection({
      user: "sys",
@@ -210,19 +210,19 @@ can also be run if you connect directly to a PDB.
 For example, when connected to a CDB, you can open the pluggable
 database in it called ‘orclpdb1’ with:
 
-.. code:: sql
+.. code-block:: sql
 
    ALTER PLUGGABLE DATABASE orclpdb1 OPEN
 
 or, to open all PDBs:
 
-.. code:: sql
+.. code-block:: sql
 
    ALTER PLUGGABLE DATABASE ALL OPEN
 
 The command:
 
-.. code:: sql
+.. code-block:: sql
 
    ALTER PLUGGABLE DATABASE ALL SAVE STATE
 

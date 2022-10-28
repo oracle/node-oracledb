@@ -10,7 +10,7 @@ to the size of a VARCHAR2.
 However, if desired, the SQL query could be changed to return a CLOB,
 for example:
 
-.. code:: sql
+.. code-block:: sql
 
    const sql = `SELECT XMLTYPE.GETCLOBVAL(res) FROM resource_view`;
 
@@ -21,7 +21,7 @@ To insert into an ``XMLType`` column, directly insert a string
 containing the XML, or use a temporary LOB, depending on the data
 length.
 
-.. code:: javascript
+.. code-block:: javascript
 
    const myxml =
        `<Warehouse>

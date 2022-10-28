@@ -84,9 +84,7 @@ SodaDatabase Methods
           - The name of the collection to be created.
         * - ``options``
           - Object
-          - The options that specify the collection. See
-            :ref:`sodadbcreatecollectionoptions` for information on the
-            properties that can be set.
+          - The options that specify the collection. See :ref:`sodadbcreatecollectionoptions` for information on the properties that can be set.
 
     The following properties can be set for the ``options`` parameter.
 
@@ -106,34 +104,20 @@ SodaDatabase Methods
           - Description
         * - ``metaData``
           - Object
-          - Metadata specifying various details about the collection, such as
-            its database storage, whether it should track version and time
-            stamp document components, how such components are generated,
-            and what document types are.
+          - Metadata specifying various details about the collection, such as its database storage, whether it should track version and time stamp document components, how such components are generated, and what document types are.
 
-            |br| If undefined or null, then a default collection metadata
-            description will be used. The default metadata specifies that the
-            collection contains only JSON documents, and is recommend for most
-            SODA users.
+            If undefined or null, then a default collection metadata description will be used. The default metadata specifies that the collection contains only JSON documents, and is recommend for most SODA users.
 
-            |br| For more discussion see :ref:`SODA Client-Assigned Keys and
-            Collection Metadata <sodaclientkeys>`. Also see `SODA Collection
-            Metadata Components <https://www.oracle.com/pls/topic/lookup?ctx=
-            dblatest&id=GUID-49EFF3D3-9FAB-4DA6-BDE2-2650383566A3>`__.
+            For more discussion see :ref:`SODA Client-Assigned Keys and Collection Metadata <sodaclientkeys>`. Also see `SODA Collection Metadata Components <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-49EFF3D3-9FAB-4DA6-BDE2-2650383566A3>`__.
         * - ``mode``
           - Number
-          - If ``mode`` is :ref:`oracledb.SODA_COLL_MAP_MODE
-            <oracledbconstantssoda>`, the collection will be stored in an
-            externally, previously created table. A future
-            ``sodaCollection.drop()`` will not drop the collection table. It
-            will simply unmap it, making it inaccessible to SODA operations.
+          - If ``mode`` is :ref:`oracledb.SODA_COLL_MAP_MODE <oracledbconstantssoda>`, the collection will be stored in an externally, previously created table. A future ``sodaCollection.drop()`` will not drop the collection table. It will simply unmap it, making it inaccessible to SODA operations.
 
-            |br| Most users will leave ``mode`` undefined.
+            Most users will leave ``mode`` undefined.
 
+    **Callback**:
 
-    If you are using the callback programming style:
-
-    **Callback**::
+    If you are using the callback programming style::
 
         createCollection(String collectionName [, Object options], function(Error error, SodaCollection collection){});
 
@@ -154,12 +138,9 @@ SodaDatabase Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``createCollection()`` succeeds, ``error`` is NULL. If an
-            error occurs, then ``error`` contains the error message.
+          - If ``createCollection()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
         * - SodaCollection ``collection``
-          - The :ref:`SodaCollection <sodacollectionclass>` containing zero
-            or more SODA documents, depending whether it is a new or existing
-            collection.
+          - The :ref:`SodaCollection <sodacollectionclass>` containing zero or more SODA documents, depending whether it is a new or existing collection.
 
 .. method:: sodaDatabase.createDocument()
 
@@ -184,7 +165,7 @@ SodaDatabase Methods
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
        myDoc = soda.createDocument({name: "Chris", city: "Melbourne"}, {key: "123"}); // assuming client-assigned keys
        newDoc = await collection.insertOneAndGet(myDoc);
@@ -208,15 +189,12 @@ SodaDatabase Methods
           - Description
         * - ``content``
           - String, Buffer, or Object
-          - The document content. When a Buffer is used, and if the collection
-            ``mediaType`` is (or will be) ‘application/json’ (which is the
-            default media type), then the JSON must be encoded in UTF-8,
-            UTF-16LE or UTF-16BE otherwise you will get a SODA error on a
-            subsequent write operation.
+          - The document content.
+
+            When a Buffer is used, and if the collection ``mediaType`` is (or will be) ‘application/json’ (which is the default media type), then the JSON must be encoded in UTF-8, UTF-16LE or UTF-16BE otherwise you will get a SODA error on a subsequent write operation.
         * - ``options``
           - Object
-          - See :ref:`sodadbcreatedocumentoptions` for information on the
-            properties that can be set.
+          - See :ref:`sodadbcreatedocumentoptions` for information on the properties that can be set.
 
     The following properties can be set for the ``options`` parameter.
 
@@ -236,16 +214,12 @@ SodaDatabase Methods
           - Description
         * - ``key``
           - String
-          - Must be supplied if the document in intended to be inserted into a
-            collection with client-assigned keys. It should be undefined, \
-            otherwise.
+          - Must be supplied if the document in intended to be inserted into a collection with client-assigned keys. It should be undefined, otherwise.
         * - ``mediaType``
           - String
-          - If the document has non-JSON content, then ``mediaType`` should
-            be set to the desired media type. Using a MIME type is
-            recommended.
+          - If the document has non-JSON content, then ``mediaType`` should be set to the desired media type. Using a MIME type is recommended.
 
-            |br| The default is ‘application/json’.
+            The default is ‘application/json’.
 
 .. method:: sodaDatabase.getCollectionNames()
 
@@ -278,9 +252,7 @@ SodaDatabase Methods
           - Description
         * - ``options``
           - Object
-          - If ``options`` is undefined, then all collection names will be
-            returned. Otherwise, it can have the attributes listed in
-            :ref:`getcollectionnamesoptions`.
+          - If ``options`` is undefined, then all collection names will be returned. Otherwise, it can have the attributes listed in :ref:`getcollectionnamesoptions`.
 
     .. _getcollectionnamesoptions:
 
@@ -298,22 +270,16 @@ SodaDatabase Methods
           - Description
         * - ``limit``
           - Number
-          - Limits the number of names returned. If limit is 0 or undefined,
-            then all collection names are returned.
+          - Limits the number of names returned. If limit is 0 or undefined, then all collection names are returned.
         * - ``startsWith``
           - String
-          - Returns names that start with the given string, and all subsequent
-            names, in alphabetic order.
+          - Returns names that start with the given string, and all subsequent names, in alphabetic order.
 
-            |br| For example, if collections with names “cat”, “dog”, and
-            “zebra” exist, then using ``startsWith`` of “d” will return “dog”
-            and “zebra”. If ``startsWith`` is an empty string or undefined,
-            all collection names are returned, subject to the value of
-            ``limit``.
+            For example, if collections with names “cat”, “dog”, and “zebra” exist, then using ``startsWith`` of “d” will return “dog” and “zebra”. If ``startsWith`` is an empty string or undefined, all collection names are returned, subject to the value of ``limit``.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         getCollectionNames([Object options,] function(Error error, Array collectionNames){});
 
@@ -333,11 +299,9 @@ SodaDatabase Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``getCollectionNames()`` succeeds, ``error`` is NULL. If an
-            error occurs, then ``error`` contains the error message.
+          - If ``getCollectionNames()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
         * - Array ``collectionNames``
-          - An array of Strings, each containing the name of a SODA collection
-            in this SODA database. The array is in alphabetical order.
+          - An array of Strings, each containing the name of a SODA collection in this SODA database. The array is in alphabetical order.
 
 .. method:: sodaDatabase.openCollection()
 
@@ -379,9 +343,9 @@ SodaDatabase Methods
           - String
           - The name of the collection to open.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         openCollection(String collectionName, function(Error error, SodaCollection collection){});
 
@@ -401,15 +365,6 @@ SodaDatabase Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``openCollection()`` succeeds, ``error`` is NULL. It is not an
-            error if the requested collection does not exist. If an error
-            occurs, then ``error`` contains the error message.
+          - If ``openCollection()`` succeeds, ``error`` is NULL. It is not an error if the requested collection does not exist. If an error occurs, then ``error`` contains the error message.
         * - SodaCollection ``collection``
-          - The requested collection, if one is found. Otherwise it will be
-            undefined.
-
-.. Code to add a space between paragraphs in list tables
-
-.. |br| raw:: html
-
-  <br />
+          - The requested collection, if one is found. Otherwise it will be undefined.

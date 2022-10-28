@@ -81,14 +81,14 @@ SodaCollection Methods
 
     Then a B-tree index could be created with:
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         indexSpec = {name: "myIndex", fields: [{path: "name"}]};
         await collection.createIndex(indexSpec);
 
     This index would improve the performance of QBEs like:
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         d = await collection.find().filter({name: "Venkat"}).getOne();
 
@@ -110,13 +110,11 @@ SodaCollection Methods
           - Description
         * - ``indexSpec``
           - Object
-          - An object with fields as shown in the `SODA Index Specifications
-            (Reference) <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
-            id=GUID-00C06941-6FFD-4CEB-81B6-9A7FBD577A2C>`__ manual.
+          - An object with fields as shown in the `SODA Index Specifications (Reference) <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-00C06941-6FFD-4CEB-81B6-9A7FBD577A2C>`__ manual.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         createIndex(Object indexSpec, function(Error error){});
 
@@ -135,8 +133,7 @@ SodaCollection Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``createIndex()`` succeeds, ``error`` is NULL. If an error
-            occurs, then ``error`` contains the error message.
+          - If ``createIndex()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
 
 .. method:: sodaCollection.drop()
 
@@ -175,9 +172,9 @@ SodaCollection Methods
 
     .. versionadded:: 3.0
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         drop(function(Error error, Object result){});
 
@@ -197,18 +194,13 @@ SodaCollection Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``drop()`` succeeds, ``error`` is NULL. It is not an error if
-            the collection does not exist. If an error occurs, then ``error``
-            contains the error message.
+          - If ``drop()`` succeeds, ``error`` is NULL. It is not an error if the collection does not exist. If an error occurs, then ``error`` contains the error message.
         * - Object ``result``
-          - The ``result`` object contains one attribute:
-
-            ::
+          - The ``result`` object contains one attribute::
 
               Boolean dropped
 
-            If the drop operation succeeded, ``dropped`` will be *true*. If no
-            collection was found, ``dropped`` will be *false*.
+            If the drop operation succeeded, ``dropped`` will be *true*. If no collection was found, ``dropped`` will be *false*.
 
 .. method:: sodaCollection.dropIndex()
 
@@ -246,21 +238,15 @@ SodaCollection Methods
           - Name of the index to be dropped.
         * - ``options``
           - Object
-          - The ``options`` parameter can have the following attribute:
-
-            ::
+          - The ``options`` parameter can have the following attribute::
 
               Boolean force
 
-            Setting ``force`` to *true* forces dropping of a JSON Search
-            index or Spatial index if the underlying Oracle Database domain
-            index does not permit normal dropping. See `DROP INDEX
-            <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID
-            -F60F75DF-2866-4F93-BB7F-8FCE64BF67B6>`__.
+            Setting ``force`` to *true* forces dropping of a JSON Search index or Spatial index if the underlying Oracle Database domain index does not permit normal dropping. See `DROP INDEX <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F60F75DF-2866-4F93-BB7F-8FCE64BF67B6>`__.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         dropIndex(String indexName [, Object options], function(Error error, Object result){});
 
@@ -281,16 +267,13 @@ SodaCollection Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``dropIndex()`` succeeds, ``error`` is NULL. It is not an error
-            if the index does not exist. If an error occurs, then ``error``
-            contains the error message.
+          - If ``dropIndex()`` succeeds, ``error`` is NULL. It is not an error if the index does not exist. If an error occurs, then ``error`` contains the error message.
         * - Object ``result``
-          - If dropping the index succeeded, ``dropped`` will be *true*. If no
-            index was found, ``dropped`` will be *false*.
+          - If dropping the index succeeded, ``dropped`` will be *true*. If no index was found, ``dropped`` will be *false*.
 
 .. method:: sodaCollection.find()
 
-    ::
+    .. code-block:: javascript
 
         find()
 
@@ -307,7 +290,7 @@ SodaCollection Methods
 
     **Example**
 
-    ::
+    .. code-block:: javascript
 
         documents = await collection.find().filter({"address.city": "Melbourne", "salary": {"$gt": 500000}}).getDocuments();
 
@@ -349,7 +332,7 @@ with the key “c” is matched.
 
 .. method:: sodaOperation.fetchArraySize()
 
-    ::
+    .. code-block:: javascript
 
         fetchArraySize(Number size)
 
@@ -372,7 +355,7 @@ with the key “c” is matched.
 
 .. method:: sodaOperation.filter()
 
-    ::
+    .. code-block:: javascript
 
         filter(Object filterSpec)
 
@@ -392,7 +375,7 @@ with the key “c” is matched.
 
 .. method:: sodaOperation.hint()
 
-    ::
+    .. code-block:: javascript
 
         hint(String hint)
 
@@ -417,7 +400,7 @@ with the key “c” is matched.
 
 .. method:: sodaOperation.key()
 
-    ::
+    .. code-block:: javascript
 
         key(String value)
 
@@ -431,7 +414,7 @@ with the key “c” is matched.
 
 .. method:: sodaOperation.keys()
 
-    ::
+    .. code-block:: javascript
 
         keys(Array value)
 
@@ -447,7 +430,7 @@ with the key “c” is matched.
 
 .. method:: sodaOperation.limit()
 
-    ::
+    .. code-block:: javascript
 
         limit(Number n)
 
@@ -465,7 +448,7 @@ with the key “c” is matched.
 
 .. method:: sodaOperation.skip()
 
-    ::
+    .. code-block:: javascript
 
         skip(Number n)
 
@@ -484,7 +467,7 @@ with the key “c” is matched.
 
 .. method:: sodaOperation.version()
 
-    ::
+    .. code-block:: javascript
 
         version(String value)
 
@@ -528,9 +511,9 @@ method chain. Only one terminal method can be used in each chain.
 
     .. versionadded:: 3.0
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         count(function (Error error, Object result){});
 
@@ -548,19 +531,15 @@ method chain. Only one terminal method can be used in each chain.
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``count()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the error message.
+          - If ``count()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
         * - Object ``result``
-          - The `result` object contains one attribute:
+          - The `result` object contains one attribute::
 
-            ::
-
-              Number count \``\`
+              Number count
 
             The number of documents matching the SodaOperation criteria.
 
-            Due to Node.js type limitations, the largest ``count`` value will be
-            232 - 1, even if more rows exist. Larger values will wrap.
+            Due to Node.js type limitations, the largest ``count`` value will be 232 - 1, even if more rows exist. Larger values will wrap.
 
 .. method:: sodaOperation.getCursor()
 
@@ -585,9 +564,9 @@ method chain. Only one terminal method can be used in each chain.
 
     .. versionadded:: 3.0
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         getCursor(function(Error error, SodaDocumentCursor cursor){});
 
@@ -605,11 +584,9 @@ method chain. Only one terminal method can be used in each chain.
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``getCursor()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the error message.
+          - If ``getCursor()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
         * - SodaDocumentCursor ``cursor``
-          - A cursor that can be iterated over to access SodaDocument objects
-            matching the SodaOperation search criteria.
+          - A cursor that can be iterated over to access SodaDocument objects matching the SodaOperation search criteria.
 
 .. method:: sodaOperation.getDocuments()
 
@@ -629,9 +606,9 @@ method chain. Only one terminal method can be used in each chain.
 
     .. versionadded:: 3.0
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         getDocuments(function(Error error, Array documents){});
 
@@ -649,8 +626,7 @@ method chain. Only one terminal method can be used in each chain.
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``getDocuments()`` succeeds, ``error`` is NULL. If an error
-            occurs, then ``error`` contains the error message.
+          - If ``getDocuments()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
         * - Array ``documents``
           - An array of SodaDocuments that match the SodaOperation query criteria.
 
@@ -671,9 +647,9 @@ method chain. Only one terminal method can be used in each chain.
 
     .. versionadded:: 3.0
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         getOne(function(Error error, SodaDocument document){});
 
@@ -691,11 +667,9 @@ method chain. Only one terminal method can be used in each chain.
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``getOne()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the error message.
+          - If ``getOne()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
         * - SodaDocument ``document``
-          - One SodaDocument that matches the sodaOperation query criteria.
-            If no document is found, then ``document`` will be undefined.
+          - One SodaDocument that matches the sodaOperation query criteria. If no document is found, then ``document`` will be undefined.
 
 .. method:: sodaOperation.remove()
 
@@ -713,9 +687,9 @@ method chain. Only one terminal method can be used in each chain.
 
     .. versionadded:: 3.0
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         remove(function(Error error, Object result){});
 
@@ -733,18 +707,15 @@ method chain. Only one terminal method can be used in each chain.
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``remove()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the error message.
+          - If ``remove()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
         * - Object ``result``
           - The `result` object contains one attribute::
 
-               result.count \``\`
+               result.count
 
             The number of documents removed from the collection.
 
-            Due to Node.js type limitations, the largest ``count`` value will be
-            232 - 1, even if Oracle Database removed more rows. Larger values
-            will wrap.
+            Due to Node.js type limitations, the largest ``count`` value will be 232 - 1, even if Oracle Database removed more rows. Larger values will wrap.
 
 .. method:: sodaOperation.replaceOne()
 
@@ -795,12 +766,11 @@ method chain. Only one terminal method can be used in each chain.
           - Description
         * - ``newDocumentContent`` or ``newSodaDocument``
           - Object or SodaDocument
-          - The new document. See :meth:`sodaCollection.insertOne()`, which has the
-            same semantics for the document.
+          - The new document. See :meth:`sodaCollection.insertOne()`, which has the same semantics for the document.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         replaceOne(Object newDocumentContent, function(Error error, Object result){});
         replaceOne(SodaDocument newSodaDocument, function(Error error, Object result){});
@@ -821,16 +791,13 @@ method chain. Only one terminal method can be used in each chain.
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``replaceOne()`` succeeds, ``error`` is NULL. It is not an
-            error if no document is replaced. If an error occurs, then
-            ``error`` contains the error message.
+          - If ``replaceOne()`` succeeds, ``error`` is NULL. It is not an error if no document is replaced. If an error occurs, then ``error`` contains the error message.
         * - Object ``result``
           - The `result` object contains one attribute::
 
-             result.replaced \``\`
+             result.replaced
 
-            This attribute will be *true* if the document was successfully
-            replaced, *false* otherwise.
+            This attribute will be *true* if the document was successfully replaced, *false* otherwise.
 
 .. method:: sodaOperation.replaceOneAndGet()
 
@@ -871,12 +838,11 @@ method chain. Only one terminal method can be used in each chain.
           - Description
         * - ``newDocumentContent`` or ``newSodaDocument``
           - Object or SodaDocument
-          - The new document. See :meth:`sodaCollection.insertOne()`, which has the
-            same semantics for the document.
+          - The new document. See :meth:`sodaCollection.insertOne()`, which has the same semantics for the document.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         replaceOneAndGet(Object newDocumentContent, function(Error error, SodaDocument updatedDocument){});
         replaceOneAndGet(SodaDocument newSodaDocument, function(Error error, SodaDocument updatedDocument){});
@@ -897,21 +863,13 @@ method chain. Only one terminal method can be used in each chain.
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``replaceOneAndGet()`` succeeds, ``error`` is NULL. It is not
-            an error if no document is replaced. If an error occurs, then
-            ``error`` contains the error message.
+          - If ``replaceOneAndGet()`` succeeds, ``error`` is NULL. It is not an error if no document is replaced. If an error occurs, then ``error`` contains the error message.
         * - SodaDocument ``updatedDocument``
-          - The updated :ref:`SodaDocument <sodadocumentclass>` if replacement
-            was successful, otherwise ``updatedDocument`` will be undefined.
+          - The updated :ref:`SodaDocument <sodadocumentclass>` if replacement was successful, otherwise ``updatedDocument`` will be undefined.
 
-            |br| The ``lastModified`` and ``version`` attributes of the stored
-            SodaDocument will be updated. The ``mediaType`` attribute and the
-            content will be replaced. Other attributes of ``newSodaDocument``
-            are ignored.
+            The ``lastModified`` and ``version`` attributes of the stored SodaDocument will be updated. The ``mediaType`` attribute and the content will be replaced. Other attributes of ``newSodaDocument`` are ignored.
 
-            |br| Note for performance reasons, ``updatedDocument`` will
-            not have document content and cannot itself be passed directly to
-            SODA insert or replace methods.
+            Note for performance reasons, ``updatedDocument`` will not have document content and cannot itself be passed directly to SODA insert or replace methods.
 
 .. method:: sodaCollection.getDataGuide()
 
@@ -942,9 +900,9 @@ method chain. Only one terminal method can be used in each chain.
 
     .. versionadded:: 3.0
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         getDataGuide(function(Error error, SodaDocument document){});
 
@@ -962,14 +920,9 @@ method chain. Only one terminal method can be used in each chain.
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``getDataGuide()`` succeeds, ``error`` is NULL. It is not an
-            error if no document is replaced. If an error occurs, then
-            ``error`` contains the error message.
+          - If ``getDataGuide()`` succeeds, ``error`` is NULL. It is not an error if no document is replaced. If an error occurs, then ``error`` contains the error message.
         * - SodaDocument ``document``
-          - The SodaDocument containing JSON content which can be accessed
-            from the document as normal with :meth:`sodaDocument.getContents()`,
-            :meth:`sodaDocument.getContentAsString()`, or
-            :meth:`sodaDocument.getContentAsBuffer()`.
+          - The SodaDocument containing JSON content which can be accessed from the document as normal with :meth:`sodaDocument.getContents()`, :meth:`sodaDocument.getContentAsString()`, or :meth:`sodaDocument.getContentAsBuffer()`.
 
 .. method:: sodaCollection.insertMany()
 
@@ -994,9 +947,9 @@ method chain. Only one terminal method can be used in each chain.
 
     It requires Oracle Client 18.5 or higher.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         insertMany(Array newDocumentContentArray, function(Error error){});
         insertMany(Array newSodaDocumentArray, function(Error error){});
@@ -1034,9 +987,9 @@ method chain. Only one terminal method can be used in each chain.
 
     This method accepts an options parameter from node-oracledb 5.2 onwards.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         insertManyAndGet(Array newDocumentContentArray [, Object options ], function(Error error, Array SodaDocuments){});
         insertManyAndGet(Array newSodaDocumentArray [, Object options ], function(Error error, Array SodaDocuments){});
@@ -1088,21 +1041,14 @@ method chain. Only one terminal method can be used in each chain.
         * - ``newDocumentContent`` or ``newSodaDocument``
           - Object or SodaDocument
           - The document to insert.
-            Passed as a simple JavaScript object, the value is interpreted as
-            JSON document content. Other document components
-            (key, version, etc.) will be auto-generated by SODA during insert.
-            The media type will be set to “application/json”.
 
-            |br| Alternatively, a :ref:`SodaDocument <sodadocumentclass>` can
-            be passed. The ``content`` and ``mediaType`` supplied in the
-            SodaDocument will be used. The ``key``, if set, will also be used
-            if collection has client-assigned keys. Other components in the
-            input SodaDocument, such as version and last-modified, will be
-            ignored and auto-generated values will be used instead.
+            Passed as a simple JavaScript object, the value is interpreted as JSON document content. Other document components (key, version, etc.) will be auto-generated by SODA during insert. The media type will be set to “application/json”.
 
-    If you are using the callback programming style:
+            Alternatively, a :ref:`SodaDocument <sodadocumentclass>` can be passed. The ``content`` and ``mediaType`` supplied in the SodaDocument will be used. The ``key``, if set, will also be used if collection has client-assigned keys. Other components in the input SodaDocument, such as version and last-modified, will be ignored and auto-generated values will be used instead.
 
-    **Callback**::
+    **Callback**:
+
+    If you are using the callback programming style::
 
         insertOne(Object newDocumentContent, function(Error error){});
         insertOne(SodaDocument newSodaDocument, function(Error error){});
@@ -1123,8 +1069,7 @@ method chain. Only one terminal method can be used in each chain.
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``insertOne()`` succeeds, ``error`` is NULL. If an error
-            occurs, then ``error`` contains the error message.
+          - If ``insertOne()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
 
 .. method:: sodaCollection.insertOneAndGet()
 
@@ -1181,13 +1126,11 @@ method chain. Only one terminal method can be used in each chain.
           - Description
         * - ``newDocumentContent`` or ``newSodaDocument``
           - Object or SodaDocument
-          - The document to insert.
-            |br| For related documentation, see
-            :meth:`sodaCollection.insertOne()`.
+          - The document to insert. For related documentation, see :meth:`sodaCollection.insertOne()`.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         insertOneAndGet(Object newDocumentContent [, Object options ], function(Error error, SodaDocument document){});
         insertOneAndGet(SodaDocument newSodaDocument [, Object options ], function(Error error, SodaDocument document){});
@@ -1209,16 +1152,11 @@ method chain. Only one terminal method can be used in each chain.
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``insertOne()`` succeeds, ``error`` is NULL. If an error
-            occurs, then ``error`` contains the error message.
+          - If ``insertOne()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
         * - SodaDocument ``document``
-          - A result :ref:`SodaDocument <sodadocumentclass>` that is useful
-            for finding the system generated key and other metadata of the
-            newly inserted document.
+          - A result :ref:`SodaDocument <sodadocumentclass>` that is useful for finding the system generated key and other metadata of the newly inserted document.
 
-            |br| Note for performance reasons, ``document`` will not have
-            document content and cannot itself be passed directly to SODA
-            insert or replace methods.
+            Note for performance reasons, ``document`` will not have document content and cannot itself be passed directly to SODA insert or replace methods.
 
 .. method:: sodaCollection.save()
 
@@ -1241,9 +1179,9 @@ method chain. Only one terminal method can be used in each chain.
     It requires Oracle Client 19.9 or later, and Oracle Database 18.3 or
     later.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         save(SodaDocument newSodaDocument, function(Error error){});
 
@@ -1281,9 +1219,9 @@ method chain. Only one terminal method can be used in each chain.
 
     This method accepts an options parameter from node-oracledb 5.2 onwards.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         saveAndGet(SodaDocument newSodaDocument [, Object options ], function(Error error, SodaDocument document){});
 
@@ -1302,9 +1240,9 @@ method chain. Only one terminal method can be used in each chain.
 
     It requires Oracle Client 20 or later, and Oracle Database 18.3 or later.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
        truncate(function(Error error) {});
 
@@ -1321,11 +1259,4 @@ method chain. Only one terminal method can be used in each chain.
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``truncate()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the error message.
-
-.. Code to add a space between paragraphs in list tables
-
-.. |br| raw:: html
-
-  <br />
+          - If ``truncate()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.

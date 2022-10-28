@@ -27,7 +27,7 @@ com/pls/topic/lookup?ctx=dblatest&id=GUID-D5C74C82-8622-46F4-8760-
 
 To find the database character set, execute the query:
 
-.. code:: sql
+.. code-block:: sql
 
    SELECT value AS db_charset
    FROM nls_database_parameters
@@ -37,7 +37,7 @@ To find the database `‘national character set’ <https://www.oracle.com/pls/
 topic/lookup?ctx=dblatest&id=GUID-AA8D783D-7337-4A61-BD7D-5DB580C46D9A>`__
 used for NCHAR and related types, execute the query:
 
-.. code:: sql
+.. code-block:: sql
 
    SELECT value AS db_ncharset
    FROM nls_database_parameters
@@ -45,7 +45,7 @@ used for NCHAR and related types, execute the query:
 
 The general Oracle statement to find the ‘client’ character set is:
 
-.. code:: sql
+.. code-block:: sql
 
    SELECT DISTINCT client_charset AS client_charset
    FROM v$session_connect_info

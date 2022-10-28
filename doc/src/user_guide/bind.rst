@@ -58,7 +58,7 @@ argument of ``execute()`` should contain bind variable objects with
 :ref:`type <executebindparamtype>` properties. Each bind variable
 object name must match the statement’s bind parameter name:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const oracledb = require('oracledb');
 
@@ -93,7 +93,7 @@ For IN binds:
 Since ``dir`` and ``type`` have defaults, these attributes are sometimes
 omitted for IN binds. Binds can be like:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const result = await connection.execute(
      `INSERT INTO countries VALUES (:country_id, :country_name)`,
@@ -105,7 +105,7 @@ omitted for IN binds. Binds can be like:
 When a bind parameter name is used more than once in the SQL statement,
 it should only occur once in the bind object:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const result = await connection.execute(
      `SELECT first_name, last_name FROM employees WHERE first_name = :nmbv OR last_name = :nmbv`,
@@ -119,7 +119,7 @@ Instead of using named bind parameters, the data can alternatively be in
 an array. In this example, values are bound to the SQL bind parameters
 ``:country_id`` and ``:country_name``:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const result = await connection.execute(
      `INSERT INTO countries VALUES (:country_id, :country_name)`,
@@ -133,7 +133,7 @@ names. This is still true even if the bind parameters are named like
 name needs to be the second entry of the array so it becomes the second
 value in the ``INSERT`` statement
 
-.. code:: javascript
+.. code-block:: javascript
 
    const result = await connection.execute(
      `INSERT INTO countries (country_id, country_name) VALUES (:1, :0)`,
@@ -228,7 +228,7 @@ returned OUT and IN OUT bind values.
 
 Given the creation of the PL/SQL procedure ``TESTPROC``:
 
-.. code:: sql
+.. code-block:: sql
 
    CREATE OR REPLACE PROCEDURE testproc (
    p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER)
@@ -242,7 +242,7 @@ Given the creation of the PL/SQL procedure ``TESTPROC``:
 
 The procedure ``TESTPROC`` can be called with:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const bindVars = {
      i:  'Chris', // default direction is BIND_IN. Data type is inferred from the data
@@ -274,7 +274,7 @@ be used in ``execute()`` like:
 An alternative to node-oracledb’s ‘bind by name’ syntax is ‘bind by
 array’ syntax:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const bindVars = [
      'Chris',
@@ -293,7 +293,7 @@ binds in the statement:
 Mixing positional and named syntax is not supported. The following will
 throw an error:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const bindVars = [
      'Chris',                                                  // valid
@@ -351,7 +351,7 @@ section and the ``RETURNING`` section of the statement.
 
 An example of DML RETURNING binds is:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const result = await connection.execute(
      `UPDATE mytab SET name = :name
@@ -409,7 +409,7 @@ an error when invoked.
 
 Given a PL/SQL procedure defined as:
 
-.. code:: sql
+.. code-block:: sql
 
    CREATE OR REPLACE PROCEDURE get_emp_rs (
      p_sal IN NUMBER,
@@ -424,7 +424,7 @@ Given a PL/SQL procedure defined as:
 
 This PL/SQL procedure can be called in node-oracledb using:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const result = await connection.execute(
      `"BEGIN get_emp_rs(:sal, :cursor); END;`,
@@ -450,7 +450,7 @@ All rows can be fetched in one operation by calling ``getRows()`` with
 no argument. This is useful when the query is known to return a “small”
 number of rows:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const result = await connection.execute(
      `"BEGIN get_emp_rs(:sal, :cursor); END;`,
@@ -480,7 +480,7 @@ See `refcursor.js <https://github.com/oracle/node-oracledb/tree/main/examples
 To convert the REF CURSOR ResultSet to a stream, use
 :meth:`~resultset.toQueryStream()`:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const result = await connection.execute(
      `"BEGIN get_emp_rs(:sal, :cursor); END;`,
@@ -514,7 +514,7 @@ If you want to pass a queried ResultSet into PL/SQL using direction
 silently fetched by node-oracledb and not being available in the later
 receiving PL/SQL code. For example:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const result = await connection.execute(
      `SELECT * FROM locations`,
@@ -538,7 +538,7 @@ Because the default bind direction is ``BIND_IN``, and the type can be
 inferred from ``result.resultSet``, the PL/SQL procedure call can be
 simplified to:
 
-.. code:: javascript
+.. code-block:: javascript
 
    await conn.execute(`BEGIN myproc(:rc); END;`, [result.resultSet]);
 
@@ -605,7 +605,7 @@ Binding Multiple Values to a SQL ``WHERE IN`` Clause
 Binding a single JavaScript value into a SQL ``WHERE IN`` clause is
 easy:
 
-.. code:: javascript
+.. code-block:: javascript
 
    sql = `SELECT first_name, last_name FROM employees WHERE first_name IN (:bv)`;
    binds = ['Christopher'];
@@ -618,7 +618,7 @@ and the query should match all chosen values.
 To use a fixed, small number of values in an ``WHERE IN`` bind clause,
 the SQL query should have individual bind parameters, for example:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const sql = `SELECT first_name, last_name FROM employees WHERE first_name IN (:bv1, :bv2, :bv3, :bv4)`;
    const binds = ['Alyssa', 'Christopher', 'Hazel', 'Samuel'];
@@ -627,7 +627,7 @@ the SQL query should have individual bind parameters, for example:
 If you sometimes execute the query with a smaller number of items, then
 null can be bound for each ‘missing’ value:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const binds = ['Alyssa', 'Christopher', 'Hazel', null];
 
@@ -640,7 +640,7 @@ If the statement is not going to be re-executed, or the number of values
 is only going to be known at runtime, then a SQL statement can be built
 up:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const binds = ['Christopher', 'Hazel', 'Samuel'];
    let sql = `SELECT first_name, last_name FROM employees WHERE first_name IN (`;
@@ -682,7 +682,7 @@ For example, if the following type was created::
 
 then the application could do:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const sql = `SELECT first_name, last_name
                 FROM employees
@@ -698,7 +698,7 @@ You may decide to overload the use of the database
 ``SYS.ODCIVARCHAR2LIST`` or ``SYS.ODCINUMBERLIST`` types so you don’t
 need to create a type like ``name_array``:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const binds = { bv: { type: 'SYS.ODCIVARCHAR2LIST', val: inlist } };
 
@@ -719,7 +719,7 @@ Binding in a ``LIKE`` or ``REGEXP_LIKE`` Clause
 To do pattern matching with a ``LIKE`` clause, bind a string containing
 the pattern match wildcards, for example:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const pattern = "%uth%";
 
@@ -738,7 +738,7 @@ Output is like:
 The same is true for regular expression functions such as
 ``REGEXP_LIKE`` and ``REGEXP_SUBSTR``. For example:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const pattern = ',[^,]+,';
 
@@ -763,7 +763,7 @@ It is not possible to bind table names in queries. Instead use a
 hard-coded Allow List of names to build the final SQL statement, for
 example:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const validTables = ['LOCATIONS', 'DEPARTMENTS'];
 
@@ -784,7 +784,7 @@ in the :ref:`statement cache <stmtcache>` by default.
 
 It is possible to bind column names used in an ORDER BY:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const sql = `SELECT first_name, last_name
                 FROM employees

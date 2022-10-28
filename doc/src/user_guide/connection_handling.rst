@@ -33,7 +33,7 @@ In applications which use connections infrequently, create a connection
 with :meth:`oracledb.getConnection()`. Connections should be released with
 :meth:`connection.close()` when no longer needed:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const oracledb = require('oracledb');
 
@@ -74,7 +74,7 @@ using one is also recommended if you have a long running application,
 particularly if connections are released to the pool while no database
 work is being done.
 
-.. code:: javascript
+.. code-block:: javascript
 
    const oracledb = require('oracledb');
 
@@ -213,7 +213,7 @@ Embedded Connect Descriptor Strings
 
 Full Connect Descriptor strings can be embedded in applications:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection(
     {
@@ -245,7 +245,7 @@ Net Service Names may also be defined in a directory server.
 
 Given a Net Service Name, node-oracledb can connect like:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection(
     {
@@ -292,7 +292,7 @@ for example::
 
 then use Oracle’s Easy Connect syntax in node-oracledb:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection(
     {
@@ -316,7 +316,7 @@ for example::
 
 then either :ref:`embed the Connect Descriptor <embedtns>`:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection(
     {
@@ -340,7 +340,7 @@ or create a :ref:`Net Service Name <tnsnames>`::
 
 This can be referenced in node-oracledb:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection(
     {
@@ -532,7 +532,7 @@ To rewrite code that uses ``Promise.all()`` you could, for example, use
 a basic ``for`` loop with ``async/await`` to iterate through each
 action:
 
-.. code:: javascript
+.. code-block:: javascript
 
    async function myfunc() {
      const stmts = [
@@ -638,7 +638,7 @@ is started.
 A connection pool should be started during application initialization,
 for example before the web server is started:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const oracledb = require('oracledb');
 
@@ -676,7 +676,7 @@ for example before the web server is started:
 Each web request will invoke ``handleRequest()``. In it, a connection
 can be obtained from the pool and used:
 
-.. code:: javascript
+.. code-block:: javascript
 
   async function handleRequest(request, response) {
 
@@ -820,7 +820,7 @@ allowed to remain active before it and its connections are terminated.
 For example, to give active connections 10 seconds to complete their
 work before being terminated:
 
-.. code:: javascript
+.. code-block:: javascript
 
   await pool.close(10);
 
@@ -845,14 +845,14 @@ Non-zero ``drainTime`` values are recommended so applications have the
 opportunity to gracefully finish database operations, however pools can
 be forcibly closed by specifying a zero drain time:
 
-.. code:: javascript
+.. code-block:: javascript
 
   await pool.close(0);
 
 Closing the pool would commonly be one of the last stages of a Node.js
 application. A typical closing routine look likes:
 
-.. code:: javascript
+.. code-block:: javascript
 
   // Close the default connection pool with 10 seconds draining, and exit
   async function closePoolAndExit() {
@@ -869,7 +869,7 @@ application. A typical closing routine look likes:
 It is helpful to invoke ``closePoolAndExit()`` if Node.js is sent a
 signal or interrupted:
 
-.. code:: javascript
+.. code-block:: javascript
 
   // Close the pool cleanly if Node.js is interrupted
   process
@@ -893,7 +893,7 @@ Pools are added to the cache by using a
 :ref:`poolAlias <createpoolpoolattrspoolalias>` property in the
 :ref:`poolAttrs <createpoolpoolattrs>` object:
 
-.. code:: javascript
+.. code-block:: javascript
 
   async function init() {
     try {
@@ -944,7 +944,7 @@ Using the Default Pool
 Assuming the connection pool cache is empty, the following will create a
 new pool and cache it using the pool alias ‘default’:
 
-.. code:: javascript
+.. code-block:: javascript
 
   async function init() {
     try {
@@ -964,7 +964,7 @@ Connections can be returned by using the shortcut to
 :meth:`oracledb.getConnection()` that returns a
 connection from a pool:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection();
 
@@ -975,7 +975,7 @@ connection from a pool:
 The default pool can also be retrieved using :meth:`oracledb.getPool()`
 without passing the ``poolAlias`` parameter:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const pool = oracledb.getPool();
   console.log(pool.poolAlias); // 'default'
@@ -991,7 +991,7 @@ Using Multiple Pools
 If the application needs to use more than one pool at a time, unique
 pool aliases can be used when creating the pools:
 
-.. code:: javascript
+.. code-block:: javascript
 
   await oracledb.createPool({
     user: 'hr',
@@ -1011,7 +1011,7 @@ pool aliases can be used when creating the pools:
 
 To get a connection from a pool, pass the pool alias:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection('hrpool');
 
@@ -1022,7 +1022,7 @@ To get a connection from a pool, pass the pool alias:
 From node-oracledb 3.1.0 you can alternatively pass the alias as an
 attribute of the options:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection({ poolAlias: 'hrpool' });
 
@@ -1037,7 +1037,7 @@ to a pooled ``getConnection()`` call, such as for :ref:`proxy
 connections <connpoolproxy>` or with :ref:`connection
 tagging <connpooltagging>`:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection({ poolAlias: 'hrpool', tag: 'loc=cn;p=1' });
 
@@ -1048,7 +1048,7 @@ tagging <connpooltagging>`:
 To use the default pool in this way you must explicitly pass the alias
 ``default``:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection({ poolAlias: 'default', tag: 'loc=cn;p=1' });
 
@@ -1059,7 +1059,7 @@ To use the default pool in this way you must explicitly pass the alias
 A specific pool can be retrieved from the cache by passing its pool
 alias to :meth:`oracledb.getPool()`:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const pool = oracledb.getPool('hrpool');
   const connection = await pool.getConnection();
@@ -1127,7 +1127,7 @@ Pool attributes :attr:`~pool.connectionsInUse` and
 :attr:`~pool.connectionsOpen` always provide basic
 information about an active pool:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const pool = await oracledb.createPool(...);
 
@@ -1143,7 +1143,7 @@ settings, and related environment variables can be enabled by setting
 
 To enable recording of queue statistics when creating the pool:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const pool = await oracledb.createPool(
     {
@@ -1156,7 +1156,7 @@ To enable recording of queue statistics when creating the pool:
 
 Statistics can alternatively be enabled on a running pool with:
 
-.. code:: javascript
+.. code-block:: javascript
 
   await pool.reconfigure({ enableStatistics: true });
 
@@ -1167,7 +1167,7 @@ the object can be accessed individually for your tracing requirements.
 The complete statistics can be printed by calling
 :meth:`poolstatistics.logStatistics()`.
 
-.. code:: javascript
+.. code-block:: javascript
 
   const poolstatistics = pool.getStatistics();
 
@@ -1177,7 +1177,7 @@ The complete statistics can be printed by calling
 Alternatively the statistics can be printed directly by calling
 :meth:`pool.logStatistics()`.
 
-.. code:: javascript
+.. code-block:: javascript
 
   pool.logStatistics();    // print all statistics to the console
 
@@ -1226,61 +1226,43 @@ The sum of ‘requests failed’, ‘requests exceeding queueMax’, and
       - Number of ``getConnection()`` requests made to this pool.
     * - ``requestsEnqueued``
       - requests enqueued
-      - Number of ``getConnection()`` requests that were added to this pool’s
-        queue (waiting for the application to return an in-use connection to
-        the pool) because every connection in this pool was already being used.
+      - Number of ``getConnection()`` requests that were added to this pool’s queue (waiting for the application to return an in-use connection to the pool) because every connection in this pool was already being used.
     * - ``requestsDequeued``
       - requests dequeued
-      - Number of ``getConnection()`` requests that were dequeued when a
-        connection in this pool became available for use.
+      - Number of ``getConnection()`` requests that were dequeued when a connection in this pool became available for use.
     * - ``failedRequests``
       - requests failed
-      - Number of getConnection() requests that failed due to an Oracle Database
-        error. Does not include :attr:`~oracledb.queueMax` or
-        :attr:`~oracledb.queueTimeout` errors.
+      - Number of getConnection() requests that failed due to an Oracle Database error. Does not include :attr:`~oracledb.queueMax` or :attr:`~oracledb.queueTimeout` errors.
     * - ``rejectedRequests``
       - requests exceeding queueMax
-      - Number of getConnection() requests rejected because the number of
-        connections in the pool queue exceeded the :attr:`~oracledb.queueMax`
-        limit.
+      - Number of getConnection() requests rejected because the number of connections in the pool queue exceeded the :attr:`~oracledb.queueMax` limit.
     * - ``requestTimeouts``
       - requests exceeding queueTimeout
-      - Number of queued getConnection() requests that were timed out from the
-        pool queue because they exceeded the :attr:`~oracledb.queueTimeout`
-        time.
+      - Number of queued getConnection() requests that were timed out from the pool queue because they exceeded the :attr:`~oracledb.queueTimeout` time.
     * - ``currentQueueLength``
       - current queue length
-      - Current number of ``getConnection()`` requests that are waiting in the
-        pool queue.
+      - Current number of ``getConnection()`` requests that are waiting in the pool queue.
     * - ``maximumQueueLength``
       - maximum queue length
-      - Maximum number of ``getConnection()`` requests that were ever waiting
-        in the pool queue at one time.
+      - Maximum number of ``getConnection()`` requests that were ever waiting in the pool queue at one time.
     * - ``timeInQueue``
       - sum of time in queue
-      - The sum of the time (milliseconds) that dequeued requests spent in the
-        pool queue.
+      - The sum of the time (milliseconds) that dequeued requests spent in the pool queue.
     * - ``minimumTimeInQueue``
       - minimum time in queue
-      - The minimum time (milliseconds) that any dequeued request spent in the
-        pool queue.
+      - The minimum time (milliseconds) that any dequeued request spent in the pool queue.
     * - ``maximumTimeInQueue``
       - maximum time in queue
-      - The maximum time (milliseconds) that any dequeued request spent in the
-        pool queue.
+      - The maximum time (milliseconds) that any dequeued request spent in the pool queue.
     * - ``averageTimeInQueue``
       - average time in queue
-      - The average time (milliseconds) that dequeued requests spent in the
-        pool queue.
+      - The average time (milliseconds) that dequeued requests spent in the pool queue.
     * - ``connectionsInUse``
       - pool connections in use
-      - The number of connections from this pool that ``getConnection()``
-        returned successfully to the application and have not yet been released
-        back to the pool.
+      - The number of connections from this pool that ``getConnection()`` returned successfully to the application and have not yet been released back to the pool.
     * - ``connectionsOpen``
       - pool connections open
-      - The number of idle or in-use connections to the database that the pool
-        is currently managing.
+      - The number of idle or in-use connections to the database that the pool is currently managing.
 
 Pool Attribute Values
 '''''''''''''''''''''
@@ -1288,7 +1270,7 @@ Pool Attribute Values
 The :ref:`PoolStatistics object <poolstatisticsclass>` and
 ``logStatistics()`` function record the pool attributes:
 
-.. list-table-with-summary::  Pool Attributes
+.. list-table-with-summary::
     :header-rows: 1
     :class: wy-table-responsive
     :align: left
@@ -1331,11 +1313,7 @@ The :ref:`PoolStatistics object <poolstatisticsclass>` and
       - Description
     * - ``threadPoolSize``
       - UV_THREADPOOL_SIZE
-      - The value of :ref:`process.env.UV_THREADPOOL_SIZE <numberofthreads>`
-        which is the number of worker threads for this process. Note this shows
-        the value of the variable, however if this variable was set after the
-        thread pool started, the thread pool will still be the default size
-        of 4.
+      - The value of :ref:`process.env.UV_THREADPOOL_SIZE <numberofthreads>` which is the number of worker threads for this process. Note this shows the value of the variable, however if this variable was set after the thread pool started, the thread pool will still be the default size of 4.
 
 .. _connpoolpinging:
 
@@ -1364,6 +1342,7 @@ The default :attr:`~oracledb.poolPingInterval` value is
     :header-rows: 1
     :class: wy-table-responsive
     :align: center
+    :widths: 15 40
     :summary: The first column displays the poolPingInterval value. The second column displays the behavior of a pool getConnection() call.
 
     * - ``poolPingInterval`` Value
@@ -1373,9 +1352,7 @@ The default :attr:`~oracledb.poolPingInterval` value is
     * - ``n`` = ``0``
       - Always checks for connection validity
     * - ``n`` > ``0``
-      - Checks validity if the connection has been idle in the pool (not
-        “checked out” to the application by ``getConnection()``) for at least
-        ``n`` seconds
+      - Checks validity if the connection has been idle in the pool (not “checked out” to the application by ``getConnection()``) for at least ``n`` seconds
 
 A ping has the cost of a :ref:`round-trip <roundtrips>` to the database so
 always pinging after each ``getConnection()`` is not recommended for
@@ -1538,7 +1515,7 @@ only set the very first time connections are established to the
 database. The ``requestedTag`` parameter is ignored because it is only
 valid when tagging is being used:
 
-.. code:: javascript
+.. code-block:: javascript
 
   function initSession(connection, requestedTag, callbackFn) {
     connection.execute(
@@ -1561,7 +1538,7 @@ properties, avoiding :ref:`round-trips <roundtrips>` of repeated
 ``execute()`` calls. If you need to execute multiple SQL statements,
 then use an anonymous PL/SQL block for the same reason:
 
-.. code:: javascript
+.. code-block:: javascript
 
   function initSession(connection, requestedTag, callbackFn) {
     connection.clientId = "Chris";
@@ -1589,7 +1566,7 @@ This example Node.js callback function ensures the connection contains
 valid settings for an application-specific “USER_TZ=X” property where X
 is a valid Oracle timezone:
 
-.. code:: javascript
+.. code-block:: javascript
 
   function initSession(connection, requestedTag, callbackFn) {
     const tagParts = requestedTag.split('=');
@@ -1678,7 +1655,7 @@ value.
 
 A sample PL/SQL callback procedure looks like:
 
-.. code:: sql
+.. code-block:: sql
 
    CREATE OR REPLACE PACKAGE myPackage AS
      TYPE property_t IS TABLE OF VARCHAR2(64) INDEX BY VARCHAR2(64);
@@ -1755,7 +1732,7 @@ A sample PL/SQL callback procedure looks like:
 
 This could be used in your application like:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const sessionTag = "SDTZ=UTC";
 
@@ -1796,7 +1773,7 @@ When a heterogeneous pool is created by setting
 credentials supplied during pool creation, then a user name and password
 may be passed to ``pool.getConnection()``:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const pool = await oracledb.createPool(
     {
@@ -1830,7 +1807,7 @@ To use heterogeneous pools with the :ref:`connection pool
 cache <connpoolcache>`, the alias should be explicitly stated, even
 if it is the default pool:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection(
     {
@@ -1861,7 +1838,7 @@ access the data.
 
 To grant access, typically a DBA would execute:
 
-.. code:: sql
+.. code-block:: sql
 
   ALTER USER sessionuser GRANT CONNECT THROUGH proxyuser;
 
@@ -1892,7 +1869,7 @@ authentication.
 To use the proxy user with a node-oracledb heterogeneous connection pool
 you could do:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const myproxyuserpw = ... // the password of the 'myproxyuser' proxy user
 
@@ -1905,7 +1882,7 @@ you could do:
 
 Other proxy cases are supported such as:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const myproxyuserpw = ... // the password of the 'myproxyuser' proxy user
 
@@ -1953,7 +1930,7 @@ operation of existing connections or pools.
 
 For a standalone connection:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const config = { connectString: "localhost/orclpdb1", externalAuth: true };
   const connection = await oracledb.getConnection(config);
@@ -1963,14 +1940,14 @@ For a standalone connection:
 If a user ``HR`` has been given the ``CONNECT THROUGH`` grant from the
 externally identified user ``MYPROXYUSER``:
 
-.. code:: sql
+.. code-block:: sql
 
   ALTER USER hr GRANT CONNECT THROUGH myproxyuser;
 
 then to specify that the session user of the connection should be
 ``HR``, use:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const config = { connectString: "localhost/orclpdb1", user: "[hr]", externalAuth: true };
   const connection = await oracledb.getConnection(config);
@@ -1980,7 +1957,7 @@ then to specify that the session user of the connection should be
 For a *Pool*, you can authenticate as an externally identified user
 like:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const config = { connectString: "localhost/orclpdb1", externalAuth: true };
   const pool = await oracledb.createPool(config);
@@ -1994,7 +1971,7 @@ If a user ``HR`` has been given the ``CONNECT THROUGH`` grant from the
 externally identified user, then to specify that the session user of the
 connection should be ``HR``, use:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const config = { connectString: "localhost/orclpdb1", externalAuth: true };
   const pool = await oracledb.createPool(config);
@@ -2091,7 +2068,7 @@ the ``oracledb.getConnection()`` attribute
 Alternatively authentication tokens can be generated by calling the
 Azure Active Directory REST API, for example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   function getOauthToken() {
     const requestParams = {
@@ -2129,7 +2106,7 @@ OAuth 2.0 Standalone Connections
 Standalone connections can be created using OAuth2 token-based
 authentication, for example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   let accessTokenStr;  // the token string. In this app it is also the token "cache"
 
@@ -2187,7 +2164,7 @@ OAuth 2.0 Connection Pooling
 Pooled connections can be created using OAuth 2.0 token-based
 authentication, for example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   let accessTokenStr;  // The token string. In this app it is also the token "cache"
 
@@ -2303,7 +2280,7 @@ IAM Token and Private Key Extraction
 Token and private key files created externally can be read by Node.js
 applications, for example like:
 
-.. code:: javascript
+.. code-block:: javascript
 
   function getIAMToken() {
     const tokenPath = '/home/cjones/.oci/db-token/token';
@@ -2342,7 +2319,7 @@ IAM Standalone Connections
 Standalone connections can be created using IAM token-based
 authentication, for example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   let accessTokenObj;  // the token object. In this app it is also the token "cache"
 
@@ -2402,7 +2379,7 @@ IAM Connection Pooling
 Pooled connections can be created using IAM token-based authentication,
 for example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   let accessTokenObj;  // The token string. In this app it is also the token "cache"
 
@@ -2689,7 +2666,7 @@ Changing Passwords
 Database passwords can be changed with :meth:`connection.changePassword()`.
 For example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const currentpw = ...  // the current password for the hr schema
   const newpw = ...      // the new hr schema password
@@ -2707,7 +2684,7 @@ Only DBAs, or users with the ALTER USER privilege, can change the
 password of another user. In this case, the old password value is
 ignored and can be an empty string:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const newpw = ... // the new password
 
@@ -2731,7 +2708,7 @@ requiring a DBA to reset their password.
 Both the current and new passwords must be given when connecting. For
 example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const oldpw = ...  // the hr schema's old password
   const newpw = ...  // the new password
@@ -3062,7 +3039,7 @@ mTLS are different.
 
 For example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const cs = `(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)
               (host=abc.oraclecloud.com))(connect_data=(service_name=xyz.adb.oraclecloud.com))
@@ -3156,7 +3133,7 @@ use the connection string in ``tnsnames.ora`` called ``cjdb1_high``.
 Update your application to use your schema username, its database
 password, and a net service name, for example:
 
-.. code:: javascript
+.. code-block:: javascript
 
    connection = await oracledb.getConnection({
      user: "scott",
@@ -3221,7 +3198,7 @@ For example, if your ``tnsnames.ora`` file had an entry:
 
 Then your applications can connect using the connection string:
 
-.. code:: javascript
+.. code-block:: javascript
 
   cs = "tcps://adb.ap-sydney-1.oraclecloud.com:1522/abc_cjjson_high.adb.oraclecloud.com?wallet_location=/Users/cjones/Cloud/CJJSON&retry_count=20&retry_delay=3"
   connection = await oracledb.getConnection({
@@ -3238,7 +3215,7 @@ the Easy Connect Plus syntax.
 You can optionally add other Easy Connect parameters to the connection
 string, for example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   cs = cs + "&https_proxy=myproxy.example.com&https_proxy_port=80"
 
@@ -3283,7 +3260,7 @@ by node-oracledb.
 
 For example, if sharding had been configured on a single column like:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE SHARDED TABLE customers (
     cust_id NUMBER,
@@ -3298,7 +3275,7 @@ For example, if sharding had been configured on a single column like:
 then a shard can be directly connected to by passing a single sharding
 key:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection(
     {
@@ -3314,7 +3291,7 @@ The ``shardingKey`` and ``superShardingKey`` properties are arrays
 because multiple values can be used. If database shards had been
 partitioned with multiple keys such as with:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE SHARDED TABLE customers (
     cust_id NUMBER NOT NULL,
@@ -3329,7 +3306,7 @@ partitioned with multiple keys such as with:
 then direct connection to a shard can be established by specifying
 multiple keys, for example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection(
     {
@@ -3341,7 +3318,7 @@ multiple keys, for example:
 
 When the sharding key is a DATE column like:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE SHARDED TABLE customers (
     cust_id NUMBER,
@@ -3358,7 +3335,7 @@ session time zone. For example if the session time zone is set to UTC
 (see :ref:`Fetching Dates and Timestamps <datehandling>`) then Dates must
 also be in UTC:
 
-.. code:: javascript
+.. code-block:: javascript
 
   key = new Date ("2019-11-30Z");   // when session time zone is UTC
   const connection = await oracledb.getConnection(
@@ -3371,7 +3348,7 @@ also be in UTC:
 
 When the sharding key is a RAW column like:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE SHARDED TABLE customers (
     cust_id NUMBER,
@@ -3385,7 +3362,7 @@ When the sharding key is a RAW column like:
 
 then direct connection to a shard could be like:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const data = [0x00, 0x01, 0x02];
   const key = Buffer.from(data);
@@ -3399,7 +3376,7 @@ then direct connection to a shard could be like:
 
 If composite sharding was in use, for example:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE SHARDED TABLE customers (
     cust_id NUMBER NOT NULL,
@@ -3415,7 +3392,7 @@ If composite sharding was in use, for example:
 then direct connection to a shard can be established by specifying a
 super sharding key and sharding key, for example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection(
     {

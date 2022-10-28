@@ -16,7 +16,7 @@ Callbacks and node-oracledb
 
 Node-oracledb supports callbacks.
 
-.. code:: javascript
+.. code-block:: javascript
 
   // myscript.js
 
@@ -74,7 +74,7 @@ native Promise implementation is used.
 If an asynchronous method is invoked without a callback, it returns a
 Promise:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const oracledb = require('oracledb');
 
@@ -117,7 +117,7 @@ to the connection within the function to which it was passed.
 When invoking asynchronous methods, it is possible to accidentally get a
 Promise by forgetting to pass a callback function:
 
-.. code:: javascript
+.. code-block:: javascript
 
   oracledb.getConnection(
     {
@@ -132,7 +132,7 @@ was to use the callback programming style, any rejections that occur
 will go unnoticed. Node.js 4.0 added the ``unhandledRejection`` event to
 prevent such rejections from going unnoticed:
 
-.. code:: javascript
+.. code-block:: javascript
 
   process.on('unhandledRejection', (reason, p) => {
     console.error("Unhandled Rejection at: ", p, " reason: ", reason);
@@ -172,7 +172,7 @@ Async/Await and node-oracledb
 Node.js 7.6 supports async functions, also known as Async/Await. These
 can be used with node-oracledb. For example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const oracledb = require('oracledb');
 

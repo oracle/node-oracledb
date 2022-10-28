@@ -64,7 +64,7 @@ Lob Methods
 .. method:: lob.close()
 
     **Note: this method is deprecated
-    and**\ :meth:`lob.destroy()`\ **should be used instead.**
+    and** :meth:`lob.destroy()` **should be used instead.**
 
     **Promise**::
 
@@ -94,9 +94,9 @@ Lob Methods
 
     See :ref:`Closing Lobs <closinglobs>` for more information.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         close(function(Error error){});
 
@@ -113,12 +113,11 @@ Lob Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``close()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the :ref:`error message <errorobj>`.
+          - If ``close()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
 .. method:: lob.destroy()
 
-    ::
+    .. code-block:: javascript
 
         destroy([Error error]);
 
@@ -153,8 +152,7 @@ Lob Methods
         * - Parameter
           - Description
         * - Error ``error``
-          - This optional parameter is used for the error emitted in an
-            ``error`` event.
+          - This optional parameter is used for the error emitted in an ``error`` event.
 
 .. method:: lob.getData()
 
@@ -173,15 +171,15 @@ Lob Methods
     Note it is an asynchronous method and requires a round-trip to the
     database:
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const data = await myLob.getData();
 
     .. versionadded:: 4.0
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         getData(function(Error error, String data));
         getData(function(Error error, Buffer data));
@@ -200,7 +198,6 @@ Lob Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``getData()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the :ref:`error message <errorobj>`.
+          - If ``getData()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - String ``data`` or Buffer ``data``
           - The value of the LOB.

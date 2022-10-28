@@ -1,4 +1,3 @@
-.. module:: oracledb
 
 .. _oracledbclass:
 
@@ -11,7 +10,7 @@ objects.
 
 The *Oracledb* object is instantiated by loading node-oracledb:
 
-.. code:: javascript
+.. code-block:: javascript
 
     const oracledb = require("oracledb");
 
@@ -221,7 +220,7 @@ for common :ref:`Oracle Database Type Constants <oracledbconstantsdbtype>`.
     * - ``oracledb.DEFAULT``
       - 0
       - n/a
-      - Used with ``fetchInfo`` to reset the fetch type to the database type
+      - Used with ``fetchInfo`` to reset the fetch type to the database type.
     * - ``oracledb.NUMBER``
       - 2010
       - ``oracledb.DB_TYPE_NUMBER``
@@ -483,20 +482,13 @@ Constants for the CQN :ref:`qos <consubscribeoptqos>` Quality of Service.
       - Description
     * - ``oracledb.SUBSCR_QOS_BEST_EFFORT``
       - 16
-      - When best effort filtering for query result set changes is acceptable.
-        False positive notifications may be received. This behavior may be
-        suitable for caching applications.
+      - When best effort filtering for query result set changes is acceptable. False positive notifications may be received. This behavior may be suitable for caching applications.
     * - ``oracledb.SUBSCR_QOS_DEREG_NFY``
       - 2
-      - The subscription will be automatically unregistered as soon as the
-        first notification is received.
+      - The subscription will be automatically unregistered as soon as the first notification is received.
     * - ``oracledb.SUBSCR_QOS_QUERY``
       - 8
-      - CQN will be used instead of Database Change Notification. This means
-        that notifications are only sent if the result set of the registered
-        query changes. By default no false positive notifications are
-        generated. Use ``oracledb.SUBSCR_QOS_BEST_EFFORT`` if this is
-        not needed.
+      - CQN will be used instead of Database Change Notification. This means that notifications are only sent if the result set of the registered query changes. By default no false positive notifications are generated. Use ``oracledb.SUBSCR_QOS_BEST_EFFORT`` if this is not needed.
     * - ``oracledb.SUBSCR_QOS_RELIABLE``
       - 1
       - Notifications are not lost in the event of database failure.
@@ -657,8 +649,7 @@ Constants for :ref:`AqMessage Class <aqmessageclass>` ``state``.
       - All intended consumers have successfully dequeued the message.
     * - ``oracledb.AQ_MSG_STATE_EXPIRED``
       - 3
-      - One or more consumers did not dequeue the message before the expiration
-        time.
+      - One or more consumers did not dequeue the message before the expiration time.
 
 Constants for :ref:`AqEnqOptions Class <aqenqoptionsclass>` and
 :ref:`AqDeqOptions Class <aqdeqoptionsclass>` ``visibility``.
@@ -677,8 +668,7 @@ Constants for :ref:`AqEnqOptions Class <aqenqoptionsclass>` and
       - Description
     * - ``oracledb.AQ_VISIBILITY_IMMEDIATE``
       - 1
-      - The message is not part of the current transaction. It constitutes a
-        transaction on its own.
+      - The message is not part of the current transaction. It constitutes a transaction on its own.
     * - ``oracledb.AQ_VISIBILITY_ON_COMMIT``
       - 2
       - The message is part of the current transaction.
@@ -712,9 +702,7 @@ properties.
       - Default. Used to request notification of all operations.
     * - ``oracledb.CQN_OPCODE_ALL_ROWS``
       - 1
-      - Indicates that row information is not available. This occurs if the
-        qos quality of service flags do not specify the desire for ROWIDs, or
-        if grouping has taken place and summary notifications are being sent.
+      - Indicates that row information is not available. This occurs if qos quality of service flags do not specify the desire for ROWIDs, or if grouping has taken place and summary notifications are being sent.
     * - ``oracledb.CQN_OPCODE_ALTER``
       - 16
       - Set if the table was altered in the notifying transaction.
@@ -755,8 +743,7 @@ Constants for the connection :attr:`pool.status` read-only attribute.
       - The connection pool has been closed.
     * - ``oracledb.POOL_STATUS_DRAINING``
       - 6001
-      - The connection pool is being drained of in-use connections and will be
-        force closed soon.
+      - The connection pool is being drained of in-use connections and will be force closed soon.
     * - ``oracledb.POOL_STATUS_OPEN``
       - 6000
       - The connection pool is open.
@@ -783,8 +770,7 @@ Simple Oracle Document Access (SODA) Constants
       - Description
     * - ``oracledb.SODA_COLL_MAP_MODE``
       - 5001
-      - Indicate :meth:`sodaDatabase.createCollection()` should use an
-        externally created table to store the collection.
+      - Indicate :meth:`sodaDatabase.createCollection()` should use an externally created table to store the collection.
 
 .. _oracledbconstantsshutdown:
 
@@ -810,30 +796,22 @@ These are new in node-oracledb 5.
       - Description
     * - ``oracledb.SHUTDOWN_MODE_ABORT``
       - 4
-      - All uncommitted transactions are terminated and not rolled back. This
-        is the fastest way to shut down the database, but the next database
-        start up may require instance recovery.
+      - All uncommitted transactions are terminated and not rolled back. This is the fastest way to shut down the database, but the next database start up may require instance recovery.
     * - ``oracledb.SHUTDOWN_MODE_DEFAULT``
       - 0
-      - Further connections to the database are prohibited. Wait for users to
-        disconnect from the database.
+      - Further connections to the database are prohibited. Wait for users to disconnect from the database.
     * - ``oracledb.SHUTDOWN_MODE_FINAL``
       - 5
-      - Used with a second :meth:`connection.shutdown()` to conclude
-        the database shut down steps.
+      - Used with a second :meth:`connection.shutdown()` to conclude the database shut down steps.
     * - ``oracledb.SHUTDOWN_MODE_IMMEDIATE``
       - 3
-      - All uncommitted transactions are terminated and rolled back and all
-        connections to the database are closed immediately.
+      - All uncommitted transactions are terminated and rolled back and all connections to the database are closed immediately.
     * - ``oracledb.SHUTDOWN_MODE_TRANSACTIONAL``
       - 1
-      - Further connections to the database are prohibited and no new
-        transactions are allowed to be started. Wait for active transactions to
-        complete.
+      - Further connections to the database are prohibited and no new transactions are allowed to be started. Wait for active transactions to complete.
     * - ``oracledb.SHUTDOWN_MODE_TRANSACTIONAL_LOCAL``
       - 2
-      - Behaves the same way as ``SHUTDOWN_MODE_TRANSACTIONAL``, but only waits
-        for local transactions to complete.
+      - Behaves the same way as ``SHUTDOWN_MODE_TRANSACTIONAL``, but only waits for local transactions to complete.
 
 .. _oracledbconstantstpc:
 
@@ -917,7 +895,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.autoCommit = false;
@@ -948,7 +926,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.connectionClass = 'HRPOOL';
@@ -974,7 +952,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.dbObjectAsPojo = false;
@@ -990,7 +968,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.edition = 'ed_2';
@@ -1029,7 +1007,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.errorOnConcurrentExecute = false;
@@ -1058,7 +1036,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.events = false;
@@ -1101,7 +1079,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.externalAuth = false;
@@ -1144,7 +1122,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.fetchArraySize = 100;
@@ -1170,7 +1148,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.fetchAsBuffer = [ oracledb.BLOB ];
@@ -1227,7 +1205,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
@@ -1249,7 +1227,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.lobPrefetchSize = 16384;
@@ -1288,7 +1266,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.maxRows = 0;
@@ -1309,7 +1287,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         console.log("Oracle client library version number is " + oracledb.oracleClientVersion);
@@ -1328,7 +1306,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         console.log("Oracle client library version is " + oracledb.oracleClientVersionString);
@@ -1373,7 +1351,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.outFormat = oracledb.OUT_FORMAT_ARRAY;
@@ -1398,7 +1376,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.poolIncrement = 1;
@@ -1425,7 +1403,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.poolMax = 4;
@@ -1456,7 +1434,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.poolMaxPerShard = 0;
@@ -1489,7 +1467,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.poolMin = 0;
@@ -1522,13 +1500,9 @@ Each of the configuration properties is described below.
         * - ``n`` < ``0``
           - Never checks for connection validity.
         * - ``n`` = ``0``
-          - Always checks for connection validity. This value is not
-            recommended for most applications because of the overhead in
-            performing each ping.
+          - Always checks for connection validity. This value is not recommended for most applications because of the overhead in performing each ping.
         * - ``n`` > ``0``
-          - Checks validity if the connection has been idle in the pool
-            (not “checked out” to the application by ``getConnection()``) for
-            at least ``n`` seconds.
+          - Checks validity if the connection has been idle in the pool (not “checked out” to the application by ``getConnection()``) for at least ``n`` seconds.
 
     This property may be overridden when
     :meth:`creating a connection pool <oracledb.createPool()>`.
@@ -1542,7 +1516,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.poolPingInterval = 60;     // seconds
@@ -1572,7 +1546,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.poolTimeout = 60;
@@ -1610,7 +1584,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.prefetchRows = 2;
@@ -1629,7 +1603,7 @@ Each of the configuration properties is described below.
     Prior to node-oracledb 5, this property could be set to override or
     disable the Promise implementation.
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const mylib = require('myfavpromiseimplementation');
         oracledb.Promise = mylib;
@@ -1637,7 +1611,7 @@ Each of the configuration properties is described below.
     Prior to node-oracledb 5, Promises could be completely disabled by
     setting:
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         oracledb.Promise = null;
 
@@ -1662,7 +1636,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.queueMax = 500;
@@ -1694,7 +1668,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.queueTimeout = 3000; // 3 seconds
@@ -1717,7 +1691,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.stmtCacheSize = 30;
@@ -1730,7 +1704,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         console.log("Driver version number is " + oracledb.version);
@@ -1744,7 +1718,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         console.log("Driver version is " + oracledb.versionString);
@@ -1759,7 +1733,7 @@ Each of the configuration properties is described below.
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const oracledb = require('oracledb');
         console.log("Driver version suffix is " + oracledb.versionSuffix);
@@ -1820,22 +1794,13 @@ Oracledb Methods
           - Description
         * - ``poolAttrs``
           - Object
-          - The ``poolAttrs`` parameter object provides connection
-            credentials and pool-specific configuration properties, such as
-            the maximum or minimum number of connections for the pool, or the
-            statement cache size for the connections.
+          - The ``poolAttrs`` parameter object provides connection credentials and pool-specific configuration properties, such as the maximum or minimum number of connections for the pool, or the statement cache size for the connections.
 
-            |br| The properties provided in the ``poolAttrs`` parameter
-            override the default pooling properties of the *Oracledb* object.
-            If an attribute is not set, or is null, the value of the related
-            *Oracledb* property will be used.
+            The properties provided in the ``poolAttrs`` parameter override the default pooling properties of the *Oracledb* object. If an attribute is not set, or is null, the value of the related *Oracledb* property will be used.
 
-            |br| Note that the ``poolAttrs`` parameter may have configuration
-            properties that are not used by the ``createPool()`` method.
-            These are ignored.
+            Note that the ``poolAttrs`` parameter may have configuration properties that are not used by the ``createPool()`` method. These are ignored.
 
-            |br| See :ref:`createpoolpoolattrs` for information on the
-            properties of ``poolAttrs``.
+            See :ref:`createpoolpoolattrs` for information on the properties of ``poolAttrs``.
 
     The properties of ``poolAttrs`` are:
 
@@ -1845,10 +1810,10 @@ Oracledb Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 10 7 30
-        :summary: The first column displays the name of the property. The
-         second column displays the data type of the property. The third
-         column displays the description of the property.
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
 
         * - Property
           - Data Type
@@ -1857,489 +1822,298 @@ Oracledb Methods
           - Function, String, Object
           - .. _createpoolpoolattrsaccesstoken:
 
-            For Microsoft Azure Active Directory OAuth 2.0 token-based
-            authentication ``accessToken`` can be:
+            For Microsoft Azure Active Directory OAuth 2.0 token-based authentication ``accessToken`` can be:
 
-               -  a callback function returning the token as a string
-               -  an object with a ``token`` attribute containing the token
-                  as a string
-               -  or the token as a string
+            -  a callback function returning the token as a string
+            -  an object with a ``token`` attribute containing the token as a string
+            -  or the token as a string
 
-            Tokens can be obtained using various approaches. For example,
-            using the Azure Active Directory API.
+            Tokens can be obtained using various approaches. For example, using the Azure Active Directory API.
 
-            |br| For Oracle Cloud Infrastructure Identity and Access Management
-            (IAM) token-based authentication ``accessToken`` can be:
+            For Oracle Cloud Infrastructure Identity and Access Management (IAM) token-based authentication ``accessToken`` can be:
 
-               -  a callback function returning an object containing
-                  ``token`` and ``privateKey`` attributes
-               -  or an object containing ``token`` and ``privateKey``
-                  attributes
+            -  a callback function returning an object containing ``token`` and ``privateKey`` attributes
+            -  or an object containing ``token`` and ``privateKey`` attributes
 
-            The properties of the ``accessToken`` object are described in
-            :ref:`accesstokenproperties`.
+            The properties of the ``accessToken`` object are described in :ref:`accesstokenproperties`.
 
-            |br| If the ``accessToken`` is a callback function, the syntax is::
+            If the ``accessToken`` is a callback function::
 
               function accessToken(boolean refresh)
 
-            When ``accessToken`` is a callback function, it will be invoked
-            at the time the pool is created (even if ``poolMin`` is 0). It
-            is also called when the pool needs to expand (causing new
-            connections to be created) and the current token has expired.
-            The returned token is used by node-oracledb for authentication.
-            The ``refresh`` parameter is described in :ref:`refresh`.
+            When ``accessToken`` is a callback function, it will be invoked at the time the pool is created (even if ``poolMin`` is 0). It is also called when the pool needs to expand (causing new connections to be created) and the current token has expired. The returned token is used by node-oracledb for authentication. The ``refresh`` parameter is described in :ref:`refresh`.
 
-            |br| When the callback is first invoked, the ``refresh`` parameter
-            will be set to *false*. This indicates that the application can
-            provide a token from its own application managed cache, or it can
-            generate a new token if there is no cached value. Node-oracledb
-            checks whether the returned token has expired. If it has expired,
-            then the callback function will be invoked a second time with
-            ``refresh`` set to *true*. In this case the function must
-            externally acquire a token, optionally add it to the application’s
-            cache, and return the token.
+            When the callback is first invoked, the ``refresh`` parameter will be set to *false*. This indicates that the application can provide a token from its own application managed cache, or it can generate a new token if there is no cached value. Node-oracledb checks whether the returned token has expired. If it has expired, then the callback function will be invoked a second time with ``refresh`` set to *true*. In this case the function must externally acquire a token, optionally add it to the application’s cache, and return the token.
 
-            |br| For token-based authentication, the ``externalAuth`` and
-            ``homogeneous`` pool attributes must be set to *true* . The
-            ``user`` (or ``username``) and ``password`` attributes should not
-            be set.
+            For token-based authentication, the ``externalAuth`` and ``homogeneous`` pool attributes must be set to *true* . The ``user`` (or ``username``) and ``password`` attributes should not be set.
 
-            |br| See :ref:`Token-Based Authentication
-            <tokenbasedauthentication>` for more information.
-
-            |br|
+            See :ref:`Token-Based Authentication <tokenbasedauthentication>` for more information.
 
             .. versionadded:: 5.4
 
-            |br| This attribute was added to support IAM token-based
-            authentication. In this release the attribute must be an Object.
-            Oracle Client libraries 19.14 (or later), or 21.5 (or later) must
-            be used for IAM token-based authentication.
+            This attribute was added to support IAM token-based authentication. In this release the attribute must be an Object. Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for IAM token-based authentication.
 
-            |br| The ``accessToken`` attribute was extended to allow OAuth 2.0
-            token-based authentication in node-oracledb 5.5. For OAuth 2.0,
-            the attribute should be a string, or a callback. Also Oracle
-            Client libraries 19.15 (or later), or 21.7 (or later) must be
-            used. The callback usage supports both OAuth 2.0 and IAM
-            token-based authentication.
-
+            The ``accessToken`` attribute was extended to allow OAuth 2.0 token-based authentication in node-oracledb 5.5. For
+            OAuth 2.0, the attribute should be a string, or a callback. Also Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. The callback usage supports both OAuth 2.0 and IAM token-based authentication.
         * - ``accessTokenCallback``
           - Object
           - .. _createpoolpoolattrsaccesstokencallback:
 
-            This optional attribute is a Node.js callback function. It gets
-            called by the connection pool if the pool needs to grow and
-            create new connections but the current token has expired.
+            This optional attribute is a Node.js callback function. It gets called by the connection pool if the pool needs to grow and create new connections but the current token has expired.
 
-            |br| The callback function must return a JavaScript object with
-            attributes ``token`` and ``privateKey`` for IAM. See
-            :ref:`Connection Pool Creation with Access Tokens for IAM
-            <iampool>`.
-
-            |br|
+            The callback function must return a JavaScript object with attributes ``token`` and ``privateKey`` for IAM. See :ref:`Connection Pool Creation with Access Tokens for IAM <iampool>`.
 
             .. versionadded:: 5.4
 
-            |br| It should be used with Oracle Client libraries 19.14
-            (or later), or 21.5 (or later).
-
-            |br|
+            It should be used with Oracle Client libraries 19.14 (or later), or 21.5 (or later).
 
             .. deprecated:: 5.5
 
-            |br| Use :ref:`accessToken <createpoolpoolattrsaccesstoken>`
-            instead, which was enhanced to support a callback.
+            Use :ref:`accessToken <createpoolpoolattrsaccesstoken>` instead, which was enhanced to support a callback.
         * - ``connectString``, ``connectionString``
           - String
           - .. _createpoolpoolattrsconnectstring:
 
-            The two properties are aliases for each other. Use only one of the
-            properties.
+            The two properties are aliases for each other. Use only one of the properties.
 
-            |br| The Oracle database instance used by connections in the pool.
-            The string can be an Easy Connect string, or a Net Service Name
-            from a ``tnsnames.ora`` file, or the name of a local Oracle
-            Database instance. See :ref:`Connection Strings
+            The Oracle database instance used by connections in the pool. The string can be an Easy Connect string, or a Net Service Name from a ``tnsnames.ora`` file, or the name of a local Oracle Database instance. See :ref:`Connection Strings
             <connectionstrings>` for examples.
 
-            |br| The alias ``connectionString`` was added in node-oracledb 2.1.
+            The alias ``connectionString`` was added in node-oracledb 2.1.
         * - ``edition``
           - String
           - .. _createpoolpoolattrsedition:
 
-            Sets the name used for :ref:`Edition-Based Redefinition <ebr>` by
-            connections in the pool.
+            Sets the name used for :ref:`Edition-Based Redefinition <ebr>` by connections in the pool.
 
-            |br| This optional property overrides the :attr:`oracledb.edition`
-            property.
-
-            |br|
+            This optional property overrides the :attr:`oracledb.edition` property.
 
             .. versionadded:: 2.2
         * - ``enableStatistics``
           - Boolean
           - .. _createpoolpoolattrsstats:
 
-            Recording of pool statistics can be enabled by setting
-            ``enableStatistics`` to *true*. Statistics can be retrieved with
-            :meth:`pool.getStatistics()`, or :meth:`pool.logStatistics()`.
-            See :ref:`Connection Pool Monitoring <connpoolmonitor>`.
+            Recording of pool statistics can be enabled by setting ``enableStatistics`` to *true*. Statistics can be retrieved with :meth:`pool.getStatistics()`, or :meth:`pool.logStatistics()`. See :ref:`Connection Pool Monitoring <connpoolmonitor>`.
 
-            |br| The default value is *false*.
-
-            |br|
+            The default value is *false*.
 
             .. versionadded:: 5.2
 
-            |br| The obsolete property ``_enableStats`` can still be used,
-            but it will be removed in a future version of node-oracledb.
+            The obsolete property ``_enableStats`` can still be used, but it will be removed in a future version of node-oracledb.
         * - ``events``
           - Boolean
           - .. _createpoolpoolattrsevents:
 
-            Indicates whether Oracle Call Interface events mode should be
-            enabled for this pool.
+            Indicates whether Oracle Call Interface events mode should be enabled for this pool.
 
-            |br| This optional property overrides the :attr:`oracledb.events`
-            property.
-
-            |br|
+            This optional property overrides the :attr:`oracledb.events` property.
 
             .. versionadded:: 2.2
         * - ``externalAuth``
           - Boolean
           - .. _createpoolpoolattrsexternalauth:
 
-            Indicates whether pooled connections should be established using
-            :ref:`External Authentication <extauth>`.
+            Indicates whether pooled connections should be established using :ref:`External Authentication <extauth>`.
 
-            |br| The default is *false*.
+            The default is *false*.
 
-            |br| This optional property overrides the
-            :attr:`oracledb.externalAuth` property.
+            This optional property overrides the :attr:`oracledb.externalAuth` property.
 
-            |br| The ``user`` (or ``username``) and ``password`` properties
-            should not be set when ``externalAuth`` is *true*.
+            The ``user`` (or ``username``) and ``password`` properties should not be set when ``externalAuth`` is *true*.
 
-            |br| Note prior to node-oracledb 0.5 this property was called
-            ``isExternalAuth``.
+            Note prior to node-oracledb 0.5 this property was called ``isExternalAuth``.
         * - ``homogeneous``
           - Boolean
           - .. _createpoolpoolattrshomogeneous:
 
-            Indicates whether connections in the pool all have the same
-            credentials (a ‘homogeneous’ pool), or whether different
-            credentials can be used (a ‘heterogeneous’ pool).
+            Indicates whether connections in the pool all have the same credentials (a ‘homogeneous’ pool), or whether different credentials can be used (a ‘heterogeneous’ pool).
 
-            |br| The default is *true*.
+            The default is *true*.
 
-            |br| When set to *false*, the user name and password can be omitted
-            from the ``connection.createPool()`` call, but will need to be
-            given for subsequent ``pool.getConnection()`` calls. Different
-            ``pool.getConnection()`` calls can provide different user
-            credentials. Alternatively, when ``homogeneous`` is *false*, the
-            user name (the ‘proxy’ user name) and password can be given, but
-            subsequent ``pool.getConnection()`` calls can specify a different
-            user name to access that user’s schema.
+            When set to *false*, the user name and password can be omitted from the ``connection.createPool()`` call, but will need to be given for subsequent ``pool.getConnection()`` calls. Different ``pool.getConnection()`` calls can provide different user credentials. Alternatively, when ``homogeneous`` is *false*, the user name (the ‘proxy’ user name) and password can be given, but subsequent ``pool.getConnection()`` calls can specify a different user name to access that user’s schema.
 
-            |br| Heterogeneous pools cannot be used with the :ref:`connection pool
-            cache <connpoolcache>`. Applications should ensure the pool
-            object is explicitly passed between code modules, or use a
-            homogeneous pool and make use of :attr:`connection.clientId`.
+            Heterogeneous pools cannot be used with the :ref:`connection pool cache <connpoolcache>`. Applications should ensure the pool object is explicitly passed between code modules, or use a homogeneous pool and make use of :attr:`connection.clientId`.
 
-            |br| See :ref:`Heterogeneous Connection Pools and Pool Proxy
-            Authentication <connpoolproxy>` for details and examples.
-
-            |br|
+            See :ref:`Heterogeneous Connection Pools and Pool Proxy Authentication <connpoolproxy>` for details and examples.
 
             .. versionadded:: 2.3
         * - ``password``
           - String
           - .. _createpoolpoolattrspassword:
 
-            The password of the database user used by connections in the
-            pool. A password is also necessary if a proxy user is specified
+            The password of the database user used by connections in the pool. A password is also necessary if a proxy user is specified
             at pool creation.
 
-            |br| If ``homogeneous`` is *false*, then the password may be
-            omitted at pool creation but given in subsequent
-            ``pool.getConnection()`` calls.
+            If ``homogeneous`` is *false*, then the password may be omitted at pool creation but given in subsequent ``pool.getConnection()`` calls.
         * - ``poolAlias``
           - String
           - .. _createpoolpoolattrspoolalias:
 
-            An optional property that is used to explicitly add pools to the
-            connection pool cache. If a pool alias is provided, then the new
-            pool will be added to the connection pool cache and the
-            ``poolAlias`` value can then be used with methods that utilize the
-            connection pool cache, such as :meth:`oracledb.getPool()` and
-            :meth:`oracledb.getConnection()`.
+            An optional property that is used to explicitly add pools to the connection pool cache. If a pool alias is provided, then the new pool will be added to the connection pool cache and the ``poolAlias`` value can then be used with methods that utilize the connection pool cache, such as :meth:`oracledb.getPool()` and :meth:`oracledb.getConnection()`.
 
-            |br| See :ref:`Connection Pool Cache <connpoolcache>` for details
-            and examples.
-
-            |br|
+            See :ref:`Connection Pool Cache <connpoolcache>` for details and examples.
 
             .. versionadded:: 1.11
         * - ``poolIncrement``
           - Number
           - .. _createpoolpoolattrspoolincrement:
 
-            The number of connections that are opened whenever a connection
-            request exceeds the number of currently open connections.
+            The number of connections that are opened whenever a connection request exceeds the number of currently open connections.
 
-            |br| The default value is *1*.
+            The default value is *1*.
 
-            |br| This optional property overrides the
-            :attr:`oracledb.poolIncrement` property.
+            This optional property overrides the :attr:`oracledb.poolIncrement` property.
         * - ``poolMax``
           - Number
           - .. _createpoolpoolattrspoolmax:
 
-            The maximum number of connections to which a connection pool can
-            grow.
+            The maximum number of connections to which a connection pool can grow.
 
-            |br| The default value is *4*.
+            The default value is *4*.
 
-            |br| This optional property overrides the :attr:`oracledb.poolMax`
-            property.
+            This optional property overrides the :attr:`oracledb.poolMax` property.
 
-            |br| Importantly, if you increase ``poolMax`` you should also
-            increase the number of threads available to node-oracledb. See
-            :ref:`Connections and Number of Threads <numberofthreads>`.
+            Importantly, if you increase ``poolMax`` you should also increase the number of threads available to node-oracledb. See :ref:`Connections and Number of Threads <numberofthreads>`.
 
-            |br| See :ref:`Connection Pooling <connpooling>` for other pool
-            sizing guidelines.
+            See :ref:`Connection Pooling <connpooling>` for other pool sizing guidelines.
         * - ``poolMaxPerShard``
           - Number
           - .. _createpoolpoolattrspoolmaxpershard:
 
-            Sets the maximum number of connections per shard for connection
-            pools. This ensures that the pool is balanced towards each shard.
+            Sets the maximum number of connections per shard for connection pools. This ensures that the pool is balanced towards each shard.
 
-            |br| This optional property overrides the
-            :attr:`oracledb.poolMaxPerShard` property.
-
-            |br|
+            This optional property overrides the :attr:`oracledb.poolMaxPerShard` property.
 
             .. versionadded:: 4.1
         * - ``poolMin``
           - Number
           - .. _createpoolpoolattrspoolmin:
 
-            The number of connections established to the database when a pool
-            is created. Also this is the minimum number of connections that a
-            pool maintains when it shrinks.
+            The number of connections established to the database when a pool is created. Also this is the minimum number of connections that a pool maintains when it shrinks.
 
-            |br| The default value is *0*.
+            The default value is *0*.
 
-            |br| This optional property overrides the :attr:`oracledb.poolMin`
-            property.
+            This optional property overrides the :attr:`oracledb.poolMin` property.
         * - ``poolPingInterval``
           - Number
           - .. _createpoolpoolattrspoolpinginterval:
 
-            When a pool :meth:`pool.getConnection()` is called
-            and the connection has been idle in the pool for at least
-            ``poolPingInterval`` seconds, an internal “ping” will be
-            performed first to check the validity of the connection.
+            When a pool :meth:`pool.getConnection()` is called and the connection has been idle in the pool for at least ``poolPingInterval`` seconds, an internal “ping” will be performed first to check the validity of the connection.
 
-            |br| The default value is *60*.
+            The default value is *60*.
 
-            |br| This optional property overrides the
-            :attr:`oracledb.poolPingInterval` property.
+            This optional property overrides the :attr:`oracledb.poolPingInterval` property.
 
-            |br| See :ref:`Connection Pool Pinging <connpoolpinging>` for more
-            information.
+            See :ref:`Connection Pool Pinging <connpoolpinging>` for more information.
         * - ``poolTimeout``
           - Number
           - .. _createpoolpoolattrspooltimeout:
 
-            The number of seconds after which idle connections (unused in the
-            pool) may be terminated. Refer to :attr:`oracledb.poolTimeout`
-            for details.
+            The number of seconds after which idle connections (unused in the pool) may be terminated. Refer to :attr:`oracledb.poolTimeout` for details.
 
-            |br| The default value is *60*.
+            The default value is *60*.
 
-            |br| This optional property overrides the
-            :attr:`oracledb.poolTimeout` property.
-
+            This optional property overrides the :attr:`oracledb.poolTimeout` property.
         * - ``queueMax``
           - Number
           - .. _createpoolpoolattrsqueuemax:
 
-            The maximum number of pending ``pool.getConnection()`` calls that
-            can be queued.
+            The maximum number of pending ``pool.getConnection()`` calls that can be queued.
 
-            |br| When the number of ``pool.getConnection()`` calls that have
-            been :ref:`queued <connpoolqueue>` waiting for an available
-            connection reaches ``queueMax``, then any future
-            ``pool.getConnection()`` calls will immediately return an error
-            and will not be queued.
+            When the number of ``pool.getConnection()`` calls that have been :ref:`queued <connpoolqueue>` waiting for an available connection reaches ``queueMax``, then any future ``pool.getConnection()`` calls will immediately return an error and will not be queued.
 
-            |br| If ``queueMax`` is -1, then the queue length is not limited.
+            If ``queueMax`` is -1, then the queue length is not limited.
 
-            |br| The default value is *500*.
+            The default value is *500*.
 
-            |br| This optional property overrides the :attr:`oracledb.queueMax`
-            property.
-
-            |br|
+            This optional property overrides the :attr:`oracledb.queueMax` property.
 
             .. versionadded:: 5.0
         * - ``queueRequests``
           - NA
           - .. _createpoolpoolattrsqueuerequests:
 
-            This property was removed in node-oracledb 3.0 and queuing was
-            always enabled. In node-oracledb 5.0, set ``queueMax`` to 0 to
-            disable queuing. See :ref:`Connection Pool Queue <connpoolqueue>`
-            for more information.
+            This property was removed in node-oracledb 3.0 and queuing was always enabled. In node-oracledb 5.0, set ``queueMax`` to 0 to disable queuing. See :ref:`Connection Pool Queue <connpoolqueue>` for more information.
         * - ``queueTimeout``
           - Number
           - .. _createpoolpoolattrsqueuetimeout:
 
-            The number of milliseconds after which connection requests
-            waiting in the connection request queue are terminated. If
-            ``queueTimeout`` is set to 0, then queued connection requests
-            are never terminated.
+            The number of milliseconds after which connection requests waiting in the connection request queue are terminated. If ``queueTimeout`` is set to 0, then queued connection requests are never terminated.
 
-            |br| The default value is *60000*.
+            The default value is *60000*.
 
-            |br| This optional property overrides the
-            :attr:`oracledb.queueTimeout` property.
+            This optional property overrides the :attr:`oracledb.queueTimeout` property.
         * - ``sessionCallback``
           - String or Function
           - .. _createpoolpoolattrssessioncallback:
 
-            If the ``sessionCallback`` is a callback function, the syntax
-            is::
+            If the ``sessionCallback`` is a callback function::
 
               function sessionCallback(Connection connection,
               String requestedTag,
               function callback(Error error, Connection connection){})
 
-            When ``sessionCallback`` is a Node.js function, each
-            ``pool.getConnection()`` will select a connection from the pool
-            and may invoke ``sessionCallback`` before returning. The
-            ``sessionCallback`` function is called:
+            When ``sessionCallback`` is a Node.js function, each ``pool.getConnection()`` will select a connection from the pool and may invoke ``sessionCallback`` before returning. The ``sessionCallback`` function is called:
 
-                -  when the pool selects a brand new, never used connection
-                   in the pool.
-                -  if the pool selects a connection from the pool with a
-                   given :ref:`tag <getconnectiondbattrstag>` but that tag
-                   string value does not match the connection’s current,
-                   actual tag. The tag requested (if any) by
-                   ``pool.getConnection()`` is available in the
-                   ``requestedTag`` parameter. The actual tag in the
-                   connection selected by the pool is available in
-                   :attr:`connection.tag`.
+            -  when the pool selects a brand new, never used connection in the pool.
+            -  if the pool selects a connection from the pool with a given :ref:`tag <getconnectiondbattrstag>` but that tag string value does not match the connection’s current, actual tag. The tag requested (if any) by ``pool.getConnection()`` is available in the ``requestedTag`` parameter. The actual tag in the connection selected by the pool is available in :attr:`connection.tag`.
 
             It will not be invoked for other ``pool.getConnection()`` calls.
 
-            |br| The session callback is called before ``pool.getConnection()``
-            returns so it can be used for logging or to efficiently set
-            session state, such as with ALTER SESSION statements. Make sure
-            any session state is set and ``connection.tag`` is updated in the
-            ``sessionCallback`` function prior to it calling its own
-            ``callback()`` function otherwise the session will not be
-            correctly set when ``getConnection()`` returns. The connection
-            passed into ``sessionCallback`` should be passed out through
-            ``callback()`` so it is returned from the application’s
-            ``pool.getConnection()`` call.
+            The session callback is called before ``pool.getConnection()`` returns so it can be used for logging or to efficiently set session state, such as with ALTER SESSION statements. Make sure any session state is set and ``connection.tag`` is updated in the ``sessionCallback`` function prior to it calling its own ``callback()`` function otherwise the session will not be correctly set when ``getConnection()`` returns. The connection passed into ``sessionCallback`` should be passed out through ``callback()`` so it is returned from the application’s ``pool.getConnection()`` call.
 
-            |br| When node-oracledb is using Oracle Client libraries 12.2 or
-            later, tags are `multi-property tags <https://www.oracle.com/pls
-            /topic/lookup?ctx=dblatest&id=GUID-DFA21225-E83C-4177-A79A-
-            B8BA29DC662C>`__ with name=value pairs like “k1=v1;k2=v2”.
+            When node-oracledb is using Oracle Client libraries 12.2 or later, tags are `multi-property tags <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-DFA21225-E83C-4177-A79A-B8BA29DC662C>`__ with name=value pairs like “k1=v1;k2=v2”.
 
-            |br| When using Oracle Client libraries 12.2 or later,
-            ``sessionCallback`` can be a string containing the name of a
-            PL/SQL procedure to be called when ``pool.getConnection()``
-            requests a :ref:`tag <getconnectiondbattrstag>`, and that tag
-            does not match the connection’s actual tag. When the application
-            uses :ref:`DRCP connections <drcp>`, a PL/SQL callback can avoid
-            the :ref:`round-trip <roundtrips>` calls that a Node.js function
-            would require to set session state. For non-DRCP connections,
-            the PL/SQL callback will require a round-trip from the
-            application.
+            When using Oracle Client libraries 12.2 or later, ``sessionCallback`` can be a string containing the name of a PL/SQL procedure to be called when ``pool.getConnection()`` requests a :ref:`tag <getconnectiondbattrstag>`, and that tag does not match the connection’s actual tag. When the application uses :ref:`DRCP connections <drcp>`, a PL/SQL callback can avoid the :ref:`round-trip <roundtrips>` calls that a Node.js function would require to set session state. For non-DRCP connections,
+            the PL/SQL callback will require a round-trip from the application.
 
-            |br| The PL/SQL procedure declaration is:
+            The PL/SQL procedure declaration is:
 
-            .. code:: sql
+            .. code-block:: sql
 
               PROCEDURE mycallback (
                 desired_props IN  VARCHAR2,
                 actual_props  IN  VARCHAR2
               );
 
-            See :ref:`Connection Tagging and Session State <connpooltagging>`
-            for more information.
-
-            |br|
+            See :ref:`Connection Tagging and Session State <connpooltagging>` for more information.
 
             .. versionadded:: 3.1
         * - ``sodaMetaDataCache``
           - Boolean
           - .. _createpoolpoolattrssodamdcache:
 
-            Indicates whether the pool’s connections should share a
-            :ref:`cache of SODA metadata <sodamdcache>`. This improves SODA
-            performance by reducing :ref:`round-trips <roundtrips>` to the
-            database when opening collections. It has no effect on non-SODA
-            operations.
+            Indicates whether the pool’s connections should share a :ref:`cache of SODA metadata <sodamdcache>`. This improves SODA performance by reducing :ref:`round-trips <roundtrips>` to the database when opening collections. It has no effect on non-SODA operations.
 
-            |br| The default is *false*.
+            The default is *false*.
 
-            |br| There is no global equivalent for setting this attribute.
-            SODA metadata caching is restricted to pooled connections only.
+            There is no global equivalent for setting this attribute. SODA metadata caching is restricted to pooled connections only.
 
-            |br| Note: if the metadata of a collection is changed externally,
-            the cache can get out of sync. If this happens, the cache can be
-            cleared by calling
-            ``pool.reconfigure({sodaMetadataCache: false})``
-            See :meth:`pool.reconfigure()`.
+            Note that if the metadata of a collection is changed externally, the cache can get out of sync. If this happens, the cache can be cleared by calling ``pool.reconfigure({sodaMetadataCache: false})``. See :meth:`pool.reconfigure()`.
 
-            |br| A second call to ``reconfigure()`` should then be made to
-            re-enable the cache.
-
-            |br|
+            A second call to ``reconfigure()`` should then be made to re-enable the cache.
 
             .. versionadded:: 5.2
 
-            |br| It requires Oracle Client 21.3 (or later). The feature is also
-            available in Oracle Client 19c from 19.11 onward.
+            It requires Oracle Client 21.3 (or later). The feature is also available in Oracle Client 19c from 19.11 onward.
         * - ``stmtCacheSize``
           - Number
           - .. _createpoolpoolattrsstmtcachesize:
 
-            The number of statements to be cached in the
-            :ref:`statementcache <stmtcache>` of each connection in the pool.
+            The number of statements to be cached in the :ref:`statementcache <stmtcache>` of each connection in the pool.
 
-            |br| This optional property overrides the
-            :attr:`oracledb.stmtCacheSize` property.
-
+            This optional property overrides the :attr:`oracledb.stmtCacheSize` property.
         * - ``user``, ``username``
           - String
           - .. _createpoolpoolattrsuser:
 
-            The two properties are aliases for each other. Use only one of
-            the properties.
+            The two properties are aliases for each other. Use only one of the properties.
 
-            |br| The database user name for connections in the pool. Can be a
-            simple user name or a proxy of the form *alison[fred]*. See the
-            `Client Access Through a Proxy <https://www.oracle.com/pls/topic
-            /lookup?ctx=dblatest&id=GUID-D77D0D4A-7483-423A-9767-
-            CBB5854A15CC>`__ section in the Oracle Call Interface manual for
-            more details about proxy authentication.
+            The database user name for connections in the pool. Can be a simple user name or a proxy of the form *alison[fred]*. See the `Client Access Through a Proxy <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-D77D0D4A-7483-423A-9767-CBB5854A15CC>`__ section in the Oracle Call Interface manual for more details about proxy authentication.
 
-            |br| If ``homogeneous`` is *false*, then the pool user name and
-            password need to be specified only if the application wants that
-            user to proxy the users supplied in subsequent
-            ``pool.getConnection()`` calls.
+            If ``homogeneous`` is *false*, then the pool user name and password need to be specified only if the application wants that user to proxy the users supplied in subsequent ``pool.getConnection()`` calls.
 
-            |br| The alias ``username`` was added in node-oracledb 5.2.
+            The alias ``username`` was added in node-oracledb 5.2.
 
     **createPool(): accessToken Object Properties**
 
@@ -2383,16 +2157,13 @@ Oracledb Methods
         * - ``refresh`` Value
           - Description
         * - *false*
-          - The application can return a token from an application-specific
-            cache. If there is no cached token, the application must
-            externally acquire one.
+          - The application can return a token from an application-specific cache. If there is no cached token, the application must externally acquire one.
         * - *true*
-          - The token previously passed to driver is known to be expired, the
-            application should externally acquire a new token.
+          - The token previously passed to driver is known to be expired, the application should externally acquire a new token.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         createPool(Object poolAttrs, function(Error error, Pool pool){});
 
@@ -2413,13 +2184,9 @@ Oracledb Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``createPool()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the :ref:`error message <errorobj>`.
+          - If ``createPool()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - Pool ``pool``
-          - The newly created connection pool. If ``createPool()`` fails, ``pool``
-            will be NULL. If the pool will be accessed via the
-            :ref:`pool cache <connpoolcache>`, this parameter can be omitted.
-            See :ref:`Pool class <poolclass>` for more information.
+          - The newly created connection pool. If ``createPool()`` fails, ``pool`` will be NULL. If the pool will be accessed via the :ref:`pool cache <connpoolcache>`, this parameter can be omitted. See :ref:`Pool class <poolclass>` for more information.
 
 .. method:: oracledb.getConnection()
 
@@ -2451,17 +2218,13 @@ Oracledb Methods
         * - Signature
           - Description
         * - ``oracledb.getConnection()``
-          - Gets a connection from the previously created default pool.
-            Returns a promise.
+          - Gets a connection from the previously created default pool. Returns a promise.
         * - ``oracledb.getConnection(callback)``
-          - Gets a connection from the previously created default pool.
-            Invokes the callback.
+          - Gets a connection from the previously created default pool. Invokes the callback.
         * - ``oracledb.getConnection(poolAlias)``
-          - Gets a connection from the previously created pool with the
-            specified ``poolAlias``. Returns a promise.
+          - Gets a connection from the previously created pool with the specified ``poolAlias``. Returns a promise.
         * - ``oracledb.getConnection(poolAlias, callback)``
-          - Gets a connection from the previously created pool with the
-            specified ``poolAlias``. Invokes the callback.
+          - Gets a connection from the previously created pool with the specified ``poolAlias``. Invokes the callback.
         * - ``oracledb.getConnection(connAttrs)``
           - Creates a standalone, non-pooled connection. Returns a promise.
         * - ``oracledb.getConnection(connAttrs, callback)``
@@ -2499,20 +2262,16 @@ Oracledb Methods
           - String
           - .. _getconnectionpoolalias:
 
-            Specifies which previously created pool in the :ref:`connection
-            pool cache <connpoolcache>` to use to obtain the connection.
+            Specifies which previously created pool in the :ref:`connection pool cache <connpoolcache>` to use to obtain the connection.
         * - ``connAttrs``
           - Object
           - .. _getconnectiondbattrsconnattrs:
 
-            The ``connAttrs`` parameter object provides connection credentials
-            and connection-specific configuration properties.
+            The ``connAttrs`` parameter object provides connection credentials and connection-specific configuration properties.
 
-            |br| Any ``connAttrs`` properties that are not used by the
-            ``getConnection()`` method are ignored.
+            Any ``connAttrs`` properties that are not used by the ``getConnection()`` method are ignored.
 
-            |br| See :ref:`connattrsparams` for information on
-            the properties of the ``connAttrs`` object.
+            See :ref:`connattrsparams` for information on the properties of the ``connAttrs`` object.
 
     The properties of the ``connAttrs`` object are:
 
@@ -2534,104 +2293,63 @@ Oracledb Methods
           - Function, String, or Object
           - .. _getconnectiondbattrsaccesstoken:
 
-            For Microsoft Azure Active Directory OAuth 2.0 token-based
-            authentication ``accessToken`` can be:
+            For Microsoft Azure Active Directory OAuth 2.0 token-based authentication ``accessToken`` can be:
 
-               -  a callback function returning the token as a string
-               -  or the token as a string
+            -  a callback function returning the token as a string
+            -  or the token as a string
 
-            For OAuth 2.0, tokens can be obtained using various approaches.
-            For example, using the Azure Active Directory API.
+            For OAuth 2.0, tokens can be obtained using various approaches. For example, using the Azure Active Directory API.
 
-            |br| For Oracle Cloud Infrastructure Identity and Access
-            Management (IAM)token-based authentication ``accessToken`` can be:
+            For Oracle Cloud Infrastructure Identity and Access Management (IAM) token-based authentication ``accessToken`` can be:
 
-               -  an object containing ``token`` and ``privateKey`` attributes
-               -  or a callback function returning an object containing
-                  ``token`` and ``privateKey`` attributes
+            -  an object containing ``token`` and ``privateKey`` attributes
+            -  or a callback function returning an object containing ``token`` and ``privateKey`` attributes
 
-            For OCI IAM, the ``token`` and ``privateKey`` values can be
-            obtained using various approaches. For example the Oracle Cloud
-            Infrastructure Command Line Interface can be used.
+            For OCI IAM, the ``token`` and ``privateKey`` values can be obtained using various approaches. For example the Oracle Cloud Infrastructure Command Line Interface can be used.
 
-            |br| The properties of the ``accessToken`` object are described in
-            :ref:`accesstokenobjproperties`.
+            The properties of the ``accessToken`` object are described in :ref:`accesstokenobjproperties`.
 
-            |br| If the ``accessToken`` is a callback function, the syntax is::
+            If the ``accessToken`` is a callback function::
 
               function accessToken(boolean refresh)
 
-            When ``accessToken`` is a callback function, the returned token is
-            used by node-oracledb for authentication. The ``refresh``
-            parameter is described in :ref:`getconnectionrefresh`.
+            When ``accessToken`` is a callback function, the returned token is used by node-oracledb for authentication. The ``refresh`` parameter is described in :ref:`getconnectionrefresh`.
 
-            |br| For each connection, the callback is invoked with the
-            ``refresh`` parameter set to *false*. This indicates that the
-            application can provide a token from its own application managed
-            cache, or it can generate a new token if there is no cached value.
-            Node-oracledb checks whether the returned token has expired. If
-            it has expired, then the callback function will be invoked a
-            second time with ``refresh`` set to *true*. In this case the
-            function must externally acquire a token, optionally add it to
-            the application’s cache, and return the token.
+            For each connection, the callback is invoked with the ``refresh`` parameter set to *false*. This indicates that the application can provide a token from its own application managed cache, or it can generate a new token if there is no cached value. Node-oracledb checks whether the returned token has expired. If it has expired, then the callback function will be invoked a second time with ``refresh`` set to *true*. In this case the function must externally acquire a token, optionally add it to the application’s cache, and return the token.
 
-            |br| For token-based authentication, the ``externalAuth``
-            connection attribute must be set to *true* . The ``user``
-            (or ``username``) and ``password`` attributes should not be set.
+            For token-based authentication, the ``externalAuth`` connection attribute must be set to *true* . The ``user`` (or ``username``) and ``password`` attributes should not be set.
 
-            |br| See :ref:`Token-Based Authentication
-            <tokenbasedauthentication>` for more information.
+            See :ref:`Token-Based Authentication <tokenbasedauthentication>` for more information.
 
-            |br| The ``accessToken`` attribute was added in node-oracledb 5.4
-            to support IAM token-based authentication. In this release the
-            attribute must be an Object. Oracle Client libraries 19.14
-            (or later), or 21.5 (or later) must be used for IAM token-based
-            authentication.
+            The ``accessToken`` attribute was added in node-oracledb 5.4 to support IAM token-based authentication. In this release the attribute must be an Object. Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for IAM token-based authentication.
 
-            |br| The ``accessToken`` attribute was extended to allow OAuth 2.0
-            token-based authentication in node-oracledb 5.5. For OAuth 2.0, the
-            attribute should be a string, or a callback. Also Oracle Client
-            libraries 19.15 (or later), or 21.7 (or later) must be used. The
-            callback usage supports both OAuth 2.0 and IAM token-based
-            authentication.
+            The ``accessToken`` attribute was extended to allow OAuth 2.0 token-based authentication in node-oracledb 5.5. For
+            OAuth 2.0, the attribute should be a string, or a callback. Also Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. The callback usage supports both OAuth 2.0 and IAM token-based authentication.
         * - ``connectString``, ``connectionString``
           - String
           - .. _getconnectiondbattrsconnectstring:
 
-            The two properties are aliases for each other. Use only one of the
-            properties.
+            The two properties are aliases for each other. Use only one of the properties.
 
-            |br| The Oracle database instance to connect to. The string can be
-            an Easy Connect string, or a Net Service Name from a
-            ``tnsnames.ora`` file, or the name of a local Oracle database
-            instance. See :ref:`Connection Strings <connectionstrings>` for
-            examples.
+            The Oracle database instance to connect to. The string can be an Easy Connect string, or a Net Service Name from a ``tnsnames.ora`` file, or the name of a local Oracle database instance. See :ref:`Connection Strings <connectionstrings>` for examples.
 
-            |br| The alias ``connectionString`` was added in node-oracledb 2.1.
+            The alias ``connectionString`` was added in node-oracledb 2.1.
         * - ``edition``
           - String
           - .. _getconnectiondbattrsedition:
 
-            Sets the name used for :ref:`Edition-Based Redefinition <ebr>` by
-            this connection.
+            Sets the name used for :ref:`Edition-Based Redefinition <ebr>` by this connection.
 
-            |br| This optional property overrides the :attr:`oracledb.edition`
-            property.
-
-            |br|
+            This optional property overrides the :attr:`oracledb.edition` property.
 
             .. versionadded:: 2.2
         * - ``events``
           - Boolean
           - .. _getconnectiondbattrsevents:
 
-            Determines if the standalone connection is created using Oracle
-            Call Interface events mode.
+            Determines if the standalone connection is created using Oracle Call Interface events mode.
 
-            |br| This optional property overrides the :attr:`oracledb.events`
-            property.
-
-            |br|
+            This optional property overrides the :attr:`oracledb.events` property.
 
             .. versionadded:: 2.2
         * - ``externalAuth``
@@ -2641,143 +2359,94 @@ Oracledb Methods
             If this optional property is *true* then the connection will be
             established using :ref:`External Authentication <extauth>`.
 
-            |br| This optional property overrides the
-            :attr:`oracledb.externalAuth` property.
+            This optional property overrides the :attr:`oracledb.externalAuth` property.
 
-            |br| The ``user`` (or ``username``) and ``password`` properties
-            should not be set when ``externalAuth`` is *true*.
+            The ``user`` (or ``username``) and ``password`` properties should not be set when ``externalAuth`` is *true*.
 
-            |br| Note prior to node-oracledb 0.5 this property was called
+            Note prior to node-oracledb 0.5 this property was called
             ``isExternalAuth``.
         * - ``matchAny``
           - Boolean
           - .. _getconnectiondbattrsmatchany:
 
-            Used in conjunction with :ref:`tag <getconnectiondbattrstag>` when
-            getting a connection from a :ref:`connection pool <poolclass>`.
+            Used in conjunction with :ref:`tag <getconnectiondbattrstag>` when getting a connection from a :ref:`connection pool <poolclass>`.
 
-            |br| Indicates that the tag in a connection returned from a
-            connection pool may not match the requested tag.
+            Indicates that the tag in a connection returned from a connection pool may not match the requested tag.
 
-            |br| See :ref:`Connection Tagging and Session State
-            <connpooltagging>`.
-
-            |br|
+            See :ref:`Connection Tagging and Session State <connpooltagging>`.
 
             .. versionadded:: 3.1
         * - ``newPassword``
           - String
           - .. _getconnectiondbattrsnewpassword:
 
-            The new password to use for the database user. When using
-            ``newPassword``, the :ref:`password <getconnectiondbattrspassword>`
-            property should be set to the current password.
+            The new password to use for the database user. When using ``newPassword``, the :ref:`password <getconnectiondbattrspassword>` property should be set to the current password.
 
-            |br| This allows passwords to be changed at the time of connection,
-            in particular it can be used to connect when the old password has
-            expired.
+            This allows passwords to be changed at the time of connection, in particular it can be used to connect when the old password has expired.
 
-            |br| See :ref:`Changing Passwords and Connecting with an Expired
-            Password <changingpassword>`.
-
-            |br|
+            See :ref:`Changing Passwords and Connecting with an Expired Password <changingpassword>`.
 
             .. versionadded:: 2.2
         * - ``poolAlias``
           - String
           - .. _getconnectiondbattrspoolalias:
 
-            Specifies which previously created pool in the :ref:`connection
-            pool cache <connpoolcache>` to obtain the connection from. See
-            :ref:`Pool Alias <getconnectionpoolalias>`.
+            Specifies which previously created pool in the :ref:`connection pool cache <connpoolcache>` to obtain the connection from. See :ref:`Pool Alias <getconnectionpoolalias>`.
         * - ``password``
           - String
           - .. _getconnectiondbattrspassword:
 
-            The password of the database user. A password is also necessary if
-            a proxy user is specified.
+            The password of the database user. A password is also necessary if a proxy user is specified.
         * - ``privilege``
           - Number
           - .. _getconnectiondbattrsprivilege:
 
-            The privilege to use when establishing connection to the database.
-            This optional property should be one of the :ref:`privileged
-            connection constants <oracledbconstantsprivilege>`. Multiple
-            privileges may be used by when required, for example
-            ``oracledb.SYSDBA | oracledb.SYSPRELIM``.
+            The privilege to use when establishing connection to the database. This optional property should be one of the :ref:`privileged connection constants <oracledbconstantsprivilege>`. Multiple privileges may be used by when required, for example ``oracledb.SYSDBA | oracledb.SYSPRELIM``.
 
-            |br| See :ref:`Privileged Connections <privconn>` for more
-            information.
+            See :ref:`Privileged Connections <privconn>` for more information.
 
-            |br| Note only non-pooled connections can be privileged.
-
-            |br|
+            Note only non-pooled connections can be privileged.
 
             .. versionadded:: 2.1
         * - ``shardingKey``
           - Array
           - .. _getconnectiondbattrsshardingkey:
 
-            Allows a connection to be established directly to a database shard.
-            See :ref:`Connecting to Sharded Databases <sharding>`.
+            Allows a connection to be established directly to a database shard. See :ref:`Connecting to Sharded Databases <sharding>`.
 
-            |br| Array values may be of String type (mapping to VARCHAR2
-            sharding keys), Number (NUMBER), Date (DATE), or Buffer (RAW).
-            Multiple types may be used in the array. Sharding keys TIMESTAMP
-            type are not supported.
-
-            |br|
+            Array values may be of String type (mapping to VARCHAR2 sharding keys), Number (NUMBER), Date (DATE), or Buffer (RAW). Multiple types may be used in the array. Sharding keys TIMESTAMP type are not supported.
 
             .. versionadded:: 4.1
         * - ``stmtCacheSize``
           - Number
           - .. _getconnectiondbattrsstmtcachesize:
 
-            The number of statements to be cached in the :ref:`statement
-            cache <stmtcache>` of each connection. This optional property may
-            be used to override the :attr:`oracledb.stmtCacheSize` property.
+            The number of statements to be cached in the :ref:`statement cache <stmtcache>` of each connection. This optional property may be used to override the :attr:`oracledb.stmtCacheSize` property.
         * - ``superShardingKey``
           - Array
           - .. _getconnectiondbattrssupershardingkey:
 
-            Allows a connection to be established directly to a database shard.
-            See :ref:`Connecting to Sharded Databases <sharding>`.
+            Allows a connection to be established directly to a database shard. See :ref:`Connecting to Sharded Databases <sharding>`.
 
-            |br| Array values may be of String type (mapping to VARCHAR2
-            sharding keys), Number (NUMBER), Date (DATE), or Buffer (RAW).
-            Multiple types may be used in the array. Sharding keys TIMESTAMP
-            type are not supported.
-
-            |br|
+            Array values may be of String type (mapping to VARCHAR2 sharding keys), Number (NUMBER), Date (DATE), or Buffer (RAW). Multiple types may be used in the array. Sharding keys TIMESTAMP type are not supported.
 
             .. versionadded:: 4.1
         * - ``tag``
           - String
           - .. _getconnectiondbattrstag:
 
-            Used when getting a connection from a :ref:`connection pool
-            <poolclass>`.
+            Used when getting a connection from a :ref:`connection pool <poolclass>`.
 
-            |br| Indicates the tag that a connection returned from a
-            connection pool should have. Various heuristics determine the tag
-            that is actually returned, see :ref:`Connection Tagging and Session
-            State <connpooltagging>`.
-
-            |br|
+            Indicates the tag that a connection returned from a connection pool should have. Various heuristics determine the tag that is actually returned, see :ref:`Connection Tagging and Session State <connpooltagging>`.
 
             .. versionadded:: 3.1
         * - ``user``, ``username``
           - String
           - .. _getconnectiondbattrsuser:
 
-            The two properties are aliases for each other. Use only one of the
-            properties.
+            The two properties are aliases for each other. Use only one of the properties.
 
-            |br| The database user name. Can be a simple user name or a proxy
-            of the form *alison[fred]*. See the `Client Access Through a Proxy
-            <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID
-            -D77D0D4A-7483-423A-9767-CBB5854A15CC>`__ section in the Oracle
-            Call Interface manual for more details about proxy authentication.
+            The database user name. Can be a simple user name or a proxy of the form *alison[fred]*. See the `Client Access Through a Proxy <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-D77D0D4A-7483-423A-9767-CBB5854A15CC>`__ section in the Oracle Call Interface manual for more details about proxy authentication.
 
             The alias ``username`` was added in node-oracledb 5.2.
 
@@ -2817,16 +2486,13 @@ Oracledb Methods
         * - ``refresh`` Value
           - Description
         * - *false*
-          - The application can return a token from an application-specific
-            cache. If there is no cached token, the application must
-            externally acquire one.
+          - The application can return a token from an application-specific cache. If there is no cached token, the application must externally acquire one.
         * - *true*
-          - The token previously passed to driver is known to be expired, the
-            application should externally acquire a new token.
+          - The token previously passed to driver is known to be expired, the application should externally acquire a new token.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         getConnection([String poolAlias | Object connAttrs], function(Error error, Connection connection){});
 
@@ -2847,17 +2513,13 @@ Oracledb Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``getConnection()`` succeeds, ``error`` is NULL. If an
-            error occurs, then ``error`` contains the
-            :ref:`error message <errorobj>`.
+          - If ``getConnection()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - Connection ``connection``
-          - The newly created connection. If ``getConnection()`` fails,
-            connection will be NULL. See :ref:`Connection class
-            <connectionclass>` for more details.
+          - The newly created connection. If ``getConnection()`` fails, connection will be NULL. See :ref:`Connection class <connectionclass>` for more details.
 
 .. method:: oracledb.getPool()
 
-    ::
+    .. code-block:: javascript
 
         getPool([String poolAlias]);
 
@@ -2882,13 +2544,11 @@ Oracledb Methods
           - Description
         * - ``alias``
           - String
-          - The pool alias of the pool to retrieve from the connection pool
-            cache. The default value is ‘default’ which will retrieve the
-            default pool from the cache.
+          - The pool alias of the pool to retrieve from the connection pool cache. The default value is ‘default’ which will retrieve the default pool from the cache.
 
 .. method:: oracledb.initOracleClient()
 
-    ::
+    .. code-block:: javascript
 
         initOracleClient([Object options]);
 
@@ -2931,10 +2591,7 @@ Oracledb Methods
           - Description
         * - ``options``
           - Object
-          - The options parameter and option attributes are optional. If an
-            attribute is set, it should be a string value. See
-            :ref:`odbinitoracleclientattrsopts` for information on the
-            ``options`` attributes.
+          - The options parameter and option attributes are optional. If an attribute is set, it should be a string value. See :ref:`odbinitoracleclientattrsopts` for information on the ``options`` attributes.
 
     The properties of the ``options`` parameter are:
 
@@ -2951,55 +2608,30 @@ Oracledb Methods
         * - Attribute
           - Description
         * - ``configDir``
-          - This specifies the directory in which the :ref:`Optional Oracle
-            Net Configuration <tnsadmin>` and :ref:`Optional Oracle Client
-            Configuration <oraaccess>` files reside.
+          - This specifies the directory in which the :ref:`Optional Oracle Net Configuration <tnsadmin>` and :ref:`Optional Oracle Client Configuration <oraaccess>` files reside.
 
-            |br| It is equivalent to setting the Oracle environment variable
-            ``TNS_ADMIN`` to this value. Any value in that environment
-            variable prior to the call to ``oracledb.initOracleClient()`` is
-            ignored. On Windows, remember to double each backslash used as a
-            directory separator.
+            It is equivalent to setting the Oracle environment variable ``TNS_ADMIN`` to this value. Any value in that environment variable prior to the call to ``oracledb.initOracleClient()`` is ignored. On Windows, remember to double each backslash used as a directory separator.
 
-            |br| If ``configDir`` is not set, Oracle’s default configuration
-            file :ref:`search heuristics <tnsadmin>` are used.
+            If ``configDir`` is not set, Oracle’s default configuration file :ref:`search heuristics <tnsadmin>` are used.
         * - ``driverName``
-          - This specifies the driver name value shown in database views,
-            such as ``V$SESSION_CONNECT_INFO``.
+          - This specifies the driver name value shown in database views, such as ``V$SESSION_CONNECT_INFO``.
 
-            |br| It can be used by applications to identify themselves for
-            tracing and monitoring purposes. The convention is to separate
-            the product name from the product version by a colon and single
-            space characters.
+            It can be used by applications to identify themselves for tracing and monitoring purposes. The convention is to separate the product name from the product version by a colon and single space characters.
 
-            |br| If this attribute is not specified, the value
-            “node-oracledb : version” is used. See
-            :ref:`Other Node-oracledb Initialization <otherinit>`.
+            If this attribute is not specified, the value “node-oracledb : version” is used. See :ref:`Other Node-oracledb Initialization <otherinit>`.
         * - ``errorUrl``
-          - This specifies the URL that is included in the node-oracledb
-            exception message if the Oracle Client libraries cannot be
-            loaded. This allows applications that use node-oracledb to refer
-            users to application-specific installation instructions.
+          - This specifies the URL that is included in the node-oracledb exception message if the Oracle Client libraries cannot be loaded.
 
-            |br| If this attribute is not specified, then the
-            :ref:`node-oracledb installation instructions <installation>`
-            are used. See :ref:`Other Node-oracledb Initialization
+            This allows applications that use node-oracledb to refer users to application-specific installation instructions.
+
+            If this attribute is not specified, then the :ref:`node-oracledb installation instructions <installation>` are used. See :ref:`Other Node-oracledb Initialization
             <otherinit>`.
         * - ``libDir``
-          - This specifies the directory containing the Oracle Client
-            libraries.
+          - This specifies the directory containing the Oracle Client libraries.
 
-            |br| If ``libDir`` is not specified, the default library
-            search mechanism is used.
+            If ``libDir`` is not specified, the default library search mechanism is used.
 
-            |br| If your client libraries are in a full Oracle Client or
-            Oracle Database installation, such as `Oracle Database “XE”
-            Express Edition <https://www.oracle.com/
-            database/technologies/appdev/xe.html>`__, then you must have
-            previously set environment variables like ``ORACLE_HOME`` before
-            calling ``initOracleClient()``. On Windows, remember to double
-            each backslash used as a directory separator. See :ref:`Locating
-            the Oracle Client Libraries <oracleclientloading>`.
+            If your client libraries are in a full Oracle Client or Oracle Database installation, such as `Oracle Database “XE” Express Edition <https://www.oracle.com/database/technologies/appdev/xe.html>`__, then you must have previously set environment variables like ``ORACLE_HOME`` before calling ``initOracleClient()``. On Windows, remember to double each backslash used as a directory separator. See :ref:`Locating the Oracle Client Libraries <oracleclientloading>`.
 
     On Linux, ensure a ``libclntsh.so`` file exists. On macOS ensure a
     ``libclntsh.dylib`` file exists. Node-oracledb will not directly load
@@ -3049,28 +2681,18 @@ Oracledb Methods
           - Object
           - .. _odbshutdownattrsconn:
 
-            Connection credentials similar to :ref:`oracledb.getConnection()
-            credentials <getconnectiondbattrsconnattrs>`. The properties
-            ``user``, ``username`` ``password``, ``connectString``,
-            ``connectionString``, and ``externalAuth`` may be specified.
+            Connection credentials similar to :ref:`oracledb.getConnection() credentials <getconnectiondbattrsconnattrs>`. The properties ``user``, ``username`` ``password``, ``connectString``, ``connectionString``, and ``externalAuth`` may be specified.
         * - ``shutdownMode``
           - Number
           - .. _odbshutdownattrsmode:
 
-            :ref:`oracledb.SHUTDOWN_MODE_ABORT <oracledbconstantsshutdown>`,
-            :ref:`oracledb.SHUTDOWN_MODE_DEFAULT <oracledbconstantsshutdown>`,
-            :ref:`oracledb.SHUTDOWN_MODE_IMMEDIATE <oracledbconstantsshutdown>`,
-            :ref:`oracledb.SHUTDOWN_MODE_TRANSACTIONAL
-            <oracledbconstantsshutdown>`, or
-            :ref:`oracledb.SHUTDOWN_MODE_TRANSACTIONAL_LOCAL
-            <oracledbconstantsshutdown>`.
+            :ref:`oracledb.SHUTDOWN_MODE_ABORT <oracledbconstantsshutdown>`, :ref:`oracledb.SHUTDOWN_MODE_DEFAULT <oracledbconstantsshutdown>`, :ref:`oracledb.SHUTDOWN_MODE_IMMEDIATE <oracledbconstantsshutdown>`, :ref:`oracledb.SHUTDOWN_MODE_TRANSACTIONAL <oracledbconstantsshutdown>`, or :ref:`oracledb.SHUTDOWN_MODE_TRANSACTIONAL_LOCAL <oracledbconstantsshutdown>`.
 
-            |br| The default mode is
-            :ref:`oracledb.SHUTDOWN_MODE_DEFAULT <oracledbconstantsshutdown>`.
+            The default mode is :ref:`oracledb.SHUTDOWN_MODE_DEFAULT <oracledbconstantsshutdown>`.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         shutdown([Object connAttr, [Number shutdownMode, ] ] function(Error error) {});
 
@@ -3089,9 +2711,7 @@ Oracledb Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``shutdown()`` succeeds, ``error`` is NULL. If an error
-            occurs, then ``error`` contains the
-            :ref:`error message <errorobj>`.
+          - If ``shutdown()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
 .. method:: oracledb.startup()
 
@@ -3131,16 +2751,12 @@ Oracledb Methods
           - Object
           - .. _odbstartupattrsconn:
 
-            Connection credentials similar to :ref:`oracledb.getConnection()
-            credentials <getconnectiondbattrsconnattrs>`. The properties
-            ``username``, ``password``, ``connectString``, ``connectionString``,
-            and ``externalAuth`` may be specified.
+            Connection credentials similar to :ref:`oracledb.getConnection() credentials <getconnectiondbattrsconnattrs>`. The properties ``username``, ``password``, ``connectString``, ``connectionString``, and ``externalAuth`` may be specified.
         * - options
           - Object
           - .. _odbstartupattrsoptions:
 
-            The optional ``options`` object can contain one or more of the
-            properties listed in :ref:`odbstartupattrsoptionsproperties`.
+            The optional ``options`` object can contain one or more of the properties listed in :ref:`odbstartupattrsoptionsproperties`.
 
     The properties of the ``options`` property are:
 
@@ -3159,26 +2775,17 @@ Oracledb Methods
           - Description
         * - ``force``
           - Boolean
-          - Shuts down a running database using
-            :ref:`oracledb.SHUTDOWN_MODE_ABORT <oracledbconstantsshutdown>` before
-            restarting the database. The database start up may require instance
-            recovery. The default for ``force`` is *false*.
+          - Shuts down a running database using :ref:`oracledb.SHUTDOWN_MODE_ABORT <oracledbconstantsshutdown>` before restarting the database. The database start up may require instance recovery. The default for ``force`` is *false*.
         * - ``restrict``
           - Boolean
-          - After the database is started, access is restricted to users who have
-            the CREATE_SESSION and RESTRICTED SESSION privileges. The default is
-            *false*.
+          - After the database is started, access is restricted to users who have the CREATE_SESSION and RESTRICTED SESSION privileges. The default is *false*.
         * - ``pfile``
           - String
-          - The path and filename for a text file containing
-            `Oracle Database initialization parameters <https://www.oracle.com/pls/
-            topic/lookup?ctx=dblatest&id=GUID-8BAD86FC-27C5-4103-8151-
-            AC5BADF274E3>`__. If ``pfile`` is not set, then the database
-            server-side parameter file is used.
+          - The path and filename for a text file containing `Oracle Database initialization parameters <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8BAD86FC-27C5-4103-8151-AC5BADF274E3>`__. If ``pfile`` is not set, then the database server-side parameter file is used.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         startup([Object connAttrs, [Object options, ] ] function(Error error) {});
 
@@ -3198,11 +2805,4 @@ Oracledb Methods
         * - Callback function parameter
           - Description
         * - Error ``error``
-          - If ``startup()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the :ref:`error message <errorobj>`.
-
-.. Code to add a space between paragraphs in list tables
-
-.. |br| raw:: html
-
-  <br />
+          - If ``startup()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.

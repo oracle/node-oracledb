@@ -127,7 +127,7 @@ Run the script, for example::
 Example: A SQL SELECT statement in Node.js
 ------------------------------------------
 
-.. code:: javascript
+.. code-block:: javascript
 
    // myscript.js
    // This example uses Node 8's async/await syntax.
@@ -188,7 +188,7 @@ document-style access with Oracle Database 18 and above, when
 node-oracledb uses Oracle Client 18.5 or Oracle Client 19.3, or later.
 Users require the CREATE TABLE privilege and the SODA_APP role.
 
-.. code:: javascript
+.. code-block:: javascript
 
    // mysoda.js
    // This example uses Node 8's async/await syntax.

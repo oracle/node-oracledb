@@ -25,9 +25,9 @@ SodaDocumentCursor Methods
 
     .. versionadded:: 3.0
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         close(function(Error error){});
 
@@ -44,8 +44,7 @@ SodaDocumentCursor Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``close()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the error message.
+          - If ``close()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
 
 .. method:: sodaDocumentCursor.getNext()
 
@@ -62,9 +61,9 @@ SodaDocumentCursor Methods
 
     .. versionadded:: 3.0
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         getNext(function(Error error, SodaDocument document){});
 
@@ -82,8 +81,6 @@ SodaDocumentCursor Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``getNext()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the error message.
+          - If ``getNext()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
         * - SodaDocument ``document``
-          - The next document in the cursor. If there are no more documents,
-            then ``document`` will be undefined.
+          - The next document in the cursor. If there are no more documents, then ``document`` will be undefined.

@@ -27,13 +27,13 @@ parameters.
 
 Given the table:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
 
 an ``INSERT`` example is:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const fs = require('fs');
   const str = fs.readFileSync('example.txt', 'utf8');
@@ -49,7 +49,7 @@ an ``INSERT`` example is:
 
 Updating LOBs is similar to insertion:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `UPDATE mylobs SET myclobcol = :cbv WHERE id = :idbv`,
@@ -63,7 +63,7 @@ When binding Strings to NCLOB columns, explicitly specify the bind
 :ref:`type <executebindparamtype>` as
 :ref:`oracledb.DB_TYPE_NVARCHAR <oracledbconstantsdbtype>`:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `UPDATE mylobs SET mynclobcol = :ncbv WHERE id = :idbv`,
@@ -72,13 +72,13 @@ When binding Strings to NCLOB columns, explicitly specify the bind
 
 When using PL/SQL, a procedure:
 
-.. code:: sql
+.. code-block:: sql
 
   PROCEDURE lobs_in (p_id IN NUMBER, c_in IN CLOB, b_in IN BLOB) . . .
 
 can be called like:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const bigStr = 'My string to insert';
   const bigBuf = Buffer.from([. . .]);
@@ -118,7 +118,7 @@ need to be streamed from a :ref:`Lob <lobclass>`, as discussed later in
 For example, to make every CLOB and NCLOB queried by the application be
 returned as a string:
 
-.. code:: javascript
+.. code-block:: javascript
 
   oracledb.fetchAsString = [ oracledb.CLOB ];
 
@@ -134,7 +134,7 @@ returned as a string:
 CLOB columns in individual queries can be fetched as strings using
 ``fetchInfo``:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `SELECT c FROM mylobs WHERE id = 1`,
@@ -153,7 +153,7 @@ CLOB columns in individual queries can be fetched as strings using
 BLOB query examples are very similar. To force every BLOB in the
 application to be returned as a buffer:
 
-.. code:: javascript
+.. code-block:: javascript
 
   oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 
@@ -169,7 +169,7 @@ application to be returned as a buffer:
 BLOB columns in individual queries can be fetched as buffers using
 ``fetchInfo``:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `SELECT b FROM mylobs WHERE id = 2`,
@@ -194,7 +194,7 @@ To get PL/SQL LOB OUT parameters as String or Buffer, set the bind
 - ``oracledb.DB_TYPE_NVARCHAR`` for NCLOB
 - ``oracledb.BUFFER`` for BLOB
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `BEGIN lobs_out(:id, :c, :b); END;`,
@@ -294,7 +294,7 @@ database (see :ref:`Simple Insertion of LOBs <basiclobinsert>`), use a
 item. Data can then be streamed into the Lob and committed directly to
 the table:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `INSERT INTO mylobs (id, c) VALUES (:id, EMPTY_CLOB()) RETURNING c INTO :lobbv`,
@@ -367,13 +367,13 @@ LOB Query Example
 Each CLOB, NCLOB or BLOB in a ``SELECT`` returns a :ref:`Lob <lobclass>`
 by default. For example, the table:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
 
 can be called to get a Lob ``clob`` like:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(`SELECT c FROM mylobs WHERE id = 1`);
 
@@ -388,13 +388,13 @@ PL/SQL LOB Parameter Fetch Example
 
 A PL/SQL procedure such as this:
 
-.. code:: sql
+.. code-block:: sql
 
   PROCEDURE lobs_out (id IN NUMBER, clob_out OUT CLOB, blob_out OUT BLOB) . . .
 
 can be called to get the :ref:`Lobs <lobclass>` ``clob`` and ``blob``:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `BEGIN lobs_out(:id, :c, :b); END;`,
@@ -418,7 +418,7 @@ Streaming Out a Lob
 Once a Lob is obtained from a query or PL/SQL OUT bind, it can be
 streamed out:
 
-.. code:: javascript
+.. code-block:: javascript
 
   if (lob === null) {
     // . . . do special handling such as create an empty file or throw an error
@@ -444,7 +444,7 @@ the Lob Stream which processes each chunk of LOB data separately. Either
 a String or Buffer can be built up or, if the LOB is big, each chunk can
 be written to another Stream or to a file:
 
-.. code:: javascript
+.. code-block:: javascript
 
   if (lob === null) {
     // . . . do special handling such as create an empty file or throw an error
@@ -502,14 +502,14 @@ procedure.
 A temporary LOB can be created with
 :meth:`connection.createLob()`:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const templob = await connection.createLob(oracledb.CLOB);
 
 Once created, data can be inserted into it. For example to read a text
 file:
 
-.. code:: javascript
+.. code-block:: javascript
 
   templob.on('error', function(err) { somecallback(err); });
 
@@ -524,7 +524,7 @@ file:
 Now the LOB has been populated, it can be bound in ``somecallback()`` to
 a PL/SQL IN parameter:
 
-.. code:: javascript
+.. code-block:: javascript
 
   // For PROCEDURE lobs_in (p_id IN NUMBER, c_in IN CLOB, b_in IN BLOB)
   const result = await connection.execute(
@@ -537,7 +537,7 @@ a PL/SQL IN parameter:
 When the temporary LOB is no longer needed, it must be closed with
 :meth:`lob.destroy()`:
 
-.. code:: javascript
+.. code-block:: javascript
 
   await templob.destroy();
 

@@ -68,7 +68,7 @@ starts the two-phase commit protocol.
 
 An example of an application managing the two-phase commit protocol is:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const oracledb = require('oracledb');
    const dbConfig1 = require('./dbconfig1.js');
@@ -161,7 +161,7 @@ a transaction, and then a second to continue it. For example, if a table
 contained a salary with initial value 100, then one process could start
 a transaction, update the table, and then suspend the transaction:
 
-.. code:: javascript
+.. code-block:: javascript
 
    connection = await oracledb.getConnection( {
      user          : "hr",
@@ -183,7 +183,7 @@ a transaction, update the table, and then suspend the transaction:
 A second process could resume that same transaction by passing the same
 XID:
 
-.. code:: javascript
+.. code-block:: javascript
 
    connection = await oracledb.getConnection( {
      user          : "hr",

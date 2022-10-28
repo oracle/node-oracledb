@@ -29,7 +29,7 @@ The attributes are set on a :attr:`connection <oracledb.connectionClass>`
 object and sent to the database on the next :ref:`round-trip <roundtrips>` from
 node-oracledb, for example, with ``execute()``:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection(
     {

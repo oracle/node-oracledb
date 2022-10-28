@@ -84,7 +84,7 @@ are read-only. The properties for default collections are listed below.
     content on top of a pre-existing database table, and that table has NULLs
     in its ``mediaType`` column.
 
-.. attribute:: version
+.. attribute:: sodaDocument.version
 
     This read-only property is a string that returns the version of the
     document. By default, SODA automatically updates the version each time the
@@ -105,7 +105,7 @@ Although documents cannot be null, content can be.
 
 .. method:: sodaDocument.getContent()
 
-    ::
+    .. code-block:: javascript
 
         getContent()
 
@@ -117,7 +117,7 @@ Although documents cannot be null, content can be.
 
 .. method:: sodaDocument.getContentAsBuffer()
 
-    ::
+    .. code-block:: javascript
 
         getContentAsBuffer()
 
@@ -136,7 +136,7 @@ Although documents cannot be null, content can be.
 
 .. method:: sodaDocument.getContentAsString()
 
-    ::
+    .. code-block:: javascript
 
         getContentAsString()
 

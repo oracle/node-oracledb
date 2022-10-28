@@ -264,19 +264,15 @@ Pool Methods
           - Description
         * - ``drainTime``
           - Number
-          - The number of seconds before the pool and connections are force
-            closed.
+          - The number of seconds before the pool and connections are force closed.
 
-            |br| If ``drainTime`` is 0, the pool and its connections are
-            closed immediately.
-
-            |br|
+            If ``drainTime`` is 0, the pool and its connections are closed immediately.
 
             .. versionadded:: 3.0
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         close([Number drainTime,] function(Error error){});
 
@@ -295,8 +291,7 @@ Pool Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``close()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the :ref:`error message <errorobj>`.
+          - If ``close()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
 .. method:: pool.getConnection()
 
@@ -319,7 +314,7 @@ Pool Methods
     ``pool.getConnection()`` is called, a connection for that user is
     returned:
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const connection = await pool.getConnection();
 
@@ -328,7 +323,7 @@ Pool Methods
     creation and credentials were omitted, then the user name and password
     may be used in ``pool.getConnection()`` like:
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         const connection = await pool.getConnection(
         {
@@ -365,24 +360,15 @@ Pool Methods
           - Description
         * - ``poolAttrs``
           - Object
-          - This parameter can contain a ``tag`` property when :ref:`connection
-            tagging <connpooltagging>` is in use. It can also contain
-            :ref:`shardingKey <getconnectiondbattrsshardingkey>` and
-            :ref:`superShardingKey <getconnectiondbattrssupershardingkey>`
-            properties, when using :ref:`database sharding <sharding>`.
+          - This parameter can contain a ``tag`` property when :ref:`connection tagging <connpooltagging>` is in use. It can also contain :ref:`shardingKey <getconnectiondbattrsshardingkey>` and :ref:`superShardingKey <getconnectiondbattrssupershardingkey>` properties, when using :ref:`database sharding <sharding>`.
 
-            |br| When getting connections from heterogeneous pools, this
-            parameter can contain ``user`` (or ``username``) and ``password``
-            properties for true heterogeneous pool usage, or it can contain a
-            ``user`` property when a pool proxy user is desired.
+            When getting connections from heterogeneous pools, this parameter can contain ``user`` (or ``username``) and ``password`` properties for true heterogeneous pool usage, or it can contain a ``user`` property when a pool proxy user is desired.
 
-            |br| See :ref:`Connection Attributes
-            <getconnectiondbattrsconnattrs>` for information on these
-            attributes.
+            See :ref:`Connection Attributes <getconnectiondbattrsconnattrs>` for information on these attributes.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         getConnection([Object poolAttrs,] function(Error error, Connection connection){});
 
@@ -402,16 +388,13 @@ Pool Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``getConnection()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the :ref:`error message <errorobj>`.
+          - If ``getConnection()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - Connection ``connection``
-          - The newly created connection. If ``getConnection()`` fails,
-            ``connection`` will be NULL. See :ref:`Connection class <connectionclass>`
-            for more details.
+          - The newly created connection. If ``getConnection()`` fails, ``connection`` will be NULL. See :ref:`Connection class <connectionclass>` for more details.
 
 .. method:: pool.getStatistics()
 
-    ::
+    .. code-block:: javascript
 
         getStatistics();
 
@@ -434,7 +417,7 @@ Pool Methods
 
 .. method:: pool.logStatistics()
 
-    ::
+    .. code-block:: javascript
 
         logStatistics();
 
@@ -490,7 +473,7 @@ Pool Methods
 
     **Example**
 
-    .. code:: javascript
+    .. code-block:: javascript
 
         await pool.reconfigure({poolMin: 5, poolMax: 10, increment: 5});
 
@@ -512,8 +495,7 @@ Pool Methods
           - Description
         * - ``poolAttrs``
           - Object
-          - The ``oracledb.createPool()`` properties that can be changed with
-            ``pool.reconfigure()`` are:
+          - The ``oracledb.createPool()`` properties that can be changed with ``pool.reconfigure()`` are:
 
             - :ref:`enableStatistics <createpoolpoolattrsstats>`
             - :ref:`poolIncrement <createpoolpoolattrspoolincrement>`
@@ -528,24 +510,13 @@ Pool Methods
             - :ref:`sodaMetaDataCache <createpoolpoolattrssodamdcache>`
             - :ref:`stmtCacheSize <createpoolpoolattrsstmtcachesize>`
 
-            A ``resetStatistics`` property can also be set to *true*. This
-            zeros the current pool statistics, with the exception of
-            ``queueMax`` which is set to the current queue length. Statistics
-            are also reset when statistics recording is turned on with the
-            ``enableStatistics`` property.
+            A ``resetStatistics`` property can also be set to *true*. This zeros the current pool statistics, with the exception of ``queueMax`` which is set to the current queue length. Statistics are also reset when statistics recording is turned on with the ``enableStatistics`` property.
 
-            |br| Changing ``queueMax``, ``queueTimeout``, or resetting
-            statistics does not affect any currently queued connection
-            requests. If connections are not made available to currently
-            queued requests, those queued requests will timeout based on the
-            ``queueTimeout`` value in effect when they were originally added
-            to the connection pool queue. If pool statistics are enabled, then
-            these failed requests will be counted in :ref:`requestTimeouts
-            <poolstats>` and included in the queue time statistics.
+            Changing ``queueMax``, ``queueTimeout``, or resetting statistics does not affect any currently queued connection requests. If connections are not made available to currently queued requests, those queued requests will timeout based on the ``queueTimeout`` value in effect when they were originally added to the connection pool queue. If pool statistics are enabled, then these failed requests will be counted in :ref:`requestTimeouts <poolstats>` and included in the queue time statistics.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         reconfigure(Object poolAttrs, function(Error error){});
 
@@ -564,8 +535,7 @@ Pool Methods
         * - Callback Function Parameter
           - Description
         * - Error ``error``
-          - If ``reconfigure()`` succeeds, ``error`` is NULL. If an error occurs,
-            then ``error`` contains the :ref:`error message <errorobj>`.
+          - If ``reconfigure()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
 .. method:: pool.setAccessToken()
 
@@ -599,13 +569,9 @@ Pool Methods
           - Description
         * - ``tokenAttrs``
           - Object
-          - The ``tokenAttrs`` parameter object provides IAM token-based
-            authentication properties.
+          - The ``tokenAttrs`` parameter object provides IAM token-based authentication properties.
 
-            |br| The properties of the ``tokenAttrs`` object are detailed in
-            the :ref:`setaccesstokenproperties` table. Both properties must
-            be set. The values can be obtained, for example, using the
-            Oracle Cloud Infrastructure Command Line Interface (OCI CLI).
+            The properties of the ``tokenAttrs`` object are detailed in the :ref:`setaccesstokenproperties` table. Both properties must be set. The values can be obtained, for example, using the Oracle Cloud Infrastructure Command Line Interface (OCI CLI).
 
     The properties of the ``tokenAttrs`` parameter are:
 
@@ -625,9 +591,3 @@ Pool Methods
           - The database authentication token string.
         * - ``privateKey``
           - The database authentication private key string.
-
-.. Code to add a space between paragraphs in list tables
-
-.. |br| raw:: html
-
-  <br />

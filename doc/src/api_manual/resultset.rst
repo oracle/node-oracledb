@@ -57,9 +57,9 @@ ResultSet Methods
     fetch or when no more rows are needed. It should also be called if no
     rows are ever going to be fetched from the ResultSet.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         close(function(Error error){});
 
@@ -83,9 +83,9 @@ ResultSet Methods
     afterwards has no effect. See :ref:`Tuning Fetch
     Performance <rowfetching>` for more information about tuning.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         getRow(function(Error error, Object row){});
 
@@ -125,15 +125,15 @@ ResultSet Methods
     In node-oracledb version 5.2 the ``numRows`` parameter was made
     optional, and support for the value 0 was added.
 
-    If you are using the callback programming style:
+    **Callback**:
 
-    **Callback**::
+    If you are using the callback programming style::
 
         getRows([Number numRows,] function(Error error, Array rows){});
 
 .. method:: resultset.toQueryStream()
 
-    ::
+    .. code-block:: javascript
 
         toQueryStream();
 

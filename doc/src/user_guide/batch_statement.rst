@@ -22,7 +22,7 @@ directory.
 
 For example, to insert three records into the database:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const sql = `INSERT INTO mytab VALUES (:a, :b)`;
 
@@ -76,7 +76,7 @@ each input record can be shown by setting
 :ref:`dmlRowCounts <execmanydmlrowscounts>`. For example when deleting
 rows:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const sql = `DELETE FROM tab WHERE id = :1`;
 
@@ -196,7 +196,7 @@ The ``executeMany()`` method can be used to execute a PL/SQL statement
 multiple times with different input values. For example, the following
 PL/SQL procedure:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE PROCEDURE testproc (
     a_num IN NUMBER,
@@ -213,7 +213,7 @@ PL/SQL procedure:
 
 can be called like:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const sql = `BEGIN testproc(:1, :2, :3); END;`;
 
@@ -248,7 +248,7 @@ The variant of ``executeMany()`` that accepts a number of iterations is
 useful when there are no bind values, or only OUT bind values. This
 example calls a PL/SQL block eight times:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const plsql = `DECLARE
                    t_id NUMBER;
@@ -283,7 +283,7 @@ You can use ``executeMany()`` with :ref:`Oracle Database
 objects <objects>`. For example, given a procedure ``myproc`` that
 accepts and returns a RECORD:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE OR REPLACE PACKAGE rectest AS
      TYPE rectype IS RECORD (name VARCHAR2(40), pos NUMBER);
@@ -293,7 +293,7 @@ accepts and returns a RECORD:
 
 This can be called like:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const RectypeClass = await connection.getDbObjectClass("RECTEST.RECTYPE");
 

@@ -27,13 +27,13 @@ lookup?ctx=dblatest&id=ADJSN>`__.
 In Oracle Database 21, to create a table with a column called
 ``PO_DOCUMENT`` for JSON data:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE TABLE j_purchaseorder (po_document JSON);
 
 For older Oracle Database versions the syntax is:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE TABLE j_purchaseorder (po_document BLOB CHECK (po_document IS JSON));
 
@@ -49,7 +49,7 @@ Using Oracle Database 21 and Oracle Client 21 with node-oracledb 5.1 (or
 later), you can insert JavaScript objects directly by binding as
 ``oracledb.DB_TYPE_JSON``:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const data = { "userId": 1, "userName": "Chris", "location": "Australia" };
 
@@ -60,7 +60,7 @@ later), you can insert JavaScript objects directly by binding as
 
 With the older BLOB storage, or to insert JSON strings:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const data = { "userId": 1, "userName": "Chris", "location": "Australia" };
   const s = JSON.stringify(data);  // change JavaScript value to a JSON string
@@ -93,7 +93,7 @@ Oracle Database 21 (or later) JSON column returns a :ref:`Lob
 Class <lobclass>` BLOB. You can stream the Lob or use
 :meth:`lob.getData()`:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(`SELECT po_document FROM j_purchaseorder`);,
 
@@ -187,7 +187,7 @@ there is no direct mapping from JavaScript.
 An example of creating a CLOB attribute with key ``mydocument``\ in a
 JSON column using SQL is:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const sql = `INSERT INTO mytab (myjsoncol)
                VALUES (JSON_OBJECT(key 'mydocument' value JSON_SCALAR(TO_CLOB(:b)) RETURNING JSON))`;
@@ -210,6 +210,8 @@ following attribute mapping occurs:
 .. list-table-with-summary::
     :header-rows: 1
     :class: wy-table-responsive
+    :align: center
+    :widths: 20 20
     :summary: The first column displays the JavaScript Type or Value. The second column displays the JSON Attribute Type or Value. The third column displays the SQL Equivalent Example.
 
     * - Database JSON Attribute Type or Value
@@ -271,7 +273,7 @@ The ``JSON_EXISTS`` function tests for the existence of a particular
 value within some JSON data. To look for JSON entries that have a
 ``location`` field:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `SELECT po_document FROM j_purchaseorder WHERE JSON_EXISTS (po_document, '$.location')`
@@ -303,7 +305,7 @@ In Oracle Database 12.2, or later, the `JSON_OBJECT <https://www.oracle.com/
 pls/topic/lookup?ctx=dblatest&id=GUID-1EF347AE-7FDA-4B41-AFE0-DD5A49E8B370>`__
 function is a great way to convert relational table data to JSON:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `SELECT JSON_OBJECT ('deptId' IS d.department_id, 'name' IS d.department_name) department
@@ -341,7 +343,7 @@ assumption that older DBs use BLOB storage.
 
 Create a table:
 
-.. code:: javascript
+.. code-block:: javascript
 
   if (connection.oracleServerVersion >= 2100000000) {
     await connection.execute(`CREATE TABLE mytab (mycol JSON)`);
@@ -353,7 +355,7 @@ Create a table:
 
 Insert data:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const inssql = `INSERT INTO mytab (mycol) VALUES (:bv)`;
   const data = { "userId": 2, "userName": "Anna", "location": "New Zealand" };
@@ -368,7 +370,7 @@ Insert data:
 
 Query data:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const qrysql = `SELECT mycol
                   FROM mytab

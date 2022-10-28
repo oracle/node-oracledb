@@ -43,7 +43,7 @@ arbitrary name and an :ref:`options <consubscribeoptions>` object that
 controls notification. In particular ``options`` contains a valid SQL
 query and a JavaScript callback:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const connection = await oracledb.getConnection({
        user          : "hr",
@@ -104,7 +104,7 @@ query-level notification occurs. In this mode, the database notifies the
 application whenever a transaction changes the result of the registered
 query and commits. For example:
 
-.. code:: javascript
+.. code-block:: javascript
 
    const options = {
        sql      : `SELECT * FROM mytable WHERE key > 100`,  // query of interest
@@ -118,7 +118,7 @@ a notification would occur.
 
 Before using CQN, users must have appropriate permissions, for example:
 
-.. code:: sql
+.. code-block:: sql
 
    SQL> CONNECT system
 
@@ -130,7 +130,7 @@ seconds, the notification callback is unregistered and no more
 notifications will occur. The quality of service flags indicate ROWIDs
 should be returned in the callback:
 
-.. code:: javascript
+.. code-block:: javascript
 
    let interval = setInterval(function() {
        console.log("waiting...");

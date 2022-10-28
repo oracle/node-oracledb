@@ -40,13 +40,13 @@ Error Properties
 The *Error* object contains ``errorNum``, ``message``, ``offset`` and
 ``stack`` properties.
 
-.. attribute:: errorNum
+.. attribute:: error.errorNum
 
   This property is a number which represents the Oracle error number. This
   value is undefined for non-Oracle errors and for messages prefixed with
   NJS or DPI.
 
-.. attribute:: message
+.. attribute:: error.message
 
   This property is a string which represents the text of the error message.
 
@@ -65,7 +65,7 @@ The *Error* object contains ``errorNum``, ``message``, ``offset`` and
     ORA-06550: line 1, column 7:
     PL/SQL: Statement ignored
 
-.. attribute:: offset
+.. attribute:: error.offset
 
   This property is a number and it is the character offset into the SQL text
   that resulted in the Oracle error. The value may be ``0`` in non-SQL
@@ -81,7 +81,7 @@ The *Error* object contains ``errorNum``, ``message``, ``offset`` and
   In node-oracledb 4.2, the maximum ``offset`` value was changed from
   (2^16)-1 to (2^32)-1.
 
-.. attribute:: stack
+.. attribute:: error.stack
 
   This property is a string. When using Promises or Async/Await, the *Error*
   object includes a stack trace, for example::

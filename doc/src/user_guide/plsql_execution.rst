@@ -14,7 +14,7 @@ PL/SQL Stored Procedures
 
 The PL/SQL procedure:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE OR REPLACE PROCEDURE myproc (id IN NUMBER, name OUT VARCHAR2, salary OUT NUMBER) AS
   BEGIN
@@ -23,7 +23,7 @@ The PL/SQL procedure:
 
 can be called:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `BEGIN
@@ -53,7 +53,7 @@ PL/SQL Stored Functions
 
 The PL/SQL function:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE OR REPLACE FUNCTION myfunc RETURN VARCHAR2 AS
   BEGIN
@@ -63,7 +63,7 @@ The PL/SQL function:
 can be called by using an OUT bind variable for the function return
 value:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `BEGIN
@@ -90,7 +90,7 @@ PL/SQL Anonymous PL/SQL Blocks
 
 Anonymous PL/SQL blocks can be called from node-oracledb like:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `BEGIN
@@ -135,7 +135,7 @@ following snippet is based on the example
 `dbmsoutputgetline.js <https://github.com/oracle/node-oracledb/tree/main/
 examples/dbmsoutputgetline.js>`__:
 
-.. code:: javascript
+.. code-block:: javascript
 
   let result;
   do {
@@ -158,7 +158,7 @@ examples/dbmsoutputpipe.js>`__ for the full example.
 
 The pipelined function could be created like:
 
-.. code:: sql
+.. code-block:: sql
 
   CREATE OR REPLACE TYPE dorow AS TABLE OF VARCHAR2(32767);
   /
@@ -177,7 +177,7 @@ The pipelined function could be created like:
 To get DBMS_OUTPUT, simply query this function using the same connection
 that created the output:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const result = await connection.execute(
     `SELECT * FROM TABLE(mydofetch())`,
@@ -220,7 +220,7 @@ The example below shows how a PL/SQL function ``DISCOUNT`` can be
 created with two different implementations. The initial procedure is
 created as normal in the SQL*Plus command line:
 
-.. code:: sql
+.. code-block:: sql
 
   CONNECT nodedemo/welcome
 
@@ -243,7 +243,7 @@ which is pre-created in new and upgraded databases.
 
 The user ``nodedemo`` can be given permission to create new ‘editions’:
 
-.. code:: sql
+.. code-block:: sql
 
   CONNECT system
 
@@ -254,7 +254,7 @@ The next SQL*Plus script creates a new edition ``e2``, and changes the
 current session to use it. A new version of ``DISCOUNT`` is created
 under that edition:
 
-.. code:: sql
+.. code-block:: sql
 
   CONNECT nodedemo/welcome
 
@@ -276,7 +276,7 @@ There are now two implementations of the PL/SQL procedure ``DISCOUNT``
 with the same prototype. Applications can choose at runtime which
 implementation to use. Here is a script that calls ``DISCOUNT``:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const mypw = ...  // set mypw to the nodedemo schema password
 
@@ -309,7 +309,7 @@ default edition is used. The output might be like::
 If the connection uses edition ``e2``, then the second implementation of
 ``DISCOUNT`` will be used:
 
-.. code:: javascript
+.. code-block:: javascript
 
   const connection = await oracledb.getConnection(
     {
@@ -418,7 +418,7 @@ Creating PL/SQL Procedures and Functions
 PL/SQL procedures and functions can easily be created in node-oracledb
 by calling ``connection.execute()``, for example:
 
-.. code:: javascript
+.. code-block:: javascript
 
   await connection.execute(
     `CREATE OR REPLACE PROCEDURE no_proc
@@ -443,7 +443,7 @@ When creating PL/SQL procedures and functions in node-oracledb,
 compilation warnings must be manually checked for. This can be done by
 querying ``USER_ERRORS`` like:
 
-.. code:: javascript
+.. code-block:: javascript
 
   await connection.execute(
     `CREATE OR REPLACE PROCEDURE badproc AS

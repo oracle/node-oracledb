@@ -18,7 +18,7 @@ PoolStatistics Methods
 
 .. method:: poolstatistics.logStatistics()
 
-    ::
+    .. code-block:: javascript
 
         logStatistics();
 
