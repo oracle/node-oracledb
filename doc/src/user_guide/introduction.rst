@@ -7,7 +7,7 @@ Introduction to the Node-oracledb Driver for Oracle Database
 The `node-oracledb <https://www.npmjs.com/package/oracledb>`__ add-on
 for Node.js powers high performance Oracle Database applications. You
 can use node-oracledb in your Node.js TypeScript or JavaScript code.
-This lets you easily write complex applications, or build sopisticated
+This lets you easily write complex applications, or build sophisticated
 web services using
 `REST <https://blogs.oracle.com/oraclemagazine/post/build-rest-apis-for-nodejs-part-1>`__
 or
@@ -23,7 +23,7 @@ additional database options or packs.
 
 The node-oracledb feature highlights are:
 
--  Easily installed from
+-  Easy installation from
    `npm <https://www.npmjs.com/package/oracledb>`__
 -  Support for Node.js 14 and later, and for multiple Oracle Database
    versions. (Note: older versions of node-oracledb supported older

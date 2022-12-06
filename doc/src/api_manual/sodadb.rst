@@ -234,11 +234,11 @@ SodaDatabase Methods
 
     .. versionadded:: 3.0
 
-    The parameters of the ``sodaDatabase.openCollection()`` method are:
+    The parameters of the ``sodaDatabase.getCollectionNames()`` method are:
 
     .. _getcollectionnames:
 
-    .. list-table-with-summary:: sodaDatabase.openCollection() Parameters
+    .. list-table-with-summary:: sodaDatabase.getCollectionNames() Parameters
         :header-rows: 1
         :class: wy-table-responsive
         :align: center

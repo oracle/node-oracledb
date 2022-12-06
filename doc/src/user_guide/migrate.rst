@@ -23,9 +23,7 @@ Migrating from node-oracledb 3.1 to node-oracledb 4.0
 
 When upgrading from node-oracledb version 3.1 to version 4.0:
 
--  Review the
-   `CHANGELOG <https://github.com/oracle/node-oracledb/blob/main/CHANGELOG.md>`__
-   and take advantage of new features.
+-  Review the :ref:`releasenotes` and take advantage of new features.
 
 -  Update Node.js, if necessary. Node-oracledb 4.0 requires
 
@@ -56,9 +54,7 @@ Migrating from node-oracledb 4.0 to node-oracledb 4.1
 
 When upgrading from node-oracledb version 4.0 to version 4.1:
 
--  Review the
-   `CHANGELOG <https://github.com/oracle/node-oracledb/blob/main/CHANGELOG.md>`__
-   and take advantage of new features.
+-  Review the :ref:`releasenotes` and take advantage of new features.
 
 -  Review your application use of node-oracledb error messages since
    some have changed.
@@ -72,9 +68,7 @@ When upgrading from node-oracledb version 4.0 to version 4.1:
 Migrating from node-oracledb 4.1 to node-oracledb 4.2
 =====================================================
 
--  Review the
-   `CHANGELOG <https://github.com/oracle/node-oracledb/blob/main/CHANGELOG.md>`__
-   and take advantage of new features.
+-  Review the :ref:`releasenotes` and take advantage of new features.
 
 -  Review the updated Lob stream documentation. The best practice is to
    use the ``end`` event (for readable streams) and ``finish`` event
@@ -91,9 +85,7 @@ Migrating from node-oracledb 4.1 to node-oracledb 4.2
 Migrating from node-oracledb 4.2 to node-oracledb 5.0
 =====================================================
 
--  Review the
-   `CHANGELOG <https://github.com/oracle/node-oracledb/blob/main/CHANGELOG.md>`__
-   and take advantage of new features.
+-  Review the :ref:`releasenotes` and take advantage of new features.
 
 -  Review the updated installation and initialization options in the
    :ref:`node-oracledb installation
@@ -125,9 +117,7 @@ Migrating from node-oracledb 4.2 to node-oracledb 5.0
 Migrating from node-oracledb 5.1 to node-oracledb 5.2
 =====================================================
 
--  Review the
-   `CHANGELOG <https://github.com/oracle/node-oracledb/blob/main/CHANGELOG.md>`__
-   and take advantage of new features.
+-  Review the :ref:`releasenotes` and take advantage of new features.
 
 -  Review the dead connection detection changes and adjust any
    application error checks to look for the new error *DPI-1080*.

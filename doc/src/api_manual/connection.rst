@@ -10,6 +10,8 @@ A *Connection* object is obtained by a *Pool* class
 
 The connection is used to access an Oracle database.
 
+.. _connectionproperties:
+
 Connection Properties
 =====================
 

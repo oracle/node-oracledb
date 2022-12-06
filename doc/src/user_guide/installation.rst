@@ -61,7 +61,7 @@ Alternatively, follow these instructions:
 -  Install Node.js from `nodejs.org <https://nodejs.org>`__.
 
 -  Add ``oracledb`` to your ``package.json`` dependencies or run
-   ``npm install   oracledb``. This installs from the `npm
+   ``npm install oracledb``. This installs from the `npm
    registry <https://www.npmjs.com/package/oracledb>`__. Pre-built
    node-oracledb binaries are available for Windows 64-bit, Linux
    x86_64, and macOS (Intel x86).
@@ -72,7 +72,7 @@ Alternatively, follow these instructions:
    Windows users will require the `Visual Studio 2017
    Redistributable <https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170>`__.
 
--  If a pre-built binary is not available, you will need to build from
+-  If a pre-built binary is not available, you will need to build from the
    source code. Review the :ref:`prerequisites <github>` and add
    ``https://github.com/oracle/node-oracledb/releases/download/v5.5.0/oracledb-src-5.5.0.tgz``
    to your ``package.json`` dependencies or run
@@ -2021,7 +2021,7 @@ Include node-oracledb as a normal dependency in your application
      },
      . . .
 
-The ``packge.json`` and application file can be added to the image, and
+The ``package.json`` and application file can be added to the image, and
 dependencies installed when the image is built:
 
 ::
@@ -2037,7 +2037,7 @@ Using Oracle Net configuration files and Oracle Wallets
 
 `Optional Oracle Net
 Configuration <https://oracle.github.io/node-oracledb/doc/api.html#tnsadmin>`__
-files (like ``tnsnames.ora`` and ``sqlnet.net``) and files that need to
+files (like ``tnsnames.ora`` and ``sqlnet.ora``) and files that need to
 be secured such as `Oracle
 wallets <https://oracle.github.io/node-oracledb/doc/api.html#connectionadb>`__
 can be mounted at runtime using a Docker volume. Map the volume to the

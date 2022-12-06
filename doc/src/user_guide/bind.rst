@@ -112,6 +112,8 @@ it should only occur once in the bind object:
      {nmbv: 'Christopher'}
    );
 
+.. _bindbypos:
+
 Bind by Position
 ----------------
 
@@ -148,6 +150,8 @@ when scanned left to right.
 
 If a bind parameter name is repeated in the SQL string then :ref:`bind by
 name <bindbyname>` syntax should be used.
+
+.. _binddatatypenotes:
 
 Bind Data Type Notes
 --------------------
@@ -218,6 +222,8 @@ explicitly set to a value. This includes bind variables that will be
 ignored. Set simple variables to NULL. Set REF CURSORS to an empty
 result set. See this `GitHub
 Issue <https://github.com/oracle/node-oracledb/issues/886>`__.
+
+.. _outbinds:
 
 Accessing OUT Bind Values
 -------------------------

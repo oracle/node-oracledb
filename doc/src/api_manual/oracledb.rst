@@ -2752,7 +2752,7 @@ Oracledb Methods
           - .. _odbstartupattrsconn:
 
             Connection credentials similar to :ref:`oracledb.getConnection() credentials <getconnectiondbattrsconnattrs>`. The properties ``username``, ``password``, ``connectString``, ``connectionString``, and ``externalAuth`` may be specified.
-        * - options
+        * - ``options``
           - Object
           - .. _odbstartupattrsoptions:
 

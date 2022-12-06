@@ -350,66 +350,6 @@ This can be referenced in node-oracledb:
     }
   );
 
-.. _tokenbasedconnstrings:
-
-Token Based Authentication Connection Strings
----------------------------------------------
-
-Token based authentication allows Oracle Cloud Infrastruction users to
-authenticate to Oracle Database with Oracle Identity Access Manager (IAM)
-tokens. Token authentication can be performed when node-oracledb uses Oracle
-Client libraries 19.14 (or later), or 21.5 (or later).
-
-The Oracle Cloud Infrastructure command line interface (OCI-CLI) can be used
-externally to get tokens and private keys from IAM, for example with
-``oci iam db-token get``.
-
-The connection string used by node-oracledb can specify the directory where the
-token and private key files are located. This syntax is usable with older
-versions of node-oracledb however it is recommended to use connection and pool
-creation parameters introduced in node-oracledb 5.4 instead, see
-:ref:`Token Based Authentication <tokenbasedauthentication>`.
-
-If you need to use the connection string syntax then the Oracle Net parameter
-``TOKEN_AUTH`` must be set. Also the ``PROTOCOL`` parameter must be ``tcps``
-and ``SSL_SERVER_CERT_DN`` should be ``ON``.
-
-You can set ``TOKEN_AUTH=OCI_TOKEN`` in a :ref:`sqlnet.ora <tnsadmin>` file.
-Alternatively, you can specify it in a connect descriptor, for example::
-
-  db_alias =
-    (DESCRIPTION =
-      (ADDRESS = (PROTOCOL = TCPS)(PORT = 1522)(HOST = adb.us-ashburn-1.oraclecloud.com))
-      (CONNECT_DATA = (SERVICE_NAME = adb.oraclecloud.com))
-      (SECURITY =
-        (SSL_SERVER_CERT_DN = "CN=adwc.uscom-east-1.oraclecloud.com, OU=Oracle BMCS US,
-             O=Oracle Corporation, L=Redwood City, ST=California, C=US")
-        (TOKEN_AUTH = OCI_TOKEN)))
-
-The default location for the token and private key is the same default
-location that the OCI-CLI tool writes to. For example ``~/.oci/db-token/``
-on Linux.
-
-If the token and private key files are not in the default location then their
-directory must be specified with the ``TOKEN_LOCATION`` parameter in a
-``sqlnet.ora`` file or in a connection string. For example in a
-``tnsnames.ora`` file:
-
-::
-
-  db_alias =
-    (DESCRIPTION =
-      (ADDRESS = (PROTOCOL = TCPS)(PORT = 1522)(HOST = adb.us-ashburn-1.oraclecloud.com))
-      (CONNECT_DATA = (SERVICE_NAME = adb.oraclecloud.com))
-      (SECURITY =
-        (SSL_SERVER_CERT_DN = "CN=adwc.uscom-east-1.oraclecloud.com, OU=Oracle BMCS US,
-             O=Oracle Corporation, L=Redwood City, ST=California, C=US")
-        (TOKEN_AUTH = OCI_TOKEN)
-        (TOKEN_LOCATION = '~/.oci/db-token')))
-
-The ``TOKEN_AUTH`` and ``TOKEN_LOCATION`` values in a connection string
-take precedence over the ``sqlnet.ora`` settings.
-
 .. _numberofthreads:
 
 Connections, Threads, and Parallelism
@@ -1270,31 +1210,24 @@ Pool Attribute Values
 The :ref:`PoolStatistics object <poolstatisticsclass>` and
 ``logStatistics()`` function record the pool attributes:
 
-.. list-table-with-summary::
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: left
-    :summary: The first column displays the Pool attribute.
-
-    * - Attribute
-    * - :attr:`~pool.connectString`
-    * - :attr:`~pool.edition`
-    * - :attr:`~pool.events`
-    * - :attr:`~pool.externalAuth`
-    * - :attr:`~pool.homogeneous`
-    * - :attr:`~pool.poolAlias`
-    * - :attr:`~pool.poolIncrement`
-    * - :attr:`~pool.poolMax`
-    * - :attr:`~pool.poolMaxPerShard`
-    * - :attr:`~pool.poolMin`
-    * - :attr:`~pool.poolPingInterval`
-    * - :attr:`~pool.poolTimeout`
-    * - :attr:`~pool.queueMax`
-    * - :attr:`~pool.queueTimeout`
-    * - :attr:`~pool.sessionCallback`
-    * - :attr:`~pool.sodaMetaDataCache`
-    * - :attr:`~pool.stmtCacheSize`
-    * - :attr:`~pool.user`
+- :attr:`~pool.connectString`
+- :attr:`~pool.edition`
+- :attr:`~pool.events`
+- :attr:`~pool.externalAuth`
+- :attr:`~pool.homogeneous`
+- :attr:`~pool.poolAlias`
+- :attr:`~pool.poolIncrement`
+- :attr:`~pool.poolMax`
+- :attr:`~pool.poolMaxPerShard`
+- :attr:`~pool.poolMin`
+- :attr:`~pool.poolPingInterval`
+- :attr:`~pool.poolTimeout`
+- :attr:`~pool.queueMax`
+- :attr:`~pool.queueTimeout`
+- :attr:`~pool.sessionCallback`
+- :attr:`~pool.sodaMetaDataCache`
+- :attr:`~pool.stmtCacheSize`
+- :attr:`~pool.user`
 
 Pool Related Environment Variables
 ''''''''''''''''''''''''''''''''''
@@ -1453,6 +1386,8 @@ There are three common scenarios for ``sessionCallback``:
 -  When using :ref:`DRCP <drcp>` then use a :ref:`PL/SQL Session Tagging
    Callback <sessiontaggingplsql>`.
 
+.. _sessionfixuptagging:
+
 Connection Tagging
 ++++++++++++++++++
 
@@ -1556,7 +1491,7 @@ See `sessionfixup.js <https://github.com/oracle/node-oracledb/tree/main
 
 .. _sessiontaggingnode:
 
-Node.js Session Tagging callback
+Node.js Session Tagging Callback
 ++++++++++++++++++++++++++++++++
 
 When connections in the pool require different state for different users
@@ -1999,7 +1934,7 @@ open connections does not fall below ``poolMin``.
 
 .. _tokenbasedauthentication:
 
-Token Based Authentication
+Token-Based Authentication
 ==========================
 
 Token-Based Authentication allows users to connect to a database by
