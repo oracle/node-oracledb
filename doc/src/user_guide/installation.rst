@@ -114,9 +114,7 @@ Alternatively, follow these instructions:
 
    You will need to know `database
    credentials <https://www.youtube.com/watch?v=WDJacg0NuLo>`__ and the
-   `connection
-   string <https://oracle.github.io/node-oracledb/doc/api.html#connectionstrings>`__
-   for the database.
+   :ref:`connection string <connectionstrings>` for the database.
 
 See :ref:`Troubleshooting Node-oracledb Installation
 Problems <troubleshooting>` if you have installation issues.
@@ -124,7 +122,7 @@ Problems <troubleshooting>` if you have installation issues.
 After installation, learn how to use node-oracledb from the
 `examples <https://github.com/oracle/node-oracledb/tree/main/examples>`__
 and the
-`documentation <https://oracle.github.io/node-oracledb/doc/api.html>`__.
+`documentation <https://node-oracledb.readthedocs.io/en/latest/index.html>`__.
 
 .. _instructions:
 
@@ -211,9 +209,7 @@ All installations need:
 
    You will need to know `database
    credentials <https://www.youtube.com/watch?v=WDJacg0NuLo>`__ and the
-   `connection
-   string <https://oracle.github.io/node-oracledb/doc/api.html#connectionstrings>`__
-   for the database.
+   :ref:`connection string <connectionstrings>` for the database.
 
 Pre-built node-oracledb binaries are available for Windows 64-bit, Linux
 x86_64, and macOS (Intel x86). For other platforms you need to :ref:`build
@@ -1833,14 +1829,14 @@ package, see :ref:`Creating a node-oracledb package from source
 code <compilepackage>`.
 
 If you make the package accessible on your local web server, for example
-at www.example.com/oracledb-5.5.0-dev.tgz, then your ``package.json``
+at www.example.com/oracledb-5.5.0.tgz, then your ``package.json``
 would contain:
 
 ::
 
    . . .
       "dependencies": {
-         "oracledb": "https://www.example.com/oracledb-5.5.0-dev.tgz"
+         "oracledb": "https://www.example.com/oracledb-5.5.0.tgz"
       },
    . . .
 
@@ -1848,7 +1844,7 @@ Or you would install with:
 
 ::
 
-   npm install https://www.example.com/oracledb-5.5.0-dev.tgz
+   npm install https://www.example.com/oracledb-5.5.0.tgz
 
 .. _docker:
 
@@ -2035,17 +2031,14 @@ dependencies installed when the image is built:
 Using Oracle Net configuration files and Oracle Wallets
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-`Optional Oracle Net
-Configuration <https://oracle.github.io/node-oracledb/doc/api.html#tnsadmin>`__
-files (like ``tnsnames.ora`` and ``sqlnet.ora``) and files that need to
-be secured such as `Oracle
-wallets <https://oracle.github.io/node-oracledb/doc/api.html#connectionadb>`__
-can be mounted at runtime using a Docker volume. Map the volume to the
-``network/admin`` subdirectory of Instant Client so the ``TNS_ADMIN``
-environment variable does not need to be set. For example, when the
-Wallet or configuration files are in ``/OracleCloud/wallet/`` on the
-host computer, and the image uses Instant Client 19.11 RPMs, then you
-can mount the files using:
+:ref:`Optional Oracle Net Configuration <tnsadmin>` files (like ``tnsnames.ora``
+and ``sqlnet.ora``) and files that need to be secured such as :ref:`Oracle
+wallets <connectionadb>` can be mounted at runtime using a Docker volume. Map
+the volume to the ``network/admin`` subdirectory of Instant Client so the
+``TNS_ADMIN`` environment variable does not need to be set. For example, when
+the Wallet or configuration files are in ``/OracleCloud/wallet/`` on the host
+computer, and the image uses Instant Client 19.11 RPMs, then you can mount the
+files using:
 
 ::
 
