@@ -180,13 +180,12 @@ Guide <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-B0437826
 -43C1-49EC-A94D-B650B6A4A6EE>`__ for the syntax in your version of the Oracle
 Client libraries.
 
-If you are using Oracle Client 19c, the latest `Easy Connect
+If you are using Oracle Client 19c (or later), the latest `Easy Connect
 Plus <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8C85D289-
 6AF3-41BC-848B-BF39D32648BA>`__ syntax allows the use of multiple hosts or
 ports, along with optional entries for the wallet location, the distinguished
 name of the database server, and even lets some network configuration options
-be set. The technical paper `Oracle Database 21c Easy Connect Plus Configurable
-Database Connection Syntax <https://download.oracle.com/ocomdocs/global/Oracle
+be set. Oracle's `Technical Paper on Easy Connect Plus Syntax <https://download.oracle.com/ocomdocs/global/Oracle
 -Net-21c-Easy-Connect-Plus.pdf>`__ discusses the syntax. The Easy Connect Plus
 syntax means that :ref:`tnsnames.ora <tnsadmin>` or
 :ref:`sqlnet.ora <tnsadmin>` files are not needed for some further common
@@ -2462,8 +2461,7 @@ has more details, including when to use, and when not to use DRCP.
 
 There are a number of Oracle Database ``V$`` views that can be used to
 monitor DRCP. These are discussed in the Oracle documentation and in the
-Oracle technical paper `PHP Scalability and High Availability <https://
-www.oracle.com/technetwork/topics/php/php-scalability-ha-twp-128842.pdf>`__.
+Oracle technical paper `Extreme Oracle Database Connection Scalability with Database Resident Connection Pooling (DRCP) <https://www.oracle.com/docs/tech/drcp-technical-brief.pdf>`__.
 This paper also gives more detail on configuring DRCP.
 
 .. _privconn:
