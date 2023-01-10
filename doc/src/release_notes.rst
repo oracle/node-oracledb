@@ -688,8 +688,8 @@ node-oracledb `v3.1.0 <https://github.com/oracle/node-oracledb/compare/v3.0.1...
     applications where not all users will be accessing Oracle Database.
 
     It allows code generation tools to access node-oracledb constants
-    without needing Oracle Client installed (see
-    `#983 <https://github.com/oracle/node-oracledb/issues/983>`__.
+    without requiring Oracle Client libraries to be installed (see
+    `#983 <https://github.com/oracle/node-oracledb/issues/983>`__).
 
     Applications now have more scope to alter Oracle environment
     variables referenced by the Oracle Client layer. Note it is still
