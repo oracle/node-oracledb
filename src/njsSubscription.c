@@ -295,7 +295,7 @@ bool njsSubscription_new(njsBaton *baton, napi_env env, napi_value *obj,
         free(tempSubscr);
         return njsUtils_genericThrowError(env);
     }
-    tempSubscr->oracleDb = baton->oracleDb;
+    tempSubscr->globals = baton->globals;
     tempSubscr->env = env;
     tempSubscr->subscrNamespace = DPI_SUBSCR_NAMESPACE_DBCHANGE;
 
@@ -334,7 +334,7 @@ static bool njsSubscription_onStopNotificationsHelper(napi_env env,
     NJS_CHECK_NAPI(env, napi_create_string_utf8(env, subscr->name,
             subscr->nameLength, &name))
     NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            subscr->oracleDb->jsSubscriptions, &allSubscriptions))
+            subscr->globals->jsSubscriptions, &allSubscriptions))
     NJS_CHECK_NAPI(env, napi_delete_property(env, allSubscriptions, name,
             NULL))
 

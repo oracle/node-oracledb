@@ -51,7 +51,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefSodaDocCursor = {
     "SodaDocCursor", sizeof(njsSodaDocCursor), njsSodaDocCursor_finalize,
-    njsClassProperties, NULL, false
+    njsClassProperties, false
 };
 
 // other methods used internally
@@ -117,7 +117,6 @@ static bool njsSodaDocCursor_createBaton(napi_env env, napi_callback_info info,
         njsBaton_reportError(tempBaton, env);
         return false;
     }
-    tempBaton->oracleDb = cursor->oracleDb;
 
     *baton = tempBaton;
     return true;
@@ -183,7 +182,7 @@ static bool njsSodaDocCursor_getNextPostAsync(njsBaton *baton, napi_env env,
         napi_value *result)
 {
     if (baton->dpiSodaDocHandle && !njsSodaDocument_createFromHandle(env,
-            baton->dpiSodaDocHandle, baton->oracleDb, result))
+            baton->dpiSodaDocHandle, baton->globals, result))
         return false;
     baton->dpiSodaDocHandle = NULL;
     return true;
@@ -202,7 +201,7 @@ bool njsSodaDocCursor_newFromBaton(njsBaton *baton, napi_env env,
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefSodaDocCursor,
-            baton->oracleDb->jsSodaDocCursorConstructor, cursorObj,
+            baton->globals->jsSodaDocCursorConstructor, cursorObj,
             (njsBaseInstance**) &cursor))
         return false;
 
@@ -216,7 +215,6 @@ bool njsSodaDocCursor_newFromBaton(njsBaton *baton, napi_env env,
     // perform initializations
     cursor->handle = baton->dpiSodaDocCursorHandle;
     baton->dpiSodaDocCursorHandle = NULL;
-    cursor->oracleDb = baton->oracleDb;
 
     return true;
 }

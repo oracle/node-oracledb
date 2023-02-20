@@ -811,7 +811,6 @@ Overview of node-oracledb functional tests
     44.8 maxSize option applies to each elements of an array
 
 45. instanceof1.js
-    45.1 instanceof works for the oracledb instance
     45.2 instanceof works for pool instances
     45.3 instanceof works for connection instances
     45.4 instanceof works for resultset instances

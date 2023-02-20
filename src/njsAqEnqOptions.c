@@ -52,7 +52,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefAqEnqOptions = {
     "AqEnqOptions", sizeof(njsAqEnqOptions), njsAqEnqOptions_finalize,
-    njsClassProperties, NULL, true
+    njsClassProperties, true
 };
 
 
@@ -82,7 +82,8 @@ static napi_value njsAqEnqOptions_getDeliveryMode(napi_env env,
 {
     njsAqEnqOptions *options;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &options))
+    if (!njsUtils_validateGetter(env, info, NULL,
+            (njsBaseInstance**) &options))
         return NULL;
     return njsUtils_convertToUnsignedInt(env, options->deliveryMode);
 }
@@ -95,15 +96,17 @@ static napi_value njsAqEnqOptions_getDeliveryMode(napi_env env,
 static napi_value njsAqEnqOptions_getTransformation(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     njsAqEnqOptions *options;
     uint32_t valueLength;
     const char *value;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &options))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &options))
         return NULL;
     if (dpiEnqOptions_getTransformation(options->handle, &value,
             &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, options->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     return njsUtils_convertToString(env, value, valueLength);
@@ -117,13 +120,15 @@ static napi_value njsAqEnqOptions_getTransformation(napi_env env,
 static napi_value njsAqEnqOptions_getVisibility(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     njsAqEnqOptions *options;
     uint32_t value;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &options))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &options))
         return NULL;
     if (dpiEnqOptions_getVisibility(options->handle, &value) < 0) {
-        njsUtils_throwErrorDPI(env, options->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     return njsUtils_convertToUnsignedInt(env, value);
@@ -137,17 +142,18 @@ static napi_value njsAqEnqOptions_getVisibility(napi_env env,
 static napi_value njsAqEnqOptions_setDeliveryMode(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     njsAqEnqOptions *options;
     napi_value valueObj;
     uint32_t value;
 
-    if (!njsUtils_validateSetter(env, info, (njsBaseInstance**) &options,
-            &valueObj))
+    if (!njsUtils_validateSetter(env, info, &globals,
+            (njsBaseInstance**) &options, &valueObj))
         return NULL;
     if (!njsUtils_setPropUnsignedInt(env, valueObj, "deliveryMode", &value))
         return NULL;
     if (dpiEnqOptions_setDeliveryMode(options->handle, (uint16_t) value) < 0) {
-        njsUtils_throwErrorDPI(env, options->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     options->deliveryMode = (uint16_t) value;
@@ -162,14 +168,15 @@ static napi_value njsAqEnqOptions_setDeliveryMode(napi_env env,
 static napi_value njsAqEnqOptions_setTransformation(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     njsAqEnqOptions *options;
     napi_value valueObj;
     size_t valueLength;
     char *value = NULL;
     int status;
 
-    if (!njsUtils_validateSetter(env, info, (njsBaseInstance**) &options,
-            &valueObj))
+    if (!njsUtils_validateSetter(env, info, &globals,
+            (njsBaseInstance**) &options, &valueObj))
         return NULL;
     if (!njsUtils_setPropString(env, valueObj, "transformation", &value,
             &valueLength))
@@ -178,7 +185,7 @@ static napi_value njsAqEnqOptions_setTransformation(napi_env env,
             (uint32_t) valueLength);
     free(value);
     if (status < 0)
-        njsUtils_throwErrorDPI(env, options->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
     return NULL;
 }
 
@@ -190,16 +197,17 @@ static napi_value njsAqEnqOptions_setTransformation(napi_env env,
 static napi_value njsAqEnqOptions_setVisibility(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     njsAqEnqOptions *options;
     napi_value valueObj;
     uint32_t value;
 
-    if (!njsUtils_validateSetter(env, info, (njsBaseInstance**) &options,
-            &valueObj))
+    if (!njsUtils_validateSetter(env, info, &globals,
+            (njsBaseInstance**) &options, &valueObj))
         return NULL;
     if (!njsUtils_setPropUnsignedInt(env, valueObj, "visibliity", &value))
         return NULL;
     if (dpiEnqOptions_setVisibility(options->handle, value) < 0)
-        njsUtils_throwErrorDPI(env, options->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
     return NULL;
 }

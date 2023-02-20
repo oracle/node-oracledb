@@ -65,33 +65,8 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefSodaDatabase = {
     "SodaDatabase", sizeof(njsSodaDatabase), njsSodaDatabase_finalize,
-    njsClassProperties, NULL, false
+    njsClassProperties, false
 };
-
-// other methods used internally
-static bool njsSodaDatabase_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton);
-
-
-//-----------------------------------------------------------------------------
-// njsSodaDatabase_createBaton()
-//   Create the baton used for asynchronous methods and initialize all
-// values. If this fails for some reason, an exception is thrown.
-//-----------------------------------------------------------------------------
-bool njsSodaDatabase_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton)
-{
-    njsSodaDatabase *db;
-    njsBaton *tempBaton;
-
-    if (!njsUtils_createBaton(env, info, numArgs, args, &tempBaton))
-        return false;
-    db = (njsSodaDatabase*) tempBaton->callingInstance;
-    tempBaton->oracleDb = db->oracleDb;
-
-    *baton = tempBaton;
-    return true;
-}
 
 
 //-----------------------------------------------------------------------------
@@ -108,7 +83,7 @@ static napi_value njsSodaDatabase_createCollection(napi_env env,
     napi_value args[2];
     njsBaton *baton;
 
-    if (!njsSodaDatabase_createBaton(env, info, 2, args, &baton))
+    if (!njsUtils_createBaton(env, info, 2, args, &baton))
         return NULL;
     if (!njsSodaDatabase_createCollectionProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -129,7 +104,7 @@ static bool njsSodaDatabase_createCollectionAsync(njsBaton *baton)
     njsSodaDatabase *db = (njsSodaDatabase*) baton->callingInstance;
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
 
-    if (db->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (baton->createCollectionMode == NJS_SODA_COLL_CREATE_MODE_MAP)
         flags |= DPI_SODA_FLAGS_CREATE_COLL_MAP;
@@ -163,6 +138,8 @@ static bool njsSodaDatabase_createCollectionPostAsync(njsBaton *baton,
 static bool njsSodaDatabase_createCollectionProcessArgs(njsBaton *baton,
         napi_env env, napi_value *args)
 {
+    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+        return false;
     if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
         return false;
     if (!njsBaton_getStringFromArg(baton, env, args, 1, "metaData",
@@ -190,13 +167,14 @@ static napi_value njsSodaDatabase_createDocument(napi_env env,
     size_t contentLength, keyLength = 0, mediaTypeLength = 0;
     char *key = NULL, *mediaType = NULL;
     napi_value args[2], docObj;
+    njsModuleGlobals *globals;
     dpiSodaDoc *docHandle;
     njsSodaDatabase *db;
     void *content;
     int dpiStatus;
 
     // verify that the right number of arguments have been passed
-    if (!njsUtils_validateArgs(env, info, 2, args, NULL,
+    if (!njsUtils_validateArgs(env, info, 2, args, &globals, NULL,
             (njsBaseInstance**) &db))
         return NULL;
 
@@ -229,13 +207,12 @@ static napi_value njsSodaDatabase_createDocument(napi_env env,
     if (mediaType)
         free(mediaType);
     if (dpiStatus < 0) {
-        njsUtils_throwErrorDPI(env, db->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
 
     // return wrapped document
-    if (!njsSodaDocument_createFromHandle(env, docHandle, db->oracleDb,
-            &docObj)) {
+    if (!njsSodaDocument_createFromHandle(env, docHandle, globals, &docObj)) {
         dpiSodaDoc_release(docHandle);
         return NULL;
     }
@@ -274,7 +251,7 @@ static napi_value njsSodaDatabase_getCollectionNames(napi_env env,
     napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaDatabase_createBaton(env, info, 1, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaDatabase_getCollectionNamesProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -373,19 +350,18 @@ static bool njsSodaDatabase_getCollectionNamesProcessArgs(njsBaton *baton,
 //   Creates a new SODA database object given the ODPI-C handle.
 //-----------------------------------------------------------------------------
 bool njsSodaDatabase_createFromHandle(napi_env env, napi_value connObj,
-        njsConnection *conn, dpiSodaDb *handle, napi_value *dbObj)
+        njsModuleGlobals *globals, dpiSodaDb *handle, napi_value *dbObj)
 {
     njsSodaDatabase *db;
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefSodaDatabase,
-            conn->oracleDb->jsSodaDatabaseConstructor, dbObj,
+            globals->jsSodaDatabaseConstructor, dbObj,
             (njsBaseInstance**) &db))
         return false;
 
-    // perform some initializations
+    // perform initialization
     db->handle = handle;
-    db->oracleDb = conn->oracleDb;
 
     // store a reference to the connection to permit serialization and to
     // ensure that it is not garbage collected during the lifetime of the SODA
@@ -410,7 +386,7 @@ static napi_value njsSodaDatabase_openCollection(napi_env env,
     napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaDatabase_createBaton(env, info, 1, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaDatabase_openCollectionProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -431,7 +407,7 @@ static bool njsSodaDatabase_openCollectionAsync(njsBaton *baton)
     njsSodaDatabase *db = (njsSodaDatabase*) baton->callingInstance;
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
 
-    if (db->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaDb_openCollection(db->handle, baton->name,
             (uint32_t) baton->nameLength, flags,
@@ -462,6 +438,8 @@ static bool njsSodaDatabase_openCollectionPostAsync(njsBaton *baton,
 static bool njsSodaDatabase_openCollectionProcessArgs(njsBaton *baton,
         napi_env env, napi_value *args)
 {
+    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+        return false;
     if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
         return false;
 

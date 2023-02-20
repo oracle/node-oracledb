@@ -65,7 +65,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefResultSet = {
     "ResultSet", sizeof(njsResultSet), njsResultSet_finalize,
-    njsClassProperties, NULL, false
+    njsClassProperties, false
 };
 
 // other methods used internally
@@ -143,7 +143,6 @@ bool njsResultSet_createBaton(napi_env env, napi_callback_info info,
         return false;
     }
 
-    tempBaton->oracleDb = rs->conn->oracleDb;
     rs->activeBaton = tempBaton;
 
     *baton = tempBaton;
@@ -177,7 +176,7 @@ static napi_value njsResultSet_getFetchArraySize(napi_env env,
 {
     njsResultSet *rs;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &rs))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &rs))
         return NULL;
     return njsUtils_convertToUnsignedInt(env, rs->fetchArraySize);
 }
@@ -193,7 +192,7 @@ static napi_value njsResultSet_getMetaData(napi_env env,
     napi_value metadata;
     njsResultSet *rs;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &rs))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &rs))
         return NULL;
     if (!rs->handle || !rs->conn->handle)
         return NULL;
@@ -214,7 +213,7 @@ static napi_value njsResultSet_getNestedCursorIndices(napi_env env,
     napi_value indices;
     njsResultSet *rs;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &rs))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &rs))
         return NULL;
     if (!rs->handle || !rs->conn->handle)
         return NULL;
@@ -422,18 +421,15 @@ static bool njsResultSet_getRowsProcessArgs(njsBaton *baton, napi_env env,
 {
     njsResultSet *rs = (njsResultSet*) baton->callingInstance;
 
-    // copy arrays for fetch as buffer and fetch as RAW types
-    if (!njsUtils_copyArray(env, baton->oracleDb->fetchAsBufferTypes,
-            baton->oracleDb->numFetchAsBufferTypes, sizeof(uint32_t),
-            (void**) &baton->fetchAsBufferTypes,
-            &baton->numFetchAsBufferTypes))
-        return false;
-    if (!njsUtils_copyArray(env, baton->oracleDb->fetchAsStringTypes,
-            baton->oracleDb->numFetchAsStringTypes, sizeof(uint32_t),
-            (void**) &baton->fetchAsStringTypes,
-            &baton->numFetchAsStringTypes))
+    // copy items from the global settings class to the baton since they might
+    // change after the asynchronous function begins
+    if (!njsBaton_getGlobalSettings(baton, env,
+            NJS_GLOBAL_ATTR_FETCH_AS_BUFFER,
+            NJS_GLOBAL_ATTR_FETCH_AS_STRING,
+            0))
         return false;
 
+    // check options
     if (!njsUtils_getUnsignedIntArg(env, args, 0, &baton->fetchArraySize))
         return false;
     if (baton->fetchArraySize == 0)
@@ -469,7 +465,7 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefResultSet,
-            baton->oracleDb->jsResultSetConstructor, rsObj,
+            baton->globals->jsResultSetConstructor, rsObj,
             (njsBaseInstance**) &rs))
         return false;
 

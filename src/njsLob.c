@@ -79,7 +79,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 
 // class definition
 const njsClassDef njsClassDefLob = {
-    "Lob", sizeof(njsLob), njsLob_finalize, njsClassProperties, NULL, false
+    "Lob", sizeof(njsLob), njsLob_finalize, njsClassProperties, false
 };
 
 // other methods used internally
@@ -145,7 +145,6 @@ bool njsLob_createBaton(napi_env env, napi_callback_info info,
         njsBaton_reportError(tempBaton, env);
         return false;
     }
-    tempBaton->oracleDb = lob->oracleDb;
     lob->activeBaton = tempBaton;
 
     *baton = tempBaton;
@@ -179,7 +178,7 @@ static napi_value njsLob_getAutoCloseLob(napi_env env, napi_callback_info info)
 {
     njsLob *lob;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &lob))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &lob))
         return NULL;
     return njsUtils_convertToBoolean(env, lob->isAutoClose);
 }
@@ -193,7 +192,7 @@ static napi_value njsLob_getChunkSize(napi_env env, napi_callback_info info)
 {
     njsLob *lob;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &lob))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &lob))
         return NULL;
     return njsUtils_convertToUnsignedInt(env, lob->chunkSize);
 }
@@ -207,7 +206,7 @@ static napi_value njsLob_getLength(napi_env env, napi_callback_info info)
 {
     njsLob *lob;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &lob))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &lob))
         return NULL;
     return njsUtils_convertToUnsignedInt(env, (uint32_t) lob->length);
 }
@@ -221,7 +220,7 @@ static napi_value njsLob_getPieceSize(napi_env env, napi_callback_info info)
 {
     njsLob *lob;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &lob))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &lob))
         return NULL;
     return njsUtils_convertToUnsignedInt(env, lob->pieceSize);
 }
@@ -235,7 +234,7 @@ static napi_value njsLob_getType(napi_env env, napi_callback_info info)
 {
     njsLob *lob;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &lob))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &lob))
         return NULL;
     return njsUtils_convertToUnsignedInt(env, lob->dataType);
 }
@@ -249,7 +248,7 @@ static napi_value njsLob_getValid(napi_env env, napi_callback_info info)
 {
     njsLob *lob;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &lob))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &lob))
         return NULL;
     return njsUtils_convertToBoolean(env, (lob->handle) ? true : false);
 }
@@ -351,20 +350,19 @@ static bool njsLob_getDataPostAsync(njsBaton *baton, napi_env env,
 // njsLob_new()
 //   Creates a new LOB object.
 //-----------------------------------------------------------------------------
-bool njsLob_new(njsOracleDb *oracleDb, njsLobBuffer *buffer, napi_env env,
+bool njsLob_new(njsModuleGlobals *globals, njsLobBuffer *buffer, napi_env env,
         napi_value parentObj, napi_value *lobObj)
 {
     njsLob *lob;
 
     // create new instance
-    if (!njsUtils_genericNew(env, &njsClassDefLob, oracleDb->jsLobConstructor,
+    if (!njsUtils_genericNew(env, &njsClassDefLob, globals->jsLobConstructor,
             lobObj, (njsBaseInstance**) &lob))
         return false;
 
     // transfer data from LOB buffer to instance
     lob->handle = buffer->handle;
     buffer->handle = NULL;
-    lob->oracleDb = oracleDb;
     lob->dataType = buffer->dataType;
     lob->chunkSize = buffer->chunkSize;
     lob->pieceSize = buffer->chunkSize;
@@ -513,7 +511,8 @@ static napi_value njsLob_setPieceSize(napi_env env, napi_callback_info info)
     napi_value value;
     njsLob *lob;
 
-    if (!njsUtils_validateSetter(env, info, (njsBaseInstance**) &lob, &value))
+    if (!njsUtils_validateSetter(env, info, NULL, (njsBaseInstance**) &lob,
+            &value))
         return NULL;
     NJS_FREE_AND_CLEAR(lob->bufferPtr);
     if (!njsUtils_setPropUnsignedInt(env, value, "pieceSize", &lob->pieceSize))

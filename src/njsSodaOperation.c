@@ -77,12 +77,10 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefSodaOperation = {
     "SodaOperation", sizeof(njsSodaOperation), njsSodaOperation_finalize,
-    njsClassProperties, NULL, false
+    njsClassProperties, false
 };
 
 // other methods used internally
-static bool njsSodaOperation_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton);
 static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
         napi_value *args);
 
@@ -99,7 +97,7 @@ static napi_value njsSodaOperation_count(napi_env env, napi_callback_info info)
     napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaOperation_createBaton(env, info, 1, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaOperation_processOptions(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -119,7 +117,7 @@ static bool njsSodaOperation_countAsync(njsBaton *baton)
     njsSodaOperation *op = (njsSodaOperation*) baton->callingInstance;
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
 
-    if (baton->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_getDocCount(op->coll->handle, baton->sodaOperOptions,
             flags, &baton->docCount) < 0)
@@ -146,38 +144,18 @@ static bool njsSodaOperation_countPostAsync(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsSodaOperation_createBaton()
-//   Create the baton used for asynchronous methods and initialize all
-// values. If this fails for some reason, an exception is thrown.
-//-----------------------------------------------------------------------------
-static bool njsSodaOperation_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton)
-{
-    njsSodaOperation *op;
-    njsBaton *tempBaton;
-
-    if (!njsUtils_createBaton(env, info, numArgs, args, &tempBaton))
-        return false;
-    op = (njsSodaOperation*) tempBaton->callingInstance;
-    tempBaton->oracleDb = op->coll->db->oracleDb;
-
-    *baton = tempBaton;
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsSodaOperation_createFromCollection()
 //   Creates a new SODA operation object given a collection.
 //-----------------------------------------------------------------------------
 bool njsSodaOperation_createFromCollection(napi_env env,
-        napi_value collObj, njsSodaCollection *coll, napi_value *opObj)
+        napi_value collObj, njsModuleGlobals *globals, njsSodaCollection *coll,
+        napi_value *opObj)
 {
     njsSodaOperation *op;
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefSodaOperation,
-            coll->db->oracleDb->jsSodaOperationConstructor, opObj,
+            globals->jsSodaOperationConstructor, opObj,
             (njsBaseInstance**) &op))
         return false;
 
@@ -219,7 +197,7 @@ static napi_value njsSodaOperation_getCursor(napi_env env,
     napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaOperation_createBaton(env, info, 1, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaOperation_processOptions(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -240,7 +218,7 @@ static bool njsSodaOperation_getCursorAsync(njsBaton *baton)
     njsSodaOperation *op = (njsSodaOperation*) baton->callingInstance;
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
 
-    if (baton->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_find(op->coll->handle, baton->sodaOperOptions,
             flags, &baton->dpiSodaDocCursorHandle) < 0)
@@ -273,7 +251,7 @@ static napi_value njsSodaOperation_getDocuments(napi_env env,
     napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaOperation_createBaton(env, info, 1, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaOperation_processOptions(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -297,7 +275,7 @@ static bool njsSodaOperation_getDocumentsAsync(njsBaton *baton)
     uint32_t numAllocated;
 
     // acquire cursor to iterate over results
-    if (baton->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_find(op->coll->handle, baton->sodaOperOptions,
             flags, &baton->dpiSodaDocCursorHandle) < 0)
@@ -358,7 +336,7 @@ static bool njsSodaOperation_getDocumentsPostAsync(njsBaton *baton,
         // create element; if successful remove the SODA document handle from
         // the baton as the reference is now owned by the element
         if (!njsSodaDocument_createFromHandle(env, baton->sodaDocs[i],
-                baton->oracleDb, &element))
+                baton->globals, &element))
             return false;
         baton->sodaDocs[i] = NULL;
 
@@ -384,7 +362,7 @@ static napi_value njsSodaOperation_getOne(napi_env env,
     napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaOperation_createBaton(env, info, 1, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaOperation_processOptions(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -404,7 +382,7 @@ static bool njsSodaOperation_getOneAsync(njsBaton *baton)
     njsSodaOperation *op = (njsSodaOperation*) baton->callingInstance;
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
 
-    if (baton->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_findOne(op->coll->handle, baton->sodaOperOptions,
             flags, &baton->dpiSodaDocHandle) < 0)
@@ -421,7 +399,7 @@ static bool njsSodaOperation_getOnePostAsync(njsBaton *baton, napi_env env,
         napi_value *result)
 {
     if (baton->dpiSodaDocHandle && !njsSodaDocument_createFromHandle(env,
-            baton->dpiSodaDocHandle, baton->oracleDb, result))
+            baton->dpiSodaDocHandle, baton->globals, result))
         return false;
     baton->dpiSodaDocHandle = NULL;
     return true;
@@ -438,19 +416,25 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
 {
     dpiVersionInfo versionInfo;
 
+    // copy settings from JavaScript
+    if (!njsBaton_getGlobalSettings(baton, env,
+            NJS_GLOBAL_ATTR_AUTOCOMMIT,
+            NJS_GLOBAL_ATTR_FETCH_ARRAY_SIZE,
+            0))
+        return false;
+
     // allocate memory for ODPI-C operations structure
     baton->sodaOperOptions = calloc(1, sizeof(dpiSodaOperOptions));
     if (!baton->sodaOperOptions)
         return njsBaton_setError(baton, errInsufficientMemory);
 
     // set fetch array size, but ONLY if the client version exceeds 19.5
-    if (dpiContext_getClientVersion(baton->oracleDb->context,
+    if (dpiContext_getClientVersion(baton->globals->context,
             &versionInfo) < 0)
-        return njsUtils_throwErrorDPI(env, baton->oracleDb);
+        return njsUtils_throwErrorDPI(env, baton->globals);
     if (versionInfo.versionNum > 19 ||
             (versionInfo.versionNum == 19 && versionInfo.releaseNum >= 5))
-        baton->sodaOperOptions->fetchArraySize =
-                baton->oracleDb->fetchArraySize;
+        baton->sodaOperOptions->fetchArraySize = baton->fetchArraySize;
 
     // process each of the options
     if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "fetchArraySize",
@@ -509,7 +493,7 @@ static napi_value njsSodaOperation_remove(napi_env env,
     napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaOperation_createBaton(env, info, 1, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaOperation_processOptions(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -529,7 +513,7 @@ static bool njsSodaOperation_removeAsync(njsBaton *baton)
     njsSodaOperation *op = (njsSodaOperation*) baton->callingInstance;
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
 
-    if (baton->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_remove(op->coll->handle, baton->sodaOperOptions,
             flags, &baton->docCount) < 0)
@@ -571,7 +555,7 @@ static napi_value njsSodaOperation_replaceOne(napi_env env,
     napi_value args[2];
     njsBaton *baton;
 
-    if (!njsSodaOperation_createBaton(env, info, 2, args, &baton))
+    if (!njsUtils_createBaton(env, info, 2, args, &baton))
         return NULL;
     if (!njsSodaOperation_processOptions(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -599,7 +583,7 @@ static bool njsSodaOperation_replaceOneAsync(njsBaton *baton)
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
     int replaced;
 
-    if (baton->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_replaceOne(op->coll->handle, baton->sodaOperOptions,
             baton->dpiSodaDocHandle, flags, &replaced, NULL) < 0)
@@ -642,7 +626,7 @@ static napi_value njsSodaOperation_replaceOneAndGet(napi_env env,
     napi_value args[2];
     njsBaton *baton;
 
-    if (!njsSodaOperation_createBaton(env, info, 2, args, &baton))
+    if (!njsUtils_createBaton(env, info, 2, args, &baton))
         return NULL;
     if (!njsSodaOperation_processOptions(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -671,7 +655,7 @@ static bool njsSodaOperation_replaceOneAndGetAsync(njsBaton *baton)
     dpiSodaDoc *replacedDoc;
     int replaced;
 
-    if (baton->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_replaceOne(op->coll->handle, baton->sodaOperOptions,
             baton->dpiSodaDocHandle, flags, &replaced, &replacedDoc) < 0)
@@ -692,7 +676,7 @@ static bool njsSodaOperation_replaceOneAndGetPostAsync(njsBaton *baton,
         napi_env env, napi_value *result)
 {
     if (baton->dpiSodaDocHandle && !njsSodaDocument_createFromHandle(env,
-            baton->dpiSodaDocHandle, baton->oracleDb, result))
+            baton->dpiSodaDocHandle, baton->globals, result))
         return false;
     baton->dpiSodaDocHandle = NULL;
     return true;

@@ -94,7 +94,8 @@ static const char *njsErrorMessages[] = {
     "NJS-085: invalid connection pool configuration with token based authentication. The homogeneous and externalAuth attributes must be set to true", // errPoolTokenBasedAuth
     "NJS-086: invalid standalone configuration with token based authentication. The externalAuth attribute must be set to true", // errStandaloneTokenBasedAuth
     "NJS-087: access token has expired", //errExpiredToken
-    "NJS-088: accessTokenCallback cannot be specified when accessToken is a function" //errAccessTokenCallback
+    "NJS-088: accessTokenCallback cannot be specified when accessToken is a function", //errAccessTokenCallback
+    "NJS-089: internal error: invalid global setting attribute num %d", // errInvalidGlobalSettingAttrNum
 };
 
 

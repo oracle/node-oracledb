@@ -71,7 +71,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefAqMessage = {
     "AqMessage", sizeof(njsAqMessage), njsAqMessage_finalize,
-    njsClassProperties, NULL, true
+    njsClassProperties, true
 };
 
 // other methods used internally
@@ -96,13 +96,12 @@ bool njsAqMessage_createFromHandle(njsBaton *baton, dpiMsgProps *handle,
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefAqMessage,
-            baton->oracleDb->jsAqMessageConstructor, messageObj,
+            baton->globals->jsAqMessageConstructor, messageObj,
             (njsBaseInstance**) &msg))
         return false;
 
     // perform some initializations
     msg->handle = handle;
-    msg->oracleDb = baton->oracleDb;
     msg->objectType = queue->payloadObjectType;
 
     return true;
@@ -134,15 +133,17 @@ static napi_value njsAqMessage_getBufferAttribute(napi_env env,
         napi_callback_info info,
         int (*getter)(dpiMsgProps*, const char **, uint32_t *))
 {
+    njsModuleGlobals *globals;
     njsAqMessage *message;
     uint32_t valueLength;
     const char *value;
     napi_value result;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &message))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &message))
         return NULL;
     if ((*getter)(message->handle, &value, &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, message->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     if (napi_create_buffer_copy(env, valueLength, value, NULL,
@@ -183,13 +184,15 @@ static napi_value njsAqMessage_getDelay(napi_env env, napi_callback_info info)
 static napi_value njsAqMessage_getDeliveryMode(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     njsAqMessage *message;
     uint16_t value;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &message))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &message))
         return NULL;
     if (dpiMsgProps_getDeliveryMode(message->handle, &value) < 0) {
-        njsUtils_throwErrorDPI(env, message->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     return njsUtils_convertToUnsignedInt(env, value);
@@ -226,13 +229,15 @@ static napi_value njsAqMessage_getExpiration(napi_env env,
 static napi_value njsAqMessage_getIntAttribute(napi_env env,
         napi_callback_info info, int (*getter)(dpiMsgProps*, int32_t *))
 {
+    njsModuleGlobals *globals;
     njsAqMessage *message;
     int32_t value;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &message))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &message))
         return NULL;
     if ((*getter)(message->handle, &value) < 0) {
-        njsUtils_throwErrorDPI(env, message->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     return njsUtils_convertToInt(env, value);
@@ -281,21 +286,24 @@ static napi_value njsAqMessage_getOriginalMsgId(napi_env env,
 static napi_value njsAqMessage_getPayload(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     napi_value payloadObj;
     uint32_t valueLength;
     dpiObject *objHandle;
     const char *value;
     njsAqMessage *msg;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &msg))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &msg))
         return NULL;
     if (dpiMsgProps_getPayload(msg->handle, &objHandle, &value,
             &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, msg->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     if (objHandle) {
-        if (!njsDbObject_new(msg->objectType, objHandle, env, &payloadObj))
+        if (!njsDbObject_new(msg->objectType, objHandle, env, globals,
+                &payloadObj))
             return NULL;
     }  else {
         if (napi_create_buffer_copy(env, valueLength, value, NULL,
@@ -326,13 +334,15 @@ static napi_value njsAqMessage_getPriority(napi_env env,
 static napi_value njsAqMessage_getState(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     njsAqMessage *message;
     uint32_t value;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &message))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &message))
         return NULL;
     if (dpiMsgProps_getState(message->handle, &value) < 0) {
-        njsUtils_throwErrorDPI(env, message->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     return njsUtils_convertToUnsignedInt(env, value);
@@ -347,14 +357,16 @@ static napi_value njsAqMessage_getTextAttribute(napi_env env,
         napi_callback_info info,
         int (*getter)(dpiMsgProps*, const char **, uint32_t *))
 {
+    njsModuleGlobals *globals;
     njsAqMessage *message;
     uint32_t valueLength;
     const char *value;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &message))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &message))
         return NULL;
     if ((*getter)(message->handle, &value, &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, message->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     return njsUtils_convertToString(env, value, valueLength);

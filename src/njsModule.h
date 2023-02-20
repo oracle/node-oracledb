@@ -36,39 +36,6 @@
 #include "dpi.h"
 #include "uv.h"
 
-// Keep the version in sync with package.json.
-// The suffix should be something like "-dev" or "-beta.1".
-// For production, use: #define NJS_NODE_ORACLEDB_SUFFIX ""
-#define NJS_NODE_ORACLEDB_MAJOR       6
-#define NJS_NODE_ORACLEDB_MINOR       0
-#define NJS_NODE_ORACLEDB_PATCH       0
-#define NJS_NODE_ORACLEDB_SUFFIX      "-dev"
-
-// define stringified version and driver name
-#define NJS_STR_HELPER(x)       #x
-#define NJS_STR(x)              NJS_STR_HELPER(x)
-#define NJS_VERSION_STRING  \
-        NJS_STR(NJS_NODE_ORACLEDB_MAJOR) "." \
-        NJS_STR(NJS_NODE_ORACLEDB_MINOR) "." \
-        NJS_STR(NJS_NODE_ORACLEDB_PATCH) \
-        NJS_NODE_ORACLEDB_SUFFIX
-#define NJS_DRIVER_NAME "node-oracledb : " NJS_VERSION_STRING
-
-// Used for Oracledb.version
-#define NJS_NODE_ORACLEDB_VERSION   ( (NJS_NODE_ORACLEDB_MAJOR * 10000) + \
-                                      (NJS_NODE_ORACLEDB_MINOR * 100) +   \
-                                      (NJS_NODE_ORACLEDB_PATCH) )
-
-// default values
-#define NJS_MAX_ROWS                    0
-#define NJS_STMT_CACHE_SIZE             30
-#define NJS_POOL_MIN                    0
-#define NJS_POOL_MAX                    4
-#define NJS_POOL_INCR                   1
-#define NJS_POOL_TIMEOUT                60
-#define NJS_LOB_PREFETCH_SIZE           16384
-#define NJS_POOL_DEFAULT_PING_INTERVAL  60
-
 // maximum length of error messages
 #define NJS_MAX_ERROR_MSG_LEN           256
 
@@ -139,6 +106,28 @@
 #define NJS_DATATYPE_BOOLEAN            DPI_ORACLE_TYPE_BOOLEAN
 #define NJS_DATATYPE_OBJECT             DPI_ORACLE_TYPE_OBJECT
 #define NJS_DATATYPE_JSON               DPI_ORACLE_TYPE_JSON
+
+// global settings attributes used in C
+#define NJS_GLOBAL_ATTR_AUTOCOMMIT          7000
+#define NJS_GLOBAL_ATTR_CONNECTION_CLASS    7001
+#define NJS_GLOBAL_ATTR_DBOBJECT_AS_POJO    7002
+#define NJS_GLOBAL_ATTR_EDITION             7003
+#define NJS_GLOBAL_ATTR_EVENTS              7004
+#define NJS_GLOBAL_ATTR_EXTENDED_METADATA   7005
+#define NJS_GLOBAL_ATTR_EXTERNAL_AUTH       7006
+#define NJS_GLOBAL_ATTR_FETCH_ARRAY_SIZE    7007
+#define NJS_GLOBAL_ATTR_FETCH_AS_BUFFER     7008
+#define NJS_GLOBAL_ATTR_FETCH_AS_STRING     7009
+#define NJS_GLOBAL_ATTR_MAX_ROWS            7010
+#define NJS_GLOBAL_ATTR_OUT_FORMAT          7011
+#define NJS_GLOBAL_ATTR_POOL_INCREMENT      7012
+#define NJS_GLOBAL_ATTR_POOL_MAX            7013
+#define NJS_GLOBAL_ATTR_POOL_MAX_PER_SHARD  7014
+#define NJS_GLOBAL_ATTR_POOL_MIN            7015
+#define NJS_GLOBAL_ATTR_POOL_PING_INTERVAL  7016
+#define NJS_GLOBAL_ATTR_POOL_TIMEOUT        7017
+#define NJS_GLOBAL_ATTR_PREFETCH_ROWS       7018
+#define NJS_GLOBAL_ATTR_STMT_CACHE_SIZE     7019
 
 // error messages used within the driver
 typedef enum {
@@ -211,6 +200,7 @@ typedef enum {
     errStandaloneTokenBasedAuth,
     errExpiredToken,
     errAccessTokenCallback,
+    errInvalidGlobalSettingAttrNum,
 
     // New ones should be added here
 
@@ -249,14 +239,13 @@ typedef struct njsBaseInstance njsBaseInstance;
 typedef struct njsBaton njsBaton;
 typedef struct njsClassDef njsClassDef;
 typedef struct njsConnection njsConnection;
-typedef struct njsConstant njsConstant;
 typedef struct njsDataTypeInfo njsDataTypeInfo;
 typedef struct njsFetchInfo njsFetchInfo;
 typedef struct njsImplicitResult njsImplicitResult;
 typedef struct njsJsonBuffer njsJsonBuffer;
 typedef struct njsLob njsLob;
 typedef struct njsLobBuffer njsLobBuffer;
-typedef struct njsOracleDb njsOracleDb;
+typedef struct njsModuleGlobals njsModuleGlobals;
 typedef struct njsPool njsPool;
 typedef struct njsResultSet njsResultSet;
 typedef struct njsSodaCollection njsSodaCollection;
@@ -306,14 +295,12 @@ extern const njsClassDef njsClassDefSodaOperation;
 struct njsAqDeqOptions {
     NJS_INSTANCE_HEAD
     dpiDeqOptions *handle;
-    njsOracleDb *oracleDb;
 };
 
 // data for class AqEnqOptions exposed to JS.
 struct njsAqEnqOptions {
     NJS_INSTANCE_HEAD
     dpiEnqOptions *handle;
-    njsOracleDb *oracleDb;
     uint16_t deliveryMode;
 };
 
@@ -321,7 +308,6 @@ struct njsAqEnqOptions {
 struct njsAqMessage {
     NJS_INSTANCE_HEAD
     dpiMsgProps *handle;
-    njsOracleDb *oracleDb;
     njsDbObjectType *objectType;
 };
 
@@ -342,7 +328,7 @@ struct njsBaseInstance {
 struct njsBaton {
 
     // assumed to be available at all times
-    njsOracleDb *oracleDb;
+    njsModuleGlobals *globals;
     njsBaseInstance *callingInstance;
 
     // error handling
@@ -567,7 +553,6 @@ struct njsClassDef {
     size_t structSize;
     napi_finalize finalizeFn;
     const napi_property_descriptor *properties;
-    const njsConstant *constants;
     bool propertiesOnInstance;
 };
 
@@ -575,16 +560,9 @@ struct njsClassDef {
 struct njsConnection {
     NJS_INSTANCE_HEAD
     dpiConn *handle;
-    njsOracleDb *oracleDb;
     char *tag;
     size_t tagLength;
     bool retag;
-};
-
-// data for constants exposed to JS
-struct njsConstant {
-    const char *name;
-    uint32_t value;
 };
 
 // data for adjusting fetch types
@@ -615,7 +593,6 @@ struct njsJsonBuffer {
 struct njsLob {
     NJS_INSTANCE_HEAD
     dpiLob *handle;
-    njsOracleDb *oracleDb;
     uint32_t dataType;
     char *bufferPtr;
     uint64_t bufferSize;
@@ -635,42 +612,15 @@ struct njsLobBuffer {
     bool isAutoClose;
 };
 
-// data for class OracleDb exposed to JS.
-struct njsOracleDb {
-    NJS_INSTANCE_HEAD
+// data for module globals
+struct njsModuleGlobals {
     dpiContext *context;
-    uint32_t maxRows;
-    uint32_t outFormat;
-    uint32_t stmtCacheSize;
-    uint32_t fetchArraySize;
-    uint32_t poolMin;
-    uint32_t poolMax;
-    uint32_t poolMaxPerShard;
-    uint32_t poolIncrement;
-    uint32_t poolTimeout;
-    uint32_t prefetchRows;
-    uint32_t lobPrefetchSize;
-    uint32_t numFetchAsBufferTypes;
-    uint32_t *fetchAsBufferTypes;
-    uint32_t numFetchAsStringTypes;
-    uint32_t *fetchAsStringTypes;
-    int32_t poolPingInterval;
-    char *connectionClass;
-    size_t connectionClassLength;
-    char *edition;
-    size_t editionLength;
-    bool autoCommit;
-    bool extendedMetaData;
-    bool externalAuth;
-    bool events;
-    bool dbObjectAsPojo;
     napi_ref jsAqDeqOptionsConstructor;
     napi_ref jsAqEnqOptionsConstructor;
     napi_ref jsAqMessageConstructor;
     napi_ref jsAqQueueConstructor;
     napi_ref jsBaseDbObjectConstructor;
     napi_ref jsConnectionConstructor;
-    napi_ref jsDateConstructor;
     napi_ref jsLobConstructor;
     napi_ref jsPoolConstructor;
     napi_ref jsResultSetConstructor;
@@ -680,15 +630,13 @@ struct njsOracleDb {
     napi_ref jsSodaDocumentConstructor;
     napi_ref jsSodaOperationConstructor;
     napi_ref jsSubscriptions;
-    napi_ref jsTokenCallbackHandler;
-
+    napi_ref jsSettings;
 };
 
 // data for class Pool exposed to JS.
 struct njsPool {
     NJS_INSTANCE_HEAD
     dpiPool *handle;
-    njsOracleDb *oracleDb;
     uint32_t poolMin;
     uint32_t poolMax;
     uint32_t poolMaxPerShard;
@@ -725,21 +673,18 @@ struct njsSodaCollection {
 struct njsSodaDatabase {
     NJS_INSTANCE_HEAD
     dpiSodaDb *handle;
-    njsOracleDb *oracleDb;
 };
 
 // data for class SodaDocCursor exposed to JS.
 struct njsSodaDocCursor {
     NJS_INSTANCE_HEAD
     dpiSodaDocCursor *handle;
-    njsOracleDb *oracleDb;
 };
 
 // data for class SodaDocument exposed to JS.
 struct njsSodaDocument {
     NJS_INSTANCE_HEAD
     dpiSodaDoc *handle;
-    njsOracleDb *oracleDb;
 };
 
 // data for class SodaOperation exposed to JS.
@@ -755,9 +700,9 @@ struct njsSubscription {
     uv_mutex_t mutex;
     uv_barrier_t barrier;
     dpiSubscrMessage *message;
+    njsModuleGlobals *globals;
     uint32_t subscrNamespace;
     uint64_t regId;
-    njsOracleDb *oracleDb;
     char *name;
     size_t nameLength;
     napi_ref jsCallback;
@@ -818,7 +763,6 @@ struct njsDataTypeInfo {
 // data for DbObjectType class exposed to JS
 struct njsDbObjectType {
     dpiObjectType *handle;
-    njsOracleDb *oracleDb;
     uint16_t numAttributes;
     njsDbObjectAttr *attributes;
     napi_property_descriptor *descriptors;
@@ -832,8 +776,8 @@ struct njsDbObjectType {
 // data for object type attribute information
 struct njsDbObjectAttr {
     dpiObjectAttr *handle;
-    njsOracleDb *oracleDb;
     njsDataTypeInfo typeInfo;
+    njsModuleGlobals *globals;
     const char *name;
     uint32_t nameLength;
 };
@@ -842,10 +786,11 @@ struct njsDbObjectAttr {
 // data for managing callback
 struct njsTokenCallback {
     dpiAccessToken *accessToken;
-    njsOracleDb *oracleDb;
+    njsModuleGlobals *globals;
     uv_async_t async;
     uv_mutex_t mutex;
     uv_barrier_t barrier;
+    napi_ref jsPool;
     napi_ref jsCallback;
     napi_env env;
     bool result;
@@ -870,6 +815,8 @@ bool njsJsonBuffer_fromValue(njsJsonBuffer *buf, napi_env env,
 //-----------------------------------------------------------------------------
 // definition of functions for njsBaton class
 //-----------------------------------------------------------------------------
+bool njsBaton_commonConnectProcessArgs(njsBaton *baton, napi_env env,
+        napi_value *args);
 bool njsBaton_create(njsBaton *baton, napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args);
 bool njsBaton_createDate(njsBaton *baton, napi_env env, double value,
@@ -880,6 +827,7 @@ bool njsBaton_getBoolFromArg(njsBaton *baton, napi_env env, napi_value *args,
 bool njsBaton_getFetchInfoFromArg(njsBaton *baton, napi_env env,
         napi_value *args, int argIndex, const char *propertyName,
         uint32_t *numFetchInfo, njsFetchInfo **fetchInfo, bool *found);
+bool njsBaton_getGlobalSettings(njsBaton *baton, napi_env env, ...);
 bool njsBaton_getIntFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, int32_t *result, bool *found);
 uint32_t njsBaton_getNumOutBinds(njsBaton *baton);
@@ -903,10 +851,15 @@ bool njsBaton_getSubscription(njsBaton *baton, napi_env env, napi_value name,
 bool njsBaton_getUnsignedIntFromArg(njsBaton *baton, napi_env env,
         napi_value *args, int argIndex, const char *propertyName,
         uint32_t *result, bool *found);
+bool njsBaton_getUnsignedIntArrayFromArg(njsBaton *baton, napi_env env,
+        napi_value *args, int argIndex, const char *propertyName,
+        uint32_t *numElements, uint32_t **elements, bool *found);
 bool njsBaton_getValueFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, napi_valuetype expectedType,
         napi_value *value, bool *found);
 bool njsBaton_getXid(njsBaton *baton, napi_env env, napi_value arg);
+bool njsBaton_initCommonCreateParams(njsBaton *baton,
+        dpiCommonCreateParams *params);
 bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value);
 bool njsBaton_isDate(njsBaton *baton, napi_env env, napi_value value,
         bool *isDate);
@@ -922,24 +875,15 @@ bool njsBaton_setJsValues(njsBaton *baton, napi_env env);
 //-----------------------------------------------------------------------------
 // definition of functions for njsDbObject class
 //-----------------------------------------------------------------------------
-bool njsDbObject_getInstance(njsOracleDb *oracleDb, napi_env env,
+bool njsDbObject_getInstance(njsModuleGlobals *globals, napi_env env,
         napi_value value, njsDbObject **obj);
 bool njsDbObject_getSubClass(njsBaton *baton, dpiObjectType *objectTypeHandle,
         napi_env env, napi_value *cls, njsDbObjectType **objectType);
 bool njsDbObject_new(njsDbObjectType *objType, dpiObject *objHandle,
-        napi_env env, napi_value *value);
+        napi_env env, njsModuleGlobals *globals, napi_value *value);
 bool njsDbObjectType_getFromClass(napi_env env, napi_value cls,
         njsDbObjectType **objType);
 bool njsDbObject_toPojo(napi_value obj, napi_env env, napi_value *pojo);
-
-
-//-----------------------------------------------------------------------------
-// definition of functions for njsOracleDb class
-//-----------------------------------------------------------------------------
-bool njsOracleDb_new(napi_env env, napi_value instanceObj,
-        njsOracleDb **instance);
-bool njsOracleDb_prepareClass(njsOracleDb *oracleDb, napi_env env,
-        napi_value instance, const njsClassDef *classDef, napi_ref *clsRef);
 
 
 //-----------------------------------------------------------------------------
@@ -967,13 +911,8 @@ bool njsConnection_newFromBaton(njsBaton *baton, napi_env env,
 // definition of functions for njsLob class
 //-----------------------------------------------------------------------------
 bool njsLob_populateBuffer(njsBaton *baton, njsLobBuffer *buffer);
-bool njsLob_new(njsOracleDb *oracleDb, njsLobBuffer *buffer, napi_env env,
+bool njsLob_new(njsModuleGlobals *globals, njsLobBuffer *buffer, napi_env env,
         napi_value parentObj, napi_value *lobObj);
-
-//-----------------------------------------------------------------------------
-// definition of functions for njsPool class
-//-----------------------------------------------------------------------------
-bool njsPool_newFromBaton(njsBaton *baton, napi_env env, napi_value *poolObj);
 
 
 //-----------------------------------------------------------------------------
@@ -1002,21 +941,22 @@ bool njsSodaDocCursor_newFromBaton(njsBaton *baton, napi_env env,
 // definition of functions for njsSodaDocument class
 //-----------------------------------------------------------------------------
 bool njsSodaDocument_createFromHandle(napi_env env, dpiSodaDoc *handle,
-        njsOracleDb *oracleDb, napi_value *docObj);
+        njsModuleGlobals *globals, napi_value *docObj);
 
 
 //-----------------------------------------------------------------------------
 // definition of functions for njsSodaDatabase class
 //-----------------------------------------------------------------------------
 bool njsSodaDatabase_createFromHandle(napi_env env, napi_value connObj,
-        njsConnection *conn, dpiSodaDb *handle, napi_value *dbObj);
+        njsModuleGlobals *globals, dpiSodaDb *handle, napi_value *dbObj);
 
 
 //-----------------------------------------------------------------------------
 // definition of functions for njsSodaOperation class
 //-----------------------------------------------------------------------------
 bool njsSodaOperation_createFromCollection(napi_env env,
-        napi_value collObj, njsSodaCollection *coll, napi_value *opObj);
+        napi_value collObj, njsModuleGlobals *globals, njsSodaCollection *coll,
+        napi_value *opObj);
 
 
 //-----------------------------------------------------------------------------
@@ -1052,6 +992,8 @@ bool njsUtils_copyStringFromJS(napi_env env, napi_value value, char **result,
         size_t *resultLength);
 bool njsUtils_createBaton(napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, njsBaton **baton);
+bool njsUtils_genericAttach(napi_env env, napi_callback_info info,
+        const njsClassDef *classDef);
 bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
         napi_ref constructorRef, napi_value *instanceObj,
         njsBaseInstance **instance);
@@ -1077,26 +1019,20 @@ bool njsUtils_getValueFromArg(napi_env env, napi_value *args,
         napi_value *value, bool *found, char *errorBuffer);
 bool njsUtils_isBuffer(napi_env env, napi_value value);
 bool njsUtils_isInstance(napi_env env, napi_value value, const char *name);
-bool njsUtils_setPropBool(napi_env env, napi_value value, const char *name,
-        bool *result);
-bool njsUtils_setPropInt(napi_env env, napi_value value, const char *name,
-        int32_t *result);
 bool njsUtils_setPropString(napi_env env, napi_value value, const char *name,
         char **result, size_t *resultLength);
 bool njsUtils_setPropUnsignedInt(napi_env env, napi_value value,
         const char *name, uint32_t *result);
-bool njsUtils_setPropUnsignedIntArray(napi_env env, napi_value value,
-        const char *name, uint32_t *numResults, uint32_t **results,
-        const uint32_t *validTypes);
 bool njsUtils_throwError(napi_env env, int errNum, ...);
-bool njsUtils_throwErrorDPI(napi_env env, njsOracleDb *oracleDb);
+bool njsUtils_throwErrorDPI(napi_env env, njsModuleGlobals *globals);
 bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, napi_value *callingObj,
-        njsBaseInstance **instance);
+        size_t numArgs, napi_value *args, njsModuleGlobals **globals,
+        napi_value *callingObj, njsBaseInstance **instance);
 bool njsUtils_validateGetter(napi_env env, napi_callback_info info,
-        njsBaseInstance **instance);
+        njsModuleGlobals **globals, njsBaseInstance **instance);
 bool njsUtils_validateSetter(napi_env env, napi_callback_info info,
-        njsBaseInstance **instance, napi_value *value);
+        njsModuleGlobals **globals, njsBaseInstance **instance,
+        napi_value *value);
 bool njsUtils_validateArgType(napi_env env, napi_value *args,
         napi_valuetype expectedType, int index);
 bool njsUtils_validatePropType(napi_env env, napi_value value,
@@ -1141,7 +1077,8 @@ bool njsVariable_setValue(njsVariable *var, napi_env env, napi_value value,
 //-----------------------------------------------------------------------------
 int njsTokenCallback_eventHandler(njsTokenCallback *callback,
         dpiAccessToken *accessToken);
-bool njsTokenCallback_new(njsBaton *baton, napi_env env);
+bool njsTokenCallback_new(njsBaton *baton, napi_env env,
+        napi_value userCallback);
 bool njsTokenCallback_startNotifications(njsTokenCallback *callback,
         napi_env env);
 bool njsTokenCallback_returnAccessToken(njsTokenCallback *callback,

@@ -34,7 +34,7 @@ const assert   = require('assert');
 describe('264. methodName.js', () => {
 
   it('264.1 check for methodName getConnection', function() {
-    assert.equal(oracledb.getConnection.name, 'bound getConnection');
+    assert.equal(oracledb.getConnection.name, 'getConnection');
   });
 
 });

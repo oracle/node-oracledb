@@ -67,16 +67,27 @@ int njsTokenCallback_eventHandler(njsTokenCallback *callback,
 // njsTokenCallback_new()
 //   This method allocates memory to structure accessTokenCallback.
 //-----------------------------------------------------------------------------
-bool njsTokenCallback_new(njsBaton *baton, napi_env env)
+bool njsTokenCallback_new(njsBaton *baton, napi_env env,
+        napi_value userCallback)
 {
-    baton->accessTokenCallback = calloc(1, sizeof(njsTokenCallback));
-    if (!baton->accessTokenCallback)
+    njsTokenCallback *callback;
+    napi_value jsPool;
+
+    callback = calloc(1, sizeof(njsTokenCallback));
+    if (!callback)
         return njsBaton_setError(baton, errInsufficientMemory);
-    baton->accessTokenCallback->accessToken = calloc(1, sizeof(dpiAccessToken));
-    if (!baton->accessTokenCallback->accessToken)
+    baton->accessTokenCallback = callback;
+    callback->accessToken = calloc(1, sizeof(dpiAccessToken));
+    if (!callback->accessToken)
         return njsBaton_setError(baton, errInsufficientMemory);
-    baton->accessTokenCallback->env = env;
-    baton->accessTokenCallback->oracleDb = baton->oracleDb;
+    callback->env = env;
+    callback->globals = baton->globals;
+    NJS_CHECK_NAPI(env, napi_create_reference(env, userCallback, 1,
+            &callback->jsCallback))
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
+            &jsPool))
+    NJS_CHECK_NAPI(env, napi_create_reference(env, jsPool, 1,
+            &callback->jsPool))
 
     return true;
 }
@@ -133,22 +144,23 @@ static void njsTokenCallback_processNotification(uv_async_t *handle)
 static bool njsTokenCallback_processNotificationHelper(
         njsTokenCallback *callback)
 {
-    napi_value jsCallback, jsCallbackHandler, global, refresh, result;
+    napi_value jsCallback, jsCallbackHandler, jsPool, refresh, result;
     napi_value jsCallbackArgs[3], externalObj;
     napi_env env = callback->env;
 
-    NJS_CHECK_NAPI(env, napi_get_global(env, &global))
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env, callback->jsPool,
+            &jsPool))
     NJS_CHECK_NAPI(env, napi_get_reference_value(env, callback->jsCallback,
             &jsCallback))
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            callback->oracleDb->jsTokenCallbackHandler, &jsCallbackHandler))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, jsPool,
+            "_accessTokenHandler", &jsCallbackHandler))
     NJS_CHECK_NAPI(env, napi_create_external(env, callback, NULL, NULL,
             &externalObj))
     NJS_CHECK_NAPI(env, napi_get_boolean(env, true, &refresh))
     jsCallbackArgs[0] = jsCallback;
     jsCallbackArgs[1] = externalObj;
     jsCallbackArgs[2] = refresh;
-    NJS_CHECK_NAPI(env, napi_make_callback(env, NULL, global,
+    NJS_CHECK_NAPI(env, napi_make_callback(env, NULL, jsPool,
             jsCallbackHandler, 3, jsCallbackArgs, &result));
 
     return true;
@@ -270,6 +282,7 @@ static bool njsTokenCallback_onStopNotificationsHelper(napi_env env,
 {
     // perform cleanup
     uv_mutex_destroy(&callback->mutex);
+    NJS_DELETE_REF_AND_CLEAR(callback->jsPool);
     NJS_DELETE_REF_AND_CLEAR(callback->jsCallback);
     if (callback->accessToken) {
         NJS_FREE_AND_CLEAR(callback->accessToken->token)

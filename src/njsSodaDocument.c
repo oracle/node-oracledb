@@ -61,7 +61,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefSodaDocument = {
     "SodaDocument", sizeof(njsSodaDocument), njsSodaDocument_finalize,
-    njsClassProperties, NULL, false
+    njsClassProperties, false
 };
 
 // other methods used internally
@@ -75,19 +75,18 @@ static napi_value njsSodaDocument_genericGetter(napi_env env,
 //   Creates a new SODA document object given the ODPI-C handle.
 //-----------------------------------------------------------------------------
 bool njsSodaDocument_createFromHandle(napi_env env, dpiSodaDoc *handle,
-        njsOracleDb *oracleDb, napi_value *docObj)
+        njsModuleGlobals *globals, napi_value *docObj)
 {
     njsSodaDocument *doc;
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefSodaDocument,
-            oracleDb->jsSodaDocumentConstructor, docObj,
+            globals->jsSodaDocumentConstructor, docObj,
             (njsBaseInstance**) &doc))
         return false;
 
     // perform initializations
     doc->handle = handle;
-    doc->oracleDb = oracleDb;
 
     return true;
 }
@@ -119,16 +118,18 @@ static napi_value njsSodaDocument_genericGetter(napi_env env,
         napi_callback_info info,
         int (*dpiGetterFn)(dpiSodaDoc*, const char**, uint32_t *))
 {
+    njsModuleGlobals *globals;
     njsSodaDocument *doc;
     uint32_t valueLength;
     napi_status status;
     const char *value;
     napi_value result;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &doc))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &doc))
         return NULL;
     if ((*dpiGetterFn)(doc->handle, &value, &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, doc->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
 
@@ -154,16 +155,17 @@ static napi_value njsSodaDocument_getContentAsBuffer(napi_env env,
         napi_callback_info info)
 {
     const char *value, *encoding;
+    njsModuleGlobals *globals;
     njsSodaDocument *doc;
     uint32_t valueLength;
     napi_value result;
 
-    if (!njsUtils_validateArgs(env, info, 0, NULL, NULL,
+    if (!njsUtils_validateArgs(env, info, 0, NULL, &globals, NULL,
             (njsBaseInstance**) &doc))
         return NULL;
     if (dpiSodaDoc_getContent(doc->handle, &value, &valueLength,
             &encoding) < 0) {
-        njsUtils_throwErrorDPI(env, doc->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     if (napi_create_buffer_copy(env, valueLength, value, NULL,
@@ -184,17 +186,18 @@ static napi_value njsSodaDocument_getContentAsString(napi_env env,
         napi_callback_info info)
 {
     const char *value, *encoding;
+    njsModuleGlobals *globals;
     njsSodaDocument *doc;
     uint32_t valueLength;
     napi_status status;
     napi_value result;
 
-    if (!njsUtils_validateArgs(env, info, 0, NULL, NULL,
+    if (!njsUtils_validateArgs(env, info, 0, NULL, &globals, NULL,
             (njsBaseInstance**) &doc))
         return NULL;
     if (dpiSodaDoc_getContent(doc->handle, &value, &valueLength,
             &encoding) < 0) {
-        njsUtils_throwErrorDPI(env, doc->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     if (valueLength == 0) {

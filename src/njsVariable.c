@@ -230,7 +230,7 @@ bool njsVariable_getArrayValue(njsVariable *var, njsConnection *conn,
 //-----------------------------------------------------------------------------
 // njsVariable_getDataType()
 //   Return the data type that is being used by the variable. This is an
-// enumeration that is publicly available in the oracledb module.
+// enumeration that is publicly available in JavaScript.
 //-----------------------------------------------------------------------------
 static uint32_t njsVariable_getDataType(njsVariable *var)
 {
@@ -549,7 +549,7 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
             }
             break;
         case DPI_NATIVE_TYPE_LOB:
-            return njsLob_new(baton->oracleDb, &buffer->lobs[pos], env,
+            return njsLob_new(baton->globals, &buffer->lobs[pos], env,
                     baton->jsCallingObj, value);
         case DPI_NATIVE_TYPE_STMT:
             if (dpiStmt_addRef(data->value.asStmt) < 0)
@@ -580,7 +580,7 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
             break;
         case DPI_NATIVE_TYPE_OBJECT:
             if (!njsDbObject_new(var->objectType, data->value.asObject,
-                    env, value))
+                    env, baton->globals, value))
                 return false;
             if (var->dbObjectAsPojo && !njsDbObject_toPojo(*value, env, value))
                 return false;
@@ -1269,7 +1269,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
                 return njsVariable_setInvalidBind(var, pos, baton);
 
             // get object instance and bind it
-            if (!njsDbObject_getInstance(baton->oracleDb, env, value, &obj))
+            if (!njsDbObject_getInstance(baton->globals, env, value, &obj))
                 return false;
             if (dpiVar_setFromObject(var->dpiVarHandle, pos, obj->handle) < 0)
                 return njsBaton_setErrorDPI(baton);
@@ -1283,8 +1283,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
                     var->objectType->jsDbObjectConstructor, &constructor))
             NJS_CHECK_NAPI(env, napi_new_instance(env, constructor, 1, &value,
                     &temp))
-            if (!njsDbObject_getInstance(var->objectType->oracleDb, env,
-                    temp, &obj))
+            if (!njsDbObject_getInstance(baton->globals, env, temp, &obj))
                 return false;
             if (dpiVar_setFromObject(var->dpiVarHandle, pos, obj->handle) < 0)
                 return njsBaton_setErrorDPI(baton);

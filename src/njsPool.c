@@ -27,21 +27,26 @@
 
 // class methods
 static NJS_NAPI_METHOD(njsPool_close);
+static NJS_NAPI_METHOD(njsPool_create);
 static NJS_NAPI_METHOD(njsPool_getConnection);
 static NJS_NAPI_METHOD(njsPool_reconfigure);
+static NJS_NAPI_METHOD(njsPool_returnAccessToken);
 static NJS_NAPI_METHOD(njsPool_setAccessToken);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsPool_closeAsync);
+static NJS_ASYNC_METHOD(njsPool_createAsync);
 static NJS_ASYNC_METHOD(njsPool_getConnectionAsync);
 static NJS_ASYNC_METHOD(njsPool_reconfigureAsync);
 static NJS_ASYNC_METHOD(njsPool_setAccessTokenAsync);
 
 // post asynchronous methods
+static NJS_ASYNC_POST_METHOD(njsPool_createPostAsync);
 static NJS_ASYNC_POST_METHOD(njsPool_getConnectionPostAsync);
 
 // processing arguments methods
 static NJS_PROCESS_ARGS_METHOD(njsPool_closeProcessArgs);
+static NJS_PROCESS_ARGS_METHOD(njsPool_createProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsPool_getConnectionProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsPool_reconfigureProcessArgs);
 
@@ -63,9 +68,12 @@ static NJS_NAPI_FINALIZE(njsPool_finalize);
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
     { "_close", NULL, njsPool_close, NULL, NULL, NULL, napi_default, NULL },
+    { "_create", NULL, njsPool_create, NULL, NULL, NULL, napi_default, NULL },
     { "_getConnection", NULL, njsPool_getConnection, NULL, NULL, NULL,
             napi_default, NULL },
     { "_reconfigure", NULL, njsPool_reconfigure, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "_returnAccessToken", NULL, njsPool_returnAccessToken, NULL, NULL, NULL,
             napi_default, NULL },
     { "_setAccessToken", NULL, njsPool_setAccessToken, NULL, NULL, NULL,
             napi_default, NULL },
@@ -94,7 +102,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 
 // class definition
 const njsClassDef njsClassDefPool = {
-    "Pool", sizeof(njsPool), njsPool_finalize, njsClassProperties, NULL, false
+    "Pool", sizeof(njsPool), njsPool_finalize, njsClassProperties, false
 };
 
 // other methods used internally
@@ -172,6 +180,201 @@ static bool njsPool_closeProcessArgs(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
+// njsPool_create()
+//   Create a connection pool.
+//
+// PARAMETERS
+//   - options
+//-----------------------------------------------------------------------------
+static napi_value njsPool_create(napi_env env, napi_callback_info info)
+{
+    napi_value args[1];
+    njsBaton *baton;
+
+    // first need to attach to the pool object
+    if (!njsUtils_genericAttach(env, info, &njsClassDefPool))
+        return NULL;
+
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
+        return NULL;
+    if (!njsPool_createProcessArgs(baton, env, args)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
+    return njsBaton_queueWork(baton, env, "create", njsPool_createAsync,
+            njsPool_createPostAsync);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool_createAsync()
+//   Worker function for createPool() performed on thread. This establishes
+// the connection using the information found in the baton.
+//-----------------------------------------------------------------------------
+static bool njsPool_createAsync(njsBaton *baton)
+{
+    dpiCommonCreateParams commonParams;
+    dpiPoolCreateParams params;
+    dpiAccessToken accessToken;
+
+    // setup pool creation parameters
+    if (dpiContext_initPoolCreateParams(baton->globals->context, &params) < 0)
+        return njsBaton_setErrorDPI(baton);
+    params.minSessions = baton->poolMin;
+    params.maxSessions = baton->poolMax;
+    params.maxSessionsPerShard = baton->poolMaxPerShard;
+    params.sessionIncrement = baton->poolIncrement;
+    params.getMode = (baton->poolMaxPerShard > 0) ?
+            DPI_MODE_POOL_GET_TIMEDWAIT : DPI_MODE_POOL_GET_WAIT;
+    params.waitTimeout = baton->poolWaitTimeout;
+    params.timeout = baton->poolTimeout;
+    params.externalAuth = baton->externalAuth;
+    params.homogeneous = baton->homogeneous;
+    params.plsqlFixupCallback = baton->plsqlFixupCallback;
+    params.plsqlFixupCallbackLength =
+            (uint32_t) baton->plsqlFixupCallbackLength;
+    if (params.externalAuth && !baton->token && !baton->privateKey)
+        params.homogeneous = 0;
+    params.pingInterval = baton->poolPingInterval;
+
+    // call function for token based authentication
+    if (baton->accessTokenCallback) {
+        params.accessTokenCallback =
+               (dpiAccessTokenCallback) njsTokenCallback_eventHandler;
+        params.accessTokenCallbackContext = baton->accessTokenCallback;
+    }
+
+    // setup common creation parameters
+    if (!njsBaton_initCommonCreateParams(baton, &commonParams))
+        return false;
+    commonParams.edition = baton->edition;
+    commonParams.editionLength = (uint32_t) baton->editionLength;
+    if (baton->sodaMetadataCache)
+        commonParams.sodaMetadataCache = 1;
+    commonParams.stmtCacheSize = baton->stmtCacheSize;
+
+    // set token based auth parameters
+    if (baton->token && baton->privateKey) {
+        accessToken.token = baton->token;
+        accessToken.tokenLength = baton->tokenLength;
+        accessToken.privateKey = baton->privateKey;
+        accessToken.privateKeyLength = baton->privateKeyLength;
+        commonParams.accessToken = &accessToken;
+    }
+
+    // create pool
+    if (dpiPool_create(baton->globals->context, baton->user,
+            (uint32_t) baton->userLength, baton->password,
+            (uint32_t) baton->passwordLength, baton->connectString,
+            (uint32_t) baton->connectStringLength, &commonParams,
+            &params, &baton->dpiPoolHandle) < 0)
+        return njsBaton_setErrorDPI(baton);
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool_createPostAsync()
+//   Defines the value returned to JS.
+//-----------------------------------------------------------------------------
+static bool njsPool_createPostAsync(njsBaton *baton, napi_env env,
+        napi_value *result)
+{
+    njsPool *pool = (njsPool*) baton->callingInstance;
+
+    // transfer the ODPI-C pool handle to the new object
+    pool->handle = baton->dpiPoolHandle;
+    baton->dpiPoolHandle = NULL;
+
+    // perform other initializations
+    pool->poolMax = baton->poolMax;
+    pool->poolMaxPerShard = baton->poolMaxPerShard;
+    pool->poolMin = baton->poolMin;
+    pool->poolIncrement = baton->poolIncrement;
+    pool->poolTimeout = baton->poolTimeout;
+    pool->poolPingInterval = baton->poolPingInterval;
+    pool->stmtCacheSize = baton->stmtCacheSize;
+    pool->sodaMetadataCache = baton->sodaMetadataCache;
+
+    // token based authentication initialization
+    if (baton->accessTokenCallback) {
+        pool->accessTokenCallback = baton->accessTokenCallback;
+        if (!njsTokenCallback_startNotifications(pool->accessTokenCallback,
+                env))
+            return false;
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool_createProcessArgs()
+//   Process the arguments for njsPool_create().
+//-----------------------------------------------------------------------------
+static bool njsPool_createProcessArgs(njsBaton *baton, napi_env env,
+        napi_value *args)
+{
+    napi_value callback;
+
+    // set defaults
+    baton->homogeneous = true;
+    if (!njsBaton_getGlobalSettings(baton, env,
+            NJS_GLOBAL_ATTR_POOL_MAX,
+            NJS_GLOBAL_ATTR_POOL_MAX_PER_SHARD,
+            NJS_GLOBAL_ATTR_POOL_MIN,
+            NJS_GLOBAL_ATTR_POOL_INCREMENT,
+            NJS_GLOBAL_ATTR_POOL_TIMEOUT,
+            NJS_GLOBAL_ATTR_POOL_PING_INTERVAL,
+            0))
+        return false;
+
+    // check the various options
+    if (!njsBaton_commonConnectProcessArgs(baton, env, args))
+        return false;
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "sessionCallback",
+            &baton->plsqlFixupCallback, &baton->plsqlFixupCallbackLength,
+            NULL))
+        return false;
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolMax",
+            &baton->poolMax, NULL))
+        return false;
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolMaxPerShard",
+            &baton->poolMaxPerShard, NULL))
+        return false;
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolMin",
+            &baton->poolMin, NULL))
+        return false;
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolIncrement",
+            &baton->poolIncrement, NULL))
+        return false;
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolTimeout",
+            &baton->poolTimeout, NULL))
+        return false;
+    if (!njsBaton_getIntFromArg(baton, env, args, 0, "poolPingInterval",
+            &baton->poolPingInterval, NULL))
+        return false;
+    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "homogeneous",
+            &baton->homogeneous, NULL))
+        return false;
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "queueTimeout",
+            &baton->poolWaitTimeout, NULL))
+        return false;
+    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "sodaMetaDataCache",
+            &baton->sodaMetadataCache, NULL))
+        return false;
+    if (!njsBaton_getValueFromArg(baton, env, args, 0, "accessTokenCallback",
+            napi_function, &callback, NULL))
+        return false;
+    if (callback && !njsTokenCallback_new(baton, env, callback))
+        return false;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsPool_createBaton()
 //   Create the baton used for asynchronous methods and initialize all
 // values. The pool is also checked to see if it is open. If this fails for
@@ -191,7 +394,6 @@ bool njsPool_createBaton(napi_env env, napi_callback_info info,
         njsBaton_reportError(tempBaton, env);
         return false;
     }
-    tempBaton->oracleDb = pool->oracleDb;
 
     *baton = tempBaton;
     return true;
@@ -255,7 +457,7 @@ static bool njsPool_getConnectionAsync(njsBaton *baton)
     dpiConnCreateParams params;
 
     // populate connection creation parameters
-    if (dpiContext_initConnCreateParams(baton->oracleDb->context, &params) < 0)
+    if (dpiContext_initConnCreateParams(baton->globals->context, &params) < 0)
         return njsBaton_setErrorDPI(baton);
     params.matchAnyTag = baton->matchAnyTag;
     params.connectionClass = baton->connectionClass;
@@ -328,12 +530,18 @@ static bool njsPool_getConnectionProcessArgs(njsBaton *baton, napi_env env,
 {
     bool userFound, usernameFound;
 
+    // copy items used from the settings class since they may change after the
+    // aysnchronous function begins
+    if (!njsBaton_getGlobalSettings(baton, env,
+            NJS_GLOBAL_ATTR_CONNECTION_CLASS, 0))
+        return false;
+
     // check arguments
     if (!njsBaton_getStringFromArg(baton, env, args, 0, "user", &baton->user,
             &baton->userLength, &userFound))
         return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "username", &baton->user,
-            &baton->userLength, &usernameFound))
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "username",
+            &baton->user, &baton->userLength, &usernameFound))
         return false;
     if (userFound && usernameFound)
         return njsBaton_setError (baton, errDblUsername);
@@ -353,13 +561,6 @@ static bool njsPool_getConnectionProcessArgs(njsBaton *baton, napi_env env,
     if (!njsBaton_getShardingKeyColumnsFromArg(baton, env, args, 0,
             "superShardingKey", &baton->numSuperShardingKeyColumns,
             &baton->superShardingKeyColumns))
-        return false;
-
-    // copy items used from the OracleDb class since they may change after
-    // the asynchronous function begins
-    if (!njsUtils_copyString(env, baton->oracleDb->connectionClass,
-            baton->oracleDb->connectionClassLength, &baton->connectionClass,
-            &baton->connectionClassLength))
         return false;
 
     return true;
@@ -515,15 +716,17 @@ static bool njsPool_reconfigureProcessArgs(njsBaton *baton, napi_env env,
 static napi_value njsPool_getConnectionsInUse(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     uint32_t value;
     njsPool *pool;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &pool))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &pool))
         return NULL;
     if (!pool->handle)
         return NULL;
     if (dpiPool_getBusyCount(pool->handle, &value) < 0) {
-        njsUtils_throwErrorDPI(env, pool->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     return njsUtils_convertToUnsignedInt(env, value);
@@ -537,15 +740,17 @@ static napi_value njsPool_getConnectionsInUse(napi_env env,
 static napi_value njsPool_getConnectionsOpen(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     uint32_t value;
     njsPool *pool;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &pool))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &pool))
         return NULL;
     if (!pool->handle)
         return NULL;
     if (dpiPool_getOpenCount(pool->handle, &value) < 0) {
-        njsUtils_throwErrorDPI(env, pool->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     return njsUtils_convertToUnsignedInt(env, value);
@@ -561,7 +766,7 @@ static napi_value njsPool_getPoolIncrement(napi_env env,
 {
     njsPool *pool;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &pool))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &pool))
         return NULL;
     return njsUtils_convertToUnsignedInt(env, pool->poolIncrement);
 }
@@ -575,7 +780,7 @@ static napi_value njsPool_getPoolMax(napi_env env, napi_callback_info info)
 {
     njsPool *pool;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &pool))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &pool))
         return NULL;
     return njsUtils_convertToUnsignedInt(env, pool->poolMax);
 }
@@ -590,7 +795,7 @@ static napi_value njsPool_getPoolMaxPerShard(napi_env env,
 {
     njsPool *pool;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &pool))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &pool))
         return NULL;
     return njsUtils_convertToUnsignedInt(env, pool->poolMaxPerShard);
 }
@@ -604,7 +809,7 @@ static napi_value njsPool_getPoolMin(napi_env env, napi_callback_info info)
 {
     njsPool *pool;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &pool))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &pool))
         return NULL;
     return njsUtils_convertToUnsignedInt(env, pool->poolMin);
 }
@@ -619,7 +824,7 @@ static napi_value njsPool_getPoolPingInterval(napi_env env,
 {
     njsPool *pool;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &pool))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &pool))
         return NULL;
     return njsUtils_convertToInt(env, pool->poolPingInterval);
 }
@@ -633,7 +838,7 @@ static napi_value njsPool_getPoolTimeout(napi_env env, napi_callback_info info)
 {
     njsPool *pool;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &pool))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &pool))
         return NULL;
     return njsUtils_convertToUnsignedInt(env, pool->poolTimeout);
 }
@@ -648,7 +853,7 @@ static napi_value njsPool_getStmtCacheSize(napi_env env,
 {
     njsPool *pool;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &pool))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &pool))
         return NULL;
     return njsUtils_convertToUnsignedInt(env, pool->stmtCacheSize);
 }
@@ -664,7 +869,7 @@ static napi_value njsPool_getSodaMetaDataCache(napi_env env,
     njsPool *pool;
     int enabled;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance **)&pool))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance **)&pool))
         return NULL;
     if (!pool->handle)
         return NULL;
@@ -676,42 +881,40 @@ static napi_value njsPool_getSodaMetaDataCache(napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsPool_newFromBaton()
-//   Called when a pool is being created from the baton.
+// njsPool_returnAccessTokenHelper()
+//   Helper method that performs the work of njsPool_returnAccessToken().
 //-----------------------------------------------------------------------------
-bool njsPool_newFromBaton(njsBaton *baton, napi_env env, napi_value *poolObj)
+static bool njsPool_returnAccessTokenHelper(napi_env env,
+        napi_callback_info info)
 {
-    njsPool *pool;
+    njsBaseInstance *callingInstance;
+    napi_value callingObj, args[2];
+    njsTokenCallback *callback;
+    njsModuleGlobals *globals;
 
-    // create new instance
-    if (!njsUtils_genericNew(env, &njsClassDefPool,
-            baton->oracleDb->jsPoolConstructor, poolObj,
-            (njsBaseInstance**) &pool))
+    if (!njsUtils_validateArgs(env, info, 2, args, &globals, &callingObj,
+            &callingInstance))
         return false;
+    NJS_CHECK_NAPI(env, napi_get_value_external(env, args[0],
+            (void**) &callback))
+    return njsTokenCallback_returnAccessToken(callback, env, args[1]);
+}
 
-    // transfer the ODPI-C connection handle to the new object
-    pool->handle = baton->dpiPoolHandle;
-    baton->dpiPoolHandle = NULL;
 
-    // perform other initializations
-    pool->oracleDb = baton->oracleDb;
-    pool->poolMax = baton->poolMax;
-    pool->poolMaxPerShard = baton->poolMaxPerShard;
-    pool->poolMin = baton->poolMin;
-    pool->poolIncrement = baton->poolIncrement;
-    pool->poolTimeout = baton->poolTimeout;
-    pool->poolPingInterval = baton->poolPingInterval;
-    pool->stmtCacheSize = baton->stmtCacheSize;
-    pool->sodaMetadataCache = baton->sodaMetadataCache;
-
-    // token based authentication initialization
-    if (baton->accessTokenCallback) {
-        pool->accessTokenCallback = baton->accessTokenCallback;
-        if (!njsTokenCallback_startNotifications(pool->accessTokenCallback,
-                env))
-            return false;
-    }
-    return true;
+//-----------------------------------------------------------------------------
+// njsPool_returnAccessToken()
+//   Returns the access token through to the callback. This needs to be done
+// independently in order to handle possible asynchronous Javascript code.
+//
+// PARAMETERS
+//   - externalObj (contains native njsAccessToken structure)
+//   - accessToken (value to be returned through callback)
+//-----------------------------------------------------------------------------
+static napi_value njsPool_returnAccessToken(napi_env env,
+        napi_callback_info info)
+{
+    njsPool_returnAccessTokenHelper(env, info);
+    return NULL;
 }
 
 

@@ -351,6 +351,32 @@ bool njsUtils_createBaton(napi_env env, napi_callback_info info,
 
 
 //-----------------------------------------------------------------------------
+// njsUtils_genericAttach()
+//   Generic method for attaching a specified structure to a JS instance.
+//-----------------------------------------------------------------------------
+bool njsUtils_genericAttach(napi_env env, napi_callback_info info,
+        const njsClassDef *classDef)
+{
+    size_t numArgs = 0;
+    napi_value obj;
+    void *data;
+
+    if (napi_get_cb_info(env, info, &numArgs, NULL, &obj, NULL) != napi_ok)
+        return njsUtils_genericThrowError(env);
+    data = calloc(1, classDef->structSize);
+    if (!data)
+        return njsUtils_throwError(env, errInsufficientMemory);
+    if (napi_wrap(env, obj, data, classDef->finalizeFn, NULL,
+            NULL) != napi_ok) {
+        free(data);
+        return njsUtils_genericThrowError(env);
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsUtils_genericNew()
 //   Generic method for creating a JS instance with the specified structure
 // size and finalize function.
@@ -683,47 +709,6 @@ bool njsUtils_isBuffer(napi_env env, napi_value value)
 
 
 //-----------------------------------------------------------------------------
-// njsUtils_setPropBool()
-//   Sets a property to a boolean value. If the value is not a boolean, an
-// error is raised and false is returned.
-//-----------------------------------------------------------------------------
-bool njsUtils_setPropBool(napi_env env, napi_value value, const char *name,
-        bool *result)
-{
-    if (!njsUtils_validatePropType(env, value, napi_boolean, name))
-        return false;
-    NJS_CHECK_NAPI(env, napi_get_value_bool(env, value, result))
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_setPropInt()
-//   Sets a property to a signed integer value. If the value is not a signed
-// integer, an error is raised and false is returned.
-//-----------------------------------------------------------------------------
-bool njsUtils_setPropInt(napi_env env, napi_value value, const char *name,
-        int32_t *result)
-{
-    napi_valuetype valueType;
-    double doubleValue;
-
-    // verify the passed value is a number
-    NJS_CHECK_NAPI(env, napi_typeof(env, value, &valueType))
-    if (valueType != napi_number)
-        return njsUtils_throwError(env, errInvalidPropertyValue, name);
-    NJS_CHECK_NAPI(env, napi_get_value_double(env, value, &doubleValue))
-
-    // if the value is not a signed integer, return an error
-    *result = (int32_t) doubleValue;
-    if ((double) *result != doubleValue)
-        return njsUtils_throwError(env, errInvalidPropertyValue, name);
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsUtils_setPropString()
 //   Sets a property to a string value. If the value is not a string, an
 // error is raised and false is returned.
@@ -764,62 +749,6 @@ bool njsUtils_setPropUnsignedInt(napi_env env, napi_value value,
 
 
 //-----------------------------------------------------------------------------
-// njsUtils_setPropUnsignedIntArray()
-//   Sets a property to an unsigned integer array. If the value is not an
-// array of unsigned integers, an error is raised and false is returned.
-//-----------------------------------------------------------------------------
-bool njsUtils_setPropUnsignedIntArray(napi_env env, napi_value value,
-        const char *name, uint32_t *numResults, uint32_t **results,
-        const uint32_t *validTypes)
-{
-    uint32_t i, j, numElements, *elements;
-    napi_value element;
-    bool isArray, ok;
-
-    // verify value is an array
-    NJS_CHECK_NAPI(env, napi_is_array(env, value, &isArray))
-    if (!isArray)
-        return njsUtils_throwError(env, errInvalidPropertyValue, name);
-
-    // allocate memory for array, if applicable
-    NJS_CHECK_NAPI(env, napi_get_array_length(env, value, &numElements))
-    elements = calloc(numElements, sizeof(uint32_t));
-    if (!elements && numElements > 0)
-        return njsUtils_throwError(env, errInsufficientMemory);
-
-    // validate values in the array
-    for (i = 0; i < numElements; i++) {
-        if (napi_get_element(env, value, i, &element) != napi_ok) {
-            free(elements);
-            return njsUtils_genericThrowError(env);
-        }
-        if (!njsUtils_setPropUnsignedInt(env, element, name, &elements[i])) {
-            free(elements);
-            return false;
-        }
-        ok = false;
-        for (j = 0; validTypes[j] != 0; j++) {
-            if (elements[i] == validTypes[j]) {
-                ok = true;
-                break;
-            }
-        }
-        if (!ok) {
-            free(elements);
-            return njsUtils_throwError(env, errInvalidTypeForConversion);
-        }
-    }
-
-    // free original array, if applicable and store results
-    if (*results)
-        free(*results);
-    *numResults = numElements;
-    *results = elements;
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsUtils_throwError()
 //   Get the error message given the error number and any number of arguments.
 // Throw the error as a JS error. If the error number is invalid, the error
@@ -844,12 +773,12 @@ bool njsUtils_throwError(napi_env env, int errNum, ...)
 //   Get the error message from ODPI-C and throw an equivalent JavaScript
 // error. False is returned as a convenience to the caller.
 //-----------------------------------------------------------------------------
-bool njsUtils_throwErrorDPI(napi_env env, njsOracleDb *oracleDb)
+bool njsUtils_throwErrorDPI(napi_env env, njsModuleGlobals *globals)
 {
     dpiErrorInfo errorInfo;
     napi_value error;
 
-    dpiContext_getError(oracleDb->context, &errorInfo);
+    dpiContext_getError(globals->context, &errorInfo);
     if (!njsUtils_getError(env, &errorInfo, NULL, &error))
         return false;
     napi_throw(env, error);
@@ -863,24 +792,27 @@ bool njsUtils_throwErrorDPI(napi_env env, njsOracleDb *oracleDb)
 // well. If the number of arguments is incorrect, an exception is thrown.
 //-----------------------------------------------------------------------------
 bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, napi_value *callingObj,
-        njsBaseInstance **instance)
+        size_t numArgs, napi_value *args, njsModuleGlobals **globals,
+        napi_value *callingObj, njsBaseInstance **instance)
 {
-    napi_value thisArg;
+    napi_value localCallingObj;
     size_t actualArgs;
 
     // get callback information and validate the number of arguments
     actualArgs = numArgs;
     NJS_CHECK_NAPI(env, napi_get_cb_info(env, info, &actualArgs, args,
-            &thisArg, NULL))
+            &localCallingObj, (void**) globals))
     if (actualArgs != numArgs)
         return njsUtils_throwError(env, errInvalidNumberOfParameters,
                                    actualArgs, numArgs);
 
-    // unwrap instance
-    NJS_CHECK_NAPI(env, napi_unwrap(env, thisArg, (void**) instance))
+    // unwrap instance, if applicable
     if (callingObj)
-        *callingObj = thisArg;
+        *callingObj = localCallingObj;
+    if (instance) {
+        NJS_CHECK_NAPI(env, napi_unwrap(env, localCallingObj,
+                (void**) instance))
+    }
     return true;
 }
 
@@ -890,9 +822,9 @@ bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
 //   Gets the instance associated with the object.
 //-----------------------------------------------------------------------------
 bool njsUtils_validateGetter(napi_env env, napi_callback_info info,
-        njsBaseInstance **instance)
+        njsModuleGlobals **globals, njsBaseInstance **instance)
 {
-    return njsUtils_validateArgs(env, info, 0, NULL, NULL, instance);
+    return njsUtils_validateArgs(env, info, 0, NULL, globals, NULL, instance);
 }
 
 
@@ -902,9 +834,10 @@ bool njsUtils_validateGetter(napi_env env, napi_callback_info info,
 // set.
 //-----------------------------------------------------------------------------
 bool njsUtils_validateSetter(napi_env env, napi_callback_info info,
-        njsBaseInstance **instance, napi_value *value)
+        njsModuleGlobals **globals, njsBaseInstance **instance,
+        napi_value *value)
 {
-    return njsUtils_validateArgs(env, info, 1, value, NULL, instance);
+    return njsUtils_validateArgs(env, info, 1, value, NULL, NULL, instance);
 }
 
 

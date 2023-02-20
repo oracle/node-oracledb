@@ -30,6 +30,7 @@ static NJS_NAPI_METHOD(njsConnection_break);
 static NJS_NAPI_METHOD(njsConnection_changePassword);
 static NJS_NAPI_METHOD(njsConnection_close);
 static NJS_NAPI_METHOD(njsConnection_commit);
+static NJS_NAPI_METHOD(njsConnection_connect);
 static NJS_NAPI_METHOD(njsConnection_createLob);
 static NJS_NAPI_METHOD(njsConnection_execute);
 static NJS_NAPI_METHOD(njsConnection_executeMany);
@@ -56,6 +57,7 @@ static NJS_ASYNC_METHOD(njsConnection_breakAsync);
 static NJS_ASYNC_METHOD(njsConnection_changePasswordAsync);
 static NJS_ASYNC_METHOD(njsConnection_closeAsync);
 static NJS_ASYNC_METHOD(njsConnection_commitAsync);
+static NJS_ASYNC_METHOD(njsConnection_connectAsync);
 static NJS_ASYNC_METHOD(njsConnection_createLobAsync);
 static NJS_ASYNC_METHOD(njsConnection_executeAsync);
 static NJS_ASYNC_METHOD(njsConnection_executeManyAsync);
@@ -76,6 +78,7 @@ static NJS_ASYNC_METHOD(njsConnection_tpcRollbackAsync);
 static NJS_ASYNC_METHOD(njsConnection_unsubscribeAsync);
 
 // post asynchronous methods
+static NJS_ASYNC_POST_METHOD(njsConnection_connectPostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_createLobPostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_executePostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_executeManyPostAsync);
@@ -87,6 +90,7 @@ static NJS_ASYNC_POST_METHOD(njsConnection_subscribePostAsync);
 
 // processing arguments methods
 static NJS_PROCESS_ARGS_METHOD(njsConnection_changePasswordProcessArgs);
+static NJS_PROCESS_ARGS_METHOD(njsConnection_connectProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_createLobProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_executeProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_executeManyProcessArgs);
@@ -143,6 +147,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             napi_default, NULL },
     { "_commit", NULL, njsConnection_commit, NULL, NULL, NULL,
             napi_default, NULL },
+    { "_connect", NULL, njsConnection_connect, NULL, NULL, NULL, napi_default,
+            NULL },
     { "_createLob", NULL, njsConnection_createLob, NULL, NULL, NULL,
             napi_default, NULL },
     { "_execute", NULL, njsConnection_execute, NULL, NULL, NULL,
@@ -218,7 +224,7 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefConnection = {
     "Connection", sizeof(njsConnection), njsConnection_finalize,
-    njsClassProperties, NULL, false
+    njsClassProperties, false
 };
 
 // other methods used internally
@@ -438,6 +444,131 @@ static napi_value njsConnection_commit(napi_env env, napi_callback_info info)
 
 
 //-----------------------------------------------------------------------------
+// njsConnection_connect()
+//   Create a standalone connection to the database.
+//
+// PARAMETERS
+//   - options
+//-----------------------------------------------------------------------------
+static napi_value njsConnection_connect(napi_env env, napi_callback_info info)
+{
+    napi_value args[1];
+    njsBaton *baton;
+
+    // first need to attach to the connection object
+    if (!njsUtils_genericAttach(env, info, &njsClassDefConnection))
+        return NULL;
+
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
+        return NULL;
+    if (!njsConnection_connectProcessArgs(baton, env, args)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
+    return njsBaton_queueWork(baton, env, "Connect",
+            njsConnection_connectAsync, njsConnection_connectPostAsync);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_connectAsync()
+//   Worker function for Connect() performed on thread. This establishes the
+// connection using the information found in the baton.
+//-----------------------------------------------------------------------------
+static bool njsConnection_connectAsync(njsBaton *baton)
+{
+    dpiCommonCreateParams commonParams;
+    dpiConnCreateParams params;
+    dpiAccessToken accessToken;
+
+    if (dpiContext_initConnCreateParams(baton->globals->context, &params) < 0)
+        return njsBaton_setErrorDPI(baton);
+    if (baton->privilege)
+        params.authMode = (dpiAuthMode) baton->privilege;
+    params.externalAuth = baton->externalAuth;
+    params.connectionClass = baton->connectionClass;
+    params.connectionClassLength = (uint32_t) baton->connectionClassLength;
+    params.newPassword = baton->newPassword;
+    params.newPasswordLength = (uint32_t) baton->newPasswordLength;
+    if (!njsBaton_initCommonCreateParams(baton, &commonParams))
+        return false;
+
+    // Sharding
+    params.shardingKeyColumns = baton->shardingKeyColumns;
+    params.numShardingKeyColumns = baton->numShardingKeyColumns;
+    params.superShardingKeyColumns = baton->superShardingKeyColumns;
+    params.numSuperShardingKeyColumns = baton->numSuperShardingKeyColumns;
+
+    commonParams.edition = baton->edition;
+    commonParams.editionLength = (uint32_t) baton->editionLength;
+    commonParams.stmtCacheSize = baton->stmtCacheSize;
+
+    // set token based auth parameters
+    if (baton->token && baton->privateKey) {
+        accessToken.token = baton->token;
+        accessToken.tokenLength = baton->tokenLength;
+        accessToken.privateKey = baton->privateKey;
+        accessToken.privateKeyLength = baton->privateKeyLength;
+        commonParams.accessToken = &accessToken;
+    }
+
+    if (dpiConn_create(baton->globals->context, baton->user,
+            (uint32_t) baton->userLength, baton->password,
+            (uint32_t) baton->passwordLength, baton->connectString,
+            (uint32_t) baton->connectStringLength, &commonParams, &params,
+            &baton->dpiConnHandle) < 0)
+        return njsBaton_setErrorDPI(baton);
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_connectPostAsync()
+//   Defines the value returned to JS.
+//-----------------------------------------------------------------------------
+static bool njsConnection_connectPostAsync(njsBaton *baton, napi_env env,
+        napi_value *result)
+{
+    njsConnection *conn = (njsConnection*) baton->callingInstance;
+
+    // transfer the ODPI-C connection handle to the new object
+    conn->handle = baton->dpiConnHandle;
+    baton->dpiConnHandle = NULL;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_connectProcessArgs()
+//   Process the arguments for the Connect() call.
+//-----------------------------------------------------------------------------
+static bool njsConnection_connectProcessArgs(njsBaton *baton, napi_env env,
+        napi_value *args)
+{
+    if (!njsBaton_commonConnectProcessArgs(baton, env, args))
+        return false;
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "newPassword",
+            &baton->newPassword, &baton->newPasswordLength, NULL))
+        return false;
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "privilege",
+            &baton->privilege, NULL))
+        return false;
+    if (!njsBaton_getShardingKeyColumnsFromArg(baton, env, args, 0,
+            "shardingKey", &baton->numShardingKeyColumns,
+            &baton->shardingKeyColumns))
+        return false;
+    if (!njsBaton_getShardingKeyColumnsFromArg(baton, env, args, 0,
+            "superShardingKey", &baton->numSuperShardingKeyColumns,
+            &baton->superShardingKeyColumns))
+        return false;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsConnection_commitAsync()
 //   Worker function for njsConnection_commit().
 //-----------------------------------------------------------------------------
@@ -472,7 +603,6 @@ bool njsConnection_createBaton(napi_env env, napi_callback_info info,
         njsBaton_reportError(tempBaton, env);
         return false;
     }
-    tempBaton->oracleDb = conn->oracleDb;
 
     *baton = tempBaton;
     return true;
@@ -536,7 +666,7 @@ static bool njsConnection_createLobPostAsync(njsBaton *baton, napi_env env,
 
     NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
             &connObj))
-    return njsLob_new(baton->oracleDb, baton->lob, env, connObj, result);
+    return njsLob_new(baton->globals, baton->lob, env, connObj, result);
 }
 
 
@@ -757,24 +887,18 @@ static bool njsConnection_executeProcessArgs(njsBaton *baton,
     bool getResultSet = false;
 
     // setup defaults and define constructors for use in various checks
-    baton->autoCommit = baton->oracleDb->autoCommit;
-    baton->dbObjectAsPojo = baton->oracleDb->dbObjectAsPojo;
-    baton->fetchArraySize = baton->oracleDb->fetchArraySize;
-    baton->maxRows = baton->oracleDb->maxRows;
-    baton->outFormat = baton->oracleDb->outFormat;
-    baton->extendedMetaData = baton->oracleDb->extendedMetaData;
-    baton->prefetchRows = baton->oracleDb->prefetchRows;
     baton->keepInStmtCache = true;
-
-    if (!njsUtils_copyArray(env, baton->oracleDb->fetchAsBufferTypes,
-            baton->oracleDb->numFetchAsBufferTypes, sizeof(uint32_t),
-            (void**) &baton->fetchAsBufferTypes,
-            &baton->numFetchAsBufferTypes))
-        return false;
-    if (!njsUtils_copyArray(env, baton->oracleDb->fetchAsStringTypes,
-            baton->oracleDb->numFetchAsStringTypes, sizeof(uint32_t),
-            (void**) &baton->fetchAsStringTypes,
-            &baton->numFetchAsStringTypes))
+    if (!njsBaton_getGlobalSettings(baton, env,
+            NJS_GLOBAL_ATTR_AUTOCOMMIT,
+            NJS_GLOBAL_ATTR_DBOBJECT_AS_POJO,
+            NJS_GLOBAL_ATTR_EXTENDED_METADATA,
+            NJS_GLOBAL_ATTR_FETCH_ARRAY_SIZE,
+            NJS_GLOBAL_ATTR_FETCH_AS_BUFFER,
+            NJS_GLOBAL_ATTR_FETCH_AS_STRING,
+            NJS_GLOBAL_ATTR_MAX_ROWS,
+            NJS_GLOBAL_ATTR_OUT_FORMAT,
+            NJS_GLOBAL_ATTR_PREFETCH_ROWS,
+            0))
         return false;
     if (!njsBaton_setJsValues(baton, env))
         return false;
@@ -990,7 +1114,8 @@ static bool njsConnection_executeManyProcessArgs(njsBaton *baton,
     // setup defaults and set JavaScript values to simplify creation of
     // returned objects
     baton->keepInStmtCache = true;
-    baton->autoCommit = baton->oracleDb->autoCommit;
+    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+        return false;
     if (!njsBaton_setJsValues(baton, env))
         return false;
 
@@ -1228,7 +1353,7 @@ static bool njsConnection_getBindInfoFromValue(njsBaton *baton,
                 baton->jsBaseDbObjectConstructor, &check))
         if (check) {
             *bindType = NJS_DATATYPE_OBJECT;
-            if (!njsDbObject_getInstance(baton->oracleDb, env, value, &obj))
+            if (!njsDbObject_getInstance(baton->globals, env, value, &obj))
                 return false;
             *objectTypeHandle = obj->type->handle;
             return true;
@@ -1261,19 +1386,20 @@ static napi_value njsConnection_getCallTimeout(napi_env env,
         napi_callback_info info)
 {
     dpiVersionInfo versionInfo;
+    njsModuleGlobals *globals;
     uint32_t callTimeout;
     njsConnection *conn;
 
     // return undefined for an invalid connection
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &conn))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &conn))
         return NULL;
     if (!conn->handle)
         return NULL;
 
     // if an Oracle Client less than 18.1 is being used, return undefined
-    if (dpiContext_getClientVersion(conn->oracleDb->context,
-            &versionInfo) < 0) {
-        njsUtils_throwErrorDPI(env, conn->oracleDb);
+    if (dpiContext_getClientVersion(globals->context, &versionInfo) < 0) {
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     if (versionInfo.versionNum < 18)
@@ -1281,7 +1407,7 @@ static napi_value njsConnection_getCallTimeout(napi_env env,
 
     // get value and return it
     if (dpiConn_getCallTimeout(conn->handle, &callTimeout) < 0) {
-        njsUtils_throwErrorDPI(env, conn->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     return njsUtils_convertToUnsignedInt(env, callTimeout);
@@ -1317,19 +1443,21 @@ static napi_value njsConnection_getClientInfo(napi_env env,
 static napi_value njsConnection_getCurrentSchema(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     uint32_t valueLength;
     njsConnection *conn;
     const char *value;
 
     // return undefined for an invalid connection
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &conn))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &conn))
         return NULL;
     if (!conn->handle)
         return NULL;
 
     // get value and return it
     if (dpiConn_getCurrentSchema(conn->handle, &value, &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, conn->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     return njsUtils_convertToString(env, value, valueLength);
@@ -1425,19 +1553,21 @@ static napi_value njsConnection_getDbOp(napi_env env,
 static napi_value njsConnection_getExternalName(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
+    uint32_t valueLength;
     njsConnection *conn;
-    const char    *value;
-    uint32_t       valueLength;
+    const char *value;
 
     // return undefined for an invalid connection
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance **)&conn))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &conn))
         return NULL;
     if (!conn->handle)
         return NULL;
 
     // get value and return it
     if (dpiConn_getExternalName(conn->handle, &value, &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, conn->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     return njsUtils_convertToString(env, value, valueLength);
@@ -1452,19 +1582,21 @@ static napi_value njsConnection_getExternalName(napi_env env,
 static napi_value njsConnection_getInternalName(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
+    uint32_t valueLength;
     njsConnection *conn;
-    const char    *value;
-    uint32_t       valueLength;
+    const char *value;
 
     // return undefined for an invalid connection
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance **)&conn))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &conn))
         return NULL;
     if (!conn->handle)
         return NULL;
 
     // get value and return it
     if (dpiConn_getInternalName(conn->handle, &value, &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, conn->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     return njsUtils_convertToString(env, value, valueLength);
@@ -1635,14 +1767,16 @@ static napi_value njsConnection_getOracleServerVersion(napi_env env,
         napi_callback_info info)
 {
     dpiVersionInfo versionInfo;
+    njsModuleGlobals *globals;
     njsConnection *conn;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &conn))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &conn))
         return NULL;
     if (!conn->handle)
         return NULL;
     if (dpiConn_getServerVersion(conn->handle, NULL, NULL, &versionInfo) < 0) {
-        njsUtils_throwErrorDPI(env, conn->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     return njsUtils_convertToUnsignedInt(env, versionInfo.fullVersionNum);
@@ -1657,15 +1791,17 @@ static napi_value njsConnection_getOracleServerVersionString(napi_env env,
         napi_callback_info info)
 {
     dpiVersionInfo versionInfo;
+    njsModuleGlobals *globals;
     char versionString[40];
     njsConnection *conn;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &conn))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &conn))
         return NULL;
     if (!conn->handle)
         return NULL;
     if (dpiConn_getServerVersion(conn->handle, NULL, NULL, &versionInfo) < 0) {
-        njsUtils_throwErrorDPI(env, conn->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     (void) snprintf(versionString, sizeof(versionString), "%d.%d.%d.%d.%d",
@@ -1808,11 +1944,12 @@ static bool njsConnection_getRowCounts(njsBaton *baton, napi_env env,
 static napi_value njsConnection_getSodaDatabase(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     napi_value dbObj, connObj;
     njsConnection *conn;
     dpiSodaDb *dbHandle;
 
-    if (!njsUtils_validateArgs(env, info, 0, NULL, &connObj,
+    if (!njsUtils_validateArgs(env, info, 0, NULL, &globals, &connObj,
             (njsBaseInstance**) &conn))
         return NULL;
     if (!conn->handle) {
@@ -1820,10 +1957,10 @@ static napi_value njsConnection_getSodaDatabase(napi_env env,
         return NULL;
     }
     if (dpiConn_getSodaDb(conn->handle, &dbHandle) < 0) {
-        njsUtils_throwErrorDPI(env, conn->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
-    if (!njsSodaDatabase_createFromHandle(env, connObj, conn, dbHandle,
+    if (!njsSodaDatabase_createFromHandle(env, connObj, globals, dbHandle,
             &dbObj))
         return NULL;
 
@@ -1838,16 +1975,18 @@ static napi_value njsConnection_getSodaDatabase(napi_env env,
 static napi_value njsConnection_getStmtCacheSize(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     njsConnection *conn;
     uint32_t cacheSize;
     napi_value value;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &conn))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &conn))
         return NULL;
     if (!conn->handle)
         return NULL;
     if (dpiConn_getStmtCacheSize(conn->handle, &cacheSize) < 0) {
-        njsUtils_throwErrorDPI(env, conn->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
     if (napi_create_uint32(env, cacheSize, &value) != napi_ok) {
@@ -2021,7 +2160,7 @@ static napi_value njsConnection_getTag(napi_env env,
 {
     njsConnection *conn;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &conn))
+    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &conn))
         return NULL;
     return njsUtils_convertToString(env, conn->tag,
             (uint32_t) conn->tagLength);
@@ -2087,7 +2226,7 @@ bool njsConnection_newFromBaton(njsBaton *baton, napi_env env,
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefConnection,
-            baton->oracleDb->jsConnectionConstructor, connObj,
+            baton->globals->jsConnectionConstructor, connObj,
             (njsBaseInstance**) &conn))
         return false;
 
@@ -2104,31 +2243,27 @@ bool njsConnection_newFromBaton(njsBaton *baton, napi_env env,
         baton->tagLength = 0;
     }
 
-    // copy the oracleDb instance to the new object
-    conn->oracleDb = baton->oracleDb;
-
     return true;
 }
 
 
 //-----------------------------------------------------------------------------
 // njsConnection_isHealthy()
-//   Get the Health status - whether the current connection is usable or not
-//   NOTE: If this function returns FALSE, conn.close() has to be called
+//   Get the Health status - whether the current connection is usable or not.
+// NOTE: If this function returns FALSE, conn.close() should be called.
 //-----------------------------------------------------------------------------
 static napi_value njsConnection_isHealthy(napi_env env,
         napi_callback_info info)
 {
-    int              value = 0;
-    napi_value       connObj;
-    njsConnection    *conn;
+    njsModuleGlobals *globals;
+    njsConnection *conn;
+    napi_value connObj;
+    int value = 0;
 
-    if (njsUtils_validateArgs(env, info, 0, NULL, &connObj,
-            (njsBaseInstance **)&conn)) {
-        if (conn->handle) {
-            dpiConn_getIsHealthy(conn->handle, &value);
-        }
-    }
+    if (!njsUtils_validateArgs(env, info, 0, NULL, &globals, &connObj,
+            (njsBaseInstance**) &conn))
+        return NULL;
+    dpiConn_getIsHealthy(conn->handle, &value);
     return njsUtils_convertToBoolean(env, value);
 }
 
@@ -2358,8 +2493,7 @@ static bool njsConnection_processImplicitResults(njsBaton *baton)
     dpiStmt *stmt;
 
     // clients earlier than 12.1 do not support implicit results
-    if (dpiContext_getClientVersion(baton->oracleDb->context,
-            &versionInfo) < 0)
+    if (dpiContext_getClientVersion(baton->globals->context, &versionInfo) < 0)
         return njsBaton_setErrorDPI(baton);
     if (versionInfo.versionNum < 12)
         return true;
@@ -2763,16 +2897,18 @@ static napi_value njsConnection_setAction(napi_env env,
 static napi_value njsConnection_setCallTimeout(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     uint32_t callTimeout;
     njsConnection *conn;
     napi_value value;
 
-    if (!njsUtils_validateSetter(env, info, (njsBaseInstance**) &conn, &value))
+    if (!njsUtils_validateSetter(env, info, &globals,
+            (njsBaseInstance**) &conn, &value))
         return NULL;
     if (!njsUtils_setPropUnsignedInt(env, value, "callTimeout", &callTimeout))
         return NULL;
     if (dpiConn_setCallTimeout(conn->handle, callTimeout) < 0)
-        njsUtils_throwErrorDPI(env, conn->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
 
     return NULL;
 }
@@ -2882,7 +3018,8 @@ static napi_value njsConnection_setTag(napi_env env,
     njsConnection *conn;
     napi_value value;
 
-    if (!njsUtils_validateSetter(env, info, (njsBaseInstance**) &conn, &value))
+    if (!njsUtils_validateSetter(env, info, NULL, (njsBaseInstance**) &conn,
+            &value))
         return NULL;
     if (!njsUtils_setPropString(env, value, "tag", &conn->tag,
             &conn->tagLength))
@@ -2901,13 +3038,15 @@ static napi_value njsConnection_setTextAttribute(napi_env env,
         napi_callback_info info, const char *attributeName,
         int (*setter)(dpiConn*, const char *, uint32_t))
 {
+    njsModuleGlobals *globals;
     size_t bufferLength;
     njsConnection *conn;
     napi_value value;
     char *buffer;
 
     // validate the arguments and the connection
-    if (!njsUtils_validateSetter(env, info, (njsBaseInstance**) &conn, &value))
+    if (!njsUtils_validateSetter(env, info, &globals,
+            (njsBaseInstance**) &conn, &value))
         return NULL;
     if (!conn->handle) {
         njsUtils_throwError(env, errInvalidConnection);
@@ -2922,7 +3061,7 @@ static napi_value njsConnection_setTextAttribute(napi_env env,
 
     // call the ODPI-C function to set the value
     if ((*setter)(conn->handle, buffer, (uint32_t) bufferLength) < 0) {
-        njsUtils_throwErrorDPI(env, conn->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         free(buffer);
         return NULL;
     }
@@ -3041,8 +3180,8 @@ static bool njsConnection_startupAsync(njsBaton *baton)
 // njsConnection_subscribe()
 //   Subscribe to events from the database. The provided callback will be
 // invoked each time a notification is received. The name is used to uniquely
-// identify a subscription and a reference is stored on the oracledb instance
-// for use by subsequent calls to subscribe() or unsubscribe().
+// identify a subscription and a reference is stored on the njsModuleGlobals
+// instance for use by subsequent calls to subscribe() or unsubscribe().
 //
 // PARAMETERS
 //   - name
@@ -3079,7 +3218,7 @@ static bool njsConnection_subscribeAsync(njsBaton *baton)
 
     // create subscription, if necessary
     if (!baton->subscription->handle) {
-        if (dpiContext_initSubscrCreateParams(baton->oracleDb->context,
+        if (dpiContext_initSubscrCreateParams(baton->globals->context,
                 &params) < 0)
             return njsBaton_setErrorDPI(baton);
         params.subscrNamespace = baton->subscription->subscrNamespace;

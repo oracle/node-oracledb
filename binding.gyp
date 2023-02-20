@@ -15,7 +15,6 @@
              "src/njsJsonBuffer.c",
              "src/njsLob.c",
              "src/njsModule.c",
-             "src/njsOracleDb.c",
              "src/njsPool.c",
              "src/njsResultSet.c",
              "src/njsSodaCollection.c",

@@ -65,12 +65,10 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefAqQueue = {
     "AqQueue", sizeof(njsAqQueue), njsAqQueue_finalize,
-    njsClassProperties, NULL, false
+    njsClassProperties, false
 };
 
 // other methods used internally
-static bool njsAqQueue_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton);
 static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
         napi_env env, napi_value value, dpiMsgProps **handle);
 static bool njsAqQueue_setRecipients(njsBaton *baton, dpiMsgProps *handle,
@@ -101,28 +99,6 @@ bool njsAqQueue_setRecipients(njsBaton *baton, dpiMsgProps *handle,
     if (status < 0)
         return njsBaton_setErrorDPI(baton);
 
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsAqQueue_createBaton()
-//   Create the baton used for asynchronous methods and initialize all
-// values. The connection is also checked to see if it is open. If this fails
-// for some reason, an exception is thrown.
-//-----------------------------------------------------------------------------
-bool njsAqQueue_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton)
-{
-    njsBaton *tempBaton;
-    njsAqQueue *queue;
-
-    if (!njsUtils_createBaton(env, info, numArgs, args, &tempBaton))
-        return false;
-    queue = (njsAqQueue*) tempBaton->callingInstance;
-    tempBaton->oracleDb = queue->conn->oracleDb;
-
-    *baton = tempBaton;
     return true;
 }
 
@@ -161,7 +137,7 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
             break;
         case napi_object:
             NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-                    baton->oracleDb->jsBaseDbObjectConstructor, &constructor))
+                    baton->globals->jsBaseDbObjectConstructor, &constructor))
             NJS_CHECK_NAPI(env, napi_instanceof(env, value, constructor,
                     &isDbObject))
             if (isDbObject || njsUtils_isBuffer(env, value)) {
@@ -210,7 +186,7 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
                 (uint32_t) bufferLength);
         free(buffer);
     } else if (isDbObject) {
-        if (!njsDbObject_getInstance(baton->oracleDb, env, payloadObj, &obj))
+        if (!njsDbObject_getInstance(baton->globals, env, payloadObj, &obj))
             return false;
         status = dpiMsgProps_setPayloadObject(tempHandle, obj->handle);
     } else {
@@ -311,7 +287,7 @@ bool njsAqQueue_createFromHandle(njsBaton *baton, napi_env env,
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefAqQueue,
-            conn->oracleDb->jsAqQueueConstructor, queueObj,
+            baton->globals->jsAqQueueConstructor, queueObj,
             (njsBaseInstance**) &queue))
         return false;
 
@@ -322,27 +298,25 @@ bool njsAqQueue_createFromHandle(njsBaton *baton, napi_env env,
 
     // create the dequeue options object
     if (dpiQueue_getDeqOptions(queue->handle, &deqOptionsHandle) < 0)
-        return njsUtils_throwErrorDPI(env, conn->oracleDb);
+        return njsUtils_throwErrorDPI(env, baton->globals);
     if (!njsUtils_genericNew(env, &njsClassDefAqDeqOptions,
-            conn->oracleDb->jsAqDeqOptionsConstructor, &deqOptionsObj,
+            baton->globals->jsAqDeqOptionsConstructor, &deqOptionsObj,
             (njsBaseInstance**) &deqOptions))
         return false;
     if (dpiDeqOptions_addRef(deqOptionsHandle) < 0)
-        return njsUtils_throwErrorDPI(env, conn->oracleDb);
+        return njsUtils_throwErrorDPI(env, baton->globals);
     deqOptions->handle = deqOptionsHandle;
-    deqOptions->oracleDb = conn->oracleDb;
 
     // create the enqueue options object
     if (dpiQueue_getEnqOptions(queue->handle, &enqOptionsHandle) < 0)
-        return njsUtils_throwErrorDPI(env, conn->oracleDb);
+        return njsUtils_throwErrorDPI(env, baton->globals);
     if (!njsUtils_genericNew(env, &njsClassDefAqEnqOptions,
-            conn->oracleDb->jsAqEnqOptionsConstructor, &enqOptionsObj,
+            baton->globals->jsAqEnqOptionsConstructor, &enqOptionsObj,
             (njsBaseInstance**) &enqOptions))
         return false;
     if (dpiEnqOptions_addRef(enqOptionsHandle) < 0)
-        return njsUtils_throwErrorDPI(env, conn->oracleDb);
+        return njsUtils_throwErrorDPI(env, baton->globals);
     enqOptions->handle = enqOptionsHandle;
-    enqOptions->oracleDb = conn->oracleDb;
     enqOptions->deliveryMode = DPI_MODE_MSG_PERSISTENT;
 
     // define properties for the connection (to ensure that it is not garbage
@@ -394,7 +368,7 @@ static napi_value njsAqQueue_deqMany(napi_env env, napi_callback_info info)
     napi_value args[1];
     njsBaton *baton;
 
-    if (!njsAqQueue_createBaton(env, info, 1, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsAqQueue_deqManyProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -475,7 +449,7 @@ static napi_value njsAqQueue_deqOne(napi_env env, napi_callback_info info)
 {
     njsBaton *baton;
 
-    if (!njsAqQueue_createBaton(env, info, 0, NULL, &baton))
+    if (!njsUtils_createBaton(env, info, 0, NULL, &baton))
         return NULL;
     return njsBaton_queueWork(baton, env, "DeqOne", njsAqQueue_deqOneAsync,
             njsAqQueue_deqOnePostAsync);
@@ -528,7 +502,7 @@ static napi_value njsAqQueue_enqMany(napi_env env, napi_callback_info info)
     napi_value args[1];
     njsBaton *baton;
 
-    if (!njsAqQueue_createBaton(env, info, 1, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsAqQueue_enqManyProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -601,7 +575,7 @@ static napi_value njsAqQueue_enqOne(napi_env env, napi_callback_info info)
     napi_value args[1];
     njsBaton *baton;
 
-    if (!njsAqQueue_createBaton(env, info, 1, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsAqQueue_enqOneProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);

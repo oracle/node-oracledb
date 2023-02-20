@@ -64,7 +64,9 @@ static NJS_ASYNC_POST_METHOD(njsSodaCollection_saveAndGetPostAsync);
 static NJS_PROCESS_ARGS_METHOD(njsSodaCollection_dropIndexProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsSodaCollection_insertManyProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsSodaCollection_insertManyAndGetProcessArgs);
+static NJS_PROCESS_ARGS_METHOD(njsSodaCollection_insertOneProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsSodaCollection_insertOneAndGetProcessArgs);
+static NJS_PROCESS_ARGS_METHOD(njsSodaCollection_saveProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsSodaCollection_saveAndGetProcessArgs);
 
 // getters
@@ -110,36 +112,12 @@ static const napi_property_descriptor njsClassProperties[] = {
 // class definition
 const njsClassDef njsClassDefSodaCollection = {
     "SodaCollection", sizeof(njsSodaCollection), njsSodaCollection_finalize,
-    njsClassProperties, NULL, false
+    njsClassProperties, false
 };
 
 // other methods used internally
-static bool njsSodaCollection_createBaton(napi_env env,
-        napi_callback_info info, size_t numArgs, napi_value *args,
-        njsBaton **baton);
 static bool njsSodaCollection_processHintOption(njsBaton *baton,
         napi_env env, napi_value *args);
-
-//-----------------------------------------------------------------------------
-// njsSodaCollection_createBaton()
-//   Create the baton used for asynchronous methods and initialize all
-// values. If this fails for some reason, an exception is thrown.
-//-----------------------------------------------------------------------------
-bool njsSodaCollection_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton)
-{
-    njsSodaCollection *coll;
-    njsBaton *tempBaton;
-
-    if (!njsUtils_createBaton(env, info, numArgs, args, &tempBaton))
-        return false;
-    coll = (njsSodaCollection*) tempBaton->callingInstance;
-    tempBaton->oracleDb = coll->db->oracleDb;
-
-    *baton = tempBaton;
-    return true;
-}
-
 
 //-----------------------------------------------------------------------------
 // njsSodaCollection_createIndex()
@@ -154,8 +132,13 @@ static napi_value njsSodaCollection_createIndex(napi_env env,
     napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 1, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
+    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT,
+            0)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
     if (!njsUtils_getStringArg(env, args, 0, &baton->indexSpec,
             &baton->indexSpecLength)) {
         njsBaton_reportError(baton, env);
@@ -175,7 +158,7 @@ static bool njsSodaCollection_createIndexAsync(njsBaton *baton)
     njsSodaCollection *coll = (njsSodaCollection*) baton->callingInstance;
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
 
-    if (baton->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_createIndex(coll->handle, baton->indexSpec,
             (uint32_t) baton->indexSpecLength, flags) < 0)
@@ -195,8 +178,13 @@ static napi_value njsSodaCollection_drop(napi_env env, napi_callback_info info)
 {
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 0, NULL, &baton))
+    if (!njsUtils_createBaton(env, info, 0, NULL, &baton))
         return NULL;
+    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT,
+            0)) {
+        njsBaton_reportError(baton, env);
+        return NULL;
+    }
     return njsBaton_queueWork(baton, env, "Drop", njsSodaCollection_dropAsync,
             njsSodaCollection_dropPostAsync);
 }
@@ -212,7 +200,7 @@ static bool njsSodaCollection_dropAsync(njsBaton *baton)
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
     int isDropped;
 
-    if (coll->db->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_drop(coll->handle, flags, &isDropped) < 0)
         return njsBaton_setErrorDPI(baton);
@@ -253,7 +241,7 @@ static napi_value njsSodaCollection_dropIndex(napi_env env,
     napi_value args[2];
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 2, args, &baton))
+    if (!njsUtils_createBaton(env, info, 2, args, &baton))
         return NULL;
     if (!njsSodaCollection_dropIndexProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -275,7 +263,7 @@ static bool njsSodaCollection_dropIndexAsync(njsBaton *baton)
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
     int isDropped;
 
-    if (coll->db->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (baton->force)
         flags |= DPI_SODA_FLAGS_INDEX_DROP_FORCE;
@@ -313,6 +301,8 @@ static bool njsSodaCollection_dropIndexPostAsync(njsBaton *baton,
 static bool njsSodaCollection_dropIndexProcessArgs(njsBaton *baton,
         napi_env env, napi_value *args)
 {
+    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+        return false;
     if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
         return false;
     if (!njsBaton_getBoolFromArg(baton, env, args, 1, "force", &baton->force,
@@ -347,12 +337,14 @@ static void njsSodaCollection_finalize(napi_env env, void *finalizeData,
 static napi_value njsSodaCollection_find(napi_env env, napi_callback_info info)
 {
     napi_value opObj, collObj;
+    njsModuleGlobals *globals;
     njsSodaCollection *coll;
 
-    if (!njsUtils_validateArgs(env, info, 0, NULL, &collObj,
+    if (!njsUtils_validateArgs(env, info, 0, NULL, &globals, &collObj,
             (njsBaseInstance**) &coll))
         return NULL;
-    if (!njsSodaOperation_createFromCollection(env, collObj, coll, &opObj))
+    if (!njsSodaOperation_createFromCollection(env, collObj, globals, coll,
+            &opObj))
         return NULL;
 
     return opObj;
@@ -370,7 +362,7 @@ static napi_value njsSodaCollection_getDataGuide(napi_env env,
 {
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 0, NULL, &baton))
+    if (!njsUtils_createBaton(env, info, 0, NULL, &baton))
         return NULL;
     return njsBaton_queueWork(baton, env, "GetDataGuide",
             njsSodaCollection_getDataGuideAsync,
@@ -401,7 +393,7 @@ static bool njsSodaCollection_getDataGuidePostAsync(njsBaton *baton,
         napi_env env, napi_value *result)
 {
     if (!njsSodaDocument_createFromHandle(env, baton->dpiSodaDocHandle,
-            baton->oracleDb, result))
+            baton->globals, result))
         return false;
     baton->dpiSodaDocHandle = NULL;
     return true;
@@ -415,15 +407,17 @@ static bool njsSodaCollection_getDataGuidePostAsync(njsBaton *baton,
 static napi_value njsSodaCollection_getMetaData(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     njsSodaCollection *coll;
     uint32_t metadataLength;
     const char *metadata;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &coll))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &coll))
         return NULL;
     if (dpiSodaColl_getMetadata(coll->handle, &metadata,
             &metadataLength) < 0) {
-        njsUtils_throwErrorDPI(env, coll->db->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
 
@@ -438,14 +432,16 @@ static napi_value njsSodaCollection_getMetaData(napi_env env,
 static napi_value njsSodaCollection_getName(napi_env env,
         napi_callback_info info)
 {
+    njsModuleGlobals *globals;
     njsSodaCollection *coll;
     uint32_t nameLength;
     const char *name;
 
-    if (!njsUtils_validateGetter(env, info, (njsBaseInstance**) &coll))
+    if (!njsUtils_validateGetter(env, info, &globals,
+            (njsBaseInstance**) &coll))
         return NULL;
     if (dpiSodaColl_getName(coll->handle, &name, &nameLength) < 0) {
-        njsUtils_throwErrorDPI(env, coll->db->oracleDb);
+        njsUtils_throwErrorDPI(env, globals);
         return NULL;
     }
 
@@ -466,7 +462,7 @@ static napi_value njsSodaCollection_insertMany(napi_env env,
     napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 1, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
     if (!njsSodaCollection_insertManyProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -486,7 +482,7 @@ static bool njsSodaCollection_insertManyAsync(njsBaton *baton)
     njsSodaCollection *coll = (njsSodaCollection*) baton->callingInstance;
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
 
-    if (baton->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_insertMany(coll->handle, baton->numSodaDocs,
             baton->sodaDocs, flags, NULL) < 0)
@@ -506,6 +502,10 @@ static bool njsSodaCollection_insertManyProcessArgs(njsBaton *baton,
     njsSodaCollection *coll = (njsSodaCollection*) baton->callingInstance;
     napi_value element;
     uint32_t i;
+
+    // get global autoCommit flag
+    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+        return false;
 
     // create array to populate SODA document handles
     NJS_CHECK_NAPI(env, napi_get_array_length(env, args[0],
@@ -540,7 +540,7 @@ static napi_value njsSodaCollection_insertManyAndGet(napi_env env,
     napi_value args[2];
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 2, args, &baton))
+    if (!njsUtils_createBaton(env, info, 2, args, &baton))
         return NULL;
     if (!njsSodaCollection_insertManyAndGetProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -562,7 +562,7 @@ static bool njsSodaCollection_insertManyAndGetAsync(njsBaton *baton)
     uint32_t i, flags = DPI_SODA_FLAGS_DEFAULT;
     dpiSodaDoc **resultDocs;
 
-    if (baton->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     resultDocs = calloc(baton->numSodaDocs, sizeof(dpiSodaDoc*));
     if (!resultDocs)
@@ -596,7 +596,7 @@ static bool njsSodaCollection_insertManyAndGetPostAsync(njsBaton *baton,
             result))
     for (i = 0; i < baton->numSodaDocs; i++) {
         if (!njsSodaDocument_createFromHandle(env, baton->sodaDocs[i],
-                baton->oracleDb, &temp))
+                baton->globals, &temp))
             return false;
         baton->sodaDocs[i] = NULL;
         NJS_CHECK_NAPI(env, napi_set_element(env, *result, i, temp))
@@ -616,7 +616,6 @@ static bool njsSodaCollection_insertManyAndGetProcessArgs(njsBaton *baton,
 {
     if (!njsSodaCollection_insertManyProcessArgs(baton, env, args))
         return false;
-
     if (!njsSodaCollection_processHintOption(baton, env, args))
         return false;
 
@@ -634,15 +633,12 @@ static bool njsSodaCollection_insertManyAndGetProcessArgs(njsBaton *baton,
 static napi_value njsSodaCollection_insertOne(napi_env env,
         napi_callback_info info)
 {
-    njsSodaCollection *coll;
     napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 1, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
-    coll = (njsSodaCollection*) baton->callingInstance;
-    if (!njsBaton_getSodaDocument(baton, coll->db, env, args[0],
-            &baton->dpiSodaDocHandle)) {
+    if (!njsSodaCollection_insertOneProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
@@ -660,7 +656,7 @@ static bool njsSodaCollection_insertOneAsync(njsBaton *baton)
     njsSodaCollection *coll = (njsSodaCollection*) baton->callingInstance;
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
 
-    if (baton->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_insertOne(coll->handle, baton->dpiSodaDocHandle, flags,
             NULL) < 0)
@@ -683,7 +679,7 @@ static napi_value njsSodaCollection_insertOneAndGet(napi_env env,
     napi_value args[2];
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 2, args, &baton))
+    if (!njsUtils_createBaton(env, info, 2, args, &baton))
         return NULL;
     if (!njsSodaCollection_insertOneAndGetProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -705,7 +701,7 @@ static bool njsSodaCollection_insertOneAndGetAsync(njsBaton *baton)
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
     dpiSodaDoc *resultDoc;
 
-    if (baton->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_insertOneWithOptions(coll->handle, baton->dpiSodaDocHandle,
             baton->sodaOperOptions ,flags, &resultDoc) < 0)
@@ -724,9 +720,29 @@ static bool njsSodaCollection_insertOneAndGetPostAsync(njsBaton *baton,
         napi_env env, napi_value *result)
 {
     if (!njsSodaDocument_createFromHandle(env, baton->dpiSodaDocHandle,
-            baton->oracleDb, result))
+            baton->globals, result))
         return false;
     baton->dpiSodaDocHandle = NULL;
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsSodaColection_insertOneProcessArgs()
+//   Processes the arguments provided by the caller and place them on the
+// baton.
+//-----------------------------------------------------------------------------
+static bool njsSodaCollection_insertOneProcessArgs(njsBaton *baton,
+        napi_env env, napi_value *args)
+{
+    njsSodaCollection *coll = (njsSodaCollection*) baton->callingInstance;
+
+    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+        return false;
+    if (!njsBaton_getSodaDocument(baton, coll->db, env, args[0],
+            &baton->dpiSodaDocHandle))
+        return false;
+
     return true;
 }
 
@@ -741,13 +757,13 @@ static bool njsSodaCollection_insertOneAndGetProcessArgs(njsBaton *baton,
 {
     njsSodaCollection *coll = (njsSodaCollection*) baton->callingInstance;
 
+    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+        return false;
     if (!njsSodaCollection_processHintOption(baton, env, args))
         return false;
-
     if (!njsBaton_getSodaDocument(baton, coll->db, env, args[0],
-            &baton->dpiSodaDocHandle)) {
+            &baton->dpiSodaDocHandle))
         return false;
-    }
 
     return true;
 }
@@ -765,7 +781,7 @@ bool njsSodaCollection_newFromBaton(njsBaton *baton, napi_env env,
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefSodaCollection,
-            baton->oracleDb->jsSodaCollectionConstructor, collObj,
+            baton->globals->jsSodaCollectionConstructor, collObj,
             (njsBaseInstance**) &coll))
         return false;
 
@@ -820,15 +836,12 @@ static bool njsSodaCollection_processHintOption(njsBaton *baton, napi_env env,
 //-----------------------------------------------------------------------------
 static napi_value njsSodaCollection_save(napi_env env, napi_callback_info info)
 {
-    njsSodaCollection *coll;
     napi_value args[1];
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 1, args, &baton))
+    if (!njsUtils_createBaton(env, info, 1, args, &baton))
         return NULL;
-    coll = (njsSodaCollection*) baton->callingInstance;
-    if (!njsBaton_getSodaDocument(baton, coll->db, env, args[0],
-            &baton->dpiSodaDocHandle)) {
+    if (!njsSodaCollection_saveProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
     }
@@ -846,7 +859,7 @@ static bool njsSodaCollection_saveAsync(njsBaton *baton)
     njsSodaCollection *coll = (njsSodaCollection*) baton->callingInstance;
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
 
-    if (baton->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_save(coll->handle, baton->dpiSodaDocHandle, flags,
             NULL) < 0)
@@ -870,7 +883,7 @@ static napi_value njsSodaCollection_saveAndGet(napi_env env,
     napi_value args[2];
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 2, args, &baton))
+    if (!njsUtils_createBaton(env, info, 2, args, &baton))
         return NULL;
     if (!njsSodaCollection_saveAndGetProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
@@ -892,7 +905,7 @@ static bool njsSodaCollection_saveAndGetAsync(njsBaton *baton)
     uint32_t flags = DPI_SODA_FLAGS_DEFAULT;
     dpiSodaDoc *resultDoc;
 
-    if (baton->oracleDb->autoCommit)
+    if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_saveWithOptions(coll->handle, baton->dpiSodaDocHandle,
             baton->sodaOperOptions ,flags, &resultDoc) < 0)
@@ -911,11 +924,32 @@ static bool njsSodaCollection_saveAndGetPostAsync(njsBaton *baton,
         napi_env env, napi_value *result)
 {
     if (!njsSodaDocument_createFromHandle(env, baton->dpiSodaDocHandle,
-            baton->oracleDb, result))
+            baton->globals, result))
         return false;
     baton->dpiSodaDocHandle = NULL;
     return true;
 }
+
+
+//-----------------------------------------------------------------------------
+// njsSodaColection_saveProcessArgs()
+//   Processes the arguments provided by the caller and place them on the
+// baton.
+//-----------------------------------------------------------------------------
+static bool njsSodaCollection_saveProcessArgs(njsBaton *baton, napi_env env,
+        napi_value *args)
+{
+    njsSodaCollection *coll = (njsSodaCollection*) baton->callingInstance;
+
+    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+        return false;
+    if (!njsBaton_getSodaDocument(baton, coll->db, env, args[0],
+            &baton->dpiSodaDocHandle))
+        return false;
+
+    return true;
+}
+
 
 //-----------------------------------------------------------------------------
 // njsSodaColection_saveAndGetProcessArgs()
@@ -927,13 +961,13 @@ static bool njsSodaCollection_saveAndGetProcessArgs(njsBaton *baton,
 {
     njsSodaCollection *coll = (njsSodaCollection*) baton->callingInstance;
 
+    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+        return false;
     if (!njsSodaCollection_processHintOption(baton, env, args))
         return false;
-
     if (!njsBaton_getSodaDocument(baton, coll->db, env, args[0],
-            &baton->dpiSodaDocHandle)) {
+            &baton->dpiSodaDocHandle))
         return false;
-    }
 
     return true;
 }
@@ -950,7 +984,7 @@ static napi_value njsSodaCollection_truncate(napi_env env,
 {
     njsBaton *baton;
 
-    if (!njsSodaCollection_createBaton(env, info, 0, NULL, &baton))
+    if (!njsUtils_createBaton(env, info, 0, NULL, &baton))
         return NULL;
     return njsBaton_queueWork(baton, env, "Truncate",
             njsSodaCollection_truncateAsync, NULL);

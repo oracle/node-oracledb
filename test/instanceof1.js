@@ -30,12 +30,6 @@ var dbConfig = require('./dbconfig.js');
 
 describe('45. instanceof1.js', function() {
 
-  it('45.1 instanceof works for the oracledb instance', function(done) {
-    (oracledb instanceof oracledb.OracleDb).should.be.true();
-
-    done();
-  });
-
   it('45.2 instanceof works for pool instances', function(done) {
     oracledb.createPool(
       {
