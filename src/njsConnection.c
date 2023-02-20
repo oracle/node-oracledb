@@ -813,7 +813,7 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
 
         // set metadata for the query
         if (!njsVariable_getMetadataMany(baton->queryVars, baton->numQueryVars,
-                env, baton->extendedMetaData, &metadata))
+                env, &metadata))
             return false;
         NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "metaData",
                 metadata))
@@ -891,7 +891,6 @@ static bool njsConnection_executeProcessArgs(njsBaton *baton,
     if (!njsBaton_getGlobalSettings(baton, env,
             NJS_GLOBAL_ATTR_AUTOCOMMIT,
             NJS_GLOBAL_ATTR_DBOBJECT_AS_POJO,
-            NJS_GLOBAL_ATTR_EXTENDED_METADATA,
             NJS_GLOBAL_ATTR_FETCH_ARRAY_SIZE,
             NJS_GLOBAL_ATTR_FETCH_AS_BUFFER,
             NJS_GLOBAL_ATTR_FETCH_AS_STRING,
@@ -931,9 +930,6 @@ static bool njsConnection_executeProcessArgs(njsBaton *baton,
         return false;
     if (!njsBaton_getBoolFromArg(baton, env, args, 2, "autoCommit",
             &baton->autoCommit, NULL))
-        return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 2, "extendedMetaData",
-            &baton->extendedMetaData, NULL))
         return false;
     if (!njsBaton_getBoolFromArg(baton, env, args, 2, "dbObjectAsPojo",
             &baton->dbObjectAsPojo, NULL))
@@ -2013,7 +2009,6 @@ static napi_value njsConnection_getStatementInfo(napi_env env,
 
     if (!njsConnection_createBaton(env, info, 1, args, &baton))
         return NULL;
-    baton->extendedMetaData = true;
     if (!njsConnection_getStatementInfoProcessArgs(baton, env, args)) {
         njsBaton_reportError(baton, env);
         return NULL;
@@ -2109,7 +2104,7 @@ static bool njsConnection_getStatementInfoPostAsync(njsBaton *baton,
                 env, baton))
             return false;
         if (!njsVariable_getMetadataMany(baton->queryVars, baton->numQueryVars,
-                env, baton->extendedMetaData, &metadata))
+                env, &metadata))
             return false;
         NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "metaData",
                 metadata))

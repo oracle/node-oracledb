@@ -113,7 +113,6 @@
 #define NJS_GLOBAL_ATTR_DBOBJECT_AS_POJO    7002
 #define NJS_GLOBAL_ATTR_EDITION             7003
 #define NJS_GLOBAL_ATTR_EVENTS              7004
-#define NJS_GLOBAL_ATTR_EXTENDED_METADATA   7005
 #define NJS_GLOBAL_ATTR_EXTERNAL_AUTH       7006
 #define NJS_GLOBAL_ATTR_FETCH_ARRAY_SIZE    7007
 #define NJS_GLOBAL_ATTR_FETCH_AS_BUFFER     7008
@@ -480,7 +479,6 @@ struct njsBaton {
     bool closeOnFetch;
     bool closeOnAllRowsFetched;
     bool autoCommit;
-    bool extendedMetaData;
     bool events;
     bool batchErrors;
     bool dmlRowCounts;
@@ -657,7 +655,6 @@ struct njsResultSet {
     njsVariable *queryVars;
     uint32_t fetchArraySize;
     uint32_t outFormat;
-    bool extendedMetaData;
     bool isNested;
     bool varsDefined;
 };
@@ -1048,8 +1045,8 @@ void njsVariable_free(njsVariable *var);
 bool njsVariable_getArrayValue(njsVariable *var, njsConnection *conn,
         uint32_t pos, njsBaton *baton, napi_env env, napi_value *value);
 bool njsVariable_getMetadataMany(njsVariable *vars, uint32_t numVars,
-        napi_env env, bool extended, napi_value *metadata);
-bool njsVariable_getMetadataOne(njsVariable *var, napi_env env, bool extended,
+        napi_env env, napi_value *metadata);
+bool njsVariable_getMetadataOne(njsVariable *var, napi_env env,
         napi_value *metadata);
 bool njsVariable_getNestedCursorIndices(njsVariable *vars, uint32_t numVars,
         napi_env env, napi_value *indices);

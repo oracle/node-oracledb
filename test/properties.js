@@ -753,7 +753,8 @@ describe('58. properties.js', function() {
     it('58.4.1 metaData (read-only)', async function() {
       assert(resultSet.metaData);
       const t = resultSet.metaData;
-      assert.deepEqual(t, [ { name: 'NUM' }, { name: 'CONTENT' } ]);
+      assert.equal(t[0].name, 'NUM');
+      assert.equal(t[1].name, 'CONTENT');
 
       assert.throws(
         function() {

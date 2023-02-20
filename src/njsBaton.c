@@ -574,9 +574,6 @@ static bool njsBaton_getGlobalSetting(njsBaton *baton, napi_env env,
         case NJS_GLOBAL_ATTR_EDITION:
             return njsBaton_getStringFromArg(baton, env, &settings, 0,
                     "edition", &baton->edition, &baton->editionLength, NULL);
-        case NJS_GLOBAL_ATTR_EXTENDED_METADATA:
-            return njsBaton_getBoolFromArg(baton, env, &settings, 0,
-                    "extendedMetaData", &baton->extendedMetaData, NULL);
         case NJS_GLOBAL_ATTR_EVENTS:
             return njsBaton_getBoolFromArg(baton, env, &settings, 0, "events",
                     &baton->events, NULL);

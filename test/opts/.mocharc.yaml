@@ -20,7 +20,6 @@ spec:
   - test/stream1.js
   - test/stream2.js
   - test/resultsetToStream.js
-  - test/extendedMetaData.js
   - test/constants.js
   - test/fetchTimestampAsString.js
   - test/dataTypeAssist.js

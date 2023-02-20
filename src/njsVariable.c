@@ -279,7 +279,7 @@ static uint32_t njsVariable_getDataType(njsVariable *var)
 //   Return metadata about many variables.
 //-----------------------------------------------------------------------------
 bool njsVariable_getMetadataMany(njsVariable *vars, uint32_t numVars,
-        napi_env env, bool extended, napi_value *metadata)
+        napi_env env, napi_value *metadata)
 {
     napi_value column;
     uint32_t i;
@@ -289,8 +289,7 @@ bool njsVariable_getMetadataMany(njsVariable *vars, uint32_t numVars,
 
     // process each of the variables in the array
     for (i = 0; i < numVars; i++) {
-        if (!njsVariable_getMetadataOne(&vars[i], env, extended,
-                &column))
+        if (!njsVariable_getMetadataOne(&vars[i], env, &column))
             return false;
         NJS_CHECK_NAPI(env, napi_set_element(env, *metadata, i, column))
     }
@@ -303,7 +302,7 @@ bool njsVariable_getMetadataMany(njsVariable *vars, uint32_t numVars,
 // njsVariable_getMetadataOne()
 //   Return metadata about a particular variable.
 //-----------------------------------------------------------------------------
-bool njsVariable_getMetadataOne(njsVariable *var, napi_env env, bool extended,
+bool njsVariable_getMetadataOne(njsVariable *var, napi_env env,
         napi_value *metadata)
 {
     napi_value temp;
@@ -315,10 +314,6 @@ bool njsVariable_getMetadataOne(njsVariable *var, napi_env env, bool extended,
     NJS_CHECK_NAPI(env, napi_create_string_utf8(env, var->name,
             var->nameLength, &temp))
     NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "name", temp))
-
-    // nothing more to do if extended metadata is not desired
-    if (!extended)
-        return true;
 
     // store JavaScript fetch type
     NJS_CHECK_NAPI(env, napi_create_uint32(env, njsVariable_getDataType(var),

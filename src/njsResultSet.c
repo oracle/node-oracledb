@@ -197,7 +197,7 @@ static napi_value njsResultSet_getMetaData(napi_env env,
     if (!rs->handle || !rs->conn->handle)
         return NULL;
     if (!njsVariable_getMetadataMany(rs->queryVars, rs->numQueryVars,
-            env, rs->extendedMetaData, &metadata))
+            env, &metadata))
         return NULL;
     return metadata;
 }
@@ -438,7 +438,6 @@ static bool njsResultSet_getRowsProcessArgs(njsBaton *baton, napi_env env,
         return false;
     if (!njsUtils_getBoolArg(env, args, 2, &baton->closeOnAllRowsFetched))
         return false;
-    baton->extendedMetaData = rs->extendedMetaData;
     baton->outFormat = rs->outFormat;
 
     return true;
@@ -483,7 +482,6 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
     rs->numQueryVars = numVars;
     rs->queryVars = vars;
     rs->outFormat = baton->outFormat;
-    rs->extendedMetaData = baton->extendedMetaData;
     rs->fetchArraySize = baton->fetchArraySize;
     rs->outFormat = baton->outFormat;
     rs->isNested = (baton->callingInstance != (void*) conn);

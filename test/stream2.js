@@ -255,10 +255,7 @@ describe('14. stream2.js', function() {
 
     var metaDataRead = false;
     stream.on('metadata', function(metaData) {
-      should.deepEqual(
-        metaData,
-        [ { name: 'EMPLOYEE_NAME' } ]
-      );
+      should.equal(metaData[0].name, 'EMPLOYEE_NAME');
       metaDataRead = true;
     });
 
@@ -284,11 +281,8 @@ describe('14. stream2.js', function() {
 
     var metaDataRead = false;
     stream.on('metadata', function(metaData) {
-      should.deepEqual(
-        metaData,
-        [ { name: 'EMPLOYEE_NAME' },
-          { name: 'EMPLOYEE_HISTORY' } ]
-      );
+      should.equal(metaData[0].name, 'EMPLOYEE_NAME');
+      should.equal(metaData[1].name, 'EMPLOYEE_HISTORY');
       metaDataRead = true;
     });
 
@@ -315,12 +309,9 @@ describe('14. stream2.js', function() {
 
     var metaDataRead = false;
     stream.on('metadata', function(metaData) {
-      should.deepEqual(
-        metaData,
-        [ { name: 'EMPLOYEE_ID' },
-          { name: 'EMPLOYEE_NAME' },
-          { name: 'EMPLOYEE_HISTORY' } ]
-      );
+      should.equal(metaData[0].name, 'EMPLOYEE_ID');
+      should.equal(metaData[1].name, 'EMPLOYEE_NAME');
+      should.equal(metaData[2].name, 'EMPLOYEE_HISTORY');
       metaDataRead = true;
     });
 
@@ -415,10 +406,7 @@ describe('14. stream2.js', function() {
 
         var metaDataRead = false;
         stream.on('metadata', function(metaData) {
-          should.deepEqual(
-            metaData,
-            [ { name: 'nAmE' } ]
-          );
+          should.equal(metaData[0].name, 'nAmE');
           metaDataRead = true;
         });
 
@@ -618,10 +606,8 @@ describe('14. stream2.js', function() {
 
     var metaDataRead = false;
     stream.on('metadata', function(metaData) {
-      should.deepEqual(
-        metaData,
-        [ { name: 'A' }, { name: 'A' } ]
-      );
+      should.equal(metaData[0].name, 'A');
+      should.equal(metaData[1].name, 'A');
       metaDataRead = true;
     });
 

@@ -67,7 +67,8 @@ describe('53. resultSetClose.js', function() {
       function verifyMetaData(cb) {
         should.exist(resultSet.metaData);
         var t = resultSet.metaData;
-        t.should.eql([ { name: 'NUM' }, { name: 'CONTENT' } ]);
+        should.equal(t[0].name, 'NUM');
+        should.equal(t[1].name, 'CONTENT');
         cb();
       },
       function closeRS(cb) {

@@ -419,11 +419,7 @@ describe('13. stream1.js', function() {
 
       let metaDataRead = false;
       stream.on('metadata', function(metaData) {
-        should.deepEqual(metaData, [
-          {
-            name: 'EMPLOYEE_NAME'
-          }
-        ]);
+        should.equal(metaData[0].name, 'EMPLOYEE_NAME');
         metaDataRead = true;
       });
 
