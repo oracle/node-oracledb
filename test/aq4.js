@@ -23,7 +23,7 @@
  * limitations under the License.
  *
  * NAME
- *   266. aq4.js
+ *   267. aq4.js
  *
  * DESCRIPTION
  *   Test Oracle Advanced Queueing (AQ) - recipient list
@@ -122,35 +122,36 @@ describe('267. aq4.js', function() {
   });  // after
 
   it('267.1 empty array or no recipients', async () => {
-    try {
+    await testsUtil.assertThrowsAsync(
+      async () => {
       // Enqueue
-      const queue1 = await conn.getQueue(
-        objQueueName,
-        {payloadType: objType}
-      );
-      const message = new queue1.payloadTypeClass(addrData);
-      await queue1.enqOne({
-        payload: message,
-        recipients: []
-      });
-      await conn.commit();
+        const queue1 = await conn.getQueue(
+          objQueueName,
+          {payloadType: objType}
+        );
+        const message = new queue1.payloadTypeClass(addrData);
+        await queue1.enqOne({
+          payload: message,
+          recipients: []
+        });
+        await conn.commit();
 
-      //Dequeue
-      const queue2 = await conn.getQueue(
-        objQueueName,
-        { payloadType: objType }
-      );
-      Object.assign(
-        queue2.deqOptions,
-        { consumerName: "" }
-      );
+        //Dequeue
+        const queue2 = await conn.getQueue(
+          objQueueName,
+          { payloadType: objType }
+        );
+        Object.assign(
+          queue2.deqOptions,
+          { consumerName: "" }
+        );
 
-      const msg = await queue2.deqOne();
-      assert.strictEqual(msg, null);
-      await conn.commit();
-    } catch (e) {
-      assert.strictEqual(e.message.startsWith("ORA-24033:"), true);
-    }
+        const msg = await queue2.deqOne();
+        assert.strictEqual(msg, null);
+        await conn.commit();
+      },
+      /ORA-24033:/
+    );
   });
 
   it('267.2 single element in array', async () => {
@@ -251,37 +252,52 @@ describe('267. aq4.js', function() {
   });
 
   it('267.7 Negative - dequeue non-existent name', async () => {
-    try {
+    await testsUtil.assertThrowsAsync(
+      async () => {
       // Enqueue
-      const queue1 = await conn.getQueue(
-        objQueueName,
-        {payloadType: objType}
-      );
-      const message = new queue1.payloadTypeClass(addrData);
-      await queue1.enqOne({
-        payload: message,
-        recipients: [ "sub1", "sub2" ]
-      });
-    } catch (e) {
-      assert.strictEqual(e.message.startsWith("NJS-005:"), true);
-    }
+        const queue1 = await conn.getQueue(
+          objQueueName,
+          {payloadType: objType}
+        );
+        const message = new queue1.payloadTypeClass(addrData);
+        await queue1.enqOne({
+          payload: message,
+          recipients: [ "sub1", "sub2" ]
+        });
+        await conn.commit();
+        const queue2 = await conn.getQueue(
+          objQueueName,
+          { payloadType: objType }
+        );
+        Object.assign(
+          queue2.deqOptions,
+          { consumerName: "sub3" }
+        );
+
+        const msg = await queue2.deqOne();
+        assert.strictEqual(msg, null);
+        await conn.commit();
+      },
+      /ORA-25242:/
+    );
   });
 
 
   it('267.8 empty recipient list with enqMany', async () => {
     let msgList = [];
 
-    try {
+    await testsUtil.assertThrowsAsync(
+      async () => {
       // Enqueue
-      const queue1 = await conn.getQueue(objQueueName, {payloadType: objType});
-      for (let i = 0; i < addrDataArr.length; i++) {
-        let msg = new queue1.payloadTypeClass(addrDataArr[i]);
-        msgList[i] = { payload: msg, recipients: [] };
-      }
-      queue1.enqMany(msgList);
-    } catch (e) {
-      assert.strictEqual(e.message.startsWith("ORA-25231:"), true);
-    }
+        const queue1 = await conn.getQueue(objQueueName, {payloadType: objType});
+        for (let i = 0; i < addrDataArr.length; i++) {
+          let msg = new queue1.payloadTypeClass(addrDataArr[i]);
+          msgList[i] = { payload: msg, recipients: [] };
+        }
+        await queue1.enqMany(msgList);
+      },
+      /ORA-24033:/
+    );
   });
 
   it('267.9 recipient list with enqMany', async () => {
@@ -293,7 +309,7 @@ describe('267. aq4.js', function() {
       let msg = new queue1.payloadTypeClass(addrDataArr[i]);
       msgList[i] = { payload: msg, recipients: ["sub1", "sub2", "sub3"] };
     }
-    queue1.enqMany(msgList);
+    await queue1.enqMany(msgList);
 
     // Dequeue
     const queue2 = await conn.getQueue(objQueueName, {payloadType: objType});
@@ -319,7 +335,7 @@ describe('267. aq4.js', function() {
       let msg = new queue1.payloadTypeClass(addrDataArr[i]);
       msgList[i] = { payload: msg, recipients: ["sub1", "sub2", "sub3"] };
     }
-    queue1.enqMany(msgList);
+    await queue1.enqMany(msgList);
 
     // Dequeue
     const queue2 = await conn.getQueue(objQueueName, {payloadType: objType});
@@ -338,18 +354,19 @@ describe('267. aq4.js', function() {
   it('267.11 recipient list with enqMany invalid datatype in dequeue', async () => {
     let msgList = [];
 
-    try {
+    await testsUtil.assertThrowsAsync(
+      async () => {
       // Enqueue
-      const queue1 = await conn.getQueue(objQueueName, {payloadType: objType});
-      for (let i = 0; i < addrDataArr.length; i++) {
-        let msg = new queue1.payloadTypeClass(addrDataArr[i]);
-        msgList[i] = { payload: msg,
-          recipients: [101, "sub2", new Date(2022, 5, 22)] };
-      }
-      queue1.enqMany(msgList);
-    } catch (e) {
-      assert.strictEqual(e.message.startsWith("NJS-004:"), true);
-    }
+        const queue1 = await conn.getQueue(objQueueName, {payloadType: objType});
+        for (let i = 0; i < addrDataArr.length; i++) {
+          let msg = new queue1.payloadTypeClass(addrDataArr[i]);
+          msgList[i] = { payload: msg,
+            recipients: [101, "sub2", new Date(2022, 5, 22)] };
+        }
+        await queue1.enqMany(msgList);
+      },
+      /NJS-007:/
+    );
   });
 
 });
