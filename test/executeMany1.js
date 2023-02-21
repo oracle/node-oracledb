@@ -302,7 +302,7 @@ describe('163. executeMany1.js', function() {
 
     await testsUtil.assertThrowsAsync(
       async () => await conn.executeMany(plsql, binds, options),
-      /DPI-1063:/
+      /NJS-095:/
     );
     await doDropProc();
   }); // 163.8
@@ -363,7 +363,7 @@ describe('163. executeMany1.js', function() {
     };
     await testsUtil.assertThrowsAsync(
       async () => await conn.executeMany(plsql, binds, options),
-      /DPI-1063:/
+      /NJS-095:/
     );
     await doDropProc();
   }); // 163.10
