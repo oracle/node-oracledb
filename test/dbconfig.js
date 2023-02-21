@@ -38,9 +38,7 @@
  *
  *****************************************************************************/
 
-const oracledb = require('oracledb');
-
-var config = {
+const config = {
   test: {
     externalAuth:  false,
     DBA_PRIVILEGE: false,
@@ -56,7 +54,7 @@ if (process.env.NODE_ORACLEDB_CONNECTIONSTRING) {
 }
 
 if (process.env.NODE_ORACLEDB_EXTERNALAUTH) {
-  var eauth = process.env.NODE_ORACLEDB_EXTERNALAUTH;
+  let eauth = process.env.NODE_ORACLEDB_EXTERNALAUTH;
   eauth = String(eauth);
   eauth = eauth.toLowerCase();
   if (eauth == 'true') {
@@ -89,7 +87,7 @@ if (process.env.NODE_ORACLEDB_QA) {
 }
 
 if (process.env.NODE_ORACLEDB_DBA_PRIVILEGE) {
-  var priv = process.env.NODE_ORACLEDB_DBA_PRIVILEGE;
+  let priv = process.env.NODE_ORACLEDB_DBA_PRIVILEGE;
   priv = String(priv);
   priv = priv.toLowerCase();
   if (priv == 'true') {
@@ -114,22 +112,12 @@ if (process.env.NODE_ORACLEDB_PROXY_SESSION_USER) {
 }
 
 if (process.env.NODE_PRINT_DEBUG_MESSAGE) {
-  var printDebugMsg = process.env.NODE_PRINT_DEBUG_MESSAGE;
+  let printDebugMsg = process.env.NODE_PRINT_DEBUG_MESSAGE;
   printDebugMsg = String(printDebugMsg);
   printDebugMsg = printDebugMsg.toLowerCase();
   if (printDebugMsg == 'true') {
     config.test.printDebugMsg = true;
   }
 }
-
-async function cloudServiceCheck() {
-  const connection = await oracledb.getConnection(config);
-  let result = await connection.execute("select sys_context('userenv', 'cloud_service') from dual");
-  if (result.rows[0][0]) {
-    config.test.isCloudService = true;
-  }
-  await connection.close();
-}
-cloudServiceCheck();
 
 module.exports = config;

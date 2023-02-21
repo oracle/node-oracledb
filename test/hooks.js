@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -23,19 +23,20 @@
  * limitations under the License.
  *
  * NAME
- *   notes.js
+ *   hooks.js
  *
  * DESCRIPTION
- *   The prerequiste checks of test suite.
+ *   This file contains the global hooks for running the Mocha test suite. It
+ * verifies the database configuration before running the test suite in order
+ * to avoid unusual errors. It also sets up information about the database
+ * (such as whether the database is running in a cloud service or not) which
+ * may be used in the test suite.
  *
  *****************************************************************************/
-'use strict';
 
 const oracledb = require('oracledb');
-const assert = require('assert');
 const dbConfig = require('./dbconfig.js');
-
-/****************** Verify the "user/password" provided by user **********************/
+const assert = require('assert');
 
 async function testConnection(description, additionalOptions = {}) {
   console.log(description);
@@ -45,6 +46,15 @@ async function testConnection(description, additionalOptions = {}) {
   const result = await connection.execute(
     "select * from dual", [], { outFormat: oracledb.OUT_FORMAT_ARRAY });
   assert.strictEqual(result.rows[0][0], "X");
+  await connection.close();
+}
+
+async function cloudServiceCheck() {
+  const connection = await oracledb.getConnection(dbConfig);
+  let result = await connection.execute("select sys_context('userenv', 'cloud_service') from dual");
+  if (result.rows[0][0]) {
+    dbConfig.test.isCloudService = true;
+  }
   await connection.close();
 }
 
@@ -59,4 +69,5 @@ before(async function() {
   if (dbConfig.test.proxySessionUser) {
     await testConnection("Proxy Session User", {user: `${dbConfig.user}[${dbConfig.test.proxySessionUser}]`});
   }
+  await cloudServiceCheck();
 });

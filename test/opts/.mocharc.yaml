@@ -5,7 +5,7 @@ require: ['async', 'should']
 retries: 1
 trace-warnings: true
 spec:
-  - test/notes.js
+  - test/hooks.js
   - test/connection.js
   - test/pool.js
   - test/examples.js

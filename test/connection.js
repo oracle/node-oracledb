@@ -299,7 +299,7 @@ describe('1. connection.js', function() {
 
     it('1.5.1 close can be used as an alternative to release', async function() {
       const conn = await oracledb.getConnection(dbConfig);
-      await conn.close();
+      await conn.release();
     });
   });
 
@@ -310,7 +310,7 @@ describe('1. connection.js', function() {
       delete credential.connectString;
 
       const connection = await oracledb.getConnection(credential);
-      await connection.close();
+      await connection.release();
     });
 
   });
@@ -358,7 +358,7 @@ describe('1. connection.js', function() {
 
       const pool = await oracledb.createPool(credential);
       const conn = await pool.getConnection();
-      await conn.close();
+      await conn.release();
       await pool.close();
     });
 
@@ -369,12 +369,12 @@ describe('1. connection.js', function() {
     it('1.8.1 ping() checks the connection is usable', async function() {
       const conn = await oracledb.getConnection(dbConfig);
       await conn.ping();
-      await conn.close();
+      await conn.release();
     });
 
     it('1.8.2 closed connection', async function() {
       const conn = await oracledb.getConnection(dbConfig);
-      await conn.close();
+      await conn.release();
       await assert.rejects(
         async () => await conn.ping(),
         /NJS-003:/
@@ -411,20 +411,17 @@ describe('1. connection.js', function() {
       credential.username = dbConfig.user;
 
       const conn = await oracledb.getConnection(credential);
-      await conn.close();
+      await conn.release();
     });
 
     it('1.10.3 uses username alias to login with SYSDBA privilege', async function() {
       if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
-      const credential = {
-        username : dbConfig.test.DBA_user,
-        password : dbConfig.test.DBA_password,
-        connectString : dbConfig.connectString,
-        privilege: oracledb.SYSDBA
-      };
+      const credential = {...dbConfig, privilege: oracledb.SYSDBA};
+      credential.user = dbConfig.test.DBA_user;
+      credential.password = dbConfig.test.DBA_password;
 
       const conn = await oracledb.getConnection(credential);
-      await conn.close();
+      await conn.release();
     });
   }); //1.10
 
@@ -465,7 +462,7 @@ describe('1. connection.js', function() {
 
     it('1.12.1 exception_on_close', async function() {
       const connection = await oracledb.getConnection(dbConfig);
-      await connection.close();
+      await connection.release();
       await assert.rejects(
         async () => await connection.execute('SELECT * FROM DUAL'),
         /NJS-003:/
@@ -481,7 +478,7 @@ describe('1. connection.js', function() {
         async () => await connection.execute("select INTERVAL '10-2' YEAR TO MONTH from dual"),
         /NJS-010:/ //NJS-010: unsupported data type 2016 in column 1
       );
-      await connection.close();
+      await connection.release();
     });
   }); //1.13
 
@@ -489,15 +486,44 @@ describe('1. connection.js', function() {
 
     it('1.14.1 unacceptable boundary numbers should get rejected', async function() {
       const connection = await oracledb.getConnection(dbConfig);
-      const in_values = ["1e126", "-1e126"];
+      const in_values = ["1e126", "-1e126", "1/0", "-1/0", "1/0.0", "1.0/0", "1.0e126", "1.0e126.0", "NaN", "undefined", "Infinity", "-Infinity"];
       await Promise.all(in_values.map(async function(element) {
         await assert.rejects(
-          async () => await connection.execute("select " + element + " from dual"),
-          /ORA-01426:/ //ORA-01426: numeric overflow
+          async () =>
+            await connection.execute("select " + element + " from dual"),
+          /ORA-01426:|ORA-01476:|ORA-00904:/ //ORA-01426: numeric overflow  | ORA-01476: divisor is equal to zero | ORA-00904: invalid identifier'
         );
       }));
-      await connection.close();
+      await connection.release();
     });
   }); //1.14
+
+  describe('1.15 result after bad execute', function() {
+
+    it('1.15.1 subsequent executes should succeed after bad execute', async function() {
+      const connection = await oracledb.getConnection(dbConfig);
+      await assert.rejects(
+        async () =>
+          await connection.execute("begin raise_application_error(-20000, 'application error raised'); end;"),
+        /ORA-20000:/ //ORA-20000: application error raised
+      );
+      await connection.execute("begin null; end;");
+      await connection.close();
+    });
+
+    it('1.15.2 result after bad execute', async function() {
+      const connection = await oracledb.getConnection(dbConfig);
+      await assert.rejects(
+        async () => await connection.execute("select y from dual", {},
+          {
+            outFormat: oracledb.OBJECT,
+          }),
+        /ORA-00904:/ //ORA-00904: "Y": invalid identifier'
+      );
+      const result = await connection.execute("select 1+1 from dual");
+      assert(result.rows[0][0], 2);
+      await connection.close();
+    });
+  }); //1.15
 });
 
