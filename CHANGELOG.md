@@ -24,6 +24,8 @@
 - Internal change: Reorganized code and moved more functionality to the
   JavaScript layer.
 
+- Fixed type used when fetching NCLOB as a string.
+
 ## node-oracledb [v5.5.0](https://github.com/oracle/node-oracledb/compare/v5.4.0...v5.5.0) (7 Sep 2022)
 
 - Token-based Authentication changes:
