@@ -42,30 +42,20 @@ describe('221. connectionClass.js', () => {
   });
 
   it('221.1 set the property when using a connection pool', async () => {
-    try {
-      oracledb.connectionClass = 'NODB_TEST';
-      const pool = await oracledb.createPool(dbconfig);
-      const conn = await pool.getConnection();
+    oracledb.connectionClass = 'NODB_TEST';
+    const pool = await oracledb.createPool(dbconfig);
+    const conn = await pool.getConnection();
 
-      const result = await conn.execute('SELECT (1+4) FROM DUAL');
-      assert.strictEqual(result.rows[0][0], 5);
+    const result = await conn.execute('SELECT (1+4) FROM DUAL');
+    assert.strictEqual(result.rows[0][0], 5);
 
-      await conn.close();
-      await pool.close();
-
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.close();
+    await pool.close();
   }); // 221.1
 
   it('221.2 set the property when using a standalone connection', async () => {
-    try {
-      oracledb.connectionClass = 'NODB_TEST';
-      const conn = await oracledb.getConnection(dbconfig);
-
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    oracledb.connectionClass = 'NODB_TEST';
+    const conn = await oracledb.getConnection(dbconfig);
+    await conn.close();
   }); // 221.2
 });

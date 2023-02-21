@@ -43,19 +43,11 @@ describe('226. dbType01.js', function() {
 
   before(async () => {
     oracledb.stmtCacheSize = 0;
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-    } catch (err) {
-      assert.fail(err);
-    }
+    conn = await oracledb.getConnection(dbconfig);
   });
 
   after(async () => {
-    try {
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.close();
     oracledb.stmtCacheSize = default_stmtCacheSize;
   });
 
@@ -69,139 +61,87 @@ describe('226. dbType01.js', function() {
   const SQL = `SELECT :1, DUMP(:1) FROM dual`;
 
   it('226.1 DB_TYPE_VARCHAR', async () => {
-    try {
-      const result = await conn.execute(SQL,
-        [{ val: strInVal, type: oracledb.DB_TYPE_VARCHAR }]);
-      assert.strictEqual(strInVal, result.rows[0][0]);
-      assert.match(result.rows[0][1], /Typ=1 Len=13/);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const result = await conn.execute(SQL,
+      [{ val: strInVal, type: oracledb.DB_TYPE_VARCHAR }]);
+    assert.strictEqual(strInVal, result.rows[0][0]);
+    assert.match(result.rows[0][1], /Typ=1 Len=13/);
   }); // 226.1
 
   it('226.2 DB_TYPE_CHAR', async () => {
-    try {
-      const result = await conn.execute(SQL,
-        [{ val: strInVal, type: oracledb.DB_TYPE_CHAR }]);
-      assert.strictEqual(strInVal, result.rows[0][0]);
-      assert.match(result.rows[0][1], /Typ=96 Len=13/);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const result = await conn.execute(SQL,
+      [{ val: strInVal, type: oracledb.DB_TYPE_CHAR }]);
+    assert.strictEqual(strInVal, result.rows[0][0]);
+    assert.match(result.rows[0][1], /Typ=96 Len=13/);
   }); // 226.2
 
   it('226.3 DB_TYPE_NVARCHAR', async () => {
-    try {
-      const result = await conn.execute(SQL,
-        [{ val: strInVal, type: oracledb.DB_TYPE_NVARCHAR }]);
-      assert.strictEqual(strInVal, result.rows[0][0]);
-      assert.match(result.rows[0][1], /Typ=1 Len=26/);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const result = await conn.execute(SQL,
+      [{ val: strInVal, type: oracledb.DB_TYPE_NVARCHAR }]);
+    assert.strictEqual(strInVal, result.rows[0][0]);
+    assert.match(result.rows[0][1], /Typ=1 Len=26/);
   }); // 226.3
 
   it('226.4 DB_TYPE_NCHAR', async () => {
-    try {
-      const result = await conn.execute(SQL,
-        [{ val: strInVal, type: oracledb.DB_TYPE_NCHAR }]);
-      assert.strictEqual(strInVal, result.rows[0][0]);
-      assert.match(result.rows[0][1], /Typ=96 Len=26/);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const result = await conn.execute(SQL,
+      [{ val: strInVal, type: oracledb.DB_TYPE_NCHAR }]);
+    assert.strictEqual(strInVal, result.rows[0][0]);
+    assert.match(result.rows[0][1], /Typ=96 Len=26/);
   }); // 226.4
 
   it('226.5 DB_TYPE_DATE', async () => {
-    try {
-      const result = await conn.execute(SQL,
-        [{ val: dateInVal, type: oracledb.DB_TYPE_DATE }]);
-      assert.match(result.rows[0][1], /Typ=12 Len=7/);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const result = await conn.execute(SQL,
+      [{ val: dateInVal, type: oracledb.DB_TYPE_DATE }]);
+    assert.match(result.rows[0][1], /Typ=12 Len=7/);
   }); // 226.5
 
   it('226.6 DB_TYPE_TIMESTAMP_LTZ', async () => {
-    try {
-      const result = await conn.execute(SQL,
-        [{ val: dateInVal, type: oracledb.DB_TYPE_TIMESTAMP_LTZ }]);
-      assert.match(result.rows[0][1], /Typ=231 Len=11/);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const result = await conn.execute(SQL,
+      [{ val: dateInVal, type: oracledb.DB_TYPE_TIMESTAMP_LTZ }]);
+    assert.match(result.rows[0][1], /Typ=231 Len=11/);
   }); // 226.6
 
   it('226.7 DB_TYPE_TIMESTAMP', async () => {
-    try {
-      const result = await conn.execute(SQL,
-        [{ val: dateInVal, type: oracledb.DB_TYPE_TIMESTAMP }]);
-      assert.match(result.rows[0][1], /Typ=180 Len=11/);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const result = await conn.execute(SQL,
+      [{ val: dateInVal, type: oracledb.DB_TYPE_TIMESTAMP }]);
+    assert.match(result.rows[0][1], /Typ=180 Len=11/);
   });
 
   it('226.8 DB_TYPE_TIMESTAMP_TZ', async () => {
-    try {
-      const result = await conn.execute(SQL,
-        [{ val: dateInVal, type: oracledb.DB_TYPE_TIMESTAMP_TZ }]);
-      assert.match(result.rows[0][1], /Typ=181 Len=13/);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const result = await conn.execute(SQL,
+      [{ val: dateInVal, type: oracledb.DB_TYPE_TIMESTAMP_TZ }]);
+    assert.match(result.rows[0][1], /Typ=181 Len=13/);
   });
 
   it('226.9 DB_TYPE_NUMBER', async () => {
-    try {
-      const sql = `SELECT DUMP(:1) FROM dual`;
-      const result = await conn.execute(sql,
-        [{ val: numInVal, type: oracledb.DB_TYPE_NUMBER }]);
-      assert.match(result.rows[0][0], /Typ=2 Len=2/);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sql = `SELECT DUMP(:1) FROM dual`;
+    const result = await conn.execute(sql,
+      [{ val: numInVal, type: oracledb.DB_TYPE_NUMBER }]);
+    assert.match(result.rows[0][0], /Typ=2 Len=2/);
   });
 
   it('226.10 DB_TYPE_BINARY_FLOAT', async () => {
-    try {
-      const result = await conn.execute(SQL,
-        [{ val: numInVal, type: oracledb.DB_TYPE_BINARY_FLOAT }]);
-      assert.match(result.rows[0][1], /Typ=100 Len=4/);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const result = await conn.execute(SQL,
+      [{ val: numInVal, type: oracledb.DB_TYPE_BINARY_FLOAT }]);
+    assert.match(result.rows[0][1], /Typ=100 Len=4/);
   });
 
   it('226.11 DB_TYPE_BINARY_DOUBLE', async () => {
-    try {
-      const result = await conn.execute(SQL,
-        [{ val: numInVal, type: oracledb.DB_TYPE_BINARY_DOUBLE }]);
-      assert.match(result.rows[0][1], /Typ=101 Len=8/);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const result = await conn.execute(SQL,
+      [{ val: numInVal, type: oracledb.DB_TYPE_BINARY_DOUBLE }]);
+    assert.match(result.rows[0][1], /Typ=101 Len=8/);
   });
 
   it('226.12 Infinity, DB_TYPE_BINARY_FLOAT', async () => {
-    try {
-      const num = 1 / 0;
-      const result = await conn.execute(SQL,
-        [{ val: num, type: oracledb.DB_TYPE_BINARY_FLOAT }]);
-      assert.match(result.rows[0][1], /Typ=100 Len=4/);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const num = 1 / 0;
+    const result = await conn.execute(SQL,
+      [{ val: num, type: oracledb.DB_TYPE_BINARY_FLOAT }]);
+    assert.match(result.rows[0][1], /Typ=100 Len=4/);
   });
 
   it('226.13 Infinity, DB_TYPE_BINARY_DOUBLE', async () => {
-    try {
-      const num = 1 / 0;
-      const result = await conn.execute(SQL,
-        [{ val: num, type: oracledb.DB_TYPE_BINARY_DOUBLE }]);
-      assert.match(result.rows[0][1], /Typ=101 Len=8/);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const num = 1 / 0;
+    const result = await conn.execute(SQL,
+      [{ val: num, type: oracledb.DB_TYPE_BINARY_DOUBLE }]);
+    assert.match(result.rows[0][1], /Typ=101 Len=8/);
   });
 });

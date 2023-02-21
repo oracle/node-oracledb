@@ -32,7 +32,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const async = require('async');
+const assert = require('assert');
 const dbconfig = require('./dbconfig.js');
 
 /****************** Verify the "user/password" provided by user **********************/
@@ -93,38 +93,15 @@ if (dbconfig.test.proxySessionUser) {
   });
 }
 
-before(function(done) {
-  var conn, seriesList = [];
-  configList.map(function(conf, index) {
-    seriesList.push(function(cb) {
-      oracledb.getConnection(conf, function(err, connection) {
-        conn = connection;
-        cb(err, index);
-      });
-    });
-    seriesList.push(function(cb) {
-      conn.execute(
-        "select * from dual", [], { outFormat: oracledb.OUT_FORMAT_ARRAY },
-        function(err, result) {
-          if (!err && result.rows && (result.rows[0][0] === "X")) {
-            cb(null, index);
-          } else {
-            cb(new Error("Query test failed"), index);
-          }
-        }
-      );
-    });
-    seriesList.push(function(cb) {
-      conn.close(function(err) {
-        cb(err, index);
-      });
-    });
-  });
-  async.series(seriesList, function(err, results) {
-    if (err) {
-      done(configList[results[results.length - 1]].errMsg);
-    } else {
-      done();
-    }
-  });
+before(async function() {
+  let connection = null;
+  await Promise.all(configList.map(async function(conf) {
+    connection = await oracledb.getConnection(conf);
+
+    let result = await connection.execute(
+      "select * from dual", [], { outFormat: oracledb.OUT_FORMAT_ARRAY });
+    assert(result);
+    assert.strictEqual(result.rows[0][0], "X");
+    await connection.close();
+  }));
 });

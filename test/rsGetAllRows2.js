@@ -80,23 +80,19 @@ describe('250. rsGetAllRows2.js', function() {
   const empInsert  = "INSERT INTO NODB_RSEMP VALUES (:1, :2, :3)";
 
   before(async function() {
-    try {
-      oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
-      conn = await oracledb.getConnection(dbconfig);
-      await conn.execute(create_table_dept_sql);
-      await conn.execute(deptInsert, [101, "R&D"]);
-      await conn.execute(deptInsert, [201, "Sales"]);
-      await conn.execute(deptInsert, [301, "Marketing"]);
+    oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
+    conn = await oracledb.getConnection(dbconfig);
+    await conn.execute(create_table_dept_sql);
+    await conn.execute(deptInsert, [101, "R&D"]);
+    await conn.execute(deptInsert, [201, "Sales"]);
+    await conn.execute(deptInsert, [301, "Marketing"]);
 
-      await conn.execute(create_table_emp_sql);
-      for (let i = 0; i < 127; i++) {
-        await conn.execute(empInsert, [301, 1100 + i, "Marketing " + i ]);
-      }
-      await conn.execute(empInsert, [101, 1001, "R&D 1"]);
-      await conn.commit();
-    } catch (err) {
-      console.error(err.message);
+    await conn.execute(create_table_emp_sql);
+    for (let i = 0; i < 127; i++) {
+      await conn.execute(empInsert, [301, 1100 + i, "Marketing " + i ]);
     }
+    await conn.execute(empInsert, [101, 1001, "R&D 1"]);
+    await conn.commit();
   });
 
   after (async function() {

@@ -73,208 +73,173 @@ describe('201. dbObject2.js', () => {
        end;`;
 
   before(async () => {
-    try {
-      conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbconfig);
 
-      let sql =
-        `CREATE OR REPLACE TYPE ${TYPE} AS OBJECT (
-          entry TIMESTAMP,
-          exit  TIMESTAMP
-        );`;
-      await conn.execute(sql);
+    let sql =
+      `CREATE OR REPLACE TYPE ${TYPE} AS OBJECT (
+        entry TIMESTAMP,
+        exit  TIMESTAMP
+      );`;
+    await conn.execute(sql);
 
-      sql =
-        `CREATE TABLE ${TABLE} (
-          num NUMBER,
-          person ${TYPE}
-        )`;
-      let plsql = testsUtil.sqlCreateTable(TABLE, sql);
-      await conn.execute(plsql);
-
-    } catch (err) {
-      assert.fail(err);
-    }
+    sql =
+      `CREATE TABLE ${TABLE} (
+        num NUMBER,
+        person ${TYPE}
+      )`;
+    let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+    await conn.execute(plsql);
   }); // before()
 
   after(async () => {
-    try {
-      let sql = `DROP TABLE ${TABLE} PURGE`;
-      await conn.execute(sql);
+    let sql = `DROP TABLE ${TABLE} PURGE`;
+    await conn.execute(sql);
 
-      sql = `DROP TYPE ${TYPE}`;
-      await conn.execute(sql);
+    sql = `DROP TYPE ${TYPE}`;
+    await conn.execute(sql);
 
-      await conn.execute(`DROP PROCEDURE nodb_getDataCursor3`);
-      await conn.execute(`DROP PROCEDURE nodb_getDataCursor2`);
-      await conn.execute(`DROP PROCEDURE nodb_getDataCursor1`);
+    await conn.execute(`DROP PROCEDURE nodb_getDataCursor3`);
+    await conn.execute(`DROP PROCEDURE nodb_getDataCursor2`);
+    await conn.execute(`DROP PROCEDURE nodb_getDataCursor1`);
 
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.close();
   }); // after()
 
   it.skip('201.1 insert an object with timestamp attributes', async () => {
-    try {
-      let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
+    let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
 
-      const date1 = new Date (1986, 8, 18, 12, 14, 27, 0);
-      const date2 = new Date (1989, 3, 4, 10, 27, 16, 201);
-      const objData = {
-        ENTRY: date1,
-        EXIT : date2
-      };
-      const objClass = await conn.getDbObjectClass(TYPE);
-      const testObj = new objClass(objData);
-      const seq = 101;
+    const date1 = new Date (1986, 8, 18, 12, 14, 27, 0);
+    const date2 = new Date (1989, 3, 4, 10, 27, 16, 201);
+    const objData = {
+      ENTRY: date1,
+      EXIT : date2
+    };
+    const objClass = await conn.getDbObjectClass(TYPE);
+    const testObj = new objClass(objData);
+    const seq = 101;
 
-      let result = await conn.execute(sql, [seq, testObj]);
-      assert.strictEqual(result.rowsAffected, 1);
-      await conn.commit();
+    let result = await conn.execute(sql, [seq, testObj]);
+    assert.strictEqual(result.rowsAffected, 1);
+    await conn.commit();
 
-      sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
-      result = await conn.execute(sql);
+    sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
+    result = await conn.execute(sql);
 
-      // console.log('Queried data', result.rows[0][1]['ENTRY'].getTime());
-      // console.log('Inserted data', date1.getTime());
+    // console.log('Queried data', result.rows[0][1]['ENTRY'].getTime());
+    // console.log('Inserted data', date1.getTime());
 
-      //assert.strictEqual(result.rows[0][1]['ENTRY'].getTime(), date1.getTime());
-      //assert.strictEqual(result.rows[0][1]['EXIT'].getTime(), date2.getTime());
-
-    } catch (err) {
-      assert.fail(err);
-    }
+    //assert.strictEqual(result.rows[0][1]['ENTRY'].getTime(), date1.getTime());
+    //assert.strictEqual(result.rows[0][1]['EXIT'].getTime(), date2.getTime());
   }); // 201.1
 
   it.skip('directly insert timestamp data', async () => {
-    try {
-      let tabName = 'nodb_tmp';
-      let sql =
-      `CREATE TABLE ${tabName} (
-        num NUMBER,
-        content TIMESTAMP
-      )`;
-      const plsql = testsUtil.sqlCreateTable(tabName, sql);
-      await conn.execute(plsql);
+    let tabName = 'nodb_tmp';
+    let sql =
+    `CREATE TABLE ${tabName} (
+      num NUMBER,
+      content TIMESTAMP
+    )`;
+    const plsql = testsUtil.sqlCreateTable(tabName, sql);
+    await conn.execute(plsql);
 
-      sql = `INSERT INTO ${tabName} VALUES (:1, :2)`;
-      let date1 = new Date (1986, 8, 18, 12, 14, 27, 0);
-      let result = await conn.execute(sql, [111, date1]);
-      assert.strictEqual(result.rowsAffected, 1);
+    sql = `INSERT INTO ${tabName} VALUES (:1, :2)`;
+    let date1 = new Date (1986, 8, 18, 12, 14, 27, 0);
+    let result = await conn.execute(sql, [111, date1]);
+    assert.strictEqual(result.rowsAffected, 1);
 
-      sql = `SELECT * FROM ${tabName}`;
-      result = await conn.execute(sql);
-      console.log('Queried data', result.rows[0][1].getTime());
-      console.log('Inserted data', date1.getTime());
+    sql = `SELECT * FROM ${tabName}`;
+    result = await conn.execute(sql);
+    console.log('Queried data', result.rows[0][1].getTime());
+    console.log('Inserted data', date1.getTime());
 
 
-      sql = `DROP TABLE ${tabName} PURGE`;
-      await conn.execute(sql);
-
-    } catch (err) {
-      assert.fail(err);
-    }
+    sql = `DROP TABLE ${tabName} PURGE`;
+    await conn.execute(sql);
   });
 
   it('201.2 insert null values for timestamp attribute', async () => {
-    try {
-      const seq = 102;
-      let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
+    const seq = 102;
+    let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
 
-      const objData = {
-        ENTRY: null,
-        EXIT : null
-      };
-      const objClass = await conn.getDbObjectClass(TYPE);
-      const testObj = new objClass(objData);
+    const objData = {
+      ENTRY: null,
+      EXIT : null
+    };
+    const objClass = await conn.getDbObjectClass(TYPE);
+    const testObj = new objClass(objData);
 
-      let result = await conn.execute(sql, [seq, testObj]);
-      assert.strictEqual(result.rowsAffected, 1);
-      await conn.commit();
+    let result = await conn.execute(sql, [seq, testObj]);
+    assert.strictEqual(result.rowsAffected, 1);
+    await conn.commit();
 
-      sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
-      result = await conn.execute(sql);
+    sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
+    result = await conn.execute(sql);
 
-      assert.strictEqual(result.rows[0][1]['ENTRY'], null);
-      assert.strictEqual(result.rows[0][1]['EXIT'], null);
-    } catch (err) {
-      assert.fail(err);
-    }
+    assert.strictEqual(result.rows[0][1]['ENTRY'], null);
+    assert.strictEqual(result.rows[0][1]['EXIT'], null);
   }); // 201.2
 
   it('201.3 insert undefined values for timestamp attribute', async () => {
-    try {
-      const seq = 103;
-      let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
+    const seq = 103;
+    let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
 
-      const objData = {
-        ENTRY: undefined,
-        EXIT : undefined
-      };
-      const objClass = await conn.getDbObjectClass(TYPE);
-      const testObj = new objClass(objData);
+    const objData = {
+      ENTRY: undefined,
+      EXIT : undefined
+    };
+    const objClass = await conn.getDbObjectClass(TYPE);
+    const testObj = new objClass(objData);
 
-      let result = await conn.execute(sql, [seq, testObj]);
-      assert.strictEqual(result.rowsAffected, 1);
-      await conn.commit();
+    let result = await conn.execute(sql, [seq, testObj]);
+    assert.strictEqual(result.rowsAffected, 1);
+    await conn.commit();
 
-      sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
-      result = await conn.execute(sql);
+    sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
+    result = await conn.execute(sql);
 
-      assert.strictEqual(result.rows[0][1]['ENTRY'], null);
-      assert.strictEqual(result.rows[0][1]['EXIT'], null);
-    } catch (err) {
-      assert.fail(err);
-    }
+    assert.strictEqual(result.rows[0][1]['ENTRY'], null);
+    assert.strictEqual(result.rows[0][1]['EXIT'], null);
   }); // 201.3
 
   it('201.4 insert an empty JSON for timestamp attribute', async () => {
-    try {
-      const seq = 104;
-      let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
+    const seq = 104;
+    let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
 
-      const objClass = await conn.getDbObjectClass(TYPE);
-      const testObj = new objClass({});
+    const objClass = await conn.getDbObjectClass(TYPE);
+    const testObj = new objClass({});
 
-      let result = await conn.execute(sql, [seq, testObj]);
-      assert.strictEqual(result.rowsAffected, 1);
-      await conn.commit();
+    let result = await conn.execute(sql, [seq, testObj]);
+    assert.strictEqual(result.rowsAffected, 1);
+    await conn.commit();
 
-      sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
-      result = await conn.execute(sql);
+    sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
+    result = await conn.execute(sql);
 
-      assert.strictEqual(result.rows[0][1]['ENTRY'], null);
-      assert.strictEqual(result.rows[0][1]['EXIT'], null);
-    } catch (err) {
-      assert.fail(err);
-    }
+    assert.strictEqual(result.rows[0][1]['ENTRY'], null);
+    assert.strictEqual(result.rows[0][1]['EXIT'], null);
   }); // 201.4
 
   it('201.5 call procedure with 2 OUT binds of DbObject', async function() {
-    try {
-      await conn.execute(proc1);
-      await conn.execute(proc2);
-      await conn.execute(proc3);
+    await conn.execute(proc1);
+    await conn.execute(proc2);
+    await conn.execute(proc3);
 
-      let result = await conn.execute(
-        `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,
-            p_cur2 => :p_cur2); end;`,
-        {
-          p_cur1: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT},
-          p_cur2: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}
-        }
-      );
+    let result = await conn.execute(
+      `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,
+          p_cur2 => :p_cur2); end;`,
+      {
+        p_cur1: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT},
+        p_cur2: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}
+      }
+    );
 
-      let resultSet = await result.outBinds.p_cur1.getRows();
-      assert.equal(resultSet.length, 3);
-      result.outBinds.p_cur1.close();
+    let resultSet = await result.outBinds.p_cur1.getRows();
+    assert.equal(resultSet.length, 3);
+    result.outBinds.p_cur1.close();
 
-      resultSet = await result.outBinds.p_cur2.getRows();
-      assert.equal(resultSet.length, 3);
-      result.outBinds.p_cur2.close();
-    } catch (e) {
-      assert.fail(e);
-    }
+    resultSet = await result.outBinds.p_cur2.getRows();
+    assert.equal(resultSet.length, 3);
+    result.outBinds.p_cur2.close();
   }); // 201.5;
 
 });

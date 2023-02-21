@@ -31,34 +31,26 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 const dbconfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('254. jsonBind2.js', function() {
   let conn = null;
   let outFormatBak = oracledb.outFormat;
 
   before (async function() {
-    try {
-      oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
-      oracledb.extendedMetaData = true;
-      conn = await oracledb.getConnection(dbconfig);
-      if (conn.oracleServerVersion < 1201000200) {
-        this.skip();
-      }
-    } catch (err) {
-      should.not.exist(err);
+    oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
+    oracledb.extendedMetaData = true;
+    conn = await oracledb.getConnection(dbconfig);
+    if (conn.oracleServerVersion < 1201000200) {
+      this.skip();
     }
   });
 
   after (async function() {
-    try {
-      await conn.close();
-    } catch (err) {
-      should.not.exist(err);
-    } finally {
-      oracledb.outFormat = outFormatBak;
-    }
+    oracledb.outFormat = outFormatBak;
+    await conn.close();
   });
 
   describe('254.1 Map javascript object into BLOB', function() {
@@ -86,40 +78,28 @@ describe('254. jsonBind2.js', function() {
     let skip = false;
 
     before (async function() {
-      try {
-        if (conn.oracleServerVersion < 1202000000) {
-          skip = true;
-          this.skip();
-        }
-        await conn.execute(create_table_sql);
-      } catch (err) {
-        should.not.exist(err);
+      if (conn.oracleServerVersion < 1202000000) {
+        skip = true;
+        this.skip();
       }
+      await conn.execute(create_table_sql);
     });
 
     after (async function() {
-      try {
-        if (!skip) {
-          await conn.execute("DROP TABLE " + tableName + " PURGE");
-        }
-      } catch (err) {
-        should.not.exist(err);
+      if (!skip) {
+        await conn.execute("DROP TABLE " + tableName + " PURGE");
       }
     });
 
     beforeEach(async function() {
-      try {
-        await conn.execute(`Delete from ` + tableName);
-      } catch (error) {
-        should.not.exist(error);
-      }
+      await conn.execute(`Delete from ` + tableName);
     });
 
     it('254.1.1 Number, String type', async function() {
       const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -131,16 +111,16 @@ describe('254. jsonBind2.js', function() {
       const d = await result.rows[0].OBJ_DATA.getData();
       j = JSON.parse(d);
 
-      should.equal(j.empId, 1);
-      should.equal(j.empName, 'Employee1');
-      should.equal(j.city, 'New City');
+      assert.strictEqual(j.empId, 1);
+      assert.strictEqual(j.empName, 'Employee1');
+      assert.strictEqual(j.city, 'New City');
     });
 
     it('254.1.2 Boolean and null value', async function() {
       const data = { "middlename": null, "honest": true};
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -153,15 +133,15 @@ describe('254. jsonBind2.js', function() {
       const d = await result.rows[0].OBJ_DATA.getData();
       j = JSON.parse(d);
 
-      should.equal(j.middlename, null);
-      should.equal(j.honest, true);
+      assert.strictEqual(j.middlename, null);
+      assert.strictEqual(j.honest, true);
     });
 
     it('254.1.3 Array type', async function() {
       const data = { "employees":[ "Employee1", "Employee2", "Employee3" ] };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -173,16 +153,16 @@ describe('254. jsonBind2.js', function() {
       const d = await result.rows[0].OBJ_DATA.getData();
       j = JSON.parse(d);
 
-      should.equal(j.employees[0], 'Employee1');
-      should.equal(j.employees[1], 'Employee2');
-      should.equal(j.employees[2], 'Employee3');
+      assert.strictEqual(j.employees[0], 'Employee1');
+      assert.strictEqual(j.employees[1], 'Employee2');
+      assert.strictEqual(j.employees[2], 'Employee3');
     });
 
     it('254.1.4 Object type', async function() {
       const data = { "employee":{ "name":"Employee1", "age":30, "city":"New City" } };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -194,16 +174,16 @@ describe('254. jsonBind2.js', function() {
       const d = await result.rows[0].OBJ_DATA.getData();
       j = JSON.parse(d);
 
-      should.equal(j.employee.name, 'Employee1');
-      should.equal(j.employee.age, 30);
-      should.equal(j.employee.city, 'New City');
+      assert.strictEqual(j.employee.name, 'Employee1');
+      assert.strictEqual(j.employee.age, 30);
+      assert.strictEqual(j.employee.city, 'New City');
     });
 
     it('254.1.5 Using JSON_VALUE to extract a value from a BLOB column', async function() {
       const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -217,31 +197,27 @@ describe('254. jsonBind2.js', function() {
         [], {outFormat: oracledb.OUT_FORMAT_ARRAY});
       j = result.rows[0][0];
 
-      should.equal(j, 'Employee1');
+      assert.strictEqual(j, 'Employee1');
     });
 
     it('254.1.6 Using dot-notation to extract a value from a BLOB column', async function() {
-      try {
-        const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
-        const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
+      const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
+      const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-        if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
-          await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
-        } else {
-          const s = JSON.stringify(data);
-          const b = Buffer.from(s, 'utf8');
-          await conn.execute(sql, { bv: { val: b } });
-        }
-        result = await conn.execute(
-          `SELECT tb.obj_data.empName
-         FROM ` + tableName + ` tb`
-        );
-
-        j = result.rows[0].EMPNAME;
-        should.equal(j, 'Employee1');
-      } catch (err) {
-        console.error(err);
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+        await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
+      } else {
+        const s = JSON.stringify(data);
+        const b = Buffer.from(s, 'utf8');
+        await conn.execute(sql, { bv: { val: b } });
       }
+      result = await conn.execute(
+        `SELECT tb.obj_data.empName
+       FROM ` + tableName + ` tb`
+      );
+
+      j = result.rows[0].EMPNAME;
+      assert.strictEqual(j, 'Employee1');
     });
   });
 
@@ -268,34 +244,22 @@ describe('254. jsonBind2.js', function() {
 
     let result, j;
     before (async function() {
-      try {
-        await conn.execute(create_table_sql);
-      } catch (err) {
-        should.not.exist(err);
-      }
+      await conn.execute(create_table_sql);
     });
 
     after (async function() {
-      try {
-        await conn.execute("DROP TABLE " + tableName + " PURGE");
-      } catch (err) {
-        should.not.exist(err);
-      }
+      await conn.execute("DROP TABLE " + tableName + " PURGE");
     });
 
     beforeEach(async function() {
-      try {
-        await conn.execute(`Delete from ` + tableName);
-      } catch (error) {
-        should.not.exist(error);
-      }
+      await conn.execute(`Delete from ` + tableName);
     });
 
     it('254.2.1 Number, String type', async function() {
       const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -306,16 +270,16 @@ describe('254. jsonBind2.js', function() {
       j = result.rows[0].OBJ_DATA;
       j = JSON.parse(j);
 
-      should.equal(j.empId, 1);
-      should.equal(j.empName, 'Employee1');
-      should.equal(j.city, 'New City');
+      assert.strictEqual(j.empId, 1);
+      assert.strictEqual(j.empName, 'Employee1');
+      assert.strictEqual(j.city, 'New City');
     });
 
     it('254.2.2 Boolean and null value', async function() {
       const data = { "middlename": null, "honest": true};
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -326,15 +290,15 @@ describe('254. jsonBind2.js', function() {
       j = result.rows[0].OBJ_DATA;
       j = JSON.parse(j);
 
-      should.equal(j.middlename, null);
-      should.equal(j.honest, true);
+      assert.strictEqual(j.middlename, null);
+      assert.strictEqual(j.honest, true);
     });
 
     it('254.2.3 Array type', async function() {
       const data = { "employees":[ "Employee1", "Employee2", "Employee3" ] };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -345,16 +309,16 @@ describe('254. jsonBind2.js', function() {
       j = result.rows[0].OBJ_DATA;
       j = JSON.parse(j);
 
-      should.equal(j.employees[0], 'Employee1');
-      should.equal(j.employees[1], 'Employee2');
-      should.equal(j.employees[2], 'Employee3');
+      assert.strictEqual(j.employees[0], 'Employee1');
+      assert.strictEqual(j.employees[1], 'Employee2');
+      assert.strictEqual(j.employees[2], 'Employee3');
     });
 
     it('254.2.4 Object type', async function() {
       const data = { "employee":{ "name":"Employee1", "age":30, "city":"New City" } };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -365,16 +329,16 @@ describe('254. jsonBind2.js', function() {
       j = result.rows[0].OBJ_DATA;
       j = JSON.parse(j);
 
-      should.equal(j.employee.name, 'Employee1');
-      should.equal(j.employee.age, 30);
-      should.equal(j.employee.city, 'New City');
+      assert.strictEqual(j.employee.name, 'Employee1');
+      assert.strictEqual(j.employee.age, 30);
+      assert.strictEqual(j.employee.city, 'New City');
     });
 
     it('254.2.5 Using JSON_VALUE to extract a value from a VARCHAR2 column', async function() {
       const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -387,33 +351,29 @@ describe('254. jsonBind2.js', function() {
         [], {outFormat: oracledb.OUT_FORMAT_ARRAY});
       j = result.rows[0][0];
 
-      should.equal(j, 'Employee1');
+      assert.strictEqual(j, 'Employee1');
     });
 
     it('254.2.6 Using dot-notation to extract a value from a VARCHAR2 column', async function() {
       if (conn.oracleServerVersion < 1202000000) {
         this.skip();
       }
-      try {
-        const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
-        const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
+      const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
+      const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-        if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
-          await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
-        } else {
-          const s = JSON.stringify(data);
-          await conn.execute(sql, { bv: { val: s } });
-        }
-        result = await conn.execute(
-          `SELECT tb.obj_data.empName
-         FROM ` + tableName + ` tb`
-        );
-
-        j = result.rows[0].EMPNAME;
-        should.equal(j, 'Employee1');
-      } catch (err) {
-        console.error(err);
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+        await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
+      } else {
+        const s = JSON.stringify(data);
+        await conn.execute(sql, { bv: { val: s } });
       }
+      result = await conn.execute(
+        `SELECT tb.obj_data.empName
+       FROM ` + tableName + ` tb`
+      );
+
+      j = result.rows[0].EMPNAME;
+      assert.strictEqual(j, 'Employee1');
     });
   });
 
@@ -441,34 +401,22 @@ describe('254. jsonBind2.js', function() {
     let result, j;
 
     before (async function() {
-      try {
-        await conn.execute(create_table_sql);
-      } catch (err) {
-        should.not.exist(err);
-      }
+      await conn.execute(create_table_sql);
     });
 
     after (async function() {
-      try {
-        await conn.execute("DROP TABLE " + tableName + " PURGE");
-      } catch (err) {
-        should.not.exist(err);
-      }
+      await conn.execute("DROP TABLE " + tableName + " PURGE");
     });
 
     beforeEach(async function() {
-      try {
-        await conn.execute(`Delete from ` + tableName);
-      } catch (error) {
-        should.not.exist(error);
-      }
+      await conn.execute(`Delete from ` + tableName);
     });
 
     it('254.3.1 Number, String type', async function() {
       const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -479,16 +427,16 @@ describe('254. jsonBind2.js', function() {
       j = await result.rows[0].OBJ_DATA.getData();
       j = JSON.parse(j);
 
-      should.equal(j.empId, 1);
-      should.equal(j.empName, 'Employee1');
-      should.equal(j.city, 'New City');
+      assert.strictEqual(j.empId, 1);
+      assert.strictEqual(j.empName, 'Employee1');
+      assert.strictEqual(j.city, 'New City');
     });
 
     it('254.3.2 Boolean and null value', async function() {
       const data = { "middlename": null, "honest": true};
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -499,15 +447,15 @@ describe('254. jsonBind2.js', function() {
       j = await result.rows[0].OBJ_DATA.getData();
       j = JSON.parse(j);
 
-      should.equal(j.middlename, null);
-      should.equal(j.honest, true);
+      assert.strictEqual(j.middlename, null);
+      assert.strictEqual(j.honest, true);
     });
 
     it('254.3.3 Array type', async function() {
       const data = { "employees":[ "Employee1", "Employee2", "Employee3" ] };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -518,16 +466,16 @@ describe('254. jsonBind2.js', function() {
       j = await result.rows[0].OBJ_DATA.getData();
       j = JSON.parse(j);
 
-      should.equal(j.employees[0], 'Employee1');
-      should.equal(j.employees[1], 'Employee2');
-      should.equal(j.employees[2], 'Employee3');
+      assert.strictEqual(j.employees[0], 'Employee1');
+      assert.strictEqual(j.employees[1], 'Employee2');
+      assert.strictEqual(j.employees[2], 'Employee3');
     });
 
     it('254.3.4 Object type', async function() {
       const data = { "employee":{ "name":"Employee1", "age":30, "city":"New City" } };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -538,16 +486,16 @@ describe('254. jsonBind2.js', function() {
       j = await result.rows[0].OBJ_DATA.getData();
       j = JSON.parse(j);
 
-      should.equal(j.employee.name, 'Employee1');
-      should.equal(j.employee.age, 30);
-      should.equal(j.employee.city, 'New City');
+      assert.strictEqual(j.employee.name, 'Employee1');
+      assert.strictEqual(j.employee.age, 30);
+      assert.strictEqual(j.employee.city, 'New City');
     });
 
     it('254.3.5 Using JSON_VALUE to extract a value from a CLOB column', async function() {
       const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -560,33 +508,29 @@ describe('254. jsonBind2.js', function() {
         [], {outFormat: oracledb.OUT_FORMAT_ARRAY});
       j = result.rows[0][0];
 
-      should.equal(j, 'Employee1');
+      assert.strictEqual(j, 'Employee1');
     });
 
     it('254.3.6 Using dot-notation to extract a value from a CLOB column', async function() {
       if (conn.oracleServerVersion < 1202000000) {
         this.skip();
       }
-      try {
-        const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
-        const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
+      const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
+      const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-        if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
-          await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
-        } else {
-          const s = JSON.stringify(data);
-          await conn.execute(sql, { bv: { val: s } });
-        }
-        result = await conn.execute(
-          `SELECT tb.obj_data.empName
-         FROM ` + tableName + ` tb`
-        );
-
-        j = result.rows[0].EMPNAME;
-        should.equal(j, 'Employee1');
-      } catch (err) {
-        console.error(err);
+      if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+        await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
+      } else {
+        const s = JSON.stringify(data);
+        await conn.execute(sql, { bv: { val: s } });
       }
+      result = await conn.execute(
+        `SELECT tb.obj_data.empName
+       FROM ` + tableName + ` tb`
+      );
+
+      j = result.rows[0].EMPNAME;
+      assert.strictEqual(j, 'Employee1');
     });
   });
 });

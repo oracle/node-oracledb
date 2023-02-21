@@ -42,7 +42,7 @@ describe('231. soda13.js', () => {
   before(async function() {
     let isSodaRunnable = await testsUtil.isSodaRunnable();
 
-    const clientVersion = oracledb.oracleClientVersion;
+    const clientVersion = testsUtil.getClientVersion();
     let isClientOK;
     if (clientVersion < 2000000000) {
       isClientOK = false;
@@ -62,88 +62,75 @@ describe('231. soda13.js', () => {
   it('231.1 example case', async () => {
 
     const TABLE = "soda_test_13_1";
-    try {
-      const conn = await oracledb.getConnection(dbconfig);
-      const soda = conn.getSodaDatabase();
-      const coll = await soda.createCollection(TABLE);
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const coll = await soda.createCollection(TABLE);
 
-      // (1)
-      await coll.insertOne({fred: 5, george: 6});
-      await coll.insertOne({fred: 8, george: 9});
-      const docs1 = await coll.find().getDocuments();
-      assert.strictEqual(docs1.length, 2);
+    // (1)
+    await coll.insertOne({fred: 5, george: 6});
+    await coll.insertOne({fred: 8, george: 9});
+    const docs1 = await coll.find().getDocuments();
+    assert.strictEqual(docs1.length, 2);
 
-      // (2)
-      await coll.truncate();
-      const docs2 = await coll.find().getDocuments();
-      assert.strictEqual(docs2.length, 0);
+    // (2)
+    await coll.truncate();
+    const docs2 = await coll.find().getDocuments();
+    assert.strictEqual(docs2.length, 0);
 
-      await conn.commit();
-      let res = await coll.drop();
-      assert.strictEqual(res.dropped, true);
-      await conn.close();
+    await conn.commit();
+    let res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
 
-    } catch (error) {
-      assert.fail(error);
-    }
   }); // 231.1
 
   it('231.2 truncate multiple times', async () => {
 
     const TABLE = "soda_test_13_2";
-    try {
-      const conn = await oracledb.getConnection(dbconfig);
-      const soda = conn.getSodaDatabase();
-      const coll = await soda.createCollection(TABLE);
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const coll = await soda.createCollection(TABLE);
 
-      await coll.insertOne({fred: 5, george: 6});
-      await coll.insertOne({fred: 8, george: 9});
-      await coll.truncate();
-      await coll.truncate();
-      const docs1 = await coll.find().getDocuments();
-      assert.strictEqual(docs1.length, 0);
+    await coll.insertOne({fred: 5, george: 6});
+    await coll.insertOne({fred: 8, george: 9});
+    await coll.truncate();
+    await coll.truncate();
+    const docs1 = await coll.find().getDocuments();
+    assert.strictEqual(docs1.length, 0);
 
-      await coll.insertOne({fred: 1, george: 2});
-      await coll.insertOne({fred: 3, george: 4});
-      await coll.insertOne({fred: 5, george: 6});
-      const docs2 = await coll.find().getDocuments();
-      assert.strictEqual(docs2.length, 3);
+    await coll.insertOne({fred: 1, george: 2});
+    await coll.insertOne({fred: 3, george: 4});
+    await coll.insertOne({fred: 5, george: 6});
+    const docs2 = await coll.find().getDocuments();
+    assert.strictEqual(docs2.length, 3);
 
-      await conn.commit();
-      let res = await coll.drop();
-      assert.strictEqual(res.dropped, true);
-      await conn.close();
+    await conn.commit();
+    let res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
 
-    } catch (error) {
-      assert.fail(error);
-    }
   }); // 231.2
 
   it('231.3 Negative -invalid parameters', async () => {
 
     const TABLE = "soda_test_13_3";
-    try {
-      const conn = await oracledb.getConnection(dbconfig);
-      const soda = conn.getSodaDatabase();
-      const coll = await soda.createCollection(TABLE);
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const coll = await soda.createCollection(TABLE);
 
-      await coll.insertOne({fred: 1, george: 2});
-      await coll.insertOne({fred: 3, george: 4});
+    await coll.insertOne({fred: 1, george: 2});
+    await coll.insertOne({fred: 3, george: 4});
 
-      await assert.rejects(
-        async () => {
-          await coll.truncate("foobar");
-        },
-        /NJS-009/
-      );
+    await assert.rejects(
+      async () => {
+        await coll.truncate("foobar");
+      },
+      /NJS-009/
+    );
 
-      await conn.commit();
-      let res = await coll.drop();
-      assert.strictEqual(res.dropped, true);
-      await conn.close();
-
-    } catch (error) {
-      assert.fail(error);
-    }
+    await conn.commit();
+    let res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 231.3
 });

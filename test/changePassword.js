@@ -330,53 +330,49 @@ describe('161. changePassword.js', function() {
   }); // 161.7
 
   it('161.8 Negative: non-DBA tries to change the password', async function() {
-    try {
-      const tUser = dbconfig.user + "_st";
-      var dbaConn, tConn;
-      const tpass = 'secret';
+    const tUser = dbconfig.user + "_st";
+    var dbaConn, tConn;
+    const tpass = 'secret';
 
-      dbaConn = await oracledb.getConnection(DBA_config);
-      assert(dbaConn);
-      sql = "CREATE USER " + tUser + " IDENTIFIED BY " + tUser;
-      await dbaConn.execute(sql);
-      sql = "GRANT CREATE SESSION to " + tUser;
-      await dbaConn.execute(sql);
+    dbaConn = await oracledb.getConnection(DBA_config);
+    assert(dbaConn);
+    sql = "CREATE USER " + tUser + " IDENTIFIED BY " + tUser;
+    await dbaConn.execute(sql);
+    sql = "GRANT CREATE SESSION to " + tUser;
+    await dbaConn.execute(sql);
 
-      var credential = {
-        user:             tUser,
-        password:         tUser,
-        connectionString: dbconfig.connectString
-      };
+    var credential = {
+      user:             tUser,
+      password:         tUser,
+      connectionString: dbconfig.connectString
+    };
 
-      tConn = await oracledb.getConnection(credential);
+    tConn = await oracledb.getConnection(credential);
 
-      await assert.rejects(
-        async () => {
-          await tConn.changePassword(myUser, myUser, tpass);
-        },
-        /ORA-01031/
-      );
+    await assert.rejects(
+      async () => {
+        await tConn.changePassword(myUser, myUser, tpass);
+      },
+      /ORA-01031/
+    );
 
-      credential = {
-        user:             myUser,
-        password:         tpass,
-        connectionString: dbconfig.connectString
-      };
+    credential = {
+      user:             myUser,
+      password:         tpass,
+      connectionString: dbconfig.connectString
+    };
 
-      await assert.rejects(
-        async () => {
-          await oracledb.getConnection(credential);
-        },
-        /ORA-01017/
-      );// ORA-01017: invalid username/password
+    await assert.rejects(
+      async () => {
+        await oracledb.getConnection(credential);
+      },
+      /ORA-01017/
+    );// ORA-01017: invalid username/password
 
-      await tConn.close();
-      sql = "DROP USER " + tUser + " CASCADE";
-      await dbaConn.execute(sql);
-      await dbaConn.close();
-    } catch (error) {
-      assert.fail(error);
-    }
+    await tConn.close();
+    sql = "DROP USER " + tUser + " CASCADE";
+    await dbaConn.execute(sql);
+    await dbaConn.close();
   }); // 161.8
 
   it("161.9 Negative: invalid type of 'newPassword'", async function() {

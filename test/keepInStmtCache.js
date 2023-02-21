@@ -79,51 +79,39 @@ describe('258. keepInStmtCache.js', function() {
 
   describe('258.1 tests for keepInStmtCache & execute', function() {
     it('258.1.1 keepInStmtCache & execute default', async function() {
-      try {
-        // flush the statement cache
-        await conn.execute(q, {}, { keepInStmtCache: false });
+      // flush the statement cache
+      await conn.execute(q, {}, { keepInStmtCache: false });
 
-        const c1 = await testsUtil.getParseCount(sysDBAConn, sid);
-        for (let i = 0; i < iters; i++) {
-          await conn.execute(q);
-        }
-        const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
-        assert.strictEqual(c2 - c1, 1);
-      } catch (e) {
-        assert.fail(e);
+      const c1 = await testsUtil.getParseCount(sysDBAConn, sid);
+      for (let i = 0; i < iters; i++) {
+        await conn.execute(q);
       }
+      const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
+      assert.strictEqual(c2 - c1, 1);
     });
 
     it('258.1.2 keepInStmtCache & execute include', async function() {
-      try {
-        // flush the statement cache
-        await conn.execute(q, {}, { keepInStmtCache: false });
+      // flush the statement cache
+      await conn.execute(q, {}, { keepInStmtCache: false });
 
-        const c1 = await testsUtil.getParseCount(sysDBAConn, sid);
-        for (let i = 0; i < iters; i++) {
-          await conn.execute(q, {}, {keepInStmtCache : true});
-        }
-        const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
-        assert.strictEqual(c2 - c1, 1);
-      } catch (e) {
-        assert.fail(e);
+      const c1 = await testsUtil.getParseCount(sysDBAConn, sid);
+      for (let i = 0; i < iters; i++) {
+        await conn.execute(q, {}, {keepInStmtCache : true});
       }
+      const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
+      assert.strictEqual(c2 - c1, 1);
     });
 
     it('258.1.3 keepInStmtCache & execute exclude', async function() {
-      try {
-        // flush the statement cache
-        await conn.execute(q, {}, {keepInStmtCache: false});
+      // flush the statement cache
+      await conn.execute(q, {}, {keepInStmtCache: false});
 
-        const c1 = await testsUtil.getParseCount (sysDBAConn, sid);
-        for (let i = 0; i < iters; i++) {
-          await conn.execute(q, {}, {keepInStmtCache : false});
-        }
-        const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
-        assert.strictEqual(c2 - c1, iters);
-      } catch (e) {
-        assert.fail(e);
+      const c1 = await testsUtil.getParseCount (sysDBAConn, sid);
+      for (let i = 0; i < iters; i++) {
+        await conn.execute(q, {}, {keepInStmtCache : false});
       }
+      const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
+      assert.strictEqual(c2 - c1, iters);
     });
 
   });
@@ -132,56 +120,44 @@ describe('258. keepInStmtCache.js', function() {
   describe('258.2 tests using keepInStmtCache & resultSet', function() {
 
     it('258.2.1 keepInStmtCache & resultSet default', async function() {
-      try {
-        // flush the statement cache
-        await conn.execute(q, {}, {keepInStmtCache: false});
+      // flush the statement cache
+      await conn.execute(q, {}, {keepInStmtCache: false});
 
-        const c1 = await testsUtil.getParseCount(sysDBAConn, sid);
-        for (let i = 0; i < iters; i++) {
-          const result = await conn.execute(q, {}, {resultSet: true});
-          await result.resultSet.close();
-        }
-        const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
-        assert.strictEqual(c2 - c1, 1);
-      } catch (e) {
-        assert.fail(e);
+      const c1 = await testsUtil.getParseCount(sysDBAConn, sid);
+      for (let i = 0; i < iters; i++) {
+        const result = await conn.execute(q, {}, {resultSet: true});
+        await result.resultSet.close();
       }
+      const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
+      assert.strictEqual(c2 - c1, 1);
     });
 
     it('258.2.2 keepInStmtCache & resultSet include', async function() {
-      try {
-        // flush the statement cache
-        await conn.execute(q, {}, {keepInStmtCache: false});
+      // flush the statement cache
+      await conn.execute(q, {}, {keepInStmtCache: false});
 
-        const c1 = await testsUtil.getParseCount(sysDBAConn, sid);
-        for (let i = 0; i < iters; i++) {
-          const result = await conn.execute(q, {},
-            {keepInStmtCache: true, resultSet: true});
-          await result.resultSet.close();
-        }
-        const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
-        assert.strictEqual(c2 - c1, 1);
-      } catch (e) {
-        assert.fail(e);
+      const c1 = await testsUtil.getParseCount(sysDBAConn, sid);
+      for (let i = 0; i < iters; i++) {
+        const result = await conn.execute(q, {},
+          {keepInStmtCache: true, resultSet: true});
+        await result.resultSet.close();
       }
+      const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
+      assert.strictEqual(c2 - c1, 1);
     });
 
     it('258.2.3 keepInStmtCache & resultSet exclude', async function() {
-      try {
-        // flush the statement cache
-        await conn.execute(q, {}, {keepInStmtCache: false, resultSet: true});
+      // flush the statement cache
+      await conn.execute(q, {}, {keepInStmtCache: false, resultSet: true});
 
-        const c1 = await testsUtil.getParseCount (sysDBAConn, sid);
-        for (let i = 0; i < iters; i++) {
-          const result = await conn.execute(q, {},
-            {keepInStmtCache: false, resultSet: true});
-          await result.resultSet.close();
-        }
-        const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
-        assert.strictEqual(c2 - c1, iters);
-      } catch (e) {
-        assert.fail(e);
+      const c1 = await testsUtil.getParseCount (sysDBAConn, sid);
+      for (let i = 0; i < iters; i++) {
+        const result = await conn.execute(q, {},
+          {keepInStmtCache: false, resultSet: true});
+        await result.resultSet.close();
       }
+      const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
+      assert.strictEqual(c2 - c1, iters);
     });
 
   });
@@ -189,95 +165,83 @@ describe('258. keepInStmtCache.js', function() {
   describe('258.3 tests using keepInStmtCache & queryStream', function() {
 
     it('258.3.1 keepInStmtCache & queryStream default', async function() {
-      try {
-        // flush the statement cache
-        await conn.execute(q, {}, { keepInStmtCache: false });
+      // flush the statement cache
+      await conn.execute(q, {}, { keepInStmtCache: false });
 
-        const c1 = await testsUtil.getParseCount(sysDBAConn, sid);
-        for (let i = 0; i < iters; i++) {
-          const stream = conn.queryStream(q, [], {resultSet: true});
-          const consumeStream = new Promise((resolve, reject) => {
-            stream.on('error', function(error) {
-              reject(error);
-            });
-            stream.on('data', function()   {
-            });
-            stream.on('end', function() {
-              stream.destroy();
-            });
-            stream.on('close', function() {
-              resolve();
-            });
+      const c1 = await testsUtil.getParseCount(sysDBAConn, sid);
+      for (let i = 0; i < iters; i++) {
+        const stream = conn.queryStream(q, [], {resultSet: true});
+        const consumeStream = new Promise((resolve, reject) => {
+          stream.on('error', function(error) {
+            reject(error);
           });
-          await consumeStream;
-        }
-        const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
-        assert.strictEqual(c2 - c1, 1);
-      } catch (e) {
-        assert.fail(e);
+          stream.on('data', function()   {
+          });
+          stream.on('end', function() {
+            stream.destroy();
+          });
+          stream.on('close', function() {
+            resolve();
+          });
+        });
+        await consumeStream;
       }
+      const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
+      assert.strictEqual(c2 - c1, 1);
     });
 
     it('258.3.2 keepInStmtCache & querystream include', async function() {
-      try {
-        // flush the statement cache
-        await conn.execute(q, {}, {keepInStmtCache: false});
+      // flush the statement cache
+      await conn.execute(q, {}, {keepInStmtCache: false});
 
-        const c1 = await testsUtil.getParseCount(sysDBAConn, sid);
-        for (let i = 0; i < iters; i++) {
-          const stream = conn.queryStream(q, [], {resultSet: true});
-          const consumeStream = new Promise ((resolve, reject) => {
-            stream.on('error', function(error) {
-              reject(error);
-            });
-            stream.on('data', function() {
-            });
-            stream.on('end', function() {
-              stream.destroy();
-            });
-            stream.on('close', function() {
-              resolve();
-            });
+      const c1 = await testsUtil.getParseCount(sysDBAConn, sid);
+      for (let i = 0; i < iters; i++) {
+        const stream = conn.queryStream(q, [], {resultSet: true});
+        const consumeStream = new Promise ((resolve, reject) => {
+          stream.on('error', function(error) {
+            reject(error);
           });
-          await consumeStream;
-        }
-        const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
-        assert.strictEqual(c2 - c1, 1);
-      } catch (e) {
-        assert.fail(e);
+          stream.on('data', function() {
+          });
+          stream.on('end', function() {
+            stream.destroy();
+          });
+          stream.on('close', function() {
+            resolve();
+          });
+        });
+        await consumeStream;
       }
+      const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
+      assert.strictEqual(c2 - c1, 1);
     });
 
     it('258.3.3 keepInStmtCache & queryStream exclude', async function() {
-      try {
-        // flush the statement cache
-        await conn.execute(q, {}, { keepInStmtCache: false, resultSet: true });
+      // flush the statement cache
+      await conn.execute(q, {}, { keepInStmtCache: false, resultSet: true });
 
-        const c1 = await testsUtil.getParseCount(sysDBAConn, sid);
-        for (let i = 0; i < iters; i++) {
-          const stream = conn.queryStream(q, [],
-            {keepInStmtCache: false, resultSet: true});
-          const consumeStream = new Promise ((resolve, reject) => {
-            stream.on('error', function(error) {
-              reject(error);
-            });
-            stream.on('data', function() {
-            });
-            stream.on('end', function() {
-              stream.destroy();
-            });
-            stream.on('close', function() {
-              resolve();
-            });
+      const c1 = await testsUtil.getParseCount(sysDBAConn, sid);
+      for (let i = 0; i < iters; i++) {
+        const stream = conn.queryStream(q, [],
+          {keepInStmtCache: false, resultSet: true});
+        const consumeStream = new Promise ((resolve, reject) => {
+          stream.on('error', function(error) {
+            reject(error);
           });
-          await consumeStream;
-        }
-
-        const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
-        assert.strictEqual(c2 - c1, iters);
-      } catch (e) {
-        assert.fail(e);
+          stream.on('data', function() {
+          });
+          stream.on('end', function() {
+            stream.destroy();
+          });
+          stream.on('close', function() {
+            resolve();
+          });
+        });
+        await consumeStream;
       }
+
+      const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
+      assert.strictEqual(c2 - c1, iters);
     });
 
   });

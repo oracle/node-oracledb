@@ -41,26 +41,18 @@ describe('229. dbType03.js', () => {
   const TABLE = `NODB_TAB_BFBD`;
 
   before(async () => {
-    try {
-      conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbconfig);
 
-      let sql = `create table ${TABLE} (id number,
-        bf binary_float, bd binary_double)`;
-      let plsql = testsUtil.sqlCreateTable(TABLE, sql);
-      await conn.execute(plsql);
-    } catch (error) {
-      assert.fail(error);
-    }
+    let sql = `create table ${TABLE} (id number,
+      bf binary_float, bd binary_double)`;
+    let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+    await conn.execute(plsql);
   });
 
   after(async () => {
-    try {
-      let sql = `drop table ${TABLE} purge`;
-      await conn.execute(sql);
-      await conn.close();
-    } catch (error) {
-      assert.fail(error);
-    }
+    let sql = `drop table ${TABLE} purge`;
+    await conn.execute(sql);
+    await conn.close();
   });
 
   function ApproxEql(v1, v2) {
@@ -70,148 +62,122 @@ describe('229. dbType03.js', () => {
 
   it('229.1 IN binds binary_float and binary_double', async () => {
     const NUM = 1;
-    try {
-      let sql = `insert into ${TABLE} values (:1, :2, :3)`;
-      let binds = [
-        NUM,
-        { val: 1.23, type: oracledb.DB_TYPE_BINARY_FLOAT },
-        { val: 3.45678, type: oracledb.DB_TYPE_BINARY_DOUBLE }
-      ];
-      let result = await conn.execute(sql, binds);
-      assert.strictEqual(1, result.rowsAffected);
+    let sql = `insert into ${TABLE} values (:1, :2, :3)`;
+    let binds = [
+      NUM,
+      { val: 1.23, type: oracledb.DB_TYPE_BINARY_FLOAT },
+      { val: 3.45678, type: oracledb.DB_TYPE_BINARY_DOUBLE }
+    ];
+    let result = await conn.execute(sql, binds);
+    assert.strictEqual(1, result.rowsAffected);
 
-      sql = `select * from ${TABLE} where id = ${NUM}`;
-      result = await conn.execute(sql);
-      assert.strictEqual(binds[0], result.rows[0][0]);
+    sql = `select * from ${TABLE} where id = ${NUM}`;
+    result = await conn.execute(sql);
+    assert.strictEqual(binds[0], result.rows[0][0]);
 
-      let nearlyEqual = false;
-      nearlyEqual = ApproxEql(binds[1].val, result.rows[0][1]);
-      assert.strictEqual(nearlyEqual, true);
+    let nearlyEqual = false;
+    nearlyEqual = ApproxEql(binds[1].val, result.rows[0][1]);
+    assert.strictEqual(nearlyEqual, true);
 
-      nearlyEqual = ApproxEql(binds[2].val, result.rows[0][2]);
-      assert.strictEqual(nearlyEqual, true);
-
-    } catch (error) {
-      assert.fail(error);
-    }
+    nearlyEqual = ApproxEql(binds[2].val, result.rows[0][2]);
+    assert.strictEqual(nearlyEqual, true);
   }); // 229.1
 
   it('229.2 OUT binds', async () => {
     const NUM = 2;
     const num1 = 2.345;
     const num2 = 9876.54321;
-    try {
-      let sql = `insert into ${TABLE} values (:1, :2, :3)
-      returning bf, bd into :4, :5`;
-      let binds = [
-        NUM,
-        { val: num1, type: oracledb.DB_TYPE_BINARY_FLOAT },
-        { val: num2, type: oracledb.DB_TYPE_BINARY_DOUBLE },
-        { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_FLOAT },
-        { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_DOUBLE }
-      ];
-      let result = await conn.execute(sql, binds);
-      assert.strictEqual(1, result.rowsAffected);
+    let sql = `insert into ${TABLE} values (:1, :2, :3)
+    returning bf, bd into :4, :5`;
+    let binds = [
+      NUM,
+      { val: num1, type: oracledb.DB_TYPE_BINARY_FLOAT },
+      { val: num2, type: oracledb.DB_TYPE_BINARY_DOUBLE },
+      { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_FLOAT },
+      { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_DOUBLE }
+    ];
+    let result = await conn.execute(sql, binds);
+    assert.strictEqual(1, result.rowsAffected);
 
-      let nearlyEqual = false;
-      nearlyEqual = ApproxEql(num1, result.outBinds[0][0]);
-      assert.strictEqual(nearlyEqual, true);
+    let nearlyEqual = false;
+    nearlyEqual = ApproxEql(num1, result.outBinds[0][0]);
+    assert.strictEqual(nearlyEqual, true);
 
-      nearlyEqual = ApproxEql(num2, result.outBinds[1][0]);
-      assert.strictEqual(nearlyEqual, true);
-    } catch (error) {
-      assert.fail(error);
-    }
+    nearlyEqual = ApproxEql(num2, result.outBinds[1][0]);
+    assert.strictEqual(nearlyEqual, true);
   }); // 229.2
 
   it('229.3 IN bind Infinity number', async () => {
     const NUM = 3;
-    try {
-      let sql = `insert into ${TABLE} values (:1, :2, :3)`;
-      let binds = [
-        NUM,
-        { val: Infinity, type: oracledb.DB_TYPE_BINARY_FLOAT },
-        { val: -Infinity, type: oracledb.DB_TYPE_BINARY_DOUBLE }
-      ];
-      let result = await conn.execute(sql, binds);
-      assert.strictEqual(1, result.rowsAffected);
+    let sql = `insert into ${TABLE} values (:1, :2, :3)`;
+    let binds = [
+      NUM,
+      { val: Infinity, type: oracledb.DB_TYPE_BINARY_FLOAT },
+      { val: -Infinity, type: oracledb.DB_TYPE_BINARY_DOUBLE }
+    ];
+    let result = await conn.execute(sql, binds);
+    assert.strictEqual(1, result.rowsAffected);
 
-      sql = `select * from ${TABLE} where id = ${NUM}`;
-      result = await conn.execute(sql);
+    sql = `select * from ${TABLE} where id = ${NUM}`;
+    result = await conn.execute(sql);
 
-      assert.strictEqual(Infinity, result.rows[0][1]);
-      assert.strictEqual(-Infinity, result.rows[0][2]);
-
-    } catch (error) {
-      assert.fail(error);
-    }
+    assert.strictEqual(Infinity, result.rows[0][1]);
+    assert.strictEqual(-Infinity, result.rows[0][2]);
   }); // 229.3
 
   it('229.4 OUT bind Infinity number', async () => {
     const NUM = 4;
 
-    try {
-      let sql = `insert into ${TABLE} values (:1, :2, :3)
-      returning bf, bd into :4, :5`;
-      let binds = [
-        NUM,
-        { val: -Infinity, type: oracledb.DB_TYPE_BINARY_FLOAT },
-        { val: Infinity, type: oracledb.DB_TYPE_BINARY_DOUBLE },
-        { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_FLOAT },
-        { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_DOUBLE }
-      ];
-      let result = await conn.execute(sql, binds);
-      assert.strictEqual(1, result.rowsAffected);
+    let sql = `insert into ${TABLE} values (:1, :2, :3)
+    returning bf, bd into :4, :5`;
+    let binds = [
+      NUM,
+      { val: -Infinity, type: oracledb.DB_TYPE_BINARY_FLOAT },
+      { val: Infinity, type: oracledb.DB_TYPE_BINARY_DOUBLE },
+      { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_FLOAT },
+      { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_DOUBLE }
+    ];
+    let result = await conn.execute(sql, binds);
+    assert.strictEqual(1, result.rowsAffected);
 
-      assert.strictEqual(-Infinity, result.outBinds[0][0]);
-      assert.strictEqual(Infinity, result.outBinds[1][0]);
-    } catch (error) {
-      assert.fail(error);
-    }
+    assert.strictEqual(-Infinity, result.outBinds[0][0]);
+    assert.strictEqual(Infinity, result.outBinds[1][0]);
   }); // 229.4
 
   it('229.5 IN bind NaN', async () => {
     const NUM = 5;
-    try {
-      let sql = `insert into ${TABLE} values (:1, :2, :3)`;
-      let binds = [
-        NUM,
-        { val: NaN, type: oracledb.DB_TYPE_BINARY_FLOAT },
-        { val: NaN, type: oracledb.DB_TYPE_BINARY_DOUBLE }
-      ];
-      let result = await conn.execute(sql, binds);
-      assert.strictEqual(1, result.rowsAffected);
+    let sql = `insert into ${TABLE} values (:1, :2, :3)`;
+    let binds = [
+      NUM,
+      { val: NaN, type: oracledb.DB_TYPE_BINARY_FLOAT },
+      { val: NaN, type: oracledb.DB_TYPE_BINARY_DOUBLE }
+    ];
+    let result = await conn.execute(sql, binds);
+    assert.strictEqual(1, result.rowsAffected);
 
-      sql = `select * from ${TABLE} where id = ${NUM}`;
-      result = await conn.execute(sql);
+    sql = `select * from ${TABLE} where id = ${NUM}`;
+    result = await conn.execute(sql);
 
-      assert.strictEqual(result.rows[0][1], NaN);
-      assert.strictEqual(result.rows[0][2], NaN);
-    } catch (error) {
-      assert.fail(error);
-    }
+    assert.strictEqual(result.rows[0][1], NaN);
+    assert.strictEqual(result.rows[0][2], NaN);
   }); // 229.5
 
   it('229.6 OUT bind NaN', async () => {
     const NUM = 6;
 
-    try {
-      let sql = `insert into ${TABLE} values (:1, :2, :3)
-      returning bf, bd into :4, :5`;
-      let binds = [
-        NUM,
-        { val: NaN, type: oracledb.DB_TYPE_BINARY_FLOAT },
-        { val: NaN, type: oracledb.DB_TYPE_BINARY_DOUBLE },
-        { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_FLOAT },
-        { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_DOUBLE }
-      ];
-      let result = await conn.execute(sql, binds);
-      assert.strictEqual(1, result.rowsAffected);
-      assert.strictEqual(result.outBinds[0][0], NaN);
-      assert.strictEqual(result.outBinds[1][0], NaN);
-    } catch (error) {
-      assert.fail(error);
-    }
+    let sql = `insert into ${TABLE} values (:1, :2, :3)
+    returning bf, bd into :4, :5`;
+    let binds = [
+      NUM,
+      { val: NaN, type: oracledb.DB_TYPE_BINARY_FLOAT },
+      { val: NaN, type: oracledb.DB_TYPE_BINARY_DOUBLE },
+      { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_FLOAT },
+      { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_DOUBLE }
+    ];
+    let result = await conn.execute(sql, binds);
+    assert.strictEqual(1, result.rowsAffected);
+    assert.strictEqual(result.outBinds[0][0], NaN);
+    assert.strictEqual(result.outBinds[1][0], NaN);
   }); // 229.6
 
 });

@@ -63,80 +63,65 @@ describe('260. tpcResume.js', function() {
     END;`;
 
   before (async function() {
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-      await connection.execute(createTableSQL);
-      await connection.executeMany(
-        `INSERT INTO nodb_tpc_resume values (:1, :2)`,
-        [[1, 100], [2, 300]],
-        { autoCommit: true }
-      );
-      await connection.close();
-    } catch (e) {
-      console.error(e);
-      throw (e);
-    }
+    connection = await oracledb.getConnection(dbConfig);
+    await connection.execute(createTableSQL);
+    await connection.executeMany(
+      `INSERT INTO nodb_tpc_resume values (:1, :2)`,
+      [[1, 100], [2, 300]],
+      { autoCommit: true }
+    );
+    await connection.close();
   });
 
   after(async function() {
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-      await connection.execute(`DROP TABLE nodb_tpc_resume`);
-      await connection.close();
-      connection = undefined;
-    } catch (e) {
-      console.error(e);
-      throw (e);
-    }
+    connection = await oracledb.getConnection(dbConfig);
+    await connection.execute(`DROP TABLE nodb_tpc_resume`);
+    await connection.close();
+    connection = undefined;
   });
 
 
   it('260.1 TPC suspend and resume', async function() {
     let result;
 
-    try {
-      // connection 1
-      connection = await oracledb.getConnection(dbConfig);
-      await connection.tpcBegin(xid);
-      await connection.execute(
-        `UPDATE nodb_tpc_resume SET salary = salary * 1.1 WHERE id = :1`, [1]);
-      await connection.execute(
-        `UPDATE nodb_tpc_resume SET salary = salary * 3   WHERE id = :1`, [2]);
+    // connection 1
+    connection = await oracledb.getConnection(dbConfig);
+    await connection.tpcBegin(xid);
+    await connection.execute(
+      `UPDATE nodb_tpc_resume SET salary = salary * 1.1 WHERE id = :1`, [1]);
+    await connection.execute(
+      `UPDATE nodb_tpc_resume SET salary = salary * 3   WHERE id = :1`, [2]);
 
-      result = await connection.execute(
-        `SELECT salary FROM nodb_tpc_resume`);
-      assert.strictEqual(result.rows[0][0], 110);
-      assert.strictEqual(result.rows[1][0], 900);
-      await connection.tpcEnd(xid, oracledb.TPC_END_SUSPEND);
-      await connection.close();
+    result = await connection.execute(
+      `SELECT salary FROM nodb_tpc_resume`);
+    assert.strictEqual(result.rows[0][0], 110);
+    assert.strictEqual(result.rows[1][0], 900);
+    await connection.tpcEnd(xid, oracledb.TPC_END_SUSPEND);
+    await connection.close();
 
-      // connection 2
-      connection = await oracledb.getConnection(dbConfig);
-      await connection.tpcBegin(xid, oracledb.TPC_BEGIN_RESUME, 60);
-      await connection.execute(
-        `UPDATE nodb_tpc_resume SET salary = salary * 2 WHERE id = :1`, [1]);
-      await connection.execute(
-        `UPDATE nodb_tpc_resume SET salary = salary * 2   WHERE id = :1`, [2]);
+    // connection 2
+    connection = await oracledb.getConnection(dbConfig);
+    await connection.tpcBegin(xid, oracledb.TPC_BEGIN_RESUME, 60);
+    await connection.execute(
+      `UPDATE nodb_tpc_resume SET salary = salary * 2 WHERE id = :1`, [1]);
+    await connection.execute(
+      `UPDATE nodb_tpc_resume SET salary = salary * 2   WHERE id = :1`, [2]);
 
-      result = await connection.execute(
-        `SELECT salary FROM nodb_tpc_resume`);
-      assert.strictEqual(result.rows[0][0], 220);
-      assert.strictEqual(result.rows[1][0], 1800);
+    result = await connection.execute(
+      `SELECT salary FROM nodb_tpc_resume`);
+    assert.strictEqual(result.rows[0][0], 220);
+    assert.strictEqual(result.rows[1][0], 1800);
 
-      await connection.tpcCommit();
-      await connection.close();
+    await connection.tpcCommit();
+    await connection.close();
 
-      // connection 3
-      connection = await oracledb.getConnection(dbConfig);
-      result = await connection.execute(
-        `SELECT salary FROM nodb_tpc_resume ORDER BY id`);
-      assert.strictEqual(result.rows[0][0], 220);
-      assert.strictEqual(result.rows[1][0], 1800);
-      await connection.close();
-    } catch (e) {
-      console.error(e);
-      throw (e);
-    }
+    // connection 3
+    connection = await oracledb.getConnection(dbConfig);
+    result = await connection.execute(
+      `SELECT salary FROM nodb_tpc_resume ORDER BY id`);
+    assert.strictEqual(result.rows[0][0], 220);
+    assert.strictEqual(result.rows[1][0], 1800);
+    await connection.close();
 
   });
 

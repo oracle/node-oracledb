@@ -46,32 +46,21 @@ describe('248. userName.js', function() {
   };
 
   const createUser = async function(userSchema, password) {
-    let dbaConn;
-    try {
-      dbaConn = await oracledb.getConnection(dbaCredential);
+    const dbaConn = await oracledb.getConnection(dbaCredential);
+    let sql = `create user ${userSchema} identified by ${password}`;
+    await dbaConn.execute(sql);
 
-      let sql = `create user ${userSchema} identified by ${password}`;
-      await dbaConn.execute(sql);
-
-      sql = `grant create session to ${userSchema}`;
-      await dbaConn.execute(sql);
-    } catch (err) {
-      assert.fail(err);
-    } finally {
-      await dbaConn.close();
-    }
+    sql = `grant create session to ${userSchema}`;
+    await dbaConn.execute(sql);
+    await dbaConn.close();
   };
 
   const dropUser = async function(userSchema) {
-    try {
-      const dbaConn = await oracledb.getConnection(dbaCredential);
+    const dbaConn = await oracledb.getConnection(dbaCredential);
 
-      const sql = `drop user ${userSchema} cascade`;
-      await dbaConn.execute(sql);
-      await dbaConn.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sql = `drop user ${userSchema} cascade`;
+    await dbaConn.execute(sql);
+    await dbaConn.close();
   };
 
   describe('248.1 test with different size of username', () => {
@@ -79,26 +68,22 @@ describe('248. userName.js', function() {
     it('248.1.1 test with username size 30', async function() {
       if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
 
-      try {
-        const userSchema = await assist.createSchemaString(30);
-        const password = "Welcome";
-        await createUser(userSchema, password);
+      const userSchema = await assist.createSchemaString(30);
+      const password = "Welcome";
+      await createUser(userSchema, password);
 
-        const credential = {
-          username     : userSchema,
-          password     : password,
-          connectString: dbConfig.connectString
-        };
+      const credential = {
+        username     : userSchema,
+        password     : password,
+        connectString: dbConfig.connectString
+      };
 
-        const conn = await oracledb.getConnection(credential);
-        assert(conn);
-        await conn.close();
+      const conn = await oracledb.getConnection(credential);
+      assert(conn);
+      await conn.close();
 
-        await dropUser(userSchema);
+      await dropUser(userSchema);
 
-      } catch (err) {
-        assert.fail(err);
-      }
     }); // 248.1.1
 
     it('248.1.2 test with username size 100', async function() {
@@ -108,26 +93,22 @@ describe('248. userName.js', function() {
         return;
       }
 
-      try {
-        const userSchema = await assist.createSchemaString(100);
-        const password = "Welcome";
-        await createUser(userSchema, password);
+      const userSchema = await assist.createSchemaString(100);
+      const password = "Welcome";
+      await createUser(userSchema, password);
 
-        const credential = {
-          username     : userSchema,
-          password     : password,
-          connectString: dbConfig.connectString
-        };
+      const credential = {
+        username     : userSchema,
+        password     : password,
+        connectString: dbConfig.connectString
+      };
 
-        let conn = await oracledb.getConnection(credential);
-        assert(conn);
-        await conn.close();
+      let conn = await oracledb.getConnection(credential);
+      assert(conn);
+      await conn.close();
 
-        await dropUser(userSchema);
+      await dropUser(userSchema);
 
-      } catch (err) {
-        assert.fail(err);
-      }
     }); // 248.1.2
 
     it('248.1.3 test with username size 128', async function() {
@@ -137,26 +118,21 @@ describe('248. userName.js', function() {
         return;
       }
 
-      try {
-        const userSchema = await assist.createSchemaString(128);
-        const password = "Welcome";
-        await createUser(userSchema, password);
+      const userSchema = await assist.createSchemaString(128);
+      const password = "Welcome";
+      await createUser(userSchema, password);
 
-        const credential = {
-          username     : userSchema,
-          password     : password,
-          connectString: dbConfig.connectString
-        };
+      const credential = {
+        username     : userSchema,
+        password     : password,
+        connectString: dbConfig.connectString
+      };
 
-        const conn = await oracledb.getConnection(credential);
-        assert(conn);
-        await conn.close();
+      const conn = await oracledb.getConnection(credential);
+      assert(conn);
+      await conn.close();
 
-        await dropUser(userSchema);
-
-      } catch (err) {
-        assert.fail(err);
-      }
+      await dropUser(userSchema);
 
     }); // 248.1.3
 
@@ -167,155 +143,113 @@ describe('248. userName.js', function() {
         return;
       }
 
-      let dbaConn;
+      const dbaConn = await oracledb.getConnection(dbaCredential);
+      const userSchema = await assist.createSchemaString(1000);
+      const sql = `create user ${userSchema} identified by welcome`;
 
-      try {
-        const userSchema = await assist.createSchemaString(1000);
-        const password = "Welcome";
-
-        dbaConn = await oracledb.getConnection(dbaCredential);
-
-        let sql = `create user ${userSchema} identified by ${password}`;
-        await dbaConn.execute(sql);
-
-        sql = `grant create session to ${userSchema}`;
-        await dbaConn.execute(sql);
-
-        assert.fail();  // should not be here
-
-      } catch (err) {
-        assert(err);
-        assert(err.message.startsWith('ORA-00972:'));
-      } finally {
-        await dbaConn.close();
-      }
+      await testsUtil.assertThrowsAsync(
+        async () => await dbaConn.execute(sql),
+        /ORA-00972:/
+      );
 
     }); // 248.1.4
 
     it('248.1.5 negative test: username = null', async function() {
-      try {
-        const credential = {
-          username     : null,
-          password     : dbConfig.password,
-          connectString: dbConfig.connectString
-        };
-        await assert.rejects(
-          async () => {
-            await oracledb.getConnection(credential);
-          },
-          /NJS-007/
-        );
-      } catch (error) {
-        assert.fail(error);
-      }
+      const credential = {
+        username     : null,
+        password     : dbConfig.password,
+        connectString: dbConfig.connectString
+      };
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /NJS-007:/
+      );
     }); // 248.1.5
 
     it('248.1.6 negative test: username = "null"', async function() {
-      try {
-        const credential = {
-          username     : "null",
-          password     : dbConfig.password,
-          connectString: dbConfig.connectString
-        };
-        await assert.rejects(
-          async () => {
-            await oracledb.getConnection(credential);
-          },
-          /ORA-01017/
-        );
-      } catch (error) {
-        assert.fail(error);
-      }
+      const credential = {
+        username     : "null",
+        password     : dbConfig.password,
+        connectString: dbConfig.connectString
+      };
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /ORA-01017:/
+      );
     }); // 248.1.6
 
     it('248.1.7 negative test: username = undefined', async function() {
-      try {
-        const credential = {
-          username     : undefined,
-          password     : dbConfig.password,
-          connectString: dbConfig.connectString
-        };
-        await assert.rejects(
-          async () => {
-            await oracledb.getConnection(credential);
-          },
-          /ORA-01017/
-        );
-      } catch (error) {
-        assert.fail(error);
-      }
+      const credential = {
+        username     : undefined,
+        password     : dbConfig.password,
+        connectString: dbConfig.connectString
+      };
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /ORA-01017:/
+      );
     }); // 248.1.7
 
     it('248.1.8 negative test: username = "undefined"', async function() {
-      try {
-        const credential = {
-          username     : "undefined",
-          password     : dbConfig.password,
-          connectString: dbConfig.connectString
-        };
-        await assert.rejects(
-          async () => {
-            await oracledb.getConnection(credential);
-          },
-          /ORA-01017/
-        );
-      } catch (error) {
-        assert.fail(error);
-      }
+      const credential = {
+        username     : "undefined",
+        password     : dbConfig.password,
+        connectString: dbConfig.connectString
+      };
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /ORA-01017:/
+      );
     }); // 248.1.8
 
     it('248.1.9 negative test: username = empty string', async function() {
-      try {
-        const credential = {
-          username     : "",
-          password     : dbConfig.password,
-          connectString: dbConfig.connectString
-        };
-        await assert.rejects(
-          async () => {
-            await oracledb.getConnection(credential);
-          },
-          /ORA-01017/
-        );
-      } catch (error) {
-        assert.fail(error);
-      }
+      const credential = {
+        username     : "",
+        password     : dbConfig.password,
+        connectString: dbConfig.connectString
+      };
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /ORA-01017:/
+      );
     }); // 248.1.9
 
     it('248.1.10 negative test: username = NaN', async function() {
-      try {
-        const credential = {
-          username     : NaN,
-          password     : dbConfig.password,
-          connectString: dbConfig.connectString
-        };
-        await assert.rejects(
-          async () => {
-            await oracledb.getConnection(credential);
-          },
-          /NJS-007/
-        );
-      } catch (error) {
-        assert.fail(error);
-      }
+      const credential = {
+        username     : NaN,
+        password     : dbConfig.password,
+        connectString: dbConfig.connectString
+      };
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /NJS-007:/
+      );
     }); // 248.1.10
 
     it('248.1.11 negative test: username in array', async function() {
-      try {
-        const credential = {
-          username     : ["scott", "scott"],
-          password     : dbConfig.password,
-          connectString: dbConfig.connectString
-        };
-        await assert.rejects(
-          async () => {
-            await oracledb.getConnection(credential);
-          },
-          /NJS-007/
-        );
-      } catch (error) {
-        assert.fail(error);
-      }
+      const credential = {
+        username     : ["scott", "scott"],
+        password     : dbConfig.password,
+        connectString: dbConfig.connectString
+      };
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /NJS-007:/
+      );
     }); // 248.1.11
 
   }); // 248.1
@@ -325,26 +259,21 @@ describe('248. userName.js', function() {
     it('248.2.1 test with user size 30', async function() {
       if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
 
-      try {
-        const userSchema = await assist.createSchemaString(30);
-        const password = "Welcome";
-        await createUser(userSchema, password);
+      const userSchema = await assist.createSchemaString(30);
+      const password = "Welcome";
+      await createUser(userSchema, password);
 
-        const credential = {
-          username     : userSchema,
-          password     : password,
-          connectString: dbConfig.connectString
-        };
+      const credential = {
+        username     : userSchema,
+        password     : password,
+        connectString: dbConfig.connectString
+      };
 
-        const conn = await oracledb.getConnection(credential);
-        assert(conn);
-        await conn.close();
+      const conn = await oracledb.getConnection(credential);
+      assert(conn);
+      await conn.close();
 
-        await dropUser(userSchema);
-
-      } catch (err) {
-        assert.fail(err);
-      }
+      await dropUser(userSchema);
     }); // 248.2.1
 
     it('248.2.2 test with user size 100', async function() {
@@ -354,26 +283,21 @@ describe('248. userName.js', function() {
         return;
       }
 
-      try {
-        const userSchema = await assist.createSchemaString(100);
-        const password = "Welcome";
-        await createUser(userSchema, password);
+      const userSchema = await assist.createSchemaString(100);
+      const password = "Welcome";
+      await createUser(userSchema, password);
 
-        const credential = {
-          username     : userSchema,
-          password     : password,
-          connectString: dbConfig.connectString
-        };
+      const credential = {
+        username     : userSchema,
+        password     : password,
+        connectString: dbConfig.connectString
+      };
 
-        const conn = await oracledb.getConnection(credential);
-        assert(conn);
-        await conn.close();
+      const conn = await oracledb.getConnection(credential);
+      assert(conn);
+      await conn.close();
 
-        await dropUser(userSchema);
-
-      } catch (err) {
-        assert.fail(err);
-      }
+      await dropUser(userSchema);
     }); // 248.2.2
 
     it('248.2.3 test with user size 128', async function() {
@@ -383,26 +307,21 @@ describe('248. userName.js', function() {
         return;
       }
 
-      try {
-        const userSchema = await assist.createSchemaString(128);
-        const password = "Welcome";
-        await createUser(userSchema, password);
+      const userSchema = await assist.createSchemaString(128);
+      const password = "Welcome";
+      await createUser(userSchema, password);
 
-        const credential = {
-          username     : userSchema,
-          password     : password,
-          connectString: dbConfig.connectString
-        };
+      const credential = {
+        username     : userSchema,
+        password     : password,
+        connectString: dbConfig.connectString
+      };
 
-        const conn = await oracledb.getConnection(credential);
-        assert(conn);
-        await conn.close();
+      const conn = await oracledb.getConnection(credential);
+      assert(conn);
+      await conn.close();
 
-        await dropUser(userSchema);
-
-      } catch (err) {
-        assert.fail(err);
-      }
+      await dropUser(userSchema);
 
     }); // 248.2.3
 
@@ -413,154 +332,112 @@ describe('248. userName.js', function() {
         return;
       }
 
-      let dbaConn;
-      try {
-        const userSchema = await assist.createSchemaString(1000);
-        const password = "Welcome";
-
-        dbaConn = await oracledb.getConnection(dbaCredential);
-
-        let sql = `create user ${userSchema} identified by ${password}`;
-        await dbaConn.execute(sql);
-
-        sql = `grant create session to ${userSchema}`;
-        await dbaConn.execute(sql);
-
-        assert.fail();
-
-      } catch (err) {
-        assert(err);
-        assert(err.message.startsWith('ORA-00972:'));  // identifier too long
-      } finally {
-        await dbaConn.close();
-      }
+      const userSchema = await assist.createSchemaString(1000);
+      const sql = `create user ${userSchema} identified by welcome`;
+      const dbaConn = await oracledb.getConnection(dbaCredential);
+      await testsUtil.assertThrowsAsync(
+        async () => await dbaConn.execute(sql),
+        /ORA-00972:/
+      );
 
     }); // 248.2.4
 
     it('248.2.5 negative test: username = null', async function() {
-      try {
-        const credential = {
-          user         : null,
-          password     : dbConfig.password,
-          connectString: dbConfig.connectString
-        };
-        await assert.rejects(
-          async () => {
-            await oracledb.getConnection(credential);
-          },
-          /NJS-007/
-        );
-      } catch (error) {
-        assert.fail(error);
-      }
+      const credential = {
+        user         : null,
+        password     : dbConfig.password,
+        connectString: dbConfig.connectString
+      };
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /NJS-007:/
+      );
     }); // 248.2.5
 
     it('248.2.6 negative test: username = "null"', async function() {
-      try {
-        const credential = {
-          user         : "null",
-          password     : dbConfig.password,
-          connectString: dbConfig.connectString
-        };
-        await assert.rejects(
-          async () => {
-            await oracledb.getConnection(credential);
-          },
-          /ORA-01017/
-        );
-      } catch (error) {
-        assert.fail(error);
-      }
+      const credential = {
+        user         : "null",
+        password     : dbConfig.password,
+        connectString: dbConfig.connectString
+      };
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /ORA-01017/
+      );
     }); // 248.2.6
 
     it('248.2.7 negative test: username = undefined', async function() {
-      try {
-        const credential = {
-          user         : undefined,
-          password     : dbConfig.password,
-          connectString: dbConfig.connectString
-        };
-        await assert.rejects(
-          async () => {
-            await oracledb.getConnection(credential);
-          },
-          /ORA-01017/
-        );
-      } catch (error) {
-        assert.fail(error);
-      }
+      const credential = {
+        user         : undefined,
+        password     : dbConfig.password,
+        connectString: dbConfig.connectString
+      };
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /ORA-01017:/
+      );
     }); // 248.2.7
 
     it('248.2.8 negative test: username = "undefined"', async function() {
-      try {
-        const credential = {
-          user         : "undefined",
-          password     : dbConfig.password,
-          connectString: dbConfig.connectString
-        };
-        await assert.rejects(
-          async () => {
-            await oracledb.getConnection(credential);
-          },
-          /ORA-01017/
-        );
-      } catch (error) {
-        assert.fail(error);
-      }
+      const credential = {
+        user         : "undefined",
+        password     : dbConfig.password,
+        connectString: dbConfig.connectString
+      };
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /ORA-01017:/
+      );
     }); // 248.2.8
 
     it('248.2.9 negative test: username = empty string', async function() {
-      try {
-        const credential = {
-          user         : "",
-          password     : dbConfig.password,
-          connectString: dbConfig.connectString
-        };
-        await assert.rejects(
-          async () => {
-            await oracledb.getConnection(credential);
-          },
-          /ORA-01017/
-        );
-      } catch (error) {
-        assert.fail(error);
-      }
+      const credential = {
+        user         : "",
+        password     : dbConfig.password,
+        connectString: dbConfig.connectString
+      };
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /ORA-01017/
+      );
     }); // 248.2.9
 
     it('248.2.10 negative test: username = NaN', async function() {
-      try {
-        const credential = {
-          user         : NaN,
-          password     : dbConfig.password,
-          connectString: dbConfig.connectString
-        };
-        await assert.rejects(
-          async () => {
-            await oracledb.getConnection(credential);
-          },
-          /NJS-007/
-        );
-      } catch (error) {
-        assert.fail(error);
-      }
+      const credential = {
+        user         : NaN,
+        password     : dbConfig.password,
+        connectString: dbConfig.connectString
+      };
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /NJS-007:/
+      );
     }); // 248.2.10
 
     it('248.2.11 negative test: username in array', async function() {
-      try {
-        const credential = {
-          user         : ["scott", "scott"],
-          password     : dbConfig.password,
-          connectString: dbConfig.connectString
-        };
-        await assert.rejects(
-          async () => {
-            await oracledb.getConnection(credential);
-          },
-          /NJS-007/
-        );
-      } catch (error) {
-        assert.fail(error);
-      }
+      const credential = {
+        user         : ["scott", "scott"],
+        password     : dbConfig.password,
+        connectString: dbConfig.connectString
+      };
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /NJS-007:/
+      );
     }); // 248.2.11
 
   }); // 248.2

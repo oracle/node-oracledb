@@ -56,209 +56,137 @@ describe('167. soda3.js', () => {
 
     await sodaUtil.cleanup();
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      sd = conn.getSodaDatabase();
+    conn = await oracledb.getConnection(dbconfig);
+    sd = conn.getSodaDatabase();
 
-      t_collections = await Promise.all(
-        t_collectionNames.map(function(name) {
-          return sd.createCollection(name);
-        })
-      );
-    } catch (err) {
-      assert.fail(err);
-    }
+    t_collections = await Promise.all(
+      t_collectionNames.map(function(name) {
+        return sd.createCollection(name);
+      })
+    );
   }); // before
 
   after('drop collections, close connection', async () => {
     if (!isRunnable) return;
 
-    try {
-      if (t_collections) {
-        await Promise.all(
-          t_collections.map(function(coll) {
-            return coll.drop();
-          })
-        );
-      }
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
+    if (t_collections) {
+      await Promise.all(
+        t_collections.map(function(coll) {
+          return coll.drop();
+        })
+      );
     }
+    await conn.close();
   }); // after
 
   it('167.1 get collection names', async () => {
-    try {
-      let cNames = await sd.getCollectionNames();
-      assert.strictEqual(cNames.length, t_collectionNames.length);
-      assert.deepEqual(cNames, t_collectionNames.sort());
-    } catch (err) {
-      assert.fail(err);
-    }
+    const cNames = await sd.getCollectionNames();
+    assert.strictEqual(cNames.length, t_collectionNames.length);
+    assert.deepEqual(cNames, t_collectionNames.sort());
   });
 
   it('167.2 getCollectionNames() - limit option', async () => {
-    try {
-      let options = { limit: 1 };
-      let cNames = await sd.getCollectionNames(options);
-      assert.strictEqual(cNames.length, 1);
-      assert.deepEqual(cNames, t_collectionNames.sort().slice(0, 1));
-    } catch (err) {
-      assert.fail(err);
-    }
+    const options = { limit: 1 };
+    const cNames = await sd.getCollectionNames(options);
+    assert.strictEqual(cNames.length, 1);
+    assert.deepEqual(cNames, t_collectionNames.sort().slice(0, 1));
   });
 
   it('167.3 getCollectionNames() - limit is "undefined"', async () => {
-    try {
-      let options = { limit: undefined };
-      let cNames = await sd.getCollectionNames(options);
-      assert.strictEqual(cNames.length, t_collectionNames.length);
-      assert.deepEqual(cNames, t_collectionNames.sort());
-    } catch (err) {
-      assert.fail(err);
-    }
+    const options = { limit: undefined };
+    const cNames = await sd.getCollectionNames(options);
+    assert.strictEqual(cNames.length, t_collectionNames.length);
+    assert.deepEqual(cNames, t_collectionNames.sort());
   });
 
   it('167.4 getCollectionNames() - limit is 0', async () => {
-    try {
-      let options = { limit: 0 };
-      let cNames = await sd.getCollectionNames(options);
-      assert.strictEqual(cNames.length, t_collectionNames.length);
-      assert.deepEqual(cNames, t_collectionNames.sort());
-    } catch (err) {
-      assert.fail(err);
-    }
+    const options = { limit: 0 };
+    const cNames = await sd.getCollectionNames(options);
+    assert.strictEqual(cNames.length, t_collectionNames.length);
+    assert.deepEqual(cNames, t_collectionNames.sort());
   });
 
   it('167.5 getCollectionNames() - limit is null', async () => {
-    try {
-      let options = { limit: null };
-      await testsUtil.assertThrowsAsync(
-        async () => await sd.getCollectionNames(options),
-        /NJS-007: invalid value for "limit" in parameter 1/
-      );
-    } catch (err) {
-      assert.fail(err);
-    }
+    let options = { limit: null };
+    await testsUtil.assertThrowsAsync(
+      async () => await sd.getCollectionNames(options),
+      /NJS-007: invalid value for "limit" in parameter 1/
+    );
   });
 
   it('167.6 getCollectionNames() - limit is an empty string', async () => {
-    try {
-      let options = { limit: '' };
-      await testsUtil.assertThrowsAsync(
-        async () => await sd.getCollectionNames(options),
-        /NJS-007: invalid value for "limit" in parameter 1/
-      );
-    } catch (err) {
-      assert.fail(err);
-    }
+    const options = { limit: '' };
+    await testsUtil.assertThrowsAsync(
+      async () => await sd.getCollectionNames(options),
+      /NJS-007: invalid value for "limit" in parameter 1/
+    );
   });
 
   it('167.7 getCollectionNames() - limit is a negative number', async () => {
-    try {
-      let options = { limit: -7 };
-      let cNames = await sd.getCollectionNames(options);
-      assert.strictEqual(cNames.length, t_collectionNames.length);
-      assert.deepEqual(cNames, t_collectionNames.sort());
-    } catch (err) {
-      assert.fail(err);
-    }
+    const options = { limit: -7 };
+    const cNames = await sd.getCollectionNames(options);
+    assert.strictEqual(cNames.length, t_collectionNames.length);
+    assert.deepEqual(cNames, t_collectionNames.sort());
   });
 
   it('167.8 startsWith option - basic test', async () => {
-    try {
-      let options = { startsWith: "changjie" };
-      let cNames = await sd.getCollectionNames(options);
-      assert.deepEqual(cNames, t_collectionNames.sort().slice(2));
-    } catch (err) {
-      assert.fail(err);
-    }
+    const options = { startsWith: "changjie" };
+    const cNames = await sd.getCollectionNames(options);
+    assert.deepEqual(cNames, t_collectionNames.sort().slice(2));
   });
 
   it('167.9 startsWith is case sensitive', async () => {
-    try {
-      let options = { startsWith: "Changjie" };
-      let cNames = await sd.getCollectionNames(options);
-      assert.strictEqual(cNames.length, t_collectionNames.length);
-      assert.deepEqual(cNames, t_collectionNames.sort());
-    } catch (err) {
-      assert.fail(err);
-    }
+    const options = { startsWith: "Changjie" };
+    const cNames = await sd.getCollectionNames(options);
+    assert.strictEqual(cNames.length, t_collectionNames.length);
+    assert.deepEqual(cNames, t_collectionNames.sort());
   });
 
   it('167.10 startsWith is an empty string', async () => {
-    try {
-      let options = { startsWith: "" };
-      let cNames = await sd.getCollectionNames(options);
-      assert.strictEqual(cNames.length, t_collectionNames.length);
-      assert.deepEqual(cNames, t_collectionNames.sort());
-    } catch (err) {
-      assert.fail(err);
-    }
+    const options = { startsWith: "" };
+    const cNames = await sd.getCollectionNames(options);
+    assert.strictEqual(cNames.length, t_collectionNames.length);
+    assert.deepEqual(cNames, t_collectionNames.sort());
   });
 
   it('167.11 startsWith is null', async () => {
-    try {
-      let options = { startsWith: null };
-      await testsUtil.assertThrowsAsync(
-        async () => await sd.getCollectionNames(options),
-        /NJS-007: invalid value for "startsWith" in parameter 1/
-      );
-    } catch (err) {
-      assert.fail(err);
-    }
+    const options = { startsWith: null };
+    await testsUtil.assertThrowsAsync(
+      async () => await sd.getCollectionNames(options),
+      /NJS-007: invalid value for "startsWith" in parameter 1/
+    );
   });
 
   it('167.12 Negative - startsWith has invalid type, a Number', async () => {
-    try {
-      let options = { startsWith: 7 };
-      await testsUtil.assertThrowsAsync(
-        async () => await sd.getCollectionNames(options),
-        /NJS-007: invalid value for "startsWith" in parameter 1/
-      );
-    } catch (err) {
-      assert.fail(err);
-    }
+    const options = { startsWith: 7 };
+    await testsUtil.assertThrowsAsync(
+      async () => await sd.getCollectionNames(options),
+      /NJS-007: invalid value for "startsWith" in parameter 1/
+    );
   });
 
   it('167.13 openCollection() basic case 1', async () => {
-    try {
-      let candidate = "Changjie_3";
-      let coll = await sd.openCollection(candidate);
-      assert.strictEqual(coll.name, candidate);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const candidate = "Changjie_3";
+    const coll = await sd.openCollection(candidate);
+    assert.strictEqual(coll.name, candidate);
   });
 
   it('167.14 openCollection() basic case 2', async () => {
-    try {
-      let candidate = "chris_1";
-      let coll = await sd.openCollection(candidate);
-      assert.strictEqual(coll.name, candidate);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const candidate = "chris_1";
+    const coll = await sd.openCollection(candidate);
+    assert.strictEqual(coll.name, candidate);
   });
 
   it('167.15 the returned value is null if the requested collection does not exist', async () => {
-    try {
-      let candidate = "nonexistent_collection";
-      let coll = await sd.openCollection(candidate);
-      assert.strictEqual(coll, undefined);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const candidate = "nonexistent_collection";
+    const coll = await sd.openCollection(candidate);
+    assert.strictEqual(coll, undefined);
   });
 
   it('167.16 the requested collection name is case sensitive', async () => {
-    try {
-      let candidate = "changjie_3";
-      let coll = await sd.openCollection(candidate);
-      assert.strictEqual(coll, undefined);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const candidate = "changjie_3";
+    const coll = await sd.openCollection(candidate);
+    assert.strictEqual(coll, undefined);
   });
 
 });

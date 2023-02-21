@@ -45,7 +45,7 @@ describe('189. sodaOverwrite.js', function() {
 
     let isSodaRunnable = await testsUtil.isSodaRunnable();
 
-    const clientVersion = oracledb.oracleClientVersion;
+    const clientVersion = testsUtil.getClientVersion();
     let isClientOK;
     if (clientVersion < 2000000000) {
       isClientOK = false;

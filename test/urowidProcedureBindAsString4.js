@@ -109,19 +109,11 @@ describe('144. urowidProcedureBindAsString4.js', function() {
     const proc_drop = "DROP PROCEDURE nodb_urowid_bind_in_1441";
 
     before('create procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_create, {}, {});
-      } catch (err) {
-        assert.fail(err);
-      }
+      await sql.executeSql(connection, proc_create, {}, {});
     });
 
     after('drop procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_drop, {}, {});
-      } catch (err) {
-        assert.fail(err);
-      }
+      await sql.executeSql(connection, proc_drop, {}, {});
     });
 
     it('144.1.1 urowid length > 500', async function() {
@@ -180,19 +172,11 @@ describe('144. urowidProcedureBindAsString4.js', function() {
     const proc_drop = "DROP PROCEDURE nodb_urowid_bind_in_1443";
 
     before('create procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_create, {}, {});
-      } catch (err) {
-        assert.fail(err);
-      }
+      await sql.executeSql(connection, proc_create, {}, {});
     });
 
     after('drop procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_drop, {}, {});
-      } catch (err) {
-        assert.fail(err);
-      }
+      await sql.executeSql(connection, proc_drop, {}, {});
     });
 
     it('144.3.1 update with urowid length > 500', async function() {

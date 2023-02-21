@@ -127,10 +127,9 @@ describe('219. aq3.js', function() {
   it('219.4 Negative - Set "maxMessages" argument to be -5', async () => {
     const queue = await conn.getQueue(rawQueueName);
 
-    testsUtil.assertThrowsAsync(
+    await testsUtil.assertThrowsAsync(
       async () => {
-        const messages = await queue.deqMany(-5);
-        assert.fail(messages);
+        await queue.deqMany(-5);
       },
       /NJS-005/
     );
@@ -139,10 +138,9 @@ describe('219. aq3.js', function() {
   it('219.5 Negative - Set "maxMessages" argument to be 0', async () => {
     const queue = await conn.getQueue(rawQueueName);
 
-    testsUtil.assertThrowsAsync(
+    await testsUtil.assertThrowsAsync(
       async () => {
-        const messages = await queue.deqMany(0);
-        assert.fail(messages);
+        await queue.deqMany(0);
       },
       /NJS-005/
     );

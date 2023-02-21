@@ -43,71 +43,57 @@ describe('210. dbObject11.js', () => {
   const TABLE = 'NODB_TAB_MYOTAB';
 
   before(async () => {
-    try {
-      conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbconfig);
 
-      let sql = `
-        CREATE OR REPLACE TYPE ${TYPE} AS OBJECT (
-          field_name     VARCHAR2(20),
-          number$$value  NUMBER,
-          number##value  NUMBER,
-          "hi &coder"     VARCHAR2(20)
-        );`;
-      await conn.execute(sql);
+    let sql = `
+      CREATE OR REPLACE TYPE ${TYPE} AS OBJECT (
+        field_name     VARCHAR2(20),
+        number$$value  NUMBER,
+        number##value  NUMBER,
+        "hi &coder"     VARCHAR2(20)
+      );`;
+    await conn.execute(sql);
 
-      sql = `
-        CREATE TABLE ${TABLE} (
-          c1 ${TYPE}
-        )`;
-      const plsql = testsUtil.sqlCreateTable(TABLE, sql);
-      await conn.execute(plsql);
+    sql = `
+      CREATE TABLE ${TABLE} (
+        c1 ${TYPE}
+      )`;
+    const plsql = testsUtil.sqlCreateTable(TABLE, sql);
+    await conn.execute(plsql);
 
-      sql = `INSERT INTO ${TABLE} VALUES (:a)`;
-      const binds = {
-        a: {
-          type: TYPE,
-          val: {
-            FIELD_NAME: 'abc',
-            NUMBER$$VALUE: 123,
-            'NUMBER##VALUE': 456,
-            'hi &coder': 'node-oracledb'
-          }
+    sql = `INSERT INTO ${TABLE} VALUES (:a)`;
+    const binds = {
+      a: {
+        type: TYPE,
+        val: {
+          FIELD_NAME: 'abc',
+          NUMBER$$VALUE: 123,
+          'NUMBER##VALUE': 456,
+          'hi &coder': 'node-oracledb'
         }
-      };
-      const result = await conn.execute(sql, binds);
-      assert.strictEqual(result.rowsAffected, 1);
-
-    } catch (err) {
-      assert.fail(err);
-    }
+      }
+    };
+    const result = await conn.execute(sql, binds);
+    assert.strictEqual(result.rowsAffected, 1);
   }); // before()
 
   after(async () => {
-    try {
-      let sql = `DROP TABLE ${TABLE} PURGE`;
-      await conn.execute(sql);
+    let sql = `DROP TABLE ${TABLE} PURGE`;
+    await conn.execute(sql);
 
-      sql = `DROP TYPE ${TYPE}`;
-      await conn.execute(sql);
+    sql = `DROP TYPE ${TYPE}`;
+    await conn.execute(sql);
 
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.close();
   }); // after()
 
   it('210.1 Attribute names with embedded "$", "#", "&" and spaces', async () => {
-    try {
-      const query = `SELECT * FROM ${TABLE}`;
-      const opts = { outFormat: oracledb.OBJECT };
-      const result = await conn.execute(query, [], opts);
+    const query = `SELECT * FROM ${TABLE}`;
+    const opts = { outFormat: oracledb.OBJECT };
+    const result = await conn.execute(query, [], opts);
 
-      assert.strictEqual(result.rows[0].C1.NUMBER$$VALUE, 123);
-      assert.strictEqual(result.rows[0].C1['NUMBER##VALUE'], 456);
-      assert.strictEqual(result.rows[0].C1['hi &coder'], 'node-oracledb');
-
-    } catch (err) {
-      assert.fail(err);
-    }
+    assert.strictEqual(result.rows[0].C1.NUMBER$$VALUE, 123);
+    assert.strictEqual(result.rows[0].C1['NUMBER##VALUE'], 456);
+    assert.strictEqual(result.rows[0].C1['hi &coder'], 'node-oracledb');
   }); // 210.1
 });

@@ -82,40 +82,32 @@ describe('247. dupColNames2.js', function() {
   const empInsert = "INSERT INTO " + tableNameEmp + " VALUES ( :1, :2, :3, :4) ";
 
   before(async function() {
-    try {
-      // set the outformat to object
-      oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
+    // set the outformat to object
+    oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
-      connection = await oracledb.getConnection (dbconfig);
+    connection = await oracledb.getConnection (dbconfig);
 
-      await connection.execute(create_table_sql);
-      await connection.execute(deptInsert, [101, "R&D"]);
-      await connection.execute(deptInsert, [201, "Sales"]);
-      await connection.execute(deptInsert, [301, "Marketing"]);
+    await connection.execute(create_table_sql);
+    await connection.execute(deptInsert, [101, "R&D"]);
+    await connection.execute(deptInsert, [201, "Sales"]);
+    await connection.execute(deptInsert, [301, "Marketing"]);
 
-      await connection.execute(create_table_emp_sql);
-      await connection.execute(empInsert, [1001, 101, "Krishna Mohan", 'abcdefgh']);
-      await connection.execute(empInsert, [1002, 102, "P Venkatraman", 'abcdefgh']);
-      await connection.execute(empInsert, [2001, 201, "Chris Jones", 'abcdefgh']);
-      await connection.execute(empInsert, [3001, 301, "John Millard", 'abcdefgh']);
+    await connection.execute(create_table_emp_sql);
+    await connection.execute(empInsert, [1001, 101, "Krishna Mohan", 'abcdefgh']);
+    await connection.execute(empInsert, [1002, 102, "P Venkatraman", 'abcdefgh']);
+    await connection.execute(empInsert, [2001, 201, "Chris Jones", 'abcdefgh']);
+    await connection.execute(empInsert, [3001, 301, "John Millard", 'abcdefgh']);
 
-      await connection.commit();
-    } catch (err) {
-      assert.fail(err);
-    }
+    await connection.commit();
   });
 
   after(async function() {
-    try {
-      await connection.execute("DROP TABLE nodb_dupEmployee PURGE");
-      await connection.execute("DROP TABLE nodb_dupDepartment PURGE");
-      await connection.commit();
-      await connection.close();
+    await connection.execute("DROP TABLE nodb_dupEmployee PURGE");
+    await connection.execute("DROP TABLE nodb_dupDepartment PURGE");
+    await connection.commit();
+    await connection.close();
 
-      oracledb.outFormat = outFormatBak;
-    } catch (err) {
-      assert.fail(err);
-    }
+    oracledb.outFormat = outFormatBak;
   });
 
   const empID = [1001, 2001, 3001];

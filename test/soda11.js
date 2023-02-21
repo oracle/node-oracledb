@@ -104,8 +104,6 @@ describe('179. soda11.js', () => {
       assert.strictEqual(typeof (collection.metaData), "object");
       assert.deepEqual(collection.metaData, t_metadata);
 
-    } catch (err) {
-      assert.fail(err);
     } finally {
       await conn.commit();
 
@@ -114,13 +112,7 @@ describe('179. soda11.js', () => {
         assert.strictEqual(res.dropped, true);
       }
 
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
+      await conn.close();
     }
   }); // 179.1
 
@@ -173,8 +165,6 @@ describe('179. soda11.js', () => {
       );
       // ORA-01918: user \'nonexistent\' does not exist
 
-    } catch (err) {
-      assert.fail(err);
     } finally {
       await conn.commit();
 
@@ -183,13 +173,7 @@ describe('179. soda11.js', () => {
         assert.strictEqual(res.dropped, true);
       }
 
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
+      await conn.close();
     }
   }); // 179.2
 
@@ -283,22 +267,12 @@ describe('179. soda11.js', () => {
       );
       // ORA-40669: Collection create failed: collection with same name but different metadata exists.
 
-    } catch (err) {
-      assert.fail(err);
     } finally {
       if (collection1) {
-        try {
-          await collection1.drop();
-        } catch (err) {
-          assert.fail(err);
-        }
+        await collection1.drop();
       }
       if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
+        await conn.close();
       }
     }
   }); // 179.3
@@ -371,15 +345,9 @@ describe('179. soda11.js', () => {
       let res = await coll.drop();
       assert.strictEqual(res.dropped, true);
 
-    } catch (err) {
-      assert.fail(err);
     } finally {
       if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
+        await conn.close();
       }
     }
   }); // 179.4
@@ -441,24 +409,14 @@ describe('179. soda11.js', () => {
         /NJS-007: invalid value for "key" in parameter 2/
       );
 
-    } catch (err) {
-      assert.fail(err);
     } finally {
       if (coll) {
-        try {
-          let res = await coll.drop();
-          assert.strictEqual(res.dropped, true);
-        } catch (err) {
-          assert.fail(err);
-        }
+        let res = await coll.drop();
+        assert.strictEqual(res.dropped, true);
       }
 
       if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
+        await conn.close();
       }
     }
   }); // 179.5
@@ -529,25 +487,15 @@ describe('179. soda11.js', () => {
 
       assert.strictEqual(myDoc.mediaType, testMediaType);
 
-    } catch (err) {
-      assert.fail(err);
     } finally {
       await conn.commit();
       if (coll) {
-        try {
-          let res = await coll.drop();
-          assert.strictEqual(res.dropped, true);
-        } catch (err) {
-          assert.fail(err);
-        }
+        let res = await coll.drop();
+        assert.strictEqual(res.dropped, true);
       }
 
       if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
+        await conn.close();
       }
     }
   }); // 179.6
@@ -613,25 +561,15 @@ describe('179. soda11.js', () => {
         /NJS-007: invalid value for "mediaType" in parameter 2/
       );
 
-    } catch (err) {
-      assert.fail(err);
     } finally {
       await conn.commit();
       if (coll) {
-        try {
-          let res = await coll.drop();
-          assert.strictEqual(res.dropped, true);
-        } catch (err) {
-          assert.fail(err);
-        }
+        let res = await coll.drop();
+        assert.strictEqual(res.dropped, true);
       }
 
       if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
+        await conn.close();
       }
     }
   }); // 179.7
@@ -690,25 +628,15 @@ describe('179. soda11.js', () => {
       let outDocument = await coll.insertOneAndGet(testDoc);
       assert(outDocument);
 
-    } catch (err) {
-      assert.fail(err);
     } finally {
       await conn.commit();
       if (coll) {
-        try {
-          let res = await coll.drop();
-          assert.strictEqual(res.dropped, true);
-        } catch (err) {
-          assert.fail(err);
-        }
+        let res = await coll.drop();
+        assert.strictEqual(res.dropped, true);
       }
 
       if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
+        await conn.close();
       }
     }
   }); // 179.8

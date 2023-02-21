@@ -39,33 +39,25 @@ const dbconfig  = require('./dbconfig.js');
 describe('223. accessPropertiesOnClosedObjects.js', () => {
 
   it('223.1 access properties of closed Connection object', async () => {
-    try {
-      const conn = await oracledb.getConnection(dbconfig);
-      assert(conn);
-      await conn.close();
+    const conn = await oracledb.getConnection(dbconfig);
+    assert(conn);
+    await conn.close();
 
-      const closedObjProp = conn.oracleServerVersion;
-      assert.ifError(closedObjProp);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const closedObjProp = conn.oracleServerVersion;
+    assert.ifError(closedObjProp);
   }); // 223.1
 
   it('223.2 access properties of closed Lob object', async () => {
-    try {
-      const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbconfig);
 
-      const Lob = await conn.createLob(oracledb.DB_TYPE_BLOB);
+    const Lob = await conn.createLob(oracledb.DB_TYPE_BLOB);
 
-      await Lob.close();
-      assert.strictEqual(Lob.type, oracledb.DB_TYPE_BLOB);
-      assert.strictEqual(Lob.length, 0);
+    await Lob.close();
+    assert.strictEqual(Lob.type, oracledb.DB_TYPE_BLOB);
+    assert.strictEqual(Lob.length, 0);
 
-      await conn.close();
-      assert.strictEqual(Lob.type, oracledb.DB_TYPE_BLOB);
-      assert.strictEqual(Lob.length, 0);
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.close();
+    assert.strictEqual(Lob.type, oracledb.DB_TYPE_BLOB);
+    assert.strictEqual(Lob.length, 0);
   }); // 223.2
 });

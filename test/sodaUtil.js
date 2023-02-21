@@ -40,9 +40,8 @@ module.exports = sodaUtil;
 let isSodaRoleGranted = false;
 
 sodaUtil.cleanup = async function() {
-  let conn;
+  const conn = await oracledb.getConnection(dbconfig);
   try {
-    conn = await oracledb.getConnection(dbconfig);
     let sd = conn.getSodaDatabase();
 
     let cNames = await sd.getCollectionNames();
@@ -52,16 +51,8 @@ sodaUtil.cleanup = async function() {
         await coll.drop();
       }
     }
-  } catch (err) {
-    console.error('Error in processing:\n', err);
   } finally {
-    if (conn) {
-      try {
-        await conn.close();
-      } catch (err) {
-        console.error('Error in closing connection:\n', err);
-      }
-    }
+    await conn.close();
   }
 
 }; // cleanup()

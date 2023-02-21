@@ -74,7 +74,7 @@ describe('184. sessionTag.js', function() {
   before(async function() {
     let isRunnable = true;
 
-    if (oracledb.oracleClientVersion < 1202000100) isRunnable = false;
+    if (testsUtil.getClientVersion() < 1202000100) isRunnable = false;
 
     const connection = await oracledb.getConnection(dbconfig);
     const serverVersion = connection.oracleServerVersion;
@@ -323,7 +323,7 @@ describe('184. sessionTag.js', function() {
     });
 
     it('184.1.9 Acquire connection from pool twice with different multi-tag using matchAnyTag', async function() {
-      if (oracledb.oracleClientVersion < 1202000000) this.skip();
+      if (testsUtil.getClientVersion() < 1202000000) this.skip();
       const pool = await oracledb.createPool({
         ...dbconfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",

@@ -34,6 +34,7 @@
 const oracledb = require('oracledb');
 const should   = require('should');
 const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('3. examples.js', function() {
 
@@ -51,7 +52,7 @@ describe('3. examples.js', function() {
       (addonVer).should.be.a.Number();
       (addonVer).should.be.greaterThan(0);
 
-      const clientVer = oracledb.oracleClientVersion;
+      const clientVer = testsUtil.getClientVersion();
       (clientVer).should.be.a.Number();
       (clientVer).should.be.greaterThan(0);
 

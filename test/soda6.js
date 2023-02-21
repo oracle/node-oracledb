@@ -362,9 +362,9 @@ describe('174. soda6.js', function() {
   it("174.13 hint(), basic case", async function() {
     // The SODA hint is available with Oracle Client 21.3 and
     // in 19 from 19.11
-    if (oracledb.oracleClientVersion < 2103000000) {
-      if (oracledb.oracleClientVersion < 1911000000 ||
-          oracledb.oracleClientVersion >= 2000000000) {
+    const clientVersion = testsUtil.getClientVersion();
+    if (clientVersion < 2103000000) {
+      if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
         this.skip();
         return;
       }
@@ -395,9 +395,9 @@ describe('174. soda6.js', function() {
   it("174.14 Negative - hint() no parameter", async function() {
     // The SODA hint is available with Oracle Client 21.3 and
     // in 19 from 19.11
-    if (oracledb.oracleClientVersion < 2103000000) {
-      if (oracledb.oracleClientVersion < 1911000000 ||
-          oracledb.oracleClientVersion >= 2000000000) {
+    const clientVersion = testsUtil.getClientVersion();
+    if (clientVersion < 2103000000) {
+      if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
         this.skip();
         return;
       }
@@ -429,9 +429,9 @@ describe('174. soda6.js', function() {
   it("174.15 Negative - hint() invalid parameter type", async function() {
     // The SODA hint is available with Oracle Client 21.3 and
     // in 19 from 19.11
-    if (oracledb.oracleClientVersion < 2103000000) {
-      if (oracledb.oracleClientVersion < 1911000000 ||
-          oracledb.oracleClientVersion >= 2000000000) {
+    const clientVersion = testsUtil.getClientVersion();
+    if (clientVersion < 2103000000) {
+      if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
         this.skip();
         return;
       }

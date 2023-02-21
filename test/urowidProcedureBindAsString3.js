@@ -205,19 +205,11 @@ describe('120. urowidProcedureBindAsString3.js', function() {
     const proc_drop = "DROP PROCEDURE nodb_rowid_bind_inout";
 
     before('create procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_create, {}, {});
-      } catch (err) {
-        assert.fail(err);
-      }
+      await sql.executeSql(connection, proc_create, {}, {});
     });
 
     after('drop procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_drop, {}, {});
-      } catch (err) {
-        assert.fail(err);
-      }
+      await sql.executeSql(connection, proc_drop, {}, {});
     });
 
     it('120.2.1 works with null', async function() {

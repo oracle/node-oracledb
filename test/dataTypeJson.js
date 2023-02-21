@@ -36,6 +36,7 @@ var should    = require('should');
 var assist    = require('./dataTypeAssist.js');
 var dbConfig  = require('./dbconfig.js');
 var async     = require('async');
+const testsUtil = require('./testsUtil.js');
 
 describe('244.dataTypeJson.js', function() {
 
@@ -54,7 +55,7 @@ describe('244.dataTypeJson.js', function() {
       should.not.exist(err);
     }
 
-    if (oracledb.oracleClientVersion >= 2100000000 && connection.oracleServerVersion >= 2100000000) {
+    if (testsUtil.getClientVersion() >= 2100000000 && connection.oracleServerVersion >= 2100000000) {
       isRunnable = true;
     }
 

@@ -49,38 +49,33 @@ describe('212. dbObject13.js', function() {
       this.skip();
       return;
     } else {
-      try {
-        conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbconfig);
 
-        let plsql = `
-          CREATE OR REPLACE PACKAGE ${PKG} AS
-            TYPE playerType IS RECORD (name VARCHAR2(40), position VARCHAR2(20), shirtnumber NUMBER);
-            TYPE teamType IS VARRAY(10) OF playerType;
-            PROCEDURE assignShirtNumbers (t_in IN teamType, t_out OUT teamType);
-          END ${PKG};
-        `;
-        await conn.execute(plsql);
+      let plsql = `
+        CREATE OR REPLACE PACKAGE ${PKG} AS
+          TYPE playerType IS RECORD (name VARCHAR2(40), position VARCHAR2(20), shirtnumber NUMBER);
+          TYPE teamType IS VARRAY(10) OF playerType;
+          PROCEDURE assignShirtNumbers (t_in IN teamType, t_out OUT teamType);
+        END ${PKG};
+      `;
+      await conn.execute(plsql);
 
-        plsql = `
-          CREATE OR REPLACE PACKAGE BODY ${PKG} AS
-            PROCEDURE assignShirtNumbers (t_in IN teamType, t_out OUT teamType) AS
-              p teamType := teamType();
-            BEGIN
-              FOR i in 1..t_in.COUNT LOOP
-                p.EXTEND;
-                p(i) := t_in(i);
-                p(i).SHIRTNUMBER := i;
-              END LOOP;
-              t_out := p;
-            END;
+      plsql = `
+        CREATE OR REPLACE PACKAGE BODY ${PKG} AS
+          PROCEDURE assignShirtNumbers (t_in IN teamType, t_out OUT teamType) AS
+            p teamType := teamType();
+          BEGIN
+            FOR i in 1..t_in.COUNT LOOP
+              p.EXTEND;
+              p(i) := t_in(i);
+              p(i).SHIRTNUMBER := i;
+            END LOOP;
+            t_out := p;
+          END;
 
-          END ${PKG};
-        `;
-        await conn.execute(plsql);
-
-      } catch (err) {
-        assert.fail(err);
-      }
+        END ${PKG};
+      `;
+      await conn.execute(plsql);
     }
 
   }); // before()
@@ -89,48 +84,39 @@ describe('212. dbObject13.js', function() {
     if (!isRunnable) {
       return;
     } else {
-      try {
-        let sql = `DROP PACKAGE ${PKG}`;
-        await conn.execute(sql);
-
-        await conn.close();
-      } catch (err) {
-        assert.fail(err);
-      }
+      const sql = `DROP PACKAGE ${PKG}`;
+      await conn.execute(sql);
+      await conn.close();
     }
 
   }); // after()
 
   it('212.1 examples/plsqlvarrayrecord.js', async () => {
-    try {
-      const CALL = `CALL ${PKG}.assignShirtNumbers(:inbv, :outbv)`;
+    const CALL = `CALL ${PKG}.assignShirtNumbers(:inbv, :outbv)`;
 
-      const players = [
-        { NAME: 'Jay',    POSITION: 'GOAL ATTACK',  SHIRTNUMBER: 1 },
-        { NAME: 'Leslie', POSITION: 'CENTRE',       SHIRTNUMBER: 2 },
-        { NAME: 'Chris',  POSITION: 'WING DEFENCE', SHIRTNUMBER: 3 }
-      ];
-      const binds = {
-        inbv:
-        {
-          type: `${PKG}.TEAMTYPE`,
-          val: players
-        },
-        outbv:
-        {
-          type: `${PKG}.TEAMTYPE`,
-          dir: oracledb.BIND_OUT
-        }
-      };
-      const result = await conn.execute(CALL, binds);
-
-      for (let i = 0, out = result.outBinds.outbv; i < players.length; i++) {
-        assert.strictEqual(out[i].NAME, players[i].NAME);
-        assert.strictEqual(out[i].POSITION, players[i].POSITION);
-        assert.strictEqual(out[i].SHIRTNUMBER, players[i].SHIRTNUMBER);
+    const players = [
+      { NAME: 'Jay',    POSITION: 'GOAL ATTACK',  SHIRTNUMBER: 1 },
+      { NAME: 'Leslie', POSITION: 'CENTRE',       SHIRTNUMBER: 2 },
+      { NAME: 'Chris',  POSITION: 'WING DEFENCE', SHIRTNUMBER: 3 }
+    ];
+    const binds = {
+      inbv:
+      {
+        type: `${PKG}.TEAMTYPE`,
+        val: players
+      },
+      outbv:
+      {
+        type: `${PKG}.TEAMTYPE`,
+        dir: oracledb.BIND_OUT
       }
-    } catch (err) {
-      assert.fail(err);
+    };
+    const result = await conn.execute(CALL, binds);
+
+    for (let i = 0, out = result.outBinds.outbv; i < players.length; i++) {
+      assert.strictEqual(out[i].NAME, players[i].NAME);
+      assert.strictEqual(out[i].POSITION, players[i].POSITION);
+      assert.strictEqual(out[i].SHIRTNUMBER, players[i].SHIRTNUMBER);
     }
   }); // 212.1
 

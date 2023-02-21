@@ -45,31 +45,23 @@ describe('241. dbType04.js', function() {
 
   before(async function() {
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-    } catch (err) {
-      assert.fail(err);
-    }
+    conn = await oracledb.getConnection(dbconfig);
 
-    if (oracledb.oracleClientVersion >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+    if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
       isRunnable = true;
     }
     if (!isRunnable) {
       this.skip();
     }
 
-    try {
-      const sql = `
-        create table ${TABLE} (
-          id        number(9) not null,
-          jsonval   json not null
-        )
-      `;
-      const plsql = testsUtil.sqlCreateTable(TABLE, sql);
-      await conn.execute(plsql);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sql = `
+      create table ${TABLE} (
+        id        number(9) not null,
+        jsonval   json not null
+      )
+    `;
+    const plsql = testsUtil.sqlCreateTable(TABLE, sql);
+    await conn.execute(plsql);
     oracledb.stmtCacheSize = 0;
   }); // before()
 
@@ -79,13 +71,9 @@ describe('241. dbType04.js', function() {
       return;
     }
 
-    try {
-      const sql = `drop table ${TABLE} purge`;
-      await conn.execute(sql);
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sql = `drop table ${TABLE} purge`;
+    await conn.execute(sql);
+    await conn.close();
     oracledb.stmtCacheSize = default_stmtCacheSize;
   }); // after()
 
@@ -104,571 +92,462 @@ describe('241. dbType04.js', function() {
     };
 
     oracledb.extendedMetaData = true;
-    try {
-      const result = await conn.execute(SQL,
-        [{ val: jsonVal, type: oracledb.DB_TYPE_JSON }]);
+    const result = await conn.execute(SQL,
+      [{ val: jsonVal, type: oracledb.DB_TYPE_JSON }]);
 
-      // check to see if the column type is JSON
-      assert.strictEqual(result.metaData[0].dbTypeName, "JSON");
-      assert.strictEqual(result.metaData[0].dbType, oracledb.DB_TYPE_JSON);
-      assert.strictEqual(result.metaData[0].fetchType, oracledb.DB_TYPE_JSON);
-    } catch (err) {
-      assert.fail(err);
-    }
+    // check to see if the column type is JSON
+    assert.strictEqual(result.metaData[0].dbTypeName, "JSON");
+    assert.strictEqual(result.metaData[0].dbType, oracledb.DB_TYPE_JSON);
+    assert.strictEqual(result.metaData[0].fetchType, oracledb.DB_TYPE_JSON);
   }); // 241.1
 
   it('241.2 JSON type data binding', async () => {
-    try {
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const jsonId = 200;
-      const jsonVal = {
-        keyA: 8,
-        keyB: "A String",
-        keyC: Buffer.from("A Raw"),
-        keyD: true,
-        keyE: false,
-        keyF: null,
-        keyG: undefined,
-        keyH: [ 9, 10, 11 ],
-        keyI: new Date()
-      };
-      const binds = [
-        jsonId,
-        { val: jsonVal, type: oracledb.DB_TYPE_JSON }
-      ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const jsonId = 200;
+    const jsonVal = {
+      keyA: 8,
+      keyB: "A String",
+      keyC: Buffer.from("A Raw"),
+      keyD: true,
+      keyE: false,
+      keyF: null,
+      keyG: undefined,
+      keyH: [ 9, 10, 11 ],
+      keyI: new Date()
+    };
+    const binds = [
+      jsonId,
+      { val: jsonVal, type: oracledb.DB_TYPE_JSON }
+    ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      const out = result2.rows[0][1];
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    const out = result2.rows[0][1];
 
-      assert.strictEqual(out.keyA, jsonVal.keyA);
-      assert.strictEqual(out.keyB, jsonVal.keyB);
-      assert.strictEqual(out.keyC.toString(), 'A Raw');
-      assert.strictEqual(out.keyD, jsonVal.keyD);
-      assert.strictEqual(out.keyE, jsonVal.keyE);
-      assert.strictEqual(out.keyF, jsonVal.keyF);
-      assert.ifError(out.keyG);
-      assert.deepEqual(out.keyH, jsonVal.keyH);
-      assert.strictEqual(testsUtil.isDate(out.keyI), true);
-    } catch (err) {
-      assert.fail(err);
-    }
+    assert.strictEqual(out.keyA, jsonVal.keyA);
+    assert.strictEqual(out.keyB, jsonVal.keyB);
+    assert.strictEqual(out.keyC.toString(), 'A Raw');
+    assert.strictEqual(out.keyD, jsonVal.keyD);
+    assert.strictEqual(out.keyE, jsonVal.keyE);
+    assert.strictEqual(out.keyF, jsonVal.keyF);
+    assert.ifError(out.keyG);
+    assert.deepEqual(out.keyH, jsonVal.keyH);
+    assert.strictEqual(testsUtil.isDate(out.keyI), true);
   }); // 241.2
 
   it('241.3 query number type from JSON column', async () => {
-    try {
-      const jsonId = 3;
-      const sqlOne = `insert into ${TABLE} values (:1, '5')`;
-      const binds = [ jsonId ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 3;
+    const sqlOne = `insert into ${TABLE} values (:1, '5')`;
+    const binds = [ jsonId ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      assert.strictEqual(result2.rows[0][1], 5);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.strictEqual(result2.rows[0][1], 5);
   }); // 241.3
 
   it('241.4 query number type from JSON column', async () => {
-    try {
-      const jsonId = 4;
-      const sqlOne = `insert into ${TABLE} values (:1, '8.1234567899')`;
-      const binds = [ jsonId ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 4;
+    const sqlOne = `insert into ${TABLE} values (:1, '8.1234567899')`;
+    const binds = [ jsonId ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      const out = result2.rows[0][1];
-      assert.strictEqual(out, 8.1234567899);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    const out = result2.rows[0][1];
+    assert.strictEqual(out, 8.1234567899);
   }); // 241.4
 
   it('241.5 query array type', async () => {
-    try {
-      const jsonId = 5;
-      const sqlOne = `insert into ${TABLE} values (:1, '[1, 2, 3]')`;
-      const binds = [ jsonId ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 5;
+    const sqlOne = `insert into ${TABLE} values (:1, '[1, 2, 3]')`;
+    const binds = [ jsonId ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      assert.deepEqual(result2.rows[0][1], [1, 2, 3]);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.deepEqual(result2.rows[0][1], [1, 2, 3]);
   }); // 241.5
 
   it('241.6 query JSON', async () => {
-    try {
-      const jsonId = 6;
-      const sqlOne = `insert into ${TABLE} values (:1, '{"fred": 5, "george": 6}')`;
-      const binds = [ jsonId ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 6;
+    const sqlOne = `insert into ${TABLE} values (:1, '{"fred": 5, "george": 6}')`;
+    const binds = [ jsonId ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      assert.deepEqual(result2.rows[0][1], { fred: 5, george: 6 });
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.deepEqual(result2.rows[0][1], { fred: 5, george: 6 });
   }); // 241.6
 
   it('241.7 query json array', async () => {
-    try {
-      const jsonId = 7;
-      const sqlOne = `
-        insert into ${TABLE} values (:1,
-            json_array(
-              json_scalar(1),
-              json_scalar(-200),
-              json_scalar('Fred'),
-              json_scalar(utl_raw.cast_to_raw('George')),
-              json_scalar(to_clob('A short CLOB')),
-              json_scalar(to_blob(utl_raw.cast_to_raw('A short BLOB'))),
-              json_scalar(to_date('2020-02-21', 'YYYY-MM-DD')),
-              json_scalar(to_timestamp('2020-02-20 08:00:25',
-                      'YYYY-MM-DD HH24:MI:SS'))
-            returning json))
-      `;
-      const binds = [ jsonId ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 7;
+    const sqlOne = `
+      insert into ${TABLE} values (:1,
+          json_array(
+            json_scalar(1),
+            json_scalar(-200),
+            json_scalar('Fred'),
+            json_scalar(utl_raw.cast_to_raw('George')),
+            json_scalar(to_clob('A short CLOB')),
+            json_scalar(to_blob(utl_raw.cast_to_raw('A short BLOB'))),
+            json_scalar(to_date('2020-02-21', 'YYYY-MM-DD')),
+            json_scalar(to_timestamp('2020-02-20 08:00:25',
+                    'YYYY-MM-DD HH24:MI:SS'))
+          returning json))
+    `;
+    const binds = [ jsonId ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      const out = result2.rows[0][1];
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    const out = result2.rows[0][1];
 
-      assert.strictEqual(out[0], 1);
-      assert.strictEqual(out[1], -200);
-      assert.strictEqual(out[2], 'Fred');
+    assert.strictEqual(out[0], 1);
+    assert.strictEqual(out[1], -200);
+    assert.strictEqual(out[2], 'Fred');
 
-      assert.strictEqual(out[3].toString(), 'George');
-      assert.strictEqual(out[4], 'A short CLOB');
+    assert.strictEqual(out[3].toString(), 'George');
+    assert.strictEqual(out[4], 'A short CLOB');
 
-      assert.strictEqual(out[5].toString(), 'A short BLOB');
-      assert.strictEqual(testsUtil.isDate(out[6]), true);
-      assert.strictEqual(testsUtil.isDate(out[7]), true);
-    } catch (err) {
-      assert.fail(err);
-    }
+    assert.strictEqual(out[5].toString(), 'A short BLOB');
+    assert.strictEqual(testsUtil.isDate(out[6]), true);
+    assert.strictEqual(testsUtil.isDate(out[7]), true);
   }); // 241.7
 
   it('241.8 query json object', async () => {
-    try {
-      const jsonId = 8;
-      const sqlOne = `
-        insert into ${TABLE} values (:1,
-            json_object(key 'Fred' value json_scalar(5), key 'George' value json_scalar('A string')
-            returning json))
-      `;
-      const binds = [ jsonId ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 8;
+    const sqlOne = `
+      insert into ${TABLE} values (:1,
+          json_object(key 'Fred' value json_scalar(5), key 'George' value json_scalar('A string')
+          returning json))
+    `;
+    const binds = [ jsonId ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      const out = result2.rows[0][1];
-      assert.strictEqual(out['Fred'], 5);
-      assert.strictEqual(out['George'], 'A string');
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    const out = result2.rows[0][1];
+    assert.strictEqual(out['Fred'], 5);
+    assert.strictEqual(out['George'], 'A string');
   }); // 241.8
 
   it('241.9 binding Number gets converted to a JSON NUMBER value', async () => {
-    try {
-      const jsonId = 9;
-      const jsonVal = 2333;
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [
-        jsonId,
-        { val: jsonVal, type: oracledb.DB_TYPE_JSON }
-      ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 9;
+    const jsonVal = 2333;
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [
+      jsonId,
+      { val: jsonVal, type: oracledb.DB_TYPE_JSON }
+    ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      assert.strictEqual(result2.rows[0][1], jsonVal);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.strictEqual(result2.rows[0][1], jsonVal);
   }); // 241.9
 
   it('241.10 binding String gets converted to JSON VARCHAR2 value', async () => {
-    try {
-      const jsonId = 10;
-      const jsonVal = 'FooBar';
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [
-        jsonId,
-        { val: jsonVal, type: oracledb.DB_TYPE_JSON }
-      ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 10;
+    const jsonVal = 'FooBar';
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [
+      jsonId,
+      { val: jsonVal, type: oracledb.DB_TYPE_JSON }
+    ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      assert.strictEqual(result2.rows[0][1], jsonVal);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.strictEqual(result2.rows[0][1], jsonVal);
   }); // 241.10
 
   it('241.11 binding Date gets converted to JSON TIMESTAMP value', async () => {
-    try {
-      const jsonId = 11;
-      const jsonVal = new Date();
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [
-        jsonId,
-        { val: jsonVal, type: oracledb.DB_TYPE_JSON }
-      ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 11;
+    const jsonVal = new Date();
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [
+      jsonId,
+      { val: jsonVal, type: oracledb.DB_TYPE_JSON }
+    ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      assert.strictEqual(testsUtil.isDate(result2.rows[0][1]), true);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.strictEqual(testsUtil.isDate(result2.rows[0][1]), true);
   }); // 241.11
 
   it('241.12 binding Buffer gets converted to JSON RAW value', async () => {
-    try {
-      const jsonId = 12;
-      const jsonVal = Buffer.from("A Raw");
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [
-        jsonId,
-        { val: jsonVal, type: oracledb.DB_TYPE_JSON }
-      ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 12;
+    const jsonVal = Buffer.from("A Raw");
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [
+      jsonId,
+      { val: jsonVal, type: oracledb.DB_TYPE_JSON }
+    ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      assert.strictEqual(result2.rows[0][1].toString(), "A Raw");
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.strictEqual(result2.rows[0][1].toString(), "A Raw");
   }); // 241.12
 
   it('241.13 binding Array gets converted to JSON Array value', async () => {
-    try {
-      const jsonId = 13;
-      const jsonVal = [3, 4, 5];
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [
-        jsonId,
-        { val: jsonVal, type: oracledb.DB_TYPE_JSON }
-      ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 13;
+    const jsonVal = [3, 4, 5];
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [
+      jsonId,
+      { val: jsonVal, type: oracledb.DB_TYPE_JSON }
+    ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      assert.deepEqual(result2.rows[0][1], jsonVal);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.deepEqual(result2.rows[0][1], jsonVal);
   }); // 241.13
 
   it('241.14 binding simple dbobject with no attributes couldn\'t get converted to JSON Object value, returns an empty object', async () => {
 
-    try {
-      let sql =
-        `CREATE OR REPLACE TYPE NODE_OBJ AS OBJECT (
-          id NUMBER,
-          name VARCHAR2(30)
-        );`;
-      await conn.execute(sql);
+    let sql =
+      `CREATE OR REPLACE TYPE NODE_OBJ AS OBJECT (
+        id NUMBER,
+        name VARCHAR2(30)
+      );`;
+    await conn.execute(sql);
 
-      let objData = {
-        ID: 300,
-        NAME: 'Christopher Jones'
-      };
-      const objClass = await conn.getDbObjectClass("NODE_OBJ");
-      const jsonVal = new objClass(objData);
+    let objData = {
+      ID: 300,
+      NAME: 'Christopher Jones'
+    };
+    const objClass = await conn.getDbObjectClass("NODE_OBJ");
+    const jsonVal = new objClass(objData);
 
-      const jsonId = 14;
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [
-        jsonId,
-        { val: jsonVal, type: oracledb.DB_TYPE_JSON }
-      ];
+    const jsonId = 14;
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [
+      jsonId,
+      { val: jsonVal, type: oracledb.DB_TYPE_JSON }
+    ];
 
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select id, json_object(jsonval) from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      assert.strictEqual(result2.rows[0][0], jsonId);
-      assert.deepEqual(result2.rows[0][1], "{\"jsonval\":{}}");
-
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select id, json_object(jsonval) from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.strictEqual(result2.rows[0][0], jsonId);
+    assert.deepEqual(result2.rows[0][1], "{\"jsonval\":{}}");
   }); // 241.14
 
   it('241.15 null', async () => {
-    try {
-      const jsonId = 15;
-      const jsonVal = null;
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [
-        jsonId,
-        { val: jsonVal, type: oracledb.DB_TYPE_JSON }
-      ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 15;
+    const jsonVal = null;
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [
+      jsonId,
+      { val: jsonVal, type: oracledb.DB_TYPE_JSON }
+    ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      assert.strictEqual(result2.rows[0][1], jsonVal);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.strictEqual(result2.rows[0][1], jsonVal);
   }); // 241.15
 
   it('241.16 "undefined" gets converted to a JSON "NULL" value', async () => {
-    try {
-      const jsonId = 16;
-      const jsonVal = undefined;
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [
-        jsonId,
-        { val: jsonVal, type: oracledb.DB_TYPE_JSON }
-      ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 16;
+    const jsonVal = undefined;
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [
+      jsonId,
+      { val: jsonVal, type: oracledb.DB_TYPE_JSON }
+    ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      assert.strictEqual(result2.rows[0][1], null);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.strictEqual(result2.rows[0][1], null);
   }); // 241.16
 
   it('241.17 true', async () => {
-    try {
-      const jsonId = 17;
-      const jsonVal = true;
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [
-        jsonId,
-        { val: jsonVal, type: oracledb.DB_TYPE_JSON }
-      ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 17;
+    const jsonVal = true;
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [
+      jsonId,
+      { val: jsonVal, type: oracledb.DB_TYPE_JSON }
+    ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      assert.strictEqual(result2.rows[0][1], jsonVal);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.strictEqual(result2.rows[0][1], jsonVal);
   }); // 241.17
 
   it('241.18 false', async () => {
-    try {
-      const jsonId = 18;
-      const jsonVal = false;
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [
-        jsonId,
-        { val: jsonVal, type: oracledb.DB_TYPE_JSON }
-      ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 18;
+    const jsonVal = false;
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [
+      jsonId,
+      { val: jsonVal, type: oracledb.DB_TYPE_JSON }
+    ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      assert.strictEqual(result2.rows[0][1], jsonVal);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.strictEqual(result2.rows[0][1], jsonVal);
   }); // 241.18
 
   it('241.19 empty string', async () => {
-    try {
-      const jsonId = 19;
-      const jsonVal = "";
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [
-        jsonId,
-        { val: jsonVal, type: oracledb.DB_TYPE_JSON }
-      ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 19;
+    const jsonVal = "";
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [
+      jsonId,
+      { val: jsonVal, type: oracledb.DB_TYPE_JSON }
+    ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      assert.strictEqual(result2.rows[0][1], jsonVal);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.strictEqual(result2.rows[0][1], jsonVal);
   }); // 241.19
 
   it('241.20 empty json', async () => {
-    try {
-      const jsonId = 20;
-      const jsonVal = {};
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [
-        jsonId,
-        { val: jsonVal, type: oracledb.DB_TYPE_JSON }
-      ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 20;
+    const jsonVal = {};
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [
+      jsonId,
+      { val: jsonVal, type: oracledb.DB_TYPE_JSON }
+    ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      const result2 = await conn.execute(sqlTwo);
-      assert.deepEqual(result2.rows[0][1], jsonVal);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.deepEqual(result2.rows[0][1], jsonVal);
   }); // 241.20
 
   it.skip('241.21 NaN', async () => {
-    try {
-      const jsonId = 21;
-      const jsonVal = NaN;
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [
-        jsonId,
-        { val: jsonVal, type: oracledb.DB_TYPE_JSON }
-      ];
-      const result1 = await conn.execute(sqlOne, binds);
-      //assert.strictEqual(result1.rowsAffected, 1);
-      console.log(result1);
-      // const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      // const result2 = await conn.execute(sqlTwo);
-      // console.log(result2.rows[0][1]);
-      // assert.strictEqual(result2.rows[0][1], jsonVal);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const jsonId = 21;
+    const jsonVal = NaN;
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [
+      jsonId,
+      { val: jsonVal, type: oracledb.DB_TYPE_JSON }
+    ];
+    const result1 = await conn.execute(sqlOne, binds);
+    //assert.strictEqual(result1.rowsAffected, 1);
+    console.log(result1);
+    // const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    // const result2 = await conn.execute(sqlTwo);
+    // console.log(result2.rows[0][1]);
+    // assert.strictEqual(result2.rows[0][1], jsonVal);
   }); // 241.21
 
   it('241.22 Negative - implicitly binding JSON', async () => {
-    try {
-      const jsonId = 22;
-      const jsonVal = { "fred": 5, "george": 6 };
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [ jsonId, jsonVal ];
+    const jsonId = 22;
+    const jsonVal = { "fred": 5, "george": 6 };
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [ jsonId, jsonVal ];
 
-      await assert.rejects(
-        async () => {
-          await conn.execute(sqlOne, binds);
-        },
-        /NJS-044/
-      );
-      // NJS-044: bind object must contain one of the following keys: "dir", "type", "maxSize", or "val"
-
-    } catch (err) {
-      assert.fail(err);
-    }
+    await assert.rejects(
+      async () => {
+        await conn.execute(sqlOne, binds);
+      },
+      /NJS-044/
+    );
+    // NJS-044: bind object must contain one of the following keys: "dir", "type", "maxSize", or "val"
   }); // 241.22
 
   it('241.23 Negative - type mismatch', async () => {
-    try {
-      const jsonId = 23;
-      const jsonVal = { "fred": 5, "george": 6 };
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [
-        jsonId,
-        { val: jsonVal }
-      ];
+    const jsonId = 23;
+    const jsonVal = { "fred": 5, "george": 6 };
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [
+      jsonId,
+      { val: jsonVal }
+    ];
 
-      await assert.rejects(
-        async () => {
-          await conn.execute(sqlOne, binds);
-        },
-        /NJS-012/
-      );
-      // NJS-012: encountered invalid bind data type in parameter 2
-
-    } catch (err) {
-      assert.fail(err);
-    }
+    await assert.rejects(
+      async () => {
+        await conn.execute(sqlOne, binds);
+      },
+      /NJS-012/
+    );
+    // NJS-012: encountered invalid bind data type in parameter 2
   }); // 241.23
 
   it('241.24 Negative - type mismatch', async () => {
-    try {
-      const jsonId = 24;
-      const jsonVal = { "fred": 5, "george": 6 };
-      const sqlOne = `insert into ${TABLE} values (:1, :2)`;
-      const binds = [
-        jsonId,
-        { val: jsonVal, type: oracledb.DB_TYPE_NUMBER }
-      ];
+    const jsonId = 24;
+    const jsonVal = { "fred": 5, "george": 6 };
+    const sqlOne = `insert into ${TABLE} values (:1, :2)`;
+    const binds = [
+      jsonId,
+      { val: jsonVal, type: oracledb.DB_TYPE_NUMBER }
+    ];
 
-      await assert.rejects(
-        async () => {
-          await conn.execute(sqlOne, binds);
-        },
-        /NJS-011/
-      );
-      // NJS-011: encountered bind value and type mismatch
-
-    } catch (err) {
-      assert.fail(err);
-    }
+    await assert.rejects(
+      async () => {
+        await conn.execute(sqlOne, binds);
+      },
+      /NJS-011/
+    );
+    // NJS-011: encountered bind value and type mismatch
   }); // 241.24
 
   it('241.25 Negative - query INTERVAL YEAR TO MONTH', async () => {
-    try {
-      const jsonId = 25;
-      const sqlOne = `insert into ${TABLE} values (:1, json_scalar(to_yminterval('+5-9')))`;
-      const binds = [ jsonId ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 25;
+    const sqlOne = `insert into ${TABLE} values (:1, json_scalar(to_yminterval('+5-9')))`;
+    const binds = [ jsonId ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      await assert.rejects(
-        async () => {
-          await conn.execute(sqlTwo);
-        },
-        /NJS-078/
-      );
-      // NJS-078: unsupported data type 2016 in JSON value
-
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    await assert.rejects(
+      async () => {
+        await conn.execute(sqlTwo);
+      },
+      /NJS-078/
+    );
+    // NJS-078: unsupported data type 2016 in JSON value
   }); // 241.25
 
   it('241.26 Negative - query INTERVAL DAY TO SECOND', async () => {
-    try {
-      const jsonId = 26;
-      const sqlOne = `insert into ${TABLE} values (:1, json_scalar(to_dsinterval('P25DT8H25M')))`;
-      const binds = [ jsonId ];
-      const result1 = await conn.execute(sqlOne, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
+    const jsonId = 26;
+    const sqlOne = `insert into ${TABLE} values (:1, json_scalar(to_dsinterval('P25DT8H25M')))`;
+    const binds = [ jsonId ];
+    const result1 = await conn.execute(sqlOne, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
 
-      const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-      await assert.rejects(
-        async () => {
-          await conn.execute(sqlTwo);
-        },
-        /NJS-078/
-      );
-      // NJS-078: unsupported data type 2016 in JSON value
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    await assert.rejects(
+      async () => {
+        await conn.execute(sqlTwo);
+      },
+      /NJS-078/
+    );
+    // NJS-078: unsupported data type 2016 in JSON value
   }); // 241.26
 
 });

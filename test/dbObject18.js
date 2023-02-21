@@ -52,87 +52,50 @@ describe('242. dbObject18.js', () => {
     }); // after()
 
     it('242.1.1 oracledb.dbObjectAsPojo could be set without connection', function() {
-      try {
-        oracledb.dbObjectAsPojo = true;
-        assert.strictEqual(oracledb.dbObjectAsPojo, true);
-      } catch (err) {
-        assert.fail(err);
-      }
+      oracledb.dbObjectAsPojo = true;
+      assert.strictEqual(oracledb.dbObjectAsPojo, true);
     }); // 242.1.1
 
     it('242.1.2 oracledb.dbObjectAsPojo could be set without connection', function() {
-      try {
-        oracledb.dbObjectAsPojo = false;
-        assert.strictEqual(oracledb.dbObjectAsPojo, false);
-      } catch (err) {
-        assert.fail(err);
-      }
+      oracledb.dbObjectAsPojo = false;
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.2
 
     it('242.1.3 set oracledb.dbObjectAsPojo to value of oracledb.autoCommit', function() {
-      try {
-        oracledb.dbObjectAsPojo = oracledb.autoCommit;
-        assert.strictEqual(oracledb.dbObjectAsPojo, oracledb.autoCommit);
-      } catch (err) {
-        assert.fail(err);
-      }
+      oracledb.dbObjectAsPojo = oracledb.autoCommit;
+      assert.strictEqual(oracledb.dbObjectAsPojo, oracledb.autoCommit);
     }); // 242.1.3
 
     it('242.1.4 set oracledb.dbObjectAsPojo to value of Boolean("false")', function() {
       const value = Boolean("false");
       console.dir(value);
-      try {
-        oracledb.dbObjectAsPojo = value;
-        assert.strictEqual(oracledb.dbObjectAsPojo, true);
-      } catch (err) {
-        assert.fail(err);
-        // console.log(oracledb.dbObjectAsPojo);
-      }
+      oracledb.dbObjectAsPojo = value;
+      assert.strictEqual(oracledb.dbObjectAsPojo, true);
     }); // 242.1.4
 
     it('242.1.5 set oracledb.dbObjectAsPojo to value of JSON.parse(\'true\')', function() {
-      try {
-        oracledb.dbObjectAsPojo = JSON.parse('true');
-        assert.strictEqual(oracledb.dbObjectAsPojo, true);
-      } catch (err) {
-        assert.fail(err);
-      }
+      oracledb.dbObjectAsPojo = JSON.parse('true');
+      assert.strictEqual(oracledb.dbObjectAsPojo, true);
     }); // 242.1.5
 
     it('242.1.6 set oracledb.dbObjectAsPojo to value of JSON.parse(\'false\')', function() {
-      try {
-        oracledb.dbObjectAsPojo = JSON.parse('false');
-        assert.strictEqual(oracledb.dbObjectAsPojo, false);
-      } catch (err) {
-        assert.fail(err);
-      }
+      oracledb.dbObjectAsPojo = JSON.parse('false');
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.6
 
     it('242.1.7 set oracledb.dbObjectAsPojo to value of Boolean(true)', function() {
-      try {
-        oracledb.dbObjectAsPojo = Boolean(true);
-        assert.strictEqual(oracledb.dbObjectAsPojo, true);
-      } catch (err) {
-        assert.fail(err);
-      }
+      oracledb.dbObjectAsPojo = Boolean(true);
+      assert.strictEqual(oracledb.dbObjectAsPojo, true);
     }); // 242.1.7
 
     it('242.1.8 set oracledb.dbObjectAsPojo to value of Boolean(\'false\')', function() {
-      try {
-        oracledb.dbObjectAsPojo = Boolean('false');
-        assert.strictEqual(oracledb.dbObjectAsPojo, true);
-      } catch (err) {
-        assert.fail(err);
-      }
+      oracledb.dbObjectAsPojo = Boolean('false');
+      assert.strictEqual(oracledb.dbObjectAsPojo, true);
     }); // 242.1.8
 
     it('242.1.9 set oracledb.dbObjectAsPojo to value of Boolean(false)', function() {
-      try {
-        oracledb.dbObjectAsPojo = Boolean(false);
-        assert.strictEqual(oracledb.dbObjectAsPojo, false);
-      } catch (err) {
-        assert.fail(err);
-      }
+      oracledb.dbObjectAsPojo = Boolean(false);
+      assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.9
 
     it('242.1.10 negative: set oracledb.dbObjectAsPojo to invalid value: null', async () => {

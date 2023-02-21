@@ -49,7 +49,7 @@ describe('238. soda14.js', () => {
   before(async function() {
     let isSodaRunnable = await testsUtil.isSodaRunnable();
 
-    const clientVersion = oracledb.oracleClientVersion;
+    const clientVersion = testsUtil.getClientVersion();
     let isClientOK;
     if (clientVersion < 2000000000) {
       isClientOK = false;

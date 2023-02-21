@@ -46,9 +46,9 @@ describe('257. sodahint.js', () => {
 
     // The SODA hint is available with Oracle Client 21.3 and
     // in 19 from 19.11
-    if (oracledb.oracleClientVersion < 2103000000) {
-      if (oracledb.oracleClientVersion < 1911000000 ||
-          oracledb.oracleClientVersion >= 2000000000) {
+    const clientVersion = testsUtil.getClientVersion();
+    if (clientVersion < 2103000000) {
+      if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
         this.skip();
         return;
       }
@@ -70,11 +70,7 @@ describe('257. sodahint.js', () => {
     if (!runnable) {
       return;
     }
-    try {
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.close();
   }); // after()
 
   const inContent = { id: 1, name: "Paul",  office: "Singapore" };

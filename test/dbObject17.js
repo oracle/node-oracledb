@@ -46,97 +46,82 @@ describe('216. dbObject17.js', () => {
   const TEAM_T   = 'NODB_TYP_TEAM_17';
 
   before(async () => {
-    try {
-      conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbconfig);
 
-      let plsql = `
-        CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
-          shirtnumber NUMBER,
-          name        VARCHAR2(20),
-          ts          TIMESTAMP,
-          tsz         TIMESTAMP WITH TIME ZONE,
-          ltz         TIMESTAMP WITH LOCAL TIME ZONE
-        );
-      `;
-      await conn.execute(plsql);
+    let plsql = `
+      CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
+        shirtnumber NUMBER,
+        name        VARCHAR2(20),
+        ts          TIMESTAMP,
+        tsz         TIMESTAMP WITH TIME ZONE,
+        ltz         TIMESTAMP WITH LOCAL TIME ZONE
+      );
+    `;
+    await conn.execute(plsql);
 
-      plsql = `
-        CREATE OR REPLACE TYPE ${TEAM_T} AS VARRAY(10) OF ${PLAYER_T};
-      `;
-      await conn.execute(plsql);
+    plsql = `
+      CREATE OR REPLACE TYPE ${TEAM_T} AS VARRAY(10) OF ${PLAYER_T};
+    `;
+    await conn.execute(plsql);
 
-      const sql = `
-        CREATE TABLE ${TABLE} (sportname VARCHAR2(20), team ${TEAM_T})
-      `;
-      plsql = testsUtil.sqlCreateTable(TABLE, sql);
-      await conn.execute(plsql);
-
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sql = `
+      CREATE TABLE ${TABLE} (sportname VARCHAR2(20), team ${TEAM_T})
+    `;
+    plsql = testsUtil.sqlCreateTable(TABLE, sql);
+    await conn.execute(plsql);
   }); // before()
 
   after(async () => {
-    try {
+    let sql = `DROP TABLE ${TABLE} PURGE`;
+    await conn.execute(sql);
 
-      let sql = `DROP TABLE ${TABLE} PURGE`;
-      await conn.execute(sql);
+    sql = `DROP TYPE ${TEAM_T} FORCE`;
+    await conn.execute(sql);
 
-      sql = `DROP TYPE ${TEAM_T} FORCE`;
-      await conn.execute(sql);
+    sql = `DROP TYPE ${PLAYER_T} FORCE`;
+    await conn.execute(sql);
 
-      sql = `DROP TYPE ${PLAYER_T} FORCE`;
-      await conn.execute(sql);
-
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.close();
   }); // after()
 
   it('216.1 VARRAY Collection. Object columns contain TS, TSZ and LTZ', async () => {
-    try {
-      const TeamTypeClass = await conn.getDbObjectClass(TEAM_T);
+    const TeamTypeClass = await conn.getDbObjectClass(TEAM_T);
 
-      // Insert with explicit constructor
-      const FrisbeePlayers = [
-        {
-          SHIRTNUMBER: 11,
-          NAME: 'Elizabeth',
-          TS:  new Date(1986, 8, 18, 12, 14, 27, 0),
-          TSZ: new Date(1989, 3, 4, 10, 27, 16, 201),
-          LTZ: new Date(1999, 5, 4, 11, 23, 5, 45)
-        },
-        {
-          SHIRTNUMBER: 22,
-          NAME: 'Frank',
-          TS:  new Date(1987, 8, 18, 12, 14, 27, 0),
-          TSZ: new Date(1990, 3, 4, 10, 27, 16, 201),
-          LTZ: new Date(2000, 5, 4, 11, 23, 5, 45)
-        }
-      ];
-      const FrisbeeTeam = new TeamTypeClass(FrisbeePlayers);
-
-      let sql = `INSERT INTO ${TABLE} VALUES (:sn, :t)`;
-      const binds = { sn: "Frisbee", t: FrisbeeTeam };
-      const result1 = await conn.execute(sql, binds);
-      assert.strictEqual(result1.rowsAffected, 1);
-
-      sql = `SELECT * FROM ${TABLE}`;
-      const result = await conn.execute(sql, [], { outFormat:oracledb.OUT_FORMAT_OBJECT });
-
-      assert.strictEqual(result.rows[0].SPORTNAME, 'Frisbee');
-
-      for (let i = 0; i < result.rows[0].TEAM.length; i++) {
-        assert.strictEqual(result.rows[0].TEAM[i].SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
-        assert.strictEqual(result.rows[0].TEAM[i].NAME, FrisbeePlayers[i].NAME);
-        // assert.strictEqual(result.rows[0].TEAM[i].TS.getTime(), FrisbeePlayers[i].TS.getTime());
-        assert.strictEqual(result.rows[0].TEAM[i].TSZ.getTime(), FrisbeePlayers[i].TSZ.getTime());
-        assert.strictEqual(result.rows[0].TEAM[i].LTZ.getTime(), FrisbeePlayers[i].LTZ.getTime());
+    // Insert with explicit constructor
+    const FrisbeePlayers = [
+      {
+        SHIRTNUMBER: 11,
+        NAME: 'Elizabeth',
+        TS:  new Date(1986, 8, 18, 12, 14, 27, 0),
+        TSZ: new Date(1989, 3, 4, 10, 27, 16, 201),
+        LTZ: new Date(1999, 5, 4, 11, 23, 5, 45)
+      },
+      {
+        SHIRTNUMBER: 22,
+        NAME: 'Frank',
+        TS:  new Date(1987, 8, 18, 12, 14, 27, 0),
+        TSZ: new Date(1990, 3, 4, 10, 27, 16, 201),
+        LTZ: new Date(2000, 5, 4, 11, 23, 5, 45)
       }
-    } catch (err) {
-      console.log(err);
-      assert.fail(err);
+    ];
+    const FrisbeeTeam = new TeamTypeClass(FrisbeePlayers);
+
+    let sql = `INSERT INTO ${TABLE} VALUES (:sn, :t)`;
+    const binds = { sn: "Frisbee", t: FrisbeeTeam };
+    const result1 = await conn.execute(sql, binds);
+    assert.strictEqual(result1.rowsAffected, 1);
+
+    sql = `SELECT * FROM ${TABLE}`;
+    const result = await conn.execute(sql, [], { outFormat:oracledb.OUT_FORMAT_OBJECT });
+
+    assert.strictEqual(result.rows[0].SPORTNAME, 'Frisbee');
+
+    for (let i = 0; i < result.rows[0].TEAM.length; i++) {
+      assert.strictEqual(result.rows[0].TEAM[i].SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
+      assert.strictEqual(result.rows[0].TEAM[i].NAME, FrisbeePlayers[i].NAME);
+      // assert.strictEqual(result.rows[0].TEAM[i].TS.getTime(), FrisbeePlayers[i].TS.getTime());
+      assert.strictEqual(result.rows[0].TEAM[i].TSZ.getTime(), FrisbeePlayers[i].TSZ.getTime());
+      assert.strictEqual(result.rows[0].TEAM[i].LTZ.getTime(), FrisbeePlayers[i].LTZ.getTime());
     }
   }); // 216.1
 });

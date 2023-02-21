@@ -63,6 +63,19 @@ testsUtil.sqlCreateTable = function(tableName, sql) {
   `;
 };
 
+testsUtil.sqlDropSource = function(sourceType, sourceName) {
+  return `
+    DECLARE
+        e_source_missing EXCEPTION;
+        PRAGMA EXCEPTION_INIT(e_source_missing, -4043);
+    BEGIN
+        EXECUTE IMMEDIATE ('DROP ${sourceType} ${sourceName}');
+    EXCEPTION
+        WHEN e_source_missing THEN NULL;
+    END;
+  `;
+};
+
 testsUtil.sqlDropTable = function(tableName) {
   return `
     DECLARE
@@ -96,6 +109,13 @@ testsUtil.createTable = async function(tableName, sql) {
   await conn.close();
 };
 
+testsUtil.dropSource = async function(sourceType, sourceName) {
+  let plsql = testsUtil.sqlDropSource(sourceType, sourceName);
+  const conn = await oracledb.getConnection(dbconfig);
+  await conn.execute(plsql);
+  await conn.close();
+};
+
 testsUtil.dropTable = async function(tableName) {
   let plsql = testsUtil.sqlDropTable(tableName);
   const conn = await oracledb.getConnection(dbconfig);
@@ -104,7 +124,7 @@ testsUtil.dropTable = async function(tableName) {
 };
 
 testsUtil.checkPrerequisites = async function(clientVersion = 1805000000, serverVersion = 1805000000) {
-  if (oracledb.oracleClientVersion < clientVersion) return false;
+  if (testsUtil.getClientVersion() < clientVersion) return false;
   try {
     let connection = await oracledb.getConnection(dbconfig);
     if (connection.oracleServerVersion < serverVersion) return false;
@@ -116,7 +136,7 @@ testsUtil.checkPrerequisites = async function(clientVersion = 1805000000, server
 };
 
 testsUtil.isSodaRunnable = async function() {
-  const clientVersion = oracledb.oracleClientVersion;
+  const clientVersion = testsUtil.getClientVersion();
   let serverVersion;
   try {
     const conn = await oracledb.getConnection(dbconfig);
@@ -151,22 +171,18 @@ testsUtil.generateRandomPassword = function(length = 6) {
 testsUtil.getDBCompatibleVersion = async function() {
   let compatibleVersion;
   if (dbconfig.test.DBA_PRIVILEGE) {
-    try {
-      const connectionDetails = {
-        user          : dbconfig.test.DBA_user,
-        password      : dbconfig.test.DBA_password,
-        connectString : dbconfig.connectString,
-        privilege     : oracledb.SYSDBA,
-      };
-      let conn = await oracledb.getConnection(connectionDetails);
-      let res = await conn.execute("select name, value from v$parameter where name = 'compatible'");
-      if (res.rows.length > 0) {
-        compatibleVersion = res.rows[0][1];
-      }
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
+    const connectionDetails = {
+      user          : dbconfig.test.DBA_user,
+      password      : dbconfig.test.DBA_password,
+      connectString : dbconfig.connectString,
+      privilege     : oracledb.SYSDBA,
+    };
+    let conn = await oracledb.getConnection(connectionDetails);
+    let res = await conn.execute("select name, value from v$parameter where name = 'compatible'");
+    if (res.rows.length > 0) {
+      compatibleVersion = res.rows[0][1];
     }
+    await conn.close();
   }
   return compatibleVersion;
 };
@@ -213,13 +229,9 @@ testsUtil.getLocalIPAddress = function() {
 
 testsUtil.measureNetworkRoundTripTime = async function() {
   const startTime = +new Date();
-  try {
-    let conn = await oracledb.getConnection(dbconfig);
-    await conn.execute("select * from dual");
-    await conn.close();
-  } catch (err) {
-    assert.fail(err);
-  }
+  const conn = await oracledb.getConnection(dbconfig);
+  await conn.execute("select * from dual");
+  await conn.close();
   return new Date() - startTime;
 };
 
@@ -308,13 +320,9 @@ testsUtil.createAQtestUser = async function(AQ_USER, AQ_USER_PWD) {
     END;
     `;
 
-    try {
-      const connAsDBA = await oracledb.getConnection(dbaCredential);
-      await connAsDBA.execute(plsql);
-      await connAsDBA.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    const connAsDBA = await oracledb.getConnection(dbaCredential);
+    await connAsDBA.execute(plsql);
+    await connAsDBA.close();
 
   }
 };
@@ -332,13 +340,9 @@ testsUtil.dropAQtestUser = async function(AQ_USER) {
       privilege:     oracledb.SYSDBA
     };
 
-    try {
-      const connAsDBA = await oracledb.getConnection(dbaCredential);
-      let sql = `DROP USER ${AQ_USER} CASCADE`;
-      await connAsDBA.execute(sql);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const connAsDBA = await oracledb.getConnection(dbaCredential);
+    let sql = `DROP USER ${AQ_USER} CASCADE`;
+    await connAsDBA.execute(sql);
   }
 };
 
@@ -394,4 +398,49 @@ testsUtil.isDate = function(date) {
   } else {
     return true;
   }
+};
+
+// return client version in use
+testsUtil.getClientVersion = function() {
+  return oracledb.oracleClientVersion;
+};
+
+// function to determine if objects are equal to each other
+testsUtil.isDeepEqual = function(x, y) {
+
+  // if values match, no need to check further
+  if (x === y)
+    return true;
+
+  // both values must not be null
+  if (x === null || y === null)
+    return false;
+
+  // both values must be an object
+  if (typeof x !== 'object' || typeof y !== 'object')
+    return false;
+
+  // both objects must have the same number of keys
+  if (Object.keys(x).length != Object.keys(y).length)
+    return false;
+
+  // each key must have the same value
+  for (let key in x) {
+    if (!testsUtil.isDeepEqual(x[key], y[key]))
+      return false;
+  }
+
+  return true;
+};
+
+// function to assert that an array contains the specified value
+testsUtil.assertOneOf = function(array, value) {
+  let matches = false;
+  for (let i = 0; i < array.length; i++) {
+    if (testsUtil.isDeepEqual(array[i], value)) {
+      matches = true;
+      break;
+    }
+  }
+  assert(matches);
 };

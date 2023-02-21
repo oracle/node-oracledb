@@ -32,8 +32,8 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const should   = require('should');
 const dbconfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('253. jsonBind1.js', function() {
   let conn = null;
@@ -66,40 +66,29 @@ describe('253. jsonBind1.js', function() {
                      "END;";
   let skip = false;
   before (async function() {
-    try {
-      oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
-      oracledb.extendedMetaData = true;
-      conn = await oracledb.getConnection(dbconfig);
-      if (conn.oracleServerVersion < 2100000000) {
-        skip = true;
-        this.skip();
-      }
-      await conn.execute(create_table_sql);
-      await conn.commit();
-    } catch (err) {
-      should.not.exist(err);
+    oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
+    oracledb.extendedMetaData = true;
+    conn = await oracledb.getConnection(dbconfig);
+    if (conn.oracleServerVersion < 2100000000) {
+      skip = true;
+      this.skip();
     }
+    await conn.execute(create_table_sql);
+    await conn.commit();
   });
 
   after (async function() {
-    try {
-      if (!skip) {
-        await conn.execute("DROP TABLE " + tableName + " PURGE");
-      }
+    oracledb.outFormat = outFormatBak;
+    if (!skip) {
+      await conn.execute("DROP TABLE " + tableName + " PURGE");
+    }
+    if (conn) {
       await conn.close();
-    } catch (err) {
-      should.not.exist(err);
-    } finally {
-      oracledb.outFormat = outFormatBak;
     }
   });
 
   beforeEach(async function() {
-    try {
-      await conn.execute(`Delete from ` + tableName);
-    } catch (error) {
-      should.not.exist(error);
-    }
+    await conn.execute(`Delete from ` + tableName);
   });
 
   describe('253.1 Map javascript object directly into JSON', function() {
@@ -109,7 +98,7 @@ describe('253. jsonBind1.js', function() {
       const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
       // With older client versions, insert as a JSON string
@@ -127,16 +116,16 @@ describe('253. jsonBind1.js', function() {
         j = JSON.parse(d);
       }
 
-      should.equal(j.empId, 1);
-      should.equal(j.empName, 'Employee1');
-      should.equal(j.city, 'New City');
+      assert.strictEqual(j.empId, 1);
+      assert.strictEqual(j.empName, 'Employee1');
+      assert.strictEqual(j.city, 'New City');
     });
 
     it('253.1.2 Boolean and null value', async function() {
       const data = { "middlename": null, "honest": true};
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
       // With older client versions, insert as a JSON string
@@ -154,15 +143,15 @@ describe('253. jsonBind1.js', function() {
         j = JSON.parse(d);
       }
 
-      should.equal(j.middlename, null);
-      should.equal(j.honest, true);
+      assert.strictEqual(j.middlename, null);
+      assert.strictEqual(j.honest, true);
     });
 
     it('253.1.3 Array type', async function() {
       const data = { "employees":[ "Employee1", "Employee2", "Employee3" ] };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
       // With older client versions, insert as a JSON string
@@ -180,15 +169,15 @@ describe('253. jsonBind1.js', function() {
         j = JSON.parse(d);
       }
 
-      should.equal(j.employees[0], 'Employee1');
-      should.equal(j.employees[1], 'Employee2');
-      should.equal(j.employees[2], 'Employee3');
+      assert.strictEqual(j.employees[0], 'Employee1');
+      assert.strictEqual(j.employees[1], 'Employee2');
+      assert.strictEqual(j.employees[2], 'Employee3');
     });
 
     it('253.1.4 Object type', async function() {
       const data = { "employee":{ "name":"Employee1", "age":30, "city":"New City" } };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
-      if (oracledb.oracleClientVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -203,16 +192,16 @@ describe('253. jsonBind1.js', function() {
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
       }
-      should.equal(j.employee.name, 'Employee1');
-      should.equal(j.employee.age, 30);
-      should.equal(j.employee.city, 'New City');
+      assert.strictEqual(j.employee.name, 'Employee1');
+      assert.strictEqual(j.employee.age, 30);
+      assert.strictEqual(j.employee.city, 'New City');
     });
 
     it('253.1.5 Using JSON_VALUE to extract a value from a JSON column', async function() {
       const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -226,14 +215,14 @@ describe('253. jsonBind1.js', function() {
         [], {outFormat: oracledb.OUT_FORMAT_ARRAY});
       j = result.rows[0][0];
 
-      should.equal(j, 'Employee1');
+      assert.strictEqual(j, 'Employee1');
     });
 
     it('253.1.6 Using dot-notation to extract a value from a JSON column', async function() {
       const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
-      if (oracledb.oracleClientVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
       } else {
         const s = JSON.stringify(data);
@@ -253,7 +242,7 @@ describe('253. jsonBind1.js', function() {
         j = JSON.parse(d);
       }
 
-      should.equal(j, 'Employee1');
+      assert.strictEqual(j, 'Employee1');
     });
 
     it('253.1.7 Using JSON_OBJECT to extract relational data as JSON', async function() {
@@ -263,11 +252,11 @@ describe('253. jsonBind1.js', function() {
       );
 
       j = JSON.parse(result.rows[0].DUMMY);
-      should.equal(j.key, 'X');
+      assert.strictEqual(j.key, 'X');
     });
 
     it('253.1.8 Number, String type with BIND_INOUT', async function() {
-      if (oracledb.oracleClientVersion < 2100000000) {
+      if (testsUtil.getClientVersion() < 2100000000) {
         this.skip();
       }
       const data = { "empId": 1, "empName": "Employee1", "city": "New City" };
@@ -279,14 +268,14 @@ describe('253. jsonBind1.js', function() {
 
       j = result.outBinds.io;
 
-      should.equal(j.empId, 1);
-      should.equal(j.empName, 'Employee1');
-      should.equal(j.city, 'New City');
+      assert.strictEqual(j.empId, 1);
+      assert.strictEqual(j.empName, 'Employee1');
+      assert.strictEqual(j.city, 'New City');
       await conn.execute("drop PROCEDURE nodb_bindjson");
     });
 
     it('253.1.9 Boolean and null value with BIND_INOUT', async function() {
-      if (oracledb.oracleClientVersion < 2100000000) {
+      if (testsUtil.getClientVersion() < 2100000000) {
         this.skip();
       }
       const data = { "middlename": null, "honest": true};
@@ -298,13 +287,13 @@ describe('253. jsonBind1.js', function() {
 
       j = result.outBinds.io;
 
-      should.equal(j.middlename, null);
-      should.equal(j.honest, true);
+      assert.strictEqual(j.middlename, null);
+      assert.strictEqual(j.honest, true);
       await conn.execute("drop PROCEDURE nodb_bindjson");
     });
 
     it('253.1.10 Array type with BIND_INOUT', async function() {
-      if (oracledb.oracleClientVersion < 2100000000) {
+      if (testsUtil.getClientVersion() < 2100000000) {
         this.skip();
       }
       const data = { "employees":[ "Employee1", "Employee2", "Employee3" ] };
@@ -316,14 +305,14 @@ describe('253. jsonBind1.js', function() {
 
       j = result.outBinds.io;
 
-      should.equal(j.employees[0], 'Employee1');
-      should.equal(j.employees[1], 'Employee2');
-      should.equal(j.employees[2], 'Employee3');
+      assert.strictEqual(j.employees[0], 'Employee1');
+      assert.strictEqual(j.employees[1], 'Employee2');
+      assert.strictEqual(j.employees[2], 'Employee3');
       await conn.execute("drop PROCEDURE nodb_bindjson");
     });
 
     it('253.1.11 Object type with BIND_INOUT', async function() {
-      if (oracledb.oracleClientVersion < 2100000000) {
+      if (testsUtil.getClientVersion() < 2100000000) {
         this.skip();
       }
       const data = { "employee":{ "name":"Employee1", "age":30, "city":"New City" } };
@@ -335,9 +324,9 @@ describe('253. jsonBind1.js', function() {
 
       j = result.outBinds.io;
 
-      should.equal(j.employee.name, 'Employee1');
-      should.equal(j.employee.age, 30);
-      should.equal(j.employee.city, 'New City');
+      assert.strictEqual(j.employee.name, 'Employee1');
+      assert.strictEqual(j.employee.age, 30);
+      assert.strictEqual(j.employee.city, 'New City');
       await conn.execute("drop PROCEDURE nodb_bindjson");
     });
   });
@@ -358,7 +347,7 @@ describe('253. jsonBind1.js', function() {
         j = JSON.parse(d);
       }
 
-      should.equal(j.key1, 123);
+      assert.strictEqual(j.key1, 123);
     });
 
     it('253.2.2 String type', async function() {
@@ -371,7 +360,7 @@ describe('253. jsonBind1.js', function() {
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
       }
-      should.equal(j.key1, 'value1');
+      assert.strictEqual(j.key1, 'value1');
     });
 
     it('253.2.3 TIMESTAMP type', async function() {
@@ -380,11 +369,11 @@ describe('253. jsonBind1.js', function() {
       result = await conn.execute(rsSelect);
       if (result.metaData[0].fetchType == oracledb.DB_TYPE_JSON) {
         j = result.rows[0].OBJ_DATA;
-        should.equal(JSON.stringify(j.key1), '"2021-03-05T00:00:00.000Z"');
+        assert.strictEqual(JSON.stringify(j.key1), '"2021-03-05T00:00:00.000Z"');
       } else {
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
-        should.equal(JSON.stringify(j.key1), '"2021-03-05T00:00:00"');
+        assert.strictEqual(JSON.stringify(j.key1), '"2021-03-05T00:00:00"');
       }
     });
 
@@ -394,12 +383,12 @@ describe('253. jsonBind1.js', function() {
       result = await conn.execute(rsSelect);
       if (result.metaData[0].fetchType == oracledb.DB_TYPE_JSON) {
         j = result.rows[0].OBJ_DATA;
-        should.equal(j.key1.toString('utf8'), 'Hello');
+        assert.strictEqual(j.key1.toString('utf8'), 'Hello');
       } else {
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
         const buf = Buffer.from(j.key1, 'hex');
-        should.equal(buf.toString('utf8'), 'Hello');
+        assert.strictEqual(buf.toString('utf8'), 'Hello');
       }
     });
 
@@ -413,9 +402,9 @@ describe('253. jsonBind1.js', function() {
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
       }
-      should.equal(j.key1[0], 'Employee1');
-      should.equal(j.key1[1], 'Employee2');
-      should.equal(j.key1[2], 'Employee3');
+      assert.strictEqual(j.key1[0], 'Employee1');
+      assert.strictEqual(j.key1[1], 'Employee2');
+      assert.strictEqual(j.key1[2], 'Employee3');
     });
 
     it('253.2.6 Object type', async function() {
@@ -428,8 +417,8 @@ describe('253. jsonBind1.js', function() {
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
       }
-      should.equal(j.key1, 123);
-      should.equal(j.key2, 'value1');
+      assert.strictEqual(j.key1, 123);
+      assert.strictEqual(j.key2, 'value1');
     });
 
     it('253.2.7 CLOB type', async function() {
@@ -442,7 +431,7 @@ describe('253. jsonBind1.js', function() {
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
       }
-      should.equal(j.key1, 'abcdefg12345');
+      assert.strictEqual(j.key1, 'abcdefg12345');
     });
 
     it('253.2.8 BLOB type', async function() {
@@ -451,12 +440,12 @@ describe('253. jsonBind1.js', function() {
       result = await conn.execute(rsSelect);
       if (result.metaData[0].fetchType == oracledb.DB_TYPE_JSON) {
         j = result.rows[0].OBJ_DATA;
-        should.equal(j.key1.toString('utf8'), 'Hello');
+        assert.strictEqual(j.key1.toString('utf8'), 'Hello');
       } else {
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
         const buf = Buffer.from(j.key1, 'hex');
-        should.equal(buf.toString('utf8'), 'Hello');
+        assert.strictEqual(buf.toString('utf8'), 'Hello');
       }
     });
 
@@ -466,17 +455,17 @@ describe('253. jsonBind1.js', function() {
       result = await conn.execute(rsSelect);
       if (result.metaData[0].fetchType == oracledb.DB_TYPE_JSON) {
         j = result.rows[0].OBJ_DATA;
-        should.equal(JSON.stringify(j.key1), '"2021-03-10T00:00:00.000Z"');
+        assert.strictEqual(JSON.stringify(j.key1), '"2021-03-10T00:00:00.000Z"');
       } else {
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
-        should.equal(JSON.stringify(j.key1), '"2021-03-10T00:00:00"');
+        assert.strictEqual(JSON.stringify(j.key1), '"2021-03-10T00:00:00"');
       }
     });
 
     it('253.2.10 INTERVAL YEAR TO MONTH type', async () => {
       const sql = `INSERT into ` + tableName + ` VALUES (JSON_OBJECT( key 'key1' value json_scalar(to_yminterval(:b)) RETURNING JSON))`;
-      if (oracledb.oracleClientVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000) {
         await assert.rejects(
           async () => {
             await conn.execute(sql, ['5-9']);
@@ -489,13 +478,13 @@ describe('253. jsonBind1.js', function() {
         result = await conn.execute(rsSelect);
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
-        should.equal(j.key1, "P5Y9M");
+        assert.strictEqual(j.key1, "P5Y9M");
       }
     });
 
     it('253.2.11 INTERVAL DAY TO SECOND type', async function() {
       const sql = `INSERT into ` + tableName + ` VALUES (JSON_OBJECT( key 'key1' value json_scalar(to_dsinterval(:b)) RETURNING JSON))`;
-      if (oracledb.oracleClientVersion >= 2100000000) {
+      if (testsUtil.getClientVersion() >= 2100000000) {
         await assert.rejects(
           async () => {
             await conn.execute(sql, ['11 10:09:08']);
@@ -508,7 +497,7 @@ describe('253. jsonBind1.js', function() {
         result = await conn.execute(rsSelect);
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
-        should.equal(j.key1, "P11DT10H9M8S");
+        assert.strictEqual(j.key1, "P11DT10H9M8S");
       }
     });
 
@@ -522,20 +511,20 @@ describe('253. jsonBind1.js', function() {
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
       }
-      should.equal(j.key1, 253);
+      assert.strictEqual(j.key1, 253);
     });
 
     it('253.2.13 BINARY_FLOAT type', async function() {
       const sql = `INSERT into ` + tableName + ` VALUES (JSON_OBJECT( key 'key1' value json_scalar(to_binary_float(:b)) RETURNING JSON))`;
-      await conn.execute(sql, [253.1]);
+      await conn.execute(sql, [253.25]);
       result = await conn.execute(rsSelect);
       if (result.metaData[0].fetchType == oracledb.DB_TYPE_JSON) {
         j = result.rows[0].OBJ_DATA;
-        should.equal(j.key1, 253.10000610351562);
+        assert.strictEqual(j.key1, 253.25);
       } else {
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
-        should.equal(j.key1, 253.1);
+        assert.strictEqual(j.key1, 253.1);
       }
     });
 
@@ -549,7 +538,7 @@ describe('253. jsonBind1.js', function() {
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
       }
-      should.equal(j.key1, null);
+      assert.strictEqual(j.key1, null);
     });
   });
 });

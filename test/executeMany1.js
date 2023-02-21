@@ -35,6 +35,7 @@ var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('163. executeMany1.js', function() {
 
@@ -321,7 +322,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.6 shows dmlRowCounts', function(done) {
 
-    if ((oracledb.oracleClientVersion < 1201000200)
+    if ((testsUtil.getClientVersion < 1201000200)
       || (conn.oracleServerVersion < 1201000200)) {
       this.skip();
     }
@@ -352,7 +353,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.7 shows batchErrors behavior', function(done) {
 
-    if ((oracledb.oracleClientVersion < 1201000200)
+    if ((testsUtil.getClientVersion < 1201000200)
       || (conn.oracleServerVersion < 1201000200)) {
       this.skip();
     }
@@ -405,7 +406,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.8 Negative - batchErrors with non-DML statement', function(done) {
 
-    if (oracledb.oracleClientVersion < 1201000200) {
+    if (testsUtil.getClientVersion < 1201000200) {
       this.skip();
     }
 
@@ -444,7 +445,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.9 if batchErrors is disabled', function(done) {
 
-    if (oracledb.oracleClientVersion < 1201000200) {
+    if (testsUtil.getClientVersion < 1201000200) {
       this.skip();
     }
 
@@ -493,7 +494,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.10 Negative -  dmlRowCounts with non-DML statement', function(done) {
 
-    if (oracledb.oracleClientVersion < 1201000200) {
+    if (testsUtil.getClientVersion < 1201000200) {
       this.skip();
     }
 

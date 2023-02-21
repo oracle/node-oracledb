@@ -51,140 +51,120 @@ describe('193. connProps.js', function() {
       this.skip();
       return;
     } else {
-      try {
-        const dbaConfig = {
-          user          : dbconfig.test.DBA_user,
-          password      : dbconfig.test.DBA_password,
-          connectString : dbconfig.connectString,
-          privilege     : oracledb.SYSDBA,
-        };
-        const dbaConnection = await oracledb.getConnection(dbaConfig);
+      const dbaConfig = {
+        user          : dbconfig.test.DBA_user,
+        password      : dbconfig.test.DBA_password,
+        connectString : dbconfig.connectString,
+        privilege     : oracledb.SYSDBA,
+      };
+      const dbaConnection = await oracledb.getConnection(dbaConfig);
 
-        const sql = `GRANT SELECT ANY DICTIONARY TO ${dbconfig.user}`;
-        await dbaConnection.execute(sql);
+      const sql = `GRANT SELECT ANY DICTIONARY TO ${dbconfig.user}`;
+      await dbaConnection.execute(sql);
 
-        await dbaConnection.close();
-      } catch (err) {
-        assert.fail(err);
-      }
+      await dbaConnection.close();
     }
   }); // before()
 
   it('193.1 the default values of clientInfo and dbOp are null', async () => {
-    try {
-      const conn = await oracledb.getConnection(dbconfig);
-      assert.strictEqual(conn.clientInfo, null);
-      assert.strictEqual(conn.dbOp, null);
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    const conn = await oracledb.getConnection(dbconfig);
+    assert.strictEqual(conn.clientInfo, null);
+    assert.strictEqual(conn.dbOp, null);
+    await conn.close();
   }); // 193.1
 
   it('193.2 clientInfo and dbOp are write-only properties', async () => {
-    try {
-      const conn = await oracledb.getConnection(dbconfig);
-      conn.clientInfo = 'nodb_193_2';
-      conn.dbOp = 'nodb_193_2';
-      assert.strictEqual(conn.clientInfo, null);
-      assert.strictEqual(conn.dbOp, null);
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    const conn = await oracledb.getConnection(dbconfig);
+    conn.clientInfo = 'nodb_193_2';
+    conn.dbOp = 'nodb_193_2';
+    assert.strictEqual(conn.clientInfo, null);
+    assert.strictEqual(conn.dbOp, null);
+    await conn.close();
   }); // 193.2
 
   it('193.3 check the results of setter()', async () => {
-    try {
-      const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbconfig);
 
-      const t_clientInfo = "My demo application";
-      const t_dbOp       = "Billing";
+    const t_clientInfo = "My demo application";
+    const t_dbOp       = "Billing";
 
-      conn.clientInfo = t_clientInfo;
-      conn.dbOp       = t_dbOp;
+    conn.clientInfo = t_clientInfo;
+    conn.dbOp       = t_dbOp;
 
-      const sqlOne = `SELECT sys_context('userenv', 'client_info') FROM dual`;
-      let result = await conn.execute(sqlOne);
-      assert.strictEqual(result.rows[0][0], t_clientInfo);
+    const sqlOne = `SELECT sys_context('userenv', 'client_info') FROM dual`;
+    let result = await conn.execute(sqlOne);
+    assert.strictEqual(result.rows[0][0], t_clientInfo);
 
-      const sqlTwo = `SELECT dbop_name FROM v$sql_monitor \
-             WHERE sid = sys_context('userenv', 'sid') \
-             AND status = 'EXECUTING'`;
-      result = await conn.execute(sqlTwo);
-      assert.strictEqual(result.rows[0][0], t_dbOp);
+    const sqlTwo = `SELECT dbop_name FROM v$sql_monitor \
+           WHERE sid = sys_context('userenv', 'sid') \
+           AND status = 'EXECUTING'`;
+    result = await conn.execute(sqlTwo);
+    assert.strictEqual(result.rows[0][0], t_dbOp);
 
-      // Change the values and check quried results again
-      const k_clientInfo = "Demo Two";
-      const k_dbOp       = "Billing Two";
+    // Change the values and check quried results again
+    const k_clientInfo = "Demo Two";
+    const k_dbOp       = "Billing Two";
 
-      conn.clientInfo = k_clientInfo;
-      conn.dbOp       = k_dbOp;
+    conn.clientInfo = k_clientInfo;
+    conn.dbOp       = k_dbOp;
 
-      result = await conn.execute(sqlOne);
-      assert.strictEqual(result.rows[0][0], k_clientInfo);
+    result = await conn.execute(sqlOne);
+    assert.strictEqual(result.rows[0][0], k_clientInfo);
 
-      result = await conn.execute(sqlTwo);
-      assert.strictEqual(result.rows[0][0], k_dbOp);
+    result = await conn.execute(sqlTwo);
+    assert.strictEqual(result.rows[0][0], k_dbOp);
 
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.close();
   }); // 193.3
 
   it('193.4 Negative - invalid values', async () => {
-    try {
-      const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbconfig);
 
-      // Numeric values
-      assert.throws(
-        () => {
-          conn.clientInfo = 3;
-        },
-        /NJS-004/
-      );
+    // Numeric values
+    assert.throws(
+      () => {
+        conn.clientInfo = 3;
+      },
+      /NJS-004/
+    );
 
-      assert.throws(
-        () => {
-          conn.dbOp = 4;
-        },
-        /NJS-004/
-      );
+    assert.throws(
+      () => {
+        conn.dbOp = 4;
+      },
+      /NJS-004/
+    );
 
-      // NaN
-      assert.throws(
-        () => {
-          conn.clientInfo = NaN;
-        },
-        /NJS-004/
-      );
+    // NaN
+    assert.throws(
+      () => {
+        conn.clientInfo = NaN;
+      },
+      /NJS-004/
+    );
 
-      assert.throws(
-        () => {
-          conn.dbOp = NaN;
-        },
-        /NJS-004/
-      );
+    assert.throws(
+      () => {
+        conn.dbOp = NaN;
+      },
+      /NJS-004/
+    );
 
-      // undefined
-      assert.throws(
-        () => {
-          conn.clientInfo = undefined;
-        },
-        /NJS-004/
-      );
+    // undefined
+    assert.throws(
+      () => {
+        conn.clientInfo = undefined;
+      },
+      /NJS-004/
+    );
 
-      assert.throws(
-        () => {
-          conn.dbOp = undefined;
-        },
-        /NJS-004/
-      );
+    assert.throws(
+      () => {
+        conn.dbOp = undefined;
+      },
+      /NJS-004/
+    );
 
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.close();
   }); // 193.4
 });

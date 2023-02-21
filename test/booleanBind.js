@@ -145,13 +145,9 @@ describe('224. booleanBind.js', function()  {
       end;
     `;
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      await conn.execute(plsqlPkg);
-      await conn.execute(plsqlPkgBody);
-    } catch (err) {
-      assert.fail(err);
-    }
+    conn = await oracledb.getConnection(dbconfig);
+    await conn.execute(plsqlPkg);
+    await conn.execute(plsqlPkgBody);
   }); // before()
 
   after(async function() {
@@ -159,13 +155,9 @@ describe('224. booleanBind.js', function()  {
       return;
     }
 
-    try {
-      const  plsql = `drop package ${pkgName}`;
-      await conn.execute(plsql);
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    const  plsql = `drop package ${pkgName}`;
+    await conn.execute(plsql);
+    await conn.close();
   }); // after()
 
   it('224.1 IN bind boolean value', async function() {
@@ -176,12 +168,8 @@ describe('224. booleanBind.js', function()  {
     };
     const  sql = `begin :outval := ${pkgName}.GetStringRep(:inval); end;`;
 
-    try {
-      const  result = await conn.execute(sql, binds);
-      assert.strictEqual('TRUE', result.outBinds.outval);
-    } catch (error) {
-      assert.fail(error);
-    }
+    const  result = await conn.execute(sql, binds);
+    assert.strictEqual('TRUE', result.outBinds.outval);
   }); // 224.1
 
   it('224.2 IN bind value "false"', async function() {
@@ -191,12 +179,8 @@ describe('224. booleanBind.js', function()  {
     };
     const  sql = `begin :outval := ${pkgName}.GetStringRep(:inval); end;`;
 
-    try {
-      const  result = await conn.execute(sql, binds);
-      assert.strictEqual('FALSE', result.outBinds.outval);
-    } catch (error) {
-      assert.fail(error);
-    }
+    const  result = await conn.execute(sql, binds);
+    assert.strictEqual('FALSE', result.outBinds.outval);
   }); // 224.2
 
   it('224.3 IN bind value "null"', async function() {
@@ -206,12 +190,8 @@ describe('224. booleanBind.js', function()  {
     };
     const  sql = `begin :outval := ${pkgName}.GetStringRep(:inval); end;`;
 
-    try {
-      const  result = await conn.execute(sql, binds);
-      assert.strictEqual('NULL', result.outBinds.outval);
-    } catch (error) {
-      assert.fail(error);
-    }
+    const  result = await conn.execute(sql, binds);
+    assert.strictEqual('NULL', result.outBinds.outval);
   }); // 224.3
 
   it('224.4 Negative - IN bind value type mismatch', async function() {
@@ -221,16 +201,12 @@ describe('224. booleanBind.js', function()  {
     };
     const  sql = `begin :outval := ${pkgName}.GetStringRep(:inval); end;`;
 
-    try {
-      await assert.rejects(
-        async function() {
-          await conn.execute(sql, binds);
-        },
-        /NJS-011/
-      );
-    } catch (error) {
-      assert.fail(error);
-    }
+    await assert.rejects(
+      async function() {
+        await conn.execute(sql, binds);
+      },
+      /NJS-011/
+    );
   });
 
   it('224.5 OUT bind value "false"', async function() {
@@ -240,12 +216,8 @@ describe('224. booleanBind.js', function()  {
     };
     const  sql = `begin :outval := ${pkgName}.IsLessThan10(:inval); end;`;
 
-    try {
-      const  result = await conn.execute(sql, binds);
-      assert.strictEqual(false, result.outBinds.outval);
-    } catch (error) {
-      assert.fail(error);
-    }
+    const  result = await conn.execute(sql, binds);
+    assert.strictEqual(false, result.outBinds.outval);
   }); // 224.5
 
   it('224.6 OUT bind value "true"', async function() {
@@ -255,66 +227,50 @@ describe('224. booleanBind.js', function()  {
     };
     const  sql = `begin :outval := ${pkgName}.IsLessThan10(:inval); end;`;
 
-    try {
-      const  result = await conn.execute(sql, binds);
-      assert.strictEqual(true, result.outBinds.outval);
-    } catch (error) {
-      assert.fail(error);
-    }
+    const  result = await conn.execute(sql, binds);
+    assert.strictEqual(true, result.outBinds.outval);
   }); // 224.6
 
   it('224.7 IN bind array with boolean data', async function() {
-    try {
-      const cls = await conn.getDbObjectClass(`${pkgName}.UDT_BOOLEANLIST`);
-      const arr = new cls([true, false, true, true, false, true, false, true]);
-      const binds = {
-        inval: arr,
-        outval: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
-      };
-      const sql = `begin :outval := ${pkgName}.TestInArrays(:inval); end;`;
-      const result = await conn.execute(sql, binds);
-      assert.strictEqual(5, result.outBinds.outval);
-    } catch (error) {
-      assert.fail(error);
-    }
+    const cls = await conn.getDbObjectClass(`${pkgName}.UDT_BOOLEANLIST`);
+    const arr = new cls([true, false, true, true, false, true, false, true]);
+    const binds = {
+      inval: arr,
+      outval: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
+    };
+    const sql = `begin :outval := ${pkgName}.TestInArrays(:inval); end;`;
+    const result = await conn.execute(sql, binds);
+    assert.strictEqual(5, result.outBinds.outval);
   }); // 224.7
 
   it('224.8 OUT bind array with boolean data', async function() {
-    try {
-      const cls = await conn.getDbObjectClass(`${pkgName}.UDT_BOOLEANLIST`);
-      const arr = new cls([true, false, true, true, false, true, false, true]);
-      const binds = {
-        inval: arr,
-        outval: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
-      };
-      const sql = `begin :outval := ${pkgName}.TestInArrays(:inval); end;`;
-      const result = await conn.execute(sql, binds);
-      assert.strictEqual(5, result.outBinds.outval);
-    } catch (error) {
-      assert.fail(error);
-    }
+    const cls = await conn.getDbObjectClass(`${pkgName}.UDT_BOOLEANLIST`);
+    const arr = new cls([true, false, true, true, false, true, false, true]);
+    const binds = {
+      inval: arr,
+      outval: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
+    };
+    const sql = `begin :outval := ${pkgName}.TestInArrays(:inval); end;`;
+    const result = await conn.execute(sql, binds);
+    assert.strictEqual(5, result.outBinds.outval);
   }); // 224.8
 
   it('224.9 INOUT bind record with boolean data', async function() {
-    try {
-      const cls = await conn.getDbObjectClass(`${pkgName}.UDT_DEMORECORD`);
-      const obj = new cls();
-      obj.NUMBERVALUE = 6;
-      obj.STRINGVALUE = "A string";
-      obj.DATEVALUE = new Date();
-      obj.BOOLEANVALUE = false;
-      const binds = [
-        { val: obj, type: cls, dir: oracledb.BIND_INOUT }
-      ];
-      const  sql = `begin ${pkgName}.DemoRecordsInOut(:1); end;`;
-      const result = await conn.execute(sql, binds);
-      assert.strictEqual(12, result.outBinds[0].NUMBERVALUE);
-      assert.strictEqual('A string (Modified)', result.outBinds[0].STRINGVALUE);
-      //assert.ok(typeof result.outBinds[0].DATEVALUE === 'object');
-      //(result.outBinds[0].DATEVALUE).should.be.a.Date();
-      assert.strictEqual(true, result.outBinds[0].BOOLEANVALUE);
-    } catch (error) {
-      assert.fail(error);
-    }
+    const cls = await conn.getDbObjectClass(`${pkgName}.UDT_DEMORECORD`);
+    const obj = new cls();
+    obj.NUMBERVALUE = 6;
+    obj.STRINGVALUE = "A string";
+    obj.DATEVALUE = new Date();
+    obj.BOOLEANVALUE = false;
+    const binds = [
+      { val: obj, type: cls, dir: oracledb.BIND_INOUT }
+    ];
+    const  sql = `begin ${pkgName}.DemoRecordsInOut(:1); end;`;
+    const result = await conn.execute(sql, binds);
+    assert.strictEqual(12, result.outBinds[0].NUMBERVALUE);
+    assert.strictEqual('A string (Modified)', result.outBinds[0].STRINGVALUE);
+    //assert.ok(typeof result.outBinds[0].DATEVALUE === 'object');
+    //(result.outBinds[0].DATEVALUE).should.be.a.Date();
+    assert.strictEqual(true, result.outBinds[0].BOOLEANVALUE);
   }); // 224.9
 });

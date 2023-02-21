@@ -109,7 +109,7 @@ describe("256. executeQueue.js", function() {
     it('256.1.3 break() not constrained by queue', async function() {
 
       // Skip for older versions since this test might hang unless DISABLE_OOB=ON is in sqlnet.ora
-      if (connection.oracleServerVersion <= 1900000000 || oracledb.oracleClientVersion <= 1900000000) {
+      if (connection.oracleServerVersion <= 1900000000 || testsUtil.getClientVersion() <= 1900000000) {
         this.skip();
         return;
       }
@@ -346,36 +346,24 @@ describe("256. executeQueue.js", function() {
     const tab = 'nodb_tab_myclob';
     let conn;
     before(async function() {
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        const sql =
-        `create table ${tab} (
-          id number(9) not null,
-          value clob not null
-        )`;
-        const plsql = testsUtil.sqlCreateTable(tab, sql);
-        await conn.execute(plsql);
-      } catch (err) {
-        assert.fail(err);
-      }
+      conn = await oracledb.getConnection(dbconfig);
+      const sql =
+      `create table ${tab} (
+        id number(9) not null,
+        value clob not null
+      )`;
+      const plsql = testsUtil.sqlCreateTable(tab, sql);
+      await conn.execute(plsql);
     });
 
     after(async function() {
-      try {
-        let sql = `drop table ${tab} purge`;
-        await conn.execute(sql);
-        await conn.close();
-      } catch (err) {
-        assert.fail(err);
-      }
+      const sql = `drop table ${tab} purge`;
+      await conn.execute(sql);
+      await conn.close();
     });
 
     beforeEach(async function() {
-      try {
-        await conn.execute(`Delete from ` + tab);
-      } catch (error) {
-        assert.fail(error);
-      }
+      await conn.execute(`Delete from ` + tab);
     });
 
     async function doGetData(lob) {

@@ -47,15 +47,11 @@ describe('66. writableProperties1.js', function() {
 
     for (keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
       if (typeof pool[keys[keysIdx]] === 'function') {
-        try {
-          originalFunction = pool[keys[keysIdx]];
+        originalFunction = pool[keys[keysIdx]];
 
-          pool[keys[keysIdx]] = function() {};
+        pool[keys[keysIdx]] = function() {};
 
-          pool[keys[keysIdx]] = originalFunction;
-        } catch (err) {
-          assert.fail(err);
-        }
+        pool[keys[keysIdx]] = originalFunction;
       }
     }
 
@@ -74,15 +70,11 @@ describe('66. writableProperties1.js', function() {
 
     for (keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
       if (typeof conn[keys[keysIdx]] === 'function') {
-        try {
-          originalFunction = conn[keys[keysIdx]];
+        originalFunction = conn[keys[keysIdx]];
 
-          conn[keys[keysIdx]] = function() {};
+        conn[keys[keysIdx]] = function() {};
 
-          conn[keys[keysIdx]] = originalFunction;
-        } catch (err) {
-          assert.fail(err);
-        }
+        conn[keys[keysIdx]] = originalFunction;
       }
     }
 
@@ -108,15 +100,11 @@ describe('66. writableProperties1.js', function() {
 
     for (keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
       if (typeof result.resultSet[keys[keysIdx]] === 'function') {
-        try {
-          originalFunction = result.resultSet[keys[keysIdx]];
+        originalFunction = result.resultSet[keys[keysIdx]];
 
-          result.resultSet[keys[keysIdx]] = function() {};
+        result.resultSet[keys[keysIdx]] = function() {};
 
-          result.resultSet[keys[keysIdx]] = originalFunction;
-        } catch (err) {
-          assert.fail(err);
-        }
+        result.resultSet[keys[keysIdx]] = originalFunction;
       }
     }
 
@@ -140,15 +128,11 @@ describe('66. writableProperties1.js', function() {
 
     for (keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
       if (typeof lob[keys[keysIdx]] === 'function') {
-        try {
-          originalFunction = lob[keys[keysIdx]];
+        originalFunction = lob[keys[keysIdx]];
 
-          lob[keys[keysIdx]] = function() {};
+        lob[keys[keysIdx]] = function() {};
 
-          lob[keys[keysIdx]] = originalFunction;
-        } catch (err) {
-          assert.fail(err);
-        }
+        lob[keys[keysIdx]] = originalFunction;
       }
     }
 
@@ -169,13 +153,9 @@ describe('66. writableProperties1.js', function() {
     var keys = Object.keys(oracledb);
     for (var keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
       if (typeof oracledb[keys[keysIdx]] === 'function') {
-        try {
-          var originalFunction = oracledb[keys[keysIdx]];
-          oracledb[keys[keysIdx]] = function() {};
-          oracledb[keys[keysIdx]] = originalFunction;
-        } catch (err) {
-          assert.fail(err);
-        }
+        var originalFunction = oracledb[keys[keysIdx]];
+        oracledb[keys[keysIdx]] = function() {};
+        oracledb[keys[keysIdx]] = originalFunction;
       }
     }
     done();

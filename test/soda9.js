@@ -50,183 +50,101 @@ describe('177. soda9.js', () => {
   });
 
   it('177.1 insertOne() with a document content', async () => {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_177_1");
+    const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
+    await collection.insertOne(inContent);
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_177_1");
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      await collection.insertOne(inContent);
+    // fetch back
+    const outDocuments = await collection.find().getDocuments();
+    const outContent = outDocuments[0].getContent();
+    assert.deepEqual(outContent, inContent);
 
-      // fetch back
-      let outDocuments = await collection.find().getDocuments();
-      let outContent = outDocuments[0].getContent();
-      assert.deepEqual(outContent, inContent);
-
-    } catch (err) {
-      assert.fail(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
-    }
-
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 177.1
 
   it('177.2 insertOne() with a document', async () => {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_177_2");
+    const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
+    const inDocument = soda.createDocument(inContent);
+    await collection.insertOne(inDocument);
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_177_2");
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let inDocument = soda.createDocument(inContent);
-      await collection.insertOne(inDocument);
+    // fetch back
+    const outDocuments = await collection.find().getDocuments();
+    const outContent = outDocuments[0].getContent();
+    assert.deepEqual(outContent, inContent);
 
-      // fetch back
-      let outDocuments = await collection.find().getDocuments();
-      let outContent = outDocuments[0].getContent();
-      assert.deepEqual(outContent, inContent);
-
-    } catch (err) {
-      assert.fail(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
-    }
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 177.2
 
   it('177.3 insertOneAndGet() with a document content', async () => {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_177_3");
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_177_3");
+    const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
+    const middleDocument = await collection.insertOneAndGet(inContent);
+    assert(middleDocument);
+    const middleContent = middleDocument.getContent();
+    assert.ifError(middleContent);
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let middleDocument = await collection.insertOneAndGet(inContent);
-      assert(middleDocument);
-      let middleContent = middleDocument.getContent();
-      assert.ifError(middleContent);
+    // Fetch it back
+    const outDocuments = await collection.find().getDocuments();
+    const outContent = outDocuments[0].getContent();
+    assert.deepEqual(outContent, inContent);
 
-      // Fetch it back
-      let outDocuments = await collection.find().getDocuments();
-      let outContent = outDocuments[0].getContent();
-      assert.deepEqual(outContent, inContent);
-
-    } catch (err) {
-      assert.fail(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
-    }
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 177.3
 
   it('177.4 insertOneAndGet() with a document', async () => {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_177_4");
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_177_4");
+    const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
+    const inDocument = soda.createDocument(inContent);
+    const middleDocument = await collection.insertOneAndGet(inDocument);
+    assert(middleDocument);
+    const middleContent = middleDocument.getContent();
+    assert.ifError(middleContent);
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let inDocument = soda.createDocument(inContent);
-      let middleDocument = await collection.insertOneAndGet(inDocument);
-      assert(middleDocument);
-      let middleContent = middleDocument.getContent();
-      assert.ifError(middleContent);
+    // Fetch it back
+    const outDocuments = await collection.find().getDocuments();
+    const outContent = outDocuments[0].getContent();
+    assert.deepEqual(outContent, inContent);
 
-      // Fetch it back
-      let outDocuments = await collection.find().getDocuments();
-      let outContent = outDocuments[0].getContent();
-      assert.deepEqual(outContent, inContent);
-
-    } catch (err) {
-      assert.fail(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
-    }
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 177.4
 
   it('177.5 createDocument() followd by getContent() i.e. without being inserted', async () => {
 
-    let conn;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
+    const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
+    const inDocument = soda.createDocument(inContent);
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let inDocument = soda.createDocument(inContent);
+    // Get content without being inserted
+    const outContent = inDocument.getContent();
+    assert.deepEqual(outContent, inContent);
 
-      // Get content without being inserted
-      let outContent = inDocument.getContent();
-      assert.deepEqual(outContent, inContent);
-
-    } catch (err) {
-      assert.fail(err);
-    } finally {
-      await conn.commit();
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
-    }
+    await conn.commit();
+    await conn.close();
 
   }); // 177.5
 });

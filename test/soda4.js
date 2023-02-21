@@ -50,132 +50,96 @@ describe('168. soda4.js', () => {
   });
 
   it('168.1 insertOneAndGet() fetches attributes without content', async () => {
-    let conn;
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_168_1';
-      let coll = await sd.createCollection(collectionName);
+    const conn = await oracledb.getConnection(dbconfig);
+    const sd = conn.getSodaDatabase();
+    const collectionName = 'soda_test_168_1';
+    const coll = await sd.createCollection(collectionName);
 
-      // Insert a new document
-      let testContent = {
-        name:    "Changjie Lin",
-        address: {city: "Shenzhen", country: "China"},
-        company: "Oracle Corporation",
-        manager: null,
-        VP:      "Bruce"
-      };
+    // Insert a new document
+    const testContent = {
+      name:    "Changjie Lin",
+      address: {city: "Shenzhen", country: "China"},
+      company: "Oracle Corporation",
+      manager: null,
+      VP:      "Bruce"
+    };
 
-      let myDoc = await coll.insertOneAndGet(testContent);
-      let myKey = myDoc.key;
-      assert(myKey);
-      assert.strictEqual(typeof (myKey), "string");
-      assert.strictEqual(typeof (myDoc), "object");
+    const myDoc = await coll.insertOneAndGet(testContent);
+    const myKey = myDoc.key;
+    assert(myKey);
+    assert.strictEqual(typeof (myKey), "string");
+    assert.strictEqual(typeof (myDoc), "object");
 
-      let content1 = myDoc.getContent();
-      assert.ifError(content1);
+    const content1 = myDoc.getContent();
+    assert.ifError(content1);
 
-      // Fetch it back
-      let doc2 = await coll.find().key(myKey).getOne();
-      let content2 = doc2.getContent();
-      assert.strictEqual(content2.name, testContent.name);
-      assert.strictEqual(content2.company, testContent.company);
-      assert.strictEqual(content2.manager, null);
+    // Fetch it back
+    const doc2 = await coll.find().key(myKey).getOne();
+    const content2 = doc2.getContent();
+    assert.strictEqual(content2.name, testContent.name);
+    assert.strictEqual(content2.company, testContent.company);
+    assert.strictEqual(content2.manager, null);
 
-      await conn.commit();
-      let res = await coll.drop();
-      assert.strictEqual(res.dropped, true);
+    await conn.commit();
+    const res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
 
-    } catch (err) {
-      assert.fail(err);
-    } finally {
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
-    }
+    await conn.close();
   }); // 168.1
 
   it('168.2 content is null', async () => {
-    let conn;
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_168_2';
-      let coll = await sd.createCollection(collectionName);
+    const conn = await oracledb.getConnection(dbconfig);
+    const sd = conn.getSodaDatabase();
+    const collectionName = 'soda_test_168_2';
+    const coll = await sd.createCollection(collectionName);
 
-      // Insert a new document
-      // Content is empty
-      let testContent = {};
+    // Insert a new document
+    // Content is empty
+    const testContent = {};
 
-      let myDoc = await coll.insertOneAndGet(testContent);
-      let myKey = myDoc.key;
-      assert(myKey);
-      assert.strictEqual(typeof (myKey), "string");
-      assert.strictEqual(typeof (myDoc), "object");
+    const myDoc = await coll.insertOneAndGet(testContent);
+    const myKey = myDoc.key;
+    assert(myKey);
+    assert.strictEqual(typeof (myKey), "string");
+    assert.strictEqual(typeof (myDoc), "object");
 
-      // Fetch it back
-      let doc2 = await coll.find().key(myKey).getOne();
-      let content2 = doc2.getContent();
-      assert.deepEqual(content2, testContent);
+    // Fetch it back
+    const doc2 = await coll.find().key(myKey).getOne();
+    const content2 = doc2.getContent();
+    assert.deepEqual(content2, testContent);
 
-      await conn.commit();
-      let res = await coll.drop();
-      assert.strictEqual(res.dropped, true);
+    await conn.commit();
+    const res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
 
-    } catch (err) {
-      assert.fail(err);
-    } finally {
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
-    }
+    await conn.close();
   }); // 168.2
 
   it('168.3 get mediaType', async () => {
-    let conn;
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_168_3';
-      let coll = await sd.createCollection(collectionName);
+    const conn = await oracledb.getConnection(dbconfig);
+    const sd = conn.getSodaDatabase();
+    const collectionName = 'soda_test_168_3';
+    const coll = await sd.createCollection(collectionName);
 
-      // Insert a new document
-      // Content is empty
-      let testContent = {};
+    // Insert a new document
+    // Content is empty
+    const testContent = {};
 
-      let myDoc = await coll.insertOneAndGet(testContent);
-      let myMediaType = myDoc.mediaType;
-      assert(myMediaType);
-      assert.strictEqual(myMediaType, 'application/json');
-      let myKey = myDoc.key;
+    const myDoc = await coll.insertOneAndGet(testContent);
+    const myMediaType = myDoc.mediaType;
+    assert(myMediaType);
+    assert.strictEqual(myMediaType, 'application/json');
+    const myKey = myDoc.key;
 
-      // Fetch it back
-      let doc2 = await coll.find().key(myKey).getOne();
-      assert.strictEqual(doc2.mediaType, 'application/json');
+    // Fetch it back
+    const doc2 = await coll.find().key(myKey).getOne();
+    assert.strictEqual(doc2.mediaType, 'application/json');
 
-      await conn.commit();
-      let res = await coll.drop();
-      assert.strictEqual(res.dropped, true);
+    await conn.commit();
+    const res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
 
-    } catch (err) {
-      assert.fail(err);
-    } finally {
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
-    }
+    await conn.close();
   }); // 168.3
 
 });

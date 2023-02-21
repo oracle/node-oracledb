@@ -33,6 +33,7 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
+const testsUtil = require('./testsUtil.js');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
 const assist   = require('./dataTypeAssist.js');
@@ -258,35 +259,35 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     it('82.1.9 works with NaN', async function() {
       let id = insertID++;
       let content = NaN;
-      try {
-        await connection.execute(
-          "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
-          {
-            ID : { val : id },
-            C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
-          });
-      } catch (err) {
-        assert(err);
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await connection.execute(
+            "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
+            {
+              ID : { val : id },
+              C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+            });
+        },
         // NJS-011: encountered bind value and type mismatch in parameter 2
-        assert(err.message.startsWith("NJS-011:"));
-      }
+        /NJS-011:/
+      );
     }); // 82.1.9
 
     it('82.1.10 works with 0', async function() {
       let id = insertID++;
       let content = 0;
-      try {
-        await connection.execute(
-          "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
-          {
-            ID : { val : id },
-            C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
-          });
-      } catch (err) {
-        assert(err);
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await connection.execute(
+            "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
+            {
+              ID : { val : id },
+              C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+            });
+        },
         // NJS-011: encountered bind value and type mismatch in parameter 2
-        assert(err.message.startsWith("NJS-011:"));
-      }
+        /NJS-011:/
+      );
     }); // 82.1.10
 
     it('82.1.11 works with Buffer length 32K', async function() {
@@ -336,18 +337,18 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     it('82.1.15 bind value and type mismatch', async function() {
       let id = insertID++;
       let content = 100;
-      try {
-        await connection.execute(
-          "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
-          {
-            ID : { val : id },
-            C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
-          });
-      } catch (err) {
-        assert(err);
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await connection.execute(
+            "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
+            {
+              ID : { val : id },
+              C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+            });
+        },
         // NJS-011: encountered bind value and type mismatch in parameter 2
-        assert(err.message.startsWith("NJS-011:"));
-      }
+        /NJS-011:/
+      );
     }); // 82.1.15
 
     it('82.1.16 mixing named with positional binding', async function() {
@@ -369,17 +370,17 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
     it('82.1.17 bind with invalid BLOB', async function() {
       let id = insertID++;
-      try {
-        await connection.execute(
-          "INSERT INTO nodb_dml_blob_1 VALUES (:1, :2)",
-          [
-            id, { val : {}, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
-          ]);
-      } catch (err) {
-        assert(err);
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await connection.execute(
+            "INSERT INTO nodb_dml_blob_1 VALUES (:1, :2)",
+            [
+              id, { val : {}, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+            ]);
+        },
         // NJS-011: encountered bind value and type mismatch in parameter 2
-        assert(err.message.startsWith("NJS-011:"));
-      }
+        /NJS-011:/
+      );
     }); // 82.1.17
 
     it('82.1.18 RETURNING INTO with bind type BUFFER', async function() {

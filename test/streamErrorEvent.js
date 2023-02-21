@@ -32,49 +32,30 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var fs       = require('fs');
-var async    = require('async');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const fs       = require('fs');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
 
 describe('105. streamErrorEvent.js', function() {
 
-  var connection = null;
-  before(function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+  let connection = null;
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
   }); // before
 
-  after(function(done) {
-    connection.close(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after(async function() {
+    await connection.close();
   }); // after
 
-  it('105.1 triggers stream error event', function(done) {
-    var rofile = "./test-read-only.txt";
-    var tableName = "nodb_tab_stream_err";
-
-    async.series([
-      function createFile(cb) {
-        fs.writeFile(rofile, "This is a read-only file.", function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function changeMode(cb) {
-        fs.chmod(rofile, '0444', function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function createTable(cb) {
-        var sql = "BEGIN \n" +
+  it('105.1 triggers stream error event', async function() {
+    let rofile = "./test-read-only.txt";
+    let tableName = "nodb_tab_stream_err";
+    await fs.writeFileSync(rofile, "This is a read-only file.");
+    await fs.chmod(rofile, '0444', (err) => {
+      if (err) throw err;
+    });
+    let sql = "BEGIN \n" +
                   "    DECLARE \n" +
                   "        e_table_missing EXCEPTION; \n" +
                   "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -91,71 +72,38 @@ describe('105. streamErrorEvent.js', function() {
                   "        ) \n" +
                   "    '); \n" +
                   "END; ";
-        connection.execute(
-          sql,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function doinsert(cb) {
-        var sql = "insert into " + tableName + " values (:i, :c)";
-        var bindvar = {
-          i: { val: 89, type: oracledb.NUMBER },
-          c: { val: "Changjie tries to trigger Stream error events.", type: oracledb.STRING }
-        };
-        var option = { autoCommit: true };
-        connection.execute(
-          sql,
-          bindvar,
-          option,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function triggerError(callback) {
-        var sql = "select lob from " + tableName;
-        connection.execute(
-          sql,
-          function(err, result) {
-            should.not.exist(err);
-            var lob = result.rows[0][0];
+    await connection.execute(sql);
+    sql = "insert into " + tableName + " values (:i, :c)";
+    let bindVar = {
+      i: { val: 89, type: oracledb.NUMBER },
+      c: { val: "Changjie tries to trigger Stream error events.", type: oracledb.STRING }
+    };
+    let option = { autoCommit: true };
+    await connection.execute(
+      sql,
+      bindVar,
+      option);
+    sql = "select lob from " + tableName;
+    let result = null;
+    result = await connection.execute(sql);
+    await new Promise((resolve, reject) => {
+      let lob = result.rows[0][0];
 
-            lob.on('error', function(err) {
-              should.not.exist(err);
-            });
+      lob.on('error', reject);
 
-            lob.on('close', callback); // Here it returns.
+      lob.on('close', resolve); // Here it returns.
 
-            var outStream = fs.createWriteStream(rofile);
-            outStream.on('error', function(err) {
-              should.exist(err);
-              should.strictEqual(err.syscall, 'open');
-            });
-            lob.pipe(outStream);
-          }
-        );
-      },
-      function dropTable(cb) {
-        var sql = "DROP TABLE " + tableName + " PURGE";
-        connection.execute(
-          sql,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function deleteFile(cb) {
-        fs.unlink(rofile, function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+      let outStream = fs.createWriteStream(rofile);
+      outStream.on('error', function(err) {
+        assert(err);
+        assert.strictEqual(err.syscall, 'open');
+      });
+      lob.pipe(outStream);
+    });
+
+    sql = "DROP TABLE " + tableName + " PURGE";
+    await connection.execute(sql);
+
+    await fs.unlinkSync(rofile);
   });
-
 });

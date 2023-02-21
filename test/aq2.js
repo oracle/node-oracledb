@@ -153,15 +153,16 @@ describe('218. aq2.js', function() {
       objQueueName,
       { payloadType: objType }
     );
-    testsUtil.assertThrowsAsync(
+    await testsUtil.assertThrowsAsync(
       async () => {
         await queue1.enqOne(addrData);
       },
-      /^NJS-070:/
+      /NJS-070:/
     );
     /* NJS-070: message must be a string, buffer, database object or
     an object containing a payload property which itself is a string,
     buffer or database object */
+    await queue1.deqOne();
   }); // 218.3
 
   it('218.4 Negative - getQueue() without options on DB Object data', async () => {

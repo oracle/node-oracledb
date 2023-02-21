@@ -82,80 +82,62 @@ describe('246. dupColNames1.js', function() {
 
   const traverse_rows = async function(resultSet) {
     const fetchedRows = [];
-    try {
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const row = await resultSet.getRow();
-        if (!row) {
-          break;
-        }
-        fetchedRows.push(row);
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const row = await resultSet.getRow();
+      if (!row) {
+        break;
       }
-      return fetchedRows;
-    } catch (err) {
-      assert.fail(err);
+      fetchedRows.push(row);
     }
-
+    return fetchedRows;
   };
 
   const traverse_results = async function(resultSet) {
     const fetchedRows = [];
-    try {
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const row = await resultSet.getRow();
-        if (!row) {
-          break;
-        }
-        for (let i in row) {
-          if (row[i] instanceof oracledb.ResultSet) {
-            row[i] = await traverse_results(row[i]);
-          }
-        }
-        fetchedRows.push(row);
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const row = await resultSet.getRow();
+      if (!row) {
+        break;
       }
-      return fetchedRows;
-    } catch (err) {
-      assert.fail(err);
+      for (let i in row) {
+        if (row[i] instanceof oracledb.ResultSet) {
+          row[i] = await traverse_results(row[i]);
+        }
+      }
+      fetchedRows.push(row);
     }
-
+    return fetchedRows;
   };
 
   before(async function() {
-    try {
-      // set the outformat to object
-      oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
+    // set the outformat to object
+    oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
-      connection = await oracledb.getConnection (dbconfig);
+    connection = await oracledb.getConnection (dbconfig);
 
-      await connection.execute(create_table_sql);
-      await connection.execute(deptInsert, [101, "R&D"]);
-      await connection.execute(deptInsert, [201, "Sales"]);
-      await connection.execute(deptInsert, [301, "Marketing"]);
+    await connection.execute(create_table_sql);
+    await connection.execute(deptInsert, [101, "R&D"]);
+    await connection.execute(deptInsert, [201, "Sales"]);
+    await connection.execute(deptInsert, [301, "Marketing"]);
 
-      await connection.execute(create_table_emp_sql);
-      await connection.execute(empInsert, [1001, 101, "Krishna Mohan"]);
-      await connection.execute(empInsert, [1002, 102, "P Venkatraman"]);
-      await connection.execute(empInsert, [2001, 201, "Chris Jones"]);
-      await connection.execute(empInsert, [3001, 301, "John Millard"]);
+    await connection.execute(create_table_emp_sql);
+    await connection.execute(empInsert, [1001, 101, "Krishna Mohan"]);
+    await connection.execute(empInsert, [1002, 102, "P Venkatraman"]);
+    await connection.execute(empInsert, [2001, 201, "Chris Jones"]);
+    await connection.execute(empInsert, [3001, 301, "John Millard"]);
 
-      await connection.commit();
-    } catch (err) {
-      assert.fail(err);
-    }
+    await connection.commit();
   });
 
   after(async function() {
-    try {
-      await connection.execute("DROP TABLE nodb_dupEmployee PURGE");
-      await connection.execute("DROP TABLE nodb_dupDepartment PURGE");
-      await connection.commit();
-      await connection.close();
+    await connection.execute("DROP TABLE nodb_dupEmployee PURGE");
+    await connection.execute("DROP TABLE nodb_dupDepartment PURGE");
+    await connection.commit();
+    await connection.close();
 
-      oracledb.outFormat = outFormatBak;
-    } catch (err) {
-      assert.fail(err);
-    }
+    oracledb.outFormat = outFormatBak;
   });
 
   describe('246.1 Duplicate column names, query with simple execution', function() {

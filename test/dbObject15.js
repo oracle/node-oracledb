@@ -51,75 +51,54 @@ describe('214. dbObject15.js', () => {
   ];
 
   before(async () => {
-    try {
-      conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbconfig);
 
-      let plsql = `
-        CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
-          shirtnumber NUMBER,
-          name        VARCHAR2(20)
-        );
-      `;
-      await conn.execute(plsql);
+    let plsql = `
+      CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
+        shirtnumber NUMBER,
+        name        VARCHAR2(20)
+      );
+    `;
+    await conn.execute(plsql);
 
-      plsql = `
-        CREATE OR REPLACE TYPE ${TEAM_T} AS VARRAY(10) OF ${PLAYER_T};
-      `;
-      await conn.execute(plsql);
+    plsql = `
+      CREATE OR REPLACE TYPE ${TEAM_T} AS VARRAY(10) OF ${PLAYER_T};
+    `;
+    await conn.execute(plsql);
 
-      const TeamTypeClass = await conn.getDbObjectClass(TEAM_T);
-      FrisbeeTeam = new TeamTypeClass(FrisbeePlayers);
-
-    } catch (err) {
-      assert.fail(err);
-    }
+    const TeamTypeClass = await conn.getDbObjectClass(TEAM_T);
+    FrisbeeTeam = new TeamTypeClass(FrisbeePlayers);
   }); // before()
 
   after(async () => {
-    try {
+    let sql = `DROP TYPE ${TEAM_T} FORCE`;
+    await conn.execute(sql);
 
-      let sql = `DROP TYPE ${TEAM_T} FORCE`;
-      await conn.execute(sql);
+    sql = `DROP TYPE ${PLAYER_T} FORCE`;
+    await conn.execute(sql);
 
-      sql = `DROP TYPE ${PLAYER_T} FORCE`;
-      await conn.execute(sql);
-
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.close();
   }); // after()
 
   it('214.1 Getter() - access collection elements directly', function() {
-    try {
-
-      for (let i = 0, element; i < FrisbeePlayers.length; i++) {
-        element = FrisbeeTeam[i];
-        assert.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
-        assert.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
-      }
-
-    } catch (err) {
-      assert.fail(err);
+    for (let i = 0, element; i < FrisbeePlayers.length; i++) {
+      element = FrisbeeTeam[i];
+      assert.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
+      assert.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
     }
   }); // 214.1
 
   it('214.2 Setter() - access collection element directly', function() {
+    const substitute = {SHIRTNUMBER: 15, NAME: 'Chris'};
+    FrisbeeTeam[0] = substitute;
+    assert.strictEqual(FrisbeeTeam[0].SHIRTNUMBER, substitute.SHIRTNUMBER);
+    assert.strictEqual(FrisbeeTeam[0].NAME, substitute.NAME);
 
-    try {
-      const substitute = {SHIRTNUMBER: 15, NAME: 'Chris'};
-      FrisbeeTeam[0] = substitute;
-      assert.strictEqual(FrisbeeTeam[0].SHIRTNUMBER, substitute.SHIRTNUMBER);
-      assert.strictEqual(FrisbeeTeam[0].NAME, substitute.NAME);
-
-      // Verify that the other elements are not impacted
-      for (let i = 1, element; i < FrisbeePlayers.length; i++) {
-        element = FrisbeeTeam[i];
-        assert.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
-        assert.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
-      }
-    } catch (err) {
-      assert.fail(err);
+    // Verify that the other elements are not impacted
+    for (let i = 1, element; i < FrisbeePlayers.length; i++) {
+      element = FrisbeeTeam[i];
+      assert.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
+      assert.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
     }
   }); // 214.2
 

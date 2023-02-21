@@ -66,130 +66,96 @@ describe('222. callTimeout.js', function() {
   });
 
   it('222.1 examples/calltimeout.js', async () => {
-    try {
-      const TIME_OUT = 2;
-      const DB_OP_TIME = 4;
+    const TIME_OUT = 2;
+    const DB_OP_TIME = 4;
 
-      conn.callTimeout = TIME_OUT * 1000;  // milliseconds
+    conn.callTimeout = TIME_OUT * 1000;  // milliseconds
 
-      await assert.rejects(
-        async () => {
-          await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [DB_OP_TIME]);
-        },
-        /DPI-1067/
-      );
-    } catch (err) {
-      assert.fail(err);
-    }
+    await assert.rejects(
+      async () => {
+        await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [DB_OP_TIME]);
+      },
+      /DPI-1067/
+    );
 
   }); // 222.1
 
   it('222.2 the timeout value is greater than the operation time', async () => {
-    try {
-      const TIME_OUT = 10;
-      const DB_OP_TIME = 2;
+    const TIME_OUT = 10;
+    const DB_OP_TIME = 2;
 
-      conn.callTimeout = TIME_OUT * 1000;  // milliseconds
+    conn.callTimeout = TIME_OUT * 1000;  // milliseconds
 
-      await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [DB_OP_TIME]);
-
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [DB_OP_TIME]);
   }); // 222.2
 
   it('222.3 callTimeout is 0', async () => {
-    try {
-      const TIME_OUT = 0;
-      const DB_OP_TIME = 2;
+    const TIME_OUT = 0;
+    const DB_OP_TIME = 2;
 
-      conn.callTimeout = TIME_OUT;
+    conn.callTimeout = TIME_OUT;
 
-      await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [DB_OP_TIME]);
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [DB_OP_TIME]);
   }); // 222.3
 
   it('222.4 callTimeout is a negative value', function() {
-    try {
-      const TIME_OUT = -5;
+    const TIME_OUT = -5;
 
-      assert.throws(
-        () => {
-          conn.callTimeout = TIME_OUT;
-        },
-        /NJS-004: invalid value for property callTimeout/
-      );
-    } catch (err) {
-      assert.fail(err);
-    }
+    assert.throws(
+      () => {
+        conn.callTimeout = TIME_OUT;
+      },
+      /NJS-004: invalid value for property callTimeout/
+    );
   }); // 222.4
 
   it('222.5 callTimeout == NaN', function() {
-    try {
-      const TIME_OUT = NaN;
+    const TIME_OUT = NaN;
 
-      assert.throws(
-        () => {
-          conn.callTimeout = TIME_OUT;
-        },
-        /NJS-004: invalid value for property callTimeout/
-      );
-    } catch (err) {
-      assert.fail(err);
-    }
+    assert.throws(
+      () => {
+        conn.callTimeout = TIME_OUT;
+      },
+      /NJS-004: invalid value for property callTimeout/
+    );
   });
 
   it('222.6 callTimeout is a String', function() {
-    try {
-      const TIME_OUT = 'foobar';
+    const TIME_OUT = 'foobar';
 
-      assert.throws(
-        () => {
-          conn.callTimeout = TIME_OUT;
-        },
-        /NJS-004: invalid value for property callTimeout/
-      );
-    } catch (err) {
-      assert.fail(err);
-    }
+    assert.throws(
+      () => {
+        conn.callTimeout = TIME_OUT;
+      },
+      /NJS-004: invalid value for property callTimeout/
+    );
   });
 
   it('222.7 The callTimeout value applies not to the sum of all round-trips', async () => {
-    try {
-      const TIME_OUT = 4;
+    const TIME_OUT = 4;
 
-      conn.callTimeout = TIME_OUT * 1000;  // milliseconds
+    conn.callTimeout = TIME_OUT * 1000;  // milliseconds
 
-      await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [2]);
-      await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [3]);
-      await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [2]);
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [2]);
+    await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [3]);
+    await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [2]);
   }); // 222.7
 
   it('222.8 The callTimeout value applies to each round-trip individually', async () => {
-    try {
-      const TIME_OUT = 2;
-      const DB_OP_TIME = 4;
+    const TIME_OUT = 2;
+    const DB_OP_TIME = 4;
 
-      conn.callTimeout = TIME_OUT * 1000;  // milliseconds
+    conn.callTimeout = TIME_OUT * 1000;  // milliseconds
 
-      await assert.rejects(
-        async () => {
-          await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [DB_OP_TIME]);
-        },
-        /DPI-1067/
-      );
+    await assert.rejects(
+      async () => {
+        await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [DB_OP_TIME]);
+      },
+      /DPI-1067/
+    );
 
-      await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [1]);
-      const result = await conn.execute(`SELECT (1+2) AS SUM FROM DUAL`);
-      assert.strictEqual(3, result.rows[0][0]);
-
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [1]);
+    const result = await conn.execute(`SELECT (1+2) AS SUM FROM DUAL`);
+    assert.strictEqual(3, result.rows[0][0]);
   });
 });

@@ -50,216 +50,124 @@ describe('165. soda2.js', () => {
   });
 
   it('165.1 create two sodaDatabase objects which point to the same instance', async () => {
-    let conn;
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let sd1 = conn.getSodaDatabase();
-      let sd2 = conn.getSodaDatabase();
-      // sd1 creates the collection
-      let collName = "soda_test_165_1";
-      let coll_create = await sd1.createCollection(collName);
-      // sd2 opens the collection
-      let coll_open = await sd2.openCollection(collName);
-      assert(coll_open);
-      await coll_create.drop();
-    } catch (err) {
-      assert.fail(err);
-    } finally {
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
-    }
-
+    const conn = await oracledb.getConnection(dbconfig);
+    const sd1 = conn.getSodaDatabase();
+    const sd2 = conn.getSodaDatabase();
+    // sd1 creates the collection
+    const collName = "soda_test_165_1";
+    const coll_create = await sd1.createCollection(collName);
+    // sd2 opens the collection
+    const coll_open = await sd2.openCollection(collName);
+    assert(coll_open);
+    await coll_create.drop();
+    await conn.close();
   }); // 165.1
 
   it('165.2 create two sodaDatabase objects from two connections', async () => {
-    let conn1, conn2;
-    try {
-      conn1 = await oracledb.getConnection(dbconfig);
-      let sd1 = await conn1.getSodaDatabase();
-      conn2 = await oracledb.getConnection(dbconfig);
-      let sd2 = await conn1.getSodaDatabase();
+    const conn1 = await oracledb.getConnection(dbconfig);
+    const sd1 = await conn1.getSodaDatabase();
+    const conn2 = await oracledb.getConnection(dbconfig);
+    const sd2 = await conn1.getSodaDatabase();
 
-      let t_collname = "soda_test_165_2";
-      let coll = await sd1.createCollection(t_collname);
+    const t_collname = "soda_test_165_2";
+    const coll = await sd1.createCollection(t_collname);
 
-      let cNames = await sd2.getCollectionNames();
-      assert.deepEqual(cNames, [ t_collname ]);
+    const cNames = await sd2.getCollectionNames();
+    assert.deepEqual(cNames, [ t_collname ]);
 
-      await coll.drop();
-    } catch (err) {
-      assert.fail(err);
-    } finally {
-      if (conn1) {
-        try {
-          await conn1.close();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
-      if (conn2) {
-        try {
-          await conn2.close();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
-    }
+    await coll.drop();
+    await conn1.close();
+    await conn2.close();
   }); // 165.2
 
   it('165.3 will open this collection when creating a collection with the existing name', async () => {
-    let conn;
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+    const conn = await oracledb.getConnection(dbconfig);
+    const sd = conn.getSodaDatabase();
 
-      let t_collname = "soda_test_165_3";
-      await sd.createCollection(t_collname);
-      let coll = await sd.createCollection(t_collname);
+    const t_collname = "soda_test_165_3";
+    await sd.createCollection(t_collname);
+    const coll = await sd.createCollection(t_collname);
 
-      let cNames = await sd.getCollectionNames();
-      assert.deepEqual(cNames, [ t_collname ]);
+    const cNames = await sd.getCollectionNames();
+    assert.deepEqual(cNames, [ t_collname ]);
 
-      await coll.drop();
-    } catch (err) {
-      assert.fail(err);
-    } finally {
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
-    }
+    await coll.drop();
+    await conn.close();
   }); // 165.3
 
   it('165.4 Negative - createCollection() when collection name is empty string', async () => {
-    let conn, coll;
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
+    const conn = await oracledb.getConnection(dbconfig);
+    const sd = conn.getSodaDatabase();
 
-      let collName = "";
-      await testsUtil.assertThrowsAsync(
-        async () => await sd.createCollection(collName),
-        /ORA-40658:/
-      );
-      // ORA-40658: Collection name cannot be null for this operation.
+    const collName = "";
+    await testsUtil.assertThrowsAsync(
+      async () => await sd.createCollection(collName),
+      /ORA-40658:/
+    );
+    // ORA-40658: Collection name cannot be null for this operation.
 
-    } catch (err) {
-      assert.fail(err);
-    } finally {
-      if (coll) {
-        try {
-          await coll.drop();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
-
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.fail(err);
-        }
-      }
-    }
+    await conn.close();
   }); // 165.4
 
   // This is a variation of 173.1
   it('165.5 connections from a pool concurrently insert documents into the same collection', async () => {
 
     const collectionName = "soda_test_165.5";
-    try {
-      await prepareCollection(collectionName);
-    } catch (err) {
-      assert.fail(err);
-    }
+    await prepareCollection(collectionName);
 
-    try {
-      let pool = await oracledb.createPool(dbconfig);
+    const pool = await oracledb.createPool(dbconfig);
 
-      const t_contents = sodaUtil.t_contents;
-      await Promise.all(
-        t_contents.map(function(content) {
-          return insertDocument(pool, collectionName, content);
-        })
-      );
-      await pool.close();
+    const t_contents = sodaUtil.t_contents;
+    await Promise.all(
+      t_contents.map(function(content) {
+        return insertDocument(pool, collectionName, content);
+      })
+    );
+    await pool.close();
 
-    } catch (err) {
-      assert.fail(err);
-    }
-
-    try {
-      await dropCollection(collectionName);
-    } catch (err) {
-      assert.fail(err);
-    }
+    await dropCollection(collectionName);
 
     async function prepareCollection(collName) {
 
-      try {
-        let conn = await oracledb.getConnection(dbconfig);
-        let soda = conn.getSodaDatabase();
-        let collection = await soda.createCollection(collName);
-        let indexSpec = {
-          "name": "OFFICE_IDX",
-          "fields": [
-            {
-              "path": "office",
-              "datatype": "string",
-              "order": "asc"
-            }
-          ]
-        };
-        await collection.createIndex(indexSpec);
-        await conn.commit();
-        await conn.close();
-
-      } catch (err) {
-        assert.fail(err);
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const soda = conn.getSodaDatabase();
+      const collection = await soda.createCollection(collName);
+      const indexSpec = {
+        "name": "OFFICE_IDX",
+        "fields": [
+          {
+            "path": "office",
+            "datatype": "string",
+            "order": "asc"
+          }
+        ]
+      };
+      await collection.createIndex(indexSpec);
+      await conn.commit();
+      await conn.close();
 
     } // prepareCollection()
 
     async function insertDocument(pool, collName, content) {
+      const conn = await pool.getConnection();
+      const soda = conn.getSodaDatabase();
+      const collection = await soda.openCollection(collName);
 
-      try {
-        let conn = await pool.getConnection();
-        let soda = conn.getSodaDatabase();
-        let collection = await soda.openCollection(collName);
-
-        await collection.insertOne(content);
-        await conn.commit();
-        await conn.close();
-      } catch (err) {
-        assert.fail(err);
-      }
+      await collection.insertOne(content);
+      await conn.commit();
+      await conn.close();
     } // insertDocument()
 
     async function dropCollection(collName) {
+      const conn = await oracledb.getConnection(dbconfig);
+      const soda = conn.getSodaDatabase();
+      const collection = await soda.openCollection(collName);
 
-      try {
-        let conn = await oracledb.getConnection(dbconfig);
-        let soda = conn.getSodaDatabase();
-        let collection = await soda.openCollection(collName);
+      const result = await collection.drop();
+      assert.strictEqual(result.dropped, true);
 
-        let result = await collection.drop();
-        assert.strictEqual(result.dropped, true);
-
-        await conn.commit();
-        await conn.close();
-
-      } catch (err) {
-        assert.fail(err);
-      }
+      await conn.commit();
+      await conn.close();
     } // dropCollection()
 
   }); // 165.5

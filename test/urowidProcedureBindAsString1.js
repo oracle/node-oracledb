@@ -83,20 +83,11 @@ describe('118. urowidProcedureBindAsString1.js', function() {
     const proc_drop = "DROP PROCEDURE nodb_urowid_bind_in_1081";
 
     before('create procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_create, {}, {});
-      } catch (err) {
-        assert.fail(err);
-      }
+      await sql.executeSql(connection, proc_create, {}, {});
     });
 
     after('drop procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_drop, {}, {});
-      } catch (err) {
-        assert.fail(err);
-      }
-
+      await sql.executeSql(connection, proc_drop, {}, {});
     });
 
     it('118.1.1 works with null', async function() {
@@ -316,19 +307,11 @@ describe('118. urowidProcedureBindAsString1.js', function() {
     const proc_drop = "DROP PROCEDURE nodb_urowid_bind_in_1083";
 
     before('create procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_create, {}, {});
-      } catch (err) {
-        assert.fail(err);
-      }
+      await sql.executeSql(connection, proc_create, {}, {});
     });
 
     after('drop procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_drop, {}, {});
-      } catch (err) {
-        assert.fail(err);
-      }
+      await sql.executeSql(connection, proc_drop, {}, {});
     });
 
     it('118.3.1 update null with UROWID', async function() {
@@ -379,11 +362,7 @@ describe('118. urowidProcedureBindAsString1.js', function() {
       c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_IN }
     };
     const option_in = { autoCommit: true };
-    try {
-      await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
-    } catch (err) {
-      assert.fail(err);
-    }
+    await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
 
     const sql_query = "select * from " + tableName + " where id = " + insertID;
     const result = await connection.execute(sql_query);
@@ -394,76 +373,64 @@ describe('118. urowidProcedureBindAsString1.js', function() {
   };
 
   const procedureBindIn_default = async function(proc_execute, content_in, expected) {
-    try {
-      const option_in = { autoCommit: true };
-      let bindVar_in = {
-        i: insertID,
-        c: content_in
-      };
-      await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
+    const option_in = { autoCommit: true };
+    let bindVar_in = {
+      i: insertID,
+      c: content_in
+    };
+    await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
 
-      let sql_query = "select * from " + tableName + " where id = " + insertID;
-      let result = await connection.execute(sql_query);
-      let resultVal = result.rows[0][1];
-      assert.strictEqual(resultVal, expected);
-      insertID++;
-      bindVar_in = [ insertID, content_in ];
-      await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
-      sql_query = "select * from " + tableName + " where id = " + insertID;
-      result = await connection.execute(sql_query);
-      resultVal = result.rows[0][1];
-      assert.strictEqual(resultVal, expected);
-    } catch (err) {
-      assert.fail(err);
-    }
+    let sql_query = "select * from " + tableName + " where id = " + insertID;
+    let result = await connection.execute(sql_query);
+    let resultVal = result.rows[0][1];
+    assert.strictEqual(resultVal, expected);
+    insertID++;
+    bindVar_in = [ insertID, content_in ];
+    await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
+    sql_query = "select * from " + tableName + " where id = " + insertID;
+    result = await connection.execute(sql_query);
+    resultVal = result.rows[0][1];
+    assert.strictEqual(resultVal, expected);
   };
 
   const procedureBindIn_update = async function(proc_execute, content_1, content_2, expected) {
-    try {
-      const bindVar_in = {
-        i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        c1: { val: content_1, type: oracledb.STRING, dir: oracledb.BIND_IN },
-        c2: { val: content_2, type: oracledb.STRING, dir: oracledb.BIND_IN }
-      };
-      const option_in = { autoCommit: true };
+    const bindVar_in = {
+      i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+      c1: { val: content_1, type: oracledb.STRING, dir: oracledb.BIND_IN },
+      c2: { val: content_2, type: oracledb.STRING, dir: oracledb.BIND_IN }
+    };
+    const option_in = { autoCommit: true };
 
-      await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
+    await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
 
-      const sql_query = "select * from " + tableName + " where id = " + insertID;
-      const result = await connection.execute(sql_query);
-      assert(result);
-      const resultVal = result.rows[0][1];
-      assert.strictEqual(resultVal, expected);
-    } catch (err) {
-      assert.fail(err);
-    }
+    const sql_query = "select * from " + tableName + " where id = " + insertID;
+    const result = await connection.execute(sql_query);
+    assert(result);
+    const resultVal = result.rows[0][1];
+    assert.strictEqual(resultVal, expected);
   };
 
   const procedureBindIn_update_default = async function(proc_execute, content_1, content_2, expected) {
-    try {
-      const option_in = { autoCommit: true };
-      let bindVar_in = {
-        i: insertID,
-        c1: content_1,
-        c2: content_2
-      };
-      await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
-      let sql_query = "select * from " + tableName + " where id = " + insertID;
-      let result = await connection.execute(sql_query);
-      let resultVal = result.rows[0][1];
-      assert.strictEqual(resultVal, expected);
-      insertID++;
+    const option_in = { autoCommit: true };
+    let bindVar_in = {
+      i: insertID,
+      c1: content_1,
+      c2: content_2
+    };
+    await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
+    let sql_query = "select * from " + tableName + " where id = " + insertID;
+    let result = await connection.execute(sql_query);
+    let resultVal = result.rows[0][1];
+    assert.strictEqual(resultVal, expected);
+    insertID++;
 
-      bindVar_in = [ insertID, content_1, content_2 ];
-      await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
-      sql_query = "select * from " + tableName + " where id = " + insertID;
-      result = await  connection.execute(sql_query);
+    bindVar_in = [ insertID, content_1, content_2 ];
+    await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
+    sql_query = "select * from " + tableName + " where id = " + insertID;
+    result = await  connection.execute(sql_query);
 
-      resultVal = result.rows[0][1];
-      assert.strictEqual(resultVal, expected);
-    } catch (err) {
-      assert.fail(err);
-    }
+    resultVal = result.rows[0][1];
+    assert.strictEqual(resultVal, expected);
   };
 
 });

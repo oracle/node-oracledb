@@ -42,7 +42,7 @@ describe('230. soda12.js', () => {
   before(async function() {
     let isSodaRunnable = await testsUtil.isSodaRunnable();
 
-    const clientVersion = oracledb.oracleClientVersion;
+    const clientVersion = testsUtil.getClientVersion();
     let isClientOK;
     if (clientVersion < 2000000000) {
       isClientOK = false;
@@ -100,61 +100,56 @@ describe('230. soda12.js', () => {
     const TABLE = "soda_test_230_1";
     const metadata = await getMetadata(TABLE);
 
-    try {
-      const conn = await oracledb.getConnection(dbconfig);
-      const soda = conn.getSodaDatabase();
-      const coll = await soda.createCollection(TABLE, { metaData: metadata });
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
-      // (1)
-      const content1 = {fred: 5, george: 10};
-      let doc = soda.createDocument(content1, { key: "1" });
-      await coll.save(doc);
-      await conn.commit();
-      const docs1 = await coll.find().getDocuments();
-      assert.strictEqual(docs1.length, 1);
-      assert.strictEqual(docs1[0].key, '1');
-      assert.deepEqual(docs1[0].getContent(), content1);
+    // (1)
+    const content1 = {fred: 5, george: 10};
+    let doc = soda.createDocument(content1, { key: "1" });
+    await coll.save(doc);
+    await conn.commit();
+    const docs1 = await coll.find().getDocuments();
+    assert.strictEqual(docs1.length, 1);
+    assert.strictEqual(docs1[0].key, '1');
+    assert.deepEqual(docs1[0].getContent(), content1);
 
-      // (2)
-      const content2 = {sally: 1, betty: 2};
-      doc = soda.createDocument(content2, { key: "2" });
-      await coll.save(doc);
-      await conn.commit();
-      const docs2 = await coll.find().getDocuments();
-      assert.strictEqual(docs2.length, 2);
-      assert.strictEqual(docs2[1].key, '2');
-      assert.deepEqual(docs2[1].getContent(), content2);
+    // (2)
+    const content2 = {sally: 1, betty: 2};
+    doc = soda.createDocument(content2, { key: "2" });
+    await coll.save(doc);
+    await conn.commit();
+    const docs2 = await coll.find().getDocuments();
+    assert.strictEqual(docs2.length, 2);
+    assert.strictEqual(docs2[1].key, '2');
+    assert.deepEqual(docs2[1].getContent(), content2);
 
-      // (3)
-      const content3 = {fred: 8, george: 16};
-      doc = soda.createDocument(content3, { key: "1" });
-      await coll.save(doc);
-      await conn.commit();
-      const docs3 = await coll.find().getDocuments();
-      assert.strictEqual(docs3.length, 2);
-      assert.strictEqual(docs3[0].key, '1');
-      assert.deepEqual(docs3[0].getContent(), content3);
+    // (3)
+    const content3 = {fred: 8, george: 16};
+    doc = soda.createDocument(content3, { key: "1" });
+    await coll.save(doc);
+    await conn.commit();
+    const docs3 = await coll.find().getDocuments();
+    assert.strictEqual(docs3.length, 2);
+    assert.strictEqual(docs3[0].key, '1');
+    assert.deepEqual(docs3[0].getContent(), content3);
 
-      // (4)
-      const content4 = {sally: 3, betty: 5};
-      doc = soda.createDocument(content4, { key: "2" });
-      const returnedDoc = await coll.saveAndGet(doc);
-      await conn.commit();
-      assert.strictEqual(returnedDoc.key, '2');
+    // (4)
+    const content4 = {sally: 3, betty: 5};
+    doc = soda.createDocument(content4, { key: "2" });
+    const returnedDoc = await coll.saveAndGet(doc);
+    await conn.commit();
+    assert.strictEqual(returnedDoc.key, '2');
 
-      const docs4 = await coll.find().getDocuments();
-      assert.strictEqual(docs4.length, 2);
-      assert.strictEqual(docs4[1].key, '2');
-      assert.deepEqual(docs4[1].getContent(), content4);
+    const docs4 = await coll.find().getDocuments();
+    assert.strictEqual(docs4.length, 2);
+    assert.strictEqual(docs4[1].key, '2');
+    assert.deepEqual(docs4[1].getContent(), content4);
 
-      await conn.commit();
-      let res = await coll.drop();
-      assert.strictEqual(res.dropped, true);
-      await conn.close();
-
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.commit();
+    let res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
 
   }); // 230.1
 
@@ -162,112 +157,103 @@ describe('230. soda12.js', () => {
 
     const TABLE = "soda_test_230_2";
     const metadata = await getMetadata(TABLE);
-    try {
-      const conn = await oracledb.getConnection(dbconfig);
-      const soda = conn.getSodaDatabase();
-      const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
-      const content1 = { id: 1, name: "Paul",  office: "Singapore" };
-      let doc = soda.createDocument(content1, { key: "3" });
-      await coll.insertOne(doc);
-      await conn.commit();
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
-      const content2 = {Charlie: 2, David: 20};
-      doc = soda.createDocument(content2, { key: "4" });
-      await coll.save(doc);
-      await conn.commit();
+    const content1 = { id: 1, name: "Paul",  office: "Singapore" };
+    let doc = soda.createDocument(content1, { key: "3" });
+    await coll.insertOne(doc);
+    await conn.commit();
 
-      const content3 = {Eve: 3, Frank: 30};
-      doc = soda.createDocument(content3, { key: "3" });
-      await coll.save(doc);
-      await conn.commit();
+    const content2 = {Charlie: 2, David: 20};
+    doc = soda.createDocument(content2, { key: "4" });
+    await coll.save(doc);
+    await conn.commit();
 
-      const docs = await coll.find().getDocuments();
-      assert.strictEqual(docs.length, 2);
-      assert.strictEqual(docs[0].key, '3');
-      assert.deepEqual(docs[0].getContent(), content3);
-      assert.strictEqual(docs[1].key, '4');
-      assert.deepEqual(docs[1].getContent(), content2);
+    const content3 = {Eve: 3, Frank: 30};
+    doc = soda.createDocument(content3, { key: "3" });
+    await coll.save(doc);
+    await conn.commit();
 
-      await conn.commit();
-      let res = await coll.drop();
-      assert.strictEqual(res.dropped, true);
-      await conn.close();
+    const docs = await coll.find().getDocuments();
+    assert.strictEqual(docs.length, 2);
+    assert.strictEqual(docs[0].key, '3');
+    assert.deepEqual(docs[0].getContent(), content3);
+    assert.strictEqual(docs[1].key, '4');
+    assert.deepEqual(docs[1].getContent(), content2);
 
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.commit();
+    let res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+
   }); // 230.2
 
   it('230.3 Negative - client assigned keys are necessary', async () => {
 
     const TABLE = "soda_test_230_3";
     const metadata = await getMetadata(TABLE);
-    try {
-      const conn = await oracledb.getConnection(dbconfig);
-      const soda = conn.getSodaDatabase();
-      const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
-      /* save() with content directly */
-      // ORA-40661: Key value cannot be null for this operation.
-      const content = { id: 23, name: "Changjie",  office: "Shenzhen", key: "1" };
-      await assert.rejects(
-        async () => {
-          await coll.save(content);
-        },
-        /ORA-40661/
-      );
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
-      let doc = soda.createDocument(content);
-      await assert.rejects(
-        async () => {
-          await coll.save(doc);
-        },
-        /ORA-40661/
-      );
-      await conn.commit();
+    /* save() with content directly */
+    // ORA-40661: Key value cannot be null for this operation.
+    const content = { id: 23, name: "Changjie",  office: "Shenzhen", key: "1" };
+    await assert.rejects(
+      async () => {
+        await coll.save(content);
+      },
+      /ORA-40661/
+    );
 
-      let res = await coll.drop();
-      assert.strictEqual(res.dropped, true);
-      await conn.close();
+    let doc = soda.createDocument(content);
+    await assert.rejects(
+      async () => {
+        await coll.save(doc);
+      },
+      /ORA-40661/
+    );
+    await conn.commit();
 
-    } catch (err) {
-      assert.fail(err);
-    }
+    let res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+
   }); // 230.3
 
   it('230.4 Negative - save without arguments', async () => {
 
     const TABLE = "soda_test_230_4";
     const metadata = await getMetadata(TABLE);
-    try {
-      const conn = await oracledb.getConnection(dbconfig);
-      const soda = conn.getSodaDatabase();
-      const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
-      // NJS-009: invalid number of parameters
-      await assert.rejects(
-        async () => {
-          await coll.save();
-        },
-        /NJS-009/
-      );
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
-      await assert.rejects(
-        async () => {
-          await coll.saveAndGet();
-        },
-        /NJS-009/
-      );
+    // NJS-009: invalid number of parameters
+    await assert.rejects(
+      async () => {
+        await coll.save();
+      },
+      /NJS-009/
+    );
+
+    await assert.rejects(
+      async () => {
+        await coll.saveAndGet();
+      },
+      /NJS-009/
+    );
 
 
-      await conn.commit();
-      let res = await coll.drop();
-      assert.strictEqual(res.dropped, true);
-      await conn.close();
+    await conn.commit();
+    let res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
 
-    } catch (err) {
-      assert.fail(err);
-    }
   }); // 230.4
 });

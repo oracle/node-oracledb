@@ -41,9 +41,9 @@ describe('252. sodaMetaDataCache.js', function() {
   before(async function() {
     // The SODA metadata cache is available with Oracle Client 21.3 and
     // in 19 from 19.11
-    if (oracledb.oracleClientVersion < 2103000000) {
-      if (oracledb.oracleClientVersion < 1911000000 ||
-          oracledb.oracleClientVersion >= 2000000000) {
+    const clientVersion = testsUtil.getClientVersion();
+    if (clientVersion < 2103000000) {
+      if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
         this.skip();
         return;
       }

@@ -62,11 +62,7 @@ describe('178. soda10.js', function() {
     if (!runnable) {
       return;
     }
-    try {
-      await conn.close();
-    } catch (err) {
-      assert.fail(err);
-    }
+    await conn.close();
   }); // after()
 
   const inContents = [
@@ -77,175 +73,151 @@ describe('178. soda10.js', function() {
   ];
 
   it('178.1 insertMany() with newSodaDocumentArray', async function() {
-    try {
-      const COLL = "soda_test_178_1";
-      const collection = await soda.createCollection(COLL);
+    const COLL = "soda_test_178_1";
+    const collection = await soda.createCollection(COLL);
 
-      let inDocuments = [];
-      for (let i = 0; i < inContents.length; i++) {
-        inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
-      }
-
-      await collection.insertMany(inDocuments);
-
-      // Fetch back
-      let outDocuments = await collection.find().getDocuments();
-      let outContents = [];
-      for (let i = 0; i < outDocuments.length; i++) {
-        outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
-      }
-
-      assert.deepEqual(outContents, inContents);
-
-      await conn.commit();
-
-      let res = await collection.drop();
-      assert.strictEqual(res.dropped, true);
-    } catch (err) {
-      assert.fail(err);
+    let inDocuments = [];
+    for (let i = 0; i < inContents.length; i++) {
+      inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
     }
+
+    await collection.insertMany(inDocuments);
+
+    // Fetch back
+    let outDocuments = await collection.find().getDocuments();
+    let outContents = [];
+    for (let i = 0; i < outDocuments.length; i++) {
+      outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
+    }
+
+    assert.deepEqual(outContents, inContents);
+
+    await conn.commit();
+
+    let res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 178.1
 
   it('178.2 insertMany() with newSodaDocumentContentArray', async function() {
-    try {
-      const COLL = "soda_test_178_2";
-      const collection = await soda.createCollection(COLL);
+    const COLL = "soda_test_178_2";
+    const collection = await soda.createCollection(COLL);
 
-      await collection.insertMany(inContents);
+    await collection.insertMany(inContents);
 
-      // Fetch back
-      let outDocuments = await collection.find().getDocuments();
-      let outContents = [];
-      for (let i = 0; i < outDocuments.length; i++) {
-        outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
-      }
-
-      assert.deepEqual(outContents, inContents);
-
-      await conn.commit();
-
-      let res = await collection.drop();
-      assert.strictEqual(res.dropped, true);
-    } catch (err) {
-      assert.fail(err);
+    // Fetch back
+    let outDocuments = await collection.find().getDocuments();
+    let outContents = [];
+    for (let i = 0; i < outDocuments.length; i++) {
+      outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
     }
+
+    assert.deepEqual(outContents, inContents);
+
+    await conn.commit();
+
+    let res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 178.2
 
   it('178.3 insertManyAndGet() with newDocumentArray', async function() {
-    try {
-      const COLL = "soda_test_178_3";
-      const collection = await soda.createCollection(COLL);
+    const COLL = "soda_test_178_3";
+    const collection = await soda.createCollection(COLL);
 
-      let inDocuments = [];
-      for (let i = 0; i < inContents.length; i++) {
-        inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
-      }
-
-      let middleDocuments = await collection.insertManyAndGet(inDocuments);
-      let middleContents = [];
-      for (let i = 0; i < middleDocuments.length; i++) {
-        middleContents[i] = middleDocuments[i].getContent();
-        assert(middleDocuments[i].key);
-      }
-      assert.deepEqual(middleContents, [null, null, null, null]);
-
-      // Fetch back
-      let outDocuments = await collection.find().getDocuments();
-      let outContents = [];
-      for (let i = 0; i < outDocuments.length; i++) {
-        outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
-      }
-
-      assert.deepEqual(outContents, inContents);
-
-      await conn.commit();
-
-      let res = await collection.drop();
-      assert.strictEqual(res.dropped, true);
-    } catch (err) {
-      assert.fail(err);
+    let inDocuments = [];
+    for (let i = 0; i < inContents.length; i++) {
+      inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
     }
+
+    let middleDocuments = await collection.insertManyAndGet(inDocuments);
+    let middleContents = [];
+    for (let i = 0; i < middleDocuments.length; i++) {
+      middleContents[i] = middleDocuments[i].getContent();
+      assert(middleDocuments[i].key);
+    }
+    assert.deepEqual(middleContents, [null, null, null, null]);
+
+    // Fetch back
+    let outDocuments = await collection.find().getDocuments();
+    let outContents = [];
+    for (let i = 0; i < outDocuments.length; i++) {
+      outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
+    }
+
+    assert.deepEqual(outContents, inContents);
+
+    await conn.commit();
+
+    let res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 178.3
 
   it('178.4 insertManyAndGet() with newDocumentContentArray', async function() {
-    try {
-      const COLL = "soda_test_178_4";
-      const collection = await soda.createCollection(COLL);
+    const COLL = "soda_test_178_4";
+    const collection = await soda.createCollection(COLL);
 
-      let middleDocuments = await collection.insertManyAndGet(inContents);
-      let middleContents = [];
-      for (let i = 0; i < middleDocuments.length; i++) {
-        middleContents[i] = middleDocuments[i].getContent();
-        assert(middleDocuments[i].key);
-      }
-      assert.deepEqual(middleContents, [null, null, null, null]);
-
-      // Fetch back
-      let outDocuments = await collection.find().getDocuments();
-      let outContents = [];
-      for (let i = 0; i < outDocuments.length; i++) {
-        outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
-      }
-
-      assert.deepEqual(outContents, inContents);
-
-      await conn.commit();
-
-      let res = await collection.drop();
-      assert.strictEqual(res.dropped, true);
-    } catch (err) {
-      assert.fail(err);
+    let middleDocuments = await collection.insertManyAndGet(inContents);
+    let middleContents = [];
+    for (let i = 0; i < middleDocuments.length; i++) {
+      middleContents[i] = middleDocuments[i].getContent();
+      assert(middleDocuments[i].key);
     }
+    assert.deepEqual(middleContents, [null, null, null, null]);
+
+    // Fetch back
+    let outDocuments = await collection.find().getDocuments();
+    let outContents = [];
+    for (let i = 0; i < outDocuments.length; i++) {
+      outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
+    }
+
+    assert.deepEqual(outContents, inContents);
+
+    await conn.commit();
+
+    let res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 178.4
 
   it('178.5 Negative - insertMany() with an empty array', async function() {
-    try {
-      const COLL = "soda_test_178_5";
-      const collection = await soda.createCollection(COLL);
+    const COLL = "soda_test_178_5";
+    const collection = await soda.createCollection(COLL);
 
-      await testsUtil.assertThrowsAsync(
-        async function() {
-          await collection.insertMany([]);
-        },
-        /NJS-005/
-      );
+    await testsUtil.assertThrowsAsync(
+      async function() {
+        await collection.insertMany([]);
+      },
+      /NJS-005/
+    );
 
-      await conn.commit();
+    await conn.commit();
 
-      let res = await collection.drop();
-      assert.strictEqual(res.dropped, true);
-    } catch (err) {
-      assert.fail(err);
-    }
+    let res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 178.5
 
   it('178.6 Negative - insertManyAndGet() with an empty array', async function() {
-    try {
-      const COLL = "soda_test_178_6";
-      const collection = await soda.createCollection(COLL);
+    const COLL = "soda_test_178_6";
+    const collection = await soda.createCollection(COLL);
 
-      await testsUtil.assertThrowsAsync(
-        async function() {
-          await collection.insertManyAndGet([]);
-        },
-        /NJS-005/
-      );
+    await testsUtil.assertThrowsAsync(
+      async function() {
+        await collection.insertManyAndGet([]);
+      },
+      /NJS-005/
+    );
 
-      await conn.commit();
+    await conn.commit();
 
-      let res = await collection.drop();
-      assert.strictEqual(res.dropped, true);
-    } catch (err) {
-      assert.fail(err);
-    }
+    let res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 178.6
 
   it('178.7 insertManyAndGet() with hint option', async function() {
     // The SODA hint is available with Oracle Client 21.3 and
     // in 19 from 19.11
-    if (oracledb.oracleClientVersion < 2103000000) {
-      if (oracledb.oracleClientVersion < 1911000000 ||
-          oracledb.oracleClientVersion >= 2000000000) {
+    const clientVersion = testsUtil.getClientVersion();
+    if (clientVersion < 2103000000) {
+      if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
         this.skip();
         return;
       }

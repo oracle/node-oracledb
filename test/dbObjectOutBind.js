@@ -109,79 +109,63 @@ describe('262. dbObjectOutBind.js', function() {
        end;`;
 
   before(async function() {
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      await conn.execute(proc1);
-      await conn.execute(proc2);
-      await conn.execute(proc3);
-      await conn.execute(proc4);
-      await conn.execute(proc5);
-      await conn.execute(proc6);
-    } catch (e) {
-      assert.fail(e);
-    }
+    conn = await oracledb.getConnection(dbConfig);
+    await conn.execute(proc1);
+    await conn.execute(proc2);
+    await conn.execute(proc3);
+    await conn.execute(proc4);
+    await conn.execute(proc5);
+    await conn.execute(proc6);
   });
 
   after(async function() {
-    try {
-      await conn.execute(`DROP PROCEDURE nodb_getDataCursor6`);
-      await conn.execute(`DROP PROCEDURE nodb_getDataCursor5`);
-      await conn.execute(`DROP PROCEDURE nodb_getDataCursor4`);
-      await conn.execute(`DROP PROCEDURE nodb_getDataCursor3`);
-      await conn.execute(`DROP PROCEDURE nodb_getDataCursor2`);
-      await conn.execute(`DROP PROCEDURE nodb_getDataCursor1`);
-      await conn.close();
-    } catch (e) {
-      assert.fail(e);
-    }
+    await conn.execute(`DROP PROCEDURE nodb_getDataCursor6`);
+    await conn.execute(`DROP PROCEDURE nodb_getDataCursor5`);
+    await conn.execute(`DROP PROCEDURE nodb_getDataCursor4`);
+    await conn.execute(`DROP PROCEDURE nodb_getDataCursor3`);
+    await conn.execute(`DROP PROCEDURE nodb_getDataCursor2`);
+    await conn.execute(`DROP PROCEDURE nodb_getDataCursor1`);
+    await conn.close();
   });
 
   it('262.1 call procedure with 2 OUT binds of DbObject', async function() {
-    try {
-      let result = await conn.execute(
-        `BEGIN nodb_getDataCursor5(p_cur1 => :p_cur1,
-            p_cur2 => :p_cur2); end;`,
-        {
-          p_cur1: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT},
-          p_cur2: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}
-        }
-      );
-      result.outBinds.p_cur1.close();
-      result.outBinds.p_cur2.close();
-    } catch (e) {
-      assert.fail(e);
-    }
+    let result = await conn.execute(
+      `BEGIN nodb_getDataCursor5(p_cur1 => :p_cur1,
+          p_cur2 => :p_cur2); end;`,
+      {
+        p_cur1: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT},
+        p_cur2: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}
+      }
+    );
+    result.outBinds.p_cur1.close();
+    result.outBinds.p_cur2.close();
   });
 
   it('262.2 call procedure with multiple OUT binds of DbObject', async function() {
-    try {
-      let result = await conn.execute(
-        `BEGIN nodb_getDataCursor6(p_cur1 => :p_cur1,
-            p_cur2 => :p_cur2, p_cur3 => :p_cur3, p_cur4 => :p_cur4); end;`,
-        {
-          p_cur1: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT},
-          p_cur2: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT},
-          p_cur3: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT},
-          p_cur4: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}
-        }
-      );
-      let resultSet = await result.outBinds.p_cur1.getRows();
-      assert.equal(resultSet.length, 9);
-      result.outBinds.p_cur1.close();
+    let result = await conn.execute(
+      `BEGIN nodb_getDataCursor6(p_cur1 => :p_cur1,
+          p_cur2 => :p_cur2, p_cur3 => :p_cur3, p_cur4 => :p_cur4); end;`,
+      {
+        p_cur1: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT},
+        p_cur2: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT},
+        p_cur3: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT},
+        p_cur4: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}
+      }
+    );
+    let resultSet = await result.outBinds.p_cur1.getRows();
+    assert.equal(resultSet.length, 9);
+    result.outBinds.p_cur1.close();
 
-      resultSet = await result.outBinds.p_cur2.getRows();
-      assert.equal(resultSet.length, 3);
-      result.outBinds.p_cur2.close();
+    resultSet = await result.outBinds.p_cur2.getRows();
+    assert.equal(resultSet.length, 3);
+    result.outBinds.p_cur2.close();
 
-      resultSet = await result.outBinds.p_cur3.getRows();
-      assert.equal(resultSet.length, 9);
-      result.outBinds.p_cur3.close();
+    resultSet = await result.outBinds.p_cur3.getRows();
+    assert.equal(resultSet.length, 9);
+    result.outBinds.p_cur3.close();
 
-      resultSet = await result.outBinds.p_cur4.getRows();
-      assert.equal(resultSet.length, 3);
-      result.outBinds.p_cur4.close();
-    } catch (e) {
-      assert.fail(e);
-    }
+    resultSet = await result.outBinds.p_cur4.getRows();
+    assert.equal(resultSet.length, 3);
+    result.outBinds.p_cur4.close();
   });
 });
