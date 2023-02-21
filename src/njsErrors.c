@@ -103,6 +103,8 @@ static const char *njsErrorMessages[] = {
     "NJS-087: access token has expired", //errExpiredToken
     "NJS-088: accessTokenCallback cannot be specified when accessToken is a function", //errAccessTokenCallback
     "NJS-089: internal error: invalid global setting attribute num %d", // errInvalidGlobalSettingAttrNum
+    "NJS-090: initOracleClient() was already called with different arguments!", //errInitOracleClientArgs
+    "NJS-091: file %s is missing", //errMissingFile
 };
 
 

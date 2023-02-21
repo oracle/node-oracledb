@@ -248,6 +248,8 @@ typedef enum {
     errExpiredToken,
     errAccessTokenCallback,
     errInvalidGlobalSettingAttrNum,
+    errInitOracleClientArgs,
+    errMissingFile,
 
     // New ones should be added here
 
