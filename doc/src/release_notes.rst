@@ -34,9 +34,12 @@ node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...
 #)  Show NJS prefixed error messages instead of DPI or ORA prefixed messages in
     some error scenarios.
 
-#)  Test and documentation improvements.
+#)  The previously deprecated Token-Based Authentication ``accessTokenCallback``
+    attribute has been removed.  Use ``accessToken`` instead.
 
 #)  Fixed type used when fetching NCLOB as a string.
+
+#)  Test and documentation improvements.
 
 
 node-oracledb `v5.5.0 <https://github.com/oracle/node-oracledb/compare/v5.4.0...v5.5.0>`__ (7 Sep 2022)

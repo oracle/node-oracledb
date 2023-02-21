@@ -197,7 +197,7 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_create, 1, &njsClassDefPool)
     if (!njsUtils_getNamedPropertyBool(env, args[0], "sodaMetaDataCache",
             &baton->sodaMetadataCache))
         return false;
-    if (!njsUtils_getNamedProperty(env, args[0], "accessTokenCallback",
+    if (!njsUtils_getNamedProperty(env, args[0], "accessTokenFn",
             &callback))
         return false;
     if (callback && !njsTokenCallback_new(baton, env, callback))
