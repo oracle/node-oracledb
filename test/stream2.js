@@ -338,10 +338,7 @@ describe('14. stream2.js', function() {
 
     var metaDataRead = false;
     stream.on('metadata', function(metaData) {
-      should.deepEqual(
-        metaData,
-        [ { name: 'EMPLOYEE_NAME' } ]
-      );
+      should.equal(metaData[0].name, 'EMPLOYEE_NAME');
       metaDataRead = true;
     });
 
@@ -567,10 +564,8 @@ describe('14. stream2.js', function() {
 
         var metaDataRead = false;
         stream.on('metadata', function(metaData) {
-          should.deepEqual(
-            metaData,
-            [ { name: 'A' }, { name: 'B' } ]
-          );
+          should.equal(metaData[0].name, 'A');
+          should.equal(metaData[1].name, 'B');
           metaDataRead = true;
         });
 

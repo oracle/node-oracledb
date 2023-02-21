@@ -376,21 +376,21 @@ describe('86. fetchClobAsString3.js', function() {
       done();
     }); // 86.2.7
 
-    it('86.2.8 undefined in fetchAsString will throw NJS-004', function() {
+    it('86.2.8 undefined in fetchAsString will throw NJS-021', function() {
       should.throws(
         function() {
           oracledb.fetchAsString = [ undefined ];
         },
-        /NJS-004:/
+        /NJS-021:/
       );
     }); // 86.2.8
 
-    it('86.2.9 Random string in fetchAsString will throw NJS-004', function() {
+    it('86.2.9 Random string in fetchAsString will throw NJS-021', function() {
       should.throws(
         function() {
           oracledb.fetchAsString = [ "foobar" ];
         },
-        /NJS-004:/
+        /NJS-021:/
       );
     }); // 86.2.9
 
@@ -403,39 +403,39 @@ describe('86. fetchClobAsString3.js', function() {
       );
     }); // 86.2.10
 
-    it('86.2.11 Negative integer in fetchAsString will throw NJS-004', function() {
+    it('86.2.11 Negative integer in fetchAsString will throw NJS-021', function() {
       should.throws(
         function() {
           oracledb.fetchAsString = [ -1 ];
         },
-        /NJS-004:/
+        /NJS-021:/
       );
     }); // 86.2.11
 
-    it('86.2.12 Random float in fetchAsString will throw NJS-004', function() {
+    it('86.2.12 Random float in fetchAsString will throw NJS-021', function() {
       should.throws(
         function() {
           oracledb.fetchAsString = [ 3.1415 ];
         },
-        /NJS-004:/
+        /NJS-021:/
       );
     }); // 86.2.12
 
-    it('86.2.13 Array in fetchAsString will throw NJS-004', function() {
+    it('86.2.13 Array in fetchAsString will throw NJS-021', function() {
       should.throws(
         function() {
           oracledb.fetchAsString = [ [3] ];
         },
-        /NJS-004:/
+        /NJS-021:/
       );
     }); // 86.2.13
 
-    it('86.2.14 Object in fetchAsString will throw NJS-004', function() {
+    it('86.2.14 Object in fetchAsString will throw NJS-021', function() {
       should.throws(
         function() {
           oracledb.fetchAsString = [ {1:1} ];
         },
-        /NJS-004:/
+        /NJS-021:/
       );
     }); // 86.2.14
 
