@@ -360,8 +360,8 @@ describe('1. connection.js', function() {
 
       await assert.rejects(
         async () => await oracledb.getConnection(credential),
-        /ORA-24300:/
-      );// ORA-24300: bad value for mode
+        /NJS-007:/
+      );
     });
 
     it('1.7.4 Negative value - NaN', async function() {
