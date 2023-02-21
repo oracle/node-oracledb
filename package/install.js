@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -41,8 +41,9 @@
 const fs = require('fs');
 const nodbUtil = require('../lib/util.js');
 const errors = require('../lib/errors.js');
+const constants = require('../lib/constants.js');
 
-let installUrl = 'https://oracle.github.io/node-oracledb/INSTALL.html';
+let installUrl = constants.DEFAULT_ERROR_URL;
 let arch;
 let thickModeErrMsg;
 
@@ -67,15 +68,16 @@ function warn(message) { // eslint-disable-line
   console.error.apply(console, args);
 }
 
-// Check for the minimum version of Node.js.
-// Version 14 (with Node-API 6), or later, is usable.
-// Note that the checked version is the minimum required for Node-API
+// This version of node-oracledb works with Node.js 14.6 or later.
+// Note: the checked version is the minimum required for Node-API
 // compatibility.  When new Node.js versions are released, older Node.js
 // versions are dropped from the node-oracledb test plan.
+//
+// Keep this code in sync with lib/oracledb.js
 function checkVersion() {
   const vs = process.version.substring(1).split(".").map(Number);
-  errors.assert(vs[0] >= 14, errors.ERR_NODE_TOO_OLD,
-    nodbUtil.PACKAGE_JSON_VERSION, "14.0");
+  errors.assert(vs[0] > 14 || (vs[0] === 14 && vs[1] >= 6),
+    errors.ERR_NODE_TOO_OLD, nodbUtil.PACKAGE_JSON_VERSION, "14.6");
 }
 
 // Check for the binary node-oracledb module needed for "Thick mode".
@@ -113,11 +115,11 @@ if (process.arch === 'x64' || process.arch === 'arm64') {
 }
 
 if (process.platform === 'linux') {
-  installUrl += '#linuxinstall';
+  installUrl += '#node-oracledb-installation-on-linux';
 } else if (process.platform === 'darwin') {
-  installUrl += '#instosx';
+  installUrl += '#node-oracledb-installation-on-apple-macos-intel-x86';
 } else if (process.platform === 'win32') {
-  installUrl += '#windowsinstallation';
+  installUrl += '#node-oracledb-installation-on-microsoft-windowsstallation';
 }
 
 log('********************************************************************************');
