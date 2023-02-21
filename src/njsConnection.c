@@ -484,7 +484,7 @@ static bool njsConnection_connectAsync(njsBaton *baton)
     commonParams.stmtCacheSize = baton->stmtCacheSize;
 
     // set token based auth parameters
-    if (baton->token && baton->privateKey) {
+    if (baton->token) {
         accessToken.token = baton->token;
         accessToken.tokenLength = baton->tokenLength;
         accessToken.privateKey = baton->privateKey;
