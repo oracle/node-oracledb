@@ -250,3 +250,4 @@ spec:
   - test/asyncStack.js
   - test/methodName.js
   - test/aq4.js
+  - test/procAndFuncs.js 

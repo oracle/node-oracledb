@@ -36,237 +36,154 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var fs       = require('fs');
-var async    = require('async');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
-var assist   = require('./dataTypeAssist.js');
+const oracledb = require('oracledb');
+const fs       = require('fs');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const assist   = require('./dataTypeAssist.js');
 
-var inFileName = 'test/fuzzydinosaur.jpg';  // contains the image to be inserted
-var outFileName = 'test/blobstreamout.jpg';
+let inFileName = 'test/fuzzydinosaur.jpg';  // contains the image to be inserted
+let outFileName = 'test/blobstreamout.jpg';
 
 describe('41. dataTypeBlob.js', function() {
 
-  var connection = null;
-  var tableName = "nodb_myblobs";
+  let connection = null;
+  let tableName = "nodb_myblobs";
 
-  before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig,
-      function(err, conn) {
-        should.not.exist(err);
-        connection = conn;
-        done();
-      }
-    );
+  before('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after('release connection', function(done) {
-    connection.release(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after('release connection', async function() {
+    await connection.close();
   });
 
   describe('41.1 testing BLOB data type', function() {
-    before('create table', function(done) {
-      assist.createTable(connection, tableName, done);
+    before('create table', async function() {
+      await connection.execute(assist.sqlCreateTable(tableName));
     });
 
-    after(function(done) {
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after(async function() {
+      await connection.execute("DROP table " + tableName + " PURGE");
     });
 
-    it('41.1.1 stores BLOB value correctly', function(done) {
-      connection.should.be.ok();
-      async.series([
-        function blobinsert1(callback) {
+    it('41.1.1 stores BLOB value correctly', async function() {
 
-          connection.execute(
-            "INSERT INTO nodb_myblobs (num, content) VALUES (:n, EMPTY_BLOB()) RETURNING content INTO :lobbv",
-            { n: 2, lobbv: {type: oracledb.BLOB, dir: oracledb.BIND_OUT} },
-            { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
-            function(err, result) {
-              should.not.exist(err);
-              (result.rowsAffected).should.be.exactly(1);
-              (result.outBinds.lobbv.length).should.be.exactly(1);
+      let result = await connection.execute(
+        `INSERT INTO nodb_myblobs (num, content) ` +
+`VALUES (:n, EMPTY_BLOB()) RETURNING content INTO :lobbv`,
+        { n: 2, lobbv: {type: oracledb.BLOB, dir: oracledb.BIND_OUT} },
+        { autoCommit: false });  // a transaction needs to span the INSERT and pipe()
 
-              var inStream = fs.createReadStream(inFileName);
-              inStream.on('error', function(err) {
-                should.not.exist(err, "inStream.on 'end' event");
-              });
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.outBinds.lobbv.length, 1);
 
-              var lob = result.outBinds.lobbv[0];
+      let inStream = await fs.createReadStream(inFileName);
 
-              lob.on('error', function(err) {
-                should.not.exist(err, "lob.on 'error' event");
-              });
+      let lob = result.outBinds.lobbv[0];
+      await new Promise((resolve, reject) => {
+        inStream.on('error', reject);
+        lob.on('error', reject);
+        lob.on('finish', resolve);
+        inStream.pipe(lob);
+      });
+      await connection.commit();
+      result = await connection.execute(
+        "SELECT content FROM nodb_myblobs WHERE num = :n",
+        { n: 2 });
 
-              inStream.pipe(lob);  // pipes the data to the BLOB
+      lob = result.rows[0][0];
 
-              lob.on('finish', function() {
-                connection.commit(function(err) {
-                  should.not.exist(err);
-                  callback();
-                });
-              });
-
-            }
-          );
-        },
-        function blobstream1(callback) {
-          connection.execute(
-            "SELECT content FROM nodb_myblobs WHERE num = :n",
-            { n: 2 },
-            function(err, result) {
-              should.not.exist(err);
-
-              var lob = result.rows[0][0];
-              should.exist(lob);
-
-              lob.on('error', function(err) {
-                should.not.exist(err, "lob.on 'error' event");
-              });
-
-              var outStream = fs.createWriteStream(outFileName);
-
-              outStream.on('error', function(err) {
-                should.not.exist(err, "outStream.on 'error' event");
-              });
-
-              lob.pipe(outStream);
-
-              outStream.on('finish', function() {
-                fs.readFile(inFileName, function(err, originalData) {
-                  should.not.exist(err);
-
-                  fs.readFile(outFileName, function(err, generatedData) {
-                    should.not.exist(err);
-                    originalData.should.eql(generatedData);
-                    callback();
-                  });
-                });
-
-              }); // finish event
-            }
-          );
-        },
-        function blobstream2(callback) {
-
-          connection.execute(
-            "SELECT content FROM nodb_myblobs WHERE num = :n",
-            { n: 2 },
-            function(err, result) {
-              should.not.exist(err);
-
-              var blob = Buffer.alloc(0);
-              var blobLength = 0;
-              var lob = result.rows[0][0];
-
-              should.exist(lob);
-
-              lob.on('error', function(err) {
-                should.not.exist(err, "lob.on 'error' event");
-              });
-
-              lob.on('data', function(chunk) {
-                blobLength = blobLength + chunk.length;
-                blob = Buffer.concat([blob, chunk], blobLength);
-              });
-
-              lob.on('end', function() {
-                fs.readFile(inFileName, function(err, data) {
-                  should.not.exist(err);
-                  data.length.should.be.exactly(blob.length);
-                  data.should.eql(blob);
-                  callback();
-                });
-              });  // close event
-
-            }
-          );
-        },
-        function deleteOutFile(callback) {
-          fs.unlink(outFileName, function(err) {
-            should.not.exist(err);
-            callback();
+      await new Promise((resolve, reject) => {
+        lob.on('error', reject);
+        let outStream = fs.createWriteStream(outFileName);
+        outStream.on('error', reject);
+        lob.pipe(outStream);
+        outStream.on('finish', async function() {
+          await fs.readFile(inFileName, function(err, originalData) {
+            assert.ifError(err);
+            fs.readFile(outFileName, function(err, generatedData) {
+              assert.ifError(err);
+              assert.deepEqual(originalData, generatedData);
+            });
           });
-        }
-      ], done);
+          resolve();
+        }); // finish event
+      });
+      await connection.commit();
+
+      result = await connection.execute(
+        "SELECT content FROM nodb_myblobs WHERE num = :n",
+        { n: 2 });
+      let blob = Buffer.alloc(0);
+      let blobLength = 0;
+      lob = result.rows[0][0];
+      await new Promise((resolve, reject) => {
+        lob.on("error", reject);
+
+        lob.on('data', async function(chunk) {
+          blobLength = blobLength + chunk.length;
+          blob = await lob.getData();
+        });
+
+        lob.on('end', async function() {
+          await fs.readFile(inFileName, function(err, data) {
+            assert.ifError(err);
+            assert.strictEqual(data.length, blob.length);
+            assert.deepEqual(data, blob);
+            resolve();
+          });
+        });  // close event
+      });
+      await fs.unlinkSync(outFileName);
     }); // 41.1.1
 
-    it('41.1.2 BLOB getData()', function(done) {
-      connection.should.be.ok();
-      async.series([
-        function blobinsert1(callback) {
+    it('41.1.2 BLOB getData()', async function() {
 
-          connection.execute(
-            "INSERT INTO nodb_myblobs (num, content) VALUES (:n, EMPTY_BLOB()) RETURNING content INTO :lobbv",
-            { n: 3, lobbv: {type: oracledb.BLOB, dir: oracledb.BIND_OUT} },
-            { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
-            function(err, result) {
-              should.not.exist(err);
-              (result.rowsAffected).should.be.exactly(1);
-              (result.outBinds.lobbv.length).should.be.exactly(1);
+      let result = await connection.execute(
+        `INSERT INTO nodb_myblobs (num, content) ` +
+        `VALUES (:n, EMPTY_BLOB()) RETURNING content INTO :lobbv`,
+        { n: 3, lobbv: {type: oracledb.BLOB, dir: oracledb.BIND_OUT} },
+        { autoCommit: false });  // a transaction needs to span the INSERT and pipe()
 
-              var inStream = fs.createReadStream(inFileName);
-              inStream.on('error', function(err) {
-                should.not.exist(err, "inStream.on 'end' event");
-              });
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.outBinds.lobbv.length, 1);
 
-              var lob = result.outBinds.lobbv[0];
+      let inStream = fs.createReadStream(inFileName);
+      inStream.on('error', function(err) {
+        assert.ifError(err, "inStream.on 'end' event");
+      });
 
-              lob.on('error', function(err) {
-                should.not.exist(err, "lob.on 'error' event");
-              });
+      let lob = result.outBinds.lobbv[0];
+      await new Promise((resolve, reject) => {
+        lob.on("error", reject);
 
-              inStream.pipe(lob);  // pipes the data to the BLOB
+        inStream.pipe(lob);  // pipes the data to the BLOB
 
-              lob.on('finish', function() {
-                connection.commit(function(err) {
-                  should.not.exist(err);
-                  callback();
-                });
-              });
+        lob.on('finish', async function() {
+          await connection.commit();
+          resolve();
+        });
+      });
+      result = await connection.execute(
+        "SELECT content FROM nodb_myblobs WHERE num = :n",
+        { n: 3 });
 
-            }
-          );
-        },
-        function blobstream2(callback) {
+      lob = result.rows[0][0];
 
-          connection.execute(
-            "SELECT content FROM nodb_myblobs WHERE num = :n",
-            { n: 3 },
-            function(err, result) {
-              should.not.exist(err);
-
-              var lob = result.rows[0][0];
-              should.exist(lob);
-
-              fs.readFile(inFileName, function(err, data) {
-                should.not.exist(err);
-                lob.getData(function(err, blob) {
-                  data.length.should.be.exactly(blob.length);
-                  data.should.eql(blob);
-                  callback();
-                });
-              });
-            });
-        }
-      ], done);
+      await fs.readFile(inFileName, function(err, data) {
+        assert.ifError(err);
+        lob.getData(function(err, blob) {
+          assert.strictEqual(data.length, blob.length);
+          assert.strictEqual(data, blob);
+        });
+      });
     }); // 41.1.2
-
   }); //41.1
 
   describe('41.2 stores null value correctly', function() {
-    it('41.2.1 testing Null, Empty string and Undefined', function(done) {
-      assist.verifyNullValues(connection, tableName, done);
+    it('41.2.1 testing Null, Empty string and Undefined', async function() {
+      await assist.verifyNullValues(connection, tableName);
     });
   });
 

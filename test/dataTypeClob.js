@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -37,267 +37,137 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var fs       = require('fs');
-var async    = require('async');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
-var assist   = require('./dataTypeAssist.js');
+const oracledb = require('oracledb');
+const fs       = require('fs');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const assist   = require('./dataTypeAssist.js');
 
-var inFileName = 'test/clobexample.txt';  // the file with text to be inserted into the database
-var outFileName = 'test/clobstreamout.txt';
+let inFileName = 'test/clobexample.txt';  // the file with text to be inserted into the database
+let outFileName = 'test/clobstreamout.txt'; // output file with the stream out data
 
 describe('40. dataTypeClob.js', function() {
 
-  var connection = null;
-  var tableName = "nodb_myclobs";
+  let connection = null;
+  let tableName = "nodb_myclobs";
 
-  before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig,
-      function(err, conn) {
-        should.not.exist(err);
-        connection = conn;
-        done();
-      }
-    );
+  before('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after('release connection', function(done) {
-    connection.release(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after('release connection', async function() {
+    await connection.close();
   });
 
   describe('40.1 testing CLOB data type', function() {
-    before('create table', function(done) {
-      assist.createTable(connection, tableName, done);
+    before('create table', async function() {
+      await connection.execute(assist.sqlCreateTable(tableName));
     });
 
-    after(function(done) {
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after(async function() {
+      await connection.execute("DROP table " + tableName + " PURGE");
     });
 
-    it('40.1.1 stores CLOB value correctly', function(done) {
-      connection.should.be.ok();
-      async.series([
-        function clobinsert1(callback) {
+    it('40.1.1 stores CLOB value correctly', async function() {
+      let result = await connection.execute(
+        'INSERT INTO nodb_myclobs (num, content) ' +
+        'VALUES (:n, EMPTY_CLOB()) RETURNING content INTO :lobbv',
+        { n: 1, lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
+        { autoCommit: false });  // a transaction needs to span the INSERT and pipe()
 
-          connection.execute(
-            "INSERT INTO nodb_myclobs (num, content) VALUES (:n, EMPTY_CLOB()) RETURNING content INTO :lobbv",
-            { n: 1, lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
-            { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
-            function(err, result) {
-              should.not.exist(err);
-              (result.rowsAffected).should.be.exactly(1);
-              (result.outBinds.lobbv.length).should.be.exactly(1);
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.outBinds.lobbv.length, 1);
 
-              var inStream = fs.createReadStream(inFileName);
-              var lob = result.outBinds.lobbv[0];
+      let inStream = await fs.createReadStream(inFileName);
+      let lob = result.outBinds.lobbv[0];
 
-              lob.on('error', function(err) {
-                should.not.exist(err, "lob.on 'error' event");
-              });
+      await new Promise((resolve, reject) => {
+        inStream.on('error', reject);
+        lob.on('error', reject);
+        lob.on('finish', resolve);
+        inStream.pipe(lob);
+      });
+      await connection.commit();
 
-              inStream.on('error', function(err) {
-                should.not.exist(err, "inStream.on 'error' event");
-              });
+      result = await connection.execute(
+        "SELECT content FROM nodb_myclobs WHERE num = :n",
+        { n: 1 });
 
-              lob.on('finish', function() {
-                // now commit updates
-                connection.commit(function(err) {
-                  should.not.exist(err);
-                  callback();
-                });
-              });
+      lob = result.rows[0][0];
+      lob.setEncoding('utf8');
+      await new Promise((resolve, reject) => {
+        lob.on("error", reject);
+        const outStream = fs.createWriteStream(outFileName);
+        outStream.on('error', reject);
+        outStream.on('finish', resolve);
+        lob.pipe(outStream);
+      });
+      const originalData = fs.readFileSync(inFileName, { encoding: 'utf8' });
+      const generatedData = fs.readFileSync(outFileName, { encoding: 'utf8' });
+      assert.strictEqual(originalData, generatedData);
 
-              inStream.pipe(lob); // copies the text to the CLOB
-            }
-          );
-        },
-        function clobstream1(callback) {
-          connection.execute(
-            "SELECT content FROM nodb_myclobs WHERE num = :n",
-            { n: 1 },
-            function(err, result) {
-              should.not.exist(err);
+      result = await connection.execute(
+        "SELECT content FROM nodb_myclobs WHERE num = :n",
+        { n: 1 });
 
-              var lob = result.rows[0][0];
-              should.exist(lob);
-              lob.setEncoding('utf8');
+      lob = result.rows[0][0];
+      let clob = await lob.getData();
+      const data = fs.readFileSync(inFileName, { encoding: 'utf8' });
+      assert.strictEqual(data, clob);
 
-              lob.on('error', function(err) {
-                should.not.exist(err, "lob.on 'error' event");
-              });
+      result = await connection.execute(
+        "SELECT content FROM nodb_myclobs WHERE num = :n",
+        { n: 1 },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
-              var outStream = fs.createWriteStream(outFileName);
-              outStream.on('error', function(err) {
-                should.not.exist(err, "outStream.on 'error' event");
-              });
-
-              lob.pipe(outStream);
-
-              outStream.on('finish', function() {
-
-                fs.readFile(inFileName, { encoding: 'utf8' }, function(err, originalData) {
-                  should.not.exist(err);
-
-                  fs.readFile(outFileName, { encoding: 'utf8' }, function(err, generatedData) {
-                    should.not.exist(err);
-                    originalData.should.equal(generatedData);
-
-                    callback();
-                  });
-                });
-              });
-
-            }
-          );
-        },
-        function clobstream2(callback) {
-          connection.execute(
-            "SELECT content FROM nodb_myclobs WHERE num = :n",
-            { n: 1 },
-            function(err, result) {
-              should.not.exist(err);
-
-              var clob = '';
-              var lob = result.rows[0][0];
-              should.exist(lob);
-              lob.setEncoding('utf8'); // set the encoding so we get a 'string' not a 'buffer'
-
-              lob.on('data', function(chunk) {
-                clob += chunk;
-              });
-
-              lob.on('end', function() {
-                fs.readFile(inFileName, { encoding: 'utf8' }, function(err, data) {
-                  should.not.exist(err);
-                  data.length.should.be.exactly(clob.length);
-                  data.should.equal(clob);
-                  callback();
-                });
-              });
-
-              lob.on('error', function(err) {
-                should.not.exist(err, "lob.on 'error' event");
-              });
-            }
-          );
-        },
-        function objectOutFormat(callback) {
-          connection.execute(
-            "SELECT content FROM nodb_myclobs WHERE num = :n",
-            { n: 1 },
-            { outFormat: oracledb.OUT_FORMAT_OBJECT },
-            function(err, result) {
-              should.not.exist(err);
-
-              var clob = '';
-              var row = result.rows[0];
-              var lob = row['CONTENT'];
-
-              lob.setEncoding('utf8');
-
-              lob.on('data', function(chunk) {
-                clob = clob + chunk;
-              });
-
-              lob.on('end', function() {
-                callback();
-              });
-
-              lob.on('error', function(err) {
-                should.not.exist(err, "lob.on 'error' event");
-              });
-            }
-          );
-        },
-        function deleteOutFile(callback) {
-          fs.unlink(outFileName, function(err) {
-            should.not.exist(err);
-            callback();
-          });
-        }
-      ], done);  // async
+      let row = result.rows[0];
+      lob = row['CONTENT'];
+      clob = await lob.getData();
+      assert.strictEqual(data, clob);
+      fs.unlinkSync(outFileName);
 
     }); // 40.1.1
 
 
-    it('40.1.2 CLOB getData()', function(done) {
-      connection.should.be.ok();
-      async.series([
-        function clobinsert1(callback) {
+    it('40.1.2 CLOB getData()', async function() {
 
-          connection.execute(
-            "INSERT INTO nodb_myclobs (num, content) VALUES (:n, EMPTY_CLOB()) RETURNING content INTO :lobbv",
-            { n: 2, lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
-            { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
-            function(err, result) {
-              should.not.exist(err);
-              (result.rowsAffected).should.be.exactly(1);
-              (result.outBinds.lobbv.length).should.be.exactly(1);
+      let result = await connection.execute(
+        `INSERT INTO nodb_myclobs (num, content) ` +
+        `VALUES (:n, EMPTY_CLOB()) RETURNING content INTO :lobbv`,
+        { n: 2, lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
+        { autoCommit: false }); // a transaction needs to span the INSERT and pipe()
 
-              var inStream = fs.createReadStream(inFileName);
-              var lob = result.outBinds.lobbv[0];
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.outBinds.lobbv.length, 1);
 
-              lob.on('error', function(err) {
-                should.not.exist(err, "lob.on 'error' event");
-              });
+      let inStream = await fs.createReadStream(inFileName);
+      let lob = result.outBinds.lobbv[0];
 
-              inStream.on('error', function(err) {
-                should.not.exist(err, "inStream.on 'error' event");
-              });
+      await new Promise((resolve, reject) => {
+        inStream.on('error', reject);
+        lob.on('error', reject);
+        lob.on('finish', resolve);
+        inStream.pipe(lob);
+      });
+      await connection.commit();
 
-              lob.on('finish', function() {
-                // now commit updates
-                connection.commit(function(err) {
-                  should.not.exist(err);
-                  callback();
-                });
-              });
+      result = await connection.execute(
+        "SELECT content FROM nodb_myclobs WHERE num = :n",
+        { n: 2 });
 
-              inStream.pipe(lob); // copies the text to the CLOB
-            }
-          );
-        },
-        function clobgetval(callback) {
-          connection.execute(
-            "SELECT content FROM nodb_myclobs WHERE num = :n",
-            { n: 2 },
-            function(err, result) {
-              should.not.exist(err);
+      lob = result.rows[0][0];
 
-              var lob = result.rows[0][0];
-              should.exist(lob);
-
-              fs.readFile(inFileName, { encoding: 'utf8' }, function(err, data) {
-                should.not.exist(err);
-                lob.getData(function(err, clob) {
-                  should.not.exist(err);
-                  data.length.should.be.exactly(clob.length);
-                  data.should.equal(clob);
-                  callback();
-                });
-              });
-            });
-        }
-      ], done);  // async
+      const data = fs.readFileSync(inFileName, { encoding: 'utf8' });
+      const clob = await lob.getData();
+      assert.strictEqual(data, clob);
 
     }); // 40.1.2
 
   }); // 40.1
 
   describe('40.2 stores null value correctly', function() {
-    it('40.2.1 testing Null, Empty string and Undefined', function(done) {
-      assist.verifyNullValues(connection, tableName, done);
+    it('40.2.1 testing Null, Empty string and Undefined', async function() {
+      await assist.verifyNullValues(connection, tableName);
     });
   });
-
 });

@@ -5240,3 +5240,19 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     267.9 recipient list with enqMany
     267.10 recipient list with enqMany non-existent in dequeue
     267.11 recipient list with enqMany invalid datatype in dequeue
+268. procAndFuncs.js
+    268.1 calling stored procedures
+        268.1.1 executing a stored procedure
+        268.1.2 executing a stored procedure with all args keyword args
+        268.1.3 executing a stored procedure with last arg as keyword arg
+    268.2 calling stored procedures no args
+        268.2.1 executing a stored procedure with last arg as keyword arg
+    268.3 calling functions
+        268.3.1 executing a stored function
+        268.3.2 executing a stored function with extra args
+        268.3.3 executing a stored function with wrong function name
+        268.3.4 executing a stored function with wrong args
+        268.3.5 executing a stored function with no args
+        268.3.6 executing a stored function with only one args
+    268.4 calling functions without any arguments
+        268.4.1 executing a stored function without any argument

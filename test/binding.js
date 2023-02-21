@@ -720,4 +720,36 @@ describe('4. binding.js', function() {
       );
     });
   });
+
+  describe('4.12 binding in a cursor', function() {
+    let connection = null;
+    before(async function() {
+      connection = await oracledb.getConnection(dbConfig);
+    });
+
+    after(async function() {
+      await connection.close();
+    });
+
+    it('4.12.1 test binding in a cursor', async function() {
+      const sql = `begin
+                      open :cursor for select 'X' StringValue from dual;
+                    end;`;
+      const bindVars = { cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR } };
+      const result = await connection.execute(sql, bindVars);
+      const cursor = result.outBinds.cursor;
+      const expectedBind = {
+        name: "STRINGVALUE",
+        fetchType: oracledb.DB_TYPE_VARCHAR,
+        dbType: oracledb.DB_TYPE_CHAR,
+        dbTypeName: "CHAR",
+        nullable: true,
+        byteSize: 1
+      };
+      assert.deepEqual(cursor.metaData, [expectedBind]);
+
+      const rows = await cursor.getRows();
+      assert.deepEqual(rows, [ [ 'X' ] ]);
+    });
+  });
 });
