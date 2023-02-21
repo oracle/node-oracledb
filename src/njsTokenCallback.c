@@ -193,7 +193,7 @@ static bool njsTokenCallback_returnAccessTokenHelper(njsTokenCallback *callback,
         accessToken->privateKey = NULL;
         accessToken->privateKeyLength = 0;
     } else if (actualType == napi_string) {
-        if (!njsUtils_setPropString(env, payloadObj, "token",
+        if (!njsUtils_copyStringFromJS(env, payloadObj,
                 (char**) &accessToken->token, &tempLength))
             return false;
         accessToken->tokenLength = (uint32_t) tempLength;
@@ -202,15 +202,15 @@ static bool njsTokenCallback_returnAccessTokenHelper(njsTokenCallback *callback,
         // Read "token" property
         NJS_CHECK_NAPI(env, napi_get_named_property(env, payloadObj, "token",
                 &temp))
-        if (!njsUtils_setPropString(env, temp, "token",
-                (char**) &accessToken->token, &tempLength))
+        if (!njsUtils_copyStringFromJS(env, temp, (char**) &accessToken->token,
+                &tempLength))
             return false;
         accessToken->tokenLength = (uint32_t) tempLength;
 
         // Read "privateKey" property
         NJS_CHECK_NAPI(env, napi_get_named_property(env, payloadObj,
                 "privateKey", &temp))
-        if (!njsUtils_setPropString(env, temp, "privateKey",
+        if (!njsUtils_copyStringFromJS(env, temp,
                 (char**) &accessToken->privateKey, &tempLength))
             return false;
         accessToken->privateKeyLength = (uint32_t) tempLength;

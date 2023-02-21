@@ -62,8 +62,6 @@ static NJS_ASYNC_POST_METHOD(njsPool_createPostAsync);
 static NJS_ASYNC_POST_METHOD(njsPool_getConnectionPostAsync);
 
 // processing arguments methods
-static NJS_PROCESS_ARGS_METHOD(njsPool_createProcessArgs);
-static NJS_PROCESS_ARGS_METHOD(njsPool_getConnectionProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsPool_reconfigureProcessArgs);
 
 // finalize
@@ -168,12 +166,46 @@ static bool njsPool_closeAsync(njsBaton *baton)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_create, 1, &njsClassDefPool)
 {
-    napi_value callingObj;
+    napi_value callback;
 
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
-            &callingObj))
-    if (!njsPool_createProcessArgs(baton, env, args))
+    if (!njsBaton_commonConnectProcessArgs(baton, env, args))
         return false;
+    if (!njsUtils_getNamedPropertyString(env, args[0], "sessionCallback",
+            &baton->plsqlFixupCallback, &baton->plsqlFixupCallbackLength))
+        return false;
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "poolMax",
+            &baton->poolMax))
+        return false;
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "poolMaxPerShard",
+            &baton->poolMaxPerShard))
+        return false;
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "poolMin",
+            &baton->poolMin))
+        return false;
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "poolIncrement",
+            &baton->poolIncrement))
+        return false;
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "poolTimeout",
+            &baton->poolTimeout))
+        return false;
+    if (!njsUtils_getNamedPropertyInt(env, args[0], "poolPingInterval",
+            &baton->poolPingInterval))
+        return false;
+    if (!njsUtils_getNamedPropertyBool(env, args[0], "homogeneous",
+            &baton->homogeneous))
+        return false;
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "queueTimeout",
+            &baton->poolWaitTimeout))
+        return false;
+    if (!njsUtils_getNamedPropertyBool(env, args[0], "sodaMetaDataCache",
+            &baton->sodaMetadataCache))
+        return false;
+    if (!njsUtils_getNamedProperty(env, args[0], "accessTokenCallback",
+            &callback))
+        return false;
+    if (callback && !njsTokenCallback_new(baton, env, callback))
+        return false;
+
     return njsBaton_queueWork(baton, env, "create", njsPool_createAsync,
             njsPool_createPostAsync, returnValue);
 }
@@ -283,71 +315,6 @@ static bool njsPool_createPostAsync(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsPool_createProcessArgs()
-//   Process the arguments for njsPool_create().
-//-----------------------------------------------------------------------------
-static bool njsPool_createProcessArgs(njsBaton *baton, napi_env env,
-        napi_value *args)
-{
-    napi_value callback;
-
-    // set defaults
-    baton->homogeneous = true;
-    if (!njsBaton_getGlobalSettings(baton, env,
-            NJS_GLOBAL_ATTR_POOL_MAX,
-            NJS_GLOBAL_ATTR_POOL_MAX_PER_SHARD,
-            NJS_GLOBAL_ATTR_POOL_MIN,
-            NJS_GLOBAL_ATTR_POOL_INCREMENT,
-            NJS_GLOBAL_ATTR_POOL_TIMEOUT,
-            NJS_GLOBAL_ATTR_POOL_PING_INTERVAL,
-            0))
-        return false;
-
-    // check the various options
-    if (!njsBaton_commonConnectProcessArgs(baton, env, args))
-        return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "sessionCallback",
-            &baton->plsqlFixupCallback, &baton->plsqlFixupCallbackLength,
-            NULL))
-        return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolMax",
-            &baton->poolMax, NULL))
-        return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolMaxPerShard",
-            &baton->poolMaxPerShard, NULL))
-        return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolMin",
-            &baton->poolMin, NULL))
-        return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolIncrement",
-            &baton->poolIncrement, NULL))
-        return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolTimeout",
-            &baton->poolTimeout, NULL))
-        return false;
-    if (!njsBaton_getIntFromArg(baton, env, args, 0, "poolPingInterval",
-            &baton->poolPingInterval, NULL))
-        return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "homogeneous",
-            &baton->homogeneous, NULL))
-        return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "queueTimeout",
-            &baton->poolWaitTimeout, NULL))
-        return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "sodaMetaDataCache",
-            &baton->sodaMetadataCache, NULL))
-        return false;
-    if (!njsBaton_getValueFromArg(baton, env, args, 0, "accessTokenCallback",
-            napi_function, &callback, NULL))
-        return false;
-    if (callback && !njsTokenCallback_new(baton, env, callback))
-        return false;
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsPool_finalize()
 //   Invoked when the njsPool object is garbage collected.
 //-----------------------------------------------------------------------------
@@ -378,7 +345,27 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_getConnection, 1, NULL)
 
     if (!pool->handle)
         return njsBaton_setError(baton, errInvalidPool);
-    if (!njsPool_getConnectionProcessArgs(baton, env, args))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "connectionClass",
+            &baton->connectionClass, &baton->connectionClassLength))
+        return false;
+    if (!njsUtils_getNamedPropertyString(env, args[0], "user", &baton->user,
+            &baton->userLength))
+        return false;
+    if (!njsUtils_getNamedPropertyString(env, args[0], "password",
+            &baton->password, &baton->passwordLength))
+        return false;
+    if (!njsUtils_getNamedPropertyString(env, args[0], "tag", &baton->tag,
+            &baton->tagLength))
+        return false;
+    if (!njsUtils_getNamedPropertyBool(env, args[0], "matchAnyTag",
+            &baton->matchAnyTag))
+        return false;
+    if (!njsUtils_getNamedPropertyShardingKey(env, args[0], "shardingKey",
+            &baton->numShardingKeyColumns, &baton->shardingKeyColumns))
+        return false;
+    if (!njsUtils_getNamedPropertyShardingKey(env, args[0], "superShardingKey",
+            &baton->numSuperShardingKeyColumns,
+            &baton->superShardingKeyColumns))
         return false;
     return njsBaton_queueWork(baton, env, "GetConnection",
             njsPool_getConnectionAsync, njsPool_getConnectionPostAsync,
@@ -455,52 +442,6 @@ static bool njsPool_getConnectionPostAsync(njsBaton *baton, napi_env env,
     NJS_CHECK_NAPI(env, napi_get_boolean(env, baton->newSession, &temp))
     NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "_newSession",
             temp))
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsPool_getConnectionProcessArgs()
-//   Process the arguments for njsPool_getConnection().
-//-----------------------------------------------------------------------------
-static bool njsPool_getConnectionProcessArgs(njsBaton *baton, napi_env env,
-        napi_value *args)
-{
-    bool userFound, usernameFound;
-
-    // copy items used from the settings class since they may change after the
-    // aysnchronous function begins
-    if (!njsBaton_getGlobalSettings(baton, env,
-            NJS_GLOBAL_ATTR_CONNECTION_CLASS, 0))
-        return false;
-
-    // check arguments
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "user", &baton->user,
-            &baton->userLength, &userFound))
-        return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "username",
-            &baton->user, &baton->userLength, &usernameFound))
-        return false;
-    if (userFound && usernameFound)
-        return njsBaton_setError (baton, errDblUsername);
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "password",
-            &baton->password, &baton->passwordLength, NULL))
-        return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "tag", &baton->tag,
-            &baton->tagLength, NULL))
-        return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "matchAnyTag",
-            &baton->matchAnyTag, NULL))
-        return false;
-    if (!njsBaton_getShardingKeyColumnsFromArg(baton, env, args, 0,
-            "shardingKey", &baton->numShardingKeyColumns,
-            &baton->shardingKeyColumns))
-        return false;
-    if (!njsBaton_getShardingKeyColumnsFromArg(baton, env, args, 0,
-            "superShardingKey", &baton->numSuperShardingKeyColumns,
-            &baton->superShardingKeyColumns))
-        return false;
 
     return true;
 }

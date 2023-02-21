@@ -175,19 +175,8 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsResultSet_getRows, 1, NULL)
     if (!njsResultSet_check(rs, baton))
         return false;
 
-    // copy items from the global settings class to the baton since they might
-    // change after the asynchronous function begins
-    if (!njsBaton_getGlobalSettings(baton, env,
-            NJS_GLOBAL_ATTR_FETCH_AS_BUFFER,
-            NJS_GLOBAL_ATTR_FETCH_AS_STRING,
-            0))
-        return false;
-
-    // check options
-    if (!njsUtils_getUnsignedIntArg(env, args, 0, &baton->fetchArraySize))
-        return false;
-    if (baton->fetchArraySize == 0)
-        return njsUtils_throwError(env, errInvalidParameterValue, 1);
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0],
+                &baton->fetchArraySize))
 
     return njsBaton_queueWork(baton, env, "GetRows", njsResultSet_getRowsAsync,
             njsResultSet_getRowsPostAsync, returnValue);

@@ -401,8 +401,6 @@ struct njsBaton {
     size_t ipAddressLength;
     char *name;
     size_t nameLength;
-    char *typeName;
-    size_t typeNameLength;
     char *plsqlFixupCallback;
     size_t plsqlFixupCallbackLength;
     char *tag;
@@ -659,7 +657,6 @@ struct njsModuleGlobals {
     napi_ref jsSodaDocumentConstructor;
     napi_ref jsSodaOperationConstructor;
     napi_ref jsSubscriptions;
-    napi_ref jsSettings;
 };
 
 // data for class Pool exposed to JS.
@@ -849,13 +846,9 @@ bool njsBaton_getBoolFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, bool *result, bool *found);
 bool njsBaton_getFetchInfoFromArg(njsBaton *baton, napi_env env,
         napi_value props, uint32_t *numFetchInfo, njsFetchInfo **fetchInfo);
-bool njsBaton_getGlobalSettings(njsBaton *baton, napi_env env, ...);
 bool njsBaton_getIntFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, int32_t *result, bool *found);
 uint32_t njsBaton_getNumOutBinds(njsBaton *baton);
-bool njsBaton_getShardingKeyColumnsFromArg(njsBaton *baton, napi_env env,
-        napi_value *args, int argIndex, const char *propertyName,
-        uint8_t *numShardKeys, dpiShardingKeyColumn **shards);
 bool njsBaton_getSodaDocument(njsBaton *baton, njsSodaDatabase *db,
         napi_env env, napi_value obj, dpiSodaDoc **handle);
 bool njsBaton_getStringFromArg(njsBaton *baton, napi_env env, napi_value *args,
@@ -864,18 +857,11 @@ bool njsBaton_getStringFromArg(njsBaton *baton, napi_env env, napi_value *args,
 bool njsBaton_getStrBufFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, char **result,
         size_t *resultLength, bool *found);
-bool njsBaton_getStringArrayFromArg(njsBaton *baton, napi_env env,
-        napi_value *args, int argIndex, const char *propertyName,
-        uint32_t *resultNumElems, char ***resultElems,
-        uint32_t **resultElemLengths, bool *found);
 bool njsBaton_getSubscription(njsBaton *baton, napi_env env, napi_value name,
         bool unsubscribe);
 bool njsBaton_getUnsignedIntFromArg(njsBaton *baton, napi_env env,
         napi_value *args, int argIndex, const char *propertyName,
         uint32_t *result, bool *found);
-bool njsBaton_getUnsignedIntArrayFromArg(njsBaton *baton, napi_env env,
-        napi_value *args, int argIndex, const char *propertyName,
-        uint32_t *numElements, uint32_t **elements, bool *found);
 bool njsBaton_getValueFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, napi_valuetype expectedType,
         napi_value *value, bool *found);
@@ -1020,43 +1006,40 @@ bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
         njsBaseInstance **instance);
 bool njsUtils_genericThrowError(napi_env env, const char *fileName,
         int lineNum);
-bool njsUtils_getBoolArg(napi_env env, napi_value *args, int index,
-        bool *result);
 bool njsUtils_getError(napi_env env, dpiErrorInfo *errorInfo,
         const char *buffer, napi_value *error);
-bool njsUtils_getIntArg(napi_env env, napi_value *args, int index,
-        int32_t *result);
 bool njsUtils_getNamedProperty(napi_env env, napi_value value,
-        const char *name, napi_value *propertyValue, bool *found);
+        const char *name, napi_value *propertyValue);
 bool njsUtils_getNamedPropertyBool(napi_env env, napi_value value,
         const char *name, bool *outValue);
-bool njsUtils_getStringArg(napi_env env, napi_value *args, int index,
-        char **result, size_t *resultLength);
+bool njsUtils_getNamedPropertyInt(napi_env env, napi_value value,
+        const char *name, int32_t *outValue);
+bool njsUtils_getNamedPropertyShardingKey(napi_env env, napi_value value,
+        const char *name, uint8_t *numShardingKeyColumns,
+        dpiShardingKeyColumn **shardingKeyColumns);
+bool njsUtils_getNamedPropertyString(napi_env env, napi_value value,
+        const char *name, char **result, size_t *resultLength);
+bool njsUtils_getNamedPropertyStringArray(napi_env env, napi_value value,
+        const char *name, uint32_t *resultNumElems, char ***resultElems,
+        uint32_t **resultElemLengths);
+bool njsUtils_getNamedPropertyUnsignedInt(napi_env env, napi_value value,
+        const char *name, uint32_t *outValue);
+bool njsUtils_getNamedPropertyUnsignedIntArray(napi_env env, napi_value value,
+        const char *name, uint32_t *numElements, uint32_t **elements);
 bool njsUtils_getStringFromArg(napi_env env, napi_value *args,
         int argIndex, const char *propertyName, char **result,
         size_t *resultLength, bool *found, char *errorBuffer);
-bool njsUtils_getUnsignedIntArg(napi_env env, napi_value *args, int index,
-        uint32_t *result);
 bool njsUtils_getValueFromArg(napi_env env, napi_value *args,
         int argIndex, const char *propertyName, napi_valuetype expectedType,
         napi_value *value, bool *found, char *errorBuffer);
 bool njsUtils_isBuffer(napi_env env, napi_value value);
 bool njsUtils_isInstance(napi_env env, napi_value value, const char *name);
-bool njsUtils_setPropString(napi_env env, napi_value value, const char *name,
-        char **result, size_t *resultLength);
-bool njsUtils_setPropUnsignedInt(napi_env env, napi_value value,
-        const char *name, uint32_t *result);
 bool njsUtils_throwError(napi_env env, int errNum, ...);
 bool njsUtils_throwErrorDPI(napi_env env, njsModuleGlobals *globals);
 bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, njsModuleGlobals **globals,
         napi_value *callingObj, const njsClassDef *classDef,
         njsBaseInstance **instance);
-bool njsUtils_validateGetter(napi_env env, napi_callback_info info,
-        njsModuleGlobals **globals, njsBaseInstance **instance);
-bool njsUtils_validateSetter(napi_env env, napi_callback_info info,
-        njsModuleGlobals **globals, njsBaseInstance **instance,
-        napi_value *value);
 bool njsUtils_validateArgType(napi_env env, napi_value *args,
         napi_valuetype expectedType, int index);
 bool njsUtils_validatePropType(napi_env env, napi_value value,

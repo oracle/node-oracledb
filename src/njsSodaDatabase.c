@@ -81,15 +81,17 @@ const njsClassDef njsClassDefSodaDatabase = {
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaDatabase_createCollection, 2, NULL)
 {
-    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+    if (!njsUtils_copyStringFromJS(env, args[0], &baton->name,
+            &baton->nameLength))
         return false;
-    if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
+    if (!njsUtils_getNamedPropertyBool(env, args[1], "autoCommit",
+            &baton->autoCommit))
         return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 1, "metaData",
-            &baton->sodaMetaData, &baton->sodaMetaDataLength, NULL))
+    if (!njsUtils_getNamedPropertyString(env, args[1], "metaData",
+            &baton->sodaMetaData, &baton->sodaMetaDataLength))
         return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1, "mode",
-            &baton->createCollectionMode, NULL))
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[1], "mode",
+            &baton->createCollectionMode))
         return false;
     return njsBaton_queueWork(baton, env, "CreateCollection",
             njsSodaDatabase_createCollectionAsync,
@@ -323,11 +325,13 @@ bool njsSodaDatabase_createFromHandle(napi_env env, napi_value connObj,
 // PARAMETERS
 //   - name
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaDatabase_openCollection, 1, NULL)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaDatabase_openCollection, 2, NULL)
 {
-    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+    if (!njsUtils_copyStringFromJS(env, args[0], &baton->name,
+            &baton->nameLength))
         return false;
-    if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
+    if (!njsUtils_getNamedPropertyBool(env, args[1], "autoCommit",
+            &baton->autoCommit))
         return false;
     return njsBaton_queueWork(baton, env, "OpenCollection",
             njsSodaDatabase_openCollectionAsync,

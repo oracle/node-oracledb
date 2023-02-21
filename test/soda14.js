@@ -154,7 +154,7 @@ describe('238. soda14.js', () => {
         async () => {
           docs = await coll.find().fetchArraySize(SIZE).getDocuments();
         },
-        /NJS-007/
+        /NJS-005/
       );
 
       assert.ifError(docs);

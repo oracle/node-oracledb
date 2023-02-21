@@ -89,7 +89,7 @@ const njsClassDef njsClassDefSodaOperation = {
 
 // other methods used internally
 static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
-        napi_value *args);
+        napi_value options);
 
 
 //-----------------------------------------------------------------------------
@@ -101,7 +101,7 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaOperation_count, 1, NULL)
 {
-    if (!njsSodaOperation_processOptions(baton, env, args))
+    if (!njsSodaOperation_processOptions(baton, env, args[0]))
         return false;
     return njsBaton_queueWork(baton, env, "Count", njsSodaOperation_countAsync,
             njsSodaOperation_countPostAsync, returnValue);
@@ -193,7 +193,7 @@ static void njsSodaOperation_finalize(napi_env env, void *finalizeData,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaOperation_getCursor, 1, NULL)
 {
-    if (!njsSodaOperation_processOptions(baton, env, args))
+    if (!njsSodaOperation_processOptions(baton, env, args[0]))
         return false;
     return njsBaton_queueWork(baton, env, "GetCursor",
             njsSodaOperation_getCursorAsync,
@@ -239,7 +239,7 @@ static bool njsSodaOperation_getCursorPostAsync(njsBaton *baton, napi_env env,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaOperation_getDocuments, 1, NULL)
 {
-    if (!njsSodaOperation_processOptions(baton, env, args))
+    if (!njsSodaOperation_processOptions(baton, env, args[0]))
         return false;
     return njsBaton_queueWork(baton, env, "GetDocuments",
             njsSodaOperation_getDocumentsAsync,
@@ -342,7 +342,7 @@ static bool njsSodaOperation_getDocumentsPostAsync(njsBaton *baton,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaOperation_getOne, 1, NULL)
 {
-    if (!njsSodaOperation_processOptions(baton, env, args))
+    if (!njsSodaOperation_processOptions(baton, env, args[0]))
         return false;
     return njsBaton_queueWork(baton, env, "GetOne",
             njsSodaOperation_getOneAsync, njsSodaOperation_getOnePostAsync,
@@ -389,15 +389,9 @@ static bool njsSodaOperation_getOnePostAsync(njsBaton *baton, napi_env env,
 // Javascript and turns them into the options expected by ODPI-C.
 //-----------------------------------------------------------------------------
 static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
-        napi_value *args)
+        napi_value options)
 {
     dpiVersionInfo versionInfo;
-
-    // copy settings from JavaScript
-    if (!njsBaton_getGlobalSettings(baton, env,
-            NJS_GLOBAL_ATTR_AUTOCOMMIT,
-            0))
-        return false;
 
     // allocate memory for ODPI-C operations structure
     baton->sodaOperOptions = calloc(1, sizeof(dpiSodaOperOptions));
@@ -413,29 +407,32 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
         baton->sodaOperOptions->fetchArraySize = baton->fetchArraySize;
 
     // process each of the options
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "fetchArraySize",
-            &baton->sodaOperOptions->fetchArraySize, NULL))
+    if (!njsUtils_getNamedPropertyBool(env, options, "autoCommit",
+            &baton->autoCommit))
         return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "limit",
-            &baton->sodaOperOptions->limit, NULL))
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, options, "fetchArraySize",
+            &baton->sodaOperOptions->fetchArraySize))
         return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "skip",
-            &baton->sodaOperOptions->skip, NULL))
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, options, "limit",
+            &baton->sodaOperOptions->limit))
         return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "filter",
-            &baton->filter, &baton->filterLength, NULL))
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, options, "skip",
+            &baton->sodaOperOptions->skip))
         return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "version",
-            &baton->version, &baton->versionLength, NULL))
+    if (!njsUtils_getNamedPropertyString(env, options, "filter",
+            &baton->filter, &baton->filterLength))
         return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "key",
-            &baton->key, &baton->keyLength, NULL))
+    if (!njsUtils_getNamedPropertyString(env, options, "version",
+            &baton->version, &baton->versionLength))
         return false;
-    if (!njsBaton_getStringArrayFromArg(baton, env, args, 0, "keys",
-            &baton->numKeys, &baton->keys, &baton->keysLengths, NULL))
+    if (!njsUtils_getNamedPropertyString(env, options, "key",
+            &baton->key, &baton->keyLength))
         return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "hint",
-            &baton->hint, &baton->hintLength, NULL))
+    if (!njsUtils_getNamedPropertyStringArray(env, options, "keys",
+            &baton->numKeys, &baton->keys, &baton->keysLengths))
+        return false;
+    if (!njsUtils_getNamedPropertyString(env, options, "hint",
+            &baton->hint, &baton->hintLength))
         return false;
 
     // populate SODDA operations options structure
@@ -465,7 +462,7 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaOperation_remove, 1, NULL)
 {
-    if (!njsSodaOperation_processOptions(baton, env, args))
+    if (!njsSodaOperation_processOptions(baton, env, args[0]))
         return false;
     return njsBaton_queueWork(baton, env, "Remove",
             njsSodaOperation_removeAsync, njsSodaOperation_removePostAsync,
@@ -521,7 +518,7 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaOperation_replaceOne, 2, NULL)
 {
     njsSodaOperation *op = (njsSodaOperation*) baton->callingInstance;
 
-    if (!njsSodaOperation_processOptions(baton, env, args))
+    if (!njsSodaOperation_processOptions(baton, env, args[0]))
         return false;
     if (!njsBaton_getSodaDocument(baton, op->coll->db, env, args[1],
             &baton->dpiSodaDocHandle))
@@ -582,7 +579,7 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaOperation_replaceOneAndGet, 2, NULL)
 {
     njsSodaOperation *op = (njsSodaOperation*) baton->callingInstance;
 
-    if (!njsSodaOperation_processOptions(baton, env, args))
+    if (!njsSodaOperation_processOptions(baton, env, args[0]))
         return false;
     if (!njsBaton_getSodaDocument(baton, op->coll->db, env, args[1],
             &baton->dpiSodaDocHandle))

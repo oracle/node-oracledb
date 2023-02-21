@@ -124,12 +124,14 @@ static bool njsSodaCollection_processHintOption(njsBaton *baton,
 //
 // PARAMETERS
 //   - index spec
+//   - options
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaCollection_createIndex, 1, NULL)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaCollection_createIndex, 2, NULL)
 {
-    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+    if (!njsUtils_getNamedPropertyBool(env, args[1], "autoCommit",
+            &baton->autoCommit))
         return false;
-    if (!njsUtils_getStringArg(env, args, 0, &baton->indexSpec,
+    if (!njsUtils_copyStringFromJS(env, args[0], &baton->indexSpec,
             &baton->indexSpecLength))
         return false;
     return njsBaton_queueWork(baton, env, "Drop",
@@ -162,9 +164,10 @@ static bool njsSodaCollection_createIndexAsync(njsBaton *baton)
 //
 // PARAMETERS - NONE
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaCollection_drop, 0, NULL)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaCollection_drop, 1, NULL)
 {
-    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+    if (!njsUtils_getNamedPropertyBool(env, args[0], "autoCommit",
+            &baton->autoCommit))
         return false;
     return njsBaton_queueWork(baton, env, "Drop", njsSodaCollection_dropAsync,
             njsSodaCollection_dropPostAsync, returnValue);
@@ -218,12 +221,12 @@ static bool njsSodaCollection_dropPostAsync(njsBaton *baton,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaCollection_dropIndex, 2, NULL)
 {
-    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+    if (!njsUtils_copyStringFromJS(env, args[0], &baton->name,
+            &baton->nameLength))
         return false;
-    if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
-        return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 1, "force", &baton->force,
-            NULL))
+    if (!njsUtils_getNamedPropertyBool(env, args[1], "autoCommit",
+            &baton->autoCommit))
+    if (!njsUtils_getNamedPropertyBool(env, args[1], "force", &baton->force))
         return false;
     return njsBaton_queueWork(baton, env, "DropIndex",
             njsSodaCollection_dropIndexAsync,
@@ -390,8 +393,9 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsSodaCollection_getName, 0, NULL)
 //
 // PARAMETERS
 //   - array of SODA documents
+//   - options
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaCollection_insertMany, 1, NULL)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaCollection_insertMany, 2, NULL)
 {
     if (!njsSodaCollection_insertManyProcessArgs(baton, env, args))
         return false;
@@ -430,10 +434,6 @@ static bool njsSodaCollection_insertManyProcessArgs(njsBaton *baton,
     napi_value element;
     uint32_t i;
 
-    // get global autoCommit flag
-    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
-        return false;
-
     // create array to populate SODA document handles
     NJS_CHECK_NAPI(env, napi_get_array_length(env, args[0],
             &baton->numSodaDocs))
@@ -448,6 +448,9 @@ static bool njsSodaCollection_insertManyProcessArgs(njsBaton *baton,
                 &baton->sodaDocs[i]))
             return false;
     }
+    if (!njsUtils_getNamedPropertyBool(env, args[1], "autoCommit",
+            &baton->autoCommit))
+        return false;
 
     return true;
 }
@@ -533,15 +536,17 @@ static bool njsSodaCollection_insertManyAndGetPostAsync(njsBaton *baton,
 //
 // PARAMETERS
 //   - SODA document
+//   - options
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaCollection_insertOne, 1, NULL)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaCollection_insertOne, 2, NULL)
 {
     njsSodaCollection *coll = (njsSodaCollection*) baton->callingInstance;
 
-    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
-        return false;
     if (!njsBaton_getSodaDocument(baton, coll->db, env, args[0],
             &baton->dpiSodaDocHandle))
+        return false;
+    if (!njsUtils_getNamedPropertyBool(env, args[1], "autoCommit",
+            &baton->autoCommit))
         return false;
     return njsBaton_queueWork(baton, env, "InsertOne",
             njsSodaCollection_insertOneAsync, NULL, returnValue);
@@ -578,12 +583,13 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaCollection_insertOneAndGet, 2, NULL)
 {
     njsSodaCollection *coll = (njsSodaCollection*) baton->callingInstance;
 
-    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
-        return false;
-    if (!njsSodaCollection_processHintOption(baton, env, args))
-        return false;
     if (!njsBaton_getSodaDocument(baton, coll->db, env, args[0],
             &baton->dpiSodaDocHandle))
+        return false;
+    if (!njsUtils_getNamedPropertyBool(env, args[1], "autoCommit",
+            &baton->autoCommit))
+        return false;
+    if (!njsSodaCollection_processHintOption(baton, env, args))
         return false;
     return njsBaton_queueWork(baton, env, "InsertOneAndGet",
             njsSodaCollection_insertOneAndGetAsync,
@@ -670,8 +676,8 @@ bool njsSodaCollection_newFromBaton(njsBaton *baton, napi_env env,
 static bool njsSodaCollection_processHintOption(njsBaton *baton, napi_env env,
         napi_value *args)
 {
-    if (!njsBaton_getStringFromArg(baton, env, args, 1, "hint", &baton->hint,
-            &baton->hintLength, NULL))
+    if (!njsUtils_getNamedPropertyString(env, args[1], "hint", &baton->hint,
+            &baton->hintLength))
         return false;
     if (baton->hintLength) {
         baton->sodaOperOptions = calloc(1, sizeof(dpiSodaOperOptions));
@@ -691,15 +697,17 @@ static bool njsSodaCollection_processHintOption(njsBaton *baton, napi_env env,
 //
 // PARAMETERS
 //   - SODA document
+//   - options
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaCollection_save, 1, NULL)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaCollection_save, 2, NULL)
 {
     njsSodaCollection *coll = (njsSodaCollection*) baton->callingInstance;
 
-    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
-        return false;
     if (!njsBaton_getSodaDocument(baton, coll->db, env, args[0],
             &baton->dpiSodaDocHandle))
+        return false;
+    if (!njsUtils_getNamedPropertyBool(env, args[1], "autoCommit",
+            &baton->autoCommit))
         return false;
     return njsBaton_queueWork(baton, env, "Save", njsSodaCollection_saveAsync,
             NULL, returnValue);
@@ -737,12 +745,13 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaCollection_saveAndGet, 2, NULL)
 {
     njsSodaCollection *coll = (njsSodaCollection*) baton->callingInstance;
 
-    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
-        return false;
     if (!njsSodaCollection_processHintOption(baton, env, args))
         return false;
     if (!njsBaton_getSodaDocument(baton, coll->db, env, args[0],
             &baton->dpiSodaDocHandle))
+        return false;
+    if (!njsUtils_getNamedPropertyBool(env, args[1], "autoCommit",
+            &baton->autoCommit))
         return false;
     return njsBaton_queueWork(baton, env, "SaveAndGet",
             njsSodaCollection_saveAndGetAsync,

@@ -123,7 +123,6 @@ static void njsModule_finalizeGlobals(napi_env env, void *finalize_data,
     NJS_DELETE_REF_AND_CLEAR(globals->jsSodaDocumentConstructor);
     NJS_DELETE_REF_AND_CLEAR(globals->jsSodaOperationConstructor);
     NJS_DELETE_REF_AND_CLEAR(globals->jsSubscriptions);
-    NJS_DELETE_REF_AND_CLEAR(globals->jsSettings);
     free(globals);
 }
 
@@ -186,10 +185,6 @@ static bool njsModule_populateGlobals(napi_env env, napi_value module,
     if (!njsModule_extendClass(env, module, globals, &njsClassDefSodaOperation,
             &globals->jsSodaOperationConstructor))
         return false;
-
-    // create reference to global settings
-    NJS_CHECK_NAPI(env, napi_create_reference(env, settings, 1,
-            &globals->jsSettings))
 
     // acquire Oracle client version and store this in the settings object
     if (dpiContext_getClientVersion(globals->context, &versionInfo) < 0)

@@ -114,7 +114,6 @@ static NJS_ASYNC_POST_METHOD(njsConnection_tpcPreparePostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_subscribePostAsync);
 
 // processing arguments methods
-static NJS_PROCESS_ARGS_METHOD(njsConnection_getQueueProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_subscribeProcessArgs);
 
 // finalize
@@ -424,24 +423,19 @@ static bool njsConnection_commitAsync(njsBaton *baton)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_connect, 1, &njsClassDefConnection)
 {
-    napi_value callingObj;
-
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
-            &callingObj))
     if (!njsBaton_commonConnectProcessArgs(baton, env, args))
         return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "newPassword",
-            &baton->newPassword, &baton->newPasswordLength, NULL))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "newPassword",
+            &baton->newPassword, &baton->newPasswordLength))
         return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "privilege",
-            &baton->privilege, NULL))
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "privilege",
+            &baton->privilege))
         return false;
-    if (!njsBaton_getShardingKeyColumnsFromArg(baton, env, args, 0,
-            "shardingKey", &baton->numShardingKeyColumns,
-            &baton->shardingKeyColumns))
+    if (!njsUtils_getNamedPropertyShardingKey(env, args[0], "shardingKey",
+            &baton->numShardingKeyColumns, &baton->shardingKeyColumns))
         return false;
-    if (!njsBaton_getShardingKeyColumnsFromArg(baton, env, args, 0,
-            "superShardingKey", &baton->numSuperShardingKeyColumns,
+    if (!njsUtils_getNamedPropertyShardingKey(env, args[0], "superShardingKey",
+            &baton->numSuperShardingKeyColumns,
             &baton->superShardingKeyColumns))
         return false;
     return njsBaton_queueWork(baton, env, "Connect",
@@ -612,13 +606,13 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_execute, 5, NULL)
                 &baton->dmlRowCounts))
             return false;
     } else {
-        if (!njsBaton_getUnsignedIntArrayFromArg(baton, env, args, 3,
+        if (!njsUtils_getNamedPropertyUnsignedIntArray(env, args[3],
                 "fetchAsBuffer", &baton->numFetchAsBufferTypes,
-                &baton->fetchAsBufferTypes, NULL))
+                &baton->fetchAsBufferTypes))
             return false;
-        if (!njsBaton_getUnsignedIntArrayFromArg(baton, env, args, 3,
+        if (!njsUtils_getNamedPropertyUnsignedIntArray(env, args[3],
                 "fetchAsString", &baton->numFetchAsStringTypes,
-                &baton->fetchAsStringTypes, NULL))
+                &baton->fetchAsStringTypes))
             return false;
         NJS_CHECK_NAPI(env, napi_get_named_property(env, args[3],
                 "fetchArraySize", &temp))
@@ -1349,10 +1343,29 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getOracleServerVersionString, 0, NULL)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_getQueue, 2, NULL)
 {
+    napi_value typeObj, jsObjType;
+    njsDbObjectType *objType;
+
     if (!njsConnection_check(baton))
         return false;
-    if (!njsConnection_getQueueProcessArgs(baton, env, args))
+
+    // get name for queue (first argument)
+    if (!njsUtils_copyStringFromJS(env, args[0], &baton->name,
+            &baton->nameLength))
         return false;
+
+    // get payload type for queue (optional second argument)
+    if (!njsUtils_getNamedProperty(env, args[1], "payloadType", &typeObj))
+        return false;
+    if (typeObj) {
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, typeObj, "_objType",
+                &jsObjType))
+        NJS_CHECK_NAPI(env, napi_unwrap(env, jsObjType, (void**) &objType))
+        if (dpiObjectType_addRef(objType->handle) < 0)
+            return njsBaton_setErrorDPI(baton);
+        baton->dpiObjectTypeHandle = objType->handle;
+    }
+
     return njsBaton_queueWork(baton, env, "GetQueue",
             njsConnection_getQueueAsync, njsConnection_getQueuePostAsync,
             returnValue);
@@ -1367,9 +1380,6 @@ static bool njsConnection_getQueueAsync(njsBaton *baton)
 {
     njsConnection *conn = (njsConnection*) baton->callingInstance;
 
-    if (baton->typeName && dpiConn_getObjectType(conn->handle, baton->typeName,
-            (uint32_t) baton->typeNameLength, &baton->dpiObjectTypeHandle) < 0)
-        return njsBaton_setErrorDPI(baton);
     if (dpiConn_newQueue(conn->handle, baton->name,
             (uint32_t) baton->nameLength, baton->dpiObjectTypeHandle,
             &baton->dpiQueueHandle) < 0)
@@ -1387,51 +1397,6 @@ static bool njsConnection_getQueuePostAsync(njsBaton *baton, napi_env env,
         napi_value *result)
 {
     return njsAqQueue_createFromHandle(baton, env, result);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_getQueueProcessArgs()
-//   Processes the arguments provided by the caller and place them on the
-// baton.
-//-----------------------------------------------------------------------------
-static bool njsConnection_getQueueProcessArgs(njsBaton *baton,
-        napi_env env, napi_value *args)
-{
-    napi_value typeObj, jsObjType;
-    napi_valuetype valueType;
-    njsDbObjectType *objType;
-    bool ok;
-
-    // get name for queue (first argument)
-    if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
-        return false;
-
-    // get payload type for queue (optional second argument)
-    // may be a string (identifying an object type) or an actual class
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, args[1], "payloadType",
-            &typeObj))
-    NJS_CHECK_NAPI(env, napi_typeof(env, typeObj, &valueType))
-    ok = (valueType == napi_undefined || valueType == napi_string);
-    if (valueType == napi_string) {
-        if (!njsUtils_copyStringFromJS(env, typeObj, &baton->typeName,
-                &baton->typeNameLength))
-            return false;
-    } else if (valueType == napi_function) {
-        NJS_CHECK_NAPI(env, napi_get_named_property(env, typeObj, "_objType",
-                &jsObjType))
-        ok = (napi_unwrap(env, jsObjType, (void**) &objType) == napi_ok);
-        if (ok) {
-            if (dpiObjectType_addRef(objType->handle) < 0)
-                return njsBaton_setErrorDPI(baton);
-            baton->dpiObjectTypeHandle = objType->handle;
-        }
-    }
-    if (!ok)
-        return njsBaton_setError(baton, errInvalidPropertyValueInParam,
-                "payloadType", 2);
-
-    return true;
 }
 
 
@@ -1763,12 +1728,11 @@ static bool njsConnection_processBindUnit(njsBaton *baton, napi_env env,
     njsConnection *conn = (njsConnection*) baton->callingInstance;
     napi_value temp, bindValues;
     uint32_t i, arrayLength;
-    bool found;
 
     // determine name/position
-    if (!njsUtils_getNamedProperty(env, bindUnit, "name", &temp, &found))
+    if (!njsUtils_getNamedProperty(env, bindUnit, "name", &temp))
         return false;
-    if (found) {
+    if (temp) {
         if (!njsUtils_copyStringFromJS(env, temp, &var->name,
                 &var->nameLength))
             return false;
@@ -1795,16 +1759,14 @@ static bool njsConnection_processBindUnit(njsBaton *baton, napi_env env,
     }
 
     // determine maximum size (optional)
-    if (!njsUtils_getNamedProperty(env, bindUnit, "maxSize", &temp, &found))
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, bindUnit, "maxSize",
+            &var->maxSize))
         return false;
-    if (found) {
-        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &var->maxSize))
-    }
 
     // determine if value is an array and the maximum array size
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, bindUnit, "isArray",
-            &temp))
-    NJS_CHECK_NAPI(env, napi_get_value_bool(env, temp, &var->isArray))
+    if (!njsUtils_getNamedPropertyBool(env, bindUnit, "isArray",
+            &var->isArray))
+        return false;
     if (var->isArray) {
         NJS_CHECK_NAPI(env, napi_get_named_property(env, bindUnit,
                 "maxArraySize", &temp))
@@ -2339,7 +2301,8 @@ static bool njsConnection_subscribeProcessArgs(njsBaton *baton, napi_env env,
     napi_value callback, binds;
 
     // first get the subscription given the name
-    if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
+    if (!njsUtils_copyStringFromJS(env, args[0], &baton->name,
+            &baton->nameLength))
         return false;
     if (!njsBaton_getSubscription(baton, env, args[0], false))
         return false;
@@ -2458,8 +2421,7 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_tpcCommit, 2, NULL)
         return false;
     if (!njsBaton_getXid(baton, env, args[0]))
         return false;
-    if (!njsUtils_getBoolArg(env, args, 1, &baton->tpcOnePhase))
-        return false;
+    NJS_CHECK_NAPI(env, napi_get_value_bool(env, args[1], &baton->tpcOnePhase))
     return njsBaton_queueWork(baton, env, "tpcCommit",
         njsConnection_tpcCommitAsync, NULL, returnValue);
 }
@@ -2495,8 +2457,7 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_tpcEnd, 2, NULL)
         return false;
     if (!njsBaton_getXid(baton, env, args[0]))
         return false;
-    if (!njsUtils_getUnsignedIntArg(env, args, 1, &baton->tpcFlags))
-        return false;
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[1], &baton->tpcFlags))
     return njsBaton_queueWork(baton, env, "tpcEnd", njsConnection_tpcEndAsync,
             NULL, returnValue);
 }

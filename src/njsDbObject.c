@@ -165,8 +165,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_deleteElement, 1, &njsClassDefDbObject)
     njsDbObject *obj = (njsDbObject*) callingInstance;
     int32_t index;
 
-    if (!njsUtils_getIntArg(env, args, 0, &index))
-        return false;
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, args[0], &index))
     if (dpiObject_deleteElementByIndex(obj->handle, index) < 0)
         return njsUtils_throwErrorDPI(env, globals);
     return true;
@@ -219,8 +218,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getElement, 1, &njsClassDefDbObject)
     int32_t index;
     dpiData data;
 
-    if (!njsUtils_getIntArg(env, args, 0, &index))
-        return NULL;
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, args[0], &index))
     if (dpiObject_getElementValueByIndex(obj->handle, index,
             obj->type->elementTypeInfo.nativeTypeNum, &data) < 0 )
         return njsUtils_throwErrorDPI(env, globals);
@@ -355,8 +353,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getNextIndex, 1, &njsClassDefDbObject)
     int32_t index;
     int exists;
 
-    if (!njsUtils_getIntArg(env, args, 0, &index))
-        return NULL;
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, args[0], &index))
     if (dpiObject_getNextIndex(obj->handle, index, &index, &exists) < 0)
         return njsUtils_throwErrorDPI(env, globals);
     if (exists) {
@@ -376,8 +373,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getPrevIndex, 1, &njsClassDefDbObject)
     int32_t index;
     int exists;
 
-    if (!njsUtils_getIntArg(env, args, 0, &index))
-        return false;
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, args[0], &index))
     if (dpiObject_getPrevIndex(obj->handle, index, &index, &exists) < 0)
         return njsUtils_throwErrorDPI(env, globals);
     if (exists) {
@@ -493,8 +489,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_hasElement, 1, &njsClassDefDbObject)
     int32_t index;
     int exists;
 
-    if (!njsUtils_getIntArg(env, args, 0, &index))
-        return false;
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, args[0], &index))
     if (dpiObject_getElementExistsByIndex(obj->handle, index, &exists) < 0)
         return njsUtils_throwErrorDPI(env, globals);
     NJS_CHECK_NAPI(env, napi_get_boolean(env, exists, returnValue))
@@ -581,8 +576,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_setElement, 2, &njsClassDefDbObject)
     dpiData data;
     int status;
 
-    if (!njsUtils_getIntArg(env, args, 0, &index))
-        return false;
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, args[0], &index))
     nativeTypeNum = obj->type->elementTypeInfo.nativeTypeNum;
     if (!njsDbObject_transformToOracle(obj, env, args[1], &nativeTypeNum,
             &data, &str, NULL, globals))
@@ -822,8 +816,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_trim, 1, &njsClassDefDbObject)
     njsDbObject *obj = (njsDbObject*) callingInstance;
     uint32_t numToTrim;
 
-    if (!njsUtils_getUnsignedIntArg(env, args, 0, &numToTrim))
-        return false;
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &numToTrim))
     if (dpiObject_trim(obj->handle, numToTrim) < 0)
         return njsUtils_throwErrorDPI(env, globals);
 

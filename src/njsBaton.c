@@ -46,62 +46,35 @@ static void njsBaton_freeShardingKeys(uint8_t *numShardingKeyColumns,
 bool njsBaton_commonConnectProcessArgs(njsBaton *baton, napi_env env,
         napi_value *args)
 {
-    bool connectStringFound, connectionStringFound, userFound, usernameFound;
-
-    // copy items from the global settings class to the baton since they might
-    // change after the asynchronous function begins
-    if (!njsBaton_getGlobalSettings(baton, env,
-            NJS_GLOBAL_ATTR_CONNECTION_CLASS,
-            NJS_GLOBAL_ATTR_EDITION,
-            NJS_GLOBAL_ATTR_EVENTS,
-            NJS_GLOBAL_ATTR_EXTERNAL_AUTH,
-            NJS_GLOBAL_ATTR_STMT_CACHE_SIZE,
-            0))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "user", &baton->user,
+            &baton->userLength))
         return false;
-
-    // check that only one of "user" or "username" is found
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "user", &baton->user,
-            &baton->userLength, &userFound))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "password",
+            &baton->password, &baton->passwordLength))
         return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "username",
-            &baton->user, &baton->userLength, &usernameFound))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "connectString",
+            &baton->connectString, &baton->connectStringLength))
         return false;
-    if (userFound && usernameFound)
-        return njsBaton_setError (baton, errDblUsername);
-
-    // check that only one of "connectString" and "connectionString" is found
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "connectString",
-            &baton->connectString, &baton->connectStringLength,
-            &connectStringFound))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "connectionClass",
+            &baton->connectionClass, &baton->connectionClassLength))
         return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "connectionString",
-            &baton->connectString, &baton->connectStringLength,
-            &connectionStringFound))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "edition",
+            &baton->edition, &baton->editionLength))
         return false;
-    if (connectStringFound && connectionStringFound)
-        return njsBaton_setError(baton, errDblConnectionString);
-
-    // check the other options
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "password",
-            &baton->password, &baton->passwordLength, NULL))
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "stmtCacheSize",
+            &baton->stmtCacheSize))
         return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "edition",
-            &baton->edition, &baton->editionLength, NULL))
+    if (!njsUtils_getNamedPropertyBool(env, args[0], "externalAuth",
+            &baton->externalAuth))
         return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "stmtCacheSize",
-            &baton->stmtCacheSize, NULL))
+    if (!njsUtils_getNamedPropertyBool(env, args[0], "events",
+            &baton->events))
         return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "externalAuth",
-            &baton->externalAuth, NULL))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "token",
+            &baton->token, &baton->tokenLength))
         return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "events", &baton->events,
-            NULL))
-        return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "privateKey",
-            &baton->privateKey, &baton->privateKeyLength, NULL))
-        return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "token",
-            &baton->token, &baton->tokenLength, NULL))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "privateKey",
+            &baton->privateKey, &baton->privateKeyLength))
         return false;
 
     return true;
@@ -223,7 +196,6 @@ void njsBaton_free(njsBaton *baton, napi_env env)
     NJS_FREE_AND_CLEAR(baton->edition);
     NJS_FREE_AND_CLEAR(baton->ipAddress);
     NJS_FREE_AND_CLEAR(baton->name);
-    NJS_FREE_AND_CLEAR(baton->typeName);
     NJS_FREE_AND_CLEAR(baton->plsqlFixupCallback);
     NJS_FREE_AND_CLEAR(baton->tag);
     NJS_FREE_AND_CLEAR(baton->sodaMetaData);
@@ -526,98 +498,6 @@ bool njsBaton_getFetchInfoFromArg(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsBaton_getGlobalSetting()
-//   Gets the value of the requested attribute from the global JavaScript
-// settings and stores it on the baton.
-//-----------------------------------------------------------------------------
-static bool njsBaton_getGlobalSetting(njsBaton *baton, napi_env env,
-        napi_value settings, int attrNum)
-{
-    switch (attrNum) {
-        case NJS_GLOBAL_ATTR_AUTOCOMMIT:
-            return njsBaton_getBoolFromArg(baton, env, &settings, 0,
-                    "autoCommit", &baton->autoCommit, NULL);
-        case NJS_GLOBAL_ATTR_CONNECTION_CLASS:
-            return njsBaton_getStringFromArg(baton, env, &settings, 0,
-                    "connectionClass", &baton->connectionClass,
-                    &baton->connectionClassLength, NULL);
-        case NJS_GLOBAL_ATTR_EDITION:
-            return njsBaton_getStringFromArg(baton, env, &settings, 0,
-                    "edition", &baton->edition, &baton->editionLength, NULL);
-        case NJS_GLOBAL_ATTR_EVENTS:
-            return njsBaton_getBoolFromArg(baton, env, &settings, 0, "events",
-                    &baton->events, NULL);
-        case NJS_GLOBAL_ATTR_EXTERNAL_AUTH:
-            return njsBaton_getBoolFromArg(baton, env, &settings, 0,
-                    "externalAuth", &baton->externalAuth, NULL);
-        case NJS_GLOBAL_ATTR_FETCH_AS_BUFFER:
-            return njsBaton_getUnsignedIntArrayFromArg(baton, env, &settings,
-                    0, "fetchAsBuffer", &baton->numFetchAsBufferTypes,
-                    &baton->fetchAsBufferTypes, NULL);
-        case NJS_GLOBAL_ATTR_FETCH_AS_STRING:
-            return njsBaton_getUnsignedIntArrayFromArg(baton, env, &settings,
-                    0, "fetchAsString", &baton->numFetchAsStringTypes,
-                    &baton->fetchAsStringTypes, NULL);
-        case NJS_GLOBAL_ATTR_POOL_INCREMENT:
-            return njsBaton_getUnsignedIntFromArg(baton, env, &settings, 0,
-                    "poolIncrement", &baton->poolIncrement, NULL);
-        case NJS_GLOBAL_ATTR_POOL_MAX:
-            return njsBaton_getUnsignedIntFromArg(baton, env, &settings, 0,
-                    "poolMax", &baton->poolMax, NULL);
-        case NJS_GLOBAL_ATTR_POOL_MAX_PER_SHARD:
-            return njsBaton_getUnsignedIntFromArg(baton, env, &settings, 0,
-                    "poolMaxPerShard", &baton->poolMaxPerShard, NULL);
-        case NJS_GLOBAL_ATTR_POOL_MIN:
-            return njsBaton_getUnsignedIntFromArg(baton, env, &settings, 0,
-                    "poolMin", &baton->poolMin, NULL);
-        case NJS_GLOBAL_ATTR_POOL_PING_INTERVAL:
-            return njsBaton_getIntFromArg(baton, env, &settings, 0,
-                    "poolPingInterval", &baton->poolPingInterval, NULL);
-        case NJS_GLOBAL_ATTR_POOL_TIMEOUT:
-            return njsBaton_getUnsignedIntFromArg(baton, env, &settings, 0,
-                    "poolTimeout", &baton->poolTimeout, NULL);
-        case NJS_GLOBAL_ATTR_STMT_CACHE_SIZE:
-            return njsBaton_getUnsignedIntFromArg(baton, env, &settings, 0,
-                    "stmtCacheSize", &baton->stmtCacheSize, NULL);
-        default:
-            return njsBaton_setError(baton, errInvalidGlobalSettingAttrNum,
-                    attrNum);
-    }
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton_getGlobalSettings()
-//   Gets the values of all requested attributes from the global JavaScript
-// settings and stores them on the baton.
-//-----------------------------------------------------------------------------
-bool njsBaton_getGlobalSettings(njsBaton *baton, napi_env env, ...)
-{
-    napi_value settings;
-    va_list vaList;
-    bool ok = true;
-    int attrNum;
-
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsSettings, &settings))
-
-    va_start(vaList, env);
-    while (1) {
-        attrNum = va_arg(vaList, int);
-        if (attrNum == 0)
-            break;
-        ok = njsBaton_getGlobalSetting(baton, env, settings, attrNum);
-        if (!ok)
-            break;
-    }
-    va_end(vaList);
-    return ok;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsBaton_getIntFromArg()
 //   Gets an integer value from the specified JavaScript object property, if
 // possible. If the given property is undefined, no error is set and the value
@@ -661,108 +541,6 @@ uint32_t njsBaton_getNumOutBinds(njsBaton *baton)
             numOutBinds++;
     }
     return numOutBinds;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton_getShardingKeyColumnsFromArg()
-//   Gets an array of sharding key columns from the specified JavaScript object
-// property, if possible. If the given property is undefined, no error is set
-// and the value is left untouched; otherwise, if the value is not an array,
-// the error is set on the baton.
-//-----------------------------------------------------------------------------
-bool njsBaton_getShardingKeyColumnsFromArg(njsBaton *baton, napi_env env,
-        napi_value *args, int argIndex, const char *propertyName,
-        uint8_t *numShardingKeyColumns,
-        dpiShardingKeyColumn **shardingKeyColumns)
-{
-    napi_value asNumber, value, element;
-    dpiShardingKeyColumn *shards;
-    napi_valuetype valueType;
-    uint32_t arrLen, i;
-    size_t numBytes;
-    bool check;
-
-    // validate parameter
-    if (!njsBaton_getValueFromArg(baton, env, args, argIndex, propertyName,
-            napi_object, &value, NULL))
-        return false;
-    if (!value)
-        return true;
-    NJS_CHECK_NAPI(env, napi_is_array(env, value, &check))
-    if (!check)
-        return njsBaton_setError(baton, errNonArrayProvided);
-
-    // allocate space for sharding key columns; if array is empty, nothing
-    // further to do!
-    NJS_CHECK_NAPI(env, napi_get_array_length(env, value, &arrLen))
-    if (arrLen == 0)
-        return true;
-    shards = calloc(arrLen, sizeof(dpiShardingKeyColumn));
-    if (!shards)
-        return njsBaton_setError(baton, errInsufficientMemory);
-    *shardingKeyColumns = shards;
-    *numShardingKeyColumns = (uint8_t)arrLen;
-
-    // process each element
-    for (i = 0; i < arrLen; i++) {
-        NJS_CHECK_NAPI(env, napi_get_element(env, value, i, &element))
-        NJS_CHECK_NAPI(env, napi_typeof(env, element, &valueType))
-
-        // handle strings
-        if (valueType == napi_string) {
-            shards[i].nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
-            shards[i].oracleTypeNum = DPI_ORACLE_TYPE_VARCHAR;
-            if (!njsUtils_copyStringFromJS(env, element,
-                    &shards[i].value.asBytes.ptr, &numBytes))
-                return false;
-            shards[i].value.asBytes.length = (uint32_t) numBytes;
-            continue;
-        }
-
-        // handle numbers
-        if (valueType == napi_number) {
-            shards[i].nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
-            shards[i].oracleTypeNum = DPI_ORACLE_TYPE_NUMBER;
-            NJS_CHECK_NAPI(env, napi_get_value_double(env, element,
-                    &shards[i].value.asDouble));
-            continue;
-        }
-
-        // handle objects
-        if (valueType == napi_object) {
-
-            // handle buffers
-            NJS_CHECK_NAPI(env, napi_is_buffer(env, element, &check))
-            if (check) {
-                shards[i].nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
-                shards[i].oracleTypeNum = DPI_ORACLE_TYPE_RAW;
-                NJS_CHECK_NAPI(env, napi_get_buffer_info(env, element,
-                        (void*) &shards[i].value.asBytes.ptr, &numBytes))
-                shards[i].value.asBytes.length = (uint32_t) numBytes;
-                continue;
-            }
-
-            // handle dates
-            NJS_CHECK_NAPI(env, napi_is_date(env, element, &check))
-            if (check) {
-                shards[i].nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
-                shards[i].oracleTypeNum = DPI_ORACLE_TYPE_DATE;
-                NJS_CHECK_NAPI(env, napi_coerce_to_number(env, element,
-                        &asNumber))
-                NJS_CHECK_NAPI(env, napi_get_value_double(env, asNumber,
-                        &shards[i].value.asDouble))
-                continue;
-            }
-
-        }
-
-        // no support for other types
-        return njsBaton_setError(baton, errInvalidPropertyValueInParam,
-                propertyName, argIndex + 1);
-    }
-
-    return true;
 }
 
 
@@ -827,60 +605,6 @@ bool njsBaton_getStringFromArg(njsBaton *baton, napi_env env, napi_value *args,
         baton->hasError = true;
         return false;
     }
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton_getStringArrayFromArg()
-//   Gets a string value from the specified JavaScript object property, if
-// possible. If the given property is undefined, no error is set and the value
-// is left untouched; otherwise, if the value is not a string, the error is set
-// on the baton.
-//-----------------------------------------------------------------------------
-bool njsBaton_getStringArrayFromArg(njsBaton *baton, napi_env env,
-        napi_value *args, int argIndex, const char *propertyName,
-        uint32_t *resultNumElems, char ***resultElems,
-        uint32_t **resultElemLengths, bool *found)
-{
-    uint32_t arrayLength, i, *tempLengths;
-    napi_value array, element;
-    char **tempStrings;
-    size_t tempLength;
-
-    // get array from the object
-    if (!njsBaton_getValueFromArg(baton, env, args, argIndex, propertyName,
-            napi_object, &array, found))
-        return false;
-    if (!array)
-        return true;
-
-    // get length of array; if there are no elements in the array, nothing
-    // further needs to be done
-    NJS_CHECK_NAPI(env, napi_get_array_length(env, array, &arrayLength))
-    if (arrayLength == 0)
-        return true;
-
-    // allocate memory for the results
-    tempStrings = calloc(arrayLength, sizeof(char*));
-    if (!tempStrings)
-        return njsBaton_setError(baton, errInsufficientMemory);
-    *resultElems = tempStrings;
-    tempLengths = calloc(arrayLength, sizeof(uint32_t));
-    if (!tempLengths)
-        return njsBaton_setError(baton, errInsufficientMemory);
-    *resultElemLengths = tempLengths;
-
-    // populate the results
-    *resultNumElems = arrayLength;
-    for (i = 0; i < arrayLength; i++) {
-        NJS_CHECK_NAPI(env, napi_get_element(env, array, i, &element))
-        if (!njsUtils_getStringArg(env, &element, 0, &tempStrings[i],
-                &tempLength))
-            return false;
-        tempLengths[i] = (uint32_t) tempLength;
-    }
-
     return true;
 }
 
@@ -967,54 +691,6 @@ bool njsBaton_getUnsignedIntFromArg(njsBaton *baton, napi_env env,
     if (doubleValue < 0 || (double) *result != doubleValue)
         return njsBaton_setError(baton, errInvalidPropertyValueInParam,
                 propertyName, argIndex + 1);
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton_getUnsignedIntArrayFromArg()
-//   Gets an unsigned integer value array from the specified JavaScript object
-// property, if possible. If the given property is undefined, no error is set
-// and the value is left untouched; otherwise, if the value is not an array of
-// integers, the error is set on the baton.
-//-----------------------------------------------------------------------------
-bool njsBaton_getUnsignedIntArrayFromArg(njsBaton *baton, napi_env env,
-        napi_value *args, int argIndex, const char *propertyName,
-        uint32_t *numElements, uint32_t **elements, bool *found)
-{
-    napi_value value, element;
-    bool isArray;
-    uint32_t i;
-
-    // get the value from the object and verify it is an array
-    if (!njsBaton_getValueFromArg(baton, env, args, argIndex, propertyName,
-            napi_object, &value, found))
-        return false;
-    if (!value)
-        return true;
-    NJS_CHECK_NAPI(env, napi_is_array(env, value, &isArray))
-    if (!isArray)
-        return njsUtils_throwError(env, errInvalidPropertyValueInParam,
-                propertyName, argIndex + 1);
-
-    // free memory, if applicable
-    if (*elements) {
-        free(*elements);
-        *elements = NULL;
-        *numElements = 0;
-    }
-
-    // get the elements and verify each is an integer
-    NJS_CHECK_NAPI(env, napi_get_array_length(env, value, numElements))
-    *elements = calloc(*numElements, sizeof(uint32_t));
-    if (!elements && *numElements > 0)
-        return njsUtils_throwError(env, errInsufficientMemory);
-    for (i = 0; i < *numElements; i++) {
-        NJS_CHECK_NAPI(env, napi_get_element(env, value, i, &element))
-        if (!njsUtils_getUnsignedIntArg(env, &element, 0, &((*elements)[i])))
-            return false;
-    }
 
     return true;
 }

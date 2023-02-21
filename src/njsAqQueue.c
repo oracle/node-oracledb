@@ -116,9 +116,9 @@ bool njsAqQueue_setRecipients(njsBaton *baton, dpiMsgProps *handle,
 static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
         napi_env env, napi_value value, dpiMsgProps **handle)
 {
-    napi_value payloadObj, constructor;
+    napi_value payloadObj, constructor, tempObj;
     dpiMsgProps *tempHandle;
-    bool found, isDbObject;
+    bool isDbObject;
     size_t bufferLength;
     njsDbObject *obj;
     int32_t intValue;
@@ -157,10 +157,10 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
 
     // set correlation, if applicable
     buffer = NULL;
-    if (!njsBaton_getStringFromArg(baton, env, &value, 0, "correlation",
-            &buffer, &bufferLength, &found))
+    if (!njsUtils_getNamedPropertyString(env, value, "correlation",
+            &buffer, &bufferLength))
         return false;
-    if (found) {
+    if (buffer) {
         status = dpiMsgProps_setCorrelation(tempHandle, buffer,
                 (uint32_t) bufferLength);
         free(buffer);
@@ -169,18 +169,20 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
     }
 
     // set delay, if applicable
-    if (!njsBaton_getIntFromArg(baton, env, &value, 0, "delay", &intValue,
-            &found))
+    if (!njsUtils_getNamedProperty(env, value, "delay", &tempObj))
         return false;
-    if (found && dpiMsgProps_setDelay(tempHandle, intValue) < 0)
-        return njsBaton_setErrorDPI(baton);
+    if (tempObj) {
+        NJS_CHECK_NAPI(env, napi_get_value_int32(env, tempObj, &intValue))
+        if (dpiMsgProps_setDelay(tempHandle, intValue) < 0)
+            return njsBaton_setErrorDPI(baton);
+    }
 
     // set exception queue, if applicable
     buffer = NULL;
-    if (!njsBaton_getStringFromArg(baton, env, &value, 0, "exceptionQueue",
-            &buffer, &bufferLength, &found))
+    if (!njsUtils_getNamedPropertyString(env, value, "exceptionQueue",
+            &buffer, &bufferLength))
         return false;
-    if (found) {
+    if (buffer) {
         status = dpiMsgProps_setExceptionQ(tempHandle, buffer,
                 (uint32_t) bufferLength);
         free(buffer);
@@ -189,24 +191,28 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
     }
 
     // set expiration, if applicable
-    if (!njsBaton_getIntFromArg(baton, env, &value, 0, "expiration", &intValue,
-            &found))
+    if (!njsUtils_getNamedProperty(env, value, "expiration", &tempObj))
         return false;
-    if (found && dpiMsgProps_setExpiration(tempHandle, intValue) < 0)
-        return njsBaton_setErrorDPI(baton);
+    if (tempObj) {
+        NJS_CHECK_NAPI(env, napi_get_value_int32(env, tempObj, &intValue))
+        if (dpiMsgProps_setExpiration(tempHandle, intValue) < 0)
+            return njsBaton_setErrorDPI(baton);
+    }
 
     // set priority, if applicable
-    if (!njsBaton_getIntFromArg(baton, env, &value, 0, "priority", &intValue,
-            &found))
+    if (!njsUtils_getNamedProperty(env, value, "priority", &tempObj))
         return false;
-    if (found && dpiMsgProps_setPriority(tempHandle, intValue) < 0)
-        return njsBaton_setErrorDPI(baton);
+    if (tempObj) {
+        NJS_CHECK_NAPI(env, napi_get_value_int32(env, tempObj, &intValue))
+        if (dpiMsgProps_setPriority(tempHandle, intValue) < 0)
+            return njsBaton_setErrorDPI(baton);
+    }
 
     // set recipient list, if applicable
-    if (!njsBaton_getStringArrayFromArg(baton, env, &value, 0, "recipients",
-            &recipCount, &recipArr, &recipLengths, &found))
+    if (!njsUtils_getNamedPropertyStringArray(env, value, "recipients",
+            &recipCount, &recipArr, &recipLengths))
         return false;
-    if (found && (recipCount > 0)) {
+    if (recipCount > 0) {
         ok = njsAqQueue_setRecipients(baton, tempHandle, recipArr,
                  recipLengths, recipCount);
         for (i = 0; i < recipCount; i ++) {

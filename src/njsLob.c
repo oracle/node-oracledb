@@ -348,8 +348,7 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_read, 1, NULL)
 
     if (!njsLob_check(lob, baton))
         return false;
-    if (!njsUtils_getUnsignedIntArg(env, args, 0, &baton->lobOffset))
-        return false;
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &baton->lobOffset))
     return njsBaton_queueWork(baton, env, "Read", njsLob_readAsync,
             njsLob_readPostAsync, returnValue);
 }
@@ -450,8 +449,7 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_write, 2, NULL)
         return false;
 
     // get the offset (characters for CLOBs, bytes for BLOBs)
-    if (!njsUtils_getUnsignedIntArg(env, args, 0, &baton->lobOffset))
-        return false;
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &baton->lobOffset))
 
     // determine if a buffer was passed
     NJS_CHECK_NAPI(env, napi_is_buffer(env, args[1], &isBuffer))
@@ -465,7 +463,7 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_write, 2, NULL)
                 (void**) &baton->bufferPtr, &bufferSize))
 
     // otherwise, the string buffer data needs to be acquired
-    } else if (!njsUtils_getStringArg(env, args, 1, &baton->bufferPtr,
+    } else if (!njsUtils_copyStringFromJS(env, args[1], &baton->bufferPtr,
             &bufferSize)) {
         return false;
     }

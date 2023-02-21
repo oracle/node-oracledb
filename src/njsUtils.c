@@ -429,22 +429,6 @@ bool njsUtils_genericThrowError(napi_env env, const char *fileName,
 
 
 //-----------------------------------------------------------------------------
-// njsUtils_getBoolArg()
-//   Gets a boolean from the specified parameter. If the value is not a
-// boolean, an error is raised and false is returned.
-//-----------------------------------------------------------------------------
-bool njsUtils_getBoolArg(napi_env env, napi_value *args, int index,
-        bool *result)
-{
-    if (!njsUtils_validateArgType(env, args, napi_boolean, index))
-        return false;
-    NJS_CHECK_NAPI(env, napi_get_value_bool(env, args[index], result))
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsUtils_getError()
 //   This method will create an error object and, if it is an ODPI-C error,
 // also acquire the error number and offset and store those as properties on
@@ -491,45 +475,20 @@ bool njsUtils_getError(napi_env env, dpiErrorInfo *errorInfo,
 
 
 //-----------------------------------------------------------------------------
-// njsUtils_getIntArg()
-//   Gets an integer from the specified parameter. If the value is not an
-// integer, an error is raised and false is returned.
-//-----------------------------------------------------------------------------
-bool njsUtils_getIntArg(napi_env env, napi_value *args, int index,
-        int32_t *result)
-{
-    double doubleValue;
-
-    // validate the parameter has the correct type
-    if (!njsUtils_validateArgType(env, args, napi_number, index))
-        return false;
-
-    // get the numeric value
-    NJS_CHECK_NAPI(env, napi_get_value_double(env, args[index], &doubleValue))
-
-    // if the value is not an integer, return an error
-    *result = (int32_t) doubleValue;
-    if ((double) *result != doubleValue)
-        return njsUtils_throwError(env, errInvalidParameterValue, index + 1);
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsUtils_getNamedProperty()
 //   Returns the value of the named property along with a boolean value
 // indicating whether or not it was found (a value other than undefined).
 //-----------------------------------------------------------------------------
 bool njsUtils_getNamedProperty(napi_env env, napi_value value,
-        const char *name, napi_value *propertyValue, bool *found)
+        const char *name, napi_value *propertyValue)
 {
     napi_valuetype valueType;
 
     NJS_CHECK_NAPI(env, napi_get_named_property(env, value, name,
             propertyValue))
     NJS_CHECK_NAPI(env, napi_typeof(env, *propertyValue, &valueType))
-    *found = (valueType != napi_undefined);
+    if (valueType == napi_undefined)
+        *propertyValue = NULL;
 
     return true;
 }
@@ -544,11 +503,10 @@ bool njsUtils_getNamedPropertyBool(napi_env env, napi_value value,
         const char *name, bool *outValue)
 {
     napi_value outValueObj;
-    bool found;
 
-    if (!njsUtils_getNamedProperty(env, value, name, &outValueObj, &found))
+    if (!njsUtils_getNamedProperty(env, value, name, &outValueObj))
         return false;
-    if (found) {
+    if (outValueObj) {
         NJS_CHECK_NAPI(env, napi_get_value_bool(env, outValueObj, outValue))
     }
 
@@ -557,16 +515,243 @@ bool njsUtils_getNamedPropertyBool(napi_env env, napi_value value,
 
 
 //-----------------------------------------------------------------------------
-// njsUtils_getStringArg()
-//   Gets a string from the specified parameter. If the value is not a string,
-// an error is raised and false is returned.
+// njsUtils_getNamedPropertyInt()
+//   Returns the value of the named property, which is assumed to be a signed
+// integer value. If the value is not found, the int32_t value is left
+// unchanged.
 //-----------------------------------------------------------------------------
-bool njsUtils_getStringArg(napi_env env, napi_value *args, int index,
-        char **result, size_t *resultLength)
+bool njsUtils_getNamedPropertyInt(napi_env env, napi_value value,
+        const char *name, int32_t *outValue)
 {
-    if (!njsUtils_validateArgType(env, args, napi_string, index))
+    napi_value outValueObj;
+
+    if (!njsUtils_getNamedProperty(env, value, name, &outValueObj))
         return false;
-    return njsUtils_copyStringFromJS(env, args[index], result, resultLength);
+    if (outValueObj) {
+        NJS_CHECK_NAPI(env, napi_get_value_int32(env, outValueObj, outValue))
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsUtils_getNamedPropertyShardingKey()
+//   Returns the value of the named property, which is assumed to be a string
+// value. If the value is not found, the string value is left unchanged.
+//-----------------------------------------------------------------------------
+bool njsUtils_getNamedPropertyShardingKey(napi_env env, napi_value value,
+        const char *name, uint8_t *numShardingKeyColumns,
+        dpiShardingKeyColumn **shardingKeyColumns)
+{
+    napi_value asNumber, shardingKey, element;
+    dpiShardingKeyColumn *shards;
+    napi_valuetype valueType;
+    uint32_t arrLen, i;
+    size_t numBytes;
+    bool check;
+
+    // allocate space for sharding key columns; if array is empty, nothing
+    // further to do!
+    if (!njsUtils_getNamedProperty(env, value, name, &shardingKey))
+        return false;
+    if (!shardingKey)
+        return true;
+    NJS_CHECK_NAPI(env, napi_get_array_length(env, shardingKey, &arrLen))
+    if (arrLen == 0)
+        return true;
+    shards = calloc(arrLen, sizeof(dpiShardingKeyColumn));
+    if (!shards)
+        return njsUtils_throwError(env, errInsufficientMemory);
+    *shardingKeyColumns = shards;
+    *numShardingKeyColumns = (uint8_t) arrLen;
+
+    // process each element
+    for (i = 0; i < arrLen; i++) {
+        NJS_CHECK_NAPI(env, napi_get_element(env, value, i, &element))
+        NJS_CHECK_NAPI(env, napi_typeof(env, element, &valueType))
+
+        // handle strings
+        if (valueType == napi_string) {
+            shards[i].nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
+            shards[i].oracleTypeNum = DPI_ORACLE_TYPE_VARCHAR;
+            if (!njsUtils_copyStringFromJS(env, element,
+                    &shards[i].value.asBytes.ptr, &numBytes))
+                return false;
+            shards[i].value.asBytes.length = (uint32_t) numBytes;
+            continue;
+        }
+
+        // handle numbers
+        if (valueType == napi_number) {
+            shards[i].nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
+            shards[i].oracleTypeNum = DPI_ORACLE_TYPE_NUMBER;
+            NJS_CHECK_NAPI(env, napi_get_value_double(env, element,
+                    &shards[i].value.asDouble));
+            continue;
+        }
+
+        // handle objects
+        if (valueType == napi_object) {
+
+            // handle buffers
+            NJS_CHECK_NAPI(env, napi_is_buffer(env, element, &check))
+            if (check) {
+                shards[i].nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
+                shards[i].oracleTypeNum = DPI_ORACLE_TYPE_RAW;
+                NJS_CHECK_NAPI(env, napi_get_buffer_info(env, element,
+                        (void*) &shards[i].value.asBytes.ptr, &numBytes))
+                shards[i].value.asBytes.length = (uint32_t) numBytes;
+                continue;
+            }
+
+            // handle dates
+            NJS_CHECK_NAPI(env, napi_is_date(env, element, &check))
+            if (check) {
+                shards[i].nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
+                shards[i].oracleTypeNum = DPI_ORACLE_TYPE_DATE;
+                NJS_CHECK_NAPI(env, napi_coerce_to_number(env, element,
+                        &asNumber))
+                NJS_CHECK_NAPI(env, napi_get_value_double(env, asNumber,
+                        &shards[i].value.asDouble))
+                continue;
+            }
+
+        }
+
+        // no support for other types (should be checked in JavaScript layer)
+        return njsUtils_genericThrowError(env, __FILE__, __LINE__);
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsUtils_getNamedPropertyString()
+//   Returns the value of the named property, which is assumed to be a string
+// value. If the value is not found, the string value is left unchanged.
+//-----------------------------------------------------------------------------
+bool njsUtils_getNamedPropertyString(napi_env env, napi_value value,
+        const char *name, char **result, size_t *resultLength)
+{
+    napi_value resultObj;
+
+    if (!njsUtils_getNamedProperty(env, value, name, &resultObj))
+        return false;
+    if (resultObj)
+        return njsUtils_copyStringFromJS(env, resultObj, result, resultLength);
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsUtils_getNamedPropertyStringArray()
+//   Returns the value of the named property, which is assumed to be an array
+// of strings. If the value is not found, the string array is left unchanged.
+//-----------------------------------------------------------------------------
+bool njsUtils_getNamedPropertyStringArray(napi_env env, napi_value value,
+        const char *name, uint32_t *resultNumElems, char ***resultElems,
+        uint32_t **resultElemLengths)
+{
+    uint32_t arrayLength, i, *tempLengths;
+    napi_value array, element;
+    char **tempStrings;
+    size_t tempLength;
+
+    // get array; if array is missing or has no elements, nothing further needs
+    // to be done!
+    if (!njsUtils_getNamedProperty(env, value, name, &array))
+        return false;
+    if (!array)
+        return true;
+    NJS_CHECK_NAPI(env, napi_get_array_length(env, array, &arrayLength))
+    if (arrayLength == 0)
+        return true;
+
+    // allocate memory for the results
+    tempStrings = calloc(arrayLength, sizeof(char*));
+    if (!tempStrings)
+        return njsUtils_throwError(env, errInsufficientMemory);
+    *resultElems = tempStrings;
+    tempLengths = calloc(arrayLength, sizeof(uint32_t));
+    if (!tempLengths)
+        return njsUtils_throwError(env, errInsufficientMemory);
+    *resultElemLengths = tempLengths;
+
+    // populate the results
+    *resultNumElems = arrayLength;
+    for (i = 0; i < arrayLength; i++) {
+        NJS_CHECK_NAPI(env, napi_get_element(env, array, i, &element))
+        if (!njsUtils_copyStringFromJS(env, element, &tempStrings[i],
+                &tempLength))
+            return false;
+        tempLengths[i] = (uint32_t) tempLength;
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsUtils_getNamedPropertyUnsignedInt()
+//   Returns the value of the named property, which is assumed to be an
+// unsigned integer value. If the value is not found, the uint32_t value is
+// left unchanged.
+//-----------------------------------------------------------------------------
+bool njsUtils_getNamedPropertyUnsignedInt(napi_env env, napi_value value,
+        const char *name, uint32_t *outValue)
+{
+    napi_value outValueObj;
+
+    if (!njsUtils_getNamedProperty(env, value, name, &outValueObj))
+        return false;
+    if (outValueObj) {
+        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, outValueObj, outValue))
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsUtils_getNamedPropertyUnsignedIntArray()
+//   Returns the value of the named property, which is assumed to be an array
+// of unsigned integers. If the value is not found, the array is left
+// unchanged.
+//-----------------------------------------------------------------------------
+bool njsUtils_getNamedPropertyUnsignedIntArray(napi_env env, napi_value value,
+        const char *name, uint32_t *numElements, uint32_t **elements)
+{
+    napi_value array, element;
+    uint32_t i;
+
+    // get value of the named property, if not found, nothing to do
+    if (!njsUtils_getNamedProperty(env, value, name, &array))
+        return false;
+    if (!array)
+        return true;
+
+    // free memory, if applicable
+    if (*elements) {
+        free(*elements);
+        *elements = NULL;
+        *numElements = 0;
+    }
+
+    // get the elements from the array
+    NJS_CHECK_NAPI(env, napi_get_array_length(env, array, numElements))
+    *elements = calloc(*numElements, sizeof(uint32_t));
+    if (!elements && *numElements > 0)
+        return njsUtils_throwError(env, errInsufficientMemory);
+    for (i = 0; i < *numElements; i++) {
+        NJS_CHECK_NAPI(env, napi_get_element(env, array, i, &element))
+        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, element,
+                &((*elements)[i])))
+    }
+
+    return true;
 }
 
 
@@ -605,32 +790,6 @@ bool njsUtils_getStringFromArg(napi_env env, napi_value *args,
         return true;
 
     return njsUtils_copyStringFromJS(env, value, result, resultLength);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_getUnsignedIntArg()
-//   Gets an unsigned integer from the specified parameter. If the value is not
-// an integer, an error is raised and false is returned.
-//-----------------------------------------------------------------------------
-bool njsUtils_getUnsignedIntArg(napi_env env, napi_value *args, int index,
-        uint32_t *result)
-{
-    double doubleValue;
-
-    // validate the parameter has the correct type
-    if (!njsUtils_validateArgType(env, args, napi_number, index))
-        return false;
-
-    // get the numeric value
-    NJS_CHECK_NAPI(env, napi_get_value_double(env, args[index], &doubleValue))
-
-    // if the value is not an integer, return an error
-    *result = (uint32_t) doubleValue;
-    if (doubleValue < 0 || (double) *result != doubleValue)
-        return njsUtils_throwError(env, errInvalidParameterValue, index + 1);
-
-    return true;
 }
 
 
@@ -687,46 +846,6 @@ bool njsUtils_isBuffer(napi_env env, napi_value value)
     if (status != napi_ok)
         return false;
     return isBuffer;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_setPropString()
-//   Sets a property to a string value. If the value is not a string, an
-// error is raised and false is returned.
-//-----------------------------------------------------------------------------
-bool njsUtils_setPropString(napi_env env, napi_value value, const char *name,
-        char **result, size_t *resultLength)
-{
-    if (!njsUtils_validatePropType(env, value, napi_string, name))
-        return false;
-    return njsUtils_copyStringFromJS(env, value, result, resultLength);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_setPropUnsignedInt()
-//   Sets a property to an unsigned integer value. If the value is not an
-// unsigned integer, an error is raised and false is returned.
-//-----------------------------------------------------------------------------
-bool njsUtils_setPropUnsignedInt(napi_env env, napi_value value,
-        const char *name, uint32_t *result)
-{
-    napi_valuetype valueType;
-    double doubleValue;
-
-    // verify the value is a JavaScript number
-    NJS_CHECK_NAPI(env, napi_typeof(env, value, &valueType))
-    if (valueType != napi_number)
-        return njsUtils_throwError(env, errInvalidPropertyValue, name);
-    NJS_CHECK_NAPI(env, napi_get_value_double(env, value, &doubleValue))
-
-    // if the value is not an unsigned integer, return an error
-    *result = (uint32_t) doubleValue;
-    if (doubleValue < 0 || (double) *result != doubleValue)
-        return njsUtils_throwError(env, errInvalidPropertyValue, name);
-
-    return true;
 }
 
 
@@ -812,32 +931,6 @@ bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
         }
     }
     return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_validateGetter()
-//   Gets the instance associated with the object.
-//-----------------------------------------------------------------------------
-bool njsUtils_validateGetter(napi_env env, napi_callback_info info,
-        njsModuleGlobals **globals, njsBaseInstance **instance)
-{
-    return njsUtils_validateArgs(env, info, 0, NULL, globals, NULL, NULL,
-            instance);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_validateSetter()
-//   Gets the instance associated with the object and the value that has been
-// set.
-//-----------------------------------------------------------------------------
-bool njsUtils_validateSetter(napi_env env, napi_callback_info info,
-        njsModuleGlobals **globals, njsBaseInstance **instance,
-        napi_value *value)
-{
-    return njsUtils_validateArgs(env, info, 1, value, NULL, NULL, NULL,
-            instance);
 }
 
 
