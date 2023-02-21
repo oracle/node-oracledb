@@ -39,3 +39,5 @@ instantclient_18_5
 instantclient_19_8
 instantclient_19_14
 instantclient_21_5
+logs/*
+.node-oracledb.env
