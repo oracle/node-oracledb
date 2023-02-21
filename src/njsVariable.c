@@ -468,9 +468,9 @@ static bool njsVariable_getJsonNodeValue(njsBaton *baton, dpiJsonNode *node,
             return true;
         case DPI_ORACLE_TYPE_DATE:
         case DPI_ORACLE_TYPE_TIMESTAMP:
-            return njsBaton_createDate(baton, env, node->value->asDouble,
-                    value);
-            break;
+            NJS_CHECK_NAPI(env, napi_create_date(env, node->value->asDouble,
+                    value))
+            return true;
         case DPI_ORACLE_TYPE_BOOLEAN:
             NJS_CHECK_NAPI(env, napi_get_boolean(env, node->value->asBoolean,
                     value))
@@ -521,11 +521,13 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
             if (var->varTypeNum == DPI_ORACLE_TYPE_TIMESTAMP_LTZ ||
                     var->varTypeNum == DPI_ORACLE_TYPE_TIMESTAMP ||
                     var->varTypeNum == DPI_ORACLE_TYPE_TIMESTAMP_TZ ||
-                    var->varTypeNum == DPI_ORACLE_TYPE_DATE)
-                return njsBaton_createDate(baton, env, data->value.asDouble,
-                        value);
-            NJS_CHECK_NAPI(env, napi_create_double(env, data->value.asDouble,
-                    value))
+                    var->varTypeNum == DPI_ORACLE_TYPE_DATE) {
+                NJS_CHECK_NAPI(env, napi_create_date(env, data->value.asDouble,
+                        value))
+            } else {
+                NJS_CHECK_NAPI(env, napi_create_double(env,
+                        data->value.asDouble, value))
+            }
             break;
         case DPI_NATIVE_TYPE_BYTES:
             if (data->value.asBytes.length > var->maxSize)
@@ -1171,8 +1173,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     if (valueType == napi_object) {
 
         // handle binding dates
-        if (!njsBaton_isDate(baton, env, value, &check))
-            return false;
+        NJS_CHECK_NAPI(env, napi_is_date(env, value, &check))
         if (check) {
             if (var->varTypeNum != DPI_ORACLE_TYPE_TIMESTAMP &&
                     var->varTypeNum != DPI_ORACLE_TYPE_TIMESTAMP_TZ &&

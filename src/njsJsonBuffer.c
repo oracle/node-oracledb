@@ -205,8 +205,7 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
     if (valueType == napi_object) {
 
         // handle dates
-        if (!njsBaton_isDate(baton, env, value, &check))
-            return false;
+        NJS_CHECK_NAPI(env, napi_is_date(env, value, &check))
         if (check) {
             node->oracleTypeNum = DPI_ORACLE_TYPE_TIMESTAMP;
             node->nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;

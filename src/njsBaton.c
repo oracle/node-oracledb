@@ -180,22 +180,6 @@ bool njsBaton_create(njsBaton *baton, napi_env env, napi_callback_info info,
 
 
 //-----------------------------------------------------------------------------
-// njsBaton_createDate()
-//   Creates a JavaScript date object given its double representation.
-//-----------------------------------------------------------------------------
-bool njsBaton_createDate(njsBaton *baton, napi_env env, double value,
-        napi_value *dateObj)
-{
-    napi_value temp;
-
-    NJS_CHECK_NAPI(env, napi_create_double(env, value, &temp))
-    NJS_CHECK_NAPI(env, napi_new_instance(env, baton->jsDateConstructor, 1,
-            &temp, dateObj))
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsBaton_executeAsync()
 //   Callback used during asynchronous processing that takes place on a
 // separate thread. This simply calls the assigned routine directly, passing
@@ -786,8 +770,7 @@ bool njsBaton_getShardingKeyColumnsFromArg(njsBaton *baton, napi_env env,
             }
 
             // handle dates
-            if (!njsBaton_isDate(baton, env, element, &check))
-                return false;
+            NJS_CHECK_NAPI(env, napi_is_date(env, element, &check))
             if (check) {
                 shards[i].nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
                 shards[i].oracleTypeNum = DPI_ORACLE_TYPE_DATE;
@@ -1225,8 +1208,7 @@ bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value)
         return true;
 
     // dates can be bound directly
-    if (!njsBaton_isDate(baton, env, value, &check))
-        return false;
+    NJS_CHECK_NAPI(env, napi_is_date(env, value, &check))
     if (check)
         return true;
 
@@ -1254,29 +1236,6 @@ bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value)
         return true;
 
     return false;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton_isDate()
-//   Returns a boolean indicating if the value refers to a date or not. This
-// can be replaced by napi_is_date() once it is available in all LTS releases.
-//-----------------------------------------------------------------------------
-bool njsBaton_isDate(njsBaton *baton, napi_env env, napi_value value,
-        bool *isDate)
-{
-    napi_value isDateObj;
-
-    if (!baton->jsIsDateObj) {
-        NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-                baton->jsCallingObjRef, &baton->jsIsDateObj))
-        NJS_CHECK_NAPI(env, napi_get_named_property(env, baton->jsIsDateObj,
-                "_isDate", &baton->jsIsDateMethod))
-    }
-    NJS_CHECK_NAPI(env, napi_call_function(env, baton->jsIsDateObj,
-            baton->jsIsDateMethod, 1, &value, &isDateObj))
-    NJS_CHECK_NAPI(env, napi_get_value_bool(env, isDateObj, isDate))
-    return true;
 }
 
 
@@ -1403,13 +1362,6 @@ bool njsBaton_setErrorDPI(njsBaton *baton)
 //-----------------------------------------------------------------------------
 bool njsBaton_setJsValues(njsBaton *baton, napi_env env)
 {
-    napi_value global;
-
-    // acquire the Date constructor
-    NJS_CHECK_NAPI(env, napi_get_global(env, &global))
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, global, "Date",
-            &baton->jsDateConstructor))
-
     // acquire the LOB constructor
     NJS_CHECK_NAPI(env, napi_get_reference_value(env,
             baton->globals->jsLobConstructor, &baton->jsLobConstructor))

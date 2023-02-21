@@ -26,7 +26,7 @@
 #ifndef __NJSMODULE_H__
 #define __NJSMODULE_H__
 
-#define NAPI_VERSION 4
+#define NAPI_VERSION 6
 
 #include <node_api.h>
 #include <stdarg.h>
@@ -521,16 +521,7 @@ struct njsBaton {
     napi_ref jsCallingObjRef;
     napi_ref jsSubscriptionRef;
 
-    // values required to check if a value is a date; this is only used when
-    // binding data in connection.execute() and connection.executeMany() and
-    // when managing sharding keys (when getting a connection); this can be
-    // replaced with calls to napi_is_date() when it is available for all LTS
-    // releases
-    napi_value jsIsDateObj;
-    napi_value jsIsDateMethod;
-
     // constructors
-    napi_value jsDateConstructor;
     napi_value jsLobConstructor;
     napi_value jsResultSetConstructor;
     napi_value jsBaseDbObjectConstructor;
@@ -816,8 +807,6 @@ bool njsBaton_commonConnectProcessArgs(njsBaton *baton, napi_env env,
         napi_value *args);
 bool njsBaton_create(njsBaton *baton, napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args);
-bool njsBaton_createDate(njsBaton *baton, napi_env env, double value,
-        napi_value *dateObj);
 void njsBaton_free(njsBaton *baton, napi_env env);
 bool njsBaton_getBoolFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, bool *result, bool *found);

@@ -1310,8 +1310,7 @@ static bool njsConnection_getBindInfoFromValue(njsBaton *baton,
     if (valueType == napi_object) {
 
         // dates can be bound
-        if (!njsBaton_isDate(baton, env, value, &check))
-            return false;
+        NJS_CHECK_NAPI(env, napi_is_date(env, value, &check))
         if (check) {
             *bindType = NJS_DATATYPE_DATE;
             return true;
