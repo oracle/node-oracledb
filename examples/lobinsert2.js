@@ -61,7 +61,7 @@ async function run() {
   let connection;
 
   try {
-    const connection = await oracledb.getConnection(dbConfig);
+    connection = await oracledb.getConnection(dbConfig);
 
     await demoSetup.setupLobs(connection);  // create the demo table
 
