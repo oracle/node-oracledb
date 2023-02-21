@@ -26,10 +26,10 @@
 #include "njsModule.h"
 
 // class methods
-static NJS_NAPI_METHOD(njsAqQueue_deqMany);
-static NJS_NAPI_METHOD(njsAqQueue_deqOne);
-static NJS_NAPI_METHOD(njsAqQueue_enqMany);
-static NJS_NAPI_METHOD(njsAqQueue_enqOne);
+NJS_NAPI_METHOD_DECL_ASYNC(njsAqQueue_deqMany);
+NJS_NAPI_METHOD_DECL_ASYNC(njsAqQueue_deqOne);
+NJS_NAPI_METHOD_DECL_ASYNC(njsAqQueue_enqMany);
+NJS_NAPI_METHOD_DECL_ASYNC(njsAqQueue_enqOne);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsAqQueue_deqManyAsync);
@@ -40,11 +40,6 @@ static NJS_ASYNC_METHOD(njsAqQueue_enqOneAsync);
 // post asynchronous methods
 static NJS_ASYNC_POST_METHOD(njsAqQueue_deqManyPostAsync);
 static NJS_ASYNC_POST_METHOD(njsAqQueue_deqOnePostAsync);
-
-// processing arguments methods
-static NJS_PROCESS_ARGS_METHOD(njsAqQueue_deqManyProcessArgs);
-static NJS_PROCESS_ARGS_METHOD(njsAqQueue_enqManyProcessArgs);
-static NJS_PROCESS_ARGS_METHOD(njsAqQueue_enqOneProcessArgs);
 
 // finalize
 static NJS_NAPI_FINALIZE(njsAqQueue_finalize);
@@ -363,19 +358,12 @@ bool njsAqQueue_createFromHandle(njsBaton *baton, napi_env env,
 // PARAMETERS
 //   - number specifying the maximum number of messages to dequeue
 //-----------------------------------------------------------------------------
-static napi_value njsAqQueue_deqMany(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsAqQueue_deqMany, 1, NULL)
 {
-    napi_value args[1];
-    njsBaton *baton;
-
-    if (!njsUtils_createBaton(env, info, 1, args, &baton))
-        return NULL;
-    if (!njsAqQueue_deqManyProcessArgs(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0],
+            &baton->numMsgProps))
     return njsBaton_queueWork(baton, env, "DeqMany", njsAqQueue_deqManyAsync,
-            njsAqQueue_deqManyPostAsync);
+            njsAqQueue_deqManyPostAsync, returnValue);
 }
 
 
@@ -423,36 +411,15 @@ static bool njsAqQueue_deqManyPostAsync(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsAqQueue_deqManyProcessArgs()
-//   Processes the arguments provided by the caller and place them on the
-// baton.
-//-----------------------------------------------------------------------------
-static bool njsAqQueue_deqManyProcessArgs(njsBaton *baton,
-        napi_env env, napi_value *args)
-{
-    if (!njsUtils_getUnsignedIntArg(env, args, 0, &baton->numMsgProps))
-        return false;
-    if (baton->numMsgProps == 0)
-        return njsUtils_throwError(env, errInvalidParameterValue, 1);
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsAqQueue_deqOne()
 //   Dequeue a message from an AQ queue.
 //
 // PARAMETERS - NONE
 //-----------------------------------------------------------------------------
-static napi_value njsAqQueue_deqOne(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsAqQueue_deqOne, 0, NULL)
 {
-    njsBaton *baton;
-
-    if (!njsUtils_createBaton(env, info, 0, NULL, &baton))
-        return NULL;
     return njsBaton_queueWork(baton, env, "DeqOne", njsAqQueue_deqOneAsync,
-            njsAqQueue_deqOnePostAsync);
+            njsAqQueue_deqOnePostAsync, returnValue);
 }
 
 
@@ -497,19 +464,25 @@ static bool njsAqQueue_deqOnePostAsync(njsBaton *baton, napi_env env,
 // PARAMETERS
 //   - array of objects containing payload and options
 //-----------------------------------------------------------------------------
-static napi_value njsAqQueue_enqMany(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsAqQueue_enqMany, 1, NULL)
 {
-    napi_value args[1];
-    njsBaton *baton;
+    njsAqQueue *queue = (njsAqQueue*) baton->callingInstance;
+    napi_value message;
+    uint32_t i;
 
-    if (!njsUtils_createBaton(env, info, 1, args, &baton))
-        return NULL;
-    if (!njsAqQueue_enqManyProcessArgs(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
+    NJS_CHECK_NAPI(env, napi_get_array_length(env, args[0],
+            &baton->numMsgProps))
+    baton->msgProps = calloc(baton->numMsgProps, sizeof(dpiMsgProps*));
+    if (!baton->msgProps)
+        return njsBaton_setError(baton, errInsufficientMemory);
+    for (i = 0; i < baton->numMsgProps; i++) {
+        NJS_CHECK_NAPI(env, napi_get_element(env, args[0], i, &message))
+        if (!njsAqQueue_createMessage(baton, queue, env, message,
+                &baton->msgProps[i]))
+            return false;
     }
     return njsBaton_queueWork(baton, env, "EnqMany", njsAqQueue_enqManyAsync,
-            NULL);
+            NULL, returnValue);
 }
 
 
@@ -530,59 +503,21 @@ static bool njsAqQueue_enqManyAsync(njsBaton *baton)
 
 
 //-----------------------------------------------------------------------------
-// njsAqQueue_enqManyProcessArgs()
-//   Processes the arguments provided by the caller and place them on the
-// baton.
-//-----------------------------------------------------------------------------
-static bool njsAqQueue_enqManyProcessArgs(njsBaton *baton,
-        napi_env env, napi_value *args)
-{
-    njsAqQueue *queue = (njsAqQueue*) baton->callingInstance;
-    napi_value message;
-    uint32_t i;
-    bool check;
-
-    NJS_CHECK_NAPI(env, napi_is_array(env, args[0], &check))
-    if (!check)
-        return njsUtils_throwError(env, errInvalidParameterValue, 1);
-    NJS_CHECK_NAPI(env, napi_get_array_length(env, args[0],
-            &baton->numMsgProps))
-    if (baton->numMsgProps == 0)
-        return njsUtils_throwError(env, errInvalidParameterValue, 1);
-    baton->msgProps = calloc(baton->numMsgProps, sizeof(dpiMsgProps*));
-    if (!baton->msgProps)
-        return njsBaton_setError(baton, errInsufficientMemory);
-    for (i = 0; i < baton->numMsgProps; i++) {
-        NJS_CHECK_NAPI(env, napi_get_element(env, args[0], i, &message))
-        if (!njsAqQueue_createMessage(baton, queue, env, message,
-                &baton->msgProps[i]))
-            return false;
-    }
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsAqQueue_enqOne()
 //   Enqueue a message into an AQ queue.
 //
 // PARAMETERS
 //   - object containing payload and message properties
 //-----------------------------------------------------------------------------
-static napi_value njsAqQueue_enqOne(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsAqQueue_enqOne, 1, NULL)
 {
-    napi_value args[1];
-    njsBaton *baton;
+    njsAqQueue *queue = (njsAqQueue*) baton->callingInstance;
 
-    if (!njsUtils_createBaton(env, info, 1, args, &baton))
-        return NULL;
-    if (!njsAqQueue_enqOneProcessArgs(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
+    if (!njsAqQueue_createMessage(baton, queue, env, args[0],
+            &baton->dpiMsgPropsHandle))
+        return false;
     return njsBaton_queueWork(baton, env, "EnqOne", njsAqQueue_enqOneAsync,
-            NULL);
+            NULL, returnValue);
 }
 
 
@@ -596,24 +531,6 @@ static bool njsAqQueue_enqOneAsync(njsBaton *baton)
 
     if (dpiQueue_enqOne(queue->handle, baton->dpiMsgPropsHandle) < 0)
         return njsBaton_setErrorDPI(baton);
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsAqQueue_enqOneProcessArgs()
-//   Processes the arguments provided by the caller and place them on the
-// baton.
-//-----------------------------------------------------------------------------
-static bool njsAqQueue_enqOneProcessArgs(njsBaton *baton,
-        napi_env env, napi_value *args)
-{
-    njsAqQueue *queue = (njsAqQueue*) baton->callingInstance;
-
-    if (!njsAqQueue_createMessage(baton, queue, env, args[0],
-            &baton->dpiMsgPropsHandle))
-        return false;
 
     return true;
 }

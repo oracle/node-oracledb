@@ -1047,7 +1047,7 @@ static bool njsVariable_setFromString(njsVariable *var, uint32_t pos,
     if (napi_get_value_string_utf8(env, value, buffer, bufferLength + 1,
             &bufferLength) != napi_ok) {
         free(buffer);
-        return njsUtils_genericThrowError(env);
+        return njsUtils_genericThrowError(env, __FILE__, __LINE__);
     }
 
     // write it to the variable

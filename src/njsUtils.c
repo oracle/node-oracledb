@@ -159,7 +159,7 @@ napi_value njsUtils_convertToBoolean(napi_env env, bool value)
     napi_value jsValue;
 
     if (napi_get_boolean(env, value, &jsValue) != napi_ok) {
-        njsUtils_genericThrowError(env);
+        njsUtils_genericThrowError(env, __FILE__, __LINE__);
         return NULL;
     }
 
@@ -176,7 +176,7 @@ napi_value njsUtils_convertToInt(napi_env env, int32_t value)
     napi_value jsValue;
 
     if (napi_create_int32(env, value, &jsValue) != napi_ok) {
-        njsUtils_genericThrowError(env);
+        njsUtils_genericThrowError(env, __FILE__, __LINE__);
         return NULL;
     }
 
@@ -195,7 +195,7 @@ napi_value njsUtils_convertToString(napi_env env, const char *value,
 
     if (napi_create_string_utf8(env, value, valueLength,
             &jsValue) != napi_ok) {
-        njsUtils_genericThrowError(env);
+        njsUtils_genericThrowError(env, __FILE__, __LINE__);
         return NULL;
     }
 
@@ -212,7 +212,7 @@ napi_value njsUtils_convertToUnsignedInt(napi_env env, uint32_t value)
     napi_value jsValue;
 
     if (napi_create_uint32(env, value, &jsValue) != napi_ok) {
-        njsUtils_genericThrowError(env);
+        njsUtils_genericThrowError(env, __FILE__, __LINE__);
         return NULL;
     }
 
@@ -231,16 +231,16 @@ napi_value njsUtils_convertToUnsignedIntArray(napi_env env, uint32_t numValues,
     uint32_t i;
 
     if (napi_create_array_with_length(env, numValues, &jsValue) != napi_ok) {
-        njsUtils_genericThrowError(env);
+        njsUtils_genericThrowError(env, __FILE__, __LINE__);
         return NULL;
     }
     for (i = 0; i < numValues; i++) {
         if (napi_create_uint32(env, values[i], &temp) != napi_ok) {
-            njsUtils_genericThrowError(env);
+            njsUtils_genericThrowError(env, __FILE__, __LINE__);
             return NULL;
         }
         if (napi_set_element(env, jsValue, i, temp) != napi_ok) {
-            njsUtils_genericThrowError(env);
+            njsUtils_genericThrowError(env, __FILE__, __LINE__);
             return NULL;
         }
     }
@@ -321,16 +321,10 @@ bool njsUtils_copyStringFromJS(napi_env env, napi_value value, char **result,
 // If this fails for some reason, an exception is thrown.
 //-----------------------------------------------------------------------------
 bool njsUtils_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton)
+        size_t numArgs, napi_value *args, const njsClassDef *classDef,
+        njsBaton **baton)
 {
     njsBaton *tempBaton;
-    napi_value callback;
-
-    // if only one argument is being passed it is always expected to be the
-    // callback; rather than force the caller to provide the memory for this
-    // allow for it to be ignored
-    if (numArgs == 1 && !args)
-        args = &callback;
 
     // allocate and zero memory
     tempBaton = calloc(1, sizeof(njsBaton));
@@ -340,38 +334,12 @@ bool njsUtils_createBaton(napi_env env, napi_callback_info info,
     }
 
     // perform common checks and populate common attributes in the baton
-    if (!njsBaton_create(tempBaton, env, info, numArgs, args)) {
+    if (!njsBaton_create(tempBaton, env, info, numArgs, args, classDef)) {
         njsBaton_free(tempBaton, env);
         return false;
     }
 
     *baton = tempBaton;
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_genericAttach()
-//   Generic method for attaching a specified structure to a JS instance.
-//-----------------------------------------------------------------------------
-bool njsUtils_genericAttach(napi_env env, napi_callback_info info,
-        const njsClassDef *classDef)
-{
-    size_t numArgs = 0;
-    napi_value obj;
-    void *data;
-
-    if (napi_get_cb_info(env, info, &numArgs, NULL, &obj, NULL) != napi_ok)
-        return njsUtils_genericThrowError(env);
-    data = calloc(1, classDef->structSize);
-    if (!data)
-        return njsUtils_throwError(env, errInsufficientMemory);
-    if (napi_wrap(env, obj, data, classDef->finalizeFn, NULL,
-            NULL) != napi_ok) {
-        free(data);
-        return njsUtils_genericThrowError(env);
-    }
-
     return true;
 }
 
@@ -408,7 +376,7 @@ bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
     if (napi_wrap(env, *instanceObj, data, classDef->finalizeFn, NULL,
             NULL) != napi_ok) {
         free(data);
-        return njsUtils_genericThrowError(env);
+        return njsUtils_genericThrowError(env, __FILE__, __LINE__);
     }
 
     // define properties on instance, if applicable
@@ -430,9 +398,11 @@ bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
 // throws an error if one is not already pending. Returns false as a convenience
 // to the caller.
 //-----------------------------------------------------------------------------
-bool njsUtils_genericThrowError(napi_env env)
+bool njsUtils_genericThrowError(napi_env env, const char *fileName,
+        int lineNum)
 {
     const napi_extended_error_info *errorInfo;
+    char internalError[1024];
     const char *errorMessage;
     bool isPending;
 
@@ -441,8 +411,11 @@ bool njsUtils_genericThrowError(napi_env env)
     if (!isPending) {
         errorMessage = errorInfo->error_message;
         if (!errorMessage)
-            errorMessage = "no error message?";
-        napi_throw_error(env, NULL, errorMessage);
+            errorMessage = "no error message";
+        (void) snprintf(internalError, sizeof(internalError),
+                "internal error in file %s, line %d (%s)", fileName, lineNum,
+                errorMessage);
+        napi_throw_error(env, NULL, internalError);
     }
     return false;
 }
@@ -545,7 +518,7 @@ napi_value njsUtils_getNull(napi_env env)
     napi_value result;
 
     if (napi_get_null(env, &result) != napi_ok) {
-        njsUtils_genericThrowError(env);
+        njsUtils_genericThrowError(env, __FILE__, __LINE__);
         return NULL;
     }
 
@@ -793,7 +766,8 @@ bool njsUtils_throwErrorDPI(napi_env env, njsModuleGlobals *globals)
 //-----------------------------------------------------------------------------
 bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, njsModuleGlobals **globals,
-        napi_value *callingObj, njsBaseInstance **instance)
+        napi_value *callingObj, const njsClassDef *classDef,
+        njsBaseInstance **instance)
 {
     napi_value localCallingObj;
     size_t actualArgs;
@@ -810,8 +784,23 @@ bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
     if (callingObj)
         *callingObj = localCallingObj;
     if (instance) {
-        NJS_CHECK_NAPI(env, napi_unwrap(env, localCallingObj,
-                (void**) instance))
+        if (classDef == &njsClassDefBaseDbObject) {
+            if (!njsDbObject_getInstance(*globals, env, localCallingObj,
+                    (njsDbObject**) instance))
+                return false;
+        } else if (classDef) {
+            *instance = calloc(1, classDef->structSize);
+            if (!*instance)
+                return njsUtils_throwError(env, errInsufficientMemory);
+            if (napi_wrap(env, localCallingObj, *instance,
+                    classDef->finalizeFn, NULL, NULL) != napi_ok) {
+                free(*instance);
+                return njsUtils_genericThrowError(env, __FILE__, __LINE__);
+            }
+        } else {
+            NJS_CHECK_NAPI(env, napi_unwrap(env, localCallingObj,
+                    (void**) instance))
+        }
     }
     return true;
 }
@@ -824,7 +813,8 @@ bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
 bool njsUtils_validateGetter(napi_env env, napi_callback_info info,
         njsModuleGlobals **globals, njsBaseInstance **instance)
 {
-    return njsUtils_validateArgs(env, info, 0, NULL, globals, NULL, instance);
+    return njsUtils_validateArgs(env, info, 0, NULL, globals, NULL, NULL,
+            instance);
 }
 
 
@@ -837,7 +827,8 @@ bool njsUtils_validateSetter(napi_env env, napi_callback_info info,
         njsModuleGlobals **globals, njsBaseInstance **instance,
         napi_value *value)
 {
-    return njsUtils_validateArgs(env, info, 1, value, NULL, NULL, instance);
+    return njsUtils_validateArgs(env, info, 1, value, NULL, NULL, NULL,
+            instance);
 }
 
 

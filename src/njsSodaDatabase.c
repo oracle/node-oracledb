@@ -26,10 +26,10 @@
 #include "njsModule.h"
 
 // class methods
-static NJS_NAPI_METHOD(njsSodaDatabase_createCollection);
-static NJS_NAPI_METHOD(njsSodaDatabase_createDocument);
-static NJS_NAPI_METHOD(njsSodaDatabase_getCollectionNames);
-static NJS_NAPI_METHOD(njsSodaDatabase_openCollection);
+NJS_NAPI_METHOD_DECL_ASYNC(njsSodaDatabase_createCollection);
+NJS_NAPI_METHOD_DECL_SYNC(njsSodaDatabase_createDocument);
+NJS_NAPI_METHOD_DECL_ASYNC(njsSodaDatabase_getCollectionNames);
+NJS_NAPI_METHOD_DECL_ASYNC(njsSodaDatabase_openCollection);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsSodaDatabase_createCollectionAsync);
@@ -40,11 +40,6 @@ static NJS_ASYNC_METHOD(njsSodaDatabase_openCollectionAsync);
 static NJS_ASYNC_POST_METHOD(njsSodaDatabase_createCollectionPostAsync);
 static NJS_ASYNC_POST_METHOD(njsSodaDatabase_getCollectionNamesPostAsync);
 static NJS_ASYNC_POST_METHOD(njsSodaDatabase_openCollectionPostAsync);
-
-// processing arguments methods
-static NJS_PROCESS_ARGS_METHOD(njsSodaDatabase_createCollectionProcessArgs);
-static NJS_PROCESS_ARGS_METHOD(njsSodaDatabase_getCollectionNamesProcessArgs);
-static NJS_PROCESS_ARGS_METHOD(njsSodaDatabase_openCollectionProcessArgs);
 
 // finalize
 static NJS_NAPI_FINALIZE(njsSodaDatabase_finalize);
@@ -77,21 +72,21 @@ const njsClassDef njsClassDefSodaDatabase = {
 //   - name
 //   - options
 //-----------------------------------------------------------------------------
-static napi_value njsSodaDatabase_createCollection(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaDatabase_createCollection, 2, NULL)
 {
-    napi_value args[2];
-    njsBaton *baton;
-
-    if (!njsUtils_createBaton(env, info, 2, args, &baton))
-        return NULL;
-    if (!njsSodaDatabase_createCollectionProcessArgs(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
+    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+        return false;
+    if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
+        return false;
+    if (!njsBaton_getStringFromArg(baton, env, args, 1, "metaData",
+            &baton->sodaMetaData, &baton->sodaMetaDataLength, NULL))
+        return false;
+    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1, "mode",
+            &baton->createCollectionMode, NULL))
+        return false;
     return njsBaton_queueWork(baton, env, "CreateCollection",
             njsSodaDatabase_createCollectionAsync,
-            njsSodaDatabase_createCollectionPostAsync);
+            njsSodaDatabase_createCollectionPostAsync, returnValue);
 }
 
 
@@ -131,29 +126,6 @@ static bool njsSodaDatabase_createCollectionPostAsync(njsBaton *baton,
 
 
 //-----------------------------------------------------------------------------
-// njsSodaDatabase_createCollectionProcessArgs()
-//   Processes the arguments provided by the caller and place them on the
-// baton.
-//-----------------------------------------------------------------------------
-static bool njsSodaDatabase_createCollectionProcessArgs(njsBaton *baton,
-        napi_env env, napi_value *args)
-{
-    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
-        return false;
-    if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
-        return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 1, "metaData",
-            &baton->sodaMetaData, &baton->sodaMetaDataLength, NULL))
-        return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1, "mode",
-            &baton->createCollectionMode, NULL))
-        return false;
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsSodaDatabase_createDocument()
 //   Creates a SODA document with the specified content and attributes.
 //
@@ -161,41 +133,30 @@ static bool njsSodaDatabase_createCollectionProcessArgs(njsBaton *baton,
 //   - content
 //   - options
 //-----------------------------------------------------------------------------
-static napi_value njsSodaDatabase_createDocument(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDatabase_createDocument, 2, NULL)
 {
     size_t contentLength, keyLength = 0, mediaTypeLength = 0;
+    njsSodaDatabase *db = (njsSodaDatabase*) callingInstance;
     char *key = NULL, *mediaType = NULL;
-    napi_value args[2], docObj;
-    njsModuleGlobals *globals;
     dpiSodaDoc *docHandle;
-    njsSodaDatabase *db;
     void *content;
     int dpiStatus;
 
-    // verify that the right number of arguments have been passed
-    if (!njsUtils_validateArgs(env, info, 2, args, &globals, NULL,
-            (njsBaseInstance**) &db))
-        return NULL;
-
     // acquire the content from the buffer
-    if (napi_get_buffer_info(env, args[0], &content,
-            &contentLength) != napi_ok) {
-        njsUtils_genericThrowError(env);
-        return NULL;
-    }
+    NJS_CHECK_NAPI(env, napi_get_buffer_info(env, args[0], &content,
+            &contentLength))
 
     // acquire the key value, if one was specified
     if (!njsUtils_getStringFromArg(env, args, 1, "key", &key, &keyLength,
             NULL, NULL))
-        return NULL;
+        return false;
 
     // acquire the mediaType value, if one was specified
     if (!njsUtils_getStringFromArg(env, args, 1, "mediaType", &mediaType,
             &mediaTypeLength, NULL, NULL)) {
         if (key)
             free(key);
-        return NULL;
+        return false;
     }
 
     // create ODPI-C document
@@ -206,18 +167,17 @@ static napi_value njsSodaDatabase_createDocument(napi_env env,
         free(key);
     if (mediaType)
         free(mediaType);
-    if (dpiStatus < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
+    if (dpiStatus < 0)
+        return njsUtils_throwErrorDPI(env, globals);
 
     // return wrapped document
-    if (!njsSodaDocument_createFromHandle(env, docHandle, globals, &docObj)) {
+    if (!njsSodaDocument_createFromHandle(env, docHandle, globals,
+            returnValue)) {
         dpiSodaDoc_release(docHandle);
-        return NULL;
+        return false;
     }
 
-    return docObj;
+    return true;
 }
 
 
@@ -245,22 +205,20 @@ static void njsSodaDatabase_finalize(napi_env env, void *finalizeData,
 // PARAMETERS
 //   - options
 //-----------------------------------------------------------------------------
-static napi_value njsSodaDatabase_getCollectionNames(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaDatabase_getCollectionNames, 1, NULL)
 {
-    napi_value args[1];
-    njsBaton *baton;
-
-    if (!njsUtils_createBaton(env, info, 1, args, &baton))
-        return NULL;
-    if (!njsSodaDatabase_getCollectionNamesProcessArgs(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
+    baton->sodaCollNames = calloc(1, sizeof(dpiSodaCollNames));
+    if (!baton->sodaCollNames)
+        return njsBaton_setError(baton, errInsufficientMemory);
+    if (!njsBaton_getStringFromArg(baton, env, args, 0, "startsWith",
+            &baton->startsWith, &baton->startsWithLength, NULL))
+        return false;
+    if (!njsBaton_getIntFromArg(baton, env, args, 0, "limit", &baton->limit,
+            NULL))
+        return false;
     return njsBaton_queueWork(baton, env, "GetCollectionNames",
             njsSodaDatabase_getCollectionNamesAsync,
-            njsSodaDatabase_getCollectionNamesPostAsync);
-    return NULL;
+            njsSodaDatabase_getCollectionNamesPostAsync, returnValue);
 }
 
 
@@ -324,28 +282,6 @@ static bool njsSodaDatabase_getCollectionNamesPostAsync(njsBaton *baton,
 
 
 //-----------------------------------------------------------------------------
-// njsSodaDatabase_getCollectionNamesProcessArgs()
-//   Processes the arguments provided by the caller and place them on the
-// baton.
-//-----------------------------------------------------------------------------
-static bool njsSodaDatabase_getCollectionNamesProcessArgs(njsBaton *baton,
-        napi_env env, napi_value *args)
-{
-    baton->sodaCollNames = calloc(1, sizeof(dpiSodaCollNames));
-    if (!baton->sodaCollNames)
-        return njsBaton_setError(baton, errInsufficientMemory);
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "startsWith",
-            &baton->startsWith, &baton->startsWithLength, NULL))
-        return false;
-    if (!njsBaton_getIntFromArg(baton, env, args, 0, "limit", &baton->limit,
-            NULL))
-        return false;
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsSodaDatabase_createFromHandle()
 //   Creates a new SODA database object given the ODPI-C handle.
 //-----------------------------------------------------------------------------
@@ -380,21 +316,15 @@ bool njsSodaDatabase_createFromHandle(napi_env env, napi_value connObj,
 // PARAMETERS
 //   - name
 //-----------------------------------------------------------------------------
-static napi_value njsSodaDatabase_openCollection(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaDatabase_openCollection, 1, NULL)
 {
-    napi_value args[1];
-    njsBaton *baton;
-
-    if (!njsUtils_createBaton(env, info, 1, args, &baton))
-        return NULL;
-    if (!njsSodaDatabase_openCollectionProcessArgs(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
+    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
+        return false;
+    if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
+        return false;
     return njsBaton_queueWork(baton, env, "OpenCollection",
             njsSodaDatabase_openCollectionAsync,
-            njsSodaDatabase_openCollectionPostAsync);
+            njsSodaDatabase_openCollectionPostAsync, returnValue);
 }
 
 
@@ -426,22 +356,5 @@ static bool njsSodaDatabase_openCollectionPostAsync(njsBaton *baton,
 {
     if (baton->dpiSodaCollHandle)
         return njsSodaCollection_newFromBaton(baton, env, result);
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsSodaDatabase_openCollectionProcessArgs()
-//   Processes the arguments provided by the caller and place them on the
-// baton.
-//-----------------------------------------------------------------------------
-static bool njsSodaDatabase_openCollectionProcessArgs(njsBaton *baton,
-        napi_env env, napi_value *args)
-{
-    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
-        return false;
-    if (!njsUtils_getStringArg(env, args, 0, &baton->name, &baton->nameLength))
-        return false;
-
     return true;
 }

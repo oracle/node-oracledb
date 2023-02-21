@@ -26,8 +26,8 @@
 #include "njsModule.h"
 
 // class methods
-static NJS_NAPI_METHOD(njsResultSet_close);
-static NJS_NAPI_METHOD(njsResultSet_getRows);
+NJS_NAPI_METHOD_DECL_ASYNC(njsResultSet_close);
+NJS_NAPI_METHOD_DECL_ASYNC(njsResultSet_getRows);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsResultSet_closeAsync);
@@ -35,9 +35,6 @@ static NJS_ASYNC_METHOD(njsResultSet_getRowsAsync);
 
 // post asynchronous methods
 static NJS_ASYNC_POST_METHOD(njsResultSet_getRowsPostAsync);
-
-// processing arguments methods
-static NJS_PROCESS_ARGS_METHOD(njsResultSet_getRowsProcessArgs);
 
 // getters
 static NJS_NAPI_GETTER(njsResultSet_getFetchArraySize);
@@ -69,12 +66,25 @@ const njsClassDef njsClassDefResultSet = {
 };
 
 // other methods used internally
-static bool njsResultSet_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton);
+static bool njsResultSet_check(njsResultSet *rs, njsBaton *baton);
 static bool njsResultSet_getRowsHelper(njsResultSet *rs, njsBaton *baton,
         bool *moreRows);
 static bool njsResultSet_makeUniqueColumnNames(napi_env env, njsBaton *baton,
         njsVariable *queryVars, uint32_t numQueryVars);
+
+//-----------------------------------------------------------------------------
+// njsResultSet_check()
+//   Checks the result set to ensure it is valid and then marks the current
+// baton as the active one (to prevent concurrent access).
+//-----------------------------------------------------------------------------
+static bool njsResultSet_check(njsResultSet *rs, njsBaton *baton)
+{
+    if (!rs->handle || !rs->conn->handle)
+        return njsBaton_setError(baton, errInvalidResultSet);
+    rs->activeBaton = baton;
+    return true;
+}
+
 
 //-----------------------------------------------------------------------------
 // njsResultSet_close()
@@ -82,18 +92,16 @@ static bool njsResultSet_makeUniqueColumnNames(napi_env env, njsBaton *baton,
 //
 // PARAMETERS - NONE
 //-----------------------------------------------------------------------------
-static napi_value njsResultSet_close(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsResultSet_close, 0, NULL)
 {
-    njsResultSet *rs;
-    njsBaton *baton;
+    njsResultSet *rs = (njsResultSet*) baton->callingInstance;
 
-    if (!njsResultSet_createBaton(env, info, 0, NULL, &baton))
-        return NULL;
-    rs = (njsResultSet*) baton->callingInstance;
+    if (!njsResultSet_check(rs, baton))
+        return false;
     baton->dpiStmtHandle = rs->handle;
     rs->handle = NULL;
     return njsBaton_queueWork(baton, env, "Close", njsResultSet_closeAsync,
-            NULL);
+            NULL, returnValue);
 }
 
 
@@ -119,33 +127,6 @@ static bool njsResultSet_closeAsync(njsBaton *baton)
         rs->numQueryVars = 0;
     }
 
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsResultSet_createBaton()
-//   Create the baton used for asynchronous methods and initialize all
-// values. If this fails for some reason, an exception is thrown.
-//-----------------------------------------------------------------------------
-bool njsResultSet_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton)
-{
-    njsBaton *tempBaton;
-    njsResultSet *rs;
-
-    if (!njsUtils_createBaton(env, info, numArgs, args, &tempBaton))
-        return false;
-    rs = (njsResultSet*) tempBaton->callingInstance;
-    if (!rs->handle || !rs->conn->handle) {
-        njsBaton_setError(tempBaton, errInvalidResultSet);
-        njsBaton_reportError(tempBaton, env);
-        return false;
-    }
-
-    rs->activeBaton = tempBaton;
-
-    *baton = tempBaton;
     return true;
 }
 
@@ -233,19 +214,34 @@ static napi_value njsResultSet_getNestedCursorIndices(napi_env env,
 //   - should the result set be closed after the fetch has completed?
 //   - should the result set be closed after all rows have been fetched?
 //-----------------------------------------------------------------------------
-static napi_value njsResultSet_getRows(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsResultSet_getRows, 3, NULL)
 {
-    napi_value args[3];
-    njsBaton *baton;
+    njsResultSet *rs = (njsResultSet*) baton->callingInstance;
 
-    if (!njsResultSet_createBaton(env, info, 3, args, &baton))
-        return NULL;
-    if (!njsResultSet_getRowsProcessArgs(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
+    if (!njsResultSet_check(rs, baton))
+        return false;
+
+    // copy items from the global settings class to the baton since they might
+    // change after the asynchronous function begins
+    if (!njsBaton_getGlobalSettings(baton, env,
+            NJS_GLOBAL_ATTR_FETCH_AS_BUFFER,
+            NJS_GLOBAL_ATTR_FETCH_AS_STRING,
+            0))
+        return false;
+
+    // check options
+    if (!njsUtils_getUnsignedIntArg(env, args, 0, &baton->fetchArraySize))
+        return false;
+    if (baton->fetchArraySize == 0)
+        return njsUtils_throwError(env, errInvalidParameterValue, 1);
+    if (!njsUtils_getBoolArg(env, args, 1, &baton->closeOnFetch))
+        return false;
+    if (!njsUtils_getBoolArg(env, args, 2, &baton->closeOnAllRowsFetched))
+        return false;
+    baton->outFormat = rs->outFormat;
+
     return njsBaton_queueWork(baton, env, "GetRows", njsResultSet_getRowsAsync,
-            njsResultSet_getRowsPostAsync);
+            njsResultSet_getRowsPostAsync, returnValue);
 }
 
 
@@ -408,39 +404,6 @@ static bool njsResultSet_getRowsHelper(njsResultSet *rs, njsBaton *baton,
     }
     return njsVariable_process(rs->queryVars, rs->numQueryVars,
             baton->rowsFetched, baton);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsResultSet_getRowsProcessArgs()
-//   Processes the arguments provided by the caller and place them on the
-// baton.
-//-----------------------------------------------------------------------------
-static bool njsResultSet_getRowsProcessArgs(njsBaton *baton, napi_env env,
-        napi_value *args)
-{
-    njsResultSet *rs = (njsResultSet*) baton->callingInstance;
-
-    // copy items from the global settings class to the baton since they might
-    // change after the asynchronous function begins
-    if (!njsBaton_getGlobalSettings(baton, env,
-            NJS_GLOBAL_ATTR_FETCH_AS_BUFFER,
-            NJS_GLOBAL_ATTR_FETCH_AS_STRING,
-            0))
-        return false;
-
-    // check options
-    if (!njsUtils_getUnsignedIntArg(env, args, 0, &baton->fetchArraySize))
-        return false;
-    if (baton->fetchArraySize == 0)
-        return njsUtils_throwError(env, errInvalidParameterValue, 1);
-    if (!njsUtils_getBoolArg(env, args, 1, &baton->closeOnFetch))
-        return false;
-    if (!njsUtils_getBoolArg(env, args, 2, &baton->closeOnAllRowsFetched))
-        return false;
-    baton->outFormat = rs->outFormat;
-
-    return true;
 }
 
 

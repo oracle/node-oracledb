@@ -26,8 +26,8 @@
 #include "njsModule.h"
 
 // class methods
-static NJS_NAPI_METHOD(njsSodaDocument_getContentAsBuffer);
-static NJS_NAPI_METHOD(njsSodaDocument_getContentAsString);
+NJS_NAPI_METHOD_DECL_SYNC(njsSodaDocument_getContentAsBuffer);
+NJS_NAPI_METHOD_DECL_SYNC(njsSodaDocument_getContentAsString);
 
 // getters
 static NJS_NAPI_GETTER(njsSodaDocument_getCreatedOn);
@@ -139,7 +139,7 @@ static napi_value njsSodaDocument_genericGetter(napi_env env,
         status = napi_create_string_utf8(env, value, valueLength, &result);
     }
     if (status != napi_ok) {
-        njsUtils_genericThrowError(env);
+        njsUtils_genericThrowError(env, __FILE__, __LINE__);
         return NULL;
     }
 
@@ -151,30 +151,19 @@ static napi_value njsSodaDocument_genericGetter(napi_env env,
 // njsSodaDocument_getContentAsBuffer()
 //   Returns the contents of the SODA document as a buffer.
 //-----------------------------------------------------------------------------
-static napi_value njsSodaDocument_getContentAsBuffer(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDocument_getContentAsBuffer, 0, NULL)
 {
+    njsSodaDocument *doc = (njsSodaDocument*) callingInstance;
     const char *value, *encoding;
-    njsModuleGlobals *globals;
-    njsSodaDocument *doc;
     uint32_t valueLength;
-    napi_value result;
 
-    if (!njsUtils_validateArgs(env, info, 0, NULL, &globals, NULL,
-            (njsBaseInstance**) &doc))
-        return NULL;
     if (dpiSodaDoc_getContent(doc->handle, &value, &valueLength,
-            &encoding) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
-    if (napi_create_buffer_copy(env, valueLength, value, NULL,
-            &result) != napi_ok) {
-        njsUtils_genericThrowError(env);
-        return NULL;
-    }
+            &encoding) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_buffer_copy(env, valueLength, value, NULL,
+            returnValue))
 
-    return result;
+    return true;
 }
 
 
@@ -182,38 +171,26 @@ static napi_value njsSodaDocument_getContentAsBuffer(napi_env env,
 // njsSodaDocument_getContentAsString()
 //   Returns the contents of the SODA document as a string.
 //-----------------------------------------------------------------------------
-static napi_value njsSodaDocument_getContentAsString(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDocument_getContentAsString, 0, NULL)
 {
+    njsSodaDocument *doc = (njsSodaDocument*) callingInstance;
     const char *value, *encoding;
-    njsModuleGlobals *globals;
-    njsSodaDocument *doc;
     uint32_t valueLength;
-    napi_status status;
-    napi_value result;
 
-    if (!njsUtils_validateArgs(env, info, 0, NULL, &globals, NULL,
-            (njsBaseInstance**) &doc))
-        return NULL;
     if (dpiSodaDoc_getContent(doc->handle, &value, &valueLength,
-            &encoding) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
+            &encoding) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
     if (valueLength == 0) {
-        status = napi_get_null(env, &result);
+        NJS_CHECK_NAPI(env, napi_get_null(env, returnValue))
     } else if (!encoding || strcmp(encoding, "UTF-8") == 0) {
-        status = napi_create_string_utf8(env, value, valueLength, &result);
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+                returnValue))
     } else {
-        status = napi_create_string_utf16(env, (char16_t*) value,
-                (size_t) (valueLength / 2), &result);
-    }
-    if (status != napi_ok) {
-        njsUtils_genericThrowError(env);
-        return NULL;
+        NJS_CHECK_NAPI(env, napi_create_string_utf16(env, (char16_t*) value,
+                (size_t) (valueLength / 2), returnValue))
     }
 
-    return result;
+    return true;
 }
 
 

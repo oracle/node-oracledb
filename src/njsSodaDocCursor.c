@@ -26,8 +26,8 @@
 #include "njsModule.h"
 
 // class methods
-static NJS_NAPI_METHOD(njsSodaDocCursor_close);
-static NJS_NAPI_METHOD(njsSodaDocCursor_getNext);
+NJS_NAPI_METHOD_DECL_ASYNC(njsSodaDocCursor_close);
+NJS_NAPI_METHOD_DECL_ASYNC(njsSodaDocCursor_getNext);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsSodaDocCursor_closeAsync);
@@ -54,10 +54,6 @@ const njsClassDef njsClassDefSodaDocCursor = {
     njsClassProperties, false
 };
 
-// other methods used internally
-static bool njsSodaDocCursor_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton);
-
 
 //-----------------------------------------------------------------------------
 // njsSodaDocCursor_close()
@@ -65,18 +61,16 @@ static bool njsSodaDocCursor_createBaton(napi_env env, napi_callback_info info,
 //
 // PARAMETERS - NONE
 //-----------------------------------------------------------------------------
-static napi_value njsSodaDocCursor_close(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaDocCursor_close, 0, NULL)
 {
-    njsSodaDocCursor *cursor;
-    njsBaton *baton;
+    njsSodaDocCursor *cursor = (njsSodaDocCursor*) baton->callingInstance;
 
-    if (!njsSodaDocCursor_createBaton(env, info, 0, NULL, &baton))
-        return NULL;
-    cursor = (njsSodaDocCursor*) baton->callingInstance;
+   if (!cursor->handle)
+       return njsBaton_setError(baton, errInvalidSodaDocCursor);
     baton->dpiSodaDocCursorHandle = cursor->handle;
     cursor->handle = NULL;
     return njsBaton_queueWork(baton, env, "Close", njsSodaDocCursor_closeAsync,
-            NULL);
+            NULL, returnValue);
 }
 
 
@@ -94,31 +88,6 @@ static bool njsSodaDocCursor_closeAsync(njsBaton *baton)
         baton->dpiSodaDocCursorHandle = NULL;
         return false;
     }
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsSodaDocCursor_createBaton()
-//   Create the baton used for asynchronous methods and initialize all
-// values. If this fails for some reason, an exception is thrown.
-//-----------------------------------------------------------------------------
-static bool njsSodaDocCursor_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton)
-{
-    njsSodaDocCursor *cursor;
-    njsBaton *tempBaton;
-
-    if (!njsUtils_createBaton(env, info, numArgs, args, &tempBaton))
-        return false;
-    cursor = (njsSodaDocCursor*) tempBaton->callingInstance;
-    if (!cursor->handle) {
-        njsBaton_setError(tempBaton, errInvalidSodaDocCursor);
-        njsBaton_reportError(tempBaton, env);
-        return false;
-    }
-
-    *baton = tempBaton;
     return true;
 }
 
@@ -146,15 +115,15 @@ static void njsSodaDocCursor_finalize(napi_env env, void *finalizeData,
 //
 // PARAMETERS - NONE
 //-----------------------------------------------------------------------------
-static napi_value njsSodaDocCursor_getNext(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaDocCursor_getNext, 0, NULL)
 {
-    njsBaton *baton;
+    njsSodaDocCursor *cursor = (njsSodaDocCursor*) baton->callingInstance;
 
-    if (!njsSodaDocCursor_createBaton(env, info, 0, NULL, &baton))
-        return NULL;
+    if (!cursor->handle)
+        return njsBaton_setError(baton, errInvalidSodaDocCursor);
     return njsBaton_queueWork(baton, env, "GetNext",
-            njsSodaDocCursor_getNextAsync, njsSodaDocCursor_getNextPostAsync);
+            njsSodaDocCursor_getNextAsync, njsSodaDocCursor_getNextPostAsync,
+            returnValue);
 }
 
 

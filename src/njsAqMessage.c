@@ -148,7 +148,7 @@ static napi_value njsAqMessage_getBufferAttribute(napi_env env,
     }
     if (napi_create_buffer_copy(env, valueLength, value, NULL,
             &result) != napi_ok) {
-        njsUtils_genericThrowError(env);
+        njsUtils_genericThrowError(env, __FILE__, __LINE__);
         return NULL;
     }
     return result;
@@ -308,7 +308,7 @@ static napi_value njsAqMessage_getPayload(napi_env env,
     }  else {
         if (napi_create_buffer_copy(env, valueLength, value, NULL,
                 &payloadObj) != napi_ok) {
-            njsUtils_genericThrowError(env);
+            njsUtils_genericThrowError(env, __FILE__, __LINE__);
             return NULL;
         }
     }

@@ -181,7 +181,7 @@ static napi_value njsAqDeqOptions_getMsgId(napi_env env,
     }
     if (napi_create_buffer_copy(env, valueLength, value, NULL,
             &result) != napi_ok) {
-        njsUtils_genericThrowError(env);
+        njsUtils_genericThrowError(env, __FILE__, __LINE__);
         return NULL;
     }
     return result;
@@ -352,7 +352,7 @@ static napi_value njsAqDeqOptions_setMsgId(napi_env env,
         return NULL;
     }
     if (napi_get_buffer_info(env, value, &buffer, &bufferLength) != napi_ok) {
-        njsUtils_genericThrowError(env);
+        njsUtils_genericThrowError(env, __FILE__, __LINE__);
         return NULL;
     }
     if (dpiDeqOptions_setMsgId(options->handle, buffer,

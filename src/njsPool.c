@@ -26,12 +26,12 @@
 #include "njsModule.h"
 
 // class methods
-static NJS_NAPI_METHOD(njsPool_close);
-static NJS_NAPI_METHOD(njsPool_create);
-static NJS_NAPI_METHOD(njsPool_getConnection);
-static NJS_NAPI_METHOD(njsPool_reconfigure);
-static NJS_NAPI_METHOD(njsPool_returnAccessToken);
-static NJS_NAPI_METHOD(njsPool_setAccessToken);
+NJS_NAPI_METHOD_DECL_ASYNC(njsPool_close);
+NJS_NAPI_METHOD_DECL_ASYNC(njsPool_create);
+NJS_NAPI_METHOD_DECL_ASYNC(njsPool_getConnection);
+NJS_NAPI_METHOD_DECL_ASYNC(njsPool_reconfigure);
+NJS_NAPI_METHOD_DECL_SYNC(njsPool_returnAccessToken);
+NJS_NAPI_METHOD_DECL_ASYNC(njsPool_setAccessToken);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsPool_closeAsync);
@@ -45,7 +45,6 @@ static NJS_ASYNC_POST_METHOD(njsPool_createPostAsync);
 static NJS_ASYNC_POST_METHOD(njsPool_getConnectionPostAsync);
 
 // processing arguments methods
-static NJS_PROCESS_ARGS_METHOD(njsPool_closeProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsPool_createProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsPool_getConnectionProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsPool_reconfigureProcessArgs);
@@ -105,10 +104,6 @@ const njsClassDef njsClassDefPool = {
     "Pool", sizeof(njsPool), njsPool_finalize, njsClassProperties, false
 };
 
-// other methods used internally
-static bool njsPool_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton);
-
 
 //-----------------------------------------------------------------------------
 // njsPool_close()
@@ -117,24 +112,19 @@ static bool njsPool_createBaton(napi_env env, napi_callback_info info,
 // PARAMETERS
 //   - options
 //-----------------------------------------------------------------------------
-static napi_value njsPool_close(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_close, 1, NULL)
 {
-    napi_value args[1];
-    njsBaton *baton;
-    njsPool *pool;
+    njsPool *pool = (njsPool*) baton->callingInstance;
 
-    if (!njsPool_createBaton(env, info, 1, args, &baton))
-        return NULL;
-    if (!njsPool_closeProcessArgs(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
-    pool = (njsPool*) baton->callingInstance;
+    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "forceClose",
+            &baton->force, NULL))
+        return false;
     baton->accessTokenCallback = pool->accessTokenCallback;
     pool->accessTokenCallback = NULL;
     baton->dpiPoolHandle = pool->handle;
     pool->handle = NULL;
-    return njsBaton_queueWork(baton, env, "Close", njsPool_closeAsync, NULL);
+    return njsBaton_queueWork(baton, env, "Close", njsPool_closeAsync, NULL,
+            returnValue);
 }
 
 
@@ -165,44 +155,22 @@ static bool njsPool_closeAsync(njsBaton *baton)
 
 
 //-----------------------------------------------------------------------------
-// njsPool_closeProcessArgs()
-//   Process the arguments for njsPool_close().
-//-----------------------------------------------------------------------------
-static bool njsPool_closeProcessArgs(njsBaton *baton, napi_env env,
-        napi_value *args)
-{
-    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "forceClose",
-            &baton->force, NULL))
-        return false;
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsPool_create()
 //   Create a connection pool.
 //
 // PARAMETERS
 //   - options
 //-----------------------------------------------------------------------------
-static napi_value njsPool_create(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_create, 1, &njsClassDefPool)
 {
-    napi_value args[1];
-    njsBaton *baton;
+    napi_value callingObj;
 
-    // first need to attach to the pool object
-    if (!njsUtils_genericAttach(env, info, &njsClassDefPool))
-        return NULL;
-
-    if (!njsUtils_createBaton(env, info, 1, args, &baton))
-        return NULL;
-    if (!njsPool_createProcessArgs(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
+            &callingObj))
+    if (!njsPool_createProcessArgs(baton, env, args))
+        return false;
     return njsBaton_queueWork(baton, env, "create", njsPool_createAsync,
-            njsPool_createPostAsync);
+            njsPool_createPostAsync, returnValue);
 }
 
 
@@ -375,32 +343,6 @@ static bool njsPool_createProcessArgs(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsPool_createBaton()
-//   Create the baton used for asynchronous methods and initialize all
-// values. The pool is also checked to see if it is open. If this fails for
-// some reason, an exception is thrown.
-//-----------------------------------------------------------------------------
-bool njsPool_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton)
-{
-    njsPool *pool;
-    njsBaton *tempBaton;
-
-    if (!njsUtils_createBaton(env, info, numArgs, args, &tempBaton))
-        return false;
-    pool = (njsPool*) tempBaton->callingInstance;
-    if (!pool->handle) {
-        njsBaton_setError(tempBaton, errInvalidPool);
-        njsBaton_reportError(tempBaton, env);
-        return false;
-    }
-
-    *baton = tempBaton;
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsPool_finalize()
 //   Invoked when the njsPool object is garbage collected.
 //-----------------------------------------------------------------------------
@@ -425,25 +367,17 @@ static void njsPool_finalize(napi_env env, void *finalizeData,
 // PARAMETERS
 //   - options
 //-----------------------------------------------------------------------------
-static napi_value njsPool_getConnection(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_getConnection, 1, NULL)
 {
-    napi_value args[1];
-    njsBaton *baton;
+    njsPool *pool = (njsPool*) baton->callingInstance;
 
-    // verify number of arguments and create baton
-    if (!njsPool_createBaton(env, info, 1, args, &baton))
-        return NULL;
-
-    // get information from arguments and store on the baton
-    if (!njsPool_getConnectionProcessArgs(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
-
-    // queue work
+    if (!pool->handle)
+        return njsBaton_setError(baton, errInvalidPool);
+    if (!njsPool_getConnectionProcessArgs(baton, env, args))
+        return false;
     return njsBaton_queueWork(baton, env, "GetConnection",
-            njsPool_getConnectionAsync, njsPool_getConnectionPostAsync);
+            njsPool_getConnectionAsync, njsPool_getConnectionPostAsync,
+            returnValue);
 }
 
 
@@ -571,24 +505,16 @@ static bool njsPool_getConnectionProcessArgs(njsBaton *baton, napi_env env,
 // njsPool_reconfigure()
 //  Change the pool parameters
 //-----------------------------------------------------------------------------
-static napi_value njsPool_reconfigure(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_reconfigure, 1, NULL)
 {
-    napi_value args[1];
-    njsBaton *baton;
+    njsPool *pool = (njsPool*) baton->callingInstance;
 
-    // verify number of arguments and create baton
-    if (!njsPool_createBaton(env, info, 1, args, &baton))
-        return NULL;
-
-    // get information from arguments and store on the baton
-    if (!njsPool_reconfigureProcessArgs(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
-
-    // queue work
+    if (!pool->handle)
+        return njsBaton_setError(baton, errInvalidPool);
+    if (!njsPool_reconfigureProcessArgs(baton, env, args))
+        return false;
     return njsBaton_queueWork(baton, env, "Reconfigure",
-            njsPool_reconfigureAsync, NULL);
+            njsPool_reconfigureAsync, NULL, returnValue);
 }
 
 
@@ -881,27 +807,6 @@ static napi_value njsPool_getSodaMetaDataCache(napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsPool_returnAccessTokenHelper()
-//   Helper method that performs the work of njsPool_returnAccessToken().
-//-----------------------------------------------------------------------------
-static bool njsPool_returnAccessTokenHelper(napi_env env,
-        napi_callback_info info)
-{
-    njsBaseInstance *callingInstance;
-    napi_value callingObj, args[2];
-    njsTokenCallback *callback;
-    njsModuleGlobals *globals;
-
-    if (!njsUtils_validateArgs(env, info, 2, args, &globals, &callingObj,
-            &callingInstance))
-        return false;
-    NJS_CHECK_NAPI(env, napi_get_value_external(env, args[0],
-            (void**) &callback))
-    return njsTokenCallback_returnAccessToken(callback, env, args[1]);
-}
-
-
-//-----------------------------------------------------------------------------
 // njsPool_returnAccessToken()
 //   Returns the access token through to the callback. This needs to be done
 // independently in order to handle possible asynchronous Javascript code.
@@ -910,11 +815,13 @@ static bool njsPool_returnAccessTokenHelper(napi_env env,
 //   - externalObj (contains native njsAccessToken structure)
 //   - accessToken (value to be returned through callback)
 //-----------------------------------------------------------------------------
-static napi_value njsPool_returnAccessToken(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsPool_returnAccessToken, 2, NULL)
 {
-    njsPool_returnAccessTokenHelper(env, info);
-    return NULL;
+    njsTokenCallback *callback;
+
+    NJS_CHECK_NAPI(env, napi_get_value_external(env, args[0],
+            (void**) &callback))
+    return njsTokenCallback_returnAccessToken(callback, env, args[1]);
 }
 
 
@@ -923,23 +830,20 @@ static napi_value njsPool_returnAccessToken(napi_env env,
 //   set access token and private key for existing pool in token
 // based authentication
 //-----------------------------------------------------------------------------
-static napi_value njsPool_setAccessToken(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_setAccessToken, 1, NULL)
 {
-    napi_value args[1];
-    njsBaton *baton;
+    njsPool *pool = (njsPool*) baton->callingInstance;
 
-    if (!njsPool_createBaton(env, info, 1, args, &baton))
-        return NULL;
+    if (!pool->handle)
+        return njsBaton_setError(baton, errInvalidPool);
     if (!njsBaton_getStringFromArg(baton, env, args, 0, "token",
             &baton->token, &baton->tokenLength, NULL))
         return false;
     if (!njsBaton_getStringFromArg(baton, env, args, 0, "privateKey",
-            &baton->privateKey, &baton->privateKeyLength,
-            NULL))
+            &baton->privateKey, &baton->privateKeyLength, NULL))
         return false;
-
     return njsBaton_queueWork(baton, env, "token",
-            njsPool_setAccessTokenAsync, NULL);
+            njsPool_setAccessTokenAsync, NULL, returnValue);
 }
 
 

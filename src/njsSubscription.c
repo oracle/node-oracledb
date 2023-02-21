@@ -293,7 +293,7 @@ bool njsSubscription_new(njsBaton *baton, napi_env env, napi_value *obj,
     if (napi_create_external(env, tempSubscr, njsSubscription_finalize,
             tempSubscr, obj) != napi_ok) {
         free(tempSubscr);
-        return njsUtils_genericThrowError(env);
+        return njsUtils_genericThrowError(env, __FILE__, __LINE__);
     }
     tempSubscr->globals = baton->globals;
     tempSubscr->env = env;

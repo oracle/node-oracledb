@@ -74,7 +74,7 @@ static bool njsModule_extendClass(napi_env env, napi_value module,
         if (napi_define_properties(env, prototype, numProperties,
                 allProperties) != napi_ok) {
             free(allProperties);
-            return njsUtils_genericThrowError(env);
+            return njsUtils_genericThrowError(env, __FILE__, __LINE__);
         }
         free(allProperties);
 
@@ -285,7 +285,7 @@ static napi_value njsModule_initOracleClient(napi_env env,
     // iniitialize ODPI-C
     libDir = configDir = errorUrl = driverName = NULL;
     libDirLength = configDirLength = errorUrlLength = driverNameLength = 0;
-    if (!njsUtils_validateArgs(env, info, 3, args, &globals, NULL, NULL))
+    if (!njsUtils_validateArgs(env, info, 3, args, &globals, NULL, NULL, NULL))
         return NULL;
     ok = njsModule_initDPI(env, args, globals, &libDir, &libDirLength,
             &configDir, &configDirLength, &errorUrl, &errorUrlLength,

@@ -54,13 +54,59 @@
 // define macro for checking the result of an Node-API call
 #define NJS_CHECK_NAPI(env, status) \
     if ((status) != napi_ok) \
-        return njsUtils_genericThrowError(env);
+        return njsUtils_genericThrowError(env, __FILE__, __LINE__);
 
-// define macros for defining Node-API functions; many are identical but different
-// names are used to make it easier to read
+// define macro for synchronous Node-API methods
+#define NJS_NAPI_METHOD_DECL_SYNC(name) \
+    static bool name##_(napi_env, napi_value*, napi_value, njsModuleGlobals*, \
+            njsBaseInstance*, napi_value*); \
+    static napi_value name(napi_env, napi_callback_info)
+#define NJS_NAPI_METHOD_IMPL_SYNC(name, numArgs, classDef) \
+    static napi_value name(napi_env env, napi_callback_info info) { \
+        napi_value callingObj, args[numArgs + 1], returnValue = NULL; \
+        njsBaseInstance* callingInstance; \
+        njsModuleGlobals *globals; \
+        if (!njsUtils_validateArgs(env, info, numArgs, args, &globals, \
+                &callingObj, classDef, (njsBaseInstance**) &callingInstance)) \
+            return NULL; \
+        if (!name##_(env, args, callingObj, globals, callingInstance, \
+                &returnValue)) { \
+            return NULL; \
+        } \
+        return returnValue; \
+    } \
+    static bool name##_(napi_env env, napi_value *args, \
+            napi_value callingObj, njsModuleGlobals *globals, \
+            njsBaseInstance *callingInstance, napi_value *returnValue)
+
+// define macro for asynchronous Node-API methods
+#define NJS_NAPI_METHOD_DECL_ASYNC(name) \
+    static bool name##_(napi_env, napi_value*, njsBaton*, \
+            napi_value*); \
+    static napi_value name(napi_env, napi_callback_info)
+#define NJS_NAPI_METHOD_IMPL_ASYNC(name, numArgs, classDef) \
+    static napi_value name(napi_env env, napi_callback_info info) { \
+        napi_value args[numArgs + 1], returnValue = NULL; \
+        njsBaton *baton = NULL; \
+        if (!njsUtils_createBaton(env, info, numArgs, args, classDef, &baton)) \
+            return NULL; \
+        if (!name##_(env, args, baton, &returnValue)) { \
+            if (baton->deferred) { \
+                napi_reject_deferred(env, baton->deferred, NULL); \
+                njsBaton_free(baton, env); \
+            } else { \
+                njsBaton_reportError(baton, env); \
+            } \
+            return NULL; \
+        } \
+        return returnValue; \
+    } \
+    static bool name##_(napi_env env, napi_value* args, njsBaton *baton, \
+            napi_value *returnValue)
+
+// define macros for defining other Node-API functions; many are identical but
+// different names are used to make it easier to read
 #define NJS_NAPI_GETTER(name) \
-    napi_value name(napi_env, napi_callback_info)
-#define NJS_NAPI_METHOD(name) \
     napi_value name(napi_env, napi_callback_info)
 #define NJS_NAPI_SETTER(name) \
     napi_value name(napi_env, napi_callback_info)
@@ -806,7 +852,7 @@ bool njsJsonBuffer_fromValue(njsJsonBuffer *buf, napi_env env,
 bool njsBaton_commonConnectProcessArgs(njsBaton *baton, napi_env env,
         napi_value *args);
 bool njsBaton_create(njsBaton *baton, napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args);
+        size_t numArgs, napi_value *args, const njsClassDef *classDef);
 void njsBaton_free(njsBaton *baton, napi_env env);
 bool njsBaton_getBoolFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, bool *result, bool *found);
@@ -849,10 +895,11 @@ bool njsBaton_initCommonCreateParams(njsBaton *baton,
 bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value);
 bool njsBaton_isDate(njsBaton *baton, napi_env env, napi_value value,
         bool *isDate);
-napi_value njsBaton_queueWork(njsBaton *baton, napi_env env,
-        const char *methodName, bool (*workCallback)(njsBaton*),
-        bool (*afterWorkCallback)(njsBaton*, napi_env, napi_value*));
-void njsBaton_reportError(njsBaton *baton, napi_env env);
+bool njsBaton_queueWork(njsBaton *baton, napi_env env, const char *methodName,
+        bool (*workCallback)(njsBaton*),
+        bool (*afterWorkCallback)(njsBaton*, napi_env, napi_value*),
+        napi_value *promise);
+bool njsBaton_reportError(njsBaton *baton, napi_env env);
 bool njsBaton_setError(njsBaton *baton, int errNum, ...);
 bool njsBaton_setErrorDPI(njsBaton *baton);
 bool njsBaton_setJsValues(njsBaton *baton, napi_env env);
@@ -977,13 +1024,13 @@ bool njsUtils_copyString(napi_env env, char *source, size_t sourceLength,
 bool njsUtils_copyStringFromJS(napi_env env, napi_value value, char **result,
         size_t *resultLength);
 bool njsUtils_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton);
-bool njsUtils_genericAttach(napi_env env, napi_callback_info info,
-        const njsClassDef *classDef);
+        size_t numArgs, napi_value *args, const njsClassDef *classDef,
+        njsBaton **baton);
 bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
         napi_ref constructorRef, napi_value *instanceObj,
         njsBaseInstance **instance);
-bool njsUtils_genericThrowError(napi_env env);
+bool njsUtils_genericThrowError(napi_env env, const char *fileName,
+        int lineNum);
 bool njsUtils_getBoolArg(napi_env env, napi_value *args, int index,
         bool *result);
 bool njsUtils_getError(napi_env env, dpiErrorInfo *errorInfo,
@@ -1013,7 +1060,8 @@ bool njsUtils_throwError(napi_env env, int errNum, ...);
 bool njsUtils_throwErrorDPI(napi_env env, njsModuleGlobals *globals);
 bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, njsModuleGlobals **globals,
-        napi_value *callingObj, njsBaseInstance **instance);
+        napi_value *callingObj, const njsClassDef *classDef,
+        njsBaseInstance **instance);
 bool njsUtils_validateGetter(napi_env env, napi_callback_info info,
         njsModuleGlobals **globals, njsBaseInstance **instance);
 bool njsUtils_validateSetter(napi_env env, napi_callback_info info,

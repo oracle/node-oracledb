@@ -26,13 +26,13 @@
 #include "njsModule.h"
 
 // class methods
-static NJS_NAPI_METHOD(njsSodaOperation_count);
-static NJS_NAPI_METHOD(njsSodaOperation_getCursor);
-static NJS_NAPI_METHOD(njsSodaOperation_getDocuments);
-static NJS_NAPI_METHOD(njsSodaOperation_getOne);
-static NJS_NAPI_METHOD(njsSodaOperation_remove);
-static NJS_NAPI_METHOD(njsSodaOperation_replaceOne);
-static NJS_NAPI_METHOD(njsSodaOperation_replaceOneAndGet);
+NJS_NAPI_METHOD_DECL_ASYNC(njsSodaOperation_count);
+NJS_NAPI_METHOD_DECL_ASYNC(njsSodaOperation_getCursor);
+NJS_NAPI_METHOD_DECL_ASYNC(njsSodaOperation_getDocuments);
+NJS_NAPI_METHOD_DECL_ASYNC(njsSodaOperation_getOne);
+NJS_NAPI_METHOD_DECL_ASYNC(njsSodaOperation_remove);
+NJS_NAPI_METHOD_DECL_ASYNC(njsSodaOperation_replaceOne);
+NJS_NAPI_METHOD_DECL_ASYNC(njsSodaOperation_replaceOneAndGet);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsSodaOperation_countAsync);
@@ -92,19 +92,12 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
 // PARAMETERS
 //   - options
 //-----------------------------------------------------------------------------
-static napi_value njsSodaOperation_count(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaOperation_count, 1, NULL)
 {
-    napi_value args[1];
-    njsBaton *baton;
-
-    if (!njsUtils_createBaton(env, info, 1, args, &baton))
-        return NULL;
-    if (!njsSodaOperation_processOptions(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
+    if (!njsSodaOperation_processOptions(baton, env, args))
+        return false;
     return njsBaton_queueWork(baton, env, "Count", njsSodaOperation_countAsync,
-            njsSodaOperation_countPostAsync);
+            njsSodaOperation_countPostAsync, returnValue);
 }
 
 
@@ -191,21 +184,13 @@ static void njsSodaOperation_finalize(napi_env env, void *finalizeData,
 // PARAMETERS
 //   - options
 //-----------------------------------------------------------------------------
-static napi_value njsSodaOperation_getCursor(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaOperation_getCursor, 1, NULL)
 {
-    napi_value args[1];
-    njsBaton *baton;
-
-    if (!njsUtils_createBaton(env, info, 1, args, &baton))
-        return NULL;
-    if (!njsSodaOperation_processOptions(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
+    if (!njsSodaOperation_processOptions(baton, env, args))
+        return false;
     return njsBaton_queueWork(baton, env, "GetCursor",
             njsSodaOperation_getCursorAsync,
-            njsSodaOperation_getCursorPostAsync);
+            njsSodaOperation_getCursorPostAsync, returnValue);
 }
 
 
@@ -245,21 +230,13 @@ static bool njsSodaOperation_getCursorPostAsync(njsBaton *baton, napi_env env,
 // PARAMETERS
 //   - options
 //-----------------------------------------------------------------------------
-static napi_value njsSodaOperation_getDocuments(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaOperation_getDocuments, 1, NULL)
 {
-    napi_value args[1];
-    njsBaton *baton;
-
-    if (!njsUtils_createBaton(env, info, 1, args, &baton))
-        return NULL;
-    if (!njsSodaOperation_processOptions(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
+    if (!njsSodaOperation_processOptions(baton, env, args))
+        return false;
     return njsBaton_queueWork(baton, env, "GetDocuments",
             njsSodaOperation_getDocumentsAsync,
-            njsSodaOperation_getDocumentsPostAsync);
+            njsSodaOperation_getDocumentsPostAsync, returnValue);
 }
 
 
@@ -356,20 +333,13 @@ static bool njsSodaOperation_getDocumentsPostAsync(njsBaton *baton,
 // PARAMETERS
 //   - options
 //-----------------------------------------------------------------------------
-static napi_value njsSodaOperation_getOne(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaOperation_getOne, 1, NULL)
 {
-    napi_value args[1];
-    njsBaton *baton;
-
-    if (!njsUtils_createBaton(env, info, 1, args, &baton))
-        return NULL;
-    if (!njsSodaOperation_processOptions(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
+    if (!njsSodaOperation_processOptions(baton, env, args))
+        return false;
     return njsBaton_queueWork(baton, env, "GetOne",
-            njsSodaOperation_getOneAsync, njsSodaOperation_getOnePostAsync);
+            njsSodaOperation_getOneAsync, njsSodaOperation_getOnePostAsync,
+            returnValue);
 }
 
 
@@ -487,20 +457,13 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
 // PARAMETERS
 //   - options
 //-----------------------------------------------------------------------------
-static napi_value njsSodaOperation_remove(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaOperation_remove, 1, NULL)
 {
-    napi_value args[1];
-    njsBaton *baton;
-
-    if (!njsUtils_createBaton(env, info, 1, args, &baton))
-        return NULL;
-    if (!njsSodaOperation_processOptions(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
+    if (!njsSodaOperation_processOptions(baton, env, args))
+        return false;
     return njsBaton_queueWork(baton, env, "Remove",
-            njsSodaOperation_removeAsync, njsSodaOperation_removePostAsync);
+            njsSodaOperation_removeAsync, njsSodaOperation_removePostAsync,
+            returnValue);
 }
 
 
@@ -548,28 +511,18 @@ static bool njsSodaOperation_removePostAsync(njsBaton *baton, napi_env env,
 //   - options
 //   - content
 //-----------------------------------------------------------------------------
-static napi_value njsSodaOperation_replaceOne(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaOperation_replaceOne, 2, NULL)
 {
-    njsSodaOperation *op;
-    napi_value args[2];
-    njsBaton *baton;
+    njsSodaOperation *op = (njsSodaOperation*) baton->callingInstance;
 
-    if (!njsUtils_createBaton(env, info, 2, args, &baton))
-        return NULL;
-    if (!njsSodaOperation_processOptions(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
-    op = (njsSodaOperation*) baton->callingInstance;
+    if (!njsSodaOperation_processOptions(baton, env, args))
+        return false;
     if (!njsBaton_getSodaDocument(baton, op->coll->db, env, args[1],
-            &baton->dpiSodaDocHandle)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
+            &baton->dpiSodaDocHandle))
+        return false;
     return njsBaton_queueWork(baton, env, "ReplaceOne",
             njsSodaOperation_replaceOneAsync,
-            njsSodaOperation_replaceOnePostAsync);
+            njsSodaOperation_replaceOnePostAsync, returnValue);
 }
 
 
@@ -619,28 +572,18 @@ static bool njsSodaOperation_replaceOnePostAsync(njsBaton *baton, napi_env env,
 //   - options
 //   - content
 //-----------------------------------------------------------------------------
-static napi_value njsSodaOperation_replaceOneAndGet(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaOperation_replaceOneAndGet, 2, NULL)
 {
-    njsSodaOperation *op;
-    napi_value args[2];
-    njsBaton *baton;
+    njsSodaOperation *op = (njsSodaOperation*) baton->callingInstance;
 
-    if (!njsUtils_createBaton(env, info, 2, args, &baton))
-        return NULL;
-    if (!njsSodaOperation_processOptions(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
-    op = (njsSodaOperation*) baton->callingInstance;
+    if (!njsSodaOperation_processOptions(baton, env, args))
+        return false;
     if (!njsBaton_getSodaDocument(baton, op->coll->db, env, args[1],
-            &baton->dpiSodaDocHandle)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
+            &baton->dpiSodaDocHandle))
+        return false;
     return njsBaton_queueWork(baton, env, "ReplaceOneAndGet",
             njsSodaOperation_replaceOneAndGetAsync,
-            njsSodaOperation_replaceOneAndGetPostAsync);
+            njsSodaOperation_replaceOneAndGetPostAsync, returnValue);
 }
 
 

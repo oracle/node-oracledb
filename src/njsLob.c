@@ -26,10 +26,10 @@
 #include "njsModule.h"
 
 // class methods
-static NJS_NAPI_METHOD(njsLob_close);
-static NJS_NAPI_METHOD(njsLob_getData);
-static NJS_NAPI_METHOD(njsLob_read);
-static NJS_NAPI_METHOD(njsLob_write);
+NJS_NAPI_METHOD_DECL_ASYNC(njsLob_close);
+NJS_NAPI_METHOD_DECL_ASYNC(njsLob_getData);
+NJS_NAPI_METHOD_DECL_ASYNC(njsLob_read);
+NJS_NAPI_METHOD_DECL_ASYNC(njsLob_write);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsLob_closeAsync);
@@ -40,10 +40,6 @@ static NJS_ASYNC_METHOD(njsLob_writeAsync);
 // post asynchronous methods
 static NJS_ASYNC_POST_METHOD(njsLob_getDataPostAsync);
 static NJS_ASYNC_POST_METHOD(njsLob_readPostAsync);
-
-// processing arguments methods
-static NJS_PROCESS_ARGS_METHOD(njsLob_readProcessArgs);
-static NJS_PROCESS_ARGS_METHOD(njsLob_writeProcessArgs);
 
 // getters
 static NJS_NAPI_GETTER(njsLob_getAutoCloseLob);
@@ -83,8 +79,21 @@ const njsClassDef njsClassDefLob = {
 };
 
 // other methods used internally
-static bool njsLob_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton);
+static bool njsLob_check(njsLob *lob, njsBaton *baton);
+
+
+//-----------------------------------------------------------------------------
+// njsLob_check()
+//   Create the baton used for asynchronous methods and initialize all
+// values. If this fails for some reason, an exception is thrown.
+//-----------------------------------------------------------------------------
+bool njsLob_check(njsLob *lob, njsBaton *baton)
+{
+    if (!lob->handle)
+        return njsBaton_setError(baton, errInvalidLob);
+    lob->activeBaton = baton;
+    return true;
+}
 
 
 //-----------------------------------------------------------------------------
@@ -93,18 +102,17 @@ static bool njsLob_createBaton(napi_env env, napi_callback_info info,
 //
 // PARAMETERS - NONE
 //-----------------------------------------------------------------------------
-static napi_value njsLob_close(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_close, 0, NULL)
 {
-    njsBaton *baton;
-    njsLob *lob;
+    njsLob *lob = (njsLob*) baton->callingInstance;
 
-    if (!njsLob_createBaton(env, info, 0, NULL, &baton))
-        return NULL;
-    lob = (njsLob*) baton->callingInstance;
+    if (!njsLob_check(lob, baton))
+        return false;
     lob->activeBaton = NULL;
     baton->dpiLobHandle = lob->handle;
     lob->handle = NULL;
-    return njsBaton_queueWork(baton, env, "Close", njsLob_closeAsync, NULL);
+    return njsBaton_queueWork(baton, env, "Close", njsLob_closeAsync, NULL,
+            returnValue);
 }
 
 
@@ -125,31 +133,6 @@ static bool njsLob_closeAsync(njsBaton *baton)
     return true;
 }
 
-
-//-----------------------------------------------------------------------------
-// njsLob_createBaton()
-//   Create the baton used for asynchronous methods and initialize all
-// values. If this fails for some reason, an exception is thrown.
-//-----------------------------------------------------------------------------
-bool njsLob_createBaton(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsBaton **baton)
-{
-    njsBaton *tempBaton;
-    njsLob *lob;
-
-    if (!njsUtils_createBaton(env, info, numArgs, args, &tempBaton))
-        return false;
-    lob = (njsLob*) tempBaton->callingInstance;
-    if (!lob->handle) {
-        njsBaton_setError(tempBaton, errInvalidLob);
-        njsBaton_reportError(tempBaton, env);
-        return false;
-    }
-    lob->activeBaton = tempBaton;
-
-    *baton = tempBaton;
-    return true;
-}
 
 
 //-----------------------------------------------------------------------------
@@ -261,14 +244,14 @@ static napi_value njsLob_getValid(napi_env env, napi_callback_info info)
 //
 // PARAMETERS - NONE
 //-----------------------------------------------------------------------------
-static napi_value njsLob_getData(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_getData, 0, NULL)
 {
-    njsBaton *baton;
+    njsLob *lob = (njsLob*) baton->callingInstance;
 
-    if (!njsLob_createBaton(env, info, 0, NULL, &baton))
-        return NULL;
+    if (!njsLob_check(lob, baton))
+        return false;
     return njsBaton_queueWork(baton, env, "GetData", njsLob_getDataAsync,
-            njsLob_getDataPostAsync);
+            njsLob_getDataPostAsync, returnValue);
 }
 
 
@@ -401,19 +384,16 @@ bool njsLob_populateBuffer(njsBaton *baton, njsLobBuffer *buffer)
 // PARAMETERS
 //   - offset
 //-----------------------------------------------------------------------------
-static napi_value njsLob_read(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_read, 1, NULL)
 {
-    napi_value args[1];
-    njsBaton *baton;
+    njsLob *lob = (njsLob*) baton->callingInstance;
 
-    if (!njsLob_createBaton(env, info, 1, args, &baton))
-        return NULL;
-    if (!njsLob_readProcessArgs(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
-    }
+    if (!njsLob_check(lob, baton))
+        return false;
+    if (!njsUtils_getUnsignedIntArg(env, args, 0, &baton->lobOffset))
+        return false;
     return njsBaton_queueWork(baton, env, "Read", njsLob_readAsync,
-            njsLob_readPostAsync);
+            njsLob_readPostAsync, returnValue);
 }
 
 
@@ -491,18 +471,6 @@ static bool njsLob_readPostAsync(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsLob_readProcessArgs()
-//   Processes the arguments provided by the caller and place them on the
-// baton.
-//-----------------------------------------------------------------------------
-static bool njsLob_readProcessArgs(njsBaton *baton, napi_env env,
-        napi_value *args)
-{
-    return njsUtils_getUnsignedIntArg(env, args, 0, &baton->lobOffset);
-}
-
-
-//-----------------------------------------------------------------------------
 // njsLob_setPieceSize()
 //   Set accessor of "pieceSize" property.
 //-----------------------------------------------------------------------------
@@ -530,18 +498,39 @@ static napi_value njsLob_setPieceSize(napi_env env, napi_callback_info info)
 //   - offset
 //   - data
 //-----------------------------------------------------------------------------
-static napi_value njsLob_write(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_write, 2, NULL)
 {
-    napi_value args[2];
-    njsBaton *baton;
+    njsLob *lob = (njsLob*) baton->callingInstance;
+    size_t bufferSize;
+    bool isBuffer;
 
-    if (!njsLob_createBaton(env, info, 2, args, &baton))
-        return NULL;
-    if (!njsLob_writeProcessArgs(baton, env, args)) {
-        njsBaton_reportError(baton, env);
-        return NULL;
+    if (!njsLob_check(lob, baton))
+        return false;
+
+    // get the offset (characters for CLOBs, bytes for BLOBs)
+    if (!njsUtils_getUnsignedIntArg(env, args, 0, &baton->lobOffset))
+        return false;
+
+    // determine if a buffer was passed
+    NJS_CHECK_NAPI(env, napi_is_buffer(env, args[1], &isBuffer))
+
+    // buffers store a reference to ensure that the buffer that is provided
+    // is not destroyed before we have finished reading from it
+    if (isBuffer) {
+        NJS_CHECK_NAPI(env, napi_create_reference(env, args[1], 1,
+                &baton->jsBufferRef))
+        NJS_CHECK_NAPI(env, napi_get_buffer_info(env, args[1],
+                (void**) &baton->bufferPtr, &bufferSize))
+
+    // otherwise, the string buffer data needs to be acquired
+    } else if (!njsUtils_getStringArg(env, args, 1, &baton->bufferPtr,
+            &bufferSize)) {
+        return false;
     }
-    return njsBaton_queueWork(baton, env, "Write", njsLob_writeAsync, NULL);
+    baton->bufferSize = bufferSize;
+
+    return njsBaton_queueWork(baton, env, "Write", njsLob_writeAsync, NULL,
+            returnValue);
 }
 
 
@@ -567,42 +556,5 @@ static bool njsLob_writeAsync(njsBaton *baton)
         return false;
     }
     lob->dirtyLength = true;
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsLob_writeProcessArgs()
-//   Processes the arguments provided by the caller and place them on the
-// baton.
-//-----------------------------------------------------------------------------
-static bool njsLob_writeProcessArgs(njsBaton *baton, napi_env env,
-        napi_value *args)
-{
-    size_t bufferSize;
-    bool isBuffer;
-
-    // get the offset (characters for CLOBs, bytes for BLOBs)
-    if (!njsUtils_getUnsignedIntArg(env, args, 0, &baton->lobOffset))
-        return false;
-
-    // determine if a buffer was passed
-    NJS_CHECK_NAPI(env, napi_is_buffer(env, args[1], &isBuffer))
-
-    // buffers store a reference to ensure that the buffer that is provided
-    // is not destroyed before we have finished reading from it
-    if (isBuffer) {
-        NJS_CHECK_NAPI(env, napi_create_reference(env, args[1], 1,
-                &baton->jsBufferRef))
-        NJS_CHECK_NAPI(env, napi_get_buffer_info(env, args[1],
-                (void**) &baton->bufferPtr, &bufferSize))
-
-    // otherwise, the string buffer data needs to be acquired
-    } else if (!njsUtils_getStringArg(env, args, 1, &baton->bufferPtr,
-            &bufferSize)) {
-        return false;
-    }
-    baton->bufferSize = bufferSize;
-
     return true;
 }
