@@ -34,9 +34,7 @@
 
 // class methods
 NJS_NAPI_METHOD_DECL_ASYNC(njsResultSet_close);
-NJS_NAPI_METHOD_DECL_SYNC(njsResultSet_getMetaData);
 NJS_NAPI_METHOD_DECL_ASYNC(njsResultSet_getRows);
-NJS_NAPI_METHOD_DECL_SYNC(njsResultSet_setFetchTypes);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsResultSet_closeAsync);
@@ -52,12 +50,8 @@ static NJS_NAPI_FINALIZE(njsResultSet_finalize);
 static const napi_property_descriptor njsClassProperties[] = {
     { "close", NULL, njsResultSet_close, NULL, NULL, NULL, napi_default,
             NULL },
-    { "getMetaData", NULL, njsResultSet_getMetaData, NULL, NULL, NULL,
-            napi_default, NULL },
     { "getRows", NULL, njsResultSet_getRows, NULL, NULL, NULL, napi_default,
             NULL },
-    { "setFetchTypes", NULL, njsResultSet_setFetchTypes, NULL, NULL, NULL,
-            napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
@@ -67,6 +61,9 @@ const njsClassDef njsClassDefResultSet = {
     njsClassProperties, false
 };
 
+// other methods used internally
+static bool njsResultSet_setFetchTypes(napi_env env, njsResultSet *rs,
+        napi_value allMetadata);
 
 //-----------------------------------------------------------------------------
 // njsResultSet_close()
@@ -129,34 +126,18 @@ static void njsResultSet_finalize(napi_env env, void *finalizeData,
 
 
 //-----------------------------------------------------------------------------
-// njsResultSet_getMetaData()
-//   Get accessor of "metaData" property.
-//-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsResultSet_getMetaData, 0, NULL)
-{
-    njsResultSet *rs = (njsResultSet*) callingInstance;
-
-    if (rs->handle && rs->conn->handle) {
-        if (!njsVariable_getMetadataMany(rs->queryVars, rs->numQueryVars, env,
-                returnValue))
-            return false;
-    }
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsResultSet_getRows()
 //   Get a number of rows from the result set.
 //
 // PARAMETERS
 //   - max number of rows to fetch at this time
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_ASYNC(njsResultSet_getRows, 1, NULL)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsResultSet_getRows, 2, NULL)
 {
     NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0],
             &baton->fetchArraySize))
+    NJS_CHECK_NAPI(env, napi_create_reference(env, args[1], 1,
+            &baton->jsExecuteOptionsRef))
     return njsBaton_queueWork(baton, env, "GetRows", njsResultSet_getRowsAsync,
             njsResultSet_getRowsPostAsync, returnValue);
 }
@@ -275,7 +256,7 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
         dpiStmt *handle, njsVariable *vars, uint32_t numVars,
         napi_value *rsObj)
 {
-    napi_value callingObj;
+    napi_value fn, temp, args[2];
     njsResultSet *rs;
 
     if (baton->outFormat == NJS_ROWS_OBJECT) {
@@ -288,13 +269,13 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
             baton->globals->jsResultSetConstructor, rsObj, (void**) &rs))
         return false;
 
-    // store a reference to the parent object (a connection or a parent result
-    // set) to ensure that it is not garbage collected during the lifetime of
-    // the result set
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
-            &callingObj))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, *rsObj, "_parentObj",
-            callingObj))
+    // setup the result set (calls into JavaScript)
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            baton->jsExecuteOptionsRef, &args[0]))
+    if (!njsVariable_getMetadataMany(vars, numVars, env, &args[1]))
+        return false;
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, *rsObj, "_setup", &fn))
+    NJS_CHECK_NAPI(env, napi_call_function(env, *rsObj, fn, 2, args, &temp))
 
     // perform some initializations
     rs->handle = handle;
@@ -304,17 +285,22 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
     rs->fetchArraySize = baton->fetchArraySize;
     rs->isNested = (baton->callingInstance != (void*) conn);
 
+    // set fetch types
+    if (!njsResultSet_setFetchTypes(env, rs, args[1]))
+        return false;
+
     return true;
 }
 
 
 //-----------------------------------------------------------------------------
 // njsResultSet_setFetchTypes()
-//   Get accessor of "metaData" property.
+//   Sets the fetch types after the fetchAsString, fetchAsBuffer and fetchInfo
+// rules have all been applied.
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsResultSet_setFetchTypes, 1, NULL)
+static bool njsResultSet_setFetchTypes(napi_env env, njsResultSet *rs,
+        napi_value allMetadata)
 {
-    njsResultSet *rs = (njsResultSet*) callingInstance;
     napi_value metadata, temp;
     njsVariable *var;
     uint32_t i;
@@ -323,7 +309,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsResultSet_setFetchTypes, 1, NULL)
         var = &rs->queryVars[i];
 
         // determine fetch type to use
-        NJS_CHECK_NAPI(env, napi_get_element(env, args[0], i, &metadata))
+        NJS_CHECK_NAPI(env, napi_get_element(env, allMetadata, i, &metadata))
         NJS_CHECK_NAPI(env, napi_get_named_property(env, metadata, "fetchType",
                 &temp))
         NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &var->varTypeNum))

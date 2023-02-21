@@ -451,6 +451,7 @@ struct njsBaton {
     napi_ref jsBufferRef;
     napi_ref jsCallingObjRef;
     napi_ref jsSubscriptionRef;
+    napi_ref jsExecuteOptionsRef;
 
     // constructors
     napi_value jsLobConstructor;

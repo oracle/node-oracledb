@@ -337,6 +337,7 @@ void njsBaton_free(njsBaton *baton, napi_env env)
     NJS_DELETE_REF_AND_CLEAR(baton->jsBufferRef);
     NJS_DELETE_REF_AND_CLEAR(baton->jsCallingObjRef);
     NJS_DELETE_REF_AND_CLEAR(baton->jsSubscriptionRef);
+    NJS_DELETE_REF_AND_CLEAR(baton->jsExecuteOptionsRef);
     if (baton->asyncWork) {
         napi_delete_async_work(env, baton->asyncWork);
         baton->asyncWork = NULL;

@@ -566,6 +566,8 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_execute, 5, NULL)
     NJS_CHECK_NAPI(env, napi_get_value_bool(env, args[4], &executeMany))
 
     // process options
+    NJS_CHECK_NAPI(env, napi_create_reference(env, args[3], 1,
+            &baton->jsExecuteOptionsRef))
     if (executeMany) {
         if (!njsUtils_getNamedPropertyBool(env, args[3], "batchErrors",
                 &baton->batchErrors))
