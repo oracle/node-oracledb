@@ -330,6 +330,11 @@ bool njsUtils_getError(napi_env env, dpiErrorInfo *errorInfo,
     // create error object
     NJS_CHECK_NAPI(env, napi_create_error(env, NULL, message, &tempError))
 
+    // let the top layer know that the stack needs to be captured
+    NJS_CHECK_NAPI(env, napi_get_boolean(env, true, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, tempError,
+            "requiresStackCapture", temp))
+
     // for ODPI-C errors, store error number and offset
     if (errorInfo) {
 
