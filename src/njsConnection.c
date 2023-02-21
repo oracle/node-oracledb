@@ -675,7 +675,7 @@ static bool njsConnection_executeAsync(njsBaton *baton)
 static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
         napi_value *result)
 {
-    napi_value metadata, resultSet, rowsAffected, outBinds, lastRowid;
+    napi_value resultSet, rowsAffected, outBinds, lastRowid;
     napi_value implicitResults;
     uint32_t rowidValueLength;
     const char *rowidValue;
@@ -701,14 +701,6 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
                 (njsConnection*) baton->callingInstance, baton->dpiStmtHandle,
                 baton->queryVars, baton->numQueryVars, &resultSet))
             return false;
-
-        // set metadata for the query
-        if (!njsVariable_getMetadataMany(baton->queryVars, baton->numQueryVars,
-                env, &metadata))
-            return false;
-        NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "metaData",
-                metadata))
-
 
         baton->dpiStmtHandle = NULL;
         baton->queryVars = NULL;
