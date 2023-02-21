@@ -498,7 +498,7 @@ describe('55. resultSet2.js', function() {
           {
             p : { type : oracledb.CURSOR, dir : oracledb.BIND_OUT }
           });
-      }, /ORA-24338:/);
+      }, /NJS-107:/);
 
     }); // 55.13.1
   }); // 55.13
