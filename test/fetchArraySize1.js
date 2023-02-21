@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -156,7 +156,7 @@ describe("148. fetchArraySize1.js", function() {
       function() {
         oracledb.fetchArraySize = values;
       },
-      /NJS-004: invalid value for property fetchArraySize/
+      /NJS-004:/
     );
     cb();
   };

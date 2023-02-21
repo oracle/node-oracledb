@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -309,7 +309,7 @@ describe('56. fetchAs.js', function() {
       function() {
         oracledb.fetchAsString = '';
       },
-      /NJS-004: invalid value for property fetchAsString/
+      /NJS-004:/
     );
   });
 
@@ -318,7 +318,7 @@ describe('56. fetchAs.js', function() {
       function() {
         oracledb.fetchAsString = null;
       },
-      /NJS-004: invalid value for property fetchAsString/
+      /NJS-004:/
     );
   });
 
@@ -327,7 +327,7 @@ describe('56. fetchAs.js', function() {
       function() {
         oracledb.fetchAsString = undefined;
       },
-      /NJS-004: invalid value for property fetchAsString/
+      /NJS-004:/
     );
   });
 
@@ -336,7 +336,7 @@ describe('56. fetchAs.js', function() {
       function() {
         oracledb.fetchAsString = NaN;
       },
-      /NJS-004: invalid value for property fetchAsString/
+      /NJS-004:/
     );
   });
 
@@ -345,7 +345,7 @@ describe('56. fetchAs.js', function() {
       function() {
         oracledb.fetchAsString = 10;
       },
-      /NJS-004: invalid value for property fetchAsString/
+      /NJS-004:/
     );
   });
 
@@ -354,7 +354,7 @@ describe('56. fetchAs.js', function() {
       function() {
         oracledb.fetchAsString = 'abc';
       },
-      /NJS-004: invalid value for property fetchAsString/
+      /NJS-004:/
     );
   });
 
@@ -418,7 +418,7 @@ describe('56. fetchAs.js', function() {
         var dt = new Date ();
         oracledb.fetchAsString = dt;
       },
-      /NJS-004: invalid value for property fetchAsString/
+      /NJS-004:/
     );
   });
 
@@ -428,7 +428,7 @@ describe('56. fetchAs.js', function() {
         var buf = assist.createBuffer (10) ;  // arbitary sized buffer
         oracledb.fetchAsString = buf;
       },
-      /NJS-004: invalid value for property fetchAsString/
+      /NJS-004:/
     );
   });
 

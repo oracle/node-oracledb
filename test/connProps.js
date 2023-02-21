@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -125,14 +125,14 @@ describe('193. connProps.js', function() {
       () => {
         conn.clientInfo = 3;
       },
-      /NJS-004/
+      /NJS-004:/
     );
 
     assert.throws(
       () => {
         conn.dbOp = 4;
       },
-      /NJS-004/
+      /NJS-004:/
     );
 
     // NaN
@@ -140,14 +140,14 @@ describe('193. connProps.js', function() {
       () => {
         conn.clientInfo = NaN;
       },
-      /NJS-004/
+      /NJS-004:/
     );
 
     assert.throws(
       () => {
         conn.dbOp = NaN;
       },
-      /NJS-004/
+      /NJS-004:/
     );
 
     // undefined
@@ -155,14 +155,14 @@ describe('193. connProps.js', function() {
       () => {
         conn.clientInfo = undefined;
       },
-      /NJS-004/
+      /NJS-004:/
     );
 
     assert.throws(
       () => {
         conn.dbOp = undefined;
       },
-      /NJS-004/
+      /NJS-004:/
     );
 
     await conn.close();

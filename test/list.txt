@@ -4120,7 +4120,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     162.17 DROP
     162.18 ALTER
     162.19 ALTER with data bind
-    162.20 ALTER, invaid statement
+    162.20 ALTER, invalid statement
     162.21 BEGIN
     162.22 BEGIN with data bind
     162.23 DECLARE
@@ -4443,7 +4443,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 191. currentSchema.js
     191.1 the value will be empty until it has been explicitly set
     191.2 SQL alternative
-    191.3 Negative - can not set inexistent schema
+    191.3 Negative - can not set non-existent schema
 
 192. implicitResults.js
     192.1 implicit results with rows fetched

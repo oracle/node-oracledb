@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -31,109 +31,50 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
 
 describe('45. instanceof1.js', function() {
 
-  it('45.2 instanceof works for pool instances', function(done) {
-    oracledb.createPool(
-      {
-        ...dbConfig,
-        poolMin           : 0,
-        poolMax           : 1,
-        poolIncrement     : 1
-      },
-      function(err, pool) {
-        should.not.exist(err);
-
-        (pool instanceof oracledb.Pool).should.be.true();
-
-        pool.terminate(function(err) {
-          should.not.exist(err);
-
-          done();
-        });
-      }
-    );
+  it('45.2 instanceof works for pool instances', async function() {
+    const config = {
+      ...dbConfig,
+      poolMin           : 0,
+      poolMax           : 1,
+      poolIncrement     : 1
+    };
+    const pool = await oracledb.createPool(config);
+    assert(pool instanceof oracledb.Pool);
+    await pool.close();
   });
 
-  it('45.3 instanceof works for connection instances', function(done) {
-    oracledb.getConnection(dbConfig,
-      function(err, conn) {
-        should.not.exist(err);
-
-        (conn instanceof oracledb.Connection).should.be.true();
-
-        conn.release(function(err) {
-          should.not.exist(err);
-
-          done();
-        });
-      }
-    );
+  it('45.3 instanceof works for connection instances', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+    assert(conn instanceof oracledb.Connection);
+    await conn.close();
   });
 
-  it('45.4 instanceof works for resultset instances', function(done) {
-    oracledb.getConnection(dbConfig,
-      function(err, conn) {
-        should.not.exist(err);
-
-        conn.execute(
-          'select 1 from dual union select 2 from dual',
-          [], // no binds
-          {
-            resultSet: true
-          },
-          function(err, result) {
-            should.not.exist(err);
-
-            (result.resultSet instanceof oracledb.ResultSet).should.be.true();
-
-            result.resultSet.close(function(err) {
-              should.not.exist(err);
-
-              conn.release(function(err) {
-                should.not.exist(err);
-
-                done();
-              });
-            });
-          }
-        );
-      }
-    );
+  it('45.4 instanceof works for resultset instances', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+    const sql = 'select 1 from dual union select 2 from dual';
+    const binds = [];
+    const options = {
+      resultSet: true
+    };
+    const result = await conn.execute(sql, binds, options);
+    assert(result.resultSet instanceof oracledb.ResultSet);
+    await result.resultSet.close();
+    await conn.close();
   });
 
-  it('45.5 instanceof works for lob instances', function(done) {
-    oracledb.getConnection(dbConfig,
-      function(err, conn) {
-        should.not.exist(err);
-
-        conn.execute(
-          'select to_clob(dummy) from dual',
-          function(err, result) {
-            should.not.exist(err);
-
-            (result.rows[0][0] instanceof oracledb.Lob).should.be.true();
-
-            var lob = result.rows[0][0];
-
-            lob.on("finish", function(err) {
-              should.not.exist(err);
-            });
-
-            lob.on("error", function(err) {
-              should.not.exist(err, "lob.on 'error' event.");
-            });
-
-            lob.destroy();
-            done();
-          }
-        );
-      }
-    );
+  it('45.5 instanceof works for lob instances', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+    const result = await conn.execute('select to_clob(dummy) from dual');
+    const lob = result.rows[0][0];
+    assert(lob instanceof oracledb.Lob);
+    lob.destroy();
+    await conn.close();
   }); // 45.5
 
 });

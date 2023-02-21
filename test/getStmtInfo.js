@@ -240,7 +240,7 @@ describe('162. getStmtInfo.js', function() {
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_ALTER);
   }); // 162.19
 
-  it('162.20 ALTER, invaid statement', async function() {
+  it('162.20 ALTER, invalid statement', async function() {
     const sql = "ALTER SESSION SET :B = 'UTC'";
     const info = await conn.getStatementInfo(sql);
     assert.deepEqual(info.bindNames, []);

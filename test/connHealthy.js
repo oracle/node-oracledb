@@ -72,7 +72,6 @@ describe('261. connHealthy.js', function() {
       await pool.close();
     });
 
-
   });
 
 });

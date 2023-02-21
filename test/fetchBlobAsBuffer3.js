@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -332,7 +332,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
         function() {
           oracledb.fetchAsBuffer = null;
         },
-        /NJS-004: invalid value for property [\w]/
+        /NJS-004:/
       );
       done();
     }); // 89.2.8
@@ -343,7 +343,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
         function() {
           oracledb.fetchAsBuffer = undefined;
         },
-        /NJS-004: invalid value for property [\w]/
+        /NJS-004:/
       );
       done();
     }); // 89.2.9
@@ -354,7 +354,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
         function() {
           oracledb.fetchAsBuffer = 89210;
         },
-        /NJS-004: invalid value for property [\w]/
+        /NJS-004:/
       );
       done();
     }); // 89.2.10
@@ -365,7 +365,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
         function() {
           oracledb.fetchAsBuffer = ' ';
         },
-        /NJS-004: invalid value for property [\w]/
+        /NJS-004:/
       );
       done();
     }); // 89.2.11
@@ -376,7 +376,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
         function() {
           oracledb.fetchAsBuffer = "89.2.12";
         },
-        /NJS-004: invalid value for property [\w]/
+        /NJS-004:/
       );
       done();
     }); // 89.2.12
@@ -388,7 +388,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
           var dt = new Date ();
           oracledb.fetchAsBuffer = dt;
         },
-        /NJS-004: invalid value for property [\w]/
+        /NJS-004:/
       );
       done();
     }); // 89.2.13
@@ -400,7 +400,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
           var buf = assist.createBuffer (10) ;
           oracledb.fetchAsBuffer = buf;
         },
-        /NJS-004: invalid value for property [\w]/
+        /NJS-004:/
       );
       done();
     }); // 89.2.14

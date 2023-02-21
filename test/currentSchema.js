@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -83,7 +83,7 @@ describe('191. currentSchema.js', function() {
 
   }); // 191.2
 
-  it('191.3 Negative - can not set inexistent schema', async () => {
+  it('191.3 Negative - can not set non-existent schema', async () => {
 
     async function setInvalidSchema() {
       const conn = await oracledb.getConnection(dbConfig);

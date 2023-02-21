@@ -380,6 +380,7 @@ describe('161. changePassword.js', function() {
       async () => await oracledb.getConnection(credential),
       /ORA-28001:/
     );
+    await dbaConn.close();
   }); // 161.10
 
 });

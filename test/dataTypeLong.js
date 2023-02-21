@@ -85,5 +85,5 @@ describe('103. dataTypeLong.js', function() {
       await assist.verifyNullValues(connection, tableName);
     });
   });
-});
 
+});
