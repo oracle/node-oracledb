@@ -31,13 +31,13 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const should   = require('should');
+const dbConfig = require('./dbconfig.js');
 
 describe("148. fetchArraySize1.js", function() {
 
-  var connection = null;
+  let connection = null;
   var defaultVal = oracledb.fetchArraySize;
 
   before(function(done) {

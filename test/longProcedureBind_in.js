@@ -41,7 +41,7 @@ var sql      = require('./sql.js');
 
 describe('131. longProcedureBind_in.js', function() {
 
-  var connection = null;
+  let connection = null;
   const tableName = "nodb_long_128";
   var insertID = 0;
   // The NOCOMPRESS option for CREATE TABLE ensures that Hybrid Columnar Compression (HCC) is disabled for tables with LONG and LONG RAW Columns

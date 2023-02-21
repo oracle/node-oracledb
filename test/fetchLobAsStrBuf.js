@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -31,11 +31,11 @@
  *****************************************************************************/
 'use strict';
 
-let oracledb = require('oracledb');
-let assert   = require('assert');
-let dbConfig = require('./dbconfig.js');
-let random   = require('./random.js');
-let assist   = require('./dataTypeAssist.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const random   = require('./random.js');
+const assist   = require('./dataTypeAssist.js');
 
 describe('245. fetchLobAsStrBuf.js', function() {
   let connection = null;

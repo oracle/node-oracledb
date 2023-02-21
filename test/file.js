@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -29,9 +29,9 @@
  *   file manipulate
  *****************************************************************************/
 'use strict';
-var should   = require('should');
-var fs       = require('fs');
-var random   = require('./random.js');
+const should   = require('should');
+const fs       = require('fs');
+const random   = require('./random.js');
 
 var file = exports;
 module.exports = file;

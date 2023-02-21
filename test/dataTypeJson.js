@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -31,16 +31,16 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb  = require('oracledb');
-var should    = require('should');
-var assist    = require('./dataTypeAssist.js');
-var dbConfig  = require('./dbconfig.js');
-var async     = require('async');
+const oracledb  = require('oracledb');
+const should    = require('should');
+const assist    = require('./dataTypeAssist.js');
+const dbConfig  = require('./dbconfig.js');
+const async     = require('async');
 const testsUtil = require('./testsUtil.js');
 
 describe('244.dataTypeJson.js', function() {
 
-  var connection = null;
+  let connection = null;
   var isRunnable = false;
   var tableName = "nodb_json";
 

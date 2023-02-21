@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -33,11 +33,11 @@
  *****************************************************************************/
 'use strict';
 
-let oracledb = require('oracledb');
+const oracledb = require('oracledb');
 const assert = require('assert');
 const sql    = require('./sqlClone.js');
-let dbConfig = require('./dbconfig.js');
-let assist   = require('./dataTypeAssist.js');
+const dbConfig = require('./dbconfig.js');
+const assist   = require('./dataTypeAssist.js');
 
 describe('94.binding_procedureBindInout.js', function() {
 

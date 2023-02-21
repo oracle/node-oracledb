@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -31,15 +31,15 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var assist   = require('./dataTypeAssist.js');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const should   = require('should');
+const async    = require('async');
+const assist   = require('./dataTypeAssist.js');
+const dbConfig = require('./dbconfig.js');
 
 describe('113. dataTypeUrowid.js', function() {
 
-  var connection = null;
+  let connection = null;
   var tableName = "nodb_urowid";
   var array = assist.data.numbersForBinaryFloat;
   var numRows = array.length;  // number of rows to return from each call to getRows()
@@ -89,7 +89,7 @@ describe('113. dataTypeUrowid.js', function() {
         "SELECT * FROM " + tableName,
         function(err, result) {
           should.not.exist(err);
-          for (var i = 0; i < array.length; i++) {
+          for (let i = 0; i < array.length; i++) {
             var resultVal = result.rows[i][1];
             should.strictEqual(typeof resultVal, "string");
             resultVal.should.not.be.null;

@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -31,16 +31,16 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb  = require('oracledb');
-var should    = require('should');
-var async     = require('async');
-var dbConfig  = require('./dbconfig.js');
-var file      = require('./file.js');
-var sql       = require('./sql.js');
-var fs        = require('fs');
+const oracledb  = require('oracledb');
+const should    = require('should');
+const async     = require('async');
+const dbConfig  = require('./dbconfig.js');
+const file      = require('./file.js');
+const sql       = require('./sql.js');
+const fs        = require('fs');
 
 describe('127.blobStream.js', function() {
-  var connection = null;
+  let connection = null;
   var fileRoot = ".";
   var insertID = 1;
   var inFileName;

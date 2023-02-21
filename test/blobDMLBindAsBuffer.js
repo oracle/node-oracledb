@@ -41,7 +41,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
   let connection = null;
   let insertID = 1; // assume id for insert into db starts from 1
 
-  let proc_blob_1 = "BEGIN \n" +
+  const proc_blob_1 = "BEGIN \n" +
                     "    DECLARE \n" +
                     "        e_table_missing EXCEPTION; \n" +
                     "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -58,7 +58,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
                     "        ) \n" +
                     "    '); \n" +
                     "END; ";
-  let sql2DropTable1 = "DROP TABLE nodb_dml_blob_1 PURGE";
+  const sql2DropTable1 = "DROP TABLE nodb_dml_blob_1 PURGE";
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);

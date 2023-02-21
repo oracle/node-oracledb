@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -31,21 +31,21 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb  = require('oracledb');
-var should    = require('should');
-var async     = require('async');
-var dbConfig  = require('./dbconfig.js');
-var file      = require('./file.js');
-var sql       = require('./sql.js');
-var fs        = require('fs');
+const oracledb  = require('oracledb');
+const should    = require('should');
+const async     = require('async');
+const dbConfig  = require('./dbconfig.js');
+const file      = require('./file.js');
+const sql       = require('./sql.js');
+const fs        = require('fs');
 
 describe('128.clobStream.js', function() {
-  var connection = null;
-  var fileRoot = ".";
-  var insertID = 1;
-  var inFileName;
+  let connection = null;
+  const fileRoot = ".";
+  let insertID = 1;
+  let inFileName;
 
-  var proc_clob_prepare_tab = "BEGIN \n" +
+  const proc_clob_prepare_tab = "BEGIN \n" +
                               "    DECLARE \n" +
                               "        e_table_missing EXCEPTION; \n" +
                               "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -100,27 +100,27 @@ describe('128.clobStream.js', function() {
   describe('128.1 stream txt file into CLOB column', function() {
     it('128.1.1 works with 64KB txt file', function(done) {
       inFileName = fileRoot + '/smallString.txt';
-      var selectID = insertID + 200;
-      var specialStr = '128.1.1';
-      var fileSize = 65536;
+      let selectID = insertID + 200;
+      let specialStr = '128.1.1';
+      let fileSize = 65536;
 
       bindIn_small(inFileName, fileSize, selectID, insertID, specialStr, done);
     });
 
     it('128.1.2 works with 64KB+1 txt file', function(done) {
       inFileName = fileRoot + '/smallString.txt';
-      var selectID = insertID + 200;
-      var specialStr = '128.1.2';
-      var fileSize = 655376;
+      let selectID = insertID + 200;
+      let specialStr = '128.1.2';
+      let fileSize = 655376;
 
       bindIn_small(inFileName, fileSize, selectID, insertID, specialStr, done);
     });
 
     it('128.1.3 works with 1MB+1 txt file', function(done) {
       inFileName = fileRoot + '/smallString.txt';
-      var selectID = insertID + 200;
-      var specialStr = '128.1.3';
-      var fileSize = 1 * 1024 * 1024;
+      let selectID = insertID + 200;
+      let specialStr = '128.1.3';
+      let fileSize = 1 * 1024 * 1024;
 
       bindIn_small(inFileName, fileSize, selectID, insertID, specialStr, done);
     });

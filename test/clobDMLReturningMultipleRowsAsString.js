@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -38,10 +38,10 @@ const sql      = require('./sqlClone.js');
 
 describe('136. clobDMLReturningMultipleRowsAsString.js', function() {
 
-  var connection = null;
-  var tableName = "nodb_dml_clob_136";
+  let connection = null;
+  let tableName = "nodb_dml_clob_136";
 
-  var clob_table_create = "BEGIN \n" +
+  const clob_table_create = "BEGIN \n" +
                           "    DECLARE \n" +
                           "        e_table_missing EXCEPTION; \n" +
                           "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -64,7 +64,7 @@ describe('136. clobDMLReturningMultipleRowsAsString.js', function() {
                           "    END LOOP; \n" +
                           "    commit; \n" +
                           "END; ";
-  var clob_table_drop = "DROP TABLE " + tableName + " PURGE";
+  const clob_table_drop = "DROP TABLE " + tableName + " PURGE";
 
   before(async function() {
     try {

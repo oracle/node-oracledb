@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -42,7 +42,7 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
   let connection = null;
   let tableName = "nodb_dml_blob_138";
 
-  let blob_table_create = "BEGIN \n" +
+  const blob_table_create = "BEGIN \n" +
                           "    DECLARE \n" +
                           "        e_table_missing EXCEPTION; \n" +
                           "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -59,7 +59,7 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
                           "        ) \n" +
                           "    '); \n" +
                           "END; ";
-  let blob_table_drop = "DROP TABLE " + tableName + " PURGE";
+  const blob_table_drop = "DROP TABLE " + tableName + " PURGE";
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);

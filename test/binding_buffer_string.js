@@ -1,4 +1,4 @@
-/* Copyright (c) 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2022, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -31,15 +31,15 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var assert   = require('assert');
+const oracledb = require('oracledb');
+const assert   = require('assert');
 const sql      = require('./sqlClone.js');
-var dbConfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 
 describe('263. binding_buffer_string.js', function() {
-  var connection = null;
+  let connection = null;
 
-  var proc_blob_in_tab = "BEGIN \n" +
+  const proc_blob_in_tab = "BEGIN \n" +
                          "    DECLARE \n" +
                          "        e_table_missing EXCEPTION; \n" +
                          "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -56,7 +56,7 @@ describe('263. binding_buffer_string.js', function() {
                          "        ) \n" +
                          "    '); \n" +
                          "END; ";
-  var drop_table = "DROP TABLE blob_tab PURGE";
+  const drop_table = "DROP TABLE blob_tab PURGE";
   before('get connection and create table', async function() {
     try {
       connection = await oracledb.getConnection(dbConfig);

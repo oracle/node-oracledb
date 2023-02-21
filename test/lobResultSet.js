@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -35,16 +35,16 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var fs       = require('fs');
-var async    = require('async');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
-var assist   = require('./dataTypeAssist.js');
+const oracledb = require('oracledb');
+const fs       = require('fs');
+const async    = require('async');
+const should   = require('should');
+const dbConfig = require('./dbconfig.js');
+const assist   = require('./dataTypeAssist.js');
 
 describe('59. lobResultSet.js', function() {
 
-  var connection = null;
+  let connection = null;
 
   before('get one connection', function(done) {
     oracledb.getConnection(dbConfig, function(err, conn) {

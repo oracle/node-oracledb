@@ -32,16 +32,16 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var async    = require('async');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
-var random   = require('./random.js');
-var assist   = require('./dataTypeAssist.js');
+const oracledb = require('oracledb');
+const async    = require('async');
+const should   = require('should');
+const dbConfig = require('./dbconfig.js');
+const random   = require('./random.js');
+const assist   = require('./dataTypeAssist.js');
 
 describe('89. fetchBlobAsBuffer3.js', function() {
 
-  var connection = null;
+  let connection = null;
   var insertID = 1; // assume id for insert into db starts from 1
 
   var proc_create_table2 = "BEGIN \n" +

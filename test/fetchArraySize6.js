@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -35,19 +35,19 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const should   = require('should');
+const async    = require('async');
+const dbConfig = require('./dbconfig.js');
 
 describe("153. fetchArraySize6.js", function() {
 
-  var connection = null;
+  let connection = null;
   var default_maxRows = oracledb.maxRows;
   var tableName = "nodb_fetchArraySize_153";
   var tableSize = 1000;
 
-  var create_table = "BEGIN \n" +
+  const create_table = "BEGIN \n" +
                      "    DECLARE \n" +
                      "        e_table_missing EXCEPTION; \n" +
                      "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -71,7 +71,7 @@ describe("153. fetchArraySize6.js", function() {
                      "    commit; \n" +
                      "END; ";
 
-  var drop_table = "DROP TABLE " + tableName + " PURGE";
+  const drop_table = "DROP TABLE " + tableName + " PURGE";
 
   before(function(done) {
     oracledb.getConnection(dbConfig, function(err, conn) {

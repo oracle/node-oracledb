@@ -31,16 +31,16 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require ('oracledb');
-var should   = require ('should');
-var async    = require ('async');
-var dbConfig = require ('./dbconfig.js');
-var assist   = require ('./dataTypeAssist.js');
+const oracledb = require ('oracledb');
+const should   = require ('should');
+const async    = require ('async');
+const dbConfig = require ('./dbconfig.js');
+const assist   = require ('./dataTypeAssist.js');
 
 
 describe('56. fetchAs.js', function() {
 
-  var connection = null;
+  let connection = null;
   beforeEach('get one connection', function(done) {
     oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);

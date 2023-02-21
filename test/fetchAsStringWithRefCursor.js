@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -33,13 +33,13 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var async    = require('async');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const async    = require('async');
+const should   = require('should');
+const dbConfig = require('./dbconfig.js');
 
 describe('139. fetchAsStringWithRefCursor.js', function() {
-  var connection = null;
+  let connection = null;
   var tableName = "nodb_tab_fetchAsRefCursor";
 
   before(function(done) {
@@ -52,7 +52,7 @@ describe('139. fetchAsStringWithRefCursor.js', function() {
         });
       },
       function createTable(cb) {
-        var sql = "BEGIN \n" +
+        let sql = "BEGIN \n" +
                   "    DECLARE \n" +
                   "        e_table_missing EXCEPTION; \n" +
                   "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
@@ -80,7 +80,7 @@ describe('139. fetchAsStringWithRefCursor.js', function() {
         );
       },
       function insertData(cb) {
-        var sql = "DECLARE \n" +
+        let sql = "DECLARE \n" +
                   "    x NUMBER := 0; \n" +
                   "    n VARCHAR2(20); \n" +
                   "BEGIN \n" +
@@ -100,7 +100,7 @@ describe('139. fetchAsStringWithRefCursor.js', function() {
         );
       },
       function createProc(cb) {
-        var proc = "CREATE OR REPLACE PROCEDURE nodb_proc_fetchcursor (p_in IN NUMBER, p_out OUT SYS_REFCURSOR) \n" +
+        let proc = "CREATE OR REPLACE PROCEDURE nodb_proc_fetchcursor (p_in IN NUMBER, p_out OUT SYS_REFCURSOR) \n" +
                    "AS \n" +
                    "BEGIN \n" +
                    "    OPEN p_out FOR \n" +
@@ -120,7 +120,7 @@ describe('139. fetchAsStringWithRefCursor.js', function() {
   after(function(done) {
     async.series([
       function(cb) {
-        var sql = "DROP PROCEDURE nodb_proc_fetchcursor";
+        let sql = "DROP PROCEDURE nodb_proc_fetchcursor";
         connection.execute(
           sql,
           function(err) {
@@ -130,7 +130,7 @@ describe('139. fetchAsStringWithRefCursor.js', function() {
         );
       },
       function(cb) {
-        var sql = "DROP TABLE " + tableName + " PURGE";
+        let sql = "DROP TABLE " + tableName + " PURGE";
         connection.execute(
           sql,
           function(err) {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -36,16 +36,16 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var async    = require('async');
-var should   = require('should');
-var stream   = require('stream');
-var dbConfig = require('./dbconfig.js');
-var assist   = require('./dataTypeAssist.js');
+const oracledb = require('oracledb');
+const async    = require('async');
+const should   = require('should');
+const stream   = require('stream');
+const dbConfig = require('./dbconfig.js');
+const assist   = require('./dataTypeAssist.js');
 
 describe('60. clobPlsqlString.js', function() {
 
-  var connection = null;
+  let connection = null;
   var tableName = "nodb_myclobs";
 
   before('get one connection, prepare table', function(done) {

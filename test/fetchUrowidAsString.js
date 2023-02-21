@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -33,15 +33,15 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var async    = require('async');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
-var random   = require('./random.js');
+const oracledb = require('oracledb');
+const async    = require('async');
+const should   = require('should');
+const dbConfig = require('./dbconfig.js');
+const random   = require('./random.js');
 
 describe('116. fetchUrowidAsString.js', function() {
 
-  var connection = null;
+  let connection = null;
   var tableName = "nodb_rowid";
   var dataArray = random.getRandomNumArray(30);
   var numRows = dataArray.length;  // number of rows to return from each call to getRows()

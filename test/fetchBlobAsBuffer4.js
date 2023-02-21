@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -31,16 +31,16 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
-var random   = require('./random.js');
-var assist   = require('./dataTypeAssist.js');
+const oracledb = require('oracledb');
+const should   = require('should');
+const async    = require('async');
+const dbConfig = require('./dbconfig.js');
+const random   = require('./random.js');
+const assist   = require('./dataTypeAssist.js');
 
 describe('91. fetchBlobAsBuffer4.js', function() {
 
-  var connection = null;
+  let connection = null;
   var insertID = 1; // assume id for insert into db starts from 1
   var proc_blob_in_tab = "BEGIN \n" +
                            "    DECLARE \n" +

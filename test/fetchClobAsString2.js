@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -33,16 +33,16 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var async    = require('async');
-var should   = require('should');
-var file     = require('./file.js');
-var dbConfig = require('./dbconfig.js');
-var random   = require('./random.js');
+const oracledb = require('oracledb');
+const async    = require('async');
+const should   = require('should');
+const file     = require('./file.js');
+const dbConfig = require('./dbconfig.js');
+const random   = require('./random.js');
 
 describe('85. fetchClobAsString2.js', function() {
 
-  var connection = null;
+  let connection = null;
   var insertID = 1; // assume id for insert into db starts from 1
   var inFileName = './test/clobTmpFile.txt';
   var proc_create_table1 = "BEGIN \n" +

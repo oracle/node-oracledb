@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -38,7 +38,7 @@ const dbConfig = require('./dbconfig.js');
 
 describe('29. dataTypeFloat2.js', function() {
 
-  var connection = null;
+  let connection = null;
   var tableName = "nodb_float2";
   var numbers = assist.data.numbers;
 

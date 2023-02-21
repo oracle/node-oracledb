@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -31,8 +31,8 @@
  *****************************************************************************/
 'use strict';
 
-var stream = require('stream');
-var util   = require('util');
+const stream = require('stream');
+const util   = require('util');
 
 module.exports = DevNull;
 

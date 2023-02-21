@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -31,18 +31,18 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
-var sql      = require('./sql.js');
+const oracledb = require('oracledb');
+const should   = require('should');
+const async    = require('async');
+const dbConfig = require('./dbconfig.js');
+const sql      = require('./sql.js');
 
 describe('135. clobDMLReturningMultipleRowsAsStream.js', function() {
 
-  var connection = null;
-  var tableName = "nodb_dml_clob_135";
+  let connection = null;
+  let tableName = "nodb_dml_clob_135";
 
-  var clob_table_create = "BEGIN \n" +
+  const clob_table_create = "BEGIN \n" +
                           "    DECLARE \n" +
                           "        e_table_missing EXCEPTION; \n" +
                           "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -65,7 +65,7 @@ describe('135. clobDMLReturningMultipleRowsAsStream.js', function() {
                           "    END LOOP; \n" +
                           "    commit; \n" +
                           "END; ";
-  var clob_table_drop = "DROP TABLE " + tableName + " PURGE";
+  const clob_table_drop = "DROP TABLE " + tableName + " PURGE";
 
   before(function(done) {
     oracledb.getConnection(dbConfig, function(err, conn) {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -43,7 +43,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
   let connection = null;
   let insertID = 1; // assume id for insert into db starts from 1
 
-  let proc_blob_in_tab = "BEGIN \n" +
+  const proc_blob_in_tab = "BEGIN \n" +
                          "    DECLARE \n" +
                          "        e_table_missing EXCEPTION; \n" +
                          "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -62,7 +62,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
                          "    '); \n" +
                          "END; ";
 
-  let proc_lobs_in_tab = "BEGIN \n" +
+  const proc_lobs_in_tab = "BEGIN \n" +
                          "    DECLARE \n" +
                          "        e_table_missing EXCEPTION; \n" +
                          "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
