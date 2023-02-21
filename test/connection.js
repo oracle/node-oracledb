@@ -359,7 +359,7 @@ describe('1. connection.js', function() {
       const pool = await oracledb.createPool(credential);
       const conn = await pool.getConnection();
       await conn.release();
-      await pool.close();
+      await pool.close(0);
     });
 
   }); // 1.7
@@ -526,4 +526,3 @@ describe('1. connection.js', function() {
     });
   }); //1.15
 });
-

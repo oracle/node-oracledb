@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -48,7 +48,7 @@ describe("73. poolPing.js", function() {
     assert.strictEqual(oracledb.poolPingInterval, defaultValue);
     const pool = await oracledb.createPool(dbConfig);
     assert.strictEqual(pool.poolPingInterval, defaultValue);
-    await pool.close();
+    await pool.close(0);
   }); // 73.1
 
   it("73.2 does not change after the pool has been created", async function() {
@@ -60,7 +60,7 @@ describe("73. poolPing.js", function() {
     oracledb.poolPingInterval = newInterval;
     await new Promise((resolve) => setTimeout(resolve, 100));
     assert.strictEqual(pool.poolPingInterval, userSetInterval);
-    await pool.close();
+    await pool.close(0);
   }); // 73.2
 
   it("73.3 can not be changed on pool object", async function() {
@@ -73,7 +73,7 @@ describe("73. poolPing.js", function() {
       () => pool.poolPingInterval = newInterval,
       /TypeError/
     );
-    await pool.close();
+    await pool.close(0);
   }); // 73.3
 
   it("73.4 can not be accessed on connection object", async function() {
@@ -81,7 +81,7 @@ describe("73. poolPing.js", function() {
     const conn = await pool.getConnection();
     assert.strictEqual(conn.poolPingInterval, undefined);
     await conn.close();
-    await pool.close();
+    await pool.close(0);
   }); // 73.4
 
   // helper function for below test cases
@@ -89,7 +89,7 @@ describe("73. poolPing.js", function() {
     oracledb.poolPingInterval = userSetInterval;
     const pool = await oracledb.createPool(dbConfig);
     assert.strictEqual(pool.poolPingInterval, userSetInterval);
-    await pool.close();
+    await pool.close(0);
   }; // testDefine()
 
   it("73.5 can be set to 0, means always ping", async function() {
@@ -162,7 +162,7 @@ describe("73. poolPing.js", function() {
     };
     const pool = await oracledb.createPool(config);
     assert.strictEqual(pool.poolPingInterval, expectedValue);
-    await pool.close();
+    await pool.close(0);
   }; // testPoolDefine
 
   it("73.14 can be set at pool creation, e.g. positive value 1234", async function() {

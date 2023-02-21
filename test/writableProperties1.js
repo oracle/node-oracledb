@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -55,7 +55,7 @@ describe('66. writableProperties1.js', function() {
   it('66.1 allows overwriting of public methods on pool instances', async function() {
     const pool = await oracledb.createPool(dbConfig);
     checkOverwrite(pool);
-    await pool.close();
+    await pool.close(0);
   });
 
   it('66.2 allows overwriting of public methods on connection instances', async function() {

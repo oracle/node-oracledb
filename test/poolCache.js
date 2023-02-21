@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -44,12 +44,12 @@ describe('67. poolCache.js', function() {
       const defaultPool = oracledb.getPool();
       assert.strictEqual(pool, defaultPool);
       assert.strictEqual(pool.poolAlias, "default");
-      await pool.close();
+      await pool.close(0);
     });
 
     it('67.1.2 removes the pool from the cache on terminate', async function() {
       const pool = await oracledb.createPool(dbConfig);
-      await pool.close();
+      await pool.close(0);
       assert.throws(
         () => oracledb.getPool(),
         /NJS-047:/
@@ -62,7 +62,7 @@ describe('67. poolCache.js', function() {
       assert.strictEqual(pool.poolAlias, config.poolAlias);
       const aliasedPool = oracledb.getPool(config.poolAlias);
       assert.strictEqual(pool, aliasedPool);
-      await pool.close();
+      await pool.close(0);
     });
 
     it('67.1.4 throws an error if the poolAlias already exists in the cache', async function() {
@@ -72,7 +72,7 @@ describe('67. poolCache.js', function() {
         async () => await oracledb.createPool(config),
         /NJS-046:/
       );
-      await pool.close();
+      await pool.close(0);
     });
 
     it('67.1.5 does not throw an error if multiple pools are created without a poolAlias', async function() {
@@ -101,7 +101,7 @@ describe('67. poolCache.js', function() {
         /TypeError: Cannot set/
       );
       assert.strictEqual(pool.poolAlias, config.poolAlias);
-      await pool.close();
+      await pool.close(0);
     });
 
     it('67.1.8 retrieves the default pool, even after an aliased pool is created', async function() {
@@ -163,7 +163,7 @@ describe('67. poolCache.js', function() {
       const pool = await oracledb.createPool(dbConfig);
       const conn = await oracledb.getConnection();
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('67.2.2 gets a connection from the pool with the specified poolAlias', async function() {
@@ -171,7 +171,7 @@ describe('67. poolCache.js', function() {
       const pool = await oracledb.createPool(config);
       const conn = await oracledb.getConnection(config.poolAlias);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('67.2.3 throws an error if an attempt is made to use the default pool when it does not exist', async function() {
@@ -181,7 +181,7 @@ describe('67. poolCache.js', function() {
         async () => await oracledb.getConnection(),
         /NJS-047:/
       );
-      await pool.close();
+      await pool.close(0);
     });
 
     it('67.2.4 throws an error if an attempt is made to use a poolAlias for a pool that is not in the cache', async function() {
@@ -191,7 +191,7 @@ describe('67. poolCache.js', function() {
         async () => await oracledb.getConnection("pool-alias-that-does-not-exist"),
         /NJS-047:/
       );
-      await pool.close();
+      await pool.close(0);
     });
 
     it('67.2.5 gets a connection from the default pool, even after an aliased pool is created', async function() {
@@ -232,7 +232,7 @@ describe('67. poolCache.js', function() {
       const pool = await oracledb.createPool(config);
       const conn = await pool.getConnection();
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
   }); // 67.2
@@ -300,7 +300,7 @@ describe('67. poolCache.js', function() {
       const config = {...dbConfig, poolAlias: undefined};
       const pool = await oracledb.createPool(config);
       assert.strictEqual(pool.poolAlias, "default");
-      await pool.close();
+      await pool.close(0);
     });
 
   }); // 67.3

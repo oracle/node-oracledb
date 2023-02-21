@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -39,7 +39,7 @@ describe('51. poolClose.js', function() {
 
   it('51.1 can not get connections from the terminated pool', async function() {
     const pool = await oracledb.createPool(dbConfig);
-    await pool.close();
+    await pool.close(0);
     await assert.rejects(
       async () => await pool.getConnection(),
       /NJS-065:/
@@ -57,9 +57,9 @@ describe('51. poolClose.js', function() {
 
   it('51.3 can not close the same pool multiple times', async function() {
     const pool = await oracledb.createPool(dbConfig);
-    await pool.close();
+    await pool.close(0);
     await assert.rejects(
-      async () => await pool.close(),
+      async () => await pool.close(0),
       /NJS-065:/
     );
   }); // 51.3
@@ -72,7 +72,7 @@ describe('51. poolClose.js', function() {
       /NJS-104:/
     );
     await conn.close();
-    await pool.close();
+    await pool.close(0);
   }); // 51.4
 
   it('51.5 can not close the same connection multiple times', async function() {
@@ -83,12 +83,12 @@ describe('51. poolClose.js', function() {
       async () => await conn.close(),
       /NJS-003:/
     );
-    await pool.close();
+    await pool.close(0);
   }); // 51.5
 
   it('51.6 can not get connection from a terminated pool', async function() {
     const pool = await oracledb.createPool(dbConfig);
-    await pool.close();
+    await pool.close(0);
     await assert.rejects(
       async () => await pool.getConnection(),
       /NJS-065:/
@@ -106,13 +106,13 @@ describe('51. poolClose.js', function() {
       () => pool.poolMin = 20,
       /TypeError: Cannot set/
     );
-    await pool.close();
+    await pool.close(0);
     assert.throws(
       () => pool.poolMin = 20,
       /TypeError: Cannot set/
     );
     await assert.rejects(
-      async () => await pool.close(),
+      async () => await pool.close(0),
       /NJS-065:/
     );
   }); // 51.7
@@ -126,7 +126,7 @@ describe('51. poolClose.js', function() {
       poolIncrement   : 2
     };
     const pool = await oracledb.createPool(config);
-    await pool.close();
+    await pool.close(0);
 
     // configured values
     assert.strictEqual(pool.poolMin, config.poolMin);

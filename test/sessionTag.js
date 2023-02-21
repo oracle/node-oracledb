@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -221,7 +221,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(res.length, 0);
       assert.strictEqual(conn.tag, '');
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.1.3 Acquire connection from pool with empty string tag', async function() {
@@ -234,7 +234,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(res.length, 0);
       assert.strictEqual(conn.tag, '');
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.1.4 Acquire connection from pool with valid tag', async function() {
@@ -248,7 +248,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(res[0][1], null);
       assert.strictEqual(conn.tag, tag1);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.1.5 Acquire connection from pool with error in callback', async function() {
@@ -263,7 +263,7 @@ describe('184. sessionTag.js', function() {
         /ORA-02248/ // ORA-02248 invalid option for ALTER SESSION
       );
       assert.strictEqual(pool.connectionsOpen, 0);
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.1.6 Acquire connection from pool twice with same tag', async function() {
@@ -281,7 +281,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(res.length, 0);
       assert.strictEqual(conn.tag, tag1);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.1.7 Acquire connection from pool twice with different tag', async function() {
@@ -300,7 +300,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(res[0][1], null);
       assert.strictEqual(conn.tag, tag2);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.1.8 Acquire connection from pool twice with different tag using matchAnyTag', async function() {
@@ -319,7 +319,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(res[0][1], tag1);
       assert.strictEqual(conn.tag, tag2);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.1.9 Acquire connection from pool twice with different multi-tag using matchAnyTag', async function() {
@@ -338,7 +338,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(pool.connectionsInUse, 1);
       assert.strictEqual(conn.tag, tagMulti);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.1.10 Acquire connection from pool twice with empty string tag using matchAnyTag', async function() {
@@ -356,7 +356,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(res.length, 0);
       assert.strictEqual(conn.tag, '');
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it.skip('184.1.11 Acquire connection from pool twice with first connection\'s tag set to ""', async function() {
@@ -376,7 +376,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(res[0][1], null);
       assert.strictEqual(conn.tag, tag1);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.1.12 Acquire connection from pool twice with different tag after setting first connection\'s tag', async function() {
@@ -395,7 +395,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(res.length, 0);
       assert.strictEqual(conn.tag, tag2);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
   });
 
@@ -473,7 +473,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(callbackRequestedTag, '');
       assert.strictEqual(callbackActualTag, '');
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.2.3 Acquire connection from pool with empty string tag', async function() {
@@ -487,7 +487,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(callbackRequestedTag, '');
       assert.strictEqual(callbackActualTag, '');
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.2.4 Acquire connection from default pool with valid tag', async function() {
@@ -501,7 +501,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(callbackRequestedTag, tag1);
       assert.strictEqual(callbackActualTag, '');
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.2.5 Acquire connection from pool with valid tag', async function() {
@@ -513,7 +513,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(callbackRequestedTag, tag1);
       assert.strictEqual(callbackActualTag, '');
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.2.6 Acquire connection from pool with bad tag using async session callback', async function() {
@@ -530,7 +530,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(pool.connectionsOpen, 0);
       assert.strictEqual(callbackRequestedTag, tagBad);
       assert.strictEqual(callbackActualTag, '');
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.2.7 Acquire connection from pool with bad tag using sync session callback', async function() {
@@ -547,7 +547,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(pool.connectionsOpen, 0);
       assert.strictEqual(callbackRequestedTag, tagBad);
       assert.strictEqual(callbackActualTag, '');
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.2.8 Acquire connection from pool twice with same tag', async function() {
@@ -564,7 +564,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(callbackRequestedTag, null);
       assert.strictEqual(callbackActualTag, null);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.2.9 Acquire connection from pool twice with different tag', async function() {
@@ -581,7 +581,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(callbackRequestedTag, tag2);
       assert.strictEqual(callbackActualTag, '');
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.2.10 Acquire connection from pool twice with different tag using matchAnyTag', async function() {
@@ -598,7 +598,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(callbackRequestedTag, tag2);
       assert.strictEqual(callbackActualTag, tag1);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.2.11 Acquire connection from pool twice with different multi-tag using matchAnyTag', async function() {
@@ -617,7 +617,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(callbackRequestedTag, tag1);
       assert.strictEqual(callbackActualTag, tagMulti);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.2.12 Acquire connection from pool twice with first connection\'s tag set to ""', async function() {
@@ -635,7 +635,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(callbackRequestedTag, tag1);
       assert.strictEqual(callbackActualTag, '');
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.2.13 Acquire connection from pool twice with different tag after setting first connection\'s tag', async function() {
@@ -653,7 +653,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(callbackRequestedTag, null);
       assert.strictEqual(callbackActualTag, null);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
   });
 
@@ -676,7 +676,7 @@ describe('184. sessionTag.js', function() {
         /NJS-004:/ //NJS-004: invalid value for property
       );
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.3.2 Setting connection\'s tag to random object triggers error NJS-004', async function() {
@@ -690,7 +690,7 @@ describe('184. sessionTag.js', function() {
         /NJS-004:/ //NJS-004: invalid value for property
       );
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it.skip('184.3.3 Closing randomly tagged connection triggers error ORA-24488', async function() {
@@ -708,7 +708,7 @@ describe('184. sessionTag.js', function() {
       );
       conn.tag = tag1;
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
   });
 
@@ -769,7 +769,7 @@ describe('184. sessionTag.js', function() {
       await conn.close({tag: tag1});
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 0);
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.4.2 Acquire connection from pool, drop session', async function() {
@@ -780,7 +780,7 @@ describe('184. sessionTag.js', function() {
       await conn.close({drop: true});
       assert.strictEqual(pool.connectionsOpen, 0);
       assert.strictEqual(pool.connectionsInUse, 0);
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.4.3 Acquire connection from pool, drop session with tag', async function() {
@@ -795,7 +795,7 @@ describe('184. sessionTag.js', function() {
       await conn.close({tag: tag1, drop: true});
       assert.strictEqual(pool.connectionsOpen, 0);
       assert.strictEqual(pool.connectionsInUse, 0);
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.4.4 Acquire connection from pool, wait for pool ping to call session fixup', async function() {
@@ -820,7 +820,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(callbackRequestedTag, tag1);
       assert.strictEqual(callbackActualTag, '');
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.4.5 Acquire connection from pool, wait for pool timeout to drop', async function() {
@@ -834,7 +834,7 @@ describe('184. sessionTag.js', function() {
       resetTag();
       await sleep(5000);
       assert.strictEqual(pool.connectionsInUse, 0);
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.4.6 Drop connection from pool with poolMin=0', async function() {
@@ -850,7 +850,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.4.7 Close connection from pool with {drop: false}', async function() {
@@ -861,7 +861,7 @@ describe('184. sessionTag.js', function() {
       await conn.close({drop: false});
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 0);
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.4.8 Close connection from pool with {drop: randomObject}', async function() {
@@ -878,7 +878,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.4.9 Close connection from pool with {drop: 0}', async function() {
@@ -895,7 +895,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.4.10 Close connection from pool with empty object', async function() {
@@ -912,7 +912,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
     it('184.4.11 Close connection from pool with {drop: random string}', async function() {
@@ -929,7 +929,7 @@ describe('184. sessionTag.js', function() {
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
-      await pool.close();
+      await pool.close(0);
     });
 
   });

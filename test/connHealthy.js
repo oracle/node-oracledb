@@ -69,7 +69,7 @@ describe('261. connHealthy.js', function() {
       await conn.close();
       isHealthy = conn.isHealthy();
       assert.strictEqual(isHealthy, false);
-      await pool.close();
+      await pool.close(0);
     });
 
   });

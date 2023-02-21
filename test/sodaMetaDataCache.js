@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -66,7 +66,7 @@ describe('252. sodaMetaDataCache.js', function() {
       should.not.exist(err);
     } finally {
       if (pool)
-        await pool.close();
+        await pool.close(0);
     }
   });
 
@@ -79,7 +79,7 @@ describe('252. sodaMetaDataCache.js', function() {
     } catch (err) {
       should.not.exist(err);
     } finally {
-      await pool.close();
+      await pool.close(0);
     }
   });
 
@@ -93,14 +93,14 @@ describe('252. sodaMetaDataCache.js', function() {
     } catch (err) {
       should.not.exist(err);
     } finally {
-      await pool.close();
+      await pool.close(0);
     }
   });
 
 
   it('252.4 sodaMetaDataCache from closed pool', async function() {
     const pool = await oracledb.createPool(dbConfig);
-    await pool.close();
+    await pool.close(0);
     should.equal(pool.sodaMetaDataCache, undefined);
   });
 

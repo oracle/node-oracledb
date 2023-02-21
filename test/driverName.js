@@ -60,6 +60,6 @@ describe('69. driverName.js', function() {
       assert.strictEqual(result.rows[0][0], "node-ora");
     }
     await connection.close();
-    await pool.close();
+    await pool.close(0);
   });
 });

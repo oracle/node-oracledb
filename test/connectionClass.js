@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -50,7 +50,7 @@ describe('221. connectionClass.js', () => {
     assert.strictEqual(result.rows[0][0], 5);
 
     await conn.close();
-    await pool.close();
+    await pool.close(0);
   }); // 221.1
 
   it('221.2 set the property when using a standalone connection', async () => {

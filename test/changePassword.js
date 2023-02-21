@@ -125,7 +125,7 @@ describe('161. changePassword.js', function() {
     // Still able to get connections
     conn = await pool.getConnection();
     await conn.close();
-    await pool.close();
+    await pool.close(0);
     // verify with old password
     pool = await oracledb.createPool(credential);
 
@@ -134,7 +134,7 @@ describe('161. changePassword.js', function() {
       /ORA-01017:/
     );
 
-    await pool.close();
+    await pool.close(0);
 
     // verify with new password
     credential = {
@@ -145,7 +145,7 @@ describe('161. changePassword.js', function() {
     pool = await oracledb.createPool(credential);
     conn = await pool.getConnection();
     await conn.close();
-    await pool.close();
+    await pool.close(0);
   }); // 161.2
 
   it('161.3 DBA changes password', async function() {

@@ -46,7 +46,7 @@ describe('45. instanceof1.js', function() {
     };
     const pool = await oracledb.createPool(config);
     assert(pool instanceof oracledb.Pool);
-    await pool.close();
+    await pool.close(0);
   });
 
   it('45.3 instanceof works for connection instances', async function() {

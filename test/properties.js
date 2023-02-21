@@ -474,7 +474,7 @@ describe('58. properties.js', function() {
 
     after(async function() {
       if (pool) {
-        await pool.close();
+        await pool.close(0);
       }
     });
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -123,7 +123,7 @@ describe('165. soda2.js', () => {
         return insertDocument(pool, collectionName, content);
       })
     );
-    await pool.close();
+    await pool.close(0);
 
     await dropCollection(collectionName);
 
