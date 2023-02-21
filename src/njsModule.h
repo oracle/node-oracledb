@@ -66,15 +66,15 @@
 // define macro for synchronous Node-API methods
 #define NJS_NAPI_METHOD_DECL_SYNC(name) \
     static bool name##_(napi_env, napi_value*, napi_value, njsModuleGlobals*, \
-            njsBaseInstance*, napi_value*); \
+            void*, napi_value*); \
     static napi_value name(napi_env, napi_callback_info)
 #define NJS_NAPI_METHOD_IMPL_SYNC(name, numArgs, classDef) \
     static napi_value name(napi_env env, napi_callback_info info) { \
         napi_value callingObj, args[numArgs + 1], returnValue = NULL; \
-        njsBaseInstance* callingInstance; \
+        void* callingInstance; \
         njsModuleGlobals *globals; \
         if (!njsUtils_validateArgs(env, info, numArgs, args, &globals, \
-                &callingObj, classDef, (njsBaseInstance**) &callingInstance)) \
+                &callingObj, classDef, (void**) &callingInstance)) \
             return NULL; \
         if (!name##_(env, args, callingObj, globals, callingInstance, \
                 &returnValue)) { \
@@ -84,7 +84,7 @@
     } \
     static bool name##_(napi_env env, napi_value *args, \
             napi_value callingObj, njsModuleGlobals *globals, \
-            njsBaseInstance *callingInstance, napi_value *returnValue)
+            void *callingInstance, napi_value *returnValue)
 
 // define macro for asynchronous Node-API methods
 #define NJS_NAPI_METHOD_DECL_ASYNC(name) \
@@ -160,101 +160,15 @@
 #define NJS_DATATYPE_OBJECT             DPI_ORACLE_TYPE_OBJECT
 #define NJS_DATATYPE_JSON               DPI_ORACLE_TYPE_JSON
 
-// global settings attributes used in C
-#define NJS_GLOBAL_ATTR_AUTOCOMMIT          7000
-#define NJS_GLOBAL_ATTR_CONNECTION_CLASS    7001
-#define NJS_GLOBAL_ATTR_EDITION             7003
-#define NJS_GLOBAL_ATTR_EVENTS              7004
-#define NJS_GLOBAL_ATTR_EXTERNAL_AUTH       7006
-#define NJS_GLOBAL_ATTR_FETCH_AS_BUFFER     7008
-#define NJS_GLOBAL_ATTR_FETCH_AS_STRING     7009
-#define NJS_GLOBAL_ATTR_POOL_INCREMENT      7012
-#define NJS_GLOBAL_ATTR_POOL_MAX            7013
-#define NJS_GLOBAL_ATTR_POOL_MAX_PER_SHARD  7014
-#define NJS_GLOBAL_ATTR_POOL_MIN            7015
-#define NJS_GLOBAL_ATTR_POOL_PING_INTERVAL  7016
-#define NJS_GLOBAL_ATTR_POOL_TIMEOUT        7017
-#define NJS_GLOBAL_ATTR_STMT_CACHE_SIZE     7019
-
-// error messages used within the driver
-typedef enum {
-    errSuccess = 0,
-    errMissingCallback,
-    errInvalidPool,
-    errInvalidConnection,
-    errInvalidPropertyValue,
-    errInvalidParameterValue,
-    errInvalidPropertyValueInParam,
-    errInvalidNumberOfParameters,
-    errUnsupportedDataType,
-    errBindValueAndTypeMismatch,
-    errInvalidBindDataType,
-    errInvalidBindDirection,
-    errNoTypeForConversion,
-    errInsufficientBufferForBinds,
-    errBusyResultSet,
-    errInvalidResultSet,
-    errInvalidNonQueryExecution,
-    errInvalidTypeForConversion,
-    errInvalidLob,
-    errBusyLob,
-    errInsufficientMemory,
-    errInvalidTypeForArrayBind,
-    errReqdMaxArraySize,
-    errInvalidArraySize,
-    errIncompatibleTypeArrayBind,
-    errConnRequestTimeout,
-    errCannotConvertRsToStream,
-    errCannotInvokeRsMethods,
-    errResultSetAlreadyConverted,
-    errNamedJSON,
-    errCannotLoadBinary,
-    errPoolWithAliasAlreadyExists,
-    errPoolWithAliasNotFound,
-    errIncompatibleTypeArrayIndexBind,
-    errNonArrayProvided,
-    errMixedBind,
-    errMissingMaxSizeByPos,
-    errMissingMaxSizeByName,
-    errMaxSizeTooSmall,
-    errMissingTypeByPos,
-    errMissingTypeByName,
-    errInvalidSubscription,
-    errMissingSubscrCallback,
-    errMissingSubscrSql,
-    errPoolClosing,
-    errPoolClosed,
-    errInvalidSodaDocCursor,
-    errNoBinaryAvailable,
-    errInvalidErrNum,
-    errNodeTooOld,
-    errInvalidAqMessage,
-    errConvertFromObjElement,
-    errConvertFromObjAttr,
-    errConvertToObjElement,
-    errConvertToObjAttr,
-    errDblConnectionString,
-    errQueueMax,
-    errClientLibAlreadyInitialized,
-    errUnsupportedDataTypeInJson,
-    errConvertToJsonValue,
-    errDblUsername,
-    errConcurrentOps,
-    errPoolReconfiguring,
-    errPoolStatisticsDisabled,
-    errTokenBasedAuth,
-    errPoolTokenBasedAuth,
-    errStandaloneTokenBasedAuth,
-    errExpiredToken,
-    errAccessTokenCallback,
-    errInvalidGlobalSettingAttrNum,
-    errInitOracleClientArgs,
-    errMissingFile,
-
-    // New ones should be added here
-
-    errMaxErrors                // Max # of errors plus one
-} njsErrorType;
+// error messages used in the C code
+#define NJS_ERR_UNSUPPORTED_DATA_TYPE \
+    "NJS-010: unsupported data type %d in column %u"
+#define NJS_ERR_INSUFFICIENT_BUFFER_FOR_BINDS \
+    "NJS-016: buffer is too small for OUT binds"
+#define NJS_ERR_INSUFFICIENT_MEMORY \
+    "NJS-024: memory allocation failed"
+#define NJS_ERR_UNSUPPORTED_DATA_TYPE_IN_JSON \
+    "NJS-078: unsupported data type %d in JSON value"
 
 // pool statuses
 #define NJS_POOL_STATUS_OPEN            6000
@@ -280,7 +194,6 @@ typedef struct njsAqDeqOptions njsAqDeqOptions;
 typedef struct njsAqEnqOptions njsAqEnqOptions;
 typedef struct njsAqMessage njsAqMessage;
 typedef struct njsAqQueue njsAqQueue;
-typedef struct njsBaseInstance njsBaseInstance;
 typedef struct njsBaton njsBaton;
 typedef struct njsClassDef njsClassDef;
 typedef struct njsConnection njsConnection;
@@ -332,41 +245,28 @@ extern const njsClassDef njsClassDefSodaOperation;
 // structures
 //-----------------------------------------------------------------------------
 
-// all structures exposed publicly have these members
-#define NJS_INSTANCE_HEAD \
-    njsBaton *activeBaton;
-
 // data for class AqDeqOptions exposed to JS.
 struct njsAqDeqOptions {
-    NJS_INSTANCE_HEAD
     dpiDeqOptions *handle;
 };
 
 // data for class AqEnqOptions exposed to JS.
 struct njsAqEnqOptions {
-    NJS_INSTANCE_HEAD
     dpiEnqOptions *handle;
     uint16_t deliveryMode;
 };
 
 // data for class AqMessage exposed to JS.
 struct njsAqMessage {
-    NJS_INSTANCE_HEAD
     dpiMsgProps *handle;
     njsDbObjectType *objectType;
 };
 
 // data for class AqQueue exposed to JS.
 struct njsAqQueue {
-    NJS_INSTANCE_HEAD
     dpiQueue *handle;
     njsConnection *conn;
     njsDbObjectType *payloadObjectType;
-};
-
-// base instance (used for commonly held attributes)
-struct njsBaseInstance {
-    NJS_INSTANCE_HEAD
 };
 
 // data for asynchronous functions
@@ -374,7 +274,7 @@ struct njsBaton {
 
     // assumed to be available at all times
     njsModuleGlobals *globals;
-    njsBaseInstance *callingInstance;
+    void *callingInstance;
 
     // error handling
     bool dpiError;
@@ -587,7 +487,6 @@ struct njsClassDef {
 
 // data for class Connection exposed to JS.
 struct njsConnection {
-    NJS_INSTANCE_HEAD
     dpiConn *handle;
     char *tag;
     size_t tagLength;
@@ -620,7 +519,6 @@ struct njsJsonBuffer {
 
 // data for class Lob exposed to JS.
 struct njsLob {
-    NJS_INSTANCE_HEAD
     dpiLob *handle;
     uint32_t dataType;
     char *bufferPtr;
@@ -656,12 +554,10 @@ struct njsModuleGlobals {
     napi_ref jsSodaDocCursorConstructor;
     napi_ref jsSodaDocumentConstructor;
     napi_ref jsSodaOperationConstructor;
-    napi_ref jsSubscriptions;
 };
 
 // data for class Pool exposed to JS.
 struct njsPool {
-    NJS_INSTANCE_HEAD
     dpiPool *handle;
     uint32_t poolMin;
     uint32_t poolMax;
@@ -676,7 +572,6 @@ struct njsPool {
 
 // data for class ResultSet exposed to JS.
 struct njsResultSet {
-    NJS_INSTANCE_HEAD
     dpiStmt *handle;
     njsConnection *conn;
     uint32_t numQueryVars;
@@ -688,32 +583,27 @@ struct njsResultSet {
 
 // data for class SodaCollection exposed to JS.
 struct njsSodaCollection {
-    NJS_INSTANCE_HEAD
     dpiSodaColl *handle;
     njsSodaDatabase *db;
 };
 
 // data for class SodaDatabase exposed to JS.
 struct njsSodaDatabase {
-    NJS_INSTANCE_HEAD
     dpiSodaDb *handle;
 };
 
 // data for class SodaDocCursor exposed to JS.
 struct njsSodaDocCursor {
-    NJS_INSTANCE_HEAD
     dpiSodaDocCursor *handle;
 };
 
 // data for class SodaDocument exposed to JS.
 struct njsSodaDocument {
-    NJS_INSTANCE_HEAD
     dpiSodaDoc *handle;
 };
 
 // data for class SodaOperation exposed to JS.
 struct njsSodaOperation {
-    NJS_INSTANCE_HEAD
     njsSodaCollection *coll;
 };
 
@@ -727,10 +617,9 @@ struct njsSubscription {
     njsModuleGlobals *globals;
     uint32_t subscrNamespace;
     uint64_t regId;
-    char *name;
-    size_t nameLength;
     napi_ref jsCallback;
     napi_env env;
+    bool notifications;
 };
 
 // data for keeping track of variables used for binding/fetching data
@@ -770,7 +659,6 @@ struct njsVariableBuffer {
 
 // data for DbObject class exposed to JS
 struct njsDbObject {
-    NJS_INSTANCE_HEAD
     dpiObject *handle;
     njsDbObjectType *type;
 };
@@ -842,30 +730,11 @@ bool njsBaton_commonConnectProcessArgs(njsBaton *baton, napi_env env,
 bool njsBaton_create(njsBaton *baton, napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, const njsClassDef *classDef);
 void njsBaton_free(njsBaton *baton, napi_env env);
-bool njsBaton_getBoolFromArg(njsBaton *baton, napi_env env, napi_value *args,
-        int argIndex, const char *propertyName, bool *result, bool *found);
 bool njsBaton_getFetchInfoFromArg(njsBaton *baton, napi_env env,
         napi_value props, uint32_t *numFetchInfo, njsFetchInfo **fetchInfo);
-bool njsBaton_getIntFromArg(njsBaton *baton, napi_env env, napi_value *args,
-        int argIndex, const char *propertyName, int32_t *result, bool *found);
 uint32_t njsBaton_getNumOutBinds(njsBaton *baton);
 bool njsBaton_getSodaDocument(njsBaton *baton, njsSodaDatabase *db,
         napi_env env, napi_value obj, dpiSodaDoc **handle);
-bool njsBaton_getStringFromArg(njsBaton *baton, napi_env env, napi_value *args,
-        int argIndex, const char *propertyName, char **result,
-        size_t *resultLength, bool *found);
-bool njsBaton_getStrBufFromArg(njsBaton *baton, napi_env env, napi_value *args,
-        int argIndex, const char *propertyName, char **result,
-        size_t *resultLength, bool *found);
-bool njsBaton_getSubscription(njsBaton *baton, napi_env env, napi_value name,
-        bool unsubscribe);
-bool njsBaton_getUnsignedIntFromArg(njsBaton *baton, napi_env env,
-        napi_value *args, int argIndex, const char *propertyName,
-        uint32_t *result, bool *found);
-bool njsBaton_getValueFromArg(njsBaton *baton, napi_env env, napi_value *args,
-        int argIndex, const char *propertyName, napi_valuetype expectedType,
-        napi_value *value, bool *found);
-bool njsBaton_getXid(njsBaton *baton, napi_env env, napi_value arg);
 bool njsBaton_initCommonCreateParams(njsBaton *baton,
         dpiCommonCreateParams *params);
 bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value);
@@ -876,7 +745,12 @@ bool njsBaton_queueWork(njsBaton *baton, napi_env env, const char *methodName,
         bool (*afterWorkCallback)(njsBaton*, napi_env, napi_value*),
         napi_value *promise);
 bool njsBaton_reportError(njsBaton *baton, napi_env env);
-bool njsBaton_setError(njsBaton *baton, int errNum, ...);
+bool njsBaton_setErrorInsufficientBufferForBinds(njsBaton *baton);
+bool njsBaton_setErrorInsufficientMemory(njsBaton *baton);
+bool njsBaton_setErrorUnsupportedDataType(njsBaton *baton,
+        uint32_t oracleTypeNum, uint32_t columnNum);
+bool njsBaton_setErrorUnsupportedDataTypeInJson(njsBaton *baton,
+        uint32_t oracleTypeNum);
 bool njsBaton_setErrorDPI(njsBaton *baton);
 bool njsBaton_setJsValues(njsBaton *baton, napi_env env);
 
@@ -972,8 +846,7 @@ bool njsSodaOperation_createFromCollection(napi_env env,
 //-----------------------------------------------------------------------------
 void njsSubscription_eventHandler(njsSubscription *subscr,
         dpiSubscrMessage *incomingMessage);
-bool njsSubscription_new(njsBaton *baton, napi_env env, napi_value *obj,
-        njsSubscription **subscr);
+bool njsSubscription_new(njsBaton *baton, napi_env env);
 bool njsSubscription_startNotifications(njsSubscription *subscr,
         napi_env env, njsBaton *baton);
 bool njsSubscription_stopNotifications(njsSubscription *subscr);
@@ -985,15 +858,6 @@ bool njsSubscription_stopNotifications(njsSubscription *subscr);
 bool njsUtils_addTypeProperties(napi_env env, napi_value obj,
         const char *propertyNamePrefix, uint32_t oracleTypeNum,
         njsDbObjectType *objType);
-napi_value njsUtils_convertToBoolean(napi_env env, bool value);
-napi_value njsUtils_convertToInt(napi_env env, int32_t value);
-napi_value njsUtils_convertToString(napi_env env, const char *value,
-        uint32_t valueLength);
-napi_value njsUtils_convertToUnsignedInt(napi_env env, uint32_t value);
-napi_value njsUtils_convertToUnsignedIntArray(napi_env env,
-        uint32_t numValues, uint32_t *values);
-bool njsUtils_copyArray(napi_env env, void *sourceArray, uint32_t numElements,
-        size_t elementSize, void **destArray, uint32_t *destNumElements);
 bool njsUtils_copyString(napi_env env, char *source, size_t sourceLength,
         char **dest, size_t *destLength);
 bool njsUtils_copyStringFromJS(napi_env env, napi_value value, char **result,
@@ -1002,8 +866,7 @@ bool njsUtils_createBaton(napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, const njsClassDef *classDef,
         njsBaton **baton);
 bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
-        napi_ref constructorRef, napi_value *instanceObj,
-        njsBaseInstance **instance);
+        napi_ref constructorRef, napi_value *instanceObj, void **instance);
 bool njsUtils_genericThrowError(napi_env env, const char *fileName,
         int lineNum);
 bool njsUtils_getError(napi_env env, dpiErrorInfo *errorInfo,
@@ -1022,28 +885,19 @@ bool njsUtils_getNamedPropertyString(napi_env env, napi_value value,
 bool njsUtils_getNamedPropertyStringArray(napi_env env, napi_value value,
         const char *name, uint32_t *resultNumElems, char ***resultElems,
         uint32_t **resultElemLengths);
+bool njsUtils_getNamedPropertyStringOrBuffer(napi_env env, napi_value value,
+        const char *name, char **result, size_t *resultLength);
 bool njsUtils_getNamedPropertyUnsignedInt(napi_env env, napi_value value,
         const char *name, uint32_t *outValue);
 bool njsUtils_getNamedPropertyUnsignedIntArray(napi_env env, napi_value value,
         const char *name, uint32_t *numElements, uint32_t **elements);
-bool njsUtils_getStringFromArg(napi_env env, napi_value *args,
-        int argIndex, const char *propertyName, char **result,
-        size_t *resultLength, bool *found, char *errorBuffer);
-bool njsUtils_getValueFromArg(napi_env env, napi_value *args,
-        int argIndex, const char *propertyName, napi_valuetype expectedType,
-        napi_value *value, bool *found, char *errorBuffer);
-bool njsUtils_isBuffer(napi_env env, napi_value value);
+bool njsUtils_getXid(napi_env env, napi_value xidObj, dpiXid **xid);
 bool njsUtils_isInstance(napi_env env, napi_value value, const char *name);
-bool njsUtils_throwError(napi_env env, int errNum, ...);
+bool njsUtils_throwInsufficientMemory(napi_env env);
 bool njsUtils_throwErrorDPI(napi_env env, njsModuleGlobals *globals);
 bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, njsModuleGlobals **globals,
-        napi_value *callingObj, const njsClassDef *classDef,
-        njsBaseInstance **instance);
-bool njsUtils_validateArgType(napi_env env, napi_value *args,
-        napi_valuetype expectedType, int index);
-bool njsUtils_validatePropType(napi_env env, napi_value value,
-        napi_valuetype expectedType, const char *name);
+        napi_value *callingObj, const njsClassDef *classDef, void **instance);
 
 
 //-----------------------------------------------------------------------------

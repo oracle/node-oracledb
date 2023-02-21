@@ -182,10 +182,6 @@ void njsBaton_free(njsBaton *baton, napi_env env)
 {
     uint32_t i;
 
-    // if this baton is considered the active baton, clear it
-    if (baton->callingInstance && baton == baton->callingInstance->activeBaton)
-        baton->callingInstance->activeBaton = NULL;
-
     // free and clear strings
     NJS_FREE_AND_CLEAR(baton->sql);
     NJS_FREE_AND_CLEAR(baton->user);
@@ -392,29 +388,6 @@ void njsBaton_freeShardingKeys(uint8_t *numShardingKeyColumns,
 
 
 //-----------------------------------------------------------------------------
-// njsBaton_getBoolFromArg()
-//   Gets a boolean value from the specified JavaScript object property, if
-// possible. If the given property is undefined, no error is set and the value
-// is left untouched; otherwise, if the value is not a boolean, the error is
-// set on the baton.
-//-----------------------------------------------------------------------------
-bool njsBaton_getBoolFromArg(njsBaton *baton, napi_env env, napi_value *args,
-        int argIndex, const char *propertyName, bool *result, bool *found)
-{
-    napi_value value;
-
-    if (!njsBaton_getValueFromArg(baton, env, args, argIndex, propertyName,
-            napi_boolean, &value, found))
-        return false;
-    if (!value)
-        return true;
-    NJS_CHECK_NAPI(env, napi_get_value_bool(env, value, result))
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsBaton_getErrorInfo()
 //   Get information on the error in preparation for invoking the callback. If
 // false is returned, the callback should not be invoked; instead an exception
@@ -476,7 +449,7 @@ bool njsBaton_getFetchInfoFromArg(njsBaton *baton, napi_env env,
     // allocate space for fetchInfo structures
     tempFetchInfo = calloc(*numFetchInfo, sizeof(njsFetchInfo));
     if (!tempFetchInfo)
-        return njsBaton_setError(baton, errInsufficientMemory);
+        return njsBaton_setErrorInsufficientMemory(baton);
     *fetchInfo = tempFetchInfo;
 
     // process each key
@@ -498,38 +471,7 @@ bool njsBaton_getFetchInfoFromArg(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsBaton_getIntFromArg()
-//   Gets an integer value from the specified JavaScript object property, if
-// possible. If the given property is undefined, no error is set and the value
-// is left untouched; otherwise, if the value is not a number, the error is set
-// on the baton.
-//-----------------------------------------------------------------------------
-bool njsBaton_getIntFromArg(njsBaton *baton, napi_env env, napi_value *args,
-        int argIndex, const char *propertyName, int32_t *result, bool *found)
-{
-    double doubleValue;
-    napi_value value;
-
-    // get the value from the object and verify it is a number
-    if (!njsBaton_getValueFromArg(baton, env, args, argIndex, propertyName,
-            napi_number, &value, found))
-        return false;
-    if (!value)
-        return true;
-    NJS_CHECK_NAPI(env, napi_get_value_double(env, value, &doubleValue))
-
-    // if the value is not an integer or negative, return an error
-    *result = (int32_t) doubleValue;
-    if ((double) *result != doubleValue)
-        return njsBaton_setError(baton, errInvalidPropertyValueInParam,
-                propertyName, argIndex + 1);
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton::GetNumOutBinds()
+// njsBaton_getNumOutBinds()
 //   Return the number of IN/OUT and OUT binds created by the baton.
 //-----------------------------------------------------------------------------
 uint32_t njsBaton_getNumOutBinds(njsBaton *baton)
@@ -585,220 +527,6 @@ bool njsBaton_getSodaDocument(njsBaton *baton, njsSodaDatabase *db,
             return njsBaton_setErrorDPI(baton);
     }
 
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton_getStringFromArg()
-//   Gets a string value from the specified JavaScript object property, if
-// possible. If the given property is undefined, no error is set and the value
-// is left untouched; otherwise, if the value is not a string, the error is set
-// on the baton.
-//-----------------------------------------------------------------------------
-bool njsBaton_getStringFromArg(njsBaton *baton, napi_env env, napi_value *args,
-        int argIndex, const char *propertyName, char **result,
-        size_t *resultLength, bool *found)
-{
-    if (!njsUtils_getStringFromArg(env, args, argIndex, propertyName, result,
-            resultLength, found, baton->error)) {
-        baton->hasError = true;
-        return false;
-    }
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton_getSubscription()
-//   Acquires the subscription stored with the given name. If it does not
-// exist, it will either be created or an error will be noted on the baton.
-//-----------------------------------------------------------------------------
-bool njsBaton_getSubscription(njsBaton *baton, napi_env env, napi_value name,
-        bool unsubscribe)
-{
-    napi_value allSubscriptions, subscription;
-    napi_valuetype valueType;
-
-    // get subscription object, if it exists
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsSubscriptions, &allSubscriptions))
-    NJS_CHECK_NAPI(env, napi_get_property(env, allSubscriptions, name,
-            &subscription))
-    NJS_CHECK_NAPI(env, napi_typeof(env, subscription, &valueType))
-
-    // if it exists, get subscription data
-    if (valueType == napi_external) {
-        NJS_CHECK_NAPI(env, napi_get_value_external(env, subscription,
-                (void**) &baton->subscription))
-
-    // set an error if the subscription does not exist and it should not be
-    // created
-    } else if (unsubscribe) {
-        return njsBaton_setError(baton, errInvalidSubscription);
-
-    // otherwise, create a new subscription and store it in the all
-    // subscriptions object
-    } else {
-        if (!njsSubscription_new(baton, env, &subscription,
-                &baton->subscription))
-            return false;
-        NJS_CHECK_NAPI(env, napi_set_property(env, allSubscriptions, name,
-                subscription))
-    }
-
-    // if unsubscribing, remove subscription from all subscriptions and nothing
-    // further needs to be done
-    if (unsubscribe) {
-        NJS_CHECK_NAPI(env, napi_delete_property(env, allSubscriptions, name,
-                NULL))
-        return true;
-    }
-
-    // otherwise, store a reference to the subscription object on the baton
-    // to ensure that it does not go out of scope
-    NJS_CHECK_NAPI(env, napi_create_reference(env, subscription, 1,
-            &baton->jsSubscriptionRef))
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton_getUnsignedIntFromArg()
-//   Gets an unsigned integer value from the specified JavaScript object
-// property, if possible. If the given property is undefined, no error is set
-// and the value is left untouched; otherwise, if the value is not a number,
-// the error is set on the baton.
-//-----------------------------------------------------------------------------
-bool njsBaton_getUnsignedIntFromArg(njsBaton *baton, napi_env env,
-        napi_value *args, int argIndex, const char *propertyName,
-        uint32_t *result, bool *found)
-{
-    double doubleValue;
-    napi_value value;
-
-    // get the value from the object and verify it is a number
-    if (!njsBaton_getValueFromArg(baton, env, args, argIndex, propertyName,
-            napi_number, &value, found))
-        return false;
-    if (!value)
-        return true;
-    NJS_CHECK_NAPI(env, napi_get_value_double(env, value, &doubleValue))
-
-    // if the value is not an integer or negative, return an error
-    *result = (uint32_t) doubleValue;
-    if (doubleValue < 0 || (double) *result != doubleValue)
-        return njsBaton_setError(baton, errInvalidPropertyValueInParam,
-                propertyName, argIndex + 1);
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton_getValueFromArg()
-//   Gets the value from the specified JavaScript object property, if possible.
-// If the given property is undefined, no error is set and the value is
-// returned as NULL. If the value is null, a "value" error is set on the baton;
-// otherwise, if the value is not the specified type, a "type" error is
-// set on the baton.
-//-----------------------------------------------------------------------------
-bool njsBaton_getValueFromArg(njsBaton *baton, napi_env env, napi_value *args,
-        int argIndex, const char *propertyName, napi_valuetype expectedType,
-        napi_value *value, bool *found)
-{
-    if (!njsUtils_getValueFromArg(env, args, argIndex, propertyName,
-            expectedType, value, found, baton->error)) {
-        baton->hasError = true;
-        return false;
-    }
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton_getStrBufFromArg()
-//   To obtain a string or Buffer value from the given object based on the
-//   propertyName if exists.  If the given property is undefined, no error is
-//   set and the value is left untouched; otherwise, if the value is not
-//   string/buffer the erroris set on the baton
-//-----------------------------------------------------------------------------
-bool njsBaton_getStrBufFromArg(njsBaton *baton, napi_env env, napi_value *args,
-         int argIndex, const char *propertyName, char **result,
-         size_t *resultLength, bool *found)
-{
-    napi_valuetype actualType;
-    napi_value     value;
-    void           *buf;
-    size_t          bufLen;
-
-    // initialize found, if applicable
-    if (found)
-        *found = false;
-
-    // acquire the value and get its type
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, args[argIndex],
-            propertyName, &value))
-    NJS_CHECK_NAPI(env, napi_typeof(env, value, &actualType))
-
-    // a value of undefined is accepted (property not defined)
-    if (actualType == napi_undefined) {
-        return true;
-    } else if (actualType != napi_string && !njsUtils_isBuffer(env, value)) {
-        njsBaton_setError(baton, errInvalidPropertyValueInParam, propertyName,
-                argIndex + 1);
-        return false;
-    }
-
-    if (actualType == napi_string) {
-        if (!njsUtils_copyStringFromJS(env, value, result, resultLength))
-            return false;
-    } else {
-        NJS_CHECK_NAPI(env, napi_get_buffer_info(env, value, &buf, &bufLen))
-        if (!njsUtils_copyString(env, buf, bufLen, result, resultLength))
-            return false;
-    }
-
-    if (found)
-       *found = true;
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton_getXid()
-//   Populates XID structure of baton from the given argument
-//-----------------------------------------------------------------------------
-bool njsBaton_getXid(njsBaton *baton, napi_env env, napi_value arg)
-{
-    napi_valuetype vtype;
-    int32_t        fmtId;
-    size_t         len;
-
-    NJS_CHECK_NAPI(env, napi_typeof(env, arg, &vtype))
-    if (vtype != napi_undefined && vtype != napi_null) {
-        baton->xid = calloc(1, sizeof(dpiXid));
-        if (!baton->xid) {
-            return njsBaton_setError(baton, errInsufficientMemory);
-        }
-        if (!njsBaton_getIntFromArg(baton, env, &arg, 0, "formatId", &fmtId,
-                NULL))
-            return false;
-        baton->xid->formatId = (long) fmtId;
-
-        if (!njsBaton_getStrBufFromArg(baton, env, &arg, 0,
-                "globalTransactionId",
-                (char **)&baton->xid->globalTransactionId, &len, NULL))
-            return false;
-        baton->xid->globalTransactionIdLength = (uint32_t)len;
-
-        if (!njsBaton_getStrBufFromArg(baton, env, &arg, 0, "branchQualifier",
-                (char **)&baton->xid->branchQualifier, &len, NULL))
-            return false;
-        baton->xid->branchQualifierLength = len;
-    }
     return true;
 }
 
@@ -949,17 +677,57 @@ bool njsBaton_reportError(njsBaton *baton, napi_env env)
 
 
 //-----------------------------------------------------------------------------
-// njsBaton_setError()
-//   Set the error on the baton to the given error message. False is returned
-// as a convenience to the caller.
+// njsBaton_setErrorInsufficientBufferForBinds()
+//   Sets the error on the baton to indicate that insufficient buffer space
+// was made available for an OUT bind. Returns false as a convenience to the
+// caller.
 //-----------------------------------------------------------------------------
-bool njsBaton_setError(njsBaton *baton, int errNum, ...)
+bool njsBaton_setErrorInsufficientBufferForBinds(njsBaton *baton)
 {
-    va_list vaList;
+    strcpy(baton->error, NJS_ERR_INSUFFICIENT_BUFFER_FOR_BINDS);
+    baton->hasError = true;
+    return false;
+}
 
-    va_start(vaList, errNum);
-    njsErrors_getMessageVaList(baton->error, errNum, vaList);
-    va_end(vaList);
+
+//-----------------------------------------------------------------------------
+// njsBaton_setErrorInsufficientMemory()
+//   Set the error on the baton to indicate insufficient memory was available.
+// Returns false as a convenience to the caller.
+//-----------------------------------------------------------------------------
+bool njsBaton_setErrorInsufficientMemory(njsBaton *baton)
+{
+    strcpy(baton->error, NJS_ERR_INSUFFICIENT_MEMORY);
+    baton->hasError = true;
+    return false;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsBaton_setErrorUnsupportedDataType()
+//   Set the error on the baton to indicate that an unsupported data type was
+// encountered during a fetch. Returns false as a convenience to the caller.
+//-----------------------------------------------------------------------------
+bool njsBaton_setErrorUnsupportedDataType(njsBaton *baton,
+        uint32_t oracleTypeNum, uint32_t columnNum)
+{
+    (void) snprintf(baton->error, sizeof(baton->error),
+            NJS_ERR_UNSUPPORTED_DATA_TYPE, oracleTypeNum, columnNum);
+    baton->hasError = true;
+    return false;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsBaton_setErrorUnsupportedDataTypeInJson()
+//   Set the error on the baton to indicate that an unsupported data type was
+// encountered in a JSON value. Returns false as a convenience to the caller.
+//-----------------------------------------------------------------------------
+bool njsBaton_setErrorUnsupportedDataTypeInJson(njsBaton *baton,
+        uint32_t oracleTypeNum)
+{
+    (void) snprintf(baton->error, sizeof(baton->error),
+            NJS_ERR_UNSUPPORTED_DATA_TYPE_IN_JSON, oracleTypeNum);
     baton->hasError = true;
     return false;
 }
@@ -973,12 +741,8 @@ bool njsBaton_setError(njsBaton *baton, int errNum, ...)
 bool njsBaton_setErrorDPI(njsBaton *baton)
 {
     dpiContext_getError(baton->globals->context, &baton->errorInfo);
-    if (baton->errorInfo.code == 1406) {
-        njsBaton_setError(baton, errInsufficientBufferForBinds);
-    } else {
-        baton->dpiError = true;
-        baton->hasError = true;
-    }
+    baton->dpiError = true;
+    baton->hasError = true;
     return false;
 }
 

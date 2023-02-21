@@ -113,9 +113,6 @@ static NJS_ASYNC_POST_METHOD(njsConnection_getStatementInfoPostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_tpcPreparePostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_subscribePostAsync);
 
-// processing arguments methods
-static NJS_PROCESS_ARGS_METHOD(njsConnection_subscribeProcessArgs);
-
 // finalize
 static NJS_NAPI_FINALIZE(njsConnection_finalize);
 
@@ -218,7 +215,6 @@ const njsClassDef njsClassDefConnection = {
 };
 
 // other methods used internally
-static bool njsConnection_check(njsBaton *baton);
 static bool njsConnection_getBatchErrors(njsBaton *baton, napi_env env,
         napi_value *batchErrors);
 static bool njsConnection_getExecuteManyOutBinds(njsBaton *baton, napi_env env,
@@ -232,14 +228,12 @@ static bool njsConnection_getOutBinds(njsBaton *baton, napi_env env,
 static bool njsConnection_getRowCounts(njsBaton *baton, napi_env env,
         napi_value *rowCounts);
 static bool njsConnection_prepareAndBind(njsConnection *conn, njsBaton *baton);
-static bool njsConnection_processImplicitResults(njsBaton *baton);
-static bool njsConnection_setTextAttribute(napi_env env,
-        njsBaseInstance *instance, njsModuleGlobals *globals,
-        napi_value value, int (*setter)(dpiConn*, const char *, uint32_t));
-
-
 static bool njsConnection_processBinds(njsBaton *baton, napi_env env,
         napi_value binds);
+static bool njsConnection_processImplicitResults(njsBaton *baton);
+static bool njsConnection_setTextAttribute(napi_env env, void *instance,
+        njsModuleGlobals *globals, napi_value value,
+        int (*setter)(dpiConn*, const char *, uint32_t));
 
 //-----------------------------------------------------------------------------
 // njsConnection_breakExecution()
@@ -249,8 +243,6 @@ static bool njsConnection_processBinds(njsBaton *baton, napi_env env,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_breakExecution, 0, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
     return njsBaton_queueWork(baton, env, "Break",
             njsConnection_breakExecutionAsync, NULL, returnValue);
 }
@@ -282,8 +274,6 @@ static bool njsConnection_breakExecutionAsync(njsBaton *baton)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_changePassword, 3, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
     if (!njsUtils_copyStringFromJS(env, args[0], &baton->user,
             &baton->userLength))
         return false;
@@ -317,20 +307,6 @@ static bool njsConnection_changePasswordAsync(njsBaton *baton)
 
 
 //-----------------------------------------------------------------------------
-// njsConnection_check()
-//   Checks to see that the connection is valid.
-//-----------------------------------------------------------------------------
-static bool njsConnection_check(njsBaton *baton)
-{
-    njsConnection *conn = (njsConnection*) baton->callingInstance;
-
-    if (!conn->handle)
-        return njsBaton_setError(baton, errInvalidConnection);
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsConnection_close()
 //   Releases the connection from use by JS. This releases the connection back
 // to the pool or closes the standalone connection so further use is not
@@ -343,10 +319,8 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_close, 1, NULL)
 {
     njsConnection *conn = (njsConnection*) baton->callingInstance;
 
-    if (!njsConnection_check(baton))
-        return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "drop",
-            &baton->dropSession, NULL))
+    if (!njsUtils_getNamedPropertyBool(env, args[0], "drop",
+            &baton->dropSession))
         return false;
     baton->dpiConnHandle = conn->handle;
     conn->handle = NULL;
@@ -392,8 +366,6 @@ static bool njsConnection_closeAsync(njsBaton *baton)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_commit, 0, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
     return njsBaton_queueWork(baton, env, "Commit", njsConnection_commitAsync,
             NULL, returnValue);
 }
@@ -523,8 +495,6 @@ static bool njsConnection_connectPostAsync(njsBaton *baton, napi_env env,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_createLob, 1, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
     NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &baton->lobType))
     return njsBaton_queueWork(baton, env, "CreateLob",
             njsConnection_createLobAsync, njsConnection_createLobPostAsync,
@@ -542,7 +512,7 @@ static bool njsConnection_createLobAsync(njsBaton *baton)
 
     baton->lob = calloc(1, sizeof(njsLobBuffer));
     if (!baton->lob)
-        return njsBaton_setError(baton, errInsufficientMemory);
+        return njsBaton_setErrorInsufficientMemory(baton);
     if (dpiConn_newTempLob(conn->handle, baton->lobType,
                 &baton->lob->handle) < 0)
         return njsBaton_setErrorDPI(baton);
@@ -586,8 +556,6 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_execute, 5, NULL)
     napi_value temp;
 
     // validate connection and process arguments
-    if (!njsConnection_check(baton))
-        return false;
     if (!njsBaton_setJsValues(baton, env))
         return false;
     if (!njsUtils_copyStringFromJS(env, args[0], &baton->sql,
@@ -687,7 +655,7 @@ static bool njsConnection_executeAsync(njsBaton *baton)
 
         baton->queryVars = calloc(baton->numQueryVars, sizeof(njsVariable));
         if (!baton->queryVars)
-            return njsBaton_setError(baton, errInsufficientMemory);
+            return njsBaton_setErrorInsufficientMemory(baton);
         if (!njsVariable_initForQuery(baton->queryVars, baton->numQueryVars,
                 baton->dpiStmtHandle, baton))
             return false;
@@ -865,7 +833,7 @@ static bool njsConnection_executeManyAsync(njsBaton *baton)
             baton->batchErrorInfos = calloc(baton->numBatchErrorInfos,
                     sizeof(dpiErrorInfo));
             if (!baton->batchErrorInfos)
-                return njsBaton_setError(baton, errInsufficientMemory);
+                return njsBaton_setErrorInsufficientMemory(baton);
             if (dpiStmt_getBatchErrors(baton->dpiStmtHandle,
                     baton->numBatchErrorInfos, baton->batchErrorInfos) < 0)
                 return njsBaton_setErrorDPI(baton);
@@ -1057,8 +1025,6 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getCurrentSchema, 0, NULL)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_getDbObjectClass, 1, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
     if (!njsUtils_copyStringFromJS(env, args[0], &baton->name,
             &baton->nameLength))
         return false;
@@ -1346,9 +1312,6 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_getQueue, 2, NULL)
     napi_value typeObj, jsObjType;
     njsDbObjectType *objType;
 
-    if (!njsConnection_check(baton))
-        return false;
-
     // get name for queue (first argument)
     if (!njsUtils_copyStringFromJS(env, args[0], &baton->name,
             &baton->nameLength))
@@ -1467,8 +1430,6 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getStmtCacheSize, 0, NULL)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_getStatementInfo, 1, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
     if (!njsUtils_copyStringFromJS(env, args[0], &baton->sql,
             &baton->sqlLength))
         return false;
@@ -1516,12 +1477,12 @@ static bool njsConnection_getStatementInfoAsync(njsBaton *baton)
         // allocate memory for the bind variable names
         baton->bindNames = calloc(baton->numBindNames, sizeof(const char*));
         if (!baton->bindNames)
-            return njsBaton_setError(baton, errInsufficientMemory);
+            return njsBaton_setErrorInsufficientMemory(baton);
 
         // allocate memory for the bind variable name lengths
         baton->bindNameLengths = calloc(baton->numBindNames, sizeof(uint32_t));
         if (!baton->bindNameLengths)
-            return njsBaton_setError(baton, errInsufficientMemory);
+            return njsBaton_setErrorInsufficientMemory(baton);
 
         // get bind names
         if (dpiStmt_getBindNames(baton->dpiStmtHandle, &baton->numBindNames,
@@ -1534,7 +1495,7 @@ static bool njsConnection_getStatementInfoAsync(njsBaton *baton)
     if (baton->numQueryVars > 0) {
         baton->queryVars = calloc(baton->numQueryVars, sizeof(njsVariable));
         if (!baton->queryVars)
-            return njsBaton_setError(baton, errInsufficientMemory);
+            return njsBaton_setErrorInsufficientMemory(baton);
         if (!njsVariable_initForQuery(baton->queryVars, baton->numQueryVars,
                 baton->dpiStmtHandle, baton))
             return false;
@@ -1615,8 +1576,7 @@ bool njsConnection_newFromBaton(njsBaton *baton, napi_env env,
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefConnection,
-            baton->globals->jsConnectionConstructor, connObj,
-            (njsBaseInstance**) &conn))
+            baton->globals->jsConnectionConstructor, connObj, (void**) &conn))
         return false;
 
     // transfer the ODPI-C connection handle to the new object
@@ -1660,8 +1620,6 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_isHealthy, 0, NULL)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_ping, 0, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
     return njsBaton_queueWork(baton, env, "Ping", njsConnection_pingAsync,
             NULL, returnValue);
 }
@@ -1821,7 +1779,7 @@ static bool njsConnection_processBinds(njsBaton *baton, napi_env env,
     // allocate memory for the bind variables
     baton->bindVars = calloc(baton->numBindVars, sizeof(njsVariable));
     if (!baton->bindVars)
-        return njsBaton_setError(baton, errInsufficientMemory);
+        return njsBaton_setErrorInsufficientMemory(baton);
 
     // initialize bind variables from supplied information
     for (i = 0; i < baton->numBindVars; i++) {
@@ -1864,7 +1822,7 @@ static bool njsConnection_processImplicitResults(njsBaton *baton)
         tempImplicitResult = calloc(1, sizeof(njsImplicitResult));
         if (!tempImplicitResult) {
             dpiStmt_release(stmt);
-            return njsBaton_setError(baton, errInsufficientMemory);
+            return njsBaton_setErrorInsufficientMemory(baton);
         }
         tempImplicitResult->stmt = stmt;
         if (implicitResult) {
@@ -1881,7 +1839,7 @@ static bool njsConnection_processImplicitResults(njsBaton *baton)
         implicitResult->queryVars = calloc(implicitResult->numQueryVars,
                 sizeof(njsVariable));
         if (!implicitResult->queryVars)
-            return njsBaton_setError(baton, errInsufficientMemory);
+            return njsBaton_setErrorInsufficientMemory(baton);
         if (!njsVariable_initForQuery(implicitResult->queryVars,
                 implicitResult->numQueryVars, implicitResult->stmt, baton))
             return false;
@@ -1900,8 +1858,6 @@ static bool njsConnection_processImplicitResults(njsBaton *baton)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_rollback, 0, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
     return njsBaton_queueWork(baton, env, "Rollback",
             njsConnection_rollbackAsync, NULL, returnValue);
 }
@@ -2058,18 +2014,14 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_setTag, 1, NULL)
 //   Sets the specified text attribute by calling the specified ODPI-C
 // function, after validating the connection and the input.
 //-----------------------------------------------------------------------------
-static bool njsConnection_setTextAttribute(napi_env env,
-        njsBaseInstance *instance, njsModuleGlobals *globals,
-        napi_value value, int (*setter)(dpiConn*, const char *, uint32_t))
+static bool njsConnection_setTextAttribute(napi_env env, void *instance,
+        njsModuleGlobals *globals, napi_value value,
+        int (*setter)(dpiConn*, const char *, uint32_t))
 {
     njsConnection *conn = (njsConnection*) instance;
     char *buffer = NULL;
     size_t bufferLength;
     int status;
-
-    // validate connection
-    if (!conn->handle)
-        return njsUtils_throwError(env, errInvalidConnection);
 
     // get contents of string
     if (!njsUtils_copyStringFromJS(env, value, &buffer, &bufferLength))
@@ -2094,8 +2046,6 @@ static bool njsConnection_setTextAttribute(napi_env env,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_shutdown, 1, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
     NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0],
             &baton->shutdownMode))
     return njsBaton_queueWork(baton, env, "Shutdown",
@@ -2129,14 +2079,12 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_startup, 1, NULL)
 {
     bool force = false, rest = false;
 
-    if (!njsConnection_check(baton))
+    if (!njsUtils_getNamedPropertyBool(env, args[0], "force", &force))
         return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "force", &force, NULL))
+    if (!njsUtils_getNamedPropertyBool(env, args[0], "restrict", &rest))
         return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "restrict", &rest, NULL))
-        return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "pfile", &baton->pfile,
-            &baton->pfileLength, NULL))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "pfile", &baton->pfile,
+            &baton->pfileLength))
         return false;
 
     if (force)
@@ -2178,10 +2126,70 @@ static bool njsConnection_startupAsync(njsBaton *baton)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_subscribe, 2, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
-    if (!njsConnection_subscribeProcessArgs(baton, env, args))
-        return false;
+    napi_value callback, binds;
+    napi_valuetype valueType;
+
+    // get subscription
+    NJS_CHECK_NAPI(env, napi_typeof(env, args[0], &valueType))
+    if (valueType == napi_external) {
+        NJS_CHECK_NAPI(env, napi_get_value_external(env, args[0],
+                (void**) &baton->subscription))
+    } else {
+        if (!njsSubscription_new(baton, env))
+            return false;
+    }
+
+    // if subscription doesn't exist, get options for creating subscription
+    if (!baton->subscription->handle) {
+        if (!njsUtils_getNamedPropertyUnsignedInt(env, args[1], "namespace",
+                &baton->subscription->subscrNamespace))
+            return false;
+        if (!njsUtils_getNamedPropertyString(env, args[1], "ipAddress",
+                &baton->ipAddress, &baton->ipAddressLength))
+            return false;
+        if (!njsUtils_getNamedPropertyUnsignedInt(env, args[1], "port",
+                &baton->portNumber))
+            return false;
+        if (!njsUtils_getNamedPropertyUnsignedInt(env, args[1], "timeout",
+                &baton->timeout))
+            return false;
+        if (!njsUtils_getNamedPropertyUnsignedInt(env, args[1], "operations",
+                &baton->operations))
+            return false;
+        if (!njsUtils_getNamedPropertyUnsignedInt(env, args[1], "qos",
+                &baton->qos))
+            return false;
+        if (!njsUtils_getNamedPropertyUnsignedInt(env, args[1],
+                "groupingClass", &baton->subscrGroupingClass))
+            return false;
+        if (!njsUtils_getNamedPropertyUnsignedInt(env, args[1],
+                "groupingValue", &baton->subscrGroupingValue))
+            return false;
+        if (!njsUtils_getNamedPropertyUnsignedInt(env, args[1], "groupingType",
+                &baton->subscrGroupingType))
+            return false;
+        if (!njsUtils_getNamedPropertyBool(env, args[1], "clientInitiated",
+                &baton->clientInitiated))
+            return false;
+        if (!njsUtils_getNamedProperty(env, args[1], "callback", &callback))
+            return false;
+        NJS_CHECK_NAPI(env, napi_create_reference(env, callback, 1,
+                &baton->subscription->jsCallback))
+    }
+
+    // get options that are used for registering queries
+    if (baton->subscription->subscrNamespace ==
+            DPI_SUBSCR_NAMESPACE_DBCHANGE) {
+        if (!njsUtils_getNamedPropertyString(env, args[1], "sql", &baton->sql,
+                &baton->sqlLength))
+            return false;
+        if (!njsUtils_getNamedProperty(env, args[1], "binds", &binds))
+            return false;
+        baton->bindArraySize = 1;
+        if (binds && !njsConnection_processBinds(baton, env, binds))
+            return false;
+    }
+
     return njsBaton_queueWork(baton, env, "Subscribe",
             njsConnection_subscribeAsync, njsConnection_subscribePostAsync,
             returnValue);
@@ -2268,12 +2276,16 @@ static bool njsConnection_subscribeAsync(njsBaton *baton)
 static bool njsConnection_subscribePostAsync(njsBaton *baton, napi_env env,
         napi_value *result)
 {
-    napi_value regId;
+    napi_value regId, subscription;
 
     // start notifications
     if (!njsSubscription_startNotifications(baton->subscription, env,
             baton))
         return false;
+
+    // get subscription to store in subscription mapping
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsSubscriptionRef,
+            &subscription))
 
     // create result object for CQN only; AQ notifications do not produce a
     // meaningful value
@@ -2284,83 +2296,12 @@ static bool njsConnection_subscribePostAsync(njsBaton *baton, napi_env env,
                 (uint32_t) baton->subscription->regId, &regId))
         NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "regId",
                 regId))
-    }
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *result,
+                "subscription", subscription))
 
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_subscribeProcessArgs()
-//   Processes the arguments provided by the caller and place them on the
-// baton.
-//-----------------------------------------------------------------------------
-static bool njsConnection_subscribeProcessArgs(njsBaton *baton, napi_env env,
-        napi_value *args)
-{
-    napi_value callback, binds;
-
-    // first get the subscription given the name
-    if (!njsUtils_copyStringFromJS(env, args[0], &baton->name,
-            &baton->nameLength))
-        return false;
-    if (!njsBaton_getSubscription(baton, env, args[0], false))
-        return false;
-
-    // if subscription doesn't exist, get options for creating subscription
-    if (!baton->subscription->handle) {
-        if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1, "namespace",
-                &baton->subscription->subscrNamespace, NULL))
-            return false;
-        if (!njsBaton_getStringFromArg(baton, env, args, 1, "ipAddress",
-                &baton->ipAddress, &baton->ipAddressLength, NULL))
-            return false;
-        if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1, "port",
-                &baton->portNumber, NULL))
-            return false;
-        if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1, "timeout",
-                &baton->timeout, NULL))
-            return false;
-        if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1, "operations",
-                &baton->operations, NULL))
-            return false;
-        if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1, "qos",
-                &baton->qos, NULL))
-            return false;
-        if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1,
-                "groupingClass", &baton->subscrGroupingClass, NULL))
-            return false;
-        if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1,
-                "groupingValue", &baton->subscrGroupingValue, NULL))
-            return false;
-        if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1,
-                "groupingType", &baton->subscrGroupingType, NULL))
-            return false;
-        if (!njsBaton_getBoolFromArg(baton, env, args, 1, "clientInitiated",
-                &baton->clientInitiated, NULL))
-            return false;
-        if (!njsBaton_getValueFromArg(baton, env, args, 1, "callback",
-                napi_function, &callback, NULL))
-            return false;
-        if (!callback)
-            return njsBaton_setError(baton, errMissingSubscrCallback);
-        NJS_CHECK_NAPI(env, napi_create_reference(env, callback, 1,
-                &baton->subscription->jsCallback))
-    }
-
-    // get options that are used for registering queries
-    if (baton->subscription->subscrNamespace ==
-            DPI_SUBSCR_NAMESPACE_DBCHANGE) {
-        if (!njsBaton_getStringFromArg(baton, env, args, 1, "sql", &baton->sql,
-                &baton->sqlLength, NULL))
-            return false;
-        if (baton->sqlLength == 0)
-            return njsBaton_setError(baton, errMissingSubscrSql);
-        if (!njsBaton_getValueFromArg(baton, env, args, 1, "binds",
-                napi_object, &binds, NULL))
-            return false;
-        if (binds && !njsConnection_processBinds(baton, env, binds))
-            return false;
+    // otherwise, return the subscription directly
+    } else {
+        *result = subscription;
     }
 
     return true;
@@ -2378,9 +2319,7 @@ static bool njsConnection_subscribeProcessArgs(njsBaton *baton, napi_env env,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_tpcBegin, 3, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
-    if (!njsBaton_getXid(baton, env, args[0]))
+    if (!njsUtils_getXid(env, args[0], &baton->xid))
         return false;
     NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[1], &baton->tpcFlags))
     NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[2],
@@ -2417,9 +2356,7 @@ static bool njsConnection_tpcBeginAsync(njsBaton *baton)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_tpcCommit, 2, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
-    if (!njsBaton_getXid(baton, env, args[0]))
+    if (!njsUtils_getXid(env, args[0], &baton->xid))
         return false;
     NJS_CHECK_NAPI(env, napi_get_value_bool(env, args[1], &baton->tpcOnePhase))
     return njsBaton_queueWork(baton, env, "tpcCommit",
@@ -2453,9 +2390,7 @@ static bool njsConnection_tpcCommitAsync(njsBaton *baton)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_tpcEnd, 2, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
-    if (!njsBaton_getXid(baton, env, args[0]))
+    if (!njsUtils_getXid(env, args[0], &baton->xid))
         return false;
     NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[1], &baton->tpcFlags))
     return njsBaton_queueWork(baton, env, "tpcEnd", njsConnection_tpcEndAsync,
@@ -2486,9 +2421,7 @@ static bool njsConnection_tpcEndAsync(njsBaton *baton)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_tpcForget, 1, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
-    if (!njsBaton_getXid(baton, env, args[0]))
+    if (!njsUtils_getXid(env, args[0], &baton->xid))
         return false;
     return njsBaton_queueWork(baton, env, "tpcForget",
         njsConnection_tpcForgetAsync, NULL, returnValue);
@@ -2516,9 +2449,7 @@ static bool njsConnection_tpcForgetAsync(njsBaton *baton)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_tpcPrepare, 1, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
-    if (!njsBaton_getXid(baton, env, args[0]))
+    if (!njsUtils_getXid(env, args[0], &baton->xid))
         return false;
     return njsBaton_queueWork(baton, env, "tpcPrepare",
         njsConnection_tpcPrepareAsync, njsConnection_tpcPreparePostAsync,
@@ -2563,9 +2494,7 @@ static bool njsConnection_tpcPreparePostAsync(njsBaton *baton, napi_env env,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_tpcRollback, 1, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
-    if (!njsBaton_getXid(baton, env, args[0]))
+    if (!njsUtils_getXid(env, args[0], &baton->xid))
         return false;
     return njsBaton_queueWork(baton, env, "tpcRollback",
             njsConnection_tpcRollbackAsync, NULL, returnValue);
@@ -2598,10 +2527,8 @@ static bool njsConnection_tpcRollbackAsync(njsBaton *baton)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_unsubscribe, 1, NULL)
 {
-    if (!njsConnection_check(baton))
-        return false;
-    if (!njsBaton_getSubscription(baton, env, args[0], true))
-        return false;
+    NJS_CHECK_NAPI(env, napi_get_value_external(env, args[0],
+            (void**) &baton->subscription))
     return njsBaton_queueWork(baton, env, "Unsubscribe",
             njsConnection_unsubscribeAsync, NULL, returnValue);
 }

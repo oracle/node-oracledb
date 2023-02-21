@@ -61,9 +61,6 @@ static NJS_ASYNC_METHOD(njsPool_setAccessTokenAsync);
 static NJS_ASYNC_POST_METHOD(njsPool_createPostAsync);
 static NJS_ASYNC_POST_METHOD(njsPool_getConnectionPostAsync);
 
-// processing arguments methods
-static NJS_PROCESS_ARGS_METHOD(njsPool_reconfigureProcessArgs);
-
 // finalize
 static NJS_NAPI_FINALIZE(njsPool_finalize);
 
@@ -119,8 +116,8 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_close, 1, NULL)
 {
     njsPool *pool = (njsPool*) baton->callingInstance;
 
-    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "forceClose",
-            &baton->force, NULL))
+    if (!njsUtils_getNamedPropertyBool(env, args[0], "forceClose",
+            &baton->force))
         return false;
     baton->accessTokenCallback = pool->accessTokenCallback;
     pool->accessTokenCallback = NULL;
@@ -341,10 +338,6 @@ static void njsPool_finalize(napi_env env, void *finalizeData,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_getConnection, 1, NULL)
 {
-    njsPool *pool = (njsPool*) baton->callingInstance;
-
-    if (!pool->handle)
-        return njsBaton_setError(baton, errInvalidPool);
     if (!njsUtils_getNamedPropertyString(env, args[0], "connectionClass",
             &baton->connectionClass, &baton->connectionClassLength))
         return false;
@@ -411,7 +404,7 @@ static bool njsPool_getConnectionAsync(njsBaton *baton)
 
         baton->tag = malloc(params.outTagLength);
         if (!baton->tag)
-            return njsBaton_setError(baton, errInsufficientMemory);
+            return njsBaton_setErrorInsufficientMemory(baton);
         strncpy(baton->tag, params.outTag, params.outTagLength);
         baton->tagLength = params.outTagLength;
     }
@@ -455,10 +448,42 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_reconfigure, 1, NULL)
 {
     njsPool *pool = (njsPool*) baton->callingInstance;
 
-    if (!pool->handle)
-        return njsBaton_setError(baton, errInvalidPool);
-    if (!njsPool_reconfigureProcessArgs(baton, env, args))
+    // set defaults
+    baton->poolMin = pool->poolMin;
+    baton->poolMax = pool->poolMax;
+    baton->poolIncrement = pool->poolIncrement;
+    baton->poolPingInterval = pool->poolPingInterval;
+    baton->poolTimeout = pool->poolTimeout;
+    baton->stmtCacheSize = pool->stmtCacheSize;
+    baton->poolMaxPerShard = pool->poolMaxPerShard;
+    baton->sodaMetadataCache = pool->sodaMetadataCache;
+
+    // check arguments
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "poolMin",
+            &baton->poolMin))
         return false;
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "poolMax",
+            &baton->poolMax))
+        return false;
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "poolMaxPerShard",
+            &baton->poolMaxPerShard))
+        return false;
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "poolIncrement",
+            &baton->poolIncrement))
+        return false;
+    if (!njsUtils_getNamedPropertyInt(env, args[0], "poolPingInterval",
+            &baton->poolPingInterval))
+        return false;
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "poolTimeout",
+            &baton->poolTimeout))
+        return false;
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "stmtCacheSize",
+            &baton->stmtCacheSize))
+        return false;
+    if (!njsUtils_getNamedPropertyBool(env, args[0], "sodaMetaDataCache",
+            &baton->sodaMetadataCache))
+        return false;
+
     return njsBaton_queueWork(baton, env, "Reconfigure",
             njsPool_reconfigureAsync, NULL, returnValue);
 }
@@ -521,61 +546,6 @@ static bool njsPool_reconfigureAsync(njsBaton *baton)
         }
         pool->sodaMetadataCache = baton->sodaMetadataCache;
     }
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsPool_reconfigureProcessArgs()
-//  Process the arguemnts for njsPool_reconfigure().
-//-----------------------------------------------------------------------------
-static bool njsPool_reconfigureProcessArgs(njsBaton *baton, napi_env env,
-        napi_value *args)
-{
-    njsPool        *pool = (njsPool *) baton->callingInstance;
-
-    baton->poolMin = pool->poolMin;
-    baton->poolMax = pool->poolMax;
-    baton->poolIncrement = pool->poolIncrement;
-    baton->poolPingInterval = pool->poolPingInterval;
-    baton->poolTimeout = pool->poolTimeout;
-    baton->stmtCacheSize = pool->stmtCacheSize;
-    baton->poolMaxPerShard = pool->poolMaxPerShard;
-    baton->sodaMetadataCache = pool->sodaMetadataCache;
-
-    // check arguments
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolMin",
-            &baton->poolMin, NULL))
-        return false;
-
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolMax",
-            &baton->poolMax, NULL))
-        return false;
-
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolIncrement",
-            &baton->poolIncrement, NULL))
-        return false;
-
-    if (!njsBaton_getIntFromArg(baton, env, args, 0, "poolPingInterval",
-            &baton->poolPingInterval, NULL))
-        return false;
-
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolTimeout",
-            &baton->poolTimeout, NULL))
-        return false;
-
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "stmtCacheSize",
-            &baton->stmtCacheSize, NULL))
-        return false;
-
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 0, "poolMaxPerShard",
-            &baton->poolMaxPerShard, NULL))
-        return false;
-
-    if (!njsBaton_getBoolFromArg(baton, env, args, 0, "sodaMetaDataCache",
-            &baton->sodaMetadataCache, NULL))
-        return false;
 
     return true;
 }
@@ -760,15 +730,11 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsPool_returnAccessToken, 2, NULL)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_setAccessToken, 1, NULL)
 {
-    njsPool *pool = (njsPool*) baton->callingInstance;
-
-    if (!pool->handle)
-        return njsBaton_setError(baton, errInvalidPool);
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "token",
-            &baton->token, &baton->tokenLength, NULL))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "token", &baton->token,
+            &baton->tokenLength))
         return false;
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "privateKey",
-            &baton->privateKey, &baton->privateKeyLength, NULL))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "privateKey",
+            &baton->privateKey, &baton->privateKeyLength))
         return false;
     return njsBaton_queueWork(baton, env, "token",
             njsPool_setAccessTokenAsync, NULL, returnValue);

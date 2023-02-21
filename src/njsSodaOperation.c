@@ -155,8 +155,7 @@ bool njsSodaOperation_createFromCollection(napi_env env,
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefSodaOperation,
-            globals->jsSodaOperationConstructor, opObj,
-            (njsBaseInstance**) &op))
+            globals->jsSodaOperationConstructor, opObj, (void**) &op))
         return false;
 
     // perform some initializations
@@ -281,7 +280,7 @@ static bool njsSodaOperation_getDocumentsAsync(njsBaton *baton)
             numAllocated += 16;
             tempArray = malloc(numAllocated * sizeof(dpiSodaDoc*));
             if (!tempArray)
-                return njsBaton_setError(baton, errInsufficientMemory);
+                return njsBaton_setErrorInsufficientMemory(baton);
             if (baton->sodaDocs) {
                 memcpy(tempArray, baton->sodaDocs,
                         baton->numSodaDocs * sizeof(dpiSodaDoc*));
@@ -396,7 +395,7 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
     // allocate memory for ODPI-C operations structure
     baton->sodaOperOptions = calloc(1, sizeof(dpiSodaOperOptions));
     if (!baton->sodaOperOptions)
-        return njsBaton_setError(baton, errInsufficientMemory);
+        return njsBaton_setErrorInsufficientMemory(baton);
 
     // set fetch array size, but ONLY if the client version exceeds 19.5
     if (dpiContext_getClientVersion(baton->globals->context,

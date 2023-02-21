@@ -439,7 +439,7 @@ static bool njsSodaCollection_insertManyProcessArgs(njsBaton *baton,
             &baton->numSodaDocs))
     baton->sodaDocs = calloc(baton->numSodaDocs, sizeof(dpiSodaDoc*));
     if (!baton->sodaDocs)
-        return njsUtils_throwError(env, errInsufficientMemory);
+        return njsUtils_throwInsufficientMemory(env);
 
     // acquire a SODA document handle for each entry in the array
     for (i = 0; i < baton->numSodaDocs; i++) {
@@ -490,7 +490,7 @@ static bool njsSodaCollection_insertManyAndGetAsync(njsBaton *baton)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     resultDocs = calloc(baton->numSodaDocs, sizeof(dpiSodaDoc*));
     if (!resultDocs)
-        return njsBaton_setError(baton, errInsufficientMemory);
+        return njsBaton_setErrorInsufficientMemory(baton);
     if (dpiSodaColl_insertManyWithOptions(coll->handle, baton->numSodaDocs,
             baton->sodaDocs, baton->sodaOperOptions, flags, resultDocs) < 0) {
         free(resultDocs);
@@ -646,7 +646,7 @@ bool njsSodaCollection_newFromBaton(njsBaton *baton, napi_env env,
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefSodaCollection,
             baton->globals->jsSodaCollectionConstructor, collObj,
-            (njsBaseInstance**) &coll))
+            (void**) &coll))
         return false;
 
     // store a copy of the database instance on the collection object to
@@ -682,7 +682,7 @@ static bool njsSodaCollection_processHintOption(njsBaton *baton, napi_env env,
     if (baton->hintLength) {
         baton->sodaOperOptions = calloc(1, sizeof(dpiSodaOperOptions));
         if (!baton->sodaOperOptions)
-            return njsBaton_setError(baton, errInsufficientMemory);
+            return njsBaton_setErrorInsufficientMemory(baton);
         baton->sodaOperOptions->hint = baton->hint;
         baton->sodaOperOptions->hintLength = (uint32_t) baton->hintLength;
     }

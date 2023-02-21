@@ -82,11 +82,11 @@ bool njsTokenCallback_new(njsBaton *baton, napi_env env,
 
     callback = calloc(1, sizeof(njsTokenCallback));
     if (!callback)
-        return njsBaton_setError(baton, errInsufficientMemory);
+        return njsBaton_setErrorInsufficientMemory(baton);
     baton->accessTokenCallback = callback;
     callback->accessToken = calloc(1, sizeof(dpiAccessToken));
     if (!callback->accessToken)
-        return njsBaton_setError(baton, errInsufficientMemory);
+        return njsBaton_setErrorInsufficientMemory(baton);
     callback->env = env;
     callback->globals = baton->globals;
     NJS_CHECK_NAPI(env, napi_create_reference(env, userCallback, 1,

@@ -79,23 +79,6 @@ const njsClassDef njsClassDefLob = {
     "LobImpl", sizeof(njsLob), njsLob_finalize, njsClassProperties, false
 };
 
-// other methods used internally
-static bool njsLob_check(njsLob *lob, njsBaton *baton);
-
-
-//-----------------------------------------------------------------------------
-// njsLob_check()
-//   Create the baton used for asynchronous methods and initialize all
-// values. If this fails for some reason, an exception is thrown.
-//-----------------------------------------------------------------------------
-bool njsLob_check(njsLob *lob, njsBaton *baton)
-{
-    if (!lob->handle)
-        return njsBaton_setError(baton, errInvalidLob);
-    lob->activeBaton = baton;
-    return true;
-}
-
 
 //-----------------------------------------------------------------------------
 // njsLob_close()
@@ -107,9 +90,6 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_close, 0, NULL)
 {
     njsLob *lob = (njsLob*) baton->callingInstance;
 
-    if (!njsLob_check(lob, baton))
-        return false;
-    lob->activeBaton = NULL;
     baton->dpiLobHandle = lob->handle;
     lob->handle = NULL;
     return njsBaton_queueWork(baton, env, "Close", njsLob_closeAsync, NULL,
@@ -215,10 +195,6 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsLob_getType, 0, NULL)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_getData, 0, NULL)
 {
-    njsLob *lob = (njsLob*) baton->callingInstance;
-
-    if (!njsLob_check(lob, baton))
-        return false;
     return njsBaton_queueWork(baton, env, "GetData", njsLob_getDataAsync,
             njsLob_getDataPostAsync, returnValue);
 }
@@ -252,7 +228,7 @@ static bool njsLob_getDataAsync(njsBaton *baton)
     if (ok && baton->bufferSize > 0) {
         baton->bufferPtr = malloc(baton->bufferSize);
         if (!baton->bufferPtr)
-            ok = njsBaton_setError(baton, errInsufficientMemory);
+            ok = njsBaton_setErrorInsufficientMemory(baton);
     }
 
     // read from the LOB into the provided buffer
@@ -299,7 +275,7 @@ bool njsLob_new(njsModuleGlobals *globals, njsLobBuffer *buffer, napi_env env,
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefLob, globals->jsLobConstructor,
-            lobObj, (njsBaseInstance**) &lob))
+            lobObj, (void**) &lob))
         return false;
 
     // transfer data from LOB buffer to instance
@@ -344,10 +320,6 @@ bool njsLob_populateBuffer(njsBaton *baton, njsLobBuffer *buffer)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_read, 1, NULL)
 {
-    njsLob *lob = (njsLob*) baton->callingInstance;
-
-    if (!njsLob_check(lob, baton))
-        return false;
     NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &baton->lobOffset))
     return njsBaton_queueWork(baton, env, "Read", njsLob_readAsync,
             njsLob_readPostAsync, returnValue);
@@ -378,7 +350,7 @@ static bool njsLob_readAsync(njsBaton *baton)
         if (ok) {
             lob->bufferPtr = malloc(lob->bufferSize);
             if (!lob->bufferPtr)
-                ok = njsBaton_setError(baton, errInsufficientMemory);
+                ok = njsBaton_setErrorInsufficientMemory(baton);
         }
 
     }
@@ -441,12 +413,8 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsLob_setPieceSize, 1, NULL)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_write, 2, NULL)
 {
-    njsLob *lob = (njsLob*) baton->callingInstance;
     size_t bufferSize;
     bool isBuffer;
-
-    if (!njsLob_check(lob, baton))
-        return false;
 
     // get the offset (characters for CLOBs, bytes for BLOBs)
     NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &baton->lobOffset))

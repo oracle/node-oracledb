@@ -93,8 +93,7 @@ bool njsAqMessage_createFromHandle(njsBaton *baton, dpiMsgProps *handle,
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefAqMessage,
-            baton->globals->jsAqMessageConstructor, messageObj,
-            (njsBaseInstance**) &msg))
+            baton->globals->jsAqMessageConstructor, messageObj, (void**) &msg))
         return false;
 
     // perform some initializations

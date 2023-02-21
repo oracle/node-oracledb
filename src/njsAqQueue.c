@@ -89,7 +89,7 @@ bool njsAqQueue_setRecipients(njsBaton *baton, dpiMsgProps *handle,
 
     dpiMsgRecipient *recipients = malloc(sizeof(dpiMsgRecipient) * recipCount);
     if (!recipients)
-        return njsBaton_setError(baton, errInsufficientMemory);
+        return njsBaton_setErrorInsufficientMemory(baton);
 
     for (i = 0; i < recipCount; i++) {
         recipients[i].name = recipArr[i];
@@ -245,8 +245,7 @@ bool njsAqQueue_createFromHandle(njsBaton *baton, napi_env env,
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefAqQueue,
-            baton->globals->jsAqQueueConstructor, queueObj,
-            (njsBaseInstance**) &queue))
+            baton->globals->jsAqQueueConstructor, queueObj, (void**) &queue))
         return false;
 
     // perform some initializations
@@ -259,7 +258,7 @@ bool njsAqQueue_createFromHandle(njsBaton *baton, napi_env env,
         return njsUtils_throwErrorDPI(env, baton->globals);
     if (!njsUtils_genericNew(env, &njsClassDefAqDeqOptions,
             baton->globals->jsAqDeqOptionsConstructor, &deqOptionsObj,
-            (njsBaseInstance**) &deqOptions))
+            (void**) &deqOptions))
         return false;
     if (dpiDeqOptions_addRef(deqOptionsHandle) < 0)
         return njsUtils_throwErrorDPI(env, baton->globals);
@@ -270,7 +269,7 @@ bool njsAqQueue_createFromHandle(njsBaton *baton, napi_env env,
         return njsUtils_throwErrorDPI(env, baton->globals);
     if (!njsUtils_genericNew(env, &njsClassDefAqEnqOptions,
             baton->globals->jsAqEnqOptionsConstructor, &enqOptionsObj,
-            (njsBaseInstance**) &enqOptions))
+            (void**) &enqOptions))
         return false;
     if (dpiEnqOptions_addRef(enqOptionsHandle) < 0)
         return njsUtils_throwErrorDPI(env, baton->globals);
@@ -340,7 +339,7 @@ static bool njsAqQueue_deqManyAsync(njsBaton *baton)
 
     baton->msgProps = calloc(baton->numMsgProps, sizeof(dpiMsgProps*));
     if (!baton->msgProps)
-        return njsBaton_setError(baton, errInsufficientMemory);
+        return njsBaton_setErrorInsufficientMemory(baton);
     if (dpiQueue_deqMany(queue->handle, &baton->numMsgProps,
             baton->msgProps) < 0)
         return njsBaton_setErrorDPI(baton);
@@ -437,7 +436,7 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsAqQueue_enqMany, 1, NULL)
             &baton->numMsgProps))
     baton->msgProps = calloc(baton->numMsgProps, sizeof(dpiMsgProps*));
     if (!baton->msgProps)
-        return njsBaton_setError(baton, errInsufficientMemory);
+        return njsBaton_setErrorInsufficientMemory(baton);
     for (i = 0; i < baton->numMsgProps; i++) {
         NJS_CHECK_NAPI(env, napi_get_element(env, args[0], i, &message))
         if (!njsAqQueue_createMessage(baton, queue, env, message,

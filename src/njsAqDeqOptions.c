@@ -104,11 +104,11 @@ const njsClassDef njsClassDefAqDeqOptions = {
 
 // other methods used internally
 static bool njsAqDeqOptions_getTextAttribute(napi_env env,
-        njsModuleGlobals *globals, njsBaseInstance *instance,
+        njsModuleGlobals *globals, void *instance,
         int (*getter)(dpiDeqOptions*, const char **, uint32_t *),
         napi_value *returnValue);
 static bool njsAqDeqOptions_setTextAttribute(napi_env env,
-        njsModuleGlobals *globals, njsBaseInstance *instance, napi_value value,
+        njsModuleGlobals *globals, void *instance, napi_value value,
         int (*setter)(dpiDeqOptions*, const char *, uint32_t));
 
 
@@ -217,7 +217,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_getNavigation, 0, NULL)
 //   Get accessor of text properties.
 //-----------------------------------------------------------------------------
 static bool njsAqDeqOptions_getTextAttribute(napi_env env,
-        njsModuleGlobals *globals, njsBaseInstance *instance,
+        njsModuleGlobals *globals, void *instance,
         int (*getter)(dpiDeqOptions*, const char **, uint32_t *),
         napi_value *returnValue)
 {
@@ -368,7 +368,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_setNavigation, 1, NULL)
 //   Set accessor of text properties.
 //-----------------------------------------------------------------------------
 static bool njsAqDeqOptions_setTextAttribute(napi_env env,
-        njsModuleGlobals *globals, njsBaseInstance *instance, napi_value value,
+        njsModuleGlobals *globals, void *instance, napi_value value,
         int (*setter)(dpiDeqOptions*, const char *, uint32_t))
 {
     njsAqDeqOptions *options = (njsAqDeqOptions*) instance;

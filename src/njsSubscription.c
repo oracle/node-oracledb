@@ -254,7 +254,7 @@ static bool njsSubscription_createMessageTable(napi_env env,
 void njsSubscription_eventHandler(njsSubscription *subscr,
         dpiSubscrMessage *incomingMessage)
 {
-    if (subscr->handle && subscr->name) {
+    if (subscr->handle) {
         uv_mutex_lock(&subscr->mutex);
         uv_barrier_init(&subscr->barrier, 2);
         subscr->message = incomingMessage;
@@ -274,7 +274,6 @@ static void njsSubscription_finalize(napi_env env, void *finalizeData,
 {
     njsSubscription *subscr = (njsSubscription*) finalizeData;
 
-    NJS_FREE_AND_CLEAR(subscr->name);
     if (subscr->handle) {
         dpiSubscr_release(subscr->handle);
         subscr->handle = NULL;
@@ -289,24 +288,26 @@ static void njsSubscription_finalize(napi_env env, void *finalizeData,
 // njsSubscription_new()
 //   Creates a new subscription object.
 //-----------------------------------------------------------------------------
-bool njsSubscription_new(njsBaton *baton, napi_env env, napi_value *obj,
-        njsSubscription **subscr)
+bool njsSubscription_new(njsBaton *baton, napi_env env)
 {
     njsSubscription *tempSubscr;
+    napi_value subscrObj;
 
     tempSubscr = calloc(1, sizeof(njsSubscription));
     if (!tempSubscr)
-        return njsBaton_setError(baton, errInsufficientMemory);
+        return njsBaton_setErrorInsufficientMemory(baton);
     if (napi_create_external(env, tempSubscr, njsSubscription_finalize,
-            tempSubscr, obj) != napi_ok) {
+            tempSubscr, &subscrObj) != napi_ok) {
         free(tempSubscr);
         return njsUtils_genericThrowError(env, __FILE__, __LINE__);
     }
+    NJS_CHECK_NAPI(env, napi_create_reference(env, subscrObj, 1,
+            &baton->jsSubscriptionRef))
     tempSubscr->globals = baton->globals;
     tempSubscr->env = env;
     tempSubscr->subscrNamespace = DPI_SUBSCR_NAMESPACE_DBCHANGE;
+    baton->subscription = tempSubscr;
 
-    *subscr = tempSubscr;
     return true;
 }
 
@@ -335,19 +336,7 @@ static void njsSubscription_onStopNotifications(uv_handle_t *handle)
 static bool njsSubscription_onStopNotificationsHelper(napi_env env,
         njsSubscription *subscr)
 {
-    napi_value name, allSubscriptions;
-
-    // delete property in all subscriptions object, if needed
-    NJS_CHECK_NAPI(env, napi_create_string_utf8(env, subscr->name,
-            subscr->nameLength, &name))
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            subscr->globals->jsSubscriptions, &allSubscriptions))
-    NJS_CHECK_NAPI(env, napi_delete_property(env, allSubscriptions, name,
-            NULL))
-
-    // perform cleanup
     uv_mutex_destroy(&subscr->mutex);
-    NJS_FREE_AND_CLEAR(subscr->name);
     if (subscr->handle) {
         dpiSubscr_release(subscr->handle);
         subscr->handle = NULL;
@@ -422,11 +411,10 @@ bool njsSubscription_startNotifications(njsSubscription *subscr,
 {
     uv_loop_t *loop;
 
-    if (!subscr->name) {
+    if (!subscr->notifications) {
 
         // keep the name on the subscription
-        subscr->name = baton->name;
-        subscr->nameLength = baton->nameLength;
+        subscr->notifications = true;
         baton->name = NULL;
         baton->nameLength = 0;
 
@@ -454,9 +442,10 @@ bool njsSubscription_startNotifications(njsSubscription *subscr,
 //-----------------------------------------------------------------------------
 bool njsSubscription_stopNotifications(njsSubscription *subscr)
 {
-    if (subscr->name) {
+    if (subscr->notifications) {
         uv_close((uv_handle_t*) &subscr->async,
                 njsSubscription_onStopNotifications);
+        subscr->notifications = false;
     }
     return true;
 }

@@ -112,7 +112,7 @@ static bool njsJsonBuffer_getString(njsJsonBuffer *buf, njsBaton *baton,
         buf->allocatedBuffers += 16;
         tempBuffers = malloc(buf->allocatedBuffers * sizeof(char*));
         if (!tempBuffers)
-            return njsBaton_setError(baton, errInsufficientMemory);
+            return njsBaton_setErrorInsufficientMemory(baton);
         if (buf->numBuffers > 0) {
             memcpy(tempBuffers, buf->buffers, buf->numBuffers * sizeof(char*));
             free(buf->buffers);
@@ -123,7 +123,7 @@ static bool njsJsonBuffer_getString(njsJsonBuffer *buf, njsBaton *baton,
             &tempLength))
     temp = malloc(tempLength + 1);
     if (!temp)
-        return njsBaton_setError(baton, errInsufficientMemory);
+        return njsBaton_setErrorInsufficientMemory(baton);
     buf->buffers[buf->numBuffers++] = temp;
     NJS_CHECK_NAPI(env, napi_get_value_string_utf8(env, inValue, temp,
             tempLength + 1, &tempLength))
@@ -197,7 +197,7 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
         array->elementValues = calloc(array->numElements,
                 sizeof(dpiDataBuffer));
         if (!array->elements || !array->elementValues)
-            return njsBaton_setError(baton, errInsufficientMemory);
+            return njsBaton_setErrorInsufficientMemory(baton);
         for (i = 0; i < array->numElements; i++) {
             NJS_CHECK_NAPI(env, napi_get_element(env, value, i, &temp))
             array->elements[i].value = &array->elementValues[i];
@@ -208,66 +208,59 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
         return true;
     }
 
-    // handle objects
-    if (valueType == napi_object) {
-
-        // handle dates
-        NJS_CHECK_NAPI(env, napi_is_date(env, value, &check))
-        if (check) {
-            node->oracleTypeNum = DPI_ORACLE_TYPE_TIMESTAMP;
-            node->nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
-            NJS_CHECK_NAPI(env, napi_coerce_to_number(env, value, &temp))
-            NJS_CHECK_NAPI(env, napi_get_value_double(env, temp,
-                    &node->value->asDouble))
-            return true;
-        }
-
-        // handle buffers
-        NJS_CHECK_NAPI(env, napi_is_buffer(env, value, &check))
-        if (check) {
-            NJS_CHECK_NAPI(env, napi_get_buffer_info(env, value,
-                    (void**) &tempBuffer, &tempBufferLength))
-            node->oracleTypeNum = DPI_ORACLE_TYPE_RAW;
-            node->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
-            node->value->asBytes.ptr = tempBuffer;
-            node->value->asBytes.length = (uint32_t) tempBufferLength;
-            return true;
-        }
-
-        // all other objects have been transformed to an object containing the
-        // key "fields" and the key "values"
-        node->oracleTypeNum = DPI_ORACLE_TYPE_JSON_OBJECT;
-        node->nativeTypeNum = DPI_NATIVE_TYPE_JSON_OBJECT;
-        obj = &node->value->asJsonObject;
-        NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "fields",
-                &fieldNames))
-        NJS_CHECK_NAPI(env, napi_get_array_length(env, fieldNames,
-                &obj->numFields))
-        NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "values",
-                &fieldValues))
-        obj->fieldNames = calloc(obj->numFields, sizeof(char*));
-        obj->fieldNameLengths = calloc(obj->numFields, sizeof(uint32_t));
-        obj->fields = calloc(obj->numFields, sizeof(dpiJsonNode));
-        obj->fieldValues = calloc(obj->numFields, sizeof(dpiDataBuffer));
-        if (!obj->fieldNames || !obj->fieldNameLengths || !obj->fields ||
-                !obj->fieldValues)
-            return njsBaton_setError(baton, errInsufficientMemory);
-        for (i = 0; i < obj->numFields; i++) {
-            NJS_CHECK_NAPI(env, napi_get_element(env, fieldNames, i, &name))
-            if (!njsJsonBuffer_getString(buf, baton, env, name,
-                    &obj->fieldNames[i], &obj->fieldNameLengths[i]))
-                return false;
-            NJS_CHECK_NAPI(env, napi_get_element(env, fieldValues, i, &temp))
-            obj->fields[i].value = &obj->fieldValues[i];
-            if (!njsJsonBuffer_populateNode(buf, &obj->fields[i], env, temp,
-                    baton))
-                return false;
-        }
+    // handle dates
+    NJS_CHECK_NAPI(env, napi_is_date(env, value, &check))
+    if (check) {
+        node->oracleTypeNum = DPI_ORACLE_TYPE_TIMESTAMP;
+        node->nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
+        NJS_CHECK_NAPI(env, napi_coerce_to_number(env, value, &temp))
+        NJS_CHECK_NAPI(env, napi_get_value_double(env, temp,
+                &node->value->asDouble))
         return true;
-
     }
 
-    return njsBaton_setError(baton, errConvertToJsonValue);
+    // handle buffers
+    NJS_CHECK_NAPI(env, napi_is_buffer(env, value, &check))
+    if (check) {
+        NJS_CHECK_NAPI(env, napi_get_buffer_info(env, value,
+                (void**) &tempBuffer, &tempBufferLength))
+        node->oracleTypeNum = DPI_ORACLE_TYPE_RAW;
+        node->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
+        node->value->asBytes.ptr = tempBuffer;
+        node->value->asBytes.length = (uint32_t) tempBufferLength;
+        return true;
+    }
+
+    // all other objects have been transformed to an object containing the
+    // key "fields" and the key "values"
+    node->oracleTypeNum = DPI_ORACLE_TYPE_JSON_OBJECT;
+    node->nativeTypeNum = DPI_NATIVE_TYPE_JSON_OBJECT;
+    obj = &node->value->asJsonObject;
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "fields",
+            &fieldNames))
+    NJS_CHECK_NAPI(env, napi_get_array_length(env, fieldNames,
+            &obj->numFields))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "values",
+            &fieldValues))
+    obj->fieldNames = calloc(obj->numFields, sizeof(char*));
+    obj->fieldNameLengths = calloc(obj->numFields, sizeof(uint32_t));
+    obj->fields = calloc(obj->numFields, sizeof(dpiJsonNode));
+    obj->fieldValues = calloc(obj->numFields, sizeof(dpiDataBuffer));
+    if (!obj->fieldNames || !obj->fieldNameLengths || !obj->fields ||
+            !obj->fieldValues)
+        return njsBaton_setErrorInsufficientMemory(baton);
+    for (i = 0; i < obj->numFields; i++) {
+        NJS_CHECK_NAPI(env, napi_get_element(env, fieldNames, i, &name))
+        if (!njsJsonBuffer_getString(buf, baton, env, name,
+                &obj->fieldNames[i], &obj->fieldNameLengths[i]))
+            return false;
+        NJS_CHECK_NAPI(env, napi_get_element(env, fieldValues, i, &temp))
+        obj->fields[i].value = &obj->fieldValues[i];
+        if (!njsJsonBuffer_populateNode(buf, &obj->fields[i], env, temp,
+                baton))
+            return false;
+    }
+    return true;
 }
 
 

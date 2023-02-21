@@ -417,7 +417,7 @@ bool njsDbObject_getSubClass(njsBaton *baton, dpiObjectType *objectTypeHandle,
     // allocate memory for structure; memory is zero-ed
     tempObjectType = (njsDbObjectType*) calloc(1, sizeof(njsDbObjectType));
     if (!tempObjectType)
-        return njsUtils_throwError(env, errInsufficientMemory);
+        return njsUtils_throwInsufficientMemory(env);
 
     // populate object type (C) and prototype (JS) with all information about
     // the object type
@@ -510,7 +510,7 @@ bool njsDbObject_new(njsDbObjectType *objType, dpiObject *objHandle,
 
     // create new object
     if (!njsUtils_genericNew(env, &njsClassDefDbObject,
-            globals->jsDbObjectConstructor, value, (njsBaseInstance**) &obj))
+            globals->jsDbObjectConstructor, value, (void**) &obj))
         return false;
 
     // get the object type and store a reference to it on the new object
@@ -691,12 +691,7 @@ static bool njsDbObject_transformFromOracle(njsDbObject *obj, napi_env env,
     }
 
     // unsupported
-    if (attr)
-        return njsUtils_throwError(env, errConvertFromObjAttr,
-                attr->nameLength, attr->name, obj->type->fqnLength,
-                obj->type->fqn);
-    return njsUtils_throwError(env, errConvertFromObjElement,
-            obj->type->fqnLength, obj->type->fqn);
+    return njsUtils_genericThrowError(env, __FILE__, __LINE__);
 }
 
 
@@ -799,11 +794,7 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
             break;
     }
 
-    if (attr)
-        return njsUtils_throwError(env, errConvertToObjAttr, attr->nameLength,
-                attr->name, obj->type->fqnLength, obj->type->fqn);
-    return njsUtils_throwError(env, errConvertToObjElement,
-            obj->type->fqnLength, obj->type->fqn);
+    return njsUtils_genericThrowError(env, __FILE__, __LINE__);
 }
 
 
@@ -844,7 +835,7 @@ static bool njsDbObject_wrap(napi_env env, napi_value jsObj, njsDbObject **obj)
     // create a new object instance
     tempObj = calloc(1, sizeof(njsDbObject));
     if (!tempObj)
-        return njsUtils_throwError(env, errInsufficientMemory);
+        return njsUtils_throwInsufficientMemory(env);
     tempObj->type = objType;
     if (napi_wrap(env, jsObj, tempObj, njsDbObject_finalize, NULL,
             NULL) != napi_ok) {
@@ -918,12 +909,12 @@ static bool njsDbObjectType_populate(njsDbObjectType *objType,
         objType->attributes = calloc(info->numAttributes,
                 sizeof(njsDbObjectAttr));
         if (!objType->attributes)
-            return njsBaton_setError(baton, errInsufficientMemory);
+            return njsBaton_setErrorInsufficientMemory(baton);
 
         // determine the attributes associated with the object type
         attrHandles = calloc(info->numAttributes, sizeof(dpiObjectAttr*));
         if (!attrHandles)
-            return njsBaton_setError(baton, errInsufficientMemory);
+            return njsBaton_setErrorInsufficientMemory(baton);
         if (dpiObjectType_getAttributes(objectTypeHandle,
                 objType->numAttributes, attrHandles) < 0) {
             free(attrHandles);
@@ -987,7 +978,7 @@ static bool njsDbObjectType_populate(njsDbObjectType *objType,
     objType->fqnLength = info->schemaLength + info->nameLength + 1;
     objType->fqn = malloc(objType->fqnLength + 1);
     if (!objType->fqn)
-        return njsBaton_setError(baton, errInsufficientMemory);
+        return njsBaton_setErrorInsufficientMemory(baton);
     (void) snprintf(objType->fqn, objType->fqnLength + 1, "%.*s.%.*s",
             (int) info->schemaLength, info->schema, (int) info->nameLength,
             info->name);

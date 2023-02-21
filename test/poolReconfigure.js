@@ -1128,28 +1128,28 @@ describe('255. poolReconfigure.js', function() {
           async function() {
             await pool.reconfigure({poolMin: -1});
           },
-          /NJS-007/
+          /NJS-007:/
         );
 
         await assert.rejects(
           async function() {
             await pool.reconfigure({poolMin: NaN});
           },
-          /NJS-007/
+          /NJS-007:/
         );
 
         await assert.rejects(
           async function() {
             await pool.reconfigure({poolMin: null});
           },
-          /NJS-007/
+          /NJS-007:/
         );
 
         await assert.rejects(
           async function() {
             await pool.reconfigure({poolMin: '10'});
           },
-          /NJS-007/
+          /NJS-007:/
         );
       } catch (err) {
         should.not.exist(err);
@@ -1206,14 +1206,14 @@ describe('255. poolReconfigure.js', function() {
         async function() {
           await pool.reconfigure({poolIncrement: null});
         },
-        /NJS-007/
+        /NJS-007:/
       );
 
       await assert.rejects(
         async function() {
           await pool.reconfigure({poolIncrement: "100"});
         },
-        /NJS-007/
+        /NJS-007:/
       );
 
     });
@@ -1223,28 +1223,28 @@ describe('255. poolReconfigure.js', function() {
         async function() {
           await pool.reconfigure({enableStatistics: null});
         },
-        /NJS-004/
+        /NJS-007:/
       );
 
       await assert.rejects(
         async function() {
           await pool.reconfigure({enableStatistics: -100});
         },
-        /NJS-004/
+        /NJS-007:/
       );
 
       await assert.rejects(
         async function() {
           await pool.reconfigure({enableStatistics: NaN});
         },
-        /NJS-004/
+        /NJS-007:/
       );
 
       await assert.rejects(
         async function() {
           await pool.reconfigure({enableStatistics: "true"});
         },
-        /NJS-004/
+        /NJS-007:/
       );
     });
 

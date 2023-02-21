@@ -67,7 +67,7 @@ static bool njsModule_extendClass(napi_env env, napi_value module,
         allProperties = calloc(numProperties,
                 sizeof(napi_property_descriptor));
         if (!allProperties)
-            return njsUtils_throwError(env, errInsufficientMemory);
+            return njsUtils_throwInsufficientMemory(env);
 
         // populate the properties
         memcpy(allProperties, classDef->properties,
@@ -122,7 +122,6 @@ static void njsModule_finalizeGlobals(napi_env env, void *finalize_data,
     NJS_DELETE_REF_AND_CLEAR(globals->jsSodaDocCursorConstructor);
     NJS_DELETE_REF_AND_CLEAR(globals->jsSodaDocumentConstructor);
     NJS_DELETE_REF_AND_CLEAR(globals->jsSodaOperationConstructor);
-    NJS_DELETE_REF_AND_CLEAR(globals->jsSubscriptions);
     free(globals);
 }
 
@@ -202,11 +201,6 @@ static bool njsModule_populateGlobals(napi_env env, napi_value module,
     NJS_CHECK_NAPI(env, napi_set_named_property(env, settings,
             "oracleClientVersionString", temp))
 
-    // create object for storing subscriptions
-    NJS_CHECK_NAPI(env, napi_create_object(env, &temp))
-    NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
-            &globals->jsSubscriptions))
-
     return true;
 }
 
@@ -230,17 +224,17 @@ static bool njsModule_initDPI(napi_env env, napi_value *args,
     dpiErrorInfo errorInfo;
 
     // get any arguments from JavaScript
-    if (!njsUtils_getStringFromArg(env, args, 0, "libDir", libDir,
-            libDirLength, NULL, NULL))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "libDir", libDir,
+            libDirLength))
         return false;
-    if (!njsUtils_getStringFromArg(env, args, 0, "configDir", configDir,
-            configDirLength, NULL, NULL))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "configDir", configDir,
+            configDirLength))
         return false;
-    if (!njsUtils_getStringFromArg(env, args, 0, "errorUrl", errorUrl,
-            errorUrlLength, NULL, NULL))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "errorUrl", errorUrl,
+            errorUrlLength))
         return false;
-    if (!njsUtils_getStringFromArg(env, args, 0, "driverName", driverName,
-            driverNameLength, NULL, NULL))
+    if (!njsUtils_getNamedPropertyString(env, args[0], "driverName",
+            driverName, driverNameLength))
         return false;
 
     // initialize structure
@@ -326,7 +320,7 @@ static bool njsModule_initHelper(napi_env env, napi_value exports)
     // function definition so that it can be directly referenced
     globals = calloc(1, sizeof(njsModuleGlobals));
     if (!globals)
-        return njsUtils_throwError(env, errInsufficientMemory);
+        return njsUtils_throwInsufficientMemory(env);
     NJS_CHECK_NAPI(env, napi_create_external(env, globals,
             njsModule_finalizeGlobals, NULL, &jsGlobals))
     NJS_CHECK_NAPI(env, napi_set_named_property(env, exports, "_globals",

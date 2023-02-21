@@ -101,7 +101,7 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
     // allocate buffer
     var->buffer = calloc(1, sizeof(njsVariableBuffer));
     if (!var->buffer)
-        return njsBaton_setError(baton, errInsufficientMemory);
+        return njsBaton_setErrorInsufficientMemory(baton);
 
     // create ODPI-C variable
     if (dpiConn_newVar(conn->handle, var->varTypeNum, var->nativeTypeNum,
@@ -427,7 +427,7 @@ static bool njsVariable_getJsonNodeValue(njsBaton *baton, dpiJsonNode *node,
             break;
     }
 
-    return njsBaton_setError(baton, errUnsupportedDataTypeInJson,
+    return njsBaton_setErrorUnsupportedDataTypeInJson(baton,
             node->oracleTypeNum);
 }
 
@@ -479,7 +479,7 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
             break;
         case DPI_NATIVE_TYPE_BYTES:
             if (data->value.asBytes.length > var->maxSize)
-                return njsBaton_setError(baton, errInsufficientBufferForBinds);
+                return njsBaton_setErrorInsufficientBufferForBinds(baton);
             if (data->value.asBytes.length == 0) {
                 NJS_CHECK_NAPI(env, napi_get_null(env, value))
             } else if (var->varTypeNum == DPI_ORACLE_TYPE_RAW ||
@@ -558,7 +558,7 @@ bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
         // allocate buffer
         vars[i].buffer = calloc(1, sizeof(njsVariable));
         if (!vars[i].buffer)
-            return njsBaton_setError(baton, errInsufficientMemory);
+            return njsBaton_setErrorInsufficientMemory(baton);
 
         // get query information for the specified column
         vars[i].pos = i + 1;
@@ -568,7 +568,7 @@ bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
             return njsBaton_setErrorDPI(baton);
         vars[i].name = malloc(queryInfo.nameLength);
         if (!vars[i].name)
-            return njsBaton_setError(baton, errInsufficientMemory);
+            return njsBaton_setErrorInsufficientMemory(baton);
         memcpy(vars[i].name, queryInfo.name, queryInfo.nameLength);
         vars[i].nameLength = queryInfo.nameLength;
         vars[i].maxArraySize = baton->fetchArraySize;
@@ -649,7 +649,7 @@ bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
             case DPI_ORACLE_TYPE_JSON:
                 break;
             default:
-                return njsBaton_setError(baton, errUnsupportedDataType,
+                return njsBaton_setErrorUnsupportedDataType(baton,
                         queryInfo.typeInfo.oracleTypeNum, i + 1);
         }
 
@@ -823,7 +823,7 @@ bool njsVariable_process(njsVariable *vars, uint32_t numVars, uint32_t numRows,
             var->dmlReturningBuffers = calloc(numRows,
                     sizeof(njsVariableBuffer));
             if (!var->dmlReturningBuffers)
-                return njsBaton_setError(baton, errInsufficientMemory);
+                return njsBaton_setErrorInsufficientMemory(baton);
             for (row = 0; row < numRows; row++) {
                 buffer = &var->dmlReturningBuffers[row];
                 if (dpiVar_getReturnedData(var->dpiVarHandle, row,
@@ -902,7 +902,7 @@ static bool njsVariable_processBuffer(njsVariable *var,
                 break;
             buffer->lobs = calloc(buffer->numElements, sizeof(njsLobBuffer));
             if (!buffer->lobs)
-                return njsBaton_setError(baton, errInsufficientMemory);
+                return njsBaton_setErrorInsufficientMemory(baton);
             for (i = 0; i < buffer->numElements; i++) {
                 lob = &buffer->lobs[i];
                 lob->dataType = var->varTypeNum;
@@ -928,7 +928,7 @@ static bool njsVariable_processBuffer(njsVariable *var,
             buffer->queryVars = calloc(buffer->numQueryVars,
                     sizeof(njsVariable));
             if (!buffer->queryVars)
-                return njsBaton_setError(baton, errInsufficientMemory);
+                return njsBaton_setErrorInsufficientMemory(baton);
             if (!njsVariable_initForQuery(buffer->queryVars,
                     buffer->numQueryVars, stmt, baton))
                 return false;
@@ -1064,10 +1064,6 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
 
         // get LOB instance
         NJS_CHECK_NAPI(env, napi_unwrap(env, value, (void**) &lob))
-        if (!lob->handle)
-            return njsBaton_setError(baton, errInvalidLob);
-        if (lob->activeBaton && lob->activeBaton != baton)
-            return njsBaton_setError(baton, errBusyLob);
         tempLobHandle = lob->handle;
 
         // for INOUT binds a copy of the LOB is made and the copy bound

@@ -156,13 +156,13 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDatabase_createDocument, 2, NULL)
             &contentLength))
 
     // acquire the key value, if one was specified
-    if (!njsUtils_getStringFromArg(env, args, 1, "key", &key, &keyLength,
-            NULL, NULL))
+    if (!njsUtils_getNamedPropertyString(env, args[1], "key", &key,
+             &keyLength))
         return false;
 
     // acquire the mediaType value, if one was specified
-    if (!njsUtils_getStringFromArg(env, args, 1, "mediaType", &mediaType,
-            &mediaTypeLength, NULL, NULL)) {
+    if (!njsUtils_getNamedPropertyString(env, args[1], "mediaType", &mediaType,
+            &mediaTypeLength)) {
         if (key)
             free(key);
         return false;
@@ -218,12 +218,11 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaDatabase_getCollectionNames, 1, NULL)
 {
     baton->sodaCollNames = calloc(1, sizeof(dpiSodaCollNames));
     if (!baton->sodaCollNames)
-        return njsBaton_setError(baton, errInsufficientMemory);
-    if (!njsBaton_getStringFromArg(baton, env, args, 0, "startsWith",
-            &baton->startsWith, &baton->startsWithLength, NULL))
+        return njsUtils_throwInsufficientMemory(env);
+    if (!njsUtils_getNamedPropertyString(env, args[0], "startsWith",
+            &baton->startsWith, &baton->startsWithLength))
         return false;
-    if (!njsBaton_getIntFromArg(baton, env, args, 0, "limit", &baton->limit,
-            NULL))
+    if (!njsUtils_getNamedPropertyInt(env, args[0], "limit", &baton->limit))
         return false;
     return njsBaton_queueWork(baton, env, "GetCollectionNames",
             njsSodaDatabase_getCollectionNamesAsync,
@@ -301,8 +300,7 @@ bool njsSodaDatabase_createFromHandle(napi_env env, napi_value connObj,
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefSodaDatabase,
-            globals->jsSodaDatabaseConstructor, dbObj,
-            (njsBaseInstance**) &db))
+            globals->jsSodaDatabaseConstructor, dbObj, (void**) &db))
         return false;
 
     // perform initialization

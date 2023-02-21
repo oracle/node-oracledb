@@ -64,22 +64,6 @@ const njsClassDef njsClassDefResultSet = {
     njsClassProperties, false
 };
 
-// other methods used internally
-static bool njsResultSet_check(njsResultSet *rs, njsBaton *baton);
-
-//-----------------------------------------------------------------------------
-// njsResultSet_check()
-//   Checks the result set to ensure it is valid and then marks the current
-// baton as the active one (to prevent concurrent access).
-//-----------------------------------------------------------------------------
-static bool njsResultSet_check(njsResultSet *rs, njsBaton *baton)
-{
-    if (!rs->handle || !rs->conn->handle)
-        return njsBaton_setError(baton, errInvalidResultSet);
-    rs->activeBaton = baton;
-    return true;
-}
-
 
 //-----------------------------------------------------------------------------
 // njsResultSet_close()
@@ -91,8 +75,6 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsResultSet_close, 0, NULL)
 {
     njsResultSet *rs = (njsResultSet*) baton->callingInstance;
 
-    if (!njsResultSet_check(rs, baton))
-        return false;
     baton->dpiStmtHandle = rs->handle;
     rs->handle = NULL;
     return njsBaton_queueWork(baton, env, "Close", njsResultSet_closeAsync,
@@ -170,14 +152,8 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsResultSet_getMetaData, 0, NULL)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsResultSet_getRows, 1, NULL)
 {
-    njsResultSet *rs = (njsResultSet*) baton->callingInstance;
-
-    if (!njsResultSet_check(rs, baton))
-        return false;
-
     NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0],
-                &baton->fetchArraySize))
-
+            &baton->fetchArraySize))
     return njsBaton_queueWork(baton, env, "GetRows", njsResultSet_getRowsAsync,
             njsResultSet_getRowsPostAsync, returnValue);
 }
@@ -309,8 +285,7 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefResultSet,
-            baton->globals->jsResultSetConstructor, rsObj,
-            (njsBaseInstance**) &rs))
+            baton->globals->jsResultSetConstructor, rsObj, (void**) &rs))
         return false;
 
     // store a reference to the parent object (a connection or a parent result

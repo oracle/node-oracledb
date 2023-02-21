@@ -158,125 +158,6 @@ bool njsUtils_addTypeProperties(napi_env env, napi_value obj,
 
 
 //-----------------------------------------------------------------------------
-// njsUtils_convertToBoolean()
-//   Convert a C boolean value to a JavaScript boolean value.
-//-----------------------------------------------------------------------------
-napi_value njsUtils_convertToBoolean(napi_env env, bool value)
-{
-    napi_value jsValue;
-
-    if (napi_get_boolean(env, value, &jsValue) != napi_ok) {
-        njsUtils_genericThrowError(env, __FILE__, __LINE__);
-        return NULL;
-    }
-
-    return jsValue;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_convertToInt()
-//   Convert a C integer to a JavaScript number value.
-//-----------------------------------------------------------------------------
-napi_value njsUtils_convertToInt(napi_env env, int32_t value)
-{
-    napi_value jsValue;
-
-    if (napi_create_int32(env, value, &jsValue) != napi_ok) {
-        njsUtils_genericThrowError(env, __FILE__, __LINE__);
-        return NULL;
-    }
-
-    return jsValue;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_convertToString()
-//   Convert a C string value to a JavaScript string value.
-//-----------------------------------------------------------------------------
-napi_value njsUtils_convertToString(napi_env env, const char *value,
-        uint32_t valueLength)
-{
-    napi_value jsValue;
-
-    if (napi_create_string_utf8(env, value, valueLength,
-            &jsValue) != napi_ok) {
-        njsUtils_genericThrowError(env, __FILE__, __LINE__);
-        return NULL;
-    }
-
-    return jsValue;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_convertToUnsignedInt()
-//   Convert a C unsigned integer to a JavaScript number value.
-//-----------------------------------------------------------------------------
-napi_value njsUtils_convertToUnsignedInt(napi_env env, uint32_t value)
-{
-    napi_value jsValue;
-
-    if (napi_create_uint32(env, value, &jsValue) != napi_ok) {
-        njsUtils_genericThrowError(env, __FILE__, __LINE__);
-        return NULL;
-    }
-
-    return jsValue;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_convertToUnsignedIntArray()
-//   Convert an array of C unsigned integers to a JavaScript array value.
-//-----------------------------------------------------------------------------
-napi_value njsUtils_convertToUnsignedIntArray(napi_env env, uint32_t numValues,
-        uint32_t *values)
-{
-    napi_value jsValue, temp;
-    uint32_t i;
-
-    if (napi_create_array_with_length(env, numValues, &jsValue) != napi_ok) {
-        njsUtils_genericThrowError(env, __FILE__, __LINE__);
-        return NULL;
-    }
-    for (i = 0; i < numValues; i++) {
-        if (napi_create_uint32(env, values[i], &temp) != napi_ok) {
-            njsUtils_genericThrowError(env, __FILE__, __LINE__);
-            return NULL;
-        }
-        if (napi_set_element(env, jsValue, i, temp) != napi_ok) {
-            njsUtils_genericThrowError(env, __FILE__, __LINE__);
-            return NULL;
-        }
-    }
-
-    return jsValue;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_copyArray()
-//   Copy an array with the specified number of elements to the destination,
-// returning a boolean indicating if this was done successfully or not.
-//-----------------------------------------------------------------------------
-bool njsUtils_copyArray(napi_env env, void *sourceArray, uint32_t numElements,
-        size_t elementSize, void **destArray, uint32_t *destNumElements)
-{
-    if (sourceArray) {
-        *destArray = malloc(numElements * elementSize);
-        if (!*destArray)
-            return njsUtils_throwError(env, errInsufficientMemory);
-        memcpy(*destArray, sourceArray, numElements * elementSize);
-        *destNumElements = numElements;
-    }
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsUtils_copyString()
 //   Copy an array with the specified number of elements to the destination,
 // returning a boolean indicating if this was done successfully or not.
@@ -287,7 +168,7 @@ bool njsUtils_copyString(napi_env env, char *source, size_t sourceLength,
     if (source && sourceLength > 0) {
         *dest = malloc(sourceLength);
         if (!*dest)
-            return njsUtils_throwError(env, errInsufficientMemory);
+            return njsUtils_throwInsufficientMemory(env);
         memcpy(*dest, source, sourceLength);
         *destLength = sourceLength;
     }
@@ -313,7 +194,7 @@ bool njsUtils_copyStringFromJS(napi_env env, napi_value value, char **result,
         free(*result);
     *result = malloc(*resultLength + 1);
     if (!*result)
-        return njsUtils_throwError(env, errInsufficientMemory);
+        return njsUtils_throwInsufficientMemory(env);
 
     // get the string value contents
     NJS_CHECK_NAPI(env, napi_get_value_string_utf8(env, value, *result,
@@ -335,10 +216,8 @@ bool njsUtils_createBaton(napi_env env, napi_callback_info info,
 
     // allocate and zero memory
     tempBaton = calloc(1, sizeof(njsBaton));
-    if (!tempBaton) {
-        njsUtils_throwError(env, errInsufficientMemory);
-        return false;
-    }
+    if (!tempBaton)
+        return njsUtils_throwInsufficientMemory(env);
 
     // perform common checks and populate common attributes in the baton
     if (!njsBaton_create(tempBaton, env, info, numArgs, args, classDef)) {
@@ -357,8 +236,7 @@ bool njsUtils_createBaton(napi_env env, napi_callback_info info,
 // size and finalize function.
 //-----------------------------------------------------------------------------
 bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
-        napi_ref constructorRef, napi_value *instanceObj,
-        njsBaseInstance **instance)
+        napi_ref constructorRef, napi_value *instanceObj, void **instance)
 {
     napi_value constructor;
     size_t numProperties;
@@ -374,10 +252,8 @@ bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
 
     // allocate memory for structure; memory is zero-ed
     data = calloc(1, classDef->structSize);
-    if (!data) {
-        njsUtils_throwError(env, errInsufficientMemory);
-        return false;
-    }
+    if (!data)
+        return njsUtils_throwInsufficientMemory(env);
 
     // wrap the structure for use by JavaScript
     if (napi_wrap(env, *instanceObj, data, classDef->finalizeFn, NULL,
@@ -394,7 +270,7 @@ bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
                 numProperties, classDef->properties))
     }
 
-    *instance = (njsBaseInstance*) data;
+    *instance = data;
     return true;
 }
 
@@ -562,7 +438,7 @@ bool njsUtils_getNamedPropertyShardingKey(napi_env env, napi_value value,
         return true;
     shards = calloc(arrLen, sizeof(dpiShardingKeyColumn));
     if (!shards)
-        return njsUtils_throwError(env, errInsufficientMemory);
+        return njsUtils_throwInsufficientMemory(env);
     *shardingKeyColumns = shards;
     *numShardingKeyColumns = (uint8_t) arrLen;
 
@@ -673,11 +549,11 @@ bool njsUtils_getNamedPropertyStringArray(napi_env env, napi_value value,
     // allocate memory for the results
     tempStrings = calloc(arrayLength, sizeof(char*));
     if (!tempStrings)
-        return njsUtils_throwError(env, errInsufficientMemory);
+        return njsUtils_throwInsufficientMemory(env);
     *resultElems = tempStrings;
     tempLengths = calloc(arrayLength, sizeof(uint32_t));
     if (!tempLengths)
-        return njsUtils_throwError(env, errInsufficientMemory);
+        return njsUtils_throwInsufficientMemory(env);
     *resultElemLengths = tempLengths;
 
     // populate the results
@@ -688,6 +564,37 @@ bool njsUtils_getNamedPropertyStringArray(napi_env env, napi_value value,
                 &tempLength))
             return false;
         tempLengths[i] = (uint32_t) tempLength;
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsUtils_getNamedPropertyStringOrBuffer()
+//   Returns the value of the named property, which is assumed to be a string
+// or Buffer value. If the value is not found, the string value is left
+// unchanged.
+//-----------------------------------------------------------------------------
+bool njsUtils_getNamedPropertyStringOrBuffer(napi_env env, napi_value value,
+        const char *name, char **result, size_t *resultLength)
+{
+    napi_value resultObj;
+    size_t bufLen;
+    bool check;
+    void *buf;
+
+    if (!njsUtils_getNamedProperty(env, value, name, &resultObj))
+        return false;
+    if (resultObj) {
+        NJS_CHECK_NAPI(env, napi_is_buffer(env, resultObj, &check))
+        if (!check)
+            return njsUtils_copyStringFromJS(env, resultObj, result,
+                    resultLength);
+        NJS_CHECK_NAPI(env, napi_get_buffer_info(env, resultObj, &buf,
+                &bufLen))
+        if (!njsUtils_copyString(env, buf, bufLen, result, resultLength))
+            return false;
     }
 
     return true;
@@ -744,7 +651,7 @@ bool njsUtils_getNamedPropertyUnsignedIntArray(napi_env env, napi_value value,
     NJS_CHECK_NAPI(env, napi_get_array_length(env, array, numElements))
     *elements = calloc(*numElements, sizeof(uint32_t));
     if (!elements && *numElements > 0)
-        return njsUtils_throwError(env, errInsufficientMemory);
+        return njsUtils_throwInsufficientMemory(env);
     for (i = 0; i < *numElements; i++) {
         NJS_CHECK_NAPI(env, napi_get_element(env, array, i, &element))
         NJS_CHECK_NAPI(env, napi_get_value_uint32(env, element,
@@ -756,115 +663,60 @@ bool njsUtils_getNamedPropertyUnsignedIntArray(napi_env env, napi_value value,
 
 
 //-----------------------------------------------------------------------------
-// njsUtils_getStringFromArg()
-//   Gets a string value from the specified JavaScript object property, if
-// possible. If the given property is undefined, no error is set and the value
-// is left untouched; otherwise, if the value is not a string, the error
-// message is populated.
+// njsUtils_getXid()
+//   Returns the XID from the specified N-API value.
 //-----------------------------------------------------------------------------
-bool njsUtils_getStringFromArg(napi_env env, napi_value *args,
-        int argIndex, const char *propertyName, char **result,
-        size_t *resultLength, bool *found, char *errorBuffer)
+bool njsUtils_getXid(napi_env env, napi_value value, dpiXid **xid)
 {
-    char localError[NJS_MAX_ERROR_MSG_LEN + 1];
-    napi_value value;
+    napi_valuetype valueType;
+    dpiXid *tempXid;
+    int32_t fmtId;
+    size_t len;
 
-    // if no error buffer was provided, call the routine a second time with
-    // the local error buffer; if an error was written, throw it
-    if (!errorBuffer) {
-        localError[0] = '\0';
-        if (!njsUtils_getStringFromArg(env, args, argIndex, propertyName,
-                result, resultLength, found, localError)) {
-            if (localError[0] != '\0')
-                napi_throw_error(env, NULL, localError);
-            return false;
-        }
+    // if value is undefined, nothing further to do!
+    NJS_CHECK_NAPI(env, napi_typeof(env, value, &valueType))
+    if (valueType == napi_undefined) {
+        *xid = NULL;
         return true;
     }
 
-    // get the value from the object and verify it is a string
-    if (!njsUtils_getValueFromArg(env, args, argIndex, propertyName,
-            napi_string, &value, found, errorBuffer))
+    // allocate memory for the XID structure
+    tempXid = calloc(1, sizeof(dpiXid));
+    if (!tempXid)
+        return njsUtils_throwInsufficientMemory(env);
+    *xid = tempXid;
+
+    // get formatId
+    if (!njsUtils_getNamedPropertyInt(env, value, "formatId", &fmtId))
         return false;
-    if (!value)
-        return true;
+    tempXid->formatId = (long) fmtId;
 
-    return njsUtils_copyStringFromJS(env, value, result, resultLength);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_getValueFromArg()
-//   Gets the value from the specified JavaScript object property, if possible.
-// If the given property is undefined, no error is set and the value is
-// returned as NULL. If the value is null, a "value" error is set; otherwise,
-// if the value is not the specified type, a "type" error is set.
-//-----------------------------------------------------------------------------
-bool njsUtils_getValueFromArg(napi_env env, napi_value *args,
-        int argIndex, const char *propertyName, napi_valuetype expectedType,
-        napi_value *value, bool *found, char *errorBuffer)
-{
-    napi_valuetype actualType;
-
-    // initialize found, if applicable
-    if (found)
-        *found = false;
-
-    // acquire the value and get its type
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, args[argIndex],
-            propertyName, value))
-    NJS_CHECK_NAPI(env, napi_typeof(env, *value, &actualType))
-
-    // a value of undefined is accepted (property not defined)
-    if (actualType == napi_undefined) {
-        *value = NULL;
-        return true;
-
-    // other types other than the expected type generate an error
-    } else if (actualType != expectedType) {
-        njsErrors_getMessage(errorBuffer, errInvalidPropertyValueInParam,
-                propertyName, argIndex + 1);
+    // get globalTransactionId
+    if (!njsUtils_getNamedPropertyStringOrBuffer(env, value,
+            "globalTransactionId", (char**) &tempXid->globalTransactionId,
+            &len))
         return false;
-    }
+    tempXid->globalTransactionIdLength = (uint32_t) len;
 
-    if (found)
-        *found = true;
+    // get branchQualifier
+    if (!njsUtils_getNamedPropertyStringOrBuffer(env, value, "branchQualifier",
+            (char**) &tempXid->branchQualifier, &len))
+        return false;
+    tempXid->branchQualifierLength = len;
+
     return true;
+
 }
 
 
 //-----------------------------------------------------------------------------
-// njsUtils_isBuffer()
-//   Return true if the specified value refers to a buffer object.
+// njsUtils_throwInsufficientMemory()
+//   Throw an error indicating that insufficient memory could be allocated. The
+// value false is returned as a convenience to the caller.
 //-----------------------------------------------------------------------------
-bool njsUtils_isBuffer(napi_env env, napi_value value)
+bool njsUtils_throwInsufficientMemory(napi_env env)
 {
-    napi_status status;
-    bool isBuffer;
-
-    status = napi_is_buffer(env, value, &isBuffer);
-    if (status != napi_ok)
-        return false;
-    return isBuffer;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_throwError()
-//   Get the error message given the error number and any number of arguments.
-// Throw the error as a JS error. If the error number is invalid, the error
-// message is changed to indicate as much. False is returned as a convenience
-// to the caller.
-//-----------------------------------------------------------------------------
-bool njsUtils_throwError(napi_env env, int errNum, ...)
-{
-    char errorMessage[NJS_MAX_ERROR_MSG_LEN + 1];
-    va_list vaList;
-
-    va_start(vaList, errNum);
-    njsErrors_getMessageVaList(errorMessage, errNum, vaList);
-    va_end(vaList);
-    napi_throw_error(env, NULL, errorMessage);
+    napi_throw_error(env, NULL, NJS_ERR_INSUFFICIENT_MEMORY);
     return false;
 }
 
@@ -894,8 +746,7 @@ bool njsUtils_throwErrorDPI(napi_env env, njsModuleGlobals *globals)
 //-----------------------------------------------------------------------------
 bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, njsModuleGlobals **globals,
-        napi_value *callingObj, const njsClassDef *classDef,
-        njsBaseInstance **instance)
+        napi_value *callingObj, const njsClassDef *classDef, void **instance)
 {
     napi_value localCallingObj;
     size_t actualArgs;
@@ -905,8 +756,7 @@ bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
     NJS_CHECK_NAPI(env, napi_get_cb_info(env, info, &actualArgs, args,
             &localCallingObj, (void**) globals))
     if (actualArgs != numArgs)
-        return njsUtils_throwError(env, errInvalidNumberOfParameters,
-                                   actualArgs, numArgs);
+        return njsUtils_genericThrowError(env, __FILE__, __LINE__);
 
     // unwrap instance, if applicable
     if (callingObj)
@@ -919,7 +769,7 @@ bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
         } else if (classDef) {
             *instance = calloc(1, classDef->structSize);
             if (!*instance)
-                return njsUtils_throwError(env, errInsufficientMemory);
+                return njsUtils_throwInsufficientMemory(env);
             if (napi_wrap(env, localCallingObj, *instance,
                     classDef->finalizeFn, NULL, NULL) != napi_ok) {
                 free(*instance);
@@ -930,41 +780,5 @@ bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
                     (void**) instance))
         }
     }
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_validateArgType()
-//   Gets the value from the specified JavaScript object property, if possible.
-// If the given property is undefined, no error is set and the value is
-// returned as NULL. If the value is null, a "value" error is thrown;
-// otherwise, if the value is not the specified type, a "type" error is thrown.
-//-----------------------------------------------------------------------------
-bool njsUtils_validateArgType(napi_env env, napi_value *args,
-        napi_valuetype expectedType, int index)
-{
-    napi_valuetype actualType;
-
-    NJS_CHECK_NAPI(env, napi_typeof(env, args[index], &actualType))
-    if (actualType != expectedType)
-        return njsUtils_throwError(env, errInvalidParameterValue, index + 1);
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsUtils_validatePropType()
-//   Verifies that the value is the correct type, and if not throws an
-// exception and returns false.
-//-----------------------------------------------------------------------------
-bool njsUtils_validatePropType(napi_env env, napi_value value,
-        napi_valuetype expectedType, const char *name)
-{
-    napi_valuetype actualType;
-
-    NJS_CHECK_NAPI(env, napi_typeof(env, value, &actualType))
-    if (actualType != expectedType)
-        return njsUtils_throwError(env, errInvalidPropertyValue, name);
     return true;
 }

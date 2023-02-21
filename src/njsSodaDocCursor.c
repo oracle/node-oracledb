@@ -72,8 +72,6 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaDocCursor_close, 0, NULL)
 {
     njsSodaDocCursor *cursor = (njsSodaDocCursor*) baton->callingInstance;
 
-   if (!cursor->handle)
-       return njsBaton_setError(baton, errInvalidSodaDocCursor);
     baton->dpiSodaDocCursorHandle = cursor->handle;
     cursor->handle = NULL;
     return njsBaton_queueWork(baton, env, "Close", njsSodaDocCursor_closeAsync,
@@ -124,10 +122,6 @@ static void njsSodaDocCursor_finalize(napi_env env, void *finalizeData,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaDocCursor_getNext, 0, NULL)
 {
-    njsSodaDocCursor *cursor = (njsSodaDocCursor*) baton->callingInstance;
-
-    if (!cursor->handle)
-        return njsBaton_setError(baton, errInvalidSodaDocCursor);
     return njsBaton_queueWork(baton, env, "GetNext",
             njsSodaDocCursor_getNextAsync, njsSodaDocCursor_getNextPostAsync,
             returnValue);
@@ -178,7 +172,7 @@ bool njsSodaDocCursor_newFromBaton(njsBaton *baton, napi_env env,
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefSodaDocCursor,
             baton->globals->jsSodaDocCursorConstructor, cursorObj,
-            (njsBaseInstance**) &cursor))
+            (void**) &cursor))
         return false;
 
     // storing reference to operation which in turn stores reference to

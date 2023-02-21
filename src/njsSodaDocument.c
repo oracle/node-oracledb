@@ -71,7 +71,7 @@ const njsClassDef njsClassDefSodaDocument = {
 
 // other methods used internally
 static bool njsSodaDocument_genericGetter(napi_env env,
-        njsModuleGlobals *globals, njsBaseInstance *instance,
+        njsModuleGlobals *globals, void *instance,
         int (*dpiGetterFn)(dpiSodaDoc*, const char**, uint32_t *),
         napi_value *returnValue);
 
@@ -87,8 +87,7 @@ bool njsSodaDocument_createFromHandle(napi_env env, dpiSodaDoc *handle,
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefSodaDocument,
-            globals->jsSodaDocumentConstructor, docObj,
-            (njsBaseInstance**) &doc))
+            globals->jsSodaDocumentConstructor, docObj, (void**) &doc))
         return false;
 
     // perform initializations
@@ -121,7 +120,7 @@ static void njsSodaDocument_finalize(napi_env env, void *finalizeData,
 // SODA document.
 //-----------------------------------------------------------------------------
 static bool njsSodaDocument_genericGetter(napi_env env,
-        njsModuleGlobals *globals, njsBaseInstance *instance,
+        njsModuleGlobals *globals, void *instance,
         int (*dpiGetterFn)(dpiSodaDoc*, const char**, uint32_t *),
         napi_value *returnValue)
 {
