@@ -151,7 +151,7 @@ describe('248. userName.js', function() {
         async () => await dbaConn.execute(sql),
         /ORA-00972:/
       );
-
+      await dbaConn.close();
     }); // 248.1.4
 
     it('248.1.5 negative test: username = null', async function() {
@@ -339,7 +339,7 @@ describe('248. userName.js', function() {
         async () => await dbaConn.execute(sql),
         /ORA-00972:/
       );
-
+      await dbaConn.close();
     }); // 248.2.4
 
     it('248.2.5 negative test: username = null', async function() {
