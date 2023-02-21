@@ -220,7 +220,7 @@ static bool njsPool_createAsync(njsBaton *baton)
     commonParams.stmtCacheSize = baton->stmtCacheSize;
 
     // set token based auth parameters
-    if (baton->token && baton->privateKey) {
+    if (baton->token) {
         accessToken.token = baton->token;
         accessToken.tokenLength = baton->tokenLength;
         accessToken.privateKey = baton->privateKey;
