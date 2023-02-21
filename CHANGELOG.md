@@ -4,6 +4,9 @@
 
 **This release is under development and information may be incomplete**
 
+- Re-licensed to dual Apache 2.0 or UPL 1.0 licenses, see
+  [LICENSE.txt](https://github.com/oracle/node-oracledb/blob/main/LICENSE.txt).
+
 ## node-oracledb [v5.5.0](https://github.com/oracle/node-oracledb/compare/v5.4.0...v5.5.0) (7 Sep 2022)
 
 - Token-based Authentication changes:
