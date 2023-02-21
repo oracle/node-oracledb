@@ -67,36 +67,21 @@ describe('136. clobDMLReturningMultipleRowsAsString.js', function() {
   const clob_table_drop = "DROP TABLE " + tableName + " PURGE";
 
   before(async function() {
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-      assert(connection);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    connection = await oracledb.getConnection(dbConfig);
   });
 
   after(async function() {
-    try {
-      await connection.release();
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await connection.close();
   });
 
   describe('136.1 CLOB DML returning multiple rows as String', function() {
+
     before(async function() {
-      try {
-        await sql.executeSql(connection, clob_table_create, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, clob_table_create, {}, {});
     });
+
     after(async function() {
-      try {
-        await sql.executeSql(connection, clob_table_drop, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, clob_table_drop, {}, {});
     });
 
     it('136.1.1 CLOB DML returning multiple rows as String', async function() {
@@ -105,8 +90,8 @@ describe('136. clobDMLReturningMultipleRowsAsString.js', function() {
 
   });
 
-  var updateReturning_string = async function() {
-    var sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, clob into :num, :lobou";
+  const updateReturning_string = async function() {
+    const sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, clob into :num, :lobou";
     const result = await connection.execute(
       sql_update,
       {
@@ -116,9 +101,9 @@ describe('136. clobDMLReturningMultipleRowsAsString.js', function() {
     assert(result);
     const numLobs = result.outBinds.lobou.length;
     assert.strictEqual(numLobs, 10);
-    for (var index = 0; index < result.outBinds.lobou.length; index++) {
-      var lob = result.outBinds.lobou[index];
-      var id = result.outBinds.num[index];
+    for (let index = 0; index < result.outBinds.lobou.length; index++) {
+      const lob = result.outBinds.lobou[index];
+      const id = result.outBinds.num[index];
       assert.strictEqual(lob, String(id - 10));
     }
   };

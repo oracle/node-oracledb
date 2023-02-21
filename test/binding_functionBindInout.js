@@ -42,29 +42,17 @@ const assist   = require('./dataTypeAssist.js');
 describe('95.binding_functionBindInout.js', function() {
 
   let connection = null;
-  var executeSql = async function(sql) {
-    try {
-      const result = await connection.execute(sql);
-      assert(result);
-    } catch (err) {
-      assert.ifError(err);
-    }
-  };
 
   before(async function() {
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    connection = await oracledb.getConnection(dbConfig);
   });
 
   after(async function() {
-    await connection.release();
+    await connection.close();
   });
 
-  var doTest = async function(table_name, proc_name, bindType, dbColType, content, sequence, nullBind) {
-    var bindVar = {
+  const doTest = async function(table_name, proc_name, bindType, dbColType, content, sequence, nullBind) {
+    let bindVar = {
       i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c: { val: content, type: bindType, dir: oracledb.BIND_INOUT, maxSize: 1000 },
       output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
@@ -74,10 +62,10 @@ describe('95.binding_functionBindInout.js', function() {
     await inBind(table_name, proc_name, dbColType, bindVar, bindType, nullBind);
   };
 
-  var inBind = async function(table_name, fun_name, dbColType, bindVar, bindType, nullBind) {
-    var createTable = sql.createTable(table_name, dbColType);
-    var drop_table = "DROP TABLE " + table_name + " PURGE";
-    var proc = "CREATE OR REPLACE FUNCTION " + fun_name + " (ID IN NUMBER, inValue IN OUT " + dbColType + ") RETURN NUMBER\n" +
+  const inBind = async function(table_name, fun_name, dbColType, bindVar, bindType, nullBind) {
+    const createTable = sql.createTable(table_name, dbColType);
+    const drop_table = "DROP TABLE " + table_name + " PURGE";
+    const proc = "CREATE OR REPLACE FUNCTION " + fun_name + " (ID IN NUMBER, inValue IN OUT " + dbColType + ") RETURN NUMBER\n" +
                "IS \n" +
                "    tmpvar NUMBER; \n" +
                "BEGIN \n" +
@@ -85,29 +73,29 @@ describe('95.binding_functionBindInout.js', function() {
                "    select id, content into tmpvar, inValue from " + table_name + " where id = ID; \n" +
                "    RETURN tmpvar; \n" +
                "END ; ";
-    var sqlRun = "BEGIN :output := " + fun_name + " (:i, :c); END;";
-    var proc_drop = "DROP FUNCTION " + fun_name;
-    // console.log(proc);
+    const sqlRun = "BEGIN :output := " + fun_name + " (:i, :c); END;";
+    const proc_drop = "DROP FUNCTION " + fun_name;
 
-    await executeSql(createTable);
+    await connection.execute(createTable);
+    await connection.execute(proc);
 
-    await executeSql(proc);
-
+    let err;
     try {
       await connection.execute(sqlRun, bindVar);
-    } catch (err) {
-      if (bindType === oracledb.STRING) {
-        compareErrMsgForString(nullBind, dbColType, err);
-      } else {
-        compareErrMsgForRAW(nullBind, dbColType, err);
-      }
+    } catch (e) {
+      err = e;
     }
-    await executeSql(proc_drop);
+    if (bindType === oracledb.STRING) {
+      compareErrMsgForString(nullBind, dbColType, err);
+    } else {
+      compareErrMsgForRAW(nullBind, dbColType, err);
+    }
 
-    await executeSql(drop_table);
+    await connection.execute(proc_drop);
+    await connection.execute(drop_table);
   };
 
-  var compareErrMsgForString = function(nullBind, element, err) {
+  const compareErrMsgForString = function(nullBind, element, err) {
     if (element === "BLOB") {
       // ORA-06550: line 1, column 7:
       // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_XX'
@@ -140,7 +128,7 @@ describe('95.binding_functionBindInout.js', function() {
     }
   };
 
-  var compareErrMsgForRAW = function(nullBind, element, err) {
+  const compareErrMsgForRAW = function(nullBind, element, err) {
     if (element === "NUMBER" || element.indexOf("FLOAT") > -1 || element === "BINARY_DOUBLE" || element === "DATE" || element === "TIMESTAMP" || element === "CLOB") {
       // ORA-06550: line 1, column 7:
       // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_XX'
@@ -161,9 +149,9 @@ describe('95.binding_functionBindInout.js', function() {
     }
   };
 
-  var tableNamePre = "table_95";
-  var procPre = "proc_95";
-  var index = 1;
+  const tableNamePre = "table_95";
+  const procPre = "proc_95";
+  let index = 1;
 
   describe('95.1 PLSQL function: bind inout small value of oracledb.STRING/BUFFER', function() {
 

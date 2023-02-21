@@ -43,28 +43,15 @@ describe('99.binding_functionBindIn.js', function() {
 
   let connection = null;
   const executeSql = async function(sql) {
-    try {
-      await connection.execute(sql);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await connection.execute(sql);
   };
 
   before(async function() {
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-      assert(connection);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    connection = await oracledb.getConnection(dbConfig);
   });
 
   after(async function() {
-    try {
-      await connection.release();
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await connection.close();
   });
 
   const doTest = async function(table_name, procName, bindType, dbColType, content, sequence, nullBind) {
@@ -94,29 +81,23 @@ describe('99.binding_functionBindIn.js', function() {
     let proc_drop = "DROP FUNCTION " + fun_name;
 
     // console.log(proc);
-    try {
-      await executeSql(createTable);
-      await executeSql(proc);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await executeSql(createTable);
+    await executeSql(proc);
 
+    let err;
     try {
       await connection.execute(sqlRun, bindVar);
-    } catch (err) {
-      if (bindType === oracledb.STRING) {
-        compareErrMsgForString(nullBind, dbColType, err);
-      } else {
-        compareErrMsgForRAW(dbColType, err);
-      }
+    } catch (e) {
+      err = e;
+    }
+    if (bindType === oracledb.STRING) {
+      compareErrMsgForString(nullBind, dbColType, err);
+    } else {
+      compareErrMsgForRAW(dbColType, err);
     }
 
-    try {
-      await executeSql(proc_drop);
-      await executeSql(drop_table);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await executeSql(proc_drop);
+    await executeSql(drop_table);
   };
 
   let compareErrMsgForString = function(nullBind, element, err) {

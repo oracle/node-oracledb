@@ -42,29 +42,13 @@ const dbConfig = require('./dbconfig.js');
 describe('100.binding_defaultBindIn.js', function() {
 
   let connection = null;
-  const executeSql = async function(sql) {
-    try {
-      await connection.execute(sql);
-    } catch (err) {
-      assert.ifError(err);
-    }
-  };
 
   before(async function() {
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-      assert(connection);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    connection = await oracledb.getConnection(dbConfig);
   });
 
   after(async function() {
-    try {
-      await connection.release();
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await connection.close();
   });
 
   const doTest1 = async function(table_name, proc_name, dbColType, content) {
@@ -97,25 +81,19 @@ describe('100.binding_defaultBindIn.js', function() {
                "END " + proc_name + "; ";
     let sqlRun = "BEGIN " + proc_name + " (:c); END;";
     let proc_drop = "DROP PROCEDURE " + proc_name;
-    try {
-      await executeSql(createTable);
-      await executeSql(proc);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await connection.execute(createTable);
+    await connection.execute(proc);
 
+    let err;
     try {
       await connection.execute(sqlRun, bindVar);
-    } catch (err) {
-      await compareErrMsg(dbColType, err);
+    } catch (e) {
+      err = e;
     }
+    compareErrMsg(dbColType, err);
 
-    try {
-      await executeSql(proc_drop);
-      await executeSql(drop_table);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await connection.execute(proc_drop);
+    await connection.execute(drop_table);
   };
 
   const inBind2 = async function(table_name, fun_name, dbColType, bindVar) {
@@ -133,24 +111,19 @@ describe('100.binding_defaultBindIn.js', function() {
     let proc_drop = "DROP FUNCTION " + fun_name;
     // console.log(proc);
 
-    try {
-      await executeSql(createTable);
-      await executeSql(proc);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await connection.execute(createTable);
+    await connection.execute(proc);
 
+    let err;
     try {
       await connection.execute(sqlRun, bindVar);
-    } catch (err) {
-      await compareErrMsg(dbColType, err);
+    } catch (e) {
+      err = e;
     }
-    try {
-      await executeSql(proc_drop);
-      await executeSql(drop_table);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    compareErrMsg(dbColType, err);
+
+    await connection.execute(proc_drop);
+    await connection.execute(drop_table);
   };
 
   let compareErrMsg = function(element, err) {

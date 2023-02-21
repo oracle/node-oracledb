@@ -32,8 +32,6 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const assert   = require('assert');
-const sql      = require('./sqlClone.js');
 const dbConfig = require('./dbconfig.js');
 
 describe('263. binding_buffer_string.js', function() {
@@ -58,23 +56,13 @@ describe('263. binding_buffer_string.js', function() {
                          "END; ";
   const drop_table = "DROP TABLE blob_tab PURGE";
   before('get connection and create table', async function() {
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-      assert(connection);
-      await sql.executeSql(connection, proc_blob_in_tab, {}, {});
-    } catch (err) {
-      assert.ifError(err);
-    }
+    connection = await oracledb.getConnection(dbConfig);
+    await connection.execute(proc_blob_in_tab);
   });
 
   after('release connection', async function() {
-    try {
-      await sql.executeSql(connection, drop_table, {}, {});
-      await connection.release();
-    } catch (err) {
-      assert.ifError(err);
-    }
-
+    await connection.execute(drop_table);
+    await connection.close();
   });
 
   describe('263.1 BLOB, PLSQL, BIND_IN', function() {
@@ -93,9 +81,7 @@ describe('263. binding_buffer_string.js', function() {
         autoCommit: true
       };
 
-      const result = await connection.executeMany("insert into blob_tab (id, blob_1) values(:a, :b)", data, options);
-      console.log(result.rowsAffected);
-      await connection.close();
+      await connection.executeMany("insert into blob_tab (id, blob_1) values(:a, :b)", data, options);
     });
   });
 });

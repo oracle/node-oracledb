@@ -415,12 +415,12 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
     }); // 77.1.11
 
     it('77.1.12 works with undefined and bind in maxSize set to (64K - 1)', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: undefined, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: 65535 }
       };
-      let option = { autoCommit: true };
+      const option = { autoCommit: true };
 
       await plsqlBindIn(sqlRun, bindVar, option);
 
@@ -429,39 +429,29 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
     }); // 77.1.12
 
     it('77.1.13 works with NaN', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: NaN, type: oracledb.BUFFER, dir: oracledb.BIND_IN }
       };
-      try {
-        await connection.execute(
-          sqlRun,
-          bindVar,
-          { autoCommit: true });
-      } catch (err) {
-        assert(err);
-        // NJS-011: encountered bind value and type mismatch in parameter 2
-        assert(err.message.startsWith("NJS-011:"));
-      }
+      const options = { autoCommit: true };
+      await assert.rejects(
+        async () => await connection.execute(sqlRun, bindVar, options),
+        /NJS-011:/
+      );
     }); // 77.1.13
 
     it('77.1.14 works with 0', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: 0, type: oracledb.BUFFER, dir: oracledb.BIND_IN }
       };
-      try {
-        await connection.execute(
-          sqlRun,
-          bindVar,
-          { autoCommit: true });
-      } catch (err) {
-        assert(err);
-        // NJS-011: encountered bind value and type mismatch in parameter 2
-        assert(err.message.startsWith("NJS-011:"));
-      }
+      const options = { autoCommit: true };
+      await assert.rejects(
+        async () => await connection.execute(sqlRun, bindVar, options),
+        /NJS-011:/
+      );
     }); // 77.1.14
 
     it('77.1.15 works with Buffer size 32K', async function() {
@@ -539,56 +529,45 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
     }); // 77.1.18
 
     it('77.1.19 works with bind value and type mismatch', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: 200, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: 50000 }
       };
-
-      try {
-        await connection.execute(
-          sqlRun,
-          bindVar,
-          { autoCommit: true });
-      } catch (err) {
-        assert(err);
-        // NJS-011: encountered bind value and type mismatch in parameter 2
-        assert(err.message.startsWith("NJS-011:"));
-      }
+      const options = { autoCommit: true };
+      await assert.rejects(
+        async () => await connection.execute(sqlRun, bindVar, options),
+        /NJS-011:/
+      );
     }); // 77.1.19
 
     it('77.1.20 mixing named with positional binding', async function() {
-      let size = 50000;
-      let sequence = insertID++;
-      let specialStr = "77.1.20";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size } ];
-      let option = { autoCommit: true };
+      const size = 50000;
+      const sequence = insertID++;
+      const specialStr = "77.1.20";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size } ];
+      const option = { autoCommit: true };
 
-      let sqlRun_77122 = "BEGIN nodb_blobs_in_771 (:1, :2); END;";
+      const sqlRun_77122 = "BEGIN nodb_blobs_in_771 (:1, :2); END;";
       await plsqlBindIn(sqlRun_77122, bindVar, option);
 
-      let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
+      const sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, bufferStr, specialStr);
     }); // 77.1.20
 
     it('77.1.21 works with invalid BLOB', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: {}, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: 50000 }
       };
-      try {
-        await connection.execute(
-          sqlRun,
-          bindVar,
-          { autoCommit: true });
-      } catch (err) {
-        assert(err);
-        // NJS-011: encountered bind value and type mismatch
-        assert(err.message.startsWith("NJS-011:"));
-      }
+      const options = { autoCommit: true };
+      await assert.rejects(
+        async () => await connection.execute(sqlRun, bindVar, options),
+        /NJS-011:/
+      );
     }); // 77.1.21
 
     it('77.1.22 works without maxSize', async function() {
@@ -878,41 +857,29 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
     }); // 77.2.12
 
     it('77.2.13 works with NaN', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: NaN, type: oracledb.BUFFER, dir: oracledb.BIND_IN }
       };
-
-      try {
-        await connection.execute(
-          sqlRun,
-          bindVar,
-          { autoCommit: true });
-      } catch (err) {
-        assert(err);
-        // NJS-011: encountered bind value and type mismatch in parameter 2
-        assert(err.message.startsWith("NJS-011:"));
-      }
+      const options = { autoCommit: true };
+      await assert.rejects(
+        async () => await connection.execute(sqlRun, bindVar, options),
+        /NJS-011:/
+      );
     }); // 77.2.13
 
     it('77.2.14 works with 0', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: 0, type: oracledb.BUFFER, dir: oracledb.BIND_IN }
       };
-
-      try {
-        await connection.execute(
-          sqlRun,
-          bindVar,
-          { autoCommit: true });
-      } catch (err) {
-        assert(err);
-        // NJS-011: encountered bind value and type mismatch in parameter 2
-        assert(err.message.startsWith("NJS-011:"));
-      }
+      const options = { autoCommit: true };
+      await assert.rejects(
+        async () => await connection.execute(sqlRun, bindVar, options),
+        /NJS-011:/
+      );
     }); // 77.2.14
 
     it('77.2.15 works with Buffer size (32K - 1)', async function() {
@@ -934,45 +901,32 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
     }); // 77.2.15
 
     it('77.2.16 works with Buffer size 32K', async function() {
-      let size = 32768;
-      let sequence = insertID++;
-      let specialStr = "77.2.16";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = {
+      const size = 32768;
+      const sequence = insertID++;
+      const specialStr = "77.2.16";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size }
       };
-
-      try {
-        await connection.execute(
-          sqlRun,
-          bindVar);
-      } catch (err) {
-        assert(err);
-        // ORA-06502: PL/SQL: numeric or value error
-        assert(err.message.startsWith("ORA-06502:"));
-      }
+      await assert.rejects(
+        async () => await connection.execute(sqlRun, bindVar),
+        /ORA-06502:/
+      );
     }); // 77.2.16
 
     it('77.2.17 works with invalid BLOB', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: {}, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: 50000 }
       };
-
-      try {
-        await connection.execute(
-          sqlRun,
-          bindVar,
-          { autoCommit: true });
-      } catch (err) {
-        assert(err);
-        // NJS-011: encountered bind value and type mismatch
-        assert(err.message.startsWith("NJS-011:"));
-        assert(err.message.startsWith("NJS-011:"));
-      }
+      const options = { autoCommit: true };
+      await assert.rejects(
+        async () => await connection.execute(sqlRun, bindVar, options),
+        /NJS-011:/
+      );
     }); // 77.2.17
 
     it('77.2.18 works without maxSize', async function() {
@@ -1106,30 +1060,22 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       let sql = "INSERT INTO nodb_tab_lobs_in (id, blob) VALUES (:i, EMPTY_BLOB()) RETURNING blob INTO :lobbv";
       await prepareTableWithBlob(sql, preparedCLOBID);
 
-      try {
-        result = await connection.execute(
-          "select blob from nodb_tab_lobs_in where id = :id",
-          { id: preparedCLOBID });
-      } catch (err) {
-        assert.ifError(err);
-      }
+      result = await connection.execute(
+        "select blob from nodb_tab_lobs_in where id = :id",
+        { id: preparedCLOBID });
 
       assert.notEqual(result.rows.length, 0);
 
-      let blob = result.rows[0][0];
-      try {
-        await connection.execute(
-          sqlRun,
-          {
-            i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            b1: { val: bufferStr_1, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size_1 },
-            b2: { val: blob, type: oracledb.BLOB, dir: oracledb.BIND_IN }
-          },
-          { autoCommit: true });
-      } catch (err) {
-        assert.ifError(err);
-        blob.close();
-      }
+      const blob = result.rows[0][0];
+      await connection.execute(
+        sqlRun,
+        {
+          i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+          b1: { val: bufferStr_1, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size_1 },
+          b2: { val: blob, type: oracledb.BLOB, dir: oracledb.BIND_IN }
+        },
+        { autoCommit: true });
+      blob.destroy();
 
       let sql_1 = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql_1, bufferStr_1, specialStr);

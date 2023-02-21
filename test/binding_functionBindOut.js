@@ -43,28 +43,15 @@ describe('97.binding_functionBindOut.js', function() {
 
   let connection = null;
   const executeSql = async function(sql) {
-    try {
-      await connection.execute(sql);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await connection.execute(sql);
   };
 
   before(async function() {
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-      assert(connection);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    connection = await oracledb.getConnection(dbConfig);
   });
 
   after(async function() {
-    try {
-      await connection.release();
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await connection.close();
   });
 
   const doTest = async function(table_name, proc_name, bindType, dbColType, content, sequence, nullBind) {
@@ -121,42 +108,32 @@ describe('97.binding_functionBindOut.js', function() {
     };
 
     // console.log(insertSql);
-    try {
-      await connection.execute(insertSql, bind);
-      await executeSql(proc);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await connection.execute(insertSql, bind);
+    await executeSql(proc);
 
+    let err;
     try {
       await connection.execute(sqlRun, bindVar);
-    } catch (err) {
-      if (bindType === oracledb.STRING) {
-        compareErrMsgForString(dbColType, err);
-      } else {
-        compareErrMsgForRAW(nullBind, dbColType, err);
-      }
+    } catch (e) {
+      err = e;
+    }
+    if (bindType === oracledb.STRING) {
+      compareErrMsgForString(dbColType, err);
+    } else {
+      compareErrMsgForRAW(nullBind, dbColType, err);
     }
 
-    try {
-      await executeSql(proc_drop);
-      await executeSql(drop_table);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await executeSql(proc_drop);
+    await executeSql(drop_table);
   };
 
   var compareErrMsgForString = function(element, err) {
-    try {
-      if (element === "BLOB") {
-        // ORA-06550: line 1, column 7:
-        // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_12'
-        // ORA-06550: line 1, column 7:
-        // PL/SQL: Statement ignored
-        assert.equal(err.message.substring(0, 10), "ORA-06550:");
-      }
-    } catch (err) {
-      assert.ifError(err);
+    if (element === "BLOB") {
+      // ORA-06550: line 1, column 7:
+      // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_12'
+      // ORA-06550: line 1, column 7:
+      // PL/SQL: Statement ignored
+      assert.equal(err.message.substring(0, 10), "ORA-06550:");
     }
   };
 

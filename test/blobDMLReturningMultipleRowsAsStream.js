@@ -107,20 +107,16 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
   let updateReturning_stream = async function() {
     let sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, blob into :num, :lobou";
     let result = null;
-    try {
-      result = await connection.execute(
-        sql_update,
-        {
-          num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          lobou: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
-        });
-      let numLobs = result.outBinds.lobou.length;
-      assert.strictEqual(numLobs, 10);
-      for (let n = 0; n < numLobs; n++) {
-        verifyLob(n, result);
-      }
-    } catch (err) {
-      assert.ifError(err);
+    result = await connection.execute(
+      sql_update,
+      {
+        num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+        lobou: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
+      });
+    let numLobs = result.outBinds.lobou.length;
+    assert.strictEqual(numLobs, 10);
+    for (let n = 0; n < numLobs; n++) {
+      verifyLob(n, result);
     }
   };
 

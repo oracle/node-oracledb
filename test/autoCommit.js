@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -95,30 +95,22 @@ describe('7. autoCommit.js', function() {
     // get another connection
     conn2 = await pool.getConnection();
 
-    try {
-      result = await conn2.execute(
-        "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
-        [],
-        { outFormat: oracledb.OUT_FORMAT_OBJECT });
-    } catch (err) {
-      assert.ifError(err);
-      assert.strictEqual(result.rows[0].DEPARTMENT_ID, 82);
-      assert.strictEqual(typeof (result.rows[0].DEPARTMENT_ID), "number");
-    }
+    result = await conn2.execute(
+      "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    assert.strictEqual(result.rows[0].DEPARTMENT_ID, 82);
+    assert.strictEqual(typeof (result.rows[0].DEPARTMENT_ID), "number");
 
     await conn1.execute(
       "UPDATE nodb_commit_dept SET department_id = 101 WHERE department_name = 'Security'");
 
-    try {
-      result = await conn2.execute(
-        "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
-        [],
-        { outFormat: oracledb.OUT_FORMAT_OBJECT });
-    } catch (err) {
-      assert.ifError(err);
-      assert.strictEqual(result.rows[0].DEPARTMENT_ID, 101);
-      assert.strictEqual(typeof (result.rows[0].DEPARTMENT_ID), "number");
-    }
+    result = await conn2.execute(
+      "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    assert.strictEqual(result.rows[0].DEPARTMENT_ID, 101);
+    assert.strictEqual(typeof (result.rows[0].DEPARTMENT_ID), "number");
 
     await conn1.release();
     await conn2.release();
@@ -137,30 +129,22 @@ describe('7. autoCommit.js', function() {
 
     conn2 = await pool.getConnection();
 
-    try {
-      result = await conn2.execute(
-        "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
-        [],
-        { outFormat: oracledb.OUT_FORMAT_OBJECT });
-    } catch (err) {
-      assert.ifError(err);
-      assert.strictEqual(result.rows[0].DEPARTMENT_ID, 82);
-      assert.strictEqual(typeof (result.rows[0].DEPARTMENT_ID), "number");
-    }
+    result = await conn2.execute(
+      "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    assert.strictEqual(result.rows[0].DEPARTMENT_ID, 82);
+    assert.strictEqual(typeof (result.rows[0].DEPARTMENT_ID), "number");
 
     await conn1.execute("UPDATE nodb_commit_dept SET department_id = 101 WHERE department_name = 'Security'");
 
 
-    try {
-      result = await conn2.execute(
-        "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
-        [],
-        { outFormat: oracledb.OUT_FORMAT_OBJECT });
-    } catch (err) {
-      assert.ifError(err);
-      assert.strictEqual(result.rows[0].DEPARTMENT_ID, 101);
-      assert.strictEqual(typeof (result.rows[0].DEPARTMENT_ID), "number");
-    }
+    result = await conn2.execute(
+      "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    assert.strictEqual(result.rows[0].DEPARTMENT_ID, 101);
+    assert.strictEqual(typeof (result.rows[0].DEPARTMENT_ID), "number");
 
     await conn1.release();
     await conn2.release();
@@ -178,39 +162,27 @@ describe('7. autoCommit.js', function() {
 
     conn2 = await pool.getConnection();
 
-    try {
-      oracledb.autoCommit = true;   // change autoCommit after connection
-      result = await conn2.execute(
-        "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
-        [],
-        { outFormat: oracledb.OUT_FORMAT_OBJECT });
-    } catch (err) {
-      assert.ifError(err);
-      assert.strictEqual(result.rows, []);
-    }
+    oracledb.autoCommit = true;   // change autoCommit after connection
+    result = await conn2.execute(
+      "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    assert.deepEqual(result.rows, []);
 
     await conn2.execute(
       "INSERT INTO nodb_commit_dept VALUES (99, 'Marketing')");
 
-    try {
-      result = await conn2.execute(
-        "SELECT COUNT(*) as amount FROM nodb_commit_dept",
-        [],
-        { outFormat: oracledb.OUT_FORMAT_OBJECT });
-    } catch (err) {
-      assert.ifError(err);
-      assert.strictEqual(result.rows[0].AMOUNT, 1);
-    }
+    result = await conn2.execute(
+      "SELECT COUNT(*) as amount FROM nodb_commit_dept",
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    assert.strictEqual(result.rows[0].AMOUNT, 1);
 
-    try {
-      result = await conn1.execute(
-        "SELECT COUNT(*) as amount FROM nodb_commit_dept",
-        [],
-        { outFormat: oracledb.OUT_FORMAT_OBJECT });
-    } catch (err) {
-      assert.ifError(err);
-      assert.strictEqual(result.rows[0].AMOUNT, 2);   // autoCommit for SELECT
-    }
+    result = await conn1.execute(
+      "SELECT COUNT(*) as amount FROM nodb_commit_dept",
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    assert.strictEqual(result.rows[0].AMOUNT, 2);   // autoCommit for SELECT
 
     await conn1.release();
     await conn2.release();
@@ -285,17 +257,13 @@ describe('7. autoCommit.js', function() {
     });
 
     let setAsExecOption = async function(setValue) {
-      let result = null;
-      try {
-        result = await connection.execute(
-          "select user from dual",
-          {},
-          { autoCommit: setValue });
-      } catch (err) {
-        assert.ifError(result);
-        assert(err);
-        assert.strictEqual(err.message, "NJS-007: invalid value for \"autoCommit\" in parameter 3");
-      }
+      const sql = "select user from dual";
+      const binds = [];
+      const options = { autoCommit: setValue };
+      await assert.rejects(
+        async () => await connection.execute(sql, binds, options),
+        /NJS-007:/
+      );
     };
   });
 
