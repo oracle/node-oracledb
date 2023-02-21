@@ -32,7 +32,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -42,68 +42,55 @@ describe('228. lastRowid.js', function() {
   const TABLE = 'nodb_lastrowid';
 
   before('get connection and create table', async () => {
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let sql =
-        `create table ${TABLE} (
-           id number(9) not null,
-           value varchar2(100) not null
-        )`;
-      let plsql = testsUtil.sqlCreateTable(TABLE, sql);
-      await conn.execute(plsql);
-    } catch (err) {
-      should.not.exist(err);
-    }
+    conn = await oracledb.getConnection(dbconfig);
+    const sql =
+      `create table ${TABLE} (
+         id number(9) not null,
+         value varchar2(100) not null
+      )`;
+    const plsql = testsUtil.sqlCreateTable(TABLE, sql);
+    await conn.execute(plsql);
   });
 
   after(async () => {
-    try {
-      let sql = `drop table ${TABLE} purge`;
-      await conn.execute(sql);
-      await conn.close();
-    } catch (err) {
-      should.not.exist(err);
-    }
+    await conn.close();
+    await testsUtil.dropTable(TABLE);
   });
 
   it('228.1 examples', async () => {
     const row1 = [1, "First"];
     const row2 = [2, "Second"];
 
-    try {
-      // insert some rows and retain the rowid of each
-      let sql = `insert into ${TABLE} values (:1, :2)`;
-      const result1 = await conn.execute(sql, row1);
-      should.exist(result1.lastRowid);
-      should.strictEqual(result1.rowsAffected, 1);
-      const result2 = await conn.execute(sql, row2);
-      should.exist(result2.lastRowid);
-      should.strictEqual(result2.rowsAffected, 1);
-      const rowid2 = result2.lastRowid;
+    // insert some rows and retain the rowid of each
+    let sql = `insert into ${TABLE} values (:1, :2)`;
+    const result1 = await conn.execute(sql, row1);
+    assert(result1.lastRowid);
+    assert.strictEqual(result1.rowsAffected, 1);
+    const result2 = await conn.execute(sql, row2);
+    assert(result2.lastRowid);
+    assert.strictEqual(result2.rowsAffected, 1);
+    const rowid2 = result2.lastRowid;
 
-      // the row can be fetched with the rowid that was retained
-      sql = `select * from ${TABLE} where rowid = :1`;
-      let result = await conn.execute(sql, [result1.lastRowid]);
-      should.deepEqual(result.rows[0], row1);
-      result = await conn.execute(sql, [result2.lastRowid]);
-      should.deepEqual(result.rows[0], row2);
+    // the row can be fetched with the rowid that was retained
+    sql = `select * from ${TABLE} where rowid = :1`;
+    let result = await conn.execute(sql, [result1.lastRowid]);
+    assert.deepEqual(result.rows[0], row1);
+    result = await conn.execute(sql, [result2.lastRowid]);
+    assert.deepEqual(result.rows[0], row2);
 
-      // updating multiple rows only returns the rowid of the last updated row
-      sql = `update ${TABLE} set value = value || ' (Modified)'`;
-      result = await conn.execute(sql);
-      should.strictEqual(result.lastRowid, rowid2);
+    // updating multiple rows only returns the rowid of the last updated row
+    sql = `update ${TABLE} set value = value || ' (Modified)'`;
+    result = await conn.execute(sql);
+    assert.strictEqual(result.lastRowid, rowid2);
 
-      // deleting multiple rows only returns the rowid of the last deleted row
-      sql = `delete from ${TABLE}`;
-      result = await conn.execute(sql);
-      should.strictEqual(result.lastRowid, rowid2);
+    // deleting multiple rows only returns the rowid of the last deleted row
+    sql = `delete from ${TABLE}`;
+    result = await conn.execute(sql);
+    assert.strictEqual(result.lastRowid, rowid2);
 
-      // deleting no rows results in an undefined value
-      result = await conn.execute(sql);
-      should.not.exist(result.lastRowid);
-    } catch (err) {
-      should.not.exist(err);
-    }
+    // deleting no rows results in an undefined value
+    result = await conn.execute(sql);
+    assert(result.lastRowid === undefined);
   }); // 228.1
 
   it('228.2 MERGE statement', async () => {
@@ -118,20 +105,15 @@ describe('228. lastRowid.js', function() {
           insert (x.id, x.value)
           values (y.tempId, y.tempValue)
     `;
-    try {
-      const result1 = await conn.execute(sqlMerge, row1, { autoCommit: true });
-      should.exist(result1.lastRowid);
-      should.strictEqual(result1.rowsAffected, 1);
-      const rowID = result1.lastRowid;
+    const result1 = await conn.execute(sqlMerge, row1, { autoCommit: true });
+    assert.ok(result1.lastRowid);
+    assert.strictEqual(result1.rowsAffected, 1);
+    const rowID = result1.lastRowid;
 
-      // check it out
-      let sql = `select * from ${TABLE} where rowid = :1`;
-      let result2 = await conn.execute(sql, [ rowID ]);
-      should.deepEqual(result2.rows[0], row1);
-
-    } catch (err) {
-      should.not.exist(err);
-    }
+    // check it out
+    let sql = `select * from ${TABLE} where rowid = :1`;
+    let result2 = await conn.execute(sql, [ rowID ]);
+    assert.deepEqual(result2.rows[0], row1);
   }); // 228.2
 
   it('228.3 Negative - not applicable to executeMany()', async () => {
@@ -157,49 +139,41 @@ describe('228. lastRowid.js', function() {
       }
     };
 
-    try {
-      const result1 = await conn.executeMany(sqlMerge, rows, options);
-      should.not.exist(result1.lastRowid);
-      should.strictEqual(result1.rowsAffected, 2);
+    const result1 = await conn.executeMany(sqlMerge, rows, options);
+    assert(result1.lastRowid === undefined);
+    assert.strictEqual(result1.rowsAffected, 2);
 
-      let sql = `select * from ${TABLE} where id >= :1`;
-      let result2 = await conn.execute(
-        sql,
-        [ rows[0].id ],
-        { outFormat: oracledb.OUT_FORMAT_OBJECT }
-      );
-      should.strictEqual(result2.rows[0].ID, rows[0].id);
-      should.strictEqual(result2.rows[0].VALUE, rows[0].value);
-      should.strictEqual(result2.rows[1].ID, rows[1].id);
-      should.strictEqual(result2.rows[1].VALUE, rows[1].value);
-    } catch (err) {
-      should.not.exist(err);
-    }
+    let sql = `select * from ${TABLE} where id >= :1`;
+    let result2 = await conn.execute(
+      sql,
+      [ rows[0].id ],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+    assert.strictEqual(result2.rows[0].ID, rows[0].id);
+    assert.strictEqual(result2.rows[0].VALUE, rows[0].value);
+    assert.strictEqual(result2.rows[1].ID, rows[1].id);
+    assert.strictEqual(result2.rows[1].VALUE, rows[1].value);
   }); // 228.3
 
   it('228.4 INSERT ALL statement', async () => {
     const rows = ['Redwood city', 'Sydney', 'Shenzhen'];
     const sqlInsertAll = `
       insert all
-        into ${TABLE} (id, value) values (100, :v)
-        into ${TABLE} (id, value) values (200, :v)
-        into ${TABLE} (id, value) values (300, :v)
+        into ${TABLE} (id, value) values (100, :v1)
+        into ${TABLE} (id, value) values (200, :v2)
+        into ${TABLE} (id, value) values (300, :v3)
       select * from dual
     `;
 
-    try {
-      let result = await conn.execute(sqlInsertAll, rows);
-      should.not.exist(result.lastRowid);
-      should.strictEqual(result.rowsAffected, 3);
+    let result = await conn.execute(sqlInsertAll, rows);
+    assert(result.lastRowid === undefined);
+    assert.strictEqual(result.rowsAffected, 3);
 
-      let sql = `select * from ${TABLE} where id >= 100 order by id asc`;
-      result = await conn.execute(sql);
+    let sql = `select * from ${TABLE} where id >= 100 order by id asc`;
+    result = await conn.execute(sql);
 
-      should.strictEqual(result.rows[0][1], rows[0]);
-      should.strictEqual(result.rows[1][1], rows[1]);
-      should.strictEqual(result.rows[2][1], rows[2]);
-    } catch (err) {
-      should.not.exist(err);
-    }
+    assert.strictEqual(result.rows[0][1], rows[0]);
+    assert.strictEqual(result.rows[1][1], rows[1]);
+    assert.strictEqual(result.rows[2][1], rows[2]);
   }); // 228.4
 });

@@ -32,118 +32,76 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
-const async    = require('async');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
 describe("83. lobProperties2.js", function() {
 
   let connection;
 
-  before(function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
-  }); // before
-
-  after(function(done) {
-    connection.close(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  const checkChunkSize = function(type, callback) {
-
-    connection.createLob(type, function(err, lob) {
-      should.not.exist(err);
-
-      const t = lob.chunkSize;
-      t.should.be.a.Number();
-
-      try {
-        lob.chunkSize = t + 1;
-      } catch (err) {
-        should.exist(err);
-        // Cannot assign to read only property 'chunkSize' of object '#<Lob>'
-      }
-
-      lob.close(function(err) {
-        should.not.exist(err);
-        return callback();
-      });
-
-    });
-  }; // checkChunkSize
-
-  it("83.1 CLOB: chunkSize (read-only)", function(done) {
-    checkChunkSize(oracledb.CLOB, done);
+  after(async function() {
+    await connection.close();
   });
 
-  it("83.2 BLOB: chunkSize (read-only)", function(done) {
-    checkChunkSize(oracledb.BLOB, done);
+  const checkChunkSize = async function(type) {
+    const lob = await connection.createLob(type);
+    const t = lob.chunkSize;
+    assert.strictEqual(typeof t, 'number');
+    assert.throws(
+      () => lob.chunkSize = t + 1,
+      /TypeError: Cannot set property chunkSize/
+    );
+    await lob.close();
+  };
+
+  it("83.1 CLOB: chunkSize (read-only)", async function() {
+    await checkChunkSize(oracledb.CLOB);
   });
 
-  const checkLength = function(type, callback) {
+  it("83.2 BLOB: chunkSize (read-only)", async function() {
+    await checkChunkSize(oracledb.BLOB);
+  });
 
-    connection.createLob(type, function(err, lob) {
-      should.not.exist(err);
-
-      const t = lob.length;
-      t.should.be.a.Number();
-
-      try {
-        lob.length = t + 1;
-      } catch (err) {
-        should.exist(err);
-        // Cannot set property length of #<Lob> which has only a getter
-      }
-
-      lob.close(function(err) {
-        should.not.exist(err);
-        return callback();
-      });
-    });
+  const checkLength = async function(type) {
+    const lob = await connection.createLob(type);
+    const t = lob.length;
+    assert.strictEqual(typeof t, 'number');
+    assert.throws(
+      () => lob.length = t + 1,
+      /TypeError: Cannot set property length/
+    );
+    await lob.close();
   }; // checkLength
 
-  it("83.3 CLOB: length (read-only)", function(done) {
-    checkLength(oracledb.CLOB, done);
+  it("83.3 CLOB: length (read-only)", async function() {
+    await checkLength(oracledb.CLOB);
   });
 
-  it("83.4 BLOB: length (read-only)", function(done) {
-    checkLength(oracledb.BLOB, done);
+  it("83.4 BLOB: length (read-only)", async function() {
+    await checkLength(oracledb.BLOB);
   });
 
-  const checkType = function(lobtype, callback) {
-
-    connection.createLob(lobtype, function(err, lob) {
-      should.not.exist(err);
-
-      const t = lob.type;
-      t.should.eql(lobtype);
-
-      try {
-        lob.type = oracledb.BUFFER;
-      } catch (err) {
-        should.exist(err);
-        // Cannot set property type of #<Lob> which has only a getter
-      }
-
-      lob.close(function(err) {
-        should.not.exist(err);
-        return callback();
-      });
-    });
+  const checkType = async function(lobtype) {
+    const lob = await connection.createLob(lobtype);
+    const t = lob.type;
+    assert.strictEqual(t, lobtype);
+    assert.throws(
+      () => lob.type = oracledb.BUFFER,
+      /TypeError: Cannot set property type/
+    );
+    await lob.close();
   }; // checkType
 
-  it("83.5 CLOB: type (read-only)", function(done) {
-    checkType(oracledb.CLOB, done);
+  it("83.5 CLOB: type (read-only)", async function() {
+    await checkType(oracledb.CLOB);
   });
 
-  it("83.6 BLOB: type (read-only)", function(done) {
-    checkType(oracledb.CLOB, done);
+  it("83.6 BLOB: type (read-only)", async function() {
+    await checkType(oracledb.CLOB);
   });
 
   describe("83.7 pieceSize", function() {
@@ -151,141 +109,75 @@ describe("83. lobProperties2.js", function() {
     let defaultChunkSize;
     let clob, blob;
 
-    before("get the lobs", function(done) {
-      async.series([
-        function(cb) {
-          connection.createLob(oracledb.CLOB, function(err, lob) {
-            should.not.exist(err);
-
-            clob = lob;
-            defaultChunkSize = clob.chunkSize;
-            cb();
-          });
-        },
-        function(cb) {
-          connection.createLob(oracledb.BLOB, function(err, lob) {
-            should.not.exist(err);
-
-            blob = lob;
-            cb();
-          });
-        }
-      ], done);
-    }); // before
-
-    after("close the lobs", function(done) {
-      async.series([
-        function(cb) {
-          clob.close(cb);
-        },
-        function(cb) {
-          blob.close(cb);
-        }
-      ], done);
-    }); // after
-
-    it("83.7.1 default value is chunkSize", function(done) {
-      const t1 = clob.pieceSize,
-        t2 = blob.pieceSize;
-
-      t1.should.eql(defaultChunkSize);
-      t2.should.eql(defaultChunkSize);
-      done();
+    before("get the lobs", async function() {
+      clob = await connection.createLob(oracledb.CLOB);
+      defaultChunkSize = clob.chunkSize;
+      blob = await connection.createLob(oracledb.BLOB);
     });
 
-    it("83.7.2 can be increased", function(done) {
+    after("close the lobs", async function() {
+      await clob.close();
+      await blob.close();
+    });
+
+    afterEach(function() {
+      clob.pieceSize = defaultChunkSize;
+      blob.pieceSize = defaultChunkSize;
+    });
+
+    it("83.7.1 default value is chunkSize", function() {
+      assert.strictEqual(clob.pieceSize, defaultChunkSize);
+      assert.strictEqual(blob.pieceSize, defaultChunkSize);
+    });
+
+    it("83.7.2 can be increased", function() {
       const newValue = clob.pieceSize * 5;
 
       clob.pieceSize = clob.pieceSize * 5;
       blob.pieceSize = blob.pieceSize * 5;
 
-      (clob.pieceSize).should.eql(newValue);
-      (blob.pieceSize).should.eql(newValue);
-
-      clob.pieceSize = defaultChunkSize;
-      blob.pieceSize = defaultChunkSize;
-
-      done();
+      assert.strictEqual(clob.pieceSize, newValue);
+      assert.strictEqual(blob.pieceSize, newValue);
     });
 
-    it("83.7.3 can be decreased", function(done) {
-      if (defaultChunkSize <= 500) {
-        console.log('As default chunkSize is too small, this case is not applicable');
-      } else {
-        const newValue = clob.pieceSize - 500;
+    it("83.7.3 can be decreased", function() {
+      if (defaultChunkSize <= 500)
+        return this.skip();
+      const newValue = clob.pieceSize - 500;
 
-        clob.pieceSize -= 500;
-        blob.pieceSize -= 500;
-        (clob.pieceSize).should.eql(newValue);
-        (blob.pieceSize).should.eql(newValue);
-
-        // Restore
-        clob.pieceSize = defaultChunkSize;
-        blob.pieceSize = defaultChunkSize;
-      }
-      return done();
+      clob.pieceSize -= 500;
+      blob.pieceSize -= 500;
+      assert.strictEqual(clob.pieceSize, newValue);
+      assert.strictEqual(blob.pieceSize, newValue);
     });
 
-    it("83.7.4 can be zero", function(done) {
+    it("83.7.4 can be zero", function() {
       clob.pieceSize = 0;
       blob.pieceSize = 0;
 
-      (clob.pieceSize).should.eql(0);
-      (blob.pieceSize).should.eql(0);
-
-      // Remember to restore the value
-      clob.pieceSize = defaultChunkSize;
-      blob.pieceSize = defaultChunkSize;
-
-      done();
+      assert.strictEqual(clob.pieceSize, 0);
+      assert.strictEqual(blob.pieceSize, 0);
     });
 
-    it("83.7.5 cannot be less than zero", function(done) {
-      try {
-        clob.pieceSize = -100;
-      } catch (err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-004:');
-        // NJS-004: invalid value for property pieceSize
-      }
-
-      // Remember to restore the value
-      clob.pieceSize = defaultChunkSize;
-      blob.pieceSize = defaultChunkSize;
-
-      done();
+    it("83.7.5 cannot be less than zero", function() {
+      assert.throws(
+        () => clob.pieceSize = -100,
+        /NJS-004:/
+      );
     });
 
-    it("83.7.6 cannot be null", function(done) {
-      try {
-        clob.pieceSize = null;
-      } catch (err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-004:');
-        // NJS-004: invalid value for property pieceSize
-      }
-
-      // Remember to restore the value
-      clob.pieceSize = defaultChunkSize;
-      blob.pieceSize = defaultChunkSize;
-
-      done();
+    it("83.7.6 cannot be null", function() {
+      assert.throws(
+        () => clob.pieceSize = null,
+        /NJS-004:/
+      );
     });
 
-    it("83.7.7 must be a number", function(done) {
-      try {
-        clob.pieceSize = NaN;
-      } catch (err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-004:');
-        // NJS-004: invalid value for property pieceSize
-      }
-
-      // Remember to restore the value
-      clob.pieceSize = defaultChunkSize;
-      blob.pieceSize = defaultChunkSize;
-
-      done();
+    it("83.7.7 must be a number", function() {
+      assert.throws(
+        () => clob.pieceSize = NaN,
+        /NJS-004:/
+      );
     });
   }); // 83.7
 

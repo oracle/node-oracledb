@@ -34,17 +34,16 @@
 'use strict';
 
 var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
+var assert   = require('assert');
 var dbConfig = require('./dbconfig.js');
-var sql      = require('./sql.js');
+var testsUtil = require('./testsUtil.js');
 
 describe('114. urowidDMLBindAsString1.js', function() {
-  var connection = null;
-  var tableName = "nodb_bind_urowid";
-  var insertID = 1;
+  let connection;
+  const tableName = "nodb_bind_urowid";
+  let insertID = 1;
 
-  var proc_create_table = "BEGIN \n" +
+  const proc_create_table = "BEGIN \n" +
                           "    DECLARE \n" +
                           "        e_table_missing EXCEPTION; \n" +
                           "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
@@ -61,185 +60,155 @@ describe('114. urowidDMLBindAsString1.js', function() {
                           "        ) \n" +
                           "      '); \n" +
                           "END;  ";
-  var drop_table = "DROP TABLE " + tableName + " PURGE";
+  const drop_table = "DROP TABLE " + tableName + " PURGE";
 
-  before('get connection and create table', function(done) {
-    async.series([
-      function(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
-      },
-      function(cb) {
-        sql.executeSql(connection, proc_create_table, {}, {}, cb);
-      }
-    ], done);
+  before('get connection and create table', async function() {
+    connection = await oracledb.getConnection(dbConfig);
+    await connection.execute(proc_create_table);
   });
 
-  after('release connection', function(done) {
-    async.series([
-      function(cb) {
-        sql.executeSql(connection, drop_table, {}, {}, cb);
-      },
-      function(cb) {
-        connection.release(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+  after('release connection', async function() {
+    await connection.execute(drop_table);
+    await connection.close();
   });
 
-  beforeEach(function(done) {
+  beforeEach(function() {
     insertID++;
-    done();
   });
 
   describe('114.1 INSERT & SELECT', function() {
 
-    it('114.1.1 works with null', function(done) {
-      var content = null;
-      var bindVar = {
+    it('114.1.1 works with null', async function() {
+      const content = null;
+      const bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
         c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
       };
-      dmlInsert(bindVar, content, done);
+      await dmlInsert(bindVar, content);
     });
 
-    it('114.1.2 works with empty string', function(done) {
-      var content = "";
-      var expected = null;
-      var bindVar = {
+    it('114.1.2 works with empty string', async function() {
+      const content = "";
+      const expected = null;
+      const bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
         c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
       };
-      dmlInsert(bindVar, expected, done);
+      await dmlInsert(bindVar, expected);
     });
 
-    it('114.1.3 works with extended rowid', function(done) {
-      var content = "AAABoqAADAAAAwPAAA";
-      var bindVar = {
+    it('114.1.3 works with extended rowid', async function() {
+      const content = "AAABoqAADAAAAwPAAA";
+      const bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
         c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
       };
-      dmlInsert(bindVar, content, done);
+      await dmlInsert(bindVar, content);
     });
 
-    it('114.1.4 works with restricted rowid', function(done) {
-      var content = "00000DD5.0000.0001";
-      var bindVar = {
+    it('114.1.4 works with restricted rowid', async function() {
+      const content = "00000DD5.0000.0001";
+      const bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
         c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
       };
-      dmlInsert(bindVar, content, done);
+      await dmlInsert(bindVar, content);
     });
 
-    it('114.1.5 throws error with number 0', function(done) {
-      var content = 0;
-      var sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
-      var bindVar = {
+    it('114.1.5 throws error with number 0', async function() {
+      const content = 0;
+      const sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
+      const bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
         c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
       };
 
-      connection.execute(
-        sql_insert,
-        bindVar,
-        function(err) {
-          should.exist(err);
-          (err.message).should.equal("NJS-011: encountered bind value and type mismatch");
-          done();
-        }
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sql_insert, bindVar),
+        /NJS-011:/
       );
     });
 
-    it('114.1.6 works with string 0', function(done) {
-      var content = "0";
-      var expected = "00000000.0000.0000";
-      var bindVar = {
+    it('114.1.6 works with string 0', async function() {
+      const content = "0";
+      const expected = "00000000.0000.0000";
+      const bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
         c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
       };
-      dmlInsert(bindVar, expected, done);
+      await dmlInsert(bindVar, expected);
     });
 
-    it('114.1.7 works with substr', function(done) {
-      var content = "AAAA8+AALAAAAQ/AAA";
-      dmlInsert_substr(content, done);
+    it('114.1.7 works with substr', async function() {
+      const content = "AAAA8+AALAAAAQ/AAA";
+      await dmlInsert_substr(content);
     });
 
-    it('114.1.8 bind null with default type/dir - named bind', function(done) {
-      var content = null;
-      var bindVar_1 = {
+    it('114.1.8 bind null with default type/dir - named bind', async function() {
+      const content = null;
+      const bindVar_1 = {
         i: insertID,
         c: content
       };
-      dmlInsert(bindVar_1, content, done);
+      await dmlInsert(bindVar_1, content);
     });
 
-    it('114.1.9 bind null with default type/dir - positional bind', function(done) {
-      var content = null;
-      var bindVar_1 = [ insertID, content ];
-      dmlInsert(bindVar_1, content, done);
+    it('114.1.9 bind null with default type/dir - positional bind', async function() {
+      const content = null;
+      const bindVar_1 = [ insertID, content ];
+      await dmlInsert(bindVar_1, content);
     });
 
-    it('114.1.10 bind extented rowid with default type/dir - named bind', function(done) {
-      var content = "AAAA8+AALAAAAQ/AAA";
-      var bindVar_1 = {
+    it('114.1.10 bind extented rowid with default type/dir - named bind', async function() {
+      const content = "AAAA8+AALAAAAQ/AAA";
+      const bindVar_1 = {
         i: insertID,
         c: content
       };
-      dmlInsert(bindVar_1, content, done);
+      await dmlInsert(bindVar_1, content);
     });
 
-    it('114.1.11 bind extented rowid with default type/dir - positional bind', function(done) {
-      var content = "AAAA8+AALAAAAQ/AAA";
-      var bindVar_1 = [ insertID, content ];
-      dmlInsert(bindVar_1, content, done);
+    it('114.1.11 bind extented rowid with default type/dir - positional bind', async function() {
+      const content = "AAAA8+AALAAAAQ/AAA";
+      const bindVar_1 = [ insertID, content ];
+      await dmlInsert(bindVar_1, content);
     });
 
-    it('114.1.12 works with undefined', function(done) {
-      var content = undefined;
-      var bindVar = {
+    it('114.1.12 works with undefined', async function() {
+      const content = undefined;
+      const bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
         c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
       };
-      dmlInsert(bindVar, null, done);
+      await dmlInsert(bindVar, null);
     });
 
-    it('114.1.13 bind undefined with default type/dir - named bind', function(done) {
-      var content = undefined;
-      var bindVar_1 = {
+    it('114.1.13 bind undefined with default type/dir - named bind', async function() {
+      const content = undefined;
+      const bindVar_1 = {
         i: insertID,
         c: content
       };
-      dmlInsert(bindVar_1, null, done);
+      await dmlInsert(bindVar_1, null);
     });
 
-    it('114.1.14 bind undefined with default type/dir - positional bind', function(done) {
-      var content = undefined;
-      var bindVar_1 = [ insertID, content ];
-      dmlInsert(bindVar_1, null, done);
+    it('114.1.14 bind undefined with default type/dir - positional bind', async function() {
+      const content = undefined;
+      const bindVar_1 = [ insertID, content ];
+      await dmlInsert(bindVar_1, null);
     });
 
-    it('114.1.15 works with NaN', function(done) {
-      var content = NaN;
-      var sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
-      var bindVar = {
+    it('114.1.15 works with NaN', async function() {
+      const content = NaN;
+      const sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
+      const bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
         c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
       };
 
-      connection.execute(
-        sql_insert,
-        bindVar,
-        function(err) {
-          should.exist(err);
-          (err.message).should.equal("NJS-011: encountered bind value and type mismatch");
-          done();
-        }
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sql_insert, bindVar),
+        /NJS-011:/
       );
     });
 
@@ -247,365 +216,244 @@ describe('114. urowidDMLBindAsString1.js', function() {
 
   describe('114.2 UPDATE', function() {
 
-    it('114.2.1 UPDATE null column', function(done) {
-      var content_insert = null;
-      var content_update = "AAABiqAADAAAAwPAAA";
-      dmlUpdate(content_insert, content_update, content_update, done);
+    it('114.2.1 UPDATE null column', async function() {
+      const content_insert = null;
+      const content_update = "AAABiqAADAAAAwPAAA";
+      await dmlUpdate(content_insert, content_update, content_update);
     });
 
-    it('114.2.1 UPDATE extented rowid with restricted rowid', function(done) {
-      var content_insert = "AAABioAADAAAAwPAAA";
-      var content_update = "00000DD5.0010.0001";
-      dmlUpdate(content_insert, content_update, content_update, done);
+    it('114.2.1 UPDATE extented rowid with restricted rowid', async function() {
+      const content_insert = "AAABioAADAAAAwPAAA";
+      const content_update = "00000DD5.0010.0001";
+      await dmlUpdate(content_insert, content_update, content_update);
     });
 
-    it('114.2.3 UPDATE restricted rowid with null', function(done) {
-      var content_insert = "00000DD5.0010.0002";
-      var content_update = null;
-      dmlUpdate(content_insert, content_update, content_update, done);
+    it('114.2.3 UPDATE restricted rowid with null', async function() {
+      const content_insert = "00000DD5.0010.0002";
+      const content_update = null;
+      await dmlUpdate(content_insert, content_update, content_update);
     });
   });
 
   describe('114.3 RETURNING INTO', function() {
-    it('114.3.1 INSERT null', function(done) {
-      var content = null;
-      var bindVar = {
+
+    it('114.3.1 INSERT null', async function() {
+      const content = null;
+      const bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
         c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING },
         o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
       };
-      insert_returning(bindVar, content, done);
+      await insert_returning(bindVar, content);
     });
 
-    it('114.3.2 INSERT extented rowid', function(done) {
-      var content = "AAAA++AALAAAAQ/AAA";
-      var bindVar = {
+    it('114.3.2 INSERT extented rowid', async function() {
+      const content = "AAAA++AALAAAAQ/AAA";
+      const bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
         c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING },
         o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
       };
-      insert_returning(bindVar, content, done);
+      await insert_returning(bindVar, content);
     });
 
-    it('114.3.3 INSERT restricted rowid', function(done) {
-      var content = "00000000.0100.0100";
-      var bindVar = {
+    it('114.3.3 INSERT restricted rowid', async function() {
+      const content = "00000000.0100.0100";
+      const bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
         c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING },
         o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
       };
-      insert_returning(bindVar, content, done);
+      await insert_returning(bindVar, content);
     });
 
-    it('114.3.7 UPDATE null with extented rowid', function(done) {
-      var content_insert = null;
-      var content_update = "AAABiqAADAAAAwPAAA";
-      var bindVar_update = {
+    it('114.3.7 UPDATE null with extented rowid', async function() {
+      const content_insert = null;
+      const content_update = "AAABiqAADAAAAwPAAA";
+      const bindVar_update = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
         c: { val : content_update, dir : oracledb.BIND_IN, type : oracledb.STRING },
         o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
       };
-      update_returning(content_insert, bindVar_update, content_update, done);
+      await update_returning(content_insert, bindVar_update, content_update);
     });
 
-    it('114.3.8 UPDATE extented rowid with null', function(done) {
-      var content_insert = "AAABiqAADAAAAwPAAA";
-      var content_update = null;
-      var bindVar_update = {
+    it('114.3.8 UPDATE extented rowid with null', async function() {
+      const content_insert = "AAABiqAADAAAAwPAAA";
+      const content_update = null;
+      const bindVar_update = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
         c: { val : content_update, dir : oracledb.BIND_IN, type : oracledb.STRING },
         o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
       };
-      update_returning(content_insert, bindVar_update, content_update, done);
+      await update_returning(content_insert, bindVar_update, content_update);
     });
 
-    it('114.3.9 UPDATE restricted rowid with empty string', function(done) {
-      var content_insert = "00000000.0100.0100";
-      var content_update = "";
-      var bindVar_update = {
+    it('114.3.9 UPDATE restricted rowid with empty string', async function() {
+      const content_insert = "00000000.0100.0100";
+      const content_update = "";
+      const bindVar_update = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
         c: { val : content_update, dir : oracledb.BIND_IN, type : oracledb.STRING },
         o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
       };
-      update_returning(content_insert, bindVar_update, null, done);
+      await update_returning(content_insert, bindVar_update, null);
     });
 
-    it('114.3.10 UPDATE restricted rowid with extented rowid', function(done) {
-      var content_insert = "00000000.0100.0100";
-      var content_update = "AAABiqAADAAAAwPAAA";
-      var bindVar_update = {
+    it('114.3.10 UPDATE restricted rowid with extented rowid', async function() {
+      const content_insert = "00000000.0100.0100";
+      const content_update = "AAABiqAADAAAAwPAAA";
+      const bindVar_update = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
         c: { val : content_update, dir : oracledb.BIND_IN, type : oracledb.STRING },
         o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
       };
-      update_returning(content_insert, bindVar_update, content_update, done);
+      await update_returning(content_insert, bindVar_update, content_update);
     });
 
-    it('114.3.11 INSERT with default type/dir - named bind', function(done) {
-      var content = "00000000.0100.0100";
-      var bindVar = {
+    it('114.3.11 INSERT with default type/dir - named bind', async function() {
+      const content = "00000000.0100.0100";
+      const bindVar = {
         i: insertID,
         c: content,
         o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
       };
-      insert_returning(bindVar, content, done);
+      await insert_returning(bindVar, content);
     });
 
-    it('114.3.12 INSERT with default type/dir - positional bind', function(done) {
-      var content = "00000000.0100.0100";
-      var bindVar = [ insertID, content, { dir : oracledb.BIND_OUT, type : oracledb.STRING } ];
-      insert_returning(bindVar, content, done);
+    it('114.3.12 INSERT with default type/dir - positional bind', async function() {
+      const content = "00000000.0100.0100";
+      const bindVar = [ insertID, content, { dir : oracledb.BIND_OUT, type : oracledb.STRING } ];
+      await insert_returning(bindVar, content);
     });
 
-    it('114.3.13 UPDATE with default type/dir - named bind', function(done) {
-      var content_insert = "00000000.0100.0100";
-      var content_update = "AAABiqAADAAAAwPAAA";
-      var bindVar_update = {
+    it('114.3.13 UPDATE with default type/dir - named bind', async function() {
+      const content_insert = "00000000.0100.0100";
+      const content_update = "AAABiqAADAAAAwPAAA";
+      const bindVar_update = {
         i: insertID,
         c: content_update,
         o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
       };
-      update_returning(content_insert, bindVar_update, content_update, done);
+      await update_returning(content_insert, bindVar_update, content_update);
     });
 
-    it('114.3.14 UPDATE with default type/dir - positional bind', function(done) {
-      var content_insert = "00000000.0100.0100";
-      var content_update = "AAABiqAADAAAAwPAAA";
-      var bindVar_update = [ content_update, insertID, { dir : oracledb.BIND_OUT, type : oracledb.STRING } ];
-      update_returning(content_insert, bindVar_update, content_update, done);
+    it('114.3.14 UPDATE with default type/dir - positional bind', async function() {
+      const content_insert = "00000000.0100.0100";
+      const content_update = "AAABiqAADAAAAwPAAA";
+      const bindVar_update = [ content_update, insertID, { dir : oracledb.BIND_OUT, type : oracledb.STRING } ];
+      await update_returning(content_insert, bindVar_update, content_update);
     });
   });
 
   describe('107.4 WHERE', function() {
-    it('107.4.1 can bind in WHERE clause', function(done) {
-      where_select(done);
+    it('107.4.1 can bind in WHERE clause', async function() {
+      await where_select();
     });
   });
 
-  var dmlInsert = function(bindVar, expected, callback) {
-    var sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
-    var sql_select = "select * from " + tableName + " where id = :i";
-    async.series([
-      function(cb) {
-        connection.execute(
-          sql_insert,
-          bindVar,
-          function(err, result) {
-            should.not.exist(err);
-            (result.rowsAffected).should.be.exactly(1);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.execute(
-          sql_select,
-          { i: insertID },
-          function(err, result) {
-            should.not.exist(err);
-            var resultVal = result.rows[0][1];
-            should.strictEqual(resultVal, expected);
-            // should.strictEqual(typeof resultVal, "string");
-            cb();
-          }
-        );
-      }
-    ], callback);
+  const dmlInsert = async function(bindVar, expected) {
+    const sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
+    const sql_select = "select * from " + tableName + " where id = :i";
+    let result = await connection.execute(sql_insert, bindVar);
+    assert.strictEqual(result.rowsAffected, 1);
+    result = await connection.execute(sql_select, { i: insertID });
+    const resultVal = result.rows[0][1];
+    assert.strictEqual(resultVal, expected);
   };
 
-  var dmlInsert_substr = function(content, callback) {
-    var id = insertID++;
-    var sql_insert = "insert into " + tableName + "(id, content) values (" + id + ", CHARTOROWID(:c))";
-    var sql_select = "select content, SUBSTR(content,1,6) , SUBSTR(content,7,3), SUBSTR(content,10,6), SUBSTR(content,16,3) from " + tableName + " where id = " + id;
-    var bindVar = { c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }};
-    async.series([
-      function(cb) {
-        connection.execute(
-          sql_insert,
-          bindVar,
-          function(err, result) {
-            should.not.exist(err);
-            (result.rowsAffected).should.be.exactly(1);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.execute(
-          sql_select,
-          function(err, result) {
-            should.not.exist(err);
-            var resultVal_rowid = result.rows[0][0];
-            var resultVal_object = result.rows[0][1];
-            var resultVal_file = result.rows[0][2];
-            var resultVal_block = result.rows[0][3];
-            var resultVal_row = result.rows[0][4];
-            should.strictEqual(typeof resultVal_rowid, "string");
-            should.strictEqual(typeof resultVal_block, "string");
-            should.strictEqual(typeof resultVal_row, "string");
-            should.strictEqual(typeof resultVal_file, "string");
-            should.strictEqual(typeof resultVal_object, "string");
-            should.strictEqual(resultVal_rowid, content);
-            should.strictEqual(resultVal_object, content.substring(0, 6));
-            should.strictEqual(resultVal_file, content.substring(6, 9));
-            should.strictEqual(resultVal_block, content.substring(9, 15));
-            should.strictEqual(resultVal_row, content.substring(15, 18));
-            cb();
-          }
-        );
-      }
-    ], callback);
+  const dmlInsert_substr = async function(content) {
+    const id = insertID++;
+    const sql_insert = "insert into " + tableName + "(id, content) values (" + id + ", CHARTOROWID(:c))";
+    const sql_select = "select content, SUBSTR(content,1,6) , SUBSTR(content,7,3), SUBSTR(content,10,6), SUBSTR(content,16,3) from " + tableName + " where id = " + id;
+    const bindVar = { c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }};
+    let result = await connection.execute(sql_insert, bindVar);
+    assert.strictEqual(result.rowsAffected, 1);
+    result = await connection.execute(sql_select);
+    const resultVal_rowid = result.rows[0][0];
+    const resultVal_object = result.rows[0][1];
+    const resultVal_file = result.rows[0][2];
+    const resultVal_block = result.rows[0][3];
+    const resultVal_row = result.rows[0][4];
+    assert.strictEqual(typeof resultVal_rowid, "string");
+    assert.strictEqual(typeof resultVal_block, "string");
+    assert.strictEqual(typeof resultVal_row, "string");
+    assert.strictEqual(typeof resultVal_file, "string");
+    assert.strictEqual(typeof resultVal_object, "string");
+    assert.strictEqual(resultVal_rowid, content);
+    assert.strictEqual(resultVal_object, content.substring(0, 6));
+    assert.strictEqual(resultVal_file, content.substring(6, 9));
+    assert.strictEqual(resultVal_block, content.substring(9, 15));
+    assert.strictEqual(resultVal_row, content.substring(15, 18));
   };
 
-  var dmlUpdate = function(content_insert, content_update, expected, callback) {
-    var sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
-    var sql_update = "update " + tableName + " set content = :c where id = :i";
-    var sql_select = "select * from " + tableName + " where id = :i";
-    var bindVar_insert = {
+  const dmlUpdate = async function(content_insert, content_update, expected) {
+    const sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
+    const sql_update = "update " + tableName + " set content = :c where id = :i";
+    const sql_select = "select * from " + tableName + " where id = :i";
+    const bindVar_insert = {
       i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
       c: { val : content_insert, dir : oracledb.BIND_IN, type : oracledb.STRING }
     };
-    var bindVar_update = {
+    const bindVar_update = {
       i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
       c: { val : content_update, dir : oracledb.BIND_IN, type : oracledb.STRING }
     };
-    async.series([
-      function(cb) {
-        connection.execute(
-          sql_insert,
-          bindVar_insert,
-          function(err, result) {
-            should.not.exist(err);
-            (result.rowsAffected).should.be.exactly(1);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.execute(
-          sql_update,
-          bindVar_update,
-          function(err, result) {
-            should.not.exist(err);
-            (result.rowsAffected).should.be.exactly(1);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.execute(
-          sql_select,
-          { i: insertID },
-          function(err, result) {
-            should.not.exist(err);
-            var resultVal = result.rows[0][1];
-            should.strictEqual(resultVal, expected);
-            // should.strictEqual(typeof resultVal, "string");
-            cb();
-          }
-        );
-      }
-    ], callback);
+    let result = await connection.execute(sql_insert, bindVar_insert);
+    assert.strictEqual(result.rowsAffected, 1);
+    result = await connection.execute(sql_update, bindVar_update);
+    assert.strictEqual(result.rowsAffected, 1);
+    result = await connection.execute(sql_select, { i: insertID });
+    const resultVal = result.rows[0][1];
+    assert.strictEqual(resultVal, expected);
   };
 
-  var insert_returning = function(bindVar, expected, callback) {
-    var sql_returning = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c)) returning content into :o";
-    connection.execute(
-      sql_returning,
-      bindVar,
-      function(err, result) {
-        should.not.exist(err);
-        var resultVal;
-        if (typeof (result.outBinds.o) === 'undefined') resultVal = result.outBinds[0][0];
-        else resultVal = result.outBinds.o[0];
-        should.strictEqual(resultVal, expected);
-        // should.strictEqual(typeof resultVal, "string");
-        callback();
-      }
-    );
+  const insert_returning = async function(bindVar, expected) {
+    const sql_returning = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c)) returning content into :o";
+    const result = await connection.execute(sql_returning, bindVar);
+    let resultVal;
+    if (typeof (result.outBinds.o) === 'undefined') resultVal = result.outBinds[0][0];
+    else resultVal = result.outBinds.o[0];
+    assert.strictEqual(resultVal, expected);
   };
 
-  var update_returning = function(content_insert, bindVar_update, expected, callback) {
-    var sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
-    var sql_update = "update " + tableName + " set content = :c where id = :i returning content into :o";
-    var bindVar_insert = {
+  const update_returning = async function(content_insert, bindVar_update, expected) {
+    const sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
+    const sql_update = "update " + tableName + " set content = :c where id = :i returning content into :o";
+    const bindVar_insert = {
       i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
       c: { val : content_insert, dir : oracledb.BIND_IN, type : oracledb.STRING }
     };
-    async.series([
-      function(cb) {
-        connection.execute(
-          sql_insert,
-          bindVar_insert,
-          function(err, result) {
-            should.not.exist(err);
-            (result.rowsAffected).should.be.exactly(1);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.execute(
-          sql_update,
-          bindVar_update,
-          function(err, result) {
-            should.not.exist(err);
-            var resultVal;
-            if (typeof (result.outBinds.o) === 'undefined') resultVal = result.outBinds[0][0];
-            else resultVal = result.outBinds.o[0];
-            should.strictEqual(resultVal, expected);
-            // should.strictEqual(typeof resultVal, "string");
-            cb();
-          }
-        );
-      }
-    ], callback);
+    let result = await connection.execute(sql_insert, bindVar_insert);
+    assert.strictEqual(result.rowsAffected, 1);
+    result = await connection.execute(sql_update, bindVar_update);
+    let resultVal;
+    if (typeof (result.outBinds.o) === 'undefined') resultVal = result.outBinds[0][0];
+    else resultVal = result.outBinds.o[0];
+    assert.strictEqual(resultVal, expected);
   };
 
-  var where_select = function(callback) {
-    async.series([
-      function(cb) {
-        connection.execute(
-          "insert into " + tableName + " T (ID) values (" + insertID + ")",
-          function(err, result) {
-            should.not.exist(err);
-            (result.rowsAffected).should.be.exactly(1);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.execute(
-          "UPDATE " + tableName + " T SET content = T.ROWID where ID = " + insertID,
-          function(err, result) {
-            should.not.exist(err);
-            (result.rowsAffected).should.be.exactly(1);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.execute(
-          "select content from " + tableName + " where ID = " + insertID,
-          function(err, result) {
-            should.not.exist(err);
-            var resultVal = result.rows[0][0];
-            connection.execute(
-              "select * from " + tableName + " where ROWID = CHARTOROWID(:c)",
-              { c: { val: resultVal, dir : oracledb.BIND_IN, type : oracledb.STRING } },
-              function(err_1, result_1) {
-                should.not.exist(err_1);
-                var resultVal_1 = result_1.rows[0][0];
-                var resultVal_2 = result_1.rows[0][1];
-                should.strictEqual(resultVal_1, insertID);
-                should.strictEqual(resultVal_2, resultVal);
-                cb();
-              }
-            );
-          }
-        );
+  const where_select = async function() {
+    let sql = `insert into ${tableName} T (ID) values (${insertID})`;
+    let result = await connection.execute(sql);
+    assert.strictEqual(result.rowsAffected, 1);
+    sql = `UPDATE ${tableName} T SET content = T.ROWID where ID = ${insertID}`;
+    result = await connection.execute(sql);
+    assert.strictEqual(result.rowsAffected, 1);
+    sql = `select content from ${tableName} where ID = ${insertID}`;
+    result = await connection.execute(sql);
+    const resultVal = result.rows[0][0];
+    sql = `select * from ${tableName} where ROWID = CHARTOROWID(:c)`;
+    const binds = {
+      c: {
+        val: resultVal, dir : oracledb.BIND_IN, type : oracledb.STRING
       }
-    ], callback);
+    };
+    result = await connection.execute(sql, binds);
+    const resultVal_1 = result.rows[0][0];
+    const resultVal_2 = result.rows[0][1];
+    assert.strictEqual(resultVal_1, insertID);
+    assert.strictEqual(resultVal_2, resultVal);
   };
 
 });

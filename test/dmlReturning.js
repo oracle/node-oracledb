@@ -35,19 +35,19 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
-var assist   = require('./dataTypeAssist.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const assist   = require('./dataTypeAssist.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('6. dmlReturning.js', function() {
 
   describe('6.1 NUMBER & STRING driver data type', function() {
 
-    var connection = null;
-    beforeEach('get connection and prepare table', function(done) {
-      var makeTable =
+    let connection;
+    beforeEach('get connection and prepare table', async function() {
+      const makeTable =
       "BEGIN \
             DECLARE \
                 e_table_missing EXCEPTION; \
@@ -80,105 +80,57 @@ describe('6. dmlReturning.js', function() {
                    (2001, ''Karen Morton'') \
             '); \
         END; ";
-      oracledb.getConnection(
-        {
-          user:          dbConfig.user,
-          password:      dbConfig.password,
-          connectString: dbConfig.connectString
-        },
-        function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          conn.execute(
-            makeTable,
-            function(err) {
-              should.not.exist(err);
-              done();
-            }
-          );
-        }
-      );
+      connection = await oracledb.getConnection(dbConfig);
+      await connection.execute(makeTable);
     });
 
-    afterEach('drop table and release connection', function(done) {
-      connection.execute(
-        "DROP TABLE nodb_dmlreturn PURGE",
-        function(err) {
-          if (err) {
-            console.error(err.message); return;
-          }
-          connection.release(function(err) {
-            if (err) {
-              console.error(err.message); return;
-            }
-            done();
-          });
-        }
-      );
+    afterEach('drop table and release connection', async function() {
+      await connection.execute("DROP TABLE nodb_dmlreturn PURGE");
+      await connection.close();
     });
 
-    it('6.1.1 INSERT statement with Object binding', function(done) {
-      connection.should.be.ok();
-      connection.execute(
+    it('6.1.1 INSERT statement with Object binding', async function() {
+      const result = await connection.execute(
         "INSERT INTO nodb_dmlreturn VALUES (1003, 'Robyn Sands') RETURNING id, name INTO :rid, :rname",
         {
           rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT},
           rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT}
-        },
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          result.rowsAffected.should.be.exactly(1);
-          result.outBinds.rid.should.eql([1003]);
-          result.outBinds.rname.should.eql(['Robyn Sands']);
-          done();
-        }
-      );
+        });
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.outBinds.rid[0], 1003);
+      assert.strictEqual(result.outBinds.rname[0], 'Robyn Sands');
     });
 
-    it('6.1.2 INSERT statement with Array binding', function(done) {
-      connection.should.be.ok();
-      connection.execute(
+    it('6.1.2 INSERT statement with Array binding', async function() {
+      const result = await connection.execute(
         "INSERT INTO nodb_dmlreturn VALUES (1003, 'Robyn Sands') RETURNING id, name INTO :rid, :rname",
         [
           { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           { type: oracledb.STRING, dir: oracledb.BIND_OUT }
-        ],
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          result.rowsAffected.should.be.exactly(1);
-          result.outBinds[0].should.eql([1003]);
-          result.outBinds[1].should.eql(['Robyn Sands']);
-          done();
-        }
+        ]);
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.outBinds[0][0], 1003);
+      assert.strictEqual(result.outBinds[1][0], 'Robyn Sands');
+    });
+
+    it('6.1.3 INSERT statement with small maxSize restriction', async function() {
+
+      const sql = "INSERT INTO nodb_dmlreturn VALUES (1003, 'Robyn Sands Delaware') RETURNING id, name INTO :rid, :rname";
+      const binds = {
+        rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+        rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2 }
+      };
+      const options = {
+        autoCommit: true
+      };
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sql, binds, options),
+        /NJS-016:/
       );
     });
 
-    it('6.1.3 INSERT statement with small maxSize restriction', function(done) {
-      connection.should.be.ok();
-      connection.execute(
-        "INSERT INTO nodb_dmlreturn VALUES (1003, 'Robyn Sands Delaware') RETURNING id, name INTO :rid, :rname",
-        {
-          rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2 }
-        },
-        { autoCommit: true },
-        function(err, result) {
-          should.exist(err);
-          should.strictEqual(
-            err.message,
-            "NJS-016: buffer is too small for OUT binds"
-          );
-          should.not.exist(result);
-          done();
-        }
-      );
-    });
-
-    it('6.1.4 UPDATE statement with single row matched', function(done) {
-      connection.should.be.ok();
-      connection.execute(
+    it('6.1.4 UPDATE statement with single row matched', async function() {
+      const result = await connection.execute(
         "UPDATE nodb_dmlreturn SET name = :n WHERE id = :i RETURNING id, name INTO :rid, :rname",
         {
           n: "Kerry Osborne",
@@ -186,21 +138,14 @@ describe('6. dmlReturning.js', function() {
           rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
         },
-        { autoCommit: true },
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          result.rowsAffected.should.be.exactly(1);
-          result.outBinds.rid.should.eql([2001]);
-          result.outBinds.rname.should.eql(['Kerry Osborne']);
-          done();
-        }
-      );
+        { autoCommit: true });
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.outBinds.rid[0], 2001);
+      assert.strictEqual(result.outBinds.rname[0], 'Kerry Osborne');
     });
 
-    it('6.1.5 UPDATE statement with single row matched & Array binding', function(done) {
-      connection.should.be.ok();
-      connection.execute(
+    it('6.1.5 UPDATE statement with single row matched & Array binding', async function() {
+      const result = await connection.execute(
         "UPDATE nodb_dmlreturn SET name = :n WHERE id = :i RETURNING id, name INTO :rid, :rname",
         [
           "Kerry Osborne",
@@ -208,113 +153,78 @@ describe('6. dmlReturning.js', function() {
           { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           { type: oracledb.STRING, dir: oracledb.BIND_OUT }
         ],
-        { autoCommit: true },
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          result.rowsAffected.should.be.exactly(1);
-          result.outBinds[0].should.eql([2001]);
-          result.outBinds[1].should.eql(['Kerry Osborne']);
-          done();
-        }
-      );
+        { autoCommit: true });
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.outBinds[0][0], 2001);
+      assert.strictEqual(result.outBinds[1][0], 'Kerry Osborne');
     });
 
-    it('6.1.6 UPDATE statements with multiple rows matched', function(done) {
-      connection.should.be.ok();
-      connection.execute(
+    it('6.1.6 UPDATE statements with multiple rows matched', async function() {
+      const result = await connection.execute(
         "UPDATE nodb_dmlreturn SET id = :i RETURNING id, name INTO :rid, :rname",
         {
           i: 999,
           rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
         },
-        { autoCommit: true },
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          result.rowsAffected.should.be.exactly(3);
-          result.outBinds.rid.should.eql([999, 999, 999]);
-          result.outBinds.rname.should.eql([ 'Chris Jones', 'Tom Kyte', 'Karen Morton' ]);
-          done();
-        }
-      );
+        { autoCommit: true });
+      assert.strictEqual(result.rowsAffected, 3);
+      assert.deepEqual(result.outBinds.rid, [999, 999, 999]);
+      assert.deepEqual(result.outBinds.rname, [ 'Chris Jones', 'Tom Kyte', 'Karen Morton' ]);
     });
 
-    it('6.1.7 UPDATE statements with multiple rows matched & Array binding', function(done) {
-      connection.should.be.ok();
-      connection.execute(
+    it('6.1.7 UPDATE statements with multiple rows matched & Array binding', async function() {
+      const result = await connection.execute(
         "UPDATE nodb_dmlreturn SET id = :i RETURNING id, name INTO :rid, :rname",
         [
           999,
           { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           { type: oracledb.STRING, dir: oracledb.BIND_OUT }
         ],
-        { autoCommit: true },
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          result.rowsAffected.should.be.exactly(3);
-          result.outBinds[0].should.eql([999, 999, 999]);
-          result.outBinds[1].should.eql([ 'Chris Jones', 'Tom Kyte', 'Karen Morton' ]);
-          done();
-        }
-      );
+        { autoCommit: true });
+      assert.strictEqual(result.rowsAffected, 3);
+      assert.deepEqual(result.outBinds[0], [999, 999, 999]);
+      assert.deepEqual(result.outBinds[1], [ 'Chris Jones', 'Tom Kyte', 'Karen Morton' ]);
     });
 
-    it('6.1.8 DELETE statement with Object binding', function(done) {
-      connection.should.be.ok();
-      connection.execute(
+    it('6.1.8 DELETE statement with Object binding', async function() {
+      const result = await connection.execute(
         "DELETE FROM nodb_dmlreturn WHERE name like '%Chris%' RETURNING id, name INTO :rid, :rname",
         {
           rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
         },
-        { autoCommit: true },
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          result.rowsAffected.should.exactly(1);
-          result.outBinds.rid.should.eql([1001]);
-          result.outBinds.rname.should.eql([ 'Chris Jones' ]);
-          done();
-        }
-      );
+        { autoCommit: true });
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.deepEqual(result.outBinds.rid, [1001]);
+      assert.deepEqual(result.outBinds.rname, ['Chris Jones']);
     });
 
-    it('6.1.9 DELETE statement with Array binding', function(done) {
-      connection.should.be.ok();
-      connection.execute(
+    it('6.1.9 DELETE statement with Array binding', async function() {
+      const result = await connection.execute(
         "DELETE FROM nodb_dmlreturn WHERE name like '%Chris%' RETURNING id, name INTO :rid, :rname",
         [
           { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           { type: oracledb.STRING, dir: oracledb.BIND_OUT }
         ],
-        { autoCommit: true },
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          result.rowsAffected.should.exactly(1);
-          result.outBinds[0].should.eql([1001]);
-          result.outBinds[1].should.eql([ 'Chris Jones' ]);
-          done();
-        }
-      );
+        { autoCommit: true });
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.deepEqual(result.outBinds[0], [1001]);
+      assert.deepEqual(result.outBinds[1], ['Chris Jones']);
     });
 
     // it currently fails with 11.2 database
-    it('6.1.10 Stress test - support 4k varchars', function(done) {
+    it('6.1.10 Stress test - support 4k varchars', async function() {
 
       /*** Helper functions ***/
-      var makeString = function(size) {
-        var buffer = new StringBuffer();
-        for (var i = 0; i < size; i++)
+      const makeString = function(size) {
+        const buffer = new StringBuffer();
+        for (let i = 0; i < size; i++)
           buffer.append('A');
-
         return buffer.toString();
       };
 
-      var StringBuffer = function() {
+      const StringBuffer = function() {
         this.buffer = [];
         this.index = 0;
       };
@@ -331,10 +241,9 @@ describe('6. dmlReturning.js', function() {
         }
       };
       /*** string length **/
-      var size = 4000;
+      const size = 4000;
 
-      connection.should.be.ok();
-      connection.execute(
+      const result = await connection.execute(
         "INSERT INTO nodb_dmlreturn VALUES (:i, :n) RETURNING id, name INTO :rid, :rname",
         {
           i: size,
@@ -342,34 +251,21 @@ describe('6. dmlReturning.js', function() {
           rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT},
           rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 4000}
         },
-        { autoCommit: true },
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          result.outBinds.rid.should.eql([size]);
-          result.outBinds.rname[0].length.should.be.exactly(size);
-          done();
-        }
-      );
+        { autoCommit: true });
+      assert.deepEqual(result.outBinds.rid, [size]);
+      assert.strictEqual(result.outBinds.rname[0].length, size);
     });
 
-    it('6.1.11 Negative test - wrong SQL got correct error thrown', function(done) {
-      connection.should.be.ok();
-      var wrongSQL = "UPDATE nodb_dmlreturn SET doesnotexist = 'X' WHERE id = :id RETURNING name INTO :rn";
+    it('6.1.11 Negative test - wrong SQL got correct error thrown', async function() {
+      const wrongSQL = "UPDATE nodb_dmlreturn SET doesnotexist = 'X' WHERE id = :id RETURNING name INTO :rn";
+      const binds = {
+        id: 2001,
+        rn: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+      };
 
-      connection.execute(
-        wrongSQL,
-        {
-          id: 2001,
-          rn: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
-        },
-        function(err, result) {
-          should.exist(err);
-          // console.log(err.message);
-          (err.message).should.startWith('ORA-00904: ');
-          should.not.exist(result);
-          done();
-        }
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(wrongSQL, binds),
+        /ORA-00904:/
       );
     });
 
@@ -377,185 +273,144 @@ describe('6. dmlReturning.js', function() {
 
   describe('6.2 DATE and TIMESTAMP data', function() {
 
-    var connection = null;
-    var tableName = "nodb_date";
-    var dates = assist.DATE_STRINGS;
+    let connection;
+    const tableName = "nodb_date";
+    const dates = assist.DATE_STRINGS;
 
-    beforeEach('get connection, prepare table', function(done) {
-      async.series([
-        function(callback) {
-          oracledb.getConnection(
-            {
-              user:          dbConfig.user,
-              password:      dbConfig.password,
-              connectString: dbConfig.connectString
-            },
-            function(err, conn) {
-              should.not.exist(err);
-              connection = conn;
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          assist.setUp4sql(connection, tableName, dates, callback);
-        }
-      ], done);
+    beforeEach('get connection, prepare table', async function() {
+      connection = await oracledb.getConnection(dbConfig);
+      await new Promise((resolve) => {
+        assist.setUp4sql(connection, tableName, dates, resolve);
+      });
     }); // before
 
-    afterEach('drop table, release connection', function(done) {
-      async.series([
-        function(callback) {
-          connection.execute(
-            "DROP table " + tableName + " PURGE",
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          connection.release(function(err) {
-            should.not.exist(err);
-            callback();
-          });
-        }
-      ], done);
+    afterEach('drop table, release connection', async function() {
+      await connection.execute("DROP table " + tableName + " PURGE");
+      await connection.close();
     });
 
-    function runSQL(sql, bindVar, isSingleMatch, callback) {
-      var beAffectedRows = (isSingleMatch ? 1 : dates.length);
-
-      connection.execute(
-        sql,
-        bindVar,
-        function(err, result) {
-          should.not.exist(err);
-          result.rowsAffected.should.be.exactly(beAffectedRows);
-          // console.log(result);
-          callback();
-        }
-      );
+    async function runSQL(sql, bindVar, isSingleMatch) {
+      const beAffectedRows = (isSingleMatch ? 1 : dates.length);
+      const result = await connection.execute(sql, bindVar);
+      assert.strictEqual(result.rowsAffected, beAffectedRows);
     }
 
-    it('6.2.1 INSERT statement, single row matched, Object binding, no bind in data', function(done) {
-      var sql = "INSERT INTO " + tableName + " VALUES (50, TO_DATE('2015-01-11','YYYY-DD-MM')) RETURNING num, content INTO :rnum, :rcontent";
-      var bindVar =
+    it('6.2.1 INSERT statement, single row matched, Object binding, no bind in data', async function() {
+      const sql = "INSERT INTO " + tableName + " VALUES (50, TO_DATE('2015-01-11','YYYY-DD-MM')) RETURNING num, content INTO :rnum, :rcontent";
+      const bindVar =
         {
           rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
         };
-      var isSingleMatch = true;
-
-      runSQL(sql, bindVar, isSingleMatch, done);
-
+      const isSingleMatch = true;
+      await runSQL(sql, bindVar, isSingleMatch);
     });
 
-    it('6.2.2 INSERT statement with JavaScript date bind in ', function(done) {
-      var sql = "INSERT INTO " + tableName + " VALUES (:no, :c) RETURNING num, content INTO :rnum, :rcontent";
-      var ndate = new Date(2003, 9, 23, 11, 50, 30, 12);
+    it('6.2.2 INSERT statement with JavaScript date bind in ', async function() {
+      const sql = "INSERT INTO " + tableName + " VALUES (:no, :c) RETURNING num, content INTO :rnum, :rcontent";
+      const ndate = new Date(2003, 9, 23, 11, 50, 30, 12);
 
-      var bindVar =
+      const bindVar =
         {
           no: 51,
           c: ndate,
           rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
         };
-      var isSingleMatch = true;
+      const isSingleMatch = true;
 
-      runSQL(sql, bindVar, isSingleMatch, done);
+      await runSQL(sql, bindVar, isSingleMatch);
 
     });
 
-    it('6.2.3 INSERT statement with Array binding', function(done) {
-      var sql = "INSERT INTO " + tableName + " VALUES (50, TO_TIMESTAMP_TZ('1999-12-01 11:00:00.123456 -8:00', 'YYYY-MM-DD HH:MI:SS.FF TZH:TZM')) RETURNING num, content INTO :rnum, :rcontent";
-      var bindVar =
+    it('6.2.3 INSERT statement with Array binding', async function() {
+      const sql = "INSERT INTO " + tableName + " VALUES (50, TO_TIMESTAMP_TZ('1999-12-01 11:00:00.123456 -8:00', 'YYYY-MM-DD HH:MI:SS.FF TZH:TZM')) RETURNING num, content INTO :rnum, :rcontent";
+      const bindVar =
         [
           { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           { type: oracledb.DATE, dir: oracledb.BIND_OUT }
         ];
-      var isSingleMatch = true;
+      const isSingleMatch = true;
 
-      runSQL(sql, bindVar, isSingleMatch, done);
+      await runSQL(sql, bindVar, isSingleMatch);
 
     });
 
-    it('6.2.4 UPDATE statement with single row matched', function(done) {
-      var sql = "UPDATE " + tableName + " SET content = :c WHERE num = :n RETURNING num, content INTO :rnum, :rcontent";
-      var bindVar =
+    it('6.2.4 UPDATE statement with single row matched', async function() {
+      const sql = "UPDATE " + tableName + " SET content = :c WHERE num = :n RETURNING num, content INTO :rnum, :rcontent";
+      const bindVar =
         {
           c: { type: oracledb.DATE, dir: oracledb.BIND_IN, val: new Date(2003, 9, 23, 11, 50, 30, 123) },
           n: 0,
           rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
         };
-      var isSingleMatch = true;
+      const isSingleMatch = true;
 
-      runSQL(sql, bindVar, isSingleMatch, done);
+      await runSQL(sql, bindVar, isSingleMatch);
 
     });
 
-    it('6.2.5 UPDATE statements with multiple rows matched, ARRAY binding format', function(done) {
-      var sql = "UPDATE " + tableName + " SET content = :c WHERE num < :n RETURNING num, content INTO :rnum, :rcontent";
-      var bindVar =
+    it('6.2.5 UPDATE statements with multiple rows matched, ARRAY binding format', async function() {
+      const sql = "UPDATE " + tableName + " SET content = :c WHERE num < :n RETURNING num, content INTO :rnum, :rcontent";
+      const bindVar =
         [
           { type: oracledb.DATE, dir: oracledb.BIND_IN, val: new Date(2003, 9, 23, 11, 50, 30, 123) },
           100,
           { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           { type: oracledb.DATE, dir: oracledb.BIND_OUT }
         ];
-      var isSingleMatch = false;
+      const isSingleMatch = false;
 
-      runSQL(sql, bindVar, isSingleMatch, done);
+      await runSQL(sql, bindVar, isSingleMatch);
 
     });
 
-    it('6.2.6 UPDATE statements, multiple rows, TIMESTAMP data', function(done) {
-      var sql = "UPDATE " + tableName + " SET content = TO_TIMESTAMP_TZ('1999-12-01 11:00:00.123456 -8:00', 'YYYY-MM-DD HH:MI:SS.FF TZH:TZM') " +
+    it('6.2.6 UPDATE statements, multiple rows, TIMESTAMP data', async function() {
+      const sql = "UPDATE " + tableName + " SET content = TO_TIMESTAMP_TZ('1999-12-01 11:00:00.123456 -8:00', 'YYYY-MM-DD HH:MI:SS.FF TZH:TZM') " +
         " WHERE num < :n RETURNING num, content INTO :rnum, :rcontent";
-      var bindVar =
+      const bindVar =
         {
           n: 100,
           rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
         };
-      var isSingleMatch = false;
+      const isSingleMatch = false;
 
-      runSQL(sql, bindVar, isSingleMatch, done);
+      await runSQL(sql, bindVar, isSingleMatch);
 
     });
 
-    it('6.2.7 DELETE statement, single row matched, Object binding format', function(done) {
-      var sql = "DELETE FROM " + tableName + " WHERE num = :n RETURNING num, content INTO :rnum, :rcontent";
-      var bindVar =
+    it('6.2.7 DELETE statement, single row matched, Object binding format', async function() {
+      const sql = "DELETE FROM " + tableName + " WHERE num = :n RETURNING num, content INTO :rnum, :rcontent";
+      const bindVar =
         {
           n: 0,
           rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
         };
-      var isSingleMatch = true;
+      const isSingleMatch = true;
 
-      runSQL(sql, bindVar, isSingleMatch, done);
+      await runSQL(sql, bindVar, isSingleMatch);
 
     });
 
-    it('6.2.8 DELETE statement, multiple rows matched, Array binding format', function(done) {
-      var sql = "DELETE FROM " + tableName + " WHERE num >= :n RETURNING num, content INTO :rnum, :rcontent";
-      var bindVar =
+    it('6.2.8 DELETE statement, multiple rows matched, Array binding format', async function() {
+      const sql = "DELETE FROM " + tableName + " WHERE num >= :n RETURNING num, content INTO :rnum, :rcontent";
+      const bindVar =
         [
           0,
           { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           { type: oracledb.DATE, dir: oracledb.BIND_OUT }
         ];
-      var isSingleMatch = false;
+      const isSingleMatch = false;
 
-      runSQL(sql, bindVar, isSingleMatch, done);
+      await runSQL(sql, bindVar, isSingleMatch);
     });
 
-    it('6.2.9 Negative test - bind value and type mismatch', function(done) {
-      var wrongSQL = "UPDATE " + tableName + " SET content = :c WHERE num = :n RETURNING num, content INTO :rnum, :rcontent";
-      var bindVar =
+    it('6.2.9 Negative test - bind value and type mismatch', async function() {
+      const wrongSQL = "UPDATE " + tableName + " SET content = :c WHERE num = :n RETURNING num, content INTO :rnum, :rcontent";
+      const bindVar =
         {
           n: 0,
           c: { type: oracledb.STRING, dir: oracledb.BIND_IN, val: new Date(2003, 9, 23, 11, 50, 30, 123) },
@@ -563,20 +418,11 @@ describe('6. dmlReturning.js', function() {
           rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
         };
 
-      connection.execute(
-        wrongSQL,
-        bindVar,
-        function(err, result) {
-          should.exist(err);
-          // console.log(err.message);
-          // NJS-011: encountered bind value and type mismatch
-          (err.message).should.startWith('NJS-011:');
-
-          should.not.exist(result);
-          done();
-        }
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(wrongSQL, bindVar),
+        /NJS-011:/
       );
-
+      // NJS-011: encountered bind value and type mismatch
     });
 
   }); // 6.2

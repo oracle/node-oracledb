@@ -31,270 +31,120 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('51. poolClose.js', function() {
 
-  it('51.1 can not get connections from the terminated pool', function(done) {
-    oracledb.createPool(
-      dbConfig,
-      function(err, pool) {
-        should.not.exist(err);
-        pool.should.be.ok();
-
-        pool.terminate(function(err) {
-          should.not.exist(err);
-
-          pool.getConnection(function(err) {
-            should.exist(err);
-            should.strictEqual(err.message, "NJS-065: connection pool was closed");
-          });
-
-          done();
-        }); // terminate()
-      }
-    ); // createPool()
+  it('51.1 can not get connections from the terminated pool', async function() {
+    const pool = await oracledb.createPool(dbConfig);
+    await pool.close();
+    await testsUtil.assertThrowsAsync(
+      async () => await pool.getConnection(),
+      /NJS-065:/
+    );
   }); // 51.1
 
-  it('51.2 can not terminate the same pool multiple times', function(done) {
-    oracledb.createPool(
-      dbConfig,
-      function(err, pool) {
-        should.not.exist(err);
-        pool.should.be.ok();
-
-        pool.terminate(function(err) {
-          should.not.exist(err);
-
-          pool.terminate(function(err) {
-            should.exist(err);
-            should.strictEqual(err.message, "NJS-065: connection pool was closed");
-          });
-
-          done();
-        }); // terminate()
-      }
-    ); // createPool()
+  it('51.2 can not terminate the same pool multiple times', async function() {
+    const pool = await oracledb.createPool(dbConfig);
+    await pool.terminate();
+    await testsUtil.assertThrowsAsync(
+      async () => await pool.terminate(),
+      /NJS-065:/
+    );
   }); // 51.2
 
-  it('51.3 can not close the same pool multiple times', function(done) {
-    oracledb.createPool(
-      dbConfig,
-      function(err, pool) {
-        should.not.exist(err);
-        pool.should.be.ok();
-
-        pool.close(function(err) {
-          should.not.exist(err);
-
-          pool.close(function(err) {
-            should.exist(err);
-            should.strictEqual(err.message, "NJS-065: connection pool was closed");
-          });
-
-          done();
-        }); // terminate()
-      }
-    ); // createPool()
+  it('51.3 can not close the same pool multiple times', async function() {
+    const pool = await oracledb.createPool(dbConfig);
+    await pool.close();
+    await testsUtil.assertThrowsAsync(
+      async () => await pool.close(),
+      /NJS-065:/
+    );
   }); // 51.3
 
-  it('51.4 pool is still available after the failing close', function(done) {
-    oracledb.createPool(
-      dbConfig,
-      function(err, pool) {
-        should.not.exist(err);
-        pool.should.be.ok();
-
-        pool.getConnection(function(err, connection) {
-          should.not.exist(err);
-
-          pool.terminate(function(err) {
-            should.exist(err);
-            (err.message).should.startWith('ORA-24422: ');
-            // ORA-24422: error occurred while trying to destroy the Session Pool
-
-            connection.release(function(err) {
-              should.not.exist(err);
-
-              pool.terminate(function(err) {
-                should.not.exist(err);
-                done();
-              }); // terminate #2
-            }); // release()
-          }); // terminate() #1
-        }); // getConnection()
-      }
-    ); // createPool()
+  it('51.4 pool is still available after the failing close', async function() {
+    const pool = await oracledb.createPool(dbConfig);
+    const conn = await pool.getConnection();
+    await testsUtil.assertThrowsAsync(
+      async () => await pool.close(),
+      /ORA-24422:/
+    );
+    await conn.close();
+    await pool.close();
   }); // 51.4
 
-  it('51.5 can not close the same connection multiple times', function(done) {
-    var pool = null;
-    var conn = null;
-
-    async.series([
-      function(cb) {
-        oracledb.createPool(
-          dbConfig,
-          function(err, pooling) {
-            should.not.exist(err);
-            pool = pooling;
-            pool.should.be.ok();
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        pool.getConnection(function(err, connection) {
-          should.not.exist(err);
-          conn = connection;
-          conn.should.be.ok();
-          cb();
-        });
-      },
-      function close1(cb) {
-        conn.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function close2(cb) {
-        conn.close(function(err) {
-          should.exist(err);
-          should.strictEqual(err.message, 'NJS-003: invalid connection');
-          cb();
-        });
-      },
-      function(cb) {
-        pool.terminate(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+  it('51.5 can not close the same connection multiple times', async function() {
+    const pool = await oracledb.createPool(dbConfig);
+    const conn = await pool.getConnection();
+    await conn.close();
+    await testsUtil.assertThrowsAsync(
+      async () => await conn.close(),
+      /NJS-003:/
+    );
+    await pool.close();
   }); // 51.5
 
-  it('51.6 can not get connection in promise version from the terminated pool', function(done) {
-    oracledb.createPool(
-      dbConfig,
-      function(err, pool) {
-        should.not.exist(err);
-        pool.should.be.ok();
-
-        pool.terminate(function(err) {
-          should.not.exist(err);
-
-          var promise = pool.getConnection();
-
-          promise
-            .then(function(conn) {
-              should.not.exist(conn);
-            })
-            .catch(function(err) {
-              should.exist(err);
-              should.strictEqual(err.message, "NJS-065: connection pool was closed");
-            })
-            .then(function() {
-              done();
-            });
-        }); // terminate()
-      }
-    ); // createPool()
+  it('51.6 can not get connection from a terminated pool', async function() {
+    const pool = await oracledb.createPool(dbConfig);
+    await pool.close();
+    await testsUtil.assertThrowsAsync(
+      async () => await pool.getConnection(),
+      /NJS-065:/
+    );
   }); // 51.6
 
-  it('51.7 can not set the attributes after pool created', function(done) {
-    var pMin = 2;
-    var pMax = 10;
-
-    oracledb.createPool(
-      {
-        user            : dbConfig.user,
-        password        : dbConfig.password,
-        connectString   : dbConfig.connectString,
-        poolMin         : pMin,
-        poolMax         : pMax
-      },
-      function(err, pool) {
-        should.not.exist(err);
-        pool.should.be.ok();
-
-        // setter
-        should.throws(
-          function() {
-            pool.poolMin = 20;
-          },
-          "TypeError: Cannot assign to read only property 'poolMin' of object '#<Pool>'"
-        );
-
-        pool.terminate(function(err) {
-          should.not.exist(err);
-
-          // setter
-          should.throws(
-            function() {
-              pool.poolMin = 20;
-            },
-            "TypeError: Cannot assign to read only property 'poolMin' of object '#<Pool>'"
-          );
-
-          pool.terminate(function(err) {
-            should.exist(err);
-            should.strictEqual(err.message, "NJS-065: connection pool was closed");
-          });
-
-          done();
-        }); // terminate()
-      }
-    ); // createPool()
+  it('51.7 can not set the attributes after pool created', async function() {
+    const config = {
+      user            : dbConfig.user,
+      password        : dbConfig.password,
+      connectString   : dbConfig.connectString,
+      poolMin         : 2,
+      poolMax         : 10
+    };
+    const pool = await oracledb.createPool(config);
+    assert.throws(
+      () => pool.poolMin = 20,
+      /TypeError: Cannot set/
+    );
+    await pool.close();
+    assert.throws(
+      () => pool.poolMin = 20,
+      /TypeError: Cannot set/
+    );
+    await testsUtil.assertThrowsAsync(
+      async () => await pool.close(),
+      /NJS-065:/
+    );
   }); // 51.7
 
-  it('51.8 can access the attributes of closed pool without error', function(done) {
-    var pMin = 2;
-    var pMax = 10;
-    var pAlias = "foobar";
-    var pIncr = 2;
+  it('51.8 can access the attributes of closed pool without error', async function() {
+    const config = {
+      user            : dbConfig.user,
+      password        : dbConfig.password,
+      connectString   : dbConfig.connectString,
+      poolMin         : 2,
+      poolMax         : 10,
+      poolAlias       : "foobar",
+      poolIncrement   : 2
+    };
+    const pool = await oracledb.createPool(config);
+    await pool.close();
 
-    oracledb.createPool(
-      {
-        user            : dbConfig.user,
-        password        : dbConfig.password,
-        connectString   : dbConfig.connectString,
-        poolMin         : pMin,
-        poolMax         : pMax,
-        poolAlias       : pAlias,
-        poolIncrement   : pIncr
-      },
-      function(err, pool) {
-        should.not.exist(err);
-        pool.should.be.ok();
+    // configured values
+    assert.strictEqual(pool.poolMin, config.poolMin);
+    assert.strictEqual(pool.poolMax, config.poolMax);
+    assert.strictEqual(pool.poolAlias, config.poolAlias);
+    assert.strictEqual(pool.poolIncrement, config.poolIncrement);
 
-        pool.terminate(function(err) {
-          should.not.exist(err);
-
-          // getter
-          should.strictEqual(pool.poolMin, pMin);
-          should.strictEqual(pool.poolMax, pMax);
-
-          // values vary with different databases
-          // (pool.connectionsInUse).should.be.a.Number();
-          // (pool.connectionsOpen).should.be.a.Number();
-
-          should.strictEqual(pool.poolAlias, pAlias);
-          should.strictEqual(pool.poolIncrement, pIncr);
-
-          // Default values
-          should.strictEqual(pool.poolPingInterval, 60);
-          should.strictEqual(pool.poolTimeout, 60);
-          should.strictEqual(pool.queueMax, 500);
-          should.strictEqual(pool.queueTimeout, 60000);
-          should.strictEqual(pool.stmtCacheSize, 30);
-
-          done();
-        }); // terminate()
-      }
-    ); // createPool()
+    // default values
+    assert.strictEqual(pool.poolPingInterval, oracledb.poolPingInterval);
+    assert.strictEqual(pool.poolTimeout, oracledb.poolTimeout);
+    assert.strictEqual(pool.queueMax, 500);
+    assert.strictEqual(pool.queueTimeout, 60000);
+    assert.strictEqual(pool.stmtCacheSize, oracledb.stmtCacheSize);
   }); // 51.8
 
 });

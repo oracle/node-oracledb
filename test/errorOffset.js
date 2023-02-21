@@ -32,54 +32,48 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 const dbconfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('240. errorOffset.js', function() {
 
   let conn;
   before(async () => {
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-    } catch (error) {
-      should.not.exist(error);
-    }
+    conn = await oracledb.getConnection(dbconfig);
   });
 
   after(async () => {
-    try {
-      await conn.close();
-    } catch (error) {
-      should.not.exist(error);
-    }
+    await conn.close();
   });
 
   it('240.1 checks the offset value of the error', async () => {
 
-    try {
-      await conn.execute("begin t_Missing := 5; end;");
-    } catch (error) {
-      should.exist(error);
-      should.strictEqual(error.offset, 6);
-      should.strictEqual(error.errorNum, 6550);
-    }
+    await testsUtil.assertThrowsAsync(
+      async () => await conn.execute("begin t_Missing := 5; end;"),
+      (err) => {
+        assert.strictEqual(err.offset, 6);
+        assert.strictEqual(err.errorNum, 6550);
+        return true;
+      }
+    );
 
   }); // 240.1
 
   it('240.2 database error', async () => {
-
     const plsql = `
       begin
           execute immediate ('drop table nodb_table_nonexistent');
       end;
     `;
-    try {
-      await conn.execute(plsql);
-    } catch (error) {
-      should.exist(error);
-      should.strictEqual(error.offset, 0);
-      should.strictEqual(error.errorNum, 942);
-    }
+    await testsUtil.assertThrowsAsync(
+      async () => await conn.execute(plsql),
+      (err) => {
+        assert.strictEqual(err.offset, 0);
+        assert.strictEqual(err.errorNum, 942);
+        return true;
+      }
+    );
 
   }); // 240.2
 
@@ -92,13 +86,14 @@ describe('240. errorOffset.js', function() {
           END;
       END;
     `;
-    try {
-      await conn.execute(plsql);
-    } catch (error) {
-      should.exist(error);
-      should.strictEqual(error.offset, 0);
-      should.strictEqual(error.errorNum, 1476);
-    }
+    await testsUtil.assertThrowsAsync(
+      async () => await conn.execute(plsql),
+      (err) => {
+        assert.strictEqual(err.offset, 0);
+        assert.strictEqual(err.errorNum, 1476);
+        return true;
+      }
+    );
   });// 240.3
 
   it('240.4 PL/SQL syntax error', async () => {
@@ -106,12 +101,14 @@ describe('240. errorOffset.js', function() {
       BEGIN
           v_missing_semicolon := 46;
       END;`;
-    try {
-      await conn.execute(plsql);
-    } catch (error) {
-      should.exist(error);
-      should.strictEqual(error.offset, 46);
-      should.strictEqual(error.errorNum, 6550);
-    }
+    await testsUtil.assertThrowsAsync(
+      async () => await conn.execute(plsql),
+      (err) => {
+        assert.strictEqual(err.offset, 46);
+        assert.strictEqual(err.errorNum, 6550);
+        return true;
+      }
+    );
   }); // 240.4
+
 });

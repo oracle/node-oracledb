@@ -32,22 +32,21 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var fs       = require('fs');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const fs       = require('fs');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
 
 describe('62. lobProperties1.js', function() {
 
-  var tableName = "nodb_tab_mylobprops";
-  var connection = null;
-  var sqlSelect = "SELECT * FROM " + tableName + " WHERE id = :i";
-  var defaultChunkSize = null;
+  const tableName = "nodb_tab_mylobprops";
+  let connection;
+  const sqlSelect = "SELECT * FROM " + tableName + " WHERE id = :i";
+  let defaultChunkSize = null;
 
-  before('prepare table and LOB data', function(done) {
+  before('prepare table and LOB data', async function() {
 
-    var sqlCreateTab =
+    const sqlCreateTab =
       " BEGIN "
       + "   DECLARE "
       + "     e_table_missing EXCEPTION; "
@@ -65,446 +64,199 @@ describe('62. lobProperties1.js', function() {
       + "   '); "
       + " END; ";
 
-    var sqlInsert = "INSERT INTO " + tableName + " VALUES (:i, EMPTY_CLOB(), EMPTY_BLOB()) "
+    const sqlInsert = "INSERT INTO " + tableName + " VALUES (:i, EMPTY_CLOB(), EMPTY_BLOB()) "
                      + " RETURNING c, b INTO :clob, :blob";
 
-    var bindVar =
+    const bindVar =
       {
         i: 1,
         clob: { type: oracledb.CLOB, dir: oracledb.BIND_OUT },
         blob: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
       };
-    var clobFileName = './test/clobexample.txt';
-    var blobFileName = './test/fuzzydinosaur.jpg';
+    const clobFileName = './test/clobexample.txt';
+    const blobFileName = './test/fuzzydinosaur.jpg';
 
-    async.series([
-      function(cb) {
-        oracledb.getConnection(
-          {
-            user: dbConfig.user,
-            password: dbConfig.password,
-            connectString: dbConfig.connectString
-          },
-          function(err, conn) {
-            should.not.exist(err);
-            connection = conn;
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.execute(
-          sqlCreateTab,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function insertLobData(cb) {
-        connection.execute(
-          sqlInsert,
-          bindVar,
-          function(err, result) {
-            should.not.exist(err);
-
-            var clob = result.outBinds.clob[0];
-            var blob = result.outBinds.blob[0];
-            var clobStream = fs.createReadStream(clobFileName);
-            var blobStream = fs.createReadStream(blobFileName);
-
-            clobStream.on('error', function(err) {
-              should.not.exist(err);
-            });
-
-            blobStream.on('error', function(err) {
-              should.not.exist(err);
-            });
-
-            clob.on('error', function(err) {
-              should.not.exist(err);
-            });
-
-            blob.on('error', function(err) {
-              should.not.exist(err);
-            });
-
-            async.parallel([
-              function(callback) {
-                clob.on('finish', function() {
-                  callback();
-                });
-              },
-              function(callback) {
-                blob.on('finish', function() {
-                  callback();
-                });
-              }
-            ], function() {
-              connection.commit(function(err) {
-                should.not.exist(err);
-                cb();
-              });
-            });
-
-            clobStream.pipe(clob);
-            blobStream.pipe(blob);
-          }
-        );
-      },
-      function saveDefaultChunkSize(cb) {
-        connection.execute(
-          sqlSelect,
-          { i: 1 },
-          function(err, result) {
-            should.not.exist(err);
-            var clob = result.rows[0][1];
-            var blob = result.rows[0][2];
-
-            defaultChunkSize = clob.chunkSize;
-            blob.close(function(err) {
-              if (err) return cb(err);
-              clob.close(cb);
-            });
-          }
-        );
-      }
-    ], done);
+    connection = await oracledb.getConnection(dbConfig);
+    await connection.execute(sqlCreateTab);
+    let result = await connection.execute(sqlInsert, bindVar);
+    let clob = result.outBinds.clob[0];
+    let blob = result.outBinds.blob[0];
+    const clobStream = fs.createReadStream(clobFileName);
+    const blobStream = fs.createReadStream(blobFileName);
+    clobStream.pipe(clob);
+    blobStream.pipe(blob);
+    await new Promise((resolve, reject) => {
+      clobStream.on('error', reject);
+      blobStream.on('error', reject);
+      clob.on('error', reject);
+      blob.on('error', reject);
+      const waitForClob = async function() {
+        await new Promise((resolve) => {
+          clob.on('finish', resolve);
+        });
+      };
+      const waitForBlob = async function() {
+        await new Promise((resolve) => {
+          blob.on('finish', resolve);
+        });
+      };
+      Promise.all([waitForClob(), waitForBlob()]).then(resolve);
+    });
+    result = await connection.execute(sqlSelect, { i: 1 });
+    clob = result.rows[0][1];
+    blob = result.rows[0][2];
+    defaultChunkSize = clob.chunkSize;
+    await blob.close();
+    await clob.close();
   }); // before
 
-  after(function(done) {
+  after(async function() {
+    await connection.execute("DROP TABLE " + tableName + " PURGE");
+    await connection.close();
+  });
 
-    async.series([
-      function(cb) {
-        connection.execute(
-          "DROP TABLE " + tableName + " PURGE",
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.release(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
-  }); // after
-
-  it('62.1 chunkSize (read-only)', function(done) {
-    connection.execute(
-      sqlSelect,
-      { i: 1 },
-      function(err, result) {
-        should.not.exist(err);
-        var clob = result.rows[0][1],
-          blob = result.rows[0][2];
-
-        var t1 = clob.chunkSize,
-          t2 = blob.chunkSize;
-
-        t1.should.be.a.Number();
-        t2.should.be.a.Number();
-        t1.should.eql(t2);
-        defaultChunkSize = clob.chunkSize;
-
-        try {
-          clob.chunkSize = t1 + 1;
-        } catch (err) {
-          should.exist(err);
-          // console.log(err.message);
-          // Cannot assign to read only property 'chunkSize' of #<Lob>
-        }
-
-        try {
-          blob.chunkSize = t2 + 1;
-        } catch (err) {
-          should.exist(err);
-          // console.log(err.message);
-          // Cannot assign to read only property 'chunkSize' of #<Lob>
-        }
-        clob.close(function(err) {
-          if (err) return done(err);
-          blob.close(done);
-        });
-      }
+  it('62.1 chunkSize (read-only)', async function() {
+    const result = await connection.execute(sqlSelect, { i: 1 });
+    const clob = result.rows[0][1];
+    const blob = result.rows[0][2];
+    const t1 = clob.chunkSize;
+    const t2 = blob.chunkSize;
+    assert.strictEqual(typeof t1, 'number');
+    assert.strictEqual(typeof t2, 'number');
+    assert.strictEqual(t1, t2);
+    defaultChunkSize = clob.chunkSize;
+    assert.throws(
+      () => clob.chunkSize = t1 + 1,
+      /TypeError: Cannot set property/
     );
+    assert.throws(
+      () => blob.chunkSize = t2 + 1,
+      /TypeError: Cannot set property/
+    );
+    await clob.close();
+    await blob.close();
   }); // 62.1
 
-  it('62.2 length (read-only)', function(done) {
-    connection.execute(
-      sqlSelect,
-      { i: 1 },
-      function(err, result) {
-        should.not.exist(err);
-        var clob = result.rows[0][1],
-          blob = result.rows[0][2];
-
-        var t1 = clob.length,
-          t2 = blob.length;
-
-        t1.should.be.a.Number();
-        t2.should.be.a.Number();
-        t1.should.not.eql(t2);
-
-        try {
-          clob.length = t1 + 1;
-        } catch (err) {
-          should.exist(err);
-          //console.log(err.message);
-          // Cannot set property length of #<Lob> which has only a getter
-        }
-
-        try {
-          blob.length = t2 + 1;
-        } catch (err) {
-          should.exist(err);
-          //console.log(err.message);
-          // Cannot set property length of #<Lob> which has only a getter
-        }
-        clob.close(function(err) {
-          if (err) return done(err);
-          blob.close(done);
-        });
-      }
+  it('62.2 length (read-only)', async function() {
+    const result = await connection.execute(sqlSelect, { i: 1 });
+    const clob = result.rows[0][1];
+    const blob = result.rows[0][2];
+    const t1 = clob.length;
+    const t2 = blob.length;
+    assert.throws(
+      () => clob.length = t1 + 1,
+      /TypeError: Cannot set property/
     );
+    assert.throws(
+      () => blob.length = t2 + 1,
+      /TypeError: Cannot set property/
+    );
+    await clob.close();
+    await blob.close();
   }); // 62.2
 
-  it('62.3 pieceSize -default value is chunkSize', function(done) {
-    connection.execute(
-      sqlSelect,
-      { i: 1 },
-      function(err, result) {
-        should.not.exist(err);
-        var clob = result.rows[0][1],
-          blob = result.rows[0][2];
-
-        var t1 = clob.pieceSize,
-          t2 = blob.pieceSize;
-        t1.should.eql(defaultChunkSize);
-        t2.should.eql(defaultChunkSize);
-        clob.close(function(err) {
-          if (err) return done(err);
-          blob.close(done);
-        });
-      }
-    );
+  it('62.3 pieceSize -default value is chunkSize', async function() {
+    const result = await connection.execute(sqlSelect, { i: 1 });
+    const clob = result.rows[0][1];
+    const blob = result.rows[0][2];
+    assert.strictEqual(clob.pieceSize, defaultChunkSize);
+    assert.strictEqual(blob.pieceSize, defaultChunkSize);
+    await clob.close();
+    await blob.close();
   }); // 62.3
 
-  it('62.4 pieceSize - can be increased', function(done) {
-    connection.execute(
-      sqlSelect,
-      { i: 1 },
-      function(err, result) {
-        should.not.exist(err);
-        var clob = result.rows[0][1],
-          blob = result.rows[0][2];
-
-        var newValue = clob.pieceSize * 5;
-
-        clob.pieceSize = clob.pieceSize * 5;
-        blob.pieceSize = blob.pieceSize * 5;
-
-        (clob.pieceSize).should.eql(newValue);
-        (blob.pieceSize).should.eql(newValue);
-
-        // Remember to restore the value
-        clob.pieceSize = defaultChunkSize;
-        blob.pieceSize = defaultChunkSize;
-
-        clob.close(function(err) {
-          if (err) return done(err);
-          blob.close(done);
-        });
-      }
-    );
+  it('62.4 pieceSize - can be increased', async function() {
+    const result = await connection.execute(sqlSelect, { i: 1 });
+    const clob = result.rows[0][1];
+    const blob = result.rows[0][2];
+    const newValue = clob.pieceSize * 5;
+    clob.pieceSize = clob.pieceSize * 5;
+    blob.pieceSize = blob.pieceSize * 5;
+    assert.strictEqual(clob.pieceSize, newValue);
+    assert.strictEqual(blob.pieceSize, newValue);
+    await clob.close();
+    await blob.close();
   }); // 62.4
 
-  it('62.5 pieceSize - can be decreased', function(done) {
-    if (defaultChunkSize <= 500) {
-      console.log('As default chunkSize is too small, this case is not applicable');
-      done();
-    } else {
-      connection.execute(
-        sqlSelect,
-        { i: 1 },
-        function(err, result) {
-          should.not.exist(err);
-          var clob = result.rows[0][1],
-            blob = result.rows[0][2];
-
-          var newValue = clob.pieceSize - 500;
-
-          clob.pieceSize -= 500;
-          blob.pieceSize -= 500;
-          (clob.pieceSize).should.eql(newValue);
-          (blob.pieceSize).should.eql(newValue);
-
-          // Restore
-          clob.pieceSize = defaultChunkSize;
-          blob.pieceSize = defaultChunkSize;
-
-          clob.close(function(err) {
-            if (err) return done(err);
-            blob.close(done);
-          });
-        }
-      );
-    }
+  it('62.5 pieceSize - can be decreased', async function() {
+    if (defaultChunkSize <= 500)
+      return this.skip();
+    const result = await connection.execute(sqlSelect, { i: 1 });
+    const clob = result.rows[0][1];
+    const blob = result.rows[0][2];
+    const newValue = clob.pieceSize - 500;
+    clob.pieceSize -= 500;
+    blob.pieceSize -= 500;
+    assert.strictEqual(clob.pieceSize, newValue);
+    assert.strictEqual(blob.pieceSize, newValue);
+    await clob.close();
+    await blob.close();
   }); // 62.5
 
-  it('62.6 pieceSize - can be zero', function(done) {
-    connection.execute(
-      sqlSelect,
-      { i: 1 },
-      function(err, result) {
-        should.not.exist(err);
-        var clob = result.rows[0][1],
-          blob = result.rows[0][2];
-
-        clob.pieceSize = 0;
-        blob.pieceSize = 0;
-
-        (clob.pieceSize).should.eql(0);
-        (blob.pieceSize).should.eql(0);
-
-        // Remember to restore the value
-        clob.pieceSize = defaultChunkSize;
-        blob.pieceSize = defaultChunkSize;
-
-        clob.close(function(err) {
-          if (err) return done(err);
-          blob.close(done);
-        });
-      }
-    );
+  it('62.6 pieceSize - can be zero', async function() {
+    const result = await connection.execute(sqlSelect, { i: 1 });
+    const clob = result.rows[0][1];
+    const blob = result.rows[0][2];
+    clob.pieceSize = 0;
+    blob.pieceSize = 0;
+    assert.strictEqual(clob.pieceSize, 0);
+    assert.strictEqual(blob.pieceSize, 0);
+    await clob.close();
+    await blob.close();
   }); // 62.6
 
-  it('62.7 pieceSize - cannot be less than zero', function(done) {
-    connection.execute(
-      sqlSelect,
-      { i: 1 },
-      function(err, result) {
-        should.not.exist(err);
-        var clob = result.rows[0][1],
-          blob = result.rows[0][2];
-
-        try {
-          clob.pieceSize = -100;
-        } catch (err) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-004:');
-          // NJS-004: invalid value for property pieceSize
-        }
-
-        // Remember to restore the value
-        clob.pieceSize = defaultChunkSize;
-        blob.pieceSize = defaultChunkSize;
-
-        clob.close(function(err) {
-          if (err) return done(err);
-          blob.close(done);
-        });
-      }
+  it('62.7 pieceSize - cannot be less than zero', async function() {
+    const result = await connection.execute(sqlSelect, { i: 1 });
+    const clob = result.rows[0][1];
+    const blob = result.rows[0][2];
+    assert.throws(
+      () => clob.pieceSize = -100,
+      /NJS-004:/
     );
+    await clob.close();
+    await blob.close();
   }); // 62.7
 
-  it('62.8 pieceSize - cannot be null', function(done) {
-    connection.execute(
-      sqlSelect,
-      { i: 1 },
-      function(err, result) {
-        should.not.exist(err);
-        var clob = result.rows[0][1],
-          blob = result.rows[0][2];
-
-        try {
-          clob.pieceSize = null;
-        } catch (err) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-004:');
-          // NJS-004: invalid value for property pieceSize
-        }
-
-        // Remember to restore the value
-        clob.pieceSize = defaultChunkSize;
-        blob.pieceSize = defaultChunkSize;
-
-        clob.close(function(err) {
-          if (err) return done(err);
-          blob.close(done);
-        });
-      }
+  it('62.8 pieceSize - cannot be null', async function() {
+    const result = await connection.execute(sqlSelect, { i: 1 });
+    const clob = result.rows[0][1];
+    const blob = result.rows[0][2];
+    assert.throws(
+      () => clob.pieceSize = null,
+      /NJS-004:/
     );
+    await clob.close();
+    await blob.close();
   }); // 62.8
 
-  it('62.9 pieceSize - must be a number', function(done) {
-    connection.execute(
-      sqlSelect,
-      { i: 1 },
-      function(err, result) {
-        should.not.exist(err);
-        var clob = result.rows[0][1],
-          blob = result.rows[0][2];
-
-        try {
-          clob.pieceSize = NaN;
-        } catch (err) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-004:');
-          // NJS-004: invalid value for property pieceSize
-        }
-
-        // Remember to restore the value
-        clob.pieceSize = defaultChunkSize;
-        blob.pieceSize = defaultChunkSize;
-
-        clob.close(function(err) {
-          if (err) return done(err);
-          blob.close(done);
-        });
-      }
+  it('62.9 pieceSize - must be a number', async function() {
+    const result = await connection.execute(sqlSelect, { i: 1 });
+    const clob = result.rows[0][1];
+    const blob = result.rows[0][2];
+    assert.throws(
+      () => clob.pieceSize = NaN,
+      /NJS-004:/
     );
+    await clob.close();
+    await blob.close();
   }); // 62.9
 
-  it('62.10 type (read-only)', function(done) {
-    connection.execute(
-      sqlSelect,
-      { i: 1 },
-      function(err, result) {
-        should.not.exist(err);
-        var clob = result.rows[0][1],
-          blob = result.rows[0][2];
-
-        var t1 = clob.type,
-          t2 = blob.type;
-
-        t1.should.eql(oracledb.CLOB);
-        t2.should.eql(oracledb.BLOB);
-
-        try {
-          clob.type = t2;
-        } catch (err) {
-          should.exist(err);
-          // console.log(err);
-          // [TypeError: Cannot set property type of #<Lob> which has only a getter]
-        }
-
-        try {
-          blob.type = t1;
-        } catch (err) {
-          should.exist(err);
-          // console.log(err);
-          // [TypeError: Cannot set property type of #<Lob> which has only a getter]
-        }
-
-        clob.close(function(err) {
-          if (err) return done(err);
-          blob.close(done);
-        });
-      }
+  it('62.10 type (read-only)', async function() {
+    const result = await connection.execute(sqlSelect, { i: 1 });
+    const clob = result.rows[0][1];
+    const blob = result.rows[0][2];
+    assert.strictEqual(clob.type, oracledb.CLOB);
+    assert.strictEqual(blob.type, oracledb.BLOB);
+    assert.throws(
+      () => clob.type = oracledb.BLOB,
+      /TypeError: Cannot set/
     );
+    assert.throws(
+      () => blob.type = oracledb.CLOB,
+      /TypeError: Cannot set/
+    );
+    await clob.close();
+    await blob.close();
   }); // 62.10
+
 });

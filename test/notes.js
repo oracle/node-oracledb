@@ -94,13 +94,10 @@ if (dbconfig.test.proxySessionUser) {
 }
 
 before(async function() {
-  let connection = null;
   await Promise.all(configList.map(async function(conf) {
-    connection = await oracledb.getConnection(conf);
-
-    let result = await connection.execute(
+    const connection = await oracledb.getConnection(conf);
+    const result = await connection.execute(
       "select * from dual", [], { outFormat: oracledb.OUT_FORMAT_ARRAY });
-    assert(result);
     assert.strictEqual(result.rows[0][0], "X");
     await connection.close();
   }));

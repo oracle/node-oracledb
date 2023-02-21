@@ -31,168 +31,79 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
-var fs       = require('fs');
-var async    = require('async');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const fs       = require('fs');
+const testsUtil = require('./testsUtil.js');
 
 describe('54. lobClose.js', function() {
 
-  var conn;
-  before(function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-        conn = connection;
-        done();
-      }
-    );
+  let conn;
+  before(async function() {
+    conn = await oracledb.getConnection(dbConfig);
   });
 
-  after(function(done) {
-    conn.close(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after(async function() {
+    await conn.close();
   });
 
-  it('54.1 can access properties of closed LOB without error', function(done) {
-
-    conn.createLob(
-      oracledb.CLOB,
-      function(err, lob) {
-        should.not.exist(err);
-
-        (lob.chunkSize).should.be.a.Number();
-        (lob.pieceSize).should.be.a.Number();
-        should.strictEqual(lob.length, 0);
-        should.strictEqual(lob.type, oracledb.CLOB);
-
-        lob.close(function(err) {
-          should.not.exist(err);
-
-          (lob.chunkSize).should.be.a.Number();
-          (lob.pieceSize).should.be.a.Number();
-          should.strictEqual(lob.length, 0);
-          should.strictEqual(lob.type, oracledb.CLOB);
-
-          done();
-        });
-      }
-    );
-
+  it('54.1 can access properties of closed LOB without error', async function() {
+    const lob = await conn.createLob(oracledb.CLOB);
+    assert.strictEqual(typeof lob.chunkSize, 'number');
+    assert.strictEqual(typeof lob.pieceSize, 'number');
+    assert.strictEqual(lob.length, 0);
+    assert.strictEqual(lob.type, oracledb.CLOB);
+    await lob.close();
+    assert.strictEqual(typeof lob.chunkSize, 'number');
+    assert.strictEqual(typeof lob.pieceSize, 'number');
+    assert.strictEqual(lob.length, 0);
+    assert.strictEqual(lob.type, oracledb.CLOB);
   }); // 54.1
 
-  it('54.2 can not call close() multiple times', function(done) {
-
-    conn.createLob(
-      oracledb.CLOB,
-      function(err, lob) {
-        should.not.exist(err);
-
-        lob.close(function(err) {
-          should.not.exist(err);
-
-          lob.close(function(err) {
-            should.not.exist(err);
-            done();
-          });
-        }); // first close();
-      }
-    );
+  it('54.2 can call close() multiple times', async function() {
+    const lob = await conn.createLob(oracledb.CLOB);
+    await lob.close();
+    await lob.close();
   }); // 54.2
 
-  it('54.3 verify closed LOB', function(done) {
-
-    conn.createLob(
-      oracledb.CLOB,
-      function(err, lob) {
-        should.not.exist(err);
-
-        lob.close(function(err) {
-          should.not.exist(err);
-
-          var inFileName = './test/clobexample.txt';
-          var inStream = fs.createReadStream(inFileName);
-          inStream.pipe(lob);
-
-          inStream.on("error", function(err) {
-            should.not.exist(err, "inStream.on 'error' event.");
-          });
-
-          lob.on("error", function(err) {
-            should.strictEqual(
-              err.message,
-              "NJS-022: invalid Lob"
-            );
-            done();
-          });
-
-          lob.on('finish', function() {
-            done(new Error("LOB emits 'finish' event!"));
-          });
-
-        }); // lob.close()
-      }
+  it('54.3 verify closed LOB', async function() {
+    const lob = await conn.createLob(oracledb.CLOB);
+    await lob.close();
+    const inFileName = './test/clobexample.txt';
+    const inStream = fs.createReadStream(inFileName);
+    inStream.pipe(lob);
+    await testsUtil.assertThrowsAsync(
+      async () => {
+        await new Promise((resolve, reject) => {
+          inStream.on("error", reject);
+          lob.on("error", reject);
+          lob.on('finish', resolve);
+        });
+      },
+      /NJS-022:/
     );
   }); // 54.3
 
-  it('54.4 automatically close result sets and LOBs when the connection is closed', function(done) {
+  it('54.4 automatically close result sets and LOBs when the connection is closed', async function() {
+    const conn2 = await oracledb.getConnection(dbConfig);
+    const lob2 = await conn2.createLob(oracledb.CLOB);
+    await conn2.close();
 
-    var conn2 = null;
-    var lob2 = null;
-    async.series([
-      function creatConn(cb) {
-        oracledb.getConnection(
-          dbConfig,
-          function(err, connection) {
-            should.not.exist(err);
-            conn2 = connection;
-            cb();
-          }
-        );
-      },
-      function createLOB(cb) {
-        conn2.createLob(
-          oracledb.CLOB,
-          function(err, lob) {
-            should.not.exist(err);
-            lob2 = lob;
-            cb();
-          }
-        );
-      },
-      function closeConn(cb) {
-        conn2.close(cb);
-      },
-      function dotest(cb) {
-      // Verify that lob2 gets closed automatically
-        var inFileName = './test/clobexample.txt';
-        var inStream = fs.createReadStream(inFileName);
-        inStream.pipe(lob2);
-
-        inStream.on("error", function(err) {
-          should.not.exist(err, "inStream.on 'error' event.");
-        });
-
-        lob2.on("error", function(err) {
-          should.strictEqual(
-            err.message,
-            "DPI-1040: LOB was already closed"
-          );
-          cb();
+    // Verify that lob2 gets closed automatically
+    const inFileName = './test/clobexample.txt';
+    const inStream = fs.createReadStream(inFileName);
+    inStream.pipe(lob2);
+    await testsUtil.assertThrowsAsync(
+      async () => {
+        await new Promise((resolve, reject) => {
+          inStream.on("error", reject);
+          lob2.on("error", reject);
+          lob2.on('finish', resolve);
         });
       },
-      function(cb) {
-        (lob2.chunkSize).should.be.a.Number();
-        (lob2.pieceSize).should.be.a.Number();
-        should.strictEqual(lob2.length, 0);
-        should.strictEqual(lob2.type, oracledb.CLOB);
-        cb();
-      }
-    ], done);
+      /DPI-1040:/
+    );
   }); // 54.4
 
 });

@@ -31,522 +31,205 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var async    = require('async');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assert   = require('should');
+const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe("73. poolPing.js", function() {
 
-  var defaultInterval = oracledb.poolPingInterval;
+  const defaultInterval = oracledb.poolPingInterval;
 
   afterEach("reset poolPingInterval to default", function() {
-
     oracledb.poolPingInterval = defaultInterval;
-    should.strictEqual(oracledb.poolPingInterval, 60);
-
   });
 
-  it("73.1 the default value of poolPingInterval is 60", function(done) {
-
-    var defaultValue = 60;
-    should.strictEqual(oracledb.poolPingInterval, defaultValue);
-
-    var pool;
-    async.series([
-      function(cb) {
-        oracledb.createPool(
-          dbConfig,
-          function(err, pooling) {
-            should.not.exist(err);
-            pool = pooling;
-
-            should.strictEqual(pool.poolPingInterval, defaultValue);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        pool.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
-
+  it("73.1 the default value of poolPingInterval is 60", async function() {
+    const defaultValue = 60;
+    assert.strictEqual(oracledb.poolPingInterval, defaultValue);
+    const pool = await oracledb.createPool(dbConfig);
+    assert.strictEqual(pool.poolPingInterval, defaultValue);
+    await pool.close();
   }); // 73.1
 
-  it("73.2 does not change after the pool has been created", function(done) {
-
-    var userSetInterval = 20;
+  it("73.2 does not change after the pool has been created", async function() {
+    const userSetInterval = 20;
     oracledb.poolPingInterval = userSetInterval;
-
-    var pool;
-    async.series([
-      function(cb) {
-        oracledb.createPool(
-          dbConfig,
-          function(err, pooling) {
-            should.not.exist(err);
-            pool = pooling;
-
-            should.strictEqual(pool.poolPingInterval, userSetInterval);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        var newInterval = userSetInterval * 2;
-        oracledb.poolPingInterval = newInterval;
-
-        // sleep a while
-        setTimeout(function() {
-          cb();
-        }, 100);
-      },
-      function dotest(cb) {
-        should.strictEqual(pool.poolPingInterval, userSetInterval);
-        cb();
-      },
-      function(cb) {
-        pool.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
-
+    const pool = await oracledb.createPool(dbConfig);
+    assert.strictEqual(pool.poolPingInterval, userSetInterval);
+    const newInterval = userSetInterval * 2;
+    oracledb.poolPingInterval = newInterval;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    assert.strictEqual(pool.poolPingInterval, userSetInterval);
+    await pool.close();
   }); // 73.2
 
-  it("73.3 can not be changed on pool object", function(done) {
-
-    var userSetInterval = 30;
+  it("73.3 can not be changed on pool object", async function() {
+    const userSetInterval = 30;
     oracledb.poolPingInterval = userSetInterval;
-
-    var pool;
-    async.series([
-      function(cb) {
-        oracledb.createPool(
-          dbConfig,
-          function(err, pooling) {
-            should.not.exist(err);
-            pool = pooling;
-
-            should.strictEqual(pool.poolPingInterval, userSetInterval);
-            cb();
-          }
-        );
-      },
-      function dotest(cb) {
-        var newInterval = userSetInterval * 2;
-
-        try {
-          pool.poolPingInterval = newInterval;
-        } catch (err) {
-          should.strictEqual(err.name, "TypeError");
-        }
-        cb();
-
-      },
-      function(cb) {
-        pool.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
-
+    const pool = await oracledb.createPool(dbConfig);
+    assert.strictEqual(pool.poolPingInterval, userSetInterval);
+    const newInterval = userSetInterval * 2;
+    assert.throws(
+      () => pool.poolPingInterval = newInterval,
+      /TypeError/
+    );
+    await pool.close();
   }); // 73.3
 
-  it("73.4 can not be accessed on connection object", function(done) {
-
-    var pool, connection;
-
-    async.series([
-      function(cb) {
-        oracledb.createPool(
-          dbConfig,
-          function(err, pooling) {
-            should.not.exist(err);
-            pool = pooling;
-            cb();
-          }
-        );
-      },
-      function dotest(cb) {
-        pool.getConnection(function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-
-          should.not.exist(connection.poolPingInterval);
-
-          cb();
-        });
-      },
-      function(cb) {
-        connection.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function(cb) {
-        pool.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
-
+  it("73.4 can not be accessed on connection object", async function() {
+    const pool = await oracledb.createPool(dbConfig);
+    const conn = await pool.getConnection();
+    assert.strictEqual(conn.poolPingInterval, undefined);
+    await conn.close();
+    await pool.close();
   }); // 73.4
 
   // helper function for below test cases
-  var testDefine = function(userSetInterval, callback) {
-
+  const testDefine = async function(userSetInterval) {
     oracledb.poolPingInterval = userSetInterval;
-
-    var pool;
-    async.series([
-      function(cb) {
-        oracledb.createPool(
-          dbConfig,
-          function(err, pooling) {
-            should.not.exist(err);
-            pool = pooling;
-
-            should.strictEqual(pool.poolPingInterval, userSetInterval);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        pool.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], callback);
-
+    const pool = await oracledb.createPool(dbConfig);
+    assert.strictEqual(pool.poolPingInterval, userSetInterval);
+    await pool.close();
   }; // testDefine()
 
-  it("73.5 can be set to 0, means always ping", function(done) {
-
-    var userSetValue = 0;
-    testDefine(userSetValue, done);
-
+  it("73.5 can be set to 0, means always ping", async function() {
+    await testDefine(0);
   }); // 73.5
 
-
-  it("73.6 can be set to negative values, means never ping", function(done) {
-
-    var userSetValue = -80;
-    testDefine(userSetValue, done);
-
+  it("73.6 can be set to negative values, means never ping", async function() {
+    await testDefine(-80);
   }); // 73.6
 
-  it("73.7 Negative: Number.MAX_SAFE_INTEGER", function(done) {
-
-    /*
-    Number.MAX_SAFE_INTEGER // 9007199254740991
-    Math.pow(2, 53) - 1     // 9007199254740991
-    */
-
-    try {
-      oracledb.poolPingInterval = Number.MAX_SAFE_INTEGER;
-    } catch (err) {
-      should.exist(err);
-      (err.message).should.startWith("NJS-004:");
-      // NJS-004: invalid value for property pingPoolInterval
-
-      done();
-    }
-
+  it("73.7 Negative: Number.MAX_SAFE_INTEGER", function() {
+    assert.throws(
+      () => oracledb.poolPingInterval = Number.MAX_SAFE_INTEGER,
+      /NJS-004:/
+    );
   }); // 73.7
 
-  it("73.8 cannot surpass the upper limit", function(done) {
-
-    var upperLimit = 2147483647; // 2GB
-
-    async.series([
-      function testMax(cb) {
-        testDefine(upperLimit, cb);
-      },
-      function(cb) {
-        var upperLimitPlus = upperLimit + 1;
-
-        try {
-          oracledb.poolPingInterval = upperLimitPlus;
-        } catch (err) {
-          should.exist(err);
-          (err.message).should.startWith("NJS-004:");
-          cb();
-        }
-      }
-    ], done);
-
+  it("73.8 cannot surpass the upper limit", async function() {
+    const upperLimit = 2147483647; // 2GB
+    await testDefine(upperLimit);
+    assert.throws(
+      () => oracledb.poolPingInterval = upperLimit + 1,
+      /NJS-004:/
+    );
   }); // 73.8
 
-  it("73.9 cannot surpass the lower Limit", function(done) {
-
-    var lowerLimit = -2147483648;
-
-    async.series([
-      function texstMin(cb) {
-        testDefine(lowerLimit, cb);
-      },
-      function(cb) {
-        var lowerLimitPlus = lowerLimit - 1;
-
-        try {
-          oracledb.poolPingInterval = lowerLimitPlus;
-        } catch (err) {
-          should.exist(err);
-          (err.message).should.startWith("NJS-004:");
-          cb();
-        }
-      }
-    ], done);
-
+  it("73.9 cannot surpass the lower Limit", async function() {
+    const lowerLimit = -2147483648;
+    await testDefine(lowerLimit);
+    assert.throws(
+      () => oracledb.poolPingInterval = lowerLimit - 1,
+      /NJS-004:/
+    );
   }); // 73.9
 
-  it("73.10 Negative: null", function(done) {
-
-    try {
-      oracledb.poolPingInterval = null;
-    } catch (err) {
-      should.exist(err);
-      (err.message).should.startWith("NJS-004:");
-
-      done();
-    }
-
-
+  it("73.10 Negative: null", function() {
+    assert.throws(
+      () => oracledb.poolPingInterval = null,
+      /NJS-004:/
+    );
   }); // 73.10
 
-  it("73.11 Negative: NaN", function(done) {
-
-    try {
-      oracledb.poolPingInterval = NaN;
-    } catch (err) {
-      should.exist(err);
-      (err.message).should.startWith("NJS-004:");
-
-      done();
-    }
-
+  it("73.11 Negative: NaN", function() {
+    assert.throws(
+      () => oracledb.poolPingInterval = NaN,
+      /NJS-004:/
+    );
   }); // 73.11
 
-  it("73.12 Negative: undefined", function(done) {
-
-    try {
-      oracledb.poolPingInterval = undefined;
-    } catch (err) {
-      should.exist(err);
-      (err.message).should.startWith("NJS-004:");
-
-      done();
-    }
-
+  it("73.12 Negative: undefined", function() {
+    assert.throws(
+      () => oracledb.poolPingInterval = undefined,
+      /NJS-004:/
+    );
   }); // 73.12
 
-  it("73.13 Negative: 'random-string'", function(done) {
-
-    try {
-      oracledb.poolPingInterval = 'random-string';
-    } catch (err) {
-      should.exist(err);
-      (err.message).should.startWith("NJS-004:");
-
-      done();
-    }
-
+  it("73.13 Negative: 'random-string'", function() {
+    assert.throws(
+      () => oracledb.poolPingInterval = "random-string",
+      /NJS-004:/
+    );
   }); // 73.13
 
-  var testPoolDefine = function(userSetInterval, expectedValue, callback) {
-
-    var pool;
-    async.series([
-      function(cb) {
-        oracledb.createPool(
-          {
-            user:             dbConfig.user,
-            password:         dbConfig.password,
-            connectString:    dbConfig.connectString,
-            poolPingInterval: userSetInterval
-          },
-          function(err, pooling) {
-            if (userSetInterval === null) {
-              should.not.exist(pooling);
-              should.exist(err);
-              should.strictEqual(err.message, "NJS-007: invalid value for \"poolPingInterval\" in parameter 1");
-            } else {
-              should.not.exist(err);
-              pool = pooling;
-
-              should.strictEqual(pool.poolPingInterval, expectedValue);
-            }
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        if (userSetInterval !== null) {
-          pool.close(function(err) {
-            should.not.exist(err);
-          });
-        }
-        cb();
-      }
-    ], callback);
-
+  const testPoolDefine = async function(userSetInterval, expectedValue) {
+    const config = {
+      user:             dbConfig.user,
+      password:         dbConfig.password,
+      connectString:    dbConfig.connectString,
+      poolPingInterval: userSetInterval
+    };
+    const pool = await oracledb.createPool(config);
+    assert.strictEqual(pool.poolPingInterval, expectedValue);
+    await pool.close();
   }; // testPoolDefine
 
-  it("73.14 can be set at pool creation, e.g. positive value 1234", function(done) {
-
-    var userSetValue = 1234;
-    testPoolDefine(userSetValue, userSetValue, done);
-
+  it("73.14 can be set at pool creation, e.g. positive value 1234", async function() {
+    const userSetValue = 1234;
+    await testPoolDefine(userSetValue, userSetValue);
   });
 
-  it("73.15 can be set at pool creation, e.g. negative value -4321", function(done) {
-
-    var userSetValue = -4321;
-    testPoolDefine(userSetValue, userSetValue, done);
-
+  it("73.15 can be set at pool creation, e.g. negative value -4321", async function() {
+    const userSetValue = -4321;
+    await testPoolDefine(userSetValue, userSetValue);
   });
 
-  it("73.16 can be set at pool creation, e.g. 0 means always ping", function(done) {
-
-    var userSetValue = 0;
-    testPoolDefine(userSetValue, userSetValue, done);
-
+  it("73.16 can be set at pool creation, e.g. 0 means always ping", async function() {
+    const userSetValue = 0;
+    await testPoolDefine(userSetValue, userSetValue);
   });
 
-  it("73.17 Negative: null", function(done) {
-
+  it("73.17 Negative: null", async function() {
     oracledb.poolPingInterval = 789;
-    var userSetValue = null;
-
-    testPoolDefine(userSetValue, 789, done);
-
-  });
-
-  it("73.18 Setting to 'undefined' will use current value from oracledb", function(done) {
-
-    oracledb.poolPingInterval = 9876;
-    var userSetValue = undefined;
-
-    testPoolDefine(userSetValue, 9876, done);
-
-  });
-
-  it("73.19 can be set at pool creation. Negative: NaN", function(done) {
-
-    /*var userSetValue = 'random-string';*/
-
-    var userSetValue = NaN;
-
-    oracledb.createPool(
-      {
-        user:             dbConfig.user,
-        password:         dbConfig.password,
-        connectString:    dbConfig.connectString,
-        poolPingInterval: userSetValue
-      },
-      function(err, pool) {
-        should.exist(err);
-        (err.message).should.startWith("NJS-007:");
-        // NJS-007: invalid value for "poolPingInterval" in parameter 1
-
-        should.not.exist(pool);
-        done();
-      }
+    const config = {...dbConfig, poolPingInterval: null};
+    await testsUtil.assertThrowsAsync(
+      async () => await oracledb.createPool(config),
+      /NJS-007:/
     );
+  });
 
+  it("73.18 Setting to 'undefined' will use current value from oracledb", async function() {
+    oracledb.poolPingInterval = 9876;
+    const userSetValue = undefined;
+    await testPoolDefine(userSetValue, oracledb.poolPingInterval);
+  });
+
+  it("73.19 can be set at pool creation. Negative: NaN", async function() {
+    const config = {...dbConfig, poolPingInterval: NaN};
+    await testsUtil.assertThrowsAsync(
+      async () => await oracledb.createPool(config),
+      /NJS-007:/
+    );
   }); // 73.19
 
-  it("73.20 can be set at pool creation. Negative: 'random-string'", function(done) {
-
-    var userSetValue = 'random-string';
-
-    oracledb.createPool(
-      {
-        user:             dbConfig.user,
-        password:         dbConfig.password,
-        connectString:    dbConfig.connectString,
-        poolPingInterval: userSetValue
-      },
-      function(err, pool) {
-        should.exist(err);
-        (err.message).should.startWith("NJS-007:");
-        // NJS-007: invalid value for "poolPingInterval" in parameter 1
-
-        should.not.exist(pool);
-        done();
-      }
+  it("73.20 can be set at pool creation. Negative: 'random-string'", async function() {
+    const config = {...dbConfig, poolPingInterval: "random-string"};
+    await testsUtil.assertThrowsAsync(
+      async () => await oracledb.createPool(config),
+      /NJS-007:/
     );
-
   }); // 73.20
 
-  it("73.21 cannot surpass the upper limit at pool creation", function(done) {
-
-    var upperLimit = 2147483647; // 2GB
-
-    async.series([
-      function testMax(cb) {
-        testPoolDefine(upperLimit, upperLimit, cb);
-      },
-      function(cb) {
-
-        var userSetValue = upperLimit + 1;
-        oracledb.createPool(
-          {
-            user: dbConfig.user,
-            password: dbConfig.password,
-            connectString: dbConfig.connectString,
-            poolPingInterval: userSetValue
-          },
-          function(err, pool) {
-            should.exist(err);
-            (err.message).should.startWith("NJS-007:");
-
-            should.not.exist(pool);
-            cb();
-          }
-        );
-      }
-    ], done);
-
+  it("73.21 cannot surpass the upper limit at pool creation", async function() {
+    const upperLimit = 2147483647; // 2GB
+    await testPoolDefine(upperLimit, upperLimit);
+    const config = {...dbConfig, poolPingInterval: upperLimit + 1};
+    await testsUtil.assertThrowsAsync(
+      async () => await oracledb.createPool(config),
+      /NJS-007:/
+    );
   }); // 73.21
 
-  it("73.22 cannot surpass the lower limit at pool creation", function(done) {
-
-    var lowerLimit = -2147483648;
-
-    async.series([
-      function testMax(cb) {
-        testPoolDefine(lowerLimit, lowerLimit, cb);
-      },
-      function(cb) {
-
-        var userSetValue = lowerLimit - 1;
-        oracledb.createPool(
-          {
-            user: dbConfig.user,
-            password: dbConfig.password,
-            connectString: dbConfig.connectString,
-            poolPingInterval: userSetValue
-          },
-          function(err, pool) {
-            should.exist(err);
-            (err.message).should.startWith("NJS-007:");
-
-            should.not.exist(pool);
-            cb();
-          }
-        );
-      }
-    ], done);
-
+  it("73.22 cannot surpass the lower limit at pool creation", async function() {
+    const lowerLimit = -2147483648;
+    await testPoolDefine(lowerLimit, lowerLimit);
+    const config = {...dbConfig, poolPingInterval: lowerLimit - 1};
+    await testsUtil.assertThrowsAsync(
+      async () => await oracledb.createPool(config),
+      /NJS-007:/
+    );
   }); // 73.22
 
 });

@@ -34,10 +34,9 @@
 const oracledb  = require('oracledb');
 const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
-
+const testsUtil = require('./testsUtil.js');
 
 describe('260. tpcResume.js', function() {
-  let connection;
   const xid = {
     "formatId": 101,
     "globalTransactionId": "testtxt1",
@@ -63,7 +62,7 @@ describe('260. tpcResume.js', function() {
     END;`;
 
   before (async function() {
-    connection = await oracledb.getConnection(dbConfig);
+    const connection = await oracledb.getConnection(dbConfig);
     await connection.execute(createTableSQL);
     await connection.executeMany(
       `INSERT INTO nodb_tpc_resume values (:1, :2)`,
@@ -74,10 +73,7 @@ describe('260. tpcResume.js', function() {
   });
 
   after(async function() {
-    connection = await oracledb.getConnection(dbConfig);
-    await connection.execute(`DROP TABLE nodb_tpc_resume`);
-    await connection.close();
-    connection = undefined;
+    await testsUtil.dropTable("nodb_tpc_resume");
   });
 
 
@@ -85,7 +81,7 @@ describe('260. tpcResume.js', function() {
     let result;
 
     // connection 1
-    connection = await oracledb.getConnection(dbConfig);
+    let connection = await oracledb.getConnection(dbConfig);
     await connection.tpcBegin(xid);
     await connection.execute(
       `UPDATE nodb_tpc_resume SET salary = salary * 1.1 WHERE id = :1`, [1]);

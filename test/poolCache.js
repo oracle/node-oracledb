@@ -31,497 +31,199 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var async = require('async');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('67. poolCache.js', function() {
-  beforeEach(function() {
-    // ensure that no poolAlias has been specified
-    delete dbConfig.poolAlias;
-  });
-
-  after(function() {
-    // ensure that no poolAlias has been specified
-    delete dbConfig.poolAlias;
-  });
 
   describe('67.1 basic functional tests', function() {
-    it('67.1.1 caches pool as default if pool is created when cache is empty', function(done) {
-      oracledb.createPool(dbConfig, function(err, pool) {
-        var defaultPool;
 
-        should.not.exist(err);
-
-        pool.should.be.ok();
-
-        // Not specifying a name, default will be used
-        defaultPool = oracledb.getPool();
-
-        should.strictEqual(pool, defaultPool);
-
-        (defaultPool.poolAlias).should.equal('default');
-
-        pool.close(function(err) {
-          should.not.exist(err);
-          done();
-        });
-      });
+    it('67.1.1 caches pool as default if pool is created when cache is empty', async function() {
+      const pool = await oracledb.createPool(dbConfig);
+      const defaultPool = oracledb.getPool();
+      assert.strictEqual(pool, defaultPool);
+      assert.strictEqual(pool.poolAlias, "default");
+      await pool.close();
     });
 
-    it('67.1.2 removes the pool from the cache on terminate', function(done) {
-      oracledb.createPool(dbConfig, function(err, pool) {
-        should.not.exist(err);
-
-        pool.should.be.ok();
-
-        pool.close(function(err) {
-          var defaultPool;
-
-          should.not.exist(err);
-
-          (function() {
-            defaultPool = oracledb.getPool();
-          }).should.throw(/^NJS-047:/);
-
-          should.not.exist(defaultPool);
-
-          done();
-        });
-      });
+    it('67.1.2 removes the pool from the cache on terminate', async function() {
+      const pool = await oracledb.createPool(dbConfig);
+      await pool.close();
+      assert.throws(
+        () => oracledb.getPool(),
+        /NJS-047:/
+      );
     });
 
-    it('67.1.3 can cache and retrieve an aliased pool', function(done) {
-      var poolAlias = 'random-pool-alias';
-
-      dbConfig.poolAlias = poolAlias;
-
-      oracledb.createPool(dbConfig, function(err, pool) {
-        var aliasedPool;
-
-        should.not.exist(err);
-
-        pool.should.be.ok();
-
-        pool.poolAlias.should.equal(poolAlias);
-
-        aliasedPool = oracledb.getPool(poolAlias);
-
-        should.strictEqual(pool, aliasedPool);
-
-        pool.close(function(err) {
-          should.not.exist(err);
-          done();
-        });
-      });
+    it('67.1.3 can cache and retrieve an aliased pool', async function() {
+      const config = {...dbConfig, poolAlias: 'random-pool-alias'};
+      const pool = await oracledb.createPool(config);
+      assert.strictEqual(pool.poolAlias, config.poolAlias);
+      const aliasedPool = oracledb.getPool(config.poolAlias);
+      assert.strictEqual(pool, aliasedPool);
+      await pool.close();
     });
 
-    it('67.1.4 throws an error if the poolAlias already exists in the cache', function(done) {
-      dbConfig.poolAlias = 'pool1';
-
-      oracledb.createPool(dbConfig, function(err, pool1) {
-        should.not.exist(err);
-
-        pool1.should.be.ok();
-
-        // Creating another pool with the same poolAlias as before
-        oracledb.createPool(dbConfig, function(err, pool2) {
-          should.exist(err);
-
-          (err.message).should.startWith('NJS-046:');
-          should.not.exist(pool2);
-
-          pool1.close(function(err) {
-            should.not.exist(err);
-
-            done();
-          });
-        });
-      });
+    it('67.1.4 throws an error if the poolAlias already exists in the cache', async function() {
+      const config = {...dbConfig, poolAlias: 'pool1'};
+      const pool = await oracledb.createPool(config);
+      await testsUtil.assertThrowsAsync(
+        async () => await oracledb.createPool(config),
+        /NJS-046:/
+      );
+      await pool.close();
     });
 
-    it('67.1.5 does not throw an error if multiple pools are created without a poolAlias', function(done) {
-      oracledb.createPool(dbConfig, function(err, pool1) {
-        should.not.exist(err);
-
-        pool1.should.be.ok();
-
-        // Creating another pool with no poolAlias
-        oracledb.createPool(dbConfig, function(err, pool2) {
-          should.not.exist(err);
-
-          pool2.should.be.ok();
-
-          pool1.close(function(err) {
-            should.not.exist(err);
-
-            pool2.close(function(err) {
-              should.not.exist(err);
-
-              done();
-            });
-          });
-        });
-      });
+    it('67.1.5 does not throw an error if multiple pools are created without a poolAlias', async function() {
+      const pool1 = await oracledb.createPool(dbConfig);
+      const pool2 = await oracledb.createPool(dbConfig);
+      await pool1.close();
+      await pool2.close();
     });
 
-    it('67.1.6 throws an error if poolAttrs.poolAlias is not a string', function(done) {
+    it('67.1.6 throws an error if poolAttrs.poolAlias is not a string', async function() {
       // Setting poolAlias to something other than a string. Could be
       // boolean, object, array, etc.
-      dbConfig.poolAlias = {};
-
-      oracledb.createPool(dbConfig, function(err, pool) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-007:');
-
-        should.not.exist(pool);
-
-        done();
-      });
-    });
-
-    it('67.1.7 makes poolAttrs.poolAlias a read-only attribute on the pool named poolAlias', function(done) {
-      dbConfig.poolAlias = 'my-pool';
-
-      oracledb.createPool(dbConfig, function(err, pool) {
-        should.not.exist(err);
-
-        pool.should.be.ok();
-
-        (pool.poolAlias).should.equal(dbConfig.poolAlias);
-
-        (function() {
-          pool.poolAlias = 'some-new-value';
-        }).should.throw('Cannot set property poolAlias of #<Pool> which has only a getter');
-
-        (pool.poolAlias).should.equal(dbConfig.poolAlias);
-
-        pool.close(function(err) {
-          should.not.exist(err);
-
-          done();
-        });
-      });
-    });
-
-    it('67.1.8 retrieves the default pool, even after an aliased pool is created', function(done) {
-      oracledb.createPool(dbConfig, function(err, pool1) {
-        should.not.exist(err);
-
-        pool1.should.be.ok();
-
-        dbConfig.poolAlias = 'random-pool-alias';
-
-        oracledb.createPool(dbConfig, function(err, pool2) {
-          var defaultPool;
-
-          should.not.exist(err);
-
-          pool2.should.be.ok();
-
-          // Not specifying a name, default will be used
-          defaultPool = oracledb.getPool();
-
-          should.strictEqual(pool1, defaultPool);
-
-          (defaultPool.poolAlias).should.equal('default');
-
-          pool1.close(function(err) {
-            should.not.exist(err);
-
-            pool2.close(function(err) {
-              should.not.exist(err);
-
-              done();
-            });
-          });
-        });
-      });
-    });
-
-    it('67.1.9 retrieves the right pool, even after multiple pools are created', function(done) {
-      var aliasToGet = 'random-pool-alias-2';
-
-      dbConfig.poolAlias = 'random-pool-alias';
-
-      oracledb.createPool(dbConfig, function(err, pool1) {
-        should.not.exist(err);
-
-        pool1.should.be.ok();
-
-        dbConfig.poolAlias = aliasToGet;
-
-        oracledb.createPool(dbConfig, function(err, pool2) {
-          should.not.exist(err);
-
-          pool2.should.be.ok();
-
-          dbConfig.poolAlias = 'random-pool-alias-3';
-
-          oracledb.createPool(dbConfig, function(err, pool3) {
-            var secondPool;
-
-            should.not.exist(err);
-
-            secondPool = oracledb.getPool(aliasToGet);
-
-            should.strictEqual(pool2, secondPool);
-
-            (secondPool.poolAlias).should.equal(aliasToGet);
-
-            pool1.close(function(err) {
-              should.not.exist(err);
-
-              pool2.close(function(err) {
-                should.not.exist(err);
-
-                pool3.close(function(err) {
-                  should.not.exist(err);
-
-                  done();
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-
-    it('67.1.10 throws an error if the pool specified in getPool doesn\'t exist', function(done) {
-      (function() {
-        oracledb.getPool();
-      }).should.throw(/^NJS-047:/);
-
-      (function() {
-        oracledb.getPool('some-random-alias');
-      }).should.throw(/^NJS-047:/);
-
-      done();
-    });
-
-    it('67.1.11 does not throw an error if multiple pools are created without a poolAlias in the same call stack', function(done) {
-      var pool1;
-      var pool2;
-
-      async.parallel(
-        [
-          function(callback) {
-            oracledb.createPool(dbConfig, function(err, pool) {
-              should.not.exist(err);
-
-              pool1 = pool;
-
-              callback();
-            });
-          },
-          function(callback) {
-            oracledb.createPool(dbConfig, function(err, pool) {
-              should.not.exist(err);
-
-              pool2 = pool;
-
-              callback();
-            });
-          }
-        ],
-        function(createPoolErr) {
-          should.not.exist(createPoolErr);
-
-          pool1.close(function(err) {
-            should.not.exist(err);
-
-            pool2.close(function(err) {
-              should.not.exist(err);
-
-              done(createPoolErr);
-            });
-          });
-        }
+      const config = {...dbConfig, poolAlias: {}};
+      await testsUtil.assertThrowsAsync(
+        async () => await oracledb.createPool(config),
+        /NJS-007:/
       );
+    });
+
+    it('67.1.7 makes poolAttrs.poolAlias a read-only attribute on the pool named poolAlias', async function() {
+      const config = {...dbConfig, poolAlias: "my-pool"};
+      const pool = await oracledb.createPool(config);
+      assert.strictEqual(pool.poolAlias, config.poolAlias);
+      assert.throws(
+        () => pool.poolAlias = "some-new-value",
+        /TypeError: Cannot set/
+      );
+      assert.strictEqual(pool.poolAlias, config.poolAlias);
+      await pool.close();
+    });
+
+    it('67.1.8 retrieves the default pool, even after an aliased pool is created', async function() {
+      const pool1 = await oracledb.createPool(dbConfig);
+      const config = {...dbConfig, poolAlias: 'random-pool-alias'};
+      const pool2 = await oracledb.createPool(config);
+      // Not specifying a name, default will be used
+      const defaultPool = oracledb.getPool();
+      assert.strictEqual(pool1, defaultPool);
+      assert.strictEqual(pool1.poolAlias, "default");
+      await pool1.close();
+      await pool2.close();
+    });
+
+    it('67.1.9 retrieves the right pool, even after multiple pools are created', async function() {
+      const config1 = {...dbConfig, poolAlias: 'random-pool-alias-1'};
+      const config2 = {...dbConfig, poolAlias: 'random-pool-alias-2'};
+      const config3 = {...dbConfig, poolAlias: 'random-pool-alias-3'};
+      const pool1 = await oracledb.createPool(config1);
+      const pool2 = await oracledb.createPool(config2);
+      const pool3 = await oracledb.createPool(config3);
+      assert.strictEqual(pool1, oracledb.getPool(config1.poolAlias));
+      assert.strictEqual(pool2, oracledb.getPool(config2.poolAlias));
+      assert.strictEqual(pool3, oracledb.getPool(config3.poolAlias));
+      await pool1.close();
+      await pool2.close();
+      await pool3.close();
+    });
+
+    it('67.1.10 throws an error if the pool specified in getPool doesn\'t exist', function() {
+      assert.throws(
+        () => oracledb.getPool(),
+        /NJS-047:/
+      );
+      assert.throws(
+        () => oracledb.getPool("some-random-alias"),
+        /NJS-047:/
+      );
+    });
+
+    it('67.1.11 does not throw an error if multiple pools are created without a poolAlias in the same call stack', async function() {
+      let pool1, pool2;
+      const routine1 = async function() {
+        pool1 = await oracledb.createPool(dbConfig);
+      };
+      const routine2 = async function() {
+        pool2 = await oracledb.createPool(dbConfig);
+      };
+      await Promise.all([routine1(), routine2()]);
+      await pool1.close();
+      await pool2.close();
     });
 
   });
 
   describe('67.2 oracledb.getConnection functional tests', function() {
-    it('67.2.1 gets a connection from the default pool when no alias is specified', function(done) {
-      oracledb.createPool(dbConfig, function(err, pool) {
-        should.not.exist(err);
 
-        // Not specifying a poolAlias, default will be used
-        oracledb.getConnection(function(err, conn) {
-          should.not.exist(err);
-
-          conn.release(function(err) {
-            should.not.exist(err);
-
-            pool.close(function(err) {
-              should.not.exist(err);
-
-              done();
-            });
-          });
-        });
-      });
+    it('67.2.1 gets a connection from the default pool when no alias is specified', async function() {
+      const pool = await oracledb.createPool(dbConfig);
+      const conn = await oracledb.getConnection();
+      await conn.close();
+      await pool.close();
     });
 
-    it('67.2.2 gets a connection from the pool with the specified poolAlias', function(done) {
-      var poolAlias = 'random-pool-alias';
-
-      dbConfig.poolAlias = poolAlias;
-
-      oracledb.createPool(dbConfig, function(err, pool) {
-        should.not.exist(err);
-
-        oracledb.getConnection(poolAlias, function(err, conn) {
-          should.not.exist(err);
-
-          conn.release(function(err) {
-            should.not.exist(err);
-
-            pool.close(function(err) {
-              should.not.exist(err);
-
-              done();
-            });
-          });
-        });
-      });
+    it('67.2.2 gets a connection from the pool with the specified poolAlias', async function() {
+      const config = {...dbConfig, poolAlias: 'random-pool-alias'};
+      const pool = await oracledb.createPool(config);
+      const conn = await oracledb.getConnection(config.poolAlias);
+      await conn.close();
+      await pool.close();
     });
 
-    it('67.2.3 throws an error if an attempt is made to use the default pool when it does not exist', function(done) {
-      dbConfig.poolAlias = 'random-pool-alias';
-
-      oracledb.createPool(dbConfig, function(err, pool) {
-        should.not.exist(err);
-
-        // Not specifying a poolAlias, default will be used
-        oracledb.getConnection(function(err) {
-          should.exist(err);
-
-          (err.message).should.startWith('NJS-047:');
-
-          pool.close(function(err) {
-            should.not.exist(err);
-
-            done();
-          });
-        });
-      });
+    it('67.2.3 throws an error if an attempt is made to use the default pool when it does not exist', async function() {
+      const config = {...dbConfig, poolAlias: 'random-pool-alias'};
+      const pool = await oracledb.createPool(config);
+      await testsUtil.assertThrowsAsync(
+        async () => await oracledb.getConnection(),
+        /NJS-047:/
+      );
+      await pool.close();
     });
 
-    it('67.2.4 throws an error if an attempt is made to use a poolAlias for a pool that is not in the cache', function(done) {
-      dbConfig.poolAlias = 'random-pool-alias';
-
-      oracledb.createPool(dbConfig, function(err, pool) {
-        should.not.exist(err);
-
-        oracledb.getConnection('pool-alias-that-does-not-exist', function(err) {
-          should.exist(err);
-
-          (err.message).should.startWith('NJS-047:');
-
-          pool.close(function(err) {
-            should.not.exist(err);
-
-            done();
-          });
-        });
-      });
+    it('67.2.4 throws an error if an attempt is made to use a poolAlias for a pool that is not in the cache', async function() {
+      const config = {...dbConfig, poolAlias: 'random-pool-alias'};
+      const pool = await oracledb.createPool(config);
+      await testsUtil.assertThrowsAsync(
+        async () => await oracledb.getConnection("pool-alias-that-does-not-exist"),
+        /NJS-047:/
+      );
+      await pool.close();
     });
 
-    it('67.2.5 gets a connection from the default pool, even after an aliased pool is created', function(done) {
-      oracledb.createPool(dbConfig, function(err, pool1) {
-        should.not.exist(err);
-
-        pool1.should.be.ok();
-
-        dbConfig.poolAlias = 'random-pool-alias';
-
-        oracledb.createPool(dbConfig, function(err, pool2) {
-          should.not.exist(err);
-
-          pool2.should.be.ok();
-
-          oracledb.getConnection(function(err, conn) {
-            should.not.exist(err);
-
-            // Using the hidden pool property to check where the connection came from
-            should.strictEqual(pool1, conn._pool);
-
-            (conn._pool.poolAlias).should.equal('default');
-
-            conn.close(function(err) {
-              should.not.exist(err);
-
-              pool1.close(function(err) {
-                should.not.exist(err);
-
-                pool2.close(function(err) {
-                  should.not.exist(err);
-
-                  done();
-                });
-              });
-            });
-          });
-        });
-      });
+    it('67.2.5 gets a connection from the default pool, even after an aliased pool is created', async function() {
+      const config = {...dbConfig, poolAlias: 'random-pool-alias'};
+      const pool1 = await oracledb.createPool(dbConfig);
+      const pool2 = await oracledb.createPool(config);
+      const conn = await oracledb.getConnection();
+      // Using the hidden pool property to check where the connection came from
+      assert.strictEqual(pool1, conn._pool);
+      await conn.close();
+      await pool1.close();
+      await pool2.close();
     });
 
-    it('67.2.6 uses the right pool, even after multiple pools are created', function(done) {
-      var aliasToUse = 'random-pool-alias-2';
-
-      dbConfig.poolAlias = 'random-pool-alias';
-
-      oracledb.createPool(dbConfig, function(err, pool1) {
-        should.not.exist(err);
-
-        pool1.should.be.ok();
-
-        dbConfig.poolAlias = aliasToUse;
-
-        oracledb.createPool(dbConfig, function(err, pool2) {
-          should.not.exist(err);
-
-          pool2.should.be.ok();
-
-          dbConfig.poolAlias = 'random-pool-alias-3';
-
-          oracledb.createPool(dbConfig, function(err, pool3) {
-            should.not.exist(err);
-
-            oracledb.getConnection(aliasToUse, function(err, conn) {
-              // Using the hidden pool property to check where the connection came from
-              should.strictEqual(pool2, conn._pool);
-
-              (conn._pool.poolAlias).should.equal(aliasToUse);
-
-              conn.close(function(err) {
-                should.not.exist(err);
-
-                pool1.close(function(err) {
-                  should.not.exist(err);
-
-                  pool2.close(function(err) {
-                    should.not.exist(err);
-
-                    pool3.close(function(err) {
-                      should.not.exist(err);
-
-                      done();
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
+    it('67.2.6 uses the right pool, even after multiple pools are created', async function() {
+      const config1 = {...dbConfig, poolAlias: 'random-pool-alias-1'};
+      const config2 = {...dbConfig, poolAlias: 'random-pool-alias-2'};
+      const config3 = {...dbConfig, poolAlias: 'random-pool-alias-3'};
+      const pool1 = await oracledb.createPool(config1);
+      const pool2 = await oracledb.createPool(config2);
+      const pool3 = await oracledb.createPool(config3);
+      const conn = await oracledb.getConnection(config2.poolAlias);
+      assert.strictEqual(pool2, conn._pool);
+      await conn.close();
+      await pool1.close();
+      await pool2.close();
+      await pool3.close();
     });
 
-    it('67.2.7 gets a connection from the default pool with callback function(err)', function(done) {
-      oracledb.createPool({ // this becomes the default pool
+    it('67.2.7 gets a connection from the default pool', async function() {
+      const config = {
         user          : dbConfig.user,
         password      : dbConfig.password,
         connectString : dbConfig.connectString,
@@ -529,138 +231,81 @@ describe('67. poolCache.js', function() {
         poolMin : 1,
         poolIncrement: 1,
         poolTimeout: 0 // never terminate unused connections
-      }, function(err) {
-        should.not.exist(err);
-
-        var defaultPool = oracledb.getPool();
-        should.exist(defaultPool);
-
-        oracledb.getConnection(function(err, conn) {
-          should.not.exist(err);
-
-          conn.close(function(err) {
-            should.not.exist(err);
-
-            defaultPool.close(function(err) {
-              should.not.exist(err);
-              done();
-            });
-          });
-        });
-      });
+      };
+      const pool = await oracledb.createPool(config);
+      const conn = await pool.getConnection();
+      await conn.close();
+      await pool.close();
     });
+
   }); // 67.2
 
   // This suite extends 67.1.6 case with various types
   describe('67.3 poolAlias attribute', function() {
 
-    it('67.3.1 throws an error if poolAttrs.poolAlias is an object', function(done) {
-
-      dbConfig.poolAlias = {'foo': 'bar'};
-
-      oracledb.createPool(dbConfig, function(err) {
-        should.exist(err);
-
-        (err.message).should.startWith('NJS-007:');
-
-        done();
-      });
+    it('67.3.1 throws an error if poolAttrs.poolAlias is an object', async function() {
+      const config = {...dbConfig, poolAlias: {'foo': 'bar'}};
+      await testsUtil.assertThrowsAsync(
+        async () => await oracledb.createPool(config),
+        /NJS-007:/
+      );
     });
 
-    it('67.3.2 throws an error if poolAttrs.poolAlias is an array', function(done) {
-
-      dbConfig.poolAlias = [];
-
-      oracledb.createPool(dbConfig, function(err) {
-        should.exist(err);
-
-        (err.message).should.startWith('NJS-007:');
-
-        done();
-      });
+    it('67.3.2 throws an error if poolAttrs.poolAlias is an array', async function() {
+      const config = {...dbConfig, poolAlias: []};
+      await testsUtil.assertThrowsAsync(
+        async () => await oracledb.createPool(config),
+        /NJS-007:/
+      );
     });
 
-    it('67.3.3 throws an error if poolAttrs.poolAlias is a number', function(done) {
-
-      dbConfig.poolAlias = 123;
-
-      oracledb.createPool(dbConfig, function(err) {
-        should.exist(err);
-
-        (err.message).should.startWith('NJS-007:');
-
-        done();
-      });
+    it('67.3.3 throws an error if poolAttrs.poolAlias is a number', async function() {
+      const config = {...dbConfig, poolAlias: 123};
+      await testsUtil.assertThrowsAsync(
+        async () => await oracledb.createPool(config),
+        /NJS-007:/
+      );
     });
 
-    it('67.3.4 throws an error if poolAttrs.poolAlias is a boolean', function(done) {
-
-      dbConfig.poolAlias = false;
-
-      oracledb.createPool(dbConfig, function(err) {
-        should.exist(err);
-
-        (err.message).should.startWith('NJS-007:');
-
-        done();
-      });
+    it('67.3.4 throws an error if poolAttrs.poolAlias is a boolean', async function() {
+      const config = {...dbConfig, poolAlias: false};
+      await testsUtil.assertThrowsAsync(
+        async () => await oracledb.createPool(config),
+        /NJS-007:/
+      );
     });
 
-    it('67.3.5 throws an error if poolAttrs.poolAlias is null', function(done) {
-
-      dbConfig.poolAlias = null;
-
-      oracledb.createPool(dbConfig, function(err) {
-        should.exist(err);
-
-        (err.message).should.startWith('NJS-007:');
-
-        done();
-      });
+    it('67.3.5 throws an error if poolAttrs.poolAlias is null', async function() {
+      const config = {...dbConfig, poolAlias: null};
+      await testsUtil.assertThrowsAsync(
+        async () => await oracledb.createPool(config),
+        /NJS-007:/
+      );
     });
 
-    it('67.3.6 throws an error if poolAttrs.poolAlias is an empty string', function(done) {
-
-      dbConfig.poolAlias = '';
-
-      oracledb.createPool(dbConfig, function(err) {
-        should.exist(err);
-
-        (err.message).should.startWith('NJS-007:');
-
-        done();
-      });
+    it('67.3.6 throws an error if poolAttrs.poolAlias is an empty string', async function() {
+      const config = {...dbConfig, poolAlias: null};
+      await testsUtil.assertThrowsAsync(
+        async () => await oracledb.createPool(config),
+        /NJS-007:/
+      );
     });
 
-    it('67.3.7 throws an error if poolAttrs.poolAlias is NaN', function(done) {
-
-      dbConfig.poolAlias = NaN;
-
-      oracledb.createPool(dbConfig, function(err) {
-        should.exist(err);
-
-        (err.message).should.startWith('NJS-007:');
-
-        done();
-      });
+    it('67.3.7 throws an error if poolAttrs.poolAlias is NaN', async function() {
+      const config = {...dbConfig, poolAlias: NaN};
+      await testsUtil.assertThrowsAsync(
+        async () => await oracledb.createPool(config),
+        /NJS-007:/
+      );
     });
 
-    it('67.3.8 works if poolAttrs.poolAlias is undefined', function(done) {
-
-      dbConfig.poolAlias = undefined;
-
-      oracledb.createPool(dbConfig, function(err, pool) {
-
-        pool.should.be.ok();
-        (pool.poolAlias).should.equal('default');
-
-        pool.close(function(err) {
-          should.not.exist(err);
-          done();
-        });
-
-      });
+    it('67.3.8 works if poolAttrs.poolAlias is undefined', async function() {
+      const config = {...dbConfig, poolAlias: undefined};
+      const pool = await oracledb.createPool(config);
+      assert.strictEqual(pool.poolAlias, "default");
+      await pool.close();
     });
 
   }); // 67.3
+
 });
