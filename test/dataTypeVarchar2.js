@@ -31,79 +31,58 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var assist   = require('./dataTypeAssist.js');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assist   = require('./dataTypeAssist.js');
+const dbConfig = require('./dbconfig.js');
 
 describe('24. dataTypeVarchar2.js', function() {
 
-  var connection = null;
-  var tableName = "nodb_varchar2";
+  let connection = null;
+  let tableName = "nodb_varchar2";
 
-  var strLen = [10, 100, 1000, 2000, 3000, 4000]; // char string length
-  var strs = [];
-  for (var i = 0; i < strLen.length; i++)
+  let strLen = [10, 100, 1000, 2000, 3000, 4000]; // char string length
+  let strs = [];
+  for (let i = 0; i < strLen.length; i++)
     strs[i] = assist.createCharString(strLen[i]);
 
-  before('get one connection', function(done) {
-    oracledb.getConnection(
-      {
-        user:          dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString
-      },
-      function(err, conn) {
-        should.not.exist(err);
-        connection = conn;
-        done();
-      }
-    );
+  before('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after('release connection', function(done) {
-    connection.release(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after('release connection', async function() {
+    await connection.release();
   });
 
   describe('24.1 testing VARCHAR2 data in various lengths', function() {
 
-    before('create table, insert data', function(done) {
-      assist.setUp(connection, tableName, strs, done);
+    before('create table, insert data', async function() {
+      await assist.setUp(connection, tableName, strs);
     });
 
-    after(function(done) {
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after(async function() {
+      await connection.execute("DROP table " + tableName + " PURGE");
     });
 
-    it('24.1.1 SELECT query', function(done) {
-      assist.dataTypeSupport(connection, tableName, strs, done);
+    it('24.1.1 SELECT query', async function() {
+      await assist.dataTypeSupport(connection, tableName, strs);
     });
 
-    it('24.1.2 resultSet stores VARCHAR2 data correctly', function(done) {
-      assist.verifyResultSet(connection, tableName, strs, done);
+    it('24.1.2 resultSet stores VARCHAR2 data correctly', async function() {
+      await assist.verifyResultSet(connection, tableName, strs);
     });
 
-    it('24.1.3 works well with REF Cursor', function(done) {
-      assist.verifyRefCursor(connection, tableName, strs, done);
+    it('24.1.3 works well with REF Cursor', async function() {
+      await assist.verifyRefCursor(connection, tableName, strs);
     });
 
-    it('24.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
-      assist.verifyRefCursorWithFetchInfo(connection, tableName, strs, done);
+    it('24.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
+      await assist.verifyRefCursorWithFetchInfo(connection, tableName, strs);
     });
   });
 
   describe('24.2 stores null value correctly', function() {
-    it('24.2.1 testing Null, Empty string and Undefined', function(done) {
-      assist.verifyNullValues(connection, tableName, done);
+    it('24.2.1 testing Null, Empty string and Undefined', async function() {
+      await assist.verifyNullValues(connection, tableName);
     });
   });
 

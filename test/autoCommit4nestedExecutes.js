@@ -88,6 +88,7 @@ describe('63. autoCommit4nestedExecutes.js', function() {
   after('drop table and procedure', async function() {
     await connection.execute("DROP PROCEDURE " + procName);
     await connection.execute("DROP TABLE " + tableName + " PURGE");
+    await connection.close();
   }); // after
 
   it('63.1 nested execute() functions', async function() {
