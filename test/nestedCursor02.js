@@ -32,7 +32,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbconfig  = require('./dbconfig.js');
 
 describe('233. nestedCursor02.js', () => {
@@ -74,95 +74,86 @@ describe('233. nestedCursor02.js', () => {
 
     async function traverse_results(resultSet) {
       const fetchedRows = [];
-      try {
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-          const row = await resultSet.getRow();
-          if (!row) {
-            await resultSet.close();
-            break;
-          }
-          for (const i in row) {
-            if (row[i] instanceof oracledb.ResultSet) {
-              row[i] = await traverse_results(row[i]);
-            }
-          }
-          fetchedRows.push(row);
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const row = await resultSet.getRow();
+        if (!row) {
+          await resultSet.close();
+          break;
         }
-        return fetchedRows;
-      } catch (err) {
-        should.not.exist(err);
+        for (const i in row) {
+          if (row[i] instanceof oracledb.ResultSet) {
+            row[i] = await traverse_results(row[i]);
+          }
+        }
+        fetchedRows.push(row);
       }
-
+      return fetchedRows;
     } // traverse_results()
 
-    try {
-      let conn = await oracledb.getConnection(dbconfig);
+    let conn = await oracledb.getConnection(dbconfig);
 
-      const rowsSimple = [
-        [ 1, 'Nested Row 1' ], [ 2, 'Nested Row 2' ], [ 3, 'Nested Row 3' ]
-      ];
+    const rowsSimple = [
+      [ 1, 'Nested Row 1' ], [ 2, 'Nested Row 2' ], [ 3, 'Nested Row 3' ]
+    ];
 
-      const rowsComplex = [
-        [ 1, 'Level 4 String A' ],
-        [ 2, 'Level 4 String B' ],
-        [ 3, 'Level 4 String C' ]
-      ];
+    const rowsComplex = [
+      [ 1, 'Level 4 String A' ],
+      [ 2, 'Level 4 String B' ],
+      [ 3, 'Level 4 String C' ]
+    ];
 
-      // (1) Simple SQL, no result set
-      const result1 = await conn.execute(simpleSql);
-      const rows1 = result1.rows;
-      should.strictEqual(rows1[0][0], 'String Val');
-      should.deepEqual(rows1[0][1], rowsSimple);
+    // (1) Simple SQL, no result set
+    const result1 = await conn.execute(simpleSql);
+    const rows1 = result1.rows;
+    assert.strictEqual(rows1[0][0], 'String Val');
+    assert.deepEqual(rows1[0][1], rowsSimple);
 
-      should.strictEqual(result1.metaData[0].name, "'STRINGVAL'");
-      should.strictEqual(result1.metaData[1].name, 'NC');
-      should.strictEqual(result1.metaData[1].metaData[0].name, '1');
-      should.strictEqual(result1.metaData[1].metaData[1].name, "'NESTEDROW1'");
+    assert.strictEqual(result1.metaData[0].name, "'STRINGVAL'");
+    assert.strictEqual(result1.metaData[1].name, 'NC');
+    assert.strictEqual(result1.metaData[1].metaData[0].name, '1');
+    assert.strictEqual(result1.metaData[1].metaData[1].name, "'NESTEDROW1'");
 
-      // (2) Simple SQL, result set
-      const result2 = await conn.execute(simpleSql, [], { resultSet: true });
-      const rows2 = await traverse_results(result2.resultSet);
-      should.strictEqual(rows2[0][0], 'String Val');
-      should.deepEqual(rows2[0][1], rowsSimple);
+    // (2) Simple SQL, result set
+    const result2 = await conn.execute(simpleSql, [], { resultSet: true });
+    const rows2 = await traverse_results(result2.resultSet);
+    assert.strictEqual(rows2[0][0], 'String Val');
+    assert.deepEqual(rows2[0][1], rowsSimple);
 
-      should.strictEqual(result1.metaData[0].name, "'STRINGVAL'");
-      should.strictEqual(result1.metaData[1].name, 'NC');
+    assert.strictEqual(result1.metaData[0].name, "'STRINGVAL'");
+    assert.strictEqual(result1.metaData[1].name, 'NC');
 
-      // (3) Complex SQL, no result set
-      const result3 = await conn.execute(complexSql);
-      const rows3 = result3.rows;
-      should.strictEqual(rows3[0][0], 'Level 1 String');
-      should.strictEqual(rows3[0][1][0][0], 'Level 2 String');
-      should.strictEqual(rows3[0][1][0][1][0][0], 'Level 3 String');
-      should.deepEqual(rows3[0][1][0][1][0][1], rowsComplex);
+    // (3) Complex SQL, no result set
+    const result3 = await conn.execute(complexSql);
+    const rows3 = result3.rows;
+    assert.strictEqual(rows3[0][0], 'Level 1 String');
+    assert.strictEqual(rows3[0][1][0][0], 'Level 2 String');
+    assert.strictEqual(rows3[0][1][0][1][0][0], 'Level 3 String');
+    assert.deepEqual(rows3[0][1][0][1][0][1], rowsComplex);
 
-      should.strictEqual(result3.metaData[0].name, "'LEVEL1STRING'");
-      should.strictEqual(result3.metaData[1].name, 'NC1');
+    assert.strictEqual(result3.metaData[0].name, "'LEVEL1STRING'");
+    assert.strictEqual(result3.metaData[1].name, 'NC1');
 
-      should.strictEqual(result3.metaData[1].metaData[0].name, "'LEVEL2STRING'");
-      should.strictEqual(result3.metaData[1].metaData[1].name, 'NC2');
+    assert.strictEqual(result3.metaData[1].metaData[0].name, "'LEVEL2STRING'");
+    assert.strictEqual(result3.metaData[1].metaData[1].name, 'NC2');
 
-      should.strictEqual(result3.metaData[1].metaData[1].metaData[0].name, "'LEVEL3STRING'");
-      should.strictEqual(result3.metaData[1].metaData[1].metaData[1].name, 'NC3');
+    assert.strictEqual(result3.metaData[1].metaData[1].metaData[0].name, "'LEVEL3STRING'");
+    assert.strictEqual(result3.metaData[1].metaData[1].metaData[1].name, 'NC3');
 
-      should.strictEqual(result3.metaData[1].metaData[1].metaData[1].metaData[0].name, '1');
-      should.strictEqual(result3.metaData[1].metaData[1].metaData[1].metaData[1].name, "'LEVEL4STRINGA'");
+    assert.strictEqual(result3.metaData[1].metaData[1].metaData[1].metaData[0].name, '1');
+    assert.strictEqual(result3.metaData[1].metaData[1].metaData[1].metaData[1].name, "'LEVEL4STRINGA'");
 
-      // (4) Complex SQL, result set
-      const result4 = await conn.execute(complexSql, [], { resultSet: true });
-      const rows4 = await traverse_results(result4.resultSet);
-      should.strictEqual(rows4[0][0], 'Level 1 String');
-      should.strictEqual(rows4[0][1][0][0], 'Level 2 String');
-      should.strictEqual(rows4[0][1][0][1][0][0], 'Level 3 String');
-      should.deepEqual(rows4[0][1][0][1][0][1], rowsComplex);
+    // (4) Complex SQL, result set
+    const result4 = await conn.execute(complexSql, [], { resultSet: true });
+    const rows4 = await traverse_results(result4.resultSet);
+    assert.strictEqual(rows4[0][0], 'Level 1 String');
+    assert.strictEqual(rows4[0][1][0][0], 'Level 2 String');
+    assert.strictEqual(rows4[0][1][0][1][0][0], 'Level 3 String');
+    assert.deepEqual(rows4[0][1][0][1][0][1], rowsComplex);
 
-      should.strictEqual(result4.metaData[0].name, "'LEVEL1STRING'");
-      should.strictEqual(result4.metaData[1].name, 'NC1');
+    assert.strictEqual(result4.metaData[0].name, "'LEVEL1STRING'");
+    assert.strictEqual(result4.metaData[1].name, 'NC1');
 
-      await conn.close();
-    } catch (err) {
-      should.not.exist(err);
-    }
+    await conn.close();
   });
 });

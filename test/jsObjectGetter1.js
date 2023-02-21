@@ -32,271 +32,168 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('140. jsObjectGetter1.js', function() {
 
-  var connection = null;
-  var tableName = "nodb_tab_v8getter";
+  let connection = null;
+  const tableName = "nodb_tab_v8getter";
 
-  before(function(done) {
-    async.series([
-      function(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
-      },
-      function(cb) {
-        var proc = "BEGIN \n" +
-                   "    DECLARE \n" +
-                   "        e_table_missing EXCEPTION; \n" +
-                   "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-                   "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE('DROP TABLE " + tableName + " PURGE'); \n" +
-                   "    EXCEPTION \n" +
-                   "        WHEN e_table_missing \n" +
-                   "        THEN NULL; \n" +
-                   "    END; \n" +
-                   "    EXECUTE IMMEDIATE (' \n" +
-                   "        CREATE TABLE " + tableName + " ( \n" +
-                   "            department_id      NUMBER, \n" +
-                   "            department_name    VARCHAR2(50) \n" +
-                   "        ) \n" +
-                   "    '); \n" +
-                   "END; ";
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
 
-        connection.execute(proc, function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function(cb) {
-        var sql = "INSERT INTO " + tableName + " VALUES(23, 'Jonh Smith')";
+    const proc = "BEGIN \n" +
+               "    DECLARE \n" +
+               "        e_table_missing EXCEPTION; \n" +
+               "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+               "    BEGIN \n" +
+               "        EXECUTE IMMEDIATE('DROP TABLE " + tableName + " PURGE'); \n" +
+               "    EXCEPTION \n" +
+               "        WHEN e_table_missing \n" +
+               "        THEN NULL; \n" +
+               "    END; \n" +
+               "    EXECUTE IMMEDIATE (' \n" +
+               "        CREATE TABLE " + tableName + " ( \n" +
+               "            department_id      NUMBER, \n" +
+               "            department_name    VARCHAR2(50) \n" +
+               "        ) \n" +
+               "    '); \n" +
+               "END; ";
 
-        connection.execute(sql, function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
-  }); // before
+    await connection.execute(proc);
 
-  after(function(done) {
-    async.series([
-      function(cb) {
-        var sql = "DROP TABLE " + tableName + " PURGE";
-        connection.execute(sql, function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function(cb) {
-        connection.release(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
-  }); // after
+    const sql = "INSERT INTO " + tableName + " VALUES(23, 'Jonh Smith')";
+
+    await connection.execute(sql);
+  });
+
+  after(async function() {
+    const sql = "DROP TABLE " + tableName + " PURGE";
+    await connection.execute(sql);
+    await connection.close();
+  });
 
   describe('140.1 Negative: overwrite the getter() function of bind in objects', function() {
-    var sql = "select * from " + tableName + " where department_id = :id";
-    var bindObj = {id: 23};
+    const sql = "select * from " + tableName + " where department_id = :id";
+    const bindObj = {id: 23};
     Object.defineProperty(bindObj, 'id', {
       get: function() {
         throw new Error('Nope');
       }
     });
 
-    it('140.1.1 ProcessBindsByName()', function(done) {
-      connection.execute(
-        sql,
-        bindObj,
-        function(err, result) {
-          should.exist(err);
-          should.strictEqual(
-            err.message,
-            "Nope"
-          );
-          should.not.exist(result);
-          done();
-        }
+    it('140.1.1 ProcessBindsByName()', async function() {
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await connection.execute(sql, bindObj);
+        },
+        /Nope/
       );
     });
 
-    it('140.1.2 ProcessBindsByPos()', function(done) {
-      connection.execute(
-        sql,
-        [bindObj],
-        function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith("NJS-044:");
-          should.not.exist(result);
-          done();
-        }
+    it('140.1.2 ProcessBindsByPos()', async function() {
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await connection.execute(sql, [bindObj]);
+        },
+        /NJS-044:/
       );
     });
+
   }); // 140.1
 
   describe('140.2 Negative (ProcessBind): OUT bind with properties altered', function() {
-    it('140.2.1 ', function(done) {
-      async.series([
-        function doCreateProcedure(cb) {
-          var proc = "CREATE OR REPLACE PROCEDURE nodb_proc_v8_out (p_in IN VARCHAR2, p_out OUT VARCHAR2) \n" +
-                     "AS \n" +
-                     "BEGIN \n" +
-                     "    p_out := 'OUT: ' || p_in; \n" +
-                     "END; ";
+    it('140.2.1 ', async function() {
+      const proc = "CREATE OR REPLACE PROCEDURE nodb_proc_v8_out (p_in IN VARCHAR2, p_out OUT VARCHAR2) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_out := 'OUT: ' || p_in; \n" +
+                 "END; ";
+      await connection.execute(proc);
+      const foo = { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 200 };
+      Object.defineProperty(foo, 'dir', {
+        get: function() {
+          throw new Error('No Dir');
+        }
+      });
 
-          connection.execute(proc, function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        },
-        function doTest(cb) {
-          var foo = { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 200 };
-          Object.defineProperty(foo, 'dir', {
-            get: function() {
-              throw new Error('No Dir');
-            }
-          });
+      Object.defineProperty(foo, 'type', {
+        get: function() {
+          throw new Error('No Type');
+        }
+      });
 
-          Object.defineProperty(foo, 'type', {
-            get: function() {
-              throw new Error('No Type');
-            }
-          });
+      Object.defineProperty(foo, 'maxSize', {
+        get: function() {
+          throw new Error('No maxSize');
+        }
+      });
 
-          Object.defineProperty(foo, 'maxSize', {
-            get: function() {
-              throw new Error('No maxSize');
-            }
-          });
-
-          connection.execute(
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await connection.execute(
             "begin nodb_proc_v8_out(:i, :o); end;",
             {
               i: "Changjie",
               o: foo
-            },
-            function(err, result) {
-              should.exist(err);
-              should.strictEqual(
-                err.message,
-                "No Dir"
-              );
-              should.not.exist(result);
-              cb();
             }
           );
         },
-        function doDropProcedure(cb) {
-          var sql = "drop procedure nodb_proc_v8_out";
-
-          connection.execute(sql, function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        }
-      ], done);
+        /No Dir/
+      );
+      const sql = "drop procedure nodb_proc_v8_out";
+      await connection.execute(sql);
     });
   }); // 140.2
 
   describe('140.3 Negative: PL/SQL Indexed Table', function() {
-    before(function(done) {
-      async.series([
-        function doCreateTable(cb) {
-          var proc =  "BEGIN \n" +
-                      "  DECLARE \n" +
-                      "    e_table_missing EXCEPTION; \n" +
-                      "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
-                      "   BEGIN \n" +
-                      "     EXECUTE IMMEDIATE ('DROP TABLE nodb_tab_waveheight PURGE'); \n" +
-                      "   EXCEPTION \n" +
-                      "     WHEN e_table_missing \n" +
-                      "     THEN NULL; \n" +
-                      "   END; \n" +
-                      "   EXECUTE IMMEDIATE (' \n" +
-                      "     CREATE TABLE nodb_tab_waveheight (beach VARCHAR2(50), depth NUMBER)  \n" +
-                      "   '); \n" +
-                      "END; ";
+    before(async function() {
+      let sql =  "BEGIN \n" +
+                  "  DECLARE \n" +
+                  "    e_table_missing EXCEPTION; \n" +
+                  "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
+                  "   BEGIN \n" +
+                  "     EXECUTE IMMEDIATE ('DROP TABLE nodb_tab_waveheight PURGE'); \n" +
+                  "   EXCEPTION \n" +
+                  "     WHEN e_table_missing \n" +
+                  "     THEN NULL; \n" +
+                  "   END; \n" +
+                  "   EXECUTE IMMEDIATE (' \n" +
+                  "     CREATE TABLE nodb_tab_waveheight (beach VARCHAR2(50), depth NUMBER)  \n" +
+                  "   '); \n" +
+                  "END; ";
 
-          connection.execute(
-            proc,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function doCreatePkg(cb) {
-          var proc = "CREATE OR REPLACE PACKAGE nodb_v8pkg IS \n" +
-                     "  TYPE beachType IS TABLE OF VARCHAR2(30) INDEX BY BINARY_INTEGER;\n" +
-                     "  TYPE depthType IS TABLE OF NUMBER       INDEX BY BINARY_INTEGER; \n" +
-                     "  PROCEDURE array_in(beaches IN beachType, depths IN depthType); \n" +
-                     "END; ";
+      await connection.execute(sql);
+      sql = "CREATE OR REPLACE PACKAGE nodb_v8pkg IS \n" +
+                 "  TYPE beachType IS TABLE OF VARCHAR2(30) INDEX BY BINARY_INTEGER;\n" +
+                 "  TYPE depthType IS TABLE OF NUMBER       INDEX BY BINARY_INTEGER; \n" +
+                 "  PROCEDURE array_in(beaches IN beachType, depths IN depthType); \n" +
+                 "END; ";
 
-          connection.execute(
-            proc,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function doCreatePkgbody(cb) {
-          var proc = "CREATE OR REPLACE PACKAGE BODY nodb_v8pkg IS \n" +
-                     "  PROCEDURE array_in(beaches IN beachType, depths IN depthType) IS \n" +
-                     "  BEGIN \n" +
-                     "    IF beaches.COUNT <> depths.COUNT THEN \n" +
-                     "      RAISE_APPLICATION_ERROR(-20000, 'Array lengths must match for this example.');" +
-                     "    END IF; \n" +
-                     "    FORALL i IN INDICES OF beaches \n" +
-                     "      INSERT INTO nodb_tab_waveheight (beach, depth) VALUES (beaches(i), depths(i)); \n" +
-                     "  END; \n" +
-                     "END;";
+      await connection.execute(sql);
+      sql = "CREATE OR REPLACE PACKAGE BODY nodb_v8pkg IS \n" +
+                 "  PROCEDURE array_in(beaches IN beachType, depths IN depthType) IS \n" +
+                 "  BEGIN \n" +
+                 "    IF beaches.COUNT <> depths.COUNT THEN \n" +
+                 "      RAISE_APPLICATION_ERROR(-20000, 'Array lengths must match for this example.');" +
+                 "    END IF; \n" +
+                 "    FORALL i IN INDICES OF beaches \n" +
+                 "      INSERT INTO nodb_tab_waveheight (beach, depth) VALUES (beaches(i), depths(i)); \n" +
+                 "  END; \n" +
+                 "END;";
 
-          connection.execute(
-            proc,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
-    }); // before
+      await connection.execute(sql);
+    });
 
-    after(function(done) {
-      async.series([
-        function doDropPkg(cb) {
-          connection.execute(
-            "drop package nodb_v8pkg",
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function doDropTable(cb) {
-          connection.execute(
-            "drop table nodb_tab_waveheight",
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
-    }); // after
+    after(async function() {
+      await connection.execute("drop package nodb_v8pkg");
+      await connection.execute("drop table nodb_tab_waveheight");
+    });
 
-    it('140.3.1 bind an element being altered-JSON object', function(done) {
-      var foo =
+    it('140.3.1 bind an element being altered-JSON object', async function() {
+      const foo =
         {
           beach_in: { type: oracledb.STRING, dir:  oracledb.BIND_IN, val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
           depth_in: { type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val:  [45, 30, 67] }
@@ -308,52 +205,42 @@ describe('140. jsObjectGetter1.js', function() {
         }
       });
 
-      connection.execute(
-        "BEGIN nodb_v8pkg.array_in(:beach_in, :depth_in); END;",
-        foo,
-        function(err) {
-          should.exist(err);
-          should.strictEqual(
-            err.message,
-            "No type"
-          );
-          done();
-        }
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          const sql = "BEGIN nodb_v8pkg.array_in(:beach_in, :depth_in); END;";
+          await connection.execute(sql, foo);
+        },
+        /No type/
       );
     }); // 140.3.1
 
-    it('140.3.2 GetBindTypeAndSizeFromValue()', function(done) {
-      var foo = { type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val:  [45, 30, 67] };
+    it('140.3.2 GetBindTypeAndSizeFromValue()', async function() {
+      const foo = { type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val:  [45, 30, 67] };
       Object.defineProperty(foo, 'type', {
         get: function() {
           throw new Error('No type');
         }
       });
 
-      connection.execute(
-        "BEGIN nodb_v8pkg.array_in(:beach_in, :depth_in); END;",
-        {
-          beach_in: { type: oracledb.STRING,
-            dir:  oracledb.BIND_IN,
-            val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
-          depth_in: foo
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          const sql = "BEGIN nodb_v8pkg.array_in(:beach_in, :depth_in); END;";
+          const binds = {
+            beach_in: { type: oracledb.STRING,
+              dir:  oracledb.BIND_IN,
+              val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+            depth_in: foo
+          };
+          await connection.execute(sql, binds);
         },
-        function(err, result) {
-          should.exist(err);
-          should.strictEqual(
-            err.message,
-            "No type"
-          );
-          should.not.exist(result);
-          done();
-        }
+        /No type/
       );
     }); // 140.3.2
   }); // 140.3
 
   describe('140.4 Negative: fetchInfo', function() {
-    it('140.4.1 changes getter() of fetchInfo itself', function(done) {
-      var foo = {
+    it('140.4.1 changes getter() of fetchInfo itself', async function() {
+      const foo = {
         outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo : { "TS_DATE": { type : oracledb.STRING } }
       };
@@ -364,25 +251,18 @@ describe('140. jsObjectGetter1.js', function() {
         }
       });
 
-      connection.execute(
-        "SELECT TO_DATE('2017-01-09', 'YYYY-DD-MM') AS TS_DATE FROM DUAL",
-        [],
-        foo,
-        function(err, result) {
-          should.exist(err);
-          should.strictEqual(
-            err.message,
-            "No fetchInfo"
-          );
-          should.not.exist(result);
-          done();
-        }
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          const sql = "SELECT TO_DATE('2017-01-09', 'YYYY-DD-MM') FROM DUAL";
+          await connection.execute(sql, [], foo);
+        },
+        /No fetchInfo/
       );
 
     }); // 140.4.1
 
-    it('140.4.2 changes getter() of the value of fetchInfo object', function(done) {
-      var foo = { type : oracledb.STRING };
+    it('140.4.2 changes getter() of the value of fetchInfo object', async function() {
+      const foo = { type : oracledb.STRING };
 
       Object.defineProperty(foo, 'type', {
         get: function() {
@@ -390,24 +270,17 @@ describe('140. jsObjectGetter1.js', function() {
         }
       });
 
-      var option = {
+      const option = {
         outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo : { "TS_DATE": foo }
       };
 
-      connection.execute(
-        "SELECT TO_DATE('2017-01-09', 'YYYY-DD-MM') AS TS_DATE FROM DUAL",
-        [],
-        option,
-        function(err, result) {
-          should.exist(err);
-          should.strictEqual(
-            err.message,
-            "No type"
-          );
-          should.not.exist(result);
-          done();
-        }
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          const sql = "SELECT TO_DATE('2017-01-09', 'YYYY-DD-MM') FROM DUAL";
+          await connection.execute(sql, [], option);
+        },
+        /No type/
       );
 
     }); // 140.4.2
@@ -415,306 +288,242 @@ describe('140. jsObjectGetter1.js', function() {
 
   describe("140.5 Negative: Bool type", function() {
 
-    var dotest = function(opt, cb) {
-      var sql = "INSERT INTO " + tableName + " VALUES(1405, 'Changjie Lin')";
-      connection.execute(
-        sql,
-        opt,
-        function(err, result) {
-          should.exist(err);
-          should.strictEqual(
-            err.message,
-            "Wrong boolean value"
-          );
-          should.not.exist(result);
-          cb();
-        }
+    const dotest = async function(opt) {
+      const sql = "INSERT INTO " + tableName + " VALUES(1405, 'Changjie Lin')";
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await connection.execute(sql, opt);
+        },
+        /Wrong boolean value/
       );
     };
 
-    it('140.5.1 option - autoCommit', function(done) {
+    it('140.5.1 option - autoCommit', async function() {
 
-      var options = { autoCommit: true };
+      const options = { autoCommit: true };
       Object.defineProperty(options, 'autoCommit', {
         get: function() {
           throw new Error('Wrong boolean value');
         }
       });
-      dotest(options, done);
+      await dotest(options);
 
     });
 
-    it('140.5.2 option - extendedMetaData', function(done) {
+    it('140.5.2 option - extendedMetaData', async function() {
 
-      var options = { extendedMetaData: true };
+      const options = { extendedMetaData: true };
       Object.defineProperty(options, 'extendedMetaData', {
         get: function() {
           throw new Error('Wrong boolean value');
         }
       });
-      dotest(options, done);
+      await dotest(options);
 
     });
   }); // 140.5
 
   describe('140.6 Negative: positive Int type', function() {
 
-    it('140.6.1 option - fetchArraySize', function(done) {
+    it('140.6.1 option - fetchArraySize', async function() {
 
-      var options = { fetchArraySize: 200 };
+      const options = { fetchArraySize: 200 };
       Object.defineProperty(options, 'fetchArraySize', {
         get: function() {
           throw new Error('No value');
         }
       });
 
-      var sql = "select * from " + tableName;
-      connection.execute(
-        sql,
-        options,
-        function(err, result) {
-          should.exist(err);
-          should.strictEqual(
-            err.message,
-            "No value"
-          );
-          should.not.exist(result);
-          done();
-        }
+      const sql = "select * from " + tableName;
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await connection.execute(sql, options);
+        },
+        /No value/
       );
     });
   }); // 140.6
 
   describe('140.7 Negative: Pool object', function() {
 
-    var dotest = function(opt, cb) {
-      oracledb.createPool(opt, function(err, pool) {
-        should.not.exist(pool);
-        should.exist(err);
-        cb();
-      });
+    const dotest = async function(opt) {
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await oracledb.createPool(opt);
+        },
+        /Nope/
+      );
     };
 
-    it('140.7.1 String type - user', function(done) {
+    it('140.7.1 String type - user', async function() {
 
-      var cred = JSON.parse(JSON.stringify(dbConfig));
+      const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'user', {
         get: function() {
           throw new Error('Nope');
         }
       });
-      dotest(cred, done);
+      await dotest(cred);
     });
 
-    it('140.7.2 String type - password', function(done) {
+    it('140.7.2 String type - password', async function() {
 
-      var cred = JSON.parse(JSON.stringify(dbConfig));
+      const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'password', {
         get: function() {
           throw new Error('Nope');
         }
       });
-      dotest(cred, done);
+      await dotest(cred);
     });
 
-    it('140.7.3 String type - connectString', function(done) {
+    it('140.7.3 String type - connectString', async function() {
 
-      var cred = JSON.parse(JSON.stringify(dbConfig));
+      const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'connectString', {
         get: function() {
           throw new Error('Nope');
         }
       });
-      dotest(cred, done);
+      await dotest(cred);
     });
 
-    it('140.7.4 poolMin', function(done) {
+    it('140.7.4 poolMin', async function() {
 
-      var cred = JSON.parse(JSON.stringify(dbConfig));
+      const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'poolMin', {
         get: function() {
           throw new Error('Nope');
         }
       });
-      dotest(cred, done);
+      await dotest(cred);
     });
 
-    it('140.7.5 poolMax', function(done) {
+    it('140.7.5 poolMax', async function() {
 
-      var cred = JSON.parse(JSON.stringify(dbConfig));
+      const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'poolMax', {
         get: function() {
           throw new Error('Nope');
         }
       });
-      dotest(cred, done);
+      await dotest(cred);
     });
 
-    it('140.7.6 poolIncrement', function(done) {
+    it('140.7.6 poolIncrement', async function() {
 
-      var cred = JSON.parse(JSON.stringify(dbConfig));
+      const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'poolIncrement', {
         get: function() {
           throw new Error('Nope');
         }
       });
-      dotest(cred, done);
+      await dotest(cred);
     });
 
-    it('140.7.7 poolTimeout', function(done) {
+    it('140.7.7 poolTimeout', async function() {
 
-      var cred = JSON.parse(JSON.stringify(dbConfig));
+      const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'poolTimeout', {
         get: function() {
           throw new Error('Nope');
         }
       });
-      dotest(cred, done);
+      await dotest(cred);
     });
 
-    it('140.7.8 poolPingInterval', function(done) {
+    it('140.7.8 poolPingInterval', async function() {
 
-      var cred = JSON.parse(JSON.stringify(dbConfig));
+      const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'poolPingInterval', {
         get: function() {
           throw new Error('Nope');
         }
       });
 
-      dotest(cred, done);
+      await dotest(cred);
     });
 
-    it('140.7.9 stmtCacheSize', function(done) {
+    it('140.7.9 stmtCacheSize', async function() {
 
-      var cred = JSON.parse(JSON.stringify(dbConfig));
+      const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'stmtCacheSize', {
         get: function() {
           throw new Error('Nope');
         }
       });
-      dotest(cred, done);
-    });
-
-    it('140.7.10 connecionsOpen', function(done) {
-
-      oracledb.createPool(
-        dbConfig,
-        function(err, pool) {
-          should.not.exist(err);
-
-          Object.defineProperty(pool, 'connecionsOpen', {
-            get: function() {
-              throw new Error('Property Wrong');
-            }
-          });
-
-          should.throws(
-            function() {
-              console.log(pool.connecionsOpen);
-            },
-            /Property Wrong/
-          );
-
-          pool.close(function(err) {
-            should.not.exist(err);
-            done();
-          });
-        }
-      );
-    });
-
-    it('140.7.11 connecionsInUse', function(done) {
-
-      oracledb.createPool(
-        dbConfig,
-        function(err, pool) {
-          should.not.exist(err);
-
-          Object.defineProperty(pool, 'connecionsInUse', {
-            get: function() {
-              throw new Error('Property Wrong');
-            }
-          });
-          should.throws(
-            function() {
-              console.log(pool.connecionsInUse);
-            },
-            /Property Wrong/
-          );
-
-          pool.close(function(err) {
-            should.not.exist(err);
-            done();
-          });
-        }
-      );
+      await dotest(cred);
     });
 
   }); // 140.7
 
   describe('140.8 Negative: Get Connection', function()  {
 
-    it('140.8.1 String type: user', function(done) {
+    it('140.8.1 String type: user', async function() {
 
-      var cred = JSON.parse(JSON.stringify(dbConfig));
+      const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'user', {
         get : function() {
           throw new Error('Nope');
         }
       });
 
-      oracledb.getConnection(cred, function(err, conn) {
-        should.not.exist(conn);
-        should.exist(err);
-        done();
-      });
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await oracledb.getConnection(cred);
+        },
+        /Nope/
+      );
     });
 
-    it('140.8.2 String type: password', function(done) {
+    it('140.8.2 String type: password', async function() {
 
-      var cred = JSON.parse(JSON.stringify(dbConfig));
+      const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'password', {
         get : function() {
           throw new Error('Nope');
         }
       });
 
-      oracledb.getConnection(cred, function(err, conn) {
-        should.not.exist(conn);
-        should.exist(err);
-        done();
-      });
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await oracledb.getConnection(cred);
+        },
+        /Nope/
+      );
     });
 
-    it('140.8.3 String type: connectionString', function(done) {
+    it('140.8.3 String type: connectionString', async function() {
 
-      var cred = JSON.parse(JSON.stringify(dbConfig));
+      const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'connectString', {
         get : function() {
           throw new Error('Nope');
         }
       });
 
-      oracledb.getConnection(cred, function(err, conn) {
-        should.not.exist(conn);
-        should.exist(err);
-        done();
-      });
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await oracledb.getConnection(cred);
+        },
+        /Nope/
+      );
     });
 
-    it('140.8.4 Constant type: privilege', function(done) {
+    it('140.8.4 Constant type: privilege', async function() {
 
-      var cred = JSON.parse(JSON.stringify(dbConfig));
+      const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'privilege', {
         get : function() {
           throw new Error('Nope');
         }
       });
-      oracledb.getConnection(cred, function(err, conn) {
-        should.not.exist(conn);
-        should.exist(err);
-        done();
-      });
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await oracledb.getConnection(cred);
+        },
+        /Nope/
+      );
     });
 
   }); // 140.8

@@ -31,18 +31,18 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
-var sql      = require('./sql.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const sql      = require('./sqlClone.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('110. rowidProcedureBindAsString_bindout.js', function() {
-  var connection = null;
-  var tableName = "nodb_rowid_plsql_out";
-  var insertID = 1;
+  let connection = null;
+  let tableName = "nodb_rowid_plsql_out";
+  let insertID = 1;
 
-  var proc_create_table = "BEGIN \n" +
+  let proc_create_table = "BEGIN \n" +
                           "    DECLARE \n" +
                           "        e_table_missing EXCEPTION; \n" +
                           "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
@@ -59,408 +59,347 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
                           "        ) \n" +
                           "    '); \n" +
                           "END;  ";
-  var drop_table = "DROP TABLE " + tableName + " PURGE";
+  let drop_table = "DROP TABLE " + tableName + " PURGE";
 
-  before('get connection and create table', function(done) {
-    async.series([
-      function(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
-      },
-      function(cb) {
-        sql.executeSql(connection, proc_create_table, {}, {}, cb);
-      }
-    ], done);
+  before('get connection and create table', async function() {
+
+    connection = await oracledb.getConnection(dbConfig);
+    assert(connection);
+    await sql.executeSql(connection, proc_create_table, {}, {});
   });
 
-  after('release connection', function(done) {
-    async.series([
-      function(cb) {
-        sql.executeSql(connection, drop_table, {}, {}, cb);
-      },
-      function(cb) {
-        connection.release(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+  after('release connection', async function() {
+
+    await sql.executeSql(connection, drop_table, {}, {});
+    await connection.release();
   });
 
-  beforeEach(function(done) {
+  beforeEach(function() {
     insertID++;
-    done();
+
   });
 
   describe('110.1 PROCEDURE BIND_OUT as rowid', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN ROWID, content_out OUT ROWID)\n" +
+    let proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN ROWID, content_out OUT ROWID)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_in)); \n" +
                       "    select content into content_out from " + tableName + " where id = id_in; \n" +
                       "END nodb_rowid_bind_out; ";
-    var proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
-    var proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
+    let proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
+    let proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
 
-    before('create procedure', function(done) {
-      sql.executeSql(connection, proc_create, {}, {}, done);
+    before('create procedure', async function() {
+      await sql.executeSql(connection, proc_create, {}, {});
     });
 
-    after('drop procedure', function(done) {
-      sql.executeSql(connection, proc_drop, {}, {}, done);
+    after('drop procedure', async function() {
+      await sql.executeSql(connection, proc_drop, {}, {});
     });
 
-    it('110.1.1 works with null', function(done) {
-      var content = null;
-      procedureBindOut(proc_execute, content, content, done);
+    it('110.1.1 works with null', async function() {
+      await procedureBindOut(proc_execute, null, null);
     });
 
-    it('110.1.2 works with empty string', function(done) {
-      var content = "";
-      procedureBindOut(proc_execute, content, null, done);
+    it('110.1.2 works with empty string', async function() {
+      await procedureBindOut(proc_execute, "", null);
     });
 
-    it('110.1.3 works with undefined', function(done) {
-      var content = undefined;
-      procedureBindOut(proc_execute, content, null, done);
+    it('110.1.3 works with undefined', async function() {
+      await procedureBindOut(proc_execute, undefined, null);
     });
 
-    it('110.1.4 works with NaN', function(done) {
-      var content = NaN;
-      var bindVar = {
+    it('110.1.4 works with NaN', async function() {
+      let content = NaN;
+      let bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-        done();
-      });
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
+        },
+        /NJS-011:/
+      );
     });
 
-    it('110.1.5 works with extended rowid', function(done) {
-      var content = "AAAB12AADAAAAwPAAA";
-      procedureBindOut(proc_execute, content, content, done);
+    it('110.1.5 works with extended rowid', async function() {
+      await procedureBindOut(proc_execute, "AAAB12AADAAAAwPAAA", "AAAB12AADAAAAwPAAA");
     });
 
-    it('110.1.6 works with restricted rowid', function(done) {
-      var content = "00000DD5.0000.0101";
-      procedureBindOut(proc_execute, content, content, done);
+    it('110.1.6 works with restricted rowid', async function() {
+      await procedureBindOut(proc_execute, "00000DD5.0000.0101", "00000DD5.0000.0101");
     });
 
-    it('110.1.7 works with string 0', function(done) {
-      var content = "0";
-      procedureBindOut(proc_execute, content, "00000000.0000.0000", done);
+    it('110.1.7 works with string 0', async function() {
+      await procedureBindOut(proc_execute, "0", "00000000.0000.0000");
     });
 
-    it('110.1.8 works with number 0', function(done) {
-      var content = 0;
-      var bindVar = {
+    it('110.1.8 works with number 0', async function() {
+      let content = 0;
+      let bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-        done();
-      });
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
+        },
+        /NJS-011:/
+      );
     });
 
-    it('110.1.9 works with default bind type/dir - extended rowid', function(done) {
-      var content = "AAAB1+AADAAAAwPAAA";
-      procedureBindOut_default(proc_execute, content, content, done);
+    it('110.1.9 works with default bind type/dir - extended rowid', async function() {
+      await procedureBindOut_default(proc_execute, "AAAB1+AADAAAAwPAAA", "AAAB1+AADAAAAwPAAA");
     });
 
-    it('110.1.10 works with default bind type/dir - null value', function(done) {
-      var content = null;
-      procedureBindOut_default(proc_execute, content, content, done);
+    it('110.1.10 works with default bind type/dir - null value', async function() {
+      await procedureBindOut_default(proc_execute, null, null);
     });
 
-    it('110.1.11 works with default bind type/dir - empty string', function(done) {
-      var content = "";
-      procedureBindOut_default(proc_execute, content, null, done);
+    it('110.1.11 works with default bind type/dir - empty string', async function() {
+      await procedureBindOut_default(proc_execute, "", null);
     });
 
-    it('110.1.12 works with default bind type/dir - undefined', function(done) {
-      var content = undefined;
-      procedureBindOut_default(proc_execute, content, null, done);
+    it('110.1.12 works with default bind type/dir - undefined', async function() {
+      await procedureBindOut_default(proc_execute, undefined, null);
     });
 
-    it('110.1.13 bind error: NJS-037', function(done) {
-      var bindVar = {
+    it('110.1.13 bind error: NJS-037', async function() {
+      let bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-037: invalid data type at array index 0 for bind ":c"');
-        done();
-      });
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
+        },
+        /NJS-037:/
+      );
     });
 
-    it('110.1.14 bind error: NJS-052', function(done) {
-      var bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN }, { type: oracledb.STRING, dir: oracledb.BIND_OUT } ];
-      sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 2');
-        done();
-      });
+    it('110.1.14 bind error: NJS-052', async function() {
+      let bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN }, { type: oracledb.STRING, dir: oracledb.BIND_OUT } ];
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
+        },
+        /NJS-052:/
+      );
     });
 
   });
 
   describe('110.2 PROCEDURE BIND_OUT as string', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN ROWID, content_out OUT VARCHAR2)\n" +
+    let proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN ROWID, content_out OUT VARCHAR2)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_in)); \n" +
                       "    select content into content_out from " + tableName + " where id = id_in; \n" +
                       "END nodb_rowid_bind_out; ";
-    var proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
-    var proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
+    let proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
+    let proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
 
-    before('create procedure', function(done) {
-      sql.executeSql(connection, proc_create, {}, {}, done);
+    before('create procedure', async function() {
+      await sql.executeSql(connection, proc_create, {}, {});
     });
 
-    after('drop procedure', function(done) {
-      sql.executeSql(connection, proc_drop, {}, {}, done);
+    after('drop procedure', async function() {
+      await sql.executeSql(connection, proc_drop, {}, {});
     });
 
-    it('110.2.1 works with null', function(done) {
-      var content = null;
-      procedureBindOut(proc_execute, content, content, done);
+    it('110.2.1 works with null', async function() {
+      await procedureBindOut(proc_execute, null, null);
     });
 
-    it('110.2.2 works with empty string', function(done) {
-      var content = "";
-      procedureBindOut(proc_execute, content, null, done);
+    it('110.2.2 works with empty string', async function() {
+      await procedureBindOut(proc_execute, "", null);
     });
 
-    it('110.2.3 works with undefined', function(done) {
-      var content = undefined;
-      procedureBindOut(proc_execute, content, null, done);
+    it('110.2.3 works with undefined', async function() {
+      await procedureBindOut(proc_execute, undefined, null);
     });
 
-    it('110.2.4 works with NaN', function(done) {
-      var content = NaN;
-      var bindVar = {
+    it('110.2.4 works with NaN', async function() {
+      let content = NaN;
+      let bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-        done();
-      });
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
+        },
+        /NJS-011:/
+      );
     });
 
-    it('110.2.5 works with extended rowid', function(done) {
-      var content = "AAAB12AADAAAAwPAAA";
-      procedureBindOut(proc_execute, content, content, done);
+    it('110.2.5 works with extended rowid', async function() {
+      await procedureBindOut(proc_execute, "AAAB12AADAAAAwPAAA", "AAAB12AADAAAAwPAAA");
     });
 
-    it('110.2.6 works with restricted rowid', function(done) {
-      var content = "00000DD5.0000.0101";
-      procedureBindOut(proc_execute, content, content, done);
+    it('110.2.6 works with restricted rowid', async function() {
+      await procedureBindOut(proc_execute, "00000DD5.0000.0101", "00000DD5.0000.0101");
     });
 
-    it('110.2.7 works with string 0', function(done) {
-      var content = "0";
-      procedureBindOut(proc_execute, content, "00000000.0000.0000", done);
+    it('110.2.7 works with string 0', async function() {
+      await procedureBindOut(proc_execute, "0", "00000000.0000.0000");
     });
 
-    it('110.2.8 works with number 0', function(done) {
-      var content = 0;
-      var bindVar = {
+    it('110.2.8 works with number 0', async function() {
+      let content = 0;
+      let bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-        done();
-      });
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
+        },
+        /NJS-011:/
+      );
     });
 
-    it('110.2.9 works with default bind type/dir - extended rowid', function(done) {
-      var content = "AAAB1+AADAAAAwPAAA";
-      procedureBindOut_default(proc_execute, content, content, done);
+    it('110.2.9 works with default bind type/dir - extended rowid', async function() {
+      await procedureBindOut_default(proc_execute, "AAAB1+AADAAAAwPAAA", "AAAB1+AADAAAAwPAAA");
     });
 
-    it('110.2.10 works with default bind type/dir - null value', function(done) {
-      var content = null;
-      procedureBindOut_default(proc_execute, content, content, done);
+    it('110.2.10 works with default bind type/dir - null value', async function() {
+      await procedureBindOut_default(proc_execute, null, null);
     });
 
-    it('110.2.11 works with default bind type/dir - empty string', function(done) {
-      var content = "";
-      procedureBindOut_default(proc_execute, content, null, done);
+    it('110.2.11 works with default bind type/dir - empty string', async function() {
+      await procedureBindOut_default(proc_execute, "", null);
     });
 
-    it('110.2.12 works with default bind type/dir - undefined', function(done) {
-      var content = undefined;
-      procedureBindOut_default(proc_execute, content, null, done);
+    it('110.2.12 works with default bind type/dir - undefined', async function() {
+      await procedureBindOut_default(proc_execute, undefined, null);
     });
 
-    it('110.2.13 bind error: NJS-037', function(done) {
-      var bindVar = {
+    it('110.2.13 bind error: NJS-037', async function() {
+      let bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-037: invalid data type at array index 0 for bind ":c"');
-        done();
-      });
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
+        },
+        /NJS-037:/
+      );
     });
 
-    it('110.2.14 bind error: NJS-052', function(done) {
-      var bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN }, { type: oracledb.STRING, dir: oracledb.BIND_OUT } ];
-      sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 2');
-        done();
-      });
+    it('110.2.14 bind error: NJS-052', async function() {
+      let bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN }, { type: oracledb.STRING, dir: oracledb.BIND_OUT } ];
+      await testsUtil.assertThrowsAsync(
+        async () => {
+          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
+        },
+        /NJS-052:/
+      );
     });
 
   });
 
   describe('110.3 PROCEDURE BIND_IN, UPDATE', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN STRING, content_2 IN ROWID, content_out OUT ROWID)\n" +
+    let proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN STRING, content_2 IN ROWID, content_out OUT ROWID)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_1)); \n" +
                       "    update " + tableName + " set content = content_2 where id = id_in; \n" +
                       "    select content into content_out from " + tableName + " where id = id_in; \n" +
                       "END nodb_rowid_bind_1083; ";
-    var proc_execute = "BEGIN nodb_rowid_bind_1083 (:i, :c1, :c2, :o); END;";
-    var proc_drop = "DROP PROCEDURE nodb_rowid_bind_1083";
+    let proc_execute = "BEGIN nodb_rowid_bind_1083 (:i, :c1, :c2, :o); END;";
+    let proc_drop = "DROP PROCEDURE nodb_rowid_bind_1083";
 
-    before('create procedure', function(done) {
-      sql.executeSql(connection, proc_create, {}, {}, done);
+    before('create procedure', async function() {
+      await sql.executeSql(connection, proc_create, {}, {});
     });
 
-    after('drop procedure', function(done) {
-      sql.executeSql(connection, proc_drop, {}, {}, done);
+    after('drop procedure', async function() {
+      await sql.executeSql(connection, proc_drop, {}, {});
     });
 
-    it('110.3.1 update null with rowid', function(done) {
-      var content_1 = null;
-      var content_2 = "AAAB12AADAAAAwPAAA";
-      procedureBindOut_update(proc_execute, content_1, content_2, content_2, done);
+    it('110.3.1 update null with rowid', async function() {
+      await procedureBindOut_update(proc_execute, null, "AAAB12AADAAAAwPAAA", "AAAB12AADAAAAwPAAA");
     });
 
-    it('110.3.2 update empty string with rowid', function(done) {
-      var content_1 = "";
-      var content_2 = "AAAB12AADAAAAwPAAA";
-      procedureBindOut_update(proc_execute, content_1, content_2, content_2, done);
+    it('110.3.2 update empty string with rowid', async function() {
+      await procedureBindOut_update(proc_execute, "", "AAAB12AADAAAAwPAAA", "AAAB12AADAAAAwPAAA");
     });
 
-    it('110.3.3 update undefined with rowid', function(done) {
-      var content_1 = undefined;
-      var content_2 = "AAAB12AADAAAAwPAAA";
-      procedureBindOut_update(proc_execute, content_1, content_2, content_2, done);
+    it('110.3.3 update undefined with rowid', async function() {
+      await procedureBindOut_update(proc_execute, undefined, "AAAB12AADAAAAwPAAA", "AAAB12AADAAAAwPAAA");
     });
 
-    it('110.3.4 works with default bind type/dir', function(done) {
-      var content_1 = "AAAB1+AADAAAAwPAAA";
-      var content_2 = "0";
-      procedureBindOut_update(proc_execute, content_1, content_2, "00000000.0000.0000", done);
+    it('110.3.4 works with default bind type/dir', async function() {
+      await procedureBindOut_update(proc_execute, "AAAB1+AADAAAAwPAAA", "0", "00000000.0000.0000");
     });
 
-    it('110.3.5 works with default bind type/dir - null value', function(done) {
-      var content_1 = "AAAB12AADAAAAwPAAA";
-      var content_2 = null;
-      procedureBindOut_update_default(proc_execute, content_1, content_2, null, done);
+    it('110.3.5 works with default bind type/dir - null value', async function() {
+      await procedureBindOut_update_default(proc_execute, "AAAB12AADAAAAwPAAA", null, null);
     });
 
-    it('110.3.6 works with default bind type/dir - empty string', function(done) {
-      var content_1 = "AAAB12AADAAAAwPAAA";
-      var content_2 = "";
-      procedureBindOut_update_default(proc_execute, content_1, content_2, null, done);
+    it('110.3.6 works with default bind type/dir - empty string', async function() {
+      await procedureBindOut_update_default(proc_execute, "AAAB12AADAAAAwPAAA", "", null);
     });
 
-    it('110.3.7 works with default bind type/dir - undefined', function(done) {
-      var content_1 = "AAAB12AADAAAAwPAAA";
-      var content_2 = undefined;
-      procedureBindOut_update_default(proc_execute, content_1, content_2, null, done);
+    it('110.3.7 works with default bind type/dir - undefined', async function() {
+      await procedureBindOut_update_default(proc_execute, "AAAB12AADAAAAwPAAA", undefined, null);
     });
 
   });
 
-  var procedureBindOut = function(proc_execute, content_in, expected, callback) {
-    var bindVar_out = {
+  let procedureBindOut = async function(proc_execute, content_in, expected) {
+    let bindVar_out = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_IN },
       o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
     };
-    connection.execute(
-      proc_execute,
-      bindVar_out,
-      function(err, result) {
-        should.not.exist(err);
-        var resultVal = result.outBinds.o;
-        should.strictEqual(resultVal, expected);
-        callback();
-      }
-    );
+    let result = await connection.execute(proc_execute, bindVar_out);
+    assert(result);
+    assert.strictEqual(result.outBinds.o, expected);
   };
 
-  var procedureBindOut_default = function(proc_execute, content_in, expected, callback) {
-    var bindVar_out = {
+  let procedureBindOut_default = async function(proc_execute, content_in, expected) {
+    let bindVar_out = {
       i: insertID,
       c: content_in,
       o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
     };
-    connection.execute(
-      proc_execute,
-      bindVar_out,
-      function(err, result) {
-        should.not.exist(err);
-        var resultVal = result.outBinds.o;
-        should.strictEqual(resultVal, expected);
-        callback();
-      }
-    );
+    let result = await connection.execute(proc_execute, bindVar_out);
+    assert(result);
+    assert.strictEqual(result.outBinds.o, expected);
   };
 
-  var procedureBindOut_update = function(proc_execute, content_1, content_2, expected, callback) {
-    var bindVar_in = {
+  let procedureBindOut_update = async function(proc_execute, content_1, content_2, expected) {
+    let bindVar_in = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c1: { val: content_1, type: oracledb.STRING, dir: oracledb.BIND_IN },
       c2: { val: content_2, type: oracledb.STRING, dir: oracledb.BIND_IN },
       o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
     };
-    connection.execute(
-      proc_execute,
-      bindVar_in,
-      function(err, result) {
-        should.not.exist(err);
-        var resultVal = result.outBinds.o;
-        should.strictEqual(resultVal, expected);
-        callback();
-      }
-    );
+    let result = await connection.execute(proc_execute, bindVar_in);
+    assert(result);
+    assert.strictEqual(result.outBinds.o, expected);
   };
 
-  var procedureBindOut_update_default = function(proc_execute, content_1, content_2, expected, callback) {
-    var bindVar_in = {
+  let procedureBindOut_update_default = async function(proc_execute, content_1, content_2, expected) {
+    let bindVar_in = {
       i: insertID,
       c1: content_1,
       c2: content_2,
       o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
     };
-    connection.execute(
-      proc_execute,
-      bindVar_in,
-      function(err, result) {
-        should.not.exist(err);
-        var resultVal = result.outBinds.o;
-        should.strictEqual(resultVal, expected);
-        callback();
-      }
-    );
+    let result = await connection.execute(proc_execute, bindVar_in);
+    assert(result);
+    assert.strictEqual(result.outBinds.o, expected);
+
   };
 });

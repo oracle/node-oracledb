@@ -495,7 +495,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       await checkInsertResult(id, content_1, null);
 
-      await await updateBlobTable1(id, content_2);
+      await updateBlobTable1(id, content_2);
 
       await checkInsertResult(id, content_2, specialStr_2);
     }); // 82.2.4

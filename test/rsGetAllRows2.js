@@ -32,7 +32,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 const dbconfig = require('./dbconfig.js');
 
 describe('250. rsGetAllRows2.js', function() {
@@ -105,7 +105,7 @@ describe('250. rsGetAllRows2.js', function() {
       await conn.execute('DROP TABLE NODB_RSDEPT PURGE');
       await conn.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     } finally {
       oracledb.outFormat = outFormatBak;
     }
@@ -133,33 +133,33 @@ describe('250. rsGetAllRows2.js', function() {
       let rows = await result.resultSet.getRows();
 
       // Top level
-      should.equal(rows.length, 3);
-      should.equal(rows[0].DEPARTMENT_NAME, "R&D");
-      should.equal(rows[1].DEPARTMENT_NAME, "Sales");
-      should.equal(rows[2].DEPARTMENT_NAME, "Marketing");
+      assert.equal(rows.length, 3);
+      assert.equal(rows[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(rows[1].DEPARTMENT_NAME, "Sales");
+      assert.equal(rows[2].DEPARTMENT_NAME, "Marketing");
 
       // nested level
       let rs = rows[0].NC;
       let rows2 = await rs.getRows();
-      should.equal(rows2.length, 1);
-      should.equal(rows2[0].EMPLOYEE_NAME, "R&D 1");
-      should.equal(rows2[0].EMPLOYEE_ID, 1001);
+      assert.equal(rows2.length, 1);
+      assert.equal(rows2[0].EMPLOYEE_NAME, "R&D 1");
+      assert.equal(rows2[0].EMPLOYEE_ID, 1001);
 
       // Sales Dept - no employees.
       rs = rows[1].NC;
       rows2 = await rs.getRows();
-      should.equal(rows2.length, 0);
+      assert.equal(rows2.length, 0);
 
       rs = rows[2].NC;
       rows2 = await rs.getRows();
-      should.equal(rows2.length, 127);
-      should.equal(rows2[0].EMPLOYEE_NAME, "Marketing 0");
-      should.equal(rows2[1].EMPLOYEE_NAME, "Marketing 1");
-      should.equal(rows2[2].EMPLOYEE_NAME, "Marketing 2");
-      should.equal(rows2[126].EMPLOYEE_NAME, "Marketing 126");
+      assert.equal(rows2.length, 127);
+      assert.equal(rows2[0].EMPLOYEE_NAME, "Marketing 0");
+      assert.equal(rows2[1].EMPLOYEE_NAME, "Marketing 1");
+      assert.equal(rows2[2].EMPLOYEE_NAME, "Marketing 2");
+      assert.equal(rows2[126].EMPLOYEE_NAME, "Marketing 126");
       await result.resultSet.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     }
   });
 
@@ -185,34 +185,34 @@ describe('250. rsGetAllRows2.js', function() {
       let rows = await result.resultSet.getRows(0);
 
       // Top level
-      should.equal(rows.length, 3);
-      should.equal(rows[0][0], "R&D");
-      should.equal(rows[1][0], "Sales");
-      should.equal(rows[2][0], "Marketing");
+      assert.equal(rows.length, 3);
+      assert.equal(rows[0][0], "R&D");
+      assert.equal(rows[1][0], "Sales");
+      assert.equal(rows[2][0], "Marketing");
 
       // nested level
       let rs = rows[0][1];
       let rows2 = await rs.getRows(0);
-      should.equal(rows2.length, 1);
-      should.equal(rows2[0][0], "R&D 1");
-      should.equal(rows2[0][1], 1001);
+      assert.equal(rows2.length, 1);
+      assert.equal(rows2[0][0], "R&D 1");
+      assert.equal(rows2[0][1], 1001);
 
       // Sales Dept - no employees.
       rs = rows[1][1];
       rows2 = await rs.getRows(0);
-      should.equal(rows2.length, 0);
+      assert.equal(rows2.length, 0);
 
       rs = rows[2][1];
       rows2 = await rs.getRows(0);
-      should.equal(rows2.length, 127) ;
-      should.equal(rows2[0][0], "Marketing 0");
-      should.equal(rows2[1][0], "Marketing 1");
-      should.equal(rows2[2][0], "Marketing 2");
-      should.equal(rows2[126][0], "Marketing 126");
+      assert.equal(rows2.length, 127) ;
+      assert.equal(rows2[0][0], "Marketing 0");
+      assert.equal(rows2[1][0], "Marketing 1");
+      assert.equal(rows2[2][0], "Marketing 2");
+      assert.equal(rows2[126][0], "Marketing 126");
       await result.resultSet.close();
       oracledb.outFormat = outFormatBak;
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     }
   });
   it('250.3 Nested Cursor + getRows(n) + getRows() OBJECT outformat', async function() {
@@ -238,36 +238,36 @@ describe('250. rsGetAllRows2.js', function() {
       let rows1 = await result.resultSet.getRows(1);
       let rows2 = await result.resultSet.getRows();
       // Top level
-      should.equal(rows1.length, 1);
-      should.equal(rows2.length, 2);
-      should.equal(rows1[0].DEPARTMENT_NAME, "R&D");
-      should.equal(rows2[0].DEPARTMENT_NAME, "Sales");
-      should.equal(rows2[1].DEPARTMENT_NAME, "Marketing");
+      assert.equal(rows1.length, 1);
+      assert.equal(rows2.length, 2);
+      assert.equal(rows1[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(rows2[0].DEPARTMENT_NAME, "Sales");
+      assert.equal(rows2[1].DEPARTMENT_NAME, "Marketing");
 
       // nested level
       let rs = rows1[0].NC;
       let rows1_NC = await rs.getRows();
-      should.equal(rows1_NC.length, 1);
-      should.equal(rows1_NC[0].EMPLOYEE_NAME, "R&D 1");
-      should.equal(rows1_NC[0].EMPLOYEE_ID, 1001);
+      assert.equal(rows1_NC.length, 1);
+      assert.equal(rows1_NC[0].EMPLOYEE_NAME, "R&D 1");
+      assert.equal(rows1_NC[0].EMPLOYEE_ID, 1001);
 
       // Sales Dept - no employees.
       rs = rows2[0].NC;
       let rows2_NC = await rs.getRows();
-      should.equal(rows2_NC.length, 0);
+      assert.equal(rows2_NC.length, 0);
 
       rs = rows2[1].NC;
       let rows2_NC1 = await rs.getRows(1);
       let rows2_NC2 = await rs.getRows();
-      should.equal(rows2_NC1.length, 1);
-      should.equal(rows2_NC2.length, 126);
-      should.equal(rows2_NC1[0].EMPLOYEE_NAME, "Marketing 0");
-      should.equal(rows2_NC2[0].EMPLOYEE_NAME, "Marketing 1");
-      should.equal(rows2_NC2[1].EMPLOYEE_NAME, "Marketing 2");
-      should.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");
+      assert.equal(rows2_NC1.length, 1);
+      assert.equal(rows2_NC2.length, 126);
+      assert.equal(rows2_NC1[0].EMPLOYEE_NAME, "Marketing 0");
+      assert.equal(rows2_NC2[0].EMPLOYEE_NAME, "Marketing 1");
+      assert.equal(rows2_NC2[1].EMPLOYEE_NAME, "Marketing 2");
+      assert.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");
       await result.resultSet.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     }
   });
 
@@ -295,35 +295,35 @@ describe('250. rsGetAllRows2.js', function() {
       let rows2 = await result.resultSet.getRows(0);
 
       // Top level
-      should.equal(rows2.length, 2);
-      should.equal(rows1[0], "R&D");
-      should.equal(rows2[0][0], "Sales");
-      should.equal(rows2[1][0], "Marketing");
+      assert.equal(rows2.length, 2);
+      assert.equal(rows1[0], "R&D");
+      assert.equal(rows2[0][0], "Sales");
+      assert.equal(rows2[1][0], "Marketing");
 
       // nested level
       let rs = rows1[1];
       let rows1_NC = await rs.getRows(0);
-      should.equal(rows1_NC.length, 1);
-      should.equal(rows1_NC[0][0], "R&D 1");
-      should.equal(rows1_NC[0][1], 1001);
+      assert.equal(rows1_NC.length, 1);
+      assert.equal(rows1_NC[0][0], "R&D 1");
+      assert.equal(rows1_NC[0][1], 1001);
 
       // Sales Dept - no employees.
       rs = rows2[0][1];
       let rows2_NC = await rs.getRows(0);
-      should.equal(rows2_NC.length, 0);
+      assert.equal(rows2_NC.length, 0);
 
       rs = rows2[1][1];
       let rows2_NC1 = await rs.getRow();
       let rows2_NC2 = await rs.getRows(0);
-      should.equal(rows2_NC2.length, 126);
-      should.equal(rows2_NC1[0], "Marketing 0");
-      should.equal(rows2_NC2[0][0], "Marketing 1");
-      should.equal(rows2_NC2[1][0], "Marketing 2");
-      should.equal(rows2_NC2[125][0], "Marketing 126");
+      assert.equal(rows2_NC2.length, 126);
+      assert.equal(rows2_NC1[0], "Marketing 0");
+      assert.equal(rows2_NC2[0][0], "Marketing 1");
+      assert.equal(rows2_NC2[1][0], "Marketing 2");
+      assert.equal(rows2_NC2[125][0], "Marketing 126");
       await result.resultSet.close();
       oracledb.outFormat = outFormatBak;
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     }
   });
 
@@ -350,35 +350,35 @@ describe('250. rsGetAllRows2.js', function() {
       let rows1 = await result.resultSet.getRows(1);
       let rows2 = await result.resultSet.getRows(0);
       // Top level
-      should.equal(rows1.length, 1);
-      should.equal(rows2.length, 2);
-      should.equal(rows1[0].DEPARTMENT_NAME, "R&D");
-      should.equal(rows2[0].DEPARTMENT_NAME, "Sales");
-      should.equal(rows2[1].DEPARTMENT_NAME, "Marketing");
+      assert.equal(rows1.length, 1);
+      assert.equal(rows2.length, 2);
+      assert.equal(rows1[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(rows2[0].DEPARTMENT_NAME, "Sales");
+      assert.equal(rows2[1].DEPARTMENT_NAME, "Marketing");
 
       // nested level
       let rs = rows1[0].NC;
       let rows1_NC = await rs.getRows(0);
-      should.equal(rows1_NC.length, 1);
-      should.equal(rows1_NC[0].EMPLOYEE_NAME, "R&D 1");
-      should.equal(rows1_NC[0].EMPLOYEE_ID, 1001);
+      assert.equal(rows1_NC.length, 1);
+      assert.equal(rows1_NC[0].EMPLOYEE_NAME, "R&D 1");
+      assert.equal(rows1_NC[0].EMPLOYEE_ID, 1001);
 
       // Sales Dept - no employees.
       rs = rows2[0].NC;
       let rows2_NC = await rs.getRows(0);
-      should.equal(rows2_NC.length, 0);
+      assert.equal(rows2_NC.length, 0);
 
       rs = rows2[1].NC;
       let rows2_NC1 = await rs.getRows(1);
       let rows2_NC2 = await rs.getRows(0);
-      should.equal(rows2_NC1.length, 1);
-      should.equal(rows2_NC2.length, 126);
-      should.equal(rows2_NC1[0].EMPLOYEE_NAME, "Marketing 0");
-      should.equal(rows2_NC2[0].EMPLOYEE_NAME, "Marketing 1");
-      should.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");
+      assert.equal(rows2_NC1.length, 1);
+      assert.equal(rows2_NC2.length, 126);
+      assert.equal(rows2_NC1[0].EMPLOYEE_NAME, "Marketing 0");
+      assert.equal(rows2_NC2[0].EMPLOYEE_NAME, "Marketing 1");
+      assert.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");
       await result.resultSet.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     }
   });
 
@@ -404,33 +404,33 @@ describe('250. rsGetAllRows2.js', function() {
       let rows1 = await result.resultSet.getRows(1);
       let rows2 = await result.resultSet.getRows();
       // Top level
-      should.equal(rows1.length, 1);
-      should.equal(rows2.length, 2);
-      should.equal(rows1[0].DEPARTMENT_NAME, "R&D");
-      should.equal(rows2[0].DEPARTMENT_NAME, "Sales");
-      should.equal(rows2[1].DEPARTMENT_NAME, "Marketing");
+      assert.equal(rows1.length, 1);
+      assert.equal(rows2.length, 2);
+      assert.equal(rows1[0].DEPARTMENT_NAME, "R&D");
+      assert.equal(rows2[0].DEPARTMENT_NAME, "Sales");
+      assert.equal(rows2[1].DEPARTMENT_NAME, "Marketing");
 
       // nested level
       let rs = rows1[0].NC;
       let rows1_NC = await rs.getRows();
-      should.equal(rows1_NC.length, 1);
-      should.equal(rows1_NC[0].EMPLOYEE_NAME, "R&D 1");
-      should.equal(rows1_NC[0].EMPLOYEE_ID, 1001);
+      assert.equal(rows1_NC.length, 1);
+      assert.equal(rows1_NC[0].EMPLOYEE_NAME, "R&D 1");
+      assert.equal(rows1_NC[0].EMPLOYEE_ID, 1001);
 
       // Sales Dept - no employees.
       rs = rows2[0].NC;
       let rows2_NC = await rs.getRows();
-      should.equal(rows2_NC.length, 0);
+      assert.equal(rows2_NC.length, 0);
 
       rs = rows2[1].NC;
       let rows2_NC1 = await rs.getRow();
       let rows2_NC2 = await rs.getRows();
-      should.equal(rows2_NC2.length, 126);
-      should.equal(rows2_NC1.EMPLOYEE_NAME, "Marketing 0");
-      should.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");
+      assert.equal(rows2_NC2.length, 126);
+      assert.equal(rows2_NC1.EMPLOYEE_NAME, "Marketing 0");
+      assert.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");
       await result.resultSet.close();
     } catch (err) {
-      should.not.exist(err);
+      assert.ifError(err);
     }
   });
 });

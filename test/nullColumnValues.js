@@ -31,16 +31,15 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
 
 describe('10. nullColumnValues.js', function() {
 
-  var connection = null;
-  beforeEach('get connection & create table', function(done) {
-    var makeTable =
+  let connection = null;
+  beforeEach('get connection & create table', async function() {
+    let makeTable =
       "BEGIN \
             DECLARE \
                 e_table_missing EXCEPTION; \
@@ -75,143 +74,77 @@ describe('10. nullColumnValues.js', function() {
                    (90, ''Executive'', 100, 1700) \
             '); \
         END; ";
-    oracledb.getConnection(
+    connection = await oracledb.getConnection(
       {
         user:          dbConfig.user,
         password:      dbConfig.password,
         connectString: dbConfig.connectString
-      },
-      function(err, conn) {
-        should.not.exist(err);
-        connection = conn;
-        conn.execute(
-          makeTable,
-          function(err) {
-            should.not.exist(err);
-            done();
-          }
-        );
-      }
-    );
+      });
+
+    await connection.execute(makeTable);
   });
 
-  afterEach('drop table and release connection', function(done) {
-    connection.execute(
-      "DROP TABLE nodb_nullcol_dept PURGE",
-      function(err) {
-        if (err) {
-          console.error(err.message); return;
-        }
-        connection.release(function(err) {
-          if (err) {
-            console.error(err.message); return;
-          }
-          done();
-        });
-      }
-    );
+  afterEach('drop table and release connection', async function() {
+    await connection.execute("DROP TABLE nodb_nullcol_dept PURGE");
+    await connection.release();
   });
 
-  it('10.1 a simple query for null value', function(done) {
-    connection.should.be.ok();
+  it('10.1 a simple query for null value', async function() {
+    assert(connection);
+    let result = null;
 
-    connection.execute(
-      "SELECT null FROM DUAL",
-      function(err, result) {
-        should.not.exist(err);
-        result.rows[0].should.eql([null]);
-        done();
-      }
-    );
+    result = await connection.execute("SELECT null FROM DUAL");
+
+    assert.deepEqual(result.rows[0], [null]);
   });
 
-  it('10.2 in-bind for null column value', function(done) {
-    connection.should.be.ok();
+  it('10.2 in-bind for null column value', async function() {
+    assert(connection);
+    let result = null;
+    result = await connection.execute(
+      "INSERT INTO nodb_nullcol_dept VALUES(:did, :dname, :mid, :mname)",
+      {
+        did: 101,
+        dname: 'Facility',
+        mid: '',
+        mname: null
+      });
+    assert.strictEqual(result.rowsAffected, 1);
 
-    async.series([
-      function(callback) {
-        connection.execute(
-          "INSERT INTO nodb_nullcol_dept VALUES(:did, :dname, :mid, :mname)",
-          {
-            did: 101,
-            dname: 'Facility',
-            mid: '',
-            mname: null
-          },
-          function(err, result) {
-            should.not.exist(err);
-            result.rowsAffected.should.be.exactly(1);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "SELECT * FROM nodb_nullcol_dept WHERE department_id = :did",
-          { did: 101 },
-          { outFormat: oracledb.OUT_FORMAT_OBJECT },
-          function(err, result) {
-            should.not.exist(err);
-            // console.log(result);
-            result.rows[0].DEPARTMENT_ID.should.be.exactly(101);
-            result.rows[0].DEPARTMENT_NAME.should.eql('Facility');
-            should.not.exist(result.rows[0].MANAGER_ID); // null
-            should.not.exist(result.rows[0].LOCATION_ID); // null
-            callback();
-          }
-        );
-      }
-    ], done);
+    result = await connection.execute(
+      "SELECT * FROM nodb_nullcol_dept WHERE department_id = :did",
+      { did: 101 },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
+    assert.strictEqual(result.rows[0].DEPARTMENT_ID, 101);
+    assert.strictEqual(result.rows[0].DEPARTMENT_NAME, 'Facility');
+    assert.ifError(result.rows[0].MANAGER_ID); // null
+    assert.ifError(result.rows[0].LOCATION_ID); // null
   });
 
-  it('10.3 out-bind for null column value', function(done) {
-    connection.should.be.ok();
-
-    async.series([
-      function(callback) {
-        var proc = "CREATE OR REPLACE PROCEDURE nodb_testproc (p_out OUT VARCHAR2) \
-                    AS \
-                    BEGIN \
-                      p_out := ''; \
-                    END;";
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_testproc(:o); END;",
-          {
-            o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
-          },
-          function(err, result) {
-            should.not.exist(err);
-            should.not.exist(result.outBinds.o); // null
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "DROP PROCEDURE nodb_testproc",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      }
-    ], done);
+  it('10.3 out-bind for null column value', async function() {
+    assert(connection);
+    let result = null;
+    let proc = "CREATE OR REPLACE PROCEDURE nodb_testproc (p_out OUT VARCHAR2) \
+                AS \
+                BEGIN \
+                  p_out := ''; \
+                END;";
+    await connection.execute(proc);
+    result = await connection.execute(
+      "BEGIN nodb_testproc(:o); END;",
+      {
+        o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+      });
+    assert.ifError(result.outBinds.o); // null
+    await connection.execute("DROP PROCEDURE nodb_testproc");
   });
 
-  it('10.4 DML Returning for null column value', function(done) {
-    connection.should.be.ok();
+  it('10.4 DML Returning for null column value', async function() {
+    assert(connection);
+    let result = null;
 
-    connection.execute(
+    result = await connection.execute(
       "UPDATE nodb_nullcol_dept SET department_name = :dname, \
         manager_id = :mid WHERE department_id = :did \
         RETURNING department_id, department_name, manager_id INTO \
@@ -224,67 +157,44 @@ describe('10. nullColumnValues.js', function() {
         rdname: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         rmid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
       },
-      { autoCommit: true },
-      function(err, result) {
-        should.not.exist(err);
-        //console.log(result);
-        result.outBinds.should.eql({rdid: [90], rdname: [null], rmid: [null]});
-        result.outBinds.rdid.should.eql([90]);
-        should.not.exist(result.outBinds.rdname[0]); // null
-        should.not.exist(result.outBinds.rmid[0]);  // null
-        done();
-      }
-    );
+      { autoCommit: true });
+
+    assert.deepEqual(result.outBinds, {rdid: [90], rdname: [null], rmid: [null]});
+    assert.deepEqual(result.outBinds.rdid, [90]);
+    assert.ifError(result.outBinds.rdname[0]); // null
+    assert.ifError(result.outBinds.rmid[0]);  // null
   });
 
-  it('10.5 resultSet for null value', function(done) {
-    connection.should.be.ok();
+  it('10.5 resultSet for null value', async function() {
+    assert(connection);
+    let result = null;
 
-    async.series([
-      function(callback) {
-        connection.execute(
-          "UPDATE nodb_nullcol_dept SET department_name = :dname, \
+    await connection.execute(
+      "UPDATE nodb_nullcol_dept SET department_name = :dname, \
           manager_id = :mid WHERE department_id = :did ",
-          {
-            dname: '',
-            mid: null,
-            did: 50
-          },
-          { autoCommit: true },
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
+      {
+        dname: '',
+        mid: null,
+        did: 50
       },
-      function(callback) {
-        connection.execute(
-          "SELECT * FROM nodb_nullcol_dept WHERE department_id = :1",
-          [50],
-          { resultSet: true },
-          function(err, result) {
-            should.not.exist(err);
-            fetchRowFromRS(result.resultSet);
-          }
-        );
+      { autoCommit: true });
+    result = await connection.execute(
+      "SELECT * FROM nodb_nullcol_dept WHERE department_id = :1",
+      [50],
+      { resultSet: true });
+    await  fetchRowFromRS(result.resultSet);
 
-        function fetchRowFromRS(rs) {
-          rs.getRow(function(err, row) {
-            should.not.exist(err);
-            if (row) {
-              // console.log(row);
-              row.should.eql([50, null, null, 1500]);
-              return fetchRowFromRS(rs);
-            } else {
-              rs.close(function(err) {
-                should.not.exist(err);
-                callback();
-              });
-            }
-          });
-        }
+    async function fetchRowFromRS(rs) {
+      let accessCount = 0;
+      while (true) { // eslint-disable-line
+        let row = await rs.getRow();
+        if (!row)
+          break;
+        accessCount++;
+        assert.deepEqual(row, [50, null, null, 1500]);
       }
-    ], done);
+      await rs.close();
+      assert.strictEqual(accessCount, 1);
+    }
   });
-
 });
