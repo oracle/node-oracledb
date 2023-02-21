@@ -1178,7 +1178,7 @@ describe('255. poolReconfigure.js', function() {
       try {
         await pool.reconfigure({poolMax: 0});
       } catch (err) {
-        (err.message).startsWith ('ORA-24413');
+        (err.message).startsWith ('NJS-007');
       }
 
       try {

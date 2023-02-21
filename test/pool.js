@@ -138,7 +138,7 @@ describe('2. pool.js', function() {
         },
         function(err, pool) {
           should.exist(err);
-          (err.message).should.startWith('ORA-24413:');
+          (err.message).should.startWith('NJS-092:');
 
           should.not.exist(pool);
           done();
@@ -213,7 +213,7 @@ describe('2. pool.js', function() {
         },
         function(err, pool) {
           should.exist(err);
-          (err.message).should.startWith('ORA-24413:');
+          (err.message).should.startWith('NJS-007:');
 
           should.not.exist(pool);
           done();
@@ -1046,8 +1046,7 @@ describe('2. pool.js', function() {
         },
         function(err, pool) {
           should.exist(err);
-          (err.message).should.startWith('ORA-24413: ');
-          // ORA-24413: Invalid number of sessions specified
+          (err.message).should.startWith('NJS-092:');
           should.not.exist(pool);
           done();
         }
