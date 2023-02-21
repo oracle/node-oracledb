@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -46,7 +46,6 @@ describe('225. cqn02.js', function() {
 
     if (!isRunnable) {
       this.skip();
-      return;
     }
   }); // before()
 

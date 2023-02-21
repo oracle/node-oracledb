@@ -1,4 +1,4 @@
-/* Copyright (c) 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2022, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -94,7 +94,6 @@ describe('267. aq4.js', function() {
   before(async function() {
     if (!dbConfig.test.DBA_PRIVILEGE) {
       this.skip();
-      return;
     }
 
     await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);

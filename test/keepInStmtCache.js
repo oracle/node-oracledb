@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -45,9 +45,9 @@ describe('258. keepInStmtCache.js', function() {
 
   before(async function() {
     if (!dbConfig.test.DBA_PRIVILEGE) {
-      let msg = "Note: DBA privilege environment variable is not true!\n";
-      msg += "Without DBA privilege the test cannot get the current parse count!";
-      throw new Error(msg);
+      // Without DBA privilege, the test cannot get the current parse count!
+      // So skip the tests
+      this.skip();
     } else {
       const dbaConfig = {
         user : dbConfig.test.DBA_user,

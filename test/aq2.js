@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -56,7 +56,6 @@ describe('218. aq2.js', function() {
 
     if (!isRunnable) {
       this.skip();
-      return;
     } else {
       await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
 
