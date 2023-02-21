@@ -259,11 +259,6 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
     napi_value fn, temp, args[2];
     njsResultSet *rs;
 
-    if (baton->outFormat == NJS_ROWS_OBJECT) {
-        if (!njsResultSet_makeUniqueColumnNames (env, baton, vars, numVars))
-            return false;
-    }
-
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefResultSet,
             baton->globals->jsResultSetConstructor, rsObj, (void**) &rs))
