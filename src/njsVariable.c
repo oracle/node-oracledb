@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2019, 2023, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -56,6 +56,9 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
         case DPI_ORACLE_TYPE_NVARCHAR:
         case DPI_ORACLE_TYPE_CHAR:
         case DPI_ORACLE_TYPE_NCHAR:
+        case DPI_ORACLE_TYPE_RAW:
+        case DPI_ORACLE_TYPE_LONG_VARCHAR:
+        case DPI_ORACLE_TYPE_LONG_RAW:
             var->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
             break;
         case DPI_ORACLE_TYPE_NATIVE_FLOAT:
@@ -74,13 +77,8 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
         case DPI_ORACLE_TYPE_STMT:
             var->nativeTypeNum = DPI_NATIVE_TYPE_STMT;
             break;
-        case DPI_ORACLE_TYPE_RAW:
-            var->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
-            break;
         case DPI_ORACLE_TYPE_CLOB:
         case DPI_ORACLE_TYPE_NCLOB:
-            var->nativeTypeNum = DPI_NATIVE_TYPE_LOB;
-            break;
         case DPI_ORACLE_TYPE_BLOB:
             var->nativeTypeNum = DPI_NATIVE_TYPE_LOB;
             break;
@@ -95,6 +93,9 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
             break;
         case DPI_ORACLE_TYPE_NATIVE_INT:
             var->nativeTypeNum = DPI_NATIVE_TYPE_INT64;
+            break;
+        case DPI_ORACLE_TYPE_ROWID:
+            var->nativeTypeNum = DPI_NATIVE_TYPE_ROWID;
             break;
     }
 
@@ -213,53 +214,6 @@ bool njsVariable_getArrayValue(njsVariable *var, njsConnection *conn,
 
 
 //-----------------------------------------------------------------------------
-// njsVariable_getDataType()
-//   Return the data type that is being used by the variable. This is an
-// enumeration that is publicly available in JavaScript.
-//-----------------------------------------------------------------------------
-static uint32_t njsVariable_getDataType(njsVariable *var)
-{
-    switch (var->varTypeNum) {
-        case DPI_ORACLE_TYPE_VARCHAR:
-        case DPI_ORACLE_TYPE_NVARCHAR:
-        case DPI_ORACLE_TYPE_CHAR:
-        case DPI_ORACLE_TYPE_NCHAR:
-        case DPI_ORACLE_TYPE_ROWID:
-        case DPI_ORACLE_TYPE_LONG_VARCHAR:
-            return NJS_DATATYPE_STR;
-        case DPI_ORACLE_TYPE_RAW:
-        case DPI_ORACLE_TYPE_LONG_RAW:
-            return NJS_DATATYPE_BUFFER;
-        case DPI_ORACLE_TYPE_NATIVE_FLOAT:
-        case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
-        case DPI_ORACLE_TYPE_NATIVE_INT:
-        case DPI_ORACLE_TYPE_NUMBER:
-            return NJS_DATATYPE_NUM;
-        case DPI_ORACLE_TYPE_DATE:
-        case DPI_ORACLE_TYPE_TIMESTAMP:
-        case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
-        case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
-            return NJS_DATATYPE_DATE;
-        case DPI_ORACLE_TYPE_CLOB:
-            return NJS_DATATYPE_CLOB;
-        case DPI_ORACLE_TYPE_NCLOB:
-            return NJS_DATATYPE_NCLOB;
-        case DPI_ORACLE_TYPE_BLOB:
-            return NJS_DATATYPE_BLOB;
-        case DPI_ORACLE_TYPE_OBJECT:
-            return NJS_DATATYPE_OBJECT;
-        case DPI_ORACLE_TYPE_STMT:
-            return NJS_DATATYPE_CURSOR;
-        case DPI_ORACLE_TYPE_JSON:
-            return NJS_DATATYPE_JSON;
-        default:
-            break;
-    }
-    return NJS_DATATYPE_DEFAULT;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsVariable_getMetadataMany()
 //   Return metadata about many variables.
 //-----------------------------------------------------------------------------
@@ -299,12 +253,6 @@ bool njsVariable_getMetadataOne(njsVariable *var, napi_env env,
     NJS_CHECK_NAPI(env, napi_create_string_utf8(env, var->name,
             var->nameLength, &temp))
     NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "name", temp))
-
-    // store JavaScript fetch type
-    NJS_CHECK_NAPI(env, napi_create_uint32(env, njsVariable_getDataType(var),
-            &temp))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "fetchType",
-            temp))
 
     // store database type, name and class, as needed
     if (!njsUtils_addTypeProperties(env, *metadata, "dbType",
@@ -552,15 +500,7 @@ bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
     dpiQueryInfo queryInfo;
     uint32_t i;
 
-    // populate variables with query metadata
     for (i = 0; i < numVars; i++) {
-
-        // allocate buffer
-        vars[i].buffer = calloc(1, sizeof(njsVariable));
-        if (!vars[i].buffer)
-            return njsBaton_setErrorInsufficientMemory(baton);
-
-        // get query information for the specified column
         vars[i].pos = i + 1;
         vars[i].isArray = false;
         vars[i].bindDir = NJS_BIND_OUT;
@@ -573,86 +513,14 @@ bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
         vars[i].nameLength = queryInfo.nameLength;
         vars[i].maxArraySize = baton->fetchArraySize;
         vars[i].dbSizeInBytes = queryInfo.typeInfo.dbSizeInBytes;
+        vars[i].maxSize = queryInfo.typeInfo.clientSizeInBytes;
         vars[i].precision = queryInfo.typeInfo.precision +
                 queryInfo.typeInfo.fsPrecision;
         vars[i].scale = queryInfo.typeInfo.scale;
         vars[i].isNullable = queryInfo.nullOk;
-
-        // determine the type of data
         vars[i].dbTypeNum = queryInfo.typeInfo.oracleTypeNum;
-        vars[i].varTypeNum = queryInfo.typeInfo.oracleTypeNum;
-        vars[i].nativeTypeNum = queryInfo.typeInfo.defaultNativeTypeNum;
-        if (queryInfo.typeInfo.oracleTypeNum != DPI_ORACLE_TYPE_VARCHAR &&
-                queryInfo.typeInfo.oracleTypeNum != DPI_ORACLE_TYPE_NVARCHAR &&
-                queryInfo.typeInfo.oracleTypeNum != DPI_ORACLE_TYPE_CHAR &&
-                queryInfo.typeInfo.oracleTypeNum != DPI_ORACLE_TYPE_NCHAR &&
-                queryInfo.typeInfo.oracleTypeNum != DPI_ORACLE_TYPE_ROWID) {
-            if (!njsVariable_performMapping(&vars[i], &queryInfo, baton))
-                return false;
-        }
-
-        // validate data type and determine size
-        if (vars[i].varTypeNum == DPI_ORACLE_TYPE_VARCHAR ||
-                vars[i].varTypeNum == DPI_ORACLE_TYPE_NVARCHAR ||
-                vars[i].varTypeNum == DPI_ORACLE_TYPE_RAW) {
-            vars[i].maxSize = NJS_MAX_FETCH_AS_STRING_SIZE;
-            vars[i].nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
-        } else {
-            vars[i].maxSize = 0;
-        }
-        switch (queryInfo.typeInfo.oracleTypeNum) {
-            case DPI_ORACLE_TYPE_VARCHAR:
-            case DPI_ORACLE_TYPE_NVARCHAR:
-            case DPI_ORACLE_TYPE_CHAR:
-            case DPI_ORACLE_TYPE_NCHAR:
-            case DPI_ORACLE_TYPE_RAW:
-                vars[i].maxSize = queryInfo.typeInfo.clientSizeInBytes;
-                if (queryInfo.typeInfo.oracleTypeNum == DPI_ORACLE_TYPE_RAW &&
-                        vars[i].varTypeNum == DPI_ORACLE_TYPE_VARCHAR)
-                    vars[i].maxSize *= 2;
-                break;
-            case DPI_ORACLE_TYPE_DATE:
-            case DPI_ORACLE_TYPE_TIMESTAMP:
-            case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
-            case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
-                if (vars[i].varTypeNum != DPI_ORACLE_TYPE_VARCHAR) {
-                    vars[i].varTypeNum = DPI_ORACLE_TYPE_TIMESTAMP_LTZ;
-                    vars[i].nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
-                }
-                break;
-            case DPI_ORACLE_TYPE_CLOB:
-            case DPI_ORACLE_TYPE_NCLOB:
-                if (vars[i].varTypeNum == DPI_ORACLE_TYPE_VARCHAR ||
-                        vars[i].varTypeNum == DPI_ORACLE_TYPE_NVARCHAR)
-                    vars[i].maxSize = (uint32_t) -1;
-                break;
-            case DPI_ORACLE_TYPE_BLOB:
-                if (vars[i].varTypeNum == DPI_ORACLE_TYPE_RAW)
-                    vars[i].maxSize = (uint32_t) -1;
-                break;
-            case DPI_ORACLE_TYPE_LONG_VARCHAR:
-            case DPI_ORACLE_TYPE_LONG_RAW:
-                vars[i].maxSize = (uint32_t) -1;
-                break;
-            case DPI_ORACLE_TYPE_OBJECT:
-                vars[i].dpiObjectTypeHandle = queryInfo.typeInfo.objectType;
-                break;
-
-            // the remaining types are valid but no special processing needs to
-            // be done
-            case DPI_ORACLE_TYPE_NUMBER:
-            case DPI_ORACLE_TYPE_NATIVE_INT:
-            case DPI_ORACLE_TYPE_NATIVE_FLOAT:
-            case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
-            case DPI_ORACLE_TYPE_ROWID:
-            case DPI_ORACLE_TYPE_STMT:
-            case DPI_ORACLE_TYPE_JSON:
-                break;
-            default:
-                return njsBaton_setErrorUnsupportedDataType(baton,
-                        queryInfo.typeInfo.oracleTypeNum, i + 1);
-        }
-
+        if (queryInfo.typeInfo.objectType)
+            vars[i].dpiObjectTypeHandle = queryInfo.typeInfo.objectType;
     }
 
     return true;
@@ -676,102 +544,6 @@ bool njsVariable_initForQueryJS(njsVariable *vars, uint32_t numVars,
             if (!njsDbObject_getSubClass(baton, vars[i].dpiObjectTypeHandle,
                     env, &temp, &vars[i].objectType))
                 return false;
-        }
-    }
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsVariable_performMapping()
-//   Apply any mapping rules that have been specified.
-//-----------------------------------------------------------------------------
-bool njsVariable_performMapping(njsVariable *var, dpiQueryInfo *queryInfo,
-        njsBaton *baton)
-{
-    uint32_t i, oracleTypeNum = queryInfo->typeInfo.oracleTypeNum;
-
-    // apply "by-name" rules
-    for (i = 0; i < baton->numFetchInfo; i++) {
-
-        // ignore rule if the name does not match
-        if (queryInfo->nameLength != baton->fetchInfo[i].nameLength)
-            continue;
-        if (strncmp(queryInfo->name, baton->fetchInfo[i].name,
-                queryInfo->nameLength) != 0)
-            continue;
-
-        // perform any mapping specified
-        if (baton->fetchInfo[i].type == NJS_DATATYPE_STR) {
-            var->varTypeNum = (oracleTypeNum == DPI_ORACLE_TYPE_NCLOB) ?
-                    DPI_ORACLE_TYPE_NVARCHAR : DPI_ORACLE_TYPE_VARCHAR;
-        } else if (baton->fetchInfo[i].type == NJS_DATATYPE_BUFFER) {
-            var->varTypeNum = DPI_ORACLE_TYPE_RAW;
-        } else if (baton->fetchInfo[i].type == NJS_DATATYPE_DEFAULT) {
-            var->varTypeNum = queryInfo->typeInfo.oracleTypeNum;
-        }
-        return true;
-
-    }
-
-    // apply fetchAsString rules
-    for (i = 0; i < baton->numFetchAsStringTypes; i++) {
-        switch (oracleTypeNum) {
-            case DPI_ORACLE_TYPE_NUMBER:
-            case DPI_ORACLE_TYPE_NATIVE_FLOAT:
-            case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
-            case DPI_ORACLE_TYPE_NATIVE_INT:
-                if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_NUM) {
-                    var->varTypeNum = DPI_ORACLE_TYPE_VARCHAR;
-                    return true;
-                }
-                break;
-            case DPI_ORACLE_TYPE_DATE:
-            case DPI_ORACLE_TYPE_TIMESTAMP:
-            case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
-            case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
-                if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_DATE) {
-                    var->varTypeNum = DPI_ORACLE_TYPE_VARCHAR;
-                    return true;
-                }
-                break;
-            case DPI_ORACLE_TYPE_CLOB:
-            case DPI_ORACLE_TYPE_NCLOB:
-                if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_CLOB) {
-                    var->varTypeNum = (oracleTypeNum == DPI_ORACLE_TYPE_CLOB) ?
-                            DPI_ORACLE_TYPE_VARCHAR : DPI_ORACLE_TYPE_NVARCHAR;
-                    return true;
-                }
-                if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_NCLOB) {
-                    var->varTypeNum = DPI_ORACLE_TYPE_NVARCHAR;
-                    return true;
-                }
-                break;
-            case DPI_ORACLE_TYPE_RAW:
-                if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_BUFFER) {
-                    var->varTypeNum = DPI_ORACLE_TYPE_VARCHAR;
-                    return true;
-                }
-                break;
-            case DPI_ORACLE_TYPE_JSON:
-                if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_JSON) {
-                    var->varTypeNum = DPI_ORACLE_TYPE_VARCHAR;
-                    return true;
-                }
-                break;
-            default:
-                break;
-        }
-
-    }
-
-    // apply fetchAsBuffer rules
-    for (i = 0; i < baton->numFetchAsBufferTypes; i++) {
-        if (queryInfo->typeInfo.oracleTypeNum == DPI_ORACLE_TYPE_BLOB &&
-                baton->fetchAsBufferTypes[i] == NJS_DATATYPE_BLOB) {
-            var->varTypeNum = DPI_ORACLE_TYPE_RAW;
-            return true;
         }
     }
 

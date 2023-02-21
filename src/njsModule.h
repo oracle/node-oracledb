@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2019, 2023, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -198,7 +198,6 @@ typedef struct njsBaton njsBaton;
 typedef struct njsClassDef njsClassDef;
 typedef struct njsConnection njsConnection;
 typedef struct njsDataTypeInfo njsDataTypeInfo;
-typedef struct njsFetchInfo njsFetchInfo;
 typedef struct njsImplicitResult njsImplicitResult;
 typedef struct njsJsonBuffer njsJsonBuffer;
 typedef struct njsLob njsLob;
@@ -369,14 +368,6 @@ struct njsBaton {
     uint32_t numRowCounts;
     uint64_t *rowCounts;
 
-    // mapping types (requires free)
-    uint32_t numFetchInfo;
-    njsFetchInfo *fetchInfo;
-    uint32_t numFetchAsStringTypes;
-    uint32_t *fetchAsStringTypes;
-    uint32_t numFetchAsBufferTypes;
-    uint32_t *fetchAsBufferTypes;
-
     // implicit results (requires free)
     njsImplicitResult *implicitResults;
 
@@ -491,13 +482,6 @@ struct njsConnection {
     char *tag;
     size_t tagLength;
     bool retag;
-};
-
-// data for adjusting fetch types
-struct njsFetchInfo {
-    char *name;
-    size_t nameLength;
-    uint32_t type;
 };
 
 // data for acquiring implicit results
@@ -730,8 +714,6 @@ bool njsBaton_commonConnectProcessArgs(njsBaton *baton, napi_env env,
 bool njsBaton_create(njsBaton *baton, napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, const njsClassDef *classDef);
 void njsBaton_free(njsBaton *baton, napi_env env);
-bool njsBaton_getFetchInfoFromArg(njsBaton *baton, napi_env env,
-        napi_value props, uint32_t *numFetchInfo, njsFetchInfo **fetchInfo);
 uint32_t njsBaton_getNumOutBinds(njsBaton *baton);
 bool njsBaton_getSodaDocument(njsBaton *baton, njsSodaDatabase *db,
         napi_env env, napi_value obj, dpiSodaDoc **handle);
@@ -893,8 +875,10 @@ bool njsUtils_getNamedPropertyUnsignedIntArray(napi_env env, napi_value value,
         const char *name, uint32_t *numElements, uint32_t **elements);
 bool njsUtils_getXid(napi_env env, napi_value xidObj, dpiXid **xid);
 bool njsUtils_isInstance(napi_env env, napi_value value, const char *name);
-bool njsUtils_throwInsufficientMemory(napi_env env);
 bool njsUtils_throwErrorDPI(napi_env env, njsModuleGlobals *globals);
+bool njsUtils_throwInsufficientMemory(napi_env env);
+bool njsUtils_throwUnsupportedDataType(napi_env env, uint32_t oracleTypeNum,
+        uint32_t columnNum);
 bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, njsModuleGlobals **globals,
         napi_value *callingObj, const njsClassDef *classDef, void **instance);
@@ -919,8 +903,6 @@ bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
         dpiStmt *handle, njsBaton *baton);
 bool njsVariable_initForQueryJS(njsVariable *vars, uint32_t numVars,
         napi_env env, njsBaton *baton);
-bool njsVariable_performMapping(njsVariable *var, dpiQueryInfo *queryInfo,
-        njsBaton *baton);
 bool njsVariable_process(njsVariable *vars, uint32_t numVars, uint32_t numRows,
         njsBaton *baton);
 bool njsVariable_processJS(njsVariable *vars, uint32_t numVars, napi_env env,

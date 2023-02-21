@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -740,7 +740,7 @@ describe('4. binding.js', function() {
       const cursor = result.outBinds.cursor;
       const expectedBind = {
         name: "STRINGVALUE",
-        fetchType: oracledb.DB_TYPE_VARCHAR,
+        fetchType: oracledb.DB_TYPE_CHAR,
         dbType: oracledb.DB_TYPE_CHAR,
         dbTypeName: "CHAR",
         nullable: true,

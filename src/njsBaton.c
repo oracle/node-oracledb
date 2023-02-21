@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2023, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -333,18 +333,6 @@ void njsBaton_free(njsBaton *baton, napi_env env)
         baton->implicitResults = baton->implicitResults->next;
     }
 
-    // free mapping type arrays
-    if (baton->fetchInfo) {
-        for (i = 0; i < baton->numFetchInfo; i++) {
-            NJS_FREE_AND_CLEAR(baton->fetchInfo[i].name);
-        }
-        free(baton->fetchInfo);
-        baton->fetchInfo = NULL;
-    }
-
-    NJS_FREE_AND_CLEAR(baton->fetchAsStringTypes);
-    NJS_FREE_AND_CLEAR(baton->fetchAsBufferTypes);
-
     // remove references to JS objects
     NJS_DELETE_REF_AND_CLEAR(baton->jsBufferRef);
     NJS_DELETE_REF_AND_CLEAR(baton->jsCallingObjRef);
@@ -418,53 +406,6 @@ static bool njsBaton_getErrorInfo(njsBaton *baton, napi_env env,
     errorInfo = (baton->dpiError) ? &baton->errorInfo : NULL;
     if (!njsUtils_getError(env, errorInfo, baton->error, error))
         return false;
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton_getFetchInfoFromArg()
-//   Gets fetchInfo data from the specified Javascript object property, if
-// possible. If the given property is undefined, no error is set and the value
-// is left untouched; otherwise, if the value is not valid, an error is set on
-// the baton.
-//-----------------------------------------------------------------------------
-bool njsBaton_getFetchInfoFromArg(njsBaton *baton, napi_env env,
-        napi_value props, uint32_t *numFetchInfo, njsFetchInfo **fetchInfo)
-{
-    napi_value value, element, temp;
-    njsFetchInfo *tempFetchInfo;
-    uint32_t i;
-
-    // determine number of fetch info; if none, nothing more to do!
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, props, "fetchInfo",
-            &value))
-    NJS_CHECK_NAPI(env, napi_get_array_length(env, value, numFetchInfo))
-    if (*numFetchInfo == 0) {
-        *fetchInfo = NULL;
-        return true;
-    }
-
-    // allocate space for fetchInfo structures
-    tempFetchInfo = calloc(*numFetchInfo, sizeof(njsFetchInfo));
-    if (!tempFetchInfo)
-        return njsBaton_setErrorInsufficientMemory(baton);
-    *fetchInfo = tempFetchInfo;
-
-    // process each key
-    for (i = 0; i < *numFetchInfo; i++) {
-        NJS_CHECK_NAPI(env, napi_get_element(env, value, i, &element))
-        NJS_CHECK_NAPI(env, napi_get_named_property(env, element, "name",
-                &temp))
-        if (!njsUtils_copyStringFromJS(env, temp, &tempFetchInfo[i].name,
-                &tempFetchInfo[i].nameLength))
-            return false;
-        NJS_CHECK_NAPI(env, napi_get_named_property(env, element, "type",
-                &temp))
-        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp,
-                &tempFetchInfo[i].type))
-    }
 
     return true;
 }
@@ -698,21 +639,6 @@ bool njsBaton_setErrorInsufficientBufferForBinds(njsBaton *baton)
 bool njsBaton_setErrorInsufficientMemory(njsBaton *baton)
 {
     strcpy(baton->error, NJS_ERR_INSUFFICIENT_MEMORY);
-    baton->hasError = true;
-    return false;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton_setErrorUnsupportedDataType()
-//   Set the error on the baton to indicate that an unsupported data type was
-// encountered during a fetch. Returns false as a convenience to the caller.
-//-----------------------------------------------------------------------------
-bool njsBaton_setErrorUnsupportedDataType(njsBaton *baton,
-        uint32_t oracleTypeNum, uint32_t columnNum)
-{
-    (void) snprintf(baton->error, sizeof(baton->error),
-            NJS_ERR_UNSUPPORTED_DATA_TYPE, oracleTypeNum, columnNum);
     baton->hasError = true;
     return false;
 }

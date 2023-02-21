@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2023, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -534,46 +534,6 @@ bool njsUtils_getNamedPropertyUnsignedInt(napi_env env, napi_value value,
 
 
 //-----------------------------------------------------------------------------
-// njsUtils_getNamedPropertyUnsignedIntArray()
-//   Returns the value of the named property, which is assumed to be an array
-// of unsigned integers. If the value is not found, the array is left
-// unchanged.
-//-----------------------------------------------------------------------------
-bool njsUtils_getNamedPropertyUnsignedIntArray(napi_env env, napi_value value,
-        const char *name, uint32_t *numElements, uint32_t **elements)
-{
-    napi_value array, element;
-    uint32_t i;
-
-    // get value of the named property, if not found, nothing to do
-    if (!njsUtils_getNamedProperty(env, value, name, &array))
-        return false;
-    if (!array)
-        return true;
-
-    // free memory, if applicable
-    if (*elements) {
-        free(*elements);
-        *elements = NULL;
-        *numElements = 0;
-    }
-
-    // get the elements from the array
-    NJS_CHECK_NAPI(env, napi_get_array_length(env, array, numElements))
-    *elements = calloc(*numElements, sizeof(uint32_t));
-    if (!elements && *numElements > 0)
-        return njsUtils_throwInsufficientMemory(env);
-    for (i = 0; i < *numElements; i++) {
-        NJS_CHECK_NAPI(env, napi_get_element(env, array, i, &element))
-        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, element,
-                &((*elements)[i])))
-    }
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsUtils_getXid()
 //   Returns the XID from the specified N-API value.
 //-----------------------------------------------------------------------------
@@ -621,18 +581,6 @@ bool njsUtils_getXid(napi_env env, napi_value value, dpiXid **xid)
 
 
 //-----------------------------------------------------------------------------
-// njsUtils_throwInsufficientMemory()
-//   Throw an error indicating that insufficient memory could be allocated. The
-// value false is returned as a convenience to the caller.
-//-----------------------------------------------------------------------------
-bool njsUtils_throwInsufficientMemory(napi_env env)
-{
-    napi_throw_error(env, NULL, NJS_ERR_INSUFFICIENT_MEMORY);
-    return false;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsUtils_throwErrorDPI()
 //   Get the error message from ODPI-C and throw an equivalent JavaScript
 // error. False is returned as a convenience to the caller.
@@ -646,6 +594,35 @@ bool njsUtils_throwErrorDPI(napi_env env, njsModuleGlobals *globals)
     if (!njsUtils_getError(env, &errorInfo, NULL, &error))
         return false;
     napi_throw(env, error);
+    return false;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsUtils_throwInsufficientMemory()
+//   Throw an error indicating that insufficient memory could be allocated. The
+// value false is returned as a convenience to the caller.
+//-----------------------------------------------------------------------------
+bool njsUtils_throwInsufficientMemory(napi_env env)
+{
+    napi_throw_error(env, NULL, NJS_ERR_INSUFFICIENT_MEMORY);
+    return false;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsUtils_throwUnsupportedDataType()
+//   Set the error on the baton to indicate that an unsupported data type was
+// encountered during a fetch. Returns false as a convenience to the caller.
+//-----------------------------------------------------------------------------
+bool njsUtils_throwUnsupportedDataType(napi_env env, uint32_t oracleTypeNum,
+        uint32_t columnNum)
+{
+    char errorMessage[100];
+
+    (void) snprintf(errorMessage, sizeof(errorMessage),
+            NJS_ERR_UNSUPPORTED_DATA_TYPE, oracleTypeNum, columnNum);
+    napi_throw_error(env, NULL, errorMessage);
     return false;
 }
 

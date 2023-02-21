@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2023, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -36,6 +36,7 @@
 NJS_NAPI_METHOD_DECL_ASYNC(njsResultSet_close);
 NJS_NAPI_METHOD_DECL_SYNC(njsResultSet_getMetaData);
 NJS_NAPI_METHOD_DECL_ASYNC(njsResultSet_getRows);
+NJS_NAPI_METHOD_DECL_SYNC(njsResultSet_setFetchTypes);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsResultSet_closeAsync);
@@ -55,6 +56,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             napi_default, NULL },
     { "getRows", NULL, njsResultSet_getRows, NULL, NULL, NULL, napi_default,
             NULL },
+    { "setFetchTypes", NULL, njsResultSet_setFetchTypes, NULL, NULL, NULL,
+            napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
@@ -181,12 +184,9 @@ static bool njsResultSet_getRowsAsync(njsBaton *baton)
                 return njsBaton_setErrorDPI(baton);
             var->dpiVarHandle = NULL;
         }
-        if (dpiConn_newVar(rs->conn->handle, var->varTypeNum,
-                var->nativeTypeNum, baton->fetchArraySize, var->maxSize, 1, 0,
-                var->dpiObjectTypeHandle, &var->dpiVarHandle,
-                &var->buffer->dpiVarData) < 0)
-            return njsBaton_setErrorDPI(baton);
         var->maxArraySize = baton->fetchArraySize;
+        if (!njsVariable_createBuffer(var, rs->conn, baton))
+            return false;
     }
 
     // perform define, if necessary
@@ -303,6 +303,79 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
     rs->queryVars = vars;
     rs->fetchArraySize = baton->fetchArraySize;
     rs->isNested = (baton->callingInstance != (void*) conn);
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsResultSet_setFetchTypes()
+//   Get accessor of "metaData" property.
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsResultSet_setFetchTypes, 1, NULL)
+{
+    njsResultSet *rs = (njsResultSet*) callingInstance;
+    napi_value metadata, temp;
+    njsVariable *var;
+    uint32_t i;
+
+    for (i = 0; i < rs->numQueryVars; i++) {
+        var = &rs->queryVars[i];
+
+        // determine fetch type to use
+        NJS_CHECK_NAPI(env, napi_get_element(env, args[0], i, &metadata))
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, metadata, "fetchType",
+                &temp))
+        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &var->varTypeNum))
+
+        // if RAW data is being returned as VARCHAR, need to have twice as much
+        // space available to account for the hex encoding that the server does
+        if (var->dbTypeNum == DPI_ORACLE_TYPE_RAW &&
+                var->varTypeNum == DPI_ORACLE_TYPE_VARCHAR) {
+            var->maxSize *= 2;
+        }
+
+        // adjust max size to use based on fetch type and verify fetch type
+        switch (var->varTypeNum) {
+            case DPI_ORACLE_TYPE_VARCHAR:
+            case DPI_ORACLE_TYPE_NVARCHAR:
+            case DPI_ORACLE_TYPE_CHAR:
+            case DPI_ORACLE_TYPE_NCHAR:
+            case DPI_ORACLE_TYPE_RAW:
+                if (var->dbTypeNum == DPI_ORACLE_TYPE_CLOB ||
+                        var->dbTypeNum == DPI_ORACLE_TYPE_NCLOB ||
+                        var->dbTypeNum == DPI_ORACLE_TYPE_BLOB) {
+                    var->maxSize = (uint32_t) -1;
+                } else if (var->maxSize == 0) {
+                    var->maxSize = NJS_MAX_FETCH_AS_STRING_SIZE;
+                }
+                break;
+            case DPI_ORACLE_TYPE_LONG_VARCHAR:
+            case DPI_ORACLE_TYPE_LONG_RAW:
+                var->maxSize = (uint32_t) -1;
+                break;
+            case DPI_ORACLE_TYPE_DATE:
+            case DPI_ORACLE_TYPE_TIMESTAMP:
+            case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
+            case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
+            case DPI_ORACLE_TYPE_CLOB:
+            case DPI_ORACLE_TYPE_NCLOB:
+            case DPI_ORACLE_TYPE_BLOB:
+            case DPI_ORACLE_TYPE_OBJECT:
+            case DPI_ORACLE_TYPE_NUMBER:
+            case DPI_ORACLE_TYPE_NATIVE_INT:
+            case DPI_ORACLE_TYPE_NATIVE_FLOAT:
+            case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
+            case DPI_ORACLE_TYPE_ROWID:
+            case DPI_ORACLE_TYPE_STMT:
+            case DPI_ORACLE_TYPE_JSON:
+                break;
+            default:
+                return njsUtils_throwUnsupportedDataType(env, var->varTypeNum,
+                        i + 1);
+        }
+
+    }
 
     return true;
 }

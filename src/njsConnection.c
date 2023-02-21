@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2023, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -574,14 +574,6 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_execute, 5, NULL)
                 &baton->dmlRowCounts))
             return false;
     } else {
-        if (!njsUtils_getNamedPropertyUnsignedIntArray(env, args[3],
-                "fetchAsBuffer", &baton->numFetchAsBufferTypes,
-                &baton->fetchAsBufferTypes))
-            return false;
-        if (!njsUtils_getNamedPropertyUnsignedIntArray(env, args[3],
-                "fetchAsString", &baton->numFetchAsStringTypes,
-                &baton->fetchAsStringTypes))
-            return false;
         NJS_CHECK_NAPI(env, napi_get_named_property(env, args[3],
                 "fetchArraySize", &temp))
         NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp,
@@ -590,9 +582,6 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_execute, 5, NULL)
                 "prefetchRows", &temp))
         NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp,
                 &baton->prefetchRows))
-        if (!njsBaton_getFetchInfoFromArg(baton, env, args[3],
-                &baton->numFetchInfo, &baton->fetchInfo))
-            return false;
     }
     NJS_CHECK_NAPI(env, napi_get_named_property(env, args[3], "autoCommit",
             &temp))
