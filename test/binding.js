@@ -233,7 +233,7 @@ describe('4. binding.js', function() {
         async () => {
           await connection.execute(insert, param2, options);
         },
-        /NJS-044/
+        /NJS-044:/
       );
 
       let res = await connection.execute("SELECT * FROM nodb_binding1 ORDER BY id", [], options);
@@ -406,7 +406,7 @@ describe('4. binding.js', function() {
     it('4.5.2 negative - DML invalid bind direction', async function() {
       await testsUtil.assertThrowsAsync(
         async () => await connection.execute("insert into nodb_raw (num) values (:id)", { id: { val: 1, type: oracledb.NUMBER, dir : 0 } }),
-        /NJS-013/
+        /NJS-013:/
       );
     });
 
