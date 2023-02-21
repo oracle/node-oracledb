@@ -16,19 +16,19 @@ and Oracle Client.  See the [homepage][4] for a list.
 The node-oracledb module is open source and maintained by Oracle Corp.
 It is stable, well documented, and has a comprehensive test suite.
 
-## <a name="installation"></a> Installation
+## Installation
 
 See [Getting Started with Node-oracledb][1] and [Quick Start Node-oracledb Installation][2].
 
-## <a name="doc"></a> Documentation
+## Documentation
 
 See [Documentation for the Oracle Database Node.js Add-on][32] and the [CHANGELOG][33].
 
-## <a name="examples"></a> Examples
+## Examples
 
 See the [examples][30] directory.  Start with [examples/example.js][31].
 
-## <a name="help"></a> Help
+## Help
 
 Issues and questions about node-oracledb can be posted on [GitHub][3] or
 [Slack][5] ([link to join Slack][6]).
@@ -37,15 +37,20 @@ Issues and questions about node-oracledb can be posted on [GitHub][3] or
 
 To run the test suite see [test/README][34].
 
-## <a name="contrib"></a> Contributing
+## Contributing
 
-Node-oracledb is an open source project. See [CONTRIBUTING][35] for
-details.
+This project welcomes contributions from the community. Before submitting a
+pull request, please [review our contribution guide](./CONTRIBUTING.md).
 
-Oracle gratefully acknowledges the contributions to node-oracledb that
-have been made by the community.
+Oracle gratefully acknowledges the contributions to node-oracledb that have
+been made by the community.
 
-## <a name="license"></a> License
+## Security
+
+Please consult the [security guide](./SECURITY.md) for our responsible security
+vulnerability disclosure process.
+
+## License
 
 Copyright (c) 2015, 2023, Oracle and/or its affiliates.
 
