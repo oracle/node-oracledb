@@ -46,20 +46,20 @@ static NJS_NAPI_FINALIZE(njsAqQueue_finalize);
 
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
-    { "_deqMany", NULL, njsAqQueue_deqMany, NULL, NULL, NULL, napi_default,
+    { "deqMany", NULL, njsAqQueue_deqMany, NULL, NULL, NULL, napi_default,
             NULL },
-    { "_deqOne", NULL, njsAqQueue_deqOne, NULL, NULL, NULL, napi_default,
+    { "deqOne", NULL, njsAqQueue_deqOne, NULL, NULL, NULL, napi_default,
             NULL },
-    { "_enqMany", NULL, njsAqQueue_enqMany, NULL, NULL, NULL, napi_default,
+    { "enqMany", NULL, njsAqQueue_enqMany, NULL, NULL, NULL, napi_default,
             NULL },
-    { "_enqOne", NULL, njsAqQueue_enqOne, NULL, NULL, NULL, napi_default,
+    { "enqOne", NULL, njsAqQueue_enqOne, NULL, NULL, NULL, napi_default,
             NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
 // class definition
 const njsClassDef njsClassDefAqQueue = {
-    "AqQueue", sizeof(njsAqQueue), njsAqQueue_finalize,
+    "AqQueueImpl", sizeof(njsAqQueue), njsAqQueue_finalize,
     njsClassProperties, false
 };
 
@@ -109,8 +109,7 @@ bool njsAqQueue_setRecipients(njsBaton *baton, dpiMsgProps *handle,
 static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
         napi_env env, napi_value value, dpiMsgProps **handle)
 {
-    napi_value payloadObj, constructor, temp;
-    napi_valuetype valueType;
+    napi_value payloadObj, constructor;
     dpiMsgProps *tempHandle;
     bool found, isDbObject;
     size_t bufferLength;
@@ -124,63 +123,19 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
     bool ok = true;
     uint32_t i;
 
-    // determine payload exists and is a string or buffer
-    NJS_CHECK_NAPI(env, napi_typeof(env, value, &valueType))
-    switch (valueType) {
-        case napi_string:
-            payloadObj = value;
-            break;
-        case napi_object:
-            NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-                    baton->globals->jsBaseDbObjectConstructor, &constructor))
-            NJS_CHECK_NAPI(env, napi_instanceof(env, value, constructor,
-                    &isDbObject))
-            if (isDbObject || njsUtils_isBuffer(env, value)) {
-                payloadObj = value;
-            } else {
-                NJS_CHECK_NAPI(env, napi_get_named_property(env, value,
-                        "payload", &payloadObj))
-                NJS_CHECK_NAPI(env, napi_typeof(env, payloadObj, &valueType))
-                if (valueType == napi_string)
-                    break;
-                if (valueType == napi_object) {
-                    NJS_CHECK_NAPI(env, napi_instanceof(env, payloadObj,
-                            constructor, &isDbObject))
-                    if (isDbObject || njsUtils_isBuffer(env, payloadObj))
-                        break;
-                    if (queue->payloadObjectType) {
-                        NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-                                queue->payloadObjectType->jsDbObjectConstructor,
-                                &constructor))
-                        NJS_CHECK_NAPI(env, napi_new_instance(env, constructor,
-                                1, &payloadObj, &temp))
-                        payloadObj = temp;
-                        isDbObject = true;
-                        break;
-                    }
-                }
-                return njsBaton_setError(baton, errInvalidAqMessage);
-            }
-            break;
-        default:
-            return njsBaton_setError(baton, errInvalidAqMessage);
-    }
-
     // create new ODPI-C message properties handle
     if (dpiConn_newMsgProps(queue->conn->handle, &tempHandle))
         return njsBaton_setErrorDPI(baton);
     *handle = tempHandle;
 
     // set payload
-    if (valueType == napi_string) {
-        buffer = NULL;
-        if (!njsUtils_copyStringFromJS(env, payloadObj, &buffer,
-                &bufferLength))
-            return false;
-        status = dpiMsgProps_setPayloadBytes(tempHandle, buffer,
-                (uint32_t) bufferLength);
-        free(buffer);
-    } else if (isDbObject) {
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "payload",
+            &payloadObj))
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            baton->globals->jsDbObjectConstructor, &constructor))
+    NJS_CHECK_NAPI(env, napi_instanceof(env, payloadObj, constructor,
+            &isDbObject))
+    if (isDbObject) {
         if (!njsDbObject_getInstance(baton->globals, env, payloadObj, &obj))
             return false;
         status = dpiMsgProps_setPayloadObject(tempHandle, obj->handle);
@@ -192,10 +147,6 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
     }
     if (status < 0)
         return njsBaton_setErrorDPI(baton);
-
-    // if value passed was the payload itself, nothing further to do
-    if (payloadObj == value)
-        return true;
 
     // set correlation, if applicable
     buffer = NULL;
@@ -248,7 +199,6 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
     if (!njsBaton_getStringArrayFromArg(baton, env, &value, 0, "recipients",
             &recipCount, &recipArr, &recipLengths, &found))
         return false;
-
     if (found && (recipCount > 0)) {
         ok = njsAqQueue_setRecipients(baton, tempHandle, recipArr,
                  recipLengths, recipCount);

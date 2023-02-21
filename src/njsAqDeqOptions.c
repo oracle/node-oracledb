@@ -25,73 +25,84 @@
 
 #include "njsModule.h"
 
-// getters
-static NJS_NAPI_GETTER(njsAqDeqOptions_getCondition);
-static NJS_NAPI_GETTER(njsAqDeqOptions_getConsumerName);
-static NJS_NAPI_GETTER(njsAqDeqOptions_getCorrelation);
-static NJS_NAPI_GETTER(njsAqDeqOptions_getMode);
-static NJS_NAPI_GETTER(njsAqDeqOptions_getMsgId);
-static NJS_NAPI_GETTER(njsAqDeqOptions_getNavigation);
-static NJS_NAPI_GETTER(njsAqDeqOptions_getTransformation);
-static NJS_NAPI_GETTER(njsAqDeqOptions_getVisibility);
-static NJS_NAPI_GETTER(njsAqDeqOptions_getWait);
-
-// setters
-static NJS_NAPI_SETTER(njsAqDeqOptions_setCondition);
-static NJS_NAPI_SETTER(njsAqDeqOptions_setConsumerName);
-static NJS_NAPI_SETTER(njsAqDeqOptions_setCorrelation);
-static NJS_NAPI_SETTER(njsAqDeqOptions_setMode);
-static NJS_NAPI_SETTER(njsAqDeqOptions_setMsgId);
-static NJS_NAPI_SETTER(njsAqDeqOptions_setNavigation);
-static NJS_NAPI_SETTER(njsAqDeqOptions_setTransformation);
-static NJS_NAPI_SETTER(njsAqDeqOptions_setVisibility);
-static NJS_NAPI_SETTER(njsAqDeqOptions_setWait);
+// class methods
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_getCondition);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_getConsumerName);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_getCorrelation);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_getMode);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_getMsgId);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_getNavigation);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_getTransformation);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_getVisibility);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_getWait);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setCondition);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setConsumerName);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setCorrelation);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setMode);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setMsgId);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setNavigation);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setTransformation);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setVisibility);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setWait);
 
 // finalize
 static NJS_NAPI_FINALIZE(njsAqDeqOptions_finalize);
 
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
-    { "condition", NULL, NULL, njsAqDeqOptions_getCondition,
-            njsAqDeqOptions_setCondition, NULL, napi_enumerable, NULL },
-    { "consumerName", NULL, NULL, njsAqDeqOptions_getConsumerName,
-            njsAqDeqOptions_setConsumerName, NULL, napi_enumerable, NULL },
-    { "correlation", NULL, NULL, njsAqDeqOptions_getCorrelation,
-            njsAqDeqOptions_setCorrelation, NULL, napi_enumerable, NULL },
-    { "mode", NULL, NULL, njsAqDeqOptions_getMode, njsAqDeqOptions_setMode,
+    { "getCondition", NULL, njsAqDeqOptions_getCondition, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "getConsumerName", NULL, njsAqDeqOptions_getConsumerName, NULL, NULL,
             NULL, napi_enumerable, NULL },
-    { "msgId", NULL, NULL, njsAqDeqOptions_getMsgId, njsAqDeqOptions_setMsgId,
+    { "getCorrelation", NULL, njsAqDeqOptions_getCorrelation, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "getMode", NULL, njsAqDeqOptions_getMode, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "getMsgId", NULL, njsAqDeqOptions_getMsgId, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "getNavigation", NULL, njsAqDeqOptions_getNavigation, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "getTransformation", NULL, njsAqDeqOptions_getTransformation, NULL,
+            NULL, NULL, napi_enumerable, NULL },
+    { "getVisibility", NULL, njsAqDeqOptions_getVisibility, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "getWait", NULL, njsAqDeqOptions_getWait, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "setCondition", NULL, njsAqDeqOptions_setCondition, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "setConsumerName", NULL, njsAqDeqOptions_setConsumerName, NULL, NULL,
             NULL, napi_enumerable, NULL },
-    { "navigation", NULL, NULL, njsAqDeqOptions_getNavigation,
-            njsAqDeqOptions_setNavigation, NULL, napi_enumerable, NULL },
-    { "transformation", NULL, NULL, njsAqDeqOptions_getTransformation,
-            njsAqDeqOptions_setTransformation, NULL, napi_enumerable, NULL },
-    { "visibility", NULL, NULL, njsAqDeqOptions_getVisibility,
-            njsAqDeqOptions_setVisibility, NULL, napi_enumerable, NULL },
-    { "wait", NULL, NULL, njsAqDeqOptions_getWait, njsAqDeqOptions_setWait,
+    { "setCorrelation", NULL, njsAqDeqOptions_setCorrelation, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "setMode", NULL, njsAqDeqOptions_setMode, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "setMsgId", NULL, njsAqDeqOptions_setMsgId, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "setNavigation", NULL, njsAqDeqOptions_setNavigation, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "setTransformation", NULL, njsAqDeqOptions_setTransformation, NULL, NULL,
             NULL, napi_enumerable, NULL },
+    { "setVisibility", NULL, njsAqDeqOptions_setVisibility, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "setWait", NULL, njsAqDeqOptions_setWait, NULL, NULL, NULL,
+            napi_enumerable, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
 // class definition
 const njsClassDef njsClassDefAqDeqOptions = {
-    "AqDeqOptions", sizeof(njsAqDeqOptions), njsAqDeqOptions_finalize,
+    "AqDeqOptionsImpl", sizeof(njsAqDeqOptions), njsAqDeqOptions_finalize,
     njsClassProperties, true
 };
 
 // other methods used internally
-static napi_value njsAqDeqOptions_getTextAttribute(napi_env env,
-        napi_callback_info info,
-        int (*getter)(dpiDeqOptions*, const char **, uint32_t *));
-static napi_value njsAqDeqOptions_getUnsignedIntAttribute(napi_env env,
-        napi_callback_info info,
-        int (*getter)(dpiDeqOptions*, uint32_t *));
-static napi_value njsAqDeqOptions_setTextAttribute(napi_env env,
-        napi_callback_info info, const char *attributeName,
+static bool njsAqDeqOptions_getTextAttribute(napi_env env,
+        njsModuleGlobals *globals, njsBaseInstance *instance,
+        int (*getter)(dpiDeqOptions*, const char **, uint32_t *),
+        napi_value *returnValue);
+static bool njsAqDeqOptions_setTextAttribute(napi_env env,
+        njsModuleGlobals *globals, njsBaseInstance *instance, napi_value value,
         int (*setter)(dpiDeqOptions*, const char *, uint32_t));
-static napi_value njsAqDeqOptions_setUnsignedIntAttribute(napi_env env,
-        napi_callback_info info, const char *attributeName,
-        int (*setter)(dpiDeqOptions*, uint32_t));
 
 
 //-----------------------------------------------------------------------------
@@ -115,11 +126,10 @@ static void njsAqDeqOptions_finalize(napi_env env, void *finalizeData,
 // njsAqDeqOptions_getCondition()
 //   Get accessor of "condition" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_getCondition(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_getCondition, 0, NULL)
 {
-    return njsAqDeqOptions_getTextAttribute(env, info,
-            dpiDeqOptions_getCondition);
+    return njsAqDeqOptions_getTextAttribute(env, globals, callingInstance,
+            dpiDeqOptions_getCondition, returnValue);
 }
 
 
@@ -127,11 +137,10 @@ static napi_value njsAqDeqOptions_getCondition(napi_env env,
 // njsAqDeqOptions_getConsumerName()
 //   Get accessor of "consumerName" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_getConsumerName(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_getConsumerName, 0, NULL)
 {
-    return njsAqDeqOptions_getTextAttribute(env, info,
-            dpiDeqOptions_getConsumerName);
+    return njsAqDeqOptions_getTextAttribute(env, globals, callingInstance,
+            dpiDeqOptions_getConsumerName, returnValue);
 }
 
 
@@ -139,11 +148,10 @@ static napi_value njsAqDeqOptions_getConsumerName(napi_env env,
 // njsAqDeqOptions_getCorrelation()
 //   Get accessor of "correlation" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_getCorrelation(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_getCorrelation, 0, NULL)
 {
-    return njsAqDeqOptions_getTextAttribute(env, info,
-            dpiDeqOptions_getCorrelation);
+    return njsAqDeqOptions_getTextAttribute(env, globals, callingInstance,
+            dpiDeqOptions_getCorrelation, returnValue);
 }
 
 
@@ -151,11 +159,15 @@ static napi_value njsAqDeqOptions_getCorrelation(napi_env env,
 // njsAqDeqOptions_getMode()
 //   Get accessor of "mode" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_getMode(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_getMode, 0, NULL)
 {
-    return njsAqDeqOptions_getUnsignedIntAttribute(env, info,
-            dpiDeqOptions_getMode);
+    njsAqDeqOptions *options = (njsAqDeqOptions*) callingInstance;
+    uint32_t value;
+
+    if (dpiDeqOptions_getMode(options->handle, &value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, value, returnValue))
+    return true;
 }
 
 
@@ -163,28 +175,17 @@ static napi_value njsAqDeqOptions_getMode(napi_env env,
 // njsAqDeqOptions_getMsgId()
 //   Get accessor of "msgId" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_getMsgId(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_getMsgId, 0, NULL)
 {
-    njsModuleGlobals *globals;
-    njsAqDeqOptions *options;
+    njsAqDeqOptions *options = (njsAqDeqOptions*) callingInstance;
     uint32_t valueLength;
     const char *value;
-    napi_value result;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &options))
-        return NULL;
-    if (dpiDeqOptions_getMsgId(options->handle, &value, &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
-    if (napi_create_buffer_copy(env, valueLength, value, NULL,
-            &result) != napi_ok) {
-        njsUtils_genericThrowError(env, __FILE__, __LINE__);
-        return NULL;
-    }
-    return result;
+    if (dpiDeqOptions_getMsgId(options->handle, &value, &valueLength) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_buffer_copy(env, valueLength, value, NULL,
+            returnValue))
+    return true;
 }
 
 
@@ -192,11 +193,15 @@ static napi_value njsAqDeqOptions_getMsgId(napi_env env,
 // njsAqDeqOptions_getNavigation()
 //   Get accessor of "navigation" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_getNavigation(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_getNavigation, 0, NULL)
 {
-    return njsAqDeqOptions_getUnsignedIntAttribute(env, info,
-            dpiDeqOptions_getNavigation);
+    njsAqDeqOptions *options = (njsAqDeqOptions*) callingInstance;
+    uint32_t value;
+
+    if (dpiDeqOptions_getNavigation(options->handle, &value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, value, returnValue))
+    return true;
 }
 
 
@@ -204,23 +209,20 @@ static napi_value njsAqDeqOptions_getNavigation(napi_env env,
 // njsAqDeqOptions_getTextAttribute()
 //   Get accessor of text properties.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_getTextAttribute(napi_env env,
-        napi_callback_info info,
-        int (*getter)(dpiDeqOptions*, const char **, uint32_t *))
+static bool njsAqDeqOptions_getTextAttribute(napi_env env,
+        njsModuleGlobals *globals, njsBaseInstance *instance,
+        int (*getter)(dpiDeqOptions*, const char **, uint32_t *),
+        napi_value *returnValue)
 {
-    njsModuleGlobals *globals;
-    njsAqDeqOptions *options;
+    njsAqDeqOptions *options = (njsAqDeqOptions*) instance;
     uint32_t valueLength;
     const char *value;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &options))
-        return NULL;
-    if ((*getter)(options->handle, &value, &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
-    return njsUtils_convertToString(env, value, valueLength);
+    if ((*getter)(options->handle, &value, &valueLength) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+            returnValue))
+    return true;
 }
 
 
@@ -228,34 +230,10 @@ static napi_value njsAqDeqOptions_getTextAttribute(napi_env env,
 // njsAqDeqOptions_getTransformation()
 //   Get accessor of "transformation" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_getTransformation(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_getTransformation, 0, NULL)
 {
-    return njsAqDeqOptions_getTextAttribute(env, info,
-            dpiDeqOptions_getTransformation);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsAqDeqOptions_getUnsignedIntAttribute()
-//   Get accessor of unsigned integer properties.
-//-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_getUnsignedIntAttribute(napi_env env,
-        napi_callback_info info,
-        int (*getter)(dpiDeqOptions*, uint32_t *))
-{
-    njsModuleGlobals *globals;
-    njsAqDeqOptions *options;
-    uint32_t value;
-
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &options))
-        return NULL;
-    if ((*getter)(options->handle, &value) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
-    return njsUtils_convertToUnsignedInt(env, value);
+    return njsAqDeqOptions_getTextAttribute(env, globals, callingInstance,
+            dpiDeqOptions_getTransformation, returnValue);
 }
 
 
@@ -263,11 +241,15 @@ static napi_value njsAqDeqOptions_getUnsignedIntAttribute(napi_env env,
 // njsAqDeqOptions_getVisibility()
 //   Get accessor of "visibility" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_getVisibility(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_getVisibility, 0, NULL)
 {
-    return njsAqDeqOptions_getUnsignedIntAttribute(env, info,
-            dpiDeqOptions_getVisibility);
+    njsAqDeqOptions *options = (njsAqDeqOptions*) callingInstance;
+    uint32_t value;
+
+    if (dpiDeqOptions_getVisibility(options->handle, &value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, value, returnValue))
+    return true;
 }
 
 
@@ -275,11 +257,15 @@ static napi_value njsAqDeqOptions_getVisibility(napi_env env,
 // njsAqDeqOptions_getWait()
 //   Get accessor of "wait" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_getWait(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_getWait, 0, NULL)
 {
-    return njsAqDeqOptions_getUnsignedIntAttribute(env, info,
-            dpiDeqOptions_getWait);
+    njsAqDeqOptions *options = (njsAqDeqOptions*) callingInstance;
+    uint32_t value;
+
+    if (dpiDeqOptions_getWait(options->handle, &value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, value, returnValue))
+    return true;
 }
 
 
@@ -287,11 +273,10 @@ static napi_value njsAqDeqOptions_getWait(napi_env env,
 // njsAqDeqOptions_setCondition()
 //   Set accessor of "condition" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_setCondition(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_setCondition, 1, NULL)
 {
-    return njsAqDeqOptions_setTextAttribute(env, info, "condition",
-            dpiDeqOptions_setCondition);
+    return njsAqDeqOptions_setTextAttribute(env, globals, callingInstance,
+            args[0], dpiDeqOptions_setCondition);
 }
 
 
@@ -299,11 +284,10 @@ static napi_value njsAqDeqOptions_setCondition(napi_env env,
 // njsAqDeqOptions_setConsumerName()
 //   Set accessor of "consumerName" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_setConsumerName(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_setConsumerName, 1, NULL)
 {
-    return njsAqDeqOptions_setTextAttribute(env, info, "consumerName",
-            dpiDeqOptions_setConsumerName);
+    return njsAqDeqOptions_setTextAttribute(env, globals, callingInstance,
+            args[0], dpiDeqOptions_setConsumerName);
 }
 
 
@@ -311,11 +295,10 @@ static napi_value njsAqDeqOptions_setConsumerName(napi_env env,
 // njsAqDeqOptions_setCorrelation()
 //   Set accessor of "correlation" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_setCorrelation(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_setCorrelation, 1, NULL)
 {
-    return njsAqDeqOptions_setTextAttribute(env, info, "correlation",
-            dpiDeqOptions_setCorrelation);
+    return njsAqDeqOptions_setTextAttribute(env, globals, callingInstance,
+            args[0], dpiDeqOptions_setCorrelation);
 }
 
 
@@ -323,11 +306,16 @@ static napi_value njsAqDeqOptions_setCorrelation(napi_env env,
 // njsAqDeqOptions_setMode()
 //   Set accessor of "mode" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_setMode(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_setMode, 1, NULL)
 {
-    return njsAqDeqOptions_setUnsignedIntAttribute(env, info, "mode",
-            dpiDeqOptions_setMode);
+    njsAqDeqOptions *options = (njsAqDeqOptions*) callingInstance;
+    uint32_t value;
+
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &value))
+    if (dpiDeqOptions_setMode(options->handle, value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+
+    return true;
 }
 
 
@@ -335,30 +323,19 @@ static napi_value njsAqDeqOptions_setMode(napi_env env,
 // njsAqDeqOptions_setMsgId()
 //   Set accessor of "msgId" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_setMsgId(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_setMsgId, 1, NULL)
 {
-    njsModuleGlobals *globals;
-    njsAqDeqOptions *options;
+    njsAqDeqOptions *options = (njsAqDeqOptions*) callingInstance;
     size_t bufferLength;
-    napi_value value;
     void *buffer;
 
-    if (!njsUtils_validateSetter(env, info, &globals,
-            (njsBaseInstance**) &options, &value))
-        return NULL;
-    if (!njsUtils_isBuffer(env, value)) {
-        njsUtils_throwError(env, errInvalidPropertyValue, "msgId");
-        return NULL;
-    }
-    if (napi_get_buffer_info(env, value, &buffer, &bufferLength) != napi_ok) {
-        njsUtils_genericThrowError(env, __FILE__, __LINE__);
-        return NULL;
-    }
+    NJS_CHECK_NAPI(env, napi_get_buffer_info(env, args[0], &buffer,
+            &bufferLength))
     if (dpiDeqOptions_setMsgId(options->handle, buffer,
             (uint32_t) bufferLength) < 0)
-        njsUtils_throwErrorDPI(env, globals);
-    return NULL;
+        return njsUtils_throwErrorDPI(env, globals);
+
+    return true;
 }
 
 
@@ -366,11 +343,16 @@ static napi_value njsAqDeqOptions_setMsgId(napi_env env,
 // njsAqDeqOptions_setNavigation()
 //   Set accessor of "navigation" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_setNavigation(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_setNavigation, 1, NULL)
 {
-    return njsAqDeqOptions_setUnsignedIntAttribute(env, info, "navigation",
-            dpiDeqOptions_setNavigation);
+    njsAqDeqOptions *options = (njsAqDeqOptions*) callingInstance;
+    uint32_t value;
+
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &value))
+    if (dpiDeqOptions_setNavigation(options->handle, value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+
+    return true;
 }
 
 
@@ -378,29 +360,23 @@ static napi_value njsAqDeqOptions_setNavigation(napi_env env,
 // njsAqDeqOptions_setTextAttribute()
 //   Set accessor of text properties.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_setTextAttribute(napi_env env,
-        napi_callback_info info, const char *attributeName,
+static bool njsAqDeqOptions_setTextAttribute(napi_env env,
+        njsModuleGlobals *globals, njsBaseInstance *instance, napi_value value,
         int (*setter)(dpiDeqOptions*, const char *, uint32_t))
 {
-    njsModuleGlobals *globals;
-    njsAqDeqOptions *options;
+    njsAqDeqOptions *options = (njsAqDeqOptions*) instance;
     size_t bufferLength;
-    napi_value value;
-    char *buffer;
+    char *buffer = NULL;
     int status;
 
-    if (!njsUtils_validateSetter(env, info, &globals,
-            (njsBaseInstance**) &options, &value))
-        return NULL;
-    buffer = NULL;
-    if (!njsUtils_setPropString(env, value, attributeName, &buffer,
-            &bufferLength))
-        return NULL;
+    if (!njsUtils_copyStringFromJS(env, value, &buffer, &bufferLength))
+        return false;
     status = (*setter)(options->handle, buffer, (uint32_t) bufferLength);
     free(buffer);
     if (status < 0)
-        njsUtils_throwErrorDPI(env, globals);
-    return NULL;
+        return njsUtils_throwErrorDPI(env, globals);
+
+    return true;
 }
 
 
@@ -408,35 +384,10 @@ static napi_value njsAqDeqOptions_setTextAttribute(napi_env env,
 // njsAqDeqOptions_setTransformation()
 //   Set accessor of "transformation" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_setTransformation(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_setTransformation, 1, NULL)
 {
-    return njsAqDeqOptions_setTextAttribute(env, info, "transformation",
-            dpiDeqOptions_setTransformation);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsAqDeqOptions_setUnsignedIntAttribute()
-//   Set accessor of unsigned integer properties.
-//-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_setUnsignedIntAttribute(napi_env env,
-        napi_callback_info info, const char *attributeName,
-        int (*setter)(dpiDeqOptions*, uint32_t))
-{
-    njsModuleGlobals *globals;
-    njsAqDeqOptions *options;
-    napi_value valueObj;
-    uint32_t value;
-
-    if (!njsUtils_validateSetter(env, info, &globals,
-            (njsBaseInstance**) &options, &valueObj))
-        return NULL;
-    if (!njsUtils_setPropUnsignedInt(env, valueObj, attributeName, &value))
-        return NULL;
-    if ((*setter)(options->handle, value) < 0)
-        njsUtils_throwErrorDPI(env, globals);
-    return NULL;
+    return njsAqDeqOptions_setTextAttribute(env, globals, callingInstance,
+            args[0], dpiDeqOptions_setTransformation);
 }
 
 
@@ -444,11 +395,16 @@ static napi_value njsAqDeqOptions_setUnsignedIntAttribute(napi_env env,
 // njsAqDeqOptions_setVisibility()
 //   Set accessor of "visibility" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_setVisibility(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_setVisibility, 1, NULL)
 {
-    return njsAqDeqOptions_setUnsignedIntAttribute(env, info, "visibility",
-            dpiDeqOptions_setVisibility);
+    njsAqDeqOptions *options = (njsAqDeqOptions*) callingInstance;
+    uint32_t value;
+
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &value))
+    if (dpiDeqOptions_setVisibility(options->handle, value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+
+    return true;
 }
 
 
@@ -456,9 +412,14 @@ static napi_value njsAqDeqOptions_setVisibility(napi_env env,
 // njsAqDeqOptions_setWait()
 //   Set accessor of "wait" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqDeqOptions_setWait(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_setWait, 1, NULL)
 {
-    return njsAqDeqOptions_setUnsignedIntAttribute(env, info, "wait",
-            dpiDeqOptions_setWait);
+    njsAqDeqOptions *options = (njsAqDeqOptions*) callingInstance;
+    uint32_t value;
+
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &value))
+    if (dpiDeqOptions_setWait(options->handle, value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+
+    return true;
 }

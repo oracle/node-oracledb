@@ -1059,8 +1059,8 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         bindvars,
         function(err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-035:');
-          // NJS-035: maxArraySize is required for IN OUT array bind
+          (err.message).should.startWith('NJS-007:');
+          // NJS-007: invalid value for "maxArraySize"
           done();
         }
       );

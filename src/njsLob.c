@@ -27,8 +27,13 @@
 
 // class methods
 NJS_NAPI_METHOD_DECL_ASYNC(njsLob_close);
+NJS_NAPI_METHOD_DECL_SYNC(njsLob_getChunkSize);
 NJS_NAPI_METHOD_DECL_ASYNC(njsLob_getData);
+NJS_NAPI_METHOD_DECL_SYNC(njsLob_getLength);
+NJS_NAPI_METHOD_DECL_SYNC(njsLob_getPieceSize);
+NJS_NAPI_METHOD_DECL_SYNC(njsLob_getType);
 NJS_NAPI_METHOD_DECL_ASYNC(njsLob_read);
+NJS_NAPI_METHOD_DECL_SYNC(njsLob_setPieceSize);
 NJS_NAPI_METHOD_DECL_ASYNC(njsLob_write);
 
 // asynchronous methods
@@ -41,41 +46,30 @@ static NJS_ASYNC_METHOD(njsLob_writeAsync);
 static NJS_ASYNC_POST_METHOD(njsLob_getDataPostAsync);
 static NJS_ASYNC_POST_METHOD(njsLob_readPostAsync);
 
-// getters
-static NJS_NAPI_GETTER(njsLob_getAutoCloseLob);
-static NJS_NAPI_GETTER(njsLob_getChunkSize);
-static NJS_NAPI_GETTER(njsLob_getLength);
-static NJS_NAPI_GETTER(njsLob_getPieceSize);
-static NJS_NAPI_GETTER(njsLob_getType);
-static NJS_NAPI_GETTER(njsLob_getValid);
-
-// setters
-static NJS_NAPI_SETTER(njsLob_setPieceSize);
-
 // finalize
 static NJS_NAPI_FINALIZE(njsLob_finalize);
 
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
-    { "_close", NULL, njsLob_close, NULL, NULL, NULL, napi_default, NULL },
-    { "_getData", NULL, njsLob_getData, NULL, NULL, NULL, napi_default, NULL },
-    { "__read", NULL, njsLob_read, NULL, NULL, NULL, napi_default, NULL },
-    { "__write", NULL, njsLob_write, NULL, NULL, NULL, napi_default, NULL },
-    { "_autoCloseLob", NULL, NULL, njsLob_getAutoCloseLob, NULL, NULL,
+    { "close", NULL, njsLob_close, NULL, NULL, NULL, napi_default, NULL },
+    { "getChunkSize", NULL, njsLob_getChunkSize, NULL, NULL, NULL,
             napi_default, NULL },
-    { "chunkSize", NULL, NULL, njsLob_getChunkSize, NULL, NULL, napi_default,
+    { "getData", NULL, njsLob_getData, NULL, NULL, NULL, napi_default, NULL },
+    { "getLength", NULL, njsLob_getLength, NULL, NULL, NULL, napi_default,
             NULL },
-    { "length", NULL, NULL, njsLob_getLength, NULL, NULL, napi_default, NULL },
-    { "pieceSize", NULL, NULL, njsLob_getPieceSize, njsLob_setPieceSize, NULL,
+    { "getPieceSize", NULL, njsLob_getPieceSize, NULL, NULL, NULL,
             napi_default, NULL },
-    { "type", NULL, NULL, njsLob_getType, NULL, NULL, napi_default, NULL },
-    { "valid", NULL, NULL, njsLob_getValid, NULL, NULL, napi_default, NULL },
+    { "getType", NULL, njsLob_getType, NULL, NULL, NULL, napi_default, NULL },
+    { "read", NULL, njsLob_read, NULL, NULL, NULL, napi_default, NULL },
+    { "setPieceSize", NULL, njsLob_setPieceSize, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "write", NULL, njsLob_write, NULL, NULL, NULL, napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
 // class definition
 const njsClassDef njsClassDefLob = {
-    "Lob", sizeof(njsLob), njsLob_finalize, njsClassProperties, false
+    "LobImpl", sizeof(njsLob), njsLob_finalize, njsClassProperties, false
 };
 
 // other methods used internally
@@ -154,30 +148,15 @@ static void njsLob_finalize(napi_env env, void *finalizeData,
 
 
 //-----------------------------------------------------------------------------
-// njsLob_getAutoCloseLob()
-//   Get accessor of "autoCloseLob" property.
-//-----------------------------------------------------------------------------
-static napi_value njsLob_getAutoCloseLob(napi_env env, napi_callback_info info)
-{
-    njsLob *lob;
-
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &lob))
-        return NULL;
-    return njsUtils_convertToBoolean(env, lob->isAutoClose);
-}
-
-
-//-----------------------------------------------------------------------------
 // njsLob_getChunkSize()
 //   Get accessor of "chunkSize" property.
 //-----------------------------------------------------------------------------
-static napi_value njsLob_getChunkSize(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsLob_getChunkSize, 0, NULL)
 {
-    njsLob *lob;
+    njsLob *lob = (njsLob*) callingInstance;
 
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &lob))
-        return NULL;
-    return njsUtils_convertToUnsignedInt(env, lob->chunkSize);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, lob->chunkSize, returnValue))
+    return true;
 }
 
 
@@ -185,13 +164,12 @@ static napi_value njsLob_getChunkSize(napi_env env, napi_callback_info info)
 // njsLob_getLength()
 //   Get accessor of "length" property.
 //-----------------------------------------------------------------------------
-static napi_value njsLob_getLength(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsLob_getLength, 0, NULL)
 {
-    njsLob *lob;
+    njsLob *lob = (njsLob*) callingInstance;
 
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &lob))
-        return NULL;
-    return njsUtils_convertToUnsignedInt(env, (uint32_t) lob->length);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, lob->length, returnValue))
+    return true;
 }
 
 
@@ -199,13 +177,12 @@ static napi_value njsLob_getLength(napi_env env, napi_callback_info info)
 // njsLob_getPieceSize()
 //   Get accessor of "pieceSize" property.
 //-----------------------------------------------------------------------------
-static napi_value njsLob_getPieceSize(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsLob_getPieceSize, 0, NULL)
 {
-    njsLob *lob;
+    njsLob *lob = (njsLob*) callingInstance;
 
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &lob))
-        return NULL;
-    return njsUtils_convertToUnsignedInt(env, lob->pieceSize);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, lob->pieceSize, returnValue))
+    return true;
 }
 
 
@@ -213,27 +190,12 @@ static napi_value njsLob_getPieceSize(napi_env env, napi_callback_info info)
 // njsLob_getType()
 //   Get accessor of "type" property.
 //-----------------------------------------------------------------------------
-static napi_value njsLob_getType(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsLob_getType, 0, NULL)
 {
-    njsLob *lob;
+    njsLob *lob = (njsLob*) callingInstance;
 
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &lob))
-        return NULL;
-    return njsUtils_convertToUnsignedInt(env, lob->dataType);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsLob_getValid()
-//   Get accessor of "valid" property.
-//-----------------------------------------------------------------------------
-static napi_value njsLob_getValid(napi_env env, napi_callback_info info)
-{
-    njsLob *lob;
-
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &lob))
-        return NULL;
-    return njsUtils_convertToBoolean(env, (lob->handle) ? true : false);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, lob->dataType, returnValue))
+    return true;
 }
 
 
@@ -291,16 +253,6 @@ static bool njsLob_getDataAsync(njsBaton *baton)
             lob->length, baton->bufferPtr, &baton->bufferSize) < 0)
         ok = njsBaton_setErrorDPI(baton);
 
-    // if an error occurs or the end of the LOB has been reached, and the LOB
-    // is marked as one that should be automatically closed, close and release
-    // it, ignoring any further errors that occur during the attempt to close
-    if (lob->isAutoClose && (!baton->bufferSize || !ok)) {
-        NJS_FREE_AND_CLEAR(lob->bufferPtr);
-        dpiLob_close(lob->handle);
-        dpiLob_release(lob->handle);
-        lob->handle = NULL;
-    }
-
     return ok;
 }
 
@@ -350,7 +302,6 @@ bool njsLob_new(njsModuleGlobals *globals, njsLobBuffer *buffer, napi_env env,
     lob->chunkSize = buffer->chunkSize;
     lob->pieceSize = buffer->chunkSize;
     lob->length = buffer->length;
-    lob->isAutoClose = buffer->isAutoClose;
 
     // store a reference to the calling object on the LOB
     NJS_CHECK_NAPI(env, napi_set_named_property(env, *lobObj, "_parentObj",
@@ -432,16 +383,6 @@ static bool njsLob_readAsync(njsBaton *baton)
             lob->pieceSize, lob->bufferPtr, &baton->bufferSize) < 0)
         ok = njsBaton_setErrorDPI(baton);
 
-    // if an error occurs or the end of the LOB has been reached, and the LOB
-    // is marked as one that should be automatically closed, close and release
-    // it, ignoring any further errors that occur during the attempt to close
-    if (lob->isAutoClose && (!baton->bufferSize || !ok)) {
-        NJS_FREE_AND_CLEAR(lob->bufferPtr);
-        dpiLob_close(lob->handle);
-        dpiLob_release(lob->handle);
-        lob->handle = NULL;
-    }
-
     return ok;
 }
 
@@ -474,19 +415,13 @@ static bool njsLob_readPostAsync(njsBaton *baton, napi_env env,
 // njsLob_setPieceSize()
 //   Set accessor of "pieceSize" property.
 //-----------------------------------------------------------------------------
-static napi_value njsLob_setPieceSize(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsLob_setPieceSize, 1, NULL)
 {
-    napi_value value;
-    njsLob *lob;
+    njsLob *lob = (njsLob*) callingInstance;
 
-    if (!njsUtils_validateSetter(env, info, NULL, (njsBaseInstance**) &lob,
-            &value))
-        return NULL;
     NJS_FREE_AND_CLEAR(lob->bufferPtr);
-    if (!njsUtils_setPropUnsignedInt(env, value, "pieceSize", &lob->pieceSize))
-        return NULL;
-
-    return NULL;
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &lob->pieceSize))
+    return true;
 }
 
 
@@ -542,19 +477,9 @@ static bool njsLob_writeAsync(njsBaton *baton)
 {
     njsLob *lob = (njsLob*) baton->callingInstance;
 
-    // if an error occurs and the LOB is marked as one that should be
-    // automatically closed, close and release it, ignoring any further errors
-    // that occur during the attempt to close
     if (dpiLob_writeBytes(lob->handle, baton->lobOffset, baton->bufferPtr,
-            baton->bufferSize) < 0) {
-        njsBaton_setErrorDPI(baton);
-        if (lob->isAutoClose) {
-            dpiLob_close(lob->handle);
-            dpiLob_release(lob->handle);
-            lob->handle = NULL;
-        }
-        return false;
-    }
+            baton->bufferSize) < 0)
+        return njsBaton_setErrorDPI(baton);
     lob->dirtyLength = true;
     return true;
 }

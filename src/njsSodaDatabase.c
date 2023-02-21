@@ -46,20 +46,20 @@ static NJS_NAPI_FINALIZE(njsSodaDatabase_finalize);
 
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
-    { "_createCollection", NULL, njsSodaDatabase_createCollection,
-            NULL, NULL, NULL, napi_default, NULL },
-    { "_createDocument", NULL, njsSodaDatabase_createDocument,
-            NULL, NULL, NULL, napi_default, NULL },
-    { "_getCollectionNames", NULL, njsSodaDatabase_getCollectionNames,
-            NULL, NULL, NULL, napi_default, NULL },
-    { "_openCollection", NULL, njsSodaDatabase_openCollection,
-            NULL, NULL, NULL, napi_default, NULL },
+    { "createCollection", NULL, njsSodaDatabase_createCollection, NULL, NULL,
+            NULL, napi_default, NULL },
+    { "createDocument", NULL, njsSodaDatabase_createDocument, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getCollectionNames", NULL, njsSodaDatabase_getCollectionNames, NULL,
+            NULL, NULL, napi_default, NULL },
+    { "openCollection", NULL, njsSodaDatabase_openCollection, NULL, NULL, NULL,
+            napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
 // class definition
 const njsClassDef njsClassDefSodaDatabase = {
-    "SodaDatabase", sizeof(njsSodaDatabase), njsSodaDatabase_finalize,
+    "SodaDatabaseImpl", sizeof(njsSodaDatabase), njsSodaDatabase_finalize,
     njsClassProperties, false
 };
 

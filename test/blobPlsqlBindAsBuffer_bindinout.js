@@ -664,8 +664,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // NJS-016: buffer is too small for OUT binds
-          (err.message).should.startWith('NJS-016:');
+          (err.message).should.startWith('NJS-058:');
           done();
         }
       );
@@ -687,8 +686,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // NJS-016: buffer is too small for OUT binds
-          (err.message).should.startWith('NJS-016:');
+          (err.message).should.startWith('NJS-058:');
           done();
         }
       );
@@ -727,8 +725,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // NJS-016: buffer is too small for OUT binds
-          (err.message).should.startWith('NJS-016:');
+          (err.message).should.startWith('NJS-058:');
           done();
         }
       );
@@ -747,8 +744,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // NJS-016: buffer is too small for OUT binds
-          (err.message).should.startWith('NJS-016:');
+          (err.message).should.startWith('NJS-058:');
           done();
         }
       );
@@ -765,14 +761,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
 
-      connection.execute(
-        sqlRun,
-        bindVar,
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+      connection.execute(sqlRun, bindVar, done);
     }); // 79.1.30
 
   }); // 79.1
@@ -1047,8 +1036,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // DPI-1019: buffer size is too small
-          (err.message).should.startWith('DPI-1019:');
+          (err.message).should.startWith('NJS-058:');
           done();
         }
       );

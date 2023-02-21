@@ -133,7 +133,7 @@ static bool njsJsonBuffer_getString(njsJsonBuffer *buf, njsBaton *baton,
 static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
         napi_env env, napi_value value, njsBaton *baton)
 {
-    napi_value temp, name, names;
+    napi_value temp, name, fieldNames, fieldValues;
     napi_valuetype valueType;
     size_t tempBufferLength;
     dpiJsonArray *array;
@@ -227,13 +227,17 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
             return true;
         }
 
-        // handle other objects
-        if (!njsUtils_getOwnPropertyNames(env, value, &names))
-            return false;
+        // all other objects have been transformed to an object containing the
+        // key "fields" and the key "values"
         node->oracleTypeNum = DPI_ORACLE_TYPE_JSON_OBJECT;
         node->nativeTypeNum = DPI_NATIVE_TYPE_JSON_OBJECT;
         obj = &node->value->asJsonObject;
-        NJS_CHECK_NAPI(env, napi_get_array_length(env, names, &obj->numFields))
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "fields",
+                &fieldNames))
+        NJS_CHECK_NAPI(env, napi_get_array_length(env, fieldNames,
+                &obj->numFields))
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "values",
+                &fieldValues))
         obj->fieldNames = calloc(obj->numFields, sizeof(char*));
         obj->fieldNameLengths = calloc(obj->numFields, sizeof(uint32_t));
         obj->fields = calloc(obj->numFields, sizeof(dpiJsonNode));
@@ -242,11 +246,11 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
                 !obj->fieldValues)
             return njsBaton_setError(baton, errInsufficientMemory);
         for (i = 0; i < obj->numFields; i++) {
-            NJS_CHECK_NAPI(env, napi_get_element(env, names, i, &name))
+            NJS_CHECK_NAPI(env, napi_get_element(env, fieldNames, i, &name))
             if (!njsJsonBuffer_getString(buf, baton, env, name,
                     &obj->fieldNames[i], &obj->fieldNameLengths[i]))
                 return false;
-            NJS_CHECK_NAPI(env, napi_get_property(env, value, name, &temp))
+            NJS_CHECK_NAPI(env, napi_get_element(env, fieldValues, i, &temp))
             obj->fields[i].value = &obj->fieldValues[i];
             if (!njsJsonBuffer_populateNode(buf, &obj->fields[i], env, temp,
                     baton))

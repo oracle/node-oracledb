@@ -29,23 +29,19 @@
 NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_append);
 NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_copy);
 NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_deleteElement);
+NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_getAttrValue);
 NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_getElement);
 NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_getFirstIndex);
 NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_getKeys);
 NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_getLastIndex);
+NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_getLength);
 NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_getNextIndex);
 NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_getPrevIndex);
 NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_getValues);
 NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_hasElement);
+NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_setAttrValue);
 NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_setElement);
 NJS_NAPI_METHOD_DECL_SYNC(njsDbObject_trim);
-
-// getters
-static NJS_NAPI_GETTER(njsDbObject_getAttrValue);
-static NJS_NAPI_GETTER(njsDbObject_getLength);
-
-// setters
-static NJS_NAPI_SETTER(njsDbObject_setAttrValue);
 
 // finalize
 static NJS_NAPI_FINALIZE(njsDbObject_finalize);
@@ -57,6 +53,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             NULL },
     { "copy", NULL, njsDbObject_copy, NULL, NULL, NULL, napi_default, NULL },
     { "deleteElement", NULL, njsDbObject_deleteElement, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getAttrValue", NULL, njsDbObject_getAttrValue, NULL, NULL, NULL,
             napi_default, NULL },
     { "getElement", NULL, njsDbObject_getElement, NULL, NULL, NULL,
             napi_default, NULL },
@@ -74,8 +72,10 @@ static const napi_property_descriptor njsClassProperties[] = {
             NULL },
     { "hasElement", NULL, njsDbObject_hasElement, NULL, NULL, NULL,
             napi_default, NULL },
-    { "length", NULL, NULL, njsDbObject_getLength, NULL, NULL, napi_default,
+    { "getLength", NULL, njsDbObject_getLength, NULL, NULL, NULL, napi_default,
             NULL },
+    { "setAttrValue", NULL, njsDbObject_setAttrValue, NULL, NULL, NULL,
+            napi_default, NULL },
     { "setElement", NULL, njsDbObject_setElement, NULL, NULL, NULL,
             napi_default, NULL },
     { "trim", NULL, njsDbObject_trim, NULL, NULL, NULL, napi_default, NULL },
@@ -83,24 +83,18 @@ static const napi_property_descriptor njsClassProperties[] = {
 };
 
 // class definition
-const njsClassDef njsClassDefBaseDbObject = {
-    "BaseDbObject", sizeof(njsDbObject), njsDbObject_finalize,
+const njsClassDef njsClassDefDbObject = {
+    "DbObjectImpl", sizeof(njsDbObject), njsDbObject_finalize,
     njsClassProperties, false
 };
 
 // other methods used internally
-static bool njsDbObject_getAttrValueHelper(napi_env env,
-        napi_callback_info info, napi_value *value);
-static bool njsDbObject_setAttrValueHelper(napi_env, napi_callback_info info);
 static bool njsDbObject_transformFromOracle(njsDbObject *obj, napi_env env,
         njsDataTypeInfo *typeInfo, dpiData *data, napi_value *value,
         njsDbObjectAttr *attr, njsModuleGlobals *globals);
 static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
         napi_value value, dpiNativeTypeNum *nativeTypeNum, dpiData *data,
         char **strBuffer, njsDbObjectAttr *attr, njsModuleGlobals *globals);
-static bool njsDbObject_validateArgs(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsDbObjectAttr **attr,
-        njsDbObject **obj, njsModuleGlobals **globals);
 static bool njsDbObjectType_populate(njsDbObjectType *objType,
         dpiObjectType *objectTypeHandle, napi_env env, napi_value jsObjectType,
         dpiObjectTypeInfo *info, njsBaton *baton);
@@ -114,7 +108,7 @@ static bool njsDbObject_wrap(napi_env env, napi_value value,
 // njsDbObject_append()
 //   Append an element to the end of the collection.
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_append, 1, &njsClassDefBaseDbObject)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_append, 1, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
     dpiNativeTypeNum nativeTypeNum;
@@ -140,7 +134,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_append, 1, &njsClassDefBaseDbObject)
 //   Create a copy of the object and return that. The copy is independent of
 // the original object that was copied.
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_copy, 0, &njsClassDefBaseDbObject)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_copy, 0, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
     dpiObject *copiedObjHandle;
@@ -159,8 +153,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_copy, 0, &njsClassDefBaseDbObject)
 // njsDbObject_deleteElement()
 //   Returns the element at the specified index.
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_deleteElement, 1,
-        &njsClassDefBaseDbObject)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_deleteElement, 1, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
     int32_t index;
@@ -194,36 +187,18 @@ static void njsDbObject_finalize(napi_env env, void *finalizeData,
 // njsDbObject_getAttrValue()
 //   Generic get accessor for attributes.
 //-----------------------------------------------------------------------------
-static napi_value njsDbObject_getAttrValue(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getAttrValue, 1, &njsClassDefDbObject)
 {
-    napi_value value = NULL;
-
-    if (!njsDbObject_getAttrValueHelper(env, info, &value))
-        return NULL;
-    return value;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsDbObject_getAttrValueHelper()
-//   Helper for njsDbObject_getAttrValue().
-//-----------------------------------------------------------------------------
-static bool njsDbObject_getAttrValueHelper(napi_env env,
-        napi_callback_info info, napi_value *value)
-{
-    njsDbObjectAttr *attr = NULL;
-    njsModuleGlobals *globals;
-    njsDbObject *obj;
+    njsDbObject *obj = (njsDbObject*) callingInstance;
+    njsDbObjectAttr *attr;
     dpiData data;
 
-    if (!njsDbObject_validateArgs(env, info, 0, NULL, &attr, &obj, &globals))
-        return false;
+    NJS_CHECK_NAPI(env, napi_unwrap(env, args[0], (void**) &attr))
     if (dpiObject_getAttributeValue(obj->handle, attr->handle,
             attr->typeInfo.nativeTypeNum, &data) < 0)
         return njsUtils_throwErrorDPI(env, globals);
     return njsDbObject_transformFromOracle(obj, env, &attr->typeInfo, &data,
-            value, attr, globals);
+            returnValue, attr, globals);
 }
 
 
@@ -231,7 +206,7 @@ static bool njsDbObject_getAttrValueHelper(napi_env env,
 // njsDbObject_getElement()
 //   Returns the element at the specified index.
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getElement, 1, &njsClassDefBaseDbObject)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getElement, 1, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
     int32_t index;
@@ -256,21 +231,19 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getElement, 1, &njsClassDefBaseDbObject)
 // case, a new instance is created and associated with the object.
 //-----------------------------------------------------------------------------
 bool njsDbObject_getInstance(njsModuleGlobals *globals, napi_env env,
-        napi_value value, njsDbObject **obj)
+        napi_value jsObj, njsDbObject **obj)
 {
-    njsDbObject *tempObj;
+    njsDbObject *tempObj = NULL;
 
     // if JavaScript object is wrapped, instance is returned immediately
-    if (napi_unwrap(env, value, (void**) obj) == napi_ok)
+    if (napi_unwrap(env, jsObj, (void**) obj) == napi_ok)
         return true;
 
-    // perform wrap, if needed
-    if (!njsDbObject_wrap(env, value, &tempObj))
+    // perform wrap; the object handle will be NULL so create a new object of
+    // that type
+    if (!njsDbObject_wrap(env, jsObj, &tempObj))
         return false;
-
-    // if wrap was needed, the object handle will be NULL; in that case, create
-    // a new object of that type
-    if (!tempObj->handle && dpiObjectType_createObject(tempObj->type->handle,
+    if (dpiObjectType_createObject(tempObj->type->handle,
             &tempObj->handle) < 0)
         return njsUtils_throwErrorDPI(env, globals);
 
@@ -283,8 +256,7 @@ bool njsDbObject_getInstance(njsModuleGlobals *globals, napi_env env,
 // njsDbObject_getFirstIndex()
 //   Returns the first index in the collection.
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getFirstIndex, 0,
-        &njsClassDefBaseDbObject)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getFirstIndex, 0, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
     int32_t index;
@@ -303,7 +275,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getFirstIndex, 0,
 // njsDbObject_getKeys()
 //   Returns the elements of the collection as a plain JavaScript array.
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getKeys, 0, &njsClassDefBaseDbObject)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getKeys, 0, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
     int32_t index, exists, size;
@@ -335,8 +307,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getKeys, 0, &njsClassDefBaseDbObject)
 // njsDbObject_getLastIndex()
 //   Returns the last index in the collection.
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getLastIndex, 0,
-        &njsClassDefBaseDbObject)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getLastIndex, 0, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
     int32_t index;
@@ -355,19 +326,15 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getLastIndex, 0,
 // njsDbObject_getLength()
 //   Get accessor of "length" property.
 //-----------------------------------------------------------------------------
-static napi_value njsDbObject_getLength(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getLength, 0, NULL)
 {
-    njsModuleGlobals *globals;
-    njsDbObject *obj;
+    njsDbObject *obj = (njsDbObject*) callingInstance;
     int32_t size;
 
-    if (!njsDbObject_validateArgs(env, info, 0, NULL, NULL, &obj, &globals))
-        return NULL;
-    if (dpiObject_getSize(obj->handle, &size) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
-    return njsUtils_convertToInt(env, size);
+    if (dpiObject_getSize(obj->handle, &size) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_int32(env, size, returnValue))
+    return true;
 }
 
 
@@ -375,8 +342,7 @@ static napi_value njsDbObject_getLength(napi_env env, napi_callback_info info)
 // njsDbObject_getNextIndex()
 //   Returns the next index in the collection following the one provided.
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getNextIndex, 1,
-        &njsClassDefBaseDbObject)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getNextIndex, 1, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
     int32_t index;
@@ -397,8 +363,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getNextIndex, 1,
 // njsDbObject_getPrevIndex()
 //   Returns the previous index in the collection preceding the one provided.
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getPrevIndex, 1,
-        &njsClassDefBaseDbObject)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getPrevIndex, 1, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
     int32_t index;
@@ -422,7 +387,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getPrevIndex, 1,
 bool njsDbObject_getSubClass(njsBaton *baton, dpiObjectType *objectTypeHandle,
         napi_env env, napi_value *cls, njsDbObjectType **objectType)
 {
-    napi_value fn, args[2], callingObj, prototype;
+    napi_value fn, args[2], callingObj;
     njsDbObjectType *tempObjectType;
     dpiObjectTypeInfo info;
 
@@ -430,7 +395,7 @@ bool njsDbObject_getSubClass(njsBaton *baton, dpiObjectType *objectTypeHandle,
     if (dpiObjectType_getInfo(objectTypeHandle, &info) < 0)
         return njsBaton_setErrorDPI(baton);
 
-    // call into JavaScript to get sub class (stored in cache on connection)
+    // call into JavaScript to get class (stored in cache on connection)
     NJS_CHECK_NAPI(env, napi_create_string_utf8(env, info.schema,
             info.schemaLength, &args[0]))
     NJS_CHECK_NAPI(env, napi_create_string_utf8(env, info.name,
@@ -438,14 +403,12 @@ bool njsDbObject_getSubClass(njsBaton *baton, dpiObjectType *objectTypeHandle,
     NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
             &callingObj))
     NJS_CHECK_NAPI(env, napi_get_named_property(env, callingObj,
-            "_getDbObjectClassJS", &fn))
+            "_getDbObjectType", &fn))
     NJS_CHECK_NAPI(env, napi_call_function(env, callingObj, fn, 2, args, cls))
 
-    // get the class prototype; if it has already been wrapped, it has been
-    // fully populated and there is no need to do anything further
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, *cls, "prototype",
-            &prototype))
-    if (napi_unwrap(env, prototype, (void**) objectType) == napi_ok)
+    // if it has already been wrapped, it has been fully populated and there is
+    // no need to do anything further
+    if (napi_unwrap(env, *cls, (void**) objectType) == napi_ok)
         return true;
 
     // allocate memory for structure; memory is zero-ed
@@ -456,14 +419,14 @@ bool njsDbObject_getSubClass(njsBaton *baton, dpiObjectType *objectTypeHandle,
     // populate object type (C) and prototype (JS) with all information about
     // the object type
     if (!njsDbObjectType_populate(tempObjectType, objectTypeHandle, env,
-            prototype, &info, baton)) {
+            *cls, &info, baton)) {
         njsDbObjectType_finalize(env, tempObjectType, NULL);
         return false;
     }
 
     // wrap the structure for use by JavaScript
-    if (napi_wrap(env, prototype, tempObjectType, njsDbObjectType_finalize,
-            NULL, NULL) != napi_ok) {
+    if (napi_wrap(env, *cls, tempObjectType, njsDbObjectType_finalize, NULL,
+            NULL) != napi_ok) {
         njsUtils_genericThrowError(env, __FILE__, __LINE__);
         njsDbObjectType_finalize(env, tempObjectType, NULL);
         return false;
@@ -478,7 +441,7 @@ bool njsDbObject_getSubClass(njsBaton *baton, dpiObjectType *objectTypeHandle,
 // njsDbObject_getValues()
 //   Returns the elements of the collection as a plain JavaScript array.
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getValues, 0, &njsClassDefBaseDbObject)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getValues, 0, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
     int32_t index, exists, size;
@@ -517,7 +480,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getValues, 0, &njsClassDefBaseDbObject)
 //   Returns true or false indicating if an element exists at the specified
 // index.
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_hasElement, 1, &njsClassDefBaseDbObject)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_hasElement, 1, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
     int32_t index;
@@ -540,35 +503,26 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_hasElement, 1, &njsClassDefBaseDbObject)
 bool njsDbObject_new(njsDbObjectType *objType, dpiObject *objHandle,
         napi_env env, njsModuleGlobals *globals, napi_value *value)
 {
-    napi_value constructor;
+    napi_value jsDbObjectType;
     njsDbObject *obj;
 
-    // create instance and wrap it
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            objType->jsDbObjectConstructor, &constructor))
-    NJS_CHECK_NAPI(env, napi_new_instance(env, constructor, 0, NULL, value))
-    if (!njsDbObject_wrap(env, *value, &obj))
+    // create new object
+    if (!njsUtils_genericNew(env, &njsClassDefDbObject,
+            globals->jsDbObjectConstructor, value, (njsBaseInstance**) &obj))
         return false;
+
+    // get the object type and store a reference to it on the new object
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            objType->jsDbObjectType, &jsDbObjectType))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *value, "_objType",
+            jsDbObjectType))
 
     // transfer handle to instance
     if (dpiObject_addRef(objHandle) < 0)
         return njsUtils_throwErrorDPI(env, globals);
     obj->handle = objHandle;
+    obj->type = objType;
 
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-//  njsDbObject_toPojo()
-//    Transforms a database object to a "Plain Old JavaScript Object".
-//-----------------------------------------------------------------------------
-bool njsDbObject_toPojo(napi_value obj, napi_env env, napi_value *pojo)
-{
-    napi_value fn;
-
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, obj, "_toPojo", &fn))
-    NJS_CHECK_NAPI(env, napi_call_function(env, obj, fn, 0, NULL, pojo))
     return true;
 }
 
@@ -577,38 +531,22 @@ bool njsDbObject_toPojo(napi_value obj, napi_env env, napi_value *pojo)
 // njsDbObject_setAttrValue()
 //   Generic set accessor for attributes.
 //-----------------------------------------------------------------------------
-static napi_value njsDbObject_setAttrValue(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_setAttrValue, 2, &njsClassDefDbObject)
 {
-    njsDbObject_setAttrValueHelper(env, info);
-    return NULL;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsDbObject_setAttrValueHelper()
-//   Helper for njsDbObject_setAttrValue().
-//-----------------------------------------------------------------------------
-static bool njsDbObject_setAttrValueHelper(napi_env env,
-        napi_callback_info info)
-{
+    njsDbObject *obj = (njsDbObject*) callingInstance;
     dpiNativeTypeNum nativeTypeNum;
-    njsDbObjectAttr *attr = NULL;
-    njsModuleGlobals *globals;
-    napi_value value;
+    njsDbObjectAttr *attr;
     char *str = NULL;
-    njsDbObject *obj;
     dpiData data;
     int status;
 
     // get object instance and validate number of arguments
-    if (!njsDbObject_validateArgs(env, info, 1, &value, &attr, &obj, &globals))
-        return false;
+    NJS_CHECK_NAPI(env, napi_unwrap(env, args[0], (void**) &attr))
 
     // transform to value required by ODPI-C
     nativeTypeNum = attr->typeInfo.nativeTypeNum;
-    if (!njsDbObject_transformToOracle(obj, env, value, &nativeTypeNum, &data,
-            &str, attr, globals))
+    if (!njsDbObject_transformToOracle(obj, env, args[1], &nativeTypeNum,
+            &data, &str, attr, globals))
         return false;
 
     // set value
@@ -627,7 +565,7 @@ static bool njsDbObject_setAttrValueHelper(napi_env env,
 // njsDbObject_setElement()
 //   Sets the element at the specified index to the specified value.
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_setElement, 2, &njsClassDefBaseDbObject)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_setElement, 2, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
     dpiNativeTypeNum nativeTypeNum;
@@ -661,7 +599,7 @@ static bool njsDbObject_transformFromOracle(njsDbObject *obj, napi_env env,
         njsDataTypeInfo *typeInfo, dpiData *data, napi_value *value,
         njsDbObjectAttr *attr, njsModuleGlobals *globals)
 {
-    napi_value global, constructor, temp;
+    napi_value global, constructor, jsDbObjectType, temp;
     njsLobBuffer lobBuffer;
     bool ok;
 
@@ -724,15 +662,14 @@ static bool njsDbObject_transformFromOracle(njsDbObject *obj, napi_env env,
         case DPI_ORACLE_TYPE_BLOB:
             lobBuffer.dataType = typeInfo->oracleTypeNum;
             lobBuffer.handle = data->value.asLOB;
-            lobBuffer.isAutoClose = true;
             if (dpiLob_getChunkSize(lobBuffer.handle,
                     &lobBuffer.chunkSize) < 0)
                 return njsUtils_throwErrorDPI(env, globals);
             if (dpiLob_getSize(lobBuffer.handle, &lobBuffer.length) < 0)
                 return njsUtils_throwErrorDPI(env, globals);
             NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-                    obj->type->jsDbObjectConstructor, &constructor))
-            NJS_CHECK_NAPI(env, napi_get_named_property(env, constructor,
+                    obj->type->jsDbObjectType, &jsDbObjectType))
+            NJS_CHECK_NAPI(env, napi_get_named_property(env, jsDbObjectType,
                     "_connection", &temp))
             if (!njsLob_new(globals, &lobBuffer, env, temp, value))
                 return false;
@@ -770,9 +707,8 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
         napi_value value, dpiNativeTypeNum *nativeTypeNum, dpiData *data,
         char **strBuffer, njsDbObjectAttr *attr, njsModuleGlobals *globals)
 {
-    napi_value global, constructor, asNumber, tempObj;
+    napi_value global, constructor, asNumber;
     napi_valuetype valueType;
-    njsDbObjectType *objType;
     njsDbObject *valueObj;
     bool check, tempBool;
     void *bufferData;
@@ -844,28 +780,11 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
 
             // handle database objects
             NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-                    globals->jsBaseDbObjectConstructor, &constructor))
+                    globals->jsDbObjectConstructor, &constructor))
             NJS_CHECK_NAPI(env, napi_instanceof(env, value, constructor,
                     &check))
             if (check) {
                 if (!njsDbObject_getInstance(globals, env, value, &valueObj))
-                    return false;
-                dpiData_setObject(data, valueObj->handle);
-                *nativeTypeNum = DPI_NATIVE_TYPE_OBJECT;
-                return true;
-            }
-
-            // other objects are the initial value for an object, but only if
-            // the object is a collection containing objects or the attribute
-            // is for an object
-            objType = (attr) ? attr->typeInfo.objectType :
-                    obj->type->elementTypeInfo.objectType;
-            if (objType) {
-                NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-                        objType->jsDbObjectConstructor, &constructor))
-                NJS_CHECK_NAPI(env, napi_new_instance(env, constructor, 1,
-                        &value, &tempObj))
-                if (!njsDbObject_getInstance(globals, env, tempObj, &valueObj))
                     return false;
                 dpiData_setObject(data, valueObj->handle);
                 *nativeTypeNum = DPI_NATIVE_TYPE_OBJECT;
@@ -891,7 +810,7 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
 // njsDbObject_trim()
 //   Trim the specified number of elements from the end of the collection.
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_trim, 1, &njsClassDefBaseDbObject)
+NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_trim, 1, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
     uint32_t numToTrim;
@@ -906,75 +825,28 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_trim, 1, &njsClassDefBaseDbObject)
 
 
 //-----------------------------------------------------------------------------
-// njsDbObject_validateArgs()
-//   Gets the instance associated with the object and gets the arguments as
-// well. If the number of arguments is incorrect, an exception is thrown. Since
-// objects may be created in JavaScript, an instance amy not be associated at
-// all. In that case, a new instance is created and associated with the object.
-//-----------------------------------------------------------------------------
-static bool njsDbObject_validateArgs(napi_env env, napi_callback_info info,
-        size_t numArgs, napi_value *args, njsDbObjectAttr **attr,
-        njsDbObject **obj, njsModuleGlobals **globals)
-{
-    napi_value thisArg;
-    size_t actualArgs;
-    void *data;
-
-    // get callback information and validate the number of arguments
-    *globals = NULL;
-    actualArgs = numArgs;
-    NJS_CHECK_NAPI(env, napi_get_cb_info(env, info, &actualArgs, args,
-            &thisArg, &data))
-    if (actualArgs != numArgs)
-        return njsUtils_throwError(env, errInvalidNumberOfParameters,
-                actualArgs, numArgs);
-
-    // data will either be an attribute or a pointer to the module globals
-    if (attr) {
-        *attr = (njsDbObjectAttr*) data;
-        *globals = (*attr)->globals;
-    } else {
-        *globals = (njsModuleGlobals*) data;
-    }
-
-    return njsDbObject_getInstance(*globals, env, thisArg, obj);
-}
-
-
-//-----------------------------------------------------------------------------
 // njsDbObject_wrap()
 //   Wraps the specified value with a new object instance and performs basic
 // initialization, if needed. For collections which are proxied, the proxy
 // target may already have been wrapped, so check for that first before
 // creating a new instance.
 //-----------------------------------------------------------------------------
-static bool njsDbObject_wrap(napi_env env, napi_value value, njsDbObject **obj)
+static bool njsDbObject_wrap(napi_env env, napi_value jsObj, njsDbObject **obj)
 {
-    napi_value prototype, temp;
     njsDbObjectType *objType;
     njsDbObject *tempObj;
+    napi_value temp;
 
-    // acquire the prototype from the value; if the prototype does not wrap the
-    // object type, then we are dealing with the proxy; in that case, acquire
-    // the special property _target which will return the target of the proxy
-    // and acquire the prototype from that value instead
-    NJS_CHECK_NAPI(env, napi_get_prototype(env, value, &prototype))
-    if (napi_unwrap(env, prototype, (void**) &objType) != napi_ok) {
-        NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "_target",
-                &temp))
-        value = temp;
-        if (napi_unwrap(env, value, (void**) obj) == napi_ok)
-            return true;
-        NJS_CHECK_NAPI(env, napi_get_prototype(env, value, &prototype))
-        NJS_CHECK_NAPI(env, napi_unwrap(env, prototype, (void**) &objType))
-    }
+    // acquire JS object type and unwrap it
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, jsObj, "_objType", &temp))
+    NJS_CHECK_NAPI(env, napi_unwrap(env, temp, (void**) &objType))
 
     // create a new object instance
     tempObj = calloc(1, sizeof(njsDbObject));
     if (!tempObj)
         return njsUtils_throwError(env, errInsufficientMemory);
     tempObj->type = objType;
-    if (napi_wrap(env, value, tempObj, njsDbObject_finalize, NULL,
+    if (napi_wrap(env, jsObj, tempObj, njsDbObject_finalize, NULL,
             NULL) != napi_ok) {
         free(tempObj);
         return njsUtils_genericThrowError(env, __FILE__, __LINE__);
@@ -1011,27 +883,9 @@ static void njsDbObjectType_finalize(napi_env env, void *finalizeData,
         dpiObjectType_release(type->handle);
         type->handle = NULL;
     }
-    NJS_DELETE_REF_AND_CLEAR(type->jsDbObjectConstructor);
-    NJS_FREE_AND_CLEAR(type->descriptors);
+    NJS_DELETE_REF_AND_CLEAR(type->jsDbObjectType);
     NJS_FREE_AND_CLEAR(type->fqn);
     free(type);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsDbObjectType_getFromClass()
-//   Acquires the object type from a class by acquiring the prototype and then
-// unwrapping it to find the object type instance.
-//-----------------------------------------------------------------------------
-bool njsDbObjectType_getFromClass(napi_env env, napi_value cls,
-        njsDbObjectType **objType)
-{
-    napi_value prototype;
-
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, cls, "prototype",
-            &prototype))
-    NJS_CHECK_NAPI(env, napi_unwrap(env, prototype, (void**) objType))
-    return true;
 }
 
 
@@ -1048,7 +902,6 @@ static bool njsDbObjectType_populate(njsDbObjectType *objType,
     dpiObjectAttrInfo attrInfo;
     napi_value attrs, temp;
     njsDbObjectAttr *attr;
-    size_t numProperties;
     napi_value element;
     uint16_t i;
 
@@ -1086,7 +939,6 @@ static bool njsDbObjectType_populate(njsDbObjectType *objType,
 
     // process collections object types
     if (info->isCollection) {
-        numProperties = 0;
         if (!njsDbObjectType_populateTypeInfo(&objType->elementTypeInfo,
                 baton, env, &info->elementTypeInfo))
             return false;
@@ -1097,48 +949,38 @@ static bool njsDbObjectType_populate(njsDbObjectType *objType,
 
     // process object types with attributes
     } else {
-        numProperties = info->numAttributes;
-        objType->descriptors = calloc(numProperties,
-                sizeof(napi_property_descriptor));
-        if (!objType->descriptors)
-            return njsBaton_setError(baton, errInsufficientMemory);
-        NJS_CHECK_NAPI(env, napi_create_object(env, &attrs))
+        NJS_CHECK_NAPI(env, napi_create_array_with_length(env,
+                info->numAttributes, &attrs))
         for (i = 0; i < info->numAttributes; i++) {
             attr = &objType->attributes[i];
             if (dpiObjectAttr_getInfo(attr->handle, &attrInfo) < 0)
                 return njsBaton_setErrorDPI(baton);
-            if (!njsDbObjectType_populateTypeInfo(&attr->typeInfo,
-                    baton, env, &attrInfo.typeInfo))
-                return false;
             attr->name = attrInfo.name;
             attr->nameLength = attrInfo.nameLength;
             attr->globals = baton->globals;
+            if (!njsDbObjectType_populateTypeInfo(&attr->typeInfo,
+                    baton, env, &attrInfo.typeInfo))
+                return false;
             NJS_CHECK_NAPI(env, napi_create_object(env, &element))
+            NJS_CHECK_NAPI(env, napi_create_string_utf8(env, attrInfo.name,
+                    attrInfo.nameLength, &temp))
+            NJS_CHECK_NAPI(env, napi_set_named_property(env, element, "name",
+                    temp))
             if (!njsUtils_addTypeProperties(env, element, "type",
                     attrInfo.typeInfo.oracleTypeNum,
                     attr->typeInfo.objectType))
                 return false;
-            NJS_CHECK_NAPI(env, napi_create_string_utf8(env, attrInfo.name,
-                    attrInfo.nameLength, &temp))
-            objType->descriptors[i].name = temp;
-            objType->descriptors[i].getter = njsDbObject_getAttrValue;
-            objType->descriptors[i].setter = njsDbObject_setAttrValue;
-            objType->descriptors[i].data = &objType->attributes[i];
-            NJS_CHECK_NAPI(env, napi_set_property(env, attrs, temp, element))
+            NJS_CHECK_NAPI(env, napi_wrap(env, element, attr, NULL, NULL,
+                    NULL))
+            NJS_CHECK_NAPI(env, napi_set_element(env, attrs, i, element))
         }
         NJS_CHECK_NAPI(env, napi_set_named_property(env, jsObjectType,
                 "attributes", attrs))
-        if (numProperties > 0) {
-            NJS_CHECK_NAPI(env, napi_define_properties(env, jsObjectType,
-                    numProperties, objType->descriptors))
-        }
     }
 
     // keep a reference to the constructor
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, jsObjectType,
-            "constructor", &temp))
-    NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
-            &objType->jsDbObjectConstructor))
+    NJS_CHECK_NAPI(env, napi_create_reference(env, jsObjectType, 1,
+            &objType->jsDbObjectType))
 
     // keep a copy of the name to be used in error messages; include enough
     // space for the trailing NULL character even though it is never used

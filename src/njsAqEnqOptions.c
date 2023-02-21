@@ -25,33 +25,37 @@
 
 #include "njsModule.h"
 
-// getters
-static NJS_NAPI_GETTER(njsAqEnqOptions_getDeliveryMode);
-static NJS_NAPI_GETTER(njsAqEnqOptions_getTransformation);
-static NJS_NAPI_GETTER(njsAqEnqOptions_getVisibility);
-
-// setters
-static NJS_NAPI_SETTER(njsAqEnqOptions_setDeliveryMode);
-static NJS_NAPI_SETTER(njsAqEnqOptions_setTransformation);
-static NJS_NAPI_SETTER(njsAqEnqOptions_setVisibility);
+// class methods
+NJS_NAPI_METHOD_DECL_SYNC(njsAqEnqOptions_getDeliveryMode);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqEnqOptions_getTransformation);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqEnqOptions_getVisibility);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqEnqOptions_setDeliveryMode);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqEnqOptions_setTransformation);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqEnqOptions_setVisibility);
 
 // finalize
 static NJS_NAPI_FINALIZE(njsAqEnqOptions_finalize);
 
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
-    { "deliveryMode", NULL, NULL, njsAqEnqOptions_getDeliveryMode,
-            njsAqEnqOptions_setDeliveryMode, NULL, napi_enumerable, NULL },
-    { "transformation", NULL, NULL, njsAqEnqOptions_getTransformation,
-            njsAqEnqOptions_setTransformation, NULL, napi_enumerable, NULL },
-    { "visibility", NULL, NULL, njsAqEnqOptions_getVisibility,
-            njsAqEnqOptions_setVisibility, NULL, napi_enumerable, NULL },
+    { "getDeliveryMode", NULL, njsAqEnqOptions_getDeliveryMode, NULL, NULL,
+            NULL, napi_enumerable, NULL },
+    { "getTransformation", NULL, njsAqEnqOptions_getTransformation, NULL, NULL,
+            NULL, napi_enumerable, NULL },
+    { "getVisibility", NULL, njsAqEnqOptions_getVisibility, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "setDeliveryMode", NULL, njsAqEnqOptions_setDeliveryMode, NULL, NULL,
+            NULL, napi_enumerable, NULL },
+    { "setTransformation", NULL, njsAqEnqOptions_setTransformation, NULL, NULL,
+            NULL, napi_enumerable, NULL },
+    { "setVisibility", NULL, njsAqEnqOptions_setVisibility, NULL, NULL, NULL,
+            napi_enumerable, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
 // class definition
 const njsClassDef njsClassDefAqEnqOptions = {
-    "AqEnqOptions", sizeof(njsAqEnqOptions), njsAqEnqOptions_finalize,
+    "AqEnqOptionsImpl", sizeof(njsAqEnqOptions), njsAqEnqOptions_finalize,
     njsClassProperties, true
 };
 
@@ -77,15 +81,13 @@ static void njsAqEnqOptions_finalize(napi_env env, void *finalizeData,
 // njsAqEnqOptions_getDeliveryMode()
 //   Get accessor of "deliveryMode" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqEnqOptions_getDeliveryMode(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqEnqOptions_getDeliveryMode, 0, NULL)
 {
-    njsAqEnqOptions *options;
+    njsAqEnqOptions *options = (njsAqEnqOptions*) callingInstance;
 
-    if (!njsUtils_validateGetter(env, info, NULL,
-            (njsBaseInstance**) &options))
-        return NULL;
-    return njsUtils_convertToUnsignedInt(env, options->deliveryMode);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, options->deliveryMode,
+            returnValue))
+    return true;
 }
 
 
@@ -93,23 +95,18 @@ static napi_value njsAqEnqOptions_getDeliveryMode(napi_env env,
 // njsAqEnqOptions_getTransformation()
 //   Get accessor of "transformation" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqEnqOptions_getTransformation(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqEnqOptions_getTransformation, 0, NULL)
 {
-    njsModuleGlobals *globals;
-    njsAqEnqOptions *options;
+    njsAqEnqOptions *options = (njsAqEnqOptions*) callingInstance;
     uint32_t valueLength;
     const char *value;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &options))
-        return NULL;
     if (dpiEnqOptions_getTransformation(options->handle, &value,
-            &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
-    return njsUtils_convertToString(env, value, valueLength);
+            &valueLength) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+            returnValue))
+    return true;
 }
 
 
@@ -117,21 +114,15 @@ static napi_value njsAqEnqOptions_getTransformation(napi_env env,
 // njsAqEnqOptions_getVisibility()
 //   Get accessor of "visibility" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqEnqOptions_getVisibility(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqEnqOptions_getVisibility, 0, NULL)
 {
-    njsModuleGlobals *globals;
-    njsAqEnqOptions *options;
+    njsAqEnqOptions *options = (njsAqEnqOptions*) callingInstance;
     uint32_t value;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &options))
-        return NULL;
-    if (dpiEnqOptions_getVisibility(options->handle, &value) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
-    return njsUtils_convertToUnsignedInt(env, value);
+    if (dpiEnqOptions_getVisibility(options->handle, &value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, value, returnValue))
+    return true;
 }
 
 
@@ -139,25 +130,16 @@ static napi_value njsAqEnqOptions_getVisibility(napi_env env,
 // njsAqEnqOptions_setDeliveryMode()
 //   Set accessor of "deliveryMode" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqEnqOptions_setDeliveryMode(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqEnqOptions_setDeliveryMode, 1, NULL)
 {
-    njsModuleGlobals *globals;
-    njsAqEnqOptions *options;
-    napi_value valueObj;
+    njsAqEnqOptions *options = (njsAqEnqOptions*) callingInstance;
     uint32_t value;
 
-    if (!njsUtils_validateSetter(env, info, &globals,
-            (njsBaseInstance**) &options, &valueObj))
-        return NULL;
-    if (!njsUtils_setPropUnsignedInt(env, valueObj, "deliveryMode", &value))
-        return NULL;
-    if (dpiEnqOptions_setDeliveryMode(options->handle, (uint16_t) value) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &value))
+    if (dpiEnqOptions_setDeliveryMode(options->handle, (uint16_t) value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
     options->deliveryMode = (uint16_t) value;
-    return NULL;
+    return true;
 }
 
 
@@ -165,28 +147,21 @@ static napi_value njsAqEnqOptions_setDeliveryMode(napi_env env,
 // njsAqEnqOptions_setTransformation()
 //   Set accessor of "transformation" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqEnqOptions_setTransformation(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqEnqOptions_setTransformation, 1, NULL)
 {
-    njsModuleGlobals *globals;
-    njsAqEnqOptions *options;
-    napi_value valueObj;
+    njsAqEnqOptions *options = (njsAqEnqOptions*) callingInstance;
     size_t valueLength;
     char *value = NULL;
     int status;
 
-    if (!njsUtils_validateSetter(env, info, &globals,
-            (njsBaseInstance**) &options, &valueObj))
-        return NULL;
-    if (!njsUtils_setPropString(env, valueObj, "transformation", &value,
-            &valueLength))
-        return NULL;
+    if (!njsUtils_copyStringFromJS(env, args[0], &value, &valueLength))
+        return false;
     status = dpiEnqOptions_setTransformation(options->handle, value,
             (uint32_t) valueLength);
     free(value);
     if (status < 0)
-        njsUtils_throwErrorDPI(env, globals);
-    return NULL;
+        return njsUtils_throwErrorDPI(env, globals);
+    return true;
 }
 
 
@@ -194,20 +169,13 @@ static napi_value njsAqEnqOptions_setTransformation(napi_env env,
 // njsAqEnqOptions_setVisibility()
 //   Set accessor of "visibility" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqEnqOptions_setVisibility(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqEnqOptions_setVisibility, 1, NULL)
 {
-    njsModuleGlobals *globals;
-    njsAqEnqOptions *options;
-    napi_value valueObj;
+    njsAqEnqOptions *options = (njsAqEnqOptions*) callingInstance;
     uint32_t value;
 
-    if (!njsUtils_validateSetter(env, info, &globals,
-            (njsBaseInstance**) &options, &valueObj))
-        return NULL;
-    if (!njsUtils_setPropUnsignedInt(env, valueObj, "visibliity", &value))
-        return NULL;
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &value))
     if (dpiEnqOptions_setVisibility(options->handle, value) < 0)
-        njsUtils_throwErrorDPI(env, globals);
-    return NULL;
+        return njsUtils_throwErrorDPI(env, globals);
+    return true;
 }

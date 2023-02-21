@@ -57,26 +57,26 @@ static NJS_NAPI_FINALIZE(njsSodaOperation_finalize);
 
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
-    { "_count", NULL, njsSodaOperation_count, NULL, NULL, NULL,
+    { "count", NULL, njsSodaOperation_count, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_getCursor", NULL, njsSodaOperation_getCursor, NULL, NULL, NULL,
+    { "getCursor", NULL, njsSodaOperation_getCursor, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_getDocuments", NULL, njsSodaOperation_getDocuments, NULL, NULL, NULL,
+    { "getDocuments", NULL, njsSodaOperation_getDocuments, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_getOne", NULL, njsSodaOperation_getOne, NULL, NULL, NULL,
+    { "getOne", NULL, njsSodaOperation_getOne, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_remove", NULL, njsSodaOperation_remove, NULL, NULL, NULL,
+    { "remove", NULL, njsSodaOperation_remove, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_replaceOne", NULL, njsSodaOperation_replaceOne, NULL, NULL, NULL,
+    { "replaceOne", NULL, njsSodaOperation_replaceOne, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_replaceOneAndGet", NULL, njsSodaOperation_replaceOneAndGet, NULL,
+    { "replaceOneAndGet", NULL, njsSodaOperation_replaceOneAndGet, NULL,
             NULL, NULL, napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
 // class definition
 const njsClassDef njsClassDefSodaOperation = {
-    "SodaOperation", sizeof(njsSodaOperation), njsSodaOperation_finalize,
+    "SodaOperationImpl", sizeof(njsSodaOperation), njsSodaOperation_finalize,
     njsClassProperties, false
 };
 
@@ -389,7 +389,6 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
     // copy settings from JavaScript
     if (!njsBaton_getGlobalSettings(baton, env,
             NJS_GLOBAL_ATTR_AUTOCOMMIT,
-            NJS_GLOBAL_ATTR_FETCH_ARRAY_SIZE,
             0))
         return false;
 

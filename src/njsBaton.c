@@ -479,57 +479,39 @@ static bool njsBaton_getErrorInfo(njsBaton *baton, napi_env env,
 // the baton.
 //-----------------------------------------------------------------------------
 bool njsBaton_getFetchInfoFromArg(njsBaton *baton, napi_env env,
-        napi_value *args, int argIndex, const char *propertyName,
-        uint32_t *numFetchInfo, njsFetchInfo **fetchInfo, bool *found)
+        napi_value props, uint32_t *numFetchInfo, njsFetchInfo **fetchInfo)
 {
-    napi_value value, keys, key, element, tempArgs[3];
+    napi_value value, element, temp;
     njsFetchInfo *tempFetchInfo;
-    uint32_t i, numElements;
-    bool tempFound;
+    uint32_t i;
 
-    // get the value from the object and verify it is an object
-    if (!njsBaton_getValueFromArg(baton, env, args, argIndex, propertyName,
-            napi_object, &value, found))
-        return false;
-    if (!value)
+    // determine number of fetch info; if none, nothing more to do!
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, props, "fetchInfo",
+            &value))
+    NJS_CHECK_NAPI(env, napi_get_array_length(env, value, numFetchInfo))
+    if (*numFetchInfo == 0) {
+        *fetchInfo = NULL;
         return true;
+    }
 
-    // extract the property names from the object
-    if (!njsUtils_getOwnPropertyNames(env, value, &keys))
-        return false;
-
-    // allocate space for the fetchInfo based on the number of keys
-    NJS_CHECK_NAPI(env, napi_get_array_length(env, keys, &numElements))
-    tempFetchInfo = calloc(numElements, sizeof(njsFetchInfo));
-    if (!tempFetchInfo && numElements > 0)
+    // allocate space for fetchInfo structures
+    tempFetchInfo = calloc(*numFetchInfo, sizeof(njsFetchInfo));
+    if (!tempFetchInfo)
         return njsBaton_setError(baton, errInsufficientMemory);
-    *numFetchInfo = numElements;
     *fetchInfo = tempFetchInfo;
 
     // process each key
-    for (i = 0; i < numElements; i++) {
-
-        // get element associated with the key
-        NJS_CHECK_NAPI(env, napi_get_element(env, keys, i, &key))
-        NJS_CHECK_NAPI(env, napi_get_property(env, value, key, &element))
-
-        // save name
-        if (!njsUtils_copyStringFromJS(env, key, &tempFetchInfo[i].name,
+    for (i = 0; i < *numFetchInfo; i++) {
+        NJS_CHECK_NAPI(env, napi_get_element(env, value, i, &element))
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, element, "name",
+                &temp))
+        if (!njsUtils_copyStringFromJS(env, temp, &tempFetchInfo[i].name,
                 &tempFetchInfo[i].nameLength))
             return false;
-
-        // get type
-        tempArgs[2] = element;
-        if (!njsBaton_getUnsignedIntFromArg(baton, env, tempArgs, 2,
-                "type", &tempFetchInfo[i].type, &tempFound))
-            return false;
-        if (!tempFound)
-            return njsBaton_setError(baton, errNoTypeForConversion);
-        if (tempFetchInfo[i].type != NJS_DATATYPE_DEFAULT &&
-                    tempFetchInfo[i].type != NJS_DATATYPE_STR &&
-                    tempFetchInfo[i].type != NJS_DATATYPE_BUFFER)
-            return njsBaton_setError(baton, errInvalidTypeForConversion);
-
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, element, "type",
+                &temp))
+        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp,
+                &tempFetchInfo[i].type))
     }
 
     return true;
@@ -552,9 +534,6 @@ static bool njsBaton_getGlobalSetting(njsBaton *baton, napi_env env,
             return njsBaton_getStringFromArg(baton, env, &settings, 0,
                     "connectionClass", &baton->connectionClass,
                     &baton->connectionClassLength, NULL);
-        case NJS_GLOBAL_ATTR_DBOBJECT_AS_POJO:
-            return njsBaton_getBoolFromArg(baton, env, &settings, 0,
-                    "dbObjectAsPojo", &baton->dbObjectAsPojo, NULL);
         case NJS_GLOBAL_ATTR_EDITION:
             return njsBaton_getStringFromArg(baton, env, &settings, 0,
                     "edition", &baton->edition, &baton->editionLength, NULL);
@@ -564,9 +543,6 @@ static bool njsBaton_getGlobalSetting(njsBaton *baton, napi_env env,
         case NJS_GLOBAL_ATTR_EXTERNAL_AUTH:
             return njsBaton_getBoolFromArg(baton, env, &settings, 0,
                     "externalAuth", &baton->externalAuth, NULL);
-        case NJS_GLOBAL_ATTR_FETCH_ARRAY_SIZE:
-            return njsBaton_getUnsignedIntFromArg(baton, env, &settings, 0,
-                    "fetchArraySize", &baton->fetchArraySize, NULL);
         case NJS_GLOBAL_ATTR_FETCH_AS_BUFFER:
             return njsBaton_getUnsignedIntArrayFromArg(baton, env, &settings,
                     0, "fetchAsBuffer", &baton->numFetchAsBufferTypes,
@@ -575,12 +551,6 @@ static bool njsBaton_getGlobalSetting(njsBaton *baton, napi_env env,
             return njsBaton_getUnsignedIntArrayFromArg(baton, env, &settings,
                     0, "fetchAsString", &baton->numFetchAsStringTypes,
                     &baton->fetchAsStringTypes, NULL);
-        case NJS_GLOBAL_ATTR_MAX_ROWS:
-            return njsBaton_getUnsignedIntFromArg(baton, env, &settings, 0,
-                    "maxRows", &baton->maxRows, NULL);
-        case NJS_GLOBAL_ATTR_OUT_FORMAT:
-            return njsBaton_getUnsignedIntFromArg(baton, env, &settings, 0,
-                    "outFormat", &baton->outFormat, NULL);
         case NJS_GLOBAL_ATTR_POOL_INCREMENT:
             return njsBaton_getUnsignedIntFromArg(baton, env, &settings, 0,
                     "poolIncrement", &baton->poolIncrement, NULL);
@@ -599,9 +569,6 @@ static bool njsBaton_getGlobalSetting(njsBaton *baton, napi_env env,
         case NJS_GLOBAL_ATTR_POOL_TIMEOUT:
             return njsBaton_getUnsignedIntFromArg(baton, env, &settings, 0,
                     "poolTimeout", &baton->poolTimeout, NULL);
-        case NJS_GLOBAL_ATTR_PREFETCH_ROWS:
-            return njsBaton_getUnsignedIntFromArg(baton, env, &settings, 0,
-                    "prefetchRows", &baton->prefetchRows, NULL);
         case NJS_GLOBAL_ATTR_STMT_CACHE_SIZE:
             return njsBaton_getUnsignedIntFromArg(baton, env, &settings, 0,
                     "stmtCacheSize", &baton->stmtCacheSize, NULL);
@@ -1228,7 +1195,7 @@ bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value)
         return true;
 
     // database objects can be bound directly
-    status = napi_instanceof(env, value, baton->jsBaseDbObjectConstructor,
+    status = napi_instanceof(env, value, baton->jsDbObjectConstructor,
             &check);
     if (status != napi_ok)
         return false;
@@ -1352,8 +1319,8 @@ bool njsBaton_setJsValues(njsBaton *baton, napi_env env)
 
     // acquire the base database object constructor
     NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsBaseDbObjectConstructor,
-            &baton->jsBaseDbObjectConstructor))
+            baton->globals->jsDbObjectConstructor,
+            &baton->jsDbObjectConstructor))
 
     // acquire the value for the calling object reference
     NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,

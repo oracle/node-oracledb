@@ -105,7 +105,7 @@ static void njsModule_finalizeGlobals(napi_env env, void *finalize_data,
     NJS_DELETE_REF_AND_CLEAR(globals->jsAqEnqOptionsConstructor);
     NJS_DELETE_REF_AND_CLEAR(globals->jsAqMessageConstructor);
     NJS_DELETE_REF_AND_CLEAR(globals->jsAqQueueConstructor);
-    NJS_DELETE_REF_AND_CLEAR(globals->jsBaseDbObjectConstructor);
+    NJS_DELETE_REF_AND_CLEAR(globals->jsDbObjectConstructor);
     NJS_DELETE_REF_AND_CLEAR(globals->jsConnectionConstructor);
     NJS_DELETE_REF_AND_CLEAR(globals->jsLobConstructor);
     NJS_DELETE_REF_AND_CLEAR(globals->jsPoolConstructor);
@@ -149,8 +149,8 @@ static bool njsModule_populateGlobals(napi_env env, napi_value module,
     if (!njsModule_extendClass(env, module, globals, &njsClassDefAqQueue,
             &globals->jsAqQueueConstructor))
         return false;
-    if (!njsModule_extendClass(env, module, globals, &njsClassDefBaseDbObject,
-            &globals->jsBaseDbObjectConstructor))
+    if (!njsModule_extendClass(env, module, globals, &njsClassDefDbObject,
+            &globals->jsDbObjectConstructor))
         return false;
     if (!njsModule_extendClass(env, module, globals, &njsClassDefConnection,
             &globals->jsConnectionConstructor))

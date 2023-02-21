@@ -112,7 +112,7 @@ describe('1. connection.js', function() {
         async () => {
           await connection.execute(query, {id: 20}, {outFormat:0 });
         },
-        /NJS-004:/
+        /NJS-007:/
       );
     });
   });

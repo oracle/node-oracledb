@@ -28,46 +28,45 @@
 // class methods
 NJS_NAPI_METHOD_DECL_SYNC(njsSodaDocument_getContentAsBuffer);
 NJS_NAPI_METHOD_DECL_SYNC(njsSodaDocument_getContentAsString);
-
-// getters
-static NJS_NAPI_GETTER(njsSodaDocument_getCreatedOn);
-static NJS_NAPI_GETTER(njsSodaDocument_getKey);
-static NJS_NAPI_GETTER(njsSodaDocument_getLastModified);
-static NJS_NAPI_GETTER(njsSodaDocument_getMediaType);
-static NJS_NAPI_GETTER(njsSodaDocument_getVersion);
+NJS_NAPI_METHOD_DECL_SYNC(njsSodaDocument_getCreatedOn);
+NJS_NAPI_METHOD_DECL_SYNC(njsSodaDocument_getKey);
+NJS_NAPI_METHOD_DECL_SYNC(njsSodaDocument_getLastModified);
+NJS_NAPI_METHOD_DECL_SYNC(njsSodaDocument_getMediaType);
+NJS_NAPI_METHOD_DECL_SYNC(njsSodaDocument_getVersion);
 
 // finalize
 static NJS_NAPI_FINALIZE(njsSodaDocument_finalize);
 
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
-    { "_getContentAsBuffer", NULL, njsSodaDocument_getContentAsBuffer,
+    { "getContentAsBuffer", NULL, njsSodaDocument_getContentAsBuffer,
             NULL, NULL, NULL, napi_default, NULL },
-    { "_getContentAsString", NULL, njsSodaDocument_getContentAsString,
+    { "getContentAsString", NULL, njsSodaDocument_getContentAsString,
             NULL, NULL, NULL, napi_default, NULL },
-    { "createdOn", NULL, NULL, njsSodaDocument_getCreatedOn, NULL, NULL,
+    { "getCreatedOn", NULL, njsSodaDocument_getCreatedOn, NULL, NULL, NULL,
             napi_default, NULL },
-    { "key", NULL, NULL, njsSodaDocument_getKey, NULL, NULL, napi_default,
+    { "getKey", NULL, njsSodaDocument_getKey, NULL, NULL, NULL, napi_default,
             NULL },
-    { "lastModified", NULL, NULL, njsSodaDocument_getLastModified, NULL, NULL,
+    { "getLastModified", NULL, njsSodaDocument_getLastModified, NULL, NULL,
+            NULL, napi_default, NULL },
+    { "getMediaType", NULL, njsSodaDocument_getMediaType, NULL, NULL, NULL,
             napi_default, NULL },
-    { "mediaType", NULL, NULL, njsSodaDocument_getMediaType, NULL, NULL,
-            napi_default, NULL },
-    { "version", NULL, NULL, njsSodaDocument_getVersion, NULL, NULL,
+    { "getVersion", NULL, njsSodaDocument_getVersion, NULL, NULL, NULL,
             napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
 // class definition
 const njsClassDef njsClassDefSodaDocument = {
-    "SodaDocument", sizeof(njsSodaDocument), njsSodaDocument_finalize,
+    "SodaDocumentImpl", sizeof(njsSodaDocument), njsSodaDocument_finalize,
     njsClassProperties, false
 };
 
 // other methods used internally
-static napi_value njsSodaDocument_genericGetter(napi_env env,
-        napi_callback_info info,
-        int (*dpiGetterFn)(dpiSodaDoc*, const char**, uint32_t *));
+static bool njsSodaDocument_genericGetter(napi_env env,
+        njsModuleGlobals *globals, njsBaseInstance *instance,
+        int (*dpiGetterFn)(dpiSodaDoc*, const char**, uint32_t *),
+        napi_value *returnValue);
 
 
 //-----------------------------------------------------------------------------
@@ -114,36 +113,25 @@ static void njsSodaDocument_finalize(napi_env env, void *finalizeData,
 //   Generic function which performs the work of getting an attribute from the
 // SODA document.
 //-----------------------------------------------------------------------------
-static napi_value njsSodaDocument_genericGetter(napi_env env,
-        napi_callback_info info,
-        int (*dpiGetterFn)(dpiSodaDoc*, const char**, uint32_t *))
+static bool njsSodaDocument_genericGetter(napi_env env,
+        njsModuleGlobals *globals, njsBaseInstance *instance,
+        int (*dpiGetterFn)(dpiSodaDoc*, const char**, uint32_t *),
+        napi_value *returnValue)
 {
-    njsModuleGlobals *globals;
-    njsSodaDocument *doc;
+    njsSodaDocument *doc = (njsSodaDocument*) instance;
     uint32_t valueLength;
-    napi_status status;
     const char *value;
-    napi_value result;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &doc))
-        return NULL;
-    if ((*dpiGetterFn)(doc->handle, &value, &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
-
+    if ((*dpiGetterFn)(doc->handle, &value, &valueLength) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
     if (valueLength == 0) {
-        status = napi_get_null(env, &result);
+        NJS_CHECK_NAPI(env, napi_get_null(env, returnValue))
     } else {
-        status = napi_create_string_utf8(env, value, valueLength, &result);
-    }
-    if (status != napi_ok) {
-        njsUtils_genericThrowError(env, __FILE__, __LINE__);
-        return NULL;
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+                returnValue))
     }
 
-    return result;
+    return true;
 }
 
 
@@ -198,10 +186,10 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDocument_getContentAsString, 0, NULL)
 // njsSodaDocument_getCreatedOn()
 //   Get accessor of "createdOn" property.
 //-----------------------------------------------------------------------------
-static napi_value njsSodaDocument_getCreatedOn(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDocument_getCreatedOn, 0, NULL)
 {
-    return njsSodaDocument_genericGetter(env, info, dpiSodaDoc_getCreatedOn);
+    return njsSodaDocument_genericGetter(env, globals, callingInstance,
+            dpiSodaDoc_getCreatedOn, returnValue);
 }
 
 
@@ -209,9 +197,10 @@ static napi_value njsSodaDocument_getCreatedOn(napi_env env,
 // njsSodaDocument_getKey()
 //   Get accessor of "key" property.
 //-----------------------------------------------------------------------------
-static napi_value njsSodaDocument_getKey(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDocument_getKey, 0, NULL)
 {
-    return njsSodaDocument_genericGetter(env, info, dpiSodaDoc_getKey);
+    return njsSodaDocument_genericGetter(env, globals, callingInstance,
+            dpiSodaDoc_getKey, returnValue);
 }
 
 
@@ -219,11 +208,10 @@ static napi_value njsSodaDocument_getKey(napi_env env, napi_callback_info info)
 // njsSodaDocument_getLastModified()
 //   Get accessor of "lastModified" property.
 //-----------------------------------------------------------------------------
-static napi_value njsSodaDocument_getLastModified(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDocument_getLastModified, 0, NULL)
 {
-    return njsSodaDocument_genericGetter(env, info,
-            dpiSodaDoc_getLastModified);
+    return njsSodaDocument_genericGetter(env, globals, callingInstance,
+            dpiSodaDoc_getLastModified, returnValue);
 }
 
 
@@ -231,10 +219,10 @@ static napi_value njsSodaDocument_getLastModified(napi_env env,
 // njsSodaDocument_getMediaType()
 //   Get accessor of "mediaType" property.
 //-----------------------------------------------------------------------------
-static napi_value njsSodaDocument_getMediaType(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDocument_getMediaType, 0, NULL)
 {
-    return njsSodaDocument_genericGetter(env, info, dpiSodaDoc_getMediaType);
+    return njsSodaDocument_genericGetter(env, globals, callingInstance,
+            dpiSodaDoc_getMediaType, returnValue);
 }
 
 
@@ -242,8 +230,8 @@ static napi_value njsSodaDocument_getMediaType(napi_env env,
 // njsSodaDocument_getVersion()
 //   Get accessor of "version" property.
 //-----------------------------------------------------------------------------
-static napi_value njsSodaDocument_getVersion(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDocument_getVersion, 0, NULL)
 {
-    return njsSodaDocument_genericGetter(env, info, dpiSodaDoc_getVersion);
+    return njsSodaDocument_genericGetter(env, globals, callingInstance,
+            dpiSodaDoc_getVersion, returnValue);
 }

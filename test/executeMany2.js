@@ -163,7 +163,7 @@ describe('172. executeMany2.js', function() {
               [undefined, undefined, undefined, undefined, undefined]
             );
           },
-          /ORA-01008/ //ORA-01008: not all variables bound
+          /NJS-005:/
         );
       } catch (err) {
         should.not.exist(err);
@@ -194,7 +194,7 @@ describe('172. executeMany2.js', function() {
               ]
             );
           },
-          /ORA-01008/ //ORA-01008: not all variables bound
+          /NJS-005:/
         );
       } catch (err) {
         should.not.exist(err);
@@ -225,10 +225,8 @@ describe('172. executeMany2.js', function() {
               ]
             );
           },
-          /TypeError: Cannot convert undefined or null to object/
+          /NJS-055:/
         );
-      } catch (err) {
-        should.not.exist(err);
       } finally {
         if (conn) {
           try {

@@ -156,22 +156,17 @@
 // global settings attributes used in C
 #define NJS_GLOBAL_ATTR_AUTOCOMMIT          7000
 #define NJS_GLOBAL_ATTR_CONNECTION_CLASS    7001
-#define NJS_GLOBAL_ATTR_DBOBJECT_AS_POJO    7002
 #define NJS_GLOBAL_ATTR_EDITION             7003
 #define NJS_GLOBAL_ATTR_EVENTS              7004
 #define NJS_GLOBAL_ATTR_EXTERNAL_AUTH       7006
-#define NJS_GLOBAL_ATTR_FETCH_ARRAY_SIZE    7007
 #define NJS_GLOBAL_ATTR_FETCH_AS_BUFFER     7008
 #define NJS_GLOBAL_ATTR_FETCH_AS_STRING     7009
-#define NJS_GLOBAL_ATTR_MAX_ROWS            7010
-#define NJS_GLOBAL_ATTR_OUT_FORMAT          7011
 #define NJS_GLOBAL_ATTR_POOL_INCREMENT      7012
 #define NJS_GLOBAL_ATTR_POOL_MAX            7013
 #define NJS_GLOBAL_ATTR_POOL_MAX_PER_SHARD  7014
 #define NJS_GLOBAL_ATTR_POOL_MIN            7015
 #define NJS_GLOBAL_ATTR_POOL_PING_INTERVAL  7016
 #define NJS_GLOBAL_ATTR_POOL_TIMEOUT        7017
-#define NJS_GLOBAL_ATTR_PREFETCH_ROWS       7018
 #define NJS_GLOBAL_ATTR_STMT_CACHE_SIZE     7019
 
 // error messages used within the driver
@@ -258,10 +253,6 @@ typedef enum {
 #define NJS_POOL_STATUS_CLOSED          6002
 #define NJS_POOL_STATUS_RECONFIGURING   6003
 
-// values used for "outFormat"
-#define NJS_ROWS_ARRAY                  4001
-#define NJS_ROWS_OBJECT                 4002
-
 // values used for SODA collection creation mode
 #define NJS_SODA_COLL_CREATE_MODE_DEFAULT   0
 #define NJS_SODA_COLL_CREATE_MODE_MAP       5001
@@ -315,7 +306,7 @@ extern const njsClassDef njsClassDefAqDeqOptions;
 extern const njsClassDef njsClassDefAqEnqOptions;
 extern const njsClassDef njsClassDefAqMessage;
 extern const njsClassDef njsClassDefAqQueue;
-extern const njsClassDef njsClassDefBaseDbObject;
+extern const njsClassDef njsClassDefDbObject;
 extern const njsClassDef njsClassDefConnection;
 extern const njsClassDef njsClassDefLob;
 extern const njsClassDef njsClassDefOracleDb;
@@ -501,7 +492,6 @@ struct njsBaton {
     uint32_t rowsFetched;
     uint32_t bufferRowIndex;
     uint64_t rowsAffected;
-    uint32_t outFormat;
     int32_t limit;
     uint32_t createCollectionMode;
     uint64_t docCount;
@@ -522,8 +512,6 @@ struct njsBaton {
     // boolean values
     bool externalAuth;
     bool homogeneous;
-    bool closeOnFetch;
-    bool closeOnAllRowsFetched;
     bool autoCommit;
     bool events;
     bool batchErrors;
@@ -535,7 +523,6 @@ struct njsBaton {
     bool replaced;
     bool force;
     bool clientInitiated;
-    bool dbObjectAsPojo;
     bool sodaMetadataCache;
     bool keepInStmtCache;
 
@@ -570,7 +557,7 @@ struct njsBaton {
     // constructors
     napi_value jsLobConstructor;
     napi_value jsResultSetConstructor;
-    napi_value jsBaseDbObjectConstructor;
+    napi_value jsDbObjectConstructor;
 
     // calling object value (used for setting a reference on created objects)
     napi_value jsCallingObj;
@@ -634,7 +621,6 @@ struct njsLob {
     uint32_t pieceSize;
     uint32_t chunkSize;
     uint64_t length;
-    bool isAutoClose;
     bool dirtyLength;
 };
 
@@ -644,7 +630,6 @@ struct njsLobBuffer {
     uint32_t dataType;
     uint32_t chunkSize;
     uint64_t length;
-    bool isAutoClose;
 };
 
 // data for module globals
@@ -654,7 +639,7 @@ struct njsModuleGlobals {
     napi_ref jsAqEnqOptionsConstructor;
     napi_ref jsAqMessageConstructor;
     napi_ref jsAqQueueConstructor;
-    napi_ref jsBaseDbObjectConstructor;
+    napi_ref jsDbObjectConstructor;
     napi_ref jsConnectionConstructor;
     napi_ref jsLobConstructor;
     napi_ref jsPoolConstructor;
@@ -691,7 +676,6 @@ struct njsResultSet {
     uint32_t numQueryVars;
     njsVariable *queryVars;
     uint32_t fetchArraySize;
-    uint32_t outFormat;
     bool isNested;
     bool varsDefined;
 };
@@ -763,7 +747,6 @@ struct njsVariable {
     int8_t scale;
     bool isArray;
     bool isNullable;
-    bool dbObjectAsPojo;
     njsVariableBuffer *buffer;
     uint32_t numDmlReturningBuffers;
     njsVariableBuffer *dmlReturningBuffers;
@@ -799,9 +782,8 @@ struct njsDbObjectType {
     dpiObjectType *handle;
     uint16_t numAttributes;
     njsDbObjectAttr *attributes;
-    napi_property_descriptor *descriptors;
     njsDataTypeInfo elementTypeInfo;
-    napi_ref jsDbObjectConstructor;
+    napi_ref jsDbObjectType;
     char *fqn;
     size_t fqnLength;
 };
@@ -857,8 +839,7 @@ void njsBaton_free(njsBaton *baton, napi_env env);
 bool njsBaton_getBoolFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, bool *result, bool *found);
 bool njsBaton_getFetchInfoFromArg(njsBaton *baton, napi_env env,
-        napi_value *args, int argIndex, const char *propertyName,
-        uint32_t *numFetchInfo, njsFetchInfo **fetchInfo, bool *found);
+        napi_value props, uint32_t *numFetchInfo, njsFetchInfo **fetchInfo);
 bool njsBaton_getGlobalSettings(njsBaton *baton, napi_env env, ...);
 bool njsBaton_getIntFromArg(njsBaton *baton, napi_env env, napi_value *args,
         int argIndex, const char *propertyName, int32_t *result, bool *found);
@@ -916,7 +897,6 @@ bool njsDbObject_new(njsDbObjectType *objType, dpiObject *objHandle,
         napi_env env, njsModuleGlobals *globals, napi_value *value);
 bool njsDbObjectType_getFromClass(napi_env env, napi_value cls,
         njsDbObjectType **objType);
-bool njsDbObject_toPojo(napi_value obj, napi_env env, napi_value *pojo);
 
 
 //-----------------------------------------------------------------------------
@@ -1037,9 +1017,10 @@ bool njsUtils_getError(napi_env env, dpiErrorInfo *errorInfo,
         const char *buffer, napi_value *error);
 bool njsUtils_getIntArg(napi_env env, napi_value *args, int index,
         int32_t *result);
-napi_value njsUtils_getNull(napi_env env);
-bool njsUtils_getOwnPropertyNames(napi_env env, napi_value value,
-        napi_value *names);
+bool njsUtils_getNamedProperty(napi_env env, napi_value value,
+        const char *name, napi_value *propertyValue, bool *found);
+bool njsUtils_getNamedPropertyBool(napi_env env, napi_value value,
+        const char *name, bool *outValue);
 bool njsUtils_getStringArg(napi_env env, napi_value *args, int index,
         char **result, size_t *resultLength);
 bool njsUtils_getStringFromArg(napi_env env, napi_value *args,
@@ -1085,8 +1066,6 @@ bool njsVariable_getMetadataMany(njsVariable *vars, uint32_t numVars,
         napi_env env, napi_value *metadata);
 bool njsVariable_getMetadataOne(njsVariable *var, napi_env env,
         napi_value *metadata);
-bool njsVariable_getNestedCursorIndices(njsVariable *vars, uint32_t numVars,
-        napi_env env, napi_value *indices);
 bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
         njsVariableBuffer *buffer, uint32_t pos, njsBaton *baton, napi_env env,
         napi_value *value);
@@ -1101,9 +1080,7 @@ bool njsVariable_process(njsVariable *vars, uint32_t numVars, uint32_t numRows,
 bool njsVariable_processJS(njsVariable *vars, uint32_t numVars, napi_env env,
         njsBaton *baton);
 bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
-        napi_value value, bool checkSize, njsBaton *baton);
-bool njsVariable_setValue(njsVariable *var, napi_env env, napi_value value,
-        njsBaton *baton);
+        napi_value value, njsBaton *baton);
 
 
 //-----------------------------------------------------------------------------

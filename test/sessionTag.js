@@ -760,8 +760,6 @@ describe('184. sessionTag.js', function() {
         should.strictEqual(pool.connectionsInUse, 1);
         should.strictEqual(callbackRequestedTag, '');
         should.strictEqual(callbackActualTag, '');
-      } catch (err) {
-        should.not.exist(err);
       } finally {
         if (conn) {
           try {

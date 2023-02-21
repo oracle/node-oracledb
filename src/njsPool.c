@@ -29,6 +29,16 @@
 NJS_NAPI_METHOD_DECL_ASYNC(njsPool_close);
 NJS_NAPI_METHOD_DECL_ASYNC(njsPool_create);
 NJS_NAPI_METHOD_DECL_ASYNC(njsPool_getConnection);
+NJS_NAPI_METHOD_DECL_SYNC(njsPool_getConnectionsInUse);
+NJS_NAPI_METHOD_DECL_SYNC(njsPool_getConnectionsOpen);
+NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolIncrement);
+NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolMax);
+NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolMaxPerShard);
+NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolMin);
+NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolPingInterval);
+NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolTimeout);
+NJS_NAPI_METHOD_DECL_SYNC(njsPool_getStmtCacheSize);
+NJS_NAPI_METHOD_DECL_SYNC(njsPool_getSodaMetaDataCache);
 NJS_NAPI_METHOD_DECL_ASYNC(njsPool_reconfigure);
 NJS_NAPI_METHOD_DECL_SYNC(njsPool_returnAccessToken);
 NJS_NAPI_METHOD_DECL_ASYNC(njsPool_setAccessToken);
@@ -49,59 +59,47 @@ static NJS_PROCESS_ARGS_METHOD(njsPool_createProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsPool_getConnectionProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsPool_reconfigureProcessArgs);
 
-// getters
-static NJS_NAPI_GETTER(njsPool_getConnectionsInUse);
-static NJS_NAPI_GETTER(njsPool_getConnectionsOpen);
-static NJS_NAPI_GETTER(njsPool_getPoolIncrement);
-static NJS_NAPI_GETTER(njsPool_getPoolMax);
-static NJS_NAPI_GETTER(njsPool_getPoolMaxPerShard);
-static NJS_NAPI_GETTER(njsPool_getPoolMin);
-static NJS_NAPI_GETTER(njsPool_getPoolPingInterval);
-static NJS_NAPI_GETTER(njsPool_getPoolTimeout);
-static NJS_NAPI_GETTER(njsPool_getStmtCacheSize);
-static NJS_NAPI_GETTER(njsPool_getSodaMetaDataCache);
-
 // finalize
 static NJS_NAPI_FINALIZE(njsPool_finalize);
 
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
-    { "_close", NULL, njsPool_close, NULL, NULL, NULL, napi_default, NULL },
-    { "_create", NULL, njsPool_create, NULL, NULL, NULL, napi_default, NULL },
-    { "_getConnection", NULL, njsPool_getConnection, NULL, NULL, NULL,
+    { "close", NULL, njsPool_close, NULL, NULL, NULL, napi_default, NULL },
+    { "create", NULL, njsPool_create, NULL, NULL, NULL, napi_default, NULL },
+    { "getConnection", NULL, njsPool_getConnection, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_reconfigure", NULL, njsPool_reconfigure, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "_returnAccessToken", NULL, njsPool_returnAccessToken, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "_setAccessToken", NULL, njsPool_setAccessToken, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "connectionsInUse", NULL, NULL, njsPool_getConnectionsInUse, NULL, NULL,
-            napi_default, NULL },
-    { "connectionsOpen", NULL, NULL, njsPool_getConnectionsOpen, NULL, NULL,
-            napi_default, NULL },
-    { "poolIncrement", NULL, NULL, njsPool_getPoolIncrement, NULL, NULL,
-            napi_default, NULL },
-    { "poolMax", NULL, NULL, njsPool_getPoolMax, NULL, NULL, napi_default,
-            NULL },
-    { "poolMaxPerShard", NULL, NULL, njsPool_getPoolMaxPerShard, NULL, NULL,
-            napi_default, NULL },
-    { "poolMin", NULL, NULL, njsPool_getPoolMin, NULL, NULL, napi_default,
-            NULL },
-    { "poolPingInterval", NULL, NULL, njsPool_getPoolPingInterval, NULL, NULL,
-            napi_default, NULL },
-    { "poolTimeout", NULL, NULL, njsPool_getPoolTimeout, NULL, NULL,
-            napi_default, NULL },
-    { "stmtCacheSize", NULL, NULL, njsPool_getStmtCacheSize, NULL, NULL,
-            napi_default, NULL },
-    { "sodaMetaDataCache", NULL, NULL, njsPool_getSodaMetaDataCache, NULL,
+    { "getConnectionsInUse", NULL, njsPool_getConnectionsInUse, NULL, NULL,
             NULL, napi_default, NULL },
+    { "getConnectionsOpen", NULL, njsPool_getConnectionsOpen, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getPoolIncrement", NULL, njsPool_getPoolIncrement, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getPoolMax", NULL, njsPool_getPoolMax, NULL, NULL, NULL, napi_default,
+            NULL },
+    { "getPoolMaxPerShard", NULL, njsPool_getPoolMaxPerShard, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getPoolMin", NULL, njsPool_getPoolMin, NULL, NULL, NULL, napi_default,
+            NULL },
+    { "getPoolPingInterval", NULL, njsPool_getPoolPingInterval, NULL, NULL,
+            NULL, napi_default, NULL },
+    { "getPoolTimeout", NULL, njsPool_getPoolTimeout, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getStmtCacheSize", NULL, njsPool_getStmtCacheSize, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getSodaMetaDataCache", NULL, njsPool_getSodaMetaDataCache, NULL, NULL,
+            NULL, napi_default, NULL },
+    { "reconfigure", NULL, njsPool_reconfigure, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "returnAccessToken", NULL, njsPool_returnAccessToken, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "setAccessToken", NULL, njsPool_setAccessToken, NULL, NULL, NULL,
+            napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
 // class definition
 const njsClassDef njsClassDefPool = {
-    "Pool", sizeof(njsPool), njsPool_finalize, njsClassProperties, false
+    "PoolImpl", sizeof(njsPool), njsPool_finalize, njsClassProperties, false
 };
 
 
@@ -639,23 +637,18 @@ static bool njsPool_reconfigureProcessArgs(njsBaton *baton, napi_env env,
 // njsPool_getConnectionsInUse()
 //   Get accessor of "connectionsInUse" property.
 //-----------------------------------------------------------------------------
-static napi_value njsPool_getConnectionsInUse(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsPool_getConnectionsInUse, 0, NULL)
 {
-    njsModuleGlobals *globals;
+    njsPool *pool = (njsPool*) callingInstance;
     uint32_t value;
-    njsPool *pool;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &pool))
-        return NULL;
-    if (!pool->handle)
-        return NULL;
-    if (dpiPool_getBusyCount(pool->handle, &value) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
+    if (pool->handle) {
+        if (dpiPool_getBusyCount(pool->handle, &value) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_create_uint32(env, value, returnValue))
     }
-    return njsUtils_convertToUnsignedInt(env, value);
+
+    return true;
 }
 
 
@@ -663,23 +656,18 @@ static napi_value njsPool_getConnectionsInUse(napi_env env,
 // njsPool_getConnectionsOpen()
 //   Get accessor of "connectionsOpen" property.
 //-----------------------------------------------------------------------------
-static napi_value njsPool_getConnectionsOpen(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsPool_getConnectionsOpen, 0, NULL)
 {
-    njsModuleGlobals *globals;
+    njsPool *pool = (njsPool*) callingInstance;
     uint32_t value;
-    njsPool *pool;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &pool))
-        return NULL;
-    if (!pool->handle)
-        return NULL;
-    if (dpiPool_getOpenCount(pool->handle, &value) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
+    if (pool->handle) {
+        if (dpiPool_getOpenCount(pool->handle, &value) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_create_uint32(env, value, returnValue))
     }
-    return njsUtils_convertToUnsignedInt(env, value);
+
+    return true;
 }
 
 
@@ -687,14 +675,13 @@ static napi_value njsPool_getConnectionsOpen(napi_env env,
 // njsPool_getPoolIncrement()
 //   Get accessor of "poolIncrement" property.
 //-----------------------------------------------------------------------------
-static napi_value njsPool_getPoolIncrement(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsPool_getPoolIncrement, 0, NULL)
 {
-    njsPool *pool;
+    njsPool *pool = (njsPool*) callingInstance;
 
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &pool))
-        return NULL;
-    return njsUtils_convertToUnsignedInt(env, pool->poolIncrement);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, pool->poolIncrement,
+            returnValue))
+    return true;
 }
 
 
@@ -702,13 +689,12 @@ static napi_value njsPool_getPoolIncrement(napi_env env,
 // njsPool_getPoolMax()
 //   Get accessor of "poolMax" property.
 //-----------------------------------------------------------------------------
-static napi_value njsPool_getPoolMax(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsPool_getPoolMax, 0, NULL)
 {
-    njsPool *pool;
+    njsPool *pool = (njsPool*) callingInstance;
 
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &pool))
-        return NULL;
-    return njsUtils_convertToUnsignedInt(env, pool->poolMax);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, pool->poolMax, returnValue))
+    return true;
 }
 
 
@@ -716,14 +702,13 @@ static napi_value njsPool_getPoolMax(napi_env env, napi_callback_info info)
 // njsPool_getPoolMaxPerShard()
 //   Get accessor of "poolMaxPerShard" property.
 //-----------------------------------------------------------------------------
-static napi_value njsPool_getPoolMaxPerShard(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsPool_getPoolMaxPerShard, 0, NULL)
 {
-    njsPool *pool;
+    njsPool *pool = (njsPool*) callingInstance;
 
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &pool))
-        return NULL;
-    return njsUtils_convertToUnsignedInt(env, pool->poolMaxPerShard);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, pool->poolMaxPerShard,
+            returnValue))
+    return true;
 }
 
 
@@ -731,13 +716,12 @@ static napi_value njsPool_getPoolMaxPerShard(napi_env env,
 // njsPool_getPoolMin()
 //   Get accessor of "poolMin" property.
 //-----------------------------------------------------------------------------
-static napi_value njsPool_getPoolMin(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsPool_getPoolMin, 0, NULL)
 {
-    njsPool *pool;
+    njsPool *pool = (njsPool*) callingInstance;
 
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &pool))
-        return NULL;
-    return njsUtils_convertToUnsignedInt(env, pool->poolMin);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, pool->poolMin, returnValue))
+    return true;
 }
 
 
@@ -745,14 +729,13 @@ static napi_value njsPool_getPoolMin(napi_env env, napi_callback_info info)
 // njsPool_getPoolPingInterval()
 //   Get accessor of "poolPingInterval" property.
 //-----------------------------------------------------------------------------
-static napi_value njsPool_getPoolPingInterval(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsPool_getPoolPingInterval, 0, NULL)
 {
-    njsPool *pool;
+    njsPool *pool = (njsPool*) callingInstance;
 
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &pool))
-        return NULL;
-    return njsUtils_convertToInt(env, pool->poolPingInterval);
+    NJS_CHECK_NAPI(env, napi_create_int32(env, pool->poolPingInterval,
+            returnValue))
+    return true;
 }
 
 
@@ -760,28 +743,13 @@ static napi_value njsPool_getPoolPingInterval(napi_env env,
 // njsPool_getPoolTimeout()
 //   Get accessor of "poolTimeout" property.
 //-----------------------------------------------------------------------------
-static napi_value njsPool_getPoolTimeout(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsPool_getPoolTimeout, 0, NULL)
 {
-    njsPool *pool;
+    njsPool *pool = (njsPool*) callingInstance;
 
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &pool))
-        return NULL;
-    return njsUtils_convertToUnsignedInt(env, pool->poolTimeout);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsPool_getStmtCacheSize()
-//   Get accessor of "stmtCacheSize" property.
-//-----------------------------------------------------------------------------
-static napi_value njsPool_getStmtCacheSize(napi_env env,
-        napi_callback_info info)
-{
-    njsPool *pool;
-
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &pool))
-        return NULL;
-    return njsUtils_convertToUnsignedInt(env, pool->stmtCacheSize);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, pool->poolTimeout,
+            returnValue))
+    return true;
 }
 
 
@@ -789,20 +757,32 @@ static napi_value njsPool_getStmtCacheSize(napi_env env,
 // njsPool_getSodaMetaDataCache()
 //   Get accessor for "sodaMetaDataCache" property.
 //-----------------------------------------------------------------------------
-static napi_value njsPool_getSodaMetaDataCache(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsPool_getSodaMetaDataCache, 0, NULL)
 {
-    njsPool *pool;
+    njsPool *pool = (njsPool*) callingInstance;
     int enabled;
 
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance **)&pool))
-        return NULL;
-    if (!pool->handle)
-        return NULL;
-    if (dpiPool_getSodaMetadataCache(pool->handle, &enabled) < 0)
-        enabled = 0;
+    if (pool->handle) {
+        if (dpiPool_getSodaMetadataCache(pool->handle, &enabled) < 0)
+            enabled = 0;
+        NJS_CHECK_NAPI(env, napi_get_boolean(env, enabled, returnValue))
+    }
 
-    return njsUtils_convertToBoolean(env, enabled);
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool_getStmtCacheSize()
+//   Get accessor of "stmtCacheSize" property.
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsPool_getStmtCacheSize, 0, NULL)
+{
+    njsPool *pool = (njsPool*) callingInstance;
+
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, pool->stmtCacheSize,
+            returnValue))
+    return true;
 }
 
 

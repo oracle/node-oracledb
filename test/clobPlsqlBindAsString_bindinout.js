@@ -661,8 +661,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // NJS-016: buffer is too small for OUT binds
-          (err.message).should.startWith('NJS-016:');
+          (err.message).should.startWith('NJS-058:');
           done();
         }
       );
@@ -683,8 +682,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // NJS-016: buffer is too small for OUT binds
-          (err.message).should.startWith('NJS-016:');
+          (err.message).should.startWith('NJS-058:');
           done();
         }
       );
@@ -723,8 +721,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // NJS-016: buffer is too small for OUT binds
-          (err.message).should.startWith('NJS-016:');
+          (err.message).should.startWith('NJS-058:');
           done();
         }
       );
@@ -743,8 +740,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // NJS-016: buffer is too small for OUT binds
-          (err.message).should.startWith('NJS-016:');
+          (err.message).should.startWith('NJS-058:');
           done();
         }
       );
@@ -1016,8 +1012,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // DPI-1019: buffer size is too small
-          (err.message).should.startWith('DPI-1019:');
+          (err.message).should.startWith('NJS-058:');
           done();
         }
       );

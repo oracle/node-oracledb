@@ -41,16 +41,16 @@ static NJS_NAPI_FINALIZE(njsSodaDocCursor_finalize);
 
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
-    { "_close", NULL, njsSodaDocCursor_close, NULL, NULL, NULL,
+    { "close", NULL, njsSodaDocCursor_close, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_getNext", NULL, njsSodaDocCursor_getNext, NULL, NULL, NULL,
+    { "getNext", NULL, njsSodaDocCursor_getNext, NULL, NULL, NULL,
             napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
 // class definition
 const njsClassDef njsClassDefSodaDocCursor = {
-    "SodaDocCursor", sizeof(njsSodaDocCursor), njsSodaDocCursor_finalize,
+    "SodaDocCursorImpl", sizeof(njsSodaDocCursor), njsSodaDocCursor_finalize,
     njsClassProperties, false
 };
 

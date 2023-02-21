@@ -298,7 +298,7 @@ describe("256. executeQueue.js", function() {
 
   describe("256.6 Execute queue length", function() {
     async function doQuery(connection) {
-      const ql = connection._requestQueue.length; // This one is an internal variable
+      const ql = connection._impl._requestQueue.length; // This one is an internal variable
       await connection.execute(`select * from dual`);
       return (ql);
     }

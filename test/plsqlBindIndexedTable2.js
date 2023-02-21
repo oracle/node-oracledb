@@ -473,8 +473,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
             }
           },
           function(err) {
-            should.not.exist(err);
-            callback();
+            callback(err);
           }
         );
       },
@@ -547,8 +546,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
             }
           },
           function(err) {
-            should.not.exist(err);
-            callback();
+            callback(err);
           }
         );
       },
@@ -569,7 +567,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
           },
           function(err) {
             should.exist(err);
-            (err.message).should.startWith('NJS-035:');
+            (err.message).should.startWith('NJS-007:');
             callback();
           }
         );
@@ -649,8 +647,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
             }
           },
           function(err) {
-            should.not.exist(err);
-            callback();
+            callback(err);
           }
         );
       },
@@ -677,8 +674,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
       },
       function(callback) {
         connection.rollback(function(err) {
-          should.not.exist(err);
-          callback();
+          callback(err);
         });
       },
       // Return input arrays sorted by beach name
@@ -698,10 +694,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
           },
           function(err) {
             should.exist(err);
-            should.strictEqual(
-              err.message,
-              "DPI-1019: buffer size of 5 is too small"
-            );
+            (err.message).should.startWith('NJS-058:');
             callback();
           }
         );

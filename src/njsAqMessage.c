@@ -25,64 +25,54 @@
 
 #include "njsModule.h"
 
-// getters
-static NJS_NAPI_GETTER(njsAqMessage_getCorrelation);
-static NJS_NAPI_GETTER(njsAqMessage_getDelay);
-static NJS_NAPI_GETTER(njsAqMessage_getDeliveryMode);
-static NJS_NAPI_GETTER(njsAqMessage_getExceptionQueue);
-static NJS_NAPI_GETTER(njsAqMessage_getExpiration);
-static NJS_NAPI_GETTER(njsAqMessage_getMsgId);
-static NJS_NAPI_GETTER(njsAqMessage_getNumAttempts);
-static NJS_NAPI_GETTER(njsAqMessage_getOriginalMsgId);
-static NJS_NAPI_GETTER(njsAqMessage_getPayload);
-static NJS_NAPI_GETTER(njsAqMessage_getPriority);
-static NJS_NAPI_GETTER(njsAqMessage_getState);
+// class methods
+NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getCorrelation);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getDelay);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getDeliveryMode);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getExceptionQueue);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getExpiration);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getMsgId);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getNumAttempts);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getOriginalMsgId);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getPayload);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getPriority);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getState);
 
 // finalize
 static NJS_NAPI_FINALIZE(njsAqMessage_finalize);
 
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
-    { "correlation", NULL, NULL, njsAqMessage_getCorrelation, NULL, NULL,
+    { "getCorrelation", NULL, njsAqMessage_getCorrelation, NULL, NULL, NULL,
             napi_enumerable, NULL },
-    { "delay", NULL, NULL, njsAqMessage_getDelay, NULL, NULL, napi_enumerable,
-            NULL },
-    { "deliveryMode", NULL, NULL, njsAqMessage_getDeliveryMode, NULL, NULL,
+    { "getDelay", NULL, njsAqMessage_getDelay, NULL, NULL, NULL,
             napi_enumerable, NULL },
-    { "exceptionQueue", NULL, NULL, njsAqMessage_getExceptionQueue, NULL, NULL,
+    { "getDeliveryMode", NULL, njsAqMessage_getDeliveryMode, NULL, NULL, NULL,
             napi_enumerable, NULL },
-    { "expiration", NULL, NULL, njsAqMessage_getExpiration, NULL, NULL,
+    { "getExceptionQueue", NULL, njsAqMessage_getExceptionQueue, NULL, NULL,
+            NULL, napi_enumerable, NULL },
+    { "getExpiration", NULL, njsAqMessage_getExpiration, NULL, NULL, NULL,
             napi_enumerable, NULL },
-    { "msgId", NULL, NULL, njsAqMessage_getMsgId, NULL, NULL, napi_enumerable,
-            NULL },
-    { "numAttempts", NULL, NULL, njsAqMessage_getNumAttempts, NULL, NULL,
+    { "getMsgId", NULL, njsAqMessage_getMsgId, NULL, NULL, NULL,
             napi_enumerable, NULL },
-    { "originalMsgId", NULL, NULL, njsAqMessage_getOriginalMsgId, NULL, NULL,
+    { "getNumAttempts", NULL, njsAqMessage_getNumAttempts, NULL, NULL, NULL,
             napi_enumerable, NULL },
-    { "payload", NULL, NULL, njsAqMessage_getPayload, NULL, NULL,
+    { "getOriginalMsgId", NULL, njsAqMessage_getOriginalMsgId, NULL, NULL,
+            NULL, napi_enumerable, NULL },
+    { "getPayload", NULL, njsAqMessage_getPayload, NULL, NULL, NULL,
             napi_enumerable, NULL },
-    { "priority", NULL, NULL, njsAqMessage_getPriority, NULL, NULL,
+    { "getPriority", NULL, njsAqMessage_getPriority, NULL, NULL, NULL,
             napi_enumerable, NULL },
-    { "state", NULL, NULL, njsAqMessage_getState, NULL, NULL, napi_enumerable,
-            NULL },
+    { "getState", NULL, njsAqMessage_getState, NULL, NULL, NULL,
+            napi_enumerable, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_enumerable, NULL }
 };
 
 // class definition
 const njsClassDef njsClassDefAqMessage = {
-    "AqMessage", sizeof(njsAqMessage), njsAqMessage_finalize,
-    njsClassProperties, true
+    "AqMessageImpl", sizeof(njsAqMessage), njsAqMessage_finalize,
+    njsClassProperties, false
 };
-
-// other methods used internally
-static napi_value njsAqMessage_getBufferAttribute(napi_env env,
-        napi_callback_info info,
-        int (*getter)(dpiMsgProps*, const char **, uint32_t *));
-static napi_value njsAqMessage_getIntAttribute(napi_env env,
-        napi_callback_info info, int (*getter)(dpiMsgProps*, int32_t *));
-static napi_value njsAqMessage_getTextAttribute(napi_env env,
-        napi_callback_info info,
-        int (*getter)(dpiMsgProps*, const char **, uint32_t *));
 
 
 //-----------------------------------------------------------------------------
@@ -126,44 +116,20 @@ static void njsAqMessage_finalize(napi_env env, void *finalizeData,
 
 
 //-----------------------------------------------------------------------------
-// njsAqMessage_getBufferAttribute()
-//   Get accessor of buffer properties.
-//-----------------------------------------------------------------------------
-static napi_value njsAqMessage_getBufferAttribute(napi_env env,
-        napi_callback_info info,
-        int (*getter)(dpiMsgProps*, const char **, uint32_t *))
-{
-    njsModuleGlobals *globals;
-    njsAqMessage *message;
-    uint32_t valueLength;
-    const char *value;
-    napi_value result;
-
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &message))
-        return NULL;
-    if ((*getter)(message->handle, &value, &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
-    if (napi_create_buffer_copy(env, valueLength, value, NULL,
-            &result) != napi_ok) {
-        njsUtils_genericThrowError(env, __FILE__, __LINE__);
-        return NULL;
-    }
-    return result;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsAqMessage_getCorrelation()
 //   Get accessor of "correlation" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqMessage_getCorrelation(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqMessage_getCorrelation, 0, NULL)
 {
-    return njsAqMessage_getTextAttribute(env, info,
-            dpiMsgProps_getCorrelation);
+    njsAqMessage *message = (njsAqMessage*) callingInstance;
+    uint32_t valueLength;
+    const char *value;
+
+    if (dpiMsgProps_getCorrelation(message->handle, &value, &valueLength) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+            returnValue))
+    return true;
 }
 
 
@@ -171,9 +137,15 @@ static napi_value njsAqMessage_getCorrelation(napi_env env,
 // njsAqMessage_getDelay()
 //   Get accessor of "delay" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqMessage_getDelay(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqMessage_getDelay, 0, NULL)
 {
-    return njsAqMessage_getIntAttribute(env, info, dpiMsgProps_getDelay);
+    njsAqMessage *message = (njsAqMessage*) callingInstance;
+    int32_t value;
+
+    if (dpiMsgProps_getDelay(message->handle, &value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_int32(env, value, returnValue))
+    return true;
 }
 
 
@@ -181,21 +153,15 @@ static napi_value njsAqMessage_getDelay(napi_env env, napi_callback_info info)
 // njsAqMessage_getDeliveryMode()
 //   Get accessor of "deliveryMode" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqMessage_getDeliveryMode(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqMessage_getDeliveryMode, 0, NULL)
 {
-    njsModuleGlobals *globals;
-    njsAqMessage *message;
+    njsAqMessage *message = (njsAqMessage*) callingInstance;
     uint16_t value;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &message))
-        return NULL;
-    if (dpiMsgProps_getDeliveryMode(message->handle, &value) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
-    return njsUtils_convertToUnsignedInt(env, value);
+    if (dpiMsgProps_getDeliveryMode(message->handle, &value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, value, returnValue))
+    return true;
 }
 
 
@@ -203,11 +169,17 @@ static napi_value njsAqMessage_getDeliveryMode(napi_env env,
 // njsAqMessage_getExceptionQueue()
 //   Get accessor of "exceptionQueue" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqMessage_getExceptionQueue(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqMessage_getExceptionQueue, 0, NULL)
 {
-    return njsAqMessage_getTextAttribute(env, info,
-            dpiMsgProps_getExceptionQ);
+    njsAqMessage *message = (njsAqMessage*) callingInstance;
+    uint32_t valueLength;
+    const char *value;
+
+    if (dpiMsgProps_getExceptionQ(message->handle, &value, &valueLength) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+            returnValue))
+    return true;
 }
 
 
@@ -215,32 +187,15 @@ static napi_value njsAqMessage_getExceptionQueue(napi_env env,
 // njsAqMessage_getExpiration()
 //   Get accessor of "expiration" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqMessage_getExpiration(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqMessage_getExpiration, 0, NULL)
 {
-    return njsAqMessage_getIntAttribute(env, info, dpiMsgProps_getExpiration);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsAqMessage_getIntAttribute()
-//   Get accessor of integer properties.
-//-----------------------------------------------------------------------------
-static napi_value njsAqMessage_getIntAttribute(napi_env env,
-        napi_callback_info info, int (*getter)(dpiMsgProps*, int32_t *))
-{
-    njsModuleGlobals *globals;
-    njsAqMessage *message;
+    njsAqMessage *message = (njsAqMessage*) callingInstance;
     int32_t value;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &message))
-        return NULL;
-    if ((*getter)(message->handle, &value) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
-    return njsUtils_convertToInt(env, value);
+    if (dpiMsgProps_getExpiration(message->handle, &value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_int32(env, value, returnValue))
+    return true;
 }
 
 
@@ -248,11 +203,17 @@ static napi_value njsAqMessage_getIntAttribute(napi_env env,
 // njsAqMessage_getMsgId()
 //   Get accessor of "msgId" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqMessage_getMsgId(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqMessage_getMsgId, 0, NULL)
 {
-    return njsAqMessage_getBufferAttribute(env, info,
-            dpiMsgProps_getMsgId);
+    njsAqMessage *message = (njsAqMessage*) callingInstance;
+    uint32_t valueLength;
+    const char *value;
+
+    if (dpiMsgProps_getMsgId(message->handle, &value, &valueLength) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_buffer_copy(env, valueLength, value, NULL,
+            returnValue))
+    return true;
 }
 
 
@@ -260,10 +221,15 @@ static napi_value njsAqMessage_getMsgId(napi_env env,
 // njsAqMessage_getNumAttempts()
 //   Get accessor of "numAttempts" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqMessage_getNumAttempts(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqMessage_getNumAttempts, 0, NULL)
 {
-    return njsAqMessage_getIntAttribute(env, info, dpiMsgProps_getNumAttempts);
+    njsAqMessage *message = (njsAqMessage*) callingInstance;
+    int32_t value;
+
+    if (dpiMsgProps_getNumAttempts(message->handle, &value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_int32(env, value, returnValue))
+    return true;
 }
 
 
@@ -271,11 +237,18 @@ static napi_value njsAqMessage_getNumAttempts(napi_env env,
 // njsAqMessage_getOriginalMsgId()
 //   Get accessor of "originalMsgId" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqMessage_getOriginalMsgId(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqMessage_getOriginalMsgId, 0, NULL)
 {
-    return njsAqMessage_getBufferAttribute(env, info,
-            dpiMsgProps_getOriginalMsgId);
+    njsAqMessage *message = (njsAqMessage*) callingInstance;
+    uint32_t valueLength;
+    const char *value;
+
+    if (dpiMsgProps_getOriginalMsgId(message->handle, &value,
+            &valueLength) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_buffer_copy(env, valueLength, value, NULL,
+            returnValue))
+    return true;
 }
 
 
@@ -283,36 +256,22 @@ static napi_value njsAqMessage_getOriginalMsgId(napi_env env,
 // njsAqMessage_getPayload()
 //   Get accessor of "payload" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqMessage_getPayload(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqMessage_getPayload, 0, NULL)
 {
-    njsModuleGlobals *globals;
-    napi_value payloadObj;
+    njsAqMessage *message = (njsAqMessage*) callingInstance;
     uint32_t valueLength;
     dpiObject *objHandle;
     const char *value;
-    njsAqMessage *msg;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &msg))
-        return NULL;
-    if (dpiMsgProps_getPayload(msg->handle, &objHandle, &value,
-            &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
-    if (objHandle) {
-        if (!njsDbObject_new(msg->objectType, objHandle, env, globals,
-                &payloadObj))
-            return NULL;
-    }  else {
-        if (napi_create_buffer_copy(env, valueLength, value, NULL,
-                &payloadObj) != napi_ok) {
-            njsUtils_genericThrowError(env, __FILE__, __LINE__);
-            return NULL;
-        }
-    }
-    return payloadObj;
+    if (dpiMsgProps_getPayload(message->handle, &objHandle, &value,
+            &valueLength) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    if (objHandle)
+        return njsDbObject_new(message->objectType, objHandle, env, globals,
+                returnValue);
+    NJS_CHECK_NAPI(env, napi_create_buffer_copy(env, valueLength, value, NULL,
+            returnValue))
+    return true;
 }
 
 
@@ -320,10 +279,15 @@ static napi_value njsAqMessage_getPayload(napi_env env,
 // njsAqMessage_getPriority()
 //   Get accessor of "priority" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqMessage_getPriority(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqMessage_getPriority, 0, NULL)
 {
-    return njsAqMessage_getIntAttribute(env, info, dpiMsgProps_getPriority);
+    njsAqMessage *message = (njsAqMessage*) callingInstance;
+    int32_t value;
+
+    if (dpiMsgProps_getPriority(message->handle, &value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_int32(env, value, returnValue))
+    return true;
 }
 
 
@@ -331,43 +295,13 @@ static napi_value njsAqMessage_getPriority(napi_env env,
 // njsAqMessage_getState()
 //   Get accessor of "state" property.
 //-----------------------------------------------------------------------------
-static napi_value njsAqMessage_getState(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqMessage_getState, 0, NULL)
 {
-    njsModuleGlobals *globals;
-    njsAqMessage *message;
+    njsAqMessage *message = (njsAqMessage*) callingInstance;
     uint32_t value;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &message))
-        return NULL;
-    if (dpiMsgProps_getState(message->handle, &value) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
-    return njsUtils_convertToUnsignedInt(env, value);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsAqMessage_getTextAttribute()
-//   Get accessor of text properties.
-//-----------------------------------------------------------------------------
-static napi_value njsAqMessage_getTextAttribute(napi_env env,
-        napi_callback_info info,
-        int (*getter)(dpiMsgProps*, const char **, uint32_t *))
-{
-    njsModuleGlobals *globals;
-    njsAqMessage *message;
-    uint32_t valueLength;
-    const char *value;
-
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &message))
-        return NULL;
-    if ((*getter)(message->handle, &value, &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
-    return njsUtils_convertToString(env, value, valueLength);
+    if (dpiMsgProps_getState(message->handle, &value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, value, returnValue))
+    return true;
 }

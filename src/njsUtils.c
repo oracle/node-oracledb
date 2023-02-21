@@ -141,7 +141,7 @@ bool njsUtils_addTypeProperties(napi_env env, napi_value obj,
         (void) snprintf(propertyName, sizeof(propertyName), "%sClass",
                 propertyNamePrefix);
         NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-                objType->jsDbObjectConstructor, &temp))
+                objType->jsDbObjectType, &temp))
         NJS_CHECK_NAPI(env, napi_set_named_property(env, obj, propertyName,
                 temp))
     }
@@ -510,38 +510,40 @@ bool njsUtils_getIntArg(napi_env env, napi_value *args, int index,
 
 
 //-----------------------------------------------------------------------------
-// njsUtils_getNull()
-//   Convenience function which returns the Node-API null value.
+// njsUtils_getNamedProperty()
+//   Returns the value of the named property along with a boolean value
+// indicating whether or not it was found (a value other than undefined).
 //-----------------------------------------------------------------------------
-napi_value njsUtils_getNull(napi_env env)
+bool njsUtils_getNamedProperty(napi_env env, napi_value value,
+        const char *name, napi_value *propertyValue, bool *found)
 {
-    napi_value result;
+    napi_valuetype valueType;
 
-    if (napi_get_null(env, &result) != napi_ok) {
-        njsUtils_genericThrowError(env, __FILE__, __LINE__);
-        return NULL;
-    }
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, name,
+            propertyValue))
+    NJS_CHECK_NAPI(env, napi_typeof(env, *propertyValue, &valueType))
+    *found = (valueType != napi_undefined);
 
-    return result;
+    return true;
 }
 
 
 //-----------------------------------------------------------------------------
-// njsUtils_getOwnPropertyNames()
-//   Returns an array of property names owned specifically by the given object.
+// njsUtils_getNamedPropertyBool()
+//   Returns the value of the named property, which is assumed to be a boolean
+// value. If the value is not found, the boolean value is left unchanged.
 //-----------------------------------------------------------------------------
-bool njsUtils_getOwnPropertyNames(napi_env env, napi_value value,
-        napi_value *names)
+bool njsUtils_getNamedPropertyBool(napi_env env, napi_value value,
+        const char *name, bool *outValue)
 {
-    napi_value global, globalObject, method;
+    napi_value outValueObj;
+    bool found;
 
-    NJS_CHECK_NAPI(env, napi_get_global(env, &global))
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, global, "Object",
-            &globalObject))
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, globalObject,
-            "getOwnPropertyNames", &method))
-    NJS_CHECK_NAPI(env, napi_call_function(env, globalObject, method, 1,
-            &value, names))
+    if (!njsUtils_getNamedProperty(env, value, name, &outValueObj, &found))
+        return false;
+    if (found) {
+        NJS_CHECK_NAPI(env, napi_get_value_bool(env, outValueObj, outValue))
+    }
 
     return true;
 }
@@ -784,7 +786,7 @@ bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
     if (callingObj)
         *callingObj = localCallingObj;
     if (instance) {
-        if (classDef == &njsClassDefBaseDbObject) {
+        if (classDef == &njsClassDefDbObject) {
             if (!njsDbObject_getInstance(*globals, env, localCallingObj,
                     (njsDbObject**) instance))
                 return false;

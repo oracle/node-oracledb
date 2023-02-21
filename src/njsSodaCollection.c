@@ -31,6 +31,8 @@ NJS_NAPI_METHOD_DECL_ASYNC(njsSodaCollection_drop);
 NJS_NAPI_METHOD_DECL_ASYNC(njsSodaCollection_dropIndex);
 NJS_NAPI_METHOD_DECL_SYNC(njsSodaCollection_find);
 NJS_NAPI_METHOD_DECL_ASYNC(njsSodaCollection_getDataGuide);
+NJS_NAPI_METHOD_DECL_SYNC(njsSodaCollection_getMetaData);
+NJS_NAPI_METHOD_DECL_SYNC(njsSodaCollection_getName);
 NJS_NAPI_METHOD_DECL_ASYNC(njsSodaCollection_insertMany);
 NJS_NAPI_METHOD_DECL_ASYNC(njsSodaCollection_insertManyAndGet);
 NJS_NAPI_METHOD_DECL_ASYNC(njsSodaCollection_insertOne);
@@ -63,50 +65,46 @@ static NJS_ASYNC_POST_METHOD(njsSodaCollection_saveAndGetPostAsync);
 // processing arguments methods
 static NJS_PROCESS_ARGS_METHOD(njsSodaCollection_insertManyProcessArgs);
 
-// getters
-static NJS_NAPI_GETTER(njsSodaCollection_getMetaData);
-static NJS_NAPI_GETTER(njsSodaCollection_getName);
-
 // finalize
 static NJS_NAPI_FINALIZE(njsSodaCollection_finalize);
 
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
-    { "_createIndex", NULL, njsSodaCollection_createIndex, NULL, NULL, NULL,
+    { "createIndex", NULL, njsSodaCollection_createIndex, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_drop", NULL, njsSodaCollection_drop, NULL, NULL, NULL,
+    { "drop", NULL, njsSodaCollection_drop, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_dropIndex", NULL, njsSodaCollection_dropIndex, NULL, NULL, NULL,
+    { "dropIndex", NULL, njsSodaCollection_dropIndex, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_find", NULL, njsSodaCollection_find, NULL, NULL, NULL,
+    { "find", NULL, njsSodaCollection_find, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_getDataGuide", NULL, njsSodaCollection_getDataGuide, NULL, NULL, NULL,
+    { "getDataGuide", NULL, njsSodaCollection_getDataGuide, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_insertOne", NULL, njsSodaCollection_insertOne, NULL, NULL, NULL,
+    { "insertOne", NULL, njsSodaCollection_insertOne, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_insertOneAndGet", NULL, njsSodaCollection_insertOneAndGet, NULL, NULL,
+    { "insertOneAndGet", NULL, njsSodaCollection_insertOneAndGet, NULL, NULL,
             NULL, napi_default, NULL },
-    { "_insertMany", NULL, njsSodaCollection_insertMany, NULL, NULL, NULL,
+    { "insertMany", NULL, njsSodaCollection_insertMany, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_insertManyAndGet", NULL, njsSodaCollection_insertManyAndGet, NULL,
+    { "insertManyAndGet", NULL, njsSodaCollection_insertManyAndGet, NULL,
             NULL, NULL, napi_default, NULL },
-    { "_metaData", NULL, NULL, njsSodaCollection_getMetaData, NULL, NULL,
+    { "getMetaData", NULL, njsSodaCollection_getMetaData, NULL, NULL, NULL,
             napi_default, NULL },
-    { "name", NULL, NULL, njsSodaCollection_getName, NULL, NULL, napi_default,
-            NULL },
-    { "_save", NULL, njsSodaCollection_save, NULL, NULL, NULL, napi_default,
-            NULL },
-    { "_saveAndGet", NULL, njsSodaCollection_saveAndGet, NULL, NULL, NULL,
+    { "getName", NULL, njsSodaCollection_getName, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_truncate", NULL, njsSodaCollection_truncate, NULL, NULL, NULL,
+    { "save", NULL, njsSodaCollection_save, NULL, NULL, NULL, napi_default,
+            NULL },
+    { "saveAndGet", NULL, njsSodaCollection_saveAndGet, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "truncate", NULL, njsSodaCollection_truncate, NULL, NULL, NULL,
             napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
 // class definition
 const njsClassDef njsClassDefSodaCollection = {
-    "SodaCollection", sizeof(njsSodaCollection), njsSodaCollection_finalize,
-    njsClassProperties, false
+    "SodaCollectionImpl", sizeof(njsSodaCollection),
+    njsSodaCollection_finalize, njsClassProperties, false
 };
 
 // other methods used internally
@@ -344,24 +342,19 @@ static bool njsSodaCollection_getDataGuidePostAsync(njsBaton *baton,
 // njsSodaCollection_getMetaData()
 //   Get accessor of "metaData" property.
 //-----------------------------------------------------------------------------
-static napi_value njsSodaCollection_getMetaData(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsSodaCollection_getMetaData, 0, NULL)
 {
-    njsModuleGlobals *globals;
-    njsSodaCollection *coll;
+    njsSodaCollection *coll = (njsSodaCollection*) callingInstance;
     uint32_t metadataLength;
     const char *metadata;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &coll))
-        return NULL;
     if (dpiSodaColl_getMetadata(coll->handle, &metadata,
-            &metadataLength) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
+            &metadataLength) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_string_utf8(env, metadata, metadataLength,
+            returnValue))
 
-    return njsUtils_convertToString(env, metadata, metadataLength);
+    return true;
 }
 
 
@@ -369,23 +362,18 @@ static napi_value njsSodaCollection_getMetaData(napi_env env,
 // njsSodaCollection_getName()
 //   Get accessor of "name" property.
 //-----------------------------------------------------------------------------
-static napi_value njsSodaCollection_getName(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsSodaCollection_getName, 0, NULL)
 {
-    njsModuleGlobals *globals;
-    njsSodaCollection *coll;
+    njsSodaCollection *coll = (njsSodaCollection*) callingInstance;
     uint32_t nameLength;
     const char *name;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &coll))
-        return NULL;
-    if (dpiSodaColl_getName(coll->handle, &name, &nameLength) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
+    if (dpiSodaColl_getName(coll->handle, &name, &nameLength) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_string_utf8(env, name, nameLength,
+            returnValue))
 
-    return njsUtils_convertToString(env, name, nameLength);
+    return true;
 }
 
 

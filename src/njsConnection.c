@@ -26,21 +26,39 @@
 #include "njsModule.h"
 
 // class methods
-NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_break);
+NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_breakExecution);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_changePassword);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_close);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_commit);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_connect);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_createLob);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_execute);
-NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_executeMany);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getCallTimeout);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getCurrentSchema);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_getDbObjectClass);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getExternalName);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getInternalName);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getOracleServerVersion);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getOracleServerVersionString);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_getQueue);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getSodaDatabase);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_getStatementInfo);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getStmtCacheSize);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getTag);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_isHealthy);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_ping);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_rollback);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setAction);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setCallTimeout);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setClientId);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setClientInfo);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setCurrentSchema);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setDbOp);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setECID);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setExternalName);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setInternalName);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setModule);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setTag);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_shutdown);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_startup);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_subscribe);
@@ -53,7 +71,7 @@ NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_tpcRollback);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_unsubscribe);
 
 // asynchronous methods
-static NJS_ASYNC_METHOD(njsConnection_breakAsync);
+static NJS_ASYNC_METHOD(njsConnection_breakExecutionAsync);
 static NJS_ASYNC_METHOD(njsConnection_changePasswordAsync);
 static NJS_ASYNC_METHOD(njsConnection_closeAsync);
 static NJS_ASYNC_METHOD(njsConnection_commitAsync);
@@ -89,129 +107,107 @@ static NJS_ASYNC_POST_METHOD(njsConnection_tpcPreparePostAsync);
 static NJS_ASYNC_POST_METHOD(njsConnection_subscribePostAsync);
 
 // processing arguments methods
-static NJS_PROCESS_ARGS_METHOD(njsConnection_executeProcessArgs);
-static NJS_PROCESS_ARGS_METHOD(njsConnection_executeManyProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_getQueueProcessArgs);
 static NJS_PROCESS_ARGS_METHOD(njsConnection_subscribeProcessArgs);
-
-// getters
-static NJS_NAPI_GETTER(njsConnection_getAction);
-static NJS_NAPI_GETTER(njsConnection_getCallTimeout);
-static NJS_NAPI_GETTER(njsConnection_getClientId);
-static NJS_NAPI_GETTER(njsConnection_getClientInfo);
-static NJS_NAPI_GETTER(njsConnection_getCurrentSchema);
-static NJS_NAPI_GETTER(njsConnection_getDbOp);
-static NJS_NAPI_GETTER(njsConnection_getExternalName);
-static NJS_NAPI_GETTER(njsConnection_getInternalName);
-static NJS_NAPI_GETTER(njsConnection_getModule);
-static NJS_NAPI_GETTER(njsConnection_getOracleServerVersion);
-static NJS_NAPI_GETTER(njsConnection_getOracleServerVersionString);
-static NJS_NAPI_GETTER(njsConnection_getStmtCacheSize);
-static NJS_NAPI_GETTER(njsConnection_getTag);
-
-// setters
-static NJS_NAPI_SETTER(njsConnection_setAction);
-static NJS_NAPI_SETTER(njsConnection_setCallTimeout);
-static NJS_NAPI_SETTER(njsConnection_setClientId);
-static NJS_NAPI_SETTER(njsConnection_setClientInfo);
-static NJS_NAPI_SETTER(njsConnection_setCurrentSchema);
-static NJS_NAPI_SETTER(njsConnection_setDbOp);
-static NJS_NAPI_SETTER(njsConnection_setECID);
-static NJS_NAPI_SETTER(njsConnection_setExternalName);
-static NJS_NAPI_SETTER(njsConnection_setInternalName);
-static NJS_NAPI_SETTER(njsConnection_setModule);
-static NJS_NAPI_SETTER(njsConnection_setTag);
 
 // finalize
 static NJS_NAPI_FINALIZE(njsConnection_finalize);
 
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
-    { "_break", NULL, njsConnection_break, NULL, NULL, NULL,
+    { "breakExecution", NULL, njsConnection_breakExecution, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_changePassword", NULL, njsConnection_changePassword, NULL, NULL,
+    { "changePassword", NULL, njsConnection_changePassword, NULL, NULL,
             NULL, napi_default, NULL },
-    { "_close", NULL, njsConnection_close, NULL, NULL, NULL,
+    { "close", NULL, njsConnection_close, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_commit", NULL, njsConnection_commit, NULL, NULL, NULL,
+    { "commit", NULL, njsConnection_commit, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_connect", NULL, njsConnection_connect, NULL, NULL, NULL, napi_default,
+    { "connect", NULL, njsConnection_connect, NULL, NULL, NULL, napi_default,
             NULL },
-    { "_createLob", NULL, njsConnection_createLob, NULL, NULL, NULL,
+    { "createLob", NULL, njsConnection_createLob, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_execute", NULL, njsConnection_execute, NULL, NULL, NULL,
+    { "execute", NULL, njsConnection_execute, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_executeMany", NULL, njsConnection_executeMany, NULL, NULL, NULL,
+    { "getCallTimeout", NULL, njsConnection_getCallTimeout, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_getDbObjectClass", NULL, njsConnection_getDbObjectClass, NULL, NULL,
+    { "getCurrentSchema", NULL, njsConnection_getCurrentSchema, NULL, NULL,
             NULL, napi_default, NULL },
-    { "_getQueue", NULL, njsConnection_getQueue, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "_getSodaDatabase", NULL, njsConnection_getSodaDatabase, NULL, NULL,
+    { "getDbObjectClass", NULL, njsConnection_getDbObjectClass, NULL, NULL,
             NULL, napi_default, NULL },
-    { "_getStatementInfo", NULL, njsConnection_getStatementInfo, NULL,
+    { "getExternalName", NULL, njsConnection_getExternalName, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getInternalName", NULL, njsConnection_getInternalName, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getOracleServerVersion", NULL, njsConnection_getOracleServerVersion,
+            NULL, NULL, NULL, napi_default, NULL },
+    { "getOracleServerVersionString", NULL,
+            njsConnection_getOracleServerVersionString, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getQueue", NULL, njsConnection_getQueue, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getSodaDatabase", NULL, njsConnection_getSodaDatabase, NULL, NULL,
+            NULL, napi_default, NULL },
+    { "getStatementInfo", NULL, njsConnection_getStatementInfo, NULL,
             NULL, NULL, napi_default, NULL },
-    { "_isHealthy", NULL, njsConnection_isHealthy, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "_ping", NULL, njsConnection_ping, NULL, NULL, NULL, napi_default,
-            NULL },
-    { "_rollback", NULL, njsConnection_rollback, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "_shutdown", NULL, njsConnection_shutdown, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "_startup", NULL, njsConnection_startup, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "_subscribe", NULL, njsConnection_subscribe, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "_tpcBegin", NULL, njsConnection_tpcBegin, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "_tpcCommit", NULL, njsConnection_tpcCommit, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "_tpcEnd", NULL, njsConnection_tpcEnd, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "_tpcForget", NULL, njsConnection_tpcForget, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "_tpcPrepare", NULL, njsConnection_tpcPrepare, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "_tpcRollback", NULL, njsConnection_tpcRollback, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "_unsubscribe", NULL, njsConnection_unsubscribe, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "action", NULL, NULL, njsConnection_getAction, njsConnection_setAction,
+    { "getStmtCacheSize", NULL, njsConnection_getStmtCacheSize, NULL, NULL,
             NULL, napi_default, NULL },
-    { "callTimeout", NULL, NULL, njsConnection_getCallTimeout,
-            njsConnection_setCallTimeout, NULL, napi_default, NULL },
-    { "clientId", NULL, NULL, njsConnection_getClientId,
-            njsConnection_setClientId, NULL, napi_default, NULL },
-    { "clientInfo", NULL, NULL, njsConnection_getClientInfo,
-            njsConnection_setClientInfo, NULL, napi_default, NULL },
-    { "currentSchema", NULL, NULL, njsConnection_getCurrentSchema,
-            njsConnection_setCurrentSchema, NULL, napi_default, NULL },
-    { "dbOp", NULL, NULL, njsConnection_getDbOp, njsConnection_setDbOp, NULL,
-            napi_default, NULL },
-    { "ecid", NULL, NULL, NULL, njsConnection_setECID, NULL, napi_default,
+    { "getTag", NULL, njsConnection_getTag, NULL, NULL, NULL, napi_default,
             NULL },
-    { "externalName", NULL, NULL, njsConnection_getExternalName,
-            njsConnection_setExternalName, NULL, napi_default, NULL },
-    { "internalName", NULL, NULL, njsConnection_getInternalName,
-            njsConnection_setInternalName, NULL, napi_default, NULL },
-    { "module", NULL, NULL, njsConnection_getModule, njsConnection_setModule,
+    { "isHealthy", NULL, njsConnection_isHealthy, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "ping", NULL, njsConnection_ping, NULL, NULL, NULL, napi_default,
+            NULL },
+    { "rollback", NULL, njsConnection_rollback, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "setAction", NULL, njsConnection_setAction, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "setCallTimeout", NULL, njsConnection_setCallTimeout, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "setClientId", NULL, njsConnection_setClientId, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "setClientInfo", NULL, njsConnection_setClientInfo, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "setCurrentSchema", NULL, njsConnection_setCurrentSchema, NULL, NULL,
             NULL, napi_default, NULL },
-    { "oracleServerVersion", NULL, NULL, njsConnection_getOracleServerVersion,
-            NULL, NULL, napi_default, NULL },
-    { "oracleServerVersionString", NULL, NULL,
-            njsConnection_getOracleServerVersionString, NULL, NULL,
+    { "setDbOp", NULL, njsConnection_setDbOp, NULL, NULL, NULL, napi_default,
+            NULL },
+    { "setECID", NULL, njsConnection_setECID, NULL, NULL, NULL, napi_default,
+            NULL },
+    { "setExternalName", NULL, njsConnection_setExternalName, NULL, NULL, NULL,
             napi_default, NULL },
-    { "stmtCacheSize", NULL, NULL, njsConnection_getStmtCacheSize, NULL, NULL,
+    { "setInternalName", NULL, njsConnection_setInternalName, NULL, NULL, NULL,
             napi_default, NULL },
-    { "tag", NULL, NULL, njsConnection_getTag, njsConnection_setTag, NULL,
+    { "setModule", NULL, njsConnection_setModule, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "setTag", NULL, njsConnection_setTag, NULL, NULL, NULL, napi_default,
+            NULL },
+    { "shutdown", NULL, njsConnection_shutdown, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "startup", NULL, njsConnection_startup, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "subscribe", NULL, njsConnection_subscribe, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "tpcBegin", NULL, njsConnection_tpcBegin, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "tpcCommit", NULL, njsConnection_tpcCommit, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "tpcEnd", NULL, njsConnection_tpcEnd, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "tpcForget", NULL, njsConnection_tpcForget, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "tpcPrepare", NULL, njsConnection_tpcPrepare, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "tpcRollback", NULL, njsConnection_tpcRollback, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "unsubscribe", NULL, njsConnection_unsubscribe, NULL, NULL, NULL,
             napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
 // class definition
 const njsClassDef njsClassDefConnection = {
-    "Connection", sizeof(njsConnection), njsConnection_finalize,
+    "ConnectionImpl", sizeof(njsConnection), njsConnection_finalize,
     njsClassProperties, false
 };
 
@@ -219,12 +215,6 @@ const njsClassDef njsClassDefConnection = {
 static bool njsConnection_check(njsBaton *baton);
 static bool njsConnection_getBatchErrors(njsBaton *baton, napi_env env,
         napi_value *batchErrors);
-static bool njsConnection_getBindInfoFromArray(njsBaton *baton,
-        napi_env env, napi_value value, uint32_t *bindType, uint32_t *maxSize,
-        dpiObjectType **objectTypeHandle);
-static bool njsConnection_getBindInfoFromValue(njsBaton *baton,
-        bool scalarOnly, napi_env env, napi_value value, uint32_t *bindType,
-        uint32_t *maxSize, dpiObjectType **objectTypeHandle);
 static bool njsConnection_getExecuteManyOutBinds(njsBaton *baton, napi_env env,
         uint32_t numOutBinds, napi_value *outBinds);
 static bool njsConnection_getExecuteOutBinds(njsBaton *baton,
@@ -235,48 +225,36 @@ static bool njsConnection_getOutBinds(njsBaton *baton, napi_env env,
         uint32_t numOutBinds, uint32_t pos, napi_value *outBinds);
 static bool njsConnection_getRowCounts(njsBaton *baton, napi_env env,
         napi_value *rowCounts);
-static bool njsConnection_initBindVars(njsBaton *baton, napi_env env,
-        napi_value binds, napi_value bindNames);
 static bool njsConnection_prepareAndBind(njsConnection *conn, njsBaton *baton);
-static bool njsConnection_processExecuteBinds(njsBaton *baton,
-        napi_env env, napi_value binds);
-static bool njsConnection_processExecuteManyBinds(njsBaton *baton,
-        napi_env env, napi_value binds, napi_value options);
 static bool njsConnection_processImplicitResults(njsBaton *baton);
-static bool njsConnection_scanExecuteBinds(njsBaton *baton, napi_env env,
-        napi_value binds, napi_value bindNames);
-static bool njsConnection_scanExecuteBindUnit(njsBaton *baton,
-        njsVariable *var, bool inExecuteMany, napi_env env,
-        napi_value bindUnit, napi_value *bindValue);
-static bool njsConnection_scanExecuteManyBinds(njsBaton *baton,
-        napi_env env, napi_value binds, napi_value bindNames);
-static napi_value njsConnection_setTextAttribute(napi_env env,
-        napi_callback_info info, const char *attributeName,
-        int (*setter)(dpiConn*, const char *, uint32_t));
-static bool njsConnection_transferExecuteManyBinds(njsBaton *baton,
-        napi_env env, napi_value binds, napi_value bindNames);
+static bool njsConnection_setTextAttribute(napi_env env,
+        njsBaseInstance *instance, njsModuleGlobals *globals,
+        napi_value value, int (*setter)(dpiConn*, const char *, uint32_t));
 
+
+static bool njsConnection_processBinds(njsBaton *baton, napi_env env,
+        napi_value binds);
 
 //-----------------------------------------------------------------------------
-// njsConnection_break()
+// njsConnection_breakExecution()
 //   Break (interrupt) the currently executing operation.
 //
 // PARAMETERS - NONE
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_break, 0, NULL)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_breakExecution, 0, NULL)
 {
     if (!njsConnection_check(baton))
         return false;
-    return njsBaton_queueWork(baton, env, "Break", njsConnection_breakAsync,
-            NULL, returnValue);
+    return njsBaton_queueWork(baton, env, "Break",
+            njsConnection_breakExecutionAsync, NULL, returnValue);
 }
 
 
 //-----------------------------------------------------------------------------
-// njsConnection_breakAsync()
-//   Worker function for njsConnection_break().
+// njsConnection_breakExecutionAsync()
+//   Worker function for njsConnection_breakExecution().
 //-----------------------------------------------------------------------------
-static bool njsConnection_breakAsync(njsBaton *baton)
+static bool njsConnection_breakExecutionAsync(njsBaton *baton)
 {
     njsConnection *conn = (njsConnection*) baton->callingInstance;
 
@@ -596,15 +574,74 @@ static bool njsConnection_createLobPostAsync(njsBaton *baton, napi_env env,
 //
 // PARAMETERS
 //   - SQL statement
-//   - binds object/array
+//   - number of iterations
+//   - array of binds
 //   - options
+//   - executeMany flag
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_execute, 3, NULL)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_execute, 5, NULL)
 {
+    bool executeMany;
+    napi_value temp;
+
+    // validate connection and process arguments
     if (!njsConnection_check(baton))
         return false;
-    if (!njsConnection_executeProcessArgs(baton, env, args))
+    if (!njsBaton_setJsValues(baton, env))
         return false;
+    if (!njsUtils_copyStringFromJS(env, args[0], &baton->sql,
+            &baton->sqlLength))
+        return false;
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[1],
+            &baton->bindArraySize))
+    NJS_CHECK_NAPI(env, napi_get_value_bool(env, args[4], &executeMany))
+
+    // process options
+    if (executeMany) {
+        if (!njsUtils_getNamedPropertyBool(env, args[3], "batchErrors",
+                &baton->batchErrors))
+            return false;
+        if (!njsUtils_getNamedPropertyBool(env, args[3], "dmlRowCounts",
+                &baton->dmlRowCounts))
+            return false;
+    } else {
+        if (!njsBaton_getUnsignedIntArrayFromArg(baton, env, args, 3,
+                "fetchAsBuffer", &baton->numFetchAsBufferTypes,
+                &baton->fetchAsBufferTypes, NULL))
+            return false;
+        if (!njsBaton_getUnsignedIntArrayFromArg(baton, env, args, 3,
+                "fetchAsString", &baton->numFetchAsStringTypes,
+                &baton->fetchAsStringTypes, NULL))
+            return false;
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, args[3],
+                "fetchArraySize", &temp))
+        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp,
+                &baton->fetchArraySize))
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, args[3],
+                "prefetchRows", &temp))
+        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp,
+                &baton->prefetchRows))
+        if (!njsBaton_getFetchInfoFromArg(baton, env, args[3],
+                &baton->numFetchInfo, &baton->fetchInfo))
+            return false;
+    }
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, args[3], "autoCommit",
+            &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_bool(env, temp, &baton->autoCommit))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, args[3],
+            "keepInStmtCache", &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_bool(env, temp,
+            &baton->keepInStmtCache))
+
+    // process binds
+    if (!njsConnection_processBinds(baton, env, args[2]))
+        return false;
+
+    // queue async work
+    if (executeMany)
+        return njsBaton_queueWork(baton, env, "ExecuteMany",
+                njsConnection_executeManyAsync,
+                njsConnection_executeManyPostAsync, returnValue);
     return njsBaton_queueWork(baton, env, "Execute",
             njsConnection_executeAsync, njsConnection_executePostAsync,
             returnValue);
@@ -773,102 +810,6 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsConnection_executeProcessArgs()
-//   Processes the arguments provided by the caller and place them on the
-// baton.
-//-----------------------------------------------------------------------------
-static bool njsConnection_executeProcessArgs(njsBaton *baton,
-        napi_env env, napi_value *args)
-{
-    bool getResultSet = false;
-
-    // setup defaults and define constructors for use in various checks
-    baton->keepInStmtCache = true;
-    if (!njsBaton_getGlobalSettings(baton, env,
-            NJS_GLOBAL_ATTR_AUTOCOMMIT,
-            NJS_GLOBAL_ATTR_DBOBJECT_AS_POJO,
-            NJS_GLOBAL_ATTR_FETCH_ARRAY_SIZE,
-            NJS_GLOBAL_ATTR_FETCH_AS_BUFFER,
-            NJS_GLOBAL_ATTR_FETCH_AS_STRING,
-            NJS_GLOBAL_ATTR_MAX_ROWS,
-            NJS_GLOBAL_ATTR_OUT_FORMAT,
-            NJS_GLOBAL_ATTR_PREFETCH_ROWS,
-            0))
-        return false;
-    if (!njsBaton_setJsValues(baton, env))
-        return false;
-
-    // get SQL from first argument
-    if (!njsUtils_getStringArg(env, args, 0, &baton->sql, &baton->sqlLength))
-        return false;
-
-    // validate options in third argument
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 2, "maxRows",
-            &baton->maxRows, NULL))
-        return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 2, "fetchArraySize",
-            &baton->fetchArraySize, NULL))
-        return false;
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 2, "prefetchRows",
-            &baton->prefetchRows, NULL))
-        return false;
-    if (baton->fetchArraySize == 0)
-        return njsBaton_setError(baton, errInvalidPropertyValueInParam,
-                "fetchArraySize", 3);
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 2, "outFormat",
-            &baton->outFormat, NULL))
-        return false;
-    if (baton->outFormat != NJS_ROWS_ARRAY &&
-            baton->outFormat != NJS_ROWS_OBJECT)
-        return njsBaton_setError(baton, errInvalidPropertyValue, "outFormat");
-    if (!njsBaton_getBoolFromArg(baton, env, args, 2, "resultSet",
-            &getResultSet, NULL))
-        return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 2, "autoCommit",
-            &baton->autoCommit, NULL))
-        return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 2, "dbObjectAsPojo",
-            &baton->dbObjectAsPojo, NULL))
-        return false;
-    if (!njsBaton_getFetchInfoFromArg(baton, env, args, 2, "fetchInfo",
-            &baton->numFetchInfo, &baton->fetchInfo, NULL))
-        return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 2, "keepInStmtCache",
-            &baton->keepInStmtCache, NULL))
-        return false;
-
-    // validate binds in second argument; these must be done after options are
-    // processed as those options may influence how bind variables are created
-    if (!njsConnection_processExecuteBinds(baton, env, args[1]))
-        return false;
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_executeMany()
-//   Executes a statement on the connection multiple times, once for each row
-// of data that is passed.
-//
-// PARAMETERS
-//   - SQL statement
-//   - array of binds (or number of rows to process)
-//   - options
-//-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_executeMany, 3, NULL)
-{
-    if (!njsConnection_check(baton))
-        return false;
-    if (!njsConnection_executeManyProcessArgs(baton, env, args))
-        return false;
-    return njsBaton_queueWork(baton, env, "ExecuteMany",
-            njsConnection_executeManyAsync, njsConnection_executeManyPostAsync,
-            returnValue);
-}
-
-
-//-----------------------------------------------------------------------------
 // njsConnection_executeManyAsync()
 //   Worker function for njsConnection_executeMany().
 //-----------------------------------------------------------------------------
@@ -990,48 +931,6 @@ static bool njsConnection_executeManyPostAsync(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsConnection_executeManyProcessArgs()
-//   Processes the arguments provided by the caller and place them on the
-// baton.
-//-----------------------------------------------------------------------------
-static bool njsConnection_executeManyProcessArgs(njsBaton *baton,
-        napi_env env, napi_value *args)
-{
-    // setup defaults and set JavaScript values to simplify creation of
-    // returned objects
-    baton->keepInStmtCache = true;
-    if (!njsBaton_getGlobalSettings(baton, env, NJS_GLOBAL_ATTR_AUTOCOMMIT, 0))
-        return false;
-    if (!njsBaton_setJsValues(baton, env))
-        return false;
-
-    // get SQL from first argument
-    if (!njsUtils_getStringArg(env, args, 0, &baton->sql, &baton->sqlLength))
-        return false;
-
-    // process execute many binds
-    if (!njsConnection_processExecuteManyBinds(baton, env, args[1], args[2]))
-        return false;
-
-    // process options
-    if (!njsBaton_getBoolFromArg(baton, env, args, 2, "autoCommit",
-            &baton->autoCommit, NULL))
-        return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 2, "batchErrors",
-            &baton->batchErrors, NULL))
-        return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 2, "dmlRowCounts",
-            &baton->dmlRowCounts, NULL))
-        return false;
-    if (!njsBaton_getBoolFromArg(baton, env, args, 2, "keepInStmtCache",
-            &baton->keepInStmtCache, NULL))
-        return false;
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsConnection_finalize()
 //   Invoked when the njsConnection object is garbage collected.
 //-----------------------------------------------------------------------------
@@ -1054,17 +953,6 @@ static void njsConnection_finalize(napi_env env, void *finalizeData,
     }
     NJS_FREE_AND_CLEAR(conn->tag);
     free(conn);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_getAction()
-//   Get accessor of "action" property.
-//-----------------------------------------------------------------------------
-static napi_value njsConnection_getAction(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_getNull(env);
 }
 
 
@@ -1109,215 +997,31 @@ static bool njsConnection_getBatchErrors(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsConnection_getBindInfoFromArray()
-//   Get the bind type, maximum size and object type handle from the array.
-//-----------------------------------------------------------------------------
-static bool njsConnection_getBindInfoFromArray(njsBaton *baton,
-        napi_env env, napi_value value, uint32_t *bindType, uint32_t *maxSize,
-        dpiObjectType **objectTypeHandle)
-{
-    uint32_t arrayLength, i, elementBindType, elementMaxSize;
-    dpiObjectType *elementObjectTypeHandle;
-    napi_valuetype valueType;
-    napi_value element;
-
-    // determine the length of the array
-    NJS_CHECK_NAPI(env, napi_get_array_length(env, value, &arrayLength))
-
-    // check each element of the array
-    for (i = 0; i < arrayLength; i++) {
-        NJS_CHECK_NAPI(env, napi_get_element(env, value, i, &element))
-        NJS_CHECK_NAPI(env, napi_typeof(env, element, &valueType))
-        if (valueType == napi_undefined || valueType == napi_null)
-            continue;
-        elementBindType = *bindType;
-        elementMaxSize = *maxSize;
-        elementObjectTypeHandle = *objectTypeHandle;
-        if (!njsConnection_getBindInfoFromValue(baton, true, env,
-                element, &elementBindType, &elementMaxSize,
-                &elementObjectTypeHandle))
-            return false;
-        if (*bindType == NJS_DATATYPE_DEFAULT)
-            *bindType = elementBindType;
-        if (elementMaxSize > *maxSize)
-            *maxSize = elementMaxSize;
-        if (!*objectTypeHandle && elementObjectTypeHandle)
-            *objectTypeHandle = elementObjectTypeHandle;
-    }
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_getBindInfoFromValue()
-//   Get the bind type, maximum size and object type handle from the specified
-// value.
-//-----------------------------------------------------------------------------
-static bool njsConnection_getBindInfoFromValue(njsBaton *baton,
-        bool scalarOnly, napi_env env, napi_value value, uint32_t *bindType,
-        uint32_t *maxSize, dpiObjectType **objectTypeHandle)
-{
-    napi_valuetype valueType;
-    size_t tempLength;
-    njsDbObject *obj;
-    void *buffer;
-    njsLob *lob;
-    bool check;
-
-    // determine the type of the value
-    NJS_CHECK_NAPI(env, napi_typeof(env, value, &valueType))
-
-    // null and undefined are treated as single character strings
-    if (valueType == napi_undefined || valueType == napi_null) {
-        *bindType = NJS_DATATYPE_STR;
-        *maxSize = 1;
-        return true;
-    }
-
-    // for strings, the length of the string in bytes is determined
-    if (valueType == napi_string) {
-        *bindType = NJS_DATATYPE_STR;
-        NJS_CHECK_NAPI(env, napi_get_value_string_utf8(env, value, NULL, 0,
-                &tempLength))
-        *maxSize = (uint32_t) tempLength;
-        return true;
-    }
-
-    // numbers can be bound
-    if (valueType == napi_number) {
-        *bindType = NJS_DATATYPE_NUM;
-        return true;
-    }
-
-    // booleans
-    if (valueType == napi_boolean) {
-        *bindType = NJS_DATATYPE_BOOLEAN;
-        return true;
-    }
-
-    // dates, LOBs, buffers and arrays are all objects
-    if (valueType == napi_object) {
-
-        // dates can be bound
-        NJS_CHECK_NAPI(env, napi_is_date(env, value, &check))
-        if (check) {
-            *bindType = NJS_DATATYPE_DATE;
-            return true;
-        }
-
-        // buffers can be bound
-        NJS_CHECK_NAPI(env, napi_is_buffer(env, value, &check))
-        if (check) {
-            *bindType = NJS_DATATYPE_BUFFER;
-            NJS_CHECK_NAPI(env, napi_get_buffer_info(env, value, &buffer,
-                    &tempLength))
-            *maxSize = (uint32_t) tempLength;
-            return true;
-        }
-
-        // LOBs can be bound
-        NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-                baton->jsLobConstructor, &check))
-        if (check) {
-            NJS_CHECK_NAPI(env, napi_unwrap(env, value, (void**) &lob))
-            *bindType = lob->dataType;
-            return true;
-        }
-
-        // result sets can be bound
-        NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-                baton->jsResultSetConstructor, &check))
-        if (check) {
-            *bindType = NJS_DATATYPE_CURSOR;
-            return true;
-        }
-
-        // database objects can be bound
-        NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-                baton->jsBaseDbObjectConstructor, &check))
-        if (check) {
-            *bindType = NJS_DATATYPE_OBJECT;
-            if (!njsDbObject_getInstance(baton->globals, env, value, &obj))
-                return false;
-            *objectTypeHandle = obj->type->handle;
-            return true;
-        }
-
-        // arrays can be bound (if not already processing an array)
-        if (!scalarOnly) {
-            NJS_CHECK_NAPI(env, napi_is_array(env, value, &check))
-            if (check)
-                return njsConnection_getBindInfoFromArray(baton, env,
-                        value, bindType, maxSize, objectTypeHandle);
-        }
-
-    }
-
-    // no value that can be bound was found; only raise an exception, however
-    // if no data type is already available
-    if (*bindType == NJS_DATATYPE_DEFAULT)
-        return njsBaton_setError(baton, errInvalidBindDataType, 2);
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsConnection_getCallTimeout()
 //   Get accessor of "callTimeout" property.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_getCallTimeout(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getCallTimeout, 0, NULL)
 {
+    njsConnection *conn = (njsConnection*) callingInstance;
     dpiVersionInfo versionInfo;
-    njsModuleGlobals *globals;
     uint32_t callTimeout;
-    njsConnection *conn;
 
     // return undefined for an invalid connection
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &conn))
-        return NULL;
     if (!conn->handle)
-        return NULL;
+        return true;
 
     // if an Oracle Client less than 18.1 is being used, return undefined
-    if (dpiContext_getClientVersion(globals->context, &versionInfo) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
+    if (dpiContext_getClientVersion(globals->context, &versionInfo) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
     if (versionInfo.versionNum < 18)
-        return NULL;
+        return true;
 
     // get value and return it
-    if (dpiConn_getCallTimeout(conn->handle, &callTimeout) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
-    }
-    return njsUtils_convertToUnsignedInt(env, callTimeout);
-}
+    if (dpiConn_getCallTimeout(conn->handle, &callTimeout) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, callTimeout, returnValue))
 
-
-//-----------------------------------------------------------------------------
-// njsConnection_getClientId()
-//   Get accessor of "clientId" property.
-//-----------------------------------------------------------------------------
-static napi_value njsConnection_getClientId(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_getNull(env);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_getClientInfo()
-//   Get accessor of "clientInfo" property.
-//-----------------------------------------------------------------------------
-static napi_value njsConnection_getClientInfo(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_getNull(env);
+    return true;
 }
 
 
@@ -1325,27 +1029,20 @@ static napi_value njsConnection_getClientInfo(napi_env env,
 // njsConnection_getCurrentSchema()
 //   Get accessor of "currentSchema" property.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_getCurrentSchema(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getCurrentSchema, 0, NULL)
 {
-    njsModuleGlobals *globals;
+    njsConnection *conn = (njsConnection*) callingInstance;
     uint32_t valueLength;
-    njsConnection *conn;
     const char *value;
 
-    // return undefined for an invalid connection
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &conn))
-        return NULL;
-    if (!conn->handle)
-        return NULL;
-
-    // get value and return it
-    if (dpiConn_getCurrentSchema(conn->handle, &value, &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
+    if (conn->handle) {
+        if (dpiConn_getCurrentSchema(conn->handle, &value, &valueLength) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+                returnValue))
     }
-    return njsUtils_convertToString(env, value, valueLength);
+
+    return true;
 }
 
 
@@ -1401,41 +1098,23 @@ static bool njsConnection_getDbObjectClassPostAsync(njsBaton *baton,
 
 
 //-----------------------------------------------------------------------------
-// njsConnection_getDbOp()
-//   Get accessor of "dbOp" property.
-//-----------------------------------------------------------------------------
-static napi_value njsConnection_getDbOp(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_getNull(env);
-}
-
-
-//-----------------------------------------------------------------------------
 // njsConnection_getExternalName()
 //   Get accessor for "externalName" property
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_getExternalName(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getExternalName, 0, NULL)
 {
-    njsModuleGlobals *globals;
+    njsConnection *conn = (njsConnection*) callingInstance;
     uint32_t valueLength;
-    njsConnection *conn;
     const char *value;
 
-    // return undefined for an invalid connection
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &conn))
-        return NULL;
-    if (!conn->handle)
-        return NULL;
-
-    // get value and return it
-    if (dpiConn_getExternalName(conn->handle, &value, &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
+    if (conn->handle) {
+        if (dpiConn_getExternalName(conn->handle, &value, &valueLength) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+                returnValue))
     }
-    return njsUtils_convertToString(env, value, valueLength);
+
+    return true;
 }
 
 
@@ -1444,27 +1123,20 @@ static napi_value njsConnection_getExternalName(napi_env env,
 // njsConnection_getInternalName()
 //   Get accessor for "internalName" property
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_getInternalName(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getInternalName, 0, NULL)
 {
-    njsModuleGlobals *globals;
+    njsConnection *conn = (njsConnection*) callingInstance;
     uint32_t valueLength;
-    njsConnection *conn;
     const char *value;
 
-    // return undefined for an invalid connection
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &conn))
-        return NULL;
-    if (!conn->handle)
-        return NULL;
-
-    // get value and return it
-    if (dpiConn_getInternalName(conn->handle, &value, &valueLength) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
+    if (conn->handle) {
+        if (dpiConn_getInternalName(conn->handle, &value, &valueLength) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+                returnValue))
     }
-    return njsUtils_convertToString(env, value, valueLength);
+
+    return true;
 }
 
 
@@ -1614,37 +1286,23 @@ static bool njsConnection_getOutBinds(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsConnection_getModule()
-//   Get accessor of "module" property.
-//-----------------------------------------------------------------------------
-static napi_value njsConnection_getModule(napi_env env,
-        napi_callback_info info)
-{
-    return njsUtils_getNull(env);
-}
-
-
-//-----------------------------------------------------------------------------
 // njsConnection_getOracleServerVersion()
 //   Get accessor of "oracleServerVersion" property.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_getOracleServerVersion(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getOracleServerVersion, 0, NULL)
 {
+    njsConnection *conn = (njsConnection*) callingInstance;
     dpiVersionInfo versionInfo;
-    njsModuleGlobals *globals;
-    njsConnection *conn;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &conn))
-        return NULL;
-    if (!conn->handle)
-        return NULL;
-    if (dpiConn_getServerVersion(conn->handle, NULL, NULL, &versionInfo) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
+    if (conn->handle) {
+        if (dpiConn_getServerVersion(conn->handle, NULL, NULL,
+                &versionInfo) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_create_uint32(env, versionInfo.fullVersionNum,
+                returnValue))
     }
-    return njsUtils_convertToUnsignedInt(env, versionInfo.fullVersionNum);
+
+    return true;
 }
 
 
@@ -1652,29 +1310,25 @@ static napi_value njsConnection_getOracleServerVersion(napi_env env,
 // njsConnection_getOracleServerVersionString()
 //   Get accessor of "oracleServerVersionString" property.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_getOracleServerVersionString(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getOracleServerVersionString, 0, NULL)
 {
+    njsConnection *conn = (njsConnection*) callingInstance;
     dpiVersionInfo versionInfo;
-    njsModuleGlobals *globals;
     char versionString[40];
-    njsConnection *conn;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &conn))
-        return NULL;
-    if (!conn->handle)
-        return NULL;
-    if (dpiConn_getServerVersion(conn->handle, NULL, NULL, &versionInfo) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
+    if (conn->handle) {
+        if (dpiConn_getServerVersion(conn->handle, NULL, NULL,
+                &versionInfo) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        (void) snprintf(versionString, sizeof(versionString), "%d.%d.%d.%d.%d",
+                versionInfo.versionNum, versionInfo.releaseNum,
+                versionInfo.updateNum, versionInfo.portReleaseNum,
+                versionInfo.portUpdateNum);
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, versionString,
+                NAPI_AUTO_LENGTH, returnValue))
     }
-    (void) snprintf(versionString, sizeof(versionString), "%d.%d.%d.%d.%d",
-            versionInfo.versionNum, versionInfo.releaseNum,
-            versionInfo.updateNum, versionInfo.portReleaseNum,
-            versionInfo.portUpdateNum);
-    return njsUtils_convertToString(env, versionString,
-            (uint32_t) strlen(versionString));
+
+    return true;
 }
 
 
@@ -1737,7 +1391,7 @@ static bool njsConnection_getQueuePostAsync(njsBaton *baton, napi_env env,
 static bool njsConnection_getQueueProcessArgs(njsBaton *baton,
         napi_env env, napi_value *args)
 {
-    napi_value typeObj, prototype;
+    napi_value typeObj, jsObjType;
     napi_valuetype valueType;
     njsDbObjectType *objType;
     bool ok;
@@ -1757,12 +1411,10 @@ static bool njsConnection_getQueueProcessArgs(njsBaton *baton,
                 &baton->typeNameLength))
             return false;
     } else if (valueType == napi_function) {
-        NJS_CHECK_NAPI(env, napi_get_prototype(env, typeObj, &prototype))
-        NJS_CHECK_NAPI(env, napi_strict_equals(env, prototype,
-                baton->jsBaseDbObjectConstructor, &ok))
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, typeObj, "_objType",
+                &jsObjType))
+        ok = (napi_unwrap(env, jsObjType, (void**) &objType) == napi_ok);
         if (ok) {
-            if (!njsDbObjectType_getFromClass(env, typeObj, &objType))
-                return false;
             if (dpiObjectType_addRef(objType->handle) < 0)
                 return njsBaton_setErrorDPI(baton);
             baton->dpiObjectTypeHandle = objType->handle;
@@ -1818,28 +1470,18 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getSodaDatabase, 0, NULL)
 // njsConnection_getStmtCacheSize()
 //   Get accessor of "stmtCacheSize" property.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_getStmtCacheSize(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getStmtCacheSize, 0, NULL)
 {
-    njsModuleGlobals *globals;
-    njsConnection *conn;
+    njsConnection *conn = (njsConnection*) callingInstance;
     uint32_t cacheSize;
-    napi_value value;
 
-    if (!njsUtils_validateGetter(env, info, &globals,
-            (njsBaseInstance**) &conn))
-        return NULL;
-    if (!conn->handle)
-        return NULL;
-    if (dpiConn_getStmtCacheSize(conn->handle, &cacheSize) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        return NULL;
+    if (conn->handle) {
+        if (dpiConn_getStmtCacheSize(conn->handle, &cacheSize) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_create_uint32(env, cacheSize, returnValue))
     }
-    if (napi_create_uint32(env, cacheSize, &value) != napi_ok) {
-        njsUtils_genericThrowError(env, __FILE__, __LINE__);
-        return NULL;
-    }
-    return value;
+
+    return true;
 }
 
 
@@ -1980,62 +1622,12 @@ static bool njsConnection_getStatementInfoPostAsync(njsBaton *baton,
 // njsConnection_getTag()
 //   Get accessor of "tag" property.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_getTag(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getTag, 0, NULL)
 {
-    njsConnection *conn;
+    njsConnection *conn = (njsConnection*) callingInstance;
 
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &conn))
-        return NULL;
-    return njsUtils_convertToString(env, conn->tag,
-            (uint32_t) conn->tagLength);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_initBindVars()
-//   Initialize bind variables using the given bind object/array as a
-// template.
-//-----------------------------------------------------------------------------
-static bool njsConnection_initBindVars(njsBaton *baton, napi_env env,
-        napi_value binds, napi_value bindNames)
-{
-    napi_value name, element;
-    njsVariable *var;
-    uint32_t i;
-
-    // determine the number of bind variables; if none are provided, nothing
-    // further needs to be done
-    if (bindNames) {
-        NJS_CHECK_NAPI(env, napi_get_array_length(env, bindNames,
-                &baton->numBindVars))
-    } else {
-        NJS_CHECK_NAPI(env, napi_get_array_length(env, binds,
-                &baton->numBindVars))
-    }
-    if (baton->numBindVars == 0)
-        return true;
-
-    // allocate memory for the bind variables
-    baton->bindVars = calloc(baton->numBindVars, sizeof(njsVariable));
-    if (!baton->bindVars)
-        return njsBaton_setError(baton, errInsufficientMemory);
-
-    // initialize bind variables by setting either the position or the name
-    for (i = 0; i < baton->numBindVars; i++) {
-        var = &baton->bindVars[i];
-        var->bindDir = NJS_BIND_IN;
-        if (!bindNames) {
-            var->pos = i + 1;
-        } else {
-            NJS_CHECK_NAPI(env, napi_get_element(env, bindNames, i, &element))
-            NJS_CHECK_NAPI(env, napi_coerce_to_string(env, element, &name))
-            if (!njsUtils_copyStringFromJS(env, name, &var->name,
-                    &var->nameLength))
-                return false;
-        }
-    }
-
+    NJS_CHECK_NAPI(env, napi_create_string_utf8(env, conn->tag,
+            conn->tagLength, returnValue))
     return true;
 }
 
@@ -2155,146 +1747,120 @@ static bool njsConnection_prepareAndBind(njsConnection *conn, njsBaton *baton)
 
 
 //-----------------------------------------------------------------------------
-// njsConnection_processExecuteBinds()
-//   Process binds passed through to the Execute() call.
+// njsConnection_processBindUnit()
+//   Process a single bind unit passed through to the execute() call.
 //-----------------------------------------------------------------------------
-static bool njsConnection_processExecuteBinds(njsBaton *baton,
-        napi_env env, napi_value binds)
+static bool njsConnection_processBindUnit(njsBaton *baton, napi_env env,
+        napi_value bindUnit, njsVariable *var)
 {
-    napi_value bindNames;
-    bool isArray;
+    njsConnection *conn = (njsConnection*) baton->callingInstance;
+    napi_value temp, bindValues;
+    uint32_t i, arrayLength;
+    bool found;
 
-    // determine if binds are an array (bind by position)
-    NJS_CHECK_NAPI(env, napi_is_array(env, binds, &isArray))
+    // determine name/position
+    if (!njsUtils_getNamedProperty(env, bindUnit, "name", &temp, &found))
+        return false;
+    if (found) {
+        if (!njsUtils_copyStringFromJS(env, temp, &var->name,
+                &var->nameLength))
+            return false;
+    } else {
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, bindUnit, "pos",
+                &temp))
+        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &var->pos))
+    }
 
-    // if binding by name, get the list of bind names
-    bindNames = NULL;
-    if (!isArray && !njsUtils_getOwnPropertyNames(env, binds, &bindNames))
+    // determine bind direction (IN, OUT or IN/OUT)
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, bindUnit, "dir",
+            &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &var->bindDir))
+
+    // determine type
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, bindUnit, "type",
+            &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &var->varTypeNum))
+    if (var->varTypeNum == DPI_ORACLE_TYPE_OBJECT) {
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, bindUnit, "objType",
+                &temp))
+        NJS_CHECK_NAPI(env, napi_unwrap(env, temp, (void**) &var->objectType))
+        var->dpiObjectTypeHandle = var->objectType->handle;
+    }
+
+    // determine maximum size (optional)
+    if (!njsUtils_getNamedProperty(env, bindUnit, "maxSize", &temp, &found))
+        return false;
+    if (found) {
+        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &var->maxSize))
+    }
+
+    // determine if value is an array and the maximum array size
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, bindUnit, "isArray",
+            &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_bool(env, temp, &var->isArray))
+    if (var->isArray) {
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, bindUnit,
+                "maxArraySize", &temp))
+        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp,
+                &var->maxArraySize))
+    } else {
+        var->maxArraySize = baton->bindArraySize;
+    }
+
+    // create buffer for variable
+    if (!njsVariable_createBuffer(var, conn, baton))
         return false;
 
-    // initialize variables; if there are no variables, nothing further to do!
-    baton->bindArraySize = 1;
-    if (!njsConnection_initBindVars(baton, env, binds, bindNames))
-        return false;
-    if (baton->numBindVars == 0)
-        return true;
+    // process bind value (except for OUT variables)
+    if (var->bindDir != NJS_BIND_OUT) {
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, bindUnit, "values",
+                &bindValues))
+        if (var->isArray) {
+            NJS_CHECK_NAPI(env, napi_get_array_length(env, bindValues,
+                    &arrayLength))
+            if (dpiVar_setNumElementsInArray(var->dpiVarHandle,
+                    arrayLength) < 0)
+                return njsBaton_setErrorDPI(baton);
+        }
+        for (i = 0; i < var->maxArraySize; i++) {
+            NJS_CHECK_NAPI(env, napi_get_element(env, bindValues, i, &temp))
+            if (!njsVariable_setScalarValue(var, i, env, temp, baton))
+                return false;
+        }
+    }
 
-    // scan the execute binds and populate the bind variables
-    return njsConnection_scanExecuteBinds(baton, env, binds, bindNames);
+    return true;
 }
 
 
 //-----------------------------------------------------------------------------
-// njsConnection_processExecuteManyBinds()
-//   Process binds passed through to the ExecuteMany() call.
+// njsConnection_processBinds()
+//   Process binds passed through to the execute() call.
 //-----------------------------------------------------------------------------
-static bool njsConnection_processExecuteManyBinds(njsBaton *baton,
-        napi_env env, napi_value binds, napi_value options)
+static bool njsConnection_processBinds(njsBaton *baton, napi_env env,
+        napi_value binds)
 {
-    njsConnection *conn = (njsConnection*) baton->callingInstance;
-    napi_value bindDefs, bindName, bindUnit, bindNames;
-    bool scanRequired, bindByPos, hasBinds;
-    napi_valuetype valueType;
-    njsVariable *var;
+    napi_value bindUnit;
     uint32_t i;
 
-    // if the binds is specified as a simple number, no binds are specified
-    NJS_CHECK_NAPI(env, napi_typeof(env, binds, &valueType))
-    if (valueType == napi_number) {
-        hasBinds = false;
-        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, binds,
-                &baton->bindArraySize))
-
-    // otherwise, an array of binds have been specified
-    } else {
-        NJS_CHECK_NAPI(env, napi_get_array_length(env, binds,
-                &baton->bindArraySize))
-        hasBinds = (baton->bindArraySize > 0);
-    }
-
-    // determine if bind definitions have been specified; if not a scan is
-    // required in order to determine bind definitions
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, options, "bindDefs",
-            &bindDefs))
-    NJS_CHECK_NAPI(env, napi_typeof(env, bindDefs, &valueType))
-    if (valueType != napi_object && valueType != napi_undefined)
-        return njsBaton_setError(baton, errInvalidPropertyValueInParam,
-                "bindDefs", 2);
-    scanRequired = (valueType == napi_undefined);
-
-    // if no bind definitions are specified, the first row is used to determine
-    // the number of bind variables and types
-    if (scanRequired && hasBinds) {
-        NJS_CHECK_NAPI(env, napi_get_element(env, binds, 0, &bindDefs))
-        NJS_CHECK_NAPI(env, napi_typeof(env, bindDefs, &valueType))
-        if (valueType == napi_undefined)
-            return true;
-        if (valueType != napi_object)
-            return njsBaton_setError(baton, errInvalidParameterValue, 2);
-    }
-
-    // if a scan is required but no binds are available, that means there are
-    // no variables to bind, so nothing further to do
-    if (scanRequired && !hasBinds)
-        return true;
-
-    // determine if bind definitions are an array (bind by position)
-    NJS_CHECK_NAPI(env, napi_is_array(env, bindDefs, &bindByPos))
-
-    // get the list of bind names, if binding by name
-    bindNames = NULL;
-    if (!bindByPos && !njsUtils_getOwnPropertyNames(env, bindDefs, &bindNames))
-        return false;
-
-    // initialize variables; if there are no variables, nothing further to do!
-    if (!njsConnection_initBindVars(baton, env, bindDefs, bindNames))
-        return false;
+    // determine the number of bind variables; if none are provided, nothing
+    // further needs to be done
+    NJS_CHECK_NAPI(env, napi_get_array_length(env, binds, &baton->numBindVars))
     if (baton->numBindVars == 0)
         return true;
 
-    // if no bind definitions are specified, scan the binds to determine type
-    // and size
-    if (scanRequired && hasBinds) {
-        if (!njsConnection_scanExecuteManyBinds(baton, env, binds, bindNames))
-            return false;
+    // allocate memory for the bind variables
+    baton->bindVars = calloc(baton->numBindVars, sizeof(njsVariable));
+    if (!baton->bindVars)
+        return njsBaton_setError(baton, errInsufficientMemory);
 
-    // otherwise, use the bind definitions to determine type and size
-    } else {
-
-        // process each bind variable
-        for (i = 0; i < baton->numBindVars; i++) {
-            var = &baton->bindVars[i];
-
-            // get bind unit
-            if (bindByPos) {
-                NJS_CHECK_NAPI(env, napi_get_element(env, bindDefs, i,
-                        &bindUnit))
-            } else {
-                NJS_CHECK_NAPI(env, napi_get_element(env, bindNames, i,
-                        &bindName))
-                NJS_CHECK_NAPI(env, napi_get_property(env, bindDefs, bindName,
-                        &bindUnit))
-            }
-
-            // scan bind unit
-            if (!njsConnection_scanExecuteBindUnit(baton, var, true, env,
-                    bindUnit, NULL))
-                return false;
-
-        }
-
-    }
-
-    // create the ODPI-C variables used to hold the data
+    // initialize bind variables from supplied information
     for (i = 0; i < baton->numBindVars; i++) {
-        if (!njsVariable_createBuffer(&baton->bindVars[i], conn, baton))
+        NJS_CHECK_NAPI(env, napi_get_element(env, binds, i, &bindUnit))
+        if (!njsConnection_processBindUnit(baton, env, bindUnit,
+                &baton->bindVars[i]))
             return false;
     }
-
-    // populate the ODPI-C variables with the data from JavaScript binds
-    if (hasBinds && !njsConnection_transferExecuteManyBinds(baton, env, binds,
-            bindNames))
-        return false;
 
     return true;
 }
@@ -2386,323 +1952,15 @@ static bool njsConnection_rollbackAsync(njsBaton *baton)
     return true;
 }
 
-//-----------------------------------------------------------------------------
-// njsConnection_scanExecuteBinds()
-//   Scan the binds passed through to Execute() and determine the bind
-// type and maximum size (for strings/buffers).
-//-----------------------------------------------------------------------------
-static bool njsConnection_scanExecuteBinds(njsBaton *baton, napi_env env,
-        napi_value binds, napi_value bindNames)
-{
-    njsConnection *conn = (njsConnection*) baton->callingInstance;
-    uint32_t i, defaultBindType, defaultMaxSize, arraySize;
-    dpiObjectType *defaultObjectTypeHandle;
-    napi_value name, bindUnit, bindValue;
-    njsVariable *var;
-    bool check;
-
-    // scan each bind
-    for (i = 0; i < baton->numBindVars; i++) {
-        var = &baton->bindVars[i];
-
-        // determine bind unit
-        if (!bindNames) {
-            NJS_CHECK_NAPI(env, napi_get_element(env, binds, i, &bindUnit))
-        } else {
-            NJS_CHECK_NAPI(env, napi_get_element(env, bindNames, i, &name))
-            NJS_CHECK_NAPI(env, napi_get_property(env, binds, name, &bindUnit))
-        }
-
-        // if bind unit is a value that can be bound directly, use it;
-        // otherwise, scan the bind unit for bind information and its value
-        if (njsBaton_isBindValue(baton, env, bindUnit)) {
-            bindValue = bindUnit;
-        } else if (!njsConnection_scanExecuteBindUnit(baton, var, false, env,
-                bindUnit, &bindValue)) {
-            return false;
-        }
-
-        // get bind information from value if it has not already been specified
-        if (var->varTypeNum == NJS_DATATYPE_DEFAULT || !var->maxSize ||
-                var->maxSize == NJS_MAX_OUT_BIND_SIZE) {
-            defaultBindType = var->varTypeNum;
-            defaultMaxSize = var->maxSize;
-            defaultObjectTypeHandle = var->dpiObjectTypeHandle;
-            if (!njsConnection_getBindInfoFromValue(baton, false, env,
-                    bindValue, &defaultBindType, &defaultMaxSize,
-                    &defaultObjectTypeHandle))
-                return false;
-            if (var->varTypeNum == NJS_DATATYPE_DEFAULT)
-                var->varTypeNum = defaultBindType;
-            if (defaultMaxSize > var->maxSize)
-                var->maxSize = defaultMaxSize;
-            if (!var->dpiObjectTypeHandle && defaultObjectTypeHandle)
-                var->dpiObjectTypeHandle = defaultObjectTypeHandle;
-        }
-
-        // for IN binds, maxArraySize is ignored and obtained from the
-        // actual array size; for INOUT binds, maxArraySize does need to be
-        // specified by the application; for OUT binds, the value from the
-        // application must be accepted as is as there is no way to
-        // validate it
-        if (var->varTypeNum != DPI_ORACLE_TYPE_OBJECT &&
-                var->varTypeNum != DPI_ORACLE_TYPE_JSON) {
-
-            NJS_CHECK_NAPI(env, napi_is_array(env, bindValue, &check))
-            if (check) {
-                var->isArray = true;
-                NJS_CHECK_NAPI(env, napi_get_array_length(env, bindValue,
-                        &arraySize))
-                if (var->bindDir == NJS_BIND_IN) {
-                    var->maxArraySize = arraySize;
-                    if (var->maxArraySize == 0)
-                        var->maxArraySize = 1;
-                } else if (var->maxArraySize == 0) {
-                    return njsBaton_setError(baton, errReqdMaxArraySize);
-                }
-                if (var->bindDir == NJS_BIND_INOUT &&
-                        arraySize > var->maxArraySize)
-                    return njsBaton_setError(baton, errInvalidArraySize);
-            }
-
-        }
-
-        // create buffer for variable
-        if (!njsVariable_createBuffer(var, conn, baton))
-            return false;
-
-        // process bind value (for all except OUT)
-        if (var->bindDir != NJS_BIND_OUT) {
-            if (!njsVariable_setValue(var, env, bindValue, baton))
-                return false;
-        }
-
-    }
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_scanExecuteBindUnit()
-//   Scan the bind unit for bind information. One of the keys "dir", "type",
-// "maxSize" and "val" must be specified for the bind unit to be considered
-// valid.
-//-----------------------------------------------------------------------------
-static bool njsConnection_scanExecuteBindUnit(njsBaton *baton,
-        njsVariable *var, bool inExecuteMany, napi_env env,
-        napi_value bindUnit, napi_value *bindValue)
-{
-    napi_value args[2], value, prototype, temp, connObj, dbObjectClasses, cls;
-    njsConnection *conn = (njsConnection*) baton->callingInstance;
-    bool okBindUnit, found, check;
-    dpiObjectType *objTypeHandle;
-    napi_valuetype valueType;
-
-    // initialization
-    args[1] = bindUnit;
-    okBindUnit = false;
-
-    // get and validate bind direction; if not specified, IN is assumed
-    if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1, "dir",
-            &var->bindDir, &found))
-        return false;
-    if (found) {
-        okBindUnit = true;
-        if (var->bindDir != NJS_BIND_IN && var->bindDir != NJS_BIND_INOUT &&
-                var->bindDir != NJS_BIND_OUT)
-            return njsBaton_setError(baton, errInvalidBindDirection);
-    }
-
-    // get data type; when calling executeMany(), the data type is mandatory
-    // the data type will either be one of the integer constants identifying
-    // types, a string identifying an object type, or a constructor function
-    // identifying an object type
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, args[1], "type", &value));
-    NJS_CHECK_NAPI(env, napi_typeof(env, value, &valueType));
-    if (valueType == napi_function) {
-        NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "prototype",
-                &prototype))
-        NJS_CHECK_NAPI(env, napi_instanceof(env, prototype,
-                baton->jsBaseDbObjectConstructor, &check))
-        if (!check)
-            return njsBaton_setError(baton, errInvalidBindDataType, 2);
-        if (!njsDbObjectType_getFromClass(env, value, &var->objectType))
-            return false;
-        var->dpiObjectTypeHandle = var->objectType->handle;
-        var->varTypeNum = DPI_ORACLE_TYPE_OBJECT;
-        okBindUnit = true;
-    } else if (valueType == napi_string) {
-
-        // first check to see if the name is already cached
-        NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-                baton->jsCallingObjRef, &connObj))
-        NJS_CHECK_NAPI(env, napi_get_named_property(env, connObj,
-                "_dbObjectClasses", &dbObjectClasses))
-        NJS_CHECK_NAPI(env, napi_get_property(env, dbObjectClasses, value,
-                &cls))
-        NJS_CHECK_NAPI(env, napi_typeof(env, cls, &valueType))
-        if (valueType == napi_function) {
-            if (!njsDbObjectType_getFromClass(env, cls, &var->objectType))
-                return false;
-
-        // if not, look up the type by its name
-        } else {
-            if (!njsUtils_copyStringFromJS(env, value, &baton->typeName,
-                    &baton->typeNameLength))
-                return false;
-            if (dpiConn_getObjectType(conn->handle, baton->typeName,
-                    (uint32_t) baton->typeNameLength, &objTypeHandle) < 0)
-                return njsBaton_setErrorDPI(baton);
-            if (!njsDbObject_getSubClass(baton, objTypeHandle, env, &temp,
-                    &var->objectType)) {
-                dpiObjectType_release(objTypeHandle);
-                return false;
-            }
-            dpiObjectType_release(objTypeHandle);
-        }
-        var->dpiObjectTypeHandle = var->objectType->handle;
-        var->varTypeNum = DPI_ORACLE_TYPE_OBJECT;
-        okBindUnit = true;
-    } else {
-        if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1, "type",
-                &var->varTypeNum, &found))
-            return false;
-        if (found) {
-            okBindUnit = true;
-        } else if (inExecuteMany) {
-            if (var->pos > 0)
-                return njsBaton_setError(baton, errMissingTypeByPos, var->pos);
-            return njsBaton_setError(baton, errMissingTypeByName,
-                    var->nameLength, var->name);
-        }
-    }
-
-    // get maximum size for strings/buffers; this value is only used for
-    // IN/OUT and OUT binds in execute() and at all times for executeMany()
-    if (var->bindDir != NJS_BIND_IN || inExecuteMany) {
-        if (var->bindDir != NJS_BIND_IN)
-            var->maxSize = NJS_MAX_OUT_BIND_SIZE;
-        if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1, "maxSize",
-                &var->maxSize, &found))
-            return false;
-        if (found) {
-            okBindUnit = true;
-        } else if (inExecuteMany) {
-            if (var->varTypeNum == DPI_ORACLE_TYPE_VARCHAR ||
-                    var->varTypeNum == DPI_ORACLE_TYPE_RAW) {
-                if (var->pos > 0)
-                    return njsBaton_setError(baton, errMissingMaxSizeByPos,
-                            var->pos);
-                return njsBaton_setError(baton, errMissingMaxSizeByName,
-                            var->nameLength, var->name);
-            }
-        }
-    }
-
-    // get max array size (for array binds, not possible in executeMany()
-    if (!inExecuteMany) {
-        if (!njsBaton_getUnsignedIntFromArg(baton, env, args, 1,
-                "maxArraySize", &var->maxArraySize, &found))
-            return false;
-        if (var->maxArraySize > 0)
-            var->isArray = true;
-    }
-
-    // get value, if specified; not used in executeMany()
-    if (!inExecuteMany) {
-        NJS_CHECK_NAPI(env, napi_get_named_property(env, bindUnit, "val",
-                bindValue))
-        NJS_CHECK_NAPI(env, napi_typeof(env, *bindValue, &valueType))
-        if (valueType != napi_undefined)
-            okBindUnit = true;
-    }
-
-    // if one of the keys was not found, the bind information is invalid
-    if (!okBindUnit)
-        return njsBaton_setError(baton, errNamedJSON);
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_scanExecuteManyBinds()
-//   Scan the binds passed through to ExecuteMany() and determine the bind
-// type and maximum size (for strings/buffers).
-//-----------------------------------------------------------------------------
-static bool njsConnection_scanExecuteManyBinds(njsBaton *baton,
-        napi_env env, napi_value binds, napi_value bindNames)
-{
-    uint32_t defaultBindType, defaultMaxSize, i, j;
-    dpiObjectType *defaultObjectTypeHandle;
-    napi_value row, bindName, value;
-    bool byPosition, isArray;
-    napi_valuetype valueType;
-    njsVariable *var;
-
-    byPosition = (baton->bindVars[0].pos > 0);
-    for (i = 0; i < baton->bindArraySize; i++) {
-
-        // get row from binds; verify that all rows are by position (array) or
-        // by name (object)
-        NJS_CHECK_NAPI(env, napi_get_element(env, binds, i, &row))
-        NJS_CHECK_NAPI(env, napi_is_array(env, row, &isArray))
-        if ((byPosition && !isArray) || (!byPosition && isArray))
-            return njsBaton_setError(baton, errMixedBind);
-
-        // scan each of the columns in the row and determine the bind type and
-        // maximum size of the input data
-        for (j = 0; j < baton->numBindVars; j++) {
-            var = &baton->bindVars[j];
-
-            // get bind value
-            if (byPosition) {
-                NJS_CHECK_NAPI(env, napi_get_element(env, row, j, &value))
-            } else {
-                NJS_CHECK_NAPI(env, napi_get_element(env, bindNames, j,
-                        &bindName))
-                NJS_CHECK_NAPI(env, napi_get_property(env, row, bindName,
-                        &value))
-            }
-
-            // null and undefined do not require any work
-            NJS_CHECK_NAPI(env, napi_typeof(env, value, &valueType))
-            if (valueType == napi_undefined || valueType == napi_null)
-                continue;
-
-            // otherwise, determine bind type and size by examining the value
-            defaultBindType = var->varTypeNum;
-            defaultMaxSize = var->maxSize;
-            defaultObjectTypeHandle = var->dpiObjectTypeHandle;
-            if (!njsConnection_getBindInfoFromValue(baton, true, env,
-                    value, &defaultBindType, &defaultMaxSize,
-                    &defaultObjectTypeHandle))
-                return false;
-            if (var->varTypeNum == NJS_DATATYPE_DEFAULT)
-                var->varTypeNum = defaultBindType;
-            if (defaultMaxSize > var->maxSize)
-                var->maxSize = defaultMaxSize;
-            if (!var->dpiObjectTypeHandle && defaultObjectTypeHandle)
-                var->dpiObjectTypeHandle = defaultObjectTypeHandle;
-
-        }
-
-    }
-
-    return true;
-}
-
 
 //-----------------------------------------------------------------------------
 // njsConnection_setAction()
 //   Set accessor of "action" property.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_setAction(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_setAction, 1, NULL)
 {
-    return njsConnection_setTextAttribute(env, info, "action",
-            dpiConn_setAction);
+    return njsConnection_setTextAttribute(env, callingInstance, globals,
+            args[0], dpiConn_setAction);
 }
 
 
@@ -2710,23 +1968,16 @@ static napi_value njsConnection_setAction(napi_env env,
 // njsConnection_setCallTimeout()
 //   Set accessor of "callTimeout" property.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_setCallTimeout(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_setCallTimeout, 1, NULL)
 {
-    njsModuleGlobals *globals;
-    uint32_t callTimeout;
-    njsConnection *conn;
-    napi_value value;
+    njsConnection *conn = (njsConnection*) callingInstance;
+    uint32_t value;
 
-    if (!njsUtils_validateSetter(env, info, &globals,
-            (njsBaseInstance**) &conn, &value))
-        return NULL;
-    if (!njsUtils_setPropUnsignedInt(env, value, "callTimeout", &callTimeout))
-        return NULL;
-    if (dpiConn_setCallTimeout(conn->handle, callTimeout) < 0)
-        njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &value))
+    if (dpiConn_setCallTimeout(conn->handle, value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
 
-    return NULL;
+    return true;
 }
 
 
@@ -2734,11 +1985,10 @@ static napi_value njsConnection_setCallTimeout(napi_env env,
 // njsConnection_setClientId()
 //   Set accessor of "clientId" property.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_setClientId(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_setClientId, 1, NULL)
 {
-    return njsConnection_setTextAttribute(env, info, "clientId",
-            dpiConn_setClientIdentifier);
+    return njsConnection_setTextAttribute(env, callingInstance, globals,
+            args[0], dpiConn_setClientIdentifier);
 }
 
 
@@ -2746,23 +1996,21 @@ static napi_value njsConnection_setClientId(napi_env env,
 // njsConnection_setClientInfo()
 //   Set accessor of "clientInfo" property.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_setClientInfo(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_setClientInfo, 1, NULL)
 {
-    return njsConnection_setTextAttribute(env, info, "clientInfo",
-            dpiConn_setClientInfo);
+    return njsConnection_setTextAttribute(env, callingInstance, globals,
+            args[0], dpiConn_setClientInfo);
 }
 
 
 //-----------------------------------------------------------------------------
 // njsConnection_setCurrentSchema()
-//   Set accessor of "clientId" property.
+//   Set accessor of "currentSchema" property.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_setCurrentSchema(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_setCurrentSchema, 1, NULL)
 {
-    return njsConnection_setTextAttribute(env, info, "currentSchema",
-            dpiConn_setCurrentSchema);
+    return njsConnection_setTextAttribute(env, callingInstance, globals,
+            args[0], dpiConn_setCurrentSchema);
 }
 
 
@@ -2770,10 +2018,10 @@ static napi_value njsConnection_setCurrentSchema(napi_env env,
 // njsConnection_setDbOp()
 //   Set accessor of "dbOp" property.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_setDbOp(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_setDbOp, 1, NULL)
 {
-    return njsConnection_setTextAttribute(env, info, "dbOp", dpiConn_setDbOp);
+    return njsConnection_setTextAttribute(env, callingInstance, globals,
+            args[0], dpiConn_setDbOp);
 }
 
 
@@ -2781,10 +2029,10 @@ static napi_value njsConnection_setDbOp(napi_env env,
 // njsConnection_setECID()
 //   Set accessor for "ecid" property.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_setECID(napi_env env, napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_setECID, 1, NULL)
 {
-    return njsConnection_setTextAttribute(env, info, "ecid",
-            dpiConn_setEcontextId);
+    return njsConnection_setTextAttribute(env, callingInstance, globals,
+            args[0], dpiConn_setEcontextId);
 }
 
 
@@ -2792,11 +2040,10 @@ static napi_value njsConnection_setECID(napi_env env, napi_callback_info info)
 // njsConnection_setExternalName
 //   Set accessor of "externalName" property
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_setExternalName(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_setExternalName, 1, NULL)
 {
-    return njsConnection_setTextAttribute(env, info, "externalName",
-             dpiConn_setExternalName);
+    return njsConnection_setTextAttribute(env, callingInstance, globals,
+            args[0], dpiConn_setExternalName);
 }
 
 
@@ -2804,11 +2051,10 @@ static napi_value njsConnection_setExternalName(napi_env env,
 // njsConnection_setInternalName
 //   Set accessor of "InternalName" property
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_setInternalName(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_setInternalName, 1, NULL)
 {
-    return njsConnection_setTextAttribute(env, info, "internalName",
-             dpiConn_setInternalName);
+    return njsConnection_setTextAttribute(env, callingInstance, globals,
+            args[0], dpiConn_setInternalName);
 }
 
 
@@ -2816,11 +2062,10 @@ static napi_value njsConnection_setInternalName(napi_env env,
 // njsConnection_setModule()
 //   Set accessor of "module" property.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_setModule(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_setModule, 1, NULL)
 {
-    return njsConnection_setTextAttribute(env, info, "module",
-            dpiConn_setModule);
+    return njsConnection_setTextAttribute(env, callingInstance, globals,
+            args[0], dpiConn_setModule);
 }
 
 
@@ -2828,20 +2073,14 @@ static napi_value njsConnection_setModule(napi_env env,
 // njsConnection_setTag()
 //   Set accessor of "tag" property.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_setTag(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_setTag, 1, NULL)
 {
-    njsConnection *conn;
-    napi_value value;
+    njsConnection *conn = (njsConnection*) callingInstance;
 
-    if (!njsUtils_validateSetter(env, info, NULL, (njsBaseInstance**) &conn,
-            &value))
-        return NULL;
-    if (!njsUtils_setPropString(env, value, "tag", &conn->tag,
-            &conn->tagLength))
-        return NULL;
+    if (!njsUtils_copyStringFromJS(env, args[0], &conn->tag, &conn->tagLength))
+        return false;
     conn->retag = true;
-    return NULL;
+    return true;
 }
 
 
@@ -2850,40 +2089,30 @@ static napi_value njsConnection_setTag(napi_env env,
 //   Sets the specified text attribute by calling the specified ODPI-C
 // function, after validating the connection and the input.
 //-----------------------------------------------------------------------------
-static napi_value njsConnection_setTextAttribute(napi_env env,
-        napi_callback_info info, const char *attributeName,
-        int (*setter)(dpiConn*, const char *, uint32_t))
+static bool njsConnection_setTextAttribute(napi_env env,
+        njsBaseInstance *instance, njsModuleGlobals *globals,
+        napi_value value, int (*setter)(dpiConn*, const char *, uint32_t))
 {
-    njsModuleGlobals *globals;
+    njsConnection *conn = (njsConnection*) instance;
+    char *buffer = NULL;
     size_t bufferLength;
-    njsConnection *conn;
-    napi_value value;
-    char *buffer;
+    int status;
 
-    // validate the arguments and the connection
-    if (!njsUtils_validateSetter(env, info, &globals,
-            (njsBaseInstance**) &conn, &value))
-        return NULL;
-    if (!conn->handle) {
-        njsUtils_throwError(env, errInvalidConnection);
-        return NULL;
-    }
+    // validate connection
+    if (!conn->handle)
+        return njsUtils_throwError(env, errInvalidConnection);
 
     // get contents of string
-    buffer = NULL;
-    if (!njsUtils_setPropString(env, value, attributeName, &buffer,
-            &bufferLength))
-        return NULL;
+    if (!njsUtils_copyStringFromJS(env, value, &buffer, &bufferLength))
+        return false;
 
     // call the ODPI-C function to set the value
-    if ((*setter)(conn->handle, buffer, (uint32_t) bufferLength) < 0) {
-        njsUtils_throwErrorDPI(env, globals);
-        free(buffer);
-        return NULL;
-    }
-
+    status = (*setter)(conn->handle, buffer, (uint32_t) bufferLength);
     free(buffer);
-    return NULL;
+    if (status < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+
+    return true;
 }
 
 
@@ -3160,60 +2389,8 @@ static bool njsConnection_subscribeProcessArgs(njsBaton *baton, napi_env env,
         if (!njsBaton_getValueFromArg(baton, env, args, 1, "binds",
                 napi_object, &binds, NULL))
             return false;
-        if (binds && !njsConnection_processExecuteBinds(baton, env, binds))
+        if (binds && !njsConnection_processBinds(baton, env, binds))
             return false;
-    }
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection_transferExecuteManyBinds()
-//   Transfer the binds from JavaScript to the ODPI-C variable buffers already
-// created.
-//-----------------------------------------------------------------------------
-static bool njsConnection_transferExecuteManyBinds(njsBaton *baton,
-        napi_env env, napi_value binds, napi_value bindNames)
-{
-    napi_value row, bindName, value;
-    bool byPosition, isArray;
-    njsVariable *var;
-    uint32_t i, j;
-
-    // determine if we are binding by position or by name
-    byPosition = (baton->bindVars[0].pos > 0);
-
-    // process each row
-    for (i = 0; i < baton->bindArraySize; i++) {
-
-        // get row from binds; verify that all rows are by position (array) or
-        // by name (object)
-        NJS_CHECK_NAPI(env, napi_get_element(env, binds, i, &row))
-        NJS_CHECK_NAPI(env, napi_is_array(env, row, &isArray))
-        if ((byPosition && !isArray) || (!byPosition && isArray))
-            return njsBaton_setError(baton, errMixedBind);
-
-        // process each column
-        for (j = 0; j < baton->numBindVars; j++) {
-            var = &baton->bindVars[j];
-
-            // get bind value
-            if (byPosition) {
-                NJS_CHECK_NAPI(env, napi_get_element(env, row, j, &value))
-            } else {
-                NJS_CHECK_NAPI(env, napi_get_element(env, bindNames, j,
-                        &bindName))
-                NJS_CHECK_NAPI(env, napi_get_property(env, row, bindName,
-                        &value))
-            }
-
-            // process value
-            if (!njsVariable_setScalarValue(var, i, env, value, true, baton))
-                return false;
-
-        }
-
     }
 
     return true;

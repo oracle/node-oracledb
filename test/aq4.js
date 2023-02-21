@@ -176,73 +176,71 @@ describe('267. aq4.js', function() {
 
 
   it('267.3 Negative - numbers as recipients ', async () => {
-    try {
-      // Enqueue
-      const queue1 = await conn.getQueue(
-        objQueueName,
-        {payloadType: objType}
-      );
-      const message = new queue1.payloadTypeClass(addrData);
-      await queue1.enqOne({
-        payload: message,
-        recipients: [1, 3, 5]
-      });
-    } catch (e) {
-      assert.strictEqual(e.message.startsWith("NJS-005:"), true);
-    }
+    const queue1 = await conn.getQueue(
+      objQueueName,
+      {payloadType: objType}
+    );
+    const message = new queue1.payloadTypeClass(addrData);
+    await testsUtil.assertThrowsAsync(
+      async () => {
+        await queue1.enqOne({
+          payload: message,
+          recipients: [1, 3, 5]
+        });
+      },
+      /NJS-007:/
+    );
   });
 
-
   it('267.4 Negative - number, string, date as recipients ', async () => {
-    try {
-      // Enqueue
-      const queue1 = await conn.getQueue(
-        objQueueName,
-        {payloadType: objType}
-      );
-      const message = new queue1.payloadTypeClass(addrData);
-      await queue1.enqOne({
-        payload: message,
-        recipients: [1, "abc", new Date(2022, 5, 17)]
-      });
-    } catch (e) {
-      assert.strictEqual(e.message.startsWith("NJS-005:"), true);
-    }
+    const queue1 = await conn.getQueue(
+      objQueueName,
+      {payloadType: objType}
+    );
+    const message = new queue1.payloadTypeClass(addrData);
+    await testsUtil.assertThrowsAsync(
+      async () => {
+        await queue1.enqOne({
+          payload: message,
+          recipients: [1, "abc", new Date(2022, 5, 17)]
+        });
+      },
+      /NJS-007:/
+    );
   });
 
   it('267.5 Negative -  null value for recipient', async () => {
-    try {
-      // Enqueue
-      const queue1 = await conn.getQueue(
-        objQueueName,
-        {payloadType: objType}
-      );
-      const message = new queue1.payloadTypeClass(addrData);
-      await queue1.enqOne({
-        payload: message,
-        recipients: [ null ]
-      });
-    } catch (e) {
-      assert.strictEqual(e.message.startsWith("NJS-005:"), true);
-    }
+    const queue1 = await conn.getQueue(
+      objQueueName,
+      {payloadType: objType}
+    );
+    const message = new queue1.payloadTypeClass(addrData);
+    await testsUtil.assertThrowsAsync(
+      async () => {
+        await queue1.enqOne({
+          payload: message,
+          recipients: [ null ]
+        });
+      },
+      /NJS-007:/
+    );
   });
 
-
   it('267.6 Negative - undefined value for recipient', async () => {
-    try {
-      // Enqueue
-      const queue1 = await conn.getQueue(
-        objQueueName,
-        {payloadType: objType}
-      );
-      const message = new queue1.payloadTypeClass(addrData);
-      await queue1.enqOne({
-        payload: message,
-        recipients: [ undefined ]
-      });
-    } catch (e) {
-      assert.strictEqual(e.message.startsWith("NJS-005:"), true);
-    }
+    const queue1 = await conn.getQueue(
+      objQueueName,
+      {payloadType: objType}
+    );
+    const message = new queue1.payloadTypeClass(addrData);
+    await testsUtil.assertThrowsAsync(
+      async () => {
+        await queue1.enqOne({
+          payload: message,
+          recipients: [ undefined ]
+        });
+      },
+      /NJS-007:/
+    );
   });
 
   it('267.7 Negative - dequeue non-existent name', async () => {

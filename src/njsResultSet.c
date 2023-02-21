@@ -27,6 +27,7 @@
 
 // class methods
 NJS_NAPI_METHOD_DECL_ASYNC(njsResultSet_close);
+NJS_NAPI_METHOD_DECL_SYNC(njsResultSet_getMetaData);
 NJS_NAPI_METHOD_DECL_ASYNC(njsResultSet_getRows);
 
 // asynchronous methods
@@ -36,41 +37,28 @@ static NJS_ASYNC_METHOD(njsResultSet_getRowsAsync);
 // post asynchronous methods
 static NJS_ASYNC_POST_METHOD(njsResultSet_getRowsPostAsync);
 
-// getters
-static NJS_NAPI_GETTER(njsResultSet_getFetchArraySize);
-static NJS_NAPI_GETTER(njsResultSet_getMetaData);
-static NJS_NAPI_GETTER(njsResultSet_getNestedCursorIndices);
-
 // finalize
 static NJS_NAPI_FINALIZE(njsResultSet_finalize);
 
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
-    { "_close", NULL, njsResultSet_close, NULL, NULL, NULL,
+    { "close", NULL, njsResultSet_close, NULL, NULL, NULL, napi_default,
+            NULL },
+    { "getMetaData", NULL, njsResultSet_getMetaData, NULL, NULL, NULL,
             napi_default, NULL },
-    { "_getRows", NULL, njsResultSet_getRows, NULL, NULL, NULL,
-            napi_default, NULL },
-    { "_fetchArraySize", NULL, NULL, njsResultSet_getFetchArraySize, NULL,
-            NULL, napi_default, NULL },
-    { "_nestedCursorIndices", NULL, NULL, njsResultSet_getNestedCursorIndices,
-            NULL, NULL, napi_default, NULL },
-    { "metaData", NULL, NULL, njsResultSet_getMetaData, NULL, NULL,
-            napi_default, NULL },
+    { "getRows", NULL, njsResultSet_getRows, NULL, NULL, NULL, napi_default,
+            NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
 
 // class definition
 const njsClassDef njsClassDefResultSet = {
-    "ResultSet", sizeof(njsResultSet), njsResultSet_finalize,
+    "ResultSetImpl", sizeof(njsResultSet), njsResultSet_finalize,
     njsClassProperties, false
 };
 
 // other methods used internally
 static bool njsResultSet_check(njsResultSet *rs, njsBaton *baton);
-static bool njsResultSet_getRowsHelper(njsResultSet *rs, njsBaton *baton,
-        bool *moreRows);
-static bool njsResultSet_makeUniqueColumnNames(napi_env env, njsBaton *baton,
-        njsVariable *queryVars, uint32_t numQueryVars);
 
 //-----------------------------------------------------------------------------
 // njsResultSet_check()
@@ -149,59 +137,20 @@ static void njsResultSet_finalize(napi_env env, void *finalizeData,
 
 
 //-----------------------------------------------------------------------------
-// njsResultSet_getFetchArraySize()
-//   Get accessor of "_fetchArraySize" property.
-//-----------------------------------------------------------------------------
-static napi_value njsResultSet_getFetchArraySize(napi_env env,
-        napi_callback_info info)
-{
-    njsResultSet *rs;
-
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &rs))
-        return NULL;
-    return njsUtils_convertToUnsignedInt(env, rs->fetchArraySize);
-}
-
-
-//-----------------------------------------------------------------------------
 // njsResultSet_getMetaData()
 //   Get accessor of "metaData" property.
 //-----------------------------------------------------------------------------
-static napi_value njsResultSet_getMetaData(napi_env env,
-        napi_callback_info info)
+NJS_NAPI_METHOD_IMPL_SYNC(njsResultSet_getMetaData, 0, NULL)
 {
-    napi_value metadata;
-    njsResultSet *rs;
+    njsResultSet *rs = (njsResultSet*) callingInstance;
 
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &rs))
-        return NULL;
-    if (!rs->handle || !rs->conn->handle)
-        return NULL;
-    if (!njsVariable_getMetadataMany(rs->queryVars, rs->numQueryVars,
-            env, &metadata))
-        return NULL;
-    return metadata;
-}
+    if (rs->handle && rs->conn->handle) {
+        if (!njsVariable_getMetadataMany(rs->queryVars, rs->numQueryVars, env,
+                returnValue))
+            return false;
+    }
 
-
-//-----------------------------------------------------------------------------
-// njsResultSet_getNestedCursorIndices()
-//   Get accessor of "_nestedCursorIndices" property.
-//-----------------------------------------------------------------------------
-static napi_value njsResultSet_getNestedCursorIndices(napi_env env,
-        napi_callback_info info)
-{
-    napi_value indices;
-    njsResultSet *rs;
-
-    if (!njsUtils_validateGetter(env, info, NULL, (njsBaseInstance**) &rs))
-        return NULL;
-    if (!rs->handle || !rs->conn->handle)
-        return NULL;
-    if (!njsVariable_getNestedCursorIndices(rs->queryVars, rs->numQueryVars,
-            env, &indices))
-        return NULL;
-    return indices;
+    return true;
 }
 
 
@@ -211,10 +160,8 @@ static napi_value njsResultSet_getNestedCursorIndices(napi_env env,
 //
 // PARAMETERS
 //   - max number of rows to fetch at this time
-//   - should the result set be closed after the fetch has completed?
-//   - should the result set be closed after all rows have been fetched?
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_ASYNC(njsResultSet_getRows, 3, NULL)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsResultSet_getRows, 1, NULL)
 {
     njsResultSet *rs = (njsResultSet*) baton->callingInstance;
 
@@ -234,11 +181,6 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsResultSet_getRows, 3, NULL)
         return false;
     if (baton->fetchArraySize == 0)
         return njsUtils_throwError(env, errInvalidParameterValue, 1);
-    if (!njsUtils_getBoolArg(env, args, 1, &baton->closeOnFetch))
-        return false;
-    if (!njsUtils_getBoolArg(env, args, 2, &baton->closeOnAllRowsFetched))
-        return false;
-    baton->outFormat = rs->outFormat;
 
     return njsBaton_queueWork(baton, env, "GetRows", njsResultSet_getRowsAsync,
             njsResultSet_getRowsPostAsync, returnValue);
@@ -252,108 +194,8 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsResultSet_getRows, 3, NULL)
 static bool njsResultSet_getRowsAsync(njsBaton *baton)
 {
     njsResultSet *rs = (njsResultSet*) baton->callingInstance;
-    bool moreRows = false, ok;
-
-    // after rows have been fetched, the JavaScript layer may have requested
-    // that the result set be closed automatically; this occurs if all of the
-    // rows are being fetched by the JavaScript library and one of the
-    // following three situations occurs:
-    //   (1) no further rows are available,
-    //   (2) an error has taken place or
-    //   (3) when a maximum number of rows has been specified and this fetch
-    //       will either satisfy that request or not enough rows are available
-    //       to satisfy that request
-    ok = njsResultSet_getRowsHelper(rs, baton, &moreRows);
-    if (baton->closeOnFetch ||
-            ((!ok || !moreRows) && baton->closeOnAllRowsFetched)) {
-        dpiStmt_release(rs->handle);
-        rs->handle = NULL;
-    }
-
-    return ok;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsResultSet_getRowsPostAsync()
-//   Defines the value returned to JS.
-//-----------------------------------------------------------------------------
-static bool njsResultSet_getRowsPostAsync(njsBaton *baton, napi_env env,
-        napi_value *result)
-{
-    njsResultSet *rs = (njsResultSet*) baton->callingInstance;
-    napi_value rowObj, colObj;
-    uint32_t row, col, i;
     njsVariable *var;
-
-    // set JavaScript values to simplify creation of returned objects
-    if (!njsBaton_setJsValues(baton, env))
-        return false;
-
-    // if outFormat is OBJECT, create names for each of the variables
-    if (rs->outFormat == NJS_ROWS_OBJECT) {
-        for (col = 0; col < rs->numQueryVars; col++) {
-            var = &rs->queryVars[col];
-            NJS_CHECK_NAPI(env, napi_create_string_utf8(env, var->name,
-                    var->nameLength, &var->jsName))
-        }
-    }
-
-    // create array
-    NJS_CHECK_NAPI(env, napi_create_array_with_length(env, baton->rowsFetched,
-            result))
-
-    // process each row
-    for (row = 0; row < baton->rowsFetched; row++) {
-
-        // create row, either as an array or an object
-        if (rs->outFormat == NJS_ROWS_ARRAY) {
-            NJS_CHECK_NAPI(env, napi_create_array_with_length(env,
-                    rs->numQueryVars, &rowObj))
-        } else {
-            NJS_CHECK_NAPI(env, napi_create_object(env, &rowObj))
-        }
-
-        // process each column
-        for (col = 0; col < rs->numQueryVars; col++) {
-            var = &rs->queryVars[col];
-            if (!njsVariable_getScalarValue(var, rs->conn, var->buffer, row,
-                    baton, env, &colObj))
-                return false;
-            if (rs->outFormat == NJS_ROWS_ARRAY) {
-                NJS_CHECK_NAPI(env, napi_set_element(env, rowObj, col, colObj))
-            } else {
-                NJS_CHECK_NAPI(env, napi_set_property(env, rowObj, var->jsName,
-                        colObj))
-            }
-        }
-        NJS_CHECK_NAPI(env, napi_set_element(env, *result, row, rowObj))
-
-    }
-
-    // clear variables if result set was closed
-    if (!rs->handle && !rs->isNested) {
-        for (i = 0; i < rs->numQueryVars; i++)
-            njsVariable_free(&rs->queryVars[i]);
-        free(rs->queryVars);
-        rs->queryVars = NULL;
-        rs->numQueryVars = 0;
-    }
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsResultSet_getRowsHelper()
-//   Get rows from the result set and indicate if more rows are available to
-// fetch or not.
-//-----------------------------------------------------------------------------
-static bool njsResultSet_getRowsHelper(njsResultSet *rs, njsBaton *baton,
-        bool *moreRows)
-{
-    njsVariable *var;
-    int tempMoreRows;
+    int moreRows;
     uint32_t i;
 
     // create ODPI-C variables, if necessary
@@ -391,19 +233,63 @@ static bool njsResultSet_getRowsHelper(njsResultSet *rs, njsBaton *baton,
 
     // perform fetch
     if (dpiStmt_fetchRows(rs->handle, baton->fetchArraySize,
-            &baton->bufferRowIndex, &baton->rowsFetched, &tempMoreRows) < 0)
+            &baton->bufferRowIndex, &baton->rowsFetched, &moreRows) < 0)
         return njsBaton_setErrorDPI(baton);
-    *moreRows = (bool) tempMoreRows;
 
-    // result sets that should be auto closed are closed if the result set
-    // is exhaused or the maximum number of rows has been fetched
-    if (*moreRows && baton->maxRows > 0) {
-        if (baton->rowsFetched == baton->maxRows) {
-            *moreRows = 0;
-        }
-    }
     return njsVariable_process(rs->queryVars, rs->numQueryVars,
             baton->rowsFetched, baton);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsResultSet_getRowsPostAsync()
+//   Defines the value returned to JS.
+//-----------------------------------------------------------------------------
+static bool njsResultSet_getRowsPostAsync(njsBaton *baton, napi_env env,
+        napi_value *result)
+{
+    njsResultSet *rs = (njsResultSet*) baton->callingInstance;
+    napi_value rowObj, colObj;
+    uint32_t row, col, i;
+    njsVariable *var;
+
+    // set JavaScript values to simplify creation of returned objects
+    if (!njsBaton_setJsValues(baton, env))
+        return false;
+
+    // create array
+    NJS_CHECK_NAPI(env, napi_create_array_with_length(env, baton->rowsFetched,
+            result))
+
+    // process each row
+    for (row = 0; row < baton->rowsFetched; row++) {
+
+        // create row
+        NJS_CHECK_NAPI(env, napi_create_array_with_length(env,
+                rs->numQueryVars, &rowObj))
+
+        // process each column
+        for (col = 0; col < rs->numQueryVars; col++) {
+            var = &rs->queryVars[col];
+            if (!njsVariable_getScalarValue(var, rs->conn, var->buffer, row,
+                    baton, env, &colObj))
+                return false;
+            NJS_CHECK_NAPI(env, napi_set_element(env, rowObj, col, colObj))
+        }
+        NJS_CHECK_NAPI(env, napi_set_element(env, *result, row, rowObj))
+
+    }
+
+    // clear variables if result set was closed
+    if (!rs->handle && !rs->isNested) {
+        for (i = 0; i < rs->numQueryVars; i++)
+            njsVariable_free(&rs->queryVars[i]);
+        free(rs->queryVars);
+        rs->queryVars = NULL;
+        rs->numQueryVars = 0;
+    }
+
+    return true;
 }
 
 
@@ -444,83 +330,8 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
     rs->conn = conn;
     rs->numQueryVars = numVars;
     rs->queryVars = vars;
-    rs->outFormat = baton->outFormat;
     rs->fetchArraySize = baton->fetchArraySize;
-    rs->outFormat = baton->outFormat;
     rs->isNested = (baton->callingInstance != (void*) conn);
 
-    return true;
-}
-
-
-//----------------------------------------------------------------------------
-// njsResultSet_makeUniqueColumnNames()
-//  Check for duplicate column names, and append "_xx" to make names unique
-//
-// Parameters
-//   env          - napi env variable
-//   baton        - baton structure
-//   queryVars    - njsVariables struct for Query SQLs
-//   numQueryVars - number of Query Variables
-//---------------------------------------------------------------------------
-bool njsResultSet_makeUniqueColumnNames(napi_env env, njsBaton *baton,
-        njsVariable *queryVars, uint32_t numQueryVars)
-{
-    char tempName[NJS_MAX_COL_NAME_BUFFER_LENGTH];
-    uint32_t tempNum, col, index;
-    napi_value tempObj, colObj;
-    size_t tempNameLength;
-    bool exists;
-
-    // First loop creates a napi-object(hash table) with unique column name &
-    // column number first appeared for later use.
-    NJS_CHECK_NAPI(env, napi_create_object(env, &tempObj))
-    for (col = 0; col < numQueryVars; col ++) {
-        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, queryVars[col].name,
-                queryVars[col].nameLength, &queryVars[col].jsName))
-
-        NJS_CHECK_NAPI(env, napi_has_own_property(env, tempObj,
-                queryVars[col].jsName, &exists))
-        if (!exists) {
-            NJS_CHECK_NAPI(env, napi_create_uint32(env, col, &colObj))
-            NJS_CHECK_NAPI(env, napi_set_property(env, tempObj,
-                    queryVars[col].jsName, colObj))
-        }
-    }
-
-    // Second loop looks for the current column name in the napi-object,
-    // if exists and column number is different, (then it is duplicate),
-    // tries to compose a name to resolve the duplicate name.
-    // The composed name is also checked in the napi-object before updating
-    // to make sure there are no conflicts.
-    for (col = 0; col < numQueryVars; col ++) {
-        NJS_CHECK_NAPI(env, napi_get_property(env, tempObj,
-                queryVars[col].jsName, &colObj))
-        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, colObj, &index))
-
-        if (index != col) {
-            exists = true;
-            tempNum = 0;
-            while (exists) {
-                tempNameLength = (size_t) snprintf(tempName, sizeof (tempName),
-                        "%.*s_%d", (int)queryVars[col].nameLength,
-                        queryVars[col].name, ++tempNum);
-                if (tempNameLength > (sizeof(tempName) - 1))
-                    tempNameLength = sizeof(tempName) - 1;
-
-                NJS_CHECK_NAPI(env, napi_create_string_utf8(env, tempName,
-                        tempNameLength, &queryVars[col].jsName))
-                NJS_CHECK_NAPI(env, napi_has_property(env, tempObj,
-                        queryVars[col].jsName, &exists))
-            }
-            if (!njsUtils_copyStringFromJS(env, queryVars[col].jsName,
-                    &queryVars[col].name, &queryVars[col].nameLength))
-                return false;
-
-            NJS_CHECK_NAPI(env, napi_create_uint32(env, col, &colObj))
-            NJS_CHECK_NAPI(env, napi_set_property(env, tempObj,
-                    queryVars[col].jsName, colObj))
-        }
-    }
     return true;
 }
