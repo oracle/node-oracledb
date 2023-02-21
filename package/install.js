@@ -27,10 +27,12 @@
  *
  * DESCRIPTION
  *   This script is included in the npm bundle of node-oracledb.  It
- *   is invoked by package.json during npm install.
+ *   is invoked by package.json during npm install to check the viability
+ *   of the installation.
  *
  * MAINTENANCE NOTES
- *   This file should only ever 'require' packages included in core Node.js.
+ *   This file should only ever 'require' packages included in core Node.js
+ *   or that are part of node-oracledb.
  *
  *****************************************************************************/
 
@@ -38,6 +40,11 @@
 
 const fs = require('fs');
 const nodbUtil = require('../lib/util.js');
+const errors = require('../lib/errors.js');
+
+let installUrl = 'https://oracle.github.io/node-oracledb/INSTALL.html';
+let arch;
+let thickModeErrMsg;
 
 // Log standard output with an 'oracledb' prefix
 function log(message) { // eslint-disable-line
@@ -53,64 +60,77 @@ function error(message) { // eslint-disable-line
   console.error.apply(console, args);
 }
 
-// Print concluding messages and quit
-function done(err) {
-  let installUrl = 'https://oracle.github.io/node-oracledb/INSTALL.html';
-
-  if (err) { // Couldn't install the binary
-    error(err.message);
-    if (err.message.match(/^NJS-067/)) {
-      error('Try compiling node-oracledb source code using ' + installUrl + '#github');
-    } else if (err.message.match(/^NJS-069/)) {
-      error('An older node-oracledb version may work with Node.js ' + process.version);
-    }
-    process.exit(87);
-  } else { // Successfully installed
-    let arch;
-
-    if (process.arch === 'x64') {
-      arch = '64-bit';
-    } else {
-      arch = '32-bit';
-    }
-
-    if (process.platform === 'linux') {
-      installUrl += '#linuxinstall';
-    } else if (process.platform === 'darwin') {
-      installUrl += '#instosx';
-    } else if (process.platform === 'win32') {
-      installUrl += '#windowsinstallation';
-    }
-
-    log('********************************************************************************');
-    log('** Node-oracledb ' + nodbUtil.PACKAGE_JSON_VERSION + ' installed in Node.js ' + process.versions.node + ' (' + process.platform + ', ' + process.arch + ')');
-    log('**');
-    log('** To use node-oracledb:');
-    log('** - Oracle Client libraries (' + arch + ') must be available.');
-    log('** - Follow the installation instructions:');
-    log('**   ' + installUrl);
-    log('********************************************************************************\n');
-  }
+// Log warnings. It combines 'oracledb' with a stylized 'WARN' prefix
+function warn(message) { // eslint-disable-line
+  const args = Array.from(arguments);
+  args.unshift('oracledb \x1b[31mWARN!\x1b[0m');
+  console.error.apply(console, args);
 }
 
-// Check for a usable binary file for the node-oracledb module with this version of Node.js.
-// Node.js 14 (Node-API 6), or later, is usable.
-// Note that the checked version(s) are the minimum required for Node-API
-// compatibility; as new Node.js versions are released, older Node.js versions
-// are dropped from the node-oracledb test plan.
-
-function checkAvailable(cb) {
-  let vs = process.version.substring(1).split(".").map(Number);
+// Check for the minimum version of Node.js.
+// Version 14 (with Node-API 6), or later, is usable.
+// Note that the checked version is the minimum required for Node-API
+// compatibility.  When new Node.js versions are released, older Node.js
+// versions are dropped from the node-oracledb test plan.
+function checkVersion() {
+  const vs = process.version.substring(1).split(".").map(Number);
   if (vs[0] < 14) {
-    cb(new Error(nodbUtil.getErrorMessage('NJS-069', nodbUtil.PACKAGE_JSON_VERSION, "14")));
-  } else {
-    try {
-      fs.statSync(nodbUtil.RELEASE_DIR + '/' + nodbUtil.BINARY_FILE);
-      cb();
-    } catch (err) {
-      cb(new Error(nodbUtil.getErrorMessage('NJS-067', process.platform + ' ' + process.arch)));
-    }
+    errors.throwErr(errors.ERR_NODE_TOO_OLD, nodbUtil.PACKAGE_JSON_VERSION, "14.0");
   }
 }
 
-checkAvailable(done);
+// Check for the binary node-oracledb module needed for "Thick mode".
+// If one isn't available, only Thin mode can be used.
+function checkThickMode() {
+  try {
+    fs.statSync(nodbUtil.RELEASE_DIR + '/' + nodbUtil.BINARY_FILE);
+  } catch (err) {
+    errors.throwErr(errors.ERR_NO_BINARY_AVAILABLE, process.platform + ' ' + process.arch);
+  }
+}
+
+try {
+  checkVersion();
+} catch (err) {
+  // This version of Node.js is too old
+  error(err.message);
+  error('An older node-oracledb version may work with Node.js ' + process.version);
+  process.exit(87);
+}
+
+try {
+  checkThickMode();
+} catch (err) {
+  // No Thick mode binary was found for this platform
+  thickModeErrMsg = err.message;
+}
+
+// Successfully installed
+
+if (process.arch === 'x64' || process.arch === 'arm64') {
+  arch = '64-bit';
+} else {
+  arch = '32-bit';
+}
+
+if (process.platform === 'linux') {
+  installUrl += '#linuxinstall';
+} else if (process.platform === 'darwin') {
+  installUrl += '#instosx';
+} else if (process.platform === 'win32') {
+  installUrl += '#windowsinstallation';
+}
+
+log('********************************************************************************');
+log('** Node-oracledb ' + nodbUtil.PACKAGE_JSON_VERSION + ' installed in Node.js ' + process.versions.node + ' (' + process.platform + ', ' + process.arch + ')');
+log('** To use node-oracledb in Thin mode, no additional steps are needed.');
+if (thickModeErrMsg) {
+  warn(thickModeErrMsg);
+  warn('If you want to use the optional Thick mode, compile node-oracledb code using');
+  warn(installUrl + '#github');
+} else {
+  log('** To use the optional Thick mode, the Oracle Client libraries (' + arch + ')');
+  log('** must be available, see the installation instructions:');
+  log('**   ' + installUrl);
+}
+log('********************************************************************************\n');

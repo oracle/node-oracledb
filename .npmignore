@@ -35,3 +35,4 @@ Makefile.win32
 /odpi/.github
 /odpi/.gitattributes
 /odpi/util
+\#*
