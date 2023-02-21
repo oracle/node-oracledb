@@ -34,7 +34,7 @@
 const oracledb  = require('oracledb');
 const should    = require('should');
 const events    = require('events');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('224. cqn01.js', function() {
@@ -45,7 +45,7 @@ describe('224. cqn01.js', function() {
   before(async function() {
 
     const prep = await testsUtil.checkPrerequisites(1904000000, 1904000000);
-    isRunnable = prep && dbconfig.test.DBA_PRIVILEGE;
+    isRunnable = prep && dbConfig.test.DBA_PRIVILEGE;
 
     if (!isRunnable) {
       this.skip();
@@ -55,18 +55,18 @@ describe('224. cqn01.js', function() {
       try {
 
         let credential = {
-          user:          dbconfig.test.DBA_user,
-          password:      dbconfig.test.DBA_password,
-          connectString: dbconfig.connectString,
+          user:          dbConfig.test.DBA_user,
+          password:      dbConfig.test.DBA_password,
+          connectString: dbConfig.connectString,
           privilege:     oracledb.SYSDBA
         };
         connAsDBA = await oracledb.getConnection(credential);
 
-        let sql = `GRANT CHANGE NOTIFICATION TO ${dbconfig.user}`;
+        let sql = `GRANT CHANGE NOTIFICATION TO ${dbConfig.user}`;
         await connAsDBA.execute(sql);
 
         conn = await oracledb.getConnection({
-          ...dbconfig,
+          ...dbConfig,
           events: true
         });
 
@@ -82,7 +82,7 @@ describe('224. cqn01.js', function() {
       return;
     } else {
       try {
-        let sql = `REVOKE CHANGE NOTIFICATION FROM ${dbconfig.user}`;
+        let sql = `REVOKE CHANGE NOTIFICATION FROM ${dbConfig.user}`;
         await connAsDBA.execute(sql);
 
         await conn.close();
@@ -108,7 +108,7 @@ describe('224. cqn01.js', function() {
         // should.strictEqual(message.type, oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE);
         // should.strictEqual(message.registered, true);
         // const table = message.queries[0].tables[0];
-        // const tableName = dbconfig.user.toUpperCase() + '.' + TABLE.toUpperCase();
+        // const tableName = dbConfig.user.toUpperCase() + '.' + TABLE.toUpperCase();
         // should.strictEqual(table.name, tableName);
         // should.strictEqual(table.operation, oracledb.CQN_OPCODE_INSERT);
         console.log(message);
@@ -175,7 +175,7 @@ describe('224. cqn01.js', function() {
         // should.strictEqual(message.type, oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE);
         // should.strictEqual(message.registered, true);
         // const table = message.queries[0].tables[0];
-        // const tableName = dbconfig.user.toUpperCase() + '.' + TABLE.toUpperCase();
+        // const tableName = dbConfig.user.toUpperCase() + '.' + TABLE.toUpperCase();
         // should.strictEqual(table.name, tableName);
         // should.strictEqual(table.operation, oracledb.CQN_OPCODE_INSERT);
         console.log(message);

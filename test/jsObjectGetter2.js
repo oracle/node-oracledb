@@ -34,7 +34,7 @@
 
 const oracledb = require('oracledb');
 const should   = require('should');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 
 describe('171. jsObjectGetter2.js', () => {
 
@@ -75,7 +75,7 @@ describe('171. jsObjectGetter2.js', () => {
   it.skip('171.3 data bind', async () => {
     let conn;
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
 
       let tableName = "nodb_tab_171_3";
       let proc = "BEGIN \n" +

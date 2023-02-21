@@ -33,7 +33,7 @@
 
 const oracledb = require('oracledb');
 const assert    = require('assert');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 const sodaUtil = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -50,7 +50,7 @@ describe('177. soda9.js', () => {
   });
 
   it('177.1 insertOne() with a document content', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_177_1");
     const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
@@ -68,7 +68,7 @@ describe('177. soda9.js', () => {
   }); // 177.1
 
   it('177.2 insertOne() with a document', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_177_2");
     const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
@@ -87,7 +87,7 @@ describe('177. soda9.js', () => {
   }); // 177.2
 
   it('177.3 insertOneAndGet() with a document content', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_177_3");
 
@@ -109,7 +109,7 @@ describe('177. soda9.js', () => {
   }); // 177.3
 
   it('177.4 insertOneAndGet() with a document', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_177_4");
 
@@ -133,7 +133,7 @@ describe('177. soda9.js', () => {
 
   it('177.5 createDocument() followd by getContent() i.e. without being inserted', async () => {
 
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
 
     const inContent = { id: 2000, name: "Paul",  office: "Singapore" };

@@ -34,7 +34,7 @@
 
 const oracledb = require('oracledb');
 const should   = require('should');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -46,9 +46,7 @@ describe('170. poolDrain.js', () => {
   });
 
   const settings = {
-    user: dbconfig.user,
-    password: dbconfig.password,
-    connectString: dbconfig.connectString,
+    ...dbConfig,
     poolMin: 1,
     poolMax: 5,
     poolIncrement: 1
@@ -165,9 +163,7 @@ describe('170. poolDrain.js', () => {
   it('170.8 works with poolAlias', async () => {
     try {
       let cred = {
-        user: dbconfig.user,
-        password: dbconfig.password,
-        connectString: dbconfig.connectString,
+        ...dbConfig,
         poolAlias: 'nodb_pool_alias'
       };
       let pool = await oracledb.createPool(cred);
@@ -181,9 +177,7 @@ describe('170. poolDrain.js', () => {
   it('170.9 works with and without poolAlias', async () => {
     try {
       let cred = {
-        user: dbconfig.user,
-        password: dbconfig.password,
-        connectString: dbconfig.connectString,
+        ...dbConfig,
         poolAlias: 'nodb_pool_alias'
       };
       let pool_1 = await oracledb.createPool(cred);
@@ -302,9 +296,7 @@ describe('170. poolDrain.js', () => {
     try {
       let pool_1 = await oracledb.createPool(settings);
       let cred = {
-        user: dbconfig.user,
-        password: dbconfig.password,
-        connectString: dbconfig.connectString,
+        ...dbConfig,
         poolAlias: 'nodb_pool_15'
       };
       let pool_2 = await oracledb.createPool(cred);

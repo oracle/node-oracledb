@@ -37,17 +37,11 @@ const dbConfig = require('./dbconfig.js');
 
 describe('44. plsqlBindIndexedTable2.js', function() {
 
-  const credentials = {
-    user:          dbConfig.user,
-    password:      dbConfig.password,
-    connectString: dbConfig.connectString
-  };
-
   let connection;
 
   beforeEach(async function() {
 
-    connection = await  oracledb.getConnection(credentials);
+    connection = await  oracledb.getConnection(dbConfig);
 
     let proc =  "BEGIN \n" +
                     "  DECLARE \n" +

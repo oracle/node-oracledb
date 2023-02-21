@@ -169,11 +169,8 @@ describe('248. userName.js', function() {
     }); // 248.1.5
 
     it('248.1.6 negative test: username = "null"', async function() {
-      const credential = {
-        username     : "null",
-        password     : dbConfig.password,
-        connectString: dbConfig.connectString
-      };
+      const credential = {...dbConfig, username: "null"};
+      delete credential.user;
       await assert.rejects(
         async () => {
           await oracledb.getConnection(credential);
@@ -183,11 +180,10 @@ describe('248. userName.js', function() {
     }); // 248.1.6
 
     it('248.1.7 negative test: username = undefined', async function() {
-      const credential = {
-        username     : undefined,
-        password     : dbConfig.password,
-        connectString: dbConfig.connectString
-      };
+      const credential = {...dbConfig};
+      delete credential.user;
+      credential.username = undefined;
+
       await assert.rejects(
         async () => {
           await oracledb.getConnection(credential);
@@ -197,11 +193,10 @@ describe('248. userName.js', function() {
     }); // 248.1.7
 
     it('248.1.8 negative test: username = "undefined"', async function() {
-      const credential = {
-        username     : "undefined",
-        password     : dbConfig.password,
-        connectString: dbConfig.connectString
-      };
+      const credential = {...dbConfig};
+      delete credential.user;
+      credential.username = "undefined";
+
       await assert.rejects(
         async () => {
           await oracledb.getConnection(credential);
@@ -211,11 +206,10 @@ describe('248. userName.js', function() {
     }); // 248.1.8
 
     it('248.1.9 negative test: username = empty string', async function() {
-      const credential = {
-        username     : "",
-        password     : dbConfig.password,
-        connectString: dbConfig.connectString
-      };
+      const credential = {...dbConfig};
+      delete credential.user;
+      credential.username = '';
+
       await assert.rejects(
         async () => {
           await oracledb.getConnection(credential);
@@ -225,11 +219,10 @@ describe('248. userName.js', function() {
     }); // 248.1.9
 
     it('248.1.10 negative test: username = NaN', async function() {
-      const credential = {
-        username     : NaN,
-        password     : dbConfig.password,
-        connectString: dbConfig.connectString
-      };
+      const credential = {...dbConfig};
+      delete credential.user;
+      credential.username = NaN;
+
       await assert.rejects(
         async () => {
           await oracledb.getConnection(credential);
@@ -239,11 +232,10 @@ describe('248. userName.js', function() {
     }); // 248.1.10
 
     it('248.1.11 negative test: username in array', async function() {
-      const credential = {
-        username     : ["scott", "scott"],
-        password     : dbConfig.password,
-        connectString: dbConfig.connectString
-      };
+      const credential = {...dbConfig};
+      delete credential.user;
+      credential.username = ["scott", "scott"];
+
       await assert.rejects(
         async () => {
           await oracledb.getConnection(credential);
@@ -262,12 +254,10 @@ describe('248. userName.js', function() {
       const userSchema = await assist.createSchemaString(30);
       const password = "Welcome";
       await createUser(userSchema, password);
-
-      const credential = {
-        username     : userSchema,
-        password     : password,
-        connectString: dbConfig.connectString
-      };
+      const credential = {...dbConfig};
+      delete credential.user;
+      credential.username = userSchema;
+      credential.password = password;
 
       const conn = await oracledb.getConnection(credential);
       assert(conn);
@@ -356,12 +346,10 @@ describe('248. userName.js', function() {
       );
     }); // 248.2.5
 
-    it('248.2.6 negative test: username = "null"', async function() {
-      const credential = {
-        user         : "null",
-        password     : dbConfig.password,
-        connectString: dbConfig.connectString
-      };
+    it('248.2.6 negative test: user = "null"', async function() {
+      const credential = {...dbConfig};
+      credential.user = "null";
+
       await assert.rejects(
         async () => {
           await oracledb.getConnection(credential);
@@ -371,11 +359,9 @@ describe('248. userName.js', function() {
     }); // 248.2.6
 
     it('248.2.7 negative test: username = undefined', async function() {
-      const credential = {
-        user         : undefined,
-        password     : dbConfig.password,
-        connectString: dbConfig.connectString
-      };
+      const credential = {...dbConfig};
+      credential.user = undefined;
+
       await assert.rejects(
         async () => {
           await oracledb.getConnection(credential);
@@ -385,11 +371,9 @@ describe('248. userName.js', function() {
     }); // 248.2.7
 
     it('248.2.8 negative test: username = "undefined"', async function() {
-      const credential = {
-        user         : "undefined",
-        password     : dbConfig.password,
-        connectString: dbConfig.connectString
-      };
+      const credential = {...dbConfig};
+      credential.user = "undefined";
+
       await assert.rejects(
         async () => {
           await oracledb.getConnection(credential);
@@ -399,11 +383,9 @@ describe('248. userName.js', function() {
     }); // 248.2.8
 
     it('248.2.9 negative test: username = empty string', async function() {
-      const credential = {
-        user         : "",
-        password     : dbConfig.password,
-        connectString: dbConfig.connectString
-      };
+      const credential = {...dbConfig};
+      credential.user = "";
+
       await assert.rejects(
         async () => {
           await oracledb.getConnection(credential);

@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('241. dbType04.js', function() {
@@ -45,7 +45,7 @@ describe('241. dbType04.js', function() {
 
   before(async function() {
 
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
 
     if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
       isRunnable = true;

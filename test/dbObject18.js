@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('242. dbObject18.js', () => {
@@ -243,7 +243,7 @@ describe('242. dbObject18.js', () => {
       // Default value of oracledb.dbObjectAsPojo should be false
       assert.strictEqual(oracledb.dbObjectAsPojo, false);
 
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
 
       let sql = `
         CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
@@ -329,7 +329,7 @@ describe('242. dbObject18.js', () => {
       // set oracledb.dbObjectAsPojo
       oracledb.dbObjectAsPojo = true;
 
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
 
       let sql = `
         CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
@@ -439,7 +439,7 @@ describe('242. dbObject18.js', () => {
       // DPI-1010: not connected
 
       // restore the connection
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
 
     }); // 242.3.2
 
@@ -458,7 +458,7 @@ describe('242. dbObject18.js', () => {
       // set oracledb.dbObjectAsPojo
       oracledb.dbObjectAsPojo = true;
 
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
 
       let sql = `
         CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
@@ -560,7 +560,7 @@ describe('242. dbObject18.js', () => {
       // console.dir(row.TEAM, { depth: null });
 
       // restore the connection
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
 
     }); // 242.4.2
 

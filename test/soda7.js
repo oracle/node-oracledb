@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -52,7 +52,7 @@ describe('175. soda7.js', () => {
   });
 
   it('175.1 count(), basic case', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     let soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_1");
 
@@ -74,7 +74,7 @@ describe('175. soda7.js', () => {
   }); // 175.1
 
   it('175.2 Negative - skip().count()', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_2");
 
@@ -99,7 +99,7 @@ describe('175. soda7.js', () => {
   }); // 175.2
 
   it('175.3 Negative - limit().count()', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_3");
 
@@ -124,7 +124,7 @@ describe('175. soda7.js', () => {
   }); // 175.3
 
   it('175.4 keys().count()', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_4");
 
@@ -148,7 +148,7 @@ describe('175. soda7.js', () => {
   }); // 175.4
 
   it('175.5 getCursor(), basic case', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_5");
 
@@ -186,7 +186,7 @@ describe('175. soda7.js', () => {
   }); // 175.5
 
   it('175.6 skip().getCursor()', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_6");
 
@@ -223,7 +223,7 @@ describe('175. soda7.js', () => {
   }); // 175.6
 
   it('175.7 getCursor(), empty document matched', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_7");
 
@@ -249,7 +249,7 @@ describe('175. soda7.js', () => {
   }); // 175.7
 
   it('175.8 Negative - close document cursor two times', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_8");
 
@@ -291,7 +291,7 @@ describe('175. soda7.js', () => {
   }); // 175.8
 
   it('175.9 getDocuments(), basic case', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_9");
 
@@ -319,7 +319,7 @@ describe('175. soda7.js', () => {
   }); // 175.9
 
   it('175.10 getDocuments(), no documents matched', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_10");
 
@@ -333,7 +333,7 @@ describe('175. soda7.js', () => {
   }); // 175.10
 
   it('175.11 getOne(), basic case', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_11");
 
@@ -356,7 +356,7 @@ describe('175. soda7.js', () => {
   }); // 175.11
 
   it('175.12 getOne(), the filter matches multiple documents', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_12");
 
@@ -378,7 +378,7 @@ describe('175. soda7.js', () => {
   }); // 175.12
 
   it('175.13 remove(), basic case', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_13");
 
@@ -406,7 +406,7 @@ describe('175. soda7.js', () => {
   }); // 175.13
 
   it('175.14 remove(), remove zero document', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_14");
 
@@ -434,7 +434,7 @@ describe('175. soda7.js', () => {
   }); // 175.14
 
   it('175.15 remove(), remove multiple times', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_13");
 

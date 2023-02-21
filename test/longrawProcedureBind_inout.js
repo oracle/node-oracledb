@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -43,6 +43,9 @@ describe('133. longrawProcedureBind_inout.js', function() {
   let connection;
   const tableName = "nodb_longraw_133";
   let insertID = 0;
+  // The NOCOMPRESS option for CREATE TABLE ensures that Hybrid Columnar Compression (HCC) is disabled for tables with LONG and LONG RAW Columns
+  // in all types of Oracle Databases. (Note: HCC is enabled in Oracle ADB-S and ADB-D by default)
+  // When HCC is enabled, Tables with LONG and LONG RAW columns cannot be created.
   const table_create = "BEGIN \n" +
                      "    DECLARE \n" +
                      "        e_table_missing EXCEPTION; \n" +
@@ -57,7 +60,7 @@ describe('133. longrawProcedureBind_inout.js', function() {
                      "        CREATE TABLE " + tableName + " ( \n" +
                      "            id         NUMBER, \n" +
                      "            content    LONG RAW \n" +
-                     "        ) \n" +
+                     "        ) NOCOMPRESS \n" +
                      "    '); \n" +
                      "END; ";
   let table_drop = "DROP TABLE " + tableName + " PURGE";

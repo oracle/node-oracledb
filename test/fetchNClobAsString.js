@@ -35,7 +35,7 @@
 
 const oracledb = require('oracledb');
 const should   = require('should');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 
 describe('251. fetchNClobAsString.js', function() {
   let conn = null;
@@ -74,7 +74,7 @@ describe('251. fetchNClobAsString.js', function() {
     stmtCacheSize = oracledb.stmtCacheSize;
     oracledb.stmtCacheSize = 0;  // varying define types used for same SQL
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       await conn.execute(create_table_sql);
       await conn.execute(insert_sql, [rowID, cValue, ncValue]);
     } catch (err) {

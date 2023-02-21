@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('209. dbObject10.js', () => {
@@ -44,7 +44,7 @@ describe('209. dbObject10.js', () => {
   const t_idno = 65;
 
   before(async () => {
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
 
     let plsql = `
       CREATE OR REPLACE TYPE ${TYPE} AS OBJECT (
@@ -105,7 +105,7 @@ describe('209. dbObject10.js', () => {
     const result = await conn.execute(`SELECT contact FROM ${TABLE}`);
     const dbObj = result.rows[0][0];
 
-    let expect = `[object ${dbconfig.user.toUpperCase()}.${TYPE}]`;
+    let expect = `[object ${dbConfig.user.toUpperCase()}.${TYPE}]`;
     assert.strictEqual(dbObj.toString(), expect);
 
     expect = '[object Object]';
@@ -116,7 +116,7 @@ describe('209. dbObject10.js', () => {
     const result = await conn.execute(`SELECT contact FROM ${TABLE}`);
     const dbObj = result.rows[0][0];
 
-    const schema = dbconfig.user.toUpperCase();
+    const schema = dbConfig.user.toUpperCase();
     let expect = `x[${schema}.NODB_PERSON_TYP] { IDNO: 65, FIRST_NAME: 'Verna',  LAST_NAME: 'Mills',  EMAIL: 'vmills@example.com', PHONE: '1-650-555-0125' }`;
     expect = expect.trim().replace(/[\s\n\r]/g, '');
 

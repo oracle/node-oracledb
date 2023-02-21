@@ -34,7 +34,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('193. connProps.js', function() {
@@ -43,7 +43,7 @@ describe('193. connProps.js', function() {
 
   before(async function() {
     const preps = await testsUtil.checkPrerequisites();
-    if (preps && dbconfig.test.DBA_PRIVILEGE) {
+    if (preps && dbConfig.test.DBA_PRIVILEGE) {
       isRunnable = true;
     }
 
@@ -52,14 +52,14 @@ describe('193. connProps.js', function() {
       return;
     } else {
       const dbaConfig = {
-        user          : dbconfig.test.DBA_user,
-        password      : dbconfig.test.DBA_password,
-        connectString : dbconfig.connectString,
+        user          : dbConfig.test.DBA_user,
+        password      : dbConfig.test.DBA_password,
+        connectString : dbConfig.connectString,
         privilege     : oracledb.SYSDBA,
       };
       const dbaConnection = await oracledb.getConnection(dbaConfig);
 
-      const sql = `GRANT SELECT ANY DICTIONARY TO ${dbconfig.user}`;
+      const sql = `GRANT SELECT ANY DICTIONARY TO ${dbConfig.user}`;
       await dbaConnection.execute(sql);
 
       await dbaConnection.close();
@@ -67,14 +67,14 @@ describe('193. connProps.js', function() {
   }); // before()
 
   it('193.1 the default values of clientInfo and dbOp are null', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     assert.strictEqual(conn.clientInfo, null);
     assert.strictEqual(conn.dbOp, null);
     await conn.close();
   }); // 193.1
 
   it('193.2 clientInfo and dbOp are write-only properties', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     conn.clientInfo = 'nodb_193_2';
     conn.dbOp = 'nodb_193_2';
     assert.strictEqual(conn.clientInfo, null);
@@ -83,7 +83,7 @@ describe('193. connProps.js', function() {
   }); // 193.2
 
   it('193.3 check the results of setter()', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
     const t_clientInfo = "My demo application";
     const t_dbOp       = "Billing";
@@ -118,7 +118,7 @@ describe('193. connProps.js', function() {
   }); // 193.3
 
   it('193.4 Negative - invalid values', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
     // Numeric values
     assert.throws(

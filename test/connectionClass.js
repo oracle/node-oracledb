@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 
 describe('221. connectionClass.js', () => {
 
@@ -43,7 +43,7 @@ describe('221. connectionClass.js', () => {
 
   it('221.1 set the property when using a connection pool', async () => {
     oracledb.connectionClass = 'NODB_TEST';
-    const pool = await oracledb.createPool(dbconfig);
+    const pool = await oracledb.createPool(dbConfig);
     const conn = await pool.getConnection();
 
     const result = await conn.execute('SELECT (1+4) FROM DUAL');
@@ -55,7 +55,7 @@ describe('221. connectionClass.js', () => {
 
   it('221.2 set the property when using a standalone connection', async () => {
     oracledb.connectionClass = 'NODB_TEST';
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     await conn.close();
   }); // 221.2
 });

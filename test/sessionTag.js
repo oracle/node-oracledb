@@ -33,7 +33,7 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 const tag1 = "LANGUAGE=FRENCH";
@@ -51,7 +51,7 @@ async function showConnTags(conn) {
 }
 
 async function truncateTable() {
-  const conn = await oracledb.getConnection(dbconfig);
+  const conn = await oracledb.getConnection(dbConfig);
   try {
     await conn.execute("truncate table plsql_fixup_calls");
   } finally {
@@ -60,7 +60,7 @@ async function truncateTable() {
 }
 
 async function dropTable() {
-  const conn = await oracledb.getConnection(dbconfig);
+  const conn = await oracledb.getConnection(dbConfig);
   try {
     await conn.execute("drop table plsql_fixup_calls");
     await conn.execute("drop package plsql_fixup_test");
@@ -76,7 +76,7 @@ describe('184. sessionTag.js', function() {
 
     if (testsUtil.getClientVersion() < 1202000100) isRunnable = false;
 
-    const connection = await oracledb.getConnection(dbconfig);
+    const connection = await oracledb.getConnection(dbConfig);
     const serverVersion = connection.oracleServerVersion;
     if (serverVersion < 1202000100) isRunnable = false;
     await connection.close();
@@ -87,7 +87,7 @@ describe('184. sessionTag.js', function() {
   describe('184.1 Remote PL/SQL Callback', function() {
 
     before(async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       let sql = "BEGIN \n" +
         "    DECLARE \n" +
         "        e_table_missing EXCEPTION; \n" +
@@ -203,7 +203,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.1.1 Acquire connection without tag', async function() {
       const conn = await oracledb.getConnection({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
       const res = await showConnTags(conn);
@@ -213,7 +213,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.1.2 Acquire connection from pool without tag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
       const conn = await pool.getConnection();
@@ -226,7 +226,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.1.3 Acquire connection from pool with empty string tag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
       const conn = await pool.getConnection({tag: ''});
@@ -239,7 +239,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.1.4 Acquire connection from pool with valid tag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
       const conn = await pool.getConnection({tag: tag1});
@@ -253,7 +253,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.1.5 Acquire connection from pool with error in callback', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: "plsql_fixup_test.set_tag_callback",
       });
       await assert.rejects(
@@ -268,7 +268,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.1.6 Acquire connection from pool twice with same tag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
       let conn = await pool.getConnection({tag: tag1});
@@ -286,7 +286,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.1.7 Acquire connection from pool twice with different tag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
       let conn = await pool.getConnection({tag: tag1});
@@ -305,7 +305,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.1.8 Acquire connection from pool twice with different tag using matchAnyTag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
       let conn = await pool.getConnection({tag: tag1});
@@ -325,7 +325,7 @@ describe('184. sessionTag.js', function() {
     it('184.1.9 Acquire connection from pool twice with different multi-tag using matchAnyTag', async function() {
       if (testsUtil.getClientVersion() < 1202000000) this.skip();
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
       let conn = await pool.getConnection({tag: tag2});
@@ -343,7 +343,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.1.10 Acquire connection from pool twice with empty string tag using matchAnyTag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
       let conn = await pool.getConnection({tag: tag1});
@@ -361,7 +361,7 @@ describe('184. sessionTag.js', function() {
 
     it.skip('184.1.11 Acquire connection from pool twice with first connection\'s tag set to ""', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
       let conn = await pool.getConnection({tag: tag1});
@@ -381,7 +381,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.1.12 Acquire connection from pool twice with different tag after setting first connection\'s tag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
       let conn = await pool.getConnection({tag: tag1});
@@ -456,7 +456,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.2.1 Acquire connection without tag', async function() {
       const conn = await oracledb.getConnection({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
       });
       assert.strictEqual(callbackRequestedTag, null);
@@ -466,7 +466,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.2.2 Acquire connection from pool without tag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
       });
       const conn = await pool.getConnection();
@@ -478,7 +478,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.2.3 Acquire connection from pool with empty string tag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
       });
       const conn = await pool.getConnection({tag: ''});
@@ -492,7 +492,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.2.4 Acquire connection from default pool with valid tag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
       });
       const conn = await oracledb.getConnection({poolAlias: 'default', tag: tag1});
@@ -506,7 +506,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.2.5 Acquire connection from pool with valid tag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
       });
       const conn = await pool.getConnection({tag: tag1});
@@ -518,7 +518,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.2.6 Acquire connection from pool with bad tag using async session callback', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: asyncTagFixup,
       });
       await assert.rejects(
@@ -535,7 +535,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.2.7 Acquire connection from pool with bad tag using sync session callback', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
       });
       await assert.rejects(
@@ -552,7 +552,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.2.8 Acquire connection from pool twice with same tag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
       });
       let conn = await pool.getConnection({tag: tag1});
@@ -569,7 +569,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.2.9 Acquire connection from pool twice with different tag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
       });
       let conn = await pool.getConnection({tag: tag1});
@@ -586,7 +586,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.2.10 Acquire connection from pool twice with different tag using matchAnyTag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
       });
       let conn = await pool.getConnection({tag: tag1});
@@ -603,7 +603,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.2.11 Acquire connection from pool twice with different multi-tag using matchAnyTag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: simpleTagFixup,
       });
       let conn = await pool.getConnection({tag: tag2});
@@ -622,7 +622,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.2.12 Acquire connection from pool twice with first connection\'s tag set to ""', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
       });
       let conn = await pool.getConnection({tag: tag1});
@@ -640,7 +640,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.2.13 Acquire connection from pool twice with different tag after setting first connection\'s tag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
       });
       let conn = await pool.getConnection({tag: tag1});
@@ -667,7 +667,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.3.1 Setting connection\'s tag to undefined triggers error NJS-004', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
       });
       const conn = await pool.getConnection({tag: tag1});
@@ -681,7 +681,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.3.2 Setting connection\'s tag to random object triggers error NJS-004', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
       });
       const conn = await pool.getConnection({tag: tag1});
@@ -695,7 +695,7 @@ describe('184. sessionTag.js', function() {
 
     it.skip('184.3.3 Closing randomly tagged connection triggers error ORA-24488', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
       });
       const conn = await pool.getConnection({tag: tag1});
@@ -731,9 +731,9 @@ describe('184. sessionTag.js', function() {
 
     async function dropUserSession(sql) {
       const connectionDetails = {
-        user          : dbconfig.test.DBA_user,
-        password      : dbconfig.test.DBA_password,
-        connectString : dbconfig.connectString,
+        user          : dbConfig.test.DBA_user,
+        password      : dbConfig.test.DBA_password,
+        connectString : dbConfig.connectString,
         privilege     : oracledb.SYSDBA,
       };
       let conn = await oracledb.getConnection(connectionDetails);
@@ -760,7 +760,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.4.1 Acquire connection from pool, close with tag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
       });
       const conn = await pool.getConnection({tag: tag1});
@@ -773,7 +773,7 @@ describe('184. sessionTag.js', function() {
     });
 
     it('184.4.2 Acquire connection from pool, drop session', async function() {
-      const pool = await oracledb.createPool(dbconfig);
+      const pool = await oracledb.createPool(dbConfig);
       const conn = await pool.getConnection();
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
@@ -785,7 +785,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.4.3 Acquire connection from pool, drop session with tag', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
         poolPingInterval: 10,
       });
@@ -799,9 +799,9 @@ describe('184. sessionTag.js', function() {
     });
 
     it('184.4.4 Acquire connection from pool, wait for pool ping to call session fixup', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) this.skip();
+      if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
         poolMax: 1,
         poolPingInterval: 2,
@@ -825,7 +825,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.4.5 Acquire connection from pool, wait for pool timeout to drop', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
         poolTimeout: 3,
       });
@@ -839,7 +839,7 @@ describe('184. sessionTag.js', function() {
 
     it('184.4.6 Drop connection from pool with poolMin=0', async function() {
       const pool = await oracledb.createPool({
-        ...dbconfig,
+        ...dbConfig,
         sessionCallback: tagFixup,
         poolMax: 1,
         poolMin: 0,
@@ -854,7 +854,7 @@ describe('184. sessionTag.js', function() {
     });
 
     it('184.4.7 Close connection from pool with {drop: false}', async function() {
-      const pool = await oracledb.createPool(dbconfig);
+      const pool = await oracledb.createPool(dbConfig);
       const conn = await pool.getConnection({tag: tag1});
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
@@ -865,7 +865,7 @@ describe('184. sessionTag.js', function() {
     });
 
     it('184.4.8 Close connection from pool with {drop: randomObject}', async function() {
-      const pool = await oracledb.createPool(dbconfig);
+      const pool = await oracledb.createPool(dbConfig);
       const conn = await pool.getConnection({tag: tag1});
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
@@ -882,7 +882,7 @@ describe('184. sessionTag.js', function() {
     });
 
     it('184.4.9 Close connection from pool with {drop: 0}', async function() {
-      const pool = await oracledb.createPool(dbconfig);
+      const pool = await oracledb.createPool(dbConfig);
       const conn = await pool.getConnection({tag: tag1});
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
@@ -899,7 +899,7 @@ describe('184. sessionTag.js', function() {
     });
 
     it('184.4.10 Close connection from pool with empty object', async function() {
-      const pool = await oracledb.createPool(dbconfig);
+      const pool = await oracledb.createPool(dbConfig);
       const conn = await pool.getConnection({tag: tag1});
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
@@ -916,7 +916,7 @@ describe('184. sessionTag.js', function() {
     });
 
     it('184.4.11 Close connection from pool with {drop: random string}', async function() {
-      const pool = await oracledb.createPool(dbconfig);
+      const pool = await oracledb.createPool(dbConfig);
       const conn = await pool.getConnection({tag: tag1});
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);

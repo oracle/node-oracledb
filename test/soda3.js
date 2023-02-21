@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -56,7 +56,7 @@ describe('167. soda3.js', () => {
 
     await sodaUtil.cleanup();
 
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
     sd = conn.getSodaDatabase();
 
     t_collections = await Promise.all(

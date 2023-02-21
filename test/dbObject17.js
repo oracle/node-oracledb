@@ -34,7 +34,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('216. dbObject17.js', () => {
@@ -46,7 +46,7 @@ describe('216. dbObject17.js', () => {
   const TEAM_T   = 'NODB_TYP_TEAM_17';
 
   before(async () => {
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
 
     let plsql = `
       CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (

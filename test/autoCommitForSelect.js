@@ -70,18 +70,8 @@ describe('8. autoCommitForSelect.js', function() {
       END; ";
 
   before(async function() {
-    connection = await oracledb.getConnection(
-      {
-        user:          dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString
-      });
-    anotherConnection = await oracledb.getConnection(
-      {
-        user:          dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString
-      });
+    connection = await oracledb.getConnection(dbConfig);
+    anotherConnection = await oracledb.getConnection(dbConfig);
   });
 
   after(async function() {

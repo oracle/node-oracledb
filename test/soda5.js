@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -52,7 +52,7 @@ describe('173. soda5.js', () => {
   });
 
   it('173.1 create index, basic case', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_1");
@@ -89,7 +89,7 @@ describe('173. soda5.js', () => {
   }); // 173.1
 
   it('173.2 query row not via indexSpec', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_2");
@@ -126,7 +126,7 @@ describe('173. soda5.js', () => {
   }); // 173.2
 
   it('173.3 Negative - invalid indexSpec, invalid index property', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_3");
@@ -144,7 +144,7 @@ describe('173. soda5.js', () => {
   }); // 173.3
 
   it('173.4 collection.drop(), basic case', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
     const collName = "soda_test_173_4";
     const collection = await sd.createCollection(collName);
@@ -154,7 +154,7 @@ describe('173. soda5.js', () => {
   }); // 173.4
 
   it('173.5 drop multiple times, no error thrown', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
 
     const collName = "soda_test_173_5";
@@ -173,7 +173,7 @@ describe('173. soda5.js', () => {
   }); // 173.5
 
   it('173.6 dropIndex(), basic case', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_6");
@@ -214,7 +214,7 @@ describe('173. soda5.js', () => {
   }); // 173.6
 
   it('173.7 dropping index does not impact query', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_7");
@@ -255,7 +255,7 @@ describe('173. soda5.js', () => {
   }); // 173.7
 
   it('173.8 The index is dropped regardless of the auto commit mode', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_8");
@@ -297,7 +297,7 @@ describe('173. soda5.js', () => {
   }); // 173.8
 
   it('173.9 Negative - dropIndex() no parameter', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_9");
@@ -341,7 +341,7 @@ describe('173. soda5.js', () => {
   }); // 173.9
 
   it('173.10 option object of dropIndex(), basic case', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_10");
 
@@ -371,7 +371,7 @@ describe('173. soda5.js', () => {
   }); // 173.10
 
   it('173.11 option object of dropIndex(), boolean value is false', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_11");
 
@@ -407,7 +407,7 @@ describe('173. soda5.js', () => {
   }); // 173.11
 
   it('173.12 getDataGuide(), basic case', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection('soda_test_173_12');
 

@@ -42,13 +42,13 @@ const dbConfig = require('./dbconfig.js');
 
 describe('63. autoCommit4nestedExecutes.js', function() {
 
-  let tableName  = "nodb_issue269tab";
-  let procName   = "issue269proc";
-  let connection = null;
+  const tableName  = "nodb_issue269tab";
+  const procName   = "issue269proc";
+  let connection;
 
   before('prepare table and procedure', async function() {
 
-    let sqlCreateTab =
+    const sqlCreateTab =
         " BEGIN "
       + "   DECLARE "
       + "     e_table_missing EXCEPTION; "
@@ -67,7 +67,7 @@ describe('63. autoCommit4nestedExecutes.js', function() {
       + "   '); "
       + " END; ";
 
-    let sqlCreateProc =
+    const sqlCreateProc =
         " CREATE OR REPLACE PROCEDURE " + procName + "(p_iname IN VARCHAR2, "
       + "   p_short_name IN VARCHAR2, p_comments IN VARCHAR2, p_new_id OUT NUMBER, p_status OUT NUMBER, "
       + "   p_description OUT VARCHAR2) "
@@ -93,17 +93,13 @@ describe('63. autoCommit4nestedExecutes.js', function() {
 
   it('63.1 nested execute() functions', async function() {
 
-    let pool = null,
-      conn = null;
-    let result = null;
-
     // sql will be the same for both execute calls
-    let procSql = "BEGIN " + procName + "(p_iname=>:p_iname, p_short_name=>:p_short_name, "
+    const procSql = "BEGIN " + procName + "(p_iname=>:p_iname, p_short_name=>:p_short_name, "
                   + " p_comments=>:p_comments, p_new_id=>:p_new_id, p_status=>:p_status, "
                   + " p_description=>:p_description); END;";
 
-    pool = await oracledb.createPool(dbConfig);
-    conn = await pool.getConnection();
+    const pool = await oracledb.createPool(dbConfig);
+    const conn = await pool.getConnection();
 
     await conn.execute(
       procSql,
@@ -126,41 +122,40 @@ describe('63. autoCommit4nestedExecutes.js', function() {
       },
       { autoCommit: false });
 
-
-    try {
-      result = await conn.execute(
-        procSql,
-        {
-          p_iname123: "Test iname", // specify wrong bind parameter name to cause an error
-          p_short_name: "TST",
-          p_comments: "Test comments",
-          p_new_id: {
-            type: oracledb.NUMBER,
-            dir: oracledb.BIND_OUT
-          },
-          p_status: {
-            type: oracledb.NUMBER,
-            dir: oracledb.BIND_OUT
-          },
-          p_description: {
-            type: oracledb.STRING,
-            dir: oracledb.BIND_OUT
-          }
-        },
-        { autoCommit: false });
-    } catch (err) {
-      assert(err);
-      // ORA-01036: illegal variable name/number
-      assert.equal(err.message.substring(0, err.message.indexOf(':')), `ORA-01036`);
-    }
+    const binds = {
+      p_iname123: "Test iname", // specify wrong bind parameter name to cause an error
+      p_short_name: "TST",
+      p_comments: "Test comments",
+      p_new_id: {
+        type: oracledb.NUMBER,
+        dir: oracledb.BIND_OUT
+      },
+      p_status: {
+        type: oracledb.NUMBER,
+        dir: oracledb.BIND_OUT
+      },
+      p_description: {
+        type: oracledb.STRING,
+        dir: oracledb.BIND_OUT
+      }
+    };
+    const options = {
+      autoCommit: false
+    };
+    await assert.rejects(
+      async () => await conn.execute(procSql, binds, options),
+      /ORA-01036:/
+    );
 
     await conn.release();
     await pool.terminate();
 
-    result = await connection.execute(
+    const result = await connection.execute(
       "SELECT count(*) as amount FROM " + tableName,
       [],
       { outFormat: oracledb.OUT_FORMAT_OBJECT });
     assert.strictEqual(result.rows[0].AMOUNT, 0);
+
   });
+
 });

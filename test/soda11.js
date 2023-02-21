@@ -35,7 +35,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -54,12 +54,12 @@ describe('179. soda11.js', () => {
   it('179.1 create collection with metadata', async () => {
     let conn, collection;
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let sd = conn.getSodaDatabase();
 
       let t_tablename = "myTableName";
       let t_metadata = {
-        "schemaName" : dbconfig.user.toUpperCase(),
+        "schemaName" : dbConfig.user.toUpperCase(),
         "tableName" : t_tablename,
         "keyColumn" :
                       {
@@ -119,7 +119,7 @@ describe('179. soda11.js', () => {
   it('179.2 Negative - create collection with an invalid metadata', async () => {
     let conn, collection;
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let sd = conn.getSodaDatabase();
 
       let t_metadata = {
@@ -181,11 +181,11 @@ describe('179. soda11.js', () => {
     let conn;
     let collection1;
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let sd = conn.getSodaDatabase();
 
       let t_metadata1 = {
-        "schemaName" : dbconfig.user.toUpperCase(),
+        "schemaName" : dbConfig.user.toUpperCase(),
         "tableName" : "nodb_tab_179_3",
         "keyColumn" :
                        {
@@ -280,11 +280,11 @@ describe('179. soda11.js', () => {
   it('179.4 customize the key value, String value', async () => {
     let conn;
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let sd = conn.getSodaDatabase();
       let collectionName = 'soda_test_179_4';
       let testMetaData = {
-        "schemaName" : dbconfig.user.toUpperCase(),
+        "schemaName" : dbConfig.user.toUpperCase(),
         "tableName" : collectionName,
         "keyColumn" :
                        {
@@ -356,11 +356,11 @@ describe('179. soda11.js', () => {
   it('179.5 Negative - customize the key value, numeric value', async () => {
     let conn, coll;
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let sd = conn.getSodaDatabase();
       let collectionName = 'soda_test_179_5';
       let testMetaData = {
-        "schemaName" : dbconfig.user.toUpperCase(),
+        "schemaName" : dbConfig.user.toUpperCase(),
         "tableName" : collectionName,
         "keyColumn" :
                        {
@@ -424,11 +424,11 @@ describe('179. soda11.js', () => {
   it('179.6 customize the value of mediaType', async () => {
     let conn, coll;
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let sd = conn.getSodaDatabase();
       let collectionName = 'soda_test_179_6';
       let testMetaData = {
-        "schemaName" : dbconfig.user.toUpperCase(),
+        "schemaName" : dbConfig.user.toUpperCase(),
         "tableName" : collectionName,
         "keyColumn" :
                      {
@@ -503,11 +503,11 @@ describe('179. soda11.js', () => {
   it('179.7 Negative - customize mediaType, invalid type, numeric value', async () => {
     let conn, coll;
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let sd = conn.getSodaDatabase();
       let collectionName = 'soda_test_179_7';
       let testMetaData = {
-        "schemaName" : dbconfig.user.toUpperCase(),
+        "schemaName" : dbConfig.user.toUpperCase(),
         "tableName" : collectionName,
         "keyColumn" :
                      {
@@ -577,11 +577,11 @@ describe('179. soda11.js', () => {
   it('179.8 insert an empty document with customized metadata', async () => {
     let conn, coll;
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let sd = conn.getSodaDatabase();
       let collectionName = 'soda_test_179_8';
       let testMetaData = {
-        "schemaName" : dbconfig.user.toUpperCase(),
+        "schemaName" : dbConfig.user.toUpperCase(),
         "tableName" : collectionName,
         "keyColumn" :
                      {

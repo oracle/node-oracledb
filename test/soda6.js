@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -52,7 +52,7 @@ describe('174. soda6.js', function() {
   });
 
   it('174.1 filter() basic case', async function() {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_174_1");
 
@@ -77,7 +77,7 @@ describe('174. soda6.js', function() {
   }); // 174.1
 
   it('174.2 Negative - fiter(filterSpec) when filterSpec is null', async function() {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_174_2");
 
@@ -100,7 +100,7 @@ describe('174. soda6.js', function() {
   }); // 174.2
 
   it('174.3 filterSpec is OK to be an empty object', async function() {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_174_3");
 
@@ -123,7 +123,7 @@ describe('174. soda6.js', function() {
   }); // 174.3
 
   it('174.4 Key(), basic case', async function() {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_174_4");
 
@@ -158,7 +158,7 @@ describe('174. soda6.js', function() {
   }); // 174.4
 
   it('174.5 Key(), no matched key', async function() {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_174_5");
 
@@ -180,7 +180,7 @@ describe('174. soda6.js', function() {
   }); // 174.5
 
   it('174.6 Negative - Key(null)', async function() {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_174_6");
 
@@ -203,7 +203,7 @@ describe('174. soda6.js', function() {
   }); // 174.6
 
   it('174.7 Key(), invalid type', async function() {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_174_7");
 
@@ -228,7 +228,7 @@ describe('174. soda6.js', function() {
   }); // 174.7
 
   it('174.8 Keys(), basic case', async function() {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_174_8");
 
@@ -257,7 +257,7 @@ describe('174. soda6.js', function() {
   }); // 174.8
 
   it('174.9 Keys([]) empty array, it selects all documents', async function() {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_174_9");
 
@@ -285,7 +285,7 @@ describe('174. soda6.js', function() {
   }); // 174.9
 
   it('174.10 Negative - keys() no parameter', async function() {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_174_10");
 
@@ -308,7 +308,7 @@ describe('174. soda6.js', function() {
   }); // 174.10
 
   it('174.11 Negative - keys(null)', async function() {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_174_11");
 
@@ -332,7 +332,7 @@ describe('174. soda6.js', function() {
   }); // 174.11
 
   it('174.12 try to query documents with nonexistent keys', async function() {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_174_12");
 
@@ -370,7 +370,7 @@ describe('174. soda6.js', function() {
       }
     }
 
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_174_13");
 
@@ -403,7 +403,7 @@ describe('174. soda6.js', function() {
       }
     }
 
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_174_14");
 
@@ -437,7 +437,7 @@ describe('174. soda6.js', function() {
       }
     }
 
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_174_15");
 

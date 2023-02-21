@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -100,7 +100,7 @@ describe('230. soda12.js', () => {
     const TABLE = "soda_test_230_1";
     const metadata = await getMetadata(TABLE);
 
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
@@ -158,7 +158,7 @@ describe('230. soda12.js', () => {
     const TABLE = "soda_test_230_2";
     const metadata = await getMetadata(TABLE);
 
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
@@ -196,7 +196,7 @@ describe('230. soda12.js', () => {
     const TABLE = "soda_test_230_3";
     const metadata = await getMetadata(TABLE);
 
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
@@ -230,7 +230,7 @@ describe('230. soda12.js', () => {
     const TABLE = "soda_test_230_4";
     const metadata = await getMetadata(TABLE);
 
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE, { metaData: metadata });
 

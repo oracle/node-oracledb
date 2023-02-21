@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -36,6 +36,7 @@ const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const sql      = require('./sqlClone.js');
 const random   = require('./random.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('145. urowidProcedureBindAsString5.js', function() {
   let connection = null;
@@ -172,7 +173,7 @@ describe('145. urowidProcedureBindAsString5.js', function() {
     assert(result);
     urowid = result.rows[0][0];
     urowidLen = urowid.length;
-    urowidLen.should.be.above(expectedLength);
+    testsUtil.checkUrowidLength(urowidLen, expectedLength);
     const bindVar_out = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c: { val: urowid, type: oracledb.STRING, dir: oracledb.BIND_IN },

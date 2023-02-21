@@ -35,7 +35,7 @@ const oracledb  = require('oracledb');
 const assert    = require('assert');
 const fs        = require('fs');
 const util      = require('util');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('196. getDataOfLob.js', () => {
@@ -45,7 +45,7 @@ describe('196. getDataOfLob.js', () => {
   const tab2 = 'nodb_tab_myblob';
 
   before('prepare the table', async () => {
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
 
     let sql =
       `create table ${tab1} (

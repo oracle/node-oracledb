@@ -34,7 +34,7 @@
 
 const oracledb  = require('oracledb');
 const should    = require('should');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('220. examineOwnedProperties.js', () => {
@@ -44,7 +44,7 @@ describe('220. examineOwnedProperties.js', () => {
 
   before(async () => {
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
 
       let sql = `
         CREATE TABLE ${TABLE} (

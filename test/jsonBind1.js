@@ -32,7 +32,7 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('253. jsonBind1.js', function() {
@@ -68,7 +68,7 @@ describe('253. jsonBind1.js', function() {
   before (async function() {
     oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
     oracledb.extendedMetaData = true;
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
     if (conn.oracleServerVersion < 2100000000) {
       skip = true;
       this.skip();

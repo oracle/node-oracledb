@@ -268,6 +268,65 @@ describe('6. dmlReturning.js', function() {
       );
     });
 
+    it('6.1.12 INSERT DML returning into too small a variable', async function() {
+
+      const sql = "INSERT INTO nodb_dmlreturn (id, name) VALUES (:int_val, :str_val) RETURNING id, name into :rid, :rname";
+      const binds = {
+        int_val : 6,
+        str_val : "A different test string",
+        rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+        rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2 }
+      };
+      const options = {
+        autoCommit: true
+      };
+      await assert.rejects(
+        async () => await connection.execute(sql, binds, options),
+        /NJS-016:/
+      );
+    });
+
+    it('6.1.13 INSERT statement with NaN', async function() {
+
+      const sql = "INSERT INTO nodb_dmlreturn (id, name) VALUES (:int_val, :str_val) RETURNING id, name into :rid, :rname";
+      const binds = {
+        int_val : 7,
+        str_val : "A" * 401,
+        rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+        rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+      };
+      const options = {
+        autoCommit: true
+      };
+      await assert.rejects(
+        async () => await connection.execute(sql, binds, options),
+        /NJS-105:/
+      );
+    });
+
+    it('6.1.14 INSERT statement with an invalid bind name (reserved namespace keyword)', async function() {
+
+      const sql = "INSERT INTO nodb_dmlreturn (id) VALUES (:int_val) RETURNING id, name INTO :ROWID";
+      const binds = {
+        int_val: 9,
+        ROWID: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      };
+      const options = {
+        autoCommit: true
+      };
+      await assert.rejects(
+        async () => await connection.execute(sql, binds, options),
+        /ORA-01745:/
+      );
+    });
+
+    it('6.1.15 INSERT statement parse non ascii returning bind', async function() {
+
+      const sql = "UPDATE nodb_dmlreturn SET id = :i RETURNING id, name INTO :rid, :méil";
+      let info = await connection.getStatementInfo(sql);
+      assert.deepEqual(info.bindNames, ["I", "RID", "MÉIL"]);
+    });
+
   }); // 6.1
 
   describe('6.2 DATE and TIMESTAMP data', function() {

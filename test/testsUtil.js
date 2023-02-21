@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -32,7 +32,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 const sodaUtil = require('./sodaUtil.js');
 const assert   = require('assert');
 const os       = require('os');
@@ -91,21 +91,21 @@ testsUtil.sqlDropType = function(typeName) {
 
 testsUtil.createTable = async function(tableName, sql) {
   let plsql = testsUtil.sqlCreateTable(tableName, sql);
-  const conn = await oracledb.getConnection(dbconfig);
+  const conn = await oracledb.getConnection(dbConfig);
   await conn.execute(plsql);
   await conn.close();
 };
 
 testsUtil.dropSource = async function(sourceType, sourceName) {
   let plsql = testsUtil.sqlDropSource(sourceType, sourceName);
-  const conn = await oracledb.getConnection(dbconfig);
+  const conn = await oracledb.getConnection(dbConfig);
   await conn.execute(plsql);
   await conn.close();
 };
 
 testsUtil.dropTable = async function(tableName) {
   let plsql = testsUtil.sqlDropTable(tableName);
-  const conn = await oracledb.getConnection(dbconfig);
+  const conn = await oracledb.getConnection(dbConfig);
   await conn.execute(plsql);
   await conn.close();
 };
@@ -113,7 +113,7 @@ testsUtil.dropTable = async function(tableName) {
 testsUtil.checkPrerequisites = async function(clientVersion = 1805000000, serverVersion = 1805000000) {
   if (testsUtil.getClientVersion() < clientVersion) return false;
   try {
-    let connection = await oracledb.getConnection(dbconfig);
+    let connection = await oracledb.getConnection(dbConfig);
     if (connection.oracleServerVersion < serverVersion) return false;
     await connection.close();
     return true;
@@ -126,7 +126,7 @@ testsUtil.isSodaRunnable = async function() {
   const clientVersion = testsUtil.getClientVersion();
   let serverVersion;
   try {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     serverVersion = conn.oracleServerVersion;
 
     await conn.close();
@@ -157,11 +157,11 @@ testsUtil.generateRandomPassword = function(length = 6) {
 
 testsUtil.getDBCompatibleVersion = async function() {
   let compatibleVersion;
-  if (dbconfig.test.DBA_PRIVILEGE) {
+  if (dbConfig.test.DBA_PRIVILEGE) {
     const connectionDetails = {
-      user          : dbconfig.test.DBA_user,
-      password      : dbconfig.test.DBA_password,
-      connectString : dbconfig.connectString,
+      user          : dbConfig.test.DBA_user,
+      password      : dbConfig.test.DBA_password,
+      connectString : dbConfig.connectString,
       privilege     : oracledb.SYSDBA,
     };
     let conn = await oracledb.getConnection(connectionDetails);
@@ -216,7 +216,7 @@ testsUtil.getLocalIPAddress = function() {
 
 testsUtil.measureNetworkRoundTripTime = async function() {
   const startTime = +new Date();
-  const conn = await oracledb.getConnection(dbconfig);
+  const conn = await oracledb.getConnection(dbConfig);
   await conn.execute("select * from dual");
   await conn.close();
   return new Date() - startTime;
@@ -229,15 +229,15 @@ testsUtil.getSid = async function(conn) {
 };
 
 testsUtil.getRoundTripCount = async function(sid) {
-  if (!dbconfig.test.DBA_PRIVILEGE) {
+  if (!dbConfig.test.DBA_PRIVILEGE) {
     let msg = "Note: DBA privilege environment variable is not true!\n";
     msg += "Without DBA privilege the test cannot get the current round trip count!";
     throw new Error(msg);
   } else {
     let dbaCredential = {
-      user:          dbconfig.test.DBA_user,
-      password:      dbconfig.test.DBA_password,
-      connectString: dbconfig.connectString,
+      user:          dbConfig.test.DBA_user,
+      password:      dbConfig.test.DBA_password,
+      connectString: dbConfig.connectString,
       privilege:     oracledb.SYSDBA
     };
 
@@ -269,15 +269,15 @@ testsUtil.getParseCount = async function(systemconn, sid) {
 
 testsUtil.createAQtestUser = async function(AQ_USER, AQ_USER_PWD) {
 
-  if (!dbconfig.test.DBA_PRIVILEGE) {
+  if (!dbConfig.test.DBA_PRIVILEGE) {
     let msg = "Note: DBA privilege environment variable is not true!\n";
     msg += "Without DBA privilege, the test cannot create the schema!";
     throw new Error(msg);
   } else {
     let dbaCredential = {
-      user:          dbconfig.test.DBA_user,
-      password:      dbconfig.test.DBA_password,
-      connectString: dbconfig.connectString,
+      user:          dbConfig.test.DBA_user,
+      password:      dbConfig.test.DBA_password,
+      connectString: dbConfig.connectString,
       privilege:     oracledb.SYSDBA
     };
 
@@ -315,15 +315,15 @@ testsUtil.createAQtestUser = async function(AQ_USER, AQ_USER_PWD) {
 };
 
 testsUtil.dropAQtestUser = async function(AQ_USER) {
-  if (!dbconfig.test.DBA_PRIVILEGE) {
+  if (!dbConfig.test.DBA_PRIVILEGE) {
     let msg = "Note: DBA privilege environment variable is not true!\n";
     msg += "Without DBA privilege, the test cannot drop the schema!\n";
     throw new Error(msg);
   } else {
     let dbaCredential = {
-      user:          dbconfig.test.DBA_user,
-      password:      dbconfig.test.DBA_password,
-      connectString: dbconfig.connectString,
+      user:          dbConfig.test.DBA_user,
+      password:      dbConfig.test.DBA_password,
+      connectString: dbConfig.connectString,
       privilege:     oracledb.SYSDBA
     };
 
@@ -354,7 +354,7 @@ testsUtil.doStream = async function(stream) {
 };
 
 testsUtil.isLongUserNameRunnable = async function() {
-  if (!dbconfig.test.DBA_PRIVILEGE) {
+  if (!dbConfig.test.DBA_PRIVILEGE) {
     return false;
   } else {
     let checkVersions = await testsUtil.checkPrerequisites(1800000000, 1800000000);
@@ -368,8 +368,8 @@ testsUtil.isLongUserNameRunnable = async function() {
 };
 
 testsUtil.getPoolConnection = async function(pool) {
-  if (dbconfig.test.proxySessionUser && dbconfig.test.externalAuth) {
-    return await pool.getConnection({user: dbconfig.test.proxySessionUser});
+  if (dbConfig.test.proxySessionUser && dbConfig.test.externalAuth) {
+    return await pool.getConnection({user: dbConfig.test.proxySessionUser});
   } else {
     return await pool.getConnection();
   }
@@ -430,4 +430,15 @@ testsUtil.assertOneOf = function(array, value) {
     }
   }
   assert(matches);
+};
+
+testsUtil.checkUrowidLength = async function(urowidLen, expectedLength) {
+  const connection = await oracledb.getConnection(dbConfig);
+  // The Oracle Cloud Database doesn't support UROWID and therefore a regular ROWID is returned which has a fixed size of 18 bytes.
+  const UROWID_LENGTH_LIMIT_CLOUD_DB = 18;
+
+  if (dbConfig.test.isCloudService) assert(urowidLen > UROWID_LENGTH_LIMIT_CLOUD_DB - 1);
+  else assert(urowidLen > expectedLength);
+
+  await connection.close();
 };

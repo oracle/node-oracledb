@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('226. dbType01.js', function() {
@@ -43,7 +43,7 @@ describe('226. dbType01.js', function() {
 
   before(async () => {
     oracledb.stmtCacheSize = 0;
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
   });
 
   after(async () => {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -38,6 +38,7 @@ const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const sql      = require('./sqlClone.js');
 const random   = require('./random.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('115. urowidDMLBindAsString2.js', function() {
   let connection = null;
@@ -211,7 +212,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
     urowid = result.rows[0][0];
     urowidLen = urowid.length;
-    assert(urowidLen > rowidLenExpected);
+    testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
     const bindVar = {
       i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
       c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING }
@@ -264,7 +265,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
     urowid = result.rows[0][0];
     urowidLen = urowid.length;
-    assert(urowidLen > rowidLenExpected);
+    testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
     const bindVar = {
       i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
       c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING, maxSize: 100 }
@@ -333,7 +334,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
 
     urowid = result.rows[0][0];
     urowidLen = urowid.length;
-    assert(urowidLen > rowidLenExpected);
+    testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
 
     bindVar = {
       c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING },
@@ -400,7 +401,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
     assert(result);
     urowid = result.rows[0][0];
     urowidLen = urowid.length;
-    assert(urowidLen > rowidLenExpected);
+    testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
 
     bindVar = {
       c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING },
@@ -439,7 +440,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
 
     urowid = result.rows[0][0];
     urowidLen = urowid.length;
-    assert(urowidLen > rowidLenExpected);
+    testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
     bindVar = {
       i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
       c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING },
@@ -478,7 +479,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
 
     urowid = result.rows[0][0];
     urowidLen = urowid.length;
-    assert(urowidLen > rowidLenExpected);
+    testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
 
     bindVar = {
       c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING }
@@ -514,12 +515,12 @@ describe('115. urowidDMLBindAsString2.js', function() {
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + id_1);
     urowid_1 = result.rows[0][0];
     urowidLen_1 = urowid_1.length;
-    assert(urowidLen_1 > rowidLenExpected);
+    testsUtil.checkUrowidLength(urowidLen_1, rowidLenExpected);
 
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + id_2);
     urowid_2 = result.rows[0][0];
     urowidLen_2 = urowid_2.length;
-    assert(urowidLen_2 > rowidLenExpected);
+    testsUtil.checkUrowidLength(urowidLen_2, rowidLenExpected);
 
     let counter = 0;
     const sql_select = "select c1, c2, ROWID from " + tableName_indexed + " where ROWID = :i1 or ROWID = :i2 order by c1";

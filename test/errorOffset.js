@@ -33,13 +33,13 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 
 describe('240. errorOffset.js', function() {
 
   let conn;
   before(async () => {
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
   });
 
   after(async () => {

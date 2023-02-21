@@ -31,7 +31,7 @@
 const oracledb = require('oracledb');
 const should   = require('should');
 const assert   = require('assert');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe("147. prefetchRows.js", function() {
@@ -66,7 +66,7 @@ describe("147. prefetchRows.js", function() {
   const DefaultPrefetchRows = oracledb.prefetchRows;
   before(async function() {
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
     } catch (error) {
       should.not.exist(error);
     }
@@ -268,7 +268,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.1.15 Query round-trips with no prefetch', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -286,7 +286,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.1.16 Query round-trips with prefetch equal to row count', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -304,7 +304,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.1.17 Query round-trips with prefetch > row count and fetchArraySize > row count', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -322,7 +322,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.1.18 Query round-trips with prefetch > row count and fetchArraySize < row count', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -340,7 +340,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.1.19 Query round-trips with prefetch < row count and fetchArraySize > total rows', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -358,7 +358,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.1.20 Query round-trips with prefetch < row count and fetchArraySize = total rows', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -376,7 +376,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.1.21 Query round-trips with prefetch < row count fetchArraySize < total rows', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -495,7 +495,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.2.9 Query round-trips with no prefetch', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -514,7 +514,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.2.10 Query round-trips with prefetch equal to row count', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -533,7 +533,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.2.11 Query round-trips with prefetch larger than row count', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -552,7 +552,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.2.12 Query round-trips with prefetch < row count, fetchArraySize < row count and getRows()', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -571,7 +571,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.2.13 Query round-trips with prefetch < row count, fetchArraySize > row count and getRows(n < row count)', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -591,7 +591,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.2.14 Query round-trips with prefetch < row count, fetchArraySize > row count and getRows(n > row count)', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -610,7 +610,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.2.15 Query round-trips with prefetch < row count, fetchArraySize > row count and getRows()', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -664,7 +664,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.3.4 Query round-trips with no prefetch', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -683,7 +683,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.3.5 Query round-trips with prefetch equal to row count', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -702,7 +702,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.3.6 Query round-trips with prefetch larger than row count', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -721,7 +721,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.3.7 Query round-trips with prefetch < row count and fetchArraySize < row count', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {
@@ -740,7 +740,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.3.8 Query round-trips with prefetch < row count and fetchArraySize > row count', async function() {
-      if (!dbconfig.test.DBA_PRIVILEGE) {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
         this.skip();
       }
       try {

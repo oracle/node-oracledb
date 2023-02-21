@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -50,7 +50,7 @@ describe('165. soda2.js', () => {
   });
 
   it('165.1 create two sodaDatabase objects which point to the same instance', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd1 = conn.getSodaDatabase();
     const sd2 = conn.getSodaDatabase();
     // sd1 creates the collection
@@ -64,9 +64,9 @@ describe('165. soda2.js', () => {
   }); // 165.1
 
   it('165.2 create two sodaDatabase objects from two connections', async () => {
-    const conn1 = await oracledb.getConnection(dbconfig);
+    const conn1 = await oracledb.getConnection(dbConfig);
     const sd1 = await conn1.getSodaDatabase();
-    const conn2 = await oracledb.getConnection(dbconfig);
+    const conn2 = await oracledb.getConnection(dbConfig);
     const sd2 = await conn1.getSodaDatabase();
 
     const t_collname = "soda_test_165_2";
@@ -81,7 +81,7 @@ describe('165. soda2.js', () => {
   }); // 165.2
 
   it('165.3 will open this collection when creating a collection with the existing name', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
 
     const t_collname = "soda_test_165_3";
@@ -96,7 +96,7 @@ describe('165. soda2.js', () => {
   }); // 165.3
 
   it('165.4 Negative - createCollection() when collection name is empty string', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
 
     const collName = "";
@@ -115,7 +115,7 @@ describe('165. soda2.js', () => {
     const collectionName = "soda_test_165.5";
     await prepareCollection(collectionName);
 
-    const pool = await oracledb.createPool(dbconfig);
+    const pool = await oracledb.createPool(dbConfig);
 
     const t_contents = sodaUtil.t_contents;
     await Promise.all(
@@ -129,7 +129,7 @@ describe('165. soda2.js', () => {
 
     async function prepareCollection(collName) {
 
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const soda = conn.getSodaDatabase();
       const collection = await soda.createCollection(collName);
       const indexSpec = {
@@ -159,7 +159,7 @@ describe('165. soda2.js', () => {
     } // insertDocument()
 
     async function dropCollection(collName) {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const soda = conn.getSodaDatabase();
       const collection = await soda.openCollection(collName);
 

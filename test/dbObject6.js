@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('205. dbObject6.js', () => {
@@ -43,7 +43,7 @@ describe('205. dbObject6.js', () => {
   let initialID = 0;
 
   before(async function() {
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
     if (conn.oracleServerVersion < 1200000000) {
       this.skip();
     }

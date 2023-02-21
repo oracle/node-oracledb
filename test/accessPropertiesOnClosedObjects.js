@@ -34,12 +34,12 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 
 describe('223. accessPropertiesOnClosedObjects.js', () => {
 
   it('223.1 access properties of closed Connection object', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     assert(conn);
     await conn.close();
 
@@ -48,7 +48,7 @@ describe('223. accessPropertiesOnClosedObjects.js', () => {
   }); // 223.1
 
   it('223.2 access properties of closed Lob object', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
     const Lob = await conn.createLob(oracledb.DB_TYPE_BLOB);
 

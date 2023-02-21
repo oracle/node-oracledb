@@ -97,9 +97,7 @@ describe('51. poolClose.js', function() {
 
   it('51.7 can not set the attributes after pool created', async function() {
     const config = {
-      user            : dbConfig.user,
-      password        : dbConfig.password,
-      connectString   : dbConfig.connectString,
+      ...dbConfig,
       poolMin         : 2,
       poolMax         : 10
     };
@@ -121,9 +119,7 @@ describe('51. poolClose.js', function() {
 
   it('51.8 can access the attributes of closed pool without error', async function() {
     const config = {
-      user            : dbConfig.user,
-      password        : dbConfig.password,
-      connectString   : dbConfig.connectString,
+      ...dbConfig,
       poolMin         : 2,
       poolMax         : 10,
       poolAlias       : "foobar",

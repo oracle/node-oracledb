@@ -33,7 +33,7 @@
 
 const oracledb = require('oracledb');
 const assert    = require('assert');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 const sodaUtil = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -50,7 +50,7 @@ describe('168. soda4.js', () => {
   });
 
   it('168.1 insertOneAndGet() fetches attributes without content', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
     const collectionName = 'soda_test_168_1';
     const coll = await sd.createCollection(collectionName);
@@ -88,7 +88,7 @@ describe('168. soda4.js', () => {
   }); // 168.1
 
   it('168.2 content is null', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
     const collectionName = 'soda_test_168_2';
     const coll = await sd.createCollection(collectionName);
@@ -116,7 +116,7 @@ describe('168. soda4.js', () => {
   }); // 168.2
 
   it('168.3 get mediaType', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
     const collectionName = 'soda_test_168_3';
     const coll = await sd.createCollection(collectionName);

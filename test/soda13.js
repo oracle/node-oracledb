@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -62,7 +62,7 @@ describe('231. soda13.js', () => {
   it('231.1 example case', async () => {
 
     const TABLE = "soda_test_13_1";
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE);
 
@@ -87,7 +87,7 @@ describe('231. soda13.js', () => {
   it('231.2 truncate multiple times', async () => {
 
     const TABLE = "soda_test_13_2";
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE);
 
@@ -114,7 +114,7 @@ describe('231. soda13.js', () => {
   it('231.3 Negative -invalid parameters', async () => {
 
     const TABLE = "soda_test_13_3";
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE);
 

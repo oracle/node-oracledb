@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -23,7 +23,7 @@
  * limitations under the License.
  *
  * NAME
- *   dbConfig.js
+ *   dbconfig.js
  *
  * DESCRIPTION
  *   This file conduct the configuration work for all the tests.
@@ -38,11 +38,14 @@
  *
  *****************************************************************************/
 
+const oracledb = require('oracledb');
+
 var config = {
   test: {
     externalAuth:  false,
     DBA_PRIVILEGE: false,
-    printDebugMsg: false
+    printDebugMsg: false,
+    isCloudService: false
   }
 };
 
@@ -118,5 +121,15 @@ if (process.env.NODE_PRINT_DEBUG_MESSAGE) {
     config.test.printDebugMsg = true;
   }
 }
+
+async function cloudServiceCheck() {
+  const connection = await oracledb.getConnection(config);
+  let result = await connection.execute("select sys_context('userenv', 'cloud_service') from dual");
+  if (result.rows[0][0]) {
+    config.test.isCloudService = true;
+  }
+  await connection.close();
+}
+cloudServiceCheck();
 
 module.exports = config;

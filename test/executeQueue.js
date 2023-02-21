@@ -32,7 +32,7 @@
 
 const assert    = require('assert');
 const oracledb  = require('oracledb');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe("256. executeQueue.js", function() {
@@ -45,7 +45,7 @@ describe("256. executeQueue.js", function() {
   const loopCount = 2;
 
   before(async function() {
-    connection = await oracledb.getConnection(dbconfig);
+    connection = await oracledb.getConnection(dbConfig);
   }); //before()
 
   after(async function() {
@@ -346,7 +346,7 @@ describe("256. executeQueue.js", function() {
     const tab = 'nodb_tab_myclob';
     let conn;
     before(async function() {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       const sql =
       `create table ${tab} (
         id number(9) not null,

@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const should    = require('should');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('192. implicitResults.js', function() {
@@ -66,7 +66,7 @@ describe('192. implicitResults.js', function() {
       return;
     } else {
       try {
-        const conn = await oracledb.getConnection(dbconfig);
+        const conn = await oracledb.getConnection(dbConfig);
 
         let sql =
           `create table ${tab1} (
@@ -124,7 +124,7 @@ describe('192. implicitResults.js', function() {
       return;
     } else {
       try {
-        const conn = await oracledb.getConnection(dbconfig);
+        const conn = await oracledb.getConnection(dbConfig);
 
         let sql = `DROP TABLE ${tab1} PURGE`;
         await conn.execute(sql);
@@ -142,7 +142,7 @@ describe('192. implicitResults.js', function() {
 
   it('192.1 implicit results with rows fetched', async () => {
     try {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const results = await conn.execute(queryImpres);
 
       let rows = results.implicitResults[0];
@@ -162,7 +162,7 @@ describe('192. implicitResults.js', function() {
 
   it('192.2 implicit Results with Result Sets', async () => {
     try {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const results = await conn.execute(queryImpres, [], { resultSet: true });
 
       // Assert the content of table 1
@@ -190,7 +190,7 @@ describe('192. implicitResults.js', function() {
 
   it('192.3 multiple options, outFormat is OUT_FORMAT_OBJECT', async () => {
     try {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       let opts = { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT };
       const results = await conn.execute(queryImpres, [], opts);
 

@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('243. dbObject19.js', () => {
@@ -46,7 +46,7 @@ describe('243. dbObject19.js', () => {
     // set oracledb.dbObjectAsPojo to true
     oracledb.dbObjectAsPojo = true;
 
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
 
     const sql =
       `CREATE OR REPLACE TYPE ${TYPE} AS OBJECT (

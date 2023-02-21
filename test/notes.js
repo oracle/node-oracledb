@@ -33,72 +33,30 @@
 
 const oracledb = require('oracledb');
 const assert = require('assert');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 
 /****************** Verify the "user/password" provided by user **********************/
-const LOGTAG = "Global before-all Hook:\n";
 
-const configList = [
-  {
-    user: dbconfig.user,
-    password: dbconfig.password,
-    connectString: dbconfig.connectString,
-    errMsg: LOGTAG +
-      "\tGetting connection using default schema user failed.\n" +
-      "\tPlease ensure you set the following environment variables correctly:\n" +
-      "\t* NODE_ORACLEDB_USER\n" +
-      "\t* NODE_ORACLEDB_PASSWORD\n" +
-      "\t* NODE_ORACLEDB_CONNECTIONSTRING\n",
-  }
-];
+async function testConnection(description, additionalOptions = {}) {
+  console.log(description);
 
-if (dbconfig.test.DBA_PRIVILEGE) {
-  configList.push({
-    user: dbconfig.test.DBA_user,
-    password: dbconfig.test.DBA_password,
-    connectString: dbconfig.connectString,
-    privilege: oracledb.SYSDBA,
-    errMsg: LOGTAG +
-      "\tGetting connection using DBA user failed.\n" +
-      "\tPlease ensure you set the following environment variables correctly:\n" +
-      "\t* NODE_ORACLEDB_DBA_USER\n" +
-      "\t* NODE_ORACLEDB_DBA_PASSWORD\n" +
-      "\tOr skip tests that requires DBA privilege using:\n" +
-      "\tunset NODE_ORACLEDB_DBA_PRIVILEGE\n",
-  });
-}
-
-if (dbconfig.test.externalAuth) {
-  configList.push({
-    externalAuth:  true,
-    connectString: dbconfig.connectString,
-    errMsg: LOGTAG +
-      "\tGetting connection using external authentication failed.\n" +
-      "\tPlease ensure you set the external authentication environment correctly.\n" +
-      "\tOr skip tests that requires external authentication using:\n" +
-      "\tunset NODE_ORACLEDB_EXTERNALAUTH\n",
-  });
-}
-
-if (dbconfig.test.proxySessionUser) {
-  configList.push({
-    user: `${dbconfig.user}[${dbconfig.test.proxySessionUser}]`,
-    password: dbconfig.password,
-    connectString: dbconfig.connectString,
-    errMsg: LOGTAG +
-      "\tGetting connection using proxy authentication failed.\n" +
-      "\tPlease ensure you set the proxy authentication environment correctly.\n" +
-      "\tOr skip tests that requires proxy authentication using:\n" +
-      "\tunset NODE_ORACLEDB_PROXY_SESSION_USER\n"
-  });
+  const credential = {...dbConfig, ...additionalOptions};
+  const connection = await oracledb.getConnection(credential);
+  const result = await connection.execute(
+    "select * from dual", [], { outFormat: oracledb.OUT_FORMAT_ARRAY });
+  assert.strictEqual(result.rows[0][0], "X");
+  await connection.close();
 }
 
 before(async function() {
-  await Promise.all(configList.map(async function(conf) {
-    const connection = await oracledb.getConnection(conf);
-    const result = await connection.execute(
-      "select * from dual", [], { outFormat: oracledb.OUT_FORMAT_ARRAY });
-    assert.strictEqual(result.rows[0][0], "X");
-    await connection.close();
-  }));
+  await testConnection("Regular connection");
+  if (dbConfig.test.DBA_PRIVILEGE) {
+    await testConnection("DBA connection", {user: dbConfig.test.DBA_user, password: dbConfig.test.DBA_password, privilege: oracledb.SYSDBA});
+  }
+  if (dbConfig.test.externalAuth) {
+    await testConnection("External auth", {externalAuth: true});
+  }
+  if (dbConfig.test.proxySessionUser) {
+    await testConnection("Proxy Session User", {user: `${dbConfig.user}[${dbConfig.test.proxySessionUser}]`});
+  }
 });

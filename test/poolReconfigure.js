@@ -44,9 +44,7 @@ describe('255. poolReconfigure.js', function() {
   let enableStatisticsOriginalVal = false;
 
   let poolConfig = {
-    user             : dbConfig.user,
-    password         : dbConfig.password,
-    connectionString : dbConfig.connectString,
+    ...dbConfig,
     poolMin          : poolMinOriginalVal,
     poolMax          : poolMaxOriginalVal,
     poolIncrement    : poolIncrementOriginalVal,
@@ -558,9 +556,7 @@ describe('255. poolReconfigure.js', function() {
     let pool;
 
     poolConfig = {
-      user             : dbConfig.user,
-      password         : dbConfig.password,
-      connectionString : dbConfig.connectString,
+      ...dbConfig,
       poolMin          : poolMinOriginalVal,
       poolMax          : poolMaxOriginalVal,
       poolIncrement    : poolIncrementOriginalVal,
@@ -706,9 +702,7 @@ describe('255. poolReconfigure.js', function() {
       await pool.close(0);
 
       poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
         poolIncrement    : poolIncrementOriginalVal,
@@ -801,9 +795,7 @@ describe('255. poolReconfigure.js', function() {
       await pool.close(0);
 
       poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
         poolIncrement    : poolIncrementOriginalVal,
@@ -1025,13 +1017,7 @@ describe('255. poolReconfigure.js', function() {
     it('255.4.14 _enableStats', async function() {
       await pool.close(0);
 
-      let config =  {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectionString  : dbConfig.connectString
-      };
-
-      pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(dbConfig);
 
       let config1 = {
         resetStatistics : true,
@@ -1467,11 +1453,10 @@ describe('255. poolReconfigure.js', function() {
   });
 
   describe('255.6 Pool statistics', function() {
+
     it('255.6.1 get pool statistics by setting _enableStats', async function() {
       let poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolAlias        : "255.6.1.1",
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1506,9 +1491,7 @@ describe('255. poolReconfigure.js', function() {
       await pool.close(0);
 
       poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolAlias        : "255.6.1.2",
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1571,9 +1554,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.6.2 get pool statistics by setting _enableStats', async function() {
       let poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolAlias        : "255.6.2.1",
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1604,9 +1585,7 @@ describe('255. poolReconfigure.js', function() {
       // NOT close the existing pool
 
       poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolAlias        : "255.6.2.2",
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1671,9 +1650,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.6.3 set enableStatistics to true, _enableStats will be ignored', async function() {
       let poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
         poolIncrement    : poolIncrementOriginalVal,
@@ -1691,9 +1668,7 @@ describe('255. poolReconfigure.js', function() {
       await pool1.close(0);
 
       let poolConfig2 = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
         poolIncrement    : poolIncrementOriginalVal,
@@ -1713,9 +1688,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.6.4 set enableStatistics to false, _enableStats will be used', async function() {
       let poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
         poolIncrement    : poolIncrementOriginalVal,
@@ -1733,9 +1706,7 @@ describe('255. poolReconfigure.js', function() {
       await pool1.close(0);
 
       let poolConfig2 = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
         poolIncrement    : poolIncrementOriginalVal,
@@ -1755,9 +1726,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.6.5 set multiple enableStatistics', async function() {
       let poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
         poolIncrement    : poolIncrementOriginalVal,
@@ -1775,9 +1744,7 @@ describe('255. poolReconfigure.js', function() {
       await pool1.close(0);
 
       let poolConfig2 = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
         poolIncrement    : poolIncrementOriginalVal,
@@ -1794,9 +1761,7 @@ describe('255. poolReconfigure.js', function() {
       await pool2.close(0);
 
       let poolConfig3 = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
         poolIncrement    : poolIncrementOriginalVal,
@@ -1817,9 +1782,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.6.6 set multiple _enableStats', async function() {
       let poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
         poolIncrement    : poolIncrementOriginalVal,
@@ -1837,9 +1800,7 @@ describe('255. poolReconfigure.js', function() {
       await pool1.close(0);
 
       let poolConfig2 = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
         poolIncrement    : poolIncrementOriginalVal,
@@ -1856,9 +1817,7 @@ describe('255. poolReconfigure.js', function() {
       await pool2.close(0);
 
       let poolConfig3 = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
         poolIncrement    : poolIncrementOriginalVal,
@@ -1879,9 +1838,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.6.7 get pool statistics by setting enableStatistics', async function() {
       let poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolAlias        : "255.6.7.1",
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1916,9 +1873,7 @@ describe('255. poolReconfigure.js', function() {
       await pool.close(0);
 
       poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolAlias        : "255.6.7.2",
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1981,9 +1936,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.6.8 get pool statistics by setting enableStatistics', async function() {
       let poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolAlias        : "255.6.8.1",
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -2016,9 +1969,7 @@ describe('255. poolReconfigure.js', function() {
       // NOT close the existing pool
 
       poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolAlias        : "255.6.8.2",
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -2084,9 +2035,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.6.9 get pool statistics by setting enableStatistics and _enableStats', async function() {
       let poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolAlias        : "255.6.9.1",
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -2117,9 +2066,7 @@ describe('255. poolReconfigure.js', function() {
       // NOT close the existing pool
 
       poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
+        ...dbConfig,
         poolAlias        : "255.6.9.2",
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -2183,12 +2130,7 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.6.10 logStatistics without enableStatistics', async function() {
-      let poolConfig = {
-        user             : dbConfig.user,
-        password         : dbConfig.password,
-        connectionString : dbConfig.connectString,
-      };
-      const pool = await oracledb.createPool(poolConfig);
+      const pool = await oracledb.createPool(dbConfig);
 
       assert.throws(
         () => pool.logStatistics(),

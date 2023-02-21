@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const should    = require('should');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('252. sodaMetaDataCache.js', function() {
@@ -60,7 +60,7 @@ describe('252. sodaMetaDataCache.js', function() {
     let pool = null;
 
     try {
-      pool = await oracledb.createPool({...dbconfig, sodaMetaDataCache : true});
+      pool = await oracledb.createPool({...dbConfig, sodaMetaDataCache : true});
       should.equal(pool.sodaMetaDataCache, true);
     } catch (err) {
       should.not.exist(err);
@@ -74,7 +74,7 @@ describe('252. sodaMetaDataCache.js', function() {
     let pool = null;
 
     try {
-      pool = await oracledb.createPool({...dbconfig, sodaMetaDataCache : false});
+      pool = await oracledb.createPool({...dbConfig, sodaMetaDataCache : false});
       should.equal(pool.sodaMetaDataCache, false);
     } catch (err) {
       should.not.exist(err);
@@ -88,7 +88,7 @@ describe('252. sodaMetaDataCache.js', function() {
     let pool;
 
     try {
-      pool = await oracledb.createPool(dbconfig);
+      pool = await oracledb.createPool(dbConfig);
       should.equal(pool.sodaMetaDataCache, false);
     } catch (err) {
       should.not.exist(err);
@@ -99,7 +99,7 @@ describe('252. sodaMetaDataCache.js', function() {
 
 
   it('252.4 sodaMetaDataCache from closed pool', async function() {
-    const pool = await oracledb.createPool(dbconfig);
+    const pool = await oracledb.createPool(dbConfig);
     await pool.close();
     should.equal(pool.sodaMetaDataCache, undefined);
   });

@@ -170,8 +170,8 @@ describe('4. binding.js', function() {
 
     it('4.1.5 default bind type - STRING', async function() {
       assert(connection);
-      let sql = "begin :n := 1001; end;";
-      let bindVar = { n : { dir: oracledb.BIND_OUT } };
+      const sql = "begin :n := 1001; end;";
+      const bindVar = { n : { dir: oracledb.BIND_OUT } };
       let options = { };
       let result = await connection.execute(sql, bindVar, options);
       assert.strictEqual(typeof (result.outBinds.n), "string");
@@ -424,18 +424,17 @@ describe('4. binding.js', function() {
 
     it('4.6.1 ', async function() {
 
-      let sql = "begin execute immediate 'drop table does_not_exist purge'; "
+      const sql = "begin execute immediate 'drop table does_not_exist purge'; "
         + "exception when others then "
         + "if sqlcode <> -942 then "
         + "raise; "
         + "end if; end;";
-      let binds = [];
+      const binds = [];
       let options = {};
 
       const connect = await oracledb.getConnection(dbConfig);
       let result = await connect.execute(sql, binds, options);
       assert.deepStrictEqual(result, {});
-
     });
   });
 
@@ -443,8 +442,8 @@ describe('4. binding.js', function() {
   describe ('4.7 Value as JSON named/unamed test cases', function() {
     it('4.7.1 valid case when numeric values are passed as it is',
       async function() {
-        let sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
-        let binds = [ 1, 456 ];
+        const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+        const binds = [ 1, 456 ];
         let connect = await oracledb.getConnection(dbConfig);
         let result = await connect.execute(sql, binds);
         assert((result.rows[0][0]) instanceof Date);
@@ -452,8 +451,8 @@ describe('4. binding.js', function() {
 
     it('4.7.2 Valid values when one of the value is passed as JSON ',
       async function() {
-        let sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
-        let binds = [ 1, { val : 456 } ];
+        const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+        const binds = [ 1, { val : 456 } ];
 
         let connect = await oracledb.getConnection(dbConfig);
         let result = await connect.execute (sql, binds);
@@ -462,8 +461,8 @@ describe('4. binding.js', function() {
 
     it('4.7.3 Valid test case when one of the value is passed as JSON ',
       async function() {
-        let sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
-        let binds = [ {val :  1}, 456 ];
+        const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+        const binds = [ {val :  1}, 456 ];
         let connect = await oracledb.getConnection(dbConfig);
         let result = await connect.execute(sql, binds);
         assert((result.rows[0][0]) instanceof Date);
@@ -471,8 +470,8 @@ describe('4. binding.js', function() {
 
     it ('4.7.4 Valid Test case when both values are passed as JSON',
       async function() {
-        let sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
-        let binds = [ {val : 1}, {val : 456 } ];
+        const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+        const binds = [ {val : 1}, {val : 456 } ];
 
         let connect = await oracledb.getConnection(dbConfig);
         const result = await connect.execute(sql, binds);
@@ -481,8 +480,8 @@ describe('4. binding.js', function() {
 
     it('4.7.5 Invalid Test case when value is passed as named JSON',
       async function() {
-        let sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
-        let binds = [ {val : 1}, { c: {val : 456 } } ];
+        const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+        const binds = [ {val : 1}, { c: {val : 456 } } ];
         let connect = await oracledb.getConnection(dbConfig);
         await assert.rejects(
           async () => await connect.execute(sql, binds),
@@ -493,8 +492,8 @@ describe('4. binding.js', function() {
 
     it('4.7.6 Invalid Test case when other-value is passed as named JSON',
       async function() {
-        let sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
-        let binds = [ { b: {val : 1} }, {val : 456 } ];
+        const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+        const binds = [ { b: {val : 1} }, {val : 456 } ];
         let connect = await oracledb.getConnection(dbConfig);
         await assert.rejects(
           async () => await connect.execute(sql, binds),
@@ -505,8 +504,8 @@ describe('4. binding.js', function() {
 
     it('4.7.7 Invalid Test case when all values is passed as named JSON',
       async function() {
-        let sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
-        let binds = [ { b: {val : 1} }, { c: {val : 456 } } ];
+        const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+        const binds = [ { b: {val : 1} }, { c: {val : 456 } } ];
         let connect = await oracledb.getConnection(dbConfig);
         await assert.rejects(
           async () => await connect.execute(sql, binds),
@@ -619,4 +618,106 @@ describe('4. binding.js', function() {
     }); // 4.8.3
 
   }); // 4.8
+
+  describe('4.9 different placeholders for bind name', function() {
+
+    it('4.9.1 test case sensitivity of quoted bind names', async function() {
+      const sql = 'select :"test" from dual';
+      const binds = {'"test"': 1};
+
+      const connect = await oracledb.getConnection(dbConfig);
+      const result = await connect.execute(sql, binds);
+      assert((result.rows[0][0]), 1);
+      await connect.release();
+    });
+
+    it('4.9.2 using a reserved keyword as a bind name', async function() {
+      const sql = 'select :ROWID from dual';
+
+      const connect = await oracledb.getConnection(dbConfig);
+      await assert.rejects(
+        async () => {
+          await connect.execute(sql, {ROWID:1});
+        },
+        //ORA-01745: invalid host/bind variable name
+        /ORA-01745:/
+      );
+      await connect.release();
+    });
+
+    it('4.9.3 not using a bind name in execute statement', async function() {
+      const sql = 'select :val from dual';
+
+      const connect = await oracledb.getConnection(dbConfig);
+      await assert.rejects(
+        async () => {
+          await connect.execute(sql);
+        },
+        //ORA-01008: not all variables bound
+        //NJS-098: 1 positional bind values are required but 0 were provided
+        /ORA-01008:|NJS-098:/
+      );
+      await connect.release();
+    });
+  }); // 4.9
+
+  describe('4.10 various quoted binds', function() {
+
+    it('4.10.1 various quoted bind names', async function() {
+      const sql = 'SELECT :"percent%" FROM DUAL';
+      const binds = {percent : "percent%" };
+
+      const connect = await oracledb.getConnection(dbConfig);
+      await assert.rejects(
+        async () => {
+          await connect.execute(sql, binds);
+        },
+        //ORA-01036: illegal variable name/number
+        //NJS-097: no bind placeholder named: :PERCENT was found in the SQL text
+        /ORA-01036:|NJS-097:/
+      );
+      await connect.release();
+    });
+  });
+
+  describe('4.11 PL/SQL block with null Binds', function() {
+
+    let connection = null;
+    let createTable =
+      "BEGIN \n"
+         + "DECLARE \n"
+         +    " e_table_missing EXCEPTION; \n"
+         +    " PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n"
+         + " BEGIN \n"
+         + "    EXECUTE IMMEDIATE ('DROP TABLE nodb_empty PURGE'); \n"
+         + "EXCEPTION \n"
+         +  "   WHEN e_table_missing \n"
+         +   "  THEN NULL; \n"
+         + "END; \n"
+         + " EXECUTE IMMEDIATE (' \n"
+         + "    CREATE TABLE nodb_empty ( \n"
+         + "        id NUMBER(4),  \n"
+         + "        name VARCHAR2(32) \n"
+         + "    ) \n"
+         + "'); \n"
+     + "END; ";
+
+    before(async function() {
+      connection = await oracledb.getConnection(dbConfig);
+      await connection.execute(createTable);
+    });
+
+    after(async function() {
+      await connection.execute("DROP TABLE nodb_empty PURGE");
+      await connection.release();
+    });
+
+    it('4.11.1 executing a null with bind values', async function() {
+      await connection.execute(
+        "insert into nodb_empty (ID, NAME) VALUES (:id, :name)",
+        { id: 1, name: null }, // binds object
+        { autoCommit: true }   // options object
+      );
+    });
+  });
 });

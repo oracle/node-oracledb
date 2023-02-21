@@ -1,4 +1,4 @@
-/* Copyright (c) 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2022, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -33,20 +33,20 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 
 describe('261. connHealthy.js', function() {
 
   describe('261.1 connection health on stand alone connections', function() {
     it('261.1.1 connection health on good connection', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const isHealthy = conn.isHealthy();
       assert.strictEqual(isHealthy, true);
       await conn.close();
     });
 
     it('261.1.2 connection health on closed connection', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       await conn.close();
       const isHealthy = conn.isHealthy();
       assert.strictEqual(isHealthy, false);
@@ -55,9 +55,7 @@ describe('261. connHealthy.js', function() {
     it('261.1.3 connection health on closed connection from a pool', async function() {
       const pool = await oracledb.createPool(
         {
-          user              : dbconfig.user,
-          password          : dbconfig.password,
-          connectString     : dbconfig.connectString,
+          ...dbConfig,
           poolMin           : 1,
           poolMax           : 5,
           poolIncrement     : 1,
@@ -66,11 +64,12 @@ describe('261. connHealthy.js', function() {
         });
       assert.strictEqual(pool.connectionsInUse, 0);
       const conn = await pool.getConnection();
-      var isHealthy = conn.isHealthy();
+      let isHealthy = conn.isHealthy();
       assert.strictEqual(isHealthy, true);
       await conn.close();
       isHealthy = conn.isHealthy();
       assert.strictEqual(isHealthy, false);
+      await pool.close();
     });
 
 

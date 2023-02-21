@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('206. dbObject7.js', () => {
@@ -41,7 +41,7 @@ describe('206. dbObject7.js', () => {
   const TYPE = 'NODB_PERSON_T';
 
   before(async () => {
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
 
     let sql =
       `CREATE OR REPLACE TYPE ${TYPE} AS OBJECT (

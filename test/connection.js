@@ -37,12 +37,6 @@ const dbConfig = require('./dbconfig.js');
 
 describe('1. connection.js', function() {
 
-  const credentials = {
-    user:          dbConfig.user,
-    password:      dbConfig.password,
-    connectString: dbConfig.connectString
-  };
-
   describe('1.1 can run SQL query with different output formats', function() {
 
     let connection = null;
@@ -76,7 +70,7 @@ describe('1. connection.js', function() {
       END; ";
 
     before(async function() {
-      connection = await oracledb.getConnection(credentials);
+      connection = await oracledb.getConnection(dbConfig);
       await connection.execute(script);
     });
 
@@ -127,7 +121,7 @@ describe('1. connection.js', function() {
                 + "END; ";
 
     before(async function() {
-      connection = await oracledb.getConnection(credentials);
+      connection = await oracledb.getConnection(dbConfig);
       await connection.execute(proc);
     });
 
@@ -188,7 +182,7 @@ describe('1. connection.js', function() {
     const defaultStmtCache = oracledb.stmtCacheSize; // 30
 
     beforeEach('get connection and prepare table', async function() {
-      connection = await oracledb.getConnection(credentials);
+      connection = await oracledb.getConnection(dbConfig);
       await connection.execute(makeTable);
     });
 
@@ -261,8 +255,8 @@ describe('1. connection.js', function() {
     let conn1 = false;
     let conn2 = false;
     beforeEach('get 2 connections and create the table', async function() {
-      conn1 = await oracledb.getConnection(credentials);
-      conn2 = await oracledb.getConnection(credentials);
+      conn1 = await oracledb.getConnection(dbConfig);
+      conn2 = await oracledb.getConnection(dbConfig);
       await conn1.execute(makeTable, [], { autoCommit: true });
     });
 
@@ -304,7 +298,7 @@ describe('1. connection.js', function() {
   describe('1.5 Close method', function() {
 
     it('1.5.1 close can be used as an alternative to release', async function() {
-      const conn = await oracledb.getConnection(credentials);
+      const conn = await oracledb.getConnection(dbConfig);
       await conn.close();
     });
   });
@@ -312,11 +306,10 @@ describe('1. connection.js', function() {
   describe('1.6 connectionString alias', function() {
 
     it('1.6.1 allows connectionString to be used as an alias for connectString', async function() {
-      const connection = await oracledb.getConnection({
-        user: dbConfig.user,
-        password: dbConfig.password,
-        connectionString: dbConfig.connectString
-      });
+      const credential = {...dbConfig, connectionString: dbConfig.connectString};
+      delete credential.connectString;
+
+      const connection = await oracledb.getConnection(credential);
       await connection.close();
     });
 
@@ -325,12 +318,8 @@ describe('1. connection.js', function() {
   describe('1.7 privileged connections', function() {
 
     it('1.7.1 Negative value - null', async function() {
-      const credential = {
-        user: dbConfig.user,
-        password: dbConfig.password,
-        connectString: dbConfig.connectString,
-        privilege: null
-      };
+      const credential = {...dbConfig, privilege: null};
+
       await assert.rejects(
         async () => await oracledb.getConnection(credential),
         /NJS-007: invalid value for "privilege" in parameter 1/
@@ -338,12 +327,8 @@ describe('1. connection.js', function() {
     });
 
     it('1.7.2 Negative - invalid type, a String', async function() {
-      const credential = {
-        user: dbConfig.user,
-        password: dbConfig.password,
-        connectString: dbConfig.connectString,
-        privilege: 'sysdba'
-      };
+      const credential = {...dbConfig, privilege: 'sysdba'};
+
       await assert.rejects(
         async () => await oracledb.getConnection(credential),
         /NJS-007:/
@@ -351,12 +336,7 @@ describe('1. connection.js', function() {
     });
 
     it('1.7.3 Negative value - random constants', async function() {
-      const credential = {
-        user: dbConfig.user,
-        password: dbConfig.password,
-        connectString: dbConfig.connectString,
-        privilege: 23
-      };
+      const credential = {...dbConfig, privilege: 23};
 
       await assert.rejects(
         async () => await oracledb.getConnection(credential),
@@ -365,12 +345,7 @@ describe('1. connection.js', function() {
     });
 
     it('1.7.4 Negative value - NaN', async function() {
-      const credential = {
-        user: dbConfig.user,
-        password: dbConfig.password,
-        connectString: dbConfig.connectString,
-        privilege: NaN
-      };
+      const credential = {...dbConfig, privilege: NaN};
 
       await assert.rejects(
         async () => await oracledb.getConnection(credential),
@@ -379,13 +354,8 @@ describe('1. connection.js', function() {
     });
 
     it('1.7.5 gets ignored when acquiring a connection from Pool', async function() {
-      const credential = {
-        user: dbConfig.user,
-        password: dbConfig.password,
-        connectString: dbConfig.connectString,
-        privilege: null,
-        poolMin: 1
-      };
+      const credential = {...dbConfig, privilege: null, poolMin: 1};
+
       const pool = await oracledb.createPool(credential);
       const conn = await pool.getConnection();
       await conn.close();
@@ -415,12 +385,7 @@ describe('1. connection.js', function() {
   describe('1.9 connectString & connectionString specified', function() {
 
     it('1.9.1 both connectString & ConnectionString specified', async function() {
-      const credential = {
-        user : dbConfig.user,
-        password : dbConfig.password,
-        connectString : dbConfig.connectString,
-        connectionString : dbConfig.connectString
-      };
+      const credential = {...dbConfig, connectionString: dbConfig.connectString};
 
       await assert.rejects(
         async () => await oracledb.getConnection(credential),
@@ -432,12 +397,7 @@ describe('1. connection.js', function() {
   describe('1.10 user & username specified', function() {
 
     it('1.10.1 both user & username specified', async function() {
-      const credential = {
-        user : dbConfig.user,
-        username : dbConfig.user,
-        password : dbConfig.password,
-        connectString : dbConfig.connectString
-      };
+      const credential = {...dbConfig, username: dbConfig.user};
 
       await assert.rejects(
         async () => await oracledb.getConnection(credential),
@@ -446,11 +406,9 @@ describe('1. connection.js', function() {
     });
 
     it('1.10.2 allows username to be used as an alias for user', async function() {
-      const credential = {
-        username : dbConfig.user,
-        password : dbConfig.password,
-        connectString : dbConfig.connectString
-      };
+      const credential = {...dbConfig};
+      delete credential.user;
+      credential.username = dbConfig.user;
 
       const conn = await oracledb.getConnection(credential);
       await conn.close();
@@ -462,7 +420,7 @@ describe('1. connection.js', function() {
         username : dbConfig.test.DBA_user,
         password : dbConfig.test.DBA_password,
         connectString : dbConfig.connectString,
-        privilege : oracledb.SYSDBA
+        privilege: oracledb.SYSDBA
       };
 
       const conn = await oracledb.getConnection(credential);
@@ -473,11 +431,8 @@ describe('1. connection.js', function() {
   describe('1.11 Invalid credentials', function() {
 
     it('1.11.1 using bad connect string', async function() {
-      const credential = {
-        username : dbConfig.user,
-        password : dbConfig.password,
-        connectString : "invalid connect string"
-      };
+      const credential = {...dbConfig};
+      credential.connectString = "invalid connect string";
 
       await assert.rejects(
         async () => await oracledb.getConnection(credential),
@@ -486,11 +441,8 @@ describe('1. connection.js', function() {
     });
 
     it('1.11.2 using user', async function() {
-      const credential = {
-        username : "tiger",
-        password : dbConfig.password,
-        connectString : dbConfig.connectString
-      };
+      const credential = {...dbConfig};
+      credential.user = "tiger";
 
       await assert.rejects(
         async () => await oracledb.getConnection(credential),
@@ -499,11 +451,8 @@ describe('1. connection.js', function() {
     });
 
     it('1.11.3 using invalid password', async function() {
-      const credential = {
-        username : dbConfig.user,
-        password : "undefined",
-        connectString : dbConfig.connectString
-      };
+      const credential = {...dbConfig};
+      credential.password = "undefined";
 
       await assert.rejects(
         async () => await oracledb.getConnection(credential),
@@ -515,13 +464,7 @@ describe('1. connection.js', function() {
   describe('1.12 confirm an exception is raised after closing a connection', function() {
 
     it('1.12.1 exception_on_close', async function() {
-      const credential = {
-        user : dbConfig.user,
-        password : dbConfig.password,
-        connectString : dbConfig.connectString,
-      };
-      let connection = false;
-      connection = await oracledb.getConnection(credential);
+      const connection = await oracledb.getConnection(dbConfig);
       await connection.close();
       await assert.rejects(
         async () => await connection.execute('SELECT * FROM DUAL'),
@@ -529,4 +472,32 @@ describe('1. connection.js', function() {
       );
     });
   }); //1.12
+
+  describe('1.13 unsupported year to month interval', function() {
+
+    it('1.13.1 test year to month interval not supported', async function() {
+      const connection = await oracledb.getConnection(dbConfig);
+      await assert.rejects(
+        async () => await connection.execute("select INTERVAL '10-2' YEAR TO MONTH from dual"),
+        /NJS-010:/ //NJS-010: unsupported data type 2016 in column 1
+      );
+      await connection.close();
+    });
+  }); //1.13
+
+  describe('1.14 unacceptable boundary values for number datatypes', function() {
+
+    it('1.14.1 unacceptable boundary numbers should get rejected', async function() {
+      const connection = await oracledb.getConnection(dbConfig);
+      const in_values = ["1e126", "-1e126"];
+      await Promise.all(in_values.map(async function(element) {
+        await assert.rejects(
+          async () => await connection.execute("select " + element + " from dual"),
+          /ORA-01426:/ //ORA-01426: numeric overflow
+        );
+      }));
+      await connection.close();
+    });
+  }); //1.14
 });
+

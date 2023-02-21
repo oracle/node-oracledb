@@ -43,12 +43,7 @@ describe('32. dataTypeDate.js', function() {
   var tableName = "nodb_date";
 
   before('get one connection', function(done) {
-    oracledb.getConnection(
-      {
-        user:          dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString
-      },
+    oracledb.getConnection(dbConfig,
       function(err, conn) {
         should.not.exist(err);
         connection = conn;

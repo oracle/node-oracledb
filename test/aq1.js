@@ -34,7 +34,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('217. aq1.js', function() {
@@ -48,7 +48,7 @@ describe('217. aq1.js', function() {
   const RAW_TABLE = 'NODB_RAW_QUEUE_TAB';
 
   before(async function() {
-    if (!dbconfig.test.DBA_PRIVILEGE) {
+    if (!dbConfig.test.DBA_PRIVILEGE) {
       isRunnable = false;
     }
 
@@ -60,7 +60,7 @@ describe('217. aq1.js', function() {
       let credential = {
         user:          AQ_USER,
         password:      AQ_USER_PWD,
-        connectString: dbconfig.connectString
+        connectString: dbConfig.connectString
       };
       conn = await oracledb.getConnection(credential);
 

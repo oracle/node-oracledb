@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('232. nestedCursor01.js', () => {
@@ -43,7 +43,7 @@ describe('232. nestedCursor01.js', () => {
   const addrTab   = 'nodb_nc01_addr';
 
   before(async () => {
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
     let sql =
       `create table ${peopleTab} (
          id number,

@@ -36,7 +36,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('222. callTimeout.js', function() {
@@ -46,14 +46,14 @@ describe('222. callTimeout.js', function() {
 
   before(async function() {
 
-    const isQA = dbconfig.test.NODE_ORACLEDB_QA;
+    const isQA = dbConfig.test.NODE_ORACLEDB_QA;
     const prep = await testsUtil.checkPrerequisites();
     isRunnable = isQA && prep;
     if (!isRunnable) {
       this.skip();
       return;
     } else {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
     }
   }); // before()
 

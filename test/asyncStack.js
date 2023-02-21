@@ -33,6 +33,7 @@
 
 const oracledb = require('oracledb');
 const assert = require('assert');
+const dbConfig = require('./dbconfig.js');
 
 const asyncMiddleware = async () => {
   await oracledb.getConnection({connectString: 'doesnotexist.oracle.com'});
@@ -44,8 +45,8 @@ describe('263. asyncStack.js', () => {
     await assert.rejects(
       async () => await asyncMiddleware(),
       (e) => {
-        assert.ok(e.stack.includes('asyncStack.js:38:'), e.stack);
-        assert.ok(e.stack.includes('asyncStack.js:45:'), e.stack);
+        assert.ok(e.stack.includes('asyncStack.js:39:'), e.stack);
+        assert.ok(e.stack.includes('asyncStack.js:46:'), e.stack);
         return true;
       }
     );
@@ -63,23 +64,18 @@ describe('263. asyncStack.js', () => {
     await assert.rejects(
       async () => await oracledb.createPool(config),
       (e) => {
-        assert.ok(e.stack.includes('asyncStack.js:64:'), e.stack);
+        assert.ok(e.stack.includes('asyncStack.js:65:'), e.stack);
         return true;
       }
     );
   });
 
   it('263.3 stack on error in execute', async () => {
-    const config = {
-      user          : process.env.NODE_ORACLEDB_USER,
-      password      : process.env.NODE_ORACLEDB_PASSWORD,
-      connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING
-    };
-    const conn = await oracledb.getConnection(config);
+    const conn = await oracledb.getConnection(dbConfig);
     await assert.rejects(
       async () => await conn.execute("SELECT * FROM NON_EXISTENT_TABLE"),
       (e) => {
-        assert.ok(e.stack.includes('asyncStack.js:80:'), e.stack);
+        assert.ok(e.stack.includes('asyncStack.js:75:'), e.stack);
         return true;
       }
     );

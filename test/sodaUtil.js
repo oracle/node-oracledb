@@ -32,7 +32,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 
 let sodaUtil = exports;
 module.exports = sodaUtil;
@@ -40,7 +40,7 @@ module.exports = sodaUtil;
 let isSodaRoleGranted = false;
 
 sodaUtil.cleanup = async function() {
-  const conn = await oracledb.getConnection(dbconfig);
+  const conn = await oracledb.getConnection(dbConfig);
   try {
     let sd = conn.getSodaDatabase();
 
@@ -59,7 +59,7 @@ sodaUtil.cleanup = async function() {
 
 sodaUtil.isSodaRoleGranted = async function() {
   if (isSodaRoleGranted == false) {
-    let conn = await oracledb.getConnection(dbconfig);
+    let conn = await oracledb.getConnection(dbConfig);
     let sql = `select count(*) from user_role_privs where GRANTED_ROLE='SODA_APP'`;
     let result = await conn.execute(sql);
     if (result.rows[0][0] == 1) {

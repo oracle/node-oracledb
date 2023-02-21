@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 
 describe('214. dbObject15.js', () => {
 
@@ -51,7 +51,7 @@ describe('214. dbObject15.js', () => {
   ];
 
   before(async () => {
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
 
     let plsql = `
       CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (

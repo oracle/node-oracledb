@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 
 describe('237. indexedTables01.js', () => {
 
@@ -41,7 +41,7 @@ describe('237. indexedTables01.js', () => {
   let pkgName = 'nodb_pkg_indexed_tables';
 
   before(async () => {
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
 
     let plsql = `
       create or replace package ${pkgName} as

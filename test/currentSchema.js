@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('191. currentSchema.js', function() {
@@ -52,10 +52,10 @@ describe('191. currentSchema.js', function() {
   it('191.1 the value will be empty until it has been explicitly set', async () => {
 
     try {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       assert.strictEqual(conn.currentSchema, '');
 
-      let schema = dbconfig.user;
+      let schema = dbConfig.user;
       conn.currentSchema = schema;
       assert.strictEqual(conn.currentSchema, schema);
 
@@ -69,9 +69,9 @@ describe('191. currentSchema.js', function() {
   it('191.2 SQL alternative', async () => {
 
     try {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
 
-      let schema = dbconfig.user.toUpperCase();
+      let schema = dbConfig.user.toUpperCase();
       let query = "ALTER SESSION SET CURRENT_SCHEMA = " + schema;
       await conn.execute(query);
       assert.strictEqual(conn.currentSchema, schema);
@@ -86,7 +86,7 @@ describe('191. currentSchema.js', function() {
   it('191.3 Negative - can not set inexistent schema', async () => {
 
     async function setInvalidSchema() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
 
       let schema = "foo";
       conn.currentSchema = schema;

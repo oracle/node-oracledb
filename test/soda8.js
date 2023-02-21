@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -55,7 +55,7 @@ describe('176. soda7.js', () => {
     let conn, collection;
 
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_1");
 
@@ -105,7 +105,7 @@ describe('176. soda7.js', () => {
     let conn, collection;
 
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_2");
 
@@ -156,7 +156,7 @@ describe('176. soda7.js', () => {
     let conn, collection;
 
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_3");
 
@@ -205,7 +205,7 @@ describe('176. soda7.js', () => {
     let conn, collection;
 
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_4");
 
@@ -255,7 +255,7 @@ describe('176. soda7.js', () => {
     let conn, collection;
 
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_5");
 
@@ -305,7 +305,7 @@ describe('176. soda7.js', () => {
     let conn, collection;
 
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_6");
 
@@ -357,7 +357,7 @@ describe('176. soda7.js', () => {
     let conn, collection;
 
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_7");
 
@@ -398,7 +398,7 @@ describe('176. soda7.js', () => {
     let conn, collection;
 
     try {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
       let soda = await conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_176_8");
 

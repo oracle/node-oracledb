@@ -74,13 +74,8 @@ describe('10. nullColumnValues.js', function() {
                    (90, ''Executive'', 100, 1700) \
             '); \
         END; ";
-    connection = await oracledb.getConnection(
-      {
-        user:          dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString
-      });
 
+    connection = await oracledb.getConnection(dbConfig);
     await connection.execute(makeTable);
   });
 

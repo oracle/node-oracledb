@@ -34,7 +34,7 @@
 const oracledb  = require('oracledb');
 const should    = require('should');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('225. cqn02.js', function() {
@@ -53,7 +53,7 @@ describe('225. cqn02.js', function() {
   it('225.1 Negative - DB version or client version is less than 19.4', async () => {
     try {
       const conn = await oracledb.getConnection({
-        ...dbconfig,
+        ...dbConfig,
         events: true
       });
       const TABLE = 'nodb_tab_cqn02';

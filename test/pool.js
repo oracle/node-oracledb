@@ -56,10 +56,7 @@ describe('2. pool.js', function() {
   describe('2.2 poolMin', function() {
 
     it('2.2.1 poolMin cannot be a negative number', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : -5,
         poolMax           : 5,
         poolIncrement     : 1,
@@ -73,10 +70,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.2.2 poolMin must be a Number', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : NaN,
         poolMax           : 5,
         poolIncrement     : 1,
@@ -90,10 +84,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.2.3 poolMin cannot greater than poolMax', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 10,
         poolMax           : 5,
         poolIncrement     : 1,
@@ -107,10 +98,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.2.4 (poolMin + poolIncrement) can equal to poolMax', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 1,
         poolMax           : 5,
         poolIncrement     : 4,
@@ -127,10 +115,7 @@ describe('2. pool.js', function() {
   describe('2.3 poolMax', function() {
 
     it('2.3.1 poolMax cannot be a negative value', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 5,
         poolMax           : -5,
         poolIncrement     : 1,
@@ -144,10 +129,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.3.2 poolMax cannot be 0', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 0,
         poolMax           : 0,
         poolIncrement     : 1,
@@ -161,10 +143,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.3.3 poolMax must be a number', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : true,
         poolMax           : 5,
         poolIncrement     : 1,
@@ -213,10 +192,7 @@ describe('2. pool.js', function() {
   describe('2.4 poolIncrement', function() {
 
     it('2.4.1 poolIncrement cannot be a negative value', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 1,
         poolMax           : 5,
         poolIncrement     : -1,
@@ -230,10 +206,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.4.2 poolIncrement must be a Number', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 1,
         poolMax           : 10,
         poolIncrement     : false,
@@ -247,10 +220,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.4.3 the amount of open connections equals to poolMax when (connectionsOpen + poolIncrement) > poolMax', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 1,
         poolMax           : 4,
         poolIncrement     : 2,
@@ -280,10 +250,7 @@ describe('2. pool.js', function() {
   describe('2.5 poolTimeout', function() {
 
     it('2.5.1 poolTimeout cannot be a negative number', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 1,
         poolMax           : 5,
         poolIncrement     : 1,
@@ -297,10 +264,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.5.2 poolTimeout can be 0, which disables timeout feature', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 1,
         poolMax           : 5,
         poolIncrement     : 1,
@@ -312,10 +276,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.5.3 poolTimeout must be a number', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 1,
         poolMax           : 5,
         poolIncrement     : 1,
@@ -333,10 +294,7 @@ describe('2. pool.js', function() {
   describe('2.6 stmtCacheSize', function() {
 
     it('2.6.1 stmtCacheSize cannot be a negative value', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 1,
         poolMax           : 5,
         poolIncrement     : 1,
@@ -350,10 +308,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.6.2 stmtCacheSize can be 0', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 1,
         poolMax           : 5,
         poolIncrement     : 1,
@@ -365,10 +320,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.6.3 stmtCacheSize must be a Number', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 1,
         poolMax           : 5,
         poolIncrement     : 1,
@@ -387,10 +339,7 @@ describe('2. pool.js', function() {
     let pool1;
 
     beforeEach('get pool ready', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 1,
         poolMax           : 2,
         poolIncrement     : 1,
@@ -429,10 +378,7 @@ describe('2. pool.js', function() {
     }
 
     it('2.8.1 basic case', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 0,
         poolMax           : 1,
         poolIncrement     : 1,
@@ -456,10 +402,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.8.2 generates NJS-040 if request is queued and queueTimeout expires', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 0,
         poolMax           : 1,
         poolIncrement     : 1,
@@ -486,10 +429,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.8.3 does not generate NJS-040 if request is queued for less time than queueTimeout', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 0,
         poolMax           : 1,
         poolIncrement     : 1,
@@ -514,10 +454,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.8.4 generates NJS-076 if request exceeds queueMax', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 1,
         poolMax           : 1,
         poolIncrement     : 0,
@@ -547,10 +484,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.8.5 generates NJS-076 if request exceeds queueMax 0', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 1,
         poolMax           : 1,
         poolIncrement     : 0,
@@ -568,10 +502,7 @@ describe('2. pool.js', function() {
     });
 
     it('2.8.6 request queue never terminate for queueTimeout set to 0', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 0,
         poolMax           : 1,
         poolIncrement     : 1,
@@ -600,10 +531,7 @@ describe('2. pool.js', function() {
   describe('2.9 _enableStats & _logStats functionality', function() {
 
     it('2.9.1 does not work after the pool has been terminated', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 0,
         poolMax           : 1,
         poolIncrement     : 1,
@@ -626,10 +554,7 @@ describe('2. pool.js', function() {
   describe('2.10 Close method', function() {
 
     it('2.10.1 close can be used as an alternative to release', async function() {
-      const config = {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin           : 0,
         poolMax           : 1,
         poolIncrement     : 1,
@@ -643,7 +568,7 @@ describe('2. pool.js', function() {
 
   describe('2.11 Invalid Credential', function() {
 
-    it('2.11.1 error occurs at creating pool when poolMin >= 1', async function() {
+    it('2.11.1 error occurs at creating pool when poolMin (user defined) greater than or equal to poolMax (default)', async function() {
       const config = {
         user: 'notexist',
         password: 'nopass',
@@ -658,9 +583,9 @@ describe('2. pool.js', function() {
 
     it('2.11.2 error occurs at getConnection() when poolMin is the default value 0', async function() {
       const config = {
+        ...dbConfig,
         user: 'notexist',
         password: 'nopass',
-        connectString: dbConfig.connectString
       };
       const pool = await oracledb.createPool(config);
       await assert.rejects(
@@ -675,10 +600,7 @@ describe('2. pool.js', function() {
   describe('2.12 connectionString alias', function() {
 
     it('2.12.1 allows connectionString to be used as an alias for connectString', async function() {
-      const config = {
-        user: dbConfig.user,
-        password: dbConfig.password,
-        connectionString: dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin: 1,
         poolMax: 1,
         poolIncrement: 0
@@ -692,10 +614,7 @@ describe('2. pool.js', function() {
   describe('2.13 connectString & connectionString provided', function() {
 
     it('2.13.1 both connectString & connectionString provided', async function() {
-      const config = {
-        user: dbConfig.user,
-        password: dbConfig.password,
-        connectString: dbConfig.connectString,
+      const config = {...dbConfig,
         connectionString: dbConfig.connectString,
         poolMin: 1,
         poolMax: 1,
@@ -713,23 +632,20 @@ describe('2. pool.js', function() {
 
     it('2.14.1 allows username to be used as an alias for user', async function() {
       const config = {
+        ...dbConfig,
         username: dbConfig.user,
-        password: dbConfig.password,
-        connectString: dbConfig.connectString,
         poolMin: 1,
         poolMax: 1,
         poolIncrement: 0
       };
+      delete config.user;
       const pool = await oracledb.createPool(config);
       await pool.close();
     }); // 2.14.1
 
     it('2.14.2 both user and username specified', async function() {
-      const config = {
-        user: dbConfig.user,
+      const config = {...dbConfig,
         username: dbConfig.user,
-        password: dbConfig.password,
-        connectString: dbConfig.connectString,
         poolMin: 1,
         poolMax: 1,
         poolIncrement: 0
@@ -743,31 +659,30 @@ describe('2. pool.js', function() {
     it('2.14.3 uses username alias to login with SYSDBA privilege', async function() {
       if (!dbConfig.test.DBA_PRIVILEGE) return this.skip();
       const config = {
+        ...dbConfig,
         username: dbConfig.user,
-        password: dbConfig.password,
-        connectString: dbConfig.connectString,
         privilege : oracledb.SYSDBA,
         poolMin: 1,
         poolMax: 1,
         poolIncrement: 0
       };
+      delete config.user;
       const pool = await oracledb.createPool(config);
       await pool.close();
     }); // 2.14.3
 
   }); // 2.14
-
   describe('2.15 creation time non editable properties', function() {
 
     it('2.15.1 default edition value', async function() {
       const config = {
+        ...dbConfig,
         username:      dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString,
         poolMin:       1,
         poolMax:       1,
         poolIncrement: 0
       };
+      delete config.user;
       const pool = await oracledb.createPool(config);
       assert.strictEqual(pool.edition, "");
       await pool.close();
@@ -775,14 +690,14 @@ describe('2. pool.js', function() {
 
     it('2.15.2 ORA$BASE edition value', async function() {
       const config = {
+        ...dbConfig,
         username:      dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString,
         poolMin:       1,
         poolMax:       1,
         poolIncrement: 0,
         edition:       "ORA$BASE"
       };
+      delete config.user;
       const pool = await oracledb.createPool(config);
       assert.strictEqual(pool.edition, "ORA$BASE");
       await pool.close();
@@ -790,13 +705,13 @@ describe('2. pool.js', function() {
 
     it('2.15.3 default value for events - false', async function() {
       const config = {
+        ...dbConfig,
         username:      dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString,
         poolMin:       1,
         poolMax:       1,
         poolIncrement: 0
       };
+      delete config.user;
       const pool = await oracledb.createPool(config);
       assert.strictEqual(pool.events, false);
       await pool.close();
@@ -804,14 +719,14 @@ describe('2. pool.js', function() {
 
     it('2.15.4 events - false', async function() {
       const config = {
+        ...dbConfig,
         username:      dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString,
         poolMin:       1,
         poolMax:       1,
         poolIncrement: 0,
         events:        false
       };
+      delete config.user;
       const pool = await oracledb.createPool(config);
       assert.strictEqual(pool.events, false);
       await pool.close();
@@ -819,14 +734,14 @@ describe('2. pool.js', function() {
 
     it('2.15.5 events - true', async function() {
       const config = {
+        ...dbConfig,
         username:      dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString,
         poolMin:       1,
         poolMax:       1,
         poolIncrement: 0,
         events:        true
       };
+      delete config.user;
       const pool = await oracledb.createPool(config);
       assert.strictEqual(pool.events, true);
       await pool.close();
@@ -834,13 +749,13 @@ describe('2. pool.js', function() {
 
     it('2.15.6 externalAuth - default false', async function() {
       const config = {
+        ...dbConfig,
         username:      dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString,
         poolMin:       1,
         poolMax:       1,
         poolIncrement: 0,
       };
+      delete config.user;
       const pool = await oracledb.createPool(config);
       assert.strictEqual(pool.externalAuth, false);
       await pool.close();
@@ -861,14 +776,14 @@ describe('2. pool.js', function() {
 
     it('2.15.8 externalAuth - false', async function() {
       const config = {
+        ...dbConfig,
         username :     dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString,
         poolMin:       1,
         poolMax:       1,
         poolIncrement: 0,
         externalAuth:  false
       };
+      delete config.user;
       const pool = await oracledb.createPool(config);
       assert.strictEqual(pool.externalAuth, false);
       await pool.close();
@@ -876,13 +791,13 @@ describe('2. pool.js', function() {
 
     it('2.15.9 homogeneous - default true', async function() {
       const config = {
+        ...dbConfig,
         username:      dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString,
         poolMin:       1,
         poolMax:       1,
         poolIncrement: 0,
       };
+      delete config.user;
       const pool = await oracledb.createPool(config);
       assert.strictEqual(pool.homogeneous, true);
       await pool.close();
@@ -890,14 +805,14 @@ describe('2. pool.js', function() {
 
     it('2.15.10 homogeneous - true', async function() {
       const config = {
+        ...dbConfig,
         username:      dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString,
         poolMin:       1,
         poolMax:       1,
         poolIncrement: 0,
         homogeneous:   true
       };
+      delete config.user;
       const pool = await oracledb.createPool(config);
       assert.strictEqual(pool.homogeneous, true);
       await pool.close();
@@ -905,24 +820,21 @@ describe('2. pool.js', function() {
 
     it('2.15.11 homogeneous - false', async function() {
       const config = {
+        ...dbConfig,
         username:      dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString,
         poolMin:       1,
         poolMax:       1,
         poolIncrement: 0,
         homogeneous:   false
       };
+      delete config.user;
       const pool = await oracledb.createPool(config);
       assert.strictEqual(pool.homogeneous, false);
       await pool.close();
     });  // 2.15.11
 
     it('2.15.12 user name', async function() {
-      const config = {
-        user:          dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString,
+      const config = {...dbConfig,
         poolMin:       1,
         poolMax:       1,
         poolIncrement: 0,
@@ -951,9 +863,7 @@ describe('2. pool.js', function() {
 
     it('2.15.14 connectString', async function() {
       const config = {
-        user:          dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString,
+        ...dbConfig,
         poolMin:       1,
         poolMax:       1,
         poolIncrement: 0,
@@ -969,13 +879,13 @@ describe('2. pool.js', function() {
 
     it('2.16.1 edition only globally set', async function() {
       const config = {
+        ...dbConfig,
         username: dbConfig.user,
-        password: dbConfig.password,
-        connectString: dbConfig.connectString,
         poolMin: 1,
         poolMax: 1,
         poolIncrement: 0
       };
+      delete config.user;
       oracledb.edition = "ORA$BASE";
       const pool = await oracledb.createPool(config);
       oracledb.edition = "";
@@ -985,14 +895,14 @@ describe('2. pool.js', function() {
 
     it('2.16.2 edition override', async function() {
       const config = {
+        ...dbConfig,
         username: dbConfig.user,
-        password: dbConfig.password,
-        connectString: dbConfig.connectString,
         poolMin: 1,
         poolMax: 1,
         poolIncrement: 0,
         edition: "ORA$BASE"
       };
+      delete config.user;
       oracledb.edition = "";
       const pool = await oracledb.createPool(config);
       assert.strictEqual(pool.edition, "ORA$BASE");
@@ -1001,14 +911,14 @@ describe('2. pool.js', function() {
 
     it('2.16.3 edition override to empty string', async function() {
       const config = {
+        ...dbConfig,
         username: dbConfig.user,
-        password: dbConfig.password,
-        connectString: dbConfig.connectString,
         poolMin: 1,
         poolMax: 1,
         poolIncrement: 0,
         edition: ""
       };
+      delete config.user;
       oracledb.edition = "ORA$BASE";
       const pool = await oracledb.createPool(config);
       oracledb.edition = "";
@@ -1021,14 +931,14 @@ describe('2. pool.js', function() {
       oracledb.events = false;
       try {
         const config = {
+          ...dbConfig,
           username: dbConfig.user,
-          password: dbConfig.password,
-          connectString: dbConfig.connectString,
           poolMin: 1,
           poolMax: 1,
           poolIncrement: 0,
           events: true
         };
+        delete config.user;
         const pool = await oracledb.createPool(config);
         assert.strictEqual(pool.events, true);
         await pool.close();
@@ -1042,9 +952,7 @@ describe('2. pool.js', function() {
       oracledb.events = true;
       try {
         const config = {
-          username: dbConfig.user,
-          password: dbConfig.password,
-          connectString: dbConfig.connectString,
+          ...dbConfig,
           poolMin: 1,
           poolMax: 1,
           poolIncrement: 0,
@@ -1063,14 +971,14 @@ describe('2. pool.js', function() {
       oracledb.externalAuth = true;
       try {
         const config = {
+          ...dbConfig,
           username: dbConfig.user,
-          password: dbConfig.password,
-          connectString: dbConfig.connectString,
           poolMin: 1,
           poolMax: 1,
           poolIncrement: 0,
           externalAuth: false
         };
+        delete config.user;
         const pool = await oracledb.createPool(config);
         assert.strictEqual(pool.externalAuth, false);
         await pool.close();

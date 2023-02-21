@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -36,6 +36,7 @@ const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const sql      = require('./sqlClone.js');
 const random   = require('./random.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('144. urowidProcedureBindAsString4.js', function() {
   let connection = null;
@@ -203,7 +204,7 @@ describe('144. urowidProcedureBindAsString4.js', function() {
     assert(result);
     urowid = result.rows[0][0];
     urowidLen = urowid.length;
-    urowidLen.should.be.above(expectedLength);
+    testsUtil.checkUrowidLength(urowidLen, expectedLength);
 
     const bindVar_in = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -232,7 +233,7 @@ describe('144. urowidProcedureBindAsString4.js', function() {
     assert(result);
     urowid_1 = result.rows[0][0];
     urowidLen_1 = urowid_1.length;
-    urowidLen_1.should.be.above(contentLen_1);
+    testsUtil.checkUrowidLength(urowidLen_1, contentLen_1);
     id_2 = insertID + 1;
     sql_insert = "insert into " + tableName_indexed + " values (" + id_2 + ", '" + str_2 + "')";
     result = await connection.execute(sql_insert);
@@ -240,7 +241,7 @@ describe('144. urowidProcedureBindAsString4.js', function() {
     assert(result);
     urowid_2 = result.rows[0][0];
     urowidLen_2 = urowid_2.length;
-    urowidLen_2.should.be.above(contentLen_2);
+    testsUtil.checkUrowidLength(urowidLen_2, contentLen_2);
 
     const bindVar_in = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },

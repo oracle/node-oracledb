@@ -287,4 +287,13 @@ describe('162. getStmtInfo.js', function() {
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_UNKNOWN);
   });
 
+  it('162.27 test various quoted bind names', async function() {
+
+    const in_values = ["percent%", "q?marks", "percent%(ens)yah", "per % cent", "per cent", "par(ens)", "more/slashes", "%percent", "/slashes/", "1col:on", "col:ons", "more :: %colons%", "more/slashes", "spaces % more spaces"];
+    await Promise.all(in_values.map(async function(element) {
+      let sql = "select :\"" + element + "\" from dual";
+      let info = await conn.getStatementInfo(sql);
+      assert.deepEqual(info.bindNames, [element]);
+    }));
+  }); // 162.2
 });

@@ -33,7 +33,7 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 
 describe('250. rsGetAllRows2.js', function() {
   let conn = null;
@@ -81,7 +81,7 @@ describe('250. rsGetAllRows2.js', function() {
 
   before(async function() {
     oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
     await conn.execute(create_table_dept_sql);
     await conn.execute(deptInsert, [101, "R&D"]);
     await conn.execute(deptInsert, [201, "Sales"]);

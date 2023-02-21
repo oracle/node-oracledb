@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('239. plsqlBindCursorsIN.js', () => {
@@ -58,7 +58,7 @@ describe('239. plsqlBindCursorsIN.js', () => {
   `;
 
   before(async () => {
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
 
     let sql = `
       create table ${tableName} (
@@ -215,7 +215,7 @@ describe('239. plsqlBindCursorsIN.js', () => {
   }); // 239.4
 
   it('239.5 check REF CURSOR round-trips with no prefetching', async () => {
-    if (!dbconfig.test.DBA_PRIVILEGE) {
+    if (!dbConfig.test.DBA_PRIVILEGE) {
       it.skip('');
       return;
     }
@@ -239,7 +239,7 @@ describe('239. plsqlBindCursorsIN.js', () => {
   }); // 239.5
 
   it('239.6 check REF CURSOR round-trips with prefetching', async () => {
-    if (!dbconfig.test.DBA_PRIVILEGE) {
+    if (!dbConfig.test.DBA_PRIVILEGE) {
       it.skip('');
       return;
     }

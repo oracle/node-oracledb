@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 
 describe('233. nestedCursor02.js', () => {
 
@@ -91,7 +91,7 @@ describe('233. nestedCursor02.js', () => {
       return fetchedRows;
     } // traverse_results()
 
-    let conn = await oracledb.getConnection(dbconfig);
+    let conn = await oracledb.getConnection(dbConfig);
 
     const rowsSimple = [
       [ 1, 'Nested Row 1' ], [ 2, 'Nested Row 2' ], [ 3, 'Nested Row 3' ]

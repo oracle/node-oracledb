@@ -34,7 +34,7 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 
 describe('187. plsqlBindList.js', function() {
 
@@ -59,7 +59,7 @@ describe('187. plsqlBindList.js', function() {
   }
 
   before(async function() {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     let packageSql =
       "create or replace package pkg_bind_number_list_test as \n" +
       "  type udt_NumberList is table of number index by binary_integer; \n" +
@@ -110,7 +110,7 @@ describe('187. plsqlBindList.js', function() {
   });
 
   after(async function() {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     await conn.execute("drop package pkg_bind_number_list_test");
     await conn.execute("drop package pkg_bind_string_list_test");
     await conn.close();
@@ -119,7 +119,7 @@ describe('187. plsqlBindList.js', function() {
   describe('187.1 Positive Cases', function() {
 
     it('187.1.1 Bind Object of List by position with type specified', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const res = await bindNumberListByPosition(conn, [
         { type: oracledb.NUMBER, val: [ 1, 2, 3, 4, 5 ] },
         { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
@@ -129,7 +129,7 @@ describe('187. plsqlBindList.js', function() {
     });
 
     it('187.1.2 Bind Object of List by name with type specified', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const res = await bindNumberListByName(conn, {
         bind_arg1: { type: oracledb.NUMBER, val: [ 1, 2, 3, 4, 5 ] },
         bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
@@ -139,7 +139,7 @@ describe('187. plsqlBindList.js', function() {
     });
 
     it('187.1.3 Bind List by position without type specified', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const res = await bindNumberListByPosition(conn, [
         [ 1, 2, 3, 4, 5 ],
         { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
@@ -149,7 +149,7 @@ describe('187. plsqlBindList.js', function() {
     });
 
     it('187.1.4 Bind List by name without type specified', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const res = await bindNumberListByName(conn, {
         bind_arg1: [ 1, 2, 3, 4, 5 ],
         bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
@@ -159,7 +159,7 @@ describe('187. plsqlBindList.js', function() {
     });
 
     it('187.1.5 Bind STRING List by name without type specified', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const res = await bindStringListByName(conn, {
         bind_arg1: [ "1", "2", "3", "4", "5" ],
         bind_arg2: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
@@ -169,7 +169,7 @@ describe('187. plsqlBindList.js', function() {
     });
 
     it('187.1.6 Bind STRING List by position without type specified', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const res = await bindStringListByPosition(conn, [
         [ "1", "2", "3", "4", "5" ],
         { type: oracledb.STRING, dir: oracledb.BIND_OUT },
@@ -183,7 +183,7 @@ describe('187. plsqlBindList.js', function() {
   describe('187.2 Negative Cases', function() {
 
     it('187.2.1 Bind Empty List by position with type specified', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const res = await bindNumberListByPosition(conn, [
         { type: oracledb.NUMBER, val: [] },
         { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
@@ -193,7 +193,7 @@ describe('187. plsqlBindList.js', function() {
     });
 
     it('187.2.2 Bind Empty List by position without type specified', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const binds = [
         [],
         { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
@@ -207,7 +207,7 @@ describe('187. plsqlBindList.js', function() {
     });
 
     it('187.2.3 Bind Empty List by name with type specified', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const res = await bindNumberListByName(conn, {
         bind_arg1: { type: oracledb.NUMBER, val: [] },
         bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
@@ -217,7 +217,7 @@ describe('187. plsqlBindList.js', function() {
     });
 
     it('187.2.4 Bind Empty List by name without type specified', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const binds = {
         bind_arg1: [],
         bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
@@ -231,7 +231,7 @@ describe('187. plsqlBindList.js', function() {
     });
 
     it('187.2.5 Bind NUMBER List by name with STRING as first element', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const binds = {
         bind_arg1: [ "1", 2, 3, 4, 5 ],
         bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
@@ -245,7 +245,7 @@ describe('187. plsqlBindList.js', function() {
     });
 
     it('187.2.6 Bind NUMBER List by position with STRING as second element', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const binds = [
         [ 1, "2", 3, 4, 5 ],
         { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
@@ -259,7 +259,7 @@ describe('187. plsqlBindList.js', function() {
     });
 
     it('187.2.7 Bind STRING List by name while required type is NUMBER', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const binds = {
         bind_arg1: [ "1", "2", "3", "4", "5" ],
         bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
@@ -273,7 +273,7 @@ describe('187. plsqlBindList.js', function() {
     });
 
     it('187.2.8 Bind STRING List by position while required type is NUMBER', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const binds = [
         [ "1", "2", "3", "4", "5" ],
         { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
@@ -287,7 +287,7 @@ describe('187. plsqlBindList.js', function() {
     });
 
     it('187.2.9 Bind NUMBER List by name while required type is STRING', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const binds = {
         bind_arg1: [ 1, 2, 3, 4, 5 ],
         bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
@@ -301,7 +301,7 @@ describe('187. plsqlBindList.js', function() {
     });
 
     it('187.2.10 Bind NUMBER List by position while required type is STRING', async function() {
-      const conn = await oracledb.getConnection(dbconfig);
+      const conn = await oracledb.getConnection(dbConfig);
       const binds = [
         [ 1, 2, 3, 4, 5 ],
         { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },

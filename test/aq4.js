@@ -32,7 +32,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 const assert    = require('assert');
 
@@ -92,7 +92,7 @@ describe('267. aq4.js', function() {
   `;
 
   before(async function() {
-    if (!dbconfig.test.DBA_PRIVILEGE) {
+    if (!dbConfig.test.DBA_PRIVILEGE) {
       this.skip();
       return;
     }
@@ -102,7 +102,7 @@ describe('267. aq4.js', function() {
     const credential = {
       user:          AQ_USER,
       password:      AQ_USER_PWD,
-      connectString: dbconfig.connectString
+      connectString: dbConfig.connectString
     };
     conn = await oracledb.getConnection(credential);
 
@@ -112,7 +112,7 @@ describe('267. aq4.js', function() {
 
 
   after(async function() {
-    if (!dbconfig.test.DBA_PRIVILEGE)
+    if (!dbConfig.test.DBA_PRIVILEGE)
       return;
 
     if (conn)

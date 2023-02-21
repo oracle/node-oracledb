@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -50,14 +50,14 @@ describe('164. soda1.js', () => {
   });
 
   it('164.1 getSodaDatabase() creates a sodaDatabase Object', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
     assert(sd);
     await conn.close();
   }); // 164.1
 
   it('164.2 createCollection() creates a collection', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
     const collName = "soda_test_164_2";
     const coll = await sd.createCollection(collName);
@@ -66,7 +66,7 @@ describe('164. soda1.js', () => {
   });// 164.2
 
   it('164.3 openCollection() opens an existing collection', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
     const collName = "soda_test_164_3";
     const coll = await sd.createCollection(collName);
@@ -78,7 +78,7 @@ describe('164. soda1.js', () => {
   }); // 164.3
 
   it('164.4 getCollectionNames() gets an array of collection names', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
 
     const collNames = [
@@ -112,7 +112,7 @@ describe('164. soda1.js', () => {
   }); // 164.4
 
   it('164.5 the operation status of collection.drop()', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
     const collName = "soda_test_164_5";
     const coll = await sd.createCollection(collName);
@@ -122,7 +122,7 @@ describe('164. soda1.js', () => {
   }); // 164.5
 
   it('164.6 Negative: the operation status of collection.drop()', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
     const collName = "soda_test_164_6";
     const coll = await sd.createCollection(collName);
@@ -133,7 +133,7 @@ describe('164. soda1.js', () => {
   }); // 164.6
 
   it('164.7 get one document', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
     const collectionName = 'soda_test_164_7';
     const coll = await sd.createCollection(collectionName);
@@ -160,7 +160,7 @@ describe('164. soda1.js', () => {
   }); // 164.7
 
   it('164.8 get multiple documents', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
     const collectionName = 'soda_test_164_8';
     const coll = await sd.createCollection(collectionName);
@@ -193,7 +193,7 @@ describe('164. soda1.js', () => {
 
   it('164.9 create index', async () => {
     const indexName = "soda_index_164_9";
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
     const collectionName = 'soda_test_164_9';
     const coll = await sd.createCollection(collectionName);
@@ -213,7 +213,7 @@ describe('164. soda1.js', () => {
   }); // 164.9
 
   it('164.10 the "examples/soda1.js" case', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     // Create the parent object for SODA
     const soda = conn.getSodaDatabase();
 
@@ -293,7 +293,7 @@ describe('164. soda1.js', () => {
   }); // 164.10
 
   it('164.11 Negative: create collection with invalid metaData value', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
 
     const t_collname = "soda_test_164_11";

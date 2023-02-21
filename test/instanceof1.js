@@ -40,9 +40,7 @@ describe('45. instanceof1.js', function() {
   it('45.2 instanceof works for pool instances', function(done) {
     oracledb.createPool(
       {
-        user              : dbConfig.user,
-        password          : dbConfig.password,
-        connectString     : dbConfig.connectString,
+        ...dbConfig,
         poolMin           : 0,
         poolMax           : 1,
         poolIncrement     : 1
@@ -62,12 +60,7 @@ describe('45. instanceof1.js', function() {
   });
 
   it('45.3 instanceof works for connection instances', function(done) {
-    oracledb.getConnection(
-      {
-        user:          dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString
-      },
+    oracledb.getConnection(dbConfig,
       function(err, conn) {
         should.not.exist(err);
 
@@ -83,12 +76,7 @@ describe('45. instanceof1.js', function() {
   });
 
   it('45.4 instanceof works for resultset instances', function(done) {
-    oracledb.getConnection(
-      {
-        user:          dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString
-      },
+    oracledb.getConnection(dbConfig,
       function(err, conn) {
         should.not.exist(err);
 
@@ -119,12 +107,7 @@ describe('45. instanceof1.js', function() {
   });
 
   it('45.5 instanceof works for lob instances', function(done) {
-    oracledb.getConnection(
-      {
-        user:          dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString
-      },
+    oracledb.getConnection(dbConfig,
       function(err, conn) {
         should.not.exist(err);
 

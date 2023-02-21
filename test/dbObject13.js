@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('212. dbObject13.js', function() {
@@ -49,7 +49,7 @@ describe('212. dbObject13.js', function() {
       this.skip();
       return;
     } else {
-      conn = await oracledb.getConnection(dbconfig);
+      conn = await oracledb.getConnection(dbConfig);
 
       let plsql = `
         CREATE OR REPLACE PACKAGE ${PKG} AS

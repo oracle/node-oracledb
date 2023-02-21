@@ -35,7 +35,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('224. booleanBind.js', function()  {
@@ -145,7 +145,7 @@ describe('224. booleanBind.js', function()  {
       end;
     `;
 
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
     await conn.execute(plsqlPkg);
     await conn.execute(plsqlPkgBody);
   }); // before()

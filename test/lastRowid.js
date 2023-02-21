@@ -33,7 +33,7 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbconfig  = require('./dbconfig.js');
+const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('228. lastRowid.js', function() {
@@ -42,7 +42,7 @@ describe('228. lastRowid.js', function() {
   const TABLE = 'nodb_lastrowid';
 
   before('get connection and create table', async () => {
-    conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbConfig);
     const sql =
       `create table ${TABLE} (
          id number(9) not null,

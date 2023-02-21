@@ -42,12 +42,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
   var tableName = "nodb_double";
 
   before('get one connection', function(done) {
-    oracledb.getConnection(
-      {
-        user:          dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString
-      },
+    oracledb.getConnection(dbConfig,
       function(err, conn) {
         assert.ifError(err);
         connection = conn;

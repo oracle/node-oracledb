@@ -450,6 +450,48 @@ describe('163. executeMany1.js', function() {
     await dotruncate();
   }); // 163.14
 
+  it('163.15 getting dmlrowcounts after executemany with dmlrowcounts=False', async function() {
+
+    const binds = [
+      { a: 6, b: "Test 6 (Six)" },
+      { a: 7, b: "Test 7 (Seven)" },
+      { a: 8, b: "Test 8 (Eight)" },
+      { a: 9 },
+      { a: 10, b: "Test 10 (Ten)" }
+    ];
+    let sql = "INSERT INTO nodb_tab_xmany VALUES (:a, :b)";
+
+    let result = await conn.executeMany(sql, binds, { dmlRowCounts: false });
+    assert.strictEqual(result.rowsAffected, binds.length);
+    sql = "SELECT * FROM nodb_tab_xmany ORDER BY ID";
+    const expectVal = [
+      [ 6, 'Test 6 (Six)' ],
+      [ 7, 'Test 7 (Seven)' ],
+      [ 8, 'Test 8 (Eight)' ],
+      [ 9, null ],
+      [ 10, 'Test 10 (Ten)' ]
+    ];
+    result = await conn.execute(sql);
+    assert.deepEqual(result.rows, expectVal);
+    await dotruncate();
+  }); // 163.15
+
+  it('163.16 executemany() with an invalid row', async function() {
+
+    const binds = [
+      { a: 6, b: "Test 6 (Six)" },
+      { a: 7, b: "Test 7 (Seven)" },
+      { a: 8, b: 8 }
+    ];
+    let sql = "INSERT INTO nodb_tab_xmany VALUES (:a, :b)";
+
+    await assert.rejects(
+      async () => await conn.executeMany(sql, binds, { dmlRowCounts: true }),
+      /NJS-011:/
+    );
+    await dotruncate();
+  }); // 163.16
+
   const doCreateProc = async function() {
     const proc = "CREATE OR REPLACE PROCEDURE nodb_proc_em (a_num IN NUMBER, " +
                "    a_outnum OUT NUMBER, a_outstr OUT VARCHAR2) \n" +

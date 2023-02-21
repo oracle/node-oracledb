@@ -33,7 +33,7 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 
 describe('181. dataTypeXML.js', function() {
 
@@ -55,7 +55,7 @@ describe('181. dataTypeXML.js', function() {
 
   before('create table and insert a row', async function() {
 
-    const connection = await oracledb.getConnection(dbconfig);
+    const connection = await oracledb.getConnection(dbConfig);
 
     let sql =
       "BEGIN \n" +
@@ -79,7 +79,7 @@ describe('181. dataTypeXML.js', function() {
     await connection.commit();
     await connection.close();
 
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
     sql = "insert into " + tableName + " ( num, content ) values ( :id, XMLType(:bv) )";
     let bindValues = { id: testRowID, bv: testXMLData };
@@ -92,7 +92,7 @@ describe('181. dataTypeXML.js', function() {
   }); // before
 
   after('drop table', async () => {
-    const connection = await oracledb.getConnection(dbconfig);
+    const connection = await oracledb.getConnection(dbConfig);
     let sql = "BEGIN EXECUTE IMMEDIATE 'DROP TABLE " + tableName + "'; " +
               "EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;";
     await connection.execute(sql);
@@ -101,7 +101,7 @@ describe('181. dataTypeXML.js', function() {
   }); // after
 
   it('181.1 basic case, insert XML data and query back', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     let sql = "select content from " + tableName + " where num = :id";
     let bindVar = { id: testRowID };
     let options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
@@ -111,7 +111,7 @@ describe('181. dataTypeXML.js', function() {
   }); // 181.1
 
   it('181.2 query XML data as CLOB', async () => {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
     let sql = "select xmltype.getclobval(content) as mycontent from " + tableName + " where num = :id";
     let bindVar = { id: testRowID };
@@ -126,7 +126,7 @@ describe('181. dataTypeXML.js', function() {
   }); // 181.2
 
   it('181.3 another query as CLOB syntax', async function() {
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
     if (conn.oracleServerVersion < 1200000000) {
       await conn.close();
       this.skip();
@@ -147,7 +147,7 @@ describe('181. dataTypeXML.js', function() {
   it('181.4 Negative - try to insert Null', async () => {
     let ID = 20;
     let XML = '';
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
     let sql = "insert into " + tableName + " ( num, content ) values ( :id, XMLType(:bv) )";
     let bindValues = { id: ID, bv: XML };
@@ -178,7 +178,7 @@ describe('181. dataTypeXML.js', function() {
     let head = '<data>', tail = '</data>\n';
     let xml = head.concat(str).concat(tail);
 
-    const conn = await oracledb.getConnection(dbconfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
     let sql = "insert into " + tableName + " ( num, content ) values ( :id, XMLType(:bv) )";
     let bindValues = { id: ID, bv: xml };

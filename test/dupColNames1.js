@@ -33,7 +33,7 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const dbconfig = require('./dbconfig.js');
+const dbConfig = require('./dbconfig.js');
 
 describe('246. dupColNames1.js', function() {
   let connection = null;
@@ -115,7 +115,7 @@ describe('246. dupColNames1.js', function() {
     // set the outformat to object
     oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
-    connection = await oracledb.getConnection (dbconfig);
+    connection = await oracledb.getConnection (dbConfig);
 
     await connection.execute(create_table_sql);
     await connection.execute(deptInsert, [101, "R&D"]);
