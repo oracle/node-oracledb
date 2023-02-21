@@ -37,11 +37,11 @@ const dbConfig = require('./dbconfig.js');
 const sql = require('./sqlClone.js');
 
 describe('119. urowidProcedureBindAsString2.js', function() {
-  var connection = null;
-  var tableName = "nodb_rowid_plsql_out";
-  var insertID = 1;
+  let connection = null;
+  const tableName = "nodb_rowid_plsql_out";
+  let insertID = 1;
 
-  var proc_create_table = "BEGIN \n" +
+  const proc_create_table = "BEGIN \n" +
                           "    DECLARE \n" +
                           "        e_table_missing EXCEPTION; \n" +
                           "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
@@ -58,25 +58,17 @@ describe('119. urowidProcedureBindAsString2.js', function() {
                           "        ) \n" +
                           "    '); \n" +
                           "END;  ";
-  var drop_table = "DROP TABLE " + tableName + " PURGE";
+  const drop_table = "DROP TABLE " + tableName + " PURGE";
 
   before('get connection and create table', async function() {
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-      assert(connection);
-      await sql.executeSql(connection, proc_create_table, {}, {});
-    } catch (err) {
-      assert.ifError(err);
-    }
+    connection = await oracledb.getConnection(dbConfig);
+    assert(connection);
+    await sql.executeSql(connection, proc_create_table, {}, {});
   });
 
   after('release connection', async function() {
-    try {
-      await sql.executeSql(connection, drop_table, {}, {});
-      await connection.release();
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await sql.executeSql(connection, drop_table, {}, {});
+    await connection.release();
   });
 
   beforeEach(function() {
@@ -84,14 +76,14 @@ describe('119. urowidProcedureBindAsString2.js', function() {
   });
 
   describe('119.1 PROCEDURE BIND_OUT as UROWID', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN UROWID, content_out OUT UROWID)\n" +
+    const proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN UROWID, content_out OUT UROWID)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_in)); \n" +
                       "    select content into content_out from " + tableName + " where id = id_in; \n" +
                       "END nodb_rowid_bind_out; ";
-    var proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
-    var proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
+    const proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
+    const proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
 
     before('create procedure', async function() {
       await sql.executeSql(connection, proc_create, {}, {});
@@ -205,14 +197,14 @@ describe('119. urowidProcedureBindAsString2.js', function() {
   });
 
   describe('119.2 PROCEDURE BIND_OUT as string', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN UROWID, content_out OUT VARCHAR2)\n" +
+    const proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN UROWID, content_out OUT VARCHAR2)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_in)); \n" +
                       "    select content into content_out from " + tableName + " where id = id_in; \n" +
                       "END nodb_rowid_bind_out; ";
-    var proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
-    var proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
+    const proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
+    const proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
 
     before('create procedure', async function() {
       await sql.executeSql(connection, proc_create, {}, {});
@@ -326,15 +318,15 @@ describe('119. urowidProcedureBindAsString2.js', function() {
   });
 
   describe('119.3 PROCEDURE BIND_IN, UPDATE', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN STRING, content_2 IN UROWID, content_out OUT UROWID)\n" +
+    const proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN STRING, content_2 IN UROWID, content_out OUT UROWID)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_1)); \n" +
                       "    update " + tableName + " set content = content_2 where id = id_in; \n" +
                       "    select content into content_out from " + tableName + " where id = id_in; \n" +
                       "END nodb_rowid_bind_1083; ";
-    var proc_execute = "BEGIN nodb_rowid_bind_1083 (:i, :c1, :c2, :o); END;";
-    var proc_drop = "DROP PROCEDURE nodb_rowid_bind_1083";
+    const proc_execute = "BEGIN nodb_rowid_bind_1083 (:i, :c1, :c2, :o); END;";
+    const proc_drop = "DROP PROCEDURE nodb_rowid_bind_1083";
 
     before('create procedure', async function() {
       try {
@@ -393,7 +385,7 @@ describe('119. urowidProcedureBindAsString2.js', function() {
 
   });
 
-  var procedureBindOut = async function(proc_execute, content_in, expected) {
+  const procedureBindOut = async function(proc_execute, content_in, expected) {
     const bindVar_out = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_IN },
@@ -405,7 +397,7 @@ describe('119. urowidProcedureBindAsString2.js', function() {
     assert.strictEqual(resultVal, expected);
   };
 
-  var procedureBindOut_default = async function(proc_execute, content_in, expected) {
+  const procedureBindOut_default = async function(proc_execute, content_in, expected) {
     const bindVar_out = {
       i: insertID,
       c: content_in,
@@ -417,7 +409,7 @@ describe('119. urowidProcedureBindAsString2.js', function() {
     assert.strictEqual(resultVal, expected);
   };
 
-  var procedureBindOut_update = async function(proc_execute, content_1, content_2, expected) {
+  const procedureBindOut_update = async function(proc_execute, content_1, content_2, expected) {
     const bindVar_in = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c1: { val: content_1, type: oracledb.STRING, dir: oracledb.BIND_IN },
@@ -430,7 +422,7 @@ describe('119. urowidProcedureBindAsString2.js', function() {
     assert.strictEqual(resultVal, expected);
   };
 
-  var procedureBindOut_update_default = async function(proc_execute, content_1, content_2, expected) {
+  const procedureBindOut_update_default = async function(proc_execute, content_1, content_2, expected) {
     const bindVar_in = {
       i: insertID,
       c1: content_1,

@@ -31,19 +31,18 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
-var sql      = require('./sql.js');
-var assist   = require('./dataTypeAssist.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const sql      = require('./sql.js');
+const assist   = require('./dataTypeAssist.js');
 
 describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
 
-  var connection = null;
-  var tableName = "nodb_dml_blob_138";
+  let connection = null;
+  let tableName = "nodb_dml_blob_138";
 
-  var blob_table_create = "BEGIN \n" +
+  let blob_table_create = "BEGIN \n" +
                           "    DECLARE \n" +
                           "        e_table_missing EXCEPTION; \n" +
                           "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -60,46 +59,35 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
                           "        ) \n" +
                           "    '); \n" +
                           "END; ";
-  var blob_table_drop = "DROP TABLE " + tableName + " PURGE";
+  let blob_table_drop = "DROP TABLE " + tableName + " PURGE";
 
-  before(function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after(function(done) {
-    connection.release(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after(async function() {
+    await connection.release();
   });
 
   describe('138.1 BLOB DML returning multiple rows as stream', function() {
-    before(function(done) {
-      async.series([
-        function(cb) {
-          sql.executeSql(connection, blob_table_create, {}, {}, cb);
-        },
-        function(cb) {
-          insertData(10, cb);
-        }
-      ], done);
-    });
-    after(function(done) {
-      sql.executeSql(connection, blob_table_drop, {}, {}, done);
+    before(async function() {
+
+      await sql.executeSql(connection, blob_table_create, {}, {});
+      insertData(10);
     });
 
-    it('138.1.1 BLOB DML returning multiple rows as stream', function(done) {
-      updateReturning_stream(done);
+    after(async function() {
+      await sql.executeSql(connection, blob_table_drop, {}, {});
+    });
+
+    it('138.1.1 BLOB DML returning multiple rows as stream', async function() {
+      await updateReturning_stream();
     }); // 138.1.1
 
   }); // 138.1
 
-  var insertData = function(tableSize, cb) {
-    var insert_data = "DECLARE \n" +
+  let insertData = async function(tableSize) {
+    let insert_data = "DECLARE \n" +
                       "    tmpchar VARCHAR2(2000); \n" +
                       "    tmplob BLOB; \n" +
                       "BEGIN \n" +
@@ -110,60 +98,38 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
                       "    END LOOP; \n" +
                       "    commit; \n" +
                       "END; ";
-    async.series([
-      function(callback) {
-        connection.execute(
-          insert_data,
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "select num from " + tableName,
-          function(err, result) {
-            should.not.exist(err);
-            should.strictEqual(result.rows.length, tableSize);
-            callback();
-          }
-        );
-      }
-    ], cb);
+    let result = null;
+    await connection.execute(insert_data);
+    result = await connection.execute("select num from " + tableName);
+    assert.strictEqual(result.rows.length, tableSize);
   };
 
-  var updateReturning_stream = function(callback) {
-    var sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, blob into :num, :lobou";
-    connection.execute(
-      sql_update,
-      {
-        num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-        lobou: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
-      },
-      function(err, result) {
-        should.not.exist(err);
-        var numLobs = result.outBinds.lobou.length;
-        should.strictEqual(numLobs, 10);
-        async.times(
-          numLobs,
-          function(n, next) {
-            verifyLob(n, result, function(err, result) {
-              next(err, result);
-            });
-          },
-          callback
-        );
+  let updateReturning_stream = async function() {
+    let sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, blob into :num, :lobou";
+    let result = null;
+    try {
+      result = await connection.execute(
+        sql_update,
+        {
+          num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+          lobou: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
+        });
+      let numLobs = result.outBinds.lobou.length;
+      assert.strictEqual(numLobs, 10);
+      for (let n = 0; n < numLobs; n++) {
+        verifyLob(n, result);
       }
-    );
+    } catch (err) {
+      assert.ifError(err);
+    }
   };
 
-  var verifyLob = function(n, result, cb) {
-    var lob = result.outBinds.lobou[n];
-    var id = result.outBinds.num[n];
-    should.exist(lob);
-    var blobData = 0;
-    var totalLength = 0;
+  let verifyLob = function(n, result) {
+    let lob = result.outBinds.lobou[n];
+    let id = result.outBinds.num[n];
+    assert(lob);
+    let blobData = 0;
+    let totalLength = 0;
     blobData = Buffer.alloc(0);
 
     lob.on('data', function(chunk) {
@@ -172,15 +138,13 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
     });
 
     lob.on('error', function(err) {
-      should.not.exist(err, "lob.on 'error' event.");
+      assert(err, "lob.on 'error' event.");
     });
 
     lob.on('end', function(err) {
-      should.not.exist(err);
-      var expected = Buffer.from(String(id - 10), "utf-8");
-      should.strictEqual(assist.compare2Buffers(blobData, expected), true);
-      cb(err, result);
+      assert(err);
+      let expected = Buffer.from(String(id - 10), "utf-8");
+      assert.strictEqual(assist.compare2Buffers(blobData, expected), true);
     });
   };
-
 });

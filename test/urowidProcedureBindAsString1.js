@@ -36,11 +36,11 @@ const assert = require('assert');
 const dbConfig = require('./dbconfig.js');
 const sql      = require('./sqlClone.js');
 describe('118. urowidProcedureBindAsString1.js', function() {
-  var connection = null;
-  var tableName = "nodb_urowid_plsql_in";
-  var insertID = 1;
+  let connection = null;
+  const tableName = "nodb_urowid_plsql_in";
+  let insertID = 1;
 
-  var proc_create_table = "BEGIN \n" +
+  const proc_create_table = "BEGIN \n" +
                           "    DECLARE \n" +
                           "        e_table_missing EXCEPTION; \n" +
                           "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
@@ -60,22 +60,13 @@ describe('118. urowidProcedureBindAsString1.js', function() {
   const drop_table = "DROP TABLE " + tableName + " PURGE";
 
   before('get connection and create table', async function() {
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-      assert(connection);
-      await sql.executeSql(connection, proc_create_table, {}, {});
-    } catch (err) {
-      assert.ifError(err);
-    }
+    connection = await oracledb.getConnection(dbConfig);
+    await sql.executeSql(connection, proc_create_table, {}, {});
   });
 
   after('release connection', async function() {
-    try {
-      await sql.executeSql(connection, drop_table, {}, {});
-      await connection.release();
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await sql.executeSql(connection, drop_table, {}, {});
+    await connection.release();
   });
 
   beforeEach(function() {
@@ -83,13 +74,13 @@ describe('118. urowidProcedureBindAsString1.js', function() {
   });
 
   describe('118.1 PROCEDURE BIND_IN as UROWID', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_urowid_bind_in_1081 (id IN NUMBER, content IN UROWID)\n" +
+    const proc_create = "CREATE OR REPLACE PROCEDURE nodb_urowid_bind_in_1081 (id IN NUMBER, content IN UROWID)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName + " (id, content) values (id, CHARTOROWID(content)); \n" +
                       "END nodb_urowid_bind_in_1081; ";
-    var proc_execute = "BEGIN nodb_urowid_bind_in_1081 (:i, :c); END;";
-    var proc_drop = "DROP PROCEDURE nodb_urowid_bind_in_1081";
+    const proc_execute = "BEGIN nodb_urowid_bind_in_1081 (:i, :c); END;";
+    const proc_drop = "DROP PROCEDURE nodb_urowid_bind_in_1081";
 
     before('create procedure', async function() {
       try {
@@ -210,28 +201,20 @@ describe('118. urowidProcedureBindAsString1.js', function() {
   });
 
   describe('118.2 PROCEDURE BIND_IN as string', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_urowid_bind_in_1082 (id IN NUMBER, content IN VARCHAR2)\n" +
+    const proc_create = "CREATE OR REPLACE PROCEDURE nodb_urowid_bind_in_1082 (id IN NUMBER, content IN VARCHAR2)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName + " (id, content) values (id, CHARTOROWID(content)); \n" +
                       "END nodb_urowid_bind_in_1082; ";
-    var proc_execute = "BEGIN nodb_urowid_bind_in_1082 (:i, :c); END;";
-    var proc_drop = "DROP PROCEDURE nodb_urowid_bind_in_1082";
+    const proc_execute = "BEGIN nodb_urowid_bind_in_1082 (:i, :c); END;";
+    const proc_drop = "DROP PROCEDURE nodb_urowid_bind_in_1082";
 
     before('create procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_create, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, proc_create, {}, {});
     });
 
     after('drop procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_drop, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, proc_drop, {}, {});
     });
 
     it('118.2.1 works with null', async function() {
@@ -323,14 +306,14 @@ describe('118. urowidProcedureBindAsString1.js', function() {
     });
   });
   describe('118.3 PROCEDURE BIND_IN, UPDATE', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_urowid_bind_in_1083 (id IN NUMBER, content_1 IN VARCHAR2, content_2 IN UROWID)\n" +
+    const proc_create = "CREATE OR REPLACE PROCEDURE nodb_urowid_bind_in_1083 (id IN NUMBER, content_1 IN VARCHAR2, content_2 IN UROWID)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName + " (id, content) values (id, CHARTOROWID(content_1)); \n" +
                       "    update " + tableName + " set content = content_2 where id = id; \n" +
                       "END nodb_urowid_bind_in_1083; ";
-    var proc_execute = "BEGIN nodb_urowid_bind_in_1083 (:i, :c1, :c2); END;";
-    var proc_drop = "DROP PROCEDURE nodb_urowid_bind_in_1083";
+    const proc_execute = "BEGIN nodb_urowid_bind_in_1083 (:i, :c1, :c2); END;";
+    const proc_drop = "DROP PROCEDURE nodb_urowid_bind_in_1083";
 
     before('create procedure', async function() {
       try {
@@ -390,12 +373,12 @@ describe('118. urowidProcedureBindAsString1.js', function() {
 
   });
 
-  var procedureBindIn = async function(proc_execute, content_in, expected) {
+  const procedureBindIn = async function(proc_execute, content_in, expected) {
     const bindVar_in = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_IN }
     };
-    var option_in = { autoCommit: true };
+    const option_in = { autoCommit: true };
     try {
       await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
     } catch (err) {
@@ -410,18 +393,18 @@ describe('118. urowidProcedureBindAsString1.js', function() {
 
   };
 
-  var procedureBindIn_default = async function(proc_execute, content_in, expected) {
+  const procedureBindIn_default = async function(proc_execute, content_in, expected) {
     try {
       const option_in = { autoCommit: true };
-      var bindVar_in = {
+      let bindVar_in = {
         i: insertID,
         c: content_in
       };
       await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
 
-      var sql_query = "select * from " + tableName + " where id = " + insertID;
-      var result = await connection.execute(sql_query);
-      var resultVal = result.rows[0][1];
+      let sql_query = "select * from " + tableName + " where id = " + insertID;
+      let result = await connection.execute(sql_query);
+      let resultVal = result.rows[0][1];
       assert.strictEqual(resultVal, expected);
       insertID++;
       bindVar_in = [ insertID, content_in ];
@@ -435,7 +418,7 @@ describe('118. urowidProcedureBindAsString1.js', function() {
     }
   };
 
-  var procedureBindIn_update = async function(proc_execute, content_1, content_2, expected) {
+  const procedureBindIn_update = async function(proc_execute, content_1, content_2, expected) {
     try {
       const bindVar_in = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -456,18 +439,18 @@ describe('118. urowidProcedureBindAsString1.js', function() {
     }
   };
 
-  var procedureBindIn_update_default = async function(proc_execute, content_1, content_2, expected) {
+  const procedureBindIn_update_default = async function(proc_execute, content_1, content_2, expected) {
     try {
       const option_in = { autoCommit: true };
-      var bindVar_in = {
+      let bindVar_in = {
         i: insertID,
         c1: content_1,
         c2: content_2
       };
       await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
-      var sql_query = "select * from " + tableName + " where id = " + insertID;
-      var result = await connection.execute(sql_query);
-      var resultVal = result.rows[0][1];
+      let sql_query = "select * from " + tableName + " where id = " + insertID;
+      let result = await connection.execute(sql_query);
+      let resultVal = result.rows[0][1];
       assert.strictEqual(resultVal, expected);
       insertID++;
 

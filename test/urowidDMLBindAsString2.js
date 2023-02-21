@@ -86,28 +86,15 @@ describe('115. urowidDMLBindAsString2.js', function() {
   const drop_table_normal = "DROP TABLE " + tableName_normal + " PURGE";
 
   before('get connection and create table', async function() {
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-      assert(connection);
-      await sql.executeSql(connection, table_indexed, {}, {});
-      await sql.executeSql(connection, table_normal, {}, {});
-    } catch (err) {
-      assert.ifError(err);
-    }
+    connection = await oracledb.getConnection(dbConfig);
+    await sql.executeSql(connection, table_indexed, {}, {});
+    await sql.executeSql(connection, table_normal, {}, {});
   });
 
   after('release connection', async function() {
-
-    try {
-
-      await sql.executeSql(connection, drop_table_indexed, {}, {});
-      await sql.executeSql(connection, drop_table_normal, {}, {});
-      await connection.release();
-    } catch (err) {
-      console.log("error is " + err);
-      assert.ifError(err);
-    }
-
+    await sql.executeSql(connection, drop_table_indexed, {}, {});
+    await sql.executeSql(connection, drop_table_normal, {}, {});
+    await connection.release();
   });
 
   beforeEach(function() {
@@ -218,7 +205,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
   const testBigUROWID = async function(strLength, rowidLenExpected) {
     const str = random.getRandomLengthString(strLength);
     let urowid, urowidLen;
-    var result;
+    let result;
     const sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
     await sql.executeInsert(connection, sql_insert, {}, {});
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
@@ -271,7 +258,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
   const testBigUROWID_maxSize = async function(strLength, rowidLenExpected) {
     const str = random.getRandomLengthString(strLength);
     let urowid, urowidLen;
-    var result;
+    let result;
     const sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
     await sql.executeInsert(connection, sql_insert, {}, {});
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
@@ -321,7 +308,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
 
   const testBigUROWID_update = async function(rowid_org, strLength, rowidLenExpected) {
     const str = random.getRandomLengthString(strLength);
-    var sql_insert, bindVar, result;
+    let sql_insert, bindVar, result;
     let urowid, urowidLen;
     let id_1 = insertID++;
     let id_2 = insertID++;
@@ -390,7 +377,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
     let urowid, urowidLen;
     let id_1 = insertID++;
     let id_2 = insertID++;
-    var sql_insert, bindVar, result;
+    let sql_insert, bindVar, result;
 
     sql_insert = "insert into " + tableName_normal + " (ID, content) values (:i, :c)";
     bindVar = {
@@ -444,7 +431,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
   const testBigUROWID_returning = async function(strLength, rowidLenExpected) {
     const str = random.getRandomLengthString(strLength);
     let urowid, urowidLen;
-    var sql_insert, result, bindVar;
+    let sql_insert, result, bindVar;
     sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
     await sql.executeInsert(connection, sql_insert, {}, {});
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
@@ -460,7 +447,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
     };
     result = await connection.execute("insert into " + tableName_normal + " (ID, content) values (:i, :c) returning content into :o",  bindVar);
     assert(result);
-    var resultVal;
+    let resultVal;
     if (typeof (result.outBinds.o) === 'undefined') resultVal = result.outBinds[0][0];
     else resultVal = result.outBinds.o[0];
     assert.strictEqual(resultVal, urowid);
@@ -481,7 +468,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
   const testBigUROWID_where = async function(strLength, rowidLenExpected) {
     const str = random.getRandomLengthString(strLength);
     let urowid, urowidLen;
-    var sql_insert, result, bindVar;
+    let sql_insert, result, bindVar;
 
     sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
     await sql.executeInsert(connection, sql_insert, {}, {});
@@ -518,7 +505,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
     let id_2 = insertID++;
     const maxRowsBak = oracledb.maxRows;
     oracledb.maxRows = maxRows;
-    var sql_insert, result;
+    let sql_insert, result;
     sql_insert = "insert into " + tableName_indexed + " values (" + id_1 + ", '" + str + "')";
     await sql.executeInsert(connection, sql_insert, {}, {});
 

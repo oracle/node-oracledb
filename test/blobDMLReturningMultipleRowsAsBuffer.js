@@ -31,18 +31,17 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
-var sql      = require('./sql.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const sql      = require('./sql.js');
 
 describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
 
-  var connection = null;
-  var tableName = "nodb_dml_blob_137";
+  let connection = null;
+  let tableName = "nodb_dml_blob_137";
 
-  var blob_table_create = "BEGIN \n" +
+  let blob_table_create = "BEGIN \n" +
                           "    DECLARE \n" +
                           "        e_table_missing EXCEPTION; \n" +
                           "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -59,49 +58,38 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
                           "        ) \n" +
                           "    '); \n" +
                           "END; ";
-  var blob_table_drop = "DROP TABLE " + tableName + " PURGE";
+  let blob_table_drop = "DROP TABLE " + tableName + " PURGE";
 
-  before(function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after(function(done) {
-    connection.release(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after(async function() {
+    await connection.release();
   });
 
   describe('137.1 BLOB DML returning multiple rows as buffer', function() {
 
-    var tabsize = 10;
+    let tabsize = 10;
 
-    before(function(done) {
-      async.series([
-        function(cb) {
-          sql.executeSql(connection, blob_table_create, {}, {}, cb);
-        },
-        function(cb) {
-          insertData(tabsize, cb);
-        }
-      ], done);
-    });
-    after(function(done) {
-      sql.executeSql(connection, blob_table_drop, {}, {}, done);
+    before(async function() {
+      await sql.executeSql(connection, blob_table_create, {}, {});
+      await insertData(tabsize);
     });
 
-    it('137.1.1 BLOB DML returning multiple rows as buffer', function(done) {
-      updateReturning_buffer(tabsize, done);
+    after(async function() {
+      await sql.executeSql(connection, blob_table_drop, {}, {});
+    });
+
+    it('137.1.1 BLOB DML returning multiple rows as buffer', async function() {
+      await updateReturning_buffer(tabsize);
     });
 
   });
 
-  var insertData = function(tableSize, cb) {
-    var insert_data = "DECLARE \n" +
+  let insertData = async function(tableSize) {
+    let result = null;
+    let insert_data = "DECLARE \n" +
                       "    tmpchar VARCHAR2(2000); \n" +
                       "    tmplob BLOB; \n" +
                       "BEGIN \n" +
@@ -112,48 +100,26 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
                       "    END LOOP; \n" +
                       "    commit; \n" +
                       "END; ";
-    async.series([
-      function(callback) {
-        connection.execute(
-          insert_data,
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "select num from " + tableName,
-          function(err, result) {
-            should.not.exist(err);
-            should.strictEqual(result.rows.length, tableSize);
-            callback();
-          }
-        );
-      }
-    ], cb);
+
+    await connection.execute(insert_data);
+    result = await connection.execute("select num from " + tableName);
+    assert.strictEqual(result.rows.length, tableSize);
   };
 
-  var updateReturning_buffer = function(tabsize, callback) {
-    var sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, blob into :num, :lobou";
-    connection.execute(
+  let updateReturning_buffer = async function(tabsize) {
+    let sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, blob into :num, :lobou";
+    let result = null;
+    result = await connection.execute(
       sql_update,
       {
         num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
         lobou: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT }
-      },
-      function(err, result) {
-        should.not.exist(err);
-        for (var i = 0; i < tabsize; i++) {
-          var outnum = result.outBinds.num[i];
-          var outbuf = Number(result.outBinds.lobou[i]);
-          should.strictEqual(outbuf, i + 1);
-          should.strictEqual(outnum, i + 11);
-        }
-        callback();
-      }
-    );
+      });
+    for (let i = 0; i < tabsize; i++) {
+      let outnum = result.outBinds.num[i];
+      let outbuf = Number(result.outBinds.lobou[i]);
+      assert.strictEqual(outbuf, i + 1);
+      assert.strictEqual(outnum, i + 11);
+    }
   };
-
 });

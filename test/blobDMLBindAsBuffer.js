@@ -31,19 +31,18 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
-var random   = require('./random.js');
-var assist   = require('./dataTypeAssist.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const random   = require('./random.js');
+const assist   = require('./dataTypeAssist.js');
 
 describe('82.blobDMLBindAsBuffer.js', function() {
 
-  var connection = null;
-  var insertID = 1; // assume id for insert into db starts from 1
+  let connection = null;
+  let insertID = 1; // assume id for insert into db starts from 1
 
-  var proc_blob_1 = "BEGIN \n" +
+  let proc_blob_1 = "BEGIN \n" +
                     "    DECLARE \n" +
                     "        e_table_missing EXCEPTION; \n" +
                     "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -60,525 +59,366 @@ describe('82.blobDMLBindAsBuffer.js', function() {
                     "        ) \n" +
                     "    '); \n" +
                     "END; ";
-  var sql2DropTable1 = "DROP TABLE nodb_dml_blob_1 PURGE";
+  let sql2DropTable1 = "DROP TABLE nodb_dml_blob_1 PURGE";
 
-  before(function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
   }); // before
 
-  after(function(done) {
-    connection.release(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after(async function() {
+    await connection.release();
   }); // after
 
-  var executeSQL = function(sql, callback) {
-    connection.execute(
-      sql,
-      function(err) {
-        should.not.exist(err);
-        return callback();
-      }
-    );
+  let executeSQL = async function(sql) {
+    await connection.execute(sql);
   };
 
-  var insertIntoBlobTable1 = function(id, content, callback) {
+  let insertIntoBlobTable1 = async function(id, content) {
+    let result = null;
     if (content == "EMPTY_BLOB") {
-      connection.execute(
+      result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, EMPTY_BLOB())",
-        [ id ],
-        function(err, result) {
-          should.not.exist(err);
-          should.strictEqual(result.rowsAffected, 1);
-          callback();
-        }
-      );
+        [ id ]);
+      assert.strictEqual(result.rowsAffected, 1);
     } else {
-      connection.execute(
+      result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
         {
           ID : { val : id },
           C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
-        },
-        function(err, result) {
-          should.not.exist(err);
-          should.strictEqual(result.rowsAffected, 1);
-          callback();
-        }
-      );
+        });
+      assert.strictEqual(result.rowsAffected, 1);
     }
   };
 
-  var updateBlobTable1 = function(id, content, callback) {
+  let updateBlobTable1 = async function(id, content) {
+    let result = null;
     if (content == "EMPTY_BLOB") {
-      connection.execute(
+      result = await connection.execute(
         "UPDATE nodb_dml_blob_1 set blob = EMPTY_BLOB() where id = :ID",
-        { ID: id },
-        function(err, result) {
-          should.not.exist(err);
-          should.strictEqual(result.rowsAffected, 1);
-          callback();
-        }
-      );
+        { ID: id });
+      assert.strictEqual(result.rowsAffected, 1);
     } else {
-      connection.execute(
+      result = await connection.execute(
         "UPDATE nodb_dml_blob_1 set blob = :C where id = :ID",
-        { ID: id, C: content },
-        function(err, result) {
-          should.not.exist(err);
-          should.strictEqual(result.rowsAffected, 1);
-          callback();
-        }
-      );
+        { ID: id, C: content });
+      assert.strictEqual(result.rowsAffected, 1);
     }
   };
 
   // compare the inserted blob with orginal content
-  var verifyBlobValueWithBuffer = function(selectSql, originalBuffer, specialStr, callback) {
-    connection.execute(
-      selectSql,
-      function(err, result) {
-        should.not.exist(err);
-        var lob = result.rows[0][0];
-        if (originalBuffer == '' || originalBuffer == undefined) {
-          should.not.exist(lob);
-          return callback();
+  let verifyBlobValueWithBuffer = async function(selectSql, originalBuffer, specialStr) {
+    let result = null;
+    result = await connection.execute(selectSql);
+
+    let lob = result.rows[0][0];
+    if (originalBuffer == '' || originalBuffer == undefined) {
+      assert.ifError(lob);
+    } else {
+      assert(lob);
+      let blobData = Buffer.alloc(0);
+      let totalLength = 0;
+
+      lob.on('data', function(chunk) {
+        totalLength = totalLength + chunk.length;
+        blobData = Buffer.concat([blobData, chunk], totalLength);
+      });
+
+      lob.on('error', function(err) {
+        assert(err, "lob.on 'error' event.");
+      });
+
+      lob.on('end', function() {
+        if (originalBuffer == "EMPTY_BLOB") {
+          let nullBuffer = Buffer.from('', "utf-8");
+          assert.strictEqual(assist.compare2Buffers(blobData, nullBuffer), true);
         } else {
-          should.exist(lob);
-          var blobData = Buffer.alloc(0);
-          var totalLength = 0;
-
-          lob.on('data', function(chunk) {
-            totalLength = totalLength + chunk.length;
-            blobData = Buffer.concat([blobData, chunk], totalLength);
-          });
-
-          lob.on('error', function(err) {
-            should.not.exist(err, "lob.on 'error' event.");
-          });
-
-          lob.on('end', function() {
-            if (originalBuffer == "EMPTY_BLOB") {
-              var nullBuffer = Buffer.from('', "utf-8");
-              should.strictEqual(assist.compare2Buffers(blobData, nullBuffer), true);
-            } else {
-              should.strictEqual(totalLength, originalBuffer.length);
-              var specStrLength = specialStr.length;
-              should.strictEqual(blobData.toString('utf8', 0, specStrLength), specialStr);
-              should.strictEqual(blobData.toString('utf8', (totalLength - specStrLength), totalLength), specialStr);
-              should.strictEqual(assist.compare2Buffers(blobData, originalBuffer), true);
-            }
-            return callback();
-          });
+          assert.strictEqual(totalLength, originalBuffer.length);
+          let specStrLength = specialStr.length;
+          assert.strictEqual(blobData.toString('utf8', 0, specStrLength), specialStr);
+          assert.strictEqual(blobData.toString('utf8', (totalLength - specStrLength), totalLength), specialStr);
+          assert.strictEqual(assist.compare2Buffers(blobData, originalBuffer), true);
         }
-      }
-    );
+      });
+    }
   };
 
-  var checkInsertResult = function(id, content, specialStr, callback) {
-    var sql = "select blob from nodb_dml_blob_1 where id = " + id;
-    verifyBlobValueWithBuffer(sql, content, specialStr, callback);
+  let checkInsertResult = async function(id, content, specialStr) {
+    let sql = "select blob from nodb_dml_blob_1 where id = " + id;
+    await verifyBlobValueWithBuffer(sql, content, specialStr);
   };
 
   describe('82.1 BLOB, INSERT', function() {
-    before(function(done) {
-      executeSQL(proc_blob_1, done);
+    before(async function() {
+      await executeSQL(proc_blob_1);
     });  // before
 
-    after(function(done) {
-      executeSQL(sql2DropTable1, done);
+    after(async function() {
+      await executeSQL(sql2DropTable1);
     }); // after
 
-    it('82.1.1 works with EMPTY_BLOB', function(done) {
-      var id = insertID++;
-      var content = "EMPTY_BLOB";
+    it('82.1.1 works with EMPTY_BLOB', async function() {
+      let id = insertID++;
+      let content = "EMPTY_BLOB";
 
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content, null, cb);
-        }
-      ], done);
+      await insertIntoBlobTable1(id, content);
+
+      await checkInsertResult(id, content, null);
+
     }); // 82.1.1
 
-    it('82.1.2 works with empty buffer', function(done) {
-      var id = insertID++;
-      var bigStr = '';
-      var content = Buffer.from(bigStr, "utf-8");
+    it('82.1.2 works with empty buffer', async function() {
+      let id = insertID++;
+      let bigStr = '';
+      let content = Buffer.from(bigStr, "utf-8");
 
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content, null, cb);
-        }
-      ], done);
+      await insertIntoBlobTable1(id, content);
+
+      await checkInsertResult(id, content, null);
     }); // 82.1.2
 
-    it('82.1.3 works with empty buffer and bind in maxSize set to 32767', function(done) {
-      var id = insertID++;
-      var bigStr = '';
-      var content = Buffer.from(bigStr, "utf-8");
-
-      async.series([
-        function(cb) {
-          connection.execute(
-            "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
-            {
-              ID : { val : id },
-              C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER, maxSize: 32767 }
-            },
-            function(err, result) {
-              should.not.exist(err);
-              should.strictEqual(result.rowsAffected, 1);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          checkInsertResult(id, content, null, cb);
-        }
-      ], done);
+    it('82.1.3 works with empty buffer and bind in maxSize set to 32767', async function() {
+      let id = insertID++;
+      let bigStr = '';
+      let content = Buffer.from(bigStr, "utf-8");
+      let result = null;
+      result = await connection.execute(
+        "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
+        {
+          ID : { val : id },
+          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER, maxSize: 32767 }
+        });
+      assert.strictEqual(result.rowsAffected, 1);
+      await checkInsertResult(id, content, null);
     }); // 82.1.3
 
-    it('82.1.4 works with empty buffer and bind in maxSize set to 50000', function(done) {
-      var id = insertID++;
-      var bigStr = '';
-      var content = Buffer.from(bigStr, "utf-8");
+    it('82.1.4 works with empty buffer and bind in maxSize set to 50000', async function() {
+      let id = insertID++;
+      let bigStr = '';
+      let content = Buffer.from(bigStr, "utf-8");
+      let result = null;
+      result = await connection.execute(
+        "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
+        {
+          ID : { val : id },
+          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER, maxSize: 50000 }
+        });
 
-      async.series([
-        function(cb) {
-          connection.execute(
-            "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
-            {
-              ID : { val : id },
-              C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER, maxSize: 50000 }
-            },
-            function(err, result) {
-              should.not.exist(err);
-              should.strictEqual(result.rowsAffected, 1);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          checkInsertResult(id, content, null, cb);
-        }
-      ], done);
+      assert.strictEqual(result.rowsAffected, 1);
+      await checkInsertResult(id, content, null);
     }); // 82.1.4
 
-    it('82.1.5 works with undefined', function(done) {
-      var id = insertID++;
-      var content = undefined;
+    it('82.1.5 works with undefined', async function() {
+      let id = insertID++;
+      let content = undefined;
 
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content, null, cb);
-        }
-      ], done);
+      await insertIntoBlobTable1(id, content);
+
+      await checkInsertResult(id, content, null);
     }); // 82.1.5
 
-    it('82.1.6 works with null', function(done) {
-      var id = insertID++;
-      var content = null;
+    it('82.1.6 works with null', async function() {
+      let id = insertID++;
+      let content = null;
 
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content, null, cb);
-        }
-      ], done);
+      await insertIntoBlobTable1(id, content);
+
+      await checkInsertResult(id, content, null);
     }); // 82.1.6
 
-    it('82.1.7 works with null and bind in maxSize set to 32767', function(done) {
-      var id = insertID++;
-      var content = null;
-
-      async.series([
-        function(cb) {
-          connection.execute(
-            "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
-            {
-              ID : { val : id },
-              C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER, maxSize: 32767 }
-            },
-            function(err, result) {
-              should.not.exist(err);
-              should.strictEqual(result.rowsAffected, 1);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          checkInsertResult(id, content, null, cb);
-        }
-      ], done);
+    it('82.1.7 works with null and bind in maxSize set to 32767', async function() {
+      let id = insertID++;
+      let content = null;
+      let result = null;
+      result = await connection.execute(
+        "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
+        {
+          ID : { val : id },
+          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER, maxSize: 32767 }
+        });
+      assert.strictEqual(result.rowsAffected, 1);
+      await checkInsertResult(id, content, null);
     }); // 82.1.7
 
-    it('82.1.8 works with null and bind in maxSize set to 50000', function(done) {
-      var id = insertID++;
-      var content = null;
+    it('82.1.8 works with null and bind in maxSize set to 50000', async function() {
+      let id = insertID++;
+      let content = null;
+      let result = null;
 
-      async.series([
-        function(cb) {
-          connection.execute(
-            "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
-            {
-              ID : { val : id },
-              C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER, maxSize: 50000 }
-            },
-            function(err, result) {
-              should.not.exist(err);
-              should.strictEqual(result.rowsAffected, 1);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          checkInsertResult(id, content, null, cb);
-        }
-      ], done);
+      result = await connection.execute(
+        "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
+        {
+          ID : { val : id },
+          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER, maxSize: 50000 }
+        });
+      assert.strictEqual(result.rowsAffected, 1);
+      await checkInsertResult(id, content, null);
     }); // 82.1.8
 
-    it('82.1.9 works with NaN', function(done) {
-      var id = insertID++;
-      var content = NaN;
-
-      connection.execute(
-        "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
-        {
-          ID : { val : id },
-          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
-        },
-        function(err) {
-          should.exist(err);
-          // NJS-011: encountered bind value and type mismatch in parameter 2
-          (err.message).should.startWith('NJS-011:');
-          done();
-        }
-      );
+    it('82.1.9 works with NaN', async function() {
+      let id = insertID++;
+      let content = NaN;
+      try {
+        await connection.execute(
+          "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
+          {
+            ID : { val : id },
+            C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+          });
+      } catch (err) {
+        assert(err);
+        // NJS-011: encountered bind value and type mismatch in parameter 2
+        assert(err.message.startsWith("NJS-011:"));
+      }
     }); // 82.1.9
 
-    it('82.1.10 works with 0', function(done) {
-      var id = insertID++;
-      var content = 0;
-
-      connection.execute(
-        "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
-        {
-          ID : { val : id },
-          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
-        },
-        function(err) {
-          should.exist(err);
-          // NJS-011: encountered bind value and type mismatch in parameter 2
-          (err.message).should.startWith('NJS-011:');
-          done();
-        }
-      );
+    it('82.1.10 works with 0', async function() {
+      let id = insertID++;
+      let content = 0;
+      try {
+        await connection.execute(
+          "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
+          {
+            ID : { val : id },
+            C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+          });
+      } catch (err) {
+        assert(err);
+        // NJS-011: encountered bind value and type mismatch in parameter 2
+        assert(err.message.startsWith("NJS-011:"));
+      }
     }); // 82.1.10
 
-    it('82.1.11 works with Buffer length 32K', function(done) {
-      var id = insertID++;
-      var contentLength = 32768;
-      var specialStr = "82.1.11";
-      var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = Buffer.from(bigStr, "utf-8");
+    it('82.1.11 works with Buffer length 32K', async function() {
+      let id = insertID++;
+      let contentLength = 32768;
+      let specialStr = "82.1.11";
+      let bigStr = random.getRandomString(contentLength, specialStr);
+      let content = Buffer.from(bigStr, "utf-8");
+      await insertIntoBlobTable1(id, content);
 
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content, specialStr, cb);
-        }
-      ], done);
+      await checkInsertResult(id, content, specialStr);
     }); // 82.1.11
 
-    it('82.1.12 works with Buffer length (64K - 1)', function(done) {
-      var id = insertID++;
-      var contentLength = 65535;
-      var specialStr = "82.1.12";
-      var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = Buffer.from(bigStr, "utf-8");
+    it('82.1.12 works with Buffer length (64K - 1)', async function() {
+      let id = insertID++;
+      let contentLength = 65535;
+      let specialStr = "82.1.12";
+      let bigStr = random.getRandomString(contentLength, specialStr);
+      let content = Buffer.from(bigStr, "utf-8");
 
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content, specialStr, cb);
-        }
-      ], done);
+      await insertIntoBlobTable1(id, content);
+      await checkInsertResult(id, content, specialStr);
     }); // 82.1.12
 
-    it('82.1.13 works with Buffer length (64K + 1)', function(done) {
-      var id = insertID++;
-      var contentLength = 65537;
-      var specialStr = "82.1.13";
-      var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = Buffer.from(bigStr, "utf-8");
+    it('82.1.13 works with Buffer length (64K + 1)', async function() {
+      let id = insertID++;
+      let contentLength = 65537;
+      let specialStr = "82.1.13";
+      let bigStr = random.getRandomString(contentLength, specialStr);
+      let content = Buffer.from(bigStr, "utf-8");
 
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content, specialStr, cb);
-        }
-      ], done);
+      await insertIntoBlobTable1(id, content);
+      await checkInsertResult(id, content, specialStr);
     }); // 82.1.13
 
-    it('82.1.14 works with Buffer length (1MB + 1)', function(done) {
-      var id = insertID++;
-      var contentLength = 1048577; // 1 * 1024 * 1024 + 1;
-      var specialStr = "82.1.14";
-      var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = Buffer.from(bigStr, "utf-8");
+    it('82.1.14 works with Buffer length (1MB + 1)', async function() {
+      let id = insertID++;
+      let contentLength = 1048577; // 1 * 1024 * 1024 + 1;
+      let specialStr = "82.1.14";
+      let bigStr = random.getRandomString(contentLength, specialStr);
+      let content = Buffer.from(bigStr, "utf-8");
 
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content, specialStr, cb);
-        }
-      ], done);
+      await insertIntoBlobTable1(id, content);
+      await checkInsertResult(id, content, specialStr);
     }); // 82.1.14
 
-    it('82.1.15 bind value and type mismatch', function(done) {
-      var id = insertID++;
-      var content = 100;
+    it('82.1.15 bind value and type mismatch', async function() {
+      let id = insertID++;
+      let content = 100;
+      try {
+        await connection.execute(
+          "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
+          {
+            ID : { val : id },
+            C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+          });
+      } catch (err) {
+        assert(err);
+        // NJS-011: encountered bind value and type mismatch in parameter 2
+        assert(err.message.startsWith("NJS-011:"));
+      }
+    }); // 82.1.15
 
-      connection.execute(
+    it('82.1.16 mixing named with positional binding', async function() {
+      let id = insertID++;
+      let contentLength = 40000;
+      let specialStr = "82.1.16";
+      let bigStr = random.getRandomString(contentLength, specialStr);
+      let content = Buffer.from(bigStr, "utf-8");
+      let result = null;
+
+      result = await connection.execute(
+        "INSERT INTO nodb_dml_blob_1 VALUES (:1, :2)",
+        [
+          id, { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+        ]);
+      assert.strictEqual(result.rowsAffected, 1);
+      await checkInsertResult(id, content, specialStr);
+    }); // 82.1.16
+
+    it('82.1.17 bind with invalid BLOB', async function() {
+      let id = insertID++;
+      try {
+        await connection.execute(
+          "INSERT INTO nodb_dml_blob_1 VALUES (:1, :2)",
+          [
+            id, { val : {}, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+          ]);
+      } catch (err) {
+        assert(err);
+        // NJS-011: encountered bind value and type mismatch in parameter 2
+        assert(err.message.startsWith("NJS-011:"));
+      }
+    }); // 82.1.17
+
+    it('82.1.18 RETURNING INTO with bind type BUFFER', async function() {
+      let id = insertID++;
+      let contentLength = 400;
+      let specialStr = "82.1.18";
+      let bigStr = random.getRandomString(contentLength, specialStr);
+      let content = Buffer.from(bigStr, "utf-8");
+      let sql = "INSERT INTO nodb_dml_blob_1 (id, blob) VALUES (:i, :c) RETURNING blob INTO :lobbv";
+      let result = null;
+
+      result = await connection.execute(sql,
+        {
+          i: id,
+          c: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN },
+          lobbv: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: contentLength }
+        });
+      assert.strictEqual(result.rowsAffected, 1);
+
+      await checkInsertResult(id, content, specialStr);
+    }); // 82.1.18
+
+    it('82.1.19 works with bind in maxSize smaller than buffer size', async function() {
+      let id = insertID++;
+      let contentLength = 32768;
+      let specialStr = "82.1.20";
+      let bigStr = random.getRandomString(contentLength, specialStr);
+      let content = Buffer.from(bigStr, "utf-8");
+      let result = null;
+
+      result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
         {
           ID : { val : id },
-          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
-        },
-        function(err) {
-          should.exist(err);
-          // NJS-011: encountered bind value and type mismatch in parameter 2
-          (err.message).should.startWith('NJS-011:');
-          done();
-        }
-      );
-    }); // 82.1.15
+          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER, maxSize: 1 }
+        });
+      assert.strictEqual(result.rowsAffected, 1);
 
-    it('82.1.16 mixing named with positional binding', function(done) {
-      var id = insertID++;
-      var contentLength = 40000;
-      var specialStr = "82.1.16";
-      var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = Buffer.from(bigStr, "utf-8");
-
-      async.series([
-        function(cb) {
-          connection.execute(
-            "INSERT INTO nodb_dml_blob_1 VALUES (:1, :2)",
-            [
-              id, { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
-            ],
-            function(err, result) {
-              should.not.exist(err);
-              should.strictEqual(result.rowsAffected, 1);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          checkInsertResult(id, content, specialStr, cb);
-        }
-      ], done);
-    }); // 82.1.16
-
-    it('82.1.17 bind with invalid BLOB', function(done) {
-      var id = insertID++;
-
-      connection.execute(
-        "INSERT INTO nodb_dml_blob_1 VALUES (:1, :2)",
-        [
-          id, { val : {}, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
-        ],
-        function(err) {
-          should.exist(err);
-          // NJS-011: encountered bind value and type mismatch in parameter 2
-          (err.message).should.startWith('NJS-011:');
-          done();
-        }
-      );
-    }); // 82.1.17
-
-    it('82.1.18 RETURNING INTO with bind type BUFFER', function(done) {
-      var id = insertID++;
-      var contentLength = 400;
-      var specialStr = "82.1.18";
-      var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = Buffer.from(bigStr, "utf-8");
-      var sql = "INSERT INTO nodb_dml_blob_1 (id, blob) VALUES (:i, :c) RETURNING blob INTO :lobbv";
-
-      async.series([
-        function(cb) {
-          connection.execute(
-            sql,
-            {
-              i: id,
-              c: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN },
-              lobbv: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: contentLength }
-            },
-            function(err, result) {
-              should.not.exist(err);
-              should.strictEqual(result.rowsAffected, 1);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          checkInsertResult(id, content, specialStr, cb);
-        }
-      ], done);
-
-    }); // 82.1.18
-
-    it('82.1.19 works with bind in maxSize smaller than buffer size', function(done) {
-      var id = insertID++;
-      var contentLength = 32768;
-      var specialStr = "82.1.20";
-      var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = Buffer.from(bigStr, "utf-8");
-
-      async.series([
-        function(cb) {
-          connection.execute(
-            "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
-            {
-              ID : { val : id },
-              C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER, maxSize: 1 }
-            },
-            function(err, result) {
-              should.not.exist(err);
-              should.strictEqual(result.rowsAffected, 1);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          checkInsertResult(id, content, specialStr, cb);
-        }
-      ], done);
+      await checkInsertResult(id, content, specialStr);
     }); // 82.1.19
 
   }); // 82.1
@@ -586,131 +426,95 @@ describe('82.blobDMLBindAsBuffer.js', function() {
   describe('82.2 BLOB, UPDATE', function() {
     insertID = 0;
 
-    before(function(done) {
-      executeSQL(proc_blob_1, done);
+    before(async function() {
+      await executeSQL(proc_blob_1);
     });  // before
 
-    after(function(done) {
-      executeSQL(sql2DropTable1, done);
+    after(async function() {
+      await executeSQL(sql2DropTable1);
     }); // after
 
-    it('82.2.1 update EMPTY_BLOB column', function(done) {
-      var id = insertID++;
-      var content_1 = "EMPTY_BLOB";
-      var contentLength_2 = 32768;
-      var specialStr_2 = "82.2.1";
-      var bigStr_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = Buffer.from(bigStr_2, "utf-8");
+    it('82.2.1 update EMPTY_BLOB column', async function() {
+      let id = insertID++;
+      let content_1 = "EMPTY_BLOB";
+      let contentLength_2 = 32768;
+      let specialStr_2 = "82.2.1";
+      let bigStr_2 = random.getRandomString(contentLength_2, specialStr_2);
+      let content_2 = Buffer.from(bigStr_2, "utf-8");
 
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content_1, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content_1, null, cb);
-        },
-        function(cb) {
-          updateBlobTable1(id, content_2, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content_2, specialStr_2, cb);
-        }
-      ], done);
+      await insertIntoBlobTable1(id, content_1);
+
+      await checkInsertResult(id, content_1, null);
+
+      await updateBlobTable1(id, content_2);
+
+      await checkInsertResult(id, content_2, specialStr_2);
     }); // 82.2.1
 
-    it('82.2.2 update a cloumn with EMPTY_BLOB', function(done) {
-      var id = insertID++;
-      var contentLength_1 = 50000;
-      var specialStr_1 = "82.2.2";
-      var bigStr_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = Buffer.from(bigStr_1, "utf-8");
-      var content_2 = "EMPTY_BLOB";
+    it('82.2.2 update a cloumn with EMPTY_BLOB', async function() {
+      let id = insertID++;
+      let contentLength_1 = 50000;
+      let specialStr_1 = "82.2.2";
+      let bigStr_1 = random.getRandomString(contentLength_1, specialStr_1);
+      let content_1 = Buffer.from(bigStr_1, "utf-8");
+      let content_2 = "EMPTY_BLOB";
 
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content_1, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content_1, specialStr_1, cb);
-        },
-        function(cb) {
-          updateBlobTable1(id, content_2, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content_2, null, cb);
-        }
-      ], done);
+      await insertIntoBlobTable1(id, content_1);
+
+      await checkInsertResult(id, content_1, specialStr_1);
+
+      await updateBlobTable1(id, content_2);
+
+      await checkInsertResult(id, content_2, null);
     }); // 82.2.2
 
-    it('82.2.3 update EMPTY_BLOB column with empty buffer', function(done) {
-      var id = insertID++;
-      var content_1 = "EMPTY_BLOB";
-      var content_2 = "";
+    it('82.2.3 update EMPTY_BLOB column with empty buffer', async function() {
+      let id = insertID++;
+      let content_1 = "EMPTY_BLOB";
+      let content_2 = "";
 
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content_1, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content_1, null, cb);
-        },
-        function(cb) {
-          updateBlobTable1(id, content_2, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content_2, null, cb);
-        }
-      ], done);
+      await insertIntoBlobTable1(id, content_1);
+
+      await checkInsertResult(id, content_1, null);
+
+      await updateBlobTable1(id, content_2);
+
+      await checkInsertResult(id, content_2, null);
     }); // 82.2.3
 
-    it('82.2.4 update empty buffer column', function(done) {
-      var id = insertID++;
-      var bigStr_1 = "";
-      var content_1 = Buffer.from(bigStr_1, "utf-8");
-      var contentLength_2 = 54321;
-      var specialStr_2 = "82.2.4";
-      var bigStr_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = Buffer.from(bigStr_2, "utf-8");
+    it('82.2.4 update empty buffer column', async function() {
+      let id = insertID++;
+      let bigStr_1 = "";
+      let content_1 = Buffer.from(bigStr_1, "utf-8");
+      let contentLength_2 = 54321;
+      let specialStr_2 = "82.2.4";
+      let bigStr_2 = random.getRandomString(contentLength_2, specialStr_2);
+      let content_2 = Buffer.from(bigStr_2, "utf-8");
 
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content_1, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content_1, null, cb);
-        },
-        function(cb) {
-          updateBlobTable1(id, content_2, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content_2, specialStr_2, cb);
-        }
-      ], done);
+      await insertIntoBlobTable1(id, content_1);
+
+      await checkInsertResult(id, content_1, null);
+
+      await await updateBlobTable1(id, content_2);
+
+      await checkInsertResult(id, content_2, specialStr_2);
     }); // 82.2.4
 
-    it('82.2.5 update a column with empty buffer', function(done) {
-      var id = insertID++;
-      var contentLength_1 = 50000;
-      var specialStr_1 = "82.2.2";
-      var bigStr_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = Buffer.from(bigStr_1, "utf-8");
-      var content_2 = "";
+    it('82.2.5 update a column with empty buffer', async function() {
+      let id = insertID++;
+      let contentLength_1 = 50000;
+      let specialStr_1 = "82.2.2";
+      let bigStr_1 = random.getRandomString(contentLength_1, specialStr_1);
+      let content_1 = Buffer.from(bigStr_1, "utf-8");
+      let content_2 = "";
 
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content_1, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content_1, specialStr_1, cb);
-        },
-        function(cb) {
-          updateBlobTable1(id, content_2, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content_2, null, cb);
-        }
-      ], done);
+      await insertIntoBlobTable1(id, content_1);
+
+      await checkInsertResult(id, content_1, specialStr_1);
+
+      await updateBlobTable1(id, content_2);
+
+      await checkInsertResult(id, content_2, null);
     }); // 82.2.5
-
   }); // 82.2
 });

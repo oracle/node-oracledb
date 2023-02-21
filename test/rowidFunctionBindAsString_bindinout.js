@@ -31,17 +31,17 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var assert   = require('assert');
-var dbConfig = require('./dbconfig.js');
-var sql      = require('./sqlClone.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const sql      = require('./sqlClone.js');
 
 describe('112. rowidFunctionBindAsString_bindinout.js', function() {
-  var connection = null;
-  var tableName = "nodb_rowid_plsql_inout";
-  var insertID = 1;
+  let connection = null;
+  const tableName = "nodb_rowid_plsql_inout";
+  let insertID = 1;
 
-  var fun_create_table = "BEGIN \n" +
+  const fun_create_table = "BEGIN \n" +
                          "    DECLARE \n" +
                          "        e_table_missing EXCEPTION; \n" +
                          "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
@@ -58,24 +58,16 @@ describe('112. rowidFunctionBindAsString_bindinout.js', function() {
                          "        ) \n" +
                          "    '); \n" +
                           "END;  ";
-  var drop_table = "DROP TABLE " + tableName + " PURGE";
+  const drop_table = "DROP TABLE " + tableName + " PURGE";
 
   before('get connection and create table', async function() {
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-      await sql.executeSql(connection, fun_create_table, {}, {});
-    } catch (err) {
-      assert.ifError(err);
-    }
+    connection = await oracledb.getConnection(dbConfig);
+    await sql.executeSql(connection, fun_create_table, {}, {});
   });
 
   after('release connection', async function() {
-    try {
-      await sql.executeSql(connection, drop_table, {}, {});
-      await connection.release();
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await sql.executeSql(connection, drop_table, {}, {});
+    await connection.release();
   });
 
   beforeEach(function(done) {
@@ -84,7 +76,7 @@ describe('112. rowidFunctionBindAsString_bindinout.js', function() {
   });
 
   describe('112.1 FUNCTION BIND_INOUT as rowid', function() {
-    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_inout_1121 (id_in IN NUMBER, content_inout IN OUT ROWID) RETURN ROWID\n" +
+    const fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_inout_1121 (id_in IN NUMBER, content_inout IN OUT ROWID) RETURN ROWID\n" +
                      "IS \n" +
                      "    tmp rowid; \n" +
                      "BEGIN \n" +
@@ -93,23 +85,15 @@ describe('112. rowidFunctionBindAsString_bindinout.js', function() {
                      "    select CHARTOROWID('AAACiZAAFAAAAJEAAA') into content_inout from dual; \n" +
                      "    return tmp; \n" +
                      "END; ";
-    var fun_execute = "BEGIN :o := nodb_rowid_bind_inout_1121 (:i, :c); END;";
-    var fun_drop = "DROP FUNCTION nodb_rowid_bind_inout_1121";
+    const fun_execute = "BEGIN :o := nodb_rowid_bind_inout_1121 (:i, :c); END;";
+    const fun_drop = "DROP FUNCTION nodb_rowid_bind_inout_1121";
 
     before('create procedure', async function() {
-      try {
-        await sql.executeSql(connection, fun_create, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, fun_create, {}, {});
     });
 
     after('drop procedure', async function() {
-      try {
-        await sql.executeSql(connection, fun_drop, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, fun_drop, {}, {});
     });
 
     it('112.1.1 works with null', async function() {
@@ -205,7 +189,7 @@ describe('112. rowidFunctionBindAsString_bindinout.js', function() {
   });
 
   describe('112.2 FUNCTION BIND_INOUT as string', function() {
-    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_inout_1121 (id_in IN NUMBER, content_inout IN OUT VARCHAR2) RETURN ROWID\n" +
+    const fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_inout_1121 (id_in IN NUMBER, content_inout IN OUT VARCHAR2) RETURN ROWID\n" +
                      "IS \n" +
                      "    tmp rowid; \n" +
                      "BEGIN \n" +
@@ -214,23 +198,15 @@ describe('112. rowidFunctionBindAsString_bindinout.js', function() {
                      "    select CHARTOROWID('AAACiZAAFAAAAJEAAA') into content_inout from dual; \n" +
                      "    return tmp; \n" +
                      "END; ";
-    var fun_execute = "BEGIN :o := nodb_rowid_bind_inout_1121 (:i, :c); END;";
-    var fun_drop = "DROP FUNCTION nodb_rowid_bind_inout_1121";
+    const fun_execute = "BEGIN :o := nodb_rowid_bind_inout_1121 (:i, :c); END;";
+    const fun_drop = "DROP FUNCTION nodb_rowid_bind_inout_1121";
 
     before('create procedure', async function() {
-      try {
-        await sql.executeSql(connection, fun_create, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, fun_create, {}, {});
     });
 
     after('drop procedure', async function() {
-      try {
-        await sql.executeSql(connection, fun_drop, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, fun_drop, {}, {});
     });
 
     it('112.2.1 works with null', async function() {
@@ -326,7 +302,7 @@ describe('112. rowidFunctionBindAsString_bindinout.js', function() {
   });
 
   describe('112.3 FUNCTION BIND_INOUT, UPDATE', function() {
-    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN OUT VARCHAR2, content_2 IN OUT ROWID) RETURN ROWID\n" +
+    const fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN OUT VARCHAR2, content_2 IN OUT ROWID) RETURN ROWID\n" +
                      "IS \n" +
                      "    tmp rowid; \n" +
                      "BEGIN \n" +
@@ -336,23 +312,15 @@ describe('112. rowidFunctionBindAsString_bindinout.js', function() {
                      "    select CHARTOROWID('AAACiZAAFAAAAJEAAA') into content_1 from dual; \n" +
                      "    return tmp; \n" +
                      "END; ";
-    var fun_execute = "BEGIN :o := nodb_rowid_bind_1083 (:i, :c1, :c2); END;";
-    var fun_drop = "DROP FUNCTION nodb_rowid_bind_1083";
+    const fun_execute = "BEGIN :o := nodb_rowid_bind_1083 (:i, :c1, :c2); END;";
+    const fun_drop = "DROP FUNCTION nodb_rowid_bind_1083";
 
     before('create procedure', async function() {
-      try {
-        await sql.executeSql(connection, fun_create, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, fun_create, {}, {});
     });
 
     after('drop procedure', async function() {
-      try {
-        await sql.executeSql(connection, fun_drop, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, fun_drop, {}, {});
     });
 
     it('112.3.1 update null with rowid', async function() {
@@ -385,7 +353,7 @@ describe('112. rowidFunctionBindAsString_bindinout.js', function() {
 
   });
 
-  var funBindInOut = async function(fun_exec, content_in, expected) {
+  const funBindInOut = async function(fun_exec, content_in, expected) {
     const bindVar_in = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
@@ -399,7 +367,7 @@ describe('112. rowidFunctionBindAsString_bindinout.js', function() {
     assert.strictEqual(resultVal_1, "AAACiZAAFAAAAJEAAA");
   };
 
-  var funBindInOut_default = async function(fun_exec, content_in, expected) {
+  const funBindInOut_default = async function(fun_exec, content_in, expected) {
     const bindVar_in = {
       i: insertID,
       c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
@@ -412,7 +380,7 @@ describe('112. rowidFunctionBindAsString_bindinout.js', function() {
     assert.strictEqual(resultVal_1, "AAACiZAAFAAAAJEAAA");
   };
 
-  var funBindInOut_update = async function(fun_exec, content_1, content_2, expected) {
+  const funBindInOut_update = async function(fun_exec, content_1, content_2, expected) {
     const bindVar_in = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c1: { val: content_1, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
@@ -427,7 +395,7 @@ describe('112. rowidFunctionBindAsString_bindinout.js', function() {
     assert.strictEqual(resultVal_1, "AAACiZAAFAAAAJEAAA");
   };
 
-  var funBindInOut_update_default = async function(fun_exec, content_1, content_2, expected) {
+  const funBindInOut_update_default = async function(fun_exec, content_1, content_2, expected) {
     const bindVar_in = {
       i: insertID,
       c1: { val: content_1, type: oracledb.STRING, dir: oracledb.BIND_INOUT },

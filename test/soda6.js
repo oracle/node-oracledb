@@ -52,490 +52,311 @@ describe('174. soda6.js', function() {
   });
 
   it('174.1 filter() basic case', async function() {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_174_1");
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_174_1");
+    await Promise.all(
+      t_contents.map(function(content) {
+        return collection.insertOne(content);
+      })
+    );
 
-      await Promise.all(
-        t_contents.map(function(content) {
-          return collection.insertOne(content);
-        })
-      );
+    // Fetch back
+    const empInShenzhen = await collection.find()
+      .filter({ "office": {"$like": "Shenzhen"} })
+      .count();
+    assert.strictEqual(empInShenzhen.count, 2);
 
-      // Fetch back
-      let empInShenzhen = await collection.find()
-        .filter({ "office": {"$like": "Shenzhen"} })
-        .count();
-      assert.strictEqual(empInShenzhen.count, 2);
+    await conn.commit();
 
-      await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
 
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
-    }
+    await conn.close();
   }); // 174.1
 
   it('174.2 Negative - fiter(filterSpec) when filterSpec is null', async function() {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_174_2");
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_174_2");
+    await Promise.all(
+      t_contents.map(function(content) {
+        return collection.insertOne(content);
+      })
+    );
 
-      await Promise.all(
-        t_contents.map(function(content) {
-          return collection.insertOne(content);
-        })
-      );
+    // Fetch back
+    await testsUtil.assertThrowsAsync(
+      async () => await collection.find().filter(),
+      /NJS-009:/
+    );
 
-      // Fetch back
-      await testsUtil.assertThrowsAsync(
-        async () => await collection.find().filter(),
-        /NJS-009: invalid number of parameters/
-      );
-
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
-    }
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 174.2
 
   it('174.3 filterSpec is OK to be an empty object', async function() {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_174_3");
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_174_3");
+    await Promise.all(
+      t_contents.map(function(content) {
+        return collection.insertOne(content);
+      })
+    );
 
-      await Promise.all(
-        t_contents.map(function(content) {
-          return collection.insertOne(content);
-        })
-      );
+    // Fetch back
+    const empInShenzhen = await collection.find()
+      .filter({})
+      .count();
+    assert.strictEqual(empInShenzhen.count, t_contents.length);
 
-      // Fetch back
-      let empInShenzhen = await collection.find()
-        .filter({})
-        .count();
-      assert.strictEqual(empInShenzhen.count, t_contents.length);
-
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
-    }
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 174.3
 
   it('174.4 Key(), basic case', async function() {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_174_4");
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_174_4");
+    await Promise.all(
+      t_contents.map(function(content) {
+        return collection.insertOne(content);
+      })
+    );
 
-      await Promise.all(
-        t_contents.map(function(content) {
-          return collection.insertOne(content);
-        })
-      );
+    // Insert another document
+    const content1 = { id: 1008, name: "Justin", office: "Shenzhen" };
+    const doc1 = await collection.insertOneAndGet(content1);
+    const key1 = doc1.key;
+    assert.strictEqual(typeof (key1), "string");
 
-      // Insert another document
-      let content1 = { id: 1008, name: "Justin", office: "Shenzhen" };
-      let doc1 = await collection.insertOneAndGet(content1);
-      let key1 = doc1.key;
-      assert.strictEqual(typeof (key1), "string");
-
-      // Fetch it back
-      let doc2 = await collection.find().key(key1).getOne();
-      let content2 = doc2.getContent();
-      assert.deepEqual(content2, content1);
+    // Fetch it back
+    const doc2 = await collection.find().key(key1).getOne();
+    const content2 = doc2.getContent();
+    assert.deepEqual(content2, content1);
 
 
-      let empInShenzhen = await collection.find()
-        .filter({ "office": {"$like": "Shenzhen"} })
-        .count();
-      assert.strictEqual(empInShenzhen.count, 3);
+    const empInShenzhen = await collection.find()
+      .filter({ "office": {"$like": "Shenzhen"} })
+      .count();
+    assert.strictEqual(empInShenzhen.count, 3);
 
-      await conn.commit();
+    await conn.commit();
 
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
-    }
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 174.4
 
   it('174.5 Key(), no matched key', async function() {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_174_5");
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_174_5");
+    await Promise.all(
+      t_contents.map(function(content) {
+        return collection.insertOne(content);
+      })
+    );
 
-      await Promise.all(
-        t_contents.map(function(content) {
-          return collection.insertOne(content);
-        })
-      );
+    // Fetch it back
+    const key1 = 'C2478535C4404F9DBFE1B2BC2B137079';
+    const doc2 = await collection.find().key(key1).getOne();
+    assert.ifError(doc2);
+    await conn.commit();
 
-      // Fetch it back
-      let key1 = 'C2478535C4404F9DBFE1B2BC2B137079';
-      let doc2 = await collection.find().key(key1).getOne();
-      assert.ifError(doc2);
-      await conn.commit();
-
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
-    }
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 174.5
 
   it('174.6 Negative - Key(null)', async function() {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_174_6");
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_174_6");
+    await Promise.all(
+      t_contents.map(function(content) {
+        return collection.insertOne(content);
+      })
+    );
 
-      await Promise.all(
-        t_contents.map(function(content) {
-          return collection.insertOne(content);
-        })
-      );
+    await testsUtil.assertThrowsAsync(
+      async () => await collection.find().key().getOne(),
+      /NJS-009:/
+    );
 
-      await testsUtil.assertThrowsAsync(
-        async () => await collection.find().key().getOne(),
-        /NJS-009: invalid number of parameters/
-      );
+    await conn.commit();
 
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
-    }
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 174.6
 
   it('174.7 Key(), invalid type', async function() {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_174_7");
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_174_7");
+    await Promise.all(
+      t_contents.map(function(content) {
+        return collection.insertOne(content);
+      })
+    );
 
-      await Promise.all(
-        t_contents.map(function(content) {
-          return collection.insertOne(content);
-        })
-      );
+    // Fetch it back
+    const key1 = {};
+    await testsUtil.assertThrowsAsync(
+      async () => await collection.find().key(key1).getOne(),
+      /NJS-005:/
+    );
 
-      // Fetch it back
-      let key1 = {};
-      await testsUtil.assertThrowsAsync(
-        async () => await collection.find().key(key1).getOne(),
-        /NJS-005: invalid value for parameter 1/
-      );
+    await conn.commit();
 
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
-    }
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 174.7
 
   it('174.8 Keys(), basic case', async function() {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_174_8");
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_174_8");
-
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
-
-      // Fetch back
-      let documents = await collection.find().keys(myKeys).getDocuments();
-
-      // Get contents
-      let myContents = [];
-      for (let i = 0; i < documents.length; i++) {
-        myContents[i] = documents[i].getContent();
-        (t_contents).includes(myContents[i]);
-      }
-
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
+    const myKeys = [];
+    for (let i = 0; i < t_contents.length; i++) {
+      const content = t_contents[i];
+      const doc = await collection.insertOneAndGet(content);
+      myKeys[i] = doc.key;
     }
+
+    // Fetch back
+    const documents = await collection.find().keys(myKeys).getDocuments();
+
+    // Get contents
+    const myContents = [];
+    for (let i = 0; i < documents.length; i++) {
+      myContents[i] = documents[i].getContent();
+      (t_contents).includes(myContents[i]);
+    }
+
+    await conn.commit();
+
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 174.8
 
   it('174.9 Keys([]) empty array, it selects all documents', async function() {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_174_9");
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_174_9");
+    await Promise.all(
+      t_contents.map(function(content) {
+        return collection.insertOne(content);
+      })
+    );
 
-      await Promise.all(
-        t_contents.map(function(content) {
-          return collection.insertOne(content);
-        })
-      );
+    // Fetch back
+    const documents = await collection.find().keys([]).getDocuments();
 
-      // Fetch back
-      let documents = await collection.find().keys([]).getDocuments();
-
-      // Get contents
-      let myContents = [];
-      for (let i = 0; i < documents.length; i++) {
-        myContents[i] = documents[i].getContent();
-        (t_contents).includes(myContents[i]);
-      }
-
-
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
+    // Get contents
+    const myContents = [];
+    for (let i = 0; i < documents.length; i++) {
+      myContents[i] = documents[i].getContent();
+      (t_contents).includes(myContents[i]);
     }
+
+    await conn.commit();
+
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 174.9
 
   it('174.10 Negative - keys() no parameter', async function() {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_174_10");
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_174_10");
+    await Promise.all(
+      t_contents.map(function(content) {
+        return collection.insertOne(content);
+      })
+    );
 
-      await Promise.all(
-        t_contents.map(function(content) {
-          return collection.insertOne(content);
-        })
-      );
+    await testsUtil.assertThrowsAsync(
+      async () => await collection.find().keys().getDocuments(),
+      /NJS-009:/
+    );
 
-      await testsUtil.assertThrowsAsync(
-        async () => await collection.find().keys().getDocuments(),
-        /NJS-009: invalid number of parameters/
-      );
+    await conn.commit();
 
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
-    }
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 174.10
 
   it('174.11 Negative - keys(null)', async function() {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_174_11");
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_174_11");
+    await Promise.all(
+      t_contents.map(function(content) {
+        return collection.insertOne(content);
+      })
+    );
 
-      await Promise.all(
-        t_contents.map(function(content) {
-          return collection.insertOne(content);
-        })
-      );
+    // Fetch back
+    await testsUtil.assertThrowsAsync(
+      async () => await collection.find().keys(null).getDocuments(),
+      /NJS-005:/
+    );
 
-      // Fetch back
-      await testsUtil.assertThrowsAsync(
-        async () => await collection.find().keys(null).getDocuments(),
-        /NJS-005: invalid value for parameter 1/
-      );
+    await conn.commit();
 
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
-    }
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 174.11
 
   it('174.12 try to query documents with nonexistent keys', async function() {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_174_12");
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_174_12");
-
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
-
-      // Fetch back
-      let nonexistentKeys = ['4A5AF2AAEB124FD4BFF80BC3630CB048', '4A5AF2AAEB124FD4BFF80BC3630CB049'];
-      let result = await collection
-        .find()
-        .keys(nonexistentKeys)
-        .count();
-
-      assert.strictEqual(result.count, 0);
-
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
+    const myKeys = [];
+    for (let i = 0; i < t_contents.length; i++) {
+      const content = t_contents[i];
+      const doc = await collection.insertOneAndGet(content);
+      myKeys[i] = doc.key;
     }
+
+    // Fetch back
+    const nonexistentKeys = ['4A5AF2AAEB124FD4BFF80BC3630CB048', '4A5AF2AAEB124FD4BFF80BC3630CB049'];
+    const result = await collection
+      .find()
+      .keys(nonexistentKeys)
+      .count();
+
+    assert.strictEqual(result.count, 0);
+
+    await conn.commit();
+
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 174.12
 
   it("174.13 hint(), basic case", async function() {
@@ -548,41 +369,27 @@ describe('174. soda6.js', function() {
         return;
       }
     }
-    let conn, collection;
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_174_13");
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_174_13");
 
-      let options = {hint: "MONITOR"};
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        await collection.insertOneAndGet(content, options);
-      }
-
-      // Fetch back
-      await collection
-        .find()
-        .hint("MONITOR");
-
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
+    const options = {hint: "MONITOR"};
+    for (let i = 0; i < t_contents.length; i++) {
+      const content = t_contents[i];
+      await collection.insertOneAndGet(content, options);
     }
+
+    // Fetch back
+    await collection
+      .find()
+      .hint("MONITOR");
+
+    await conn.commit();
+
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); //174.13
 
   it("174.14 Negative - hint() no parameter", async function() {
@@ -595,41 +402,28 @@ describe('174. soda6.js', function() {
         return;
       }
     }
-    let conn, collection;
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_174_14");
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_174_14");
 
-      let options = {hint: "MONITOR"};
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        await collection.insertOneAndGet(content, options);
-      }
-
-      // Fetch back
-      await collection
-        .find()
-        .hint();
-
-    } catch (err) {
-      assert.match(err.message, /NJS-009:/);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
+    const options = {hint: "MONITOR"};
+    for (let i = 0; i < t_contents.length; i++) {
+      const content = t_contents[i];
+      await collection.insertOneAndGet(content, options);
     }
+
+    // Fetch back
+    await testsUtil.assertThrowsAsync(
+      async () => await collection.find().hint(),
+      /NJS-009:/
+    );
+
+    await conn.commit();
+
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); //174.14
 
   it("174.15 Negative - hint() invalid parameter type", async function() {
@@ -642,41 +436,28 @@ describe('174. soda6.js', function() {
         return;
       }
     }
-    let conn, collection;
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let soda = conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_174_15");
+    const conn = await oracledb.getConnection(dbconfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_174_15");
 
-      let options = {hint: "MONITOR"};
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        await collection.insertOneAndGet(content, options);
-      }
-
-      // Fetch back
-      await collection
-        .find()
-        .hint(1);
-
-    } catch (err) {
-      assert.match(err.message, /NJS-005:/);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
+    const options = {hint: "MONITOR"};
+    for (let i = 0; i < t_contents.length; i++) {
+      const content = t_contents[i];
+      await collection.insertOneAndGet(content, options);
     }
+
+    // Fetch back
+    await testsUtil.assertThrowsAsync(
+      async () => await collection.find().hint(1),
+      /NJS-005:/
+    );
+
+    await conn.commit();
+
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); //174.15
 
 });

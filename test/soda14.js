@@ -65,101 +65,65 @@ describe('238. soda14.js', () => {
 
     await sodaUtil.cleanup();
 
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      soda = conn.getSodaDatabase();
-      coll = await soda.createCollection(collectionName);
+    conn = await oracledb.getConnection(dbconfig);
+    soda = conn.getSodaDatabase();
+    coll = await soda.createCollection(collectionName);
 
-      // populate the collection with a number of rows
-      for (let i = 0; i < numBatches; i++) {
-        const docs = [];
-        for (let j = 0; j < numRowsInBatch; j++) {
-          await docs.push({fred: 5, george: 10});
-        }
-        await coll.insertMany(docs);
+    // populate the collection with a number of rows
+    for (let i = 0; i < numBatches; i++) {
+      const docs = [];
+      for (let j = 0; j < numRowsInBatch; j++) {
+        await docs.push({fred: 5, george: 10});
       }
-
-      await conn.commit();
-    } catch (err) {
-      assert.ifError(err);
+      await coll.insertMany(docs);
     }
+
+    await conn.commit();
   }); // before()
 
   after(async () => {
     if (conn) {
-      try {
-        let result = await coll.drop();
-        assert.strictEqual(result.dropped, true);
+      let result = await coll.drop();
+      assert.strictEqual(result.dropped, true);
 
-        await conn.close();
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await conn.close();
     }
   }); // after()
 
   it('238.1 the fetchArraySize() method works', async () => {
-    try {
-      const SIZE = 100;
-      const docs = await coll.find().fetchArraySize(SIZE).getDocuments();
-
-      assert.strictEqual(docs.length, DocSize);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    const SIZE = 100;
+    const docs = await coll.find().fetchArraySize(SIZE).getDocuments();
+    assert.strictEqual(docs.length, DocSize);
   }); // 238.1
 
   it('238.2 fetchArraySize value is larger than the size of collection', async () => {
-    try {
-      const SIZE = 10000;
-      const docs = await coll.find().fetchArraySize(SIZE).getDocuments();
-
-      assert.strictEqual(docs.length, DocSize);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    const SIZE = 10000;
+    const docs = await coll.find().fetchArraySize(SIZE).getDocuments();
+    assert.strictEqual(docs.length, DocSize);
   }); // 238.2
 
   it('238.3 Negative - call fetchArraySize() without parameter', async () => {
-    try {
-      let docs;
-      await assert.rejects(
-        async () => {
-          docs = await coll.find().fetchArraySize().getDocuments();
-        },
-        /NJS-009/
-      );
-      assert.ifError(docs);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await assert.rejects(
+      async () => {
+        await coll.find().fetchArraySize().getDocuments();
+      },
+      /NJS-009:/
+    );
   }); // 238.3
 
   it('238.4 fetchArraySize is 0', async () => {
-    try {
-      const SIZE = 0;
-      const docs = await coll.find().fetchArraySize(SIZE).getDocuments();
-
-      assert.strictEqual(docs.length, DocSize);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    const SIZE = 0;
+    const docs = await coll.find().fetchArraySize(SIZE).getDocuments();
+    assert.strictEqual(docs.length, DocSize);
   }); // 238.4
 
   it('238.5 Negative - fetchArraySize is a negative value', async () => {
-    try {
-      const SIZE = -10;
-      let docs;
-      await assert.rejects(
-        async () => {
-          docs = await coll.find().fetchArraySize(SIZE).getDocuments();
-        },
-        /NJS-005/
-      );
-
-      assert.ifError(docs);
-    } catch (err) {
-      assert.ifError(err);
-    }
+    const SIZE = -10;
+    await assert.rejects(
+      async () => {
+        await coll.find().fetchArraySize(SIZE).getDocuments();
+      },
+      /NJS-005:/
+    );
   }); // 238.5
 });

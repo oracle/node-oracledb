@@ -38,12 +38,12 @@ const sql      = require('./sqlClone.js');
 const random   = require('./random.js');
 
 describe('145. urowidProcedureBindAsString5.js', function() {
-  var connection = null;
-  var tableName_indexed = "nodb_urowid_indexed_proc";
-  var tableName_normal = "nodb_urowid_normal_proc";
-  var insertID = 1;
+  let connection = null;
+  const tableName_indexed = "nodb_urowid_indexed_proc";
+  const tableName_normal = "nodb_urowid_normal_proc";
+  let insertID = 1;
 
-  var table_indexed = "BEGIN \n" +
+  const table_indexed = "BEGIN \n" +
                       "    DECLARE \n" +
                       "        e_table_missing EXCEPTION; \n" +
                       "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
@@ -62,7 +62,7 @@ describe('145. urowidProcedureBindAsString5.js', function() {
                       "    '); \n" +
                       "END;  ";
 
-  var table_normal = "BEGIN \n" +
+  const table_normal = "BEGIN \n" +
                      "    DECLARE \n" +
                      "        e_table_missing EXCEPTION; \n" +
                      "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
@@ -80,27 +80,19 @@ describe('145. urowidProcedureBindAsString5.js', function() {
                      "    '); \n" +
                      "END;  ";
 
-  var drop_table_indexed = "DROP TABLE " + tableName_indexed + " PURGE";
-  var drop_table_normal = "DROP TABLE " + tableName_normal + " PURGE";
+  const drop_table_indexed = "DROP TABLE " + tableName_indexed + " PURGE";
+  const drop_table_normal = "DROP TABLE " + tableName_normal + " PURGE";
 
   before('get connection and create table', async function() {
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-      await sql.executeSql(connection, table_indexed, {}, {});
-      await sql.executeSql(connection, table_normal, {}, {});
-    } catch (err) {
-      assert.ifError(err);
-    }
+    connection = await oracledb.getConnection(dbConfig);
+    await sql.executeSql(connection, table_indexed, {}, {});
+    await sql.executeSql(connection, table_normal, {}, {});
   });
 
   after('release connection', async function() {
-    try {
-      await sql.executeSql(connection, drop_table_indexed, {}, {});
-      await sql.executeSql(connection, drop_table_normal, {}, {});
-      await connection.release();
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await sql.executeSql(connection, drop_table_indexed, {}, {});
+    await sql.executeSql(connection, drop_table_normal, {}, {});
+    await connection.release();
   });
 
   beforeEach(function() {
@@ -108,29 +100,21 @@ describe('145. urowidProcedureBindAsString5.js', function() {
   });
 
   describe('145.1 PROCEDURE BIND_OUT as UROWID', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out_1451 (id_in IN NUMBER, content_in IN UROWID, content_out OUT UROWID)\n" +
+    const proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out_1451 (id_in IN NUMBER, content_in IN UROWID, content_out OUT UROWID)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName_normal + " (id, content) values (id_in, content_in); \n" +
                       "    select content into content_out from " + tableName_normal + " where id = id_in; \n" +
                       "END nodb_rowid_bind_out_1451; ";
-    var proc_execute = "BEGIN nodb_rowid_bind_out_1451 (:i, :c, :o); END;";
-    var proc_drop = "DROP PROCEDURE nodb_rowid_bind_out_1451";
+    const proc_execute = "BEGIN nodb_rowid_bind_out_1451 (:i, :c, :o); END;";
+    const proc_drop = "DROP PROCEDURE nodb_rowid_bind_out_1451";
 
     before('create procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_create, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, proc_create, {}, {});
     });
 
     after('drop procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_drop, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, proc_drop, {}, {});
     });
 
     it('145.1.1 urowid length > 500', async function() {
@@ -148,29 +132,21 @@ describe('145. urowidProcedureBindAsString5.js', function() {
   });
 
   describe('145.2 PROCEDURE BIND_OUT as STRING', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out_1452 (id_in IN NUMBER, content_in IN UROWID, content_out OUT VARCHAR2)\n" +
+    const proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out_1452 (id_in IN NUMBER, content_in IN UROWID, content_out OUT VARCHAR2)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName_normal + " (id, content) values (id_in, content_in); \n" +
                       "    select content into content_out from " + tableName_normal + " where id = id_in; \n" +
                       "END nodb_rowid_bind_out_1452; ";
-    var proc_execute = "BEGIN nodb_rowid_bind_out_1452 (:i, :c, :o); END;";
-    var proc_drop = "DROP PROCEDURE nodb_rowid_bind_out_1452";
+    const proc_execute = "BEGIN nodb_rowid_bind_out_1452 (:i, :c, :o); END;";
+    const proc_drop = "DROP PROCEDURE nodb_rowid_bind_out_1452";
 
     before('create procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_create, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, proc_create, {}, {});
     });
 
     after('drop procedure', async function() {
-      try {
-        await sql.executeSql(connection, proc_drop, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, proc_drop, {}, {});
     });
 
     it('145.2.1 urowid length > 500', async function() {
@@ -187,12 +163,12 @@ describe('145. urowidProcedureBindAsString5.js', function() {
 
   });
 
-  var procedureBindOut = async function(proc_execute, expectedLength) {
-    var str = random.getRandomLengthString(expectedLength);
-    var urowid, urowidLen;
-    var sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
+  const procedureBindOut = async function(proc_execute, expectedLength) {
+    const str = random.getRandomLengthString(expectedLength);
+    let urowid, urowidLen;
+    const sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
     await sql.executeInsert(connection, sql_insert, {}, {});
-    var result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
+    let result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
     assert(result);
     urowid = result.rows[0][0];
     urowidLen = urowid.length;

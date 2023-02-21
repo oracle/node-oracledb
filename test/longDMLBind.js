@@ -40,10 +40,10 @@ const sql      = require('./sqlClone.js');
 
 describe('125. longDMLBind.js', function() {
 
-  var connection = null;
-  var tableName = "nodb_long";
-  var insertID = 0;
-  var table_create = "BEGIN \n" +
+  let connection = null;
+  const tableName = "nodb_long";
+  let insertID = 0;
+  const table_create = "BEGIN \n" +
                      "    DECLARE \n" +
                      "        e_table_missing EXCEPTION; \n" +
                      "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -60,25 +60,16 @@ describe('125. longDMLBind.js', function() {
                      "        ) \n" +
                      "    '); \n" +
                      "END; ";
-  var table_drop = "DROP TABLE " + tableName + " PURGE";
+  const table_drop = "DROP TABLE " + tableName + " PURGE";
 
   before(async function() {
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-      sql.executeSql(connection, table_create, {}, {});
-    } catch (err) {
-      assert.ifError(err);
-    }
+    connection = await oracledb.getConnection(dbConfig);
+    await sql.executeSql(connection, table_create, {}, {});
   }); // before
 
   after(async function() {
-    try {
-      await sql.executeSql(connection, table_drop, {}, {});
-      await connection.release();
-    } catch (err) {
-      assert.ifError(err);
-    }
-
+    await sql.executeSql(connection, table_drop, {}, {});
+    await connection.release();
   }); // after
 
   beforeEach(function() {
@@ -135,23 +126,23 @@ describe('125. longDMLBind.js', function() {
 
   }); // 125.3
 
-  var test1 = async function(content, maxsize) {
+  const test1 = async function(content, maxsize) {
     await insert(content, maxsize);
     await fetch(content);
   };
 
-  var test2 = async function(insertedStr, updateStr, maxsize) {
+  const test2 = async function(insertedStr, updateStr, maxsize) {
     await insert(insertedStr, insertedStr.length);
     await update(updateStr, maxsize);
     await fetch(updateStr);
   };
 
-  var test3 = async function(insertedStr, updateStr) {
+  const test3 = async function(insertedStr, updateStr) {
     await insert(insertedStr, insertedStr.length);
     await returning(updateStr);
   };
 
-  var insert = async function(content, maxsize) {
+  const insert = async function(content, maxsize) {
     const sql_query = "insert into " + tableName + " (id, content) values (:i, :c)";
     const bindVar = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
@@ -162,7 +153,7 @@ describe('125. longDMLBind.js', function() {
     assert.equal(1, result.rowsAffected);
   };
 
-  var update = async function(content, maxsize) {
+  const update = async function(content, maxsize) {
     const sql_query = "update " + tableName + " set content = :c where id = :i";
     const bindVar = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
@@ -173,7 +164,7 @@ describe('125. longDMLBind.js', function() {
     assert.equal(1, result.rowsAffected);
   };
 
-  var returning = async function(content) {
+  const returning = async function(content) {
     const sql_query = "update " + tableName + " set content = :c1 where id = :i returning content into :c2";
     const bindVar = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
@@ -188,7 +179,7 @@ describe('125. longDMLBind.js', function() {
     // ORA-22816: unsupported feature with RETURNING clause
   };
 
-  var fetch = async function(expected) {
+  const fetch = async function(expected) {
     const sql_query = "select content from " + tableName + " where id = " + insertID;
     const result = await connection.execute(sql_query);
     assert(result);

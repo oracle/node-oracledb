@@ -31,19 +31,19 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var assert   = require('assert');
-var dbConfig = require('./dbconfig.js');
-var sql      = require('./sqlClone.js');
-var random   = require('./random.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const sql      = require('./sqlClone.js');
+const random   = require('./random.js');
 
 describe('142. urowidFunctionBindAsString3.js', function() {
-  var connection = null;
-  var tableName_indexed = "nodb_urowid_indexed";
-  var tableName_normal = "nodb_urowid_normal";
-  var insertID = 1;
+  let connection = null;
+  const tableName_indexed = "nodb_urowid_indexed";
+  const tableName_normal = "nodb_urowid_normal";
+  let insertID = 1;
 
-  var table_indexed = "BEGIN \n" +
+  const table_indexed = "BEGIN \n" +
                       "    DECLARE \n" +
                       "        e_table_missing EXCEPTION; \n" +
                       "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
@@ -62,7 +62,7 @@ describe('142. urowidFunctionBindAsString3.js', function() {
                       "    '); \n" +
                       "END;  ";
 
-  var table_normal = "BEGIN \n" +
+  const table_normal = "BEGIN \n" +
                      "    DECLARE \n" +
                      "        e_table_missing EXCEPTION; \n" +
                      "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
@@ -80,29 +80,19 @@ describe('142. urowidFunctionBindAsString3.js', function() {
                      "    '); \n" +
                      "END;  ";
 
-  var drop_table_indexed = "DROP TABLE " + tableName_indexed + " PURGE";
-  var drop_table_normal = "DROP TABLE " + tableName_normal + " PURGE";
+  const drop_table_indexed = "DROP TABLE " + tableName_indexed + " PURGE";
+  const drop_table_normal = "DROP TABLE " + tableName_normal + " PURGE";
 
   before('get connection and create table', async function() {
-
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-      assert(connection);
-      await sql.executeSql(connection, table_indexed, {}, {});
-      await sql.executeSql(connection, table_normal, {}, {});
-    } catch (err) {
-      assert.ifError(err);
-    }
+    connection = await oracledb.getConnection(dbConfig);
+    await sql.executeSql(connection, table_indexed, {}, {});
+    await sql.executeSql(connection, table_normal, {}, {});
   });
 
   after('release connection', async function() {
-    try {
-      await sql.executeSql(connection, drop_table_indexed, {}, {});
-      await sql.executeSql(connection, drop_table_normal, {}, {});
-      await connection.release();
-    } catch (err) {
-      assert.ifError(err);
-    }
+    await sql.executeSql(connection, drop_table_indexed, {}, {});
+    await sql.executeSql(connection, drop_table_normal, {}, {});
+    await connection.release();
   });
 
   beforeEach(function(done) {
@@ -111,7 +101,7 @@ describe('142. urowidFunctionBindAsString3.js', function() {
   });
 
   describe('142.1 FUNCTION BIND_IN/OUT as UROWID', function() {
-    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind (ID_in IN NUMBER, content_in IN UROWID) RETURN UROWID\n" +
+    const fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind (ID_in IN NUMBER, content_in IN UROWID) RETURN UROWID\n" +
                      "IS \n" +
                      "    tmp UROWID(4000); \n" +
                      "BEGIN \n" +
@@ -119,23 +109,15 @@ describe('142. urowidFunctionBindAsString3.js', function() {
                      "    select content into tmp from " + tableName_normal + " where id = ID_in; \n" +
                      "    return tmp; \n" +
                      "END; ";
-    var fun_execute = "BEGIN :o := nodb_rowid_bind (:i, :c); END;";
-    var fun_drop = "DROP FUNCTION nodb_rowid_bind";
+    const fun_execute = "BEGIN :o := nodb_rowid_bind (:i, :c); END;";
+    const fun_drop = "DROP FUNCTION nodb_rowid_bind";
 
     before('create procedure', async function() {
-      try {
-        await sql.executeSql(connection, fun_create, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, fun_create, {}, {});
     });
 
     after('drop procedure', async function() {
-      try {
-        await sql.executeSql(connection, fun_drop, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, fun_drop, {}, {});
     });
 
     it('142.1.1 urowid length > 200', async function() {
@@ -153,7 +135,7 @@ describe('142. urowidFunctionBindAsString3.js', function() {
   });
 
   describe('142.2 FUNCTION BIND_IN/OUT as string', function() {
-    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind (id_in IN NUMBER, content_in IN UROWID) RETURN VARCHAR2\n" +
+    const fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind (id_in IN NUMBER, content_in IN UROWID) RETURN VARCHAR2\n" +
                      "IS \n" +
                      "    tmp UROWID; \n" +
                      "BEGIN \n" +
@@ -161,23 +143,15 @@ describe('142. urowidFunctionBindAsString3.js', function() {
                      "    select content into tmp from " + tableName_normal + " where id = id_in; \n" +
                      "    return tmp; \n" +
                      "END; ";
-    var fun_execute = "BEGIN :o := nodb_rowid_bind (:i, :c); END;";
-    var fun_drop = "DROP FUNCTION nodb_rowid_bind";
+    const fun_execute = "BEGIN :o := nodb_rowid_bind (:i, :c); END;";
+    const fun_drop = "DROP FUNCTION nodb_rowid_bind";
 
     before('create procedure', async function() {
-      try {
-        await sql.executeSql(connection, fun_create, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, fun_create, {}, {});
     });
 
     after('drop procedure', async function() {
-      try {
-        await sql.executeSql(connection, fun_drop, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, fun_drop, {}, {});
     });
 
     it('142.2.1 urowid length > 200', async function() {
@@ -195,7 +169,7 @@ describe('142. urowidFunctionBindAsString3.js', function() {
   });
 
   describe('142.3 FUNCTION BIND_IN, UPDATE', function() {
-    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN VARCHAR2, content_2 IN UROWID) RETURN UROWID\n" +
+    const fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN VARCHAR2, content_2 IN UROWID) RETURN UROWID\n" +
                      "IS \n" +
                      "    tmp UROWID; \n" +
                      "BEGIN \n" +
@@ -204,23 +178,15 @@ describe('142. urowidFunctionBindAsString3.js', function() {
                      "    select content into tmp from " + tableName_normal + " where id = id_in; \n" +
                      "    return tmp; \n" +
                      "END; ";
-    var fun_exec = "BEGIN :o := nodb_rowid_bind_1083 (:i, :c1, :c2); END;";
-    var fun_drop = "DROP FUNCTION nodb_rowid_bind_1083";
+    const fun_exec = "BEGIN :o := nodb_rowid_bind_1083 (:i, :c1, :c2); END;";
+    const fun_drop = "DROP FUNCTION nodb_rowid_bind_1083";
 
     before('create procedure', async function() {
-      try {
-        await sql.executeSql(connection, fun_create, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, fun_create, {}, {});
     });
 
     after('drop procedure', async function() {
-      try {
-        await sql.executeSql(connection, fun_drop, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, fun_drop, {}, {});
     });
 
     it('142.3.1 update with UROWID > 200', async function() {
@@ -237,17 +203,17 @@ describe('142. urowidFunctionBindAsString3.js', function() {
 
   });
 
-  var funBindOut = async function(fun_exec, expectedLength) {
-    var str = random.getRandomLengthString(expectedLength);
-    var urowid, urowidLen;
+  const funBindOut = async function(fun_exec, expectedLength) {
+    const str = random.getRandomLengthString(expectedLength);
+    let urowid, urowidLen;
     const sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
     await sql.executeInsert(connection, sql_insert, {}, {});
-    var result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
+    let result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
     assert(result);
     urowid = result.rows[0][0];
     urowidLen = urowid.length;
     assert(urowidLen > expectedLength);
-    var bindVar_in = {
+    const bindVar_in = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c: { val: urowid, type: oracledb.STRING, dir: oracledb.BIND_IN },
       o: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 5000 }
@@ -260,14 +226,14 @@ describe('142. urowidFunctionBindAsString3.js', function() {
 
   };
 
-  var funBindOut_update = async function(fun_exec, contentLen_1, contentLen_2) {
-    var str_1 = random.getRandomLengthString(contentLen_1);
-    var str_2 = random.getRandomLengthString(contentLen_2);
-    var urowid_1, urowid_2, urowidLen_1, urowidLen_2, id_1, id_2;
+  const funBindOut_update = async function(fun_exec, contentLen_1, contentLen_2) {
+    const str_1 = random.getRandomLengthString(contentLen_1);
+    const str_2 = random.getRandomLengthString(contentLen_2);
+    let urowid_1, urowid_2, urowidLen_1, urowidLen_2, id_1, id_2;
     id_1 = insertID;
-    var sql_insert = "insert into " + tableName_indexed + " values (" + id_1 + ", '" + str_1 + "')";
+    let sql_insert = "insert into " + tableName_indexed + " values (" + id_1 + ", '" + str_1 + "')";
     await sql.executeInsert(connection, sql_insert, {}, {});
-    var result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + id_1);
+    let result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + id_1);
     assert(result);
     urowid_1 = result.rows[0][0];
     urowidLen_1 = urowid_1.length;

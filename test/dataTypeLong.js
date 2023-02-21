@@ -39,31 +39,24 @@ const random   = require('./random.js');
 
 describe('103. dataTypeLong.js', function() {
 
-  var connection = null;
-  var tableName = "nodb_long";
+  let connection = null;
+  const tableName = "nodb_long";
 
-  before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      assert.ifError(err);
-      connection = conn;
-      done();
-    });
+  before('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after('release connection', function(done) {
-    connection.release(function(err) {
-      assert.ifError(err);
-      done();
-    });
+  after('release connection', async function() {
+    await connection.close();
   });
 
   describe('103.1 LONG data type support', function() {
 
     // Generate test data
-    var strLen = [1000, 4000, 10000, 100000, 1000000];
-    var strs = [];
-    var specialStr = "103.1";
-    for (var i = 0; i < strLen.length; i++)
+    const strLen = [1000, 4000, 10000, 100000, 1000000];
+    const strs = [];
+    const specialStr = "103.1";
+    for (let i = 0; i < strLen.length; i++)
       strs[i] = random.getRandomString(strLen[i], specialStr);
 
     before(function(done) {

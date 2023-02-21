@@ -40,10 +40,10 @@ const sql      = require('./sqlClone.js');
 
 describe('130. longProcedureBind_out.js', function() {
 
-  var connection = null;
-  var tableName = "nodb_long_130";
-  var insertID = 0;
-  var table_create = "BEGIN \n" +
+  let connection = null;
+  const tableName = "nodb_long_130";
+  let insertID = 0;
+  const table_create = "BEGIN \n" +
                      "    DECLARE \n" +
                      "        e_table_missing EXCEPTION; \n" +
                      "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -60,25 +60,16 @@ describe('130. longProcedureBind_out.js', function() {
                      "        ) \n" +
                      "    '); \n" +
                      "END; ";
-  var table_drop = "DROP TABLE " + tableName + " PURGE";
+  const table_drop = "DROP TABLE " + tableName + " PURGE";
 
   before(async function() {
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-      await sql.executeSql(connection, table_create, {}, {});
-    } catch (err) {
-      assert.ifError(err);
-    }
+    connection = await oracledb.getConnection(dbConfig);
+    await sql.executeSql(connection, table_create, {}, {});
   }); // before
 
   after(async function() {
-    try {
-      await sql.executeSql(connection, table_drop, {}, {});
-      await connection.release();
-    } catch (err) {
-      assert.ifError(err);
-    }
-
+    await sql.executeSql(connection, table_drop, {}, {});
+    await connection.release();
   }); // after
 
   beforeEach(function() {
@@ -86,30 +77,21 @@ describe('130. longProcedureBind_out.js', function() {
   });
 
   describe('130.1 PLSQL PROCEDURE BIND OUT AS LONG', function() {
-    var proc_bindout_name = "nodb_long_bindout_proc_1";
-    var proc_bindout_create = "CREATE OR REPLACE PROCEDURE " + proc_bindout_name + " (num IN NUMBER, C OUT LONG) \n" +
+    const proc_bindout_name = "nodb_long_bindout_proc_1";
+    const proc_bindout_create = "CREATE OR REPLACE PROCEDURE " + proc_bindout_name + " (num IN NUMBER, C OUT LONG) \n" +
                               "AS \n" +
                               "BEGIN \n" +
                               "    select content into C from " + tableName + " where num = ID; \n" +
                               "END " + proc_bindout_name + ";";
-    var proc_bindout_exec = "BEGIN " + proc_bindout_name + " (:i, :c); END;";
-    var proc_bindout_drop = "DROP PROCEDURE " + proc_bindout_name;
+    const proc_bindout_exec = "BEGIN " + proc_bindout_name + " (:i, :c); END;";
+    const proc_bindout_drop = "DROP PROCEDURE " + proc_bindout_name;
 
     before(async function() {
-      try {
-        await sql.executeSql(connection, proc_bindout_create, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, proc_bindout_create, {}, {});
     });
 
     after(async function() {
-      try {
-        await sql.executeSql(connection, proc_bindout_drop, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
-
+      await sql.executeSql(connection, proc_bindout_drop, {}, {});
     });
 
     it('130.1.1 works with NULL', async function() {
@@ -144,29 +126,21 @@ describe('130. longProcedureBind_out.js', function() {
   }); // 130.1
 
   describe('130.2 PLSQL PROCEDURE BIND OUT AS STRING', function() {
-    var proc_bindout_name = "nodb_long_bindout_proc_2";
-    var proc_bindout_create = "CREATE OR REPLACE PROCEDURE " + proc_bindout_name + " (num IN NUMBER, C OUT VARCHAR2) \n" +
+    const proc_bindout_name = "nodb_long_bindout_proc_2";
+    const proc_bindout_create = "CREATE OR REPLACE PROCEDURE " + proc_bindout_name + " (num IN NUMBER, C OUT VARCHAR2) \n" +
                               "AS \n" +
                               "BEGIN \n" +
                               "    select content into C from " + tableName + " where num = ID; \n" +
                               "END " + proc_bindout_name + ";";
-    var proc_bindout_exec = "BEGIN " + proc_bindout_name + " (:i, :c); END;";
-    var proc_bindout_drop = "DROP PROCEDURE " + proc_bindout_name;
+    const proc_bindout_exec = "BEGIN " + proc_bindout_name + " (:i, :c); END;";
+    const proc_bindout_drop = "DROP PROCEDURE " + proc_bindout_name;
 
     before(async function() {
-      try {
-        await sql.executeSql(connection, proc_bindout_create, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, proc_bindout_create, {}, {});
     });
 
     after(async function() {
-      try {
-        await sql.executeSql(connection, proc_bindout_drop, {}, {});
-      } catch (err) {
-        assert.ifError(err);
-      }
+      await sql.executeSql(connection, proc_bindout_drop, {}, {});
     });
 
     it('130.2.1 works with NULL', async function() {
@@ -200,7 +174,7 @@ describe('130. longProcedureBind_out.js', function() {
 
   }); // 130.2
 
-  var long_bindout = async function(insertContent, proc_bindin_exec, maxsize) {
+  const long_bindout = async function(insertContent, proc_bindin_exec, maxsize) {
 
     await insert(insertContent);
     const bind_in_var  = {
@@ -208,7 +182,7 @@ describe('130. longProcedureBind_out.js', function() {
       c: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: maxsize }
     };
     const result = await connection.execute(proc_bindin_exec, bind_in_var);
-    var expected = insertContent;
+    let expected = insertContent;
     if (insertContent == "" || insertContent == undefined) {
       expected = null;
     }
@@ -216,7 +190,7 @@ describe('130. longProcedureBind_out.js', function() {
 
   };
 
-  var insert = async function(insertStr) {
+  const insert = async function(insertStr) {
     const result = await connection.execute(
       "insert into " + tableName + " values (:i, :c)",
       {

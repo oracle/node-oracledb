@@ -47,8 +47,8 @@ describe('263. asyncStack.js', () => {
       await asyncMiddleware();
     } catch (e) {
       assert.strictEqual(e.errorNum, 12154); // TNS:could not resolve the connect identifier specified
-      assert.ok(e.stack.includes('asyncStack.js:33:'), e.stack);
       assert.ok(e.stack.includes('asyncStack.js:40:'), e.stack);
+      assert.ok(e.stack.includes('asyncStack.js:47:'), e.stack);
     }
   });
 
@@ -67,7 +67,7 @@ describe('263. asyncStack.js', () => {
       pool = await oracledb.createPool(dbconfig);
     } catch (e) {
       assert.strictEqual(e.errorNum, 12154);
-      assert.ok(e.stack.includes('asyncStack.js:60:'), e.stack);
+      assert.ok(e.stack.includes('asyncStack.js:67:'), e.stack);
     } finally {
       if (pool) {
         await pool.close ();
@@ -88,7 +88,7 @@ describe('263. asyncStack.js', () => {
       await conn.execute("SELECT * FROM NON_EXISTENT_TABLE");
     } catch (e)  {
       assert.strictEqual(e.errorNum, 942);
-      assert.ok(e.stack.includes('asyncStack.js:81:'), e.stack);
+      assert.ok(e.stack.includes('asyncStack.js:88:'), e.stack);
     }
 
   });
