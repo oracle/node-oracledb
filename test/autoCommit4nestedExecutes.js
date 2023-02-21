@@ -150,8 +150,8 @@ describe('63. autoCommit4nestedExecutes.js', function() {
         { autoCommit: false });
     } catch (err) {
       assert(err);
-      // NJS-097: illegal variable name/number
-      assert.equal(err.message.substring(0, err.message.indexOf(':')), `NJS-097`);
+      // ORA-01036: illegal variable name/number
+      assert.equal(err.message.substring(0, err.message.indexOf(':')), `ORA-01036`);
     }
 
     await conn.release();
