@@ -67,21 +67,21 @@ describe('141. insertNaNToNumber.js', function() {
       );
     });
 
-    it('141.1.2 binding in NaN by name into Oracle NUMBER column throws DPI-1055', async function() {
+    it('141.1.2 binding in NaN by name into Oracle NUMBER column throws NJS-105', async function() {
       const sql = "insert into " + tableName + " values (:no, :c)";
       const binds = { no: 1, c: NaN };
       await assert.rejects(
         async () => await connection.execute(sql, binds),
-        /DPI-1055:/
+        /NJS-105:/
       );
     });
 
-    it('141.1.3 binding in NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
+    it('141.1.3 binding in NaN by position into Oracle NUMBER column throws NJS-105', async function() {
       const sql = "insert into " + tableName + " values (:1, :2)";
       const binds = [ 1, NaN ];
       await assert.rejects(
         async () => await connection.execute(sql, binds),
-        /DPI-1055:/
+        /NJS-105:/
       );
     });
 
@@ -122,7 +122,7 @@ describe('141. insertNaNToNumber.js', function() {
       await connection.execute("DROP table " + tableName + " PURGE");
     });
 
-    it('141.2.1 binding in NaN by name into Oracle NUMBER column throws DPI-1055', async function() {
+    it('141.2.1 binding in NaN by name into Oracle NUMBER column throws NJS-105', async function() {
       const bindVar = {
         i: { val: 1, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: NaN, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -130,22 +130,22 @@ describe('141. insertNaNToNumber.js', function() {
       };
       await assert.rejects(
         async () => await connection.execute(sqlRun_bindin, bindVar),
-        /DPI-1055:/
+        /NJS-105:/
       );
     });
 
-    it('141.2.2 binding in NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
+    it('141.2.2 binding in NaN by position into Oracle NUMBER column throws NJS-105', async function() {
       const sql = "BEGIN :1 := nodb_bind_fun_NaN (:2, :3); END;";
       const binds = [
         { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, 2, NaN
       ];
       await assert.rejects(
         async () => await connection.execute(sql, binds),
-        /DPI-1055:/
+        /NJS-105:/
       );
     });
 
-    it('141.2.3 binding inout NaN by name into Oracle NUMBER column throws DPI-1055', async function() {
+    it('141.2.3 binding inout NaN by name into Oracle NUMBER column throws NJS-105', async function() {
       await connection.execute(proc_bindinout);
       const binds = {
         i: { val: 1, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -154,12 +154,12 @@ describe('141. insertNaNToNumber.js', function() {
       };
       await assert.rejects(
         async () => await connection.execute(sqlRun_bindinout, binds),
-        /DPI-1055:/
+        /NJS-105:/
       );
       await connection.execute(sqlDrop_bindinout);
     });
 
-    it('141.2.4 binding inout NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
+    it('141.2.4 binding inout NaN by position into Oracle NUMBER column throws NJS-105', async function() {
       await connection.execute(proc_bindinout);
       const sql = "BEGIN :1 := nodb_bindinout_fun_NaN (:2, :3); END;";
       const binds = [
@@ -167,7 +167,7 @@ describe('141. insertNaNToNumber.js', function() {
       ];
       await assert.rejects(
         async () => await connection.execute(sql, binds),
-        /DPI-1055:/
+        /NJS-105:/
       );
       await connection.execute(sqlDrop_bindinout);
     });
@@ -204,7 +204,7 @@ describe('141. insertNaNToNumber.js', function() {
       await connection.execute("DROP table " + tableName + " PURGE");
     });
 
-    it('141.3.1 binding in NaN by name into Oracle NUMBER column throws DPI-1055', async function() {
+    it('141.3.1 binding in NaN by name into Oracle NUMBER column throws NJS-105', async function() {
       const bindVar = {
         i: { val: 1, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: NaN, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -212,20 +212,20 @@ describe('141. insertNaNToNumber.js', function() {
       };
       await assert.rejects(
         async () => await connection.execute(sqlRun_bindin, bindVar),
-        /DPI-1055:/
+        /NJS-105:/
       );
     });
 
-    it('141.3.2 binding in NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
+    it('141.3.2 binding in NaN by position into Oracle NUMBER column throws NJS-105', async function() {
       const sql = "BEGIN nodb_proc_bind_NaN (:1, :2, :3); END;";
       const binds = [ 2, NaN, { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } ];
       await assert.rejects(
         async () => await connection.execute(sql, binds),
-        /DPI-1055:/
+        /NJS-105:/
       );
     });
 
-    it('141.3.3 binding inout NaN by name into Oracle NUMBER column throws DPI-1055', async function() {
+    it('141.3.3 binding inout NaN by name into Oracle NUMBER column throws NJS-105', async function() {
       await connection.execute(proc_bindinout);
       const bindVar = {
         i: { val: 1, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -233,18 +233,18 @@ describe('141. insertNaNToNumber.js', function() {
       };
       await assert.rejects(
         async () => await connection.execute(sqlRun_bindinout, bindVar),
-        /DPI-1055:/
+        /NJS-105:/
       );
       await connection.execute(sqlDrop_bindinout);
     });
 
-    it('141.3.4 binding inout NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
+    it('141.3.4 binding inout NaN by position into Oracle NUMBER column throws NJS-105', async function() {
       await connection.execute(proc_bindinout);
       const sql = "BEGIN nodb_proc_bindinout_NaN (:1, :2); END;";
       const binds = [ 1, NaN ];
       await assert.rejects(
         async () => await connection.execute(sql, binds),
-        /DPI-1055:/
+        /NJS-105:/
       );
       await connection.execute(sqlDrop_bindinout);
     });
@@ -300,29 +300,29 @@ describe('141. insertNaNToNumber.js', function() {
       await connection.execute(dropTable);
     });
 
-    it('141.4.1 binding in NaN by name into Oracle NUMBER column throws DPI-1055', async function() {
+    it('141.4.1 binding in NaN by name into Oracle NUMBER column throws NJS-105', async function() {
       const sql = "BEGIN nodb_nan_pkg.array_in(:id_in); END;";
       const binds = {
         id_in: { type: oracledb.NUMBER, val:  [1, 0, NaN] }
       };
       await assert.rejects(
         async () => await connection.execute(sql, binds),
-        /DPI-1055:/
+        /NJS-105:/
       );
     });
 
-    it('141.4.2 binding in NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
+    it('141.4.2 binding in NaN by position into Oracle NUMBER column throws NJS-105', async function() {
       const sql = "BEGIN nodb_nan_pkg.array_in(:1); END;";
       const binds = [
         {type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val:  [1, 0, NaN]}
       ];
       await assert.rejects(
         async () => await connection.execute(sql, binds),
-        /DPI-1055:/
+        /NJS-105:/
       );
     });
 
-    it('141.4.3 binding inout NaN by name into Oracle NUMBER column throws DPI-1055', async function() {
+    it('141.4.3 binding inout NaN by name into Oracle NUMBER column throws NJS-105', async function() {
       const sql = "BEGIN nodb_nan_pkg.array_inout(:id_in); END;";
       const binds = {
         id_in: {
@@ -334,11 +334,11 @@ describe('141. insertNaNToNumber.js', function() {
       };
       await assert.rejects(
         async () => await connection.execute(sql, binds),
-        /DPI-1055:/
+        /NJS-105:/
       );
     });
 
-    it('141.4.4 binding inout NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
+    it('141.4.4 binding inout NaN by position into Oracle NUMBER column throws NJS-105', async function() {
       const sql = "BEGIN nodb_nan_pkg.array_inout(:1); END;";
       const binds = [
         {
@@ -350,7 +350,7 @@ describe('141. insertNaNToNumber.js', function() {
       ];
       await assert.rejects(
         async () => await connection.execute(sql, binds),
-        /DPI-1055:/
+        /NJS-105:/
       );
     });
 

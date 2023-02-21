@@ -222,7 +222,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
-        /DPI-1055:/
+        /NJS-105:/
       );
     }); // 70.2.7
 
@@ -754,7 +754,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
-        /DPI-1055:/
+        /NJS-105:/
       );
     }); // 70.6.6
 
