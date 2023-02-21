@@ -706,7 +706,6 @@ bool njsVariable_performMapping(njsVariable *var, dpiQueryInfo *queryInfo,
         if (baton->fetchInfo[i].type == NJS_DATATYPE_STR) {
             var->varTypeNum = (oracleTypeNum == DPI_ORACLE_TYPE_NCLOB) ?
                     DPI_ORACLE_TYPE_NVARCHAR : DPI_ORACLE_TYPE_VARCHAR;
-            var->varTypeNum = DPI_ORACLE_TYPE_VARCHAR;
         } else if (baton->fetchInfo[i].type == NJS_DATATYPE_BUFFER) {
             var->varTypeNum = DPI_ORACLE_TYPE_RAW;
         } else if (baton->fetchInfo[i].type == NJS_DATATYPE_DEFAULT) {
