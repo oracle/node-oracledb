@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, 2022,Oracle and/or its affiliates. */
+/* Copyright (c) 2020, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -222,22 +222,24 @@ describe('236. nestedCursor05.js', () => {
 
     const stringMetaData = {
       name: 'DESCRIPTION',
-      fetchType: 2001,
-      dbType: 2001,
+      fetchType: oracledb.DB_TYPE_VARCHAR,
+      dbType: oracledb.DB_TYPE_VARCHAR,
       dbTypeName: 'VARCHAR2',
       nullable: true,
       byteSize: 200
     };
     assert.deepEqual(result.metaData[0], stringMetaData);
     assert.strictEqual(result.metaData[1].name, 'CHILDREN');
-    assert.strictEqual(result.metaData[1].fetchType, 2021);
-    assert.strictEqual(result.metaData[1].dbType, 2021);
+    assert.strictEqual(result.metaData[1].fetchType, oracledb.DB_TYPE_CURSOR);
+    assert.strictEqual(result.metaData[1].dbType, oracledb.DB_TYPE_CURSOR);
     assert.strictEqual(result.metaData[1].dbTypeName, 'CURSOR');
 
     assert.deepEqual(result.metaData[1].metaData[0], stringMetaData);
     assert.strictEqual(result.metaData[1].metaData[1].name, 'GRANDCHILDREN');
-    assert.strictEqual(result.metaData[1].metaData[1].fetchType, 2021);
-    assert.strictEqual(result.metaData[1].metaData[1].dbType, 2021);
+    assert.strictEqual(result.metaData[1].metaData[1].fetchType,
+      oracledb.DB_TYPE_CURSOR);
+    assert.strictEqual(result.metaData[1].metaData[1].dbType,
+      oracledb.DB_TYPE_CURSOR);
     assert.strictEqual(result.metaData[1].metaData[1].dbTypeName, 'CURSOR');
 
     assert.deepEqual(result.metaData[1].metaData[1].metaData[0], stringMetaData);
@@ -254,13 +256,15 @@ describe('236. nestedCursor05.js', () => {
     const result = await conn.execute(sqlOne, [], options);
 
     assert.strictEqual(result.metaData[1].name, 'CHILDREN');
-    assert.strictEqual(result.metaData[1].fetchType, 2021);
-    assert.strictEqual(result.metaData[1].dbType, 2021);
+    assert.strictEqual(result.metaData[1].fetchType, oracledb.DB_TYPE_CURSOR);
+    assert.strictEqual(result.metaData[1].dbType, oracledb.DB_TYPE_CURSOR);
     assert.strictEqual(result.metaData[1].dbTypeName, 'CURSOR');
 
     assert.strictEqual(result.metaData[1].metaData[1].name, 'GRANDCHILDREN');
-    assert.strictEqual(result.metaData[1].metaData[1].fetchType, 2021);
-    assert.strictEqual(result.metaData[1].metaData[1].dbType, 2021);
+    assert.strictEqual(result.metaData[1].metaData[1].fetchType,
+      oracledb.DB_TYPE_CURSOR);
+    assert.strictEqual(result.metaData[1].metaData[1].dbType,
+      oracledb.DB_TYPE_CURSOR);
     assert.strictEqual(result.metaData[1].metaData[1].dbTypeName, 'CURSOR');
 
     assert.strictEqual(result.rows.length, LIMIT);
