@@ -1478,7 +1478,8 @@ additional attributes.  These are listed in
 
 This property may be overridden in an [`execute()`](#executeoptions) call.
 
-This property was added in node-oracledb 1.10.
+This property was added in node-oracledb 1.10.  In node-oracledb 6.0 this
+attribute is ignored because extended metadata is always available.
 
 #### <a name="propdbisexternalauth"></a> 3.2.8 `oracledb.externalAuth`
 

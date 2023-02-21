@@ -7,6 +7,23 @@
 - Re-licensed to dual Apache 2.0 or UPL 1.0 licenses, see
   [LICENSE.txt](https://github.com/oracle/node-oracledb/blob/main/LICENSE.txt).
 
+- Bumped the minimum Node.js version required to 14 so Node-API version 6 can
+  be used.
+
+- Multiple calls to `initOracleClient()` with the same arguments no longer
+  result in an error.
+
+- Query extended metadata is now always available.  The
+  `oracledb.extendedMetaData` and equivalent execution attribute values are
+  ignored.
+
+- Query column metadata now always returns unique column names regardless of
+  the value of the `outFormat` setting.  Previously they were only unique when
+  `oracledb.OUT_FORMAT_OBJECT` was used.
+
+- Internal change: Reorganized code and moved more functionality to the
+  JavaScript layer.
+
 ## node-oracledb [v5.5.0](https://github.com/oracle/node-oracledb/compare/v5.4.0...v5.5.0) (7 Sep 2022)
 
 - Token-based Authentication changes:

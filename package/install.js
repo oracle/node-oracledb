@@ -93,19 +93,16 @@ function done(err) {
   }
 }
 
-// Check for a usable binary file for the node-oracledb module.  Node.js 8.16
-// and 10.16 (and 12.0) contain an important Node-API performance regression fix.
-// Note that the checked versions are the minimum required for Node-API
+// Check for a usable binary file for the node-oracledb module with this version of Node.js.
+// Node.js 14 (Node-API 6), or later, is usable.
+// Note that the checked version(s) are the minimum required for Node-API
 // compatibility; as new Node.js versions are released, older Node.js versions
-// are dropped from the node-oracledb test plan.  For example, the obsolete
-// Node.js 9 and 11 versions are not tested.
+// are dropped from the node-oracledb test plan.
 
 function checkAvailable(cb) {
   let vs = process.version.substring(1).split(".").map(Number);
-  if (vs[0] < 8 || (vs[0] === 8 && vs[1] < 16)) {
-    cb(new Error(nodbUtil.getErrorMessage('NJS-069', nodbUtil.PACKAGE_JSON_VERSION, "8.16")));
-  } else if (vs[0] === 10 && vs[1] < 16) {
-    cb(new Error(nodbUtil.getErrorMessage('NJS-069', nodbUtil.PACKAGE_JSON_VERSION, "10.16")));
+  if (vs[0] < 14) {
+    cb(new Error(nodbUtil.getErrorMessage('NJS-069', nodbUtil.PACKAGE_JSON_VERSION, "14")));
   } else {
     try {
       fs.statSync(nodbUtil.RELEASE_DIR + '/' + nodbUtil.BINARY_FILE);
