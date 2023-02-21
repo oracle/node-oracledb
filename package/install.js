@@ -74,9 +74,8 @@ function warn(message) { // eslint-disable-line
 // versions are dropped from the node-oracledb test plan.
 function checkVersion() {
   const vs = process.version.substring(1).split(".").map(Number);
-  if (vs[0] < 14) {
-    errors.throwErr(errors.ERR_NODE_TOO_OLD, nodbUtil.PACKAGE_JSON_VERSION, "14.0");
-  }
+  errors.assert(vs[0] >= 14, errors.ERR_NODE_TOO_OLD,
+    nodbUtil.PACKAGE_JSON_VERSION, "14.0");
 }
 
 // Check for the binary node-oracledb module needed for "Thick mode".
