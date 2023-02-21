@@ -70,7 +70,7 @@ describe('51. poolClose.js', function() {
     const conn = await pool.getConnection();
     await testsUtil.assertThrowsAsync(
       async () => await pool.close(),
-      /ORA-24422:/
+      /NJS-104:/
     );
     await conn.close();
     await pool.close();

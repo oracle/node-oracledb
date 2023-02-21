@@ -80,7 +80,7 @@ describe('170. poolDrain.js', () => {
       await pool.close();
     } catch (err) {
       should.exist(err);
-      (err.message).should.startWith('ORA-24422:');
+      (err.message).should.startWith('NJS-104:');
     } finally {
       await pool.close(0);
     }
