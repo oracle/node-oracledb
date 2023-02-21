@@ -41,107 +41,13 @@ bool njsUtils_addTypeProperties(napi_env env, napi_value obj,
         const char *propertyNamePrefix, uint32_t oracleTypeNum,
         njsDbObjectType *objType)
 {
-    size_t typeNameLength = NAPI_AUTO_LENGTH;
     char propertyName[100];
-    const char *typeName;
     napi_value temp;
-
-    switch (oracleTypeNum) {
-        case DPI_ORACLE_TYPE_VARCHAR:
-            typeName = "VARCHAR2";
-            break;
-        case DPI_ORACLE_TYPE_NVARCHAR:
-            typeName = "NVARCHAR2";
-            break;
-        case DPI_ORACLE_TYPE_CHAR:
-            typeName = "CHAR";
-            break;
-        case DPI_ORACLE_TYPE_NCHAR:
-            typeName = "NCHAR";
-            break;
-        case DPI_ORACLE_TYPE_ROWID:
-            typeName = "ROWID";
-            break;
-        case DPI_ORACLE_TYPE_RAW:
-            typeName = "RAW";
-            break;
-        case DPI_ORACLE_TYPE_NATIVE_FLOAT:
-            typeName = "BINARY_FLOAT";
-            break;
-        case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
-            typeName = "BINARY_DOUBLE";
-            break;
-        case DPI_ORACLE_TYPE_NATIVE_INT:
-            typeName = "BINARY_INTEGER";
-            break;
-        case DPI_ORACLE_TYPE_NUMBER:
-            typeName = "NUMBER";
-            break;
-        case DPI_ORACLE_TYPE_DATE:
-            typeName = "DATE";
-            break;
-        case DPI_ORACLE_TYPE_TIMESTAMP:
-            typeName = "TIMESTAMP";
-            break;
-        case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
-            typeName = "TIMESTAMP WITH TIME ZONE";
-            break;
-        case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
-            typeName = "TIMESTAMP WITH LOCAL TIME ZONE";
-            break;
-        case DPI_ORACLE_TYPE_CLOB:
-            typeName = "CLOB";
-            break;
-        case DPI_ORACLE_TYPE_NCLOB:
-            typeName = "NCLOB";
-            break;
-        case DPI_ORACLE_TYPE_BLOB:
-            typeName = "BLOB";
-            break;
-        case DPI_ORACLE_TYPE_LONG_VARCHAR:
-            typeName = "LONG";
-            break;
-        case DPI_ORACLE_TYPE_LONG_RAW:
-            typeName = "LONG RAW";
-            break;
-        case DPI_ORACLE_TYPE_OBJECT:
-            typeName = objType->fqn;
-            typeNameLength = objType->fqnLength;
-            break;
-        case DPI_ORACLE_TYPE_INTERVAL_DS:
-            typeName = "INTERVAL DAY TO SECOND";
-            break;
-        case DPI_ORACLE_TYPE_INTERVAL_YM:
-            typeName = "INTERVAL YEAR TO MONTH";
-            break;
-        case DPI_ORACLE_TYPE_BFILE:
-            typeName = "BFILE";
-            break;
-        case DPI_ORACLE_TYPE_BOOLEAN:
-            typeName = "BOOLEAN";
-            break;
-        case DPI_ORACLE_TYPE_STMT:
-            typeName = "CURSOR";
-            break;
-        case DPI_ORACLE_TYPE_JSON:
-            typeName = "JSON";
-            break;
-        default:
-            typeName = "UNKNOWN";
-            break;
-    }
 
     // set the type (integer constant)
     NJS_CHECK_NAPI(env, napi_create_uint32(env, oracleTypeNum, &temp))
     NJS_CHECK_NAPI(env, napi_set_named_property(env, obj, propertyNamePrefix,
             temp))
-
-    // set the type name
-    (void) snprintf(propertyName, sizeof(propertyName), "%sName",
-            propertyNamePrefix);
-    NJS_CHECK_NAPI(env, napi_create_string_utf8(env, typeName, typeNameLength,
-            &temp))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, obj, propertyName, temp))
 
     // set the type class, if applicable
     if (objType) {
