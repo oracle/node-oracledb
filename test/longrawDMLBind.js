@@ -32,20 +32,17 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
-var random   = require('./random.js');
-var sql      = require('./sql.js');
-var assist   = require('./dataTypeAssist.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const random   = require('./random.js');
 
 describe('126. longrawDMLBind.js', function() {
 
-  var connection = null;
-  var tableName = "nodb_longraw";
-  var insertID = 0;
-  var table_create = "BEGIN \n" +
+  let connection;
+  const tableName = "nodb_longraw";
+  let insertID = 0;
+  const table_create = "BEGIN \n" +
                      "    DECLARE \n" +
                      "        e_table_missing EXCEPTION; \n" +
                      "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -62,257 +59,190 @@ describe('126. longrawDMLBind.js', function() {
                      "        ) \n" +
                      "    '); \n" +
                      "END; ";
-  var table_drop = "DROP TABLE " + tableName + " PURGE";
+  const table_drop = "DROP TABLE " + tableName + " PURGE";
 
-  before(function(done) {
-    async.series([
-      function(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
-      },
-      function(cb) {
-        sql.executeSql(connection, table_create, {}, {}, cb);
-      }
-    ], done);
-  }); // before
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
+    await connection.execute(table_create);
+  });
 
-  after(function(done) {
-    async.series([
-      function(cb) {
-        sql.executeSql(connection, table_drop, {}, {}, cb);
-      },
-      function(cb) {
-        connection.release(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
-  }); // after
+  after(async function() {
+    await connection.execute(table_drop);
+    await connection.close();
+  });
 
-  beforeEach(function(done) {
+  beforeEach(function() {
     insertID++;
-    done();
   });
 
   describe('126.1 INSERT and SELECT', function() {
 
-    it('126.1.1 works with data size 64K - 1', function(done) {
-      var insertedStr = random.getRandomLengthString(65535);
-      var insertedBuf = Buffer.from(insertedStr);
-      var maxsize = 65535;
-      test1(insertedBuf, maxsize, done);
+    it('126.1.1 works with data size 64K - 1', async function() {
+      const insertedStr = random.getRandomLengthString(65535);
+      const insertedBuf = Buffer.from(insertedStr);
+      const maxsize = 65535;
+      await test1(insertedBuf, maxsize);
     });
 
-    it('126.1.2 works with data size 64K', function(done) {
-      var insertedStr = random.getRandomLengthString(65536);
-      var insertedBuf = Buffer.from(insertedStr);
-      var maxsize = 65536;
-      test1(insertedBuf, maxsize, done);
+    it('126.1.2 works with data size 64K', async function() {
+      const insertedStr = random.getRandomLengthString(65536);
+      const insertedBuf = Buffer.from(insertedStr);
+      const maxsize = 65536;
+      await test1(insertedBuf, maxsize);
     });
 
-    it('126.1.3 works with data size 64K + 1', function(done) {
-      var insertedStr = random.getRandomLengthString(65537);
-      var insertedBuf = Buffer.from(insertedStr);
-      var maxsize = 65537;
-      test1(insertedBuf, maxsize, done);
+    it('126.1.3 works with data size 64K + 1', async function() {
+      const insertedStr = random.getRandomLengthString(65537);
+      const insertedBuf = Buffer.from(insertedStr);
+      const maxsize = 65537;
+      await test1(insertedBuf, maxsize);
     });
 
-    it('126.1.4 works with data size 1MB + 1', function(done) {
-      var size = 1 * 1024 * 1024 + 1;
-      var insertedStr = random.getRandomLengthString(size);
-      var insertedBuf = Buffer.from(insertedStr);
-      test1(insertedBuf, size, done);
+    it('126.1.4 works with data size 1MB + 1', async function() {
+      const size = 1 * 1024 * 1024 + 1;
+      const insertedStr = random.getRandomLengthString(size);
+      const insertedBuf = Buffer.from(insertedStr);
+      await test1(insertedBuf, size);
     });
 
-    it('126.1.5 works with data size 100', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      var insertedBuf = Buffer.from(insertedStr);
-      test1(insertedBuf, 100, done);
+    it('126.1.5 works with data size 100', async function() {
+      const insertedStr = random.getRandomLengthString(100);
+      const insertedBuf = Buffer.from(insertedStr);
+      await test1(insertedBuf, 100);
     });
 
-    it('126.1.6 set maxSize to 2000', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      var insertedBuf = Buffer.from(insertedStr);
-      var maxsize = 2000;
-      test1(insertedBuf, maxsize, done);
+    it('126.1.6 set maxSize to 2000', async function() {
+      const insertedStr = random.getRandomLengthString(100);
+      const insertedBuf = Buffer.from(insertedStr);
+      const maxsize = 2000;
+      await test1(insertedBuf, maxsize);
     });
 
-    it('126.1.7 set maxSize to 4GB', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      var insertedBuf = Buffer.from(insertedStr);
-      var maxsize = 4 * 1024 * 1024 * 1024;
-      test1(insertedBuf, maxsize, done);
+    it('126.1.7 set maxSize to 4GB', async function() {
+      const insertedStr = random.getRandomLengthString(100);
+      const insertedBuf = Buffer.from(insertedStr);
+      const maxsize = 4 * 1024 * 1024 * 1024;
+      await test1(insertedBuf, maxsize);
     });
 
   }); // 126.1
 
   describe('126.2 UPDATE', function() {
 
-    it('126.2.1 works with data size 64K - 1', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      var updateStr = random.getRandomLengthString(65535);
-      var insertedBuf = Buffer.from(insertedStr);
-      var updateBuf = Buffer.from(updateStr);
-      test2(insertedBuf, updateBuf, 65535, done);
+    it('126.2.1 works with data size 64K - 1', async function() {
+      const insertedStr = random.getRandomLengthString(100);
+      const updateStr = random.getRandomLengthString(65535);
+      const insertedBuf = Buffer.from(insertedStr);
+      const updateBuf = Buffer.from(updateStr);
+      await test2(insertedBuf, updateBuf, 65535);
     });
 
-    it('126.2.2 works with data size 64K', function(done) {
-      var insertedStr = random.getRandomLengthString(200);
-      var updateStr = random.getRandomLengthString(65536);
-      var insertedBuf = Buffer.from(insertedStr);
-      var updateBuf = Buffer.from(updateStr);
-      test2(insertedBuf, updateBuf, 65536, done);
+    it('126.2.2 works with data size 64K', async function() {
+      const insertedStr = random.getRandomLengthString(200);
+      const updateStr = random.getRandomLengthString(65536);
+      const insertedBuf = Buffer.from(insertedStr);
+      const updateBuf = Buffer.from(updateStr);
+      await test2(insertedBuf, updateBuf, 65536);
     });
 
-    it('126.2.3 works with data size 64K + 1', function(done) {
-      var insertedStr = random.getRandomLengthString(10);
-      var updateStr = random.getRandomLengthString(65537);
-      var insertedBuf = Buffer.from(insertedStr);
-      var updateBuf = Buffer.from(updateStr);
-      test2(insertedBuf, updateBuf, 65537, done);
+    it('126.2.3 works with data size 64K + 1', async function() {
+      const insertedStr = random.getRandomLengthString(10);
+      const updateStr = random.getRandomLengthString(65537);
+      const insertedBuf = Buffer.from(insertedStr);
+      const updateBuf = Buffer.from(updateStr);
+      await test2(insertedBuf, updateBuf, 65537);
     });
 
-    it('126.2.4 works with data size 1MB + 1', function(done) {
-      var size = 1 * 1024 * 1024 + 1;
-      var insertedStr = random.getRandomLengthString(65536);
-      var updateStr = random.getRandomLengthString(size);
-      var insertedBuf = Buffer.from(insertedStr);
-      var updateBuf = Buffer.from(updateStr);
-      test2(insertedBuf, updateBuf, size, done);
+    it('126.2.4 works with data size 1MB + 1', async function() {
+      const size = 1 * 1024 * 1024 + 1;
+      const insertedStr = random.getRandomLengthString(65536);
+      const updateStr = random.getRandomLengthString(size);
+      const insertedBuf = Buffer.from(insertedStr);
+      const updateBuf = Buffer.from(updateStr);
+      await test2(insertedBuf, updateBuf, size);
     });
 
-    it('126.2.5 set maxSize to 2000', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      var updateStr = random.getRandomLengthString(500);
-      var insertedBuf = Buffer.from(insertedStr);
-      var updateBuf = Buffer.from(updateStr);
-      test2(insertedBuf, updateBuf, 2000, done);
+    it('126.2.5 set maxSize to 2000', async function() {
+      const insertedStr = random.getRandomLengthString(100);
+      const updateStr = random.getRandomLengthString(500);
+      const insertedBuf = Buffer.from(insertedStr);
+      const updateBuf = Buffer.from(updateStr);
+      await test2(insertedBuf, updateBuf, 2000);
     });
 
-    it('126.2.6 set maxSize to 4GB', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      var updateStr = random.getRandomLengthString(500);
-      var insertedBuf = Buffer.from(insertedStr);
-      var updateBuf = Buffer.from(updateStr);
-      var maxsize = 4 * 1024 * 1024 * 1024;
-      test2(insertedBuf, updateBuf, maxsize, done);
+    it('126.2.6 set maxSize to 4GB', async function() {
+      const insertedStr = random.getRandomLengthString(100);
+      const updateStr = random.getRandomLengthString(500);
+      const insertedBuf = Buffer.from(insertedStr);
+      const updateBuf = Buffer.from(updateStr);
+      const maxsize = 4 * 1024 * 1024 * 1024;
+      await test2(insertedBuf, updateBuf, maxsize);
     });
 
   }); // 126.2
 
   describe.skip('126.3 RETURNING INTO', function() {
 
-    it('126.3.1 works with data size 64K - 1', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      var updateStr = random.getRandomLengthString(65535);
-      var insertedBuf = Buffer.from(insertedStr);
-      var updateBuf = Buffer.from(updateStr);
-      test3(insertedBuf, updateBuf, done);
+    it('126.3.1 works with data size 64K - 1', async function() {
+      const insertedStr = random.getRandomLengthString(100);
+      const updateStr = random.getRandomLengthString(65535);
+      const insertedBuf = Buffer.from(insertedStr);
+      const updateBuf = Buffer.from(updateStr);
+      await test3(insertedBuf, updateBuf);
     });
 
   }); // 126.3
 
-  var test1 = function(content, maxsize, callback) {
-    async.series([
-      function(cb) {
-        insert(content, maxsize, cb);
-      },
-      function(cb) {
-        fetch(content, cb);
-      }
-    ], callback);
+  const test1 = async function(content, maxsize) {
+    await insert(content, maxsize);
+    await fetch(content);
   };
 
-  var test2 = function(insertedStr, updateStr, maxsize, callback) {
-    async.series([
-      function(cb) {
-        insert(insertedStr, insertedStr.length, cb);
-      },
-      function(cb) {
-        update(updateStr, maxsize, cb);
-      },
-      function(cb) {
-        fetch(updateStr, cb);
-      }
-    ], callback);
+  const test2 = async function(insertedStr, updateStr, maxsize) {
+    await insert(insertedStr, insertedStr.length);
+    await update(updateStr, maxsize);
+    await fetch(updateStr);
   };
 
-  var test3 = function(insertedStr, updateStr, callback) {
-    async.series([
-      function(cb) {
-        insert(insertedStr, insertedStr.length, cb);
-      },
-      function(cb) {
-        returning(updateStr, cb);
-      }
-    ], callback);
+  const test3 = async function(insertedStr, updateStr) {
+    await insert(insertedStr, insertedStr.length);
+    await returning(updateStr);
   };
 
-  var insert = function(content, maxsize, callback) {
-    var sql = "insert into " + tableName + " (id, content) values (:i, :c)";
-    var bindVar = {
+  const insert = async function(content, maxsize) {
+    const sql = "insert into " + tableName + " (id, content) values (:i, :c)";
+    const bindVar = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       c: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER, maxSize: maxsize }
     };
-    connection.execute(
-      sql,
-      bindVar,
-      function(err, result) {
-        should.not.exist(err);
-        (result.rowsAffected).should.be.exactly(1);
-        callback();
-      }
-    );
+    const result = await connection.execute(sql, bindVar);
+    assert.strictEqual(result.rowsAffected, 1);
   };
 
-  var update = function(content, maxsize, callback) {
-    var sql = "update " + tableName + " set content = :c where id = :i";
-    var bindVar = {
+  const update = async function(content, maxsize) {
+    const sql = "update " + tableName + " set content = :c where id = :i";
+    const bindVar = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       c: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER, maxSize: maxsize }
     };
-    connection.execute(
-      sql,
-      bindVar,
-      function(err, result) {
-        should.not.exist(err);
-        (result.rowsAffected).should.be.exactly(1);
-        callback();
-      }
-    );
+    const result = await connection.execute(sql, bindVar);
+    assert.strictEqual(result.rowsAffected, 1);
   };
 
-  var returning = function(content, callback) {
-    var sql = "update " + tableName + " set content = :c1 where id = :i returning content into :c2";
-    var bindVar = {
+  const returning = async function(content) {
+    const sql = "update " + tableName + " set content = :c1 where id = :i returning content into :c2";
+    const bindVar = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       c1: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER },
       c2: { dir: oracledb.BIND_OUT, type: oracledb.BUFFER }
     };
-    connection.execute(
-      sql,
-      bindVar,
-      function(err) {
-        should.not.exist(err);
-        callback();
-      }
-    );
+    await connection.execute(sql, bindVar);
   };
 
-  var fetch = function(expected, callback) {
-    var sql = "select content from " + tableName + " where id = " + insertID;
-    connection.execute(
-      sql,
-      function(err, result) {
-        should.not.exist(err);
-        assist.compare2Buffers(result.rows[0][0], expected);
-        callback();
-      }
-    );
+  const fetch = async function(expected) {
+    const sql = "select content from " + tableName + " where id = " + insertID;
+    const result = await connection.execute(sql);
+    assert.deepEqual(result.rows[0][0], expected);
   };
 
 });

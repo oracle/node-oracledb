@@ -35,7 +35,7 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const fs = require('fs');
-const fsPromises = require('node:fs/promises');
+const fsPromises = require('fs/promises');
 const random = require('./random.js');
 
 describe('80. lobBindAsStringBuffer.js', function() {

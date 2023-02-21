@@ -32,7 +32,6 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
 const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
@@ -66,10 +65,10 @@ describe('255. poolReconfigure.js', function() {
   }
 
   function checkOriginalPoolConfig(pool) {
-    should.strictEqual(pool.poolMin, poolMinOriginalVal);
-    should.strictEqual(pool.poolMax, poolMaxOriginalVal);
-    should.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
-    should.strictEqual(pool.enableStatistics, enableStatisticsOriginalVal);
+    assert.strictEqual(pool.poolMin, poolMinOriginalVal);
+    assert.strictEqual(pool.poolMax, poolMaxOriginalVal);
+    assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
+    assert.strictEqual(pool.enableStatistics, enableStatisticsOriginalVal);
   }
 
   describe('255.1 poolReconfigure - poolMin/poolMax/poolIncrement properties', function() {
@@ -87,11 +86,11 @@ describe('255. poolReconfigure.js', function() {
     it('255.1.1 Change poolMin - increase', async function() {
       let conn1 = await testsUtil.getPoolConnection(pool);
       let conn2 = await testsUtil.getPoolConnection(pool);
-      should.strictEqual(pool.connectionsInUse, 2);
+      assert.strictEqual(pool.connectionsInUse, 2);
       if (dbConfig.test.externalAuth) {
-        should.strictEqual(pool.connectionsOpen, 2);
+        assert.strictEqual(pool.connectionsOpen, 2);
       } else {
-        should.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
+        assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
       }
 
       let poolMin = pool.poolMin * 2;
@@ -99,26 +98,26 @@ describe('255. poolReconfigure.js', function() {
         poolMin : poolMin
       };
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMin, poolMin);
-      should.strictEqual(pool.poolMax, poolMaxOriginalVal);
-      should.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
-      should.strictEqual(pool.connectionsInUse, 2);
+      assert.strictEqual(pool.poolMin, poolMin);
+      assert.strictEqual(pool.poolMax, poolMaxOriginalVal);
+      assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(pool.connectionsInUse, 2);
 
       await conn1.close();
       await conn2.close();
 
       let conn3 = await testsUtil.getPoolConnection(pool);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       await conn3.close();
     });
 
     it('255.1.2 Change poolMin - decrease', async function() {
       let conn = await testsUtil.getPoolConnection(pool);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       if (dbConfig.test.externalAuth) {
-        should.strictEqual(pool.connectionsOpen, 1);
+        assert.strictEqual(pool.connectionsOpen, 1);
       } else {
-        should.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
+        assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
       }
 
       let poolMin = Math.floor(pool.poolMin / 2);
@@ -127,10 +126,10 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure (config);
-      should.strictEqual(pool.poolMin, poolMin);
-      should.strictEqual(pool.poolMax, poolMaxOriginalVal);
-      should.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.poolMin, poolMin);
+      assert.strictEqual(pool.poolMax, poolMaxOriginalVal);
+      assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(pool.connectionsInUse, 1);
 
       await conn.close();
     });
@@ -143,8 +142,8 @@ describe('255. poolReconfigure.js', function() {
         conns.push(conn);
       }
 
-      should.strictEqual(pool.connectionsInUse, poolMaxOriginalVal);
-      should.strictEqual(pool.connectionsOpen, poolMaxOriginalVal);
+      assert.strictEqual(pool.connectionsInUse, poolMaxOriginalVal);
+      assert.strictEqual(pool.connectionsOpen, poolMaxOriginalVal);
 
       let poolMax = pool.poolMax * 2;
       let config = {
@@ -152,16 +151,16 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMax, poolMax);
-      should.strictEqual(pool.poolMin, poolMinOriginalVal);
-      should.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(pool.poolMax, poolMax);
+      assert.strictEqual(pool.poolMin, poolMinOriginalVal);
+      assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
 
       let connNew = await testsUtil.getPoolConnection(pool);
-      should.strictEqual(pool.connectionsInUse, poolMaxOriginalVal + 1);
+      assert.strictEqual(pool.connectionsInUse, poolMaxOriginalVal + 1);
       if (dbConfig.test.externalAuth) {
-        should.strictEqual(pool.connectionsOpen, poolMaxOriginalVal + 1);
+        assert.strictEqual(pool.connectionsOpen, poolMaxOriginalVal + 1);
       } else {
-        should.strictEqual(pool.connectionsOpen, poolMaxOriginalVal + poolIncrementOriginalVal);
+        assert.strictEqual(pool.connectionsOpen, poolMaxOriginalVal + poolIncrementOriginalVal);
       }
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
@@ -175,11 +174,11 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.1.4 Change poolMax - decrease', async function() {
       let conn = await testsUtil.getPoolConnection(pool);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       if (dbConfig.test.externalAuth) {
-        should.strictEqual(pool.connectionsOpen, 1);
+        assert.strictEqual(pool.connectionsOpen, 1);
       } else {
-        should.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
+        assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
       }
 
       let poolMax = Math.floor (pool.poolMax / 2);
@@ -188,14 +187,14 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMax, poolMax);
-      should.strictEqual(pool.poolMin, poolMinOriginalVal);
-      should.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.poolMax, poolMax);
+      assert.strictEqual(pool.poolMin, poolMinOriginalVal);
+      assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(pool.connectionsInUse, 1);
       if (dbConfig.test.externalAuth) {
-        should.strictEqual(pool.connectionsOpen, 1);
+        assert.strictEqual(pool.connectionsOpen, 1);
       } else {
-        should.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
+        assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
       }
 
       await conn.close();
@@ -208,8 +207,8 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      should.strictEqual(pool.connectionsInUse, poolMinOriginalVal);
-      should.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
+      assert.strictEqual(pool.connectionsInUse, poolMinOriginalVal);
+      assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
 
       let poolIncrement = pool.poolIncrement * 2;
       let config = {
@@ -217,16 +216,16 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolIncrement, poolIncrement);
-      should.strictEqual(pool.poolMin, poolMinOriginalVal);
-      should.strictEqual(pool.poolMax, poolMaxOriginalVal);
+      assert.strictEqual(pool.poolIncrement, poolIncrement);
+      assert.strictEqual(pool.poolMin, poolMinOriginalVal);
+      assert.strictEqual(pool.poolMax, poolMaxOriginalVal);
 
       let connNew = await testsUtil.getPoolConnection(pool);
-      should.strictEqual(pool.connectionsInUse, poolMinOriginalVal + 1);
+      assert.strictEqual(pool.connectionsInUse, poolMinOriginalVal + 1);
       if (dbConfig.test.externalAuth) {
-        should.strictEqual(pool.connectionsOpen, poolMinOriginalVal + 1);
+        assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal + 1);
       } else {
-        should.strictEqual(pool.connectionsOpen, poolMinOriginalVal + poolIncrement);
+        assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal + poolIncrement);
       }
 
       for (conIndex = 0; conIndex < poolMinOriginalVal; conIndex++) {
@@ -244,24 +243,24 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      should.strictEqual(pool.connectionsInUse, poolMinOriginalVal);
-      should.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
+      assert.strictEqual(pool.connectionsInUse, poolMinOriginalVal);
+      assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
 
       let poolIncrement = Math.floor(pool.poolIncrement / 2);
       let config = {
         poolIncrement : poolIncrement
       };
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolIncrement, poolIncrement);
-      should.strictEqual(pool.poolMin, poolMinOriginalVal);
-      should.strictEqual(pool.poolMax, poolMaxOriginalVal);
+      assert.strictEqual(pool.poolIncrement, poolIncrement);
+      assert.strictEqual(pool.poolMin, poolMinOriginalVal);
+      assert.strictEqual(pool.poolMax, poolMaxOriginalVal);
 
       let connNew = await testsUtil.getPoolConnection(pool);
-      should.strictEqual(pool.connectionsInUse, poolMinOriginalVal + 1);
+      assert.strictEqual(pool.connectionsInUse, poolMinOriginalVal + 1);
       if (dbConfig.test.externalAuth) {
-        should.strictEqual(pool.connectionsOpen, poolMinOriginalVal + 1);
+        assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal + 1);
       } else {
-        should.strictEqual(pool.connectionsOpen, poolMinOriginalVal + poolIncrement);
+        assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal + poolIncrement);
       }
 
       for (conIndex = 0; conIndex < poolMinOriginalVal; conIndex++) {
@@ -281,9 +280,9 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMin, poolMin);
-      should.strictEqual(pool.poolMax, poolMax);
-      should.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(pool.poolMin, poolMin);
+      assert.strictEqual(pool.poolMax, poolMax);
+      assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
     });
 
     it('255.1.8 increase poolMin & poolIncrement', async function() {
@@ -295,9 +294,9 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMin, poolMin);
-      should.strictEqual(pool.poolIncrement, poolIncrement);
-      should.strictEqual(pool.poolMax, poolMaxOriginalVal);
+      assert.strictEqual(pool.poolMin, poolMin);
+      assert.strictEqual(pool.poolIncrement, poolIncrement);
+      assert.strictEqual(pool.poolMax, poolMaxOriginalVal);
     });
 
     it('255.1.9 increase poolMax & poolIncrement', async function() {
@@ -309,9 +308,9 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMax, poolMax);
-      should.strictEqual(pool.poolIncrement, poolIncrement);
-      should.strictEqual(pool.poolMin, poolMinOriginalVal);
+      assert.strictEqual(pool.poolMax, poolMax);
+      assert.strictEqual(pool.poolIncrement, poolIncrement);
+      assert.strictEqual(pool.poolMin, poolMinOriginalVal);
     });
 
 
@@ -326,9 +325,9 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMin, poolMin);
-      should.strictEqual(pool.poolMax, poolMax);
-      should.strictEqual(pool.poolIncrement, poolIncrement);
+      assert.strictEqual(pool.poolMin, poolMin);
+      assert.strictEqual(pool.poolMax, poolMax);
+      assert.strictEqual(pool.poolIncrement, poolIncrement);
     });
 
     it('255.1.11 Change enableStatistics to true', async function() {
@@ -337,10 +336,10 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.enableStatistics, true);
-      should.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
-      should.strictEqual(pool.poolMin, poolMinOriginalVal);
-      should.strictEqual(pool.poolMax, poolMaxOriginalVal);
+      assert.strictEqual(pool.enableStatistics, true);
+      assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(pool.poolMin, poolMinOriginalVal);
+      assert.strictEqual(pool.poolMax, poolMaxOriginalVal);
     });
 
     it('255.1.12 Change enableStatistics to false', async function() {
@@ -349,10 +348,10 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.enableStatistics, false);
-      should.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
-      should.strictEqual(pool.poolMin, poolMinOriginalVal);
-      should.strictEqual(pool.poolMax, poolMaxOriginalVal);
+      assert.strictEqual(pool.enableStatistics, false);
+      assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(pool.poolMin, poolMinOriginalVal);
+      assert.strictEqual(pool.poolMax, poolMaxOriginalVal);
     });
 
     it('255.1.13 Decreasing poolMax when all connection are in use', async function() {
@@ -363,8 +362,8 @@ describe('255. poolReconfigure.js', function() {
         conns.push(conn);
       }
 
-      should.strictEqual(pool.connectionsInUse, poolMaxOriginalVal);
-      should.strictEqual(pool.connectionsOpen, poolMaxOriginalVal);
+      assert.strictEqual(pool.connectionsInUse, poolMaxOriginalVal);
+      assert.strictEqual(pool.connectionsOpen, poolMaxOriginalVal);
 
       let poolMax = Math.floor (pool.poolMax / 2);
       let config = {
@@ -372,11 +371,11 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMax, poolMax);
-      should.strictEqual(pool.poolMin, poolMinOriginalVal);
-      should.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
-      should.strictEqual(pool.connectionsInUse, poolMaxOriginalVal);
-      should.strictEqual(pool.connectionsOpen, poolMaxOriginalVal);
+      assert.strictEqual(pool.poolMax, poolMax);
+      assert.strictEqual(pool.poolMin, poolMinOriginalVal);
+      assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(pool.connectionsInUse, poolMaxOriginalVal);
+      assert.strictEqual(pool.connectionsOpen, poolMaxOriginalVal);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
         let conn = conns[conIndex];
@@ -396,16 +395,16 @@ describe('255. poolReconfigure.js', function() {
 
       await pool.reconfigure(config);
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMin, poolMin);
-      should.strictEqual(pool.poolMax, poolMax);
-      should.strictEqual(pool.poolIncrement, poolIncrement);
+      assert.strictEqual(pool.poolMin, poolMin);
+      assert.strictEqual(pool.poolMax, poolMax);
+      assert.strictEqual(pool.poolIncrement, poolIncrement);
 
       await pool.reconfigure(config);
       await pool.reconfigure(config);
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMin, poolMin);
-      should.strictEqual(pool.poolMax, poolMax);
-      should.strictEqual(pool.poolIncrement, poolIncrement);
+      assert.strictEqual(pool.poolMin, poolMin);
+      assert.strictEqual(pool.poolMax, poolMax);
+      assert.strictEqual(pool.poolIncrement, poolIncrement);
 
     });
 
@@ -429,9 +428,9 @@ describe('255. poolReconfigure.js', function() {
         poolIncrement : poolIncrement
       };
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMin, poolMin);
-      should.strictEqual(pool.poolMax, poolMax);
-      should.strictEqual(pool.poolIncrement, poolIncrement);
+      assert.strictEqual(pool.poolMin, poolMin);
+      assert.strictEqual(pool.poolMax, poolMax);
+      assert.strictEqual(pool.poolIncrement, poolIncrement);
 
       poolMin = 1;
       poolMax = 3;
@@ -442,9 +441,9 @@ describe('255. poolReconfigure.js', function() {
         poolIncrement : poolIncrement
       };
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMin, poolMin);
-      should.strictEqual(pool.poolMax, poolMax);
-      should.strictEqual(pool.poolIncrement, poolIncrement);
+      assert.strictEqual(pool.poolMin, poolMin);
+      assert.strictEqual(pool.poolMax, poolMax);
+      assert.strictEqual(pool.poolIncrement, poolIncrement);
     });
 
     it('255.1.16 Connection queuing after decreasing poolMax', async function() {
@@ -461,48 +460,46 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMax, poolMax);
-      should.strictEqual(pool.poolMin, poolMinOriginalVal);
-      should.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
-      should.strictEqual(pool.connectionsInUse, poolMaxOriginalVal);
+      assert.strictEqual(pool.poolMax, poolMax);
+      assert.strictEqual(pool.poolMin, poolMinOriginalVal);
+      assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(pool.connectionsInUse, poolMaxOriginalVal);
 
       // Execute a query using the existing connections
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
         await conns[conIndex].execute(`select user from dual`);
       }
 
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool),
+        /NJS-040:/
       );
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
 
       // release two connections
       await conns[poolMaxOriginalVal - 1].close();
       await conns[poolMaxOriginalVal - 2].close();
+
       // Get a new connection
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool),
+        /NJS-040/
       );
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
 
       // release a third connection
       await conns[poolMaxOriginalVal - 3].close();
       // Get a new connection
       conns[poolMaxOriginalVal - 3] = await testsUtil.getPoolConnection(pool);
       // Get a new connection
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool),
+        /NJS-040/
       );
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
 
-      for (conIndex = 0; conIndex < poolMax; conIndex++) {
-        await conns[conIndex].close();
+      for (let i = 0; i < poolMax; i++) {
+        await conns[i].close();
       }
 
     });
@@ -515,15 +512,14 @@ describe('255. poolReconfigure.js', function() {
         conns.push(conn);
       }
 
-      should.strictEqual(pool.connectionsInUse, poolMaxOriginalVal);
-      should.strictEqual(pool.connectionsOpen, poolMaxOriginalVal);
+      assert.strictEqual(pool.connectionsInUse, poolMaxOriginalVal);
+      assert.strictEqual(pool.connectionsOpen, poolMaxOriginalVal);
 
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool),
+        /NJS-040/
       );
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
 
       let poolMax = pool.poolMax + 10;
       let config = {
@@ -531,21 +527,20 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMax, poolMax);
-      should.strictEqual(pool.poolMin, poolMinOriginalVal);
-      should.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(pool.poolMax, poolMax);
+      assert.strictEqual(pool.poolMin, poolMinOriginalVal);
+      assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
 
       for (conIndex = poolMaxOriginalVal; conIndex < poolMax; conIndex++) {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
 
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool),
+        /NJS-040/
       );
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
 
       for (conIndex = 0; conIndex < poolMax; conIndex++) {
         // Execute a query using the existing connections
@@ -601,7 +596,7 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolPingInterval, poolPingInterval);
+      assert.strictEqual(pool.poolPingInterval, poolPingInterval);
       checkOriginalPoolConfig(pool);
     });
 
@@ -612,7 +607,7 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolTimeout, poolTimeout);
+      assert.strictEqual(pool.poolTimeout, poolTimeout);
       checkOriginalPoolConfig(pool);
     });
 
@@ -623,7 +618,7 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMaxPerShard, poolMaxPerShard);
+      assert.strictEqual(pool.poolMaxPerShard, poolMaxPerShard);
       checkOriginalPoolConfig(pool);
     });
 
@@ -634,7 +629,7 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.stmtCacheSize, stmtCacheSize);
+      assert.strictEqual(pool.stmtCacheSize, stmtCacheSize);
       checkOriginalPoolConfig(pool);
     });
 
@@ -645,12 +640,11 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool),
+        /NJS-040/
       );
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
 
       let totalConnectionRequestsOriginalVal = pool._totalConnectionRequests;
       let totalRequestsDequeuedOriginalVal = pool._totalConnectionRequests;
@@ -658,11 +652,11 @@ describe('255. poolReconfigure.js', function() {
       let totalFailedRequestsOriginalVal = pool._totalFailedRequests;
       let totalRequestsRejectedOriginalVal = pool._totalRequestsRejected;
       let timeOfLastResetOriginalVal = pool._timeOfReset;
-      should.strictEqual(totalConnectionRequestsOriginalVal, 0);
-      should.strictEqual(totalRequestsDequeuedOriginalVal, 0);
-      should.strictEqual(totalRequestsEnqueuedOriginalVal, 0);
-      should.strictEqual(totalFailedRequestsOriginalVal, 0);
-      should.strictEqual(totalRequestsRejectedOriginalVal, 0);
+      assert.strictEqual(totalConnectionRequestsOriginalVal, 0);
+      assert.strictEqual(totalRequestsDequeuedOriginalVal, 0);
+      assert.strictEqual(totalRequestsEnqueuedOriginalVal, 0);
+      assert.strictEqual(totalFailedRequestsOriginalVal, 0);
+      assert.strictEqual(totalRequestsRejectedOriginalVal, 0);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
         let conn = conns[conIndex];
@@ -680,19 +674,18 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool),
+        /NJS-040/
       );
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
 
-      should.strictEqual(pool._totalConnectionRequests, poolMaxOriginalVal + 1);
-      should.strictEqual(pool._totalRequestsDequeued, 0);
-      should.strictEqual(pool._totalRequestsEnqueued, 1);
-      should.strictEqual(pool._totalFailedRequests, 0);
-      should.strictEqual(pool._totalRequestsRejected, 0);
-      (pool._timeOfReset).should.above(timeOfLastResetOriginalVal);
+      assert.strictEqual(pool._totalConnectionRequests, poolMaxOriginalVal + 1);
+      assert.strictEqual(pool._totalRequestsDequeued, 0);
+      assert.strictEqual(pool._totalRequestsEnqueued, 1);
+      assert.strictEqual(pool._totalFailedRequests, 0);
+      assert.strictEqual(pool._totalRequestsRejected, 0);
+      assert(pool._timeOfReset > timeOfLastResetOriginalVal);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
         let conn = conns[conIndex];
@@ -706,7 +699,7 @@ describe('255. poolReconfigure.js', function() {
         resetStatistics : true
       };
       await pool.reconfigure(config);
-      should.strictEqual(pool.enableStatistics, enableStatisticsOriginalVal);
+      assert.strictEqual(pool.enableStatistics, enableStatisticsOriginalVal);
     });
 
     it('255.2.7 getStatistics', async function() {
@@ -731,15 +724,14 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool),
+        /NJS-040/
       );
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
 
       let poolStatistics = pool.getStatistics();
-      should.strictEqual(poolStatistics, null);
+      assert.strictEqual(poolStatistics, null);
       let timeOfLastResetOriginalVal = pool._timeOfReset;
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
@@ -758,45 +750,45 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool),
+        /NJS-040/
       );
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
 
       poolStatistics = pool.getStatistics();
 
-      (poolStatistics.upTime).should.above(0);
-      (poolStatistics.upTimeSinceReset).should.above(0);
-      (pool._timeOfReset).should.above(timeOfLastResetOriginalVal);
-      should.strictEqual(poolStatistics.connectionRequests, poolMaxOriginalVal + 1);
-      should.strictEqual(poolStatistics.requestsEnqueued, 1);
-      should.strictEqual(poolStatistics.requestsDequeued, 0);
-      should.strictEqual(poolStatistics.failedRequests, 0);
-      should.strictEqual(poolStatistics.rejectedRequests, 0);
-      should.strictEqual(poolStatistics.requestTimeouts, 1);
-      should.strictEqual(poolStatistics.currentQueueLength, 0);
-      should.strictEqual(poolStatistics.maximumQueueLength, 1);
-      (poolStatistics.minimumTimeInQueue).should.above(0);
-      (poolStatistics.maximumTimeInQueue).should.above(0);
-      (poolStatistics.timeInQueue).should.aboveOrEqual(5);
-      (poolStatistics.averageTimeInQueue).should.aboveOrEqual(5);
-      should.strictEqual(poolStatistics.connectionsInUse, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.poolAlias, "255.2.7");
-      should.strictEqual(poolStatistics.queueMax, 500);
-      should.strictEqual(poolStatistics.queueTimeout, 5);
-      should.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
-      should.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
-      should.strictEqual(poolStatistics.poolPingInterval, 60);
-      should.strictEqual(poolStatistics.poolTimeout, 60);
-      should.strictEqual(poolStatistics.poolMaxPerShard, 0);
-      should.strictEqual(poolStatistics.sessionCallback, undefined);
-      should.strictEqual(poolStatistics.stmtCacheSize, 30);
-      should.strictEqual(poolStatistics.sodaMetaDataCache, false);
-      should.strictEqual(poolStatistics.threadPoolSize, undefined);
+      assert(poolStatistics.upTime > 0);
+      assert(poolStatistics.upTimeSinceReset > 0);
+      assert(pool._timeOfReset > timeOfLastResetOriginalVal);
+      assert.strictEqual(poolStatistics.connectionRequests, poolMaxOriginalVal + 1);
+      assert.strictEqual(poolStatistics.requestsEnqueued, 1);
+      assert.strictEqual(poolStatistics.requestsDequeued, 0);
+      assert.strictEqual(poolStatistics.failedRequests, 0);
+      assert.strictEqual(poolStatistics.rejectedRequests, 0);
+      assert.strictEqual(poolStatistics.requestTimeouts, 1);
+      assert.strictEqual(poolStatistics.currentQueueLength, 0);
+      assert.strictEqual(poolStatistics.maximumQueueLength, 1);
+      assert(poolStatistics.minimumTimeInQueue > 0);
+      assert(poolStatistics.maximumTimeInQueue > 0);
+      assert(poolStatistics.timeInQueue >= 5,
+        `timeInQueue should be >= 5 but is ${poolStatistics.timeInQueue}`);
+      assert(poolStatistics.averageTimeInQueue >= 5);
+      assert.strictEqual(poolStatistics.connectionsInUse, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.poolAlias, "255.2.7");
+      assert.strictEqual(poolStatistics.queueMax, 500);
+      assert.strictEqual(poolStatistics.queueTimeout, 5);
+      assert.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
+      assert.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(poolStatistics.poolPingInterval, 60);
+      assert.strictEqual(poolStatistics.poolTimeout, 60);
+      assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+      assert.strictEqual(poolStatistics.sessionCallback, undefined);
+      assert.strictEqual(poolStatistics.stmtCacheSize, 30);
+      assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
         let conn = conns[conIndex];
@@ -826,14 +818,14 @@ describe('255. poolReconfigure.js', function() {
       });
 
       let poolStatistics = pool.getStatistics();
-      (poolStatistics instanceof oracledb.PoolStatistics).should.be.true();
+      assert(poolStatistics instanceof oracledb.PoolStatistics);
 
-      should.strictEqual(poolStatistics.user, dbConfig.user);
-      should.strictEqual(poolStatistics.edition, "");
-      should.strictEqual(poolStatistics.events, false);
-      should.strictEqual(poolStatistics.externalAuth, false);
-      should.strictEqual(poolStatistics.homogeneous, true);
-      should.strictEqual(poolStatistics.connectString, dbConfig.connectString);
+      assert.strictEqual(poolStatistics.user, dbConfig.user);
+      assert.strictEqual(poolStatistics.edition, "");
+      assert.strictEqual(poolStatistics.events, false);
+      assert.strictEqual(poolStatistics.externalAuth, false);
+      assert.strictEqual(poolStatistics.homogeneous, true);
+      assert.strictEqual(poolStatistics.connectString, dbConfig.connectString);
 
       // reconfigure for later use
       await pool.reconfigure({enableStatistics : false});
@@ -860,7 +852,7 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.queueMax, queueMax);
+      assert.strictEqual(pool.queueMax, queueMax);
       checkOriginalPoolConfig(pool);
     });
 
@@ -872,7 +864,7 @@ describe('255. poolReconfigure.js', function() {
 
       await pool.reconfigure(config);
 
-      should.strictEqual(pool.queueTimeout, queueTimeout);
+      assert.strictEqual(pool.queueTimeout, queueTimeout);
       checkOriginalPoolConfig(pool);
     });
 
@@ -889,7 +881,7 @@ describe('255. poolReconfigure.js', function() {
       };
 
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMaxPerShard, maxPerShard);
+      assert.strictEqual(pool.poolMaxPerShard, maxPerShard);
       checkOriginalPoolConfig(pool);
     });
 
@@ -907,7 +899,7 @@ describe('255. poolReconfigure.js', function() {
         }
       }
       await pool.reconfigure(config);
-      should.strictEqual(pool.sodaMetaDataCache, config.sodaMetaDataCache);
+      assert.strictEqual(pool.sodaMetaDataCache, config.sodaMetaDataCache);
     });
 
     it('255.3.5 sodaMetaDataCache set to false', async function() {
@@ -924,7 +916,7 @@ describe('255. poolReconfigure.js', function() {
         }
       }
       await pool.reconfigure(config);
-      should.strictEqual(pool.sodaMetaDataCache, config.sodaMetaDataCache);
+      assert.strictEqual(pool.sodaMetaDataCache, config.sodaMetaDataCache);
       checkOriginalPoolConfig(pool);
     });
 
@@ -945,91 +937,89 @@ describe('255. poolReconfigure.js', function() {
     it('255.4.1 connectionsInUse', async function() {
       let conn = await testsUtil.getPoolConnection(pool);
       await pool.reconfigure({connectionsInUse: 3});
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
-      should.strictEqual(pool.connectionsInUse, 0);
+      assert.strictEqual(pool.connectionsInUse, 0);
     });
 
     it('255.4.2 connectionsOpen', async function() {
       if (dbConfig.test.externalAuth) {
-        should.strictEqual(pool.connectionsOpen, 0);
+        assert.strictEqual(pool.connectionsOpen, 0);
       } else {
-        should.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
+        assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
       }
 
       await pool.reconfigure({connectionsOpen: 2});
 
       if (dbConfig.test.externalAuth) {
-        should.strictEqual(pool.connectionsOpen, 0);
+        assert.strictEqual(pool.connectionsOpen, 0);
       } else {
-        should.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
+        assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
       }
 
     });
 
     it('255.4.3 connectString', async function() {
       await pool.reconfigure({connectString: 'invalid_connection_string'});
-      let conn = await testsUtil.getPoolConnection(pool);
-      should.exist(conn);
+      const conn = await testsUtil.getPoolConnection(pool);
       await conn.close();
     });
 
     it('255.4.4 connectionString', async function() {
       await pool.reconfigure({connectionString: 'invalid_connection_string'});
-      let conn = await testsUtil.getPoolConnection(pool);
-      should.exist(conn);
+      const conn = await testsUtil.getPoolConnection(pool);
       await conn.close();
     });
 
     it('255.4.5 edition', async function() {
       let editionBak = oracledb.edition;
       await pool.reconfigure({edition: 'e2'});
-      should.strictEqual(oracledb.edition, editionBak);
+      assert.strictEqual(oracledb.edition, editionBak);
     });
 
     it('255.4.6 events', async function() {
       let eventsBak = oracledb.events;
       await pool.reconfigure({events: true});
-      should.strictEqual(oracledb.events, eventsBak);
+      assert.strictEqual(oracledb.events, eventsBak);
     });
 
     it('255.4.7 homogeneous', async function() {
       let homogeneousBak = pool.homogeneous;
       await pool.reconfigure ({homogeneous: false});
-      should.strictEqual(pool.homogeneous, homogeneousBak);
+      assert.strictEqual(pool.homogeneous, homogeneousBak);
     });
 
     it('255.4.8 externalAuth', async function() {
       let externalAuthBak = oracledb.externalAuth;
       await pool.reconfigure({externalAuth: true});
-      should.strictEqual(oracledb.externalAuth, externalAuthBak);
+      assert.strictEqual(oracledb.externalAuth, externalAuthBak);
     });
 
     it('255.4.9 password', async function() {
       await pool.reconfigure({password: 'testing'});
-      should.strictEqual(oracledb.password, undefined);
+      assert.strictEqual(oracledb.password, undefined);
     });
 
     it('255.4.10 poolAlias', async function() {
       let poolAliasBak = pool.poolAlias;
       await pool.reconfigure({poolAlias: 'poolalias1'});
-      should.strictEqual(pool.poolAlias, poolAliasBak);
+      assert.strictEqual(pool.poolAlias, poolAliasBak);
     });
 
     it('255.4.11 status', async function() {
       let statusBak = pool.status;
       await pool.reconfigure({status: oracledb.POOL_STATUS_DRAINING});
-      should.strictEqual(pool.status, statusBak);
+      assert.strictEqual(pool.status, statusBak);
     });
 
     it('255.4.12 username', async function() {
       await pool.reconfigure({username: 'testinguser'});
-      should.strictEqual(pool.username, undefined);
+      assert.strictEqual(pool.username, undefined);
     });
 
     it('255.4.13 user', async function() {
       await pool.reconfigure({user: 'testinguser'});
-      should.strictEqual(pool.user, dbConfig.user);
+      assert.strictEqual(pool.user, dbConfig.user);
     });
 
     it('255.4.14 _enableStats', async function() {
@@ -1049,18 +1039,18 @@ describe('255. poolReconfigure.js', function() {
       };
       await pool.reconfigure(config1);
       let poolStatistics1 = pool.getStatistics();
-      should.strictEqual(pool._enableStats, false);
-      should.strictEqual(pool.enableStatistics, false);
-      should.strictEqual(poolStatistics1, null);
+      assert.strictEqual(pool._enableStats, false);
+      assert.strictEqual(pool.enableStatistics, false);
+      assert.strictEqual(poolStatistics1, null);
 
       let config2 = {
         _enableStats : true
       };
       await pool.reconfigure(config2);
       let poolStatistics2 = pool.getStatistics();
-      should.strictEqual(pool._enableStats, false);
-      should.strictEqual(pool.enableStatistics, false);
-      should.strictEqual(poolStatistics2, null);
+      assert.strictEqual(pool._enableStats, false);
+      assert.strictEqual(pool.enableStatistics, false);
+      assert.strictEqual(poolStatistics2, null);
 
       let config3 = {
         resetStatistics : false,
@@ -1068,9 +1058,9 @@ describe('255. poolReconfigure.js', function() {
       };
       await pool.reconfigure(config3);
       let poolStatistics3 = pool.getStatistics();
-      should.strictEqual(pool._enableStats, false);
-      should.strictEqual(pool.enableStatistics, false);
-      should.strictEqual(poolStatistics3, null);
+      assert.strictEqual(pool._enableStats, false);
+      assert.strictEqual(pool.enableStatistics, false);
+      assert.strictEqual(poolStatistics3, null);
 
     });
 
@@ -1123,296 +1113,227 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.5.2 passing invalid poolMin to pool.reconfigure', async function() {
-      try {
-        await assert.rejects(
-          async function() {
-            await pool.reconfigure({poolMin: -1});
-          },
-          /NJS-007:/
-        );
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolMin: -1}),
+        /NJS-007:/
+      );
 
-        await assert.rejects(
-          async function() {
-            await pool.reconfigure({poolMin: NaN});
-          },
-          /NJS-007:/
-        );
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolMin: NaN}),
+        /NJS-007:/
+      );
 
-        await assert.rejects(
-          async function() {
-            await pool.reconfigure({poolMin: null});
-          },
-          /NJS-007:/
-        );
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolMin: null}),
+        /NJS-007:/
+      );
 
-        await assert.rejects(
-          async function() {
-            await pool.reconfigure({poolMin: '10'});
-          },
-          /NJS-007:/
-        );
-      } catch (err) {
-        should.not.exist(err);
-      }
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolMin: '10'}),
+        /NJS-007:/
+      );
     });
 
     it('255.5.3 passing invalid poolMax to pool.reconfigure', async function() {
-      try {
-        await pool.reconfigure ({ poolMax: -1 });
-      } catch (err) {
-        (err.message).startsWith('NJS-007');
-      }
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure ({ poolMax: -1 }),
+        /NJS-007:/
+      );
 
-      try {
-        await pool.reconfigure({poolMax: NaN});
-      } catch (err) {
-        (err.message).startsWith('NJS-007');
-      }
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolMax: NaN}),
+        /NJS-007:/
+      );
 
-      try {
-        await pool.reconfigure({poolMax: null});
-      } catch (err) {
-        (err.message).startsWith('NJS-007');
-      }
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolMax: null}),
+        /NJS-007:/
+      );
 
-      try {
-        await pool.reconfigure({poolMax: 0});
-      } catch (err) {
-        (err.message).startsWith ('NJS-007');
-      }
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolMax: 0}),
+        /ORA-24413:/
+      );
 
-      try {
-        await pool.reconfigure({poolMax:"10"});
-      } catch (err) {
-        (err.message).startsWith ("NJS-007");
-      }
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolMax:"10"}),
+        /NJS-007:/
+      );
 
     });
 
     it('255.5.4 passing invalid poolIncrement to pool.reconfigure', async function() {
-      try {
-        await pool.reconfigure ({poolIncrement : -1 });
-      } catch (err) {
-        (err.message).startsWith ('NJS-007');
-      }
-
-      try {
-        await pool.reconfigure({ poolIncrement: NaN});
-      } catch (err) {
-        (err.message).startsWith ('NJS-007');
-      }
-
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({poolIncrement: null});
-        },
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure ({poolIncrement : -1 }),
         /NJS-007:/
       );
 
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({poolIncrement: "100"});
-        },
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({ poolIncrement: NaN}),
+        /NJS-007:/
+      );
+
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolIncrement: null}),
+        /NJS-007:/
+      );
+
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolIncrement: "100"}),
         /NJS-007:/
       );
 
     });
 
     it('255.5.5 passing invalid enableStatistics to pool.reconfigure', async function() {
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({enableStatistics: null});
-        },
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({enableStatistics: null}),
         /NJS-007:/
       );
 
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({enableStatistics: -100});
-        },
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({enableStatistics: -100}),
         /NJS-007:/
       );
 
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({enableStatistics: NaN});
-        },
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({enableStatistics: NaN}),
         /NJS-007:/
       );
 
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({enableStatistics: "true"});
-        },
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({enableStatistics: "true"}),
         /NJS-007:/
       );
     });
 
     it('255.5.6 passing invalid poolPingInterval to pool.reconfigure', async function() {
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({poolPingInterval: null});
-        },
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolPingInterval: null}),
         /NJS-007/
       );
 
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({poolPingInterval: NaN});
-        },
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolPingInterval: NaN}),
         /NJS-007/
       );
 
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({poolPingInterval: "10"});
-        },
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolPingInterval: "10"}),
         /NJS-007/
       );
 
     });
 
     it('255.5.7 passing invalid poolTimeout to pool.reconfigure', async function() {
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({poolTimeout: null});
-        },
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolTimeout: null}),
         /NJS-007/
       );
 
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({poolTimeout: -100});
-        },
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolTimeout: -100}),
         /NJS-007/
       );
 
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({poolTimeout: NaN});
-        },
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolTimeout: NaN}),
         /NJS-007/
       );
 
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({poolTimeout: "10"});
-        },
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolTimeout: "10"}),
         /NJS-007/
       );
     });
 
     it('255.5.8 passing invalid poolMaxPerShard to pool.reconfigure', async function() {
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({poolMaxPerShard: null});
-        },
-        /NJS-007/
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolMaxPerShard: null}),
+        /NJS-007:/
       );
 
-      try {
-        await pool.reconfigure({poolMaxPerShard: -100});
-      } catch (err) {
-        should.exist(err);
-        (err.message).startsWith('ORA-24328');
-      }
-
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({poolMaxPerShard: NaN});
-        },
-        /NJS-007/
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolMaxPerShard: -100}),
+        /NJS-007:/
       );
 
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({poolMaxPerShard: "10"});
-        },
-        /NJS-007/
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolMaxPerShard: NaN}),
+        /NJS-007:/
+      );
+
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({poolMaxPerShard: "10"}),
+        /NJS-007:/
       );
     });
 
     it('255.5.9 passing invalid queueMax to pool.reconfigure', async function() {
-      try {
-        await pool.reconfigure({queueMax: null});
-      } catch (err) {
-        (err.message).startsWith('NJS-004');
-      }
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({queueMax: null}),
+        /NJS-007:/
+      );
 
-      try {
-        await pool.reconfigure({queueMax : -100});
-      } catch (err) {
-        (err.message).startsWith('NJS-004');
-      }
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({queueMax : -100}),
+        /NJS-007:/
+      );
 
-      try {
-        await pool.reconfigure({queueMax :NaN});
-      }  catch (err) {
-        (err.message).startsWith('NJS-004');
-      }
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({queueMax :NaN}),
+        /NJS-007:/
+      );
 
-      try {
-        await pool.reconfigure({queueMax :"10"});
-      } catch (err) {
-        (err.message).startsWith('NJS-004');
-      }
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({queueMax :"10"}),
+        /NJS-007:/
+      );
 
     });
 
     it('255.5.10 passing invalid queueTimeout to pool.reconfigure', async function() {
-      try {
-        await pool.reconfigure ({queueTimeout: null});
-      } catch (err) {
-        (err.message).startsWith('NJS-004');
-      }
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure ({queueTimeout: null}),
+        /NJS-007:/
+      );
 
-      try {
-        await pool.reconfigure({queueTimeout: -100});
-      } catch (err) {
-        (err.message).startsWith('NJS-004');
-      }
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({queueTimeout: -100}),
+        /NJS-007:/
+      );
 
-      try {
-        await pool.reconfigure({queueTimeout: NaN});
-      } catch (err) {
-        (err.message).startsWith('NJS-004');
-      }
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({queueTimeout: NaN}),
+        /NJS-007:/
+      );
 
-      try {
-        await pool.reconfigure ({queueTimeout:"10"});
-      } catch (err) {
-        (err.message).startsWith('NJS-004');
-      }
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure ({queueTimeout:"10"}),
+        /NJS-007:/
+      );
 
     });
 
     it('255.5.11 passing invalid stmtCacheSize to pool.reconfigure', async function() {
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({stmtCacheSize: null});
-        },
-        /NJS-007/
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({stmtCacheSize: null}),
+        /NJS-007:/
       );
 
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({stmtCacheSize: -100});
-        },
-        /NJS-007/
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({stmtCacheSize: -100}),
+        /NJS-007:/
       );
 
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({stmtCacheSize: NaN});
-        },
-        /NJS-007/
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({stmtCacheSize: NaN}),
+        /NJS-007:/
       );
 
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure({stmtCacheSize: "10"});
-        },
-        /NJS-007/
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure({stmtCacheSize: "10"}),
+        /NJS-007:/
       );
     });
 
@@ -1445,15 +1366,15 @@ describe('255. poolReconfigure.js', function() {
       }
       await pool.reconfigure(config);
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMin, poolMin);
-      should.strictEqual(pool.poolMax, poolMax);
-      should.strictEqual(pool.poolIncrement, poolIncrement);
-      should.strictEqual(pool.poolPingInterval, poolPingInterval);
-      should.strictEqual(pool.poolTimeout, poolTimeout);
-      should.strictEqual(pool.poolMaxPerShard, poolMaxPerShard);
-      should.strictEqual(pool.queueMax, queueMax);
-      should.strictEqual(pool.queueTimeout, queueTimeout);
-      should.strictEqual(pool.stmtCacheSize, stmtCacheSize);
+      assert.strictEqual(pool.poolMin, poolMin);
+      assert.strictEqual(pool.poolMax, poolMax);
+      assert.strictEqual(pool.poolIncrement, poolIncrement);
+      assert.strictEqual(pool.poolPingInterval, poolPingInterval);
+      assert.strictEqual(pool.poolTimeout, poolTimeout);
+      assert.strictEqual(pool.poolMaxPerShard, poolMaxPerShard);
+      assert.strictEqual(pool.queueMax, queueMax);
+      assert.strictEqual(pool.queueTimeout, queueTimeout);
+      assert.strictEqual(pool.stmtCacheSize, stmtCacheSize);
 
       poolMin = 5;
       poolMax = 10;
@@ -1486,15 +1407,15 @@ describe('255. poolReconfigure.js', function() {
       await pool.reconfigure(config);
       await pool.reconfigure(config);
       await pool.reconfigure(config);
-      should.strictEqual(pool.poolMin, poolMin);
-      should.strictEqual(pool.poolMax, poolMax);
-      should.strictEqual(pool.poolIncrement, poolIncrement);
-      should.strictEqual(pool.poolPingInterval, poolPingInterval);
-      should.strictEqual(pool.poolTimeout, poolTimeout);
-      should.strictEqual(pool.poolMaxPerShard, poolMaxPerShard);
-      should.strictEqual(pool.queueMax, queueMax);
-      should.strictEqual(pool.queueTimeout, queueTimeout);
-      should.strictEqual(pool.stmtCacheSize, stmtCacheSize);
+      assert.strictEqual(pool.poolMin, poolMin);
+      assert.strictEqual(pool.poolMax, poolMax);
+      assert.strictEqual(pool.poolIncrement, poolIncrement);
+      assert.strictEqual(pool.poolPingInterval, poolPingInterval);
+      assert.strictEqual(pool.poolTimeout, poolTimeout);
+      assert.strictEqual(pool.poolMaxPerShard, poolMaxPerShard);
+      assert.strictEqual(pool.queueMax, queueMax);
+      assert.strictEqual(pool.queueTimeout, queueTimeout);
+      assert.strictEqual(pool.stmtCacheSize, stmtCacheSize);
     });
 
     it('255.5.14 reconfigure closed pool', async function() {
@@ -1514,19 +1435,13 @@ describe('255. poolReconfigure.js', function() {
         resetStatistics   : resetStatistics
       };
 
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure(config);
-        },
-        /NJS-065/
-        // NJS-065: connection pool was closed
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure(config),
+        /NJS-065:/
       );
-      await assert.rejects(
-        async function() {
-          await pool.reconfigure(config);
-        },
-        /NJS-065/
-        // NJS-065: connection pool was closed
+      await testsUtil.assertThrowsAsync(
+        async () => await pool.reconfigure(config),
+        /NJS-065:/
       );
       pool = await oracledb.createPool(poolConfig);
 
@@ -1540,12 +1455,9 @@ describe('255. poolReconfigure.js', function() {
       await pool.reconfigure(config);
       await pool.close(0);
 
-      assert.rejects(
-        function() {
-          pool.getStatistics();
-        },
+      assert.throws(
+        () => pool.getStatistics(),
         /NJS-065/
-        // NJS-065: connection pool was closed
       );
 
       pool = await oracledb.createPool(poolConfig);
@@ -1568,7 +1480,7 @@ describe('255. poolReconfigure.js', function() {
         _enableStats     : false
       };
       let pool = await oracledb.createPool(poolConfig);
-      should.strictEqual(pool.poolAlias, "255.6.1.1");
+      assert.strictEqual(pool.poolAlias, "255.6.1.1");
 
       let conns = new Array();
       let conIndex;
@@ -1576,15 +1488,13 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool),
+        /NJS-040:/
       );
 
       let poolStatistics = pool.getStatistics();
-      should.strictEqual(poolStatistics, null);
+      assert.strictEqual(poolStatistics, null);
       let timeOfLastResetOriginalVal = pool._timeOfReset;
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
@@ -1614,45 +1524,43 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool),
+        /NJS-040:/
       );
 
       poolStatistics = pool.getStatistics();
 
-      (poolStatistics.upTime).should.above(0);
-      (poolStatistics.upTimeSinceReset).should.above(0);
-      (pool._timeOfReset).should.above(timeOfLastResetOriginalVal);
-      should.strictEqual(poolStatistics.connectionRequests, poolMaxOriginalVal + 1);
-      should.strictEqual(poolStatistics.requestsEnqueued, 1);
-      should.strictEqual(poolStatistics.requestsDequeued, 0);
-      should.strictEqual(poolStatistics.failedRequests, 0);
-      should.strictEqual(poolStatistics.rejectedRequests, 0);
-      should.strictEqual(poolStatistics.requestTimeouts, 1);
-      should.strictEqual(poolStatistics.currentQueueLength, 0);
-      should.strictEqual(poolStatistics.maximumQueueLength, 1);
-      (poolStatistics.minimumTimeInQueue).should.above(0);
-      (poolStatistics.maximumTimeInQueue).should.above(0);
-      (poolStatistics.timeInQueue).should.aboveOrEqual(4);  // can be just less than 5
-      (poolStatistics.averageTimeInQueue).should.aboveOrEqual(4);  // can be just less than 5
-      should.strictEqual(poolStatistics.connectionsInUse, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.poolAlias, "255.6.1.2");
-      should.strictEqual(poolStatistics.queueMax, 500);
-      should.strictEqual(poolStatistics.queueTimeout, 5);
-      should.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
-      should.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
-      should.strictEqual(poolStatistics.poolPingInterval, 60);
-      should.strictEqual(poolStatistics.poolTimeout, 60);
-      should.strictEqual(poolStatistics.poolMaxPerShard, 0);
-      should.strictEqual(poolStatistics.sessionCallback, undefined);
-      should.strictEqual(poolStatistics.stmtCacheSize, 30);
-      should.strictEqual(poolStatistics.sodaMetaDataCache, false);
-      should.strictEqual(poolStatistics.threadPoolSize, undefined);
+      assert(poolStatistics.upTime > 0);
+      assert(poolStatistics.upTimeSinceReset > 0);
+      assert(pool._timeOfReset > timeOfLastResetOriginalVal);
+      assert.strictEqual(poolStatistics.connectionRequests, poolMaxOriginalVal + 1);
+      assert.strictEqual(poolStatistics.requestsEnqueued, 1);
+      assert.strictEqual(poolStatistics.requestsDequeued, 0);
+      assert.strictEqual(poolStatistics.failedRequests, 0);
+      assert.strictEqual(poolStatistics.rejectedRequests, 0);
+      assert.strictEqual(poolStatistics.requestTimeouts, 1);
+      assert.strictEqual(poolStatistics.currentQueueLength, 0);
+      assert.strictEqual(poolStatistics.maximumQueueLength, 1);
+      assert(poolStatistics.minimumTimeInQueue > 0);
+      assert(poolStatistics.maximumTimeInQueue > 0);
+      assert(poolStatistics.timeInQueue >= 4);  // can be just less than 5
+      assert(poolStatistics.averageTimeInQueue >= 4);  // can be just less than 5
+      assert.strictEqual(poolStatistics.connectionsInUse, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.poolAlias, "255.6.1.2");
+      assert.strictEqual(poolStatistics.queueMax, 500);
+      assert.strictEqual(poolStatistics.queueTimeout, 5);
+      assert.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
+      assert.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(poolStatistics.poolPingInterval, 60);
+      assert.strictEqual(poolStatistics.poolTimeout, 60);
+      assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+      assert.strictEqual(poolStatistics.sessionCallback, undefined);
+      assert.strictEqual(poolStatistics.stmtCacheSize, 30);
+      assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
         let conn = conns[conIndex];
@@ -1673,29 +1581,25 @@ describe('255. poolReconfigure.js', function() {
         queueTimeout     : 5,
         _enableStats     : false
       };
-      let pool1 = await oracledb.createPool(poolConfig);
-      should.strictEqual(pool1.poolAlias, "255.6.2.1");
+      const pool1 = await oracledb.createPool(poolConfig);
+      assert.strictEqual(pool1.poolAlias, "255.6.2.1");
 
-      let conns = new Array();
-      let conIndex;
-      for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool1);
+      let conns = [];
+      for (let i = 0; i < poolMaxOriginalVal; i++) {
+        const conn = await testsUtil.getPoolConnection(pool1);
         conns.push(conn);
       }
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool1);
-        },
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool1),
         /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
       );
 
       let poolStatistics = pool1.getStatistics();
-      should.strictEqual(poolStatistics, null);
-      let timeOfLastResetOriginalVal = pool1._timeOfReset;
+      assert.strictEqual(poolStatistics, null);
+      const timeOfLastResetOriginalVal = pool1._timeOfReset;
 
-      for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
-        await conn.close();
+      for (let i = 0; i < poolMaxOriginalVal; i++) {
+        await conns[i].close();
       }
       // NOT close the existing pool
 
@@ -1711,57 +1615,55 @@ describe('255. poolReconfigure.js', function() {
         _enableStats     : true
       };
 
-      let pool2 = await oracledb.createPool(poolConfig);
+      const pool2 = await oracledb.createPool(poolConfig);
 
       conns = new Array();
-      for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool2);
+      for (let i = 0; i < poolMaxOriginalVal; i++) {
+        const conn = await testsUtil.getPoolConnection(pool2);
         conns.push(conn);
       }
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool2);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool2),
+        /NJS-040/
       );
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
 
       poolStatistics = pool2.getStatistics();
 
-      (poolStatistics.gatheredDate).should.above(0);
-      (poolStatistics.upTime).should.above(0);
-      (poolStatistics.upTimeSinceReset).should.above(0);
-      (pool2._timeOfReset).should.above(timeOfLastResetOriginalVal);
-      should.strictEqual(poolStatistics.connectionRequests, poolMaxOriginalVal + 1);
-      should.strictEqual(poolStatistics.requestsEnqueued, 1);
-      should.strictEqual(poolStatistics.requestsDequeued, 0);
-      should.strictEqual(poolStatistics.failedRequests, 0);
-      should.strictEqual(poolStatistics.rejectedRequests, 0);
-      should.strictEqual(poolStatistics.requestTimeouts, 1);
-      should.strictEqual(poolStatistics.currentQueueLength, 0);
-      should.strictEqual(poolStatistics.maximumQueueLength, 1);
-      (poolStatistics.minimumTimeInQueue).should.above(0);
-      (poolStatistics.maximumTimeInQueue).should.above(0);
-      (poolStatistics.timeInQueue).should.aboveOrEqual(5);
-      (poolStatistics.averageTimeInQueue).should.aboveOrEqual(5);
-      should.strictEqual(poolStatistics.connectionsInUse, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.poolAlias, '255.6.2.2');
-      should.strictEqual(poolStatistics.queueMax, 500);
-      should.strictEqual(poolStatistics.queueTimeout, 5);
-      should.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
-      should.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
-      should.strictEqual(poolStatistics.poolPingInterval, 60);
-      should.strictEqual(poolStatistics.poolTimeout, 60);
-      should.strictEqual(poolStatistics.poolMaxPerShard, 0);
-      should.strictEqual(poolStatistics.sessionCallback, undefined);
-      should.strictEqual(poolStatistics.stmtCacheSize, 30);
-      should.strictEqual(poolStatistics.sodaMetaDataCache, false);
-      should.strictEqual(poolStatistics.threadPoolSize, undefined);
+      assert(poolStatistics.gatheredDate > 0);
+      assert(poolStatistics.upTime > 0);
+      assert(poolStatistics.upTimeSinceReset > 0);
+      assert(pool2._timeOfReset > timeOfLastResetOriginalVal);
+      assert.strictEqual(poolStatistics.connectionRequests, poolMaxOriginalVal + 1);
+      assert.strictEqual(poolStatistics.requestsEnqueued, 1);
+      assert.strictEqual(poolStatistics.requestsDequeued, 0);
+      assert.strictEqual(poolStatistics.failedRequests, 0);
+      assert.strictEqual(poolStatistics.rejectedRequests, 0);
+      assert.strictEqual(poolStatistics.requestTimeouts, 1);
+      assert.strictEqual(poolStatistics.currentQueueLength, 0);
+      assert.strictEqual(poolStatistics.maximumQueueLength, 1);
+      assert(poolStatistics.minimumTimeInQueue > 0);
+      assert(poolStatistics.maximumTimeInQueue > 0);
+      assert(poolStatistics.timeInQueue >= 5);
+      assert(poolStatistics.averageTimeInQueue >= 5);
+      assert.strictEqual(poolStatistics.connectionsInUse, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.poolAlias, '255.6.2.2');
+      assert.strictEqual(poolStatistics.queueMax, 500);
+      assert.strictEqual(poolStatistics.queueTimeout, 5);
+      assert.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
+      assert.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(poolStatistics.poolPingInterval, 60);
+      assert.strictEqual(poolStatistics.poolTimeout, 60);
+      assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+      assert.strictEqual(poolStatistics.sessionCallback, undefined);
+      assert.strictEqual(poolStatistics.stmtCacheSize, 30);
+      assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
-      for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
-        await conn.close();
+      for (let i = 0; i < poolMaxOriginalVal; i++) {
+        await conns[i].close();
       }
       await pool1.close(0);
       await pool2.close(0);
@@ -1783,9 +1685,9 @@ describe('255. poolReconfigure.js', function() {
       let pool1 = await oracledb.createPool(poolConfig);
 
       let poolStatistics1 = pool1.getStatistics();
-      should.strictEqual(pool1._enableStats, true);
-      should.strictEqual(pool1.enableStatistics, true);
-      (poolStatistics1.gatheredDate).should.above(0);
+      assert.strictEqual(pool1._enableStats, true);
+      assert.strictEqual(pool1.enableStatistics, true);
+      assert(poolStatistics1.gatheredDate > 0);
       await pool1.close(0);
 
       let poolConfig2 = {
@@ -1802,9 +1704,9 @@ describe('255. poolReconfigure.js', function() {
 
       let pool2 = await oracledb.createPool(poolConfig2);
       let poolStatistics2 = pool2.getStatistics();
-      should.strictEqual(pool2._enableStats, true);
-      should.strictEqual(pool2.enableStatistics, true);
-      (poolStatistics2.gatheredDate).should.above(0);
+      assert.strictEqual(pool2._enableStats, true);
+      assert.strictEqual(pool2.enableStatistics, true);
+      assert(poolStatistics2.gatheredDate > 0);
       await pool2.close(0);
 
     });
@@ -1825,9 +1727,9 @@ describe('255. poolReconfigure.js', function() {
       let pool1 = await oracledb.createPool(poolConfig);
 
       let poolStatistics1 = pool1.getStatistics();
-      should.strictEqual(pool1._enableStats, false);
-      should.strictEqual(pool1.enableStatistics, false);
-      should.strictEqual(poolStatistics1, null);
+      assert.strictEqual(pool1._enableStats, false);
+      assert.strictEqual(pool1.enableStatistics, false);
+      assert.strictEqual(poolStatistics1, null);
       await pool1.close(0);
 
       let poolConfig2 = {
@@ -1844,9 +1746,9 @@ describe('255. poolReconfigure.js', function() {
 
       let pool2 = await oracledb.createPool(poolConfig2);
       let poolStatistics2 = pool2.getStatistics();
-      should.strictEqual(pool2._enableStats, true);
-      should.strictEqual(pool2.enableStatistics, true);
-      (poolStatistics2.gatheredDate).should.above(0);
+      assert.strictEqual(pool2._enableStats, true);
+      assert.strictEqual(pool2.enableStatistics, true);
+      assert(poolStatistics2.gatheredDate > 0);
       await pool2.close(0);
 
     });
@@ -1867,9 +1769,9 @@ describe('255. poolReconfigure.js', function() {
       let pool1 = await oracledb.createPool(poolConfig);
 
       let poolStatistics1 = pool1.getStatistics();
-      should.strictEqual(pool1._enableStats, true);
-      should.strictEqual(pool1.enableStatistics, true);
-      (poolStatistics1.gatheredDate).should.above(0);
+      assert.strictEqual(pool1._enableStats, true);
+      assert.strictEqual(pool1.enableStatistics, true);
+      assert(poolStatistics1.gatheredDate > 0);
       await pool1.close(0);
 
       let poolConfig2 = {
@@ -1886,9 +1788,9 @@ describe('255. poolReconfigure.js', function() {
 
       let pool2 = await oracledb.createPool(poolConfig2);
       let poolStatistics2 = pool2.getStatistics();
-      should.strictEqual(pool2._enableStats, false);
-      should.strictEqual(pool2.enableStatistics, false);
-      should.strictEqual(poolStatistics2, null);
+      assert.strictEqual(pool2._enableStats, false);
+      assert.strictEqual(pool2.enableStatistics, false);
+      assert.strictEqual(poolStatistics2, null);
       await pool2.close(0);
 
       let poolConfig3 = {
@@ -1906,9 +1808,9 @@ describe('255. poolReconfigure.js', function() {
 
       let pool3 = await oracledb.createPool(poolConfig3);
       let poolStatistics3 = pool3.getStatistics();
-      should.strictEqual(pool3._enableStats, false);
-      should.strictEqual(pool3.enableStatistics, false);
-      should.strictEqual(poolStatistics3, null);
+      assert.strictEqual(pool3._enableStats, false);
+      assert.strictEqual(pool3.enableStatistics, false);
+      assert.strictEqual(poolStatistics3, null);
       await pool3.close(3);
 
     });
@@ -1929,9 +1831,9 @@ describe('255. poolReconfigure.js', function() {
       let pool1 = await oracledb.createPool(poolConfig);
 
       let poolStatistics1 = pool1.getStatistics();
-      should.strictEqual(pool1._enableStats, true);
-      should.strictEqual(pool1.enableStatistics, true);
-      (poolStatistics1.gatheredDate).should.above(0);
+      assert.strictEqual(pool1._enableStats, true);
+      assert.strictEqual(pool1.enableStatistics, true);
+      assert(poolStatistics1.gatheredDate > 0);
       await pool1.close(0);
 
       let poolConfig2 = {
@@ -1948,9 +1850,9 @@ describe('255. poolReconfigure.js', function() {
 
       let pool2 = await oracledb.createPool(poolConfig2);
       let poolStatistics2 = pool2.getStatistics();
-      should.strictEqual(pool2._enableStats, false);
-      should.strictEqual(pool2.enableStatistics, false);
-      should.strictEqual(poolStatistics2, null);
+      assert.strictEqual(pool2._enableStats, false);
+      assert.strictEqual(pool2.enableStatistics, false);
+      assert.strictEqual(poolStatistics2, null);
       await pool2.close(0);
 
       let poolConfig3 = {
@@ -1968,9 +1870,9 @@ describe('255. poolReconfigure.js', function() {
 
       let pool3 = await oracledb.createPool(poolConfig3);
       let poolStatistics3 = pool3.getStatistics();
-      should.strictEqual(pool3._enableStats, false);
-      should.strictEqual(pool3.enableStatistics, false);
-      should.strictEqual(poolStatistics3, null);
+      assert.strictEqual(pool3._enableStats, false);
+      assert.strictEqual(pool3.enableStatistics, false);
+      assert.strictEqual(poolStatistics3, null);
       await pool3.close(0);
 
     });
@@ -1988,7 +1890,7 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : false
       };
       let pool = await oracledb.createPool(poolConfig);
-      should.strictEqual(pool.poolAlias, "255.6.7.1");
+      assert.strictEqual(pool.poolAlias, "255.6.7.1");
 
       let conns = new Array();
       let conIndex;
@@ -1996,15 +1898,13 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool),
+        /NJS-040:/
       );
 
       let poolStatistics = pool.getStatistics();
-      should.strictEqual(poolStatistics, null);
+      assert.strictEqual(poolStatistics, null);
       let timeOfLastResetOriginalVal = pool._timeOfReset;
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
@@ -2034,45 +1934,43 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool),
+        /NJS-040:/
       );
 
       poolStatistics = pool.getStatistics();
 
-      (poolStatistics.upTime).should.above(0);
-      (poolStatistics.upTimeSinceReset).should.above(0);
-      (pool._timeOfReset).should.above(timeOfLastResetOriginalVal);
-      should.strictEqual(poolStatistics.connectionRequests, poolMaxOriginalVal + 1);
-      should.strictEqual(poolStatistics.requestsEnqueued, 1);
-      should.strictEqual(poolStatistics.requestsDequeued, 0);
-      should.strictEqual(poolStatistics.failedRequests, 0);
-      should.strictEqual(poolStatistics.rejectedRequests, 0);
-      should.strictEqual(poolStatistics.requestTimeouts, 1);
-      should.strictEqual(poolStatistics.currentQueueLength, 0);
-      should.strictEqual(poolStatistics.maximumQueueLength, 1);
-      (poolStatistics.minimumTimeInQueue).should.above(0);
-      (poolStatistics.maximumTimeInQueue).should.above(0);
-      (poolStatistics.timeInQueue).should.aboveOrEqual(4); // can be just less than 5
-      (poolStatistics.averageTimeInQueue).should.aboveOrEqual(4);  // can be just less than 5
-      should.strictEqual(poolStatistics.connectionsInUse, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.poolAlias, "255.6.7.2");
-      should.strictEqual(poolStatistics.queueMax, 500);
-      should.strictEqual(poolStatistics.queueTimeout, 5);
-      should.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
-      should.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
-      should.strictEqual(poolStatistics.poolPingInterval, 60);
-      should.strictEqual(poolStatistics.poolTimeout, 60);
-      should.strictEqual(poolStatistics.poolMaxPerShard, 0);
-      should.strictEqual(poolStatistics.sessionCallback, undefined);
-      should.strictEqual(poolStatistics.stmtCacheSize, 30);
-      should.strictEqual(poolStatistics.sodaMetaDataCache, false);
-      should.strictEqual(poolStatistics.threadPoolSize, undefined);
+      assert(poolStatistics.upTime > 0);
+      assert(poolStatistics.upTimeSinceReset > 0);
+      assert(pool._timeOfReset > timeOfLastResetOriginalVal);
+      assert.strictEqual(poolStatistics.connectionRequests, poolMaxOriginalVal + 1);
+      assert.strictEqual(poolStatistics.requestsEnqueued, 1);
+      assert.strictEqual(poolStatistics.requestsDequeued, 0);
+      assert.strictEqual(poolStatistics.failedRequests, 0);
+      assert.strictEqual(poolStatistics.rejectedRequests, 0);
+      assert.strictEqual(poolStatistics.requestTimeouts, 1);
+      assert.strictEqual(poolStatistics.currentQueueLength, 0);
+      assert.strictEqual(poolStatistics.maximumQueueLength, 1);
+      assert(poolStatistics.minimumTimeInQueue > 0);
+      assert(poolStatistics.maximumTimeInQueue > 0);
+      assert(poolStatistics.timeInQueue >= 4); // can be just less than 5
+      assert(poolStatistics.averageTimeInQueue >= 4);  // can be just less than 5
+      assert.strictEqual(poolStatistics.connectionsInUse, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.poolAlias, "255.6.7.2");
+      assert.strictEqual(poolStatistics.queueMax, 500);
+      assert.strictEqual(poolStatistics.queueTimeout, 5);
+      assert.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
+      assert.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(poolStatistics.poolPingInterval, 60);
+      assert.strictEqual(poolStatistics.poolTimeout, 60);
+      assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+      assert.strictEqual(poolStatistics.sessionCallback, undefined);
+      assert.strictEqual(poolStatistics.stmtCacheSize, 30);
+      assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
         let conn = conns[conIndex];
@@ -2094,7 +1992,7 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : false
       };
       let pool1 = await oracledb.createPool(poolConfig);
-      should.strictEqual(pool1.poolAlias, "255.6.8.1");
+      assert.strictEqual(pool1.poolAlias, "255.6.8.1");
 
       let conns = new Array();
       let conIndex;
@@ -2102,15 +2000,13 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool1);
         conns.push(conn);
       }
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool1);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool1),
+        /NJS-040:/
       );
 
       let poolStatistics = pool1.getStatistics();
-      should.strictEqual(poolStatistics, null);
+      assert.strictEqual(poolStatistics, null);
       let timeOfLastResetOriginalVal = pool1._timeOfReset;
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
@@ -2138,46 +2034,45 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool2);
         conns.push(conn);
       }
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool2);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool2),
+        /NJS-040:/
       );
 
       poolStatistics = pool2.getStatistics();
 
-      (poolStatistics.gatheredDate).should.above(0);
-      (poolStatistics.upTime).should.above(0);
-      (poolStatistics.upTimeSinceReset).should.above(0);
-      (pool2._timeOfReset).should.above(timeOfLastResetOriginalVal);
-      should.strictEqual(poolStatistics.connectionRequests, poolMaxOriginalVal + 1);
-      should.strictEqual(poolStatistics.requestsEnqueued, 1);
-      should.strictEqual(poolStatistics.requestsDequeued, 0);
-      should.strictEqual(poolStatistics.failedRequests, 0);
-      should.strictEqual(poolStatistics.rejectedRequests, 0);
-      should.strictEqual(poolStatistics.requestTimeouts, 1);
-      should.strictEqual(poolStatistics.currentQueueLength, 0);
-      should.strictEqual(poolStatistics.maximumQueueLength, 1);
-      (poolStatistics.minimumTimeInQueue).should.above(0);
-      (poolStatistics.maximumTimeInQueue).should.above(0);
-      (poolStatistics.timeInQueue).should.aboveOrEqual(5);
-      (poolStatistics.averageTimeInQueue).should.aboveOrEqual(5);
-      should.strictEqual(poolStatistics.connectionsInUse, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.poolAlias, "255.6.8.2");
-      should.strictEqual(poolStatistics.queueMax, 500);
-      should.strictEqual(poolStatistics.queueTimeout, 5);
-      should.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
-      should.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
-      should.strictEqual(poolStatistics.poolPingInterval, 60);
-      should.strictEqual(poolStatistics.poolTimeout, 60);
-      should.strictEqual(poolStatistics.poolMaxPerShard, 0);
-      should.strictEqual(poolStatistics.sessionCallback, undefined);
-      should.strictEqual(poolStatistics.stmtCacheSize, 30);
-      should.strictEqual(poolStatistics.sodaMetaDataCache, false);
-      should.strictEqual(poolStatistics.threadPoolSize, undefined);
+      assert(poolStatistics.gatheredDate > 0);
+      assert(poolStatistics.upTime > 0);
+      assert(poolStatistics.upTimeSinceReset > 0);
+      assert(pool2._timeOfReset > timeOfLastResetOriginalVal);
+      assert.strictEqual(poolStatistics.connectionRequests, poolMaxOriginalVal + 1);
+      assert.strictEqual(poolStatistics.requestsEnqueued, 1);
+      assert.strictEqual(poolStatistics.requestsDequeued, 0);
+      assert.strictEqual(poolStatistics.failedRequests, 0);
+      assert.strictEqual(poolStatistics.rejectedRequests, 0);
+      assert.strictEqual(poolStatistics.requestTimeouts, 1);
+      assert.strictEqual(poolStatistics.currentQueueLength, 0);
+      assert.strictEqual(poolStatistics.maximumQueueLength, 1);
+      assert(poolStatistics.minimumTimeInQueue > 0);
+      assert(poolStatistics.maximumTimeInQueue > 0);
+      assert(poolStatistics.timeInQueue >= 5,
+        `timeInQueue should be >= 5 but is ${poolStatistics.timeInQueue}`);
+      assert(poolStatistics.averageTimeInQueue >= 5);
+      assert.strictEqual(poolStatistics.connectionsInUse, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.poolAlias, "255.6.8.2");
+      assert.strictEqual(poolStatistics.queueMax, 500);
+      assert.strictEqual(poolStatistics.queueTimeout, 5);
+      assert.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
+      assert.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(poolStatistics.poolPingInterval, 60);
+      assert.strictEqual(poolStatistics.poolTimeout, 60);
+      assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+      assert.strictEqual(poolStatistics.sessionCallback, undefined);
+      assert.strictEqual(poolStatistics.stmtCacheSize, 30);
+      assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
         let conn = conns[conIndex];
@@ -2200,23 +2095,19 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : false
       };
       let pool1 = await oracledb.createPool(poolConfig);
-      should.exist(pool1);
-
       let conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
         let conn = await testsUtil.getPoolConnection(pool1);
         conns.push(conn);
       }
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool1);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool1),
+        /NJS-040:/
       );
 
       let poolStatistics = pool1.getStatistics();
-      should.strictEqual(poolStatistics, null);
+      assert.strictEqual(poolStatistics, null);
       let timeOfLastResetOriginalVal = pool1._timeOfReset;
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
@@ -2244,46 +2135,44 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool2);
         conns.push(conn);
       }
-      await assert.rejects(
-        async function() {
-          await testsUtil.getPoolConnection(pool2);
-        },
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      await testsUtil.assertThrowsAsync(
+        async () => await testsUtil.getPoolConnection(pool2),
+        /NJS-040:/
       );
 
       poolStatistics = pool2.getStatistics();
 
-      (poolStatistics.gatheredDate).should.above(0);
-      (poolStatistics.upTime).should.above(0);
-      (poolStatistics.upTimeSinceReset).should.above(0);
-      (pool2._timeOfReset).should.above(timeOfLastResetOriginalVal);
-      should.strictEqual(poolStatistics.connectionRequests, poolMaxOriginalVal + 1);
-      should.strictEqual(poolStatistics.requestsEnqueued, 1);
-      should.strictEqual(poolStatistics.requestsDequeued, 0);
-      should.strictEqual(poolStatistics.failedRequests, 0);
-      should.strictEqual(poolStatistics.rejectedRequests, 0);
-      should.strictEqual(poolStatistics.requestTimeouts, 1);
-      should.strictEqual(poolStatistics.currentQueueLength, 0);
-      should.strictEqual(poolStatistics.maximumQueueLength, 1);
-      (poolStatistics.minimumTimeInQueue).should.above(0);
-      (poolStatistics.maximumTimeInQueue).should.above(0);
-      (poolStatistics.timeInQueue).should.aboveOrEqual(5);
-      (poolStatistics.averageTimeInQueue).should.aboveOrEqual(5);
-      should.strictEqual(poolStatistics.connectionsInUse, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.poolAlias, "255.6.9.2");
-      should.strictEqual(poolStatistics.queueMax, 500);
-      should.strictEqual(poolStatistics.queueTimeout, 5);
-      should.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
-      should.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
-      should.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
-      should.strictEqual(poolStatistics.poolPingInterval, 60);
-      should.strictEqual(poolStatistics.poolTimeout, 60);
-      should.strictEqual(poolStatistics.poolMaxPerShard, 0);
-      should.strictEqual(poolStatistics.sessionCallback, undefined);
-      should.strictEqual(poolStatistics.stmtCacheSize, 30);
-      should.strictEqual(poolStatistics.sodaMetaDataCache, false);
-      should.strictEqual(poolStatistics.threadPoolSize, undefined);
+      assert(poolStatistics.gatheredDate > 0);
+      assert(poolStatistics.upTime > 0);
+      assert(poolStatistics.upTimeSinceReset > 0);
+      assert(pool2._timeOfReset > timeOfLastResetOriginalVal);
+      assert.strictEqual(poolStatistics.connectionRequests, poolMaxOriginalVal + 1);
+      assert.strictEqual(poolStatistics.requestsEnqueued, 1);
+      assert.strictEqual(poolStatistics.requestsDequeued, 0);
+      assert.strictEqual(poolStatistics.failedRequests, 0);
+      assert.strictEqual(poolStatistics.rejectedRequests, 0);
+      assert.strictEqual(poolStatistics.requestTimeouts, 1);
+      assert.strictEqual(poolStatistics.currentQueueLength, 0);
+      assert.strictEqual(poolStatistics.maximumQueueLength, 1);
+      assert(poolStatistics.minimumTimeInQueue > 0);
+      assert(poolStatistics.maximumTimeInQueue > 0);
+      assert(poolStatistics.timeInQueue >= 5);
+      assert(poolStatistics.averageTimeInQueue >= 5);
+      assert.strictEqual(poolStatistics.connectionsInUse, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.poolAlias, "255.6.9.2");
+      assert.strictEqual(poolStatistics.queueMax, 500);
+      assert.strictEqual(poolStatistics.queueTimeout, 5);
+      assert.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
+      assert.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
+      assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
+      assert.strictEqual(poolStatistics.poolPingInterval, 60);
+      assert.strictEqual(poolStatistics.poolTimeout, 60);
+      assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+      assert.strictEqual(poolStatistics.sessionCallback, undefined);
+      assert.strictEqual(poolStatistics.stmtCacheSize, 30);
+      assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
         let conn = conns[conIndex];
@@ -2300,16 +2189,11 @@ describe('255. poolReconfigure.js', function() {
         connectionString : dbConfig.connectString,
       };
       const pool = await oracledb.createPool(poolConfig);
-      should.exist(pool);
 
-      let sawErr = false;
-      try {
-        pool.logStatistics();
-      } catch (err) {
-        sawErr = true;
-        (err.message).should.startWith('NJS-083:');
-      }
-      should.strictEqual(sawErr, true);
+      assert.throws(
+        () => pool.logStatistics(),
+        /NJS-083:/
+      );
 
       await pool.close(0);
     });

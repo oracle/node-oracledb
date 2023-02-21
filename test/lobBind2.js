@@ -33,7 +33,7 @@
 
 const oracledb = require('oracledb');
 const fs       = require('fs');
-const fsPromises = require('node:fs/promises');
+const fsPromises = require('fs/promises');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');

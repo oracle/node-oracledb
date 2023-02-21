@@ -31,88 +31,64 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var assist   = require('./dataTypeAssist.js');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assist   = require('./dataTypeAssist.js');
+const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('141. insertNaNToNumber.js', function() {
 
-  var connection = null;
-  var tableName = "nodb_number";
+  let connection;
+  const tableName = "nodb_number";
 
-  before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+  before('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after('release connection', function(done) {
-    connection.release(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after('release connection', async function() {
+    await connection.close();
   });
 
   describe('141.1 SQL, stores NaN', function() {
-    before('create table, insert data', function(done) {
-      assist.createTable(connection, tableName, done);
+    before('create table, insert data', async function() {
+      const sql = assist.sqlCreateTable(tableName);
+      await connection.execute(sql);
     });
 
-    after(function(done) {
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
+    after(async function() {
+      await connection.execute("DROP table " + tableName + " PURGE");
+    });
+
+    it('141.1.1 insert NaN to NUMBER column will report ORA-00984', async function() {
+      const sql = "insert into " + tableName + " values (1, " + NaN + ")";
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sql),
+        /ORA-00984:/
       );
     });
 
-    it('141.1.1 insert NaN to NUMBER column will report ORA-00984', function(done) {
-      connection.execute(
-        "insert into " + tableName + " values (1, " + NaN + ")",
-        function(err, result) {
-          should.not.exist(result);
-          should.exist(err);
-          // ORA-00984: column not allowed here
-          (err.message).should.startWith("ORA-00984:");
-          done();
-        });
-    });
-
-    it('141.1.2 binding in NaN by name into Oracle NUMBER column throws DPI-1055', function(done) {
-      connection.execute(
-        "insert into " + tableName + " values (:no, :c)",
-        { no: 1, c: NaN },
-        function(err, result) {
-          should.not.exist(result);
-          should.exist(err);
-          should.strictEqual(err.message, "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers");
-          done();
-        }
+    it('141.1.2 binding in NaN by name into Oracle NUMBER column throws DPI-1055', async function() {
+      const sql = "insert into " + tableName + " values (:no, :c)";
+      const binds = { no: 1, c: NaN };
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sql, binds),
+        /DPI-1055:/
       );
     });
 
-    it('141.1.3 binding in NaN by position into Oracle NUMBER column throws DPI-1055', function(done) {
-      connection.execute(
-        "insert into " + tableName + " values (:1, :2)",
-        [ 1, NaN ],
-        function(err, result) {
-          should.not.exist(result);
-          should.exist(err);
-          should.strictEqual(err.message, "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers");
-          done();
-        }
+    it('141.1.3 binding in NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
+      const sql = "insert into " + tableName + " values (:1, :2)";
+      const binds = [ 1, NaN ];
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sql, binds),
+        /DPI-1055:/
       );
     });
+
   });
 
   describe('141.2 PL/SQL, Function, bind NaN', function() {
-    var proc_bindin = "CREATE OR REPLACE FUNCTION nodb_bindin_fun_NaN(id IN NUMBER, value IN NUMBER) RETURN NUMBER \n" +
+    const proc_bindin = "CREATE OR REPLACE FUNCTION nodb_bindin_fun_NaN(id IN NUMBER, value IN NUMBER) RETURN NUMBER \n" +
                       "IS \n" +
                       "    tmpvar NUMBER; \n" +
                       "BEGIN \n" +
@@ -120,10 +96,10 @@ describe('141. insertNaNToNumber.js', function() {
                       "    select content into tmpvar from " + tableName + " where num = id;\n" +
                       "    return tmpvar; \n" +
                       "END nodb_bindin_fun_NaN;";
-    var sqlRun_bindin = "BEGIN :output := nodb_bindin_fun_NaN (:i, :c); END;";
-    var sqlDrop_bindin = "DROP FUNCTION nodb_bindin_fun_NaN";
+    const sqlRun_bindin = "BEGIN :output := nodb_bindin_fun_NaN (:i, :c); END;";
+    const sqlDrop_bindin = "DROP FUNCTION nodb_bindin_fun_NaN";
 
-    var proc_bindinout = "CREATE OR REPLACE FUNCTION nodb_bindinout_fun_NaN(id IN NUMBER, value IN OUT NUMBER) RETURN NUMBER \n" +
+    const proc_bindinout = "CREATE OR REPLACE FUNCTION nodb_bindinout_fun_NaN(id IN NUMBER, value IN OUT NUMBER) RETURN NUMBER \n" +
                          "IS \n" +
                          "    tmpvar NUMBER; \n" +
                          "BEGIN \n" +
@@ -132,320 +108,151 @@ describe('141. insertNaNToNumber.js', function() {
                          "    select content into value from " + tableName + " where num = id;\n" +
                          "    return tmpvar; \n" +
                          "END nodb_bindinout_fun_NaN;";
-    var sqlRun_bindinout = "BEGIN :output := nodb_bindinout_fun_NaN (:i, :c); END;";
-    var sqlDrop_bindinout = "DROP FUNCTION nodb_bindinout_fun_NaN";
+    const sqlRun_bindinout = "BEGIN :output := nodb_bindinout_fun_NaN (:i, :c); END;";
+    const sqlDrop_bindinout = "DROP FUNCTION nodb_bindinout_fun_NaN";
 
-    before('create table, insert data', function(done) {
-      async.series([
-        function(cb) {
-          assist.createTable(connection, tableName, cb);
-        },
-        function(cb) {
-          connection.execute(
-            proc_bindin,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
-
+    before('create table, insert data', async function() {
+      const sql = assist.sqlCreateTable(tableName);
+      await connection.execute(sql);
+      await connection.execute(proc_bindin);
     });
 
-    after(function(done) {
-      async.series([
-        function(cb) {
-          connection.execute(
-            sqlDrop_bindin,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            "DROP table " + tableName + " PURGE",
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+    after(async function() {
+      await connection.execute(sqlDrop_bindin);
+      await connection.execute("DROP table " + tableName + " PURGE");
     });
 
-    it('141.2.1 binding in NaN by name into Oracle NUMBER column throws DPI-1055', function(done) {
-      var bindVar = {
+    it('141.2.1 binding in NaN by name into Oracle NUMBER column throws DPI-1055', async function() {
+      const bindVar = {
         i: { val: 1, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: NaN, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
       };
-      connection.execute(
-        sqlRun_bindin,
-        bindVar,
-        function(err, result) {
-          should.not.exist(result);
-          should.exist(err);
-          should.strictEqual(err.message, "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers");
-          done();
-        });
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sqlRun_bindin, bindVar),
+        /DPI-1055:/
+      );
     });
 
-    it('141.2.2 binding in NaN by position into Oracle NUMBER column throws DPI-1055', function(done) {
-      connection.execute(
-        "BEGIN :1 := nodb_bind_fun_NaN (:2, :3); END;",
-        [ { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, 2, NaN ],
-        function(err) {
-          should.exist(err);
-          should.strictEqual(err.message, "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers");
-          done();
-        });
+    it('141.2.2 binding in NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
+      const sql = "BEGIN :1 := nodb_bind_fun_NaN (:2, :3); END;";
+      const binds = [
+        { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, 2, NaN
+      ];
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sql, binds),
+        /DPI-1055:/
+      );
     });
 
-    it('141.2.3 binding inout NaN by name into Oracle NUMBER column throws DPI-1055', function(done) {
-      async.series([
-        function(cb) {
-          connection.execute(
-            proc_bindinout,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var bindVar = {
-            i: { val: 1, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { val: NaN, type: oracledb.NUMBER, dir: oracledb.BIND_INOUT },
-            output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
-          };
-          connection.execute(
-            sqlRun_bindinout,
-            bindVar,
-            function(err, result) {
-              should.not.exist(result);
-              should.exist(err);
-              should.strictEqual(err.message, "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers");
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            sqlDrop_bindinout,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+    it('141.2.3 binding inout NaN by name into Oracle NUMBER column throws DPI-1055', async function() {
+      await connection.execute(proc_bindinout);
+      const binds = {
+        i: { val: 1, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        c: { val: NaN, type: oracledb.NUMBER, dir: oracledb.BIND_INOUT },
+        output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
+      };
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sqlRun_bindinout, binds),
+        /DPI-1055:/
+      );
+      await connection.execute(sqlDrop_bindinout);
     });
 
-    it('141.2.4 binding inout NaN by position into Oracle NUMBER column throws DPI-1055', function(done) {
-      async.series([
-        function(cb) {
-          connection.execute(
-            proc_bindinout,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            "BEGIN :1 := nodb_bindinout_fun_NaN (:2, :3); END;",
-            [ { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, 1, NaN ],
-            function(err, result) {
-              should.not.exist(result);
-              should.exist(err);
-              should.strictEqual(err.message, "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers");
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            sqlDrop_bindinout,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+    it('141.2.4 binding inout NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
+      await connection.execute(proc_bindinout);
+      const sql = "BEGIN :1 := nodb_bindinout_fun_NaN (:2, :3); END;";
+      const binds = [
+        { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, 1, NaN
+      ];
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sql, binds),
+        /DPI-1055:/
+      );
+      await connection.execute(sqlDrop_bindinout);
     });
+
   });
 
   describe('141.3 PL/SQL, Procedure, bind NaN', function() {
-    var proc_bindin = "CREATE OR REPLACE PROCEDURE nodb_proc_bindin_NaN(id IN NUMBER, c1 IN NUMBER, c2 OUT NUMBER) \n" +
+    const proc_bindin = "CREATE OR REPLACE PROCEDURE nodb_proc_bindin_NaN(id IN NUMBER, c1 IN NUMBER, c2 OUT NUMBER) \n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName + " values (id, c1);\n" +
                       "    select content into c2 from " + tableName + " where num = id;\n" +
                       "END nodb_proc_bindin_NaN;";
-    var sqlRun_bindin = "BEGIN nodb_proc_bindin_NaN (:i, :c1, :c2); END;";
-    var sqlDrop_bindin = "DROP PROCEDURE nodb_proc_bindin_NaN";
+    const sqlRun_bindin = "BEGIN nodb_proc_bindin_NaN (:i, :c1, :c2); END;";
+    const sqlDrop_bindin = "DROP PROCEDURE nodb_proc_bindin_NaN";
 
-    var proc_bindinout = "CREATE OR REPLACE PROCEDURE nodb_proc_bindinout_NaN(id IN NUMBER, c1 IN OUT NUMBER) \n" +
+    const proc_bindinout = "CREATE OR REPLACE PROCEDURE nodb_proc_bindinout_NaN(id IN NUMBER, c1 IN OUT NUMBER) \n" +
                          "AS \n" +
                          "BEGIN \n" +
                          "    insert into " + tableName + " values (id, c1);\n" +
                          "    select content into c1 from " + tableName + " where num = id;\n" +
                          "END nodb_proc_bindinout_NaN;";
-    var sqlRun_bindinout = "BEGIN nodb_proc_bindinout_NaN (:i, :c1); END;";
-    var sqlDrop_bindinout = "DROP PROCEDURE nodb_proc_bindinout_NaN";
+    const sqlRun_bindinout = "BEGIN nodb_proc_bindinout_NaN (:i, :c1); END;";
+    const sqlDrop_bindinout = "DROP PROCEDURE nodb_proc_bindinout_NaN";
 
-    before('create table, insert data', function(done) {
-      async.series([
-        function(cb) {
-          assist.createTable(connection, tableName, cb);
-        },
-        function(cb) {
-          connection.execute(
-            proc_bindin,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
-
+    before('create table, insert data', async function() {
+      const sql = assist.sqlCreateTable(tableName);
+      await connection.execute(sql);
+      await connection.execute(proc_bindin);
     });
 
-    after(function(done) {
-      async.series([
-        function(cb) {
-          connection.execute(
-            sqlDrop_bindin,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            "DROP table " + tableName + " PURGE",
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+    after(async function() {
+      await connection.execute(sqlDrop_bindin);
+      await connection.execute("DROP table " + tableName + " PURGE");
     });
 
-    it('141.3.1 binding in NaN by name into Oracle NUMBER column throws DPI-1055', function(done) {
-      var bindVar = {
+    it('141.3.1 binding in NaN by name into Oracle NUMBER column throws DPI-1055', async function() {
+      const bindVar = {
         i: { val: 1, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: NaN, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
       };
-      connection.execute(
-        sqlRun_bindin,
-        bindVar,
-        function(err, result) {
-          should.not.exist(result);
-          should.exist(err);
-          should.strictEqual(err.message, "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers");
-          done();
-        });
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sqlRun_bindin, bindVar),
+        /DPI-1055:/
+      );
     });
 
-    it('141.3.2 binding in NaN by position into Oracle NUMBER column throws DPI-1055', function(done) {
-      connection.execute(
-        "BEGIN nodb_proc_bind_NaN (:1, :2, :3); END;",
-        [ 2, NaN, { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } ],
-        function(err, result) {
-          should.not.exist(result);
-          should.exist(err);
-          should.strictEqual(err.message, "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers");
-          done();
-        });
+    it('141.3.2 binding in NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
+      const sql = "BEGIN nodb_proc_bind_NaN (:1, :2, :3); END;";
+      const binds = [ 2, NaN, { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } ];
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sql, binds),
+        /DPI-1055:/
+      );
     });
 
-    it('141.3.3 binding inout NaN by name into Oracle NUMBER column throws DPI-1055', function(done) {
-      async.series([
-        function(cb) {
-          connection.execute(
-            proc_bindinout,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var bindVar = {
-            i: { val: 1, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c1: { val: NaN, type: oracledb.NUMBER, dir: oracledb.BIND_INOUT },
-          };
-          connection.execute(
-            sqlRun_bindinout,
-            bindVar,
-            function(err, result) {
-              should.not.exist(result);
-              should.exist(err);
-              should.strictEqual(err.message, "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers");
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            sqlDrop_bindinout,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+    it('141.3.3 binding inout NaN by name into Oracle NUMBER column throws DPI-1055', async function() {
+      await connection.execute(proc_bindinout);
+      const bindVar = {
+        i: { val: 1, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        c1: { val: NaN, type: oracledb.NUMBER, dir: oracledb.BIND_INOUT },
+      };
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sqlRun_bindinout, bindVar),
+        /DPI-1055:/
+      );
+      await connection.execute(sqlDrop_bindinout);
     });
 
-    it('141.3.4 binding inout NaN by position into Oracle NUMBER column throws DPI-1055', function(done) {
-      async.series([
-        function(cb) {
-          connection.execute(
-            proc_bindinout,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            "BEGIN nodb_proc_bindinout_NaN (:1, :2); END;",
-            [ 1, NaN ],
-            function(err, result) {
-              should.not.exist(result);
-              should.exist(err);
-              should.strictEqual(err.message, "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers");
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            sqlDrop_bindinout,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+    it('141.3.4 binding inout NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
+      await connection.execute(proc_bindinout);
+      const sql = "BEGIN nodb_proc_bindinout_NaN (:1, :2); END;";
+      const binds = [ 1, NaN ];
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sql, binds),
+        /DPI-1055:/
+      );
+      await connection.execute(sqlDrop_bindinout);
     });
+
   });
 
   describe('141.4 PL/SQL, Procedure, bind NaN, indexed table', function() {
-    var createTable =  "BEGIN \n" +
+    const createTable =  "BEGIN \n" +
                        "  DECLARE \n" +
                        "    e_table_missing EXCEPTION; \n" +
                        "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
@@ -459,15 +266,15 @@ describe('141. insertNaNToNumber.js', function() {
                        "     CREATE TABLE nodb_NaN_indexed_table (id NUMBER)  \n" +
                        "   '); \n" +
                        "END; ";
-    var dropTable = "DROP table nodb_NaN_indexed_table purge";
+    const dropTable = "DROP table nodb_NaN_indexed_table purge";
 
-    var proc_package = "CREATE OR REPLACE PACKAGE nodb_nan_pkg IS\n" +
+    const proc_package = "CREATE OR REPLACE PACKAGE nodb_nan_pkg IS\n" +
                        "  TYPE idType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
                        "  PROCEDURE array_in(ids IN idType);\n" +
                        "  PROCEDURE array_inout(ids IN OUT idType); \n" +
                        "END;";
 
-    var proc_package_body = "CREATE OR REPLACE PACKAGE BODY nodb_nan_pkg IS \n" +
+    const proc_package_body = "CREATE OR REPLACE PACKAGE BODY nodb_nan_pkg IS \n" +
                             "  PROCEDURE array_in(ids IN idType) IS \n" +
                             "  BEGIN \n" +
                             "    FORALL i IN INDICES OF ids \n" +
@@ -480,125 +287,73 @@ describe('141. insertNaNToNumber.js', function() {
                             "      SELECT id BULK COLLECT INTO ids FROM nodb_NaN_indexed_table ORDER BY 1; \n" +
                             "  END; \n  " +
                             "END;";
-    var proc_drop = "DROP PACKAGE nodb_nan_pkg";
+    const proc_drop = "DROP PACKAGE nodb_nan_pkg";
 
-    before('create table, insert data', function(done) {
-      async.series([
-        function(cb) {
-          connection.execute(
-            createTable,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            proc_package,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            proc_package_body,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
-
+    before('create table, insert data', async function() {
+      await connection.execute(createTable);
+      await connection.execute(proc_package);
+      await connection.execute(proc_package_body);
     });
 
-    after(function(done) {
-      async.series([
-        function(cb) {
-          connection.execute(
-            proc_drop,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            dropTable,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+    after(async function() {
+      await connection.execute(proc_drop);
+      await connection.execute(dropTable);
     });
 
-    it('141.4.1 binding in NaN by name into Oracle NUMBER column throws DPI-1055', function(done) {
-      connection.execute(
-        "BEGIN nodb_nan_pkg.array_in(:id_in); END;",
+    it('141.4.1 binding in NaN by name into Oracle NUMBER column throws DPI-1055', async function() {
+      const sql = "BEGIN nodb_nan_pkg.array_in(:id_in); END;";
+      const binds = {
+        id_in: { type: oracledb.NUMBER, val:  [1, 0, NaN] }
+      };
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sql, binds),
+        /DPI-1055:/
+      );
+    });
+
+    it('141.4.2 binding in NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
+      const sql = "BEGIN nodb_nan_pkg.array_in(:1); END;";
+      const binds = [
+        {type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val:  [1, 0, NaN]}
+      ];
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sql, binds),
+        /DPI-1055:/
+      );
+    });
+
+    it('141.4.3 binding inout NaN by name into Oracle NUMBER column throws DPI-1055', async function() {
+      const sql = "BEGIN nodb_nan_pkg.array_inout(:id_in); END;";
+      const binds = {
+        id_in: {
+          type: oracledb.NUMBER,
+          dir:  oracledb.BIND_INOUT,
+          val:  [1, 0, NaN],
+          maxArraySize: 3
+        }
+      };
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sql, binds),
+        /DPI-1055:/
+      );
+    });
+
+    it('141.4.4 binding inout NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
+      const sql = "BEGIN nodb_nan_pkg.array_inout(:1); END;";
+      const binds = [
         {
-          id_in: { type: oracledb.NUMBER,
-            dir:  oracledb.BIND_IN,
-            val:  [1, 0, NaN]
-          }
-        },
-        function(err, result) {
-          should.not.exist(result);
-          should.exist(err);
-          should.strictEqual(err.message, "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers");
-          done();
+          type: oracledb.NUMBER,
+          dir: oracledb.BIND_INOUT,
+          val: [1, 0, NaN],
+          maxArraySize: 3
         }
+      ];
+      await testsUtil.assertThrowsAsync(
+        async () => await connection.execute(sql, binds),
+        /DPI-1055:/
       );
     });
 
-    it('141.4.2 binding in NaN by position into Oracle NUMBER column throws DPI-1055', function(done) {
-      connection.execute(
-        "BEGIN nodb_nan_pkg.array_in(:1); END;",
-        [ {type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val:  [1, 0, NaN]} ],
-        function(err, result) {
-          should.not.exist(result);
-          should.exist(err);
-          should.strictEqual(err.message, "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers");
-          done();
-        }
-      );
-    });
-
-    it('141.4.3 binding inout NaN by name into Oracle NUMBER column throws DPI-1055', function(done) {
-      connection.execute(
-        "BEGIN nodb_nan_pkg.array_inout(:id_in); END;",
-        {
-          id_in: { type: oracledb.NUMBER,
-            dir:  oracledb.BIND_INOUT,
-            val:  [1, 0, NaN],
-            maxArraySize: 3
-          }
-        },
-        function(err, result) {
-          should.not.exist(result);
-          should.exist(err);
-          should.strictEqual(err.message, "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers");
-          done();
-        }
-      );
-    });
-
-    it('141.4.4 binding inout NaN by position into Oracle NUMBER column throws DPI-1055', function(done) {
-      connection.execute(
-        "BEGIN nodb_nan_pkg.array_inout(:1); END;",
-        [ {type: oracledb.NUMBER, dir:  oracledb.BIND_INOUT, val:  [1, 0, NaN], maxArraySize: 3} ],
-        function(err, result) {
-          should.not.exist(result);
-          should.exist(err);
-          should.strictEqual(err.message, "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers");
-          done();
-        }
-      );
-    });
   });
+
 });

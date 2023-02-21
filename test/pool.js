@@ -273,6 +273,7 @@ describe('2. pool.js', function() {
       await conn2.close();
       await conn3.close();
       await conn4.close();
+      await pool.close();
     });
 
   }); // 2.4
@@ -1073,6 +1074,7 @@ describe('2. pool.js', function() {
         };
         const pool = await oracledb.createPool(config);
         assert.strictEqual(pool.externalAuth, false);
+        await pool.close();
       } finally {
         oracledb.externalAuth = origExternalAuth;
       }
@@ -1091,6 +1093,7 @@ describe('2. pool.js', function() {
         };
         const pool = await oracledb.createPool(config);
         assert.strictEqual(pool.externalAuth, true);
+        await pool.close();
       } finally {
         oracledb.externalAuth = origExternalAuth;
       }

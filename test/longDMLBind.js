@@ -36,7 +36,6 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
-const sql      = require('./sqlClone.js');
 
 describe('125. longDMLBind.js', function() {
 
@@ -64,11 +63,11 @@ describe('125. longDMLBind.js', function() {
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
-    await sql.executeSql(connection, table_create, {}, {});
+    await connection.execute(table_create);
   }); // before
 
   after(async function() {
-    await sql.executeSql(connection, table_drop, {}, {});
+    await connection.execute(table_drop);
     await connection.release();
   }); // after
 
