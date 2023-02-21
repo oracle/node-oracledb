@@ -19,12 +19,13 @@ In a clone or copy of the repository:
   related build metadata information files from all `package/Staging`
   directories to the `package/Staging` directory on one machine.
 
-- Run `npm run buildpackage`.  This calls `buildpackage.js` to make the
-  node-oracledb package containing the node-oracledb JavaScript files, the
-  available binaries, and a `package.json` that has `install` and `prune` script
-  targets.  The package will be created in the top level directory.  It can be
-  uploaded to npmjs.com, or to your own local server, and then used as a
-  dependency in your projects.
+- On the machine with all the binaries in `package/Staging`, run `npm run
+  buildpackage`.  This calls `buildpackage.js` to make the node-oracledb
+  package containing the node-oracledb JavaScript files, the available
+  binaries, and a `package.json` that has `install` and `prune` script targets.
+  The package will be created in the top level directory.  It can be uploaded
+  to npmjs.com by maintainers of node-oracledb, or you can upload to your own
+  local server and then use it as a dependency in your projects.
 
 # Package Installation
 

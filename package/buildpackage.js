@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -32,8 +32,6 @@
  * USAGE
  *   Run this with 'npm run buildpackage'
  *
- *   It requires Node 8 or later
- *
  *****************************************************************************/
 
 'use strict';
@@ -42,6 +40,15 @@ const fs = require('fs');
 const execSync = require('child_process').execSync;
 const nodbUtil = require('../lib/util.js');
 const packageJSON = require("../package.json");
+
+const jsStagingInfoFile = nodbUtil.RELEASE_DIR + '/oracledb-' + nodbUtil.PACKAGE_JSON_VERSION + '-js-buildinfo.txt';
+
+let njsGitSha;
+try {
+  njsGitSha = execSync('git --git-dir=./.git rev-parse --verify HEAD').toString().replace(/[\n\r]/, '');
+} catch (err) {
+  njsGitSha = 'unknown NJS SHA';
+}
 
 // Save files that get overwritten
 const origPackageJson = fs.readFileSync('package.json');
@@ -72,6 +79,9 @@ async function packageUp() {
     await delDir(nodbUtil.RELEASE_DIR);
     fs.mkdirSync(nodbUtil.RELEASE_DIR, { recursive: true, mode: 0o755 });
     await copyDir(nodbUtil.STAGING_DIR, nodbUtil.RELEASE_DIR);
+
+    // Record the SHA of the bundle's non-binary files
+    fs.appendFileSync(jsStagingInfoFile, njsGitSha + "\n");
 
     // Don't include source code etc. in the npm package.  This is
     // done dynamically because .npmignore cannot exclude source code
