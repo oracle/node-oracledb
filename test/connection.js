@@ -452,7 +452,8 @@ describe('1. connection.js', function() {
         connectString : dbConfig.connectString
       };
 
-      await oracledb.getConnection(credential);
+      const conn = await oracledb.getConnection(credential);
+      await conn.close();
     });
 
     it('1.10.3 uses username alias to login with SYSDBA privilege', async function() {
@@ -464,7 +465,8 @@ describe('1. connection.js', function() {
         privilege : oracledb.SYSDBA
       };
 
-      await oracledb.getConnection(credential);
+      const conn = await oracledb.getConnection(credential);
+      await conn.close();
     });
   }); //1.10
 
