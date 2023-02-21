@@ -34,7 +34,6 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbconfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('240. errorOffset.js', function() {
 
@@ -49,7 +48,7 @@ describe('240. errorOffset.js', function() {
 
   it('240.1 checks the offset value of the error', async () => {
 
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await conn.execute("begin t_Missing := 5; end;"),
       (err) => {
         assert.strictEqual(err.offset, 6);
@@ -66,7 +65,7 @@ describe('240. errorOffset.js', function() {
           execute immediate ('drop table nodb_table_nonexistent');
       end;
     `;
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await conn.execute(plsql),
       (err) => {
         assert.strictEqual(err.offset, 0);
@@ -86,7 +85,7 @@ describe('240. errorOffset.js', function() {
           END;
       END;
     `;
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await conn.execute(plsql),
       (err) => {
         assert.strictEqual(err.offset, 0);
@@ -101,7 +100,7 @@ describe('240. errorOffset.js', function() {
       BEGIN
           v_missing_semicolon := 46;
       END;`;
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await conn.execute(plsql),
       (err) => {
         assert.strictEqual(err.offset, 46);

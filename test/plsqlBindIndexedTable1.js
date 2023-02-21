@@ -34,7 +34,6 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('43. plsqlBindIndexedTable1.js', function() {
 
@@ -241,7 +240,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3]}
       };
       const sql = "BEGIN nodb_plsqlbindpack21.test2(:p); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-035:/
       );
@@ -253,7 +252,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 2}
       };
       const sql = "BEGIN nodb_plsqlbindpack21.test3(:p); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-036:/
       );
@@ -266,7 +265,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: "hi"}
       };
       const sql = "BEGIN nodb_plsqlbindpack21.test4(:id, :p); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-037: .* index 0 .* bind ":id"/
       );
@@ -279,7 +278,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 'hello']}
       };
       const sql = "BEGIN nodb_plsqlbindpack21.test4(:id, :p); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-037: .* index 2 .* bind ":id"/
       );
@@ -292,7 +291,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: ['hello', 1]}
       };
       const sql = "BEGIN nodb_plsqlbindpack21.test4(:id, :p); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-037: .* index 0 .* bind ":p"/
       );
@@ -304,7 +303,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 'hello']}
       };
       const sql = "BEGIN nodb_plsqlbindpack21.test4(:id, :p); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-037: .* index 2 .* bind ":p"/
       );
@@ -324,7 +323,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : "hi" }
       ];
       const sql = "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-052: .* index 0 .* position 1/
       );
@@ -336,7 +335,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : "hi" }
       ];
       const sql = "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-052: .* index 2 .* position 1/
       );
@@ -348,7 +347,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : ["hi", 1] }
       ];
       const sql = "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-052: .* index 0 .* position 2/
       );
@@ -360,7 +359,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : [1, 2, "hi"] }
       ];
       const sql = "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-052: .* index 2 .* position 2/
       );
@@ -518,7 +517,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3]}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test2(:p); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-035:/
       );
@@ -530,7 +529,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 2}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test2(:p); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-036:/
       );
@@ -549,7 +548,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 987654321}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test2(:p); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /DPI-1015:/
       );
@@ -560,7 +559,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: -9}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test2(:p); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-007:/
       );
@@ -571,7 +570,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 0}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test2(:p); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-007:/
       );
@@ -582,7 +581,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 'foobar'}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test2(:p); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-007:/
       );
@@ -593,7 +592,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: NaN}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test2(:p); END;";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindvars),
         /NJS-007:/
       );

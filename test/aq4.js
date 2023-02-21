@@ -122,7 +122,7 @@ describe('267. aq4.js', function() {
   });  // after
 
   it('267.1 empty array or no recipients', async () => {
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => {
       // Enqueue
         const queue1 = await conn.getQueue(
@@ -189,7 +189,7 @@ describe('267. aq4.js', function() {
       {payloadType: objType}
     );
     const message = new queue1.payloadTypeClass(addrData);
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => {
         await queue1.enqOne({
           payload: message,
@@ -206,7 +206,7 @@ describe('267. aq4.js', function() {
       {payloadType: objType}
     );
     const message = new queue1.payloadTypeClass(addrData);
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => {
         await queue1.enqOne({
           payload: message,
@@ -223,7 +223,7 @@ describe('267. aq4.js', function() {
       {payloadType: objType}
     );
     const message = new queue1.payloadTypeClass(addrData);
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => {
         await queue1.enqOne({
           payload: message,
@@ -240,7 +240,7 @@ describe('267. aq4.js', function() {
       {payloadType: objType}
     );
     const message = new queue1.payloadTypeClass(addrData);
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => {
         await queue1.enqOne({
           payload: message,
@@ -252,7 +252,7 @@ describe('267. aq4.js', function() {
   });
 
   it('267.7 Negative - dequeue non-existent name', async () => {
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => {
       // Enqueue
         const queue1 = await conn.getQueue(
@@ -286,7 +286,7 @@ describe('267. aq4.js', function() {
   it('267.8 empty recipient list with enqMany', async () => {
     let msgList = [];
 
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => {
       // Enqueue
         const queue1 = await conn.getQueue(objQueueName, {payloadType: objType});
@@ -354,7 +354,7 @@ describe('267. aq4.js', function() {
   it('267.11 recipient list with enqMany invalid datatype in dequeue', async () => {
     let msgList = [];
 
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => {
       // Enqueue
         const queue1 = await conn.getQueue(objQueueName, {payloadType: objType});

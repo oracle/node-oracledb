@@ -32,9 +32,9 @@
 'use strict';
 
 const oracledb = require('oracledb');
+const assert = require('assert');
 const assist   = require('./dataTypeAssist.js');
 const dbConfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('141. insertNaNToNumber.js', function() {
 
@@ -61,7 +61,7 @@ describe('141. insertNaNToNumber.js', function() {
 
     it('141.1.1 insert NaN to NUMBER column will report ORA-00984', async function() {
       const sql = "insert into " + tableName + " values (1, " + NaN + ")";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql),
         /ORA-00984:/
       );
@@ -70,7 +70,7 @@ describe('141. insertNaNToNumber.js', function() {
     it('141.1.2 binding in NaN by name into Oracle NUMBER column throws DPI-1055', async function() {
       const sql = "insert into " + tableName + " values (:no, :c)";
       const binds = { no: 1, c: NaN };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, binds),
         /DPI-1055:/
       );
@@ -79,7 +79,7 @@ describe('141. insertNaNToNumber.js', function() {
     it('141.1.3 binding in NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
       const sql = "insert into " + tableName + " values (:1, :2)";
       const binds = [ 1, NaN ];
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, binds),
         /DPI-1055:/
       );
@@ -128,7 +128,7 @@ describe('141. insertNaNToNumber.js', function() {
         c: { val: NaN, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun_bindin, bindVar),
         /DPI-1055:/
       );
@@ -139,7 +139,7 @@ describe('141. insertNaNToNumber.js', function() {
       const binds = [
         { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, 2, NaN
       ];
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, binds),
         /DPI-1055:/
       );
@@ -152,7 +152,7 @@ describe('141. insertNaNToNumber.js', function() {
         c: { val: NaN, type: oracledb.NUMBER, dir: oracledb.BIND_INOUT },
         output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun_bindinout, binds),
         /DPI-1055:/
       );
@@ -165,7 +165,7 @@ describe('141. insertNaNToNumber.js', function() {
       const binds = [
         { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, 1, NaN
       ];
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, binds),
         /DPI-1055:/
       );
@@ -210,7 +210,7 @@ describe('141. insertNaNToNumber.js', function() {
         c1: { val: NaN, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun_bindin, bindVar),
         /DPI-1055:/
       );
@@ -219,7 +219,7 @@ describe('141. insertNaNToNumber.js', function() {
     it('141.3.2 binding in NaN by position into Oracle NUMBER column throws DPI-1055', async function() {
       const sql = "BEGIN nodb_proc_bind_NaN (:1, :2, :3); END;";
       const binds = [ 2, NaN, { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } ];
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, binds),
         /DPI-1055:/
       );
@@ -231,7 +231,7 @@ describe('141. insertNaNToNumber.js', function() {
         i: { val: 1, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: NaN, type: oracledb.NUMBER, dir: oracledb.BIND_INOUT },
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun_bindinout, bindVar),
         /DPI-1055:/
       );
@@ -242,7 +242,7 @@ describe('141. insertNaNToNumber.js', function() {
       await connection.execute(proc_bindinout);
       const sql = "BEGIN nodb_proc_bindinout_NaN (:1, :2); END;";
       const binds = [ 1, NaN ];
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, binds),
         /DPI-1055:/
       );
@@ -305,7 +305,7 @@ describe('141. insertNaNToNumber.js', function() {
       const binds = {
         id_in: { type: oracledb.NUMBER, val:  [1, 0, NaN] }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, binds),
         /DPI-1055:/
       );
@@ -316,7 +316,7 @@ describe('141. insertNaNToNumber.js', function() {
       const binds = [
         {type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val:  [1, 0, NaN]}
       ];
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, binds),
         /DPI-1055:/
       );
@@ -332,7 +332,7 @@ describe('141. insertNaNToNumber.js', function() {
           maxArraySize: 3
         }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, binds),
         /DPI-1055:/
       );
@@ -348,7 +348,7 @@ describe('141. insertNaNToNumber.js', function() {
           maxArraySize: 3
         }
       ];
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, binds),
         /DPI-1055:/
       );

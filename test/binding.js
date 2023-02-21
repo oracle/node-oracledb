@@ -37,7 +37,6 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('4. binding.js', function() {
 
@@ -229,7 +228,7 @@ describe('4. binding.js', function() {
     });
 
     it('4.2.2 array binding with mixing JSON should throw an error', async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(insert, param2, options);
         },
@@ -337,7 +336,7 @@ describe('4. binding.js', function() {
                       END;";
       assert(connection);
       await connection.execute(proc);
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             "BEGIN nodb_bindproc4(:o); END;",
@@ -359,7 +358,7 @@ describe('4. binding.js', function() {
     });
 
     it('4.4.3 Negative - bind out data exceeds default length', async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             "BEGIN :o := lpad('A',201,'x'); END;",
@@ -371,10 +370,17 @@ describe('4. binding.js', function() {
     });
 
     it('4.4.4 maximum value of maxSize option is 32767', async function() {
-      let result = await connection.execute(
-        "BEGIN :o := lpad('A',32767,'x'); END;",
-        { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT, maxSize:50000 } });
-
+      const sql = `
+        DECLARE
+          t_OutVal varchar2(32767);
+        BEGIN
+          t_OutVal := lpad('A', 32767, 'x');
+          :o := t_OutVal;
+        END;`;
+      const binds = {
+        o: { type: oracledb.STRING, dir : oracledb.BIND_OUT, maxSize:50000 }
+      };
+      const result = await connection.execute(sql, binds);
       assert.strictEqual(result.outBinds.o.length, 32767);
     });
 
@@ -404,7 +410,7 @@ describe('4. binding.js', function() {
 
 
     it('4.5.2 negative - DML invalid bind direction', async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute("insert into nodb_raw (num) values (:id)", { id: { val: 1, type: oracledb.NUMBER, dir : 0 } }),
         /NJS-013:/
       );
@@ -478,7 +484,7 @@ describe('4. binding.js', function() {
         let sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         let binds = [ {val : 1}, { c: {val : 456 } } ];
         let connect = await oracledb.getConnection(dbConfig);
-        await testsUtil.assertThrowsAsync(
+        await assert.rejects(
           async () => await connect.execute(sql, binds),
           /NJS-044:/
         );
@@ -490,7 +496,7 @@ describe('4. binding.js', function() {
         let sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         let binds = [ { b: {val : 1} }, {val : 456 } ];
         let connect = await oracledb.getConnection(dbConfig);
-        await testsUtil.assertThrowsAsync(
+        await assert.rejects(
           async () => await connect.execute(sql, binds),
           /NJS-044:/
         );
@@ -502,7 +508,7 @@ describe('4. binding.js', function() {
         let sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         let binds = [ { b: {val : 1} }, { c: {val : 456 } } ];
         let connect = await oracledb.getConnection(dbConfig);
-        await testsUtil.assertThrowsAsync(
+        await assert.rejects(
           async () => await connect.execute(sql, binds),
           /NJS-044:/
         );

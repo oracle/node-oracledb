@@ -40,19 +40,6 @@ const os       = require('os');
 let testsUtil = exports;
 module.exports = testsUtil;
 
-testsUtil.assertThrowsAsync = async function(fn, RegExp) {
-  let f = () => {};
-  try {
-    await fn();
-  } catch (e) {
-    f = () => {
-      throw e;
-    };
-  } finally {
-    assert.throws(f, RegExp);
-  }
-};
-
 testsUtil.sqlCreateTable = function(tableName, sql) {
   const dropSql = testsUtil.sqlDropTable(tableName);
   return `

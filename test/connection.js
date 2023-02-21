@@ -483,4 +483,71 @@ describe('1. connection.js', function() {
       await oracledb.getConnection(credential);
     });
   }); //1.10
+  describe('1.11 Invalid credentials', function() {
+
+    it('1.11.1 using bad connect string', async function() {
+      const credential = {
+        username : dbConfig.user,
+        password : dbConfig.password,
+        connectString : "invalid connect string"
+      };
+
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /ORA-12154:/
+      );
+    });
+
+    it('1.11.2 using user', async function() {
+      const credential = {
+        username : "tiger",
+        password : dbConfig.password,
+        connectString : dbConfig.connectString
+      };
+
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /ORA-01017:/
+      );
+    });
+
+    it('1.11.3 using invalid password', async function() {
+      const credential = {
+        username : dbConfig.user,
+        password : "undefined",
+        connectString : dbConfig.connectString
+      };
+
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(credential);
+        },
+        /ORA-01017:/
+      );
+    });
+  }); //1.11
+
+  describe('1.12 confirm an exception is raised after closing a connection', function() {
+
+    it('1.12.1 exception_on_close', async function() {
+      const credential = {
+        user : dbConfig.user,
+        password : dbConfig.password,
+        connectString : dbConfig.connectString,
+      };
+      let connection = false;
+      connection = await oracledb.getConnection(credential);
+      await connection.close();
+      await assert.rejects(
+        async () => {
+          await connection.execute('SELECT * FROM DUAL');
+        },
+        /NJS-003:/
+      );
+    });
+  }); //1.12
 });

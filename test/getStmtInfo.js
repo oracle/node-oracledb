@@ -91,7 +91,7 @@ describe('162. getStmtInfo.js', function() {
 
   it('162.4 Negative - unknown statement, invalid SQL', async function() {
     const sql = "purge recyclebinx";
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await conn.getStatementInfo(sql),
       /ORA-38302:/
     );
@@ -159,7 +159,7 @@ describe('162. getStmtInfo.js', function() {
   it('162.12 Negative - insert nonexistent table', async function() {
 
     const sql = "insert into nonexistence values (:xxx) returning dummy into :kk";
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await conn.getStatementInfo(sql),
       /ORA-00942:/
     );
@@ -169,7 +169,7 @@ describe('162. getStmtInfo.js', function() {
   it('162.13 Negative - INSERT with invalid SQL', async function() {
 
     const sql = "insert into nodb_number values (:x, :y, :z) returning num into :n";
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await conn.getStatementInfo(sql),
       /ORA-00913:/
     );
@@ -183,7 +183,7 @@ describe('162. getStmtInfo.js', function() {
     assert.deepEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_CREATE);
     sql = "insert into nodb_test_162_14 values (89)";
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await conn.execute(sql),
       /ORA-00942:/
     );
@@ -201,7 +201,7 @@ describe('162. getStmtInfo.js', function() {
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_CREATE);
     proc = "begin nodb_proc_162_15(:out); end;";
     const binds = { out: { type: oracledb.STRING, dir: oracledb.BIND_OUT } };
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await conn.execute(proc, binds),
       /ORA-06550:/
     );

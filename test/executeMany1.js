@@ -300,7 +300,7 @@ describe('163. executeMany1.js', function() {
       ]
     };
 
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await conn.executeMany(plsql, binds, options),
       /NJS-095:/
     );
@@ -338,7 +338,7 @@ describe('163. executeMany1.js', function() {
         { type: oracledb.STRING, maxSize: 20 }
       ]
     };
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await conn.executeMany(sql, binds, options),
       /ORA-00001:/
     );
@@ -361,7 +361,7 @@ describe('163. executeMany1.js', function() {
         { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 20 }
       ]
     };
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await conn.executeMany(plsql, binds, options),
       /NJS-095:/
     );
@@ -443,7 +443,7 @@ describe('163. executeMany1.js', function() {
     end;`;
 
     const numIterations = -8;
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await conn.executeMany(sql, numIterations),
       /NJS-005:/
     );

@@ -32,6 +32,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
+const assert   = require('assert');
 const should   = require('should');
 const dbconfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
@@ -163,7 +164,7 @@ describe('180. externalProxyAuth.js', function() {
       }
       let conn;
       try {
-        await testsUtil.assertThrowsAsync(
+        await assert.rejects(
           async () => {
             conn = await oracledb.getConnection({
               connectString: dbconfig.connectString,
@@ -326,7 +327,7 @@ describe('180. externalProxyAuth.js', function() {
       }
       let conn, pool;
       try {
-        await testsUtil.assertThrowsAsync(
+        await assert.rejects(
           async () => {
             pool = await oracledb.createPool({
               ...dbconfig,
@@ -363,7 +364,7 @@ describe('180. externalProxyAuth.js', function() {
       }
       let conn, pool;
       try {
-        await testsUtil.assertThrowsAsync(
+        await assert.rejects(
           async () => {
             pool = await oracledb.createPool({
               connectString: dbconfig.connectString,
@@ -401,7 +402,7 @@ describe('180. externalProxyAuth.js', function() {
       }
       let conn, pool;
       try {
-        await testsUtil.assertThrowsAsync(
+        await assert.rejects(
           async () => {
             pool = await oracledb.createPool({
               connectString: dbconfig.connectString,
@@ -473,7 +474,7 @@ describe('180. externalProxyAuth.js', function() {
       }
       let conn, pool;
       try {
-        await testsUtil.assertThrowsAsync(
+        await assert.rejects(
           async () => {
             pool = await oracledb.createPool({
               connectString: dbconfig.connectString,

@@ -159,7 +159,7 @@ describe('179. soda11.js', () => {
 
       let t_collname = "soda_test_179_2";
       let options = { metaData: t_metadata };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await sd.createCollection(t_collname, options),
         /ORA-01918:/
       );
@@ -261,7 +261,7 @@ describe('179. soda11.js', () => {
 
       let options2 = { metaData: t_metadata2 };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await sd.createCollection(t_collname, options2),
         /ORA-40669:/
       );
@@ -404,7 +404,7 @@ describe('179. soda11.js', () => {
       /* The key must always be a string and is always returned a string as
          well -- even if the "type" in the database is numeric. */
       let testKey = 86755;
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await sd.createDocument(testContent, { key: testKey }),
         /NJS-007: invalid value for "key" in parameter 2/
       );
@@ -553,7 +553,7 @@ describe('179. soda11.js', () => {
       /* Negative value */
       let testMediaType = 65432;
       let testKey = '86755';
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await sd.createDocument(
           testContent,
           { mediaType: testMediaType, key: testKey }

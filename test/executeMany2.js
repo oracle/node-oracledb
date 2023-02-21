@@ -36,8 +36,8 @@
 'use strict';
 
 const oracledb = require('oracledb');
+const assert = require('assert');
 const dbconfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('172. executeMany2.js', function() {
 
@@ -53,7 +53,7 @@ describe('172. executeMany2.js', function() {
 
     const sql = `insert into "${schema}"."NODB_TAB_SALES" ("AMOUNT_SOLD") values (:1)`;
     const binds = [ 48, 33, 3, 999, 1, 13.13 ];
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await conn.executeMany(sql, binds),
       /NJS-005:/
     );
@@ -94,7 +94,7 @@ describe('172. executeMany2.js', function() {
         { a: 2, b: "Changjie" },
       ];
       const sql = `insert into nodb_tab_emp values (:a, :b)`;
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await conn.executeMany(sql, bindVars),
         /NJS-055:/
       );
@@ -106,7 +106,7 @@ describe('172. executeMany2.js', function() {
       const conn = await oracledb.getConnection(dbconfig);
       const sql = "insert into nodb_tab_emp values (:a, :b)";
       const binds = [undefined, undefined, undefined, undefined, undefined];
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await conn.executeMany(sql, binds),
         /NJS-005:/
       );
@@ -122,7 +122,7 @@ describe('172. executeMany2.js', function() {
         { a: 3, b: "foobar3" },
         { a: 4, b: "foobar4" }
       ];
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await conn.executeMany(sql, binds),
         /NJS-005:/
       );
@@ -138,7 +138,7 @@ describe('172. executeMany2.js', function() {
         { a: 3, b: "foobar3" },
         { a: 4, b: "foobar4" }
       ];
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await conn.executeMany(sql, binds),
         /NJS-055:/
       );
@@ -149,7 +149,7 @@ describe('172. executeMany2.js', function() {
       const conn = await oracledb.getConnection(dbconfig);
       const sql = "insert into nodb_tab_emp values (:a, :b)";
       const binds = [];
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await conn.executeMany(sql, binds),
         /NJS-005/
       );
@@ -161,7 +161,7 @@ describe('172. executeMany2.js', function() {
       const conn = await oracledb.getConnection(dbconfig);
       const sql = "insert into nodb_tab_emp values (:a, :b)";
       const binds = 0;
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await conn.executeMany(sql, binds),
         /NJS-005/
       );

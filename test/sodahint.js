@@ -101,7 +101,7 @@ describe('257. sodahint.js', () => {
     let inDocuments = soda.createDocument(inContent); // n.b. synchronous method
 
     let options = 3;
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => {
         await collection.insertOneAndGet(inDocuments, options);
       },
@@ -141,7 +141,7 @@ describe('257. sodahint.js', () => {
     let inDocuments = soda.createDocument(inContent); // n.b. synchronous method
 
     let options = 3;
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => {
         await collection.saveAndGet(inDocuments, options);
       },

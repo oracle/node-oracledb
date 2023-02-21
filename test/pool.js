@@ -34,7 +34,6 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('2. pool.js', function() {
 
@@ -67,7 +66,7 @@ describe('2. pool.js', function() {
         poolTimeout       : 28,
         stmtCacheSize     : 23
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -84,7 +83,7 @@ describe('2. pool.js', function() {
         poolTimeout       : 28,
         stmtCacheSize     : 23
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -101,7 +100,7 @@ describe('2. pool.js', function() {
         poolTimeout       : 28,
         stmtCacheSize     : 23
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-092:/
       );
@@ -138,7 +137,7 @@ describe('2. pool.js', function() {
         poolTimeout       : 28,
         stmtCacheSize     : 23
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -155,7 +154,7 @@ describe('2. pool.js', function() {
         poolTimeout       : 28,
         stmtCacheSize     : 23
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -172,7 +171,7 @@ describe('2. pool.js', function() {
         poolTimeout       : 28,
         stmtCacheSize     : 23
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -190,7 +189,7 @@ describe('2. pool.js', function() {
       const pool = await oracledb.createPool(config);
       conns.push(await pool.getConnection());
       conns.push(await pool.getConnection());
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.getConnection(),
         /NJS-040:/
       );
@@ -224,7 +223,7 @@ describe('2. pool.js', function() {
         poolTimeout       : 28,
         stmtCacheSize     : 23
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -241,7 +240,7 @@ describe('2. pool.js', function() {
         poolTimeout       : 28,
         stmtCacheSize     : 23
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -291,7 +290,7 @@ describe('2. pool.js', function() {
         poolTimeout       : -5,
         stmtCacheSize     : 23
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -323,7 +322,7 @@ describe('2. pool.js', function() {
         poolTimeout       : NaN,
         stmtCacheSize     : 23
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -344,7 +343,7 @@ describe('2. pool.js', function() {
         poolTimeout       : 28,
         stmtCacheSize     : -9
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -376,7 +375,7 @@ describe('2. pool.js', function() {
         poolTimeout       : 28,
         stmtCacheSize     : NaN
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -402,7 +401,7 @@ describe('2. pool.js', function() {
 
     it('2.7.1 passes error in callback if called after pool is terminated and a callback is provided', async function() {
       await pool1.close();
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool1.getConnection(),
         /NJS-065:/
       );
@@ -477,7 +476,7 @@ describe('2. pool.js', function() {
         await new Promise((resolve) => {
           setTimeout(resolve, 100);
         });
-        await testsUtil.assertThrowsAsync(
+        await assert.rejects(
           async () => await pool.getConnection(),
           /NJS-040:/
         );
@@ -528,7 +527,7 @@ describe('2. pool.js', function() {
       const pool = await oracledb.createPool(config);
       const routine1 = async function() {
         const conn1 = await pool.getConnection();
-        await testsUtil.assertThrowsAsync(
+        await assert.rejects(
           async () => await pool.getConnection(),
           /NJS-040:/
         );
@@ -538,7 +537,7 @@ describe('2. pool.js', function() {
         await new Promise((resolve) => {
           setTimeout(resolve, 100);
         });
-        await testsUtil.assertThrowsAsync(
+        await assert.rejects(
           async () => await pool.getConnection(),
           /NJS-076:/
         );
@@ -560,7 +559,7 @@ describe('2. pool.js', function() {
       };
       const pool = await oracledb.createPool(config);
       const conn = await pool.getConnection();
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.getConnection(),
         /NJS-076:/
       );
@@ -651,7 +650,7 @@ describe('2. pool.js', function() {
         connectString: dbConfig.connectString,
         poolMin: 5
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-092:/
       );
@@ -664,7 +663,7 @@ describe('2. pool.js', function() {
         connectString: dbConfig.connectString
       };
       const pool = await oracledb.createPool(config);
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.getConnection(),
         /ORA-01017:/
       );
@@ -702,7 +701,7 @@ describe('2. pool.js', function() {
         poolMax: 1,
         poolIncrement: 0
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-075:/
       );
@@ -735,7 +734,7 @@ describe('2. pool.js', function() {
         poolMax: 1,
         poolIncrement: 0
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-080:/
       );

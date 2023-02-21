@@ -32,7 +32,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 const dbconfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -207,7 +207,7 @@ describe('184. sessionTag.js', function() {
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
       const res = await showConnTags(conn);
-      should.strictEqual(res.length, 0);
+      assert.strictEqual(res.length, 0);
       await conn.close();
     });
 
@@ -218,8 +218,8 @@ describe('184. sessionTag.js', function() {
       });
       const conn = await pool.getConnection();
       const res = await showConnTags(conn);
-      should.strictEqual(res.length, 0);
-      should.strictEqual(conn.tag, '');
+      assert.strictEqual(res.length, 0);
+      assert.strictEqual(conn.tag, '');
       await conn.close();
       await pool.close();
     });
@@ -231,8 +231,8 @@ describe('184. sessionTag.js', function() {
       });
       const conn = await pool.getConnection({tag: ''});
       const res = await showConnTags(conn);
-      should.strictEqual(res.length, 0);
-      should.strictEqual(conn.tag, '');
+      assert.strictEqual(res.length, 0);
+      assert.strictEqual(conn.tag, '');
       await conn.close();
       await pool.close();
     });
@@ -244,9 +244,9 @@ describe('184. sessionTag.js', function() {
       });
       const conn = await pool.getConnection({tag: tag1});
       const res = await showConnTags(conn);
-      should.strictEqual(res[0][0], tag1);
-      should.strictEqual(res[0][1], null);
-      should.strictEqual(conn.tag, tag1);
+      assert.strictEqual(res[0][0], tag1);
+      assert.strictEqual(res[0][1], null);
+      assert.strictEqual(conn.tag, tag1);
       await conn.close();
       await pool.close();
     });
@@ -256,13 +256,13 @@ describe('184. sessionTag.js', function() {
         ...dbconfig,
         sessionCallback: "plsql_fixup_test.set_tag_callback",
       });
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await pool.getConnection({tag: tagBad});
         },
         /ORA-02248/ // ORA-02248 invalid option for ALTER SESSION
       );
-      should.strictEqual(pool.connectionsOpen, 0);
+      assert.strictEqual(pool.connectionsOpen, 0);
       await pool.close();
     });
 
@@ -275,11 +275,11 @@ describe('184. sessionTag.js', function() {
       await conn.close();
       await truncateTable();
       conn = await pool.getConnection({tag: tag1});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       const res = await showConnTags(conn);
-      should.strictEqual(res.length, 0);
-      should.strictEqual(conn.tag, tag1);
+      assert.strictEqual(res.length, 0);
+      assert.strictEqual(conn.tag, tag1);
       await conn.close();
       await pool.close();
     });
@@ -293,12 +293,12 @@ describe('184. sessionTag.js', function() {
       await conn.close();
       await truncateTable();
       conn = await pool.getConnection({tag: tag2});
-      should.strictEqual(pool.connectionsOpen, 2);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsOpen, 2);
+      assert.strictEqual(pool.connectionsInUse, 1);
       const res = await showConnTags(conn);
-      should.strictEqual(res[0][0], tag2);
-      should.strictEqual(res[0][1], null);
-      should.strictEqual(conn.tag, tag2);
+      assert.strictEqual(res[0][0], tag2);
+      assert.strictEqual(res[0][1], null);
+      assert.strictEqual(conn.tag, tag2);
       await conn.close();
       await pool.close();
     });
@@ -312,12 +312,12 @@ describe('184. sessionTag.js', function() {
       await conn.close();
       await truncateTable();
       conn = await pool.getConnection({tag: tag2, matchAnyTag: true});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       const res = await showConnTags(conn);
-      should.strictEqual(res[0][0], tag2);
-      should.strictEqual(res[0][1], tag1);
-      should.strictEqual(conn.tag, tag2);
+      assert.strictEqual(res[0][0], tag2);
+      assert.strictEqual(res[0][1], tag1);
+      assert.strictEqual(conn.tag, tag2);
       await conn.close();
       await pool.close();
     });
@@ -334,9 +334,9 @@ describe('184. sessionTag.js', function() {
       await conn.close();
       await truncateTable();
       conn = await pool.getConnection({tag: tag1, matchAnyTag: true});
-      should.strictEqual(pool.connectionsOpen, 2);
-      should.strictEqual(pool.connectionsInUse, 1);
-      should.strictEqual(conn.tag, tagMulti);
+      assert.strictEqual(pool.connectionsOpen, 2);
+      assert.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(conn.tag, tagMulti);
       await conn.close();
       await pool.close();
     });
@@ -350,11 +350,11 @@ describe('184. sessionTag.js', function() {
       await conn.close();
       await truncateTable();
       conn = await pool.getConnection({tag: '', matchAnyTag: true});
-      should.strictEqual(pool.connectionsOpen, 2);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsOpen, 2);
+      assert.strictEqual(pool.connectionsInUse, 1);
       const res = await showConnTags(conn);
-      should.strictEqual(res.length, 0);
-      should.strictEqual(conn.tag, '');
+      assert.strictEqual(res.length, 0);
+      assert.strictEqual(conn.tag, '');
       await conn.close();
       await pool.close();
     });
@@ -369,12 +369,12 @@ describe('184. sessionTag.js', function() {
       await conn.close();
       await truncateTable();
       conn = await pool.getConnection({tag: tag1});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       const res = await showConnTags(conn);
-      should.strictEqual(res[0][0], tag1);
-      should.strictEqual(res[0][1], null);
-      should.strictEqual(conn.tag, tag1);
+      assert.strictEqual(res[0][0], tag1);
+      assert.strictEqual(res[0][1], null);
+      assert.strictEqual(conn.tag, tag1);
       await conn.close();
       await pool.close();
     });
@@ -389,11 +389,11 @@ describe('184. sessionTag.js', function() {
       await conn.close();
       await truncateTable();
       conn = await pool.getConnection({tag: tag2});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       const res = await showConnTags(conn);
-      should.strictEqual(res.length, 0);
-      should.strictEqual(conn.tag, tag2);
+      assert.strictEqual(res.length, 0);
+      assert.strictEqual(conn.tag, tag2);
       await conn.close();
       await pool.close();
     });
@@ -459,8 +459,8 @@ describe('184. sessionTag.js', function() {
         ...dbconfig,
         sessionCallback: tagFixup,
       });
-      should.strictEqual(callbackRequestedTag, null);
-      should.strictEqual(callbackActualTag, null);
+      assert.strictEqual(callbackRequestedTag, null);
+      assert.strictEqual(callbackActualTag, null);
       await conn.close();
     });
 
@@ -470,8 +470,8 @@ describe('184. sessionTag.js', function() {
         sessionCallback: tagFixup,
       });
       const conn = await pool.getConnection();
-      should.strictEqual(callbackRequestedTag, '');
-      should.strictEqual(callbackActualTag, '');
+      assert.strictEqual(callbackRequestedTag, '');
+      assert.strictEqual(callbackActualTag, '');
       await conn.close();
       await pool.close();
     });
@@ -482,10 +482,10 @@ describe('184. sessionTag.js', function() {
         sessionCallback: tagFixup,
       });
       const conn = await pool.getConnection({tag: ''});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
-      should.strictEqual(callbackRequestedTag, '');
-      should.strictEqual(callbackActualTag, '');
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(callbackRequestedTag, '');
+      assert.strictEqual(callbackActualTag, '');
       await conn.close();
       await pool.close();
     });
@@ -496,10 +496,10 @@ describe('184. sessionTag.js', function() {
         sessionCallback: tagFixup,
       });
       const conn = await oracledb.getConnection({poolAlias: 'default', tag: tag1});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
-      should.strictEqual(callbackRequestedTag, tag1);
-      should.strictEqual(callbackActualTag, '');
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(callbackRequestedTag, tag1);
+      assert.strictEqual(callbackActualTag, '');
       await conn.close();
       await pool.close();
     });
@@ -510,8 +510,8 @@ describe('184. sessionTag.js', function() {
         sessionCallback: tagFixup,
       });
       const conn = await pool.getConnection({tag: tag1});
-      should.strictEqual(callbackRequestedTag, tag1);
-      should.strictEqual(callbackActualTag, '');
+      assert.strictEqual(callbackRequestedTag, tag1);
+      assert.strictEqual(callbackActualTag, '');
       await conn.close();
       await pool.close();
     });
@@ -521,15 +521,15 @@ describe('184. sessionTag.js', function() {
         ...dbconfig,
         sessionCallback: asyncTagFixup,
       });
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await pool.getConnection({tag: tagBad});
         },
         /ORA-12705/ //ORA-12705: Cannot access NLS data files or invalid environment specified
       );
-      should.strictEqual(pool.connectionsOpen, 0);
-      should.strictEqual(callbackRequestedTag, tagBad);
-      should.strictEqual(callbackActualTag, '');
+      assert.strictEqual(pool.connectionsOpen, 0);
+      assert.strictEqual(callbackRequestedTag, tagBad);
+      assert.strictEqual(callbackActualTag, '');
       await pool.close();
     });
 
@@ -538,15 +538,15 @@ describe('184. sessionTag.js', function() {
         ...dbconfig,
         sessionCallback: tagFixup,
       });
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await pool.getConnection({tag: tagBad});
         },
         /ORA-12705/ //ORA-12705: Cannot access NLS data files or invalid environment specified
       );
-      should.strictEqual(pool.connectionsOpen, 0);
-      should.strictEqual(callbackRequestedTag, tagBad);
-      should.strictEqual(callbackActualTag, '');
+      assert.strictEqual(pool.connectionsOpen, 0);
+      assert.strictEqual(callbackRequestedTag, tagBad);
+      assert.strictEqual(callbackActualTag, '');
       await pool.close();
     });
 
@@ -559,10 +559,10 @@ describe('184. sessionTag.js', function() {
       await conn.close();
       resetTag();
       conn = await pool.getConnection({tag: tag1});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
-      should.strictEqual(callbackRequestedTag, null);
-      should.strictEqual(callbackActualTag, null);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(callbackRequestedTag, null);
+      assert.strictEqual(callbackActualTag, null);
       await conn.close();
       await pool.close();
     });
@@ -576,10 +576,10 @@ describe('184. sessionTag.js', function() {
       await conn.close();
       resetTag();
       conn = await pool.getConnection({tag: tag2});
-      should.strictEqual(pool.connectionsOpen, 2);
-      should.strictEqual(pool.connectionsInUse, 1);
-      should.strictEqual(callbackRequestedTag, tag2);
-      should.strictEqual(callbackActualTag, '');
+      assert.strictEqual(pool.connectionsOpen, 2);
+      assert.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(callbackRequestedTag, tag2);
+      assert.strictEqual(callbackActualTag, '');
       await conn.close();
       await pool.close();
     });
@@ -593,10 +593,10 @@ describe('184. sessionTag.js', function() {
       await conn.close();
       resetTag();
       conn = await pool.getConnection({tag: tag2, matchAnyTag: true});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
-      should.strictEqual(callbackRequestedTag, tag2);
-      should.strictEqual(callbackActualTag, tag1);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(callbackRequestedTag, tag2);
+      assert.strictEqual(callbackActualTag, tag1);
       await conn.close();
       await pool.close();
     });
@@ -612,10 +612,10 @@ describe('184. sessionTag.js', function() {
       await conn.close();
       resetTag();
       conn = await pool.getConnection({tag: tag1, matchAnyTag: true});
-      should.strictEqual(pool.connectionsOpen, 2);
-      should.strictEqual(pool.connectionsInUse, 1);
-      should.strictEqual(callbackRequestedTag, tag1);
-      should.strictEqual(callbackActualTag, tagMulti);
+      assert.strictEqual(pool.connectionsOpen, 2);
+      assert.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(callbackRequestedTag, tag1);
+      assert.strictEqual(callbackActualTag, tagMulti);
       await conn.close();
       await pool.close();
     });
@@ -630,10 +630,10 @@ describe('184. sessionTag.js', function() {
       await conn.close();
       resetTag();
       conn = await pool.getConnection({tag: tag1});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
-      should.strictEqual(callbackRequestedTag, tag1);
-      should.strictEqual(callbackActualTag, '');
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(callbackRequestedTag, tag1);
+      assert.strictEqual(callbackActualTag, '');
       await conn.close();
       await pool.close();
     });
@@ -648,10 +648,10 @@ describe('184. sessionTag.js', function() {
       await conn.close();
       resetTag();
       conn = await pool.getConnection({tag: tag2});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
-      should.strictEqual(callbackRequestedTag, null);
-      should.strictEqual(callbackActualTag, null);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(callbackRequestedTag, null);
+      assert.strictEqual(callbackActualTag, null);
       await conn.close();
       await pool.close();
     });
@@ -671,10 +671,8 @@ describe('184. sessionTag.js', function() {
         sessionCallback: tagFixup,
       });
       const conn = await pool.getConnection({tag: tag1});
-      await testsUtil.assertThrowsAsync(
-        () => {
-          conn.tag = undefined;
-        },
+      await assert.throws(
+        () => conn.tag = undefined,
         /NJS-004:/ //NJS-004: invalid value for property
       );
       await conn.close();
@@ -687,10 +685,8 @@ describe('184. sessionTag.js', function() {
         sessionCallback: tagFixup,
       });
       const conn = await pool.getConnection({tag: tag1});
-      await testsUtil.assertThrowsAsync(
-        () => {
-          conn.tag = {data: ["doesn't matter"], status: "SUCC"};
-        },
+      await assert.throws(
+        () => conn.tag = {data: ["doesn't matter"], status: "SUCC"},
         /NJS-004:/ //NJS-004: invalid value for property
       );
       await conn.close();
@@ -704,7 +700,7 @@ describe('184. sessionTag.js', function() {
       });
       const conn = await pool.getConnection({tag: tag1});
       conn.tag = "it doesn't matter";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await conn.close();
         },
@@ -768,22 +764,22 @@ describe('184. sessionTag.js', function() {
         sessionCallback: tagFixup,
       });
       const conn = await pool.getConnection({tag: tag1});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close({tag: tag1});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 0);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 0);
       await pool.close();
     });
 
     it('184.4.2 Acquire connection from pool, drop session', async function() {
       const pool = await oracledb.createPool(dbconfig);
       const conn = await pool.getConnection();
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close({drop: true});
-      should.strictEqual(pool.connectionsOpen, 0);
-      should.strictEqual(pool.connectionsInUse, 0);
+      assert.strictEqual(pool.connectionsOpen, 0);
+      assert.strictEqual(pool.connectionsInUse, 0);
       await pool.close();
     });
 
@@ -794,11 +790,11 @@ describe('184. sessionTag.js', function() {
         poolPingInterval: 10,
       });
       const conn = await pool.getConnection({tag: tag1});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close({tag: tag1, drop: true});
-      should.strictEqual(pool.connectionsOpen, 0);
-      should.strictEqual(pool.connectionsInUse, 0);
+      assert.strictEqual(pool.connectionsOpen, 0);
+      assert.strictEqual(pool.connectionsInUse, 0);
       await pool.close();
     });
 
@@ -818,11 +814,11 @@ describe('184. sessionTag.js', function() {
       resetTag();
       await sleep(5000);
       conn = await pool.getConnection({tag: tag1});
-      should.strictEqual(await checkConnValid(conn), true);
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
-      should.strictEqual(callbackRequestedTag, tag1);
-      should.strictEqual(callbackActualTag, '');
+      assert.strictEqual(await checkConnValid(conn), true);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(callbackRequestedTag, tag1);
+      assert.strictEqual(callbackActualTag, '');
       await conn.close();
       await pool.close();
     });
@@ -837,7 +833,7 @@ describe('184. sessionTag.js', function() {
       await conn.close();
       resetTag();
       await sleep(5000);
-      should.strictEqual(pool.connectionsInUse, 0);
+      assert.strictEqual(pool.connectionsInUse, 0);
       await pool.close();
     });
 
@@ -851,8 +847,8 @@ describe('184. sessionTag.js', function() {
       let conn = await pool.getConnection({tag: tag1});
       await conn.close({drop: true});
       conn = await pool.getConnection({tag: tag1});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
       await pool.close();
     });
@@ -860,27 +856,27 @@ describe('184. sessionTag.js', function() {
     it('184.4.7 Close connection from pool with {drop: false}', async function() {
       const pool = await oracledb.createPool(dbconfig);
       const conn = await pool.getConnection({tag: tag1});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close({drop: false});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 0);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 0);
       await pool.close();
     });
 
     it('184.4.8 Close connection from pool with {drop: randomObject}', async function() {
       const pool = await oracledb.createPool(dbconfig);
       const conn = await pool.getConnection({tag: tag1});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
-      await testsUtil.assertThrowsAsync(
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
+      await assert.rejects(
         async () => {
           await conn.close({drop: {data: ["doesn't matter"], status: "SUCC"}});
         },
         /NJS-007:/ //NJS-007: invalid value for %s in parameter
       );
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
       await pool.close();
     });
@@ -888,16 +884,16 @@ describe('184. sessionTag.js', function() {
     it('184.4.9 Close connection from pool with {drop: 0}', async function() {
       const pool = await oracledb.createPool(dbconfig);
       const conn = await pool.getConnection({tag: tag1});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
-      await testsUtil.assertThrowsAsync(
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
+      await assert.rejects(
         async () => {
           await conn.close({drop: 0});
         },
         /NJS-007:/ //NJS-007: invalid value for %s in parameter
       );
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
       await pool.close();
     });
@@ -905,16 +901,16 @@ describe('184. sessionTag.js', function() {
     it('184.4.10 Close connection from pool with empty object', async function() {
       const pool = await oracledb.createPool(dbconfig);
       const conn = await pool.getConnection({tag: tag1});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
-      await testsUtil.assertThrowsAsync(
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
+      await assert.rejects(
         async () => {
           await conn.close({drop: {}});
         },
         /NJS-007:/ //NJS-007: invalid value for %s in parameter
       );
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
       await pool.close();
     });
@@ -922,16 +918,16 @@ describe('184. sessionTag.js', function() {
     it('184.4.11 Close connection from pool with {drop: random string}', async function() {
       const pool = await oracledb.createPool(dbconfig);
       const conn = await pool.getConnection({tag: tag1});
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
-      await testsUtil.assertThrowsAsync(
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
+      await assert.rejects(
         async () => {
           await conn.close({drop: "it doesn't matter"});
         },
         /NJS-007:/ //NJS-007: invalid type for %s in parameter
       );
-      should.strictEqual(pool.connectionsOpen, 1);
-      should.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
       await pool.close();
     });

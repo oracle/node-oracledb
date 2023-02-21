@@ -243,9 +243,11 @@ describe('102. bindTimestamp.js', function() {
     const  bv = new Date(-1000000);
 
     let result = await connection.execute(
-      "insert into nodb_tab_tsbind values (:1, :2, :3) returning id, tstz into :1, :3",
-      [ { val: id, type: oracledb.NUMBER, dir: oracledb.BIND_INOUT }, bv,
-        { val: bv, type: oracledb.DATE, dir: oracledb.BIND_INOUT} ],
+      "insert into nodb_tab_tsbind values (:1, :2, :3) returning id, tstz into :4, :5",
+      [ { val: id, type: oracledb.NUMBER, dir: oracledb.BIND_IN }, bv,
+        { val: bv, type: oracledb.DATE, dir: oracledb.BIND_IN},
+        { type: oracledb.NUMBER, dir: oracledb.BIND_OUT},
+        { type: oracledb.DATE, dir: oracledb.BIND_OUT} ],
       { autoCommit: true});
 
     assert(result);
@@ -266,17 +268,19 @@ describe('102. bindTimestamp.js', function() {
     const  bv = new Date('2015-07-23 22:00:00');
 
     let result = await connection.execute(
-      "insert into nodb_tab_tsbind values (:i, :ts, :tz) returning ts, tstz into :ts, :tz",
+      "insert into nodb_tab_tsbind values (:i, :ts, :tz) returning ts, tstz into :ts1, :tz1",
       {
         i: id,
-        ts: { val: bv, dir: oracledb.BIND_INOUT, type: oracledb.DATE },
-        tz: { val: bv, dir: oracledb.BIND_INOUT, type: oracledb.DATE }
+        ts: { val: bv, dir: oracledb.BIND_IN, type: oracledb.DATE },
+        tz: { val: bv, dir: oracledb.BIND_IN, type: oracledb.DATE },
+        ts1: { dir: oracledb.BIND_OUT, type: oracledb.DATE },
+        tz1: { dir: oracledb.BIND_OUT, type: oracledb.DATE }
       },
       { autoCommit: true});
 
     assert(result);
-    assert.deepEqual(result.outBinds.ts[0], bv);
-    assert.deepEqual(result.outBinds.tz[0], bv);
+    assert.deepEqual(result.outBinds.ts1[0], bv);
+    assert.deepEqual(result.outBinds.tz1[0], bv);
 
     result = await connection.execute(
       "select * from nodb_tab_tsbind where id = :i",
@@ -291,19 +295,19 @@ describe('102. bindTimestamp.js', function() {
   it('102.10 Negative - INOUT bind, in bind value and type mismatch', async function() {
     const  id = caseIndex++;
     const  bv = new Date(1995, 11, 17);
+    const sql = "insert into nodb_tab_tsbind values (:i, :ts, :tz) returning ts, tstz into :ts1, :tz1";
+    const binds = {
+      i: id,
+      ts: { val: bv, dir: oracledb.BIND_IN, type: oracledb.DATE },
+      tz: { val: bv, dir: oracledb.BIND_IN, type: oracledb.BUFFER },
+      ts1: { dir: oracledb.BIND_OUT, type: oracledb.DATE },
+      tz1: { dir: oracledb.BIND_OUT, type: oracledb.DATE }
+    };
+    const options = { autoCommit: true};
 
     await assert.rejects(
-      async () => {
-        await connection.execute(
-          "insert into nodb_tab_tsbind values (:i, :ts, :tz) returning ts, tstz into :ts, :tz",
-          {
-            i: id,
-            ts: { val: bv, dir: oracledb.BIND_INOUT, type: oracledb.DATE },
-            tz: { val: bv, dir: oracledb.BIND_INOUT, type: oracledb.BUFFER }
-          },
-          { autoCommit: true});
-      },
-      /NJS-011: encountered bind value and type mismatch/
+      async () => await connection.execute(sql, binds, options),
+      /NJS-011:/
     );
 
     const result = await connection.execute(
@@ -322,11 +326,13 @@ describe('102. bindTimestamp.js', function() {
     await assert.rejects(
       async () => {
         await connection.execute(
-          "insert into nodb_tab_tsbind values (:i, :ts, :tz) returning ts, id into :ts, :tz",
+          "insert into nodb_tab_tsbind values (:i, :ts, :tz) returning ts, id into :ts1, :tz1",
           {
             i: id,
-            ts: { val: bv, dir: oracledb.BIND_INOUT, type: oracledb.DATE },
-            tz: { val: bv, dir: oracledb.BIND_INOUT, type: oracledb.DATE }
+            ts: { val: bv, dir: oracledb.BIND_IN, type: oracledb.DATE },
+            tz: { val: bv, dir: oracledb.BIND_IN, type: oracledb.DATE },
+            ts1: { dir: oracledb.BIND_OUT, type: oracledb.DATE },
+            tz1: { dir: oracledb.BIND_OUT, type: oracledb.DATE }
           },
           { autoCommit: true});
       },
@@ -348,17 +354,19 @@ describe('102. bindTimestamp.js', function() {
     const  bv2 = null;
 
     let result = await connection.execute(
-      "insert into nodb_tab_tsbind values (:i, :ts, :tz) returning ts, tstz into :ts, :tz",
+      "insert into nodb_tab_tsbind values (:i, :ts, :tz) returning ts, tstz into :ts1, :tz1",
       {
         i: id,
-        ts: { val: bv1, dir: oracledb.BIND_INOUT, type: oracledb.DATE },
-        tz: { val: bv2, dir: oracledb.BIND_INOUT, type: oracledb.DATE }
+        ts: { val: bv1, dir: oracledb.BIND_IN, type: oracledb.DATE },
+        tz: { val: bv2, dir: oracledb.BIND_IN, type: oracledb.DATE },
+        ts1: { dir: oracledb.BIND_OUT, type: oracledb.DATE },
+        tz1: { dir: oracledb.BIND_OUT, type: oracledb.DATE }
       },
       { autoCommit: true });
 
     assert(result);
-    assert.deepEqual(result.outBinds.ts[0], bv1);
-    assert.strictEqual(result.outBinds.tz[0], null);
+    assert.deepEqual(result.outBinds.ts1[0], bv1);
+    assert.strictEqual(result.outBinds.tz1[0], null);
 
     result = await connection.execute(
       "select * from nodb_tab_tsbind where id = :i",

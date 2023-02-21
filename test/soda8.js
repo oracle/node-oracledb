@@ -217,7 +217,7 @@ describe('176. soda7.js', () => {
       }
 
       let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await collection.find().replaceOne(inContent),
         /ORA-40734:/
       );

@@ -34,14 +34,13 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('51. poolClose.js', function() {
 
   it('51.1 can not get connections from the terminated pool', async function() {
     const pool = await oracledb.createPool(dbConfig);
     await pool.close();
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await pool.getConnection(),
       /NJS-065:/
     );
@@ -50,7 +49,7 @@ describe('51. poolClose.js', function() {
   it('51.2 can not terminate the same pool multiple times', async function() {
     const pool = await oracledb.createPool(dbConfig);
     await pool.terminate();
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await pool.terminate(),
       /NJS-065:/
     );
@@ -59,7 +58,7 @@ describe('51. poolClose.js', function() {
   it('51.3 can not close the same pool multiple times', async function() {
     const pool = await oracledb.createPool(dbConfig);
     await pool.close();
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await pool.close(),
       /NJS-065:/
     );
@@ -68,7 +67,7 @@ describe('51. poolClose.js', function() {
   it('51.4 pool is still available after the failing close', async function() {
     const pool = await oracledb.createPool(dbConfig);
     const conn = await pool.getConnection();
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await pool.close(),
       /NJS-104:/
     );
@@ -80,7 +79,7 @@ describe('51. poolClose.js', function() {
     const pool = await oracledb.createPool(dbConfig);
     const conn = await pool.getConnection();
     await conn.close();
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await conn.close(),
       /NJS-003:/
     );
@@ -90,7 +89,7 @@ describe('51. poolClose.js', function() {
   it('51.6 can not get connection from a terminated pool', async function() {
     const pool = await oracledb.createPool(dbConfig);
     await pool.close();
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await pool.getConnection(),
       /NJS-065:/
     );
@@ -114,7 +113,7 @@ describe('51. poolClose.js', function() {
       () => pool.poolMin = 20,
       /TypeError: Cannot set/
     );
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await pool.close(),
       /NJS-065:/
     );

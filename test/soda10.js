@@ -182,7 +182,7 @@ describe('178. soda10.js', function() {
     const COLL = "soda_test_178_5";
     const collection = await soda.createCollection(COLL);
 
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async function() {
         await collection.insertMany([]);
       },
@@ -199,7 +199,7 @@ describe('178. soda10.js', function() {
     const COLL = "soda_test_178_6";
     const collection = await soda.createCollection(COLL);
 
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async function() {
         await collection.insertManyAndGet([]);
       },
@@ -264,7 +264,7 @@ describe('178. soda10.js', function() {
     }
 
     let options = 3;
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async function() {
         await collection.insertManyAndGet(inDocuments, options);
       },

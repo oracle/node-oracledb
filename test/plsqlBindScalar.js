@@ -35,7 +35,6 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('70. plsqlBindScalar.js', function() {
 
@@ -85,7 +84,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         strValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: 42}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -132,7 +131,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         strValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: NaN}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -192,7 +191,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         numValue: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: ''}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -221,7 +220,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         numValue: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: NaN}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /DPI-1055:/
       );
@@ -291,7 +290,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -311,7 +310,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -442,7 +441,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         bufValue: {type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: ''}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -462,7 +461,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         bufValue: {type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: NaN}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -519,7 +518,7 @@ describe('70. plsqlBindScalar.js', function() {
           val:  755
         }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -569,7 +568,7 @@ describe('70. plsqlBindScalar.js', function() {
           val:  NaN
         }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -715,7 +714,7 @@ describe('70. plsqlBindScalar.js', function() {
           val:  ''
         }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -753,7 +752,7 @@ describe('70. plsqlBindScalar.js', function() {
           val:  NaN
         }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /DPI-1055:/
       );
@@ -891,7 +890,7 @@ describe('70. plsqlBindScalar.js', function() {
           val:  ''
         }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -917,7 +916,7 @@ describe('70. plsqlBindScalar.js', function() {
           val:  NaN
         }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -1105,7 +1104,7 @@ describe('70. plsqlBindScalar.js', function() {
           maxSize: 32767
         }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -1762,7 +1761,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: NaN}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun_str, bindVar),
         /NJS-011:/
       );
@@ -1774,7 +1773,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun_str, bindVar),
         /ORA-01839:/
       );
@@ -1847,7 +1846,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun_dt, bindVar),
         /NJS-011:/
       );
@@ -1867,7 +1866,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun_dt, bindVar),
         /NJS-011:/
       );
@@ -1956,7 +1955,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -1976,7 +1975,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -2046,7 +2045,7 @@ describe('70. plsqlBindScalar.js', function() {
           val:  ''
         }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -2072,7 +2071,7 @@ describe('70. plsqlBindScalar.js', function() {
           val:  NaN
         }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -2225,7 +2224,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: NaN}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun_str, bindVar),
         /NJS-011:/
       );
@@ -2237,7 +2236,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun_str, bindVar),
         /ORA-01839:/
       );
@@ -2310,7 +2309,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun_dt, bindVar),
         /NJS-011:/
       );
@@ -2330,7 +2329,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun_dt, bindVar),
         /NJS-011:/
       );
@@ -2419,7 +2418,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -2439,7 +2438,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -2510,7 +2509,7 @@ describe('70. plsqlBindScalar.js', function() {
           val:  ''
         }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -2536,7 +2535,7 @@ describe('70. plsqlBindScalar.js', function() {
           val:  NaN
         }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -2689,7 +2688,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: NaN}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun_str, bindVar),
         /NJS-011:/
       );
@@ -2701,7 +2700,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun_str, bindVar),
         /ORA-01839:/
       );
@@ -2776,7 +2775,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun_dt, bindVar),
         /NJS-011:/
       );
@@ -2796,7 +2795,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun_dt, bindVar),
         /NJS-011:/
       );
@@ -2885,7 +2884,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -2905,7 +2904,7 @@ describe('70. plsqlBindScalar.js', function() {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -2976,7 +2975,7 @@ describe('70. plsqlBindScalar.js', function() {
           val:  ''
         }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );
@@ -3002,7 +3001,7 @@ describe('70. plsqlBindScalar.js', function() {
           val:  NaN
         }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlrun, bindVar),
         /NJS-011:/
       );

@@ -34,11 +34,11 @@
 'use strict';
 
 const oracledb = require('oracledb');
+const assert   = require('assert');
 const sql      = require('./sql.js');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
 const random   = require('./random.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('92.binding_DMLInsert.js', function() {
 
@@ -71,7 +71,7 @@ describe('92.binding_DMLInsert.js', function() {
     if (largeVal === true) {
       if (bindType === oracledb.STRING) {
         if (dbColType.indexOf("CHAR") > -1) {
-          await testsUtil.assertThrowsAsync(
+          await assert.rejects(
             async () => {
               await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
             },
@@ -80,7 +80,7 @@ describe('92.binding_DMLInsert.js', function() {
           );
         }
         if (dbColType === "NUMBER" || dbColType.indexOf("FLOAT") > -1 || dbColType === "BINARY_DOUBLE") {
-          await testsUtil.assertThrowsAsync(
+          await assert.rejects(
             async () => {
               await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
             },
@@ -89,7 +89,7 @@ describe('92.binding_DMLInsert.js', function() {
           );
         }
         if (dbColType === "DATE") {
-          await testsUtil.assertThrowsAsync(
+          await assert.rejects(
             async () => {
               await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
             },
@@ -98,7 +98,7 @@ describe('92.binding_DMLInsert.js', function() {
           );
         }
         if (dbColType === "TIMESTAMP") {
-          await testsUtil.assertThrowsAsync(
+          await assert.rejects(
             async () => {
               await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
             },
@@ -107,7 +107,7 @@ describe('92.binding_DMLInsert.js', function() {
           );
         }
         if (dbColType === "BLOB" || dbColType.indexOf("RAW") > -1) {
-          await testsUtil.assertThrowsAsync(
+          await assert.rejects(
             async () => {
               await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
             },
@@ -120,7 +120,7 @@ describe('92.binding_DMLInsert.js', function() {
         }
       } else {
         if (dbColType === "NUMBER" || dbColType === "DATE" || dbColType === "TIMESTAMP" || dbColType.indexOf("FLOAT") > -1) {
-          await testsUtil.assertThrowsAsync(
+          await assert.rejects(
             async () => {
               await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
             },
@@ -132,7 +132,7 @@ describe('92.binding_DMLInsert.js', function() {
           );
         }
         if (dbColType.indexOf("CHAR") > -1 || dbColType.indexOf("RAW") > -1) {
-          await testsUtil.assertThrowsAsync(
+          await assert.rejects(
             async () => {
               await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
             },
@@ -153,7 +153,7 @@ describe('92.binding_DMLInsert.js', function() {
             await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
           }
           if (dbColType === "NUMBER" || dbColType.indexOf("FLOAT") > -1 || dbColType === "BINARY_DOUBLE") {
-            await testsUtil.assertThrowsAsync(
+            await assert.rejects(
               async () => {
                 await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
               },
@@ -162,7 +162,7 @@ describe('92.binding_DMLInsert.js', function() {
             );
           }
           if (dbColType === "TIMESTAMP" || dbColType === "DATE") {
-            await testsUtil.assertThrowsAsync(
+            await assert.rejects(
               async () => {
                 await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
               },
@@ -171,7 +171,7 @@ describe('92.binding_DMLInsert.js', function() {
             );
           }
           if (dbColType === "BLOB" || dbColType.indexOf("RAW") > -1) {
-            await testsUtil.assertThrowsAsync(
+            await assert.rejects(
               async () => {
                 await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
               },
@@ -182,7 +182,7 @@ describe('92.binding_DMLInsert.js', function() {
         }
       } else {
         if (dbColType === "NUMBER" || dbColType === "DATE" || dbColType === "TIMESTAMP" || dbColType.indexOf("FLOAT") > -1) {
-          await testsUtil.assertThrowsAsync(
+          await assert.rejects(
             async () => {
               await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
             },

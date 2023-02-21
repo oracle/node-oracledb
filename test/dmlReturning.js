@@ -39,7 +39,6 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('6. dmlReturning.js', function() {
 
@@ -123,7 +122,7 @@ describe('6. dmlReturning.js', function() {
       const options = {
         autoCommit: true
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, binds, options),
         /NJS-016:/
       );
@@ -263,7 +262,7 @@ describe('6. dmlReturning.js', function() {
         rn: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(wrongSQL, binds),
         /ORA-00904:/
       );
@@ -418,7 +417,7 @@ describe('6. dmlReturning.js', function() {
           rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
         };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(wrongSQL, bindVar),
         /NJS-011:/
       );

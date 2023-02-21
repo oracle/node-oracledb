@@ -34,7 +34,6 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbconfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('181. dataTypeXML.js', function() {
 
@@ -154,13 +153,13 @@ describe('181. dataTypeXML.js', function() {
     let bindValues = { id: ID, bv: XML };
 
     if (conn.oracleServerVersion < 1200000000) {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await conn.execute(sql, bindValues),
         /ORA-19032:/
       );
       // ORA-19032: Expected XML tag , got no content
     } else {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await conn.execute(sql, bindValues),
         /ORA-01400:/
       );

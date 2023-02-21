@@ -470,7 +470,7 @@ describe('255. poolReconfigure.js', function() {
         await conns[conIndex].execute(`select user from dual`);
       }
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040:/
       );
@@ -481,7 +481,7 @@ describe('255. poolReconfigure.js', function() {
       await conns[poolMaxOriginalVal - 2].close();
 
       // Get a new connection
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
@@ -492,7 +492,7 @@ describe('255. poolReconfigure.js', function() {
       // Get a new connection
       conns[poolMaxOriginalVal - 3] = await testsUtil.getPoolConnection(pool);
       // Get a new connection
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
@@ -515,7 +515,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(pool.connectionsInUse, poolMaxOriginalVal);
       assert.strictEqual(pool.connectionsOpen, poolMaxOriginalVal);
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
@@ -536,7 +536,7 @@ describe('255. poolReconfigure.js', function() {
         conns.push(conn);
       }
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
@@ -640,7 +640,7 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
@@ -674,7 +674,7 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
@@ -724,7 +724,7 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
@@ -750,7 +750,7 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
@@ -1113,49 +1113,49 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.5.2 passing invalid poolMin to pool.reconfigure', async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolMin: -1}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolMin: NaN}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolMin: null}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolMin: '10'}),
         /NJS-007:/
       );
     });
 
     it('255.5.3 passing invalid poolMax to pool.reconfigure', async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure ({ poolMax: -1 }),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolMax: NaN}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolMax: null}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolMax: 0}),
         /ORA-24413:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolMax:"10"}),
         /NJS-007:/
       );
@@ -1163,22 +1163,22 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.5.4 passing invalid poolIncrement to pool.reconfigure', async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure ({poolIncrement : -1 }),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({ poolIncrement: NaN}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolIncrement: null}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolIncrement: "100"}),
         /NJS-007:/
       );
@@ -1186,39 +1186,39 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.5.5 passing invalid enableStatistics to pool.reconfigure', async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({enableStatistics: null}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({enableStatistics: -100}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({enableStatistics: NaN}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({enableStatistics: "true"}),
         /NJS-007:/
       );
     });
 
     it('255.5.6 passing invalid poolPingInterval to pool.reconfigure', async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolPingInterval: null}),
         /NJS-007/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolPingInterval: NaN}),
         /NJS-007/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolPingInterval: "10"}),
         /NJS-007/
       );
@@ -1226,66 +1226,66 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.5.7 passing invalid poolTimeout to pool.reconfigure', async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolTimeout: null}),
         /NJS-007/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolTimeout: -100}),
         /NJS-007/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolTimeout: NaN}),
         /NJS-007/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolTimeout: "10"}),
         /NJS-007/
       );
     });
 
     it('255.5.8 passing invalid poolMaxPerShard to pool.reconfigure', async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolMaxPerShard: null}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolMaxPerShard: -100}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolMaxPerShard: NaN}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({poolMaxPerShard: "10"}),
         /NJS-007:/
       );
     });
 
     it('255.5.9 passing invalid queueMax to pool.reconfigure', async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({queueMax: null}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({queueMax : -100}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({queueMax :NaN}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({queueMax :"10"}),
         /NJS-007:/
       );
@@ -1293,22 +1293,22 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.5.10 passing invalid queueTimeout to pool.reconfigure', async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure ({queueTimeout: null}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({queueTimeout: -100}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({queueTimeout: NaN}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure ({queueTimeout:"10"}),
         /NJS-007:/
       );
@@ -1316,22 +1316,22 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.5.11 passing invalid stmtCacheSize to pool.reconfigure', async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({stmtCacheSize: null}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({stmtCacheSize: -100}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({stmtCacheSize: NaN}),
         /NJS-007:/
       );
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure({stmtCacheSize: "10"}),
         /NJS-007:/
       );
@@ -1435,11 +1435,11 @@ describe('255. poolReconfigure.js', function() {
         resetStatistics   : resetStatistics
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure(config),
         /NJS-065:/
       );
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await pool.reconfigure(config),
         /NJS-065:/
       );
@@ -1488,7 +1488,7 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040:/
       );
@@ -1524,7 +1524,7 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040:/
       );
@@ -1589,7 +1589,7 @@ describe('255. poolReconfigure.js', function() {
         const conn = await testsUtil.getPoolConnection(pool1);
         conns.push(conn);
       }
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool1),
         /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
       );
@@ -1622,7 +1622,7 @@ describe('255. poolReconfigure.js', function() {
         const conn = await testsUtil.getPoolConnection(pool2);
         conns.push(conn);
       }
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool2),
         /NJS-040/
       );
@@ -1898,7 +1898,7 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040:/
       );
@@ -1934,7 +1934,7 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040:/
       );
@@ -2000,7 +2000,7 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool1);
         conns.push(conn);
       }
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool1),
         /NJS-040:/
       );
@@ -2034,7 +2034,7 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool2);
         conns.push(conn);
       }
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool2),
         /NJS-040:/
       );
@@ -2101,7 +2101,7 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool1);
         conns.push(conn);
       }
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool1),
         /NJS-040:/
       );
@@ -2135,7 +2135,7 @@ describe('255. poolReconfigure.js', function() {
         let conn = await testsUtil.getPoolConnection(pool2);
         conns.push(conn);
       }
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool2),
         /NJS-040:/
       );

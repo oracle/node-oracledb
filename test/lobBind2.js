@@ -36,7 +36,6 @@ const fs       = require('fs');
 const fsPromises = require('fs/promises');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe("72. lobBind2.js", function() {
 
@@ -140,14 +139,14 @@ describe("72. lobBind2.js", function() {
     }); // 72.1.2
 
     it("72.1.3 Negative - invalid type", async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.createLob('CLOB'),
         /NJS-005:/
       );
     }); // 72.1.3
 
     it("72.1.4 Negative - invalid value", async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.createLob(oracledb.STRING),
         /NJS-005:/
       );
@@ -325,7 +324,7 @@ describe("72. lobBind2.js", function() {
       });
       const sql = "insert into nodb_tab_blob72 (id, content) values (:id, :bindvar)";
       const binds = { id: seq, bindvar: lob};
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, binds),
         /ORA-00932:/
       );
@@ -334,7 +333,7 @@ describe("72. lobBind2.js", function() {
     }); // 72.2.3
 
     it("72.2.4 Negative - not providing first parameter", async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.createLob(),
         /NJS-009:/
       );
@@ -454,14 +453,14 @@ describe("72. lobBind2.js", function() {
     }); // 72.3.2
 
     it("72.3.3 Negative - invalid type", async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.createLob('NCLOB'),
         /NJS-005:/
       );
     }); // 72.3.3
 
     it("72.3.4 Negative - invalid value", async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.createLob(oracledb.STRING),
         /NJS-005:/
       );

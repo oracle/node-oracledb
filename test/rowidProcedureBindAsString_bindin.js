@@ -34,7 +34,6 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('108. rowidProcedureBindAsString_bindin.js', function() {
   let connection;
@@ -112,7 +111,7 @@ describe('108. rowidProcedureBindAsString_bindin.js', function() {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(proc_execute, bindVar),
         /NJS-011:/
       );
@@ -139,7 +138,7 @@ describe('108. rowidProcedureBindAsString_bindin.js', function() {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(proc_execute, bindVar),
         /NJS-011:/
       );
@@ -170,7 +169,7 @@ describe('108. rowidProcedureBindAsString_bindin.js', function() {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(proc_execute, bindVar),
         /NJS-037:/
       );
@@ -178,7 +177,7 @@ describe('108. rowidProcedureBindAsString_bindin.js', function() {
 
     it('108.1.14 bind error: NJS-052', async function() {
       const bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN } ];
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(proc_execute, bindVar),
         /NJS-052:/
       );
@@ -224,7 +223,7 @@ describe('108. rowidProcedureBindAsString_bindin.js', function() {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(proc_execute, bindVar),
         /NJS-011:/
       );
@@ -251,7 +250,7 @@ describe('108. rowidProcedureBindAsString_bindin.js', function() {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(proc_execute, bindVar),
         /NJS-011:/
       );
@@ -282,7 +281,7 @@ describe('108. rowidProcedureBindAsString_bindin.js', function() {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(proc_execute, bindVar),
         /NJS-037:/
       );
@@ -290,7 +289,7 @@ describe('108. rowidProcedureBindAsString_bindin.js', function() {
 
     it('108.2.14 bind error: NJS-052', async function() {
       const bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN } ];
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(proc_execute, bindVar),
         /NJS-052:/
       );

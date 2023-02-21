@@ -38,7 +38,6 @@ const file     = require('./file.js');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
 const assist   = require('./dataTypeAssist.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
@@ -600,7 +599,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       await insertBlobWithbuffer(sequence, bufferStr);
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -624,7 +623,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       await insertBlobWithbuffer(sequence, bufferStr);
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -648,7 +647,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       await insertBlobWithbuffer(sequence, bufferStr);
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -670,7 +669,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       await insertBlobWithbuffer(sequence, bufferStr);
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -692,7 +691,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       await insertBlobWithbuffer(sequence, bufferStr);
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -714,7 +713,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       await insertBlobWithbuffer(sequence, bufferStr);
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -736,7 +735,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       await insertBlobWithbuffer(sequence, bufferStr);
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -945,7 +944,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       await insertBlobWithbuffer(sequence, bufferStr);
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -969,7 +968,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       await insertBlobWithbuffer(sequence, bufferStr);
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -991,7 +990,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       await insertBlobWithbuffer(sequence, bufferStr);
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,

@@ -132,7 +132,7 @@ describe('173. soda5.js', () => {
     const collection = await soda.createCollection("soda_test_173_3");
 
     const indexSpec = { "foo": "bar" };
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await collection.createIndex(indexSpec),
       /ORA-40719:/
     );
@@ -438,7 +438,7 @@ describe('173. soda5.js', () => {
       const outDocument = await collection.getDataGuide();
       assert(outDocument);
     } else if (isCreateIndexEligible < 0) {
-      await testsUtil.assertThrowsAsync(async () => {
+      await assert.rejects(async () => {
         await collection.createIndex(indexSpec);
       }, /ORA-00406:/);
     }

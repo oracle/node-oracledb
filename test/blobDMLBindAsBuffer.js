@@ -33,7 +33,6 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const testsUtil = require('./testsUtil.js');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
 const assist   = require('./dataTypeAssist.js');
@@ -259,7 +258,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     it('82.1.9 works with NaN', async function() {
       let id = insertID++;
       let content = NaN;
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
@@ -276,7 +275,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     it('82.1.10 works with 0', async function() {
       let id = insertID++;
       let content = 0;
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
@@ -337,7 +336,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     it('82.1.15 bind value and type mismatch', async function() {
       let id = insertID++;
       let content = 100;
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
@@ -370,7 +369,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
     it('82.1.17 bind with invalid BLOB', async function() {
       let id = insertID++;
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             "INSERT INTO nodb_dml_blob_1 VALUES (:1, :2)",

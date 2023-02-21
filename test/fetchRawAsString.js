@@ -36,9 +36,8 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
-const testUtil = require('./testsUtil');
 
-describe('188. fetchRowidAsString.js', function() {
+describe('188. fetchRawAsString.js', function() {
 
   let conn;
   const tableName = "nodb_rawToString";
@@ -145,7 +144,7 @@ describe('188. fetchRowidAsString.js', function() {
     const res = await conn.execute(`select raw_content from ${tableName} where content_type='string'`);
     assert.strictEqual(res.rows.length, 1);
     const fetchedContent = res.rows[0][0];
-    assert.strictEqual(fetchedContent.toLowerCase(), Buffer.from(rawContentString).toString("hex"));
+    assert.strictEqual(fetchedContent.toString("hex").toLowerCase(), Buffer.from(rawContentString).toString("hex"));
   });
 
   it("188.3 Fetch RAW as string by defining fetchInfo", async function() {
@@ -156,7 +155,7 @@ describe('188. fetchRowidAsString.js', function() {
     );
     assert.strictEqual(res.rows.length, 1);
     const fetchedContent = res.rows[0][0];
-    assert.strictEqual(fetchedContent.toLowerCase(), Buffer.from(rawContentString).toString("hex"));
+    assert.strictEqual(fetchedContent.toString("hex").toLowerCase(), Buffer.from(rawContentString).toString("hex"));
   });
 
   it("188.4 Fetch number converted RAW as string", async function() {
@@ -164,7 +163,7 @@ describe('188. fetchRowidAsString.js', function() {
     const res = await conn.execute(`select raw_content from ${tableName} where content_type='number'`);
     assert.strictEqual(res.rows.length, 1);
     const fetchedContent = res.rows[0][0];
-    assert.strictEqual(fetchedContent.toLowerCase(), getHex(rawContentNumber, "number"));
+    assert.strictEqual(fetchedContent.toString("hex").toLowerCase(), getHex(rawContentNumber, "number"));
   });
 
   it("188.5 Fetch binary double converted RAW as string", async function() {
@@ -172,7 +171,7 @@ describe('188. fetchRowidAsString.js', function() {
     const res = await conn.execute(`select raw_content from ${tableName} where content_type='binary_double'`);
     assert.strictEqual(res.rows.length, 1);
     const fetchedContent = res.rows[0][0];
-    assert.strictEqual(fetchedContent.toLowerCase(), getHex(rawContentFloat, "double"));
+    assert.strictEqual(fetchedContent.toString("hex").toLowerCase(), getHex(rawContentFloat, "double"));
   });
 
   it("188.6 Fetch binary float converted RAW as string", async function() {
@@ -180,7 +179,7 @@ describe('188. fetchRowidAsString.js', function() {
     const res = await conn.execute(`select raw_content from ${tableName} where content_type='binary_float'`);
     assert.strictEqual(res.rows.length, 1);
     const fetchedContent = res.rows[0][0];
-    assert.strictEqual(fetchedContent.toLowerCase(), getHex(rawContentFloat, "float"));
+    assert.strictEqual(fetchedContent.toString("hex").toLowerCase(), getHex(rawContentFloat, "float"));
   });
 
   it("188.7 Fetch binary integer converted RAW as string", async function() {
@@ -188,7 +187,7 @@ describe('188. fetchRowidAsString.js', function() {
     const res = await conn.execute(`select raw_content from ${tableName} where content_type='binary_integer'`);
     assert.strictEqual(res.rows.length, 1);
     const fetchedContent = res.rows[0][0];
-    assert.strictEqual(fetchedContent.toLowerCase(), getHex(rawContentNumber, "integer"));
+    assert.strictEqual(fetchedContent.toString("hex").toLowerCase(), getHex(rawContentNumber, "integer"));
   });
 
   it("188.8 Insert a string of maximum lenght of RAW then fetch it as string", async function() {
@@ -196,13 +195,13 @@ describe('188. fetchRowidAsString.js', function() {
     const res = await conn.execute(`select raw_content from ${tableName} where content_type='max_length_string'`);
     assert.strictEqual(res.rows.length, 1);
     const fetchedContent = res.rows[0][0];
-    assert.strictEqual(fetchedContent.toLowerCase(), Buffer.from(rawMaxLengthString).toString("hex"));
+    assert.strictEqual(fetchedContent.toString("hex").toLowerCase(), Buffer.from(rawMaxLengthString).toString("hex"));
   });
 
   it("188.9 Insert a string exceeds maximum lenght of RAW", async function() {
     const contentString = random.getRandomLengthString(rawMaxLength + 1);
     const sql = `INSERT INTO ${tableName} VALUES(utl_raw.cast_to_raw('${contentString}'), 'string')`;
-    await testUtil.assertThrowsAsync(async () => {
+    await assert.rejects(async () => {
       await conn.execute(sql);
       await conn.commit();
     }, /ORA-12899:/); // ORA-12899: value too large for column "HR"."NODB_RAWTOSTRING"."RAW_CONTENT" (actual: 21, maximum: 20)

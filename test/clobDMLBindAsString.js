@@ -35,7 +35,6 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('81. clobDMLBindAsString.js', function() {
 
@@ -246,7 +245,7 @@ describe('81. clobDMLBindAsString.js', function() {
     it('81.1.9 works with NaN', async function() {
       const id = insertID++;
       const content = NaN;
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             "INSERT INTO nodb_dml_clob_1 VALUES (:ID, :C)",
@@ -263,7 +262,7 @@ describe('81. clobDMLBindAsString.js', function() {
     it('81.1.10 works with 0', async function() {
       const id = insertID++;
       const content = 0;
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             "INSERT INTO nodb_dml_clob_1 VALUES (:ID, :C)",
@@ -321,7 +320,7 @@ describe('81. clobDMLBindAsString.js', function() {
         ID : { val : id },
         C : { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
       };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, binds),
         // NJS-011: encountered bind value and type mismatch in parameter 2
         /NJS-011:/
@@ -344,7 +343,7 @@ describe('81. clobDMLBindAsString.js', function() {
 
     it('81.1.17 bind with invalid CLOB', async function() {
       const id = insertID++;
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             "INSERT INTO nodb_dml_clob_1 VALUES (:1, :2)",

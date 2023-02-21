@@ -150,7 +150,7 @@ describe('218. aq2.js', function() {
 
     // Enqueue
     const queue1 = await conn.getQueue(objQueueName);
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => {
         await queue1.enqOne(addrData);
       },

@@ -38,7 +38,6 @@ const dbConfig = require('./dbconfig.js');
 const fs       = require('fs');
 const fsPromises = require('fs/promises');
 const random   = require('./random.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
@@ -332,7 +331,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         c: { val: NaN, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 }
       };
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /NJS-011:/
       );
@@ -346,7 +345,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         c: { val: 0, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 }
       };
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /NJS-011:/
       );
@@ -426,7 +425,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         c: { val: 20, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 }
       };
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /NJS-011:/
       );
@@ -453,7 +452,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         c: { val: {}, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 5000 }
       };
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /NJS-011:/
       );
@@ -540,7 +539,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         c: { val: "sequence", type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 }
       };
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /NJS-037:/
       );
@@ -553,7 +552,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 }
       };
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /NJS-037:/
       );
@@ -565,7 +564,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         c: { val: "sequence", type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 }
       };
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /NJS-037:/
       );
@@ -577,7 +576,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         c: { val: ["sequence", "ab", 3], type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 }
       };
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /NJS-037:/
       );
@@ -587,7 +586,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
       const sequence = insertID++;
       const bindVar = [ sequence, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 } ] ;
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /NJS-052:/
       );
@@ -596,7 +595,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
     it('74.1.30 bind error: NJS-052, bind by pos 2', async function() {
       const bindVar = [ { val: ["sequence"], type: oracledb.NUMBER, dir: oracledb.BIND_IN }, { val: "sequence", type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 } ] ;
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /NJS-052:/
       );
@@ -605,7 +604,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
     it('74.1.31 bind error: NJS-052, bind by pos 3', async function() {
       const bindVar = [ { val: [1, 2, "sequence"], type: oracledb.NUMBER, dir: oracledb.BIND_IN }, { val: "sequence", type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 } ] ;
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /NJS-052:/
       );
@@ -614,7 +613,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
     it('74.1.32 bind error: NJS-052, bind by pos 4', async function() {
       const bindVar = [ { val: [1, 2], type: oracledb.NUMBER, dir: oracledb.BIND_IN }, { val: ["sequence", 1], type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 } ] ;
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /NJS-052:/
       );
@@ -814,7 +813,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         c: { val: NaN, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 }
       };
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /NJS-011:/
       );
@@ -827,7 +826,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         c: { val: 0, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 }
       };
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /NJS-011:/
       );
@@ -859,7 +858,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         c: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
       };
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /ORA-06502:/
       );
@@ -873,7 +872,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         c: { val: {}, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 5000 }
       };
       const options = { autoCommit: true };
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar, options),
         /NJS-011:/
       );

@@ -524,7 +524,7 @@ describe('253. jsonBind1.js', function() {
       } else {
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
-        assert.strictEqual(j.key1, 253.1);
+        assert.strictEqual(j.key1, 253.25);
       }
     });
 

@@ -299,7 +299,7 @@ describe('164. soda1.js', () => {
     const t_collname = "soda_test_164_11";
     const options = { metaData: "metaData" };
 
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await sd.createCollection(t_collname, options),
       /NJS-007:/
     );

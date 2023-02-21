@@ -39,7 +39,6 @@ const assert   = require('assert');
 const sql      = require('./sql.js');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('98.binding_DMLReturningInto.js', function() {
   let connection;
@@ -96,7 +95,7 @@ describe('98.binding_DMLReturningInto.js', function() {
 
     await connection.execute(createTable);
     if (throwError) {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlToExec, bindVar),
         (err) => {
           if (bindType === oracledb.STRING) {

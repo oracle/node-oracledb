@@ -34,7 +34,6 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('107. rowidDMLBindAsString.js', function() {
   let connection;
@@ -123,7 +122,7 @@ describe('107. rowidDMLBindAsString.js', function() {
         c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql_insert, bindVar),
         /NJS-011:/
       );
@@ -206,7 +205,7 @@ describe('107. rowidDMLBindAsString.js', function() {
         c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql_insert, bindVar),
         /NJS-011:/
       );

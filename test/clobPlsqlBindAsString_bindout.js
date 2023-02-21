@@ -38,7 +38,6 @@ const fsPromises = require('fs/promises');
 const dbConfig = require('./dbconfig.js');
 const file     = require('./file.js');
 const random   = require('./random.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
@@ -312,7 +311,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
         c: { val: NaN, type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
       const sql = "INSERT INTO nodb_tab_clob_in (id, clob_1) VALUES (:i, :c)";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindVar),
         /NJS-011:/
       );
@@ -325,7 +324,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
         c: { val: 0, type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
       const sql = "INSERT INTO nodb_tab_clob_in (id, clob_1) VALUES (:i, :c)";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindVar),
         /NJS-011:/
       );
@@ -397,7 +396,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
         c: { val: 100, type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
       const sql = "INSERT INTO nodb_tab_clob_in (id, clob_1) VALUES (:i, :c)";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindVar),
         /NJS-011:/
       );
@@ -482,7 +481,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
         c: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len - 1 }
       };
       await insertClobWithString(sequence, clobStr);
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar),
         /ORA-06502:/
       );
@@ -498,7 +497,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
         c: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len - 1 }
       };
       await insertClobWithString(sequence, clobStr);
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar),
         /NJS-016:/
       );
@@ -514,7 +513,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
         c: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len - 1 }
       };
       await insertClobWithString(sequence, clobStr);
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar),
         /NJS-016:/
       );
@@ -528,7 +527,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       const sqlRun = "BEGIN nodb_clobs_out_741 (:1, :2); END;";
       const bindVar = [ sequence, { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len - 1 } ];
       await insertClobWithString(sequence, clobStr);
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar),
         /ORA-06502:/
       );
@@ -542,7 +541,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       const sqlRun = "BEGIN nodb_clobs_out_741 (:1, :2); END;";
       const bindVar = [ sequence, { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len - 1 } ];
       await insertClobWithString(sequence, clobStr);
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar),
         /NJS-016:/
       );
@@ -556,7 +555,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       const sqlRun = "BEGIN nodb_clobs_out_741 (:1, :2); END;";
       const bindVar = [ sequence, { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len - 1 } ];
       await insertClobWithString(sequence, clobStr);
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar),
         /NJS-016:/
       );
@@ -708,7 +707,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
         c: { val: NaN, type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
       const sql = "INSERT INTO nodb_tab_clob_in (id, clob_1) VALUES (:i, :c)";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindVar),
         /NJS-011:/
       );
@@ -721,7 +720,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
         c: { val: 0, type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
       const sql = "INSERT INTO nodb_tab_clob_in (id, clob_1) VALUES (:i, :c)";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql, bindVar),
         /NJS-011:/
       );
@@ -750,7 +749,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
         c: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }
       };
       await insertClobWithString(sequence, clobStr);
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar),
         /ORA-06502:/
       );
@@ -763,7 +762,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       const clobStr = random.getRandomString(len, specialStr);
       const bindVar = [ sequence, { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len - 1 } ];
       await insertClobWithString(sequence, clobStr);
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar),
         /ORA-06502:/
       );

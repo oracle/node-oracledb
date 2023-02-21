@@ -86,7 +86,7 @@ describe('175. soda7.js', () => {
 
     // Fetch back
     const numberToSkip = 3;
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await collection.find().skip(numberToSkip).count(),
       /ORA-40748:/
     );
@@ -111,7 +111,7 @@ describe('175. soda7.js', () => {
 
     // Fetch back
     const numberToLimit = 5;
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await collection.find().skip(numberToLimit).count(),
       /ORA-40748:/
     );
@@ -278,7 +278,7 @@ describe('175. soda7.js', () => {
     assert.strictEqual(myContents.length, t_contents.length);
 
     await docCursor.close();
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await docCursor.close(),
       /NJS-066: invalid SODA document cursor/
     );

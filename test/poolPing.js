@@ -32,9 +32,8 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const assert   = require('should');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe("73. poolPing.js", function() {
 
@@ -184,7 +183,7 @@ describe("73. poolPing.js", function() {
   it("73.17 Negative: null", async function() {
     oracledb.poolPingInterval = 789;
     const config = {...dbConfig, poolPingInterval: null};
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await oracledb.createPool(config),
       /NJS-007:/
     );
@@ -198,7 +197,7 @@ describe("73. poolPing.js", function() {
 
   it("73.19 can be set at pool creation. Negative: NaN", async function() {
     const config = {...dbConfig, poolPingInterval: NaN};
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await oracledb.createPool(config),
       /NJS-007:/
     );
@@ -206,7 +205,7 @@ describe("73. poolPing.js", function() {
 
   it("73.20 can be set at pool creation. Negative: 'random-string'", async function() {
     const config = {...dbConfig, poolPingInterval: "random-string"};
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await oracledb.createPool(config),
       /NJS-007:/
     );
@@ -216,7 +215,7 @@ describe("73. poolPing.js", function() {
     const upperLimit = 2147483647; // 2GB
     await testPoolDefine(upperLimit, upperLimit);
     const config = {...dbConfig, poolPingInterval: upperLimit + 1};
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await oracledb.createPool(config),
       /NJS-007:/
     );
@@ -226,7 +225,7 @@ describe("73. poolPing.js", function() {
     const lowerLimit = -2147483648;
     await testPoolDefine(lowerLimit, lowerLimit);
     const config = {...dbConfig, poolPingInterval: lowerLimit - 1};
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await oracledb.createPool(config),
       /NJS-007:/
     );

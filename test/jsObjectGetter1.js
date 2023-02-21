@@ -33,8 +33,8 @@
 'use strict';
 
 const oracledb = require('oracledb');
+const assert = require('assert');
 const dbConfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('140. jsObjectGetter1.js', function() {
 
@@ -85,7 +85,7 @@ describe('140. jsObjectGetter1.js', function() {
     });
 
     it('140.1.1 ProcessBindsByName()', async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(sql, bindObj);
         },
@@ -94,7 +94,7 @@ describe('140. jsObjectGetter1.js', function() {
     });
 
     it('140.1.2 ProcessBindsByPos()', async function() {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(sql, [bindObj]);
         },
@@ -131,7 +131,7 @@ describe('140. jsObjectGetter1.js', function() {
         }
       });
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             "begin nodb_proc_v8_out(:i, :o); end;",
@@ -205,7 +205,7 @@ describe('140. jsObjectGetter1.js', function() {
         }
       });
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           const sql = "BEGIN nodb_v8pkg.array_in(:beach_in, :depth_in); END;";
           await connection.execute(sql, foo);
@@ -222,7 +222,7 @@ describe('140. jsObjectGetter1.js', function() {
         }
       });
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           const sql = "BEGIN nodb_v8pkg.array_in(:beach_in, :depth_in); END;";
           const binds = {
@@ -251,7 +251,7 @@ describe('140. jsObjectGetter1.js', function() {
         }
       });
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           const sql = "SELECT TO_DATE('2017-01-09', 'YYYY-DD-MM') FROM DUAL";
           await connection.execute(sql, [], foo);
@@ -275,7 +275,7 @@ describe('140. jsObjectGetter1.js', function() {
         fetchInfo : { "TS_DATE": foo }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           const sql = "SELECT TO_DATE('2017-01-09', 'YYYY-DD-MM') FROM DUAL";
           await connection.execute(sql, [], option);
@@ -290,7 +290,7 @@ describe('140. jsObjectGetter1.js', function() {
 
     const dotest = async function(opt) {
       const sql = "INSERT INTO " + tableName + " VALUES(1405, 'Changjie Lin')";
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(sql, opt);
         },
@@ -335,7 +335,7 @@ describe('140. jsObjectGetter1.js', function() {
       });
 
       const sql = "select * from " + tableName;
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(sql, options);
         },
@@ -347,7 +347,7 @@ describe('140. jsObjectGetter1.js', function() {
   describe('140.7 Negative: Pool object', function() {
 
     const dotest = async function(opt) {
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await oracledb.createPool(opt);
         },
@@ -468,7 +468,7 @@ describe('140. jsObjectGetter1.js', function() {
         }
       });
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await oracledb.getConnection(cred);
         },
@@ -485,7 +485,7 @@ describe('140. jsObjectGetter1.js', function() {
         }
       });
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await oracledb.getConnection(cred);
         },
@@ -502,7 +502,7 @@ describe('140. jsObjectGetter1.js', function() {
         }
       });
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await oracledb.getConnection(cred);
         },
@@ -518,7 +518,7 @@ describe('140. jsObjectGetter1.js', function() {
           throw new Error('Nope');
         }
       });
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await oracledb.getConnection(cred);
         },

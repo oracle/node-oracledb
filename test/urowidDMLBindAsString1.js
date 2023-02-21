@@ -33,10 +33,9 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var assert   = require('assert');
-var dbConfig = require('./dbconfig.js');
-var testsUtil = require('./testsUtil.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
 
 describe('114. urowidDMLBindAsString1.js', function() {
   let connection;
@@ -123,7 +122,7 @@ describe('114. urowidDMLBindAsString1.js', function() {
         c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql_insert, bindVar),
         /NJS-011:/
       );
@@ -206,7 +205,7 @@ describe('114. urowidDMLBindAsString1.js', function() {
         c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await connection.execute(sql_insert, bindVar),
         /NJS-011:/
       );

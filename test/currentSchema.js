@@ -94,7 +94,7 @@ describe('191. currentSchema.js', function() {
       await conn.close();
     }
 
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await setInvalidSchema(),
       /ORA-01435|ORA-28726/
     );

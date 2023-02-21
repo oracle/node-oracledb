@@ -31,32 +31,25 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
 
 describe('44. plsqlBindIndexedTable2.js', function() {
 
-  var credentials = {
+  const credentials = {
     user:          dbConfig.user,
     password:      dbConfig.password,
     connectString: dbConfig.connectString
   };
 
-  var connection = null;
+  let connection;
 
-  beforeEach(function(done) {
-    async.series([
-      function(callback) {
-        oracledb.getConnection(credentials, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          callback();
-        });
-      },
-      function createTab(callback) {
-        var proc =  "BEGIN \n" +
+  beforeEach(async function() {
+
+    connection = await  oracledb.getConnection(credentials);
+
+    let proc =  "BEGIN \n" +
                     "  DECLARE \n" +
                     "    e_table_missing EXCEPTION; \n" +
                     "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
@@ -71,17 +64,9 @@ describe('44. plsqlBindIndexedTable2.js', function() {
                     "   '); \n" +
                     "END; ";
 
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
+    await connection.execute(proc);
 
-      },
-      function createPkg(callback) {
-        var proc = "CREATE OR REPLACE PACKAGE nodb_beachpkg IS\n" +
+    proc = "CREATE OR REPLACE PACKAGE nodb_beachpkg IS\n" +
                    "  TYPE beachType IS TABLE OF VARCHAR2(30) INDEX BY BINARY_INTEGER;\n" +
                    "  TYPE depthType IS TABLE OF NUMBER       INDEX BY BINARY_INTEGER;\n" +
                    "  PROCEDURE array_in(beaches IN beachType, depths IN depthType);\n" +
@@ -89,16 +74,8 @@ describe('44. plsqlBindIndexedTable2.js', function() {
                    "  PROCEDURE array_inout(beaches IN OUT beachType, depths IN OUT depthType); \n" +
                    "END;";
 
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        var proc = "CREATE OR REPLACE PACKAGE BODY nodb_beachpkg IS \n" +
+    await connection.execute(proc);
+    proc = "CREATE OR REPLACE PACKAGE BODY nodb_beachpkg IS \n" +
                    "  PROCEDURE array_in(beaches IN beachType, depths IN depthType) IS \n" +
                    "  BEGIN \n" +
                    "    IF beaches.COUNT <> depths.COUNT THEN \n" +
@@ -122,591 +99,361 @@ describe('44. plsqlBindIndexedTable2.js', function() {
                    "  END; \n  " +
                    "END;";
 
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.commit(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      }
-    ], done);
+    await connection.execute(proc);
+
+    await connection.commit();
   }); // before
 
-  afterEach(function(done) {
-    async.series([
-      function(callback) {
-        connection.execute(
-          "DROP TABLE nodb_waveheight PURGE",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "DROP PACKAGE nodb_beachpkg",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.release(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      },
-    ], done);
-  }); // after
+  afterEach(async function() {
+    await connection.execute("DROP TABLE nodb_waveheight PURGE");
+    await connection.execute("DROP PACKAGE nodb_beachpkg");
+    await connection.close();
+  });
 
-  it('44.1 example case', function(done) {
-    async.series([
-      // Pass arrays of values to a PL/SQL procedure
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
-          {
-            beach_in: { type: oracledb.STRING,
-              dir:  oracledb.BIND_IN,
-              val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
-            depth_in: { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_IN,
-              val:  [45, 30, 67]
-            }
-          },
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      // Fetch arrays of values from a PL/SQL procedure
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
-          {
-            beach_out: { type: oracledb.STRING,
-              dir:  oracledb.BIND_OUT,
-              maxArraySize: 3 },
-            depth_out: { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_OUT,
-              maxArraySize: 3 }
-          },
-          function(err, result) {
-            should.not.exist(err);
-            // console.log(result.outBinds);
-            (result.outBinds.beach_out).should.eql([ 'Malibu Beach', 'Bondi Beach', 'Waikiki Beach' ]);
-            (result.outBinds.depth_out).should.eql([45, 30, 67]);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.rollback(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      },
-      // Return input arrays sorted by beach name
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
-          {
-            beach_inout: { type: oracledb.STRING,
-              dir:  oracledb.BIND_INOUT,
-              val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
-              maxArraySize: 3},
-            depth_inout: { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_INOUT,
-              val:  [8, 3, 70],
-              maxArraySize: 3}
-          },
-          function(err, result) {
-            should.not.exist(err);
-            //console.log(result.outBinds);
-            (result.outBinds.beach_inout).should.eql([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach' ]);
-            (result.outBinds.depth_inout).should.eql([ 70, 3, 8 ]);
-            callback();
-          }
-        );
+  it('44.1 example case', async function() {
+
+    await connection.execute("BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
+      {
+        beach_in: { type: oracledb.STRING,
+          dir:  oracledb.BIND_IN,
+          val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+        depth_in: { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_IN,
+          val:  [45, 30, 67]
+        }
       }
-    ], done);
+    );
+
+    let result = await connection.execute(
+      "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
+      {
+        beach_out: { type: oracledb.STRING,
+          dir:  oracledb.BIND_OUT,
+          maxArraySize: 3 },
+        depth_out: { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_OUT,
+          maxArraySize: 3 }
+      });
+
+    assert.deepStrictEqual(result.outBinds.beach_out, ([ 'Malibu Beach', 'Bondi Beach', 'Waikiki Beach' ]));
+    assert.deepStrictEqual(result.outBinds.depth_out, ([45, 30, 67]));
+
+    await connection.rollback();
+    result = await connection.execute(
+      "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
+      {
+        beach_inout: { type: oracledb.STRING,
+          dir:  oracledb.BIND_INOUT,
+          val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+          maxArraySize: 3},
+        depth_inout: { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_INOUT,
+          val:  [8, 3, 70],
+          maxArraySize: 3}
+      });
+    assert.deepStrictEqual(result.outBinds.beach_inout, ([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach' ]));
+    assert.deepStrictEqual(result.outBinds.depth_inout, ([ 70, 3, 8 ]));
+
   }); // 44.1
 
-  it('44.2 example case binding by position', function(done) {
-    async.series([
-      // Pass arrays of values to a PL/SQL procedure
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_in(:1, :2); END;",
-          [
-            { type: oracledb.STRING,
-              dir:  oracledb.BIND_IN,
-              val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
-            { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_IN,
-              val:  [45, 30, 67]
-            }
-          ],
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      // Fetch arrays of values from a PL/SQL procedure
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_out(:1, :2); END;",
-          [
-            { type: oracledb.STRING,
-              dir:  oracledb.BIND_OUT,
-              maxArraySize: 3 },
-            { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_OUT,
-              maxArraySize: 3 }
-          ],
-          function(err, result) {
-            should.not.exist(err);
-            // console.log(result.outBinds);
-            (result.outBinds[0]).should.eql([ 'Malibu Beach', 'Bondi Beach', 'Waikiki Beach' ]);
-            (result.outBinds[1]).should.eql([45, 30, 67]);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.rollback(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      },
-      // Return input arrays sorted by beach name
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_inout(:1, :2); END;",
-          [
-            { type: oracledb.STRING,
-              dir:  oracledb.BIND_INOUT,
-              val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
-              maxArraySize: 3},
-            { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_INOUT,
-              val:  [8, 3, 70],
-              maxArraySize: 3}
-          ],
-          function(err, result) {
-            should.not.exist(err);
-            // console.log(result.outBinds);
-            (result.outBinds[0]).should.eql([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach' ]);
-            (result.outBinds[1]).should.eql([ 70, 3, 8 ]);
-            callback();
-          }
-        );
-      }
-    ], done);
+  it('44.2 example case binding by position', async function() {
+
+    await connection.execute(
+      "BEGIN nodb_beachpkg.array_in(:1, :2); END;",
+      [
+        { type: oracledb.STRING,
+          dir:  oracledb.BIND_IN,
+          val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+        { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_IN,
+          val:  [45, 30, 67]
+        }
+      ]);
+
+    let result = await connection.execute(
+      "BEGIN nodb_beachpkg.array_out(:1, :2); END;",
+      [
+        { type: oracledb.STRING,
+          dir:  oracledb.BIND_OUT,
+          maxArraySize: 3 },
+        { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_OUT,
+          maxArraySize: 3 }
+      ]);
+    assert.deepStrictEqual(result.outBinds[0], ([ 'Malibu Beach', 'Bondi Beach', 'Waikiki Beach' ]));
+    assert.deepStrictEqual(result.outBinds[1], ([45, 30, 67]));
+
+    await connection.rollback();
+    result = await connection.execute(
+      "BEGIN nodb_beachpkg.array_inout(:1, :2); END;",
+      [
+        { type: oracledb.STRING,
+          dir:  oracledb.BIND_INOUT,
+          val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+          maxArraySize: 3},
+        { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_INOUT,
+          val:  [8, 3, 70],
+          maxArraySize: 3}
+      ]);
+    assert.deepStrictEqual(result.outBinds[0], ([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach' ]));
+    assert.deepStrictEqual(result.outBinds[1], ([ 70, 3, 8 ]));
+
   });
 
-  it('44.3 default binding type and direction with binding by name', function(done) {
-    async.series([
-      // Pass arrays of values to a PL/SQL procedure
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
-          {
-            beach_in: { //type: oracledb.STRING,
-              //dir:  oracledb.BIND_IN,
-              val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
-            depth_in: { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_IN,
-              val:  [45, 30, 67]
-            }
-          },
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      // Fetch arrays of values from a PL/SQL procedure
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
-          {
-            beach_out: { type: oracledb.STRING,
-              dir:  oracledb.BIND_OUT,
-              maxArraySize: 3 },
-            depth_out: { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_OUT,
-              maxArraySize: 3 }
-          },
-          function(err, result) {
-            should.not.exist(err);
-            // console.log(result.outBinds);
-            (result.outBinds.beach_out).should.eql([ 'Malibu Beach', 'Bondi Beach', 'Waikiki Beach' ]);
-            (result.outBinds.depth_out).should.eql([45, 30, 67]);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.rollback(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      },
-      // Return input arrays sorted by beach name
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
-          {
-            beach_inout: { type: oracledb.STRING,
-              dir:  oracledb.BIND_INOUT,
-              val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
-              maxArraySize: 3},
-            depth_inout: { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_INOUT,
-              val:  [8, 3, 70],
-              maxArraySize: 3}
-          },
-          function(err, result) {
-            should.not.exist(err);
-            //console.log(result.outBinds);
-            (result.outBinds.beach_inout).should.eql([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach' ]);
-            (result.outBinds.depth_inout).should.eql([ 70, 3, 8 ]);
-            callback();
-          }
-        );
+  it('44.3 default binding type and direction with binding by name', async function() {
+
+    await connection.execute(
+      "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
+      {
+        beach_in: { //type: oracledb.STRING,
+          //dir:  oracledb.BIND_IN,
+          val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+        depth_in: { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_IN,
+          val:  [45, 30, 67]
+        }
       }
-    ], done);
+    );
+
+    let result = await connection.execute("BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
+      {
+        beach_out: { type: oracledb.STRING,
+          dir:  oracledb.BIND_OUT,
+          maxArraySize: 3 },
+        depth_out: { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_OUT,
+          maxArraySize: 3 }
+      });
+    assert.deepStrictEqual(result.outBinds.beach_out, ([ 'Malibu Beach', 'Bondi Beach', 'Waikiki Beach' ]));
+    assert.deepStrictEqual(result.outBinds.depth_out, ([45, 30, 67]));
+
+
+    await connection.rollback();
+    result = await connection.execute(
+      "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
+      {
+        beach_inout: { type: oracledb.STRING,
+          dir:  oracledb.BIND_INOUT,
+          val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+          maxArraySize: 3},
+        depth_inout: { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_INOUT,
+          val:  [8, 3, 70],
+          maxArraySize: 3}
+      });
+
+    //console.log(result.outBinds);
+    assert.deepStrictEqual(result.outBinds.beach_inout, ([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach' ]));
+    assert.deepStrictEqual(result.outBinds.depth_inout, ([ 70, 3, 8 ]));
   }); // 44.3
 
-  it('44.4 default binding type and direction with binding by position', function(done) {
-    async.series([
-      // Pass arrays of values to a PL/SQL procedure
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_in(:1, :2); END;",
-          [
-            { type: oracledb.STRING,
-              // dir:  oracledb.BIND_IN,
-              val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
-            { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_IN,
-              val:  [45, 30, 67]
-            }
-          ],
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      // Fetch arrays of values from a PL/SQL procedure
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_out(:1, :2); END;",
-          [
-            { type: oracledb.STRING,
-              dir:  oracledb.BIND_OUT,
-              maxArraySize: 3 },
-            { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_OUT,
-              maxArraySize: 3 }
-          ],
-          function(err, result) {
-            should.not.exist(err);
-            // console.log(result.outBinds);
-            (result.outBinds[0]).should.eql([ 'Malibu Beach', 'Bondi Beach', 'Waikiki Beach' ]);
-            (result.outBinds[1]).should.eql([45, 30, 67]);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.rollback(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      },
-      // Return input arrays sorted by beach name
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_inout(:1, :2); END;",
-          [
-            { type: oracledb.STRING,
-              dir:  oracledb.BIND_INOUT,
-              val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
-              maxArraySize: 3},
-            { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_INOUT,
-              val:  [8, 3, 70],
-              maxArraySize: 3}
-          ],
-          function(err, result) {
-            should.not.exist(err);
-            // console.log(result.outBinds);
-            (result.outBinds[0]).should.eql([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach' ]);
-            (result.outBinds[1]).should.eql([ 70, 3, 8 ]);
-            callback();
-          }
-        );
-      }
-    ], done);
+  it('44.4 default binding type and direction with binding by position', async function() {
+
+    await connection.execute("BEGIN nodb_beachpkg.array_in(:1, :2); END;",
+      [
+        { type: oracledb.STRING,
+          // dir:  oracledb.BIND_IN,
+          val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+        { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_IN,
+          val:  [45, 30, 67]
+        }
+      ]);
+
+
+    let result = await connection.execute(
+      "BEGIN nodb_beachpkg.array_out(:1, :2); END;",
+      [
+        { type: oracledb.STRING,
+          dir:  oracledb.BIND_OUT,
+          maxArraySize: 3 },
+        { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_OUT,
+          maxArraySize: 3 }
+      ]);
+
+    assert.deepStrictEqual(result.outBinds[0], ([ 'Malibu Beach', 'Bondi Beach', 'Waikiki Beach' ]));
+    assert.deepStrictEqual(result.outBinds[1], ([45, 30, 67]));
+
+    await connection.rollback();
+    result = await connection.execute(
+      "BEGIN nodb_beachpkg.array_inout(:1, :2); END;",
+      [
+        { type: oracledb.STRING,
+          dir:  oracledb.BIND_INOUT,
+          val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+          maxArraySize: 3},
+        { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_INOUT,
+          val:  [8, 3, 70],
+          maxArraySize: 3}
+      ]);
+    assert.deepStrictEqual(result.outBinds[0], ([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach' ]));
+    assert.deepStrictEqual(result.outBinds[1], ([ 70, 3, 8 ]));
+
   });
 
-  it('44.5 null elements in String and Number arrays', function(done) {
-    async.series([
-      // Pass arrays of values to a PL/SQL procedure
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
-          {
-            beach_in: { type: oracledb.STRING,
-              dir:  oracledb.BIND_IN,
-              val:  ["Malibu Beach", "Bondi Beach", null, "Waikiki Beach", '', null] },
-            depth_in: { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_IN,
-              val:  [null, null, 45, 30, 67, null, ]
-            }
-          },
-          function(err) {
-            callback(err);
-          }
-        );
-      },
-      // Fetch arrays of values from a PL/SQL procedure
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
-          {
-            beach_out: { type: oracledb.STRING,
-              dir:  oracledb.BIND_OUT,
-              maxArraySize: 10 },
-            depth_out: { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_OUT,
-              maxArraySize: 10 }
-          },
-          function(err, result) {
-            should.not.exist(err);
-            // console.log(result.outBinds);
-            (result.outBinds.beach_out).should.eql([ 'Malibu Beach', 'Bondi Beach', null, 'Waikiki Beach', null, null ]);
-            (result.outBinds.depth_out).should.eql([ null, null, 45, 30, 67, null ]);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.rollback(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      },
-      // Return input arrays sorted by beach name
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
-          {
-            beach_inout: { type: oracledb.STRING,
-              dir:  oracledb.BIND_INOUT,
-              val:  ["Port Melbourne Beach", "Eighty Mile Beach", '', "Chesil Beach", null, ''],
-              maxArraySize: 10},
-            depth_inout: { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_INOUT,
-              val:  [null, 8, null, 3, null, 70],
-              maxArraySize: 10}
-          },
-          function(err, result) {
-            should.not.exist(err);
-            // console.log(result.outBinds);
-            (result.outBinds.beach_inout).should.eql([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach', null, null, null ]);
-            (result.outBinds.depth_inout).should.eql([ 3, 8, null, null, 70, null ]);
-            callback();
-          }
-        );
-      }
-    ], done);
+  it('44.5 null elements in String and Number arrays', async function() {
+
+    await connection.execute(
+      "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
+      {
+        beach_in: { type: oracledb.STRING,
+          dir:  oracledb.BIND_IN,
+          val:  ["Malibu Beach", "Bondi Beach", null, "Waikiki Beach", '', null] },
+        depth_in: { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_IN,
+          val:  [null, null, 45, 30, 67, null, ]
+        }
+      });
+
+    let result = await connection.execute(
+      "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
+      {
+        beach_out: { type: oracledb.STRING,
+          dir:  oracledb.BIND_OUT,
+          maxArraySize: 10 },
+        depth_out: { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_OUT,
+          maxArraySize: 10 }
+      });
+    assert.deepStrictEqual(result.outBinds.beach_out, ([ 'Malibu Beach', 'Bondi Beach', null, 'Waikiki Beach', null, null ]));
+    assert.deepStrictEqual(result.outBinds.depth_out, ([ null, null, 45, 30, 67, null ]));
+
+
+    await connection.rollback();
+
+    result = await connection.execute(
+      "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
+      {
+        beach_inout: { type: oracledb.STRING,
+          dir:  oracledb.BIND_INOUT,
+          val:  ["Port Melbourne Beach", "Eighty Mile Beach", '', "Chesil Beach", null, ''],
+          maxArraySize: 10},
+        depth_inout: { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_INOUT,
+          val:  [null, 8, null, 3, null, 70],
+          maxArraySize: 10}
+      });
+
+    // console.log(result.outBinds);
+    assert.deepStrictEqual(result.outBinds.beach_inout, ([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach', null, null, null ]));
+    assert.deepStrictEqual(result.outBinds.depth_inout, ([ 3, 8, null, null, 70, null ]));
   }); // 44.5
 
-  it('44.6 empty array for BIND_IN and BIND_INOUT', function(done) {
-    async.series([
-      // Pass arrays of values to a PL/SQL procedure
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
-          {
-            beach_in: { type: oracledb.STRING,
-              dir:  oracledb.BIND_IN,
-              val:  [] },
-            depth_in: { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_IN,
-              val:  []
-            }
+  it('44.6 empty array for BIND_IN and BIND_INOUT', async function() {
+
+    await connection.execute("BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
+      {
+        beach_in: { type: oracledb.STRING,
+          dir:  oracledb.BIND_IN,
+          val:  [] },
+        depth_in: { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_IN,
+          val:  []
+        }
+      });
+
+    await assert.rejects(
+
+      async () => await connection.execute(
+        "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
+        {
+          beach_inout: { type: oracledb.STRING,
+            dir:  oracledb.BIND_INOUT,
+            val:  [],
+            maxArraySize: 0
           },
-          function(err) {
-            callback(err);
-          }
-        );
-      },
-      // Return input arrays sorted by beach name
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
-          {
-            beach_inout: { type: oracledb.STRING,
-              dir:  oracledb.BIND_INOUT,
-              val:  [],
-              maxArraySize: 0
-            },
-            depth_inout: { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_INOUT,
-              val:  [],
-              maxArraySize: 3}
-          },
-          function(err) {
-            should.exist(err);
-            (err.message).should.startWith('NJS-007:');
-            callback();
-          }
-        );
-      }
-    ], done);
+          depth_inout: { type: oracledb.NUMBER,
+            dir:  oracledb.BIND_INOUT,
+            val:  [],
+            maxArraySize: 3}
+        }),
+      /NJS-007:/);
+
+
   }); // 44.6
 
-  it('44.7 empty array for BIND_OUT', function(done) {
-    async.series([
-      function(callback) {
-        var proc = "CREATE OR REPLACE PACKAGE\n" +
+  it('44.7 empty array for BIND_OUT', async function() {
+
+    let proc = "CREATE OR REPLACE PACKAGE\n" +
                       "oracledb_testpack\n" +
                       "IS\n" +
                       "  TYPE stringsType IS TABLE OF VARCHAR2(2000) INDEX BY BINARY_INTEGER;\n" +
                       "  PROCEDURE test(p OUT stringsType);\n" +
                       "END;";
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
+    await connection.execute(proc);
+
+    proc = "CREATE OR REPLACE PACKAGE BODY\n" +
                      "oracledb_testpack\n" +
                      "IS\n" +
                      "  PROCEDURE test(p OUT stringsType) IS BEGIN NULL; END;\n" +
                      "END;";
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "BEGIN oracledb_testpack.test(:0); END;",
-          [
-            {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxArraySize: 1}
-          ],
-          function(err, result) {
-            should.not.exist(err);
-            result.outBinds[0].should.eql([]);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "DROP PACKAGE oracledb_testpack",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      }
-    ], done);
+    await connection.execute(proc);
+
+    let result = await connection.execute("BEGIN oracledb_testpack.test(:0); END;",
+      [
+        {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxArraySize: 1}
+      ]
+    );
+    assert.deepStrictEqual(result.outBinds[0], []);
+    // result.outBinds[0].should.eql([]);
+
+    await connection.execute("DROP PACKAGE oracledb_testpack");
+
   }); // 44.7
 
-  it('44.8 maxSize option applies to each elements of an array', function(done) {
-    async.series([
-      // Pass arrays of values to a PL/SQL procedure
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
-          {
-            beach_in: { type: oracledb.STRING,
-              dir:  oracledb.BIND_IN,
-              val:  ["Malibu", "Bondi", "Waikiki"] },
-            depth_in: { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_IN,
-              val:  [45, 30, 67]
-            }
-          },
-          function(err) {
-            callback(err);
-          }
-        );
-      },
-      // Fetch arrays of values from a PL/SQL procedure
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
-          {
-            beach_out: { type: oracledb.STRING,
-              dir:  oracledb.BIND_OUT,
-              maxArraySize: 3,
-              maxSize: 6 },
-            depth_out: { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_OUT,
-              maxArraySize: 3 }
-          },
-          function(err) {
-            should.exist(err);
-            (err.message).should.startWith('ORA-06502:');
-            // ORA-06502: PL/SQL: numeric or value error: host bind array too small
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.rollback(function(err) {
-          callback(err);
-        });
-      },
-      // Return input arrays sorted by beach name
-      function(callback) {
-        connection.execute(
-          "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
-          {
-            beach_inout: { type: oracledb.STRING,
-              dir:  oracledb.BIND_INOUT,
-              val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
-              maxArraySize: 3,
-              maxSize : 5},
-            depth_inout: { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_INOUT,
-              val:  [8, 3, 70],
-              maxArraySize: 3}
-          },
-          function(err) {
-            should.exist(err);
-            (err.message).should.startWith('NJS-058:');
-            callback();
-          }
-        );
-      }
-    ], done);
+  it('44.8 maxSize option applies to each elements of an array', async function() {
+
+    await connection.execute("BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
+      {
+        beach_in: { type: oracledb.STRING,
+          dir:  oracledb.BIND_IN,
+          val:  ["Malibu", "Bondi", "Waikiki"] },
+        depth_in: { type: oracledb.NUMBER,
+          dir:  oracledb.BIND_IN,
+          val:  [45, 30, 67]
+        }
+      });
+    await assert.rejects(
+
+      async () => await connection.execute(
+        "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
+        {
+          beach_out: { type: oracledb.STRING,
+            dir:  oracledb.BIND_OUT,
+            maxArraySize: 3,
+            maxSize: 6 },
+          depth_out: { type: oracledb.NUMBER,
+            dir:  oracledb.BIND_OUT,
+            maxArraySize: 3 }
+        }
+      ),
+
+      /ORA-06502:/
+    );
+
+    await connection.rollback();
+    await assert.rejects(
+
+      async () => await connection.execute(
+        "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
+        {
+          beach_inout: { type: oracledb.STRING,
+            dir:  oracledb.BIND_INOUT,
+            val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+            maxArraySize: 3,
+            maxSize : 5},
+          depth_inout: { type: oracledb.NUMBER,
+            dir:  oracledb.BIND_INOUT,
+            val:  [8, 3, 70],
+            maxArraySize: 3}
+        }),
+      /NJS-058:/
+    );
+
+
   }); // 44.8
 
 });

@@ -147,7 +147,7 @@ describe('248. userName.js', function() {
       const userSchema = await assist.createSchemaString(1000);
       const sql = `create user ${userSchema} identified by welcome`;
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await dbaConn.execute(sql),
         /ORA-00972:/
       );
@@ -335,7 +335,7 @@ describe('248. userName.js', function() {
       const userSchema = await assist.createSchemaString(1000);
       const sql = `create user ${userSchema} identified by welcome`;
       const dbaConn = await oracledb.getConnection(dbaCredential);
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await dbaConn.execute(sql),
         /ORA-00972:/
       );

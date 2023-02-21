@@ -33,501 +33,287 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 const dbconfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('187. plsqlBindList.js', function() {
 
   async function bindNumberListByPosition(conn, binds) {
     const callSql = "begin pkg_bind_number_list_test.TestArrays(:1, :2); end;";
-    try {
-      return await conn.execute(callSql, binds);
-    } catch (err) {
-      should.not.exist(err);
-    }
+    return await conn.execute(callSql, binds);
   }
 
   async function bindStringListByPosition(conn, binds) {
     const callSql = "begin pkg_bind_string_list_test.TestArrays(:1, :2); end;";
-    try {
-      return await conn.execute(callSql, binds);
-    } catch (err) {
-      should.not.exist(err);
-    }
+    return await conn.execute(callSql, binds);
   }
 
   async function bindNumberListByName(conn, binds) {
     const callSql = "begin pkg_bind_number_list_test.TestArrays( :bind_arg1 , :bind_arg2 ); end;";
-    try {
-      return await conn.execute(callSql, binds);
-    } catch (err) {
-      should.not.exist(err);
-    }
+    return await conn.execute(callSql, binds);
   }
 
   async function bindStringListByName(conn, binds) {
     const callSql = "begin pkg_bind_string_list_test.TestArrays( :bind_arg1 , :bind_arg2 ); end;";
-    try {
-      return await conn.execute(callSql, binds);
-    } catch (err) {
-      should.not.exist(err);
-    }
+    return await conn.execute(callSql, binds);
   }
 
   before(async function() {
-    let conn;
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let packageSql =
-        "create or replace package pkg_bind_number_list_test as \n" +
-        "  type udt_NumberList is table of number index by binary_integer; \n" +
-        "  procedure TestArrays ( \n" +
-        "    a_InArray           udt_NumberList, \n" +
-        "    a_Sum               out number \n" +
-        "  ); \n" +
-        "end;";
-      await conn.execute(packageSql);
-      packageSql =
-        "create or replace package body pkg_bind_number_list_test as \n" +
-        "  procedure TestArrays ( \n" +
-        "    a_InArray           udt_NumberList,\n" +
-        "    a_Sum               out number \n" +
-        "  ) is \n" +
-        "  begin \n" +
-        "    a_Sum := 0; \n" +
-        "    for i in 1..a_InArray.count loop \n" +
-        "      a_Sum := a_Sum + a_InArray(i); \n" +
-        "    end loop; \n" +
-        "  end; \n" +
-        "end; \n";
-      await conn.execute(packageSql);
-      packageSql =
-        "create or replace package pkg_bind_string_list_test as \n" +
-        "  type udt_StringList is table of VARCHAR2(64) index by binary_integer; \n" +
-        "  procedure TestArrays ( \n" +
-        "    a_InArray           udt_StringList, \n" +
-        "    a_Sum               out VARCHAR2 \n" +
-        "  ); \n" +
-        "end;";
-      await conn.execute(packageSql);
-      packageSql =
-        "create or replace package body pkg_bind_string_list_test as \n" +
-        "  procedure TestArrays ( \n" +
-        "    a_InArray           udt_StringList,\n" +
-        "    a_Sum               out VARCHAR2 \n" +
-        "  ) is \n" +
-        "  begin \n" +
-        "    a_Sum := ''; \n" +
-        "    for i in 1..a_InArray.count loop \n" +
-        "      a_Sum := a_Sum || a_InArray(i); \n" +
-        "    end loop; \n" +
-        "  end; \n" +
-        "end; \n";
-      await conn.execute(packageSql);
-    } catch (err) {
-      should.not.exist(err);
-    } finally {
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          should.not.exist(err);
-        }
-      }
-    }
+    const conn = await oracledb.getConnection(dbconfig);
+    let packageSql =
+      "create or replace package pkg_bind_number_list_test as \n" +
+      "  type udt_NumberList is table of number index by binary_integer; \n" +
+      "  procedure TestArrays ( \n" +
+      "    a_InArray           udt_NumberList, \n" +
+      "    a_Sum               out number \n" +
+      "  ); \n" +
+      "end;";
+    await conn.execute(packageSql);
+    packageSql =
+      "create or replace package body pkg_bind_number_list_test as \n" +
+      "  procedure TestArrays ( \n" +
+      "    a_InArray           udt_NumberList,\n" +
+      "    a_Sum               out number \n" +
+      "  ) is \n" +
+      "  begin \n" +
+      "    a_Sum := 0; \n" +
+      "    for i in 1..a_InArray.count loop \n" +
+      "      a_Sum := a_Sum + a_InArray(i); \n" +
+      "    end loop; \n" +
+      "  end; \n" +
+      "end; \n";
+    await conn.execute(packageSql);
+    packageSql =
+      "create or replace package pkg_bind_string_list_test as \n" +
+      "  type udt_StringList is table of VARCHAR2(64) index by binary_integer; \n" +
+      "  procedure TestArrays ( \n" +
+      "    a_InArray           udt_StringList, \n" +
+      "    a_Sum               out VARCHAR2 \n" +
+      "  ); \n" +
+      "end;";
+    await conn.execute(packageSql);
+    packageSql =
+      "create or replace package body pkg_bind_string_list_test as \n" +
+      "  procedure TestArrays ( \n" +
+      "    a_InArray           udt_StringList,\n" +
+      "    a_Sum               out VARCHAR2 \n" +
+      "  ) is \n" +
+      "  begin \n" +
+      "    a_Sum := ''; \n" +
+      "    for i in 1..a_InArray.count loop \n" +
+      "      a_Sum := a_Sum || a_InArray(i); \n" +
+      "    end loop; \n" +
+      "  end; \n" +
+      "end; \n";
+    await conn.execute(packageSql);
+    await conn.close();
   });
 
   after(async function() {
-    let conn;
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      await conn.execute("drop package pkg_bind_number_list_test");
-      await conn.execute("drop package pkg_bind_string_list_test");
-    } catch (err) {
-      should.not.exist(err);
-    } finally {
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          should.not.exist(err);
-        }
-      }
-    }
+    const conn = await oracledb.getConnection(dbconfig);
+    await conn.execute("drop package pkg_bind_number_list_test");
+    await conn.execute("drop package pkg_bind_string_list_test");
+    await conn.close();
   });
 
   describe('187.1 Positive Cases', function() {
 
     it('187.1.1 Bind Object of List by position with type specified', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        const res = await bindNumberListByPosition(conn, [
-          { type: oracledb.NUMBER, val: [ 1, 2, 3, 4, 5 ] },
-          { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-        ]);
-        should.strictEqual(res.outBinds[0], 15);
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const res = await bindNumberListByPosition(conn, [
+        { type: oracledb.NUMBER, val: [ 1, 2, 3, 4, 5 ] },
+        { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      ]);
+      assert.strictEqual(res.outBinds[0], 15);
+      await conn.close();
     });
 
     it('187.1.2 Bind Object of List by name with type specified', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        const res = await bindNumberListByName(conn, {
-          bind_arg1: { type: oracledb.NUMBER, val: [ 1, 2, 3, 4, 5 ] },
-          bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-        });
-        should.strictEqual(res.outBinds.bind_arg2, 15);
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const res = await bindNumberListByName(conn, {
+        bind_arg1: { type: oracledb.NUMBER, val: [ 1, 2, 3, 4, 5 ] },
+        bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      });
+      assert.strictEqual(res.outBinds.bind_arg2, 15);
+      await conn.close();
     });
 
     it('187.1.3 Bind List by position without type specified', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        const res = await bindNumberListByPosition(conn, [
-          [ 1, 2, 3, 4, 5 ],
-          { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-        ]);
-        should.strictEqual(res.outBinds[0], 15);
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const res = await bindNumberListByPosition(conn, [
+        [ 1, 2, 3, 4, 5 ],
+        { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      ]);
+      assert.strictEqual(res.outBinds[0], 15);
+      await conn.close();
     });
 
     it('187.1.4 Bind List by name without type specified', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        const res = await bindNumberListByName(conn, {
-          bind_arg1: [ 1, 2, 3, 4, 5 ],
-          bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-        });
-        should.strictEqual(res.outBinds.bind_arg2, 15);
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const res = await bindNumberListByName(conn, {
+        bind_arg1: [ 1, 2, 3, 4, 5 ],
+        bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      });
+      assert.strictEqual(res.outBinds.bind_arg2, 15);
+      await conn.close();
     });
 
     it('187.1.5 Bind STRING List by name without type specified', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        const res = await bindStringListByName(conn, {
-          bind_arg1: [ "1", "2", "3", "4", "5" ],
-          bind_arg2: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
-        });
-        should.strictEqual(res.outBinds.bind_arg2, "12345");
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const res = await bindStringListByName(conn, {
+        bind_arg1: [ "1", "2", "3", "4", "5" ],
+        bind_arg2: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+      });
+      assert.strictEqual(res.outBinds.bind_arg2, "12345");
+      await conn.close();
     });
 
     it('187.1.6 Bind STRING List by position without type specified', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        const res = await bindStringListByPosition(conn, [
-          [ "1", "2", "3", "4", "5" ],
-          { type: oracledb.STRING, dir: oracledb.BIND_OUT },
-        ]);
-        should.strictEqual(res.outBinds[0], "12345");
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const res = await bindStringListByPosition(conn, [
+        [ "1", "2", "3", "4", "5" ],
+        { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+      ]);
+      assert.strictEqual(res.outBinds[0], "12345");
+      await conn.close();
     });
+
   });
 
   describe('187.2 Negative Cases', function() {
 
     it('187.2.1 Bind Empty List by position with type specified', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        let res = await bindNumberListByPosition(conn, [
-          { type: oracledb.NUMBER, val: [] },
-          { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-        ]);
-        should.strictEqual(res.outBinds[0], 0);
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const res = await bindNumberListByPosition(conn, [
+        { type: oracledb.NUMBER, val: [] },
+        { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      ]);
+      assert.strictEqual(res.outBinds[0], 0);
+      await conn.close();
     });
 
     it('187.2.2 Bind Empty List by position without type specified', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        await testsUtil.assertThrowsAsync(async () => {
-          await bindNumberListByPosition(conn, [
-            [],
-            { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          ]);
-        // PLS-00418: array bind type must match PL/SQL table row type
-        }, /PLS-00418:/);
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const binds = [
+        [],
+        { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
+      ];
+      await assert.rejects(
+        async () => await bindNumberListByPosition(conn, binds),
+        /PLS-00418:/
+      );
+      // PLS-00418: array bind type must match PL/SQL table row type
+      await conn.close();
     });
 
     it('187.2.3 Bind Empty List by name with type specified', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        const res = await bindNumberListByName(conn, {
-          bind_arg1: { type: oracledb.NUMBER, val: [] },
-          bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-        });
-        should.strictEqual(res.outBinds.bind_arg2, 0);
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const res = await bindNumberListByName(conn, {
+        bind_arg1: { type: oracledb.NUMBER, val: [] },
+        bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      });
+      assert.strictEqual(res.outBinds.bind_arg2, 0);
+      await conn.close();
     });
 
     it('187.2.4 Bind Empty List by name without type specified', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        await testsUtil.assertThrowsAsync(async () => {
-          await bindNumberListByName(conn, {
-            bind_arg1: [],
-            bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          });
-        // PLS-00418: array bind type must match PL/SQL table row type
-        }, /PLS-00418:/);
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const binds = {
+        bind_arg1: [],
+        bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      };
+      await assert.rejects(
+        async () => await bindNumberListByName(conn, binds),
+        /PLS-00418:/
+      );
+      // PLS-00418: array bind type must match PL/SQL table row type
+      await conn.close();
     });
 
     it('187.2.5 Bind NUMBER List by name with STRING as first element', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        await testsUtil.assertThrowsAsync(async () => {
-          await bindNumberListByName(conn, {
-            bind_arg1: [ "1", 2, 3, 4, 5 ],
-            bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          });
-        // NJS-037: invalid data type at array index 0 for bind ":bind_arg1"
-        }, /NJS-037:/);
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const binds = {
+        bind_arg1: [ "1", 2, 3, 4, 5 ],
+        bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      };
+      await assert.rejects(
+        async () => await bindNumberListByName(conn, binds),
+        /NJS-037:/
+      );
+      // NJS-037: invalid data type at array index 0 for bind ":bind_arg1"
+      await conn.close();
     });
 
     it('187.2.6 Bind NUMBER List by position with STRING as second element', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        await testsUtil.assertThrowsAsync(async () => {
-          await bindNumberListByPosition(conn, [
-            [ 1, "2", 3, 4, 5 ],
-            { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          ]);
-        // NJS-052: invalid data type at array index 1 for bind position 1
-        }, /NJS-052:/);
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const binds = [
+        [ 1, "2", 3, 4, 5 ],
+        { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
+      ];
+      await assert.rejects(
+        async () => await bindNumberListByPosition(conn, binds),
+        /NJS-052:/
+      );
+      // NJS-052: invalid data type at array index 1 for bind position 1
+      await conn.close();
     });
 
     it('187.2.7 Bind STRING List by name while required type is NUMBER', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        await testsUtil.assertThrowsAsync(async () => {
-          await bindNumberListByName(conn, {
-            bind_arg1: [ "1", "2", "3", "4", "5" ],
-            bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          });
-        // PLS-00418: array bind type must match PL/SQL table row type"
-        }, /PLS-00418:/);
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const binds = {
+        bind_arg1: [ "1", "2", "3", "4", "5" ],
+        bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      };
+      await assert.rejects(
+        async () => await bindNumberListByName(conn, binds),
+        /PLS-00418:/
+      );
+      // PLS-00418: array bind type must match PL/SQL table row type"
+      await conn.close();
     });
 
     it('187.2.8 Bind STRING List by position while required type is NUMBER', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        await testsUtil.assertThrowsAsync(async () => {
-          await bindNumberListByPosition(conn, [
-            [ "1", "2", "3", "4", "5" ],
-            { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          ]);
-        // PLS-00418: array bind type must match PL/SQL table row type"
-        }, /PLS-00418:/);
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const binds = [
+        [ "1", "2", "3", "4", "5" ],
+        { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      ];
+      await assert.rejects(
+        async () => await bindNumberListByPosition(conn, binds),
+        /PLS-00418:/
+      );
+      // PLS-00418: array bind type must match PL/SQL table row type"
+      await conn.close();
     });
 
     it('187.2.9 Bind NUMBER List by name while required type is STRING', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        await testsUtil.assertThrowsAsync(async () => {
-          await bindStringListByName(conn, {
-            bind_arg1: [ 1, 2, 3, 4, 5 ],
-            bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          });
-        // PLS-00418: array bind type must match PL/SQL table row type"
-        }, /PLS-00418:/);
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const binds = {
+        bind_arg1: [ 1, 2, 3, 4, 5 ],
+        bind_arg2: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      };
+      await assert.rejects(
+        async () => await bindStringListByName(conn, binds),
+        /PLS-00418:/
+      );
+      // PLS-00418: array bind type must match PL/SQL table row type"
+      await conn.close();
     });
 
     it('187.2.10 Bind NUMBER List by position while required type is STRING', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbconfig);
-        await testsUtil.assertThrowsAsync(async () => {
-          await bindStringListByPosition(conn, [
-            [ 1, 2, 3, 4, 5 ],
-            { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          ]);
-        // PLS-00418: array bind type must match PL/SQL table row type"
-        }, /PLS-00418:/);
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbconfig);
+      const binds = [
+        [ 1, 2, 3, 4, 5 ],
+        { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      ];
+      await assert.rejects(
+        async () => await bindStringListByPosition(conn, binds),
+        /PLS-00418:/
+      );
+      // PLS-00418: array bind type must match PL/SQL table row type"
+      await conn.close();
     });
+
   });
+
 });

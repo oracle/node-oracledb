@@ -35,7 +35,6 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const fs       = require('fs');
-const testsUtil = require('./testsUtil.js');
 
 describe('54. lobClose.js', function() {
 
@@ -73,7 +72,7 @@ describe('54. lobClose.js', function() {
     const inFileName = './test/clobexample.txt';
     const inStream = fs.createReadStream(inFileName);
     inStream.pipe(lob);
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => {
         await new Promise((resolve, reject) => {
           inStream.on("error", reject);
@@ -94,7 +93,7 @@ describe('54. lobClose.js', function() {
     const inFileName = './test/clobexample.txt';
     const inStream = fs.createReadStream(inFileName);
     inStream.pipe(lob2);
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => {
         await new Promise((resolve, reject) => {
           inStream.on("error", reject);

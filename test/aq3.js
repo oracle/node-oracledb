@@ -127,7 +127,7 @@ describe('219. aq3.js', function() {
   it('219.4 Negative - Set "maxMessages" argument to be -5', async () => {
     const queue = await conn.getQueue(rawQueueName);
 
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => {
         await queue.deqMany(-5);
       },
@@ -138,7 +138,7 @@ describe('219. aq3.js', function() {
   it('219.5 Negative - Set "maxMessages" argument to be 0', async () => {
     const queue = await conn.getQueue(rawQueueName);
 
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => {
         await queue.deqMany(0);
       },

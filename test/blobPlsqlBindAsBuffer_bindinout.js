@@ -37,7 +37,6 @@ const fs       = require('fs');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
 const assist   = require('./dataTypeAssist.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
 
@@ -340,7 +339,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         io: { val: NaN, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -358,7 +357,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         io: { val: 0, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -432,7 +431,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         io: { val: 200, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -465,7 +464,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         io: { val: {}, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 50000 }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -546,7 +545,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -568,7 +567,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -589,7 +588,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -607,7 +606,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
       let bufferStr = Buffer.from(bigStr, "utf-8");
       let bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 } ];
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             "begin nodb_blob_in_out_791(:1, :2); end;",
@@ -626,7 +625,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
       let bufferStr = Buffer.from(bigStr, "utf-8");
       let bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 } ];
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             "begin nodb_blob_in_out_791(:1, :2); end;",
@@ -644,7 +643,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
       let bufferStr = Buffer.from(bigStr, "utf-8");
       let bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 } ];
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             "begin nodb_blob_in_out_791(:1, :2); end;",
@@ -838,7 +837,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         io: { val: NaN, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -856,7 +855,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         io: { val: 0, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -892,7 +891,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -914,7 +913,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,
@@ -931,7 +930,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         io: { val: {}, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 50000 }
       };
 
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => {
           await connection.execute(
             sqlRun,

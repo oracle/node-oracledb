@@ -100,7 +100,7 @@ describe('165. soda2.js', () => {
     const sd = conn.getSodaDatabase();
 
     const collName = "";
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await sd.createCollection(collName),
       /ORA-40658:/
     );

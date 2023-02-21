@@ -34,7 +34,6 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('55. resultSet2.js', function() {
 
@@ -181,7 +180,7 @@ describe('55. resultSet2.js', function() {
           break;
       }
       await testConn.close();
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await rs.close(),
         /NJS-018:/
       );
@@ -424,7 +423,7 @@ describe('55. resultSet2.js', function() {
       const rs = result.resultSet;
       await rs.getRows(numRows);
       await rs.close();
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await rs.getRows(numRows),
         /NJS-018:/
       );
@@ -433,7 +432,7 @@ describe('55. resultSet2.js', function() {
 
   describe('55.11 result set with unsupported data types', function() {
     it('55.11.1 INTERVAL YEAR TO MONTH data type', async function() {
-      await testsUtil.assertThrowsAsync(async () => {
+      await assert.rejects(async () => {
         await connection.execute(
           "SELECT dummy, to_yminterval('1-3') FROM dual");
       }, /NJS-010:/);
@@ -461,7 +460,7 @@ describe('55. resultSet2.js', function() {
                  WHERE employees_id > p_in; \
              END; ";
       await connection.execute(proc);
-      await testsUtil.assertThrowsAsync(async () => {
+      await assert.rejects(async () => {
         await connection.execute(
           "BEGIN nodb_rs2_get_emp_inout(:in, :out); END;",
           {
@@ -493,7 +492,7 @@ describe('55. resultSet2.js', function() {
     });
 
     it('55.13.1 ', async function() {
-      await testsUtil.assertThrowsAsync(async () => {
+      await assert.rejects(async () => {
         await connection.execute(
           "BEGIN get_invalid_refcur ( :p ); END; ",
           {

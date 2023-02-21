@@ -108,7 +108,7 @@ describe('167. soda3.js', () => {
 
   it('167.5 getCollectionNames() - limit is null', async () => {
     let options = { limit: null };
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await sd.getCollectionNames(options),
       /NJS-007: invalid value for "limit" in parameter 1/
     );
@@ -116,7 +116,7 @@ describe('167. soda3.js', () => {
 
   it('167.6 getCollectionNames() - limit is an empty string', async () => {
     const options = { limit: '' };
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await sd.getCollectionNames(options),
       /NJS-007: invalid value for "limit" in parameter 1/
     );
@@ -151,7 +151,7 @@ describe('167. soda3.js', () => {
 
   it('167.11 startsWith is null', async () => {
     const options = { startsWith: null };
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await sd.getCollectionNames(options),
       /NJS-007: invalid value for "startsWith" in parameter 1/
     );
@@ -159,7 +159,7 @@ describe('167. soda3.js', () => {
 
   it('167.12 Negative - startsWith has invalid type, a Number', async () => {
     const options = { startsWith: 7 };
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await sd.getCollectionNames(options),
       /NJS-007: invalid value for "startsWith" in parameter 1/
     );

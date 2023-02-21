@@ -88,7 +88,7 @@ describe('174. soda6.js', function() {
     );
 
     // Fetch back
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await collection.find().filter(),
       /NJS-009:/
     );
@@ -190,7 +190,7 @@ describe('174. soda6.js', function() {
       })
     );
 
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await collection.find().key().getOne(),
       /NJS-009:/
     );
@@ -215,7 +215,7 @@ describe('174. soda6.js', function() {
 
     // Fetch it back
     const key1 = {};
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await collection.find().key(key1).getOne(),
       /NJS-005:/
     );
@@ -295,7 +295,7 @@ describe('174. soda6.js', function() {
       })
     );
 
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await collection.find().keys().getDocuments(),
       /NJS-009:/
     );
@@ -319,7 +319,7 @@ describe('174. soda6.js', function() {
     );
 
     // Fetch back
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await collection.find().keys(null).getDocuments(),
       /NJS-005:/
     );
@@ -414,7 +414,7 @@ describe('174. soda6.js', function() {
     }
 
     // Fetch back
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await collection.find().hint(),
       /NJS-009:/
     );
@@ -448,7 +448,7 @@ describe('174. soda6.js', function() {
     }
 
     // Fetch back
-    await testsUtil.assertThrowsAsync(
+    await assert.rejects(
       async () => await collection.find().hint(1),
       /NJS-005:/
     );

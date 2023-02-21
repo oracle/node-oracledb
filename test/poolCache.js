@@ -34,7 +34,6 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('67. poolCache.js', function() {
 
@@ -69,7 +68,7 @@ describe('67. poolCache.js', function() {
     it('67.1.4 throws an error if the poolAlias already exists in the cache', async function() {
       const config = {...dbConfig, poolAlias: 'pool1'};
       const pool = await oracledb.createPool(config);
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-046:/
       );
@@ -87,7 +86,7 @@ describe('67. poolCache.js', function() {
       // Setting poolAlias to something other than a string. Could be
       // boolean, object, array, etc.
       const config = {...dbConfig, poolAlias: {}};
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -178,7 +177,7 @@ describe('67. poolCache.js', function() {
     it('67.2.3 throws an error if an attempt is made to use the default pool when it does not exist', async function() {
       const config = {...dbConfig, poolAlias: 'random-pool-alias'};
       const pool = await oracledb.createPool(config);
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.getConnection(),
         /NJS-047:/
       );
@@ -188,7 +187,7 @@ describe('67. poolCache.js', function() {
     it('67.2.4 throws an error if an attempt is made to use a poolAlias for a pool that is not in the cache', async function() {
       const config = {...dbConfig, poolAlias: 'random-pool-alias'};
       const pool = await oracledb.createPool(config);
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.getConnection("pool-alias-that-does-not-exist"),
         /NJS-047:/
       );
@@ -245,7 +244,7 @@ describe('67. poolCache.js', function() {
 
     it('67.3.1 throws an error if poolAttrs.poolAlias is an object', async function() {
       const config = {...dbConfig, poolAlias: {'foo': 'bar'}};
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -253,7 +252,7 @@ describe('67. poolCache.js', function() {
 
     it('67.3.2 throws an error if poolAttrs.poolAlias is an array', async function() {
       const config = {...dbConfig, poolAlias: []};
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -261,7 +260,7 @@ describe('67. poolCache.js', function() {
 
     it('67.3.3 throws an error if poolAttrs.poolAlias is a number', async function() {
       const config = {...dbConfig, poolAlias: 123};
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -269,7 +268,7 @@ describe('67. poolCache.js', function() {
 
     it('67.3.4 throws an error if poolAttrs.poolAlias is a boolean', async function() {
       const config = {...dbConfig, poolAlias: false};
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -277,7 +276,7 @@ describe('67. poolCache.js', function() {
 
     it('67.3.5 throws an error if poolAttrs.poolAlias is null', async function() {
       const config = {...dbConfig, poolAlias: null};
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -285,7 +284,7 @@ describe('67. poolCache.js', function() {
 
     it('67.3.6 throws an error if poolAttrs.poolAlias is an empty string', async function() {
       const config = {...dbConfig, poolAlias: null};
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
@@ -293,7 +292,7 @@ describe('67. poolCache.js', function() {
 
     it('67.3.7 throws an error if poolAttrs.poolAlias is NaN', async function() {
       const config = {...dbConfig, poolAlias: NaN};
-      await testsUtil.assertThrowsAsync(
+      await assert.rejects(
         async () => await oracledb.createPool(config),
         /NJS-007:/
       );
