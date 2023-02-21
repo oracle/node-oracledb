@@ -31,17 +31,17 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var assert   = require('assert');
-var dbConfig = require('./dbconfig.js');
-var assist   = require('./dataTypeAssist.js');
-var testsUtil = require('./testsUtil.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const assist   = require('./dataTypeAssist.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('162. getStmtInfo.js', function() {
 
-  var conn;
-  var tableName = "nodb_number";
-  var numbers = assist.data.numbers;
+  let conn;
+  const tableName = "nodb_number";
+  const numbers = assist.data.numbers;
 
   before(async function() {
     conn = await oracledb.getConnection(dbConfig);

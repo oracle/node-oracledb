@@ -31,172 +31,108 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var async    = require('async');
-var should   = require('should');
-var dbConfig = require('./dbconfig.js');
-var assist   = require('./dataTypeAssist.js');
-var random   = require('./random.js');
+const oracledb = require('oracledb');
+const assert   = require('assert');
+const dbConfig = require('./dbconfig.js');
+const assist   = require('./dataTypeAssist.js');
+const random   = require('./random.js');
 
 describe('104. dataTypeLongRaw.js', function() {
 
-  var connection = null;
-  var tableName = "nodb_longraw";
+  let connection;
+  const tableName = "nodb_longraw";
 
-  before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+  before('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after('release connection', function(done) {
-    connection.release(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after('release connection', async function() {
+    await connection.release();
   });
 
   describe('104.1 LONG RAW data type support', function() {
 
     // Generate test data
-    var strLen = [10, 100, 1000];
-    var strs = [];
-    var specialStr = "104.1";
-    for (var i = 0; i < strLen.length; i++)
+    const strLen = [10, 100, 1000];
+    const strs = [];
+    const specialStr = "104.1";
+    for (let i = 0; i < strLen.length; i++)
       strs[i] = random.getRandomString(strLen[i], specialStr);
 
-    before(function(done) {
-      async.series([
-        function(cb) {
-          assist.createTable(connection, tableName, cb);
-        },
-        function(cb) {
-          async.eachSeries(strs, function(element, callback) {
-            connection.execute(
-              "insert into " + tableName + " values( :no, utl_raw.cast_to_raw(:bv) )",
-              { no: strs.indexOf(element), bv: element},
-              { autoCommit: true },
-              function(err) {
-                should.not.exist(err);
-                callback();
-              }
-            );
-          }, function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        }
-      ], done);
+    before(async function() {
+      await assist.createTable(connection, tableName);
+      await Promise.all(strs.map(async function(element) {
+        await connection.execute(
+          "insert into " + tableName + " values( :no, utl_raw.cast_to_raw(:bv) )",
+          { no: strs.indexOf(element), bv: element},
+          { autoCommit: true });
+      }));
     });
 
-    after(function(done) {
-      connection.execute(
-        "drop table " + tableName + " purge",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after(async function() {
+      await connection.execute("drop table " + tableName + " purge");
     });
 
-    it('104.1.1 SELECT query', function(done) {
-      connection.execute(
+    it('104.1.1 SELECT query', async function() {
+      const result = await connection.execute(
         "select * from " + tableName + " order by num",
         [],
-        { outFormat: oracledb.OUT_FORMAT_OBJECT },
-        function(err, result) {
-          should.not.exist(err);
-          should.strictEqual(result.rows.length, strs.length);
-          for (var i = 0; i < strs.length; i++) {
-            (Buffer.isBuffer(result.rows[i].CONTENT)).should.be.ok();
-          }
-          done();
-        }
-      );
+        { outFormat: oracledb.OUT_FORMAT_OBJECT });
+      assert.strictEqual(result.rows.length, strs.length);
+      for (let i = 0; i < strs.length; i++) {
+        assert(Buffer.isBuffer(result.rows[i].CONTENT));
+      }
     });
 
-    it('104.1.2 works well with result set', function(done) {
-      connection.execute(
+    it('104.1.2 works well with result set', async function() {
+      const result = await connection.execute(
         "select * from " + tableName,
         [],
-        { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT },
-        function(err, result) {
-          should.not.exist(err);
-          (result.resultSet.metaData[0]).name.should.eql('NUM');
-          (result.resultSet.metaData[1]).name.should.eql('CONTENT');
-          fetchRowsFromRS(result.resultSet, strs, done);
-        }
-      );
+        { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+      assert.strictEqual(result.resultSet.metaData[0].name, 'NUM');
+      assert.strictEqual(result.resultSet.metaData[1].name, 'CONTENT');
+      await fetchRowsFromRS(result.resultSet, strs);
     });
 
-    it('104.1.3 works well with REF Cursor', function(done) {
-      var createProc = "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) \n" +
+    it('104.1.3 works well with REF Cursor', async function() {
+      const createProc = "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) \n" +
                        "AS \n" +
                        "BEGIN \n" +
                        "    OPEN p_out FOR \n" +
                        "        SELECT * FROM " + tableName  + "; \n" +
                        "END; ";
+      await connection.execute(createProc);
 
-      async.series([
-        function createProcedure(callback) {
-          connection.execute(
-            createProc,
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function verify(callback) {
-          connection.execute(
-            "BEGIN testproc(:o); END;",
-            [
-              { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-            ],
-            { outFormat: oracledb.OUT_FORMAT_OBJECT },
-            function(err, result) {
-              should.not.exist(err);
-              fetchRowsFromRS(result.outBinds[0], strs, callback);
-            }
-          );
-        },
-        function dropProcedure(callback) {
-          connection.execute(
-            "DROP PROCEDURE testproc",
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        }
-      ], done);
+      const result = await connection.execute(
+        "BEGIN testproc(:o); END;",
+        [
+          { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        ],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT });
+      await fetchRowsFromRS(result.outBinds[0], strs);
+
+      await connection.execute("DROP PROCEDURE testproc");
     });
 
-    var numRows = 3;
-    function fetchRowsFromRS(rs, array, callback) {
-      rs.getRows(numRows, function(err, rows) {
-        should.not.exist(err);
-        if (rows.length > 0) {
-          for (var i = 0; i < rows.length; i++) {
-            (Buffer.isBuffer(rows[i].CONTENT)).should.be.ok();
-          }
-          return fetchRowsFromRS(rs, array, callback);
-        } else {
-          rs.close(function(err) {
-            should.not.exist(err);
-            callback();
-          });
+    const numRows = 3;
+    async function fetchRowsFromRS(rs, array) {
+      const rows = await rs.getRows(numRows);
+      if (rows.length > 0) {
+        for (let i = 0; i < rows.length; i++) {
+          (Buffer.isBuffer(rows[i].CONTENT)).should.be.ok();
         }
-      });
+        return fetchRowsFromRS(rs, array);
+      } else {
+        await rs.close();
+      }
     }
 
   }); // 104.1
 
   describe('104.2 stores null values correctly', function() {
-    it('104.2.1 testing Null, Empty string and Undefined', function(done) {
-      assist.verifyNullValues(connection, tableName, done);
+    it('104.2.1 testing Null, Empty string and Undefined', async function() {
+      await assist.verifyNullValues(connection, tableName);
     });
   });
 
