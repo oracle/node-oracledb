@@ -51,7 +51,7 @@ describe('71. lobBind1.js', function() {
   }); // before
 
   after(function(done) {
-    connection.release(function(err) {
+    connection.close(function(err) {
       should.not.exist(err);
       done();
     });

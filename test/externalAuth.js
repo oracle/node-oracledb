@@ -72,7 +72,7 @@ describe('5. externalAuth.js', function() {
         }
       ], function(err, connection) {
         should.not.exist(err);
-        connection.release(function(err) {
+        connection.close(function(err) {
           should.not.exist(err);
           done();
         });
@@ -271,7 +271,7 @@ describe('5. externalAuth.js', function() {
         }
       ], function(err, connection) {
         should.not.exist(err);
-        connection.release(function(err) {
+        connection.close(function(err) {
           should.not.exist(err);
           done();
         });

@@ -66,7 +66,7 @@ describe('245. fetchLobAsStrBuf.js', function() {
   });
 
   after(async function() {
-    await connection.release();
+    await connection.close();
   });
 
   let executeSQL = async function(sql) {

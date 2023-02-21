@@ -87,7 +87,7 @@ describe('85. fetchClobAsString2.js', function() {
     async.series([
       function(cb) {
         oracledb.stmtCacheSize = defaultStmtCache;
-        connection.release(function(err) {
+        connection.close(function(err) {
           should.not.exist(err);
           cb();
         });

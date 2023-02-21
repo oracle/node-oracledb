@@ -65,7 +65,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
   }); // before
 
   after(async function() {
-    await connection.release();
+    await connection.close();
   }); // after
 
   let executeSQL = async function(sql) {

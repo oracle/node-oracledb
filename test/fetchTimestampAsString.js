@@ -48,7 +48,7 @@ describe('19. fetchTimestampAsString.js', function() {
 
   after(async function() {
     oracledb.fetchAsString = [];
-    await connection.release();
+    await connection.close();
   });
 
   describe('19.1 TIMESTAMP', function() {

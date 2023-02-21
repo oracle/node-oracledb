@@ -75,7 +75,7 @@ describe('86. fetchClobAsString3.js', function() {
 
   after('release connection', function(done) {
     oracledb.stmtCacheSize = defaultStmtCache;
-    connection.release(function(err) {
+    connection.close(function(err) {
       should.not.exist(err);
       done();
     });

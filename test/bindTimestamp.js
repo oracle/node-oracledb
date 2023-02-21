@@ -71,7 +71,7 @@ describe('102. bindTimestamp.js', function() {
   after(async function() {
     const  sql = "drop table nodb_tab_tsbind purge";
     await runSQL(sql);
-    await connection.release();
+    await connection.close();
   });
 
   async function runSQL(sql) {

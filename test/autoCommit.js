@@ -74,7 +74,7 @@ describe('7. autoCommit.js', function() {
 
   after('drop table, release connection, terminate pool', async function() {
     await connection.execute("DROP TABLE nodb_commit_dept purge");
-    await connection.release();
+    await connection.close();
     await pool.terminate();
   });
 

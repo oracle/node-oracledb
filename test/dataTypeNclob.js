@@ -48,7 +48,7 @@ describe('123. dataTypeNclob.js', function() {
   });
 
   after('release connection', async function() {
-    await connection.release();
+    await connection.close();
   });
 
   beforeEach(function() {

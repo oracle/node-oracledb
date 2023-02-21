@@ -32,42 +32,28 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
-var random   = require('./random.js');
-var sql      = require('./sql.js');
-var assist   = require('./dataTypeAssist.js');
+const oracledb = require('oracledb');
+const should   = require('should');
+const async    = require('async');
+const dbConfig = require('./dbconfig.js');
+const random   = require('./random.js');
+const sql      = require('./sql.js');
+const testsUtil = require('./testsUtil.js');
+const assist   = require('./dataTypeAssist.js');
 
 describe('134. longrawProcedureBind_out.js', function() {
 
   var connection = null;
-  var tableName = "nodb_longraw_134";
+  const tableName = "nodb_longraw_134";
   var insertID = 0;
-  // The NOCOMPRESS option for CREATE TABLE ensures that Hybrid Columnar Compression (HCC) is disabled for tables with LONG and LONG RAW Columns
-  // in all types of Oracle Databases. (Note: HCC is enabled in Oracle ADB-S and ADB-D by default)
-  // When HCC is enabled, Tables with LONG and LONG RAW columns cannot be created.
-  var table_create = "BEGIN \n" +
-                     "    DECLARE \n" +
-                     "        e_table_missing EXCEPTION; \n" +
-                     "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-                     "    BEGIN \n" +
-                     "        EXECUTE IMMEDIATE('DROP TABLE " + tableName + " PURGE'); \n" +
-                     "    EXCEPTION \n" +
-                     "        WHEN e_table_missing \n" +
-                     "        THEN NULL; \n" +
-                     "    END; \n" +
-                     "    EXECUTE IMMEDIATE (' \n" +
-                     "        CREATE TABLE " + tableName + " ( \n" +
-                     "            id         NUMBER, \n" +
-                     "            content    LONG RAW \n" +
-                     "        ) NOCOMPRESS \n" +
-                     "    '); \n" +
-                     "END; ";
-  var table_drop = "DROP TABLE " + tableName + " PURGE";
 
   before(function(done) {
+    const sqlCreate =  `
+        CREATE TABLE ${tableName} (
+            id         NUMBER,
+            content    LONG RAW
+        )`;
+    const sqlCreateTbl = testsUtil.sqlCreateTable(tableName, sqlCreate);
     async.series([
       function(cb) {
         oracledb.getConnection(dbConfig, function(err, conn) {
@@ -77,18 +63,19 @@ describe('134. longrawProcedureBind_out.js', function() {
         });
       },
       function(cb) {
-        sql.executeSql(connection, table_create, {}, {}, cb);
+        sql.executeSql(connection, sqlCreateTbl, {}, {}, cb);
       }
     ], done);
   }); // before
 
   after(function(done) {
+    const sqlDropTbl = testsUtil.sqlDropTable(tableName);
     async.series([
       function(cb) {
-        sql.executeSql(connection, table_drop, {}, {}, cb);
+        sql.executeSql(connection, sqlDropTbl, {}, {}, cb);
       },
       function(cb) {
-        connection.release(function(err) {
+        connection.close(function(err) {
           should.not.exist(err);
           cb();
         });

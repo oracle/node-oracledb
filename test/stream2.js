@@ -115,7 +115,7 @@ describe('14. stream2.js', function() {
         );
       },
       function(callback) {
-        connection.release(function(err) {
+        connection.close(function(err) {
           should.not.exist(err);
           callback();
         });
@@ -609,7 +609,7 @@ describe('14. stream2.js', function() {
     var metaDataRead = false;
     stream.on('metadata', function(metaData) {
       should.equal(metaData[0].name, 'A');
-      should.equal(metaData[1].name, 'A');
+      should.equal(metaData[1].name, 'A_1');
       metaDataRead = true;
     });
 

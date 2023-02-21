@@ -94,7 +94,7 @@ describe('90. fetchClobAsString4.js', function() {
           });
       },
       function(cb) {
-        connection.release(function(err) {
+        connection.close(function(err) {
           should.not.exist(err);
           cb();
         });

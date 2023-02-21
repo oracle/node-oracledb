@@ -140,7 +140,7 @@ describe('139. fetchAsStringWithRefCursor.js', function() {
         );
       },
       function(cb) {
-        connection.release(function(err) {
+        connection.close(function(err) {
           should.not.exist(err);
           cb();
         });

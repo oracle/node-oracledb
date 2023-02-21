@@ -54,7 +54,7 @@ describe('22. dataTypeChar.js', function() {
   });
 
   after('release connection', async function() {
-    await connection.release();
+    await connection.close();
   });
 
   describe('22.1 testing CHAR data in various lengths', function() {

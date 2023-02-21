@@ -41,7 +41,7 @@ describe('52. connClose.js', function() {
     const connection = await oracledb.getConnection(dbConfig);
     const defaultSize = 30;
     assert.strictEqual(connection.stmtCacheSize, defaultSize);
-    await connection.release();
+    await connection.close();
     assert.throws(
       function() {
         connection.stmtCacheSize = 10;
@@ -53,7 +53,7 @@ describe('52. connClose.js', function() {
   it('52.2 can not set property, clientId, after connection closes', async function() {
     const connection = await oracledb.getConnection(dbConfig);
     assert(connection);
-    await connection.release();
+    await connection.close();
     assert.throws(
       function() {
         connection.clientId = "52.3";
@@ -65,7 +65,7 @@ describe('52. connClose.js', function() {
   it('52.3 can not set property, module', async function() {
     const connection = await oracledb.getConnection(dbConfig);
     assert(connection);
-    await connection.release();
+    await connection.close();
     assert.throws(
       function() {
         connection.module = "52.4";
@@ -77,7 +77,7 @@ describe('52. connClose.js', function() {
   it('52.4 can not set property, action', async function() {
     const connection = await oracledb.getConnection(dbConfig);
     assert(connection);
-    await connection.release();
+    await connection.close();
     assert.throws(
       function() {
         connection.module = "52.5";
@@ -89,7 +89,7 @@ describe('52. connClose.js', function() {
   it('52.5 can not call method, execute()', async function() {
     const connection = await oracledb.getConnection(dbConfig);
     assert(connection);
-    await connection.release();
+    await connection.close();
     await assert.rejects(
       async () => {
         await connection.execute("select sysdate from dual");
@@ -101,7 +101,7 @@ describe('52. connClose.js', function() {
   it('52.6 can not call method, break()', async function() {
     const connection = await oracledb.getConnection(dbConfig);
     assert(connection);
-    await connection.release();
+    await connection.close();
     await assert.rejects(
       async () => {
         await connection.break();
@@ -113,7 +113,7 @@ describe('52. connClose.js', function() {
   it('52.7 can not call method, commit()', async function() {
     const connection = await oracledb.getConnection(dbConfig);
     assert(connection);
-    await connection.release();
+    await connection.close();
     await assert.rejects(
       async () => {
         await connection.commit();
@@ -125,7 +125,7 @@ describe('52. connClose.js', function() {
   it('52.8 can not call method, createLob()', async function() {
     const connection = await oracledb.getConnection(dbConfig);
     assert(connection);
-    await connection.release();
+    await connection.close();
     await assert.rejects(
       async () => {
         await connection.createLob(oracledb.CLOB);
@@ -137,7 +137,7 @@ describe('52. connClose.js', function() {
   it('52.9 can not call method, queryStream()', async function() {
     const connection = await oracledb.getConnection(dbConfig);
     assert(connection);
-    await connection.release();
+    await connection.close();
     const stream = await connection.queryStream("select sysdate from dual");
     assert(stream);
 
@@ -169,7 +169,7 @@ describe('52. connClose.js', function() {
   it('52.10 can not call release() multiple times', async function() {
     const connection = await oracledb.getConnection(dbConfig);
     assert(connection);
-    await connection.release();
+    await connection.close();
     await assert.rejects(
       async () => {
         await connection.commit();
@@ -181,7 +181,7 @@ describe('52. connClose.js', function() {
   it('52.11 can not call method, rollback()', async function() {
     const connection = await oracledb.getConnection(dbConfig);
     assert(connection);
-    await connection.release();
+    await connection.close();
     await assert.rejects(
       async () => {
         await connection.rollback();
@@ -193,7 +193,7 @@ describe('52. connClose.js', function() {
   it("52.12 can access properties of closed connection without error", async function() {
     const connection = await oracledb.getConnection(dbConfig);
     assert(connection);
-    await connection.release();
+    await connection.close();
     assert.strictEqual(connection.stmtCacheSize, undefined);
     assert.strictEqual(connection.oracleServerVersion, undefined);
     assert.strictEqual(connection.oracleServerVersionString, undefined);

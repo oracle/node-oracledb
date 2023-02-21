@@ -51,7 +51,7 @@ describe('56. fetchAs.js', function() {
 
   afterEach('release connection, reset fetchAsString property', function(done) {
     oracledb.fetchAsString = [];
-    connection.release(function(err) {
+    connection.close(function(err) {
       should.not.exist(err);
       done();
     });

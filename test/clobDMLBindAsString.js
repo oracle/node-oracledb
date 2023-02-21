@@ -65,7 +65,7 @@ describe('81. clobDMLBindAsString.js', function() {
   }); // before
 
   after(async function() {
-    await connection.release();
+    await connection.close();
   }); // after
 
   const executeSQL = async function(sql) {

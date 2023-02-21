@@ -70,7 +70,7 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
   after('release connection', async function() {
 
     await sql.executeSql(connection, drop_table, {}, {});
-    await connection.release();
+    await connection.close();
   });
 
   beforeEach(function() {

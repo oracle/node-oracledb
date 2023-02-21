@@ -50,7 +50,7 @@ describe('23. dataTypeNchar.js', function() {
   });
 
   after('release connection', async function() {
-    await connection.release();
+    await connection.close();
   });
 
   describe('23.1 testing NCHAR data in various lengths', function() {

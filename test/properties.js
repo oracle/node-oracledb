@@ -756,7 +756,7 @@ describe('58. properties.js', function() {
 
     after(async function() {
       await connection.execute("DROP TABLE " + tableName + " PURGE");
-      await connection.release();
+      await connection.close();
     });
 
     it('58.4.1 metaData (read-only)', async function() {

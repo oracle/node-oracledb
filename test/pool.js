@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -439,7 +439,7 @@ describe('2. pool.js', function() {
       const pool = await oracledb.createPool(config);
       const routine1 = async function() {
         const conn = await pool.getConnection();
-        await conn.execute(getBlockingSql(2));
+        await conn.execute(getBlockingSql(1));
         await conn.close();
       };
       const routine2 = async function() {

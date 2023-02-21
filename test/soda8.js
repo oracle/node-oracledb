@@ -1,10 +1,10 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
  * This software is dual-licensed to you under the Universal Permissive License
  * (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl and Apache License
- * 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose
+ * 2.0 as shown at https://www.apache.org/licenses/LICENSE-2.0. You may choose
  * either license.
  *
  * If you elect to accept the software under the Apache License, Version 2.0,
@@ -39,7 +39,7 @@ const testsUtil = require('./testsUtil.js');
 
 const t_contents = sodaUtil.t_contents;
 
-describe('176. soda7.js', () => {
+describe('176. soda8.js', () => {
 
   before(async function() {
     const runnable = await testsUtil.isSodaRunnable();
@@ -52,386 +52,258 @@ describe('176. soda7.js', () => {
   });
 
   it('176.1 replaceOne(), basic case with document content', async () => {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = await conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_176_1");
 
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      let soda = await conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_1");
+    const myKeys = [];
+    for (let i = 0; i < t_contents.length; i++) {
+      const content = t_contents[i];
+      const doc = await collection.insertOneAndGet(content);
+      myKeys[i] = doc.key;
+    }
 
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
+    const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
+    let res = await collection.find().key(myKeys[1]).replaceOne(inContent);
+    assert.strictEqual(res.replaced, true);
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let res = await collection.find().key(myKeys[1]).replaceOne(inContent);
-      assert.strictEqual(res.replaced, true);
-
-      // Fetch all back
-      let outDocuments = await collection.find().getDocuments();
-      let contents = [];
-      for (let i = 0; i < outDocuments.length; i++) {
-        contents[i] = outDocuments[i].getContent();
-        if (i == 1) {
-          assert.deepEqual(contents[i], inContent);
-        } else {
-          testsUtil.assertOneOf(t_contents, contents[i]);
-        }
-      }
-
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
+    // Fetch all back
+    const outDocuments = await collection.find().getDocuments();
+    const contents = [];
+    for (let i = 0; i < outDocuments.length; i++) {
+      contents[i] = outDocuments[i].getContent();
+      if (i == 1) {
+        assert.deepEqual(contents[i], inContent);
+      } else {
+        testsUtil.assertOneOf(t_contents, contents[i]);
       }
     }
+
+    await conn.commit();
+    res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 176.1
 
   it('176.2 replaceOne(), basic case with document object', async () => {
-    let conn, collection;
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = await conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_176_2");
 
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      let soda = await conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_2");
+    const myKeys = [];
+    for (let i = 0; i < t_contents.length; i++) {
+      const content = t_contents[i];
+      const doc = await collection.insertOneAndGet(content);
+      myKeys[i] = doc.key;
+    }
 
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
+    const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
+    const inDocument = soda.createDocument(inContent);
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let inDocument = soda.createDocument(inContent);
+    let res = await collection.find().key(myKeys[1]).replaceOne(inDocument);
+    assert.strictEqual(res.replaced, true);
 
-      let res = await collection.find().key(myKeys[1]).replaceOne(inDocument);
-      assert.strictEqual(res.replaced, true);
-
-      // Fetch all back
-      let documents = await collection.find().getDocuments();
-      let contents = [];
-      for (let i = 0; i < documents.length; i++) {
-        contents[i] = documents[i].getContent();
-        if (i == 1) {
-          assert.deepEqual(contents[i], inContent);
-        } else {
-          testsUtil.assertOneOf(t_contents, contents[i]);
-        }
-      }
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
+    // Fetch all back
+    const documents = await collection.find().getDocuments();
+    const contents = [];
+    for (let i = 0; i < documents.length; i++) {
+      contents[i] = documents[i].getContent();
+      if (i == 1) {
+        assert.deepEqual(contents[i], inContent);
+      } else {
+        testsUtil.assertOneOf(t_contents, contents[i]);
       }
     }
+    await conn.commit();
+    res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
   }); // 176.2
 
-  it('176.3 replaceOne(), no error is reported if the query criteria do not match any document', async () => {
-    let conn, collection;
+  it('175.3 replaceOne(), no error is reported if the query criteria do not match any document', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = await conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_176_3");
 
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      let soda = await conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_3");
+    const myKeys = [];
+    for (let i = 0; i < t_contents.length; i++) {
+      const content = t_contents[i];
+      const doc = await collection.insertOneAndGet(content);
+      myKeys[i] = doc.key;
+    }
 
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
+    const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
+    let res = await collection
+      .find()
+      .key('4A5AF2AAEB124FD4BFF80BC3630CB048')
+      .replaceOne(inContent);
+    assert.strictEqual(res.replaced, false);
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let res = await collection
-        .find()
-        .key('4A5AF2AAEB124FD4BFF80BC3630CB048')
-        .replaceOne(inContent);
-      assert.strictEqual(res.replaced, false);
+    // Fetch all back
+    const outDocuments = await collection.find().getDocuments();
+    const contents = [];
+    for (let i = 0; i < outDocuments.length; i++) {
+      contents[i] = outDocuments[i].getContent();
+      testsUtil.assertOneOf(t_contents, contents[i]);
+    }
 
-      // Fetch all back
-      let outDocuments = await collection.find().getDocuments();
-      let contents = [];
-      for (let i = 0; i < outDocuments.length; i++) {
-        contents[i] = outDocuments[i].getContent();
+    await conn.commit();
+    res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+  }); // 175.3
+
+  it('175.4 Negative - replaceOne(), the key() method must be used', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = await conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_176_4");
+
+    const myKeys = [];
+    for (let i = 0; i < t_contents.length; i++) {
+      const content = t_contents[i];
+      const doc = await collection.insertOneAndGet(content);
+      myKeys[i] = doc.key;
+    }
+
+    const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
+    await assert.rejects(
+      async () => await collection.find().replaceOne(inContent),
+      /ORA-40734:/
+    );
+    // ORA-40734: key for the document to replace must be specified using the key attribute
+
+    // Fetch all back
+    const outDocuments = await collection.find().keys([myKeys[0]]).getDocuments();
+
+    const contents = [];
+    for (let i = 0; i < outDocuments.length; i++) {
+      contents[i] = outDocuments[i].getContent();
+      testsUtil.assertOneOf(t_contents, contents[i]);
+    }
+
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+  }); // 175.4
+
+  it('175.5 replaceOneAndGet(), basic case with document content', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = await conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_176_5");
+
+    const myKeys = [];
+    for (let i = 0; i < t_contents.length; i++) {
+      const content = t_contents[i];
+      const doc = await collection.insertOneAndGet(content);
+      myKeys[i] = doc.key;
+    }
+
+    const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
+    const updatedDocument = await collection.find().key(myKeys[1]).replaceOneAndGet(inContent);
+    assert(updatedDocument);
+
+    // Fetch all back
+    const outDocuments = await collection.find().getDocuments();
+    const contents = [];
+    for (let i = 0; i < outDocuments.length; i++) {
+      contents[i] = outDocuments[i].getContent();
+      if (i == 1) {
+        assert.deepEqual(contents[i], inContent);
+      } else {
         testsUtil.assertOneOf(t_contents, contents[i]);
       }
-
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
     }
-  }); // 176.3
 
-  it('176.4 Negative - replaceOne(), the key() method must be used', async () => {
-    let conn, collection;
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+  }); // 175.5
 
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      let soda = await conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_4");
+  it('175.6 replaceOneAndGet(), basic case with document object', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = await conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_176_6");
 
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
+    const myKeys = [];
+    for (let i = 0; i < t_contents.length; i++) {
+      let content = t_contents[i];
+      let doc = await collection.insertOneAndGet(content);
+      myKeys[i] = doc.key;
+    }
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      await assert.rejects(
-        async () => await collection.find().replaceOne(inContent),
-        /ORA-40734:/
-      );
-      // ORA-40734: key for the document to replace must be specified using the key attribute
+    const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
+    const inDocument = soda.createDocument(inContent);
 
-      // Fetch all back
-      let outDocuments = await collection.find().keys([myKeys[0]]).getDocuments();
+    const updatedDocument = await collection.find().key(myKeys[1]).replaceOneAndGet(inDocument);
+    assert(updatedDocument);
 
-      let contents = [];
-      for (let i = 0; i < outDocuments.length; i++) {
-        contents[i] = outDocuments[i].getContent();
+    // Fetch all back
+    const documents = await collection.find().getDocuments();
+    const contents = [];
+    for (let i = 0; i < documents.length; i++) {
+      contents[i] = documents[i].getContent();
+      if (i == 1) {
+        assert.deepEqual(contents[i], inContent);
+      } else {
         testsUtil.assertOneOf(t_contents, contents[i]);
       }
-
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
     }
-  }); // 176.4
 
-  it('176.5 replaceOneAndGet(), basic case with document content', async () => {
-    let conn, collection;
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+  }); // 175.6
 
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      let soda = await conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_5");
+  it('175.7 replaceOneAndGet(), updatedDocument does not have document content', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = await conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_176_7");
 
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
-
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let updatedDocument = await collection.find().key(myKeys[1]).replaceOneAndGet(inContent);
-      assert(updatedDocument);
-
-      // Fetch all back
-      let outDocuments = await collection.find().getDocuments();
-      let contents = [];
-      for (let i = 0; i < outDocuments.length; i++) {
-        contents[i] = outDocuments[i].getContent();
-        if (i == 1) {
-          assert.deepEqual(contents[i], inContent);
-        } else {
-          testsUtil.assertOneOf(t_contents, contents[i]);
-        }
-      }
-
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
+    const myKeys = [];
+    for (let i = 0; i < t_contents.length; i++) {
+      const content = t_contents[i];
+      const doc = await collection.insertOneAndGet(content);
+      myKeys[i] = doc.key;
     }
-  }); // 176.5
 
-  it('176.6 replaceOneAndGet(), basic case with document object', async () => {
-    let conn, collection;
+    const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
+    const updatedDocument = await collection.find().key(myKeys[1]).replaceOneAndGet(inContent);
+    assert(updatedDocument);
 
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      let soda = await conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_6");
+    const outContent = updatedDocument.getContent();
+    assert.ifError(outContent);
 
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+  }); // 175.7
 
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let inDocument = soda.createDocument(inContent);
+  it('175.8 replaceOneAndGet(), no error is reported if it does not match any document', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = await conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_176_8");
 
-      let updatedDocument = await collection.find().key(myKeys[1]).replaceOneAndGet(inDocument);
-      assert(updatedDocument);
-
-      // Fetch all back
-      let documents = await collection.find().getDocuments();
-      let contents = [];
-      for (let i = 0; i < documents.length; i++) {
-        contents[i] = documents[i].getContent();
-        if (i == 1) {
-          assert.deepEqual(contents[i], inContent);
-        } else {
-          testsUtil.assertOneOf(t_contents, contents[i]);
-        }
-      }
-
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
+    const myKeys = [];
+    for (let i = 0; i < t_contents.length; i++) {
+      const content = t_contents[i];
+      const doc = await collection.insertOneAndGet(content);
+      myKeys[i] = doc.key;
     }
-  }); // 176.6
 
-  it('176.7 replaceOneAndGet(), updatedDocument does not have document content', async () => {
-    let conn, collection;
+    const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
+    const updatedDocument = await collection
+      .find()
+      .key('4A5AF2AAEB124FD4BFF80BC3630CB048')
+      .replaceOneAndGet(inContent);
+    assert.ifError(updatedDocument);
 
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      let soda = await conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_7");
-
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
-
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let updatedDocument = await collection.find().key(myKeys[1]).replaceOneAndGet(inContent);
-      assert(updatedDocument);
-
-      let outContent = updatedDocument.getContent();
-      assert.ifError(outContent);
-
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
-    }
-  }); // 176.7
-
-  it('176.8 replaceOneAndGet(), no error is reported if it does not match any document', async () => {
-    let conn, collection;
-
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      let soda = await conn.getSodaDatabase();
-      collection = await soda.createCollection("soda_test_176_8");
-
-      let myKeys = [];
-      for (let i = 0; i < t_contents.length; i++) {
-        let content = t_contents[i];
-        let doc = await collection.insertOneAndGet(content);
-        myKeys[i] = doc.key;
-      }
-
-      let inContent = { id: 2000, name: "Paul",  office: "Singapore" };
-      let updatedDocument = await collection
-        .find()
-        .key('4A5AF2AAEB124FD4BFF80BC3630CB048')
-        .replaceOneAndGet(inContent);
-      assert.ifError(updatedDocument);
-
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        let res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          assert.ifError(err);
-        }
-      }
-    }
-  }); // 176.8
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+  }); // 175.8
 });

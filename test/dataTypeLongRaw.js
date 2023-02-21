@@ -47,7 +47,7 @@ describe('104. dataTypeLongRaw.js', function() {
   });
 
   after('release connection', async function() {
-    await connection.release();
+    await connection.close();
   });
 
   describe('104.1 LONG RAW data type support', function() {

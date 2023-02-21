@@ -52,7 +52,7 @@ describe('64. sqlWithWarnings.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release(function(err) {
+    connection.close(function(err) {
       should.not.exist(err);
       done();
     });

@@ -87,7 +87,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
   after(async function() {
     await dropAllTable();
-    await connection.release();
+    await connection.close();
 
   }); // after
 

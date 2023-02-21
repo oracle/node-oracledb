@@ -31,9 +31,9 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
+const oracledb = require('oracledb');
+const should = require('should');
+const async = require('async');
 
 var assist = exports;
 
@@ -770,32 +770,29 @@ assist.insertData4sql = function(connection, tableName, array, done) {
 };
 
 assist.sqlCreateTable = function(tableName) {
-  // Add the NOCOMPRESS option for CREATE TABLE, so that Hybrid Columnar Compression (HCC) is disabled for tables with LONG and LONG RAW Columns
-  // in all types of Oracle Databases. (Note: HCC is enabled in Oracle ADB-S and ADB-D by default)
-  // When HCC is enabled, Tables with LONG and LONG RAW columns cannot be created.
-  const noCompressOption = (assist.allDataTypeNames[tableName] === 'LONG' || assist.allDataTypeNames[tableName] === 'LONG RAW') ? " NOCOMPRESS" : "";
-
+  // The NOCOMPRESS option for CREATE TABLE ensures Hybrid Columnar Compression (HCC)
+  // is disabled for tables with LONG & LONG RAW columns in all types of Oracle DB.
+  // (Note: HCC is enabled in Oracle ADB-S and ADB-D by default)
+  // When HCC is enabled, tables with LONG & LONG RAW columns cannot be created.
   var createTab =
-        "BEGIN " +
-        "  DECLARE " +
-        "    e_table_missing EXCEPTION; " +
-        "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
-        "   BEGIN " +
-        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); " +
-        "   EXCEPTION " +
-        "     WHEN e_table_missing " +
-        "     THEN NULL; " +
-        "   END; " +
-        "   EXECUTE IMMEDIATE (' " +
-        "     CREATE TABLE " + tableName + " ( " +
-        "       num NUMBER(10), " +
-        "       content " + assist.allDataTypeNames[tableName] + ", " +
-        "       CONSTRAINT " + tableName + "_pk PRIMARY KEY (num) " +
-        "     )" +
-        noCompressOption +
-        "   '); " +
-        "END; ";
-
+        `BEGIN
+           DECLARE
+             e_table_missing EXCEPTION;
+             PRAGMA EXCEPTION_INIT(e_table_missing, -00942);
+           BEGIN
+             EXECUTE IMMEDIATE ('DROP TABLE ${tableName} PURGE');
+             EXCEPTION
+               WHEN e_table_missing
+               THEN NULL;
+           END;
+           EXECUTE IMMEDIATE ('
+             CREATE TABLE ${tableName} (
+               num NUMBER(10),
+               content ${assist.allDataTypeNames[tableName]},
+               CONSTRAINT ${tableName}_pk PRIMARY KEY (num)
+             ) NOCOMPRESS
+           ');
+         END; `;
   return createTab;
 };
 

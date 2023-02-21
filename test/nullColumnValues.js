@@ -81,7 +81,7 @@ describe('10. nullColumnValues.js', function() {
 
   afterEach('drop table and release connection', async function() {
     await connection.execute("DROP TABLE nodb_nullcol_dept PURGE");
-    await connection.release();
+    await connection.close();
   });
 
   it('10.1 a simple query for null value', async function() {

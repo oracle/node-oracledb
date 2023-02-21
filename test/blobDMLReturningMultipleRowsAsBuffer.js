@@ -65,7 +65,7 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
   });
 
   after(async function() {
-    await connection.release();
+    await connection.close();
   });
 
   describe('137.1 BLOB DML returning multiple rows as buffer', function() {

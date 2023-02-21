@@ -52,7 +52,7 @@ describe('101.binding_defaultBindInout.js', function() {
   });
 
   after(async function() {
-    await connection.release();
+    await connection.close();
   });
 
   const doTest1 = async function(table_name, procName, dbColType, content, sequence) {

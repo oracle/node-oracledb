@@ -75,7 +75,7 @@ describe('8. autoCommitForSelect.js', function() {
   });
 
   after(async function() {
-    await connection.release();
+    await connection.close();
     await anotherConnection.release();
   });
 

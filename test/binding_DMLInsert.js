@@ -52,7 +52,7 @@ describe('92.binding_DMLInsert.js', function() {
   });
 
   after(async function() {
-    await connection.release();
+    await connection.close();
   });
 
   let doTest = async function(table_name, content, dbColType, bindType, nullBind, largeVal) {

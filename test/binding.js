@@ -49,7 +49,7 @@ describe('4. binding.js', function() {
     });
 
     after(async function() {
-      await connection.release();
+      await connection.close();
     });
 
     it('4.1.1 VARCHAR2 binding, Object & Array formats', async function() {
@@ -213,7 +213,7 @@ describe('4. binding.js', function() {
     afterEach(async function() {
       assert(connection);
       await connection.execute("DROP TABLE nodb_binding1 PURGE");
-      await connection.release();
+      await connection.close();
     });
 
     it('4.2.1 array binding is ok', async function() {
@@ -271,7 +271,7 @@ describe('4. binding.js', function() {
     afterEach(async function() {
       assert(connection);
       await connection.execute("DROP TABLE nodb_binding2 PURGE");
-      await connection.release();
+      await connection.close();
     });
 
     let insert1 = 'insert into nodb_binding2 (num, str, dt) values (:0, :1, :2)';
@@ -324,7 +324,7 @@ describe('4. binding.js', function() {
     });
 
     after(async function() {
-      await connection.release();
+      await connection.close();
     });
 
     it('4.4.1 outBind & maxSize restriction', async function() {
@@ -397,7 +397,7 @@ describe('4. binding.js', function() {
 
     after(async function() {
       await connection.execute("DROP TABLE " + tableName + " PURGE");
-      await connection.release();
+      await connection.close();
     });
 
 
@@ -524,7 +524,7 @@ describe('4. binding.js', function() {
     }); // before
 
     after(async function() {
-      await connection.release();
+      await connection.close();
     }); // after
 
     it('4.8.1 binding out in Object & Array formats', async function() {
@@ -709,7 +709,7 @@ describe('4. binding.js', function() {
 
     after(async function() {
       await connection.execute("DROP TABLE nodb_empty PURGE");
-      await connection.release();
+      await connection.close();
     });
 
     it('4.11.1 executing a null with bind values', async function() {

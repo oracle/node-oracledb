@@ -90,7 +90,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
   });
 
   after('release connection', async function() {
-    await connection.release();
+    await connection.close();
   });
 
   beforeEach(function() {

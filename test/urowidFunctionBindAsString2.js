@@ -67,7 +67,7 @@ describe('122. urowidFunctionBindAsString2.js', function() {
 
   after('release connection', async function() {
     await sql.executeSql(connection, drop_table, {}, {});
-    await connection.release();
+    await connection.close();
   });
 
   beforeEach(function(done) {

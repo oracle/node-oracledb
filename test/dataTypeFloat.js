@@ -54,7 +54,7 @@ describe('28. dataTypeFloat.js', function() {
 
   after('release connection', function(done) {
     oracledb.fetchAsString = [];
-    connection.release(function(err) {
+    connection.close(function(err) {
       assert.ifError(err);
       done();
     });

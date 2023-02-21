@@ -93,7 +93,7 @@ describe('145. urowidProcedureBindAsString5.js', function() {
   after('release connection', async function() {
     await sql.executeSql(connection, drop_table_indexed, {}, {});
     await sql.executeSql(connection, drop_table_normal, {}, {});
-    await connection.release();
+    await connection.close();
   });
 
   beforeEach(function() {

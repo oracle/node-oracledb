@@ -78,7 +78,7 @@ describe('60. clobPlsqlString.js', function() {
         );
       },
       function(callback) {
-        connection.release(function(err) {
+        connection.close(function(err) {
           should.not.exist(err);
           callback();
         });

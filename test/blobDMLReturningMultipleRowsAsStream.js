@@ -66,7 +66,7 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
   });
 
   after(async function() {
-    await connection.release();
+    await connection.close();
   });
 
   describe('138.1 BLOB DML returning multiple rows as stream', function() {

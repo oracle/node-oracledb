@@ -35,6 +35,7 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 const random   = require('./random.js');
 
 describe('126. longrawDMLBind.js', function() {
@@ -42,35 +43,21 @@ describe('126. longrawDMLBind.js', function() {
   let connection;
   const tableName = "nodb_longraw";
   let insertID = 0;
-  // The NOCOMPRESS option for CREATE TABLE ensures that Hybrid Columnar Compression (HCC) is disabled for tables with LONG and LONG RAW Columns
-  // in all types of Oracle Databases. (Note: HCC is enabled in Oracle ADB-S and ADB-D by default)
-  // When HCC is enabled, Tables with LONG and LONG RAW columns cannot be created.
-  const table_create = "BEGIN \n" +
-                     "    DECLARE \n" +
-                     "        e_table_missing EXCEPTION; \n" +
-                     "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-                     "    BEGIN \n" +
-                     "        EXECUTE IMMEDIATE('DROP TABLE " + tableName + " PURGE'); \n" +
-                     "    EXCEPTION \n" +
-                     "        WHEN e_table_missing \n" +
-                     "        THEN NULL; \n" +
-                     "    END; \n" +
-                     "    EXECUTE IMMEDIATE (' \n" +
-                     "        CREATE TABLE " + tableName + " ( \n" +
-                     "            id         NUMBER, \n" +
-                     "            content    LONG RAW\n" +
-                     "        ) NOCOMPRESS \n" +
-                     "    '); \n" +
-                     "END; ";
-  const table_drop = "DROP TABLE " + tableName + " PURGE";
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
-    await connection.execute(table_create);
+    const sqlCreate =  `
+        CREATE TABLE ${tableName} (
+            id         NUMBER,
+            content    LONG RAW
+        )`;
+    const sql = testsUtil.sqlCreateTable(tableName, sqlCreate);
+    await connection.execute(sql);
   });
 
   after(async function() {
-    await connection.execute(table_drop);
+    const sql = testsUtil.sqlDropTable(tableName);
+    await connection.execute(sql);
     await connection.close();
   });
 

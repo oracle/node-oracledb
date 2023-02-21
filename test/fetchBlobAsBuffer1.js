@@ -75,7 +75,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
   after('release connection', async function() {
     oracledb.stmtCacheSize = defaultStmtCache;
-    await connection.release();
+    await connection.close();
     await file.delete(inFileName);
   });  // after
 

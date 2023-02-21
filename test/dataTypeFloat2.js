@@ -53,7 +53,7 @@ describe('29. dataTypeFloat2.js', function() {
   });
 
   after('release connection', function(done) {
-    connection.release(function(err) {
+    connection.close(function(err) {
       assert.ifError(err);
       done();
     });

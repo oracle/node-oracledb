@@ -41,11 +41,15 @@ let testsUtil = exports;
 module.exports = testsUtil;
 
 testsUtil.sqlCreateTable = function(tableName, sql) {
+  // The NOCOMPRESS option for CREATE TABLE ensures Hybrid Columnar Compression (HCC)
+  // is disabled for tables with LONG & LONG RAW columns in all types of Oracle DB.
+  // (Note: HCC is enabled in Oracle ADB-S and ADB-D by default)
+  // When HCC is enabled, Tables with LONG & LONG RAW columns cannot be created.
   const dropSql = testsUtil.sqlDropTable(tableName);
   return `
     BEGIN
         ${dropSql}
-        EXECUTE IMMEDIATE ('${sql}');
+        EXECUTE IMMEDIATE ('${sql} NOCOMPRESS');
     END;
   `;
 };

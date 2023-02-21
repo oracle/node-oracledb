@@ -76,7 +76,7 @@ describe('135. clobDMLReturningMultipleRowsAsStream.js', function() {
   });
 
   after(function(done) {
-    connection.release(function(err) {
+    connection.close(function(err) {
       should.not.exist(err);
       done();
     });

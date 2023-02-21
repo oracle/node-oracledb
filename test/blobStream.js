@@ -85,7 +85,7 @@ describe('127.blobStream.js', function() {
         dropAllTable(cb);
       },
       function(cb) {
-        connection.release(function(err) {
+        connection.close(function(err) {
           should.not.exist(err);
           cb();
         });

@@ -47,7 +47,7 @@ describe('39. dataTypeRowid.js', function() {
   });
 
   after('release connection', async function() {
-    await connection.release();
+    await connection.close();
   });
 
   describe('39.1 testing ROWID data type', function() {

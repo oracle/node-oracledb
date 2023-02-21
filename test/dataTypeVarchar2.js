@@ -50,7 +50,7 @@ describe('24. dataTypeVarchar2.js', function() {
   });
 
   after('release connection', async function() {
-    await connection.release();
+    await connection.close();
   });
 
   describe('24.1 testing VARCHAR2 data in various lengths', function() {
