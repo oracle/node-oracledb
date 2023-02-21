@@ -46,7 +46,7 @@ have been made by the community.
 
 ## <a name="license"></a> License
 
-Copyright (c) 2015, 2022, Oracle and/or its affiliates.
+Copyright (c) 2015, 2023, Oracle and/or its affiliates.
 
 This software is dual-licensed to you under the Universal Permissive License
 (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl and Apache License
@@ -68,15 +68,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-[1]: https://oracle.github.io/node-oracledb/doc/api.html#getstarted
-[2]: https://oracle.github.io/node-oracledb/INSTALL.html#quickstart
+[1]: https://node-oracledb.readthedocs.io/en/latest/user_guide/introduction.html#getstarted
+[2]: https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#quickstart
 [3]: https://github.com/oracle/node-oracledb/issues
 [4]: https://oracle.github.io/node-oracledb
 [5]: https://node-oracledb.slack.com/
 [6]: https://join.slack.com/t/node-oracledb/shared_invite/enQtNDU4Mjc2NzM5OTA2LWMzY2ZlZDY5MDdlMGZiMGRkY2IzYjI5OGU4YTEzZWM5YjQ3ODUzMjcxNWQyNzE4MzM5YjNkYjVmNDk5OWU5NDM
 [30]: https://github.com/oracle/node-oracledb/blob/main/examples
 [31]: https://github.com/oracle/node-oracledb/blob/main/examples/example.js#L32
-[32]: https://oracle.github.io/node-oracledb/doc/api.html
+[32]: https://node-oracledb.readthedocs.io/en/latest/
 [33]: https://github.com/oracle/node-oracledb/blob/main/CHANGELOG.md
 [34]: https://github.com/oracle/node-oracledb/blob/main/test/README.md
 [35]: https://github.com/oracle/node-oracledb/blob/main/CONTRIBUTING.md

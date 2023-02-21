@@ -43,7 +43,7 @@ limitations under the License.
 
 ## <a name="preparations"></a> 1. Preparations
 
-See [INSTALL](https://oracle.github.io/node-oracledb/INSTALL.html)
+See [INSTALL](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html)
 for installation details.
 
 On macOS, run a command like:
@@ -98,7 +98,7 @@ Set the following environment variables to provide credentials for the test suit
 
 * `NODE_ORACLEDB_CONNECTIONSTRING` provides the connection string that points to your database's location.
 
-* `NODE_ORACLEDB_EXTERNALAUTH` provides the options for external authentication tests. Setting this environment variable to "true" will enable the tests that require external authentication. To ensure external authentication tests works, firstly make sure the Oracle external authentication service is correctly configured. See [Documentation for External Authentication](https://oracle.github.io/node-oracledb/doc/api.html#extauth) for details.
+* `NODE_ORACLEDB_EXTERNALAUTH` provides the options for external authentication tests. Setting this environment variable to "true" will enable the tests that require external authentication. To ensure external authentication tests works, firstly make sure the Oracle external authentication service is correctly configured. See [Documentation for External Authentication](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#extauth) for details.
 
 * `NODE_ORACLEDB_DBA_PRIVILEGE` provides the options for DBA privilege. Setting this environment variable to "true" will enable the tests and utilities that require DBA privilege.
 
@@ -144,14 +144,14 @@ The following test(s) are automatically skipped if their required environment va
 ### <a name="externalproxyauth"></a> 3.1 externalProxyAuth.js
 This test aims to test the combined usage of external authentication and proxy authentication. To run this test, you need to complete the following prerequisite setups.
 
-* Enable external authentication on the schema user which you used for testing. See [Documentation for External Authentication](https://oracle.github.io/node-oracledb/doc/api.html#extauth) for more information on external authentication. Then use the following command to enable external authentication in the test suite.
+* Enable external authentication on the schema user which you used for testing. See [Documentation for External Authentication](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#extauth) for more information on external authentication. Then use the following command to enable external authentication in the test suite.
 
     ```
     export NODE_ORACLEDB_EXTERNALAUTH true
 
     ```
 
-* Enable proxy authentication on another schema user specified by environment variable `NODE_ORACLEDB_PROXY_SESSION_USER` that connects through the schema user which you used for testing. See [Documentation for Pool Proxy Authentication](https://oracle.github.io/node-oracledb/doc/api.html#pool-proxy-authentication) for more information on proxy authentication. Then use the following command to enable proxy authentication in the test suite.
+* Enable proxy authentication on another schema user specified by environment variable `NODE_ORACLEDB_PROXY_SESSION_USER` that connects through the schema user which you used for testing. See [Documentation for Pool Proxy Authentication](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#pool-proxy-authentication) for more information on proxy authentication. Then use the following command to enable proxy authentication in the test suite.
 
     ```
     export NODE_ORACLEDB_PROXY_SESSION_USER "Your_Proxy_Authenticating_User"

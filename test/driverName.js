@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -31,7 +31,7 @@
  *   Note that enabling the externalAuth feature requires configuration on the
  *   database besides setting "externalAuth" attribute to be true. Please refer
  *   to api doc about the configuration.
- *   https://oracle.github.io/node-oracledb/doc/api.html#extauth
+ *   https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#extauth
  *
  *****************************************************************************/
 

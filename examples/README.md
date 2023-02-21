@@ -2,11 +2,11 @@
 
 This directory contains [node-oracledb](https://www.npmjs.com/package/oracledb)
 examples.  Documentation is
-[here](https://oracle.github.io/node-oracledb/doc/api.html).
+[here](https://node-oracledb.readthedocs.io/en/latest/).
 
 To run the examples:
 
-- [Install node-oracledb](https://oracle.github.io/node-oracledb/INSTALL.html#quickstart).
+- [Install node-oracledb](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#quickstart).
 
 - Edit `dbconfig.js` and set your username and the database connection string,
   for example:

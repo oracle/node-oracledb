@@ -48,5 +48,5 @@ The
 in GitHub doesn't have an `install` script target by default.  This means that
 node-gyp will be invoked to compile node-oracledb.  This allows installation
 from GitHub [source
-code](https://oracle.github.io/node-oracledb/INSTALL.html#github) when no
-suitable pre-built binary is available.
+code](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#github)
+when no suitable pre-built binary is available.

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -91,10 +91,10 @@ module.exports = {
   password      : process.env.NODE_ORACLEDB_PASSWORD,
 
   // For information on connection strings see:
-  // https://oracle.github.io/node-oracledb/doc/api.html#connectionstrings
+  // https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connectionstrings
   connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING || "localhost/orclpdb1",
 
   // Setting externalAuth is optional.  It defaults to false.  See:
-  // https://oracle.github.io/node-oracledb/doc/api.html#extauth
+  // https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#extauth
   externalAuth  : process.env.NODE_ORACLEDB_EXTERNALAUTH ? true : false
 };

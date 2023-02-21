@@ -30,8 +30,8 @@
  *
  *   Note that enabling the externalAuth feature requires configuration on the
  *   database besides setting "externalAuth" attribute to be true. Please refer
- *   to api doc about the configuration.
- *   https://oracle.github.io/node-oracledb/doc/api.html#extauth
+ *   to API documentation about configuration.
+ *   https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#extauth
  *
  *****************************************************************************/
 'use strict';

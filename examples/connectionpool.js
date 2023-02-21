@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -34,7 +34,7 @@
  *
  *   In some networks forced pool termination may hang unless you have
  *   'disable_oob=on' in sqlnet.ora, see
- *   https://oracle.github.io/node-oracledb/doc/api.html#tnsadmin
+ *   https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#limiting-the-time-taken-to-execute-statements
  *
  *   In production applications, set poolMin=poolMax (and poolIncrement=0)
  *

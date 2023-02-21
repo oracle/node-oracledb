@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -30,7 +30,7 @@
  *
  *   Requires Oracle Database and Client 18.3, or higher.
  *   The user must have been granted the SODA_APP and CREATE TABLE privileges.
- *   See https://oracle.github.io/node-oracledb/doc/api.html#sodaoverview
+ *   https://node-oracledb.readthedocs.io/en/latest/user_guide/soda.html#sodaoverview
  *
  *   This example requires node-oracledb 3.0 or later.
  *
