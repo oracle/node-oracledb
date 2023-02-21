@@ -101,7 +101,7 @@ describe('54. lobClose.js', function() {
           lob2.on('finish', resolve);
         });
       },
-      /DPI-1040:/
+      /NJS-108:/
     );
   }); // 54.4
 
