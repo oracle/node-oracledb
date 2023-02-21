@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -60,10 +60,10 @@ describe('104. dataTypeLongRaw.js', function() {
       strs[i] = random.getRandomString(strLen[i], specialStr);
 
     before(async function() {
-      await assist.createTable(connection, tableName);
+      await connection.execute(assist.sqlCreateTable(tableName));
       await Promise.all(strs.map(async function(element) {
         await connection.execute(
-          "insert into " + tableName + " values( :no, utl_raw.cast_to_raw(:bv) )",
+          `insert into ` + tableName + ` values( :no, utl_raw.cast_to_raw(:bv) )`,
           { no: strs.indexOf(element), bv: element},
           { autoCommit: true });
       }));
@@ -75,7 +75,7 @@ describe('104. dataTypeLongRaw.js', function() {
 
     it('104.1.1 SELECT query', async function() {
       const result = await connection.execute(
-        "select * from " + tableName + " order by num",
+        `select * from ` + tableName + ` order by num`,
         [],
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
       assert.strictEqual(result.rows.length, strs.length);
@@ -86,7 +86,7 @@ describe('104. dataTypeLongRaw.js', function() {
 
     it('104.1.2 works well with result set', async function() {
       const result = await connection.execute(
-        "select * from " + tableName,
+        `select * from ` + tableName,
         [],
         { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT });
 
@@ -96,23 +96,23 @@ describe('104. dataTypeLongRaw.js', function() {
     });
 
     it('104.1.3 works well with REF Cursor', async function() {
-      const createProc = "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) \n" +
-                       "AS \n" +
-                       "BEGIN \n" +
-                       "    OPEN p_out FOR \n" +
-                       "        SELECT * FROM " + tableName  + "; \n" +
-                       "END; ";
+      const createProc = `CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) \n` +
+                       `AS \n` +
+                       `BEGIN \n` +
+                       `    OPEN p_out FOR \n` +
+                       `        SELECT * FROM ` + tableName  + `; \n` +
+                       `END; `;
       await connection.execute(createProc);
 
       const result = await connection.execute(
-        "BEGIN testproc(:o); END;",
+        `BEGIN testproc(:o); END;`,
         [
           { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
         ],
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
       await fetchRowsFromRS(result.outBinds[0], strs);
 
-      await connection.execute("DROP PROCEDURE testproc");
+      await connection.execute(`DROP PROCEDURE testproc`);
     });
 
     const numRows = 3;

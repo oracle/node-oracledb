@@ -35,124 +35,110 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
-const async    = require('async');
+const asssert  = require('assert');
 const assist   = require('./dataTypeAssist.js');
 const dbConfig = require('./dbconfig.js');
 
 describe('38. dataTypeTimestamp6.js', function() {
 
   let connection = null;
-  var tableName = "nodb_timestamp6";
+  let tableName = "nodb_timestamp6";
 
-  before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig,
-      function(err, conn) {
-        should.not.exist(err);
-        connection = conn;
-        done();
-      }
-    );
+  before('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after('release connection', function(done) {
-    connection.release(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after('release connection', async function() {
+    await connection.close();
   });
 
   describe('38.1 Testing JavaScript Date with database TIMESTAMP(9) WITH LOCAL TIME ZONE', function() {
-    var dates = assist.data.dates;
+    let dates = assist.data.dates;
 
-    before('create table, insert data', function(done) {
-      assist.setUp(connection, tableName, dates, done);
+    before('create table, insert data', async function() {
+      await new Promise((resolve) => {
+        assist.setUp(connection, tableName, dates, resolve);
+      });
     });
 
-    after(function(done) {
+    after(async function() {
       oracledb.fetchAsString = [];
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+      await connection.execute(`DROP table ` + tableName + ` PURGE`);
     });
 
-    it('38.1.1 works well with SELECT query', function(done) {
-      assist.dataTypeSupport(connection, tableName, dates, done);
+    it('38.1.1 works well with SELECT query', async function() {
+      await new Promise((resolve) => {
+        assist.dataTypeSupport(connection, tableName, dates, resolve);
+      });
     });
 
-    it('38.1.2 works well with result set', function(done) {
-      assist.verifyResultSet(connection, tableName, dates, done);
+    it('38.1.2 works well with result set', async function() {
+      await new Promise((resolve) => {
+        assist.verifyResultSet(connection, tableName, dates, resolve);
+      });
     });
 
-    it('38.1.3 works well with REF Cursor', function(done) {
-      assist.verifyRefCursor(connection, tableName, dates, done);
+    it('38.1.3 works well with REF Cursor', async function() {
+      await new Promise((resolve) => {
+        assist.verifyRefCursor(connection, tableName, dates, resolve);
+      });
     });
 
-    it('38.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
-      assist.verifyRefCursorWithFetchInfo(connection, tableName, dates, done);
+    it('38.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
+      await new Promise((resolve) => {
+        assist.verifyRefCursorWithFetchInfo(connection, tableName, dates, resolve);
+      });
     });
 
-    it('38.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', function(done) {
+    it('38.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', async function() {
       oracledb.fetchAsString = [ oracledb.DATE ];
-      assist.verifyRefCursorWithFetchAsString(connection, tableName, dates, done);
+      await new Promise((resolve) => {
+        assist.verifyRefCursorWithFetchAsString(connection, tableName, dates, resolve);
+      });
     });
-
   }); // end of 37.1 suite
 
   describe('38.2 stores null value correctly', function() {
-    it('38.2.1 testing Null, Empty string and Undefined', function(done) {
-      assist.verifyNullValues(connection, tableName, done);
+    it('38.2.1 testing Null, Empty string and Undefined', async function() {
+      await new Promise((resolve) => {
+        assist.verifyNullValues(connection, tableName, resolve);
+      });
     });
   });
 
   describe('38.3 testing TIMESTAMP WITH LOCAL TIME ZONE', function() {
-    var timestamps = assist.TIMESTAMP_TZ_STRINGS_2;
+    let timestamps = assist.TIMESTAMP_TZ_STRINGS_2;
 
-    before(function(done) {
-      assist.setUp4sql(connection, tableName, timestamps, done);
+    before(async function() {
+      await new Promise((resolve) => {
+        assist.setUp4sql(connection, tableName, timestamps, resolve);
+      });
     });
 
-    after(function(done) {
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after(async function() {
+      await connection.execute(`DROP table ` + tableName + ` PURGE`);
     }); // after
 
-    it('38.3.1 SELECT query - original data', function(done) {
-      assist.selectOriginalData(connection, tableName, timestamps, done);
+    it('38.3.1 SELECT query - original data', async function() {
+      await new Promise((resolve) => {
+        assist.selectOriginalData(connection, tableName, timestamps, resolve);
+      });
     });
 
-    it('38.3.2 SELECT query - formatted data for comparison', function(done) {
-      var sql = "SELECT num, TO_CHAR(content AT TIME ZONE '-8:00', 'DD-MM-YYYY HH24:MI:SS.FF TZR') AS TS_DATA FROM "
-                 + tableName + " WHERE num = :no";
+    it('38.3.2 SELECT query - formatted data for comparison', async function() {
+      let sql = `SELECT num, TO_CHAR(content AT TIME ZONE '-8:00', 'DD-MM-YYYY HH24:MI:SS.FF TZR') AS TS_DATA FROM `
+                 + tableName + ` WHERE num = :no`;
 
-      async.eachSeries(timestamps, function(timestamp, cb) {
-        var bv = timestamps.indexOf(timestamp);
-        connection.execute(
+      await Promise.all(timestamps.map(async function(timestamp) {
+        let bv = timestamps.indexOf(timestamp);
+        let result = await connection.execute(
           sql,
           { no: bv },
           {
             outFormat: oracledb.OUT_FORMAT_OBJECT
-          },
-          function(err, result) {
-            should.not.exist(err);
-            // console.log(result.rows);
-            (result.rows[0].TS_DATA).should.equal(assist.content.timestamps6[bv]);
-            cb();
-          }
-        );
-      }, function(err) {
-        should.not.exist(err);
-        done();
-      });
+          });
+        asssert.strictEqual(result.rows[0].TS_DATA, assist.content.timestamps6[bv]);
+      }));
     });
   }); // end of 38.3 suite
 });

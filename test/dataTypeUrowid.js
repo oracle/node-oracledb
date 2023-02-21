@@ -32,273 +32,171 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
-const async    = require('async');
+const assert   = require('assert');
 const assist   = require('./dataTypeAssist.js');
 const dbConfig = require('./dbconfig.js');
 
 describe('113. dataTypeUrowid.js', function() {
 
   let connection = null;
-  var tableName = "nodb_urowid";
-  var array = assist.data.numbersForBinaryFloat;
-  var numRows = array.length;  // number of rows to return from each call to getRows()
+  let tableName = "nodb_urowid";
+  let array = assist.data.numbersForBinaryFloat;
+  let numRows = array.length;  // number of rows to return from each call to getRows()
 
-  before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+  before('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after('release connection', function(done) {
-    connection.release(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after('release connection', async function() {
+    await connection.close();
   });
 
   describe('113.1 testing UROWID data type', function() {
-    before(function(done) {
-      async.series([
-        function makeTable(callback) {
-          assist.createTable(connection, tableName, callback);
-        },
-        function insertOneRow(callback) {
-          insertData(connection, tableName, callback);
-        },
-        function fillRowid(callback) {
-          updateDate(connection, tableName, callback);
-        }
-      ], done);
+    before(async function() {
+
+      await connection.execute(assist.sqlCreateTable(tableName));
+
+      await insertData(connection, tableName);
+      await updateDate(connection, tableName);
     });
 
-    after(function(done) {
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after(async function() {
+      await connection.execute(`DROP table ` + tableName + ` PURGE`);
     });
 
-    it('113.1.1 query rowid', function(done) {
-      connection.execute(
-        "SELECT * FROM " + tableName,
-        function(err, result) {
-          should.not.exist(err);
-          for (let i = 0; i < array.length; i++) {
-            var resultVal = result.rows[i][1];
-            should.strictEqual(typeof resultVal, "string");
-            resultVal.should.not.be.null;
-            should.exist(resultVal);
-          }
-          done();
-        }
-      );
+    it('113.1.1 query rowid', async function() {
+      let result = await connection.execute(
+        `SELECT * FROM ` + tableName);
+
+      for (let i = 0; i < array.length; i++) {
+        let resultVal = result.rows[i][1];
+        assert.strictEqual(typeof resultVal, "string");
+        assert(resultVal);
+      }
     });
 
-    it('113.1.2 works well with result set', function(done) {
-      connection.execute(
-        "SELECT * FROM " + tableName,
+    it('113.1.2 works well with result set', async function() {
+      let result = await connection.execute(
+        `SELECT * FROM ` + tableName,
         [],
-        { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT },
-        function(err, result) {
-          should.not.exist(err);
-          (result.resultSet.metaData[0]).name.should.eql('NUM');
-          (result.resultSet.metaData[1]).name.should.eql('CONTENT');
-          fetchRowsFromRS(result.resultSet, done);
-        }
-      );
+        { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+      assert.strictEqual((result.resultSet.metaData[0]).name, 'NUM');
+      assert.strictEqual((result.resultSet.metaData[1]).name, 'CONTENT');
+      await fetchRowsFromRS(result.resultSet);
     });
 
-    it('113.1.3 works well with REF Cursor', function(done) {
-      verifyRefCursor(connection, tableName, done);
+    it('113.1.3 works well with REF Cursor', async function() {
+      await verifyRefCursor(connection, tableName);
     });
 
-    it('113.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
-      verifyRefCursorWithFetchInfo(connection, tableName, done);
+    it('113.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
+      await verifyRefCursorWithFetchInfo(connection, tableName);
     });
   });
 
   describe('113.2 stores null value correctly', function() {
-    it('113.2.1 testing Null, Empty string and Undefined', function(done) {
-      assist.verifyNullValues(connection, tableName, done);
+    it('113.2.1 testing Null, Empty string and Undefined', async function() {
+      await new Promise((resolve) => {
+        assist.verifyNullValues(connection, tableName, resolve);
+      });
     });
   });
 
-  var insertData = function(connection, tableName, callback) {
-
-    async.eachSeries(array, function(element, cb) {
-      var sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
-      connection.execute(
-        sql,
-        function(err) {
-          should.not.exist(err);
-          cb();
-        }
-      );
-    }, function(err) {
-      should.not.exist(err);
-      callback();
-    });
+  let insertData = async function(connection, tableName) {
+    await Promise.all(array.map(async function(element) {
+      let sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
+      await connection.execute(sql);
+    }));
   };
 
-  var updateDate = function(connection, tableName, callback) {
-    async.eachSeries(array, function(element, cb) {
-      var sql = "UPDATE " + tableName + " T SET content = T.ROWID where num = " + element;
-      connection.execute(
-        sql,
-        function(err) {
-          should.not.exist(err);
-          cb();
-        }
-      );
-    }, function(err) {
-      should.not.exist(err);
-      callback();
-    });
+  let updateDate = async function(connection, tableName) {
+    await Promise.all(array.map(async function(element) {
+      let sql = `UPDATE ` + tableName + ` T SET content = T.ROWID where num = ` + element;
+      await connection.execute(sql);
+    }));
   };
 
-  var verifyRefCursor = function(connection, tableName, done) {
-    var createProc =
-          "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
-          "AS " +
-          "BEGIN " +
-          "    OPEN p_out FOR " +
-          "        SELECT * FROM " + tableName  + "; " +
-          "END; ";
-    async.series([
-      function createProcedure(callback) {
-        connection.execute(
-          createProc,
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function verify(callback) {
-        connection.execute(
-          "BEGIN testproc(:o); END;",
-          [
-            { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-          ],
-          { outFormat: oracledb.OUT_FORMAT_OBJECT },
-          function(err, result) {
-            should.not.exist(err);
-            fetchRowsFromRS(result.outBinds[0], callback);
-          }
-        );
-      },
-      function dropProcedure(callback) {
-        connection.execute(
-          "DROP PROCEDURE testproc",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
+  let verifyRefCursor = async function(connection, tableName) {
+    let createProc =
+          `CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) ` +
+          `AS ` +
+          `BEGIN ` +
+          `    OPEN p_out FOR ` +
+          `        SELECT * FROM ` + tableName  + `; ` +
+          `END; `;
+
+    await connection.execute(createProc);
+
+    let result = await connection.execute(
+      "BEGIN testproc(:o); END;",
+      [
+        { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+      ],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    await fetchRowsFromRS(result.outBinds[0]);
+
+    await connection.execute("DROP PROCEDURE testproc");
+  };
+  let fetchRowsFromRS = async function(rs) {
+    let rows = await rs.getRows(numRows);
+    if (rows.length > 0) {
+      for (let i = 0; i < rows.length; i++) {
+        let resultVal = rows[i].CONTENT;
+        assert(resultVal);
       }
-    ], done);
-  };
-  var fetchRowsFromRS = function(rs, cb) {
-    rs.getRows(numRows, function(err, rows) {
-      if (rows.length > 0) {
-        for (var i = 0; i < rows.length; i++) {
-          var resultVal = rows[i].CONTENT;
-          resultVal.should.not.be.null;
-          should.exist(resultVal);
-        }
-        return fetchRowsFromRS(rs, cb);
-      } else {
-        rs.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    });
+      return fetchRowsFromRS(rs);
+    } else {
+      await rs.close();
+    }
   };
 
-  var verifyRefCursorWithFetchInfo = function(connection, tableName, done) {
-    var createProc =
-          "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
-          "AS " +
-          "BEGIN " +
-          "    OPEN p_out FOR " +
-          "    SELECT * FROM " + tableName  + "; " +
-          "END; ";
-    async.series([
-      function createProcedure(callback) {
-        connection.execute(
-          createProc,
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function verify(callback) {
-        connection.execute(
-          "BEGIN testproc(:o); END;",
-          [
-            { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-          ],
-          {
-            outFormat: oracledb.OUT_FORMAT_OBJECT,
-            fetchInfo:
+  let verifyRefCursorWithFetchInfo = async function(connection, tableName) {
+    let createProc =
+          `CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) ` +
+          `AS ` +
+          `BEGIN ` +
+          `    OPEN p_out FOR ` +
+          `    SELECT * FROM ` + tableName  + `; ` +
+          `END; `;
+
+    await connection.execute(createProc);
+    let result = await connection.execute(
+      `BEGIN testproc(:o); END;`,
+      [
+        { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+      ],
+      {
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+        fetchInfo:
             {
               "CONTENT": { type: oracledb.STRING }
             }
-          },
-          function(err, result) {
-            should.not.exist(err);
-            fetchRowsFromRS_fetchas(result.outBinds[0], callback);
-          }
-        );
-      },
-      function dropProcedure(callback) {
-        connection.execute(
-          "DROP PROCEDURE testproc",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      }
-    ], done);
+      });
+    await fetchRowsFromRS_fetchas(result.outBinds[0]);
+
+    await connection.execute(`DROP PROCEDURE testproc`);
   };
 
-  var fetchRowsFromRS_fetchas = function(rs, cb) {
-    rs.getRows(numRows, function(err, rsrows) {
-      if (rsrows.length > 0) {
-        for (var i = 0; i < rsrows.length; i++) {
-          var resultVal = rsrows[i].CONTENT;
-          resultVal.should.not.be.null;
-          resultVal.should.be.a.String();
-          should.exist(resultVal);
-          verifyFetchValues(connection, rsrows[i].NUM, rsrows[i].CONTENT, tableName);
-        }
-        return fetchRowsFromRS_fetchas(rs, cb);
-      } else {
-        rs.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
+  let fetchRowsFromRS_fetchas = async function(rs) {
+    let rsrows = await rs.getRows(numRows);
+    if (rsrows.length > 0) {
+      for (let i = 0; i < rsrows.length; i++) {
+        let resultVal = rsrows[i].CONTENT;
+        assert(resultVal);
+        assert(typeof resultVal, "string");
+        await verifyFetchValues(connection, rsrows[i].NUM, rsrows[i].CONTENT, tableName);
       }
-    });
+      return fetchRowsFromRS_fetchas(rs);
+    } else {
+      await rs.close();
+    }
   };
 
-  function verifyFetchValues(connection, num, content, tableName) {
-    connection.execute(
-      "select ROWID from " + tableName + " where num = " + num,
-      function(err, result) {
-        should.not.exist(err);
-        content.should.eql(result.rows[0][0]);
-      }
-    );
+  async function verifyFetchValues(connection, num, content, tableName) {
+    let result = await connection.execute(
+      "select ROWID from " + tableName + " where num = " + num);
+
+    assert.strictEqual(content, result.rows[0][0]);
   }
-
 });

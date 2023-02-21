@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -744,7 +744,9 @@ describe('58. properties.js', function() {
 
     before('get resultSet class', async function() {
       connection = await oracledb.getConnection(dbConfig);
-      await assist.setUp(connection, tableName, numbers);
+      await new Promise((resolve) => {
+        assist.setUp(connection, tableName, numbers, resolve);
+      });
       result = await connection.execute(
         "SELECT * FROM " + tableName + " ORDER BY num",
         [],

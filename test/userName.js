@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -68,7 +68,7 @@ describe('248. userName.js', function() {
     it('248.1.1 test with username size 30', async function() {
       if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
 
-      const userSchema = await assist.createSchemaString(30);
+      const userSchema = assist.createSchemaString(30);
       const password = "Welcome";
       await createUser(userSchema, password);
 
@@ -93,7 +93,7 @@ describe('248. userName.js', function() {
         return;
       }
 
-      const userSchema = await assist.createSchemaString(100);
+      const userSchema = assist.createSchemaString(100);
       const password = "Welcome";
       await createUser(userSchema, password);
 
@@ -118,7 +118,7 @@ describe('248. userName.js', function() {
         return;
       }
 
-      const userSchema = await assist.createSchemaString(128);
+      const userSchema = assist.createSchemaString(128);
       const password = "Welcome";
       await createUser(userSchema, password);
 
@@ -144,7 +144,7 @@ describe('248. userName.js', function() {
       }
 
       const dbaConn = await oracledb.getConnection(dbaCredential);
-      const userSchema = await assist.createSchemaString(1000);
+      const userSchema = assist.createSchemaString(1000);
       const sql = `create user ${userSchema} identified by welcome`;
 
       await assert.rejects(
@@ -251,7 +251,7 @@ describe('248. userName.js', function() {
     it('248.2.1 test with user size 30', async function() {
       if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
 
-      const userSchema = await assist.createSchemaString(30);
+      const userSchema = assist.createSchemaString(30);
       const password = "Welcome";
       await createUser(userSchema, password);
       const credential = {...dbConfig};
@@ -273,7 +273,7 @@ describe('248. userName.js', function() {
         return;
       }
 
-      const userSchema = await assist.createSchemaString(100);
+      const userSchema = assist.createSchemaString(100);
       const password = "Welcome";
       await createUser(userSchema, password);
 
@@ -297,7 +297,7 @@ describe('248. userName.js', function() {
         return;
       }
 
-      const userSchema = await assist.createSchemaString(128);
+      const userSchema = assist.createSchemaString(128);
       const password = "Welcome";
       await createUser(userSchema, password);
 
@@ -322,7 +322,7 @@ describe('248. userName.js', function() {
         return;
       }
 
-      const userSchema = await assist.createSchemaString(1000);
+      const userSchema = assist.createSchemaString(1000);
       const sql = `create user ${userSchema} identified by welcome`;
       const dbaConn = await oracledb.getConnection(dbaCredential);
       await assert.rejects(

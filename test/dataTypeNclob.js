@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -57,7 +57,7 @@ describe('123. dataTypeNclob.js', function() {
 
   describe('123.1 insert and stream out', function() {
     before('create table', async function() {
-      await assist.createTable(connection, tableName);
+      await connection.execute(assist.sqlCreateTable(tableName));
     });
 
     after(async function() {
@@ -133,7 +133,7 @@ describe('123. dataTypeNclob.js', function() {
     }); // afterEach
 
     before('create table', async function() {
-      await assist.createTable(connection, tableName);
+      await connection.execute(assist.sqlCreateTable(tableName));
     });
 
     after(async function() {
@@ -172,7 +172,7 @@ describe('123. dataTypeNclob.js', function() {
   describe('123.4 ref cursor', function() {
 
     before('create table', async function() {
-      await assist.createTable(connection, tableName);
+      await connection.execute(assist.sqlCreateTable(tableName));
     });
 
     after(async function() {

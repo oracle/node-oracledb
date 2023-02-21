@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -63,7 +63,7 @@ describe('103. dataTypeLong.js', function() {
     });
 
     after(async function() {
-      await connection.execute("drop table " + tableName + " purge");
+      await connection.execute(`drop table ` + tableName + ` purge`);
     });
 
     it('103.1.1 SELECT query', async function() {

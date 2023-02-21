@@ -32,78 +32,75 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 const assist   = require('./dataTypeAssist.js');
 const dbConfig = require('./dbconfig.js');
-const async    = require('async');
 
 describe('26. dataTypeNumber.js', function() {
 
   let connection = null;
-  var tableName = "nodb_number";
-  var numbers = assist.data.numbers;
+  let tableName = "nodb_number";
+  let numbers = assist.data.numbers;
 
-  before('get one connection', function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, conn) {
-        should.not.exist(err);
-        connection = conn;
-        done();
-      }
-    );
+  before('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after('release connection', function(done) {
-    connection.release(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after('release connection', async function() {
+    await connection.close();
   });
 
   describe('26.1 testing NUMBER data', function() {
 
-    before('create table, insert data', function(done) {
-      assist.setUp(connection, tableName, numbers, done);
+    before('create table, insert data', async function() {
+      await new Promise((resolve) => {
+        assist.setUp(connection, tableName, numbers, resolve);
+      });
     });
 
-    after(function(done) {
+    after(async function() {
       oracledb.fetchAsString = [];
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+      await connection.execute("DROP table " + tableName + " PURGE");
     });
 
-    it('26.1.1 SELECT query', function(done) {
-      assist.dataTypeSupport(connection, tableName, numbers, done);
+    it('26.1.1 SELECT query', async function() {
+      await new Promise((resolve) => {
+        assist.dataTypeSupport(connection, tableName, numbers, resolve);
+      });
     });
 
-    it('26.1.2 resultSet stores NUMBER data correctly', function(done) {
-      assist.verifyResultSet(connection, tableName, numbers, done);
+    it('26.1.2 resultSet stores NUMBER data correctly', async function() {
+      await new Promise((resolve) => {
+        assist.verifyResultSet(connection, tableName, numbers, resolve);
+      });
     });
 
-    it('26.1.3 works well with REF Cursor', function(done) {
-      assist.verifyRefCursor(connection, tableName, numbers, done);
+    it('26.1.3 works well with REF Cursor', async function() {
+      await new Promise((resolve) => {
+        assist.verifyRefCursor(connection, tableName, numbers, resolve);
+      });
     });
 
-    it('26.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
-      assist.verifyRefCursorWithFetchInfo(connection, tableName, numbers, done);
+    it('26.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
+      await new Promise((resolve) => {
+        assist.verifyRefCursorWithFetchInfo(connection, tableName, numbers, resolve);
+      });
     });
 
-    it('26.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', function(done) {
+    it('26.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', async function() {
       oracledb.fetchAsString = [ oracledb.NUMBER ];
-      assist.verifyRefCursorWithFetchAsString(connection, tableName, numbers, done);
+      await new Promise((resolve) => {
+        assist.verifyRefCursorWithFetchAsString(connection, tableName, numbers, resolve);
+      });
     });
 
   });
 
   describe('26.2 stores null value correctly', function() {
-    it('26.2.1 testing Null, Empty string and Undefined', function(done) {
-      assist.verifyNullValues(connection, tableName, done);
+    it('26.2.1 testing Null, Empty string and Undefined', async function() {
+      await new Promise((resolve) => {
+        assist.verifyNullValues(connection, tableName, resolve);
+      });
     });
   });
 
@@ -111,73 +108,42 @@ describe('26. dataTypeNumber.js', function() {
   // https://github.com/oracle/node-oracledb/issues/833
   describe('26.3 large integers that cannot fit inside a 32-bit integer', function() {
 
-    it('26.3.1 original case', function(done) {
+    it('26.3.1 original case', async function() {
 
-      var num = 999999999999;
-      async.series([
-        function(cb) {
-          var proc = "BEGIN \n" +
-                     "    DECLARE \n" +
-                     "        e_table_missing EXCEPTION; \n" +
-                     "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-                     "    BEGIN \n" +
-                     "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_bignum PURGE'); \n" +
-                     "    EXCEPTION \n" +
-                     "        WHEN e_table_missing \n" +
-                     "        THEN NULL; \n" +
-                     "    END; \n" +
-                     "    EXECUTE IMMEDIATE (' \n" +
-                     "        CREATE TABLE nodb_tab_bignum ( \n" +
-                     "            id       NUMBER NOT NULL, \n" +
-                     "            content  NUMBER(12, 0) \n" +
-                     "        ) \n" +
-                     "    '); \n" +
-                     "END; ";
+      let num = 999999999999;
 
-          connection.execute(
-            proc,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var sql = "insert into nodb_tab_bignum (id, content) values (1, :n)";
-          connection.execute(
-            sql,
-            { n: num },
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var sql = "select content from nodb_tab_bignum where id = 1";
-          connection.execute(
-            sql,
-            function(err, result) {
-              should.not.exist(err);
-              should.strictEqual(
-                result.rows[0][0],
-                num
-              );
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var sql = "DROP TABLE nodb_tab_bignum PURGE";
-          connection.execute(
-            sql,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+      let proc = `BEGIN \n` +
+                     `    DECLARE \n` +
+                     `        e_table_missing EXCEPTION; \n` +
+                     `        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n` +
+                     `    BEGIN \n` +
+                     `        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_bignum PURGE'); \n` +
+                     `    EXCEPTION \n` +
+                     `        WHEN e_table_missing \n` +
+                     `        THEN NULL; \n` +
+                     `    END; \n` +
+                     `    EXECUTE IMMEDIATE (' \n` +
+                     `        CREATE TABLE nodb_tab_bignum ( \n` +
+                     `            id       NUMBER NOT NULL, \n` +
+                     `            content  NUMBER(12, 0) \n` +
+                     `        ) \n` +
+                     `    '); \n` +
+                     `END; `;
+
+      await connection.execute(proc);
+      let sql = `insert into nodb_tab_bignum (id, content) values (1, :n)`;
+      await connection.execute(
+        sql,
+        { n: num });
+      sql = `select content from nodb_tab_bignum where id = 1`;
+      let result = await connection.execute(sql);
+
+      assert.strictEqual(
+        result.rows[0][0],
+        num
+      );
+      sql = `DROP TABLE nodb_tab_bignum PURGE`;
+      await connection.execute(sql);
     });
   }); // 26.3
 
@@ -188,92 +154,63 @@ describe('26. dataTypeNumber.js', function() {
    */
   describe('26.4 Large number, edge cases', function() {
 
-    it('26.4.1 maximum safe integer, (2^53 - 1)', function(done) {
+    it('26.4.1 maximum safe integer, (2^53 - 1)', async function() {
 
-      var num = 9007199254740992;
-      var sql = "select " + num + " from dual";
-      connection.execute(
-        sql,
-        function(err, result) {
-          should.not.exist(err);
-          should.strictEqual(
-            result.rows[0][0],
-            num
-          );
-          done();
-        }
+      let num = 9007199254740992;
+      let sql = `select ` + num + ` from dual`;
+      let result = await connection.execute(sql);
+      assert.strictEqual(
+        result.rows[0][0],
+        num
       );
     });
 
-    it('26.4.2 Negative - maximum safe integer + 1', function(done) {
+    it('26.4.2 Negative - maximum safe integer + 1', async function() {
 
-      var actual = '9007199254740993';
-      var expected = 9007199254740992;
+      let actual = '9007199254740993';
+      let expected = 9007199254740992;
 
-      var sql = "SELECT TO_NUMBER( " + actual + " ) FROM DUAL";
-      connection.execute(
-        sql,
-        function(err, result) {
-          should.not.exist(err);
-          var outNum = result.rows[0][0];
-          should.strictEqual(outNum, expected);
-          done();
-        }
+      let sql = `SELECT TO_NUMBER( ` + actual + ` ) FROM DUAL`;
+      let result = await connection.execute(sql);
+      let outNum = result.rows[0][0];
+      assert.strictEqual(outNum, expected);
+    });
+
+    it('26.4.3 minimum safe integer', async function() {
+
+      let num = -9007199254740992;
+      let sql = `select ` + num + ` from dual`;
+      let result = await connection.execute(sql);
+
+      assert.strictEqual(
+        result.rows[0][0],
+        num
       );
     });
 
-    it('26.4.3 minimum safe integer', function(done) {
+    it('26.4.4 Negative - minimum safe integer - 1', async function() {
+      let actual = '-9007199254740993';
+      let expected = -9007199254740992;
 
-      var num = -9007199254740992;
-      var sql = "select " + num + " from dual";
-      connection.execute(
-        sql,
-        function(err, result) {
-          should.not.exist(err);
-          should.strictEqual(
-            result.rows[0][0],
-            num
-          );
-          done();
-        }
-      );
+      let sql = `SELECT TO_NUMBER( ` + actual + ` ) FROM DUAL`;
+      let result = await connection.execute(sql);
+
+      let outNum = result.rows[0][0];
+      assert.strictEqual(outNum, expected);
     });
 
-    it('26.4.4 Negative - minimum safe integer - 1', function(done) {
-      var actual = '-9007199254740993';
-      var expected = -9007199254740992;
+    it('26.4.5 gets correct number via fetching as string', async function() {
+      let num = '-9007199254740993';
 
-      var sql = "SELECT TO_NUMBER( " + actual + " ) FROM DUAL";
-      connection.execute(
-        sql,
-        function(err, result) {
-          should.not.exist(err);
-          var outNum = result.rows[0][0];
-          should.strictEqual(outNum, expected);
-          done();
-        }
-      );
-    });
-
-    it('26.4.5 gets correct number via fetching as string', function(done) {
-      var num = '-9007199254740993';
-
-      var sql = "SELECT TO_NUMBER( " + num + " ) AS TS_NUM FROM DUAL";
-      connection.execute(
+      let sql = "SELECT TO_NUMBER( " + num + " ) AS TS_NUM FROM DUAL";
+      let result = await connection.execute(
         sql,
         [],
         {
           fetchInfo : { "TS_NUM"  : { type : oracledb.STRING } }
-        },
-        function(err, result) {
-          should.not.exist(err);
-          var got = result.rows[0][0];
-          should.strictEqual(got, num);
-          done();
-        }
-      );
+        });
+      let got = result.rows[0][0];
+      assert.strictEqual(got, num);
     });
-
   }); // 26.4
-
 });

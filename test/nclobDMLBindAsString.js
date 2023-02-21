@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -57,7 +57,7 @@ describe('124. nclobDMLBindAsString.js', function() {
 
   describe('124.1 DML binding', function() {
     before('create table', async function() {
-      await assist.createTable(connection, tableName);
+      await connection.execute(assist.sqlCreateTable(tableName));
     });
 
     after(async function() {

@@ -85,15 +85,10 @@ describe('249. rsGetAllRows1.js', function() {
   });
 
   after (async function() {
-    try {
-      await conn.execute("DROP PROCEDURE nodb_rsgetRowsOut");
-      await conn.execute("DROP TABLE " + tableName + " PURGE");
-      await conn.close();
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      oracledb.outFormat = outFormatBak;
-    }
+    oracledb.outFormat = outFormatBak;
+    await conn.execute("DROP PROCEDURE nodb_rsgetRowsOut");
+    await conn.execute("DROP TABLE " + tableName + " PURGE");
+    await conn.close();
   });
 
   describe('249.1 ResultSet & getRows()', function() {

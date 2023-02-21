@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -96,337 +96,309 @@ describe('250. rsGetAllRows2.js', function() {
   });
 
   after (async function() {
-    try {
-      await conn.execute('DROP TABLE NODB_RSEMP PURGE');
-      await conn.execute('DROP TABLE NODB_RSDEPT PURGE');
-      await conn.close();
-    } catch (err) {
-      assert.ifError(err);
-    } finally {
-      oracledb.outFormat = outFormatBak;
-    }
+    oracledb.outFormat = outFormatBak;
+    await conn.execute('DROP TABLE NODB_RSEMP PURGE');
+    await conn.execute('DROP TABLE NODB_RSDEPT PURGE');
+    await conn.close();
   });
 
   it('250.1 Nested Cursor + getRows() OBJECT outformat', async function() {
-    try {
-      let result = await conn.execute(
-        `SELECT
-          DEPARTMENT_NAME,
-          CURSOR (
-            SELECT
-              EMPLOYEE_NAME,
-              EMPLOYEE_ID
-            FROM
-              nodb_rsEmp B
-            WHERE
-              A.DEPARTMENT_ID = B.DEPARTMENT_ID
-            ORDER BY EMPLOYEE_ID ) as NC
+    let result = await conn.execute(
+      `SELECT
+        DEPARTMENT_NAME,
+        CURSOR (
+          SELECT
+            EMPLOYEE_NAME,
+            EMPLOYEE_ID
           FROM
-            NODB_RSDEPT A`,
-        {}, { resultSet : true }
-      );
+            nodb_rsEmp B
+          WHERE
+            A.DEPARTMENT_ID = B.DEPARTMENT_ID
+          ORDER BY EMPLOYEE_ID ) as NC
+        FROM
+          NODB_RSDEPT A`,
+      {}, { resultSet : true }
+    );
 
-      let rows = await result.resultSet.getRows();
+    let rows = await result.resultSet.getRows();
 
-      // Top level
-      assert.equal(rows.length, 3);
-      assert.equal(rows[0].DEPARTMENT_NAME, "R&D");
-      assert.equal(rows[1].DEPARTMENT_NAME, "Sales");
-      assert.equal(rows[2].DEPARTMENT_NAME, "Marketing");
+    // Top level
+    assert.equal(rows.length, 3);
+    assert.equal(rows[0].DEPARTMENT_NAME, "R&D");
+    assert.equal(rows[1].DEPARTMENT_NAME, "Sales");
+    assert.equal(rows[2].DEPARTMENT_NAME, "Marketing");
 
-      // nested level
-      let rs = rows[0].NC;
-      let rows2 = await rs.getRows();
-      assert.equal(rows2.length, 1);
-      assert.equal(rows2[0].EMPLOYEE_NAME, "R&D 1");
-      assert.equal(rows2[0].EMPLOYEE_ID, 1001);
+    // nested level
+    let rs = rows[0].NC;
+    let rows2 = await rs.getRows();
+    assert.equal(rows2.length, 1);
+    assert.equal(rows2[0].EMPLOYEE_NAME, "R&D 1");
+    assert.equal(rows2[0].EMPLOYEE_ID, 1001);
 
-      // Sales Dept - no employees.
-      rs = rows[1].NC;
-      rows2 = await rs.getRows();
-      assert.equal(rows2.length, 0);
+    // Sales Dept - no employees.
+    rs = rows[1].NC;
+    rows2 = await rs.getRows();
+    assert.equal(rows2.length, 0);
 
-      rs = rows[2].NC;
-      rows2 = await rs.getRows();
-      assert.equal(rows2.length, 127);
-      assert.equal(rows2[0].EMPLOYEE_NAME, "Marketing 0");
-      assert.equal(rows2[1].EMPLOYEE_NAME, "Marketing 1");
-      assert.equal(rows2[2].EMPLOYEE_NAME, "Marketing 2");
-      assert.equal(rows2[126].EMPLOYEE_NAME, "Marketing 126");
-      await result.resultSet.close();
-    } catch (err) {
-      assert.ifError(err);
-    }
+    rs = rows[2].NC;
+    rows2 = await rs.getRows();
+    assert.equal(rows2.length, 127);
+    assert.equal(rows2[0].EMPLOYEE_NAME, "Marketing 0");
+    assert.equal(rows2[1].EMPLOYEE_NAME, "Marketing 1");
+    assert.equal(rows2[2].EMPLOYEE_NAME, "Marketing 2");
+    assert.equal(rows2[126].EMPLOYEE_NAME, "Marketing 126");
+    await result.resultSet.close();
   });
 
   it('250.2 Nested Cursor + getRows(0) rows ARRAY outformat', async function() {
-    try {
-      let result = await conn.execute(
-        `SELECT
-          DEPARTMENT_NAME,
-          CURSOR (
-            SELECT
-              EMPLOYEE_NAME,
-              EMPLOYEE_ID
-            FROM
-              nodb_rsEmp B
-            WHERE
-              A.DEPARTMENT_ID = B.DEPARTMENT_ID
-            ORDER BY EMPLOYEE_ID ) as NC
-        FROM
-          NODB_RSDEPT A`,
-        {}, { resultSet : true, outFormat : oracledb.OUT_FORMAT_ARRAY }
-      );
+    let result = await conn.execute(
+      `SELECT
+        DEPARTMENT_NAME,
+        CURSOR (
+          SELECT
+            EMPLOYEE_NAME,
+            EMPLOYEE_ID
+          FROM
+            nodb_rsEmp B
+          WHERE
+            A.DEPARTMENT_ID = B.DEPARTMENT_ID
+          ORDER BY EMPLOYEE_ID ) as NC
+      FROM
+        NODB_RSDEPT A`,
+      {}, { resultSet : true, outFormat : oracledb.OUT_FORMAT_ARRAY }
+    );
 
-      let rows = await result.resultSet.getRows(0);
+    let rows = await result.resultSet.getRows(0);
 
-      // Top level
-      assert.equal(rows.length, 3);
-      assert.equal(rows[0][0], "R&D");
-      assert.equal(rows[1][0], "Sales");
-      assert.equal(rows[2][0], "Marketing");
+    // Top level
+    assert.equal(rows.length, 3);
+    assert.equal(rows[0][0], "R&D");
+    assert.equal(rows[1][0], "Sales");
+    assert.equal(rows[2][0], "Marketing");
 
-      // nested level
-      let rs = rows[0][1];
-      let rows2 = await rs.getRows(0);
-      assert.equal(rows2.length, 1);
-      assert.equal(rows2[0][0], "R&D 1");
-      assert.equal(rows2[0][1], 1001);
+    // nested level
+    let rs = rows[0][1];
+    let rows2 = await rs.getRows(0);
+    assert.equal(rows2.length, 1);
+    assert.equal(rows2[0][0], "R&D 1");
+    assert.equal(rows2[0][1], 1001);
 
-      // Sales Dept - no employees.
-      rs = rows[1][1];
-      rows2 = await rs.getRows(0);
-      assert.equal(rows2.length, 0);
+    // Sales Dept - no employees.
+    rs = rows[1][1];
+    rows2 = await rs.getRows(0);
+    assert.equal(rows2.length, 0);
 
-      rs = rows[2][1];
-      rows2 = await rs.getRows(0);
-      assert.equal(rows2.length, 127) ;
-      assert.equal(rows2[0][0], "Marketing 0");
-      assert.equal(rows2[1][0], "Marketing 1");
-      assert.equal(rows2[2][0], "Marketing 2");
-      assert.equal(rows2[126][0], "Marketing 126");
-      await result.resultSet.close();
-      oracledb.outFormat = outFormatBak;
-    } catch (err) {
-      assert.ifError(err);
-    }
+    rs = rows[2][1];
+    rows2 = await rs.getRows(0);
+    assert.equal(rows2.length, 127) ;
+    assert.equal(rows2[0][0], "Marketing 0");
+    assert.equal(rows2[1][0], "Marketing 1");
+    assert.equal(rows2[2][0], "Marketing 2");
+    assert.equal(rows2[126][0], "Marketing 126");
+    await result.resultSet.close();
+    oracledb.outFormat = outFormatBak;
   });
   it('250.3 Nested Cursor + getRows(n) + getRows() OBJECT outformat', async function() {
-    try {
-      oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
-      let result = await conn.execute(
-        `SELECT
-          DEPARTMENT_NAME,
-          CURSOR (
-            SELECT
-              EMPLOYEE_NAME,
-              EMPLOYEE_ID
-            FROM
-              nodb_rsEmp B
-            WHERE
-              A.DEPARTMENT_ID = B.DEPARTMENT_ID
-            ORDER BY EMPLOYEE_ID ) as NC
+    oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
+    let result = await conn.execute(
+      `SELECT
+        DEPARTMENT_NAME,
+        CURSOR (
+          SELECT
+            EMPLOYEE_NAME,
+            EMPLOYEE_ID
           FROM
-            NODB_RSDEPT A`,
-        {}, { resultSet : true }
-      );
+            nodb_rsEmp B
+          WHERE
+            A.DEPARTMENT_ID = B.DEPARTMENT_ID
+          ORDER BY EMPLOYEE_ID ) as NC
+        FROM
+          NODB_RSDEPT A`,
+      {}, { resultSet : true }
+    );
 
-      let rows1 = await result.resultSet.getRows(1);
-      let rows2 = await result.resultSet.getRows();
-      // Top level
-      assert.equal(rows1.length, 1);
-      assert.equal(rows2.length, 2);
-      assert.equal(rows1[0].DEPARTMENT_NAME, "R&D");
-      assert.equal(rows2[0].DEPARTMENT_NAME, "Sales");
-      assert.equal(rows2[1].DEPARTMENT_NAME, "Marketing");
+    let rows1 = await result.resultSet.getRows(1);
+    let rows2 = await result.resultSet.getRows();
+    // Top level
+    assert.equal(rows1.length, 1);
+    assert.equal(rows2.length, 2);
+    assert.equal(rows1[0].DEPARTMENT_NAME, "R&D");
+    assert.equal(rows2[0].DEPARTMENT_NAME, "Sales");
+    assert.equal(rows2[1].DEPARTMENT_NAME, "Marketing");
 
-      // nested level
-      let rs = rows1[0].NC;
-      let rows1_NC = await rs.getRows();
-      assert.equal(rows1_NC.length, 1);
-      assert.equal(rows1_NC[0].EMPLOYEE_NAME, "R&D 1");
-      assert.equal(rows1_NC[0].EMPLOYEE_ID, 1001);
+    // nested level
+    let rs = rows1[0].NC;
+    let rows1_NC = await rs.getRows();
+    assert.equal(rows1_NC.length, 1);
+    assert.equal(rows1_NC[0].EMPLOYEE_NAME, "R&D 1");
+    assert.equal(rows1_NC[0].EMPLOYEE_ID, 1001);
 
-      // Sales Dept - no employees.
-      rs = rows2[0].NC;
-      let rows2_NC = await rs.getRows();
-      assert.equal(rows2_NC.length, 0);
+    // Sales Dept - no employees.
+    rs = rows2[0].NC;
+    let rows2_NC = await rs.getRows();
+    assert.equal(rows2_NC.length, 0);
 
-      rs = rows2[1].NC;
-      let rows2_NC1 = await rs.getRows(1);
-      let rows2_NC2 = await rs.getRows();
-      assert.equal(rows2_NC1.length, 1);
-      assert.equal(rows2_NC2.length, 126);
-      assert.equal(rows2_NC1[0].EMPLOYEE_NAME, "Marketing 0");
-      assert.equal(rows2_NC2[0].EMPLOYEE_NAME, "Marketing 1");
-      assert.equal(rows2_NC2[1].EMPLOYEE_NAME, "Marketing 2");
-      assert.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");
-      await result.resultSet.close();
-    } catch (err) {
-      assert.ifError(err);
-    }
+    rs = rows2[1].NC;
+    let rows2_NC1 = await rs.getRows(1);
+    let rows2_NC2 = await rs.getRows();
+    assert.equal(rows2_NC1.length, 1);
+    assert.equal(rows2_NC2.length, 126);
+    assert.equal(rows2_NC1[0].EMPLOYEE_NAME, "Marketing 0");
+    assert.equal(rows2_NC2[0].EMPLOYEE_NAME, "Marketing 1");
+    assert.equal(rows2_NC2[1].EMPLOYEE_NAME, "Marketing 2");
+    assert.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");
+    await result.resultSet.close();
   });
 
   it('250.4 Nested Cursor + getRow() + getRows(0) rows ARRAY outformat', async function() {
-    try {
-      oracledb.outFormat = oracledb.OUT_FORMAT_ARRAY;
-      let result = await conn.execute(
-        `SELECT
-          DEPARTMENT_NAME,
-          CURSOR (
-            SELECT
-              EMPLOYEE_NAME,
-              EMPLOYEE_ID
-            FROM
-              nodb_rsEmp B
-            WHERE
-              A.DEPARTMENT_ID = B.DEPARTMENT_ID
-            ORDER BY EMPLOYEE_ID ) as NC
-        FROM
-          NODB_RSDEPT A`,
-        {}, { resultSet : true }
-      );
+    oracledb.outFormat = oracledb.OUT_FORMAT_ARRAY;
+    let result = await conn.execute(
+      `SELECT
+        DEPARTMENT_NAME,
+        CURSOR (
+          SELECT
+            EMPLOYEE_NAME,
+            EMPLOYEE_ID
+          FROM
+            nodb_rsEmp B
+          WHERE
+            A.DEPARTMENT_ID = B.DEPARTMENT_ID
+          ORDER BY EMPLOYEE_ID ) as NC
+      FROM
+        NODB_RSDEPT A`,
+      {}, { resultSet : true }
+    );
 
-      let rows1 = await result.resultSet.getRow();
-      let rows2 = await result.resultSet.getRows(0);
+    let rows1 = await result.resultSet.getRow();
+    let rows2 = await result.resultSet.getRows(0);
 
-      // Top level
-      assert.equal(rows2.length, 2);
-      assert.equal(rows1[0], "R&D");
-      assert.equal(rows2[0][0], "Sales");
-      assert.equal(rows2[1][0], "Marketing");
+    // Top level
+    assert.equal(rows2.length, 2);
+    assert.equal(rows1[0], "R&D");
+    assert.equal(rows2[0][0], "Sales");
+    assert.equal(rows2[1][0], "Marketing");
 
-      // nested level
-      let rs = rows1[1];
-      let rows1_NC = await rs.getRows(0);
-      assert.equal(rows1_NC.length, 1);
-      assert.equal(rows1_NC[0][0], "R&D 1");
-      assert.equal(rows1_NC[0][1], 1001);
+    // nested level
+    let rs = rows1[1];
+    let rows1_NC = await rs.getRows(0);
+    assert.equal(rows1_NC.length, 1);
+    assert.equal(rows1_NC[0][0], "R&D 1");
+    assert.equal(rows1_NC[0][1], 1001);
 
-      // Sales Dept - no employees.
-      rs = rows2[0][1];
-      let rows2_NC = await rs.getRows(0);
-      assert.equal(rows2_NC.length, 0);
+    // Sales Dept - no employees.
+    rs = rows2[0][1];
+    let rows2_NC = await rs.getRows(0);
+    assert.equal(rows2_NC.length, 0);
 
-      rs = rows2[1][1];
-      let rows2_NC1 = await rs.getRow();
-      let rows2_NC2 = await rs.getRows(0);
-      assert.equal(rows2_NC2.length, 126);
-      assert.equal(rows2_NC1[0], "Marketing 0");
-      assert.equal(rows2_NC2[0][0], "Marketing 1");
-      assert.equal(rows2_NC2[1][0], "Marketing 2");
-      assert.equal(rows2_NC2[125][0], "Marketing 126");
-      await result.resultSet.close();
-      oracledb.outFormat = outFormatBak;
-    } catch (err) {
-      assert.ifError(err);
-    }
+    rs = rows2[1][1];
+    let rows2_NC1 = await rs.getRow();
+    let rows2_NC2 = await rs.getRows(0);
+    assert.equal(rows2_NC2.length, 126);
+    assert.equal(rows2_NC1[0], "Marketing 0");
+    assert.equal(rows2_NC2[0][0], "Marketing 1");
+    assert.equal(rows2_NC2[1][0], "Marketing 2");
+    assert.equal(rows2_NC2[125][0], "Marketing 126");
+    await result.resultSet.close();
+    oracledb.outFormat = outFormatBak;
   });
 
   it('250.5 Nested Cursor + getRows(n) + getRows(0) with fetchArraySize < remaining rows inside nested cursor', async function() {
-    try {
-      oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
-      let result = await conn.execute(
-        `SELECT
-          DEPARTMENT_NAME,
-          CURSOR (
-            SELECT
-              EMPLOYEE_NAME,
-              EMPLOYEE_ID
-            FROM
-              nodb_rsEmp B
-            WHERE
-              A.DEPARTMENT_ID = B.DEPARTMENT_ID
-            ORDER BY EMPLOYEE_ID ) as NC
+    oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
+    let result = await conn.execute(
+      `SELECT
+        DEPARTMENT_NAME,
+        CURSOR (
+          SELECT
+            EMPLOYEE_NAME,
+            EMPLOYEE_ID
           FROM
-            NODB_RSDEPT A`,
-        {}, { resultSet : true, fetchArraySize : 100 }
-      );
+            nodb_rsEmp B
+          WHERE
+            A.DEPARTMENT_ID = B.DEPARTMENT_ID
+          ORDER BY EMPLOYEE_ID ) as NC
+        FROM
+          NODB_RSDEPT A`,
+      {}, { resultSet : true, fetchArraySize : 100 }
+    );
 
-      let rows1 = await result.resultSet.getRows(1);
-      let rows2 = await result.resultSet.getRows(0);
-      // Top level
-      assert.equal(rows1.length, 1);
-      assert.equal(rows2.length, 2);
-      assert.equal(rows1[0].DEPARTMENT_NAME, "R&D");
-      assert.equal(rows2[0].DEPARTMENT_NAME, "Sales");
-      assert.equal(rows2[1].DEPARTMENT_NAME, "Marketing");
+    let rows1 = await result.resultSet.getRows(1);
+    let rows2 = await result.resultSet.getRows(0);
+    // Top level
+    assert.equal(rows1.length, 1);
+    assert.equal(rows2.length, 2);
+    assert.equal(rows1[0].DEPARTMENT_NAME, "R&D");
+    assert.equal(rows2[0].DEPARTMENT_NAME, "Sales");
+    assert.equal(rows2[1].DEPARTMENT_NAME, "Marketing");
 
-      // nested level
-      let rs = rows1[0].NC;
-      let rows1_NC = await rs.getRows(0);
-      assert.equal(rows1_NC.length, 1);
-      assert.equal(rows1_NC[0].EMPLOYEE_NAME, "R&D 1");
-      assert.equal(rows1_NC[0].EMPLOYEE_ID, 1001);
+    // nested level
+    let rs = rows1[0].NC;
+    let rows1_NC = await rs.getRows(0);
+    assert.equal(rows1_NC.length, 1);
+    assert.equal(rows1_NC[0].EMPLOYEE_NAME, "R&D 1");
+    assert.equal(rows1_NC[0].EMPLOYEE_ID, 1001);
 
-      // Sales Dept - no employees.
-      rs = rows2[0].NC;
-      let rows2_NC = await rs.getRows(0);
-      assert.equal(rows2_NC.length, 0);
+    // Sales Dept - no employees.
+    rs = rows2[0].NC;
+    let rows2_NC = await rs.getRows(0);
+    assert.equal(rows2_NC.length, 0);
 
-      rs = rows2[1].NC;
-      let rows2_NC1 = await rs.getRows(1);
-      let rows2_NC2 = await rs.getRows(0);
-      assert.equal(rows2_NC1.length, 1);
-      assert.equal(rows2_NC2.length, 126);
-      assert.equal(rows2_NC1[0].EMPLOYEE_NAME, "Marketing 0");
-      assert.equal(rows2_NC2[0].EMPLOYEE_NAME, "Marketing 1");
-      assert.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");
-      await result.resultSet.close();
-    } catch (err) {
-      assert.ifError(err);
-    }
+    rs = rows2[1].NC;
+    let rows2_NC1 = await rs.getRows(1);
+    let rows2_NC2 = await rs.getRows(0);
+    assert.equal(rows2_NC1.length, 1);
+    assert.equal(rows2_NC2.length, 126);
+    assert.equal(rows2_NC1[0].EMPLOYEE_NAME, "Marketing 0");
+    assert.equal(rows2_NC2[0].EMPLOYEE_NAME, "Marketing 1");
+    assert.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");
+    await result.resultSet.close();
   });
 
   it('250.6 Nested Cursor + getRows(n) + getRow() + getRows() with fetchArraySize = 1', async function() {
-    try {
-      let result = await conn.execute(
-        `SELECT
-          DEPARTMENT_NAME,
-          CURSOR (
-            SELECT
-              EMPLOYEE_NAME,
-              EMPLOYEE_ID
-            FROM
-              nodb_rsEmp B
-            WHERE
-              A.DEPARTMENT_ID = B.DEPARTMENT_ID
-            ORDER BY EMPLOYEE_ID ) as NC
+    let result = await conn.execute(
+      `SELECT
+        DEPARTMENT_NAME,
+        CURSOR (
+          SELECT
+            EMPLOYEE_NAME,
+            EMPLOYEE_ID
           FROM
-            NODB_RSDEPT A`,
-        {}, { resultSet : true, fetchArraySize : 1 }
-      );
+            nodb_rsEmp B
+          WHERE
+            A.DEPARTMENT_ID = B.DEPARTMENT_ID
+          ORDER BY EMPLOYEE_ID ) as NC
+        FROM
+          NODB_RSDEPT A`,
+      {}, { resultSet : true, fetchArraySize : 1 }
+    );
 
-      let rows1 = await result.resultSet.getRows(1);
-      let rows2 = await result.resultSet.getRows();
-      // Top level
-      assert.equal(rows1.length, 1);
-      assert.equal(rows2.length, 2);
-      assert.equal(rows1[0].DEPARTMENT_NAME, "R&D");
-      assert.equal(rows2[0].DEPARTMENT_NAME, "Sales");
-      assert.equal(rows2[1].DEPARTMENT_NAME, "Marketing");
+    let rows1 = await result.resultSet.getRows(1);
+    let rows2 = await result.resultSet.getRows();
+    // Top level
+    assert.equal(rows1.length, 1);
+    assert.equal(rows2.length, 2);
+    assert.equal(rows1[0].DEPARTMENT_NAME, "R&D");
+    assert.equal(rows2[0].DEPARTMENT_NAME, "Sales");
+    assert.equal(rows2[1].DEPARTMENT_NAME, "Marketing");
 
-      // nested level
-      let rs = rows1[0].NC;
-      let rows1_NC = await rs.getRows();
-      assert.equal(rows1_NC.length, 1);
-      assert.equal(rows1_NC[0].EMPLOYEE_NAME, "R&D 1");
-      assert.equal(rows1_NC[0].EMPLOYEE_ID, 1001);
+    // nested level
+    let rs = rows1[0].NC;
+    let rows1_NC = await rs.getRows();
+    assert.equal(rows1_NC.length, 1);
+    assert.equal(rows1_NC[0].EMPLOYEE_NAME, "R&D 1");
+    assert.equal(rows1_NC[0].EMPLOYEE_ID, 1001);
 
-      // Sales Dept - no employees.
-      rs = rows2[0].NC;
-      let rows2_NC = await rs.getRows();
-      assert.equal(rows2_NC.length, 0);
+    // Sales Dept - no employees.
+    rs = rows2[0].NC;
+    let rows2_NC = await rs.getRows();
+    assert.equal(rows2_NC.length, 0);
 
-      rs = rows2[1].NC;
-      let rows2_NC1 = await rs.getRow();
-      let rows2_NC2 = await rs.getRows();
-      assert.equal(rows2_NC2.length, 126);
-      assert.equal(rows2_NC1.EMPLOYEE_NAME, "Marketing 0");
-      assert.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");
-      await result.resultSet.close();
-    } catch (err) {
-      assert.ifError(err);
-    }
+    rs = rows2[1].NC;
+    let rows2_NC1 = await rs.getRow();
+    let rows2_NC2 = await rs.getRows();
+    assert.equal(rows2_NC2.length, 126);
+    assert.equal(rows2_NC1.EMPLOYEE_NAME, "Marketing 0");
+    assert.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");
+    await result.resultSet.close();
   });
+
 });

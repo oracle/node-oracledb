@@ -392,7 +392,7 @@ describe('4. binding.js', function() {
 
     before(async function() {
       connection = await oracledb.getConnection(dbConfig);
-      await assist.createTable(connection, tableName);
+      await connection.execute(assist.sqlCreateTable(tableName));
     });
 
     after(async function() {

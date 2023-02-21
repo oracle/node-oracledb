@@ -32,74 +32,69 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
 const assist   = require('./dataTypeAssist.js');
 const dbConfig = require('./dbconfig.js');
 
 describe('25. dataTypeNvarchar2.js', function() {
 
   let connection = null;
-  var tableName = "nodb_nvarchar2";
+  let tableName = "nodb_nvarchar2";
 
   let strLen = [10, 100, 1000, 2000]; // char string length
   let strs = [];
-  for (var i = 0; i < strLen.length; i++)
+  for (let i = 0; i < strLen.length; i++)
     strs[i] = assist.createCharString(strLen[i]);
 
-  before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig,
-      function(err, conn) {
-        should.not.exist(err);
-        connection = conn;
-        done();
-      }
-    );
+  before('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after('release connection', function(done) {
-    connection.release(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after('release connection', async function() {
+    await connection.close();
   });
 
   describe('25.1 testing NVARCHAR2 data in various lengths', function() {
 
-    before('create table, insert data', function(done) {
-      assist.setUp(connection, tableName, strs, done);
+    before('create table, insert data', async function() {
+      await new Promise((resolve) => {
+        assist.setUp(connection, tableName, strs, resolve);
+      });
     });
 
-    after(function(done) {
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after(async function() {
+      await connection.execute(`DROP table ` + tableName + ` PURGE`);
     });
 
-    it('25.1.1 SELECT query', function(done) {
-      assist.dataTypeSupport(connection, tableName, strs, done);
+    it('25.1.1 SELECT query', async function() {
+      await new Promise((resolve) => {
+        assist.dataTypeSupport(connection, tableName, strs, resolve);
+      });
     });
 
-    it('25.1.2 resultSet stores NVARCHAR2 data correctly', function(done) {
-      assist.verifyResultSet(connection, tableName, strs, done);
+    it('25.1.2 resultSet stores NVARCHAR2 data correctly', async function() {
+      await new Promise((resolve) => {
+        assist.verifyResultSet(connection, tableName, strs, resolve);
+      });
     });
 
-    it('25.1.3 works well with REF Cursor', function(done) {
-      assist.verifyRefCursor(connection, tableName, strs, done);
+    it('25.1.3 works well with REF Cursor', async function() {
+      await new Promise((resolve) => {
+        assist.verifyRefCursor(connection, tableName, strs, resolve);
+      });
     });
 
-    it('25.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
-      assist.verifyRefCursorWithFetchInfo(connection, tableName, strs, done);
+    it('25.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
+      await new Promise((resolve) => {
+        assist.verifyRefCursorWithFetchInfo(connection, tableName, strs, resolve);
+      });
     });
   });
 
   describe('25.2 stores null value correctly', function() {
-    it('25.2.1 testing Null, Empty string and Undefined', function(done) {
-      assist.verifyNullValues(connection, tableName, done);
+    it('25.2.1 testing Null, Empty string and Undefined', async function() {
+      await new Promise((resolve) => {
+        assist.verifyNullValues(connection, tableName, resolve);
+      });
     });
   });
-
 });

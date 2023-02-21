@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -66,7 +66,7 @@ describe('39. dataTypeRowid.js', function() {
     });
 
     it('39.1.1 query rowid', async function() {
-      let result = await connection.execute("SELECT * FROM " + tableName);
+      let result = await connection.execute(`SELECT * FROM ` + tableName);
 
       for (let i = 0; i < array.length; i++) {
         const resultVal = result.rows[i][1];
@@ -89,7 +89,7 @@ describe('39. dataTypeRowid.js', function() {
       await assert.rejects(
         async () => {
           await connection.execute(
-            "update " + tableName + " set ROWID = CHARTOROWID('AAAspiAABAAAZnJAAE') where num = 1");
+            `update ` + tableName + ` set ROWID = CHARTOROWID('AAAspiAABAAAZnJAAE') where num = 1`);
         },
         /ORA-01747:/
       );
@@ -97,7 +97,7 @@ describe('39. dataTypeRowid.js', function() {
 
     it('39.1.4 can get data object number correctly', async function() {
       let result = await connection.execute(
-        "select dbms_rowid.rowid_object(ROWID) AS C from " + tableName + " WHERE ROWNUM <=1");
+        `select dbms_rowid.rowid_object(ROWID) AS C from ` + tableName + ` WHERE ROWNUM <=1`);
 
       const resultVal = result.rows[0][0];
       assert.strictEqual(typeof resultVal, "number");
@@ -105,7 +105,7 @@ describe('39. dataTypeRowid.js', function() {
 
     it('39.1.5 can get datafile number correctly', async function() {
       let result = await connection.execute(
-        "select dbms_rowid.rowid_relative_fno(ROWID) AS C from " + tableName + " WHERE ROWNUM <=1");
+        `select dbms_rowid.rowid_relative_fno(ROWID) AS C from ` + tableName + ` WHERE ROWNUM <=1`);
 
       const resultVal = result.rows[0][0];
       assert.strictEqual(typeof resultVal, "number");
@@ -113,7 +113,7 @@ describe('39. dataTypeRowid.js', function() {
 
     it('39.1.6 can get data block number correctly', async function() {
       let result = await connection.execute(
-        "select dbms_rowid.ROWID_BLOCK_NUMBER(ROWID) AS C from " + tableName + " WHERE ROWNUM <=1");
+        `select dbms_rowid.ROWID_BLOCK_NUMBER(ROWID) AS C from ` + tableName + ` WHERE ROWNUM <=1`);
 
       const resultVal = result.rows[0][0];
       assert.strictEqual(typeof resultVal, "number");
@@ -121,7 +121,7 @@ describe('39. dataTypeRowid.js', function() {
 
     it('39.1.7 can get row number correctly', async function() {
       let result = await connection.execute(
-        "select dbms_rowid.rowid_row_number(ROWID) AS C from " + tableName + " WHERE ROWNUM <=1");
+        `select dbms_rowid.rowid_row_number(ROWID) AS C from ` + tableName + ` WHERE ROWNUM <=1`);
 
       const resultVal = result.rows[0][0];
       assert.strictEqual(typeof resultVal, "number");
@@ -139,7 +139,7 @@ describe('39. dataTypeRowid.js', function() {
       await assert.rejects(
         async () => {
           await connection.execute(
-            "update " + tableName + " set ROWID = 'AAAspiAABAAAZnJAAE' where num = 1");
+            `update ` + tableName + ` set ROWID = 'AAAspiAABAAAZnJAAE' where num = 1`);
         },
         /ORA-01747:/
       );
@@ -149,7 +149,7 @@ describe('39. dataTypeRowid.js', function() {
       await assert.rejects(
         async () => {
           await connection.execute(
-            "INSERT INTO " + tableName + " (num, ROWID) VALUES ('12345', 523lkhlf)");
+            `INSERT INTO ` + tableName + ` (num, ROWID) VALUES ('12345', 523lkhlf)`);
         },
         /ORA-01747:/
       );
@@ -164,26 +164,26 @@ describe('39. dataTypeRowid.js', function() {
 
   const insertData = async function(connection, tableName) {
     await Promise.all(array.map(async function(element) {
-      const sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
+      const sql = `INSERT INTO ` + tableName + `(num) VALUES(` + element + `)`;
       await connection.execute(sql);
     }));
   };
 
   const updateDate = async function(connection, tableName) {
     await Promise.all(array.map(async function(element) {
-      const sql = "UPDATE " + tableName + " T SET content = T.ROWID where num = " + element;
+      const sql = `UPDATE ` + tableName + ` T SET content = T.ROWID where num = ` + element;
       await connection.execute(sql);
     }));
   };
 
   const verifyRefCursor = async function(connection, tableName) {
     const createProc =
-          "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
-          "AS " +
-          "BEGIN " +
-          "    OPEN p_out FOR " +
-          "    SELECT * FROM " + tableName  + "; " +
-          "END; ";
+          `CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) ` +
+          `AS ` +
+          `BEGIN ` +
+          `    OPEN p_out FOR ` +
+          `    SELECT * FROM ` + tableName  + `; ` +
+          `END; `;
 
     await connection.execute(createProc);
 
@@ -194,7 +194,7 @@ describe('39. dataTypeRowid.js', function() {
       ],
       { outFormat: await oracledb.OUT_FORMAT_OBJECT });
     await fetchRowsFromRS(result.outBinds[0]);
-    await connection.execute("DROP PROCEDURE testproc");
+    await connection.execute(`DROP PROCEDURE testproc`);
   };
 
   async function verifyRefCursorWithFetchInfo(connection, tableName) {
@@ -250,7 +250,7 @@ describe('39. dataTypeRowid.js', function() {
   }
 
   async function verifyFetchValues(connection, num, content, tableName) {
-    const result = await connection.execute("SELECT ROWID FROM " + tableName + " WHERE num = " + num);
+    const result = await connection.execute(`SELECT ROWID FROM ` + tableName + ` WHERE num = ` + num);
     assert.strictEqual(content, result.rows[0][0]);
   }
 });

@@ -32,114 +32,86 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 const assist   = require('./dataTypeAssist.js');
 const dbConfig = require('./dbconfig.js');
 
 describe('27. dataTypeNumber2.js', function() {
 
   let connection = null;
-  var tableName = "nodb_number2";
-  var numbers = assist.data.numbers;
+  let tableName = "nodb_number2";
+  let numbers = assist.data.numbers;
 
-  before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig,
-      function(err, conn) {
-        should.not.exist(err);
-        connection = conn;
-        done();
-      }
-    );
+  before('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after('release connection', function(done) {
-    connection.release(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after('release connection', async function() {
+    await connection.close();
   });
 
   describe('27.1 testing NUMBER(p, s) data', function() {
 
-    before('create table, insert data', function(done) {
-      assist.setUp(connection, tableName, numbers, done);
+    before('create table, insert data', async function() {
+      await new Promise((resolve) => {
+        assist.setUp(connection, tableName, numbers, resolve);
+      });
     });
 
-    after(function(done) {
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after(async function() {
+      await connection.execute(`DROP table ` + tableName + ` PURGE`);
     });
 
-    it('27.1.1 SELECT query', function(done) {
-      connection.should.be.ok();
-      connection.execute(
-        "SELECT * FROM " + tableName,
+    it('27.1.1 SELECT query', async function() {
+      let result = await connection.execute(
+        `SELECT * FROM ` + tableName,
         [],
-        { outFormat: oracledb.OUT_FORMAT_OBJECT },
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          for (var j = 0; j < numbers.length; j++) {
-            if (Math.abs(numbers[result.rows[j].NUM]) == 0.00000123)
-              result.rows[j].CONTENT.should.be.exactly(0);
-            else
-              result.rows[j].CONTENT.should.be.exactly(numbers[result.rows[j].NUM]);
-          }
-          done();
-        }
-      );
+        { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+      for (let j = 0; j < numbers.length; j++) {
+        if (Math.abs(numbers[result.rows[j].NUM]) == 0.00000123)
+          assert.strictEqual(result.rows[j].CONTENT, 0);
+        else
+          assert.strictEqual(result.rows[j].CONTENT, numbers[result.rows[j].NUM]);
+      }
     }); // 27.1.1
 
-    it('27.1.2 resultSet stores NUMBER(p, s) data correctly', function(done) {
-      connection.should.be.ok();
-      var numRows = 3; // number of rows to return from each call to getRows()
-      connection.execute(
-        "SELECT * FROM " + tableName,
+    it('27.1.2 resultSet stores NUMBER(p, s) data correctly', async function() {
+      let numRows = 3; // number of rows to return from each call to getRows()
+      let result = await connection.execute(
+        `SELECT * FROM ` + tableName,
         [],
-        { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT },
-        function(err, result) {
-          should.not.exist(err);
-          (result.resultSet.metaData[0]).name.should.eql('NUM');
-          (result.resultSet.metaData[1]).name.should.eql('CONTENT');
-          fetchRowsFromRS(result.resultSet);
-        }
-      );
+        { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT });
+      assert.strictEqual((result.resultSet.metaData[0]).name, 'NUM');
+      assert.strictEqual((result.resultSet.metaData[1]).name, 'CONTENT');
+      await fetchRowsFromRS(result.resultSet);
 
-      function fetchRowsFromRS(rs) {
-        rs.getRows(numRows, function(err, rows) {
-          should.not.exist(err);
-          if (rows.length > 0) {
-            for (var i = 0; i < rows.length; i++) {
-              if (Math.abs(numbers[rows[i].NUM]) == 0.00000123)
-                rows[i].CONTENT.should.be.exactly(0);
-              else
-                rows[i].CONTENT.should.be.exactly(numbers[rows[i].NUM]);
-            }
-            return fetchRowsFromRS(rs);
-          } else if (rows.length == 0) {
-            rs.close(function(err) {
-              should.not.exist(err);
-              done();
-            });
-          } else {
-            var lengthLessThanZero = true;
-            should.not.exist(lengthLessThanZero);
-            done();
+      async function fetchRowsFromRS(rs) {
+        let rows = await rs.getRows(numRows);
+        if (rows.length > 0) {
+          for (let i = 0; i < rows.length; i++) {
+            if (Math.abs(numbers[rows[i].NUM]) == 0.00000123)
+              assert.strictEqual(rows[i].CONTENT, 0);
+            else
+              assert.strictEqual(rows[i].CONTENT, numbers[rows[i].NUM]);
           }
-        });
+          return fetchRowsFromRS(rs);
+        } else if (rows.length == 0) {
+          await rs.close();
+        } else {
+          let lengthLessThanZero = true;
+          assert.ifError(lengthLessThanZero);
+        }
       }
     });
 
   }); // 27.1
 
   describe('27.2 stores null value correctly', function() {
-    it('27.2.1 testing Null, Empty string and Undefined', function(done) {
-      assist.verifyNullValues(connection, tableName, done);
+    it('27.2.1 testing Null, Empty string and Undefined', async function() {
+      await new Promise((resolve) => {
+        assist.verifyNullValues(connection, tableName, resolve);
+      });
     });
   });
 

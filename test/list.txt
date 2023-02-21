@@ -5256,3 +5256,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         268.3.6 executing a stored function with only one args
     268.4 calling functions without any arguments
         268.4.1 executing a stored function without any argument
+ 269. Pool Timeout
+     269.1 poolTimeout as 0, no idle connection removals
+     269.2 poolTimeout as 1sec, idle connection will get removed
+     269.3 poolTimeout as 1sec and min connection defined, idle connection will be removed
+     269.4 check default poolTimeout as 60sec
