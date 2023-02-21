@@ -336,6 +336,7 @@ static bool njsResultSet_setFetchTypes(napi_env env, njsResultSet *rs,
                     var->maxSize = NJS_MAX_FETCH_AS_STRING_SIZE;
                 }
                 break;
+            case DPI_ORACLE_TYPE_LONG_NVARCHAR:
             case DPI_ORACLE_TYPE_LONG_VARCHAR:
             case DPI_ORACLE_TYPE_LONG_RAW:
                 var->maxSize = (uint32_t) -1;
