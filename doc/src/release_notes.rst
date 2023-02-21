@@ -640,8 +640,7 @@ node-oracledb `v4.0.0 <https://github.com/oracle/node-oracledb/compare/v3.1.2...
     are required.
 
 #)  Fixed a crash occurring when draining the connection pool (`ODPI-C
-    change <https://github.com/oracle/odpi/commit/https://github.com/oracle/
-    odpi/commit/7666dc3208087383f7f0f5e49c1ee423cb154997>`__).
+    change <https://github.com/oracle/odpi/commit/7666dc3208087383f7f0f5e49c1ee423cb154997>`__).
 
 #)  Corrected ``pool.status`` to be read-only, as was documented.
 
@@ -723,8 +722,8 @@ node-oracledb `v3.1.0 <https://github.com/oracle/node-oracledb/compare/v3.0.1...
     applications where not all users will be accessing Oracle Database.
 
     It allows code generation tools to access node-oracledb constants
-    without needing Oracle Client installed (see
-    `#983 <https://github.com/oracle/node-oracledb/issues/983>`__.
+    without requiring Oracle Client libraries to be installed (see
+    `#983 <https://github.com/oracle/node-oracledb/issues/983>`__).
 
     Applications now have more scope to alter Oracle environment
     variables referenced by the Oracle Client layer. Note it is still
@@ -736,7 +735,7 @@ node-oracledb `v3.1.0 <https://github.com/oracle/node-oracledb/compare/v3.0.1...
     String limited to the VARCHAR2 length.
 
 #)  Updated install processes by bundling all pre-built binaries into
-    the `<https://www.npmjs.com/package/oracledb package>`__, removing the
+    the `<https://www.npmjs.com/package/oracledb>`__ package, removing the
     need for a separate binary package download from GitHub.  At runtime
     an appropriate binary is loaded by `require()`, if it exists,
     allowing one `node_modules/oracledb` install to be usable in
@@ -1010,7 +1009,7 @@ node-oracledb `v2.1.0 <https://github.com/oracle/node-oracledb/compare/v2.0.15..
     - The `yum.oracle.com <http://yum.oracle.com/oracle-linux-nodejs.html>`__
       Node.js RPM Packages for Oracle Linux
 
-    - The `Oracle mirror <oss.oracle.com/git/oracle>`__ of `github.com/oracle
+    - The `Oracle mirror <https://oss.oracle.com/git/oracle/>`__ of `github.com/oracle
       <https://github.com/oracle>`__.
 
 #)  Correct the error message text when attempting to set
@@ -1751,7 +1750,7 @@ node-oracledb `v1.4.0 <https://github.com/oracle/node-oracledb/compare/v1.3.0...
 #)  Fixed a crash when accessing Pool properties on Windows.
 
 #)  Added a run-script 'testWindows' target for Windows testing. See
-    `test/README.md <test/README.md>`__.
+    `test/README.md <https://github.com/oracle/node-oracledb/blob/v5.5.x/test/README.md>`__.
 
 #)  Fixed compilation warnings with recent compilers.
 

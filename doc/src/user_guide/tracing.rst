@@ -22,7 +22,7 @@ database schema. By setting ``clientId`` to the application’s
 authenticated user name, the database is aware of who the actual end
 user is. This can, for example, be used by Oracle `Virtual Private
 Database <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
-89DB0C3C-A36F-4254-8C82-020F5F6DE31F>`__ policies to automatically restrict
+4F37BAE5-CA2E-42AC-9CDF-EC9181671FFE>`__ policies to automatically restrict
 data access by that user.
 
 The attributes are set on a :attr:`connection <oracledb.connectionClass>`
