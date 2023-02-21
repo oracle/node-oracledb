@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -32,7 +32,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const fs        = require('fs');
 const util      = require('util');
 const dbconfig  = require('./dbconfig.js');
@@ -45,203 +45,167 @@ describe('196. getDataOfLob.js', () => {
   const tab2 = 'nodb_tab_myblob';
 
   before('prepare the table', async () => {
-    try {
-      conn = await oracledb.getConnection(dbconfig);
+    conn = await oracledb.getConnection(dbconfig);
 
-      let sql =
-        `create table ${tab1} (
-          id number(9) not null,
-          value clob not null
-        )`;
-      let plsql = testsUtil.sqlCreateTable(tab1, sql);
-      await conn.execute(plsql);
+    let sql =
+      `create table ${tab1} (
+        id number(9) not null,
+        value clob not null
+      )`;
+    let plsql = testsUtil.sqlCreateTable(tab1, sql);
+    await conn.execute(plsql);
 
-      sql =
-        `create table ${tab2} (
-          id number(9) not null,
-          value blob not null
-        )`;
-      plsql = testsUtil.sqlCreateTable(tab2, sql);
-      await conn.execute(plsql);
-    } catch (err) {
-      should.not.exist(err);
-    }
+    sql =
+      `create table ${tab2} (
+        id number(9) not null,
+        value blob not null
+      )`;
+    plsql = testsUtil.sqlCreateTable(tab2, sql);
+    await conn.execute(plsql);
   }); // before()
 
   after(async () => {
-    try {
-      let sql = `drop table ${tab1} purge`;
-      await conn.execute(sql);
+    let sql = `drop table ${tab1} purge`;
+    await conn.execute(sql);
 
-      sql = `drop table ${tab2} purge`;
-      await conn.execute(sql);
+    sql = `drop table ${tab2} purge`;
+    await conn.execute(sql);
 
-      await conn.close();
-    } catch (err) {
-      should.not.exist(err);
-    }
+    await conn.close();
   }); // after()
 
   it('196.1 getData() works on CLOB ', async () => {
-    try {
-      let content = 'A short string value';
-      let sql = `insert into ${tab1} values (1, '${content}')`;
-      await conn.execute(sql);
+    let content = 'A short string value';
+    let sql = `insert into ${tab1} values (1, '${content}')`;
+    await conn.execute(sql);
 
-      sql = `select * from ${tab1} where id = 1`;
-      const result = await conn.execute(sql);
-      const clob = result.rows[0][1];
-      const value = await clob.getData();
+    sql = `select * from ${tab1} where id = 1`;
+    const result = await conn.execute(sql);
+    const clob = result.rows[0][1];
+    const value = await clob.getData();
 
-      should.strictEqual(value, content);
-
-    } catch (err) {
-      should.not.exist(err);
-    }
+    assert.strictEqual(value, content);
   }); // 196.1
 
   it('196.2 getData() returns CLOB as Strings', async () => {
 
-    try {
-      const txtFile = 'test/clobexample.txt';
-      const inStream = fs.createReadStream(txtFile);
-      const num = 2;
-      let sql = `insert into ${tab1} values (:i, empty_clob())
-        returning value into :lobbv`;
-      let binds = { i: num, lobbv: { type: oracledb.CLOB, dir: oracledb.BIND_OUT } };
-      let opt = { autoCommit: false };
+    const txtFile = 'test/clobexample.txt';
+    const inStream = fs.createReadStream(txtFile);
+    const num = 2;
+    let sql = `insert into ${tab1} values (:i, empty_clob())
+      returning value into :lobbv`;
+    let binds = { i: num, lobbv: { type: oracledb.CLOB, dir: oracledb.BIND_OUT } };
+    let opt = { autoCommit: false };
 
-      // Insertion with Stream
-      const result = await conn.execute(sql, binds, opt);
+    // Insertion with Stream
+    const result = await conn.execute(sql, binds, opt);
 
-      const clob = result.outBinds.lobbv[0];
-      inStream.pipe(clob);
+    const clob = result.outBinds.lobbv[0];
+    inStream.pipe(clob);
 
-      let insertionComplete = new Promise((resolve, reject) => {
-        inStream.on('error', reject);
-        clob.on('error', reject);
-        clob.on('finish', () => resolve(conn.commit()));
-      });
+    let insertionComplete = new Promise((resolve, reject) => {
+      inStream.on('error', reject);
+      clob.on('error', reject);
+      clob.on('finish', () => resolve(conn.commit()));
+    });
 
-      await insertionComplete;
+    await insertionComplete;
 
-      // Query
-      sql = `select value from ${tab1} where id = ${num}`;
-      const outResult = await conn.execute(sql);
-      const outLob = outResult.rows[0][0];
+    // Query
+    sql = `select value from ${tab1} where id = ${num}`;
+    const outResult = await conn.execute(sql);
+    const outLob = outResult.rows[0][0];
 
-      const queryResult = await outLob.getData();
+    const queryResult = await outLob.getData();
 
-      // Verify
-      const readFile = util.promisify(fs.readFile);
-      const content = await readFile(txtFile);
-      should.strictEqual(queryResult, content.toString());
-
-    } catch (err) {
-      should.not.exist(err);
-    }
+    // Verify
+    const readFile = util.promisify(fs.readFile);
+    const content = await readFile(txtFile);
+    assert.strictEqual(queryResult, content.toString());
 
   }); // 196.2
 
   it('196.3 getData() on BLOB', async () => {
-    try {
-      let content = 'A somewhat longer BLOB value';
-      let sql = `insert into ${tab2} values ( 1, utl_raw.cast_to_raw('${content}') )`;
-      await conn.execute(sql);
+    const content = 'A somewhat longer BLOB value';
+    let sql = `insert into ${tab2} values ( 1, utl_raw.cast_to_raw('${content}') )`;
+    await conn.execute(sql);
 
-      sql = `select * from ${tab2} where id = 1`;
-      const result = await conn.execute(sql);
-      const clob = result.rows[0][1];
-      const value = await clob.getData();
+    sql = `select * from ${tab2} where id = 1`;
+    const result = await conn.execute(sql);
+    const clob = result.rows[0][1];
+    const value = await clob.getData();
 
-      should.strictEqual(value.toString(), content);
-
-    } catch (err) {
-      should.not.exist(err);
-    }
+    assert.strictEqual(value.toString(), content);
   }); // 196.3
 
   it('196.4 getData() returns BLOB as Buffer', async () => {
-    try {
-      const jpgFile = 'test/tree.jpg';
-      const inStream = fs.createReadStream(jpgFile);
-      const num = 2;
-      let sql = `insert into ${tab2} values (:i, empty_blob())
-        returning value into :lobbv`;
-      let binds = { i: num, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } };
-      let opt = { autoCommit: false };
+    const jpgFile = 'test/tree.jpg';
+    const inStream = fs.createReadStream(jpgFile);
+    const num = 2;
+    let sql = `insert into ${tab2} values (:i, empty_blob())
+      returning value into :lobbv`;
+    let binds = { i: num, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } };
+    let opt = { autoCommit: false };
 
-      // Insertion with Stream
-      const result = await conn.execute(sql, binds, opt);
+    // Insertion with Stream
+    const result = await conn.execute(sql, binds, opt);
 
-      const blob = result.outBinds.lobbv[0];
-      inStream.pipe(blob);
+    const blob = result.outBinds.lobbv[0];
+    inStream.pipe(blob);
 
-      let insertionComplete = new Promise((resolve, reject) => {
-        inStream.on('error', reject);
-        blob.on('error', reject);
-        blob.on('finish', () => resolve(conn.commit()));
-      });
+    let insertionComplete = new Promise((resolve, reject) => {
+      inStream.on('error', reject);
+      blob.on('error', reject);
+      blob.on('finish', () => resolve(conn.commit()));
+    });
 
-      await insertionComplete;
+    await insertionComplete;
 
-      // Query
-      sql = `select value from ${tab2} where id = ${num}`;
-      const outResult = await conn.execute(sql);
-      const outLob = outResult.rows[0][0];
+    // Query
+    sql = `select value from ${tab2} where id = ${num}`;
+    const outResult = await conn.execute(sql);
+    const outLob = outResult.rows[0][0];
 
-      const queryResult = await outLob.getData();
+    const queryResult = await outLob.getData();
 
-      // Verify
-      const readFile = util.promisify(fs.readFile);
-      const content = await readFile(jpgFile);
-      let isEqual = content.equals(queryResult);
-      (isEqual).should.be.true();
-
-    } catch (err) {
-      should.not.exist(err);
-    }
+    // Verify
+    const readFile = util.promisify(fs.readFile);
+    const content = await readFile(jpgFile);
+    const isEqual = content.equals(queryResult);
+    assert.strictEqual(isEqual, true);
   }); // 196.4
 
   it('196.5 getData() on empty LOB returns null', async () => {
-    try {
-      const tempLob = await conn.createLob(oracledb.BLOB);
-      const value = await tempLob.getData();
-      should.strictEqual(value, null);
-      await tempLob.close();
-    } catch (err) {
-      should.not.exist(err);
-    }
+    const tempLob = await conn.createLob(oracledb.BLOB);
+    const value = await tempLob.getData();
+    assert.strictEqual(value, null);
+    await tempLob.close();
   }); // 196.5
 
   it('196.6 works with temp LOB', async () => {
-    try {
-      const inFileName = 'test/clobexample.txt';
-      const tempLob = await conn.createLob(oracledb.CLOB);
-      const inStream = fs.createReadStream(inFileName);
+    const inFileName = 'test/clobexample.txt';
+    const tempLob = await conn.createLob(oracledb.CLOB);
+    const inStream = fs.createReadStream(inFileName);
 
-      inStream.pipe(tempLob);
+    inStream.pipe(tempLob);
 
-      let insertionComplete = new Promise((resolve, reject) => {
-        inStream.on('error', reject);
-        tempLob.on('error', reject);
-        tempLob.on('finish', resolve);
-      });
+    let insertionComplete = new Promise((resolve, reject) => {
+      inStream.on('error', reject);
+      tempLob.on('error', reject);
+      tempLob.on('finish', resolve);
+    });
 
-      await insertionComplete;
+    await insertionComplete;
 
-      // Query
-      const queryResult = await tempLob.getData();
+    // Query
+    const queryResult = await tempLob.getData();
 
-      // Verify
-      const readFile = util.promisify(fs.readFile);
-      const content = await readFile(inFileName);
-      should.strictEqual(queryResult, content.toString());
+    // Verify
+    const readFile = util.promisify(fs.readFile);
+    const content = await readFile(inFileName);
+    assert.strictEqual(queryResult, content.toString());
 
-      await tempLob.close();
-    } catch (err) {
-      should.not.exist(err);
-    }
+    await tempLob.close();
   }); // 196.6
 
 });

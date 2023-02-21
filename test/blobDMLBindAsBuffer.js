@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -35,7 +35,6 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
-const assist   = require('./dataTypeAssist.js');
 
 describe('82.blobDMLBindAsBuffer.js', function() {
 
@@ -107,45 +106,24 @@ describe('82.blobDMLBindAsBuffer.js', function() {
   };
 
   // compare the inserted blob with orginal content
-  let verifyBlobValueWithBuffer = async function(selectSql, originalBuffer, specialStr) {
-    let result = null;
-    result = await connection.execute(selectSql);
-
-    let lob = result.rows[0][0];
+  let verifyBlobValueWithBuffer = async function(selectSql, originalBuffer) {
+    const result = await connection.execute(selectSql);
+    const lob = result.rows[0][0];
     if (originalBuffer == '' || originalBuffer == undefined) {
-      assert.ifError(lob);
+      assert.strictEqual(lob, null);
     } else {
-      assert(lob);
-      let blobData = Buffer.alloc(0);
-      let totalLength = 0;
-
-      lob.on('data', function(chunk) {
-        totalLength = totalLength + chunk.length;
-        blobData = Buffer.concat([blobData, chunk], totalLength);
-      });
-
-      lob.on('error', function(err) {
-        assert(err, "lob.on 'error' event.");
-      });
-
-      lob.on('end', function() {
-        if (originalBuffer == "EMPTY_BLOB") {
-          let nullBuffer = Buffer.from('', "utf-8");
-          assert.strictEqual(assist.compare2Buffers(blobData, nullBuffer), true);
-        } else {
-          assert.strictEqual(totalLength, originalBuffer.length);
-          let specStrLength = specialStr.length;
-          assert.strictEqual(blobData.toString('utf8', 0, specStrLength), specialStr);
-          assert.strictEqual(blobData.toString('utf8', (totalLength - specStrLength), totalLength), specialStr);
-          assert.strictEqual(assist.compare2Buffers(blobData, originalBuffer), true);
-        }
-      });
+      const blobData = await lob.getData();
+      if (originalBuffer == "EMPTY_BLOB") {
+        assert.strictEqual(blobData, null);
+      } else {
+        assert.deepEqual(blobData, originalBuffer);
+      }
     }
   };
 
-  let checkInsertResult = async function(id, content, specialStr) {
+  let checkInsertResult = async function(id, content) {
     let sql = "select blob from nodb_dml_blob_1 where id = " + id;
-    await verifyBlobValueWithBuffer(sql, content, specialStr);
+    await verifyBlobValueWithBuffer(sql, content);
   };
 
   describe('82.1 BLOB, INSERT', function() {
@@ -297,7 +275,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       let content = Buffer.from(bigStr, "utf-8");
       await insertIntoBlobTable1(id, content);
 
-      await checkInsertResult(id, content, specialStr);
+      await checkInsertResult(id, content);
     }); // 82.1.11
 
     it('82.1.12 works with Buffer length (64K - 1)', async function() {
@@ -308,7 +286,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       let content = Buffer.from(bigStr, "utf-8");
 
       await insertIntoBlobTable1(id, content);
-      await checkInsertResult(id, content, specialStr);
+      await checkInsertResult(id, content);
     }); // 82.1.12
 
     it('82.1.13 works with Buffer length (64K + 1)', async function() {
@@ -319,7 +297,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       let content = Buffer.from(bigStr, "utf-8");
 
       await insertIntoBlobTable1(id, content);
-      await checkInsertResult(id, content, specialStr);
+      await checkInsertResult(id, content);
     }); // 82.1.13
 
     it('82.1.14 works with Buffer length (1MB + 1)', async function() {
@@ -330,7 +308,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       let content = Buffer.from(bigStr, "utf-8");
 
       await insertIntoBlobTable1(id, content);
-      await checkInsertResult(id, content, specialStr);
+      await checkInsertResult(id, content);
     }); // 82.1.14
 
     it('82.1.15 bind value and type mismatch', async function() {
@@ -364,7 +342,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           id, { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
         ]);
       assert.strictEqual(result.rowsAffected, 1);
-      await checkInsertResult(id, content, specialStr);
+      await checkInsertResult(id, content);
     }); // 82.1.16
 
     it('82.1.17 bind with invalid BLOB', async function() {
@@ -399,7 +377,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
         });
       assert.strictEqual(result.rowsAffected, 1);
 
-      await checkInsertResult(id, content, specialStr);
+      await checkInsertResult(id, content);
     }); // 82.1.18
 
     it('82.1.19 works with bind in maxSize smaller than buffer size', async function() {
@@ -418,7 +396,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
         });
       assert.strictEqual(result.rowsAffected, 1);
 
-      await checkInsertResult(id, content, specialStr);
+      await checkInsertResult(id, content);
     }); // 82.1.19
 
   }); // 82.1
@@ -444,11 +422,11 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       await insertIntoBlobTable1(id, content_1);
 
-      await checkInsertResult(id, content_1, null);
+      await checkInsertResult(id, content_1);
 
       await updateBlobTable1(id, content_2);
 
-      await checkInsertResult(id, content_2, specialStr_2);
+      await checkInsertResult(id, content_2);
     }); // 82.2.1
 
     it('82.2.2 update a cloumn with EMPTY_BLOB', async function() {
@@ -461,11 +439,11 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       await insertIntoBlobTable1(id, content_1);
 
-      await checkInsertResult(id, content_1, specialStr_1);
+      await checkInsertResult(id, content_1);
 
       await updateBlobTable1(id, content_2);
 
-      await checkInsertResult(id, content_2, null);
+      await checkInsertResult(id, content_2);
     }); // 82.2.2
 
     it('82.2.3 update EMPTY_BLOB column with empty buffer', async function() {
@@ -493,11 +471,11 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       await insertIntoBlobTable1(id, content_1);
 
-      await checkInsertResult(id, content_1, null);
+      await checkInsertResult(id, content_1);
 
       await updateBlobTable1(id, content_2);
 
-      await checkInsertResult(id, content_2, specialStr_2);
+      await checkInsertResult(id, content_2);
     }); // 82.2.4
 
     it('82.2.5 update a column with empty buffer', async function() {
@@ -510,11 +488,11 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       await insertIntoBlobTable1(id, content_1);
 
-      await checkInsertResult(id, content_1, specialStr_1);
+      await checkInsertResult(id, content_1);
 
       await updateBlobTable1(id, content_2);
 
-      await checkInsertResult(id, content_2, null);
+      await checkInsertResult(id, content_2);
     }); // 82.2.5
   }); // 82.2
 });

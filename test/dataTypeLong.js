@@ -32,7 +32,6 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
 const random   = require('./random.js');
@@ -59,37 +58,31 @@ describe('103. dataTypeLong.js', function() {
     for (let i = 0; i < strLen.length; i++)
       strs[i] = random.getRandomString(strLen[i], specialStr);
 
-    before(function(done) {
-      assist.setUp(connection, tableName, strs, done);
+    before(async function() {
+      await assist.setUp(connection, tableName, strs);
     });
 
-    after(function(done) {
-      connection.execute(
-        "drop table " + tableName + " purge",
-        function(err) {
-          assert.ifError(err);
-          done();
-        }
-      );
+    after(async function() {
+      await connection.execute("drop table " + tableName + " purge");
     });
 
-    it('103.1.1 SELECT query', function(done) {
-      assist.dataTypeSupport(connection, tableName, strs, done);
+    it('103.1.1 SELECT query', async function() {
+      await assist.dataTypeSupport(connection, tableName, strs);
     });
 
-    it('103.1.2 works well with result set', function(done) {
-      assist.verifyResultSet(connection, tableName, strs, done);
+    it('103.1.2 works well with result set', async function() {
+      await assist.verifyResultSet(connection, tableName, strs);
     });
 
-    it('103.1.3 works well with REF Cursor', function(done) {
-      assist.verifyRefCursor(connection, tableName, strs, done);
+    it('103.1.3 works well with REF Cursor', async function() {
+      await assist.verifyRefCursor(connection, tableName, strs);
     });
 
   }); // 103.1
 
   describe('103.2 stores null values correctly', function() {
-    it('103.2.1 testing Null, Empty string and Undefined', function(done) {
-      assist.verifyNullValues(connection, tableName, done);
+    it('103.2.1 testing Null, Empty string and Undefined', async function() {
+      await assist.verifyNullValues(connection, tableName);
     });
   });
 });

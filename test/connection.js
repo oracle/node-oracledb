@@ -111,9 +111,7 @@ describe('1. connection.js', function() {
 
     it('1.1.4 Negative test - invalid outFormat value', async function() {
       await assert.rejects(
-        async () => {
-          await connection.execute(query, {id: 20}, {outFormat:0 });
-        },
+        async () => await connection.execute(query, {id: 20}, {outFormat:0 }),
         /NJS-007:/
       );
     });
@@ -334,9 +332,7 @@ describe('1. connection.js', function() {
         privilege: null
       };
       await assert.rejects(
-        async () => {
-          await oracledb.getConnection(credential);
-        },
+        async () => await oracledb.getConnection(credential),
         /NJS-007: invalid value for "privilege" in parameter 1/
       );
     });
@@ -349,10 +345,8 @@ describe('1. connection.js', function() {
         privilege: 'sysdba'
       };
       await assert.rejects(
-        async () => {
-          await oracledb.getConnection(credential);
-        },
-        /NJS-007: invalid value for "privilege" in parameter 1/
+        async () => await oracledb.getConnection(credential),
+        /NJS-007:/
       );
     });
 
@@ -365,10 +359,8 @@ describe('1. connection.js', function() {
       };
 
       await assert.rejects(
-        async () => {
-          await oracledb.getConnection(credential);
-        },
-        /ORA-24300/
+        async () => await oracledb.getConnection(credential),
+        /ORA-24300:/
       );// ORA-24300: bad value for mode
     });
 
@@ -381,10 +373,8 @@ describe('1. connection.js', function() {
       };
 
       await assert.rejects(
-        async () => {
-          await oracledb.getConnection(credential);
-        },
-        /NJS-007: invalid value for "privilege" in parameter 1/
+        async () => await oracledb.getConnection(credential),
+        /NJS-007:/
       );
     });
 
@@ -416,10 +406,8 @@ describe('1. connection.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       await conn.close();
       await assert.rejects(
-        async () => {
-          await conn.ping();
-        },
-        /NJS-003: invalid connection/
+        async () => await conn.ping(),
+        /NJS-003:/
       );
     });
   }); // 1.8
@@ -435,9 +423,7 @@ describe('1. connection.js', function() {
       };
 
       await assert.rejects(
-        async () => {
-          await oracledb.getConnection(credential);
-        },
+        async () => await oracledb.getConnection(credential),
         /NJS-075:/
       );
     });
@@ -454,9 +440,7 @@ describe('1. connection.js', function() {
       };
 
       await assert.rejects(
-        async () => {
-          await oracledb.getConnection(credential);
-        },
+        async () => await oracledb.getConnection(credential),
         /NJS-080:/
       );
     });
@@ -483,6 +467,7 @@ describe('1. connection.js', function() {
       await oracledb.getConnection(credential);
     });
   }); //1.10
+
   describe('1.11 Invalid credentials', function() {
 
     it('1.11.1 using bad connect string', async function() {
@@ -493,9 +478,7 @@ describe('1. connection.js', function() {
       };
 
       await assert.rejects(
-        async () => {
-          await oracledb.getConnection(credential);
-        },
+        async () => await oracledb.getConnection(credential),
         /ORA-12154:/
       );
     });
@@ -508,9 +491,7 @@ describe('1. connection.js', function() {
       };
 
       await assert.rejects(
-        async () => {
-          await oracledb.getConnection(credential);
-        },
+        async () => await oracledb.getConnection(credential),
         /ORA-01017:/
       );
     });
@@ -523,9 +504,7 @@ describe('1. connection.js', function() {
       };
 
       await assert.rejects(
-        async () => {
-          await oracledb.getConnection(credential);
-        },
+        async () => await oracledb.getConnection(credential),
         /ORA-01017:/
       );
     });
@@ -543,9 +522,7 @@ describe('1. connection.js', function() {
       connection = await oracledb.getConnection(credential);
       await connection.close();
       await assert.rejects(
-        async () => {
-          await connection.execute('SELECT * FROM DUAL');
-        },
+        async () => await connection.execute('SELECT * FROM DUAL'),
         /NJS-003:/
       );
     });

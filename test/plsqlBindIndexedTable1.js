@@ -372,6 +372,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     before(async function() {
       connection = await oracledb.getConnection(dbConfig);
+      await connection.execute("alter session set time_zone = 'UTC'");
     });
 
     after(async function() {
@@ -440,7 +441,8 @@ describe('43. plsqlBindIndexedTable1.js', function() {
       const result = await connection.execute(sql, bindvars);
       assert.strictEqual(result.outBinds.stringValue, 'Space odyssey');
       assert.strictEqual(result.outBinds.numberValue, 2001);
-      assert.deepEqual(result.outBinds.dateValue, new Date(1968, 3, 2));
+      assert.deepEqual(result.outBinds.dateValue,
+        new Date(Date.UTC(1968, 3, 2)));
       await connection.execute("DROP PROCEDURE nodb_plsqlbindproc33");
     });
 
@@ -463,7 +465,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
       const result = await connection.execute(sql, bindvars);
       assert.strictEqual(result.outBinds[0], 'Space odyssey');
       assert.strictEqual(result.outBinds[1], 2001);
-      assert.deepEqual(result.outBinds[2], new Date(1968, 3, 2));
+      assert.deepEqual(result.outBinds[2], new Date(Date.UTC(1968, 3, 2)));
       await connection.execute("DROP PROCEDURE nodb_plsqlbindproc34");
     });
 
