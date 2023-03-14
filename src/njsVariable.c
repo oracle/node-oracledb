@@ -38,6 +38,8 @@ static bool njsVariable_processBuffer(njsVariable *var,
         njsVariableBuffer *buffer, njsBaton *baton);
 static bool njsVariable_processBufferJS(njsVariable *var,
         njsVariableBuffer *buffer, napi_env env, njsBaton *baton);
+static bool njsVariable_setFromString(njsVariable *var, uint32_t pos,
+        napi_env env, napi_value value, njsBaton *baton);
 
 
 //-----------------------------------------------------------------------------
@@ -791,6 +793,10 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
         return true;
     }
 
+    // handle binding strings
+    if (valueType == napi_string)
+        return njsVariable_setFromString(var, pos, env, value, baton);
+
     // handle binding booleans
     if (valueType == napi_boolean) {
         NJS_CHECK_NAPI(env, napi_get_value_bool(env, value,
@@ -874,4 +880,44 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     }
 
     return njsUtils_genericThrowError(env, __FILE__, __LINE__);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable_setFromString()
+//   Set the value of the variable from the specified Javascript string. At
+// this point it is known that the Javascript value is indeed a string and that
+// the variable can support it.
+//-----------------------------------------------------------------------------
+static bool njsVariable_setFromString(njsVariable *var, uint32_t pos,
+        napi_env env, napi_value value, njsBaton *baton)
+{
+    size_t bufferLength;
+    char *buffer;
+
+    // determine length of string
+    NJS_CHECK_NAPI(env, napi_get_value_string_utf8(env, value, NULL, 0,
+            &bufferLength))
+
+    // allocate memory for the buffer
+    buffer = malloc(bufferLength + 1);
+    if (!buffer)
+        return njsBaton_setErrorInsufficientMemory(baton);
+
+    // get the string value
+    if (napi_get_value_string_utf8(env, value, buffer, bufferLength + 1,
+            &bufferLength) != napi_ok) {
+        free(buffer);
+        return njsUtils_genericThrowError(env, __FILE__, __LINE__);
+    }
+
+    // write it to the variable
+    if (dpiVar_setFromBytes(var->dpiVarHandle, pos, buffer,
+            (uint32_t) bufferLength) < 0) {
+        free(buffer);
+        return njsBaton_setErrorDPI(baton);
+    }
+
+    free(buffer);
+    return true;
 }
