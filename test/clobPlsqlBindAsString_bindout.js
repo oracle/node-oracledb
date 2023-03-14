@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -34,9 +34,7 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const fs       = require('fs');
-const fsPromises = require('fs/promises');
 const dbConfig = require('./dbconfig.js');
-const file     = require('./file.js');
 const random   = require('./random.js');
 
 describe('75. clobPlsqlBindAsString_bindout.js', function() {
@@ -90,7 +88,6 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
     await connection.execute("DROP TABLE nodb_tab_clob_in PURGE");
     await connection.execute("DROP TABLE nodb_tab_lobs_in PURGE");
     await connection.close();
-    file.delete(inFileStreamed);
   });
 
   const insertClobWithString = async function(id, insertStr) {
@@ -109,8 +106,6 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
     const result = await connection.execute(sql, bindVar);
     assert.strictEqual(result.rowsAffected, 1);
   };
-
-  const inFileStreamed = './test/clobTmpFile.txt';
 
   const preparedInFileName = './test/clobexample.txt';
 
@@ -134,16 +129,8 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
   const verifyClobValueWithFileData = async function(selectSql) {
     const result = await connection.execute(selectSql);
     const lob = result.rows[0][0];
-    lob.setEncoding('utf8');
-    let clobData = '';
-    await new Promise((resolve, reject) => {
-      lob.on("error", reject);
-      lob.on('data', function(chunk) {
-        clobData += chunk;
-      });
-      lob.on("end", resolve);
-    });
-    const data = await fsPromises.readFile(preparedInFileName,
+    const clobData = await lob.getData();
+    const data = await fs.promises.readFile(preparedInFileName,
       {encoding: "utf8"});
     assert.strictEqual(clobData, data);
   };
@@ -159,7 +146,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
   const verifyBindOutResult = async function(sqlRun, bindVar, originalStr, specialStr) {
     const result = await connection.execute(sqlRun, bindVar);
-    if (originalStr == "EMPTY_LOB" || originalStr == undefined || originalStr == null || originalStr == "") {
+    if (originalStr === "EMPTY_LOB" || originalStr == undefined || originalStr == null || originalStr === "") {
       assert.strictEqual(result.outBinds.c, null);
     } else {
       const resultVal = result.outBinds.c;
@@ -372,7 +359,6 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       };
       await insertClobWithString(sequence, clobStr);
       await verifyBindOutResult(sqlRun, bindVar, clobStr, specialStr);
-      file.delete(inFileStreamed);
     }); // 75.1.17
 
     it('75.1.18 works with String length (1MB + 1)', async function() {
@@ -386,7 +372,6 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       };
       await insertClobWithString(sequence, clobStr);
       await verifyBindOutResult(sqlRun, bindVar, clobStr, specialStr);
-      file.delete(inFileStreamed);
     }); // 75.1.18
 
     it('75.1.19 works with bind value and type mismatch', async function() {
@@ -818,7 +803,8 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       const result = await connection.execute(sqlRun_7519, bindVar);
       const resultVal = result.outBinds.co;
       // PLSQL substr function: the position starts from zero(0).
-      // The substring method extracts the characters in a string between "start" and "end", not including "end" itself.
+      // The substring method extracts the characters in a string between
+      // "start" and "end", not including "end" itself.
       clobStr = clobStr.substring(0, 3);
       assert.strictEqual(resultVal.length, 3);
       assert.strictEqual(resultVal, clobStr);
@@ -902,15 +888,8 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       compareResultStrAndOriginal(resultVal, clobStr_1, specialStr);
       const lob = result.outBinds.c2;
       lob.setEncoding("utf8");
-      let clobData = '';
-      await new Promise((resolve, reject) => {
-        lob.on("error", reject);
-        lob.on("end", resolve);
-        lob.on('data', function(chunk) {
-          clobData += chunk;
-        });
-      });
-      const data = await fsPromises.readFile(preparedInFileName,
+      const clobData = await lob.getData();
+      const data = await fs.promises.readFile(preparedInFileName,
         {encoding: "utf8"});
       assert.strictEqual(clobData, data);
     }); // 75.3.2

@@ -33,235 +33,189 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
-const async    = require('async');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
 const testsUtil = require('./testsUtil.js');
-const sql      = require('./sql.js');
 
 describe('131. longProcedureBind_in.js', function() {
 
   let connection = null;
   const tableName = "nodb_long_128";
-  var insertID = 0;
+  let insertID = 0;
 
-  before(function(done) {
+  before(async function() {
     const sqlCreate =  `
         CREATE TABLE ${tableName} (
             id         NUMBER,
             content    LONG
         )`;
     const sqlCreateTbl = testsUtil.sqlCreateTable(tableName, sqlCreate);
-    async.series([
-      function(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
-      },
-      function(cb) {
-        sql.executeSql(connection, sqlCreateTbl, {}, {}, cb);
-      }
-    ], done);
+    connection = await oracledb.getConnection(dbConfig);
+    await connection.execute(sqlCreateTbl);
+
   }); // before
 
-  after(function(done) {
+  after(async function() {
     const sqlDropTbl = testsUtil.sqlDropTable(tableName);
-    async.series([
-      function(cb) {
-        sql.executeSql(connection, sqlDropTbl, {}, {}, cb);
-      },
-      function(cb) {
-        connection.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+
+    await connection.execute(sqlDropTbl);
+
+    await connection.close();
   }); // after
 
-  beforeEach(function(done) {
+  beforeEach(function() {
     insertID++;
-    done();
   });
 
   describe('131.1 PLSQL PROCEDURE BIND IN AS LONG', function() {
-    var proc_bindin_name = "nodb_long_bindin_proc_1";
-    var proc_bindin_create = "CREATE OR REPLACE PROCEDURE " + proc_bindin_name + " (ID IN NUMBER, CONTENT IN LONG) \n" +
+    const proc_bindin_name = "nodb_long_bindin_proc_1";
+    const proc_bindin_create = "CREATE OR REPLACE PROCEDURE " + proc_bindin_name + " (ID IN NUMBER, CONTENT IN LONG) \n" +
                              "AS \n" +
                              "BEGIN \n" +
                              "    insert into " + tableName + " values (ID, CONTENT); \n" +
                              "END " + proc_bindin_name + ";";
-    var proc_bindin_exec = "BEGIN " + proc_bindin_name + " (:i, :c); END;";
-    var proc_bindin_drop = "DROP PROCEDURE " + proc_bindin_name;
+    const proc_bindin_exec = "BEGIN " + proc_bindin_name + " (:i, :c); END;";
+    const proc_bindin_drop = "DROP PROCEDURE " + proc_bindin_name;
 
-    before(function(done) {
-      sql.executeSql(connection, proc_bindin_create, {}, {}, done);
+    before(async function() {
+      await connection.execute(proc_bindin_create);
     });
 
-    after(function(done) {
-      sql.executeSql(connection, proc_bindin_drop, {}, {}, done);
+    after(async function() {
+      await connection.execute(proc_bindin_drop);
     });
 
-    it('131.1.1 works with NULL', function(done) {
-      var insertedStr = null;
-      long_bindin(insertedStr, proc_bindin_exec, done);
+    it('131.1.1 works with NULL', async function() {
+      const insertedStr = null;
+      await long_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('131.1.2 works with undefined', function(done) {
-      var insertedStr = undefined;
-      long_bindin(insertedStr, proc_bindin_exec, done);
+    it('131.1.2 works with undefined', async function() {
+      const insertedStr = undefined;
+      await long_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('131.1.3 works with empty string', function(done) {
-      var insertedStr = "";
-      long_bindin(insertedStr, proc_bindin_exec, done);
+    it('131.1.3 works with empty string', async function() {
+      const insertedStr = "";
+      await long_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('131.1.4 works with data size 4000', function(done) {
-      var insertedStr = random.getRandomLengthString(4000);
-      long_bindin(insertedStr, proc_bindin_exec, done);
+    it('131.1.4 works with data size 4000', async function() {
+      const insertedStr = random.getRandomLengthString(4000);
+      await long_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('131.1.5 works with data size (32K - 1)', function(done) {
-      var insertedStr = random.getRandomLengthString(32767);
-      long_bindin(insertedStr, proc_bindin_exec, done);
+    it('131.1.5 works with data size (32K - 1)', async function() {
+      const insertedStr = random.getRandomLengthString(32767);
+      await long_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('131.1.6 set maxSize to size (32K - 1)', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      long_bindin_maxSize(insertedStr, proc_bindin_exec, 32767, done);
+    it('131.1.6 set maxSize to size (32K - 1)', async function() {
+      const insertedStr = random.getRandomLengthString(100);
+      await long_bindin_maxSize(insertedStr, proc_bindin_exec, 32767);
     });
 
-    it('131.1.7 set maxSize to size 1GB', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      var maxsize = 1 * 1024 * 1024 * 1024;
-      long_bindin_maxSize(insertedStr, proc_bindin_exec, maxsize, done);
+    it('131.1.7 set maxSize to size 1GB', async function() {
+      const insertedStr = random.getRandomLengthString(100);
+      const maxsize = 1 * 1024 * 1024 * 1024;
+      await long_bindin_maxSize(insertedStr, proc_bindin_exec, maxsize);
     });
 
   }); // 131.1
 
   describe('131.2 PLSQL PROCEDURE BIND IN AS STRING', function() {
-    var proc_bindin_name = "nodb_long_bindin_proc_2";
-    var proc_bindin_create = "CREATE OR REPLACE PROCEDURE " + proc_bindin_name + " (ID IN NUMBER, CONTENT IN VARCHAR2) \n" +
+    const proc_bindin_name = "nodb_long_bindin_proc_2";
+    const proc_bindin_create = "CREATE OR REPLACE PROCEDURE " + proc_bindin_name + " (ID IN NUMBER, CONTENT IN VARCHAR2) \n" +
                              "AS \n" +
                              "BEGIN \n" +
                              "    insert into " + tableName + " values (ID, CONTENT); \n" +
                              "END " + proc_bindin_name + ";";
-    var proc_bindin_exec = "BEGIN " + proc_bindin_name + " (:i, :c); END;";
-    var proc_bindin_drop = "DROP PROCEDURE " + proc_bindin_name;
+    const proc_bindin_exec = "BEGIN " + proc_bindin_name + " (:i, :c); END;";
+    const proc_bindin_drop = "DROP PROCEDURE " + proc_bindin_name;
 
-    before(function(done) {
-      sql.executeSql(connection, proc_bindin_create, {}, {}, done);
+    before(async function() {
+      await connection.execute(proc_bindin_create);
     });
 
-    after(function(done) {
-      sql.executeSql(connection, proc_bindin_drop, {}, {}, done);
+    after(async function() {
+      await connection.execute(proc_bindin_drop);
     });
 
-    it('131.2.1 works with NULL', function(done) {
-      var insertedStr = null;
-      long_bindin(insertedStr, proc_bindin_exec, done);
+    it('131.2.1 works with NULL', async function() {
+      const insertedStr = null;
+      await long_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('131.2.2 works with undefined', function(done) {
-      var insertedStr = undefined;
-      long_bindin(insertedStr, proc_bindin_exec, done);
+    it('131.2.2 works with undefined', async function() {
+      const insertedStr = undefined;
+      await long_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('131.2.3 works with empty string', function(done) {
-      var insertedStr = "";
-      long_bindin(insertedStr, proc_bindin_exec, done);
+    it('131.2.3 works with empty string', async function() {
+      const insertedStr = "";
+      await long_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('131.2.4 works with data size 4000', function(done) {
-      var insertedStr = random.getRandomLengthString(4000);
-      long_bindin(insertedStr, proc_bindin_exec, done);
+    it('131.2.4 works with data size 4000', async function() {
+      const insertedStr = random.getRandomLengthString(4000);
+      await long_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('131.2.5 works with data size (32K - 1)', function(done) {
-      var insertedStr = random.getRandomLengthString(32767);
-      long_bindin(insertedStr, proc_bindin_exec, done);
+    it('131.2.5 works with data size (32K - 1)', async function() {
+      const insertedStr = random.getRandomLengthString(32767);
+      await long_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('131.2.6 set maxSize to size (32K - 1)', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      long_bindin_maxSize(insertedStr, proc_bindin_exec, 32767, done);
+    it('131.2.6 set maxSize to size (32K - 1)', async function() {
+      const insertedStr = random.getRandomLengthString(100);
+      await long_bindin_maxSize(insertedStr, proc_bindin_exec, 32767);
     });
 
-    it('131.2.7 set maxSize to size 1GB', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      var maxsize = 1 * 1024 * 1024 * 1024;
-      long_bindin_maxSize(insertedStr, proc_bindin_exec, maxsize, done);
+    it('131.2.7 set maxSize to size 1GB', async function() {
+      const insertedStr = random.getRandomLengthString(100);
+      const maxsize = 1 * 1024 * 1024 * 1024;
+      await long_bindin_maxSize(insertedStr, proc_bindin_exec, maxsize);
     });
 
   }); // 131.2
 
-  var long_bindin = function(insertContent, proc_bindin_exec, callback) {
-    async.series([
-      function(cb) {
-        var bind_in_var  = {
-          i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
-          c: { val: insertContent, dir: oracledb.BIND_IN, type: oracledb.STRING }
-        };
-        connection.execute(
-          proc_bindin_exec,
-          bind_in_var,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        var expected = insertContent;
-        if (insertContent == "" || insertContent == undefined) {
-          expected = null;
-        }
-        checkResult(expected, cb);
-      }
-    ], callback);
+  const long_bindin = async function(insertContent, proc_bindin_exec) {
+
+    const bind_in_var  = {
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: insertContent, dir: oracledb.BIND_IN, type: oracledb.STRING }
+    };
+    await connection.execute(
+      proc_bindin_exec,
+      bind_in_var);
+    let expected = insertContent;
+    if (insertContent == "" || insertContent == undefined) {
+      expected = null;
+    }
+    await checkResult(expected);
   };
 
-  var long_bindin_maxSize = function(insertContent, proc_bindin_exec, maxsize, callback) {
-    async.series([
-      function(cb) {
-        var bind_in_var  = {
-          i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
-          c: { val: insertContent, dir: oracledb.BIND_IN, type: oracledb.STRING, maxSize: maxsize }
-        };
-        connection.execute(
-          proc_bindin_exec,
-          bind_in_var,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        var expected = insertContent;
-        if (insertContent == "" || insertContent == undefined) {
-          expected = null;
-        }
-        checkResult(expected, cb);
-      }
-    ], callback);
+  const long_bindin_maxSize = async function(insertContent, proc_bindin_exec, maxsize) {
+
+    const bind_in_var  = {
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: insertContent, dir: oracledb.BIND_IN, type: oracledb.STRING, maxSize: maxsize }
+    };
+    await connection.execute(
+      proc_bindin_exec,
+      bind_in_var);
+    let expected = insertContent;
+    if (insertContent == "" || insertContent == undefined) {
+      expected = null;
+    }
+    await checkResult(expected);
   };
 
-  var checkResult = function(expected, callback) {
-    connection.execute(
-      "select * from " + tableName + " where id = " + insertID,
-      function(err, result) {
-        should.not.exist(err);
-        should.strictEqual(result.rows[0][0], insertID);
-        should.strictEqual(result.rows[0][1], expected);
-        callback();
-      }
-    );
+  const checkResult = async function(expected) {
+    const result = await connection.execute("select * from " + tableName + " where id = " + insertID);
+    assert.strictEqual(result.rows[0][0], insertID);
+    assert.strictEqual(result.rows[0][1], expected);
   };
-
 
 });

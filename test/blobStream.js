@@ -32,20 +32,17 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
-const async     = require('async');
-const dbConfig  = require('./dbconfig.js');
-const file      = require('./file.js');
-const sql       = require('./sql.js');
+const assert    = require('assert');
 const fs        = require('fs');
+const dbConfig  = require('./dbconfig.js');
+const random = require('./random.js');
 
 describe('127.blobStream.js', function() {
   let connection = null;
-  var fileRoot = ".";
-  var insertID = 1;
-  var inFileName;
+  const fileRoot = ".";
+  let insertID = 1;
 
-  var proc_blob_prepare_tab = "BEGIN \n" +
+  const proc_blob_prepare_tab = "BEGIN \n" +
                               "    DECLARE \n" +
                               "        e_table_missing EXCEPTION; \n" +
                               "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -63,149 +60,86 @@ describe('127.blobStream.js', function() {
                               "    '); \n" +
                               "END; ";
 
-  before(function(done) {
-    async.series([
-      function(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-
-          cb();
-        });
-      },
-      function(cb) {
-        setupAllTable(cb);
-      }
-    ], done);
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
+    await setupAllTable();
   }); // before
 
-  after(function(done) {
-    async.series([
-      function(cb) {
-        dropAllTable(cb);
-      },
-      function(cb) {
-        connection.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+  after(async function() {
+    await dropAllTable();
+    await connection.close();
   }); // after
 
-  beforeEach(function(done) {
+  beforeEach(function() {
     insertID++;
-    done();
   });
 
   describe('127.1 stream txt file into BLOB column', function() {
-    it('127.1.1 works with 64K txt file', function(done) {
-      inFileName = fileRoot + '/smallString.txt';
-      var selectID = insertID + 100;
-      var fileSize = 64 * 1024;
-      var specialStr = '127.1.1';
-
-      bindSmallFile(inFileName, fileSize, selectID, insertID, specialStr, done);
+    it('127.1.1 works with 64K txt file', async function() {
+      const fileName = fileRoot + '/smallString.txt';
+      const selectID = insertID + 100;
+      const fileSize = 64 * 1024;
+      const specialStr = '127.1.1';
+      await bindSmallFile(fileName, fileSize, selectID, insertID, specialStr);
     });
 
-    it('127.1.2 works with 64K+1 txt file', function(done) {
-      inFileName = fileRoot + '/smallString.txt';
-      var selectID = insertID + 100;
-      var fileSize = 64 * 1024 + 1;
-      var specialStr = '127.1.2';
-
-      bindSmallFile(inFileName, fileSize, selectID, insertID, specialStr, done);
+    it('127.1.2 works with 64K+1 txt file', async function() {
+      const fileName = fileRoot + '/smallString.txt';
+      const selectID = insertID + 100;
+      const fileSize = 64 * 1024 + 1;
+      const specialStr = '127.1.2';
+      await bindSmallFile(fileName, fileSize, selectID, insertID, specialStr);
     });
 
-    it('127.1.3 works with 1MB+1 txt file', function(done) {
-      inFileName = fileRoot + '/smallString.txt';
-      var selectID = insertID + 100;
-      var fileSize = 1 * 1024 * 1024 + 1;
-      var specialStr = '127.1.3';
-
-      bindSmallFile(inFileName, fileSize, selectID, insertID, specialStr, done);
+    it('127.1.3 works with 1MB+1 txt file', async function() {
+      const fileName = fileRoot + '/smallString.txt';
+      const selectID = insertID + 100;
+      const fileSize = 1 * 1024 * 1024 + 1;
+      const specialStr = '127.1.3';
+      await bindSmallFile(fileName, fileSize, selectID, insertID, specialStr);
     });
 
   }); // 1.1
 
-  var bindSmallFile = function(inFileName, fileSize, selectID, insertID, specialStr, callback) {
-    async.series([
-      function(cb) {
-        file.createFileInKB(inFileName, fileSize, specialStr);
-        cb();
-      },
-      function(cb) {
-        insetTableWithBlob(selectID, inFileName, cb);
-      },
-      function(cb) {
-        verifyBlob(selectID, insertID, fileSize, cb);
-      },
-      function(cb) {
-        file.delete(inFileName);
-        cb();
-      }
-    ], callback);
+  const bindSmallFile = async function(fileName, fileSize, selectID, insertID, specialStr) {
+    const bigStr = random.getRandomString(fileSize, specialStr);
+    await fs.promises.writeFile(fileName, bigStr);
+    await insetTableWithBlob(selectID, fileName);
+    await verifyBlob(selectID, insertID, fileSize);
+    await fs.promises.unlink(fileName);
   };
 
-  var setupAllTable = function(callback) {
-    connection.execute(
-      proc_blob_prepare_tab,
-      function(err) {
-        should.not.exist(err);
-        callback();
-      });
+  const setupAllTable = async function() {
+    await connection.execute(proc_blob_prepare_tab);
   };
 
-  var dropAllTable = function(callback) {
-    connection.execute(
-      "DROP TABLE nodb_tab_lobs_pre PURGE",
-      function(err) {
-        should.not.exist(err);
-        callback();
-      });
+  const dropAllTable = async function() {
+    await connection.execute("DROP TABLE nodb_tab_lobs_pre PURGE");
   };
 
-  var insetTableWithBlob = function(id, inFileName, callback) {
-    var sql = "INSERT INTO nodb_tab_lobs_pre (id, blob) VALUES (:i, EMPTY_BLOB()) RETURNING blob INTO :lobbv";
-    var bindVar = { i: id, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } };
+  const insetTableWithBlob = async function(id, fileName) {
+    const sql = `INSERT INTO nodb_tab_lobs_pre (id, blob) VALUES (:i, EMPTY_BLOB())
+      RETURNING blob INTO :lobbv`;
+    const bindVar = { i: id, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } };
 
-    connection.execute(
-      sql,
-      bindVar,
-      { autoCommit: false }, // a transaction needs to span the INSERT and pipe()
-      function(err, result) {
-        should.not.exist(err);
-        (result.rowsAffected).should.be.exactly(1);
-        (result.outBinds.lobbv.length).should.be.exactly(1);
-
-        var inStream = fs.createReadStream(inFileName);
-        var lob = result.outBinds.lobbv[0];
-
-        lob.on('error', function(err) {
-          should.not.exist(err);
-        });
-
-        inStream.on('error', function(err) {
-          should.not.exist(err);
-        });
-
-        lob.on('finish', function() {
-          connection.commit(function(err) {
-            should.not.exist(err);
-            callback();
-          });
-        });
-
-        inStream.pipe(lob); // copies the text to the BLOB
-      }
-    );
+    const result = await connection.execute(sql, bindVar, { autoCommit: false });
+    assert.strictEqual(result.rowsAffected, 1);
+    assert.strictEqual(result.outBinds.lobbv.length, 1);
+    const inStream = fs.createReadStream(fileName);
+    const lob = result.outBinds.lobbv[0];
+    await new Promise((resolve, reject)=>{
+      inStream.on('error', reject);
+      lob.on('error', reject);
+      lob.on('finish', resolve);
+      inStream.pipe(lob);
+    });
+    await connection.commit();
   };
 
-  var verifyBlob = function(selectID, insertID, lenExpected, callback) {
-    var lob = {};
-    var selectSql = "select blob from nodb_tab_lobs_pre where id = " + selectID;
-    var insetSql = "INSERT INTO nodb_tab_lobs_pre (id, blob) VALUES (:i, :c)";
-    var proc_compare_blob = "CREATE OR REPLACE PROCEDURE nodb_blob_compare(result OUT NUMBER, len OUT NUMBER) \n" +
+  const verifyBlob =  async function(selectID, insertID, lenExpected) {
+    const selectSql = "select blob from nodb_tab_lobs_pre where id = " + selectID;
+    const insetSql = "INSERT INTO nodb_tab_lobs_pre (id, blob) VALUES (:i, :c)";
+    const proc_compare_blob = "CREATE OR REPLACE PROCEDURE nodb_blob_compare(result OUT NUMBER, len OUT NUMBER) \n" +
                             "IS \n" +
                             "    blob1 BLOB; \n" +
                             "    blob2 BLOB; \n" +
@@ -215,56 +149,24 @@ describe('127.blobStream.js', function() {
                             "    result := DBMS_LOB.COMPARE(blob1, blob2); \n" + // Zero if the comparison succeeds, nonzero if not.
                             "    len := length(blob1); \n" +
                             "END nodb_blob_compare;";
-    var sqlRunComparePorc = "begin nodb_blob_compare(:r, :l); end;";
-    var sqlDropComparePorc = "DROP PROCEDURE nodb_blob_compare";
+    const sqlRunCompareProc = "begin nodb_blob_compare(:r, :l); end;";
+    const sqlDropCompareProc = "DROP PROCEDURE nodb_blob_compare";
 
-    async.series([
-      function(cb) {
-        connection.execute(
-          selectSql,
-          function(err, result) {
-            should.not.exist(err);
-            lob = result.rows[0][0];
-            should.exist(lob);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        var bindVar = { i: insertID, c: { val: lob, type: oracledb.BLOB, dir: oracledb.BIND_IN } };
-        connection.execute(
-          insetSql,
-          bindVar,
-          { autoCommit: true },
-          function(err) {
-            should.not.exist(err);
-            lob.close(cb);
-          }
-        );
-      },
-      function(cb) {
-        sql.executeSql(connection, proc_compare_blob, {}, {}, cb);
-      },
-      function(cb) {
-        var bindVar = {
-          r: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          l: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
-        };
-        connection.execute(
-          sqlRunComparePorc,
-          bindVar,
-          function(err, result) {
-            should.not.exist(err);
-            result.outBinds.r.should.eql(0);
-            should.strictEqual(result.outBinds.l, lenExpected);
-            cb();
-          });
-      },
-      function(cb) {
-        sql.executeSql(connection, sqlDropComparePorc, {}, {}, cb);
-      }
-    ], callback);
-
+    let result = await connection.execute(selectSql);
+    const lob = result.rows[0][0];
+    assert(lob);
+    let bindVar = { i: insertID, c: { val: lob, type: oracledb.BLOB, dir: oracledb.BIND_IN } };
+    await connection.execute(insetSql, bindVar, { autoCommit: true });
+    await lob.close();
+    await connection.execute(proc_compare_blob);
+    bindVar = {
+      r: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      l: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
+    };
+    result = await connection.execute(sqlRunCompareProc, bindVar);
+    assert.strictEqual(result.outBinds.r, 0);
+    assert.strictEqual(result.outBinds.l, lenExpected);
+    await connection.execute(sqlDropCompareProc);
   };
 
 });

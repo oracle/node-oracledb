@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -29,19 +29,19 @@
  *   Testing rowid plsql bind as String.
  *
  *****************************************************************************/
+
 'use strict';
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const sql      = require('./sqlClone.js');
 
 describe('110. rowidProcedureBindAsString_bindout.js', function() {
   let connection = null;
-  let tableName = "nodb_rowid_plsql_out";
+  const tableName = "nodb_rowid_plsql_out";
   let insertID = 1;
 
-  let proc_create_table = "BEGIN \n" +
+  const proc_create_table = "BEGIN \n" +
                           "    DECLARE \n" +
                           "        e_table_missing EXCEPTION; \n" +
                           "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
@@ -58,42 +58,39 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
                           "        ) \n" +
                           "    '); \n" +
                           "END;  ";
-  let drop_table = "DROP TABLE " + tableName + " PURGE";
+  const drop_table = "DROP TABLE " + tableName + " PURGE";
 
   before('get connection and create table', async function() {
-
     connection = await oracledb.getConnection(dbConfig);
     assert(connection);
-    await sql.executeSql(connection, proc_create_table, {}, {});
+    await connection.execute(proc_create_table);
   });
 
   after('release connection', async function() {
-
-    await sql.executeSql(connection, drop_table, {}, {});
+    await connection.execute(drop_table);
     await connection.close();
   });
 
   beforeEach(function() {
     insertID++;
-
   });
 
   describe('110.1 PROCEDURE BIND_OUT as rowid', function() {
-    let proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN ROWID, content_out OUT ROWID)\n" +
+    const proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN ROWID, content_out OUT ROWID)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_in)); \n" +
                       "    select content into content_out from " + tableName + " where id = id_in; \n" +
                       "END nodb_rowid_bind_out; ";
-    let proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
-    let proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
+    const proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
+    const proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
 
     before('create procedure', async function() {
-      await sql.executeSql(connection, proc_create, {}, {});
+      await connection.execute(proc_create);
     });
 
     after('drop procedure', async function() {
-      await sql.executeSql(connection, proc_drop, {}, {});
+      await connection.execute(proc_drop);
     });
 
     it('110.1.1 works with null', async function() {
@@ -109,16 +106,14 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
     });
 
     it('110.1.4 works with NaN', async function() {
-      let content = NaN;
-      let bindVar = {
+      const content = NaN;
+      const bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
       await assert.rejects(
-        async () => {
-          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-        },
+        async () => await connection.execute(proc_execute, bindVar),
         /NJS-011:/
       );
     });
@@ -136,16 +131,14 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
     });
 
     it('110.1.8 works with number 0', async function() {
-      let content = 0;
-      let bindVar = {
+      const content = 0;
+      const bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
       await assert.rejects(
-        async () => {
-          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-        },
+        async () => await connection.execute(proc_execute, bindVar),
         /NJS-011:/
       );
     });
@@ -167,25 +160,21 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
     });
 
     it('110.1.13 bind error: NJS-037', async function() {
-      let bindVar = {
+      const bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
       await assert.rejects(
-        async () => {
-          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-        },
+        async () => await connection.execute(proc_execute, bindVar),
         /NJS-037:/
       );
     });
 
     it('110.1.14 bind error: NJS-052', async function() {
-      let bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN }, { type: oracledb.STRING, dir: oracledb.BIND_OUT } ];
+      const bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN }, { type: oracledb.STRING, dir: oracledb.BIND_OUT } ];
       await assert.rejects(
-        async () => {
-          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-        },
+        async () => await connection.execute(proc_execute, bindVar),
         /NJS-052:/
       );
     });
@@ -193,21 +182,21 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
   });
 
   describe('110.2 PROCEDURE BIND_OUT as string', function() {
-    let proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN ROWID, content_out OUT VARCHAR2)\n" +
+    const proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN ROWID, content_out OUT VARCHAR2)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_in)); \n" +
                       "    select content into content_out from " + tableName + " where id = id_in; \n" +
                       "END nodb_rowid_bind_out; ";
-    let proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
-    let proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
+    const proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
+    const proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
 
     before('create procedure', async function() {
-      await sql.executeSql(connection, proc_create, {}, {});
+      await connection.execute(proc_create);
     });
 
     after('drop procedure', async function() {
-      await sql.executeSql(connection, proc_drop, {}, {});
+      await connection.execute(proc_drop);
     });
 
     it('110.2.1 works with null', async function() {
@@ -223,16 +212,14 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
     });
 
     it('110.2.4 works with NaN', async function() {
-      let content = NaN;
-      let bindVar = {
+      const content = NaN;
+      const bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
       await assert.rejects(
-        async () => {
-          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-        },
+        async () => await connection.execute(proc_execute, bindVar),
         /NJS-011:/
       );
     });
@@ -250,16 +237,14 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
     });
 
     it('110.2.8 works with number 0', async function() {
-      let content = 0;
-      let bindVar = {
+      const content = 0;
+      const bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
       await assert.rejects(
-        async () => {
-          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-        },
+        async () => await connection.execute(proc_execute, bindVar),
         /NJS-011:/
       );
     });
@@ -281,25 +266,21 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
     });
 
     it('110.2.13 bind error: NJS-037', async function() {
-      let bindVar = {
+      const bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
       await assert.rejects(
-        async () => {
-          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-        },
+        async () => await connection.execute(proc_execute, bindVar),
         /NJS-037:/
       );
     });
 
     it('110.2.14 bind error: NJS-052', async function() {
-      let bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN }, { type: oracledb.STRING, dir: oracledb.BIND_OUT } ];
+      const bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN }, { type: oracledb.STRING, dir: oracledb.BIND_OUT } ];
       await assert.rejects(
-        async () => {
-          await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-        },
+        async () => await connection.execute(proc_execute, bindVar),
         /NJS-052:/
       );
     });
@@ -307,22 +288,22 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
   });
 
   describe('110.3 PROCEDURE BIND_IN, UPDATE', function() {
-    let proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN STRING, content_2 IN ROWID, content_out OUT ROWID)\n" +
+    const proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN STRING, content_2 IN ROWID, content_out OUT ROWID)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_1)); \n" +
                       "    update " + tableName + " set content = content_2 where id = id_in; \n" +
                       "    select content into content_out from " + tableName + " where id = id_in; \n" +
                       "END nodb_rowid_bind_1083; ";
-    let proc_execute = "BEGIN nodb_rowid_bind_1083 (:i, :c1, :c2, :o); END;";
-    let proc_drop = "DROP PROCEDURE nodb_rowid_bind_1083";
+    const proc_execute = "BEGIN nodb_rowid_bind_1083 (:i, :c1, :c2, :o); END;";
+    const proc_drop = "DROP PROCEDURE nodb_rowid_bind_1083";
 
     before('create procedure', async function() {
-      await sql.executeSql(connection, proc_create, {}, {});
+      await connection.execute(proc_create);
     });
 
     after('drop procedure', async function() {
-      await sql.executeSql(connection, proc_drop, {}, {});
+      await connection.execute(proc_drop);
     });
 
     it('110.3.1 update null with rowid', async function() {
@@ -355,50 +336,47 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
 
   });
 
-  let procedureBindOut = async function(proc_execute, content_in, expected) {
-    let bindVar_out = {
+  const procedureBindOut = async function(proc_execute, content_in, expected) {
+    const bindVar_out = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_IN },
       o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
     };
-    let result = await connection.execute(proc_execute, bindVar_out);
-    assert(result);
+    const result = await connection.execute(proc_execute, bindVar_out);
     assert.strictEqual(result.outBinds.o, expected);
   };
 
-  let procedureBindOut_default = async function(proc_execute, content_in, expected) {
-    let bindVar_out = {
+  const procedureBindOut_default = async function(proc_execute, content_in, expected) {
+    const bindVar_out = {
       i: insertID,
       c: content_in,
       o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
     };
-    let result = await connection.execute(proc_execute, bindVar_out);
-    assert(result);
+    const result = await connection.execute(proc_execute, bindVar_out);
     assert.strictEqual(result.outBinds.o, expected);
   };
 
-  let procedureBindOut_update = async function(proc_execute, content_1, content_2, expected) {
-    let bindVar_in = {
+  const procedureBindOut_update = async function(proc_execute, content_1, content_2, expected) {
+    const bindVar_in = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c1: { val: content_1, type: oracledb.STRING, dir: oracledb.BIND_IN },
       c2: { val: content_2, type: oracledb.STRING, dir: oracledb.BIND_IN },
       o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
     };
-    let result = await connection.execute(proc_execute, bindVar_in);
-    assert(result);
+    const result = await connection.execute(proc_execute, bindVar_in);
     assert.strictEqual(result.outBinds.o, expected);
   };
 
-  let procedureBindOut_update_default = async function(proc_execute, content_1, content_2, expected) {
-    let bindVar_in = {
+  const procedureBindOut_update_default = async function(proc_execute, content_1, content_2, expected) {
+    const bindVar_in = {
       i: insertID,
       c1: content_1,
       c2: content_2,
       o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
     };
-    let result = await connection.execute(proc_execute, bindVar_in);
-    assert(result);
+    const result = await connection.execute(proc_execute, bindVar_in);
     assert.strictEqual(result.outBinds.o, expected);
 
   };
+
 });

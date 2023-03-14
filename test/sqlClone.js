@@ -143,26 +143,6 @@ sql.executeSql = async function(connection, sql, bindVar, option) {
   }
 };
 
-sql.executeInsert = async function(connection, sql, bindVar, option) {
-  try {
-    const result = await connection.execute(sql, bindVar, option);
-    (result.rowsAffected).should.be.exactly(1);
-  } catch (err) {
-    should.not.exist(err);
-  }
-
-};
-
-sql.executeSqlWithErr = async function(connection, sql, bindVar, option) {
-  try {
-    await connection.execute(sql, bindVar, option);
-  } catch (err) {
-    should.exist(err);
-    throw err;
-  }
-
-};
-
 sql.createRowid = function(connection, rowid_type, object_number, relative_fno, block_number, row_number, callback) {
 // Parameter       Description
 // rowid_type      Type (restricted or extended), set the rowid_type parameter to 0 for a restricted ROWID. Set it to 1 to create an extended ROWID.

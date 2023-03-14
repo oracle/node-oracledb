@@ -29,12 +29,12 @@
  *   Testing UROWID(> 200 bytes) plsql procedure bind inout as String.
  *
  *****************************************************************************/
+
 'use strict';
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const sql      = require('./sqlClone.js');
 const random   = require('./random.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -86,13 +86,13 @@ describe('146. urowidProcedureBindAsString6.js', function() {
 
   before('get connection and create table', async function() {
     connection = await oracledb.getConnection(dbConfig);
-    await sql.executeSql(connection, table_indexed, {}, {});
-    await sql.executeSql(connection, table_normal, {}, {});
+    await connection.execute(table_indexed);
+    await connection.execute(table_normal);
   });
 
   after('release connection', async function() {
-    await sql.executeSql(connection, drop_table_indexed, {}, {});
-    await sql.executeSql(connection, drop_table_normal, {}, {});
+    await connection.execute(drop_table_indexed);
+    await connection.execute(drop_table_normal);
     await connection.close();
   });
 
@@ -111,11 +111,11 @@ describe('146. urowidProcedureBindAsString6.js', function() {
     const proc_drop = "DROP PROCEDURE nodb_rowid_bind_inout_1461";
 
     before('create procedure', async function() {
-      await sql.executeSql(connection, proc_create, {}, {});
+      await connection.execute(proc_create);
     });
 
     after('drop procedure', async function() {
-      await sql.executeSql(connection, proc_drop, {}, {});
+      await connection.execute(proc_drop);
     });
 
     it('146.1.1 urowid length > 500', async function() {
@@ -143,11 +143,11 @@ describe('146. urowidProcedureBindAsString6.js', function() {
     const proc_drop = "DROP PROCEDURE nodb_rowid_bind_inout_1462";
 
     before('create procedure', async function() {
-      await sql.executeSql(connection, proc_create, {}, {});
+      await connection.execute(proc_create);
     });
 
     after('drop procedure', async function() {
-      await sql.executeSql(connection, proc_drop, {}, {});
+      await connection.execute(proc_drop);
     });
 
     it('146.2.1 urowid length > 500', async function() {
@@ -177,11 +177,11 @@ describe('146. urowidProcedureBindAsString6.js', function() {
     const proc_drop = "DROP PROCEDURE nodb_rowid_bind_inout_1463";
 
     before('create procedure', async function() {
-      await sql.executeSql(connection, proc_create, {}, {});
+      await connection.execute(proc_create);
     });
 
     after('drop procedure', async function() {
-      await sql.executeSql(connection, proc_drop, {}, {});
+      await connection.execute(proc_drop);
     });
 
     it('146.3.1 update with urowid length > 500', async function() {
@@ -202,7 +202,7 @@ describe('146. urowidProcedureBindAsString6.js', function() {
     const str = random.getRandomLengthString(expectedLength);
     let urowid, urowidLen;
     const sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
-    await sql.executeInsert(connection, sql_insert, {}, {});
+    await connection.execute(sql_insert);
     let result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
     urowid = result.rows[0][0];
     urowidLen = urowid.length;
@@ -223,7 +223,7 @@ describe('146. urowidProcedureBindAsString6.js', function() {
     let urowid_1, urowid_2, urowidLen_1, urowidLen_2, id_1, id_2;
     id_1 = insertID;
     let sql_insert = "insert into " + tableName_indexed + " values (" + id_1 + ", '" + str_1 + "')";
-    await sql.executeInsert(connection, sql_insert, {}, {});
+    await connection.execute(sql_insert);
     let result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + id_1);
     urowid_1 = result.rows[0][0];
     urowidLen_1 = urowid_1.length;
@@ -249,4 +249,5 @@ describe('146. urowidProcedureBindAsString6.js', function() {
     assert.strictEqual(resultVal_2, urowid_2);
     insertID = insertID + 10;
   };
+
 });

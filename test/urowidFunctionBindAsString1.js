@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -29,12 +29,12 @@
  *   Testing UROWID(< 200 bytes) plsql function bind in/out as String.
  *
  *****************************************************************************/
+
 'use strict';
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const sql      = require('./sqlClone.js');
 
 describe('121. urowidFunctionBindAsString1.js', function() {
   let connection = null;
@@ -62,11 +62,11 @@ describe('121. urowidFunctionBindAsString1.js', function() {
 
   before('get connection and create table', async function() {
     connection = await oracledb.getConnection(dbConfig);
-    await sql.executeSql(connection, fun_create_table, {}, {});
+    await connection.execute(fun_create_table);
   });
 
   after('release connection', async function() {
-    await sql.executeSql(connection, drop_table, {}, {});
+    await connection.execute(drop_table);
     await connection.close();
   });
 
@@ -87,11 +87,11 @@ describe('121. urowidFunctionBindAsString1.js', function() {
     const fun_drop = "DROP FUNCTION nodb_rowid_bind";
 
     before('create procedure', async function() {
-      await sql.executeSql(connection, fun_create, {}, {});
+      await connection.execute(fun_create);
     });
 
     after('drop procedure', async function() {
-      await sql.executeSql(connection, fun_drop, {}, {});
+      await connection.execute(fun_drop);
     });
 
     it('121.1.1 works with null', async function() {
@@ -112,11 +112,10 @@ describe('121. urowidFunctionBindAsString1.js', function() {
         c: { val: NaN, type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      try {
-        await sql.executeSqlWithErr(connection, fun_create, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-      }
+      await assert.rejects(
+        async () => await connection.execute(fun_create, bindVar),
+        /NJS-011:/
+      );
     });
 
     it('121.1.5 works with extended ROWID', async function() {
@@ -133,12 +132,10 @@ describe('121. urowidFunctionBindAsString1.js', function() {
         c: { val: "0", type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      try {
-        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
-      } catch (err) {
-        assert.equal(err.message.substring(0, 10), "ORA-01410:");
-        // ORA-01410: invalid ROWID
-      }
+      await assert.rejects(
+        async () => await connection.execute(fun_execute, bindVar),
+        /ORA-01410:/
+      );
     });
 
     it('121.1.8 works with number 0', async function() {
@@ -147,12 +144,10 @@ describe('121. urowidFunctionBindAsString1.js', function() {
         c: { val: 0, type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      try {
-        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-      }
-
+      await assert.rejects(
+        async () => await connection.execute(fun_execute, bindVar),
+        /NJS-011:/
+      );
     });
 
     it('121.1.9 works with default bind type/dir - extended ROWID', async function() {
@@ -177,21 +172,18 @@ describe('121. urowidFunctionBindAsString1.js', function() {
         c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      try {
-        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-037: invalid data type at array index 0 for bind ":c"');
-      }
-
+      await assert.rejects(
+        async () => await connection.execute(fun_execute, bindVar),
+        /NJS-037:/
+      );
     });
 
     it('121.1.14 bind error: NJS-052', async function() {
       const bindVar = [ { type: oracledb.STRING, dir: oracledb.BIND_OUT }, insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN } ];
-      try {
-        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 3');
-      }
+      await assert.rejects(
+        async () => await connection.execute(fun_execute, bindVar),
+        /NJS-052:/
+      );
     });
 
   });
@@ -209,11 +201,11 @@ describe('121. urowidFunctionBindAsString1.js', function() {
     const fun_drop = "DROP FUNCTION nodb_rowid_bind";
 
     before('create procedure', async function() {
-      await sql.executeSql(connection, fun_create, {}, {});
+      await connection.execute(fun_create);
     });
 
     after('drop procedure', async function() {
-      await sql.executeSql(connection, fun_drop, {}, {});
+      await connection.execute(fun_drop);
     });
 
     it('121.2.1 works with null', async function() {
@@ -234,11 +226,10 @@ describe('121. urowidFunctionBindAsString1.js', function() {
         c: { val: NaN, type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      try {
-        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-      }
+      await assert.rejects(
+        async () => await connection.execute(fun_execute, bindVar),
+        /NJS-011:/
+      );
     });
 
     it('121.2.5 works with extended ROWID', async function() {
@@ -255,12 +246,10 @@ describe('121. urowidFunctionBindAsString1.js', function() {
         c: { val: "0", type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      try {
-        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
-      } catch (err) {
-        assert.equal(err.message.substring(0, 10), "ORA-01410:");
-        // ORA-01410: invalid ROWID
-      }
+      await assert.rejects(
+        async () => await connection.execute(fun_execute, bindVar),
+        /ORA-01410:/
+      );
     });
 
     it('121.2.8 works with number 0', async function() {
@@ -269,11 +258,10 @@ describe('121. urowidFunctionBindAsString1.js', function() {
         c: { val: 0, type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      try {
-        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-      }
+      await assert.rejects(
+        async () => await connection.execute(fun_execute, bindVar),
+        /NJS-011:/
+      );
     });
 
     it('121.2.9 works with default bind type/dir - extended ROWID', async function() {
@@ -298,21 +286,18 @@ describe('121. urowidFunctionBindAsString1.js', function() {
         c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      try {
-        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-037: invalid data type at array index 0 for bind ":c"');
-      }
-
+      await assert.rejects(
+        async () => await connection.execute(fun_execute, bindVar),
+        /NJS-037:/
+      );
     });
 
     it('121.2.14 bind error: NJS-052', async function() {
       const bindVar = [ { type: oracledb.STRING, dir: oracledb.BIND_OUT }, insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN } ];
-      try {
-        await sql.executeSqlWithErr(connection, fun_execute, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 3');
-      }
+      await assert.rejects(
+        async () => await connection.execute(fun_execute, bindVar),
+        /NJS-052:/
+      );
     });
 
   });
@@ -331,11 +316,11 @@ describe('121. urowidFunctionBindAsString1.js', function() {
     const fun_drop = "DROP FUNCTION nodb_rowid_bind_1083";
 
     before('create procedure', async function() {
-      await sql.executeSql(connection, fun_create, {}, {});
+      await connection.execute(fun_create);
     });
 
     after('drop procedure', async function() {
-      await sql.executeSql(connection, fun_drop, {}, {});
+      await connection.execute(fun_drop);
     });
 
     it('121.3.1 update null with UROWID', async function() {
@@ -357,11 +342,10 @@ describe('121. urowidFunctionBindAsString1.js', function() {
         c2: { val: "0", type: oracledb.STRING, dir: oracledb.BIND_IN },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      try {
-        await sql.executeSqlWithErr(connection, fun_exec, bindVar, {});
-      } catch (err) {
-        assert.equal(err.message.substring(0, 10), "ORA-01410:");
-      }
+      await assert.rejects(
+        async () => await connection.execute(fun_exec, bindVar),
+        /ORA-01410:/
+      );
       // ORA-01410: invalid ROWID
     });
 

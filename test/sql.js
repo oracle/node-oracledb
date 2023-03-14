@@ -136,36 +136,6 @@ sql.executeSql = function(connection, sql, bindVar, option, callback) {
   );
 };
 
-sql.executeInsert = function(connection, sql, bindVar, option, callback) {
-  connection.execute(
-    sql,
-    bindVar,
-    option,
-    function(err, result) {
-      if (err) {
-        let stack = new Error().stack;
-        console.error(err);
-        console.error(stack);
-      }
-      should.not.exist(err);
-      (result.rowsAffected).should.be.exactly(1);
-      callback(err);
-    }
-  );
-};
-
-sql.executeSqlWithErr = function(connection, sql, bindVar, option, callback) {
-  connection.execute(
-    sql,
-    bindVar,
-    option,
-    function(err) {
-      should.exist(err);
-      callback(err);
-    }
-  );
-};
-
 sql.createRowid = function(connection, rowid_type, object_number, relative_fno, block_number, row_number, callback) {
 // Parameter       Description
 // rowid_type      Type (restricted or extended), set the rowid_type parameter to 0 for a restricted ROWID. Set it to 1 to create an extended ROWID.

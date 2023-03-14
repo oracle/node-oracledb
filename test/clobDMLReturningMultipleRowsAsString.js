@@ -29,17 +29,17 @@
  *   Testing CLOB DML returning multiple rows as String.
  *
  *****************************************************************************/
+
 'use strict';
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const sql      = require('./sqlClone.js');
 
 describe('136. clobDMLReturningMultipleRowsAsString.js', function() {
 
   let connection = null;
-  let tableName = "nodb_dml_clob_136";
+  const tableName = "nodb_dml_clob_136";
 
   const clob_table_create = "BEGIN \n" +
                           "    DECLARE \n" +
@@ -77,11 +77,11 @@ describe('136. clobDMLReturningMultipleRowsAsString.js', function() {
   describe('136.1 CLOB DML returning multiple rows as String', function() {
 
     before(async function() {
-      await sql.executeSql(connection, clob_table_create, {}, {});
+      await connection.execute(clob_table_create);
     });
 
     after(async function() {
-      await sql.executeSql(connection, clob_table_drop, {}, {});
+      await connection.execute(clob_table_drop);
     });
 
     it('136.1.1 CLOB DML returning multiple rows as String', async function() {
@@ -98,7 +98,6 @@ describe('136. clobDMLReturningMultipleRowsAsString.js', function() {
         num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
         lobou: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       });
-    assert(result);
     const numLobs = result.outBinds.lobou.length;
     assert.strictEqual(numLobs, 10);
     for (let index = 0; index < result.outBinds.lobou.length; index++) {

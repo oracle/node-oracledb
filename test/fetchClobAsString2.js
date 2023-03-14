@@ -31,21 +31,22 @@
  *    This could be very useful for smaller CLOB size as it can be fetched as string and processed in memory itself.
  *
  *****************************************************************************/
+
 'use strict';
 
 const oracledb = require('oracledb');
 const async    = require('async');
 const should   = require('should');
-const file     = require('./file.js');
+const fsPromises = require('fs/promises');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
 
 describe('85. fetchClobAsString2.js', function() {
 
   let connection = null;
-  var insertID = 1; // assume id for insert into db starts from 1
-  var inFileName = './test/clobTmpFile.txt';
-  var proc_create_table1 = "BEGIN \n" +
+  let insertID = 1; // assume id for insert into db starts from 1
+  const inFileName = './test/clobTmpFile.txt';
+  const proc_create_table1 = "BEGIN \n" +
                           "    DECLARE \n" +
                           "        e_table_missing EXCEPTION; \n" +
                           "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -62,44 +63,22 @@ describe('85. fetchClobAsString2.js', function() {
                           "        ) \n" +
                           "    '); \n" +
                           "END; ";
-  var drop_table1 = "DROP TABLE nodb_clob1 PURGE";
-  var defaultStmtCache = oracledb.stmtCacheSize;
+  const drop_table1 = "DROP TABLE nodb_clob1 PURGE";
+  const defaultStmtCache = oracledb.stmtCacheSize;
 
-  before('get one connection', function(done) {
-    async.series([
-      function(cb) {
-        oracledb.stmtCacheSize = 0;
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
-      },
-      function(cb) {
-        file.create(inFileName);
-        cb();
-      }
-    ], done);
-
+  before('get one connection', async function() {
+    oracledb.stmtCacheSize = 0;
+    connection = await oracledb.getConnection(dbConfig);
+    await fsPromises.writeFile(inFileName, '');
   }); // before
 
-  after('release connection', function(done) {
-    async.series([
-      function(cb) {
-        oracledb.stmtCacheSize = defaultStmtCache;
-        connection.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function(cb) {
-        file.delete(inFileName);
-        cb();
-      }
-    ], done);
-  });  // after
+  after('release connection', async function() {
+    oracledb.stmtCacheSize = defaultStmtCache;
+    await connection.close();
+    await fsPromises.unlink(inFileName);
+  }); // after
 
-  var insertIntoClobTable1 = function(id, content, callback) {
+  const insertIntoClobTable1 = function(id, content, callback) {
     if (content == "EMPTY_CLOB") {
       connection.execute(
         "INSERT INTO nodb_clob1 VALUES (:ID, EMPTY_CLOB())",
@@ -2300,4 +2279,5 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.5.13
 
   }); // 85.5
+
 });

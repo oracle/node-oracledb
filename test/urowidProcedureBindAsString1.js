@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -29,12 +29,13 @@
  *   Testing UROWID(< 200 bytes) plsql procedure bind in as String.
  *
  *****************************************************************************/
+
 'use strict';
 
 const oracledb = require('oracledb');
 const assert = require('assert');
 const dbConfig = require('./dbconfig.js');
-const sql      = require('./sqlClone.js');
+
 describe('118. urowidProcedureBindAsString1.js', function() {
   let connection = null;
   const tableName = "nodb_urowid_plsql_in";
@@ -61,11 +62,11 @@ describe('118. urowidProcedureBindAsString1.js', function() {
 
   before('get connection and create table', async function() {
     connection = await oracledb.getConnection(dbConfig);
-    await sql.executeSql(connection, proc_create_table, {}, {});
+    await connection.execute(proc_create_table);
   });
 
   after('release connection', async function() {
-    await sql.executeSql(connection, drop_table, {}, {});
+    await connection.execute(drop_table);
     await connection.close();
   });
 
@@ -83,11 +84,11 @@ describe('118. urowidProcedureBindAsString1.js', function() {
     const proc_drop = "DROP PROCEDURE nodb_urowid_bind_in_1081";
 
     before('create procedure', async function() {
-      await sql.executeSql(connection, proc_create, {}, {});
+      await connection.execute(proc_create);
     });
 
     after('drop procedure', async function() {
-      await sql.executeSql(connection, proc_drop, {}, {});
+      await connection.execute(proc_drop);
     });
 
     it('118.1.1 works with null', async function() {
@@ -108,12 +109,10 @@ describe('118. urowidProcedureBindAsString1.js', function() {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
-      try {
-        await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-      }
-
+      await assert.rejects(
+        async () => await connection.execute(proc_execute, bindVar),
+        /NJS-011:/
+      );
     });
 
     it('118.1.5 works with extended ROWID', async function() {
@@ -130,11 +129,10 @@ describe('118. urowidProcedureBindAsString1.js', function() {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
-      try {
-        await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-      } catch (err) {
-        assert.equal(err.message.substring(0, 10), "ORA-01410:");
-      }
+      await assert.rejects(
+        async () => await connection.execute(proc_execute, bindVar),
+        /ORA-01410:/
+      );
       // ORA-01410: invalid ROWID
     });
 
@@ -144,12 +142,10 @@ describe('118. urowidProcedureBindAsString1.js', function() {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
-      try {
-        await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-      }
-
+      await assert.rejects(
+        async () => await connection.execute(proc_execute, bindVar),
+        /NJS-011:/
+      );
     });
 
     it('118.1.9 works with default bind type/dir - extended ROWID', async function() {
@@ -173,20 +169,18 @@ describe('118. urowidProcedureBindAsString1.js', function() {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
-      try {
-        await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-037: invalid data type at array index 0 for bind ":c"');
-      }
+      await assert.rejects(
+        async () => await connection.execute(proc_execute, bindVar),
+        /NJS-037:/
+      );
     });
 
     it('118.1.14 bind error: NJS-052', async function() {
       const bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN } ];
-      try {
-        await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 2');
-      }
+      await assert.rejects(
+        async () => await connection.execute(proc_execute, bindVar),
+        /NJS-052:/
+      );
     });
 
   });
@@ -201,11 +195,11 @@ describe('118. urowidProcedureBindAsString1.js', function() {
     const proc_drop = "DROP PROCEDURE nodb_urowid_bind_in_1082";
 
     before('create procedure', async function() {
-      await sql.executeSql(connection, proc_create, {}, {});
+      await connection.execute(proc_create);
     });
 
     after('drop procedure', async function() {
-      await sql.executeSql(connection, proc_drop, {}, {});
+      await connection.execute(proc_drop);
     });
 
     it('118.2.1 works with null', async function() {
@@ -226,11 +220,10 @@ describe('118. urowidProcedureBindAsString1.js', function() {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
-      try {
-        await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-      }
+      await assert.rejects(
+        async () => await connection.execute(proc_execute, bindVar),
+        /NJS-011:/
+      );
     });
 
     it('118.2.5 works with extended ROWID', async function() {
@@ -251,11 +244,10 @@ describe('118. urowidProcedureBindAsString1.js', function() {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
-      try {
-        await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
-      }
+      await assert.rejects(
+        async () => await connection.execute(proc_execute, bindVar),
+        /NJS-011:/
+      );
     });
 
     it('118.2.9 works with default bind type/dir - extended ROWID', async function() {
@@ -279,23 +271,22 @@ describe('118. urowidProcedureBindAsString1.js', function() {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
-      try {
-        await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-037: invalid data type at array index 0 for bind ":c"');
-      }
+      await assert.rejects(
+        async () => await connection.execute(proc_execute, bindVar),
+        /NJS-037:/
+      );
     });
 
     it('118.2.14 bind error: NJS-052', async function() {
       const bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN } ];
-      try {
-        await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-      } catch (err) {
-        assert.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 2');
-      }
-
+      await assert.rejects(
+        async () => await connection.execute(proc_execute, bindVar),
+        /NJS-052:/
+      );
     });
+
   });
+
   describe('118.3 PROCEDURE BIND_IN, UPDATE', function() {
     const proc_create = "CREATE OR REPLACE PROCEDURE nodb_urowid_bind_in_1083 (id IN NUMBER, content_1 IN VARCHAR2, content_2 IN UROWID)\n" +
                       "AS \n" +
@@ -307,11 +298,11 @@ describe('118. urowidProcedureBindAsString1.js', function() {
     const proc_drop = "DROP PROCEDURE nodb_urowid_bind_in_1083";
 
     before('create procedure', async function() {
-      await sql.executeSql(connection, proc_create, {}, {});
+      await connection.execute(proc_create);
     });
 
     after('drop procedure', async function() {
-      await sql.executeSql(connection, proc_drop, {}, {});
+      await connection.execute(proc_drop);
     });
 
     it('118.3.1 update null with UROWID', async function() {
@@ -334,11 +325,10 @@ describe('118. urowidProcedureBindAsString1.js', function() {
         c1: { val: content_1, type: oracledb.STRING, dir: oracledb.BIND_IN },
         c2: { val: content_2, type: oracledb.STRING, dir: oracledb.BIND_IN }
       };
-      try {
-        await sql.executeSqlWithErr(connection, proc_execute, bindVar, {});
-      } catch (err) {
-        assert.equal(err.message.substring(0, 10), "ORA-01410:");
-      }
+      await assert.rejects(
+        async () => await connection.execute(proc_execute, bindVar),
+        /ORA-01410:/
+      );
       // ORA-01410: invalid ROWID
     });
 
@@ -362,7 +352,7 @@ describe('118. urowidProcedureBindAsString1.js', function() {
       c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_IN }
     };
     const option_in = { autoCommit: true };
-    await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
+    await connection.execute(proc_execute, bindVar_in, option_in);
 
     const sql_query = "select * from " + tableName + " where id = " + insertID;
     const result = await connection.execute(sql_query);
@@ -378,7 +368,7 @@ describe('118. urowidProcedureBindAsString1.js', function() {
       i: insertID,
       c: content_in
     };
-    await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
+    await connection.execute(proc_execute, bindVar_in, option_in);
 
     let sql_query = "select * from " + tableName + " where id = " + insertID;
     let result = await connection.execute(sql_query);
@@ -386,7 +376,7 @@ describe('118. urowidProcedureBindAsString1.js', function() {
     assert.strictEqual(resultVal, expected);
     insertID++;
     bindVar_in = [ insertID, content_in ];
-    await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
+    await connection.execute(proc_execute, bindVar_in, option_in);
     sql_query = "select * from " + tableName + " where id = " + insertID;
     result = await connection.execute(sql_query);
     resultVal = result.rows[0][1];
@@ -401,7 +391,7 @@ describe('118. urowidProcedureBindAsString1.js', function() {
     };
     const option_in = { autoCommit: true };
 
-    await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
+    await connection.execute(proc_execute, bindVar_in, option_in);
 
     const sql_query = "select * from " + tableName + " where id = " + insertID;
     const result = await connection.execute(sql_query);
@@ -417,7 +407,7 @@ describe('118. urowidProcedureBindAsString1.js', function() {
       c1: content_1,
       c2: content_2
     };
-    await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
+    await connection.execute(proc_execute, bindVar_in, option_in);
     let sql_query = "select * from " + tableName + " where id = " + insertID;
     let result = await connection.execute(sql_query);
     let resultVal = result.rows[0][1];
@@ -425,7 +415,7 @@ describe('118. urowidProcedureBindAsString1.js', function() {
     insertID++;
 
     bindVar_in = [ insertID, content_1, content_2 ];
-    await sql.executeSql(connection, proc_execute, bindVar_in, option_in);
+    await connection.execute(proc_execute, bindVar_in, option_in);
     sql_query = "select * from " + tableName + " where id = " + insertID;
     result = await  connection.execute(sql_query);
 

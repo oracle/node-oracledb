@@ -29,12 +29,12 @@
  *   Testing UROWID(> 200 bytes) plsql function bind inout as String.
  *
  *****************************************************************************/
+
 'use strict';
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const sql      = require('./sql.js');
 const random   = require('./random.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -86,19 +86,18 @@ describe('143. urowidFunctionBindAsString4.js', function() {
 
   before('get connection and create table', async function() {
     connection = await oracledb.getConnection(dbConfig);
-    await sql.executeSql(connection, table_indexed, {}, {});
-    await sql.executeSql(connection, table_normal, {}, {});
+    await connection.execute(table_indexed);
+    await connection.execute(table_normal);
   });
 
   after('release connection', async function() {
-    await sql.executeSql(connection, drop_table_indexed, {}, {});
-    await sql.executeSql(connection, drop_table_normal, {}, {});
+    await connection.execute(drop_table_indexed);
+    await connection.execute(drop_table_normal);
     await connection.close();
   });
 
-  beforeEach(function(done) {
+  beforeEach(function() {
     insertID++;
-    done();
   });
 
   describe('143.1 FUNCTION BIND_INOUT as UROWID', function() {
@@ -115,11 +114,11 @@ describe('143. urowidFunctionBindAsString4.js', function() {
     const fun_drop = "DROP FUNCTION nodb_rowid_bind_inout_1121";
 
     before('create procedure', async function() {
-      await sql.executeSql(connection, fun_create, {}, {});
+      await connection.execute(fun_create);
     });
 
     after('drop procedure', async function() {
-      await sql.executeSql(connection, fun_drop, {}, {});
+      await connection.execute(fun_drop);
     });
 
     it('143.1.1 urowid length > 200', async function() {
@@ -150,11 +149,11 @@ describe('143. urowidFunctionBindAsString4.js', function() {
     const fun_drop = "DROP FUNCTION nodb_rowid_bind_inout_1121";
 
     before('create procedure', async function() {
-      await sql.executeSql(connection, fun_create, {}, {});
+      await connection.execute(fun_create);
     });
 
     after('drop procedure', async function() {
-      await sql.executeSql(connection, fun_drop, {}, {});
+      await connection.execute(fun_drop);
     });
 
     it('143.2.1 urowid length > 200', async function() {
@@ -187,11 +186,11 @@ describe('143. urowidFunctionBindAsString4.js', function() {
     const fun_drop = "DROP FUNCTION nodb_rowid_bind_1443";
 
     before('create procedure', async function() {
-      await sql.executeSql(connection, fun_create, {}, {});
+      await connection.execute(fun_create);
     });
 
     after('drop procedure', async function() {
-      await sql.executeSql(connection, fun_drop, {}, {});
+      await connection.execute(fun_drop);
     });
 
     it('143.3.1 update with UROWID > 200', async function() {
@@ -212,7 +211,7 @@ describe('143. urowidFunctionBindAsString4.js', function() {
     const str = random.getRandomLengthString(expectedLength);
     let urowid, urowidLen;
     const sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
-    await sql.executeInsert(connection, sql_insert, {}, {});
+    await connection.execute(sql_insert);
     let result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
     assert(result);
     urowid = result.rows[0][0];
@@ -239,7 +238,7 @@ describe('143. urowidFunctionBindAsString4.js', function() {
     let urowid_1, urowid_2, urowidLen_1, urowidLen_2, id_1, id_2;
     id_1 = insertID;
     let sql_insert = "insert into " + tableName_indexed + " values (" + id_1 + ", '" + str_1 + "')";
-    await sql.executeInsert(connection, sql_insert, {}, {});
+    await connection.execute(sql_insert);
 
     let result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + id_1);
     assert(result);
@@ -248,7 +247,7 @@ describe('143. urowidFunctionBindAsString4.js', function() {
     testsUtil.checkUrowidLength(urowidLen_1, contentLen_1);
     id_2 = insertID + 1;
     sql_insert = "insert into " + tableName_indexed + " values (" + id_2 + ", '" + str_2 + "')";
-    await sql.executeInsert(connection, sql_insert, {}, {});
+    await connection.execute(sql_insert);
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + id_2);
     assert(result);
     urowid_2 = result.rows[0][0];

@@ -30,6 +30,7 @@
  *    Long column restrictions: http://docs.oracle.com/cd/B19306_01/server.102/b14200/sql_elements001.htm#SQLRF00201
  *
  *****************************************************************************/
+
 'use strict';
 
 const oracledb = require('oracledb');
@@ -37,7 +38,6 @@ const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
 const testsUtil = require('./testsUtil.js');
-const sql      = require('./sqlClone.js');
 
 describe('130. longProcedureBind_out.js', function() {
 
@@ -53,12 +53,12 @@ describe('130. longProcedureBind_out.js', function() {
             content    LONG
         )`;
     const sqlCreateTbl = testsUtil.sqlCreateTable(tableName, sqlCreate);
-    await sql.executeSql(connection, sqlCreateTbl, {}, {});
+    await connection.execute(sqlCreateTbl);
   }); // before
 
   after(async function() {
     const sqlDropTbl = testsUtil.sqlDropTable(tableName);
-    await sql.executeSql(connection, sqlDropTbl, {}, {});
+    await connection.execute(sqlDropTbl);
     await connection.close();
   }); // after
 
@@ -77,11 +77,11 @@ describe('130. longProcedureBind_out.js', function() {
     const proc_bindout_drop = "DROP PROCEDURE " + proc_bindout_name;
 
     before(async function() {
-      await sql.executeSql(connection, proc_bindout_create, {}, {});
+      await connection.execute(proc_bindout_create);
     });
 
     after(async function() {
-      await sql.executeSql(connection, proc_bindout_drop, {}, {});
+      await connection.execute(proc_bindout_drop);
     });
 
     it('130.1.1 works with NULL', async function() {
@@ -126,11 +126,11 @@ describe('130. longProcedureBind_out.js', function() {
     const proc_bindout_drop = "DROP PROCEDURE " + proc_bindout_name;
 
     before(async function() {
-      await sql.executeSql(connection, proc_bindout_create, {}, {});
+      await connection.execute(proc_bindout_create);
     });
 
     after(async function() {
-      await sql.executeSql(connection, proc_bindout_drop, {}, {});
+      await connection.execute(proc_bindout_drop);
     });
 
     it('130.2.1 works with NULL', async function() {
@@ -177,7 +177,6 @@ describe('130. longProcedureBind_out.js', function() {
       expected = null;
     }
     assert.strictEqual(result.outBinds.c, expected);
-
   };
 
   const insert = async function(insertStr) {
@@ -187,8 +186,6 @@ describe('130. longProcedureBind_out.js', function() {
         i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
         c: { val: insertStr, type: oracledb.STRING, dir: oracledb.BIND_IN }
       });
-
-    assert(result);
     assert.strictEqual(result.rowsAffected, 1);
   };
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -41,7 +41,7 @@ describe('102. bindTimestamp.js', function() {
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
-    var sql = "alter session set nls_timestamp_format = 'YYYY-MM-DD HH24:MI:SS.FF'";
+    let sql = "alter session set nls_timestamp_format = 'YYYY-MM-DD HH24:MI:SS.FF'";
     await runSQL(sql);
     sql = "alter session set nls_timestamp_tz_format = 'YYYY-MM-DD HH24:MI:SS.FF'";
     await runSQL(sql);

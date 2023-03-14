@@ -116,14 +116,10 @@ testsUtil.dropTable = async function(tableName) {
 
 testsUtil.checkPrerequisites = async function(clientVersion = 1805000000, serverVersion = 1805000000) {
   if (testsUtil.getClientVersion() < clientVersion) return false;
-  try {
-    let connection = await oracledb.getConnection(dbConfig);
-    if (connection.oracleServerVersion < serverVersion) return false;
-    await connection.close();
-    return true;
-  } catch (err) {
-    console.log('Error in checking prerequistes:\n', err);
-  }
+  const connection = await oracledb.getConnection(dbConfig);
+  const version = connection.oracleServerVersion;
+  await connection.close();
+  return (version >= serverVersion);
 };
 
 testsUtil.isSodaRunnable = async function() {
@@ -436,13 +432,10 @@ testsUtil.assertOneOf = function(array, value) {
   assert(matches);
 };
 
-testsUtil.checkUrowidLength = async function(urowidLen, expectedLength) {
-  const connection = await oracledb.getConnection(dbConfig);
-  // The Oracle Cloud Database doesn't support UROWID and therefore a regular ROWID is returned which has a fixed size of 18 bytes.
-  const UROWID_LENGTH_LIMIT_CLOUD_DB = 18;
-
-  if (dbConfig.test.isCloudService) assert(urowidLen > UROWID_LENGTH_LIMIT_CLOUD_DB - 1);
-  else assert(urowidLen > expectedLength);
-
-  await connection.close();
+testsUtil.checkUrowidLength = function(urowidLen, expectedLength) {
+  // The Oracle Cloud Database doesn't support UROWID and therefore a regular
+  // ROWID is returned which has a fixed size of 18 bytes
+  if (dbConfig.test.isCloudService)
+    expectedLength = 18;
+  assert(urowidLen >= expectedLength);
 };

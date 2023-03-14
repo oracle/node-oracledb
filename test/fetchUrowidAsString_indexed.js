@@ -37,15 +37,14 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
-const sql      = require('./sql.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('117. fetchUrowidAsString_indexed.js', function() {
   let connection = null;
   let insertID = 1;
-  let tableName_indexed = "nodb_urowid_fsi";
-  let tableName_normal = "nodb_urowid_fsn";
-  let table_indexed = "BEGIN \n" +
+  const tableName_indexed = "nodb_urowid_fsi";
+  const tableName_normal = "nodb_urowid_fsn";
+  const table_indexed = "BEGIN \n" +
                       "    DECLARE \n" +
                       "        e_table_missing EXCEPTION; \n" +
                       "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
@@ -64,7 +63,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
                       "      '); \n" +
                       "END;  ";
 
-  let table_normal = "BEGIN \n" +
+  const table_normal = "BEGIN \n" +
                      "    DECLARE \n" +
                      "        e_table_missing EXCEPTION; \n" +
                      "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
@@ -82,8 +81,8 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
                      "      '); \n" +
                      "END;  ";
 
-  let drop_table_indexed = "DROP TABLE " + tableName_indexed + " PURGE";
-  let drop_table_normal = "DROP TABLE " + tableName_normal + " PURGE";
+  const drop_table_indexed = "DROP TABLE " + tableName_indexed + " PURGE";
+  const drop_table_normal = "DROP TABLE " + tableName_normal + " PURGE";
 
   before('get connection and create table', async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -98,33 +97,21 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
   });
 
   describe('117.1 works with fetchInfo option and urowid length > 200/500', function() {
-    let option = { fetchInfo: { "content": { type: oracledb.STRING } } };
-    let maxRowBak;
+    const option = { fetchInfo: { "content": { type: oracledb.STRING } } };
+    const maxRowBak = oracledb.maxRows;
 
     before('get connection and create table', async function() {
-
-      await sql.executeSql(connection, table_indexed, {}, {});
-
-      await sql.executeSql(connection, table_normal, {}, {});
-
+      await connection.execute(table_indexed);
+      await connection.execute(table_normal);
     });
 
     after('release connection', async function() {
-
-      await sql.executeSql(connection, drop_table_indexed, {}, {});
-
-      await sql.executeSql(connection, drop_table_normal, {}, {});
-
-    });
-
-    beforeEach(function() {
-      maxRowBak = oracledb.maxRows;
-
+      await connection.execute(drop_table_indexed);
+      await connection.execute(drop_table_normal);
     });
 
     afterEach(function() {
       oracledb.maxRows = maxRowBak;
-
     });
 
     it('117.1.1 fetchInfo', async function() {
@@ -147,7 +134,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
     });
 
     it('117.1.5 resultSet = true', async function() {
-      let option_rs = {
+      const option_rs = {
         resultSet: true,
         fetchInfo: { "content": { type: oracledb.STRING } }
       };
@@ -172,36 +159,24 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
   });
 
   describe('117.2 works with fetchInfo and outFormat = OBJECT, urowid length > 200/500', function() {
-    let option = {
+    const option = {
       outFormat: oracledb.OUT_FORMAT_OBJECT,
       fetchInfo: { "content": { type: oracledb.STRING } }
     };
-    let maxRowBak;
+    const maxRowBak = oracledb.maxRows;
 
     before('get connection and create table', async function() {
-
-      await sql.executeSql(connection, table_indexed, {}, {});
-
-      await sql.executeSql(connection, table_normal, {}, {});
-
+      await connection.execute(table_indexed);
+      await connection.execute(table_normal);
     });
 
     after('release connection', async function() {
-
-      await sql.executeSql(connection, drop_table_indexed, {}, {});
-
-      await sql.executeSql(connection, drop_table_normal, {}, {});
-
-    });
-
-    beforeEach(function() {
-      maxRowBak = oracledb.maxRows;
-
+      await connection.execute(drop_table_indexed);
+      await connection.execute(drop_table_normal);
     });
 
     afterEach(function() {
       oracledb.maxRows = maxRowBak;
-
     });
 
     it('117.2.1 fetchInfo', async function() {
@@ -224,7 +199,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
     });
 
     it('117.2.5 resultSet = true', async function() {
-      let option_rs = {
+      const option_rs = {
         outFormat: oracledb.OUT_FORMAT_OBJECT,
         resultSet: true,
         fetchInfo: { "content": { type: oracledb.STRING } }
@@ -250,36 +225,24 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
   });
 
   describe('117.3 works with fetchInfo and outFormat = ARRAY, urowid length > 200/500', function() {
-    let option = {
+    const option = {
       outFormat: oracledb.OUT_FORMAT_ARRAY,
       fetchInfo: { "content": { type: oracledb.STRING } }
     };
-    let maxRowBak;
+    const maxRowBak = oracledb.maxRows;
 
     before('get connection and create table', async function() {
-
-      await sql.executeSql(connection, table_indexed, {}, {});
-
-      await sql.executeSql(connection, table_normal, {}, {});
-
+      await connection.execute(table_indexed);
+      await connection.execute(table_normal);
     });
 
     after('release connection', async function() {
-
-      await sql.executeSql(connection, drop_table_indexed, {}, {});
-
-      await sql.executeSql(connection, drop_table_normal, {}, {});
-
-    });
-
-    beforeEach(function() {
-      maxRowBak = oracledb.maxRows;
-
+      await connection.execute(drop_table_indexed);
+      await connection.execute(drop_table_normal);
     });
 
     afterEach(function() {
       oracledb.maxRows = maxRowBak;
-
     });
 
     it('117.3.1 fetchInfo', async function() {
@@ -302,7 +265,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
     });
 
     it('117.3.5 resultSet = true', async function() {
-      let option_rs = {
+      const option_rs = {
         outFormat: oracledb.OUT_FORMAT_ARRAY,
         resultSet: true,
         fetchInfo: { "content": { type: oracledb.STRING } }
@@ -328,33 +291,21 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
   });
 
   describe('117.4 fetch as string by default, urowid length > 200/500', function() {
-    let option = {};
-    let maxRowBak;
+    const option = {};
+    const maxRowBak = oracledb.maxRows;
 
     before('get connection and create table', async function() {
-
-      await sql.executeSql(connection, table_indexed, {}, {});
-
-      await sql.executeSql(connection, table_normal, {}, {});
-
+      await connection.execute(table_indexed);
+      await connection.execute(table_normal);
     });
 
     after('release connection', async function() {
-
-      await sql.executeSql(connection, drop_table_indexed, {}, {});
-
-      await sql.executeSql(connection, drop_table_normal, {}, {});
-
-    });
-
-    beforeEach(function() {
-      maxRowBak = oracledb.maxRows;
-
+      await connection.execute(drop_table_indexed);
+      await connection.execute(drop_table_normal);
     });
 
     afterEach(function() {
       oracledb.maxRows = maxRowBak;
-
     });
 
     it('117.4.1 fetchInfo', async function() {
@@ -377,7 +328,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
     });
 
     it('117.4.5 resultSet = true', async function() {
-      let option_rs = {
+      const option_rs = {
         resultSet: true,
       };
       await test1(option_rs, false, true);
@@ -401,33 +352,21 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
   });
 
   describe('117.5 fetch as string by default with outFormat = OBJECT, urowid length > 200/500', function() {
-    let option = { outFormat: oracledb.OUT_FORMAT_OBJECT };
-    let maxRowBak;
+    const option = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+    const maxRowBak = oracledb.maxRows;
 
     before('get connection and create table', async function() {
-
-      await sql.executeSql(connection, table_indexed, {}, {});
-
-      await sql.executeSql(connection, table_normal, {}, {});
-
+      await connection.execute(table_indexed);
+      await connection.execute(table_normal);
     });
 
     after('release connection', async function() {
-
-      await sql.executeSql(connection, drop_table_indexed, {}, {});
-
-      await sql.executeSql(connection, drop_table_normal, {}, {});
-
-    });
-
-    beforeEach(function() {
-      maxRowBak = oracledb.maxRows;
-
+      await connection.execute(drop_table_indexed);
+      await connection.execute(drop_table_normal);
     });
 
     afterEach(function() {
       oracledb.maxRows = maxRowBak;
-
     });
 
     it('117.5.1 fetchInfo', async function() {
@@ -450,7 +389,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
     });
 
     it('117.5.5 resultSet = true', async function() {
-      let option_rs = {
+      const option_rs = {
         resultSet: true,
         outFormat: oracledb.OUT_FORMAT_OBJECT
       };
@@ -475,33 +414,21 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
   });
 
   describe('117.6 fetch as string by default with outFormat = ARRAY, urowid length > 200/500', function() {
-    let option = { outFormat: oracledb.OUT_FORMAT_ARRAY  };
-    let maxRowBak;
+    const option = { outFormat: oracledb.OUT_FORMAT_ARRAY  };
+    const maxRowBak = oracledb.maxRows;
 
     before('get connection and create table', async function() {
-
-      await sql.executeSql(connection, table_indexed, {}, {});
-
-      await sql.executeSql(connection, table_normal, {}, {});
-
+      await connection.execute(table_indexed);
+      await connection.execute(table_normal);
     });
 
     after('release connection', async function() {
-
-      await sql.executeSql(connection, drop_table_indexed, {}, {});
-
-      await sql.executeSql(connection, drop_table_normal, {}, {});
-
-    });
-
-    beforeEach(function() {
-      maxRowBak = oracledb.maxRows;
-
+      await connection.execute(drop_table_indexed);
+      await connection.execute(drop_table_normal);
     });
 
     afterEach(function() {
       oracledb.maxRows = maxRowBak;
-
     });
 
     it('117.6.1 fetchInfo', async function() {
@@ -524,7 +451,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
     });
 
     it('117.6.5 resultSet = true', async function() {
-      let option_rs = {
+      const option_rs = {
         resultSet: true,
         outFormat: oracledb.OUT_FORMAT_ARRAY
       };
@@ -549,7 +476,6 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
   });
 
   async function test1(option, object, rsFlag) {
-
     let strLength = 200;
     let rowidLenExpected = 200;
     let id = insertID++;
@@ -565,20 +491,14 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
   }
 
   async function fetchRowid(id, strLength, rowidLenExpected, option, object) {
-    let urowid_1, urowid_2;
-
     await prepareData(id, strLength, rowidLenExpected);
-
     let sqlQuery = "select ROWID from " + tableName_indexed + " where c1 = " + id;
     let result = await connection.execute(sqlQuery);
-    urowid_1 = result.rows[0][0];
+    const urowid_1 = result.rows[0][0];
     assert.strictEqual(typeof urowid_1, "string");
     sqlQuery = "select content from " + tableName_normal + " where id = " + id;
-    result = await connection.execute(
-      sqlQuery,
-      [],
-      option);
-    urowid_2 = result.rows[0][0];
+    result = await connection.execute(sqlQuery, [], option);
+    let urowid_2 = result.rows[0][0];
     if (object === true) {
       urowid_2 = result.rows[0].CONTENT;
     }
@@ -590,23 +510,18 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
   }
 
   async function fetchRowid_rs(id, strLength, rowidLenExpected, option, object) {
-    let urowid_1, urowid_2;
-
     await prepareData(id, strLength, rowidLenExpected);
 
     let sqlQuery = "select ROWID from " + tableName_indexed + " where c1 = " + id;
     let result = await connection.execute(
       sqlQuery);
-    urowid_1 = result.rows[0][0];
+    const urowid_1 = result.rows[0][0];
     assert.strictEqual(typeof urowid_1, "string");
 
     sqlQuery = "select content from " + tableName_normal + " where id = " + id;
-    result = await connection.execute(
-      sqlQuery,
-      [],
-      option);
-    let row = await result.resultSet.getRow();
-    urowid_2 = row[0];
+    result = await connection.execute(sqlQuery, [], option);
+    const row = await result.resultSet.getRow();
+    let urowid_2 = row[0];
     if (object === true) {
       urowid_2 = row.CONTENT;
     }
@@ -618,9 +533,9 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
   }
 
   async function testMaxRow(option, rsFlag) {
-    let id_1 = insertID++;
-    let id_2 = insertID++;
-    let rowExpected, rowid_1, rowid_2, sqlQuery;
+    const id_1 = insertID++;
+    const id_2 = insertID++;
+    let rowid_2;
 
     let strLength = 200;
     let rowidLenExpected = 200;
@@ -633,17 +548,17 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
     let result = await connection.execute(
       "select * from " + tableName_normal + " where id = " + id_1 + " or id = " + id_2);
 
-    rowExpected = (oracledb.maxRows >= 2) ? 2 : oracledb.maxRows;
+    let rowExpected = (oracledb.maxRows >= 2) ? 2 : oracledb.maxRows;
     if (rsFlag === true) {
       rowExpected = 2;
     }
     assert.strictEqual(result.rows.length, rowExpected);
-    rowid_1 = result.rows[0][1];
+    const rowid_1 = result.rows[0][1];
     if (rowExpected === 2) {
       rowid_2 = result.rows[1][1];
     }
 
-    sqlQuery = "select ROWID from " + tableName_indexed + " where c1 = " + id_1;
+    let sqlQuery = "select ROWID from " + tableName_indexed + " where c1 = " + id_1;
     result = await connection.execute(sqlQuery);
     let resultVal = result.rows[0][0];
     assert.strictEqual(typeof resultVal, "string");
@@ -672,37 +587,29 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
     await prepareData(id_2, strLength, rowidLenExpected);
 
     let sqlQuery = "select content from " + tableName_normal + " where id = " + id_1 + " or id = " + id_2;
-    let stream = await connection.queryStream(
-      sqlQuery,
-      [],
-      option
-    );
+    const stream = await connection.queryStream(sqlQuery, [], option);
 
     let result = [];
     await new Promise((resolve, reject) => {
+      stream.on('error', reject);
+      stream.on('close', resolve);
       stream.on('data', function(data) {
         assert(data);
         result.push(data);
       });
-
-      stream.on('error', function(error) {
-        reject(error);
-      });
       stream.on('end',  function() {
         assert.strictEqual(result.length, 2);
-        rowid_1 = result[0][0];
-        rowid_2 = result[1][0];
         if (object === true) {
           rowid_1 = result[0].CONTENT;
           rowid_2 = result[1].CONTENT;
+        } else {
+          rowid_1 = result[0][0];
+          rowid_2 = result[1][0];
         }
         stream.destroy();
       });
-
-      stream.on('close',  function() {
-        resolve();
-      });
     });
+
     sqlQuery = "select ROWID from " + tableName_indexed + " where c1 = " + id_1;
     result = await connection.execute(
       sqlQuery);
@@ -719,17 +626,16 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
   }
 
   async function prepareData(id, strLength, rowidLenExpected) {
-    let str = random.getRandomLengthString(strLength);
-    let urowid, urowidLen;
+    const str = random.getRandomLengthString(strLength);
 
-    let sql_insert = "insert into " + tableName_indexed + " values (" + id + ", '" + str + "')";
-    await sql.executeInsert(connection, sql_insert, {}, {});
+    const sql_insert = "insert into " + tableName_indexed + " values (" + id + ", '" + str + "')";
+    await connection.execute(sql_insert);
 
     let result = await connection.execute(
       "select ROWID from " + tableName_indexed + " where c1 = " + id);
 
-    urowid = result.rows[0][0];
-    urowidLen = urowid.length;
+    const urowid = result.rows[0][0];
+    const urowidLen = urowid.length;
     testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
 
     result = await connection.execute(

@@ -30,178 +30,158 @@
  *    https://docs.oracle.com/cloud/latest/db121/LNPLS/datatypes.htm#LNPLS346
  *
  *****************************************************************************/
+
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
-const async    = require('async');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
-const sql      = require('./sql.js');
 const testsUtil = require('./testsUtil.js');
 const assist   = require('./dataTypeAssist.js');
 
 describe('132. longrawProcedureBind_in.js', function() {
 
-  var connection = null;
+  let connection = null;
   const tableName = "nodb_longraw_132";
-  var insertID = 0;
+  let insertID = 0;
 
-  before(function(done) {
+  before(async function() {
     const sqlCreate =  `
         CREATE TABLE ${tableName} (
             id         NUMBER,
             content    LONG RAW
         )`;
-    const sqlCreateTbl = testsUtil.sqlCreateTable(tableName, sqlCreate);
-    async.series([
-      function(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
-      },
-      function(cb) {
-        sql.executeSql(connection, sqlCreateTbl, {}, {}, cb);
-      }
-    ], done);
+    const sqlCreateTbl = await testsUtil.sqlCreateTable(tableName, sqlCreate);
+
+    connection = await oracledb.getConnection(dbConfig);
+    await connection.execute(sqlCreateTbl);
   }); // before
 
-  after(function(done) {
-    const sqlDropTbl = testsUtil.sqlDropTable(tableName);
-    async.series([
-      function(cb) {
-        sql.executeSql(connection, sqlDropTbl, {}, {}, cb);
-      },
-      function(cb) {
-        connection.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+  after(async function() {
+    const sqlDropTbl = await testsUtil.sqlDropTable(tableName);
+    await connection.execute(sqlDropTbl);
+    await connection.close();
   }); // after
 
-  beforeEach(function(done) {
+  beforeEach(function() {
     insertID++;
-    done();
   });
 
   describe('132.1 PLSQL PROCEDURE BIND IN AS LONG RAW', function() {
-    var proc_bindin_name = "nodb_longraw_bindin_proc_1";
-    var proc_bindin_create = "CREATE OR REPLACE PROCEDURE " + proc_bindin_name + " (NUM IN NUMBER, C IN LONG RAW) \n" +
+    const proc_bindin_name = "nodb_longraw_bindin_proc_1";
+    const proc_bindin_create = "CREATE OR REPLACE PROCEDURE " + proc_bindin_name + " (NUM IN NUMBER, C IN LONG RAW) \n" +
                              "AS \n" +
                              "BEGIN \n" +
                              "    insert into " + tableName + " values (NUM, C); \n" +
                              "END " + proc_bindin_name + ";";
-    var proc_bindin_exec = "BEGIN " + proc_bindin_name + " (:i, :c); END;";
-    var proc_bindin_drop = "DROP PROCEDURE " + proc_bindin_name;
+    const proc_bindin_exec = "BEGIN " + proc_bindin_name + " (:i, :c); END;";
+    const proc_bindin_drop = "DROP PROCEDURE " + proc_bindin_name;
 
-    before(function(done) {
-      sql.executeSql(connection, proc_bindin_create, {}, {}, done);
+    before(async function() {
+      await connection.execute(proc_bindin_create);
     });
 
-    after(function(done) {
-      sql.executeSql(connection, proc_bindin_drop, {}, {}, done);
+    after(async function() {
+      await connection.execute(proc_bindin_drop);
     });
 
-    it('132.1.1 works with NULL', function(done) {
-      var insertedStr = null;
-      longraw_bindin(insertedStr, proc_bindin_exec, done);
+    it('132.1.1 works with NULL', async function() {
+      const insertedStr = null;
+      await longraw_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('132.1.2 works with undefined', function(done) {
-      var insertedStr = undefined;
-      longraw_bindin(insertedStr, proc_bindin_exec, done);
+    it('132.1.2 works with undefined', async function() {
+      const insertedStr = undefined;
+      await longraw_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('132.1.3 works with empty buffer', function(done) {
-      var insertedBuf = Buffer.from("");
-      longraw_bindin(insertedBuf, proc_bindin_exec, done);
+    it('132.1.3 works with empty buffer', async function() {
+      const insertedBuf = Buffer.from("");
+      await longraw_bindin(insertedBuf, proc_bindin_exec);
     });
 
-    it('132.1.4 works with data size 2000', function(done) {
-      var insertedStr = random.getRandomLengthString(2000);
-      longraw_bindin(insertedStr, proc_bindin_exec, done);
+    it('132.1.4 works with data size 2000', async function() {
+      const insertedStr = random.getRandomLengthString(2000);
+      await longraw_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('132.1.5 works with data size (32K - 1)', function(done) {
-      var insertedStr = random.getRandomLengthString(32767);
-      longraw_bindin(insertedStr, proc_bindin_exec, done);
+    it('132.1.5 works with data size (32K - 1)', async function() {
+      const insertedStr = random.getRandomLengthString(32767);
+      await longraw_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('132.1.6 set maxSize to size (32K - 1)', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      longraw_bindin_maxSize(insertedStr, proc_bindin_exec, 32767, done);
+    it('132.1.6 set maxSize to size (32K - 1)', async function() {
+      const insertedStr = random.getRandomLengthString(100);
+      await longraw_bindin_maxSize(insertedStr, proc_bindin_exec, 32767);
     });
 
-    it('132.1.7 set maxSize to size 1GB', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      var maxsize = 1 * 1024 * 1024 * 1024;
-      longraw_bindin_maxSize(insertedStr, proc_bindin_exec, maxsize, done);
+    it('132.1.7 set maxSize to size 1GB', async function() {
+      const insertedStr = random.getRandomLengthString(100);
+      const maxsize = 1 * 1024 * 1024 * 1024;
+      await longraw_bindin_maxSize(insertedStr, proc_bindin_exec, maxsize);
     });
 
   }); // 132.1
 
   describe('132.2 PLSQL PROCEDURE BIND IN AS RAW', function() {
-    var proc_bindin_name = "nodb_longraw_bindin_proc_2";
-    var proc_bindin_create = "CREATE OR REPLACE PROCEDURE " + proc_bindin_name + " (NUM IN NUMBER, C IN RAW) \n" +
+    const proc_bindin_name = "nodb_longraw_bindin_proc_2";
+    const proc_bindin_create = "CREATE OR REPLACE PROCEDURE " + proc_bindin_name + " (NUM IN NUMBER, C IN RAW) \n" +
                              "AS \n" +
                              "BEGIN \n" +
                              "    insert into " + tableName + " values (NUM, C); \n" +
                              "END " + proc_bindin_name + ";";
-    var proc_bindin_exec = "BEGIN " + proc_bindin_name + " (:i, :c); END;";
-    var proc_bindin_drop = "DROP PROCEDURE " + proc_bindin_name;
+    const proc_bindin_exec = "BEGIN " + proc_bindin_name + " (:i, :c); END;";
+    const proc_bindin_drop = "DROP PROCEDURE " + proc_bindin_name;
 
-    before(function(done) {
-      sql.executeSql(connection, proc_bindin_create, {}, {}, done);
+    before(async function() {
+      await connection.execute(proc_bindin_create);
     });
 
-    after(function(done) {
-      sql.executeSql(connection, proc_bindin_drop, {}, {}, done);
+    after(async function() {
+      await connection.execute(proc_bindin_drop);
     });
 
-    it('132.2.1 works with NULL', function(done) {
-      var insertedStr = null;
-      longraw_bindin(insertedStr, proc_bindin_exec, done);
+    it('132.2.1 works with NULL', async function() {
+      const insertedStr = null;
+      await longraw_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('132.2.2 works with undefined', function(done) {
-      var insertedStr = undefined;
-      longraw_bindin(insertedStr, proc_bindin_exec, done);
+    it('132.2.2 works with undefined', async function() {
+      const insertedStr = undefined;
+      await longraw_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('132.2.3 works with empty buffer', function(done) {
-      var insertedStr = Buffer.from("");
-      longraw_bindin(insertedStr, proc_bindin_exec, done);
+    it('132.2.3 works with empty buffer', async function() {
+      const insertedStr = Buffer.from("");
+      await longraw_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('132.2.4 works with data size 2000', function(done) {
-      var insertedStr = random.getRandomLengthString(2000);
-      longraw_bindin(insertedStr, proc_bindin_exec, done);
+    it('132.2.4 works with data size 2000', async function() {
+      const insertedStr = random.getRandomLengthString(2000);
+      await longraw_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('132.2.5 works with data size 32767', function(done) {
-      var insertedStr = random.getRandomLengthString(32767);
-      longraw_bindin(insertedStr, proc_bindin_exec, done);
+    it('132.2.5 works with data size 32767', async function() {
+      const insertedStr = random.getRandomLengthString(32767);
+      await longraw_bindin(insertedStr, proc_bindin_exec);
     });
 
-    it('132.2.6 set maxSize to size (32K - 1)', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      longraw_bindin_maxSize(insertedStr, proc_bindin_exec, 32767, done);
+    it('132.2.6 set maxSize to size (32K - 1)', async function() {
+      const insertedStr = random.getRandomLengthString(100);
+      await longraw_bindin_maxSize(insertedStr, proc_bindin_exec, 32767);
     });
 
-    it('132.2.7 set maxSize to size 1GB', function(done) {
-      var insertedStr = random.getRandomLengthString(100);
-      var maxsize = 1 * 1024 * 1024 * 1024;
-      longraw_bindin_maxSize(insertedStr, proc_bindin_exec, maxsize, done);
+    it('132.2.7 set maxSize to size 1GB', async function() {
+      const insertedStr = random.getRandomLengthString(100);
+      const maxsize = 1 * 1024 * 1024 * 1024;
+      await longraw_bindin_maxSize(insertedStr, proc_bindin_exec, maxsize);
     });
 
   }); // 132.2
 
-  var longraw_bindin = function(insertContent, proc_bindin_exec, callback) {
-    var insertBuf, expectedBuf;
+  const longraw_bindin = async function(insertContent, proc_bindin_exec) {
+    let insertBuf, expectedBuf;
     if (insertContent == null || insertContent == undefined || insertContent.length == 0) {
       insertBuf = insertContent;
       expectedBuf = null;
@@ -209,29 +189,19 @@ describe('132. longrawProcedureBind_in.js', function() {
       insertBuf = Buffer.from(insertContent);
       expectedBuf = insertBuf;
     }
-    async.series([
-      function(cb) {
-        var bind_in_var  = {
-          i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
-          c: { val: insertBuf, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
-        };
-        connection.execute(
-          proc_bindin_exec,
-          bind_in_var,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        checkResult(expectedBuf, cb);
-      }
-    ], callback);
+
+    const bind_in_var  = {
+      i: { val: insertID, dir: await oracledb.BIND_IN, type: await oracledb.NUMBER },
+      c: { val: insertBuf, dir: await oracledb.BIND_IN, type: await oracledb.BUFFER }
+    };
+    await connection.execute(
+      proc_bindin_exec,
+      bind_in_var);
+    await checkResult(expectedBuf);
   };
 
-  var longraw_bindin_maxSize = function(insertContent, proc_bindin_exec, maxsize, callback) {
-    var insertBuf, expectedBuf;
+  const longraw_bindin_maxSize = async function(insertContent, proc_bindin_exec, maxsize) {
+    let insertBuf, expectedBuf;
     if (insertContent == null || insertContent == undefined) {
       insertBuf = insertContent;
       expectedBuf = null;
@@ -239,42 +209,27 @@ describe('132. longrawProcedureBind_in.js', function() {
       insertBuf = Buffer.from(insertContent);
       expectedBuf = insertBuf;
     }
-    async.series([
-      function(cb) {
-        var bind_in_var  = {
-          i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
-          c: { val: insertBuf, dir: oracledb.BIND_IN, type: oracledb.BUFFER, maxSize: maxsize }
-        };
-        connection.execute(
-          proc_bindin_exec,
-          bind_in_var,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        checkResult(expectedBuf, cb);
-      }
-    ], callback);
+
+    const bind_in_var = {
+      i: { val: insertID, dir: await oracledb.BIND_IN, type: await oracledb.NUMBER },
+      c: { val: insertBuf, dir: await oracledb.BIND_IN, type: await oracledb.BUFFER, maxSize: maxsize }
+    };
+    await connection.execute(
+      proc_bindin_exec,
+      bind_in_var);
+    await checkResult(expectedBuf);
   };
 
-  var checkResult = function(expected, callback) {
-    connection.execute(
-      "select * from " + tableName + " where id = " + insertID,
-      function(err, result) {
-        should.not.exist(err);
-        should.strictEqual(result.rows[0][0], insertID);
-        if (expected == null) {
-          should.strictEqual(result.rows[0][1], expected);
-        } else {
-          assist.compare2Buffers(result.rows[0][1], expected);
-        }
-        callback();
-      }
-    );
-  };
+  const checkResult = async function(expected) {
+    const result = await connection.execute(
+      "select * from " + tableName + " where id = " + insertID);
 
+    assert.strictEqual(result.rows[0][0], insertID);
+    if (expected == null) {
+      assert.strictEqual(result.rows[0][1], expected);
+    } else {
+      assist.compare2Buffers(result.rows[0][1], expected);
+    }
+  };
 
 });

@@ -74,7 +74,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
   let insertIntoBlobTable1 = async function(id, content) {
     let result = null;
-    if (content == "EMPTY_BLOB") {
+    if (content === "EMPTY_BLOB") {
       result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, EMPTY_BLOB())",
         [ id ]);
@@ -92,7 +92,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
   let updateBlobTable1 = async function(id, content) {
     let result = null;
-    if (content == "EMPTY_BLOB") {
+    if (content === "EMPTY_BLOB") {
       result = await connection.execute(
         "UPDATE nodb_dml_blob_1 set blob = EMPTY_BLOB() where id = :ID",
         { ID: id });

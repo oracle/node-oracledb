@@ -79,7 +79,7 @@ describe('32. dataTypeDate.js', function() {
     });
 
     it('32.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
-      await await assist.verifyRefCursorWithFetchInfo(connection, tableName, dates);
+      await assist.verifyRefCursorWithFetchInfo(connection, tableName, dates);
     });
 
     it('32.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', async function() {

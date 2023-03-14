@@ -29,18 +29,17 @@
  *   Testing CLOB DML returning multiple rows as stream.
  *
  *****************************************************************************/
+
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
-const async    = require('async');
 const dbConfig = require('./dbconfig.js');
-const sql      = require('./sql.js');
+const assert = require('assert');
 
 describe('135. clobDMLReturningMultipleRowsAsStream.js', function() {
 
   let connection = null;
-  let tableName = "nodb_dml_clob_135";
+  const tableName = "nodb_dml_clob_135";
 
   const clob_table_create = "BEGIN \n" +
                           "    DECLARE \n" +
@@ -67,83 +66,50 @@ describe('135. clobDMLReturningMultipleRowsAsStream.js', function() {
                           "END; ";
   const clob_table_drop = "DROP TABLE " + tableName + " PURGE";
 
-  before(function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after(function(done) {
-    connection.close(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after(async function() {
+    await connection.close();
   });
 
   describe('135.1 CLOB DML returning multiple rows as stream', function() {
-    before(function(done) {
-      sql.executeSql(connection, clob_table_create, {}, {}, done);
+    before(async function() {
+      await connection.execute(clob_table_create);
     });
-    after(function(done) {
-      sql.executeSql(connection, clob_table_drop, {}, {}, done);
+    after(async function() {
+      await connection.execute(clob_table_drop);
     });
 
-    it('135.1.1 CLOB DML returning multiple rows as stream', function(done) {
-      updateReturning_stream(done);
+    it('135.1.1 CLOB DML returning multiple rows as stream', async function() {
+      await updateReturning_stream();
     });
 
   });
 
-  var updateReturning_stream = function(callback) {
-    var sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, clob into :num, :lobou";
-    connection.execute(
+  const updateReturning_stream = async function() {
+    const sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, clob into :num, :lobou";
+    const result = await connection.execute(
       sql_update,
       {
         num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
         lobou: { type: oracledb.CLOB, dir: oracledb.BIND_OUT }
-      },
-      function(err, result) {
-        should.not.exist(err);
-        var numLobs = result.outBinds.lobou.length;
-        should.strictEqual(numLobs, 10);
-        async.times(
-          numLobs,
-          function(n, next) {
-            verifyLob(n, result, function(err, result) {
-              next(err, result);
-            });
-          },
-          callback
-        );
       }
     );
+    const numLobs = result.outBinds.lobou.length;
+    assert.strictEqual(numLobs, 10);
+    for (let n = 0; n < numLobs; n++) {
+      await verifyLob(n, result);
+    }
   };
 
-  var verifyLob = function(n, result, cb) {
-    var lob = result.outBinds.lobou[n];
-    var id = result.outBinds.num[n];
-    should.exist(lob);
-    lob.setEncoding('utf8');
-    var clobData = '';
-
-    lob.on('data', function(chunk) {
-      clobData += chunk;
-    });
-
-    lob.on('error', function(err) {
-      should.not.exist(err);
-    });
-
-    lob.on('end', function(err) {
-      should.not.exist(err);
-      should.strictEqual(clobData, (id - 10).toString());
-    });
-    lob.on('close', function(err) {
-      should.not.exist(err);
-      cb(err, result);
-    });
+  const verifyLob = async function(n, result) {
+    const lob = result.outBinds.lobou[n];
+    const id = result.outBinds.num[n];
+    const clobData = await lob.getData();
+    assert.strictEqual(clobData, (id - 10).toString());
+    await lob.close();
   };
 
 });

@@ -31,11 +31,12 @@
  *    This could be very useful for smaller CLOB size as it can be fetched as string and processed in memory itself.
  *
  *****************************************************************************/
+
 'use strict';
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const file     = require('./file.js');
+const fs       = require('fs');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
 
@@ -67,13 +68,13 @@ describe('84. fetchClobAsString1.js', function() {
   before('get one connection', async function() {
     oracledb.stmtCacheSize = 0;
     connection = await oracledb.getConnection(dbConfig);
-    file.create(inFileName);
+    await fs.promises.writeFile(inFileName, '');
   }); // before
 
   after('release connection', async function() {
     oracledb.stmtCacheSize = defaultStmtCache;
     await connection.close();
-    file.delete(inFileName);
+    await fs.promises.unlink(inFileName);
   });  // after
 
   const insertIntoClobTable1 = async function(id, content) {
@@ -1561,4 +1562,5 @@ describe('84. fetchClobAsString1.js', function() {
     }); // 84.5.16
 
   }); // 84.5
+
 });

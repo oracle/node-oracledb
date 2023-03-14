@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -51,7 +51,6 @@ describe('222. callTimeout.js', function() {
     isRunnable = isQA && prep;
     if (!isRunnable) {
       this.skip();
-      return;
     } else {
       conn = await oracledb.getConnection(dbConfig);
     }

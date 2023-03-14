@@ -36,7 +36,6 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const sql      = require('./sqlClone.js');
 const random   = require('./random.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -88,13 +87,13 @@ describe('115. urowidDMLBindAsString2.js', function() {
 
   before('get connection and create table', async function() {
     connection = await oracledb.getConnection(dbConfig);
-    await sql.executeSql(connection, table_indexed, {}, {});
-    await sql.executeSql(connection, table_normal, {}, {});
+    await connection.execute(table_indexed);
+    await connection.execute(table_normal);
   });
 
   after('release connection', async function() {
-    await sql.executeSql(connection, drop_table_indexed, {}, {});
-    await sql.executeSql(connection, drop_table_normal, {}, {});
+    await connection.execute(drop_table_indexed);
+    await connection.execute(drop_table_normal);
     await connection.close();
   });
 
@@ -208,11 +207,11 @@ describe('115. urowidDMLBindAsString2.js', function() {
     let urowid, urowidLen;
     let result;
     const sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
-    await sql.executeInsert(connection, sql_insert, {}, {});
+    await connection.execute(sql_insert);
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
     urowid = result.rows[0][0];
     urowidLen = urowid.length;
-    testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
+    await testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
     const bindVar = {
       i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
       c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING }
@@ -261,11 +260,11 @@ describe('115. urowidDMLBindAsString2.js', function() {
     let urowid, urowidLen;
     let result;
     const sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
-    await sql.executeInsert(connection, sql_insert, {}, {});
+    await connection.execute(sql_insert);
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
     urowid = result.rows[0][0];
     urowidLen = urowid.length;
-    testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
+    await testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
     const bindVar = {
       i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
       c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING, maxSize: 100 }
@@ -318,23 +317,23 @@ describe('115. urowidDMLBindAsString2.js', function() {
       i: { val : id_1, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
       c: { val : rowid_org, dir : oracledb.BIND_IN, type : oracledb.STRING }
     };
-    await sql.executeInsert(connection, sql_insert, bindVar, {});
+    await connection.execute(sql_insert, bindVar);
 
     sql_insert = "insert into " + tableName_normal + " (ID, content) values (:i, :c)";
     bindVar = {
       i: { val : id_2, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
       c: { val : rowid_org, dir : oracledb.BIND_IN, type : oracledb.STRING }
     };
-    await sql.executeInsert(connection, sql_insert, bindVar, {});
+    await connection.execute(sql_insert, bindVar);
 
     sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
-    await sql.executeInsert(connection, sql_insert, {}, {});
+    await connection.execute(sql_insert);
 
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
 
     urowid = result.rows[0][0];
     urowidLen = urowid.length;
-    testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
+    await testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
 
     bindVar = {
       c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING },
@@ -348,7 +347,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
       }
     }
     if (urowidLen <= 4000) {
-      assert(result.rowsAffected, 1);
+      assert.strictEqual(result.rowsAffected, 1);
     }
 
     result = await connection.execute("select * from " + tableName_normal + " where ID = " + id_1);
@@ -385,17 +384,17 @@ describe('115. urowidDMLBindAsString2.js', function() {
       i: { val : id_1, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
       c: { val : rowid_org, dir : oracledb.BIND_IN, type : oracledb.STRING }
     };
-    await sql.executeInsert(connection, sql_insert, bindVar, {});
+    await connection.execute(sql_insert, bindVar);
 
     sql_insert = "insert into " + tableName_normal + " (ID, content) values (:i, :c)";
     bindVar = {
       i: { val : id_2, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
       c: { val : rowid_org, dir : oracledb.BIND_IN, type : oracledb.STRING }
     };
-    await sql.executeInsert(connection, sql_insert, bindVar, {});
+    await connection.execute(sql_insert, bindVar);
 
     sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
-    await sql.executeInsert(connection, sql_insert, {}, {});
+    await connection.execute(sql_insert);
 
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
     assert(result);
@@ -434,7 +433,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
     let urowid, urowidLen;
     let sql_insert, result, bindVar;
     sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
-    await sql.executeInsert(connection, sql_insert, {}, {});
+    await connection.execute(sql_insert);
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
     assert(result);
 
@@ -472,7 +471,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
     let sql_insert, result, bindVar;
 
     sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
-    await sql.executeInsert(connection, sql_insert, {}, {});
+    await connection.execute(sql_insert);
 
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
     assert(result);
@@ -508,10 +507,10 @@ describe('115. urowidDMLBindAsString2.js', function() {
     oracledb.maxRows = maxRows;
     let sql_insert, result;
     sql_insert = "insert into " + tableName_indexed + " values (" + id_1 + ", '" + str + "')";
-    await sql.executeInsert(connection, sql_insert, {}, {});
+    await connection.execute(sql_insert);
 
     sql_insert = "insert into " + tableName_indexed + " values (" + id_2 + ", '" + str + "')";
-    await sql.executeInsert(connection, sql_insert, {}, {});
+    await connection.execute(sql_insert);
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + id_1);
     urowid_1 = result.rows[0][0];
     urowidLen_1 = urowid_1.length;
@@ -561,3 +560,4 @@ describe('115. urowidDMLBindAsString2.js', function() {
   };
 
 });
+
