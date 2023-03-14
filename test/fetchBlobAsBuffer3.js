@@ -33,8 +33,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const async    = require('async');
-const should   = require('should');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
 const assist   = require('./dataTypeAssist.js');
@@ -42,9 +41,9 @@ const assist   = require('./dataTypeAssist.js');
 describe('89. fetchBlobAsBuffer3.js', function() {
 
   let connection = null;
-  var insertID = 1; // assume id for insert into db starts from 1
+  let insertID = 1; // assume id for insert into db starts from 1
 
-  var proc_create_table2 = "BEGIN \n" +
+  const proc_create_table2 = "BEGIN \n" +
                            "    DECLARE \n" +
                            "        e_table_missing EXCEPTION; \n" +
                            "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -62,181 +61,96 @@ describe('89. fetchBlobAsBuffer3.js', function() {
                            "        ) \n" +
                            "    '); \n" +
                            "END; ";
-  var drop_table2 = "DROP TABLE nodb_blob2 PURGE";
-  var defaultStmtCache = oracledb.stmtCacheSize;
+  const drop_table2 = "DROP TABLE nodb_blob2 PURGE";
+  const defaultStmtCache = oracledb.stmtCacheSize;
 
-  before('get one connection', function(done) {
+  before('get one connection', async function() {
     oracledb.stmtCacheSize = 0;
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
-
+    connection = await oracledb.getConnection(dbConfig);
   }); // before
 
-  after('release connection', function(done) {
+  after('release connection', async function() {
     oracledb.stmtCacheSize = defaultStmtCache;
-    connection.close(function(err) {
-      should.not.exist(err);
-      done();
-    });
+    await connection.close();
   });  // after
 
-  var insertIntoBlobTable2 = function(id, content1, content2, callback) {
-    connection.execute(
+  const insertIntoBlobTable2 = async function(id, content1, content2) {
+    let result = await connection.execute(
       "INSERT INTO nodb_blob2 VALUES (:ID, :B1, :B2)",
-      [ id, content1, content2 ],
-      function(err, result) {
-        should.not.exist(err);
-        should.strictEqual(result.rowsAffected, 1);
-        callback();
-      }
+      [ id, content1, content2 ]
     );
-  };
-
-  // compare fetch result
-  var compareClientFetchResult = function(err, resultVal, specialStr, content, contentLength) {
-    should.not.exist(err);
-    compareBuffers(resultVal, specialStr, content, contentLength);
-  };
-
-  // compare two buffers
-  var compareBuffers = function(resultVal, specialStr, content, contentLength) {
-    should.equal(resultVal.length, contentLength);
-    var compareBuffer = assist.compare2Buffers(resultVal, content);
-    should.strictEqual(compareBuffer, true);
+    assert.strictEqual(result.rowsAffected, 1);
   };
 
   describe('89.1 fetch multiple BLOBs', function() {
 
-    before('create Table and populate', function(done) {
-      connection.execute(
-        proc_create_table2,
-        function(err) {
-          should.not.exist(err);
-          done() ;
-        }
-      );
+    before('create Table and populate', async function() {
+      await connection.execute(proc_create_table2);
     });  // before
 
-    after('drop table', function(done) {
-      connection.execute(
-        drop_table2,
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after('drop table', async function() {
+      await connection.execute(drop_table2);
     }); // after
 
-    beforeEach('set oracledb.fetchAsBuffer', function(done) {
+    beforeEach('set oracledb.fetchAsBuffer', function() {
       oracledb.fetchAsBuffer = [ oracledb.BLOB ];
-      done();
     }); // beforeEach
 
-    afterEach('clear the By type specification', function(done) {
+    afterEach('clear the By type specification', function() {
       oracledb.fetchAsBuffer = [];
-      done();
     }); // afterEach
 
-    it('89.1.1 fetch multiple BLOB columns as Buffer', function(done) {
-      var id = insertID++;
-      var specialStr_1 = '89.1.1_1';
-      var contentLength_1 = 26;
-      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = Buffer.from(strBuf_1, "utf-8");
-      var specialStr_2 = '89.1.1_2';
-      var contentLength_2 = 100;
-      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = Buffer.from(strBuf_2, "utf-8");
+    it('89.1.1 fetch multiple BLOB columns as Buffer', async function() {
+      const id = insertID++;
+      const specialStr_1 = '89.1.1_1';
+      const contentLength_1 = 26;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const specialStr_2 = '89.1.1_2';
+      const contentLength_2 = 100;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
 
-      async.series([
-        function(cb) {
-          insertIntoBlobTable2(id, content_1, content_2, cb);
-        },
-        function(cb) {
-          connection.execute(
-            "SELECT ID, B1, B2 from nodb_blob2",
-            function(err, result) {
-              should.not.exist(err);
-              var resultVal = result.rows[0][1];
-              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
-              resultVal = result.rows[0][2];
-              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
-              cb();
-            }
-          );
-        }
-      ], done);
-
+      await insertIntoBlobTable2(id, content_1, content_2);
+      const result = await connection.execute(
+        "SELECT ID, B1, B2 from nodb_blob2"
+      );
+      assert.deepStrictEqual(result.rows[0][1], content_1);
+      assert.deepStrictEqual(result.rows[0][2], content_2);
     }); // 89.1.1
 
-    it('89.1.2 fetch two BLOB columns, one as string, another streamed', function(done) {
-      var id = insertID++;
-      var specialStr_1 = '89.1.2_1';
-      var contentLength_1 = 30;
-      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = Buffer.from(strBuf_1, "utf-8");
-      var specialStr_2 = '89.1.2_2';
-      var contentLength_2 = 50;
-      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = Buffer.from(strBuf_2, "utf-8");
+    it('89.1.2 fetch two BLOB columns, one as string, another streamed', async function() {
+      const id = insertID++;
+      const specialStr_1 = '89.1.2_1';
+      const contentLength_1 = 30;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const specialStr_2 = '89.1.2_2';
+      const contentLength_2 = 50;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
 
-      async.series([
-        function(cb) {
-          insertIntoBlobTable2(id, content_1, content_2, cb);
-        },
-        function(cb) {
-          connection.execute(
-            "SELECT ID, B1 from nodb_blob2 where ID = :id",
-            { id : id },
-            function(err, result) {
-              should.not.exist(err);
-              var resultVal = result.rows[0][1];
-              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          oracledb.fetchAsBuffer = [];
+      await insertIntoBlobTable2(id, content_1, content_2);
 
-          connection.execute(
-            "SELECT B2 from nodb_blob2 where ID = :id",
-            { id : id },
-            function(err, result) {
-              should.not.exist(err);
-              (result.rows.length).should.not.eql(0);
-              var lob = result.rows[0][0];
-              should.exist(lob);
+      let result = await connection.execute(
+        "SELECT ID, B1 from nodb_blob2 where ID = :id",
+        { id : id }
+      );
+      assert.deepStrictEqual(result.rows[0][1], content_1);
 
-              // set the encoding so we get a 'string' not a 'buffer'
-              lob.setEncoding('utf8');
-              var clobData = '';
+      oracledb.fetchAsBuffer = [];
 
-              lob.on('data', function(chunk) {
-                clobData += chunk;
-              });
-
-              lob.on('error', function(err) {
-                should.not.exist(err, "lob.on 'error' event.");
-              });
-
-              lob.on('end', function() {
-                should.not.exist(err);
-                var specialStrLen_2 = specialStr_2.length;
-                var resultLen_2 = clobData.length;
-                should.equal(clobData.length, contentLength_2);
-                should.strictEqual(clobData.substring(0, specialStrLen_2), specialStr_2);
-                should.strictEqual(clobData.substring(resultLen_2 - specialStrLen_2, resultLen_2), specialStr_2);
-
-                cb();
-              });
-            }
-          );
-        }
-      ], done);
+      result = await connection.execute(
+        "SELECT B2 from nodb_blob2 where ID = :id",
+        { id : id }
+      );
+      assert.notStrictEqual(result.rows.length, 0);
+      const clobData = (await result.rows[0][0].getData()).toString();
+      const specialStrLen_2 = specialStr_2.length;
+      const resultLen_2 = clobData.length;
+      assert.strictEqual(clobData.length, contentLength_2);
+      assert.strictEqual(clobData.substring(0, specialStrLen_2), specialStr_2);
+      assert.strictEqual(clobData.substring(resultLen_2 - specialStrLen_2, resultLen_2), specialStr_2);
 
     }); // 89.1.2
 
@@ -244,165 +158,150 @@ describe('89. fetchBlobAsBuffer3.js', function() {
 
   describe('89.2 types support for fetchAsBuffer property', function() {
 
-    afterEach ('clear the by-type specification', function(done) {
+    afterEach('clear the by-type specification', function() {
       oracledb.fetchAsBuffer = [];
-      done ();
     });
 
-    it('89.2.1 String not supported in fetchAsBuffer', function(done) {
-      should.throws(
+    it('89.2.1 String not supported in fetchAsBuffer', function() {
+      assert.throws(
         function() {
           oracledb.fetchAsBuffer = [ oracledb.STRING ];
         },
         /NJS-021: invalid type for conversion specified/
       );
-      done();
     }); // 89.2.1
 
 
-    it('89.2.2 CLOB not supported in fetchAsBuffer', function(done) {
-      should.throws(
+    it('89.2.2 CLOB not supported in fetchAsBuffer', function() {
+      assert.throws(
         function() {
           oracledb.fetchAsBuffer = [ oracledb.CLOB ];
         },
         /NJS-021: invalid type for conversion specified/
       );
-      done();
     }); // 89.2.2
 
 
-    it('89.2.3 Number not supported in fetchAsBuffer', function(done) {
-      should.throws(
+    it('89.2.3 Number not supported in fetchAsBuffer', function() {
+      assert.throws(
         function() {
           oracledb.fetchAsBuffer = [ oracledb.NUMBER ];
         },
         /NJS-021: invalid type for conversion specified/
       );
-      done();
     }); // 89.2.3
 
 
-    it('89.2.4 Date not supported in fetchAsBuffer', function(done) {
-      should.throws(
+    it('89.2.4 Date not supported in fetchAsBuffer', function() {
+      assert.throws(
         function() {
           oracledb.fetchAsBuffer = [ oracledb.DATE ];
         },
         /NJS-021: invalid type for conversion specified/
       );
-      done();
     }); // 89.2.4
 
 
-    it('89.2.5 Cursor not supported in fetchAsBuffer', function(done) {
-      should.throws(
+    it('89.2.5 Cursor not supported in fetchAsBuffer', function() {
+      assert.throws(
         function() {
           oracledb.fetchAsBuffer = [ oracledb.CURSOR ];
         },
         /NJS-021: invalid type for conversion specified/
       );
-      done();
     }); // 89.2.5
 
 
-    it('89.2.6 Buffer not supported in fetchAsBuffer', function(done) {
-      should.throws(
+    it('89.2.6 Buffer not supported in fetchAsBuffer', function() {
+      assert.throws(
         function() {
           oracledb.fetchAsBuffer = [ oracledb.BUFFER ];
         },
         /NJS-021: invalid type for conversion specified/
       );
-      done();
     }); // 89.2.6
 
 
-    it('89.2.7 BLOB supported in fetchAsBuffer', function(done) {
-      should.doesNotThrow(
+    it('89.2.7 BLOB supported in fetchAsBuffer', function() {
+      assert.doesNotThrow(
         function() {
           oracledb.fetchAsBuffer = [ oracledb.BLOB ];
         }
       );
-      should.strictEqual(oracledb.fetchAsBuffer.length, 1);
-      should.strictEqual(oracledb.fetchAsBuffer[0], oracledb.BLOB);
-      done();
+      assert.strictEqual(oracledb.fetchAsBuffer.length, 1);
+      assert.strictEqual(oracledb.fetchAsBuffer[0], oracledb.BLOB);
     }); // 89.2.7
 
 
-    it('89.2.8 negative null value for fetchAsBuffer', function(done) {
-      should.throws(
+    it('89.2.8 negative null value for fetchAsBuffer', function() {
+      assert.throws(
         function() {
           oracledb.fetchAsBuffer = null;
         },
         /NJS-004:/
       );
-      done();
     }); // 89.2.8
 
 
-    it('89.2.9 negative undefined value for fetchAsBuffer', function(done) {
-      should.throws(
+    it('89.2.9 negative undefined value for fetchAsBuffer', function() {
+      assert.throws(
         function() {
           oracledb.fetchAsBuffer = undefined;
         },
         /NJS-004:/
       );
-      done();
     }); // 89.2.9
 
 
-    it('89.2.10 negative numeric value for fetchAsBuffer', function(done) {
-      should.throws(
+    it('89.2.10 negative numeric value for fetchAsBuffer', function() {
+      assert.throws(
         function() {
           oracledb.fetchAsBuffer = 89210;
         },
         /NJS-004:/
       );
-      done();
     }); // 89.2.10
 
 
-    it('89.2.11 negative emtpy string value for fetchAsBuffer', function(done) {
-      should.throws(
+    it('89.2.11 negative emtpy string value for fetchAsBuffer', function() {
+      assert.throws(
         function() {
           oracledb.fetchAsBuffer = ' ';
         },
         /NJS-004:/
       );
-      done();
     }); // 89.2.11
 
 
-    it('89.2.12 negative arbitary string value for fetchAsBuffer', function(done) {
-      should.throws(
+    it('89.2.12 negative arbitary string value for fetchAsBuffer', function() {
+      assert.throws(
         function() {
           oracledb.fetchAsBuffer = "89.2.12";
         },
         /NJS-004:/
       );
-      done();
     }); // 89.2.12
 
 
-    it('89.2.13 negative date value for fetchAsBuffer', function(done) {
-      should.throws(
+    it('89.2.13 negative date value for fetchAsBuffer', function() {
+      assert.throws(
         function() {
-          var dt = new Date ();
+          let dt = new Date ();
           oracledb.fetchAsBuffer = dt;
         },
         /NJS-004:/
       );
-      done();
     }); // 89.2.13
 
 
-    it('89.2.14 negative arbitary buffer value for fetchAsBuffer', function(done) {
-      should.throws(
+    it('89.2.14 negative arbitary buffer value for fetchAsBuffer', function() {
+      assert.throws(
         function() {
-          var buf = assist.createBuffer (10) ;
+          let buf = assist.createBuffer(10) ;
           oracledb.fetchAsBuffer = buf;
         },
         /NJS-004:/
       );
-      done();
     }); // 89.2.14
 
   }); // 89.2

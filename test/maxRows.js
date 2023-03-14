@@ -32,192 +32,121 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
-const async    = require('async');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
 describe('157. maxRows.js', function() {
 
   let connection = null;
-  var totalAmount = 107;
+  let totalAmount = 107;
 
-  before(function(done) {
-    async.series([
-      function getConn(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
-      },
-      function createTab(cb) {
-        var proc = "BEGIN \n" +
-                   "    DECLARE \n" +
-                   "        e_table_missing EXCEPTION; \n" +
-                   "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-                   "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_conn_emp2 PURGE'); \n" +
-                   "    EXCEPTION \n" +
-                   "        WHEN e_table_missing \n" +
-                   "        THEN NULL; \n" +
-                   "    END; \n" +
-                   "    EXECUTE IMMEDIATE (' \n" +
-                   "        CREATE TABLE nodb_tab_conn_emp2 ( \n" +
-                   "            id       NUMBER NOT NULL, \n" +
-                   "            name     VARCHAR2(20) \n" +
-                   "        ) \n" +
-                   "    '); \n" +
-                   "END; ";
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
+    let proc = "BEGIN \n" +
+                 "    DECLARE \n" +
+                 "        e_table_missing EXCEPTION; \n" +
+                 "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+                 "    BEGIN \n" +
+                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_conn_emp2 PURGE'); \n" +
+                 "    EXCEPTION \n" +
+                 "        WHEN e_table_missing \n" +
+                 "        THEN NULL; \n" +
+                 "    END; \n" +
+                 "    EXECUTE IMMEDIATE (' \n" +
+                 "        CREATE TABLE nodb_tab_conn_emp2 ( \n" +
+                 "            id       NUMBER NOT NULL, \n" +
+                 "            name     VARCHAR2(20) \n" +
+                 "        ) \n" +
+                 "    '); \n" +
+                 "END; ";
+    await connection.execute(proc);
 
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function insertData(cb) {
-        var proc = "DECLARE \n" +
-                   "    x NUMBER := 0; \n" +
-                   "    n VARCHAR2(20); \n" +
-                   "BEGIN \n" +
-                   "    FOR i IN 1..107 LOOP \n" +
-                   "        x := x + 1; \n" +
-                   "        n := 'staff ' || x; \n" +
-                   "        INSERT INTO nodb_tab_conn_emp2 VALUES (x, n); \n" +
-                   "    END LOOP; \n" +
-                   "END; ";
-
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      }
-    ], done);
+    proc = "DECLARE \n" +
+           "    x NUMBER := 0; \n" +
+           "    n VARCHAR2(20); \n" +
+           "BEGIN \n" +
+           "    FOR i IN 1..107 LOOP \n" +
+           "        x := x + 1; \n" +
+           "        n := 'staff ' || x; \n" +
+           "        INSERT INTO nodb_tab_conn_emp2 VALUES (x, n); \n" +
+           "    END LOOP; \n" +
+           "END; ";
+    await connection.execute(proc);
   }); // before()
 
-  after(function(done) {
-    async.series([
-      function(cb) {
-        connection.execute(
-          "DROP TABLE nodb_tab_conn_emp2 PURGE",
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+  after(async function() {
+    await connection.execute("DROP TABLE nodb_tab_conn_emp2 PURGE");
+    await connection.close();
   }); // after()
 
   // restore oracledb.maxRows to its default value
-  afterEach(function(done) {
-    var defaultValue = 0;
+  afterEach(function() {
+    let defaultValue = 0;
     oracledb.maxRows = defaultValue;
-    done();
   });
 
-  var verifyRows = function(rows, amount) {
-    for (var i = 0; i < amount; i++) {
-      should.strictEqual(rows[i][0], (i + 1));
-      should.strictEqual(rows[i][1], ("staff " + String(i + 1)));
+  let verifyRows = function(rows, amount) {
+    for (let i = 0; i < amount; i++) {
+      assert.strictEqual(rows[i][0], (i + 1));
+      assert.strictEqual(rows[i][1], ("staff " + String(i + 1)));
     }
   };
 
-  var sqlQuery = "SELECT * FROM nodb_tab_conn_emp2 ORDER BY id";
+  let sqlQuery = "SELECT * FROM nodb_tab_conn_emp2 ORDER BY id";
 
-  it('157.1 Default maxRows == 0, which means unlimited', function(done) {
-    should.strictEqual(oracledb.maxRows, 0);
+  it('157.1 Default maxRows == 0, which means unlimited', async function() {
+    assert.strictEqual(oracledb.maxRows, 0);
 
-    connection.execute(
-      sqlQuery,
-      function(err, result) {
-        should.not.exist(err);
-        should.exist(result);
-        should.strictEqual(result.rows.length, totalAmount);
-        verifyRows(result.rows, totalAmount);
-        done();
-      }
-    );
+    const result = await connection.execute(sqlQuery);
+    assert(result);
+    assert.strictEqual(result.rows.length, totalAmount);
+    verifyRows(result.rows, totalAmount);
   });
 
-  it("157.2 specify the value at execution", function(done) {
-    var fetchAmount = 25;
-    connection.execute(
+  it("157.2 specify the value at execution", async function() {
+    let fetchAmount = 25;
+    const result = await connection.execute(
       sqlQuery,
       {},
-      { maxRows: fetchAmount },
-      function(err, result) {
-        should.not.exist(err);
-        should.exist(result);
-        should.strictEqual(result.rows.length, fetchAmount);
-        verifyRows(result.rows, fetchAmount);
-        done();
-      }
+      { maxRows: fetchAmount }
     );
+    assert(result);
+    assert.strictEqual(result.rows.length, fetchAmount);
+    verifyRows(result.rows, fetchAmount);
   });
 
-  it('157.3 equals to the total amount of rows', function(done) {
-    connection.execute(
+  it('157.3 equals to the total amount of rows', async function() {
+    const result = await connection.execute(
       sqlQuery,
       {},
-      { maxRows: totalAmount },
-      function(err, result) {
-        should.not.exist(err);
-        should.exist(result);
-        should.strictEqual(result.rows.length, totalAmount);
-        verifyRows(result.rows, totalAmount);
-        done();
-      }
+      { maxRows: totalAmount }
+    );
+    assert(result);
+    assert.strictEqual(result.rows.length, totalAmount);
+    verifyRows(result.rows, totalAmount);
+  });
+
+  it('157.4 cannot set it to be a negative number', async function() {
+    await assert.rejects(
+      async () => {
+        await connection.execute(sqlQuery, {}, { maxRows: -5 });
+      },
+      // NJS-007: invalid value for "maxRows" in parameter 3
+      /NJS-007:/
     );
   });
 
-  it('157.4 cannot set it to be a negative number', function(done) {
-    connection.execute(
-      sqlQuery,
-      {},
-      { maxRows: -5 },
-      function(err, result) {
-        should.exist(err);
-        should.not.exist(result);
-        should.strictEqual(
-          err.message,
-          'NJS-007: invalid value for "maxRows" in parameter 3'
-        );
-        done();
-      }
-    );
+  it('157.5 sets it to be large value', async function() {
+    const result = await connection.execute(sqlQuery, {}, { maxRows: 500000 });
+    assert(result);
+    verifyRows(result.rows, totalAmount);
   });
 
-  it('157.5 sets it to be large value', function(done) {
-    connection.execute(
-      sqlQuery,
-      {},
-      { maxRows: 500000 },
-      function(err, result) {
-        should.not.exist(err);
-        should.exist(result);
-        verifyRows(result.rows, totalAmount);
-        done();
-      }
-    );
-  });
+  it('157.6 shows 12c new way to limit the number of records fetched by queries', async function() {
 
-  it('157.6 shows 12c new way to limit the number of records fetched by queries', function(done) {
-
-    var myoffset     = 2;  // number of rows to skip
-    var mymaxnumrows = 6;  // number of rows to fetch
-    var sql = "SELECT * FROM nodb_tab_conn_emp2 ORDER BY id";
+    let myoffset     = 2;  // number of rows to skip
+    let mymaxnumrows = 6;  // number of rows to fetch
+    let sql = "SELECT * FROM nodb_tab_conn_emp2 ORDER BY id";
 
     if (connection.oracleServerVersion >= 1201000000) {
       // 12c row-limiting syntax
@@ -229,47 +158,29 @@ describe('157. maxRows.js', function() {
           + "WHERE ROWNUM <= :maxnumrows + :offset) WHERE MY_RNUM > :offset";
     }
 
-    connection.execute(
+    const result = await connection.execute(
       sql,
       { offset: myoffset, maxnumrows: mymaxnumrows },
-      { maxRows: 150 },
-      function(err, result) {
-        should.not.exist(err);
-        (result.rows.length).should.eql(mymaxnumrows);
-        done();
-      }
+      { maxRows: 150 }
     );
+    assert.strictEqual(result.rows.length, mymaxnumrows);
   }); // 157.6
 
-  it('157.7 oracledb.maxRows > 0 && oracledb.maxRows < totalAmount', function(done) {
+  it('157.7 oracledb.maxRows > 0 && oracledb.maxRows < totalAmount', async function() {
 
-    var testValue = 100;
+    let testValue = 100;
     oracledb.maxRows = testValue;
-    connection.execute(
-      sqlQuery,
-      function(err, result) {
-        should.not.exist(err);
-        var expectedAmount = testValue;
-        verifyRows(result.rows, expectedAmount);
-        done();
-      }
-    );
+    let result = await connection.execute(sqlQuery);
+    let expectedAmount = testValue;
+    verifyRows(result.rows, expectedAmount);
   }); // 157.7
 
-  it('157.8 oracledb.maxRows > 0, execute() with maxRows=0', function(done) {
+  it('157.8 oracledb.maxRows > 0, execute() with maxRows=0', async function() {
 
     oracledb.maxRows = 100;
-    connection.execute(
-      sqlQuery,
-      {},
-      { maxRows: 0 },
-      function(err, result) {
-        should.not.exist(err);
-        var expectedAmount = totalAmount;
-        verifyRows(result.rows, expectedAmount);
-        done();
-      }
-    );
+    let result = await connection.execute(sqlQuery, {}, { maxRows: 0 });
+    let expectedAmount = totalAmount;
+    verifyRows(result.rows, expectedAmount);
   }); // 157.8
 
 });

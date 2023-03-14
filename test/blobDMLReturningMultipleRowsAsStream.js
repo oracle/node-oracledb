@@ -34,8 +34,6 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const sql      = require('./sql.js');
-const assist   = require('./dataTypeAssist.js');
 
 describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
 
@@ -71,13 +69,12 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
 
   describe('138.1 BLOB DML returning multiple rows as stream', function() {
     before(async function() {
-
-      await sql.executeSql(connection, blob_table_create, {}, {});
-      insertData(10);
+      await connection.execute(blob_table_create);
+      await insertData(10);
     });
 
     after(async function() {
-      await sql.executeSql(connection, blob_table_drop, {}, {});
+      await connection.execute(blob_table_drop);
     });
 
     it('138.1.1 BLOB DML returning multiple rows as stream', async function() {
@@ -140,7 +137,7 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
     lob.on('end', function(err) {
       assert(err);
       let expected = Buffer.from(String(id - 10), "utf-8");
-      assert.strictEqual(assist.compare2Buffers(blobData, expected), true);
+      assert.deepStrictEqual(blobData, expected);
     });
   };
 });

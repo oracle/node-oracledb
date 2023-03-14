@@ -36,7 +36,6 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
-const assist   = require('./dataTypeAssist.js');
 
 describe('88. fetchBlobAsBuffer2.js', function() {
 
@@ -104,8 +103,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
   // compare fetch result
   const compareClientFetchResult = function(resultVal, specialStr, content, contentLength) {
     assert.strictEqual(resultVal.length, contentLength);
-    const compareBuffer = assist.compare2Buffers(resultVal, content);
-    assert.strictEqual(compareBuffer, true);
+    assert.deepStrictEqual(resultVal, content);
   };
 
   describe('88.1 fetch BLOB columns by setting fetchInfo option', function() {

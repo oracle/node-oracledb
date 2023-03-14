@@ -105,4 +105,35 @@ describe('54. lobClose.js', function() {
     );
   }); // 54.4
 
+  it('54.5 temp LOBs should be freed in next rpc', async function() {
+    const conn2 = await oracledb.getConnection(dbConfig);
+    let tempLOBArray = [];
+    const numLOBs = 20;
+    const query = "select cache_lobs+nocache_lobs from v$temporary_lobs where sid = sys_context('USERENV','SID')";
+
+    // Create multiple temp LOB's
+    for (let i = 0; i < numLOBs; i++) {
+      tempLOBArray[i] = await conn2.createLob(oracledb.CLOB);
+    }
+
+    // Check number of opened temp LOB's
+    let result = await conn2.execute(query);
+    let numTempLOBs = result.rows[0][0];
+    assert.strictEqual(numTempLOBs, numLOBs);
+
+    // Destroy multiple temp LOB's
+    for (let i = 0; i < numLOBs; i++) {
+      await new Promise((resolve) => {
+        tempLOBArray[i].once('close', resolve);
+        tempLOBArray[i].destroy();
+      });
+    }
+
+    // temp LOB's should be freed on roundtrip (like execute) as piggybacks are sent for closing temp LOB's
+    result = await conn2.execute(query);
+    numTempLOBs = result.rows[0][0];
+    assert.strictEqual(numTempLOBs, 0);
+    await conn2.close();
+  }); // 54.5
+
 });

@@ -34,36 +34,26 @@
 "use strict";
 
 const oracledb = require('oracledb');
-const should   = require('should');
-const async    = require('async');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
 describe('64. sqlWithWarnings.js', function() {
 
   let connection = null;
-  before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig,
-      function(err, conn) {
-        should.not.exist(err);
-        connection = conn;
-        done();
-      }
-    );
+  before('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after('release connection', function(done) {
-    connection.close(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after('release connection', async function() {
+    await connection.close();
   });
 
   describe('64.1 test case offered by GitHub user', function() {
 
-    var tableName = "nodb_aggregate";
+    const tableName = "nodb_aggregate";
 
-    before('prepare table', function(done) {
-      var sqlCreateTab =
+    before('prepare table', async function() {
+      const sqlCreateTab =
         "BEGIN " +
         "  DECLARE " +
         "    e_table_missing EXCEPTION; " +
@@ -81,86 +71,39 @@ describe('64. sqlWithWarnings.js', function() {
         "   '); " +
         "END; ";
 
-      async.series([
-        function(cb) {
-          connection.execute(
-            sqlCreateTab,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            "INSERT INTO " + tableName + " VALUES(1)",
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            "INSERT INTO " + tableName + " VALUES(null)",
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.commit(function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        }
-      ], done);
+      await connection.execute(sqlCreateTab);
+      await connection.execute("INSERT INTO " + tableName + " VALUES(1)");
+      await connection.execute("INSERT INTO " + tableName + " VALUES(null)");
+      await connection.commit();
     }); // before
 
-    after(function(done) {
-      connection.execute(
-        "DROP TABLE " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after(async function() {
+      await connection.execute("DROP TABLE " + tableName + " PURGE");
     });
 
-    it('64.1.1 Executes an aggregate query which causes warnings', function(done) {
-      connection.execute(
+    it('64.1.1 Executes an aggregate query which causes warnings', async function() {
+      await connection.execute(
         "SELECT MAX(NUM_COL) AS NUM_COL FROM " + tableName,
         [],
-        { maxRows: 1 },
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
+        { maxRows: 1 }
       );
-    });
+    }); // 64.1.1
 
   }); // 64.1
 
   describe('64.2 PL/SQL - Success With Info', function() {
 
-    var plsqlWithWarning =
+    const plsqlWithWarning =
       " CREATE OR REPLACE PROCEDURE get_emp_rs_inout " +
       "   (p_in IN NUMBER, p_out OUT SYS_REFCURSOR ) AS " +
       "  BEGIN " +
       "    OPEN p_out FOR SELECT * FROM nodb_sql_emp " +
       "  END;";
 
-    it('64.2.1 Execute SQL Statement to create PLSQL procedure with warnings', function(done) {
-      connection.should.be.an.Object;
-      connection.execute (
-        plsqlWithWarning,
-        function(err) {
-          should.not.exist (err);
-          done();
-        }
-      );
-    });
+    it('64.2.1 Execute SQL Statement to create PLSQL procedure with warnings', async function() {
+      assert.strictEqual(typeof connection, "object");
+      await connection.execute (plsqlWithWarning);
+    }); // 64.2.1
 
   }); // 64.2
 

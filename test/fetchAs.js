@@ -32,8 +32,7 @@
 'use strict';
 
 const oracledb = require ('oracledb');
-const should   = require ('should');
-const async    = require ('async');
+const assert   = require('assert');
 const dbConfig = require ('./dbconfig.js');
 const assist   = require ('./dataTypeAssist.js');
 
@@ -41,61 +40,49 @@ const assist   = require ('./dataTypeAssist.js');
 describe('56. fetchAs.js', function() {
 
   let connection = null;
-  beforeEach('get one connection', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+  beforeEach('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  afterEach('release connection, reset fetchAsString property', function(done) {
+  afterEach('release connection, reset fetchAsString property', async function() {
     oracledb.fetchAsString = [];
-    connection.close(function(err) {
-      should.not.exist(err);
-      done();
-    });
+    await connection.close();
   });
 
   it('56.1 property value check', function() {
 
-    (oracledb.fetchAsString).should.eql([]);
+    assert.deepStrictEqual(oracledb.fetchAsString, []);
 
     oracledb.fetchAsString = [oracledb.DATE];
-    should.deepEqual(oracledb.fetchAsString, [ oracledb.DATE ]);
+    assert.deepStrictEqual(oracledb.fetchAsString, [ oracledb.DATE ]);
 
     oracledb.fetchAsString = [ oracledb.NUMBER ];
-    should.deepEqual(oracledb.fetchAsString, [ oracledb.NUMBER ]);
+    assert.deepStrictEqual(oracledb.fetchAsString, [ oracledb.NUMBER ]);
 
     oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
-    should.deepEqual(oracledb.fetchAsString, [ oracledb.DATE, oracledb.NUMBER ]);
+    assert.deepStrictEqual(oracledb.fetchAsString, [ oracledb.DATE, oracledb.NUMBER ]);
 
     oracledb.fetchAsString = [ oracledb.DB_TYPE_JSON ];
-    should.deepEqual(oracledb.fetchAsString, [ oracledb.DB_TYPE_JSON ]);
+    assert.deepStrictEqual(oracledb.fetchAsString, [ oracledb.DB_TYPE_JSON ]);
 
     oracledb.fetchAsString = [ oracledb.DB_TYPE_JSON, oracledb.DATE, oracledb.NUMBER ];
-    should.deepEqual(oracledb.fetchAsString, [ oracledb.DB_TYPE_JSON, oracledb.DATE, oracledb.NUMBER ]);
+    assert.deepStrictEqual(oracledb.fetchAsString, [ oracledb.DB_TYPE_JSON, oracledb.DATE, oracledb.NUMBER ]);
   });
 
-  it('56.2 Fetch DATE column values as STRING - by-Column name', function(done) {
-    connection.execute(
+  it('56.2 Fetch DATE column values as STRING - by-Column name', async function() {
+    let result = await connection.execute(
       "SELECT TO_DATE('2005-01-06', 'YYYY-DD-MM') AS TS_DATE FROM DUAL",
       [],
       {
         outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo : { "TS_DATE": { type : oracledb.STRING } }
-      },
-      function(err, result) {
-        should.not.exist(err);
-        // console.log(result.rows[0]);
-        result.rows[0].TS_DATE.should.be.a.String();
-        done();
       }
     );
+    assert.strictEqual(typeof result.rows[0].TS_DATE, "string");
   });
 
-  it('56.3 Fetch DATE, NUMBER column values STRING - by Column-name', function(done) {
-    connection.execute(
+  it('56.3 Fetch DATE, NUMBER column values STRING - by Column-name', async function() {
+    let result = await connection.execute(
       "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
       [],
       {
@@ -105,22 +92,17 @@ describe('56. fetchAs.js', function() {
           "TS_DATE" : { type : oracledb.STRING },
           "TS_NUM"  : { type : oracledb.STRING }
         }
-      },
-      function(err, result) {
-        should.not.exist(err);
-        // console.log(result.rows[0]);
-        result.rows[0].TS_DATE.should.be.a.String();
-        result.rows[0].TS_NUM.should.be.a.String();
-        Number(result.rows[0].TS_NUM).should.equal(1234567);
-        done();
       }
     );
+    assert.strictEqual(typeof result.rows[0].TS_DATE, "string");
+    assert.strictEqual(typeof result.rows[0].TS_NUM, "string");
+    assert.strictEqual(Number(result.rows[0].TS_NUM), 1234567);
   });
 
-  it('56.4 Fetch DATE, NUMBER as STRING by-time configuration and by-name', function(done) {
+  it('56.4 Fetch DATE, NUMBER as STRING by-time configuration and by-name', async function() {
     oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 
-    connection.execute(
+    let result = await connection.execute(
       "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
       [],
       {
@@ -130,22 +112,17 @@ describe('56. fetchAs.js', function() {
           "TS_DATE" : { type : oracledb.STRING },
           "TS_NUM"  : { type : oracledb.STRING }
         }
-      },
-      function(err, result) {
-        should.not.exist(err);
-        // console.log(result.rows[0]);
-        result.rows[0].TS_DATE.should.be.a.String();
-        result.rows[0].TS_NUM.should.be.a.String();
-        Number(result.rows[0].TS_NUM).should.equal(1234567);
-        done();
       }
     );
+    assert.strictEqual(typeof result.rows[0].TS_DATE, "string");
+    assert.strictEqual(typeof result.rows[0].TS_NUM, "string");
+    assert.strictEqual(Number(result.rows[0].TS_NUM), 1234567);
   });
 
-  it('56.5 Fetch DATE, NUMBER column as STRING by-type and override at execute time', function(done) {
+  it('56.5 Fetch DATE, NUMBER column as STRING by-type and override at execute time', async function() {
     oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 
-    connection.execute(
+    let result = await connection.execute(
       "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
       [],
       {
@@ -155,20 +132,15 @@ describe('56. fetchAs.js', function() {
           "TS_DATE" : { type : oracledb.DEFAULT },
           "TS_NUM"  : { type : oracledb.STRING }
         }
-      },
-      function(err, result) {
-        should.not.exist(err);
-        // console.log(result.rows[0]);
-        result.rows[0].TS_DATE.should.be.an.Object;
-        result.rows[0].TS_NUM.should.be.a.String();
-        Number(result.rows[0].TS_NUM).should.equal(1234567);
-        done();
       }
     );
+    assert.strictEqual(typeof result.rows[0].TS_DATE, "object");
+    assert.strictEqual(typeof result.rows[0].TS_NUM, "string");
+    assert.strictEqual(Number(result.rows[0].TS_NUM), 1234567);
   });
 
-  it('56.6 Fetch ROWID column values STRING - non-ResultSet', function(done) {
-    connection.execute(
+  it('56.6 Fetch ROWID column values STRING - non-ResultSet', async function() {
+    let result = await connection.execute(
       "SELECT ROWID from DUAL",
       [],
       {
@@ -177,18 +149,13 @@ describe('56. fetchAs.js', function() {
         {
           "ROWID" : { type : oracledb.STRING }
         }
-      },
-      function(err, result) {
-        should.not.exist(err);
-        // console.log(result.rows[0].TS_DATA);
-        result.rows[0].ROWID.should.be.a.String();
-        done();
       }
     );
+    assert.strictEqual(typeof result.rows[0].ROWID, "string");
   });
 
-  it('56.7 Fetch ROWID column values STRING - ResultSet', function(done) {
-    connection.execute(
+  it('56.7 Fetch ROWID column values STRING - ResultSet', async function() {
+    let result = await connection.execute(
       "SELECT ROWID from DUAL",
       [],
       {
@@ -198,21 +165,11 @@ describe('56. fetchAs.js', function() {
         {
           "ROWID" : { type : oracledb.STRING }
         }
-      },
-      function(err, result) {
-        should.not.exist(err);
-
-        result.resultSet.getRow(function(err, row) {
-          should.not.exist(err);
-          // console.log(row);
-          row.ROWID.should.be.a.String();
-          result.resultSet.close(function(err) {
-            should.not.exist(err);
-            done();
-          });
-        });
       }
     );
+    let row = await result.resultSet.getRow();
+    assert.strictEqual(typeof row.ROWID, "string");
+    await result.resultSet.close();
   });
 
   /*
@@ -221,7 +178,7 @@ describe('56. fetchAs.js', function() {
   * Numbers out of above range will be rounded.
   * The last element is out of Oracle database standard Number range. It will be rounded by database.
   */
-  var numStrs =
+  let numStrs =
     [
       '17249138680355831',
       '-17249138680355831',
@@ -230,7 +187,7 @@ describe('56. fetchAs.js', function() {
       '0.1724913868035583123456789123456789123456'
     ];
 
-  var numResults =
+  let numResults =
     [
       '17249138680355831',
       '-17249138680355831',
@@ -239,9 +196,9 @@ describe('56. fetchAs.js', function() {
       '.172491386803558312345678912345678912346'
     ];
 
-  it('56.8 large numbers with fetchInfo', function(done) {
-    async.eachSeries(numStrs, function(element, callback) {
-      connection.execute(
+  it('56.8 large numbers with fetchInfo', async function() {
+    for (let element of numStrs) {
+      let result = await connection.execute(
         "SELECT TO_NUMBER( " + element + " ) AS TS_NUM FROM DUAL",
         [],
         {
@@ -250,62 +207,49 @@ describe('56. fetchAs.js', function() {
           {
             "TS_NUM"  : { type : oracledb.STRING }
           }
-        },
-        function(err, result) {
-          should.not.exist(err);
-          result.rows[0].TS_NUM.should.be.a.String();
-          (result.rows[0].TS_NUM).should.eql(numResults[numStrs.indexOf(element)]);
-          callback();
         }
       );
-    }, function(err) {
-      should.not.exist(err);
-      done();
-    });
+      assert.strictEqual(typeof result.rows[0].TS_NUM, "string");
+      assert.strictEqual(result.rows[0].TS_NUM, numResults[numStrs.indexOf(element)]);
+    }
   });
 
-  it('56.9 large numbers with setting fetchAsString property', function(done) {
+  it('56.9 large numbers with setting fetchAsString property', async function() {
     oracledb.fetchAsString = [ oracledb.NUMBER ];
 
-    async.eachSeries(numStrs, function(element, callback) {
-      connection.execute(
+    for (let element of numStrs) {
+      let result = await connection.execute(
         "SELECT TO_NUMBER( " + element + " ) AS TS_NUM FROM DUAL",
         [],
-        { outFormat : oracledb.OUT_FORMAT_OBJECT },
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result.rows[0].TS_NUM);
-          result.rows[0].TS_NUM.should.be.a.String();
-          (result.rows[0].TS_NUM).should.eql(numResults[numStrs.indexOf(element)]);
-          callback();
-        }
+        { outFormat : oracledb.OUT_FORMAT_OBJECT }
       );
-    }, function(err) {
-      should.not.exist(err);
-      done();
-    });
+      assert.strictEqual(typeof result.rows[0].TS_NUM, "string");
+      assert.strictEqual(result.rows[0].TS_NUM, numResults[numStrs.indexOf(element)]);
+    }
   });
 
   // FetchInfo format should <columName> : {type : oracledb.<type> }
-  it('56.10 invalid syntax for type should result in error', function(done) {
-    connection.execute (
-      "SELECT SYSDATE AS THE_DATE FROM DUAL",
-      { },
-      { fetchInfo : { "THE_DATE" : oracledb.STRING }},
-      function(err) {
-        should.exist (err) ;
-        should.strictEqual(err.message, 'NJS-015: type was not specified for conversion');
-        done ();
-      });
+  it('56.10 invalid syntax for type should result in error', async function() {
+    await assert.rejects(
+      async () => {
+        await connection.execute(
+          "SELECT SYSDATE AS THE_DATE FROM DUAL",
+          { },
+          { fetchInfo : { "THE_DATE" : oracledb.STRING }}
+        );
+      },
+      // NJS-015: type was not specified for conversion
+      / NJS-015:/
+    );
   });
 
   it('56.11 assigns an empty array to fetchAsString', function() {
     oracledb.fetchAsString = [];
-    (oracledb.fetchAsString).should.eql([]);
+    assert.deepStrictEqual(oracledb.fetchAsString, []);
   });
 
   it('56.12 Negative - empty string', function() {
-    should.throws(
+    assert.throws(
       function() {
         oracledb.fetchAsString = '';
       },
@@ -314,7 +258,7 @@ describe('56. fetchAs.js', function() {
   });
 
   it('56.13 Negative - null', function() {
-    should.throws(
+    assert.throws(
       function() {
         oracledb.fetchAsString = null;
       },
@@ -323,7 +267,7 @@ describe('56. fetchAs.js', function() {
   });
 
   it('56.14 Negative - undefined', function() {
-    should.throws(
+    assert.throws(
       function() {
         oracledb.fetchAsString = undefined;
       },
@@ -332,7 +276,7 @@ describe('56. fetchAs.js', function() {
   });
 
   it('56.15 Negative - NaN', function() {
-    should.throws(
+    assert.throws(
       function() {
         oracledb.fetchAsString = NaN;
       },
@@ -341,7 +285,7 @@ describe('56. fetchAs.js', function() {
   });
 
   it('56.16 Negative - invalid type of value, number', function() {
-    should.throws(
+    assert.throws(
       function() {
         oracledb.fetchAsString = 10;
       },
@@ -350,7 +294,7 @@ describe('56. fetchAs.js', function() {
   });
 
   it('56.17 Negative - invalid type of value, string', function() {
-    should.throws(
+    assert.throws(
       function() {
         oracledb.fetchAsString = 'abc';
       },
@@ -358,64 +302,54 @@ describe('56. fetchAs.js', function() {
     );
   });
 
-  it('56.18 Negative - passing oracledb.DATE type to fetchInfo', function(done) {
-    connection.execute(
-      "select sysdate as ts_date from dual",
-      { },
-      {
-        fetchInfo: { ts_date: { type: oracledb.DATE } }
-      },
-      function(err, result) {
-        should.exist(err);
-        should.strictEqual(
-          err.message,
-          'NJS-021: invalid type for conversion specified'
+  it('56.18 Negative - passing oracledb.DATE type to fetchInfo', async function() {
+    await assert.rejects(
+      async () => {
+        await connection.execute(
+          "select sysdate as ts_date from dual",
+          { },
+          {
+            fetchInfo: { ts_date: { type: oracledb.DATE } }
+          }
         );
-        should.not.exist(result);
-        done();
-      }
+      },
+      // NJS-021: invalid type for conversion specified
+      /NJS-021:/
     );
   });
 
-  it('56.19 Negative - passing empty JSON to fetchInfo', function(done) {
-    connection.execute(
+  it('56.19 Negative - passing empty JSON to fetchInfo', async function() {
+    let result = await connection.execute(
       "select sysdate as ts_date from dual",
       { },
       {
         fetchInfo: {}
-      },
-      function(err, result) {
-        should.not.exist(err);
-        should.exist(result);
-        (result.rows[0][0]).should.be.a.Date();
-        done();
       }
     );
+    assert(result);
+    assert.strictEqual(result.rows[0][0] instanceof Date, true);
   });
 
-  it('56.20 Negative - passing oracledb.NUMBER type to fetchInfo', function(done) {
-    connection.execute(
-      "select sysdate as ts_date from dual",
-      { },
-      {
-        fetchInfo: { ts_date: { type: oracledb.NUMBER } }
-      },
-      function(err, result) {
-        should.exist(err);
-        should.strictEqual(
-          err.message,
-          'NJS-021: invalid type for conversion specified'
+  it('56.20 Negative - passing oracledb.NUMBER type to fetchInfo', async function() {
+    await assert.rejects(
+      async () => {
+        await connection.execute(
+          "select sysdate as ts_date from dual",
+          { },
+          {
+            fetchInfo: { ts_date: { type: oracledb.NUMBER } }
+          }
         );
-        should.not.exist(result);
-        done();
-      }
+      },
+      // NJS-021: invalid type for conversion specified
+      /NJS-021:/
     );
   });
 
   it('56.21 Negative - invalid type of value, Date', function() {
-    should.throws(
+    assert.throws(
       function() {
-        var dt = new Date ();
+        let dt = new Date ();
         oracledb.fetchAsString = dt;
       },
       /NJS-004:/
@@ -423,9 +357,9 @@ describe('56. fetchAs.js', function() {
   });
 
   it('56.22 Negative - invalid type of value, Buffer', function() {
-    should.throws(
+    assert.throws(
       function() {
-        var buf = assist.createBuffer (10) ;  // arbitary sized buffer
+        let buf = assist.createBuffer (10) ;  // arbitary sized buffer
         oracledb.fetchAsString = buf;
       },
       /NJS-004:/

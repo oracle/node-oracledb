@@ -36,7 +36,6 @@ const assert   = require('assert');
 const fs       = require('fs');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
-const assist   = require('./dataTypeAssist.js');
 
 describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
@@ -203,7 +202,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       assert.strictEqual(resultVal.toString('utf8', 0, specStrLength), specialStr);
       assert.strictEqual(resultVal.toString('utf8', (totalLength - specStrLength), totalLength), specialStr);
     }
-    assert.strictEqual(assist.compare2Buffers(resultVal, originalBuffer), true);
+    assert.strictEqual(resultVal, originalBuffer);
   };
 
   // execute the bind in plsql procedure

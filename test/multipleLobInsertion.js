@@ -26,191 +26,99 @@
  *   68. multipleLobInsertion.js
  *
  * DESCRIPTION
- *   Testing external authentication functionality.
- *
- *   Note that enabling the externalAuth feature requires configuration on the
- *   database besides setting "externalAuth" attribute to be true. Please refer
- *   to API documentation about configuration.
- *   https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#extauth
+ *   Testing multiple insertions of Large Objects including BLOB and CLOB
  *
  *****************************************************************************/
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
-const async    = require('async');
 const fs       = require('fs');
 const dbConfig = require('./dbconfig.js');
 
 describe('68. multipleLobInsertion.js', function() {
 
   let connection = null;
-  before(function(done) {
+  before(async function() {
 
-    async.series([
-      function getConn(cb) {
-        oracledb.getConnection(
-          dbConfig,
-          function(err, conn) {
-            should.not.exist(err);
-            connection = conn;
-            cb();
-          }
-        );
-      },
-      function createTabBLOB(cb) {
-        var proc = "BEGIN \n" +
-                   "    DECLARE \n" +
-                   "        e_table_missing EXCEPTION; \n" +
-                   "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-                   "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE('DROP TABLE nodb_multi_blob PURGE'); \n" +
-                   "    EXCEPTION \n" +
-                   "        WHEN e_table_missing \n" +
-                   "        THEN NULL; \n" +
-                   "    END; \n" +
-                   "    EXECUTE IMMEDIATE (' \n" +
-                   "        CREATE TABLE nodb_multi_blob ( \n" +
-                   "            id    NUMBER, \n" +
-                   "            b1    BLOB, \n" +
-                   "            b2    BLOB, \n" +
-                   "            b3    BLOB, \n" +
-                   "            b4    BLOB, \n" +
-                   "            b5    BLOB \n" +
-                   "        ) \n" +
-                   "    '); \n" +
-                   "END; ";
+    connection = await oracledb.getConnection(dbConfig);
 
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function createTabCLOB(cb) {
-        var proc = "BEGIN \n" +
-                   "    DECLARE \n" +
-                   "        e_table_missing EXCEPTION; \n" +
-                   "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-                   "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE('DROP TABLE nodb_multi_clob PURGE'); \n" +
-                   "    EXCEPTION \n" +
-                   "        WHEN e_table_missing \n" +
-                   "        THEN NULL; \n" +
-                   "    END; \n" +
-                   "    EXECUTE IMMEDIATE (' \n" +
-                   "        CREATE TABLE nodb_multi_clob ( \n" +
-                   "            id    NUMBER, \n" +
-                   "            c1    CLOB, \n" +
-                   "            c2    CLOB, \n" +
-                   "            c3    CLOB, \n" +
-                   "            c4    CLOB, \n" +
-                   "            c5    CLOB \n" +
-                   "        ) \n" +
-                   "    '); \n" +
-                   "END; ";
+    // create the BLOB table
+    let proc = "BEGIN \n" +
+               "    DECLARE \n" +
+               "        e_table_missing EXCEPTION; \n" +
+               "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+               "    BEGIN \n" +
+               "        EXECUTE IMMEDIATE('DROP TABLE nodb_multi_blob PURGE'); \n" +
+               "    EXCEPTION \n" +
+               "        WHEN e_table_missing \n" +
+               "        THEN NULL; \n" +
+               "    END; \n" +
+               "    EXECUTE IMMEDIATE (' \n" +
+               "        CREATE TABLE nodb_multi_blob ( \n" +
+               "            id    NUMBER, \n" +
+               "            b1    BLOB, \n" +
+               "            b2    BLOB, \n" +
+               "            b3    BLOB, \n" +
+               "            b4    BLOB, \n" +
+               "            b5    BLOB \n" +
+               "        ) \n" +
+               "    '); \n" +
+               "END; ";
+    await connection.execute(proc);
 
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      }
-    ], done);
-
+    // create the CLOB table
+    proc = "BEGIN \n" +
+           "    DECLARE \n" +
+           "        e_table_missing EXCEPTION; \n" +
+           "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+           "    BEGIN \n" +
+           "        EXECUTE IMMEDIATE('DROP TABLE nodb_multi_clob PURGE'); \n" +
+           "    EXCEPTION \n" +
+           "        WHEN e_table_missing \n" +
+           "        THEN NULL; \n" +
+           "    END; \n" +
+           "    EXECUTE IMMEDIATE (' \n" +
+           "        CREATE TABLE nodb_multi_clob ( \n" +
+           "            id    NUMBER, \n" +
+           "            c1    CLOB, \n" +
+           "            c2    CLOB, \n" +
+           "            c3    CLOB, \n" +
+           "            c4    CLOB, \n" +
+           "            c5    CLOB \n" +
+           "        ) \n" +
+           "    '); \n" +
+           "END; ";
+    await connection.execute(proc);
   }); // before
 
-  after(function(done) {
-    async.series([
-      function(cb) {
-        connection.execute(
-          "DROP TABLE nodb_multi_clob PURGE",
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.execute(
-          "DROP TABLE nodb_multi_blob PURGE",
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    ], done);
+  after(async function() {
+    await connection.execute("DROP TABLE nodb_multi_clob PURGE");
+    await connection.execute("DROP TABLE nodb_multi_blob PURGE");
+    await connection.close();
   }); // after
 
-  var lobInsert = function(sql, bindv, inFileName, cb) {
-
-    connection.execute(
-      sql,
-      bindv,
-      { autoCommit: false },
-      function(err, result) {
-        should.not.exist(err);
-
-        var lobArr = new Array();
-
-        // put lobbv1..5 to lobArr
-        for (var item in result.outBinds) {
-          lobArr.push(result.outBinds[item][0]);
-        }
-
-        async.eachSeries(
-          lobArr,
-          function(lob, callback) {
-            var inStream = fs.createReadStream(inFileName);
-
-            inStream.pipe(lob);
-
-            // one task completes
-            lob.on('finish', function() {
-              return callback();
-            });
-
-            lob.on('error', function(err) {
-              return callback(err);
-            });
-
-            inStream.on('error', function(err) {
-              return callback(err);
-            });
-          },
-          function(err) {
-            should.not.exist(err);
-
-            connection.commit(function(err) {
-              should.not.exist(err);
-              return cb();
-            });
-          }
-        ); // async.eachSeries
-
-      }
-    );
-
+  const lobInsert = async function(sql, bindv, inFileName) {
+    const result = await connection.execute(sql, bindv, { autoCommit: false });
+    for (let item in result.outBinds) {
+      const lob = result.outBinds[item][0];
+      const inStream = fs.createReadStream(inFileName);
+      await new Promise((resolve, reject) => {
+        inStream.on('error', reject);
+        lob.on('error', reject);
+        lob.on('finish', resolve);
+        inStream.pipe(lob);
+      });
+    }
+    await connection.commit();
   };
 
-  it('68.1 inserts multiple BLOBs', function(done) {
+  it('68.1 inserts multiple BLOBs', async function() {
 
-    var sql = "insert into nodb_multi_blob values(1, " +
+    const sql = "insert into nodb_multi_blob values(1, " +
               " EMPTY_BLOB(), EMPTY_BLOB(), EMPTY_BLOB(), EMPTY_BLOB(), EMPTY_BLOB() ) " +
               "  returning b1, b2, b3, b4, b5 into :lobbv1, :lobbv2, :lobbv3, :lobbv4, :lobbv5";
 
-    var bindvars = {
+    const bindvars = {
       lobbv1: { type: oracledb.BLOB, dir: oracledb.BIND_OUT },
       lobbv2: { type: oracledb.BLOB, dir: oracledb.BIND_OUT },
       lobbv3: { type: oracledb.BLOB, dir: oracledb.BIND_OUT },
@@ -218,19 +126,19 @@ describe('68. multipleLobInsertion.js', function() {
       lobbv5: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
     };
 
-    var inFileName = './test/fuzzydinosaur.jpg';
+    const inFileName = './test/fuzzydinosaur.jpg';
 
-    lobInsert(sql, bindvars, inFileName, done);
+    await lobInsert(sql, bindvars, inFileName);
 
   }); // 68.1
 
-  it('68.2 inserts multiple CLOBs', function(done) {
+  it('68.2 inserts multiple CLOBs', async function() {
 
-    var sql = "insert into nodb_multi_clob values(1, " +
+    const sql = "insert into nodb_multi_clob values(1, " +
               " EMPTY_CLOB(), EMPTY_CLOB(), EMPTY_CLOB(), EMPTY_CLOB(), EMPTY_CLOB() ) " +
               "  returning c1, c2, c3, c4, c5 into :lobbv1, :lobbv2, :lobbv3, :lobbv4, :lobbv5";
 
-    var bindvars = {
+    const bindvars = {
       lobbv1: { type: oracledb.CLOB, dir: oracledb.BIND_OUT },
       lobbv2: { type: oracledb.CLOB, dir: oracledb.BIND_OUT },
       lobbv3: { type: oracledb.CLOB, dir: oracledb.BIND_OUT },
@@ -238,10 +146,10 @@ describe('68. multipleLobInsertion.js', function() {
       lobbv5: { type: oracledb.CLOB, dir: oracledb.BIND_OUT }
     };
 
-    var inFileName = './test/clobexample.txt';
+    const inFileName = './test/clobexample.txt';
 
-    lobInsert(sql, bindvars, inFileName, done);
+    await lobInsert(sql, bindvars, inFileName);
 
-  });
+  }); // 68.2
 
 });

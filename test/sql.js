@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -29,9 +29,6 @@
  *   generate sql
  *****************************************************************************/
 'use strict';
-
-const should   = require('should');
-const async    = require('async');
 
 const sql = exports;
 module.exports = sql;
@@ -69,97 +66,5 @@ sql.createTable = function(tableName, dataType) {
                       )
                   ');
                END;`;
-  return sql;
-};
-
-sql.createAllTable = function(tableName, dataTypeArray) {
-  let sql = `BEGIN
-                 DECLARE
-                     e_table_missing EXCEPTION;
-                     PRAGMA EXCEPTION_INIT(e_table_missing, -00942);
-                 BEGIN
-                     EXECUTE IMMEDIATE ('DROP TABLE ` + tableName + ` PURGE' );
-                 EXCEPTION
-                     WHEN e_table_missing
-                     THEN NULL;
-                 END;
-                 EXECUTE IMMEDIATE ( '
-                     CREATE TABLE ` + tableName + ` (
-                         id    NUMBER, `;
-
-  async.eachSeries(dataTypeArray, function(element, cb) {
-    const index = dataTypeArray.indexOf(element);
-    const length = dataTypeArray.length;
-    const col_name = "col_" + (index + 1);
-    let col_type = element;
-    let  isLast;
-
-    if (col_type === "CHAR") {
-      element = element + "(2000)";
-    }
-    if (col_type === "NCHAR") {
-      element = element + "(1000)";
-    }
-    if (col_type === "VARCHAR2") {
-      element = element + "(4000)";
-    }
-    if (col_type === "RAW") {
-      element = element + "(2000)";
-    }
-    isLast = (index == (length - 1)) ? true : false;
-    sql = appendSql(sql, col_name, element, isLast);
-    cb();
-  }, function(err) {
-    should.not.exist(err);
-  });
-  sql = sql +
-        `        )
-            ');
-        END;`;
-  return sql;
-};
-
-sql.executeSql = function(connection, sql, bindVar, option, callback) {
-  connection.execute(
-    sql,
-    bindVar,
-    option,
-    function(err) {
-      if (err) {
-        let stack = new Error().stack;
-        console.error(err);
-        console.error(stack);
-      }
-      should.not.exist(err);
-      callback(err);
-    }
-  );
-};
-
-sql.createRowid = function(connection, rowid_type, object_number, relative_fno, block_number, row_number, callback) {
-// Parameter       Description
-// rowid_type      Type (restricted or extended), set the rowid_type parameter to 0 for a restricted ROWID. Set it to 1 to create an extended ROWID.
-//                 If you specify rowid_type as 0, then the required object_number parameter is ignored, and ROWID_CREATE returns a restricted ROWID.
-// object_number   The data object number for the ROWID. For a restricted ROWID, use the ROWID_OBJECT_UNDEFINED constant.
-// relative_fno    The relative file number for the ROWID.
-// block_number    The block number for the ROWID.
-// row_number      The row number for the ROWID.
-  let myRowid = "";
-  connection.execute(
-    "select DBMS_ROWID.ROWID_CREATE(" + rowid_type + ", " + object_number + ", " + relative_fno + ", " + block_number + ", " + row_number + ") create_rowid from dual",
-    function(err, result) {
-      should.not.exist(err);
-      myRowid = result.rows[0][0];
-      callback(myRowid);
-    }
-  );
-};
-
-const appendSql = function(sql, col_name, col_type, isLast) {
-  if (isLast === true) {
-    sql = sql + "            " + col_name + " " + col_type + " \n";
-  } else {
-    sql = sql + "            " + col_name + " " + col_type + ", \n";
-  }
   return sql;
 };

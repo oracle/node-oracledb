@@ -252,3 +252,4 @@ spec:
   - test/aq4.js
   - test/procAndFuncs.js
   - test/poolTimeout.js
+  - test/binding_buffer_string.js

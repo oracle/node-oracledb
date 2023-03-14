@@ -746,10 +746,10 @@ describe('4. binding.js', function() {
         nullable: true,
         byteSize: 1
       };
-      assert.deepEqual(cursor.metaData, [expectedBind]);
+      assert.deepStrictEqual(cursor.metaData, [expectedBind]);
 
       const rows = await cursor.getRows();
-      assert.deepEqual(rows, [ [ 'X' ] ]);
+      assert.deepStrictEqual(rows, [ [ 'X' ] ]);
     });
   });
 });

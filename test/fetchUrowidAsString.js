@@ -34,650 +34,472 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const async    = require('async');
-const should   = require('should');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
 
 describe('116. fetchUrowidAsString.js', function() {
 
   let connection = null;
-  var tableName = "nodb_rowid";
-  var dataArray = random.getRandomNumArray(30);
-  var numRows = dataArray.length;  // number of rows to return from each call to getRows()
+  const tableName = "nodb_rowid";
+  let dataArray = random.getRandomNumArray(30);
+  let numRows = dataArray.length;  // number of rows to return from each call to getRows()
 
-  var proc_create_table = "BEGIN \n" +
-                          "    DECLARE \n" +
-                          "        e_table_missing EXCEPTION; \n" +
-                          "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
-                          "        BEGIN \n" +
-                          "            EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE' ); \n" +
-                          "        EXCEPTION \n" +
-                          "            WHEN e_table_missing \n" +
-                          "            THEN NULL; \n" +
-                          "        END; \n" +
-                          "        EXECUTE IMMEDIATE ( ' \n" +
-                          "            CREATE TABLE " + tableName + " ( \n" +
-                          "                num      NUMBER, \n" +
-                          "                content  UROWID \n" +
-                          "            ) \n" +
-                          "        '); \n" +
-                          "END;  ";
-  var drop_table = "DROP TABLE " + tableName + " PURGE";
+  const proc_create_table = "BEGIN \n" +
+                            "    DECLARE \n" +
+                            "        e_table_missing EXCEPTION; \n" +
+                            "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
+                            "        BEGIN \n" +
+                            "            EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE' ); \n" +
+                            "        EXCEPTION \n" +
+                            "            WHEN e_table_missing \n" +
+                            "            THEN NULL; \n" +
+                            "        END; \n" +
+                            "        EXECUTE IMMEDIATE ( ' \n" +
+                            "            CREATE TABLE " + tableName + " ( \n" +
+                            "                num      NUMBER, \n" +
+                            "                content  UROWID \n" +
+                            "            ) \n" +
+                            "        '); \n" +
+                            "END;  ";
+  const drop_table = "DROP TABLE " + tableName + " PURGE";
 
-  before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+  before('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after('release connection', function(done) {
-    connection.close(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after('release connection', async function() {
+    await connection.close();
   });
 
-  var insertData = function(connection, tableName, callback) {
-    async.eachSeries(dataArray, function(element, cb) {
-      var sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
-      connection.execute(
-        sql,
-        function(err) {
-          should.not.exist(err);
-          cb();
-        }
-      );
-    }, function(err) {
-      should.not.exist(err);
-      callback();
-    });
+  const insertData = async function(connection, tableName) {
+    for (let element in dataArray) {
+      const sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
+      await connection.execute(sql);
+    }
   };
 
-  var updateDate = function(connection, tableName, callback) {
-    async.eachSeries(dataArray, function(element, cb) {
-      var sql = "UPDATE " + tableName + " T SET content = T.ROWID where num = " + element;
-      connection.execute(
-        sql,
-        function(err) {
-          should.not.exist(err);
-          cb();
-        }
-      );
-    }, function(err) {
-      should.not.exist(err);
-      callback();
-    });
+  const updateData = async function(connection, tableName) {
+    for (let element in dataArray) {
+      const sql = "UPDATE " + tableName + " T SET content = T.ROWID where num = " + element;
+      await connection.execute(sql);
+    }
   };
 
   describe('116.1 works with fetchInfo option', function() {
-    var maxRowBak = oracledb.maxRows;
-    var option = { fetchInfo: { "CONTENT": { type: oracledb.STRING } } };
-    before(function(done) {
-      async.series([
-        function makeTable(callback) {
-          connection.execute(
-            proc_create_table,
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function insertRow(callback) {
-          insertData(connection, tableName, callback);
-        },
-        function fillRowid(callback) {
-          updateDate(connection, tableName, callback);
-        }
-      ], done);
+    let maxRowBak = oracledb.maxRows;
+    let option = { fetchInfo: { "CONTENT": { type: oracledb.STRING } } };
+    before(async function() {
+      await connection.execute(proc_create_table);
+      await insertData(connection, tableName);
+      await updateData(connection, tableName);
     });
 
-    after(function(done) {
+    after(async function() {
       oracledb.maxRows = maxRowBak;
-      connection.execute(
-        drop_table,
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+      await connection.execute(drop_table);
     });
 
-    it('116.1.1 fetchInfo', function(done) {
-      test1(option, false, false, done);
+    it('116.1.1 fetchInfo', async function() {
+      await test1(option, false);
     });
 
-    it('116.1.2 fetchInfo, and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.1.2 fetchInfo, and oracledb.maxRows < actual number of rows', async function() {
       oracledb.maxRows = numRows - 1;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.1.3 fetchInfo, and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.1.3 fetchInfo, and oracledb.maxRows = actual number of rows', async function() {
       oracledb.maxRows = numRows;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.1.4 fetchInfo, and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.1.4 fetchInfo, and oracledb.maxRows > actual number of rows', async function() {
       oracledb.maxRows = numRows + 1;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.1.5 fetchInfo, queryStream() and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.1.5 fetchInfo, queryStream() and oracledb.maxRows < actual number of rows', async function() {
       oracledb.maxRows = numRows - 1;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.1.6 fetchInfo, queryStream() and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.1.6 fetchInfo, queryStream() and oracledb.maxRows = actual number of rows', async function() {
       oracledb.maxRows = numRows;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.1.7 fetchInfo, queryStream() and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.1.7 fetchInfo, queryStream() and oracledb.maxRows > actual number of rows', async function() {
       oracledb.maxRows = numRows + 1;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.1.8 fetchInfo, resultSet = true', function(done) {
-      var option_rs = {
+    it('116.1.8 fetchInfo, resultSet = true', async function() {
+      let option_rs = {
         resultSet: true,
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
       };
-      test2(option_rs, false, false, done);
+      await test2(option_rs, false);
     });
 
   });
 
   describe('116.2 works with fetchInfo and outFormat = OBJECT', function() {
-    var maxRowBak = oracledb.maxRows;
-    var option = {
+    let maxRowBak = oracledb.maxRows;
+    let option = {
       outFormat: oracledb.OUT_FORMAT_OBJECT,
       fetchInfo: { "CONTENT": { type: oracledb.STRING } }
     };
-    before(function(done) {
-      async.series([
-        function makeTable(callback) {
-          connection.execute(
-            proc_create_table,
-            function(err) {
-              should.not.exist(err);
-              callback();
-            });
-        },
-        function insertRow(callback) {
-          insertData(connection, tableName, callback);
-        },
-        function fillRowid(callback) {
-          updateDate(connection, tableName, callback);
-        }
-      ], done);
+    before(async function() {
+      await connection.execute(proc_create_table);
+      await insertData(connection, tableName);
+      await updateData(connection, tableName);
     });
 
-    after(function(done) {
+    after(async function() {
       oracledb.maxRows = maxRowBak;
-      connection.execute(
-        drop_table,
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+      await connection.execute(drop_table);
     });
 
-    it('116.2.1 fetchInfo with outFormat = OBJECT', function(done) {
-      test1(option, true, false, done);
+    it('116.2.1 fetchInfo with outFormat = OBJECT', async function() {
+      await test1(option, true);
     });
 
-    it('116.2.2 fetchInfo, outFormat = OBJECT, and resultSet = true', function(done) {
-      var option_rs = {
+    it('116.2.2 fetchInfo, outFormat = OBJECT, and resultSet = true', async function() {
+      let option_rs = {
         resultSet: true,
         outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
       };
-      test2(option_rs, true, false, done);
+      await test2(option_rs, true);
     });
 
-    it('116.2.3 fetchInfo, outFormat = OBJECT, and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.2.3 fetchInfo, outFormat = OBJECT, and oracledb.maxRows < actual number of rows', async function() {
       oracledb.maxRows = numRows - 1;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.2.4 fetchInfo, outFormat = OBJECT, and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.2.4 fetchInfo, outFormat = OBJECT, and oracledb.maxRows = actual number of rows', async function() {
       oracledb.maxRows = numRows;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.2.5 fetchInfo, outFormat = OBJECT, and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.2.5 fetchInfo, outFormat = OBJECT, and oracledb.maxRows > actual number of rows', async function() {
       oracledb.maxRows = numRows + 1;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.2.6 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.2.6 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows < actual number of rows', async function() {
       oracledb.maxRows = numRows - 1;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.2.7 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.2.7 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows = actual number of rows', async function() {
       oracledb.maxRows = numRows;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.2.8 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.2.8 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows > actual number of rows', async function() {
       oracledb.maxRows = numRows + 1;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
   });
 
   describe('116.3 works with fetchInfo and outFormat = ARRAY', function() {
-    var maxRowBak = oracledb.maxRows;
-    var option = {
+    let maxRowBak = oracledb.maxRows;
+    let option = {
       outFormat: oracledb.OUT_FORMAT_ARRAY,
       fetchInfo: { "CONTENT": { type: oracledb.STRING } }
     };
-    before(function(done) {
-      async.series([
-        function makeTable(callback) {
-          connection.execute(
-            proc_create_table,
-            function(err) {
-              should.not.exist(err);
-              callback();
-            });
-        },
-        function insertRow(callback) {
-          insertData(connection, tableName, callback);
-        },
-        function fillRowid(callback) {
-          updateDate(connection, tableName, callback);
-        }
-      ], done);
+    before(async function() {
+      await connection.execute(proc_create_table);
+      await insertData(connection, tableName);
+      await updateData(connection, tableName);
     });
 
-    after(function(done) {
+    after(async function() {
       oracledb.maxRows = maxRowBak;
-      connection.execute(
-        drop_table,
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+      await connection.execute(drop_table);
     });
 
-    it('116.3.1 fetchInfo', function(done) {
-      test1(option, false, true, done);
+    it('116.3.1 fetchInfo', async function() {
+      await test1(option, false);
     });
 
-    it('116.3.2 fetchInfo, and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.3.2 fetchInfo, and oracledb.maxRows < actual number of rows', async function() {
       oracledb.maxRows = numRows - 1;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.3.3 fetchInfo, and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.3.3 fetchInfo, and oracledb.maxRows = actual number of rows', async function() {
       oracledb.maxRows = numRows;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.3.4 fetchInfo, and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.3.4 fetchInfo, and oracledb.maxRows > actual number of rows', async function() {
       oracledb.maxRows = numRows + 1;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.3.5 fetchInfo, queryStream() and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.3.5 fetchInfo, queryStream() and oracledb.maxRows < actual number of rows', async function() {
       oracledb.maxRows = numRows - 1;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.3.6 fetchInfo, queryStream() and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.3.6 fetchInfo, queryStream() and oracledb.maxRows = actual number of rows', async function() {
       oracledb.maxRows = numRows;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.3.7 fetchInfo, queryStream() and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.3.7 fetchInfo, queryStream() and oracledb.maxRows > actual number of rows', async function() {
       oracledb.maxRows = numRows + 1;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.3.8 fetchInfo, resultSet = true', function(done) {
-      var option_rs = {
+    it('116.3.8 fetchInfo, resultSet = true', async function() {
+      let option_rs = {
         resultSet: true,
         outFormat: oracledb.OUT_FORMAT_ARRAY,
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
       };
-      test2(option_rs, false, true, done);
+      await test2(option_rs, false);
     });
   });
 
   describe('116.4 fetch as string by default', function() {
-    var maxRowBak = oracledb.maxRows;
-    var option = {};
-    before(function(done) {
-      async.series([
-        function makeTable(callback) {
-          connection.execute(
-            proc_create_table,
-            function(err) {
-              should.not.exist(err);
-              callback();
-            });
-        },
-        function insertRow(callback) {
-          insertData(connection, tableName, callback);
-        },
-        function fillRowid(callback) {
-          updateDate(connection, tableName, callback);
-        }
-      ], done);
+    let maxRowBak = oracledb.maxRows;
+    let option = {};
+    before(async function() {
+      await connection.execute(proc_create_table);
+      await insertData(connection, tableName);
+      await updateData(connection, tableName);
     });
 
-    after(function(done) {
+    after(async function() {
       oracledb.maxRows = maxRowBak;
-      connection.execute(
-        drop_table,
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+      await connection.execute(drop_table);
 
     });
 
-    it('116.4.1 fetch by default', function(done) {
-      test1(option, false, false, done);
+    it('116.4.1 fetch by default', async function() {
+      await test1(option, false);
     });
 
-    it('116.4.2 oracledb.maxRows < actual number of rows', function(done) {
+    it('116.4.2 oracledb.maxRows < actual number of rows', async function() {
       oracledb.maxRows = numRows - 1;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.4.3 oracledb.maxRows = actual number of rows', function(done) {
+    it('116.4.3 oracledb.maxRows = actual number of rows', async function() {
       oracledb.maxRows = numRows;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.4.4 oracledb.maxRows > actual number of rows', function(done) {
+    it('116.4.4 oracledb.maxRows > actual number of rows', async function() {
       oracledb.maxRows = numRows + 1;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.4.5 queryStream() and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.4.5 queryStream() and oracledb.maxRows < actual number of rows', async function() {
       oracledb.maxRows = numRows - 1;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.4.6 queryStream() and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.4.6 queryStream() and oracledb.maxRows = actual number of rows', async function() {
       oracledb.maxRows = numRows;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.4.7 queryStream() and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.4.7 queryStream() and oracledb.maxRows > actual number of rows', async function() {
       oracledb.maxRows = numRows + 1;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.4.8 resultSet = true', function(done) {
-      var option_rs = {
+    it('116.4.8 resultSet = true', async function() {
+      let option_rs = {
         resultSet: true,
       };
-      test2(option_rs, false, false, done);
+      await test2(option_rs, false);
     });
 
   });
 
   describe('116.5 fetch as string by default with outFormat = OBJECT', function() {
-    var maxRowBak = oracledb.maxRows;
-    var option = { outFormat: oracledb.OUT_FORMAT_OBJECT };
-    before(function(done) {
-      async.series([
-        function makeTable(callback) {
-          connection.execute(
-            proc_create_table,
-            function(err) {
-              should.not.exist(err);
-              callback();
-            });
-        },
-        function insertRow(callback) {
-          insertData(connection, tableName, callback);
-        },
-        function fillRowid(callback) {
-          updateDate(connection, tableName, callback);
-        }
-      ], done);
+    let maxRowBak = oracledb.maxRows;
+    let option = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+    before(async function() {
+      await connection.execute(proc_create_table);
+      await insertData(connection, tableName);
+      await updateData(connection, tableName);
     });
 
-    after(function(done) {
+    after(async function() {
       oracledb.maxRows = maxRowBak;
-      connection.execute(
-        drop_table,
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+      await connection.execute(drop_table);
 
     });
 
-    it('116.5.1 fetch by default', function(done) {
-      test1(option, true, false, done);
+    it('116.5.1 fetch by default', async function() {
+      await test1(option, true);
     });
 
-    it('116.5.2 oracledb.maxRows < actual number of rows', function(done) {
+    it('116.5.2 oracledb.maxRows < actual number of rows', async function() {
       oracledb.maxRows = numRows - 1;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.5.3 oracledb.maxRows = actual number of rows', function(done) {
+    it('116.5.3 oracledb.maxRows = actual number of rows', async function() {
       oracledb.maxRows = numRows;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.5.4 oracledb.maxRows > actual number of rows', function(done) {
+    it('116.5.4 oracledb.maxRows > actual number of rows', async function() {
       oracledb.maxRows = numRows + 1;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.5.5 queryStream() and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.5.5 queryStream() and oracledb.maxRows < actual number of rows', async function() {
       oracledb.maxRows = numRows - 1;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.5.6 queryStream() and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.5.6 queryStream() and oracledb.maxRows = actual number of rows', async function() {
       oracledb.maxRows = numRows;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.5.7 queryStream() and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.5.7 queryStream() and oracledb.maxRows > actual number of rows', async function() {
       oracledb.maxRows = numRows + 1;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.5.8 resultSet = true', function(done) {
-      var option_rs = {
+    it('116.5.8 resultSet = true', async function() {
+      let option_rs = {
         resultSet: true,
         outFormat: oracledb.OUT_FORMAT_OBJECT
       };
-      test2(option_rs, true, false, done);
+      await test2(option_rs, true);
     });
 
   });
 
   describe('116.6 fetch as string by default with outFormat = ARRAY', function() {
-    var maxRowBak = oracledb.maxRows;
-    var option = { outFormat: oracledb.OUT_FORMAT_ARRAY };
-    before(function(done) {
-      async.series([
-        function makeTable(callback) {
-          connection.execute(
-            proc_create_table,
-            function(err) {
-              should.not.exist(err);
-              callback();
-            });
-        },
-        function insertRow(callback) {
-          insertData(connection, tableName, callback);
-        },
-        function fillRowid(callback) {
-          updateDate(connection, tableName, callback);
-        }
-      ], done);
+    let maxRowBak = oracledb.maxRows;
+    let option = { outFormat: oracledb.OUT_FORMAT_ARRAY };
+    before(async function() {
+      await connection.execute(proc_create_table);
+      await insertData(connection, tableName);
+      await updateData(connection, tableName);
     });
 
-    after(function(done) {
+    after(async function() {
       oracledb.maxRows = maxRowBak;
-      connection.execute(
-        drop_table,
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
-
+      await connection.execute(drop_table);
     });
 
-    it('116.6.1 fetch by default', function(done) {
-      test1(option, false, true, done);
+    it('116.6.1 fetch by default', async function() {
+      await test1(option, false);
     });
 
-    it('116.6.2 oracledb.maxRows < actual number of rows', function(done) {
+    it('116.6.2 oracledb.maxRows < actual number of rows', async function() {
       oracledb.maxRows = numRows - 1;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.6.3 oracledb.maxRows = actual number of rows', function(done) {
+    it('116.6.3 oracledb.maxRows = actual number of rows', async function() {
       oracledb.maxRows = numRows;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.6.4 oracledb.maxRows > actual number of rows', function(done) {
+    it('116.6.4 oracledb.maxRows > actual number of rows', async function() {
       oracledb.maxRows = numRows + 1;
-      testMaxRow(option, done);
+      await testMaxRow(option);
     });
 
-    it('116.6.5 queryStream() and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.6.5 queryStream() and oracledb.maxRows < actual number of rows', async function() {
       oracledb.maxRows = numRows - 1;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.6.6 queryStream() and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.6.6 queryStream() and oracledb.maxRows = actual number of rows', async function() {
       oracledb.maxRows = numRows;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.6.7 queryStream() and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.6.7 queryStream() and oracledb.maxRows > actual number of rows', async function() {
       oracledb.maxRows = numRows + 1;
-      testQueryStream(option, done);
+      await testQueryStream(option);
     });
 
-    it('116.6.8 resultSet = true', function(done) {
-      var option_rs = {
+    it('116.6.8 resultSet = true', async function() {
+      let option_rs = {
         resultSet: true,
         outFormat: oracledb.OUT_FORMAT_ARRAY,
       };
-      test2(option_rs, false, false, done);
+      await test2(option_rs, false);
     });
 
   });
 
-  function test1(option, object, array, callback) {
-    async.eachSeries(dataArray, function(element, cb) {
-      var sql = "select content,rowid from " + tableName + " where num = " + element;
-      connection.execute(
-        sql,
-        [],
-        option,
-        function(err, result) {
-          should.not.exist(err);
-          var resultVal_1 = result.rows[0][0];
-          var resultVal_2 = result.rows[0][1];
-          if (object === true) {
-            resultVal_1 = result.rows[0].CONTENT;
-            resultVal_2 = result.rows[0].ROWID;
-          }
-          should.strictEqual(typeof resultVal_1, "string");
-          should.strictEqual(resultVal_1, resultVal_2);
-          cb();
-        }
-      );
-    }, function(err) {
-      should.not.exist(err);
-      callback();
-    });
-  }
-
-  function test2(option, object, array, callback) {
-    async.eachSeries(dataArray, function(element, cb) {
-      var sql = "select content,rowid from " + tableName + " where num = " + element;
-      connection.execute(
-        sql,
-        [],
-        option,
-        function(err, result) {
-          should.not.exist(err);
-          result.resultSet.getRow(
-            function(err, row) {
-              var resultVal_1 = row[0];
-              var resultVal_2 = row[1];
-              if (object === true) {
-                resultVal_1 = row.CONTENT;
-                resultVal_2 = row.ROWID;
-              }
-              should.strictEqual(typeof resultVal_1, "string");
-              should.strictEqual(resultVal_1, resultVal_2);
-              result.resultSet.close(function(err) {
-                should.not.exist(err);
-                cb();
-              });
-            }
-          );
-        }
-      );
-    }, function(err) {
-      should.not.exist(err);
-      callback();
-    });
-  }
-
-  function testMaxRow(option, callback) {
-    var sql = "select CONTENT from " + tableName;
-    connection.execute(
-      sql,
-      [],
-      option,
-      function(err, result) {
-        should.not.exist(err);
-        var rowExpected = (oracledb.maxRows >= numRows) ? numRows : oracledb.maxRows;
-        should.strictEqual(result.rows.length, rowExpected);
-        callback();
+  async function test1(option, object) {
+    for (let element in dataArray) {
+      const sql = "select content,rowid from " + tableName + " where num = " + element;
+      let result = await connection.execute(sql, [], option);
+      let resultVal_1 = result.rows[0][0];
+      let resultVal_2 = result.rows[0][1];
+      if (object === true) {
+        resultVal_1 = result.rows[0].CONTENT;
+        resultVal_2 = result.rows[0].ROWID;
       }
-    );
+      assert.strictEqual(typeof resultVal_1, "string");
+      assert.strictEqual(resultVal_1, resultVal_2);
+
+    }
   }
 
-  function testQueryStream(option, callback) {
-    var sql = "select CONTENT from " + tableName;
-    var stream = connection.queryStream(
-      sql,
-      [],
-      option
-    );
+  async function test2(option, object) {
+    for (let element in dataArray) {
+      const sql = "select content,rowid from " + tableName + " where num = " + element;
+      let result = await connection.execute(sql, [], option);
+      let row = await result.resultSet.getRow();
+      let resultVal_1 = row[0];
+      let resultVal_2 = row[1];
 
-    var result = [];
-    stream.on('data', function(data) {
-      should.exist(data);
-      result.push(data);
+      if (object === true) {
+        resultVal_1 = row.CONTENT;
+        resultVal_2 = row.ROWID;
+      }
+      assert.strictEqual(typeof resultVal_1, "string");
+      assert.strictEqual(resultVal_1, resultVal_2);
+
+      await result.resultSet.close();
+    }
+  }
+
+  async function testMaxRow(option) {
+    let sql = "select CONTENT from " + tableName;
+    let result = await connection.execute(sql, [], option);
+    let rowExpected = (oracledb.maxRows >= numRows) ? numRows : oracledb.maxRows;
+    assert.strictEqual(result.rows.length, rowExpected);
+  }
+
+  async function testQueryStream(option) {
+    const sql = "select CONTENT from " + tableName;
+    const stream = await connection.queryStream(sql, [], option);
+
+    let result = [];
+    await new Promise((resolve, reject) => {
+      stream.on('error', reject);
+      stream.on('end', function() {
+        assert.strictEqual(result.length, numRows);
+        stream.destroy();
+      });
+      stream.on('close', resolve);
+      stream.on('data', function(data) {
+        assert(data);
+        result.push(data);
+      });
     });
 
-    stream.on('end', function() {
-      should.strictEqual(result.length, numRows);
-      stream.destroy();
-    });
-
-    stream.on('close', function() {
-      callback();
-    });
   }
 });

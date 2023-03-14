@@ -109,7 +109,7 @@ describe('85. fetchClobAsString2.js', function() {
   const compareStrings = function(resultVal, specialStr, content, contentLength) {
     let specialStrLen = specialStr.length;
     let resultLen = resultVal.length;
-    assert.equal(resultLen, contentLength);
+    assert.strictEqual(resultLen, contentLength);
     assert.strictEqual(resultVal.substring(0, specialStrLen), specialStr);
     assert.strictEqual(resultVal.substring(resultLen - specialStrLen, resultLen), specialStr);
   };
@@ -137,7 +137,7 @@ describe('85. fetchClobAsString2.js', function() {
       );
       let resultVal = result.rows[0][1];
       if (specialStr === null) {
-        assert.equal(resultVal, null);
+        assert.strictEqual(resultVal, null);
       } else {
         compareStrings(resultVal, specialStr, insertContent, insertContentLength);
       }
@@ -543,7 +543,7 @@ describe('85. fetchClobAsString2.js', function() {
       );
       let resultVal = result.rows[0].C;
       if (specialStr === null) {
-        assert.equal(resultVal, null);
+        assert.strictEqual(resultVal, null);
       } else {
         compareStrings(resultVal, specialStr, insertContent, insertContentLength);
       }
@@ -824,7 +824,7 @@ describe('85. fetchClobAsString2.js', function() {
       let resultVal = row.C;
 
       if (specialStr === null) {
-        assert.equal(resultVal, null);
+        assert.strictEqual(resultVal, null);
       } else {
         compareStrings(resultVal, specialStr, insertContent, insertContentLength);
       }
@@ -1092,7 +1092,7 @@ describe('85. fetchClobAsString2.js', function() {
       );
       let resultVal = result.rows[0][1];
       if (specialStr === null) {
-        assert.equal(resultVal, null);
+        assert.strictEqual(resultVal, null);
       } else {
         compareStrings(resultVal, specialStr, insertContent, insertContentLength);
       }
@@ -1370,7 +1370,7 @@ describe('85. fetchClobAsString2.js', function() {
 
       let resultVal = row[1];
       if (specialStr === null) {
-        assert.equal(resultVal, null);
+        assert.strictEqual(resultVal, null);
       } else {
         compareStrings(resultVal, specialStr, insertContent, insertContentLength);
       }

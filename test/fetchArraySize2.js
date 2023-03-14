@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -38,8 +38,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
-const async    = require('async');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
 describe("149. fetchArraySize2.js", function() {
@@ -76,210 +75,166 @@ describe("149. fetchArraySize2.js", function() {
 
   const drop_table = "DROP TABLE " + tableName + " PURGE";
 
-  before(function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.strictEqual(default_fetcArraySize, 100);
-      should.strictEqual(default_maxRows, 0);
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
+    assert.strictEqual(default_fetcArraySize, 100);
+    assert.strictEqual(default_maxRows, 0);
   });
 
-  after(function(done) {
-    connection.close(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after(async function() {
+    await connection.close();
   });
 
   describe("149.1 basic fetch with different maxRows and oracledb.fetchArraySize", function() {
 
-    before(function(done) {
-      connection.execute(
-        create_table,
-        function(err) {
-          should.not.exist(err);
-          done() ;
-        }
-      );
+    before(async function() {
+      await connection.execute(create_table);
     });
 
-    after(function(done) {
-      connection.execute(
-        drop_table,
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after(async function() {
+      await connection.execute(drop_table);
     });
 
-    afterEach(function(done) {
+    afterEach(function() {
       oracledb.fetchArraySize = default_fetcArraySize;
       oracledb.maxRows = default_maxRows;
-      done();
     });
 
-    const basicFetch = function(fetchArraySizeVal, maxRowsVal, affectedID, cb) {
+    const basicFetch = async function(fetchArraySizeVal, maxRowsVal, affectedID) {
       oracledb.fetchArraySize = fetchArraySizeVal;
       oracledb.maxRows = maxRowsVal;
-      connection.execute(
-        "SELECT * FROM " + tableName + " WHERE id > " + affectedID + " ORDER BY id",
-        function(err, result) {
-          should.not.exist(err);
-          let resultLenExpected = maxRowsVal > (tableSize - affectedID) ? (tableSize - affectedID) : maxRowsVal;
-          if (maxRowsVal === 0) resultLenExpected = tableSize - affectedID;
-          should.strictEqual(result.rows.length, resultLenExpected);
-          verifyResult(result.rows, affectedID, cb);
-        }
+      let result = await connection.execute(
+        "SELECT * FROM " + tableName + " WHERE id > " + affectedID + " ORDER BY id"
       );
+      let resultLenExpected = maxRowsVal > (tableSize - affectedID) ? (tableSize - affectedID) : maxRowsVal;
+      if (maxRowsVal === 0) resultLenExpected = tableSize - affectedID;
+      assert.strictEqual(result.rows.length, resultLenExpected);
+      verifyResult(result.rows, affectedID);
     };
 
-    const verifyResult = function(result, affectedID, callback) {
-      async.forEach(result, function(element, cb) {
-        const index = result.indexOf(element);
-        verifyEachRow(index + 1 + affectedID, element);
-        cb();
-      }, function(err) {
-        should.not.exist(err);
-        callback();
-      });
+    const verifyResult = function(result, affectedID) {
+      for (let element of result) {
+        const index = result.indexOf(element) + 1 + affectedID;
+        assert.strictEqual(element[1], String(index));
+        assert.strictEqual(element[0], index);
+      }
     };
 
-    const verifyEachRow = function(index, element) {
-      should.strictEqual(element[1], String(index));
-      should.strictEqual(element[0], index);
-    };
-
-    it("149.1.1 maxRows > table size > oracledb.fetchArraySize", function(done) {
+    it("149.1.1 maxRows > table size > oracledb.fetchArraySize", async function() {
       const fetchArraySizeVal = tableSize - 1;
       const maxRowsVal = tableSize + 1;
       const affectedID = 0;
-      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await basicFetch(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.1.2 maxRows > oracledb.fetchArraySize > table size", function(done) {
+    it("149.1.2 maxRows > oracledb.fetchArraySize > table size", async function() {
       const fetchArraySizeVal = tableSize - 99;
       const maxRowsVal = tableSize - 7;
       const affectedID = 20;
-      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await basicFetch(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.1.3 table size > maxRows > oracledb.fetchArraySize", function(done) {
+    it("149.1.3 table size > maxRows > oracledb.fetchArraySize", async function() {
       const fetchArraySizeVal = tableSize - 100;
       const maxRowsVal = tableSize - 2;
       const affectedID = 10;
-      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await basicFetch(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.1.4 table size > oracledb.fetchArraySize > maxRow", function(done) {
+    it("149.1.4 table size > oracledb.fetchArraySize > maxRow", async function() {
       const fetchArraySizeVal = tableSize - 3;
       const maxRowsVal = tableSize - 77;
       const affectedID = 50;
-      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await basicFetch(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.1.5 maxRows = oracledb.fetchArraySize < table size", function(done) {
+    it("149.1.5 maxRows = oracledb.fetchArraySize < table size", async function() {
       const fetchArraySizeVal = tableSize - 110;
       const maxRowsVal = tableSize - 110;
       const affectedID = 20;
-      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await basicFetch(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.1.6 maxRows = oracledb.fetchArraySize = table size", function(done) {
+    it("149.1.6 maxRows = oracledb.fetchArraySize = table size", async function() {
       const fetchArraySizeVal = tableSize;
       const maxRowsVal = tableSize;
       const affectedID = 0;
-      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await basicFetch(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.1.7 maxRows = oracledb.fetchArraySize > table size", function(done) {
+    it("149.1.7 maxRows = oracledb.fetchArraySize > table size", async function() {
       const fetchArraySizeVal = tableSize + 9999;
       const maxRowsVal = tableSize + 9999;
       const affectedID = 10;
-      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await basicFetch(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.1.8 maxRows = oracledb.fetchArraySize/10", function(done) {
+    it("149.1.8 maxRows = oracledb.fetchArraySize/10", async function() {
       const fetchArraySizeVal = tableSize / 10 - 1;
       const maxRowsVal = tableSize / 10;
       const affectedID = 0;
-      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await basicFetch(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.1.9 maxRows = 10 * oracledb.fetchArraySize", function(done) {
+    it("149.1.9 maxRows = 10 * oracledb.fetchArraySize", async function() {
       const fetchArraySizeVal = 90;
       const maxRowsVal = 900;
       const affectedID = 50;
-      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await basicFetch(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.1.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10", function(done) {
+    it("149.1.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10", async function() {
       const fetchArraySizeVal = tableSize / 10;
       const maxRowsVal = tableSize / 10 + 1;
       const affectedID = 0;
-      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await basicFetch(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.1.11 maxRows = 0, fetchArraySize = table size ", function(done) {
+    it("149.1.11 maxRows = 0, fetchArraySize = table size ", async function() {
       const fetchArraySizeVal = tableSize;
       const maxRowsVal = 0;
       const affectedID = 0;
-      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await basicFetch(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.1.12 maxRows = 9999999, fetchArraySize = table size ", function(done) {
+    it("149.1.12 maxRows = 9999999, fetchArraySize = table size ", async function() {
       const fetchArraySizeVal = tableSize;
       const maxRowsVal = 9999999;
       const affectedID = 0;
-      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await basicFetch(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.1.13 maxRows = (table size - 1), fetchArraySize = table size ", function(done) {
+    it("149.1.13 maxRows = (table size - 1), fetchArraySize = table size ", async function() {
       const fetchArraySizeVal = tableSize;
       const maxRowsVal = tableSize - 1;
       const affectedID = 0;
-      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await basicFetch(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.1.14 fetchArraySize = (table size - 1), maxRows = table size ", function(done) {
+    it("149.1.14 fetchArraySize = (table size - 1), maxRows = table size ", async function() {
       const fetchArraySizeVal = tableSize - 1;
       const maxRowsVal = tableSize;
       const affectedID = 0;
-      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await basicFetch(fetchArraySizeVal, maxRowsVal, affectedID);
     });
   });
 
   describe("149.2 REF CURSORS with different numRows and oracledb.fetchArraySize", function() {
 
-    before(function(done) {
-      connection.execute(
-        create_table,
-        function(err) {
-          should.not.exist(err);
-          done() ;
-        }
-      );
+    before(async function() {
+      await connection.execute(create_table);
     });
 
-    after(function(done) {
-      connection.execute(
-        drop_table,
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after(async function() {
+      await connection.execute(drop_table);
     });
 
-    afterEach(function(done) {
+    afterEach(function() {
       oracledb.fetchArraySize = default_fetcArraySize;
       oracledb.maxRows = default_maxRows;
-      done();
     });
 
-    const testRefCursor = function(fetchArraySizeVal, numRowsVal, cb) {
+    const testRefCursor = async function(fetchArraySizeVal, numRowsVal) {
       const create_ref = `CREATE OR REPLACE PROCEDURE testrefproc (p_out OUT SYS_REFCURSOR)
                           AS
                           BEGIN
@@ -289,294 +244,249 @@ describe("149. fetchArraySize2.js", function() {
       const drop_ref = "DROP PROCEDURE testrefproc";
       const exec_ref = "BEGIN testrefproc(:o); END;";
 
-      async.series([
-        function(callback) {
-          connection.execute(
-            create_ref,
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          oracledb.fetchArraySize = fetchArraySizeVal;
-          connection.execute(
-            exec_ref,
-            [
-              { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-            ],
-            { outFormat: oracledb.OUT_FORMAT_OBJECT },
-            function(err, result) {
-              should.not.exist(err);
-              const rowCount = 0;
-              fetchRowsFromRS(result.outBinds[0], numRowsVal, rowCount, callback);
-            }
-          );
-        },
-        function(callback) {
-          connection.execute(
-            drop_ref,
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        }
-      ], cb);
+      await connection.execute(create_ref);
+
+      oracledb.fetchArraySize = fetchArraySizeVal;
+      let result = await connection.execute(
+        exec_ref,
+        [
+          { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        ],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+      const rowCount = 0;
+      fetchRowsFromRS(result.outBinds[0], numRowsVal, rowCount);
+
+      await connection.execute(drop_ref);
     };
 
-    function fetchRowsFromRS(rs, numRowsVal, rowCount, cb) {
-      rs.getRows(numRowsVal, function(err, rows) {
-        if (rows.length > 0) {
-          for (let i = 0; i < rows.length; i++) {
-            (rows.length).should.be.belowOrEqual(numRowsVal);
-            rowCount = rowCount + 1;
-            // console.log(rows[i][0]);
-            should.strictEqual(rows[i].ID, rowCount);
-            should.strictEqual(rows[i].CONTENT, rowCount.toString());
-          }
-          return fetchRowsFromRS(rs, numRowsVal, rowCount, cb);
-        } else {
-          should.strictEqual(rowCount, tableSize);
-          rs.close(function(err) {
-            should.not.exist(err);
-            cb();
-          });
+    async function fetchRowsFromRS(rs, numRowsVal, rowCount) {
+      let rows = await rs.getRows(numRowsVal);
+      if (rows.length > 0) {
+        for (let i = 0; i < rows.length; i++) {
+          assert(rows.length <= numRowsVal);
+          rowCount++;
+          assert.strictEqual(rows[i].ID, rowCount);
+          assert.strictEqual(rows[i].CONTENT, rowCount.toString());
         }
-      });
+        return fetchRowsFromRS(rs, numRowsVal, rowCount);
+      } else {
+        assert.strictEqual(rowCount, tableSize);
+        await rs.close();
+      }
     }
 
-    it("149.2.1 numRows > table size > oracledb.fetchArraySize", function(done) {
+    it("149.2.1 numRows > table size > oracledb.fetchArraySize", async function() {
       const fetchArraySizeVal = tableSize - 1;
       const numRowsVal = tableSize + 1;
-      testRefCursor(fetchArraySizeVal, numRowsVal, done);
+      await testRefCursor(fetchArraySizeVal, numRowsVal);
     });
 
-    it("149.2.2 numRows > oracledb.fetchArraySize > table size", function(done) {
+    it("149.2.2 numRows > oracledb.fetchArraySize > table size", async function() {
       const fetchArraySizeVal = tableSize + 7;
       const numRowsVal = tableSize + 77;
-      testRefCursor(fetchArraySizeVal, numRowsVal, done);
+      await testRefCursor(fetchArraySizeVal, numRowsVal);
     });
 
-    it("149.2.3 table size > numRows > oracledb.fetchArraySize", function(done) {
+    it("149.2.3 table size > numRows > oracledb.fetchArraySize", async function() {
       const fetchArraySizeVal = tableSize - 11;
       const numRowsVal = tableSize - 2;
-      testRefCursor(fetchArraySizeVal, numRowsVal, done);
+      await testRefCursor(fetchArraySizeVal, numRowsVal);
     });
 
-    it("149.2.4 table size > oracledb.fetchArraySize > maxRow", function(done) {
+    it("149.2.4 table size > oracledb.fetchArraySize > maxRow", async function() {
       const fetchArraySizeVal = tableSize - 90;
       const numRowsVal = tableSize - 150;
-      testRefCursor(fetchArraySizeVal, numRowsVal, done);
+      await testRefCursor(fetchArraySizeVal, numRowsVal);
     });
 
-    it("149.2.5 numRows = oracledb.fetchArraySize < table size", function(done) {
+    it("149.2.5 numRows = oracledb.fetchArraySize < table size", async function() {
       const fetchArraySizeVal = tableSize - 110;
       const numRowsVal = tableSize - 110;
-      testRefCursor(fetchArraySizeVal, numRowsVal, done);
+      await testRefCursor(fetchArraySizeVal, numRowsVal);
     });
 
-    it("149.2.6 numRows = oracledb.fetchArraySize = table size", function(done) {
+    it("149.2.6 numRows = oracledb.fetchArraySize = table size", async function() {
       const fetchArraySizeVal = tableSize;
       const numRowsVal = tableSize;
-      testRefCursor(fetchArraySizeVal, numRowsVal, done);
+      await testRefCursor(fetchArraySizeVal, numRowsVal);
     });
 
-    it("149.2.7 numRows = oracledb.fetchArraySize > table size", function(done) {
+    it("149.2.7 numRows = oracledb.fetchArraySize > table size", async function() {
       const fetchArraySizeVal = tableSize + 9999;
       const numRowsVal = tableSize + 9999;
-      testRefCursor(fetchArraySizeVal, numRowsVal, done);
+      await testRefCursor(fetchArraySizeVal, numRowsVal);
     });
 
-    it("149.2.8 numRows = oracledb.fetchArraySize/10", function(done) {
+    it("149.2.8 numRows = oracledb.fetchArraySize/10", async function() {
       const fetchArraySizeVal = tableSize / 10 + 1;
       const numRowsVal = tableSize / 10;
-      testRefCursor(fetchArraySizeVal, numRowsVal, done);
+      await testRefCursor(fetchArraySizeVal, numRowsVal);
     });
 
-    it("149.2.9 numRows = 10 * oracledb.fetchArraySize", function(done) {
+    it("149.2.9 numRows = 10 * oracledb.fetchArraySize", async function() {
       const fetchArraySizeVal = 90;
       const numRowsVal = 900;
-      testRefCursor(fetchArraySizeVal, numRowsVal, done);
+      await testRefCursor(fetchArraySizeVal, numRowsVal);
     });
 
-    it("149.2.10 numRows > fetchArraySize, fetchArraySize = (table size)/10", function(done) {
+    it("149.2.10 numRows > fetchArraySize, fetchArraySize = (table size)/10", async function() {
       const fetchArraySizeVal = tableSize / 10;
       const numRowsVal = tableSize / 10 + 1;
-      testRefCursor(fetchArraySizeVal, numRowsVal, done);
+      await testRefCursor(fetchArraySizeVal, numRowsVal);
     });
 
-    it("149.2.11 numRows = (table size - 1), fetchArraySize = table size", function(done) {
+    it("149.2.11 numRows = (table size - 1), fetchArraySize = table size", async function() {
       const fetchArraySizeVal = tableSize;
       const numRowsVal = tableSize - 1;
-      testRefCursor(fetchArraySizeVal, numRowsVal, done);
+      await testRefCursor(fetchArraySizeVal, numRowsVal);
     });
 
-    it("149.2.12 fetchArraySize = (table size - 1), numRows = table size", function(done) {
+    it("149.2.12 fetchArraySize = (table size - 1), numRows = table size", async function() {
       const fetchArraySizeVal = tableSize - 1;
       const numRowsVal = tableSize;
-      testRefCursor(fetchArraySizeVal, numRowsVal, done);
+      await testRefCursor(fetchArraySizeVal, numRowsVal);
     });
   });
 
   describe("149.3 queryStream() with different maxRows and oracledb.fetchArraySize", function() {
 
-    before(function(done) {
-      connection.execute(
-        create_table,
-        function(err) {
-          should.not.exist(err);
-          done() ;
-        }
-      );
+    before(async function() {
+      await connection.execute(create_table);
     });
 
-    after(function(done) {
-      connection.execute(
-        drop_table,
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after(async function() {
+      await connection.execute(drop_table);
     });
 
-    afterEach(function(done) {
+    afterEach(function() {
       oracledb.fetchArraySize = default_fetcArraySize;
       oracledb.maxRows = default_maxRows;
-      done();
     });
 
-    const testQueryStream = function(fetchArraySizeVal, maxRowsVal, affectedID, cb) {
+    const testQueryStream = async function(fetchArraySizeVal, maxRowsVal, affectedID) {
       oracledb.fetchArraySize = fetchArraySizeVal;
       oracledb.maxRows = maxRowsVal;
       const resultLenExpected = tableSize - affectedID;
       const querySql = "select * from " + tableName + " where id > " + affectedID + " order by id";
-      const stream = connection.queryStream(querySql);
-
-      stream.on('error', function(error) {
-        should.fail(error, null, 'Error event should not be triggered');
-      });
-
+      const stream = await connection.queryStream(querySql);
       let counter = 0;
-      stream.on('data', function(data) {
-        should.exist(data);
-        counter = counter + 1;
-        verifyResult(data, counter, affectedID);
-      });
-
-      stream.on('end', function() {
-        should.equal(counter, resultLenExpected);
-        stream.destroy();
-      });
-
-      stream.on('close', function() {
-        cb();
+      await new Promise((resolve, reject) => {
+        stream.on('error', reject);
+        stream.on('end', function() {
+          assert.strictEqual(counter, resultLenExpected);
+          stream.destroy();
+        });
+        stream.on('close', resolve);
+        stream.on('data', function(data) {
+          assert(data);
+          counter++;
+          verifyResult(data, counter, affectedID);
+        });
       });
     };
 
     const verifyResult = function(data, counter, affectedID) {
-      should.strictEqual(data[0], counter + affectedID);
-      should.strictEqual(data[1], String(counter + affectedID));
+      assert.strictEqual(data[0], counter + affectedID);
+      assert.strictEqual(data[1], String(counter + affectedID));
     };
 
-    it("149.3.1 maxRows > table size > oracledb.fetchArraySize", function(done) {
+    it("149.3.1 maxRows > table size > oracledb.fetchArraySize", async function() {
       const fetchArraySizeVal = tableSize - 1;
       const maxRowsVal = tableSize + 1;
       const affectedID = 0;
-      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.3.2 maxRows > oracledb.fetchArraySize > table size", function(done) {
+    it("149.3.2 maxRows > oracledb.fetchArraySize > table size", async function() {
       const fetchArraySizeVal = tableSize + 101;
       const maxRowsVal = tableSize + 1000;
       const affectedID = 20;
-      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.3.3 table size > maxRows > oracledb.fetchArraySize", function(done) {
+    it("149.3.3 table size > maxRows > oracledb.fetchArraySize", async function() {
       const fetchArraySizeVal = tableSize - 11;
       const maxRowsVal = tableSize - 2;
       const affectedID = 0;
-      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.3.4 table size > oracledb.fetchArraySize > maxRow", function(done) {
+    it("149.3.4 table size > oracledb.fetchArraySize > maxRow", async function() {
       const fetchArraySizeVal = tableSize - 90;
       const maxRowsVal = tableSize - 150;
       const affectedID = 50;
-      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.3.5 maxRows = oracledb.fetchArraySize < table size", function(done) {
+    it("149.3.5 maxRows = oracledb.fetchArraySize < table size", async function() {
       const fetchArraySizeVal = tableSize - 110;
       const maxRowsVal = tableSize - 110;
       const affectedID = 20;
-      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.3.6 maxRows = oracledb.fetchArraySize = table size", function(done) {
+    it("149.3.6 maxRows = oracledb.fetchArraySize = table size", async function() {
       const fetchArraySizeVal = tableSize;
       const maxRowsVal = tableSize;
       const affectedID = 0;
-      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.3.7 maxRows = oracledb.fetchArraySize > table size", function(done) {
+    it("149.3.7 maxRows = oracledb.fetchArraySize > table size", async function() {
       const fetchArraySizeVal = tableSize + 9999;
       const maxRowsVal = tableSize + 9999;
       const affectedID = 10;
-      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.3.8 maxRows = oracledb.fetchArraySize/10", function(done) {
+    it("149.3.8 maxRows = oracledb.fetchArraySize/10", async function() {
       const fetchArraySizeVal = tableSize / 10 + 1;
       const maxRowsVal = tableSize / 10;
       const affectedID = 0;
-      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.3.9 maxRows = 10 * oracledb.fetchArraySize", function(done) {
+    it("149.3.9 maxRows = 10 * oracledb.fetchArraySize", async function() {
       const fetchArraySizeVal = 90;
       const maxRowsVal = 900;
       const affectedID = 50;
-      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.3.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10", function(done) {
+    it("149.3.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10", async function() {
       const fetchArraySizeVal = tableSize / 10;
       const maxRowsVal = tableSize / 10 + 1;
       const affectedID = 50;
-      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.3.11 maxRows = 0, fetchArraySize = table size", function(done) {
+    it("149.3.11 maxRows = 0, fetchArraySize = table size", async function() {
       const fetchArraySizeVal = tableSize;
       const maxRowsVal = 0;
       const affectedID = 0;
-      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.3.12 maxRows = 9999999, fetchArraySize = table size", function(done) {
+    it("149.3.12 maxRows = 9999999, fetchArraySize = table size", async function() {
       const fetchArraySizeVal = tableSize;
       const maxRowsVal = 9999999;
       const affectedID = 0;
-      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.3.13 maxRows = (table size - 1), fetchArraySize = table size ", function(done) {
+    it("149.3.13 maxRows = (table size - 1), fetchArraySize = table size ", async function() {
       const fetchArraySizeVal = tableSize;
       const maxRowsVal = tableSize - 1;
       const affectedID = 0;
-      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
-    it("149.3.14 fetchArraySize = (table size - 1), maxRows = table size ", function(done) {
+    it("149.3.14 fetchArraySize = (table size - 1), maxRows = table size ", async function() {
       const fetchArraySizeVal = tableSize - 1;
       const maxRowsVal = tableSize;
       const affectedID = 0;
-      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+      await testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID);
     });
   });
 

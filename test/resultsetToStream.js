@@ -32,138 +32,86 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
-const async    = require('async');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
 describe('15. resultsetToStream.js', function() {
 
   let connection = null;
-  var rowsAmount = 217;
-  before(function(done) {
-    async.series([
-      function getConn(cb) {
-        oracledb.getConnection(
-          dbConfig,
-          function(err, conn) {
-            should.not.exist(err);
-            connection = conn;
-            cb();
-          }
-        );
-      },
-      function createTab(cb) {
-        var proc = "BEGIN \n" +
-                   "    DECLARE \n" +
-                   "        e_table_missing EXCEPTION; \n" +
-                   "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
-                   "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_rs2stream PURGE'); \n" +
-                   "    EXCEPTION \n" +
-                   "        WHEN e_table_missing \n" +
-                   "        THEN NULL; \n" +
-                   "    END; \n" +
-                   "    EXECUTE IMMEDIATE (' \n" +
-                   "        CREATE TABLE nodb_rs2stream ( \n" +
-                   "            employees_id NUMBER, \n" +
-                   "            employees_name VARCHAR2(20), \n" +
-                   "            employees_history CLOB \n" +
-                   "        ) \n" +
-                   "    '); \n" +
-                   "END; ";
+  const rowsAmount = 217;
 
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function insertRows(cb) {
-        var proc = "DECLARE \n" +
-                   "    x NUMBER := 0; \n" +
-                   "    n VARCHAR2(20); \n" +
-                   "    clobData CLOB; \n" +
-                   "BEGIN \n" +
-                   "    FOR i IN 1..217 LOOP \n" +
-                   "        x := x + 1; \n" +
-                   "        n := 'staff ' || x; \n" +
-                   "        INSERT INTO nodb_rs2stream VALUES (x, n, EMPTY_CLOB()) RETURNING employees_history INTO clobData; \n" +
-                   "        DBMS_LOB.WRITE(clobData, 20, 1, '12345678901234567890'); \n" +
-                   "    END LOOP; \n" +
-                   "end; ";
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
 
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      }
-    ], done);
+    let proc = "BEGIN \n" +
+               "    DECLARE \n" +
+               "        e_table_missing EXCEPTION; \n" +
+               "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
+               "    BEGIN \n" +
+               "        EXECUTE IMMEDIATE ('DROP TABLE nodb_rs2stream PURGE'); \n" +
+               "    EXCEPTION \n" +
+               "        WHEN e_table_missing \n" +
+               "        THEN NULL; \n" +
+               "    END; \n" +
+               "    EXECUTE IMMEDIATE (' \n" +
+               "        CREATE TABLE nodb_rs2stream ( \n" +
+               "            employees_id NUMBER, \n" +
+               "            employees_name VARCHAR2(20), \n" +
+               "            employees_history CLOB \n" +
+               "        ) \n" +
+               "    '); \n" +
+               "END; ";
+    await connection.execute(proc);
+
+    proc = "DECLARE \n" +
+           "    x NUMBER := 0; \n" +
+           "    n VARCHAR2(20); \n" +
+           "    clobData CLOB; \n" +
+           "BEGIN \n" +
+           "    FOR i IN 1..217 LOOP \n" +
+           "        x := x + 1; \n" +
+           "        n := 'staff ' || x; \n" +
+           "        INSERT INTO nodb_rs2stream VALUES (x, n, EMPTY_CLOB()) RETURNING employees_history INTO clobData; \n" +
+           "        DBMS_LOB.WRITE(clobData, 20, 1, '12345678901234567890'); \n" +
+           "    END LOOP; \n" +
+           "end; ";
+    await connection.execute(proc);
   }); // before
 
-  after(function(done) {
-    async.series([
-      function(callback) {
-        connection.execute(
-          "DROP TABLE nodb_rs2stream PURGE",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.close(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      },
-    ], done);
+  after(async function() {
+    await connection.execute("DROP TABLE nodb_rs2stream PURGE");
+    await connection.close();
   }); // after
 
   describe('15.1 Testing ResultSet.toQueryStream', function() {
-    it('15.1.1 should allow resultsets to be converted to streams', function(done) {
-      connection.execute(
+
+    it('15.1.1 should allow resultsets to be converted to streams', async function() {
+      const result = await connection.execute(
         'begin \n' +
         '  open :cursor for select employees_name from nodb_rs2stream; \n' +
         'end;',
         {
           cursor:  { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-        },
-        function(err, result) {
-          should.not.exist(err);
-
-          var stream = result.outBinds.cursor.toQueryStream();
-
-          stream.on('error', function(error) {
-            console.log(error);
-            should.fail(error, null, 'Error event should not be triggered');
-          });
-
-          var counter = 0;
-          stream.on('data', function(data) {
-            should.exist(data);
-            counter++;
-          });
-
-          stream.on('end', function() {
-            should.equal(counter, rowsAmount);
-            stream.destroy();
-          });
-
-          stream.on('close', function() {
-            done();
-          });
         }
       );
-    });
-  });
+      const stream = result.outBinds.cursor.toQueryStream();
+      let counter = 0;
+      await new Promise((resolve, reject) => {
+        stream.on('error', reject);
+        stream.on('end', stream.destroy);
+        stream.on('close', resolve);
+        stream.on('data', function(data) {
+          assert(data);
+          counter++;
+        });
+      });
+      assert.strictEqual(counter, rowsAmount);
+    }); // 15.1.1
+
+  }); // 15.1
 
   describe('15.2 Testing ResultSet/QueryStream conversion errors', function() {
+
     it('15.2.1 should prevent conversion to stream after getRow is invoked', async function() {
       const sql = `
         begin
@@ -175,15 +123,13 @@ describe('15. resultsetToStream.js', function() {
       const result = await connection.execute(sql, binds);
       const cursor = result.outBinds.cursor;
       await cursor.getRow();
-      try {
-        const stream = cursor.toQueryStream();
-        should.not.exist(stream);
-      } catch (err) {
-        (err.message).should.startWith('NJS-041:');
+      await assert.throws(
+        () => cursor.toQueryStream(),
         // NJS-041: cannot convert to stream after invoking methods
-      }
+        /NJS-041:/
+      );
       await cursor.close();
-    });
+    }); // 15.2.1
 
     it('15.2.2 should prevent conversion to stream after getRows is invoked', async function() {
       const sql = `
@@ -196,14 +142,13 @@ describe('15. resultsetToStream.js', function() {
       const result = await connection.execute(sql, binds);
       const cursor = result.outBinds.cursor;
       await cursor.getRows(5);
-      try {
-        const stream = cursor.toQueryStream();
-        should.not.exist(stream);
-      } catch (err) {
-        (err.message).should.startWith('NJS-041:');
-      }
+      assert.throws(
+        () => cursor.toQueryStream(),
+        // NJS-041: cannot convert to stream after invoking methods
+        /NJS-041:/
+      );
       await cursor.close();
-    });
+    }); // 15.2.2
 
     it('15.2.3 should prevent conversion to stream after close is invoked', async function() {
       const sql = `
@@ -216,126 +161,86 @@ describe('15. resultsetToStream.js', function() {
       const result = await connection.execute(sql, binds);
       const cursor = result.outBinds.cursor;
       await cursor.close();
-      try {
-        const stream = cursor.toQueryStream();
-        should.not.exist(stream);
-      } catch (err) {
-        (err.message).should.startWith('NJS-041:');
-      }
-    });
-
-    it('15.2.4 should prevent invoking getRow after conversion to stream', function(done) {
-      connection.execute(
-        'begin \n' +
-        '  open :cursor for select employees_name from nodb_rs2stream; \n' +
-        'end;',
-        {
-          cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
-        },
-        function(err, result) {
-          should.not.exist(err);
-
-          var cursor = result.outBinds.cursor;
-          var stream = cursor.toQueryStream();
-
-          stream.on('close', done);
-          stream.on('error', function(err) {
-            should.not.exist(err);
-          });
-
-          cursor.getRow(function(err) {
-            (err.message).should.startWith('NJS-042:');
-            // NJS-042: cannot invoke methods after converting to stream
-            stream.destroy();
-          });
-        }
+      assert.throws(
+        () => cursor.toQueryStream(),
+        // NJS-041: cannot convert to stream after invoking methods
+        /NJS-041:/
       );
-    });
+    }); // 15.2.3
 
-    it('15.2.5 should prevent invoking getRows after conversion to stream', function(done) {
-      connection.execute(
-        'begin \n' +
-        '  open :cursor for select employees_name from nodb_rs2stream; \n' +
-        'end;',
-        {
-          cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
-        },
-        function(err, result) {
-          should.not.exist(err);
-
-          var cursor = result.outBinds.cursor;
-          var stream = cursor.toQueryStream();
-
-          stream.on('close', done);
-          stream.on('error', function(err) {
-            should.not.exist(err);
-          });
-
-          cursor.getRows(5, function(err) {
-            (err.message).should.startWith('NJS-042:');
-            stream.destroy();
-          });
-        }
+    it('15.2.4 should prevent invoking getRow after conversion to stream', async function() {
+      const sql = `
+        begin
+          open :cursor for select employees_name from nodb_rs2stream;
+        end;`;
+      const binds = {
+        cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
+      };
+      const result = await connection.execute(sql, binds);
+      const cursor = result.outBinds.cursor;
+      const stream = cursor.toQueryStream();
+      await assert.rejects(
+        async () => await cursor.getRow(),
+        // NJS-042: cannot invoke methods after converting to stream
+        /NJS-042:/
       );
-    });
+      stream.destroy();
+    }); // 15.2.4
 
-    it('15.2.6 should prevent invoking close after conversion to stream', function(done) {
-      connection.execute(
-        'begin \n' +
-        '  open :cursor for select employees_name from nodb_rs2stream; \n' +
-        'end;',
-        {
-          cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
-        },
-        function(err, result) {
-          should.not.exist(err);
-
-          var cursor = result.outBinds.cursor;
-          var stream = cursor.toQueryStream();
-
-          stream.on('close', done);
-          stream.on('error', function(err) {
-            should.not.exist(err);
-          });
-
-          cursor.close(function(err) {
-            (err.message).should.startWith('NJS-042:');
-            stream.destroy();
-          });
-        }
+    it('15.2.5 should prevent invoking getRows after conversion to stream', async function() {
+      const sql = `
+        begin
+          open :cursor for select employees_name from nodb_rs2stream;
+        end;`;
+      const binds = {
+        cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
+      };
+      const result = await connection.execute(sql, binds);
+      const cursor = result.outBinds.cursor;
+      const stream = cursor.toQueryStream();
+      await assert.rejects(
+        async () => await cursor.getRows(5),
+        // NJS-042: cannot invoke methods after converting to stream
+        /NJS-042:/
       );
-    });
+      stream.destroy();
+    }); // 15.2.5
 
-    it('15.2.7 should prevent calling toQueryStream more than once', function(done) {
-      connection.execute(
-        'begin \n' +
-        '  open :cursor for select employees_name from nodb_rs2stream; \n' +
-        'end;',
-        {
-          cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
-        },
-        function(err, result) {
-          should.not.exist(err);
-
-          var cursor = result.outBinds.cursor;
-
-          // First conversion to stream
-          var stream = cursor.toQueryStream();
-
-          stream.on('close', done);
-          stream.on('error', function(err) {
-            should.not.exist(err);
-          });
-
-          try {
-            // Second conversion to stream
-            stream = cursor.toQueryStream();
-          } catch (err) {
-            (err.message).should.startWith('NJS-043:');
-            stream.destroy();
-          }
-        }
+    it('15.2.6 should prevent invoking close after conversion to stream', async function() {
+      const sql = `
+        begin
+          open :cursor for select employees_name from nodb_rs2stream;
+        end;`;
+      const binds = {
+        cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
+      };
+      const result = await connection.execute(sql, binds);
+      const cursor = result.outBinds.cursor;
+      const stream = cursor.toQueryStream();
+      await assert.rejects(
+        async () => await cursor.close(),
+        // NJS-042: cannot invoke methods after converting to stream
+        /NJS-042:/
       );
+      stream.destroy();
+    });  // 15.2.6
+
+    it('15.2.7 should prevent calling toQueryStream more than once', async function() {
+      const sql = `
+        begin
+          open :cursor for select employees_name from nodb_rs2stream;
+        end;`;
+      const binds = {
+        cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
+      };
+      const result = await connection.execute(sql, binds);
+      const cursor = result.outBinds.cursor;
+      const stream = cursor.toQueryStream();
+      assert.throws(
+        () => cursor.toQueryStream(),
+        /NJS-043:/
+      );
+      stream.destroy();
     }); // 15.2.7
 
   }); // 15.2

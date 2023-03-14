@@ -34,126 +34,72 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const async    = require('async');
-const should   = require('should');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
 describe('139. fetchAsStringWithRefCursor.js', function() {
   let connection = null;
-  var tableName = "nodb_tab_fetchAsRefCursor";
+  const tableName = "nodb_tab_fetchAsRefCursor";
 
-  before(function(done) {
-    async.series([
-      function(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
-      },
-      function createTable(cb) {
-        let sql = "BEGIN \n" +
-                  "    DECLARE \n" +
-                  "        e_table_missing EXCEPTION; \n" +
-                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
-                  "    BEGIN \n" +
-                  "        EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE' ); \n" +
-                  "    EXCEPTION \n" +
-                  "        WHEN e_table_missing \n" +
-                  "        THEN NULL; \n" +
-                  "    END; \n" +
-                  "    EXECUTE IMMEDIATE ( ' \n" +
-                  "        CREATE TABLE " + tableName + " ( \n" +
-                  "            id        NUMBER(10), \n" +
-                  "            content   VARCHAR2(20), \n" +
-                  "            hiredate  DATE \n" +
-                  "        ) \n" +
-                  "    '); \n" +
-                  "END;  ";
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
+    // PL/SQL procedure to create the table
+    let sql = "BEGIN \n" +
+                "    DECLARE \n" +
+                "        e_table_missing EXCEPTION; \n" +
+                "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
+                "    BEGIN \n" +
+                "        EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE' ); \n" +
+                "    EXCEPTION \n" +
+                "        WHEN e_table_missing \n" +
+                "        THEN NULL; \n" +
+                "    END; \n" +
+                "    EXECUTE IMMEDIATE ( ' \n" +
+                "        CREATE TABLE " + tableName + " ( \n" +
+                "            id        NUMBER(10), \n" +
+                "            content   VARCHAR2(20), \n" +
+                "            hiredate  DATE \n" +
+                "        ) \n" +
+                "    '); \n" +
+                "END;  ";
+    await connection.execute(sql);
 
-        connection.execute(
-          sql,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function insertData(cb) {
-        let sql = "DECLARE \n" +
-                  "    x NUMBER := 0; \n" +
-                  "    n VARCHAR2(20); \n" +
-                  "BEGIN \n" +
-                  "    FOR i IN 1..300 LOOP \n" +
-                  "        x := x + 1; \n" +
-                  "        n := 'staff ' || x; \n" +
-                  "        INSERT INTO " + tableName + " VALUES(x, n, TO_DATE('2012-02-18', 'YYYY-MM-DD')); \n" +
-                  "    END LOOP; \n" +
-                  "END; ";
+    // PL/SQL procedure to insert data into the table
+    sql = "DECLARE \n" +
+          "    x NUMBER := 0; \n" +
+          "    n VARCHAR2(20); \n" +
+          "BEGIN \n" +
+          "    FOR i IN 1..300 LOOP \n" +
+          "        x := x + 1; \n" +
+          "        n := 'staff ' || x; \n" +
+          "        INSERT INTO " + tableName + " VALUES(x, n, TO_DATE('2012-02-18', 'YYYY-MM-DD')); \n" +
+          "    END LOOP; \n" +
+          "END; ";
+    await connection.execute(sql);
 
-        connection.execute(
-          sql,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function createProc(cb) {
-        let proc = "CREATE OR REPLACE PROCEDURE nodb_proc_fetchcursor (p_in IN NUMBER, p_out OUT SYS_REFCURSOR) \n" +
-                   "AS \n" +
-                   "BEGIN \n" +
-                   "    OPEN p_out FOR \n" +
-                   "        SELECT * FROM " + tableName + " WHERE id > p_in; \n" +
-                   "END; ";
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      }
-    ], done);
+    // PL/SQL procedure for the ref cursor
+    let proc = "CREATE OR REPLACE PROCEDURE nodb_proc_fetchcursor (p_in IN NUMBER, p_out OUT SYS_REFCURSOR) \n" +
+                "AS \n" +
+                "BEGIN \n" +
+                "    OPEN p_out FOR \n" +
+                "        SELECT * FROM " + tableName + " WHERE id > p_in; \n" +
+                "END; ";
+    await connection.execute(proc);
   });
 
-  after(function(done) {
-    async.series([
-      function(cb) {
-        let sql = "DROP PROCEDURE nodb_proc_fetchcursor";
-        connection.execute(
-          sql,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        let sql = "DROP TABLE " + tableName + " PURGE";
-        connection.execute(
-          sql,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        connection.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      },
-      function restoreSettings(cb) {
-        oracledb.fetchAsString = [];
-        cb();
-      }
-    ], done);
+  after(async function() {
+    let sql = "DROP PROCEDURE nodb_proc_fetchcursor";
+    await connection.execute(sql);
+
+    sql = "DROP TABLE " + tableName + " PURGE";
+    await connection.execute(sql);
+
+    await connection.close();
+    oracledb.fetchAsString = [];
   });
 
-  it('139.1 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
-    connection.execute(
+  it('139.1 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
+    let result = await connection.execute(
       "begin nodb_proc_fetchcursor(:in, :out); end;",
       {
         in: 290,
@@ -166,63 +112,48 @@ describe('139. fetchAsStringWithRefCursor.js', function() {
           "ID": { type: oracledb.STRING },
           "HIREDATE": { type: oracledb.STRING }
         }
-      },
-      function(err, result) {
-        should.not.exist(err);
-        fetchRowFromRC(result.outBinds.out, done);
       }
     );
 
-    var fetchRowFromRC = function(rc, callback) {
-      rc.getRow(function(err, row) {
-        should.not.exist(err);
-        if (row) {
-          (row.ID).should.be.a.String();
-          (row.HIREDATE).should.be.a.String();
-          return fetchRowFromRC(rc, callback);
-        } else {
-          rc.close(function(err) {
-            should.not.exist(err);
-            callback();
-          });
-        }
-      });
+    const fetchRowFromRC = async function(rc) {
+      const row = await rc.getRow();
+      if (row) {
+        assert.strictEqual(typeof row.ID, "string");
+        assert.strictEqual(typeof row.HIREDATE, "string");
+        return await fetchRowFromRC(rc);
+      } else {
+        await rc.close();
+      }
     }; // fetchRowFromRC()
+
+    await fetchRowFromRC(result.outBinds.out);
 
   }); // 139.1
 
-  it('139.2 fetchAsString takes effect as well', function(done) {
+  it('139.2 fetchAsString takes effect as well', async function() {
 
     oracledb.fetchAsString = [ oracledb.DATE ];
-    connection.execute(
+    let result = await connection.execute(
       "begin nodb_proc_fetchcursor(:in, :out); end;",
       {
         in: 295,
         out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       },
-      { outFormat: oracledb.OUT_FORMAT_OBJECT },
-      function(err, result) {
-        should.not.exist(err);
-        fetchRowFromRC(result.outBinds.out, done);
-      }
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
 
-    var fetchRowFromRC = function(rc, callback) {
-      rc.getRow(function(err, row) {
-        should.not.exist(err);
-        if (row) {
-          (row.ID).should.not.be.a.String();
-          (row.HIREDATE).should.be.a.String();
-          return fetchRowFromRC(rc, callback);
-        } else {
-          rc.close(function(err) {
-            should.not.exist(err);
-            callback();
-          });
-        }
-      });
+    const fetchRowFromRC = async function(rc) {
+      const row = await rc.getRow();
+      if (row) {
+        assert.notStrictEqual(typeof row.ID, "string");
+        assert.strictEqual(typeof row.HIREDATE, "string");
+        return await fetchRowFromRC(rc);
+      } else {
+        await rc.close();
+      }
     }; // fetchRowFromRC()
 
+    await fetchRowFromRC(result.outBinds.out);
   }); // 139.2
 
 });

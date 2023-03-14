@@ -37,7 +37,6 @@ const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
 const testsUtil = require('./testsUtil.js');
-const assist   = require('./dataTypeAssist.js');
 
 describe('133. longrawProcedureBind_inout.js', function() {
 
@@ -182,7 +181,7 @@ describe('133. longrawProcedureBind_inout.js', function() {
     if (expectedBuf == null) {
       assert.strictEqual(result.outBinds.c, expectedBuf);
     } else {
-      assist.compare2Buffers(result.outBinds.c, expectedBuf);
+      assert.deepStrictEqual(result.outBinds.c, expectedBuf);
     }
 
   };
@@ -204,7 +203,7 @@ describe('133. longrawProcedureBind_inout.js', function() {
     if (expectedBuf == null) {
       assert.strictEqual(result.outBinds.c, expectedBuf);
     } else {
-      assist.compare2Buffers(result.outBinds.c, expectedBuf);
+      assert.deepStrictEqual(result.outBinds.c, expectedBuf);
     }
 
   };

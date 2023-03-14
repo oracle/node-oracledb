@@ -33,37 +33,26 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
-const async    = require('async');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
 describe('158. insertAll.js', function() {
 
   let conn;
 
-  before(function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-        conn = connection;
-        done();
-      }
-    );
+  before(async function() {
+    conn = await oracledb.getConnection(dbConfig);
   });
 
-  after(function(done) {
-    conn.close(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after(async function() {
+    await conn.close();
   });
 
-  it('158.1 original case from the issue', function(done) {
+  it('158.1 original case from the issue', async function() {
 
-    var dataLength = 35000;
-    var doCreate = function(cb) {
-      var proc = "BEGIN \n" +
+    let dataLength = 35000;
+    //Create the table
+    const proc = "BEGIN \n" +
                  "    DECLARE \n" +
                  "        e_table_missing EXCEPTION; \n" +
                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -80,228 +69,132 @@ describe('158. insertAll.js', function() {
                  "        ) \n" +
                  "    '); \n" +
                  "END; ";
-      conn.execute(
-        proc,
-        function(err) {
-          should.not.exist(err);
-          cb();
-        }
-      );
-    };
+    await conn.execute(proc);
 
-    var doDrop = function(cb) {
-      var sql = "DROP TABLE nodb_tab_insertall PURGE";
-      conn.execute(
-        sql,
-        function(err) {
-          should.not.exist(err);
-          cb();
-        }
-      );
-    };
+    // insert data (including LOB) into the table
+    const myval = 'a'.repeat(dataLength);
+    let sql = "INSERT ALL INTO nodb_tab_insertall \n" +
+              "    WITH nt AS (SELECT 1, :C FROM DUAL) \n" +
+              "        SELECT * FROM nt";
+    let result = await conn.execute(
+      sql,
+      { c: { val: myval, type: oracledb.CLOB } }
+    );
+    assert.strictEqual(result.rowsAffected, 1);
 
-    var doInsert = function(cb) {
-      var myval = 'a'.repeat(dataLength);
-      var sql = "INSERT ALL INTO nodb_tab_insertall \n" +
-                "    WITH nt AS (SELECT 1, :C FROM DUAL) \n" +
-                "        SELECT * FROM nt";
-      conn.execute(
-        sql,
-        { c: { val: myval, type: oracledb.CLOB } },
-        function(err, result) {
-          should.not.exist(err);
-          (result.rowsAffected).should.be.exactly(1);
-          cb();
-        }
-      );
-    };
+    // Run a select query to get the inserted LOB's length
+    sql = "select dbms_lob.getlength(val) from nodb_tab_insertall";
+    result = await conn.execute(sql);
+    let buf = result.rows[0][0];
+    assert.strictEqual(buf, dataLength);
 
-    var doQuery = function(cb) {
-      var sql = "select dbms_lob.getlength(val) from nodb_tab_insertall";
-      conn.execute(
-        sql,
-        function(err, result) {
-          should.not.exist(err);
-          var buf = result.rows[0][0];
-          should.strictEqual(buf, dataLength);
-          cb();
-        }
-      );
-    };
-
-    async.series([
-      doCreate,
-      doInsert,
-      doQuery,
-      doDrop
-    ], done);
+    // Drop the table
+    sql = "DROP TABLE nodb_tab_insertall PURGE";
+    await conn.execute(sql);
 
   }); // 158.1
 
-  it('158.2 inserts into one table', function(done) {
-    async.series([
-      makeTab1,
-      function dotest(cb) {
-        var sql = "INSERT ALL \n" +
-                  "  INTO nodb_tab_ia1 (id, content) VALUES (100, :a) \n" +
-                  "  INTO nodb_tab_ia1 (id, content) VALUES (200, :b) \n" +
-                  "  INTO nodb_tab_ia1 (id, content) VALUES (300, :c) \n" +
-                  "SELECT * FROM DUAL";
-        conn.execute(
-          sql,
-          ['Changjie', 'Shelly', 'Chris'],
-          function(err, result) {
-            should.not.exist(err);
-            should.strictEqual(result.rowsAffected, 3);
-            cb();
-          }
-        );
-      },
-      function doverify(cb) {
-        var sql = "select content from nodb_tab_ia1 order by id";
-        conn.execute(
-          sql,
-          function(err, result) {
-            should.not.exist(err);
-            should.deepEqual(
-              result.rows,
-              [ [ 'Changjie' ], [ 'Shelly' ], [ 'Chris' ] ]
-            );
-            cb();
-          }
-        );
-      },
-      dropTab1
-    ], done);
+  it('158.2 inserts into one table', async function() {
+    await makeTab1();
+    let sql = "INSERT ALL \n" +
+              "  INTO nodb_tab_ia1 (id, content) VALUES (100, :a) \n" +
+              "  INTO nodb_tab_ia1 (id, content) VALUES (200, :b) \n" +
+              "  INTO nodb_tab_ia1 (id, content) VALUES (300, :c) \n" +
+              "SELECT * FROM DUAL";
+    let result = await conn.execute(
+      sql,
+      ['Changjie', 'Shelly', 'Chris']
+    );
+    assert.strictEqual(result.rowsAffected, 3);
+
+    sql = "select content from nodb_tab_ia1 order by id";
+    result = await conn.execute(sql);
+    assert.deepStrictEqual(
+      result.rows,
+      [ [ 'Changjie' ], [ 'Shelly' ], [ 'Chris' ] ]
+    );
+
+    //Drop the table
+    sql = "DROP TABLE nodb_tab_ia1 PURGE";
+    await conn.execute(sql);
   }); // 158.2
 
-  it('158.3 inserts into multiple tables', function(done) {
-    async.series([
-      makeTab1,
-      makeTab2,
-      function dotest(cb) {
-        var sql = "INSERT ALL \n" +
-                  "  INTO nodb_tab_ia1 (id, content) VALUES (100, :a) \n" +
-                  "  INTO nodb_tab_ia1 (id, content) VALUES (200, :b) \n" +
-                  "  INTO nodb_tab_ia2 (id, content) VALUES (300, :c) \n" +
-                  "SELECT * FROM DUAL";
-        conn.execute(
-          sql,
-          ['Redwood city', 'Sydney', 'Shenzhen'],
-          function(err, result) {
-            should.not.exist(err);
-            should.strictEqual(result.rowsAffected, 3);
-            cb();
-          }
-        );
-      },
-      function doverify1(cb) {
-        var sql = "select content from nodb_tab_ia1 order by id";
-        conn.execute(
-          sql,
-          function(err, result) {
-            should.not.exist(err);
-            should.deepEqual(
-              result.rows,
-              [ [ 'Redwood city' ], [ 'Sydney' ]]
-            );
-            cb();
-          }
-        );
-      },
-      function doverify2(cb) {
-        var sql = "select content from nodb_tab_ia2 order by id";
-        conn.execute(
-          sql,
-          function(err, result) {
-            should.not.exist(err);
-            should.deepEqual(
-              result.rows,
-              [ [ 'Shenzhen' ]]
-            );
-            cb();
-          }
-        );
-      },
-      dropTab1,
-      dropTab2
-    ], done);
+  it('158.3 inserts into multiple tables', async function() {
+    await makeTab1();
+    await makeTab2();
+
+    let sql = "INSERT ALL \n" +
+              "  INTO nodb_tab_ia1 (id, content) VALUES (100, :a) \n" +
+              "  INTO nodb_tab_ia1 (id, content) VALUES (200, :b) \n" +
+              "  INTO nodb_tab_ia2 (id, content) VALUES (300, :c) \n" +
+              "SELECT * FROM DUAL";
+    let result = await conn.execute(
+      sql,
+      ['Redwood city', 'Sydney', 'Shenzhen']
+    );
+    assert.strictEqual(result.rowsAffected, 3);
+
+    sql = "select content from nodb_tab_ia1 order by id";
+    result = await conn.execute(sql);
+    assert.deepStrictEqual(
+      result.rows,
+      [ [ 'Redwood city' ], [ 'Sydney' ]]
+    );
+
+    sql = "select content from nodb_tab_ia2 order by id";
+    result = await conn.execute(sql);
+    assert.deepStrictEqual(
+      result.rows,
+      [ [ 'Shenzhen' ]]
+    );
+
+    //Drop the tables
+    sql = "DROP TABLE nodb_tab_ia1 PURGE";
+    await conn.execute(sql);
+    sql = "DROP TABLE nodb_tab_ia2 PURGE";
+    await conn.execute(sql);
   }); // 158.3
 
-  var makeTab1 = function(cb) {
-    var proc = "BEGIN \n" +
-               "    DECLARE \n" +
-               "        e_table_missing EXCEPTION; \n" +
-               "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-               "    BEGIN \n" +
-               "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_ia1 PURGE'); \n" +
-               "    EXCEPTION \n" +
-               "        WHEN e_table_missing \n" +
-               "        THEN NULL; \n" +
-               "    END; \n" +
-               "    EXECUTE IMMEDIATE (' \n" +
-               "        CREATE TABLE nodb_tab_ia1 ( \n" +
-               "            id       NUMBER, \n" +
-               "            content  VARCHAR2(100) \n" +
-               "        ) \n" +
-               "    '); \n" +
-               "END; ";
-    conn.execute(
-      proc,
-      function(err) {
-        should.not.exist(err);
-        cb();
-      }
-    );
+  const makeTab1 = async function() {
+    const proc = "BEGIN \n" +
+                 "    DECLARE \n" +
+                 "        e_table_missing EXCEPTION; \n" +
+                 "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+                 "    BEGIN \n" +
+                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_ia1 PURGE'); \n" +
+                 "    EXCEPTION \n" +
+                 "        WHEN e_table_missing \n" +
+                 "        THEN NULL; \n" +
+                 "    END; \n" +
+                 "    EXECUTE IMMEDIATE (' \n" +
+                 "        CREATE TABLE nodb_tab_ia1 ( \n" +
+                 "            id       NUMBER, \n" +
+                 "            content  VARCHAR2(100) \n" +
+                 "        ) \n" +
+                 "    '); \n" +
+                 "END; ";
+    await conn.execute(proc);
   }; // makeTab1
 
-  var dropTab1 = function(cb) {
-    var sql = "DROP TABLE nodb_tab_ia1 PURGE";
-    conn.execute(
-      sql,
-      function(err) {
-        should.not.exist(err);
-        cb();
-      }
-    );
-  };
-
-  var makeTab2 = function(cb) {
-    var proc = "BEGIN \n" +
-               "    DECLARE \n" +
-               "        e_table_missing EXCEPTION; \n" +
-               "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-               "    BEGIN \n" +
-               "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_ia2 PURGE'); \n" +
-               "    EXCEPTION \n" +
-               "        WHEN e_table_missing \n" +
-               "        THEN NULL; \n" +
-               "    END; \n" +
-               "    EXECUTE IMMEDIATE (' \n" +
-               "        CREATE TABLE nodb_tab_ia2 ( \n" +
-               "            id       NUMBER, \n" +
-               "            content  VARCHAR2(50) " +
-               "        ) \n" +
-               "    '); \n" +
-               "END; ";
-    conn.execute(
-      proc,
-      function(err) {
-        should.not.exist(err);
-        cb();
-      }
-    );
-  };
-
-  var dropTab2 = function(cb) {
-    var sql = "DROP TABLE nodb_tab_ia2 PURGE";
-    conn.execute(
-      sql,
-      function(err) {
-        should.not.exist(err);
-        cb();
-      }
-    );
+  const makeTab2 = async function() {
+    const proc = "BEGIN \n" +
+                 "    DECLARE \n" +
+                 "        e_table_missing EXCEPTION; \n" +
+                 "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+                 "    BEGIN \n" +
+                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_ia2 PURGE'); \n" +
+                 "    EXCEPTION \n" +
+                 "        WHEN e_table_missing \n" +
+                 "        THEN NULL; \n" +
+                 "    END; \n" +
+                 "    EXECUTE IMMEDIATE (' \n" +
+                 "        CREATE TABLE nodb_tab_ia2 ( \n" +
+                 "            id       NUMBER, \n" +
+                 "            content  VARCHAR2(50) " +
+                 "        ) \n" +
+                 "    '); \n" +
+                 "END; ";
+    await conn.execute(proc);
   };
 
 });

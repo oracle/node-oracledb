@@ -36,17 +36,16 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
-const async    = require('async');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
 describe("150. fetchArraySize3.js", function() {
 
   let connection = null;
-  var default_fetcArraySize = oracledb.fetchArraySize;
-  var default_maxRows = oracledb.maxRows;
-  var tableName = "nodb_fetchArraySize_150";
-  var tableSize = 1000;
+  let default_fetcArraySize = oracledb.fetchArraySize;
+  let default_maxRows = oracledb.maxRows;
+  let tableName = "nodb_fetchArraySize_150";
+  let tableSize = 1000;
 
   const create_table = "BEGIN \n" +
                      "    DECLARE \n" +
@@ -74,342 +73,233 @@ describe("150. fetchArraySize3.js", function() {
 
   const drop_table = "DROP TABLE " + tableName + " PURGE";
 
-  before(function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.strictEqual(default_fetcArraySize, 100);
-      should.strictEqual(default_maxRows, 0);
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
+    assert.strictEqual(default_fetcArraySize, 100);
+    assert.strictEqual(default_maxRows, 0);
   });
 
-  after(function(done) {
-    connection.close(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after(async function() {
+    await connection.close();
   });
 
   describe("150.1 DML binding", function() {
 
-    before(function(done) {
-      connection.execute(
-        create_table,
-        function(err) {
-          should.not.exist(err);
-          done() ;
-        }
-      );
+    before(async function() {
+      await connection.execute(create_table);
     });
 
-    after(function(done) {
-      connection.execute(
-        drop_table,
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after(async function() {
+      await connection.execute(drop_table);
     });
 
-    afterEach(function(done) {
+    afterEach(function() {
       oracledb.fetchArraySize = default_fetcArraySize;
       oracledb.maxRows = default_maxRows;
-      done();
     });
 
-    var dmlBinding = function(fetchArraySize, affectedRowId, cb) {
+    const dmlBinding = async function(fetchArraySize, affectedRowId) {
       oracledb.fetchArraySize = fetchArraySize;
-      async.series([
-        function(callback) {
-          connection.execute(
-            "update " + tableName + " set content = :c where id > :num",
-            {
-              num: { val: affectedRowId, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
-              c: { val: "something", dir: oracledb.BIND_IN, type: oracledb.STRING }
-            },
-            function(err, result) {
-              should.not.exist(err);
-              should.strictEqual(result.rowsAffected, tableSize - affectedRowId);
-              callback();
-            });
-        },
-        function(callback) {
-          connection.execute(
-            "select * from " + tableName + " where id > :num order by id",
-            { num: { val: affectedRowId, dir: oracledb.BIND_IN, type: oracledb.NUMBER } },
-            function(err, result) {
-              should.not.exist(err);
-              should.strictEqual(result.rows.length, tableSize - affectedRowId);
-              verifyResult(result.rows, affectedRowId);
-              callback();
-            }
-          );
+      let result = await connection.execute(
+        "update " + tableName + " set content = :c where id > :num",
+        {
+          num: { val: affectedRowId, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+          c: { val: "something", dir: oracledb.BIND_IN, type: oracledb.STRING }
         }
-      ], cb);
+      );
+      assert.strictEqual(result.rowsAffected, tableSize - affectedRowId);
+
+      result = await connection.execute(
+        "select * from " + tableName + " where id > :num order by id",
+        { num: { val: affectedRowId, dir: oracledb.BIND_IN, type: oracledb.NUMBER } }
+      );
+      assert.strictEqual(result.rows.length, tableSize - affectedRowId);
+      verifyResult(result.rows, affectedRowId);
     };
 
-    var verifyResult = function(result, affectedRowId) {
-      async.forEach(result, function(element, cb) {
-        var index = result.indexOf(element);
+    let verifyResult = function(result, affectedRowId) {
+      for (let element of result) {
+        let index = result.indexOf(element);
         verifyEachRow(index + 1 + affectedRowId, element);
-        cb();
-      }, function(err) {
-        should.not.exist(err);
-      });
+      }
     };
 
-    var verifyEachRow = function(index, element) {
-      should.strictEqual(element[0], index);
-      should.strictEqual(element[1], "something");
+    let verifyEachRow = function(index, element) {
+      assert.strictEqual(element[0], index);
+      assert.strictEqual(element[1], "something");
     };
 
-    it("150.1.1 oracledb.fetchArraySize = 1", function(done) {
-      dmlBinding(1, 50, done);
+    it("150.1.1 oracledb.fetchArraySize = 1", async function() {
+      await dmlBinding(1, 50);
     });
 
-    it("150.1.2 oracledb.fetchArraySize = tableSize/20", function(done) {
-      dmlBinding(tableSize / 20, 0, done);
+    it("150.1.2 oracledb.fetchArraySize = tableSize/20", async function() {
+      await dmlBinding(tableSize / 20, 0);
     });
 
-    it("150.1.3 oracledb.fetchArraySize = tableSize/10", function(done) {
-      dmlBinding(tableSize / 10, 2, done);
+    it("150.1.3 oracledb.fetchArraySize = tableSize/10", async function() {
+      await dmlBinding(tableSize / 10, 2);
     });
 
-    it("150.1.4 oracledb.fetchArraySize = tableSize", function(done) {
-      dmlBinding(tableSize, 1, done);
+    it("150.1.4 oracledb.fetchArraySize = tableSize", async function() {
+      await dmlBinding(tableSize, 1);
     });
 
-    it("150.1.5 oracledb.fetchArraySize = (table size - 1)", function(done) {
-      dmlBinding(tableSize - 1, 0, done);
+    it("150.1.5 oracledb.fetchArraySize = (table size - 1)", async function() {
+      await dmlBinding(tableSize - 1, 0);
     });
 
   });
 
   describe("150.2 procedure binding", function() {
 
-    var proc_package = "CREATE OR REPLACE PACKAGE nodb_ref_pkg IS\n" +
-                       "    TYPE idType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
-                       "    TYPE stringType IS TABLE OF VARCHAR2(2000) INDEX BY BINARY_INTEGER;\n" +
-                       "    PROCEDURE array_out(ids OUT idType);\n" +
-                       "    PROCEDURE array_inout(id_in IN NUMBER, contents IN OUT stringType); \n" +
-                       "END;";
+    const proc_package = "CREATE OR REPLACE PACKAGE nodb_ref_pkg IS\n" +
+                         "    TYPE idType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
+                         "    TYPE stringType IS TABLE OF VARCHAR2(2000) INDEX BY BINARY_INTEGER;\n" +
+                         "    PROCEDURE array_out(ids OUT idType);\n" +
+                         "    PROCEDURE array_inout(id_in IN NUMBER, contents IN OUT stringType); \n" +
+                         "END;";
 
-    var proc_package_body = "CREATE OR REPLACE PACKAGE BODY nodb_ref_pkg IS \n" +
-                            "    PROCEDURE array_out(ids OUT idType) IS \n" +
-                            "    BEGIN \n" +
-                            "        SELECT id BULK COLLECT INTO ids from " + tableName + " order by 1; \n" +
-                            "    END; \n" +
-                            "    PROCEDURE array_inout(id_in IN NUMBER, contents IN OUT stringType) IS \n" +
-                            "    BEGIN \n" +
-                            "        update " + tableName + " set content = (contents(1)||' '||to_char(id)) where id > id_in; \n" +
-                            "        SELECT content BULK COLLECT INTO contents FROM " + tableName + " where id > id_in ORDER BY id; \n" +
-                            "    END; \n  " +
-                            "END;";
-    var proc_drop = "DROP PACKAGE nodb_ref_pkg";
+    const proc_package_body = "CREATE OR REPLACE PACKAGE BODY nodb_ref_pkg IS \n" +
+                              "    PROCEDURE array_out(ids OUT idType) IS \n" +
+                              "    BEGIN \n" +
+                              "        SELECT id BULK COLLECT INTO ids from " + tableName + " order by 1; \n" +
+                              "    END; \n" +
+                              "    PROCEDURE array_inout(id_in IN NUMBER, contents IN OUT stringType) IS \n" +
+                              "    BEGIN \n" +
+                              "        update " + tableName + " set content = (contents(1)||' '||to_char(id)) where id > id_in; \n" +
+                              "        SELECT content BULK COLLECT INTO contents FROM " + tableName + " where id > id_in ORDER BY id; \n" +
+                              "    END; \n  " +
+                              "END;";
+    const proc_drop = "DROP PACKAGE nodb_ref_pkg";
 
-    before(function(done) {
-      async.series([
-        function(cb) {
-          connection.execute(
-            create_table,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            proc_package,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            proc_package_body,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+    before(async function() {
+      await connection.execute(create_table);
+      await connection.execute(proc_package);
+      await connection.execute(proc_package_body);
     });
 
-    after(function(done) {
-      async.series([
-        function(cb) {
-          connection.execute(
-            proc_drop,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            drop_table,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+    after(async function() {
+      await connection.execute(proc_drop);
+      await connection.execute(drop_table);
     });
 
-    afterEach(function(done) {
+    afterEach(function() {
       oracledb.fetchArraySize = default_fetcArraySize;
       oracledb.maxRows = default_maxRows;
-      done();
     });
 
-    var proc_query_inout = function(updateFromId, maxArraySizeVal, fetchArraySizeVal, cb) {
+    const proc_query_inout = async function(updateFromId, maxArraySizeVal, fetchArraySizeVal) {
       oracledb.fetchArraySize = fetchArraySizeVal;
-      connection.execute(
+      let result = await connection.execute(
         "BEGIN nodb_ref_pkg.array_inout(:id_in, :c); END;",
         {
           id_in: { type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val: updateFromId },
           c: { type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: ["something new"], maxArraySize: maxArraySizeVal },
-        },
-        function(err, result) {
-          should.not.exist(err);
-          var rowsAffected = tableSize - updateFromId;
-          should.strictEqual(result.outBinds.c.length, rowsAffected);
-          proc_verifyResult_inout(result.outBinds.c, updateFromId, cb);
         }
       );
+      const rowsAffected = tableSize - updateFromId;
+      const outVal = result.outBinds.c;
+      assert.strictEqual(outVal.length, rowsAffected);
+      for (let element of outVal) {
+        const index = outVal.indexOf(element) + updateFromId + 1;
+        assert.strictEqual(element, "something new " + index);
+      }
     };
 
-    var proc_verifyResult_inout = function(result, updateFromId, callback) {
-      async.forEach(result, function(element, cb) {
-        var index = result.indexOf(element);
-        proc_verifyEachRows_inout(index, element, updateFromId);
-        cb();
-      }, function(err) {
-        should.not.exist(err);
-        callback();
-      });
-    };
-
-    var proc_verifyEachRows_inout = function(index, element, updateFromId) {
-      var expectedTail = index + updateFromId + 1;
-      should.strictEqual(element, "something new " + expectedTail);
-    };
-
-    var proc_query_out = function(maxArraySizeVal, fetchArraySizeVal, cb) {
+    const proc_query_out = async function(maxArraySizeVal, fetchArraySizeVal) {
       oracledb.fetchArraySize = fetchArraySizeVal;
-      connection.execute(
+      const result = await connection.execute(
         "BEGIN nodb_ref_pkg.array_out(:c); END;",
         {
           c: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT, maxArraySize: maxArraySizeVal },
-        },
-        function(err, result) {
-          should.not.exist(err);
-          should.strictEqual(result.outBinds.c.length, tableSize);
-          proc_verifyResult_out(result.outBinds.c);
-          cb();
         }
       );
+      const outVal = result.outBinds.c;
+      assert.strictEqual(outVal.length, tableSize);
+      for (let element of outVal) {
+        const index = outVal.indexOf(element);
+        assert.strictEqual(element, index + 1);
+      }
     };
 
-    var proc_verifyResult_out = function(result) {
-      async.forEach(result, function(element, cb) {
-        var index = result.indexOf(element);
-        proc_verifyEachRow_out(index, element);
-        cb();
-      }, function(err) {
-        should.not.exist(err);
-      });
-    };
-
-    var proc_verifyEachRow_out = function(index, element) {
-      should.strictEqual(element, index + 1);
-    };
-
-    it("150.2.1 Bind OUT with oracledb.fetchArraySize = 1", function(done) {
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = 1;
-      proc_query_out(maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.2.1 Bind OUT with oracledb.fetchArraySize = 1", async function() {
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = 1;
+      await proc_query_out(maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.2.2 Bind OUT with oracledb.fetchArraySize = tableSize/20", function(done) {
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize / 20;
-      proc_query_out(maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.2.2 Bind OUT with oracledb.fetchArraySize = tableSize/20", async function() {
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = tableSize / 20;
+      await proc_query_out(maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.2.3 Bind OUT with oracledb.fetchArraySize = tableSize/10", function(done) {
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize / 10;
-      proc_query_out(maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.2.3 Bind OUT with oracledb.fetchArraySize = tableSize/10", async function() {
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = tableSize / 10;
+      await proc_query_out(maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.2.4 Bind OUT with oracledb.fetchArraySize = tableSize", function(done) {
-      var maxArraySizeVal = tableSize + 1;
-      var fetchArraySizeVal = tableSize;
-      proc_query_out(maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.2.4 Bind OUT with oracledb.fetchArraySize = tableSize", async function() {
+      let maxArraySizeVal = tableSize + 1;
+      let fetchArraySizeVal = tableSize;
+      await proc_query_out(maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.2.5 Bind OUT with oracledb.fetchArraySize = (table size - 1)", function(done) {
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize - 1;
-      proc_query_out(maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.2.5 Bind OUT with oracledb.fetchArraySize = (table size - 1)", async function() {
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = tableSize - 1;
+      await proc_query_out(maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.2.6 Bind IN OUT with oracledb.fetchArraySize = 1", function(done) {
-      var updateFromId = 20;
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = 1;
-      proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.2.6 Bind IN OUT with oracledb.fetchArraySize = 1", async function() {
+      let updateFromId = 20;
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = 1;
+      await proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.2.7 Bind IN OUT with oracledb.fetchArraySize = tableSize/20", function(done) {
-      var updateFromId = 0;
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize / 20;
-      proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.2.7 Bind IN OUT with oracledb.fetchArraySize = tableSize/20", async function() {
+      let updateFromId = 0;
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = tableSize / 20;
+      await proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.2.8 Bind IN OUT with oracledb.fetchArraySize = tableSize/10", function(done) {
-      var updateFromId = 0;
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize / 10;
-      proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.2.8 Bind IN OUT with oracledb.fetchArraySize = tableSize/10", async function() {
+      let updateFromId = 0;
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = tableSize / 10;
+      await proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.2.9 Bind IN OUT with oracledb.fetchArraySize = tableSize", function(done) {
-      var updateFromId = 0;
-      var maxArraySizeVal = tableSize + 10;
-      var fetchArraySizeVal = tableSize;
-      proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.2.9 Bind IN OUT with oracledb.fetchArraySize = tableSize", async function() {
+      let updateFromId = 0;
+      let maxArraySizeVal = tableSize + 10;
+      let fetchArraySizeVal = tableSize;
+      await proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.2.10 Bind IN OUT with oracledb.fetchArraySize = (table size - 1)", function(done) {
-      var updateFromId = 0;
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize - 1;
-      proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.2.10 Bind IN OUT with oracledb.fetchArraySize = (table size - 1)", async function() {
+      let updateFromId = 0;
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = tableSize - 1;
+      await proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
   });
 
   describe("150.3 function binding", function() {
 
-    var proc_package = "CREATE OR REPLACE PACKAGE nodb_ref_fun_pkg AS\n" +
-                       "    TYPE idType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
-                       "    TYPE stringType IS TABLE OF VARCHAR2(2000) INDEX BY BINARY_INTEGER;\n" +
-                       "    FUNCTION array_out(id_in IN NUMBER) RETURN idType;\n" +
-                       "    FUNCTION array_inout(id_in IN NUMBER, contents IN OUT stringType) RETURN idType; \n" +
-                       "END;";
+    const proc_package = "CREATE OR REPLACE PACKAGE nodb_ref_fun_pkg AS\n" +
+                         "    TYPE idType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
+                         "    TYPE stringType IS TABLE OF VARCHAR2(2000) INDEX BY BINARY_INTEGER;\n" +
+                         "    FUNCTION array_out(id_in IN NUMBER) RETURN idType;\n" +
+                         "    FUNCTION array_inout(id_in IN NUMBER, contents IN OUT stringType) RETURN idType; \n" +
+                         "END;";
 
-    var proc_package_body = "CREATE OR REPLACE PACKAGE BODY nodb_ref_fun_pkg AS \n" +
+    let proc_package_body = "CREATE OR REPLACE PACKAGE BODY nodb_ref_fun_pkg AS \n" +
                             "    FUNCTION array_out(id_in IN NUMBER) RETURN idType AS \n" +
                             "        tmp_id1 idType; \n" +
                             "    BEGIN \n" +
@@ -425,207 +315,136 @@ describe("150. fetchArraySize3.js", function() {
                             "        RETURN tmp_id2; \n" +
                             "    END; \n  " +
                             "END;";
-    var proc_drop = "DROP PACKAGE nodb_ref_fun_pkg";
+    const proc_drop = "DROP PACKAGE nodb_ref_fun_pkg";
 
-    before(function(done) {
-      async.series([
-        function(cb) {
-          connection.execute(
-            create_table,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            proc_package,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            proc_package_body,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+    before(async function() {
+      await connection.execute(create_table);
+      await connection.execute(proc_package);
+      await connection.execute(proc_package_body);
     });
 
-    after(function(done) {
-      async.series([
-        function(cb) {
-          connection.execute(
-            proc_drop,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            drop_table,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+    after(async function() {
+      await connection.execute(proc_drop);
+      await connection.execute(drop_table);
     });
 
-    afterEach(function(done) {
+    afterEach(function() {
       oracledb.fetchArraySize = default_fetcArraySize;
       oracledb.maxRows = default_maxRows;
-      done();
     });
 
-    var fun_query_inout = function(updateFromId, maxArraySizeVal, fetchArraySizeVal, cb) {
+    const fun_query_inout = async function(updateFromId, maxArraySizeVal, fetchArraySizeVal) {
       oracledb.fetchArraySize = fetchArraySizeVal;
-      connection.execute(
+      let result = await connection.execute(
         "BEGIN :output := nodb_ref_fun_pkg.array_inout(:id_in, :c_inout); END;",
         {
           id_in: { type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val: updateFromId },
           c_inout: { type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: ["something new"], maxArraySize: maxArraySizeVal },
           output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT, maxArraySize: maxArraySizeVal }
-        },
-        function(err, result) {
-          should.not.exist(err);
-          fun_verifyResult_inout(result.outBinds.c_inout, updateFromId);
-          fun_verifyResult_inout(result.outBinds.output, updateFromId);
-          cb();
         }
       );
+      fun_verifyResult_inout(result.outBinds.c_inout, updateFromId);
+      fun_verifyResult_inout(result.outBinds.output, updateFromId);
     };
 
-    var fun_verifyResult_inout = function(result, updateFromId) {
-      var rowsAffected = tableSize - updateFromId;
-      should.strictEqual(result.length, rowsAffected);
-      async.forEach(result, function(element, cb) {
-        var index = result.indexOf(element);
-        fun_verifyEachRow_inout(index, element, updateFromId);
-        cb();
-      }, function(err) {
-        should.not.exist(err);
-      });
-    };
-
-    var fun_verifyEachRow_inout = function(index, element, updateFromId) {
-      if (typeof element === "string") {
-        var expectedTail = index + updateFromId + 1;
-        should.strictEqual(element, "something new " + expectedTail);
-      } else if (typeof element === "number") {
-        should.strictEqual(element, index + 1 + updateFromId);
+    const fun_verifyResult_inout = function(result, updateFromId) {
+      let rowsAffected = tableSize - updateFromId;
+      assert.strictEqual(result.length, rowsAffected);
+      for (let element of result) {
+        const index = result.indexOf(element) + updateFromId + 1;
+        if (typeof element === "string") {
+          assert.strictEqual(element, "something new " + index);
+        } else if (typeof element === "number") {
+          assert.strictEqual(element, index);
+        }
       }
     };
 
-    var fun_query_out = function(affectFromId, maxArraySizeVal, fetchArraySizeVal, cb) {
+    const fun_query_out = async function(affectFromId, maxArraySizeVal, fetchArraySizeVal) {
       oracledb.fetchArraySize = fetchArraySizeVal;
-      connection.execute(
+      const result = await connection.execute(
         "BEGIN :output := nodb_ref_fun_pkg.array_out(:c); END;",
         {
           c: { type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: affectFromId },
           output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT, maxArraySize: maxArraySizeVal }
-        },
-        function(err, result) {
-          should.not.exist(err);
-          should.strictEqual(result.outBinds.output.length, tableSize - affectFromId);
-          fun_verifyResult_out(result.outBinds.output, affectFromId);
-          cb();
         }
       );
+      const outVal = result.outBinds.output;
+      assert.strictEqual(outVal.length, tableSize - affectFromId);
+      for (let element of outVal) {
+        const index = outVal.indexOf(element) + affectFromId + 1;
+        assert.strictEqual(element, index);
+      }
     };
 
-    var fun_verifyResult_out = function(result, affectFromId) {
-      async.forEach(result, function(element, cb) {
-        var index = result.indexOf(element);
-        fun_verifyEachRow_out(index, element, affectFromId);
-        cb();
-      }, function(err) {
-        should.not.exist(err);
-      });
-    };
-
-    var fun_verifyEachRow_out = function(index, element, affectFromId) {
-      should.strictEqual(element, index + 1 + affectFromId);
-    };
-
-    it("150.3.1 Bind OUT with oracledb.fetchArraySize = 1", function(done) {
-      var affectFromId = 0;
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = 1;
-      fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.3.1 Bind OUT with oracledb.fetchArraySize = 1", async function() {
+      let affectFromId = 0;
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = 1;
+      await fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.3.2 Bind OUT with oracledb.fetchArraySize = tableSize/20", function(done) {
-      var affectFromId = 0;
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize / 20;
-      fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.3.2 Bind OUT with oracledb.fetchArraySize = tableSize/20", async function() {
+      let affectFromId = 0;
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = tableSize / 20;
+      await fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.3.3 Bind OUT with oracledb.fetchArraySize = tableSize/10", function(done) {
-      var affectFromId = 0;
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize / 10;
-      fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.3.3 Bind OUT with oracledb.fetchArraySize = tableSize/10", async function() {
+      let affectFromId = 0;
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = tableSize / 10;
+      await fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.3.4 Bind OUT with oracledb.fetchArraySize = tableSize", function(done) {
-      var affectFromId = 0;
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize;
-      fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.3.4 Bind OUT with oracledb.fetchArraySize = tableSize", async function() {
+      let affectFromId = 0;
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = tableSize;
+      await fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.3.5 Bind OUT with oracledb.fetchArraySize = (table size - 1)", function(done) {
-      var affectFromId = 0;
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize - 1;
-      fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.3.5 Bind OUT with oracledb.fetchArraySize = (table size - 1)", async function() {
+      let affectFromId = 0;
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = tableSize - 1;
+      await fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.3.6 Bind IN OUT with oracledb.fetchArraySize = 1", function(done) {
-      var updateFromId = 20;
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = 1;
-      fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.3.6 Bind IN OUT with oracledb.fetchArraySize = 1", async function() {
+      let updateFromId = 20;
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = 1;
+      await fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.3.7 Bind IN OUT with oracledb.fetchArraySize = tableSize/20", function(done) {
-      var updateFromId = 0;
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize / 20;
-      fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.3.7 Bind IN OUT with oracledb.fetchArraySize = tableSize/20", async function() {
+      let updateFromId = 0;
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = tableSize / 20;
+      await fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.3.8 Bind IN OUT with oracledb.fetchArraySize = tableSize/10", function(done) {
-      var updateFromId = 0;
-      var maxArraySizeVal = tableSize * 2;
-      var fetchArraySizeVal = tableSize / 10;
-      fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.3.8 Bind IN OUT with oracledb.fetchArraySize = tableSize/10", async function() {
+      let updateFromId = 0;
+      let maxArraySizeVal = tableSize * 2;
+      let fetchArraySizeVal = tableSize / 10;
+      await fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.3.9 Bind IN OUT with oracledb.fetchArraySize = tableSize", function(done) {
-      var updateFromId = 0;
-      var maxArraySizeVal = tableSize * 2;
-      var fetchArraySizeVal = tableSize;
-      fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.3.9 Bind IN OUT with oracledb.fetchArraySize = tableSize", async function() {
+      let updateFromId = 0;
+      let maxArraySizeVal = tableSize * 2;
+      let fetchArraySizeVal = tableSize;
+      await fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
-    it("150.3.10 Bind IN OUT with oracledb.fetchArraySize = (table size - 1)", function(done) {
-      var updateFromId = 0;
-      var maxArraySizeVal = tableSize;
-      var fetchArraySizeVal = tableSize - 1;
-      fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    it("150.3.10 Bind IN OUT with oracledb.fetchArraySize = (table size - 1)", async function() {
+      let updateFromId = 0;
+      let maxArraySizeVal = tableSize;
+      let fetchArraySizeVal = tableSize - 1;
+      await fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
   });

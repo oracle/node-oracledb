@@ -34,7 +34,6 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
-const sql      = require('./sql.js');
 
 describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
 
@@ -73,12 +72,12 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
     let tabsize = 10;
 
     before(async function() {
-      await sql.executeSql(connection, blob_table_create, {}, {});
+      await connection.execute(blob_table_create);
       await insertData(tabsize);
     });
 
     after(async function() {
-      await sql.executeSql(connection, blob_table_drop, {}, {});
+      await connection.execute(blob_table_drop);
     });
 
     it('137.1.1 BLOB DML returning multiple rows as buffer', async function() {

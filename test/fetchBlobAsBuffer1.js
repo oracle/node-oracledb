@@ -38,7 +38,6 @@ const assert   = require('assert');
 const fs       = require('fs');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
-const assist   = require('./dataTypeAssist.js');
 
 describe('87. fetchBlobAsBuffer1.js', function() {
 
@@ -104,18 +103,6 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     assert.strictEqual(result.rowsAffected, 1);
   };
 
-  // compare fetch result
-  const compareClientFetchResult = async function(resultVal, specialStr, content, contentLength) {
-    await compareBuffers(resultVal, specialStr, content, contentLength);
-  };
-
-  // compare two buffers
-  const compareBuffers = function(resultVal, specialStr, content, contentLength) {
-    assert.equal(resultVal.length, contentLength);
-    const compareBuffer = assist.compare2Buffers(resultVal, content);
-    assert.strictEqual(compareBuffer, true);
-  };
-
   describe('87.1 fetch BLOB columns by setting oracledb.fetchAsBuffer', function() {
 
     before('Create table and populate', async function() {
@@ -126,16 +113,16 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       await connection.execute(drop_table1);
     }); // after
 
-    const insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
+    const insertAndFetch = async function(id, specialStr, insertContent) {
       await insertIntoBlobTable1(id, insertContent);
       const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = :id",
         { id : id });
       const resultVal = result.rows[0][1];
       if (specialStr === null) {
-        assert.equal(resultVal, null);
+        assert.strictEqual(resultVal, null);
       } else {
-        await compareClientFetchResult(resultVal, specialStr, insertContent, insertContentLength);
+        assert.deepStrictEqual(resultVal, insertContent);
       }
     };
 
@@ -150,13 +137,13 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     it('87.1.1 works with NULL value', async function() {
       const id = insertID++;
       const content = null;
-      await insertAndFetch(id, null, content, null);
+      await insertAndFetch(id, null, content);
     }); // 87.1.1
 
     it('87.1.2 works with empty Buffer', async function() {
       const id = insertID++;
       const content = Buffer.from("", "utf-8");
-      await insertAndFetch(id, null, content, null);
+      await insertAndFetch(id, null, content);
     }); // 87.1.2
 
     it('87.1.3 works with small value', async function() {
@@ -165,7 +152,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const contentLength = 20;
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.1.3
 
     it('87.1.4 works with (64K - 1) value', async function() {
@@ -174,7 +161,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const contentLength = 65535;
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.1.4
 
     it('87.1.5 works with (64K + 1) value', async function() {
@@ -183,7 +170,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const contentLength = 65537;
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.1.5
 
     it('87.1.6 works with (1MB + 1) data', async function() {
@@ -192,7 +179,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const contentLength = 1048577; // 1MB + 1
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.1.6
 
     it('87.1.7 works with dbms_lob.substr()', async function() {
@@ -208,13 +195,13 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         { id : id });
       const resultVal = result.rows[0][0];
       const buffer2Compare = Buffer.from(specialStr, "utf-8");
-      await compareClientFetchResult(resultVal, specialStr, buffer2Compare, specialStrLength);
+      assert.deepStrictEqual(resultVal, buffer2Compare);
     }); // 87.1.7
 
     it('87.1.8 works with EMPTY_BLOB()', async function() {
       const id = insertID++;
       const content = "EMPTY_BLOB";
-      await insertAndFetch(id, null, content, null);
+      await insertAndFetch(id, null, content);
     }); // 87.1.8
 
     it('87.1.9 fetch multiple BLOB rows as Buffer', async function() {
@@ -233,10 +220,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2);
 
-      let resultVal = result.rows[0][1];
-      await compareClientFetchResult(resultVal, specialStr_1, content_1, contentLength_1);
-      resultVal = result.rows[1][1];
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
+      assert.deepStrictEqual(result.rows[0][1], content_1);
+      assert.deepStrictEqual(result.rows[1][1], content_2);
     }); // 87.1.9
 
     it('87.1.10 fetch the same BLOB column multiple times', async function() {
@@ -248,11 +233,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       await insertIntoBlobTable1(id, content);
       const result = await connection.execute(
         "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id);
-      let resultVal = result.rows[0][1];
-      await compareClientFetchResult(resultVal, specialStr, content, contentLength);
-      resultVal = result.rows[0][2];
-      await compareClientFetchResult(resultVal, specialStr, content, contentLength);
-
+      assert.deepStrictEqual(result.rows[0][1], content);
+      assert.deepStrictEqual(result.rows[0][2], content);
     }); // 87.1.10
 
     it('87.1.11 works with update statement', async function() {
@@ -265,11 +247,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const contentLength_2 = 200;
       const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       const content_2 = Buffer.from(strBuf_2, "utf-8");
-      await insertAndFetch(id, specialStr_1, content_1, contentLength_1);
+      await insertAndFetch(id, specialStr_1, content_1);
       await updateBlobTable1(id, content_2);
       const result = await connection.execute("SELECT ID, B from nodb_blob1 WHERE ID = " + id);
-      const resultVal = result.rows[0][1];
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
+      assert.deepStrictEqual(result.rows[0][1], content_2);
     }); // 87.1.11
 
     it('87.1.12 works with REF CURSOR', async function() {
@@ -292,8 +273,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       };
       const result = await connection.execute(sql, bindVar);
       const rows = await result.outBinds.b.getRows(3);
-      const resultVal = rows[0][0];
-      await compareClientFetchResult(resultVal, specialStr, content, contentLength);
+      assert.deepStrictEqual(rows[0][0], content);
       await result.outBinds.b.close();
       const ref_proc_drop = "DROP PROCEDURE nodb_ref";
       await connection.execute(ref_proc_drop);
@@ -319,7 +299,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         lob.on('end', lob.destroy);
         lob.on('close', resolve);
       });
-      await compareClientFetchResult(blobData, specialStr, content, contentLength);
+      assert.deepStrictEqual(blobData, content);
     }); // 87.1.13
 
     it('87.1.14 works with setting oracledb.maxRows < actual number of rows in the table', async function() {
@@ -341,8 +321,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2);
       assert.strictEqual(result.rows.length, 1);
-      const resultVal = result.rows[0][1];
-      await compareClientFetchResult(resultVal, specialStr_1, content_1, contentLength_1);
+      assert.deepStrictEqual(result.rows[0][1], content_1);
       oracledb.maxRows = maxRowsBak;
     }); // 87.1.14
 
@@ -364,10 +343,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2);
       assert.strictEqual(result.rows.length, 2);
-      let resultVal = result.rows[0][1];
-      await compareClientFetchResult(resultVal, specialStr_1, content_1, contentLength_1);
-      resultVal = result.rows[1][1];
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
+      assert.deepStrictEqual(result.rows[0][1], content_1);
+      assert.deepStrictEqual(result.rows[1][1], content_2);
       oracledb.maxRows = maxRowsBak;
     }); // 87.1.15
 
@@ -387,7 +364,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       const lob = result.rows[0][1];
       const blobData = await lob.getData();
-      await compareClientFetchResult(blobData, specialStr, content, contentLength);
+      assert.deepStrictEqual(blobData, content);
       lob.destroy();
     }); // 87.1.16
 
@@ -407,7 +384,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         stream.on('end', stream.destroy);
         stream.on('close', resolve);
         stream.on('data', function(data) {
-          compareBuffers(data[1], specialStr, content, contentLength);
+          assert.deepStrictEqual(data[1], content);
           counter++;
         });
       });
@@ -441,14 +418,14 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           const result = data[1];
           counter++;
           if (counter == 1) {
-            compareBuffers(result, specialStr_1, content_1, contentLength_1);
+            assert.deepStrictEqual(result, content_1);
           } else {
-            compareBuffers(result, specialStr_2, content_2, contentLength_2);
+            assert.deepStrictEqual(result, content_2);
           }
         });
       });
       oracledb.maxRows = maxRowsBak;
-      assert.equal(counter, 2);
+      assert.strictEqual(counter, 2);
     }); // 87.1.18
 
     it('87.1.19 works with await connection.queryStream() and oracledb.maxRows = actual number of rows in the table', async function() {
@@ -483,14 +460,14 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           const result = data[1];
           counter++;
           if (counter == 1) {
-            compareBuffers(result, specialStr_1, content_1, contentLength_1);
+            assert.deepStrictEqual(result, content_1);
           } else {
-            compareBuffers(result, specialStr_2, content_2, contentLength_2);
+            assert.deepStrictEqual(result, content_2);
           }
         });
 
         stream.on('end', function() {
-          assert.equal(counter, 2);
+          assert.strictEqual(counter, 2);
           oracledb.maxRows = maxRowsBak;
           stream.destroy();
         });
@@ -534,14 +511,14 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           const result = data[1];
           counter++;
           if (counter == 1) {
-            compareBuffers(result, specialStr_1, content_1, contentLength_1);
+            assert.deepStrictEqual(result, content_1);
           } else {
-            compareBuffers(result, specialStr_2, content_2, contentLength_2);
+            assert.deepStrictEqual(result, content_2);
           }
         });
 
         stream.on('end', function() {
-          assert.equal(counter, 2);
+          assert.strictEqual(counter, 2);
           oracledb.maxRows = maxRowsBak;
           stream.destroy();
         });
@@ -572,19 +549,18 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       oracledb.fetchAsBuffer = [];
     }); // afterEach
 
-    let insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
-      let result = null;
+    const insertAndFetch = async function(id, specialStr, insertContent) {
       await insertIntoBlobTable1(id, insertContent);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = :id",
         { id : id },
         { outFormat : oracledb.OUT_FORMAT_OBJECT });
       let resultVal = result.rows[0].B;
       if (specialStr === null) {
-        assert.equal(resultVal, null);
+        assert.strictEqual(resultVal, null);
       } else {
-        await compareClientFetchResult(resultVal, specialStr, insertContent, insertContentLength);
+        assert.deepStrictEqual(resultVal, insertContent);
       }
     };
 
@@ -592,14 +568,14 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let id = insertID++;
       let content = null;
 
-      await insertAndFetch(id, null, content, null);
+      await insertAndFetch(id, null, content);
     }); // 87.2.1
 
     it('87.2.2 works with empty Buffer', async function() {
       let id = insertID++;
       let content = Buffer.from("", "utf-8");
 
-      await insertAndFetch(id, null, content, null);
+      await insertAndFetch(id, null, content);
     }); // 87.2.2
 
     it('87.2.3 works with small value', async function() {
@@ -609,7 +585,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.2.3
 
     it('87.2.4 works with (64K - 1) value', async function() {
@@ -619,7 +595,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.2.4
 
     it('87.2.5 works with (64K + 1) value', async function() {
@@ -629,7 +605,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.2.5
 
     it('87.2.6 works with (1MB + 1) data', async function() {
@@ -639,7 +615,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.2.6
 
     it('87.2.7 works with dbms_lob.substr()', async function() {
@@ -660,14 +636,14 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       let resultVal = result.rows[0].B1;
       let buffer2Compare = Buffer.from(specialStr, "utf-8");
-      await compareClientFetchResult(resultVal, specialStr, buffer2Compare, specialStrLength);
+      assert.deepStrictEqual(resultVal, buffer2Compare);
     }); // 87.2.7
 
     it('87.2.8 works with EMPTY_BLOB()', async function() {
       let id = insertID++;
       let content = "EMPTY_BLOB";
 
-      await insertAndFetch(id, null, content, null);
+      await insertAndFetch(id, null, content);
     }); // 87.2.8
 
     it('87.2.9 fetch multiple BLOB rows as Buffer', async function() {
@@ -688,10 +664,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
         { outFormat : oracledb.OUT_FORMAT_OBJECT });
-      let resultVal = result.rows[0].B;
-      await compareClientFetchResult(resultVal, specialStr_1, content_1, contentLength_1);
-      resultVal = result.rows[1].B;
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
+      assert.deepStrictEqual(result.rows[0].B, content_1);
+      assert.deepStrictEqual(result.rows[1].B, content_2);
     }); // 87.2.9
 
     it('87.2.10 fetch the same BLOB column multiple times', async function() {
@@ -709,10 +683,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         { },
         { outFormat : oracledb.OUT_FORMAT_OBJECT });
 
-      let resultVal = result.rows[0].B1;
-      await compareClientFetchResult(resultVal, specialStr, content, contentLength);
-      resultVal = result.rows[0].B2;
-      await compareClientFetchResult(resultVal, specialStr, content, contentLength);
+      assert.deepStrictEqual(result.rows[0].B1, content);
+      assert.deepStrictEqual(result.rows[0].B2, content);
     }); // 87.2.10
 
     it('87.2.11 works with update statement', async function() {
@@ -727,7 +699,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let content_2 = Buffer.from(strBuf_2, "utf-8");
       let result = null;
 
-      await insertAndFetch(id, specialStr_1, content_1, contentLength_1);
+      await insertAndFetch(id, specialStr_1, content_1);
 
       await updateBlobTable1(id, content_2);
 
@@ -735,8 +707,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
         { },
         { outFormat : oracledb.OUT_FORMAT_OBJECT });
-      let resultVal = result.rows[0].B;
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
+      assert.deepStrictEqual(result.rows[0].B, content_2);
     }); // 87.2.11
 
     it('87.2.12 works with REF CURSOR', async function() {
@@ -745,7 +716,6 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let contentLength = 100;
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
-      let result = null;
       await insertIntoBlobTable1(id, content);
       let ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
                          "AS \n" +
@@ -759,14 +729,11 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let bindVar = {
         b: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
-      result = await connection.execute(
-        sql,
-        bindVar);
-      let rows = await result.outBinds.b.getRows(3);
-      let resultVal = rows[0][0];
-      await compareClientFetchResult(resultVal, specialStr, content, contentLength);
+      const result = await connection.execute(sql, bindVar);
+      const rows = await result.outBinds.b.getRows(3);
+      assert.deepStrictEqual(rows[0][0], content);
       await result.outBinds.b.close();
-      let ref_proc_drop = "DROP PROCEDURE nodb_ref";
+      const ref_proc_drop = "DROP PROCEDURE nodb_ref";
       await connection.execute(ref_proc_drop);
     }); // 87.2.12
 
@@ -783,29 +750,16 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       result = await connection.execute("SELECT B from nodb_blob1 WHERE ID = " + id);
 
       let lob = result.rows[0][0];
-      assert(lob);
       let blobData = Buffer.alloc(0);
-      let totalLength = 0;
       await new Promise((resolve, reject) => {
+        lob.on('error', reject);
+        lob.on('end', lob.destroy);
+        lob.on('close', resolve);
         lob.on('data', function(chunk) {
-          totalLength = totalLength + chunk.length;
-          blobData = Buffer.concat([blobData, chunk], totalLength);
-        });
-
-        lob.on('error', function(err) {
-          assert.ifError(err, "lob.on 'error' event.");
-          reject();
-        });
-
-        lob.on('end', async function() {
-          await compareClientFetchResult(blobData, specialStr, content, contentLength);
-          lob.destroy();
-        });
-
-        lob.on('close', function() {
-          resolve();
+          blobData = Buffer.concat([blobData, chunk]);
         });
       });
+      assert.deepStrictEqual(blobData, content);
     }); // 87.2.13
 
     it('87.2.14 works with setting oracledb.maxRows < actual number of rows in the table', async function() {
@@ -833,8 +787,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         { outFormat : oracledb.OUT_FORMAT_OBJECT });
 
       assert.strictEqual(result.rows.length, 1);
-      let resultVal = result.rows[0].B;
-      await compareClientFetchResult(resultVal, specialStr_1, content_1, contentLength_1);
+      assert.deepStrictEqual(result.rows[0].B, content_1);
       oracledb.maxRows = maxRowsBak;
     }); // 87.2.14
 
@@ -861,10 +814,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         { outFormat : oracledb.OUT_FORMAT_OBJECT });
 
       assert.strictEqual(result.rows.length, 2);
-      let resultVal = result.rows[0].B;
-      await compareClientFetchResult(resultVal, specialStr_1, content_1, contentLength_1);
-      resultVal = result.rows[1].B;
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
+      assert.deepStrictEqual(result.rows[0].B, content_1);
+      assert.deepStrictEqual(result.rows[1].B, content_2);
       oracledb.maxRows = maxRowsBak;
     }); // 87.2.15
 
@@ -874,41 +825,19 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let contentLength = 20;
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
-      let result = null;
 
       await insertIntoBlobTable1(id, content);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = :id",
         { id : id },
         {
           fetchInfo : { B : { type : oracledb.DEFAULT } }
         });
-      await new Promise((resolve, reject) => {
-        let lob = result.rows[0][1];
-        assert(lob);
-        let blobData = Buffer.alloc(0);
-        let totalLength = 0;
-
-        lob.on('data', function(chunk) {
-          totalLength = totalLength + chunk.length;
-          blobData = Buffer.concat([blobData, chunk], totalLength);
-        });
-
-        lob.on('error', function(err) {
-          assert.ifError(err, "lob.on 'error' event.");
-          reject();
-        });
-
-        lob.on('end', async function() {
-          await compareClientFetchResult(blobData, specialStr, content, contentLength);
-          lob.destroy();
-        });
-
-        lob.on('close', function() {
-          resolve();
-        });
-      });
+      const lob = result.rows[0][1];
+      const blobData = await lob.getData();
+      await lob.close();
+      assert.deepStrictEqual(blobData, content);
     }); // 87.2.16
 
   }); // 87.2
@@ -933,10 +862,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
     }); // afterEach
 
-    let insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
-      let result = null;
+    const insertAndFetch = async function(id, specialStr, insertContent) {
       await insertIntoBlobTable1(id, insertContent);
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = :id",
         { id : id },
         {
@@ -947,25 +875,25 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let resultVal;
       resultVal = row.B;
       if (specialStr === null) {
-        assert.equal(resultVal, null);
+        assert.strictEqual(resultVal, null);
       } else {
-        await compareClientFetchResult(resultVal, specialStr, insertContent, insertContentLength);
+        assert.deepStrictEqual(resultVal, insertContent);
       }
-      result.resultSet.close();
+      await result.resultSet.close();
     };
 
     it('87.3.1 works with NULL value', async function() {
       let id = insertID++;
       let content = null;
 
-      await insertAndFetch(id, null, content, null);
+      await insertAndFetch(id, null, content);
     }); // 87.3.1
 
     it('87.3.2 works with empty Buffer', async function() {
       let id = insertID++;
       let content = Buffer.from("", "utf-8");
 
-      await insertAndFetch(id, null, content, null);
+      await insertAndFetch(id, null, content);
     }); // 87.3.2
 
     it('87.3.3 works with small value', async function() {
@@ -975,7 +903,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.3.3
 
     it('87.3.4 works with (64K - 1) value', async function() {
@@ -985,7 +913,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.3.4
 
     it('87.3.5 works with (64K + 1) value', async function() {
@@ -995,7 +923,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.3.5
 
     it('87.3.6 works with (1MB + 1) data', async function() {
@@ -1005,7 +933,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.3.6
 
     it('87.3.7 works with dbms_lob.substr()', async function() {
@@ -1016,28 +944,26 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      let result = null;
       await insertIntoBlobTable1(id, content);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) AS B1 from nodb_blob1 WHERE ID = :id",
         { id : id },
         {
           outFormat : oracledb.OUT_FORMAT_OBJECT,
           resultSet : true
         });
-      let row = await result.resultSet.getRow();
-      let resultVal = row.B1;
-      let buffer2Compare = Buffer.from(specialStr, "utf-8");
-      await compareClientFetchResult(resultVal, specialStr, buffer2Compare, specialStrLength);
-      result.resultSet.close();
+      const row = await result.resultSet.getRow();
+      const buffer2Compare = Buffer.from(specialStr, "utf-8");
+      assert.deepStrictEqual(row.B1, buffer2Compare);
+      await result.resultSet.close();
     }); // 87.3.7
 
     it('87.3.8 works with EMPTY_BLOB()', async function() {
       let id = insertID++;
       let content = "EMPTY_BLOB";
 
-      await insertAndFetch(id, null, content, null);
+      await insertAndFetch(id, null, content);
     }); // 87.3.8
 
     it('87.3.9 fetch multiple BLOB rows as Buffer', async function() {
@@ -1068,11 +994,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       let row = await result.resultSet.getRows(
         rowNumFetched);
-      let resultVal = row[0].B;
-      await compareClientFetchResult(resultVal, specialStr_1, content_1, contentLength_1);
-      resultVal = row[1].B;
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
-      result.resultSet.close();
+      assert.deepStrictEqual(row[0].B, content_1);
+      assert.deepStrictEqual(row[1].B, content_2);
+      await result.resultSet.close();
     }); // 87.3.9
 
     it('87.3.10 fetch the same BLOB column multiple times', async function() {
@@ -1093,12 +1017,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           resultSet : true
         });
 
-      let row = await result.resultSet.getRow();
-      let resultVal = row.B1;
-      await compareClientFetchResult(resultVal, specialStr, content, contentLength);
-      resultVal = row.B2;
-      await compareClientFetchResult(resultVal, specialStr, content, contentLength);
-      result.resultSet.close();
+      const row = await result.resultSet.getRow();
+      assert.deepStrictEqual(row.B1, content);
+      assert.deepStrictEqual(row.B2, content);
+      await result.resultSet.close();
     }); // 87.3.10
 
     it('87.3.11 works with update statement', async function() {
@@ -1111,22 +1033,20 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let contentLength_2 = 208;
       let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       let content_2 = Buffer.from(strBuf_2, "utf-8");
-      let result = null;
 
-      await insertAndFetch(id, specialStr_1, content_1, contentLength_1);
+      await insertAndFetch(id, specialStr_1, content_1);
 
       await updateBlobTable1(id, content_2);
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
         { },
         {
           outFormat : oracledb.OUT_FORMAT_OBJECT,
           resultSet : true
         });
-      let row = await result.resultSet.getRow();
-      let resultVal = row.B;
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
-      result.resultSet.close();
+      const row = await result.resultSet.getRow();
+      assert.deepStrictEqual(row.B, content_2);
+      await result.resultSet.close();
     }); // 87.3.11
 
     it('87.3.12 works with REF CURSOR', async function() {
@@ -1135,7 +1055,6 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let contentLength = 100;
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
-      let result = null;
 
       await insertIntoBlobTable1(id, content);
 
@@ -1145,20 +1064,16 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                          "    OPEN blob_cursor FOR \n" +
                          "        SELECT B from nodb_blob1 WHERE ID = " + id + "; \n" +
                          "END;";
-      await connection.execute(
-        ref_proc);
+      await connection.execute(ref_proc);
 
-      let sql = "BEGIN nodb_ref(:b); END;";
-      let bindVar = {
+      const sql = "BEGIN nodb_ref(:b); END;";
+      const bindVar = {
         b: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
-      result = await connection.execute(
-        sql,
-        bindVar);
-      let rows = await result.outBinds.b.getRows(3);
+      const result = await connection.execute(sql, bindVar);
+      const rows = await result.outBinds.b.getRows(3);
 
-      let resultVal = rows[0][0];
-      await compareClientFetchResult(resultVal, specialStr, content, contentLength);
+      assert.deepStrictEqual(rows[0][0], content);
       await result.outBinds.b.close();
       let ref_proc_drop = "DROP PROCEDURE nodb_ref";
       await connection.execute(ref_proc_drop);
@@ -1170,39 +1085,23 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let contentLength = 200;
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
-      let result = null;
 
       await insertIntoBlobTable1(id, content);
       oracledb.fetchAsBuffer = [];
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT B from nodb_blob1 WHERE ID = " + id);
 
-
-      let lob = result.rows[0][0];
-      assert(lob);
+      const lob = result.rows[0][0];
       let blobData = Buffer.alloc(0);
-      let totalLength = 0;
       await new Promise((resolve, reject) => {
-
+        lob.on('error', reject);
+        lob.on('end', lob.destroy);
+        lob.on('close', resolve);
         lob.on('data', function(chunk) {
-          totalLength = totalLength + chunk.length;
-          blobData = Buffer.concat([blobData, chunk], totalLength);
-        });
-
-        lob.on('error', function(err) {
-          assert.ifError(err, "lob.on 'error' event.");
-          reject();
-        });
-
-        lob.on('end', async function() {
-          await compareClientFetchResult(blobData, specialStr, content, contentLength);
-          lob.destroy();
-        });
-
-        lob.on('close', function() {
-          resolve();
+          blobData = Buffer.concat([blobData, chunk]);
         });
       });
+      assert.deepStrictEqual(blobData, content);
     }); // 87.3.13
 
     it('87.3.14 works with setting oracledb.maxRows < actual number of rows in the table', async function() {
@@ -1218,14 +1117,13 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let content_2 = Buffer.from(strBuf_2, "utf-8");
       let maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
-      let result = null;
 
       await insertIntoBlobTable1(id_1, content_1);
 
       await insertIntoBlobTable1(id_2, content_2);
 
       let rowNumFetched = 2;
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -1233,14 +1131,12 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           resultSet : true
         });
 
-      let row = await result.resultSet.getRows(rowNumFetched);
+      const row = await result.resultSet.getRows(rowNumFetched);
       assert.strictEqual(row.length, 2);
-      let resultVal = row[0].B;
-      await compareClientFetchResult(resultVal, specialStr_1, content_1, contentLength_1);
-      resultVal = row[1].B;
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
+      assert.deepStrictEqual(row[0].B, content_1);
+      assert.deepStrictEqual(row[1].B, content_2);
       oracledb.maxRows = maxRowsBak;
-      result.resultSet.close();
+      await result.resultSet.close();
     }); // 87.3.14
 
     it('87.3.15 works with setting oracledb.maxRows > actual number of rows in the table', async function() {
@@ -1256,12 +1152,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let content_2 = Buffer.from(strBuf_2, "utf-8");
       let maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
-      let result = null;
 
       await insertIntoBlobTable1(id_1, content_1);
       await insertIntoBlobTable1(id_2, content_2);
-      let rowNumFetched = 2;
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -1269,15 +1163,12 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           resultSet : true
         });
 
-      let row = await result.resultSet.getRows(rowNumFetched);
-
-      assert.strictEqual(row.length, 2);
-      let resultVal = row[0].B;
-      await compareClientFetchResult(resultVal, specialStr_1, content_1, contentLength_1);
-      resultVal = row[1].B;
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
+      const rows = await result.resultSet.getRows(2);
+      assert.strictEqual(rows.length, 2);
+      assert.deepStrictEqual(rows[0].B, content_1);
+      assert.deepStrictEqual(rows[1].B, content_2);
       oracledb.maxRows = maxRowsBak;
-      result.resultSet.close();
+      await result.resultSet.close();
     }); // 87.3.15
 
     it('87.3.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', async function() {
@@ -1297,34 +1188,13 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           fetchInfo : { B : { type : oracledb.DEFAULT } }
         });
 
-      let lob = result.rows[0][1];
-      assert(lob);
-      let blobData = Buffer.alloc(0);
-      let totalLength = 0;
-      await new Promise((resolve, reject) => {
-        lob.on('data', function(chunk) {
-          totalLength = totalLength + chunk.length;
-          blobData = Buffer.concat([blobData, chunk], totalLength);
-        });
+      const lob = result.rows[0][1];
+      const blobData = await lob.getData();
+      await lob.close();
+      assert.deepStrictEqual(blobData, content);
+    }); // 87.3.16
 
-        lob.on('error', function(err) {
-          assert.ifError(err, "lob.on 'error' event.");
-          reject();
-        });
-
-        lob.on('end', async function() {
-          await compareClientFetchResult(blobData, specialStr, content, contentLength);
-          lob.destroy();
-        });
-
-        lob.on('close', function() {
-          resolve();
-        });
-      }
-      );
-    });
-  }); // 87.3.16
-  // 87.3
+  }); // 87.3
 
   describe('87.4 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.OUT_FORMAT_ARRAY', function() {
 
@@ -1347,7 +1217,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
     }); // afterEach
 
-    let insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
+    let insertAndFetch = async function(id, specialStr, insertContent) {
       let result = null;
       await insertIntoBlobTable1(id, insertContent);
 
@@ -1358,9 +1228,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       let resultVal = result.rows[0][1];
       if (specialStr === null) {
-        assert.equal(resultVal, null);
+        assert.strictEqual(resultVal, null);
       } else {
-        await compareClientFetchResult(resultVal, specialStr, insertContent, insertContentLength);
+        assert.deepStrictEqual(resultVal, insertContent);
       }
     };
 
@@ -1368,14 +1238,14 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let id = insertID++;
       let content = null;
 
-      await insertAndFetch(id, null, content, null);
+      await insertAndFetch(id, null, content);
     }); // 87.4.1
 
     it('87.4.2 works with empty Buffer', async function() {
       let id = insertID++;
       let content = Buffer.from("", "utf-8");
 
-      await insertAndFetch(id, null, content, null);
+      await insertAndFetch(id, null, content);
     }); // 87.4.2
 
     it('87.4.3 works with small value', async function() {
@@ -1385,7 +1255,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.4.3
 
     it('87.4.4 works with (64K - 1) value', async function() {
@@ -1395,7 +1265,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.4.4
 
     it('87.4.5 works with (64K + 1) value', async function() {
@@ -1405,7 +1275,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.4.5
 
     it('87.4.6 works with (1MB + 1) data', async function() {
@@ -1415,7 +1285,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.4.6
 
     it('87.4.7 works with dbms_lob.substr()', async function() {
@@ -1434,14 +1304,14 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         { outFormat : oracledb.OUT_FORMAT_ARRAY });
       let resultVal = result.rows[0][0];
       let buffer2Compare = Buffer.from(specialStr, "utf-8");
-      await compareClientFetchResult(resultVal, specialStr, buffer2Compare, specialStrLength);
+      assert.deepStrictEqual(resultVal, buffer2Compare);
     }); // 87.4.7
 
     it('87.4.8 works with EMPTY_BLOB()', async function() {
       let id = insertID++;
       let content = "EMPTY_BLOB";
 
-      await insertAndFetch(id, null, content, null);
+      await insertAndFetch(id, null, content);
     }); // 87.4.8
 
     it('87.4.9 fetch multiple BLOB rows as Buffer', async function() {
@@ -1466,10 +1336,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         { },
         { outFormat : oracledb.OUT_FORMAT_ARRAY });
 
-      let resultVal = result.rows[0][1];
-      await compareClientFetchResult(resultVal, specialStr_1, content_1, contentLength_1);
-      resultVal = result.rows[1][1];
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
+      assert.deepStrictEqual(result.rows[0][1], content_1);
+      assert.deepStrictEqual(result.rows[1][1], content_2);
     }); // 87.4.9
 
     it('87.4.10 fetch the same BLOB column multiple times', async function() {
@@ -1485,10 +1353,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
         { },
         { outFormat : oracledb.OUT_FORMAT_ARRAY });
-      let resultVal = result.rows[0][1];
-      await compareClientFetchResult(resultVal, specialStr, content, contentLength);
-      resultVal = result.rows[0][2];
-      await compareClientFetchResult(resultVal, specialStr, content, contentLength);
+      assert.deepStrictEqual(result.rows[0][1], content);
+      assert.deepStrictEqual(result.rows[0][2], content);
     }); // 87.4.10
 
     it('87.4.11 works with update statement', async function() {
@@ -1501,19 +1367,17 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let contentLength_2 = 208;
       let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       let content_2 = Buffer.from(strBuf_2, "utf-8");
-      let result = null;
 
-      await insertAndFetch(id, specialStr_1, content_1, contentLength_1);
+      await insertAndFetch(id, specialStr_1, content_1);
 
       await updateBlobTable1(id, content_2);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
         { },
         { outFormat : oracledb.OUT_FORMAT_ARRAY });
 
-      let resultVal = result.rows[0][1];
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
+      assert.deepStrictEqual(result.rows[0][1], content_2);
     }); // 87.4.11
 
     it('87.4.12 works with REF CURSOR', async function() {
@@ -1522,7 +1386,6 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let contentLength = 100;
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
-      let result = null;
       await insertIntoBlobTable1(id, content);
 
       let ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
@@ -1538,13 +1401,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         b: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
 
-      result = await connection.execute(
-        sql,
-        bindVar);
+      const result = await connection.execute(sql, bindVar);
 
-      let rows = await result.outBinds.b.getRows(3);
-      let resultVal = rows[0][0];
-      await compareClientFetchResult(resultVal, specialStr, content, contentLength);
+      const rows = await result.outBinds.b.getRows(3);
+      assert.deepStrictEqual(rows[0][0], content);
       await result.outBinds.b.close();
       let ref_proc_drop = "DROP PROCEDURE nodb_ref";
       await connection.execute(ref_proc_drop);
@@ -1563,31 +1423,17 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       result = await connection.execute(
         "SELECT B from nodb_blob1 WHERE ID = " + id);
 
+      const lob = result.rows[0][0];
+      let blobData = Buffer.alloc(0);
       await new Promise((resolve, reject) => {
-        let lob = result.rows[0][0];
-        assert(lob);
-        let blobData = Buffer.alloc(0);
-        let totalLength = 0;
-
+        lob.on('error', reject);
+        lob.on('end', lob.destroy);
+        lob.on('close', resolve);
         lob.on('data', function(chunk) {
-          totalLength = totalLength + chunk.length;
-          blobData = Buffer.concat([blobData, chunk], totalLength);
-        });
-
-        lob.on('error', function(err) {
-          assert.ifError(err, "lob.on 'error' event.");
-          reject();
-        });
-
-        lob.on('end', async function() {
-          await compareClientFetchResult(blobData, specialStr, content, contentLength);
-          lob.destroy();
-        });
-
-        lob.on('close', function() {
-          resolve();
+          blobData = Buffer.concat([blobData, chunk]);
         });
       });
+      assert.deepStrictEqual(blobData, content);
     }); // 87.4.13
 
     it('87.4.14 works with setting oracledb.maxRows < actual number of rows in the table', async function() {
@@ -1603,20 +1449,18 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let content_2 = Buffer.from(strBuf_2, "utf-8");
       let maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
-      let result = null;
 
       await insertIntoBlobTable1(id_1, content_1);
 
       await insertIntoBlobTable1(id_2, content_2);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         { outFormat : oracledb.OUT_FORMAT_ARRAY });
 
       assert.strictEqual(result.rows.length, 1);
-      let resultVal = result.rows[0][1];
-      await compareClientFetchResult(resultVal, specialStr_1, content_1, contentLength_1);
+      assert.deepStrictEqual(result.rows[0][1], content_1);
       oracledb.maxRows = maxRowsBak;
     }); // 87.4.14
 
@@ -1633,24 +1477,20 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let content_2 = Buffer.from(strBuf_2, "utf-8");
       let maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
-      let result = null;
 
       await insertIntoBlobTable1(id_1, content_1);
 
       await insertIntoBlobTable1(id_2, content_2);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         { outFormat : oracledb.OUT_FORMAT_ARRAY });
 
       assert.strictEqual(result.rows.length, 2);
-      let resultVal = result.rows[0][1];
-      await compareClientFetchResult(resultVal, specialStr_1, content_1, contentLength_1);
-      resultVal = result.rows[1][1];
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
+      assert.deepStrictEqual(result.rows[0][1], content_1);
+      assert.deepStrictEqual(result.rows[1][1], content_2);
       oracledb.maxRows = maxRowsBak;
-
     }); // 87.4.15
 
     it('87.4.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', async function() {
@@ -1670,30 +1510,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           fetchInfo : { B : { type : oracledb.DEFAULT } }
         });
 
-      let lob = result.rows[0][1];
-      assert(lob);
-      let blobData = Buffer.alloc(0);
-      let totalLength = 0;
-      await new Promise((resolve, reject) => {
-        lob.on('data', function(chunk) {
-          totalLength = totalLength + chunk.length;
-          blobData = Buffer.concat([blobData, chunk], totalLength);
-        });
-
-        lob.on('error', function(err) {
-          assert.ifError(err, "lob.on 'error' event.");
-          reject();
-        });
-
-        lob.on('end', async function() {
-          await compareClientFetchResult(blobData, specialStr, content, contentLength);
-          lob.destroy();
-        });
-
-        lob.on('close', function() {
-          resolve();
-        });
-      });
+      const lob = result.rows[0][1];
+      const blobData = await lob.getData();
+      await lob.close();
+      assert.deepStrictEqual(blobData, content);
     }); // 87.4.16
 
   }); // 87.4
@@ -1718,7 +1538,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
     }); // afterEach
 
-    let insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
+    const insertAndFetch = async function(id, specialStr, insertContent) {
       let result = null;
       await insertIntoBlobTable1(id, insertContent);
 
@@ -1734,25 +1554,25 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let resultVal;
       resultVal = row[1];
       if (specialStr === null) {
-        assert.equal(resultVal, null);
+        assert.strictEqual(resultVal, null);
       } else {
-        await compareClientFetchResult(resultVal, specialStr, insertContent, insertContentLength);
+        assert.deepStrictEqual(resultVal, insertContent);
       }
-      result.resultSet.close();
+      await result.resultSet.close();
     };
 
     it('87.5.1 works with NULL value', async function() {
       let id = insertID++;
       let content = null;
 
-      await insertAndFetch(id, null, content, null);
+      await insertAndFetch(id, null, content);
     }); // 87.5.1
 
     it('87.5.2 works with empty Buffer', async function() {
       let id = insertID++;
       let content = Buffer.from("", "utf-8");
 
-      await insertAndFetch(id, null, content, null);
+      await insertAndFetch(id, null, content);
     }); // 87.5.2
 
     it('87.5.3 works with small value', async function() {
@@ -1762,7 +1582,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.5.3
 
     it('87.5.4 works with (64K - 1) value', async function() {
@@ -1772,7 +1592,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.5.4
 
     it('87.5.5 works with (64K + 1) value', async function() {
@@ -1782,7 +1602,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.5.5
 
     it('87.5.6 works with (1MB + 1) data', async function() {
@@ -1792,7 +1612,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
 
-      await insertAndFetch(id, specialStr, content, contentLength);
+      await insertAndFetch(id, specialStr, content);
     }); // 87.5.6
 
     it('87.5.7 works with dbms_lob.substr()', async function() {
@@ -1815,15 +1635,15 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let row = await result.resultSet.getRow();
       let resultVal = row[0];
       let buffer2Compare = Buffer.from(specialStr, "utf-8");
-      await compareClientFetchResult(resultVal, specialStr, buffer2Compare, specialStrLength);
-      result.resultSet.close();
+      assert.deepStrictEqual(resultVal, buffer2Compare);
+      await result.resultSet.close();
     }); // 87.5.7
 
     it('87.5.8 works with EMPTY_BLOB()', async function() {
       let id = insertID++;
       let content = "EMPTY_BLOB";
 
-      await insertAndFetch(id, null, content, null);
+      await insertAndFetch(id, null, content);
     }); // 87.5.8
 
     it('87.5.9 fetch multiple BLOB rows as Buffer', async function() {
@@ -1837,14 +1657,12 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let contentLength_2 = 100;
       let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       let content_2 = Buffer.from(strBuf_2, "utf-8");
-      let result = null;
 
       await insertIntoBlobTable1(id_1, content_1);
 
       await insertIntoBlobTable1(id_2, content_2);
 
-      let rowNumFetched = 2;
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -1852,12 +1670,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           resultSet : true
         });
 
-      let row = await result.resultSet.getRows(rowNumFetched);
-      let resultVal = row[0][1];
-      await compareClientFetchResult(resultVal, specialStr_1, content_1, contentLength_1);
-      resultVal = row[1][1];
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
-      result.resultSet.close();
+      const rows = await result.resultSet.getRows(2);
+      assert.deepStrictEqual(rows[0][1], content_1);
+      assert.deepStrictEqual(rows[1][1], content_2);
+      await result.resultSet.close();
     }); // 87.5.9
 
     it('87.5.10 fetch the same BLOB column multiple times', async function() {
@@ -1866,11 +1682,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let contentLength = 200;
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
-      let result = null;
 
       await insertIntoBlobTable1(id, content);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
         { },
         {
@@ -1878,14 +1693,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           resultSet : true
         });
 
-      let row = await result.resultSet.getRow();
-
-      let resultVal = row[1];
-      await compareClientFetchResult(resultVal, specialStr, content, contentLength);
-      resultVal = row[2];
-      await compareClientFetchResult(resultVal, specialStr, content, contentLength);
-      result.resultSet.close();
-
+      const row = await result.resultSet.getRow();
+      assert.deepStrictEqual(row[1], content);
+      assert.deepStrictEqual(row[2], content);
+      await result.resultSet.close();
     }); // 87.5.10
 
     it('87.5.11 works with update statement', async function() {
@@ -1898,13 +1709,12 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let contentLength_2 = 208;
       let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       let content_2 = Buffer.from(strBuf_2, "utf-8");
-      let result = null;
 
-      await insertAndFetch(id, specialStr_1, content_1, contentLength_1);
+      await insertAndFetch(id, specialStr_1, content_1);
 
       await updateBlobTable1(id, content_2);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
         { },
         {
@@ -1912,11 +1722,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           resultSet : true
         });
 
-      let row = await result.resultSet.getRow();
+      const row = await result.resultSet.getRow();
 
-      let resultVal = row[1];
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
-      result.resultSet.close();
+      assert.deepStrictEqual(row[1], content_2);
+      await result.resultSet.close();
     }); // 87.5.11
 
     it('87.5.12 works with REF CURSOR', async function() {
@@ -1943,9 +1752,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       result = await connection.execute(
         sql,
         bindVar);
-      let rows = await result.outBinds.b.getRows(3);
-      let resultVal = rows[0][0];
-      await compareClientFetchResult(resultVal, specialStr, content, contentLength);
+      const rows = await result.outBinds.b.getRows(3);
+      assert.deepStrictEqual(rows[0][0], content);
       await result.outBinds.b.close();
 
       let ref_proc_drop = "DROP PROCEDURE nodb_ref";
@@ -1958,38 +1766,17 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let contentLength = 200;
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
-      let result = null;
 
       await insertIntoBlobTable1(id, content);
 
       oracledb.fetchAsBuffer = [];
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT B from nodb_blob1 WHERE ID = " + id);
 
-      let lob = result.rows[0][0];
-      assert(lob);
-      let blobData = Buffer.alloc(0);
-      let totalLength = 0;
-      await new Promise((resolve, reject) => {
-        lob.on('data', function(chunk) {
-          totalLength = totalLength + chunk.length;
-          blobData = Buffer.concat([blobData, chunk], totalLength);
-        });
-
-        lob.on('error', function(err) {
-          assert.ifError(err, "lob.on 'error' event.");
-          reject();
-        });
-
-        lob.on('end', async function() {
-          await compareClientFetchResult(blobData, specialStr, content, contentLength);
-          lob.destroy();
-        });
-
-        lob.on('close', function() {
-          resolve();
-        });
-      });
+      const lob = result.rows[0][0];
+      const blobData = await lob.getData();
+      await lob.close();
+      assert.deepStrictEqual(blobData, content);
     }); // 87.5.13
 
     it('87.5.14 works with setting oracledb.maxRows < actual number of rows in the table', async function() {
@@ -2005,14 +1792,12 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let content_2 = Buffer.from(strBuf_2, "utf-8");
       let maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
-      let result = null;
 
       await insertIntoBlobTable1(id_1, content_1);
 
       await insertIntoBlobTable1(id_2, content_2);
 
-      let rowNumFetched = 2;
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -2020,15 +1805,12 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           resultSet : true
         });
 
-      let row =  await result.resultSet.getRows(
-        rowNumFetched);
-      assert.strictEqual(row.length, 2);
-      let resultVal = row[0][1];
-      await compareClientFetchResult(resultVal, specialStr_1, content_1, contentLength_1);
-      resultVal = row[1][1];
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
+      const rows = await result.resultSet.getRows(2);
+      assert.strictEqual(rows.length, 2);
+      assert.deepStrictEqual(rows[0][1], content_1);
+      assert.deepStrictEqual(rows[1][1], content_2);
       oracledb.maxRows = maxRowsBak;
-      result.resultSet.close();
+      await result.resultSet.close();
     }); // 87.5.14
 
     it('87.5.15 works with setting oracledb.maxRows > actual number of rows in the table', async function() {
@@ -2044,14 +1826,12 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let content_2 = Buffer.from(strBuf_2, "utf-8");
       let maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
-      let result = null;
 
       await insertIntoBlobTable1(id_1, content_1);
 
       await insertIntoBlobTable1(id_2, content_2);
 
-      let rowNumFetched = 2;
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -2059,15 +1839,12 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           resultSet : true
         });
 
-      let row = await result.resultSet.getRows(rowNumFetched);
-
-      assert.strictEqual(row.length, 2);
-      let resultVal = row[0][1];
-      await compareClientFetchResult(resultVal, specialStr_1, content_1, contentLength_1);
-      resultVal = row[1][1];
-      await compareClientFetchResult(resultVal, specialStr_2, content_2, contentLength_2);
+      const rows = await result.resultSet.getRows(2);
+      assert.strictEqual(rows.length, 2);
+      assert.deepStrictEqual(rows[0][1], content_1);
+      assert.deepStrictEqual(rows[1][1], content_2);
       oracledb.maxRows = maxRowsBak;
-      result.resultSet.close();
+      await result.resultSet.close();
     }); // 87.5.15
 
     it('87.5.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', async function() {
@@ -2076,40 +1853,19 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       let contentLength = 20;
       let strBuf = random.getRandomString(contentLength, specialStr);
       let content = Buffer.from(strBuf, "utf-8");
-      let result = null;
       await insertIntoBlobTable1(id, content);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = :id",
         { id : id },
         {
           fetchInfo : { B : { type : oracledb.DEFAULT } }
         });
 
-      let lob = result.rows[0][1];
-      assert(lob);
-      let blobData = Buffer.alloc(0);
-      let totalLength = 0;
-      await new Promise((resolve, reject) => {
-        lob.on('data', function(chunk) {
-          totalLength = totalLength + chunk.length;
-          blobData = Buffer.concat([blobData, chunk], totalLength);
-        });
-
-        lob.on('error', function(err) {
-          assert.ifError(err, "lob.on 'error' event.");
-          reject();
-        });
-
-        lob.on('end', async function() {
-          await compareClientFetchResult(blobData, specialStr, content, contentLength);
-          lob.destroy();
-        });
-
-        lob.on('close', function() {
-          resolve();
-        });
-      });
+      const lob = result.rows[0][1];
+      const blobData = await lob.getData();
+      await lob.close();
+      assert.deepStrictEqual(blobData, content);
     }); // 87.5.16
 
   }); // 87.5

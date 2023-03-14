@@ -464,6 +464,6 @@ describe('42. dataTypeRaw.js', function() {
   let fetch = async function(expected) {
     let sql = "select content from " + tableName + " where num = " + insertID;
     let result = await connection.execute(sql);
-    assist.compare2Buffers(result.rows[0][0], expected);
+    assert.deepStrictEqual(result.rows[0][0], expected);
   };
 });

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -63,7 +63,6 @@ describe('192. implicitResults.js', function() {
 
     if (!isRunnable) {
       this.skip();
-      return;
     } else {
       try {
         const conn = await oracledb.getConnection(dbConfig);

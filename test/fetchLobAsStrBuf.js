@@ -35,7 +35,6 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
-const assist   = require('./dataTypeAssist.js');
 
 describe('245. fetchLobAsStrBuf.js', function() {
   let connection = null;
@@ -163,13 +162,13 @@ describe('245. fetchLobAsStrBuf.js', function() {
         lob.on('end', function() {
           if (originalBuffer == "EMPTY_BLOB") {
             let nullBuffer = Buffer.from('', "utf-8");
-            assert.strictEqual(assist.compare2Buffers(blobData, nullBuffer), true);
+            assert.deepStrictEqual(blobData, nullBuffer);
           } else {
             assert.strictEqual(totalLength, originalBuffer.length);
             let specStrLength = specialStr.length;
             assert.strictEqual(blobData.toString('utf8', 0, specStrLength), specialStr);
             assert.strictEqual(blobData.toString('utf8', (totalLength - specStrLength), totalLength), specialStr);
-            assert.strictEqual(assist.compare2Buffers(blobData, originalBuffer), true);
+            assert.deepStrictEqual(blobData, originalBuffer);
           }
           resolve();
         });

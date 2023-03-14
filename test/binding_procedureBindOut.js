@@ -35,7 +35,7 @@
 
 const oracledb = require('oracledb');
 const assert = require('assert');
-const sql    = require('./sqlClone.js');
+const sql    = require('./sql.js');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
 

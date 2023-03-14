@@ -36,7 +36,6 @@ const assert   = require('assert');
 const fs       = require('fs');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
-const assist   = require('./dataTypeAssist.js');
 
 describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
@@ -116,7 +115,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
       b: { val: insertBuffer, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
     };
 
-    if (insertBuffer == 'EMPTY_LOB') {
+    if (insertBuffer === 'EMPTY_LOB') {
       sql = "INSERT INTO nodb_tab_blob_in (id, blob_1) VALUES (:i, EMPTY_BLOB())";
       bindVar = {
         i: { val: id, dir: oracledb.BIND_IN, type: oracledb.NUMBER }
@@ -160,10 +159,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
     assert.deepEqual(originalData, blobData);
   };
 
-  const verifyBlobValueWithBuffer = async function(selectSql, oraginalBuffer, specialStr) {
+  const verifyBlobValueWithBuffer = async function(selectSql, originalBuffer, specialStr) {
     const result = await connection.execute(selectSql);
     const lob = result.rows[0][0];
-    if (oraginalBuffer == null | oraginalBuffer == '' || oraginalBuffer == undefined) {
+    if (originalBuffer == null | originalBuffer == '' || originalBuffer == undefined) {
       assert(lob);
     } else {
       const blobData = await lob.getData();
@@ -183,12 +182,12 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
       assert.strictEqual(resultVal.toString('utf8', 0, specStrLength), specialStr);
       assert.strictEqual(resultVal.toString('utf8', (resultLength - specStrLength), resultLength), specialStr);
     }
-    assert.strictEqual(assist.compare2Buffers(resultVal, originalBuffer), true);
+    assert.deepStrictEqual(resultVal, originalBuffer);
   };
 
   const verifyBindOutResult = async function(sqlRun, bindVar, originalBuf, specialStr) {
     const result = await connection.execute(sqlRun, bindVar);
-    if (originalBuf == "EMPTY_LOB" || originalBuf == undefined || originalBuf == null || originalBuf == "") {
+    if (originalBuf === "EMPTY_LOB" || originalBuf == undefined || originalBuf == null || originalBuf == "") {
       assert.strictEqual(result.outBinds.b, null);
     } else {
       const resultVal = result.outBinds.b;

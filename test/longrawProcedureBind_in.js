@@ -38,7 +38,6 @@ const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
 const testsUtil = require('./testsUtil.js');
-const assist   = require('./dataTypeAssist.js');
 
 describe('132. longrawProcedureBind_in.js', function() {
 
@@ -228,7 +227,7 @@ describe('132. longrawProcedureBind_in.js', function() {
     if (expected == null) {
       assert.strictEqual(result.rows[0][1], expected);
     } else {
-      assist.compare2Buffers(result.rows[0][1], expected);
+      assert.deepStrictEqual(result.rows[0][1], expected);
     }
   };
 

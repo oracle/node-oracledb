@@ -36,7 +36,7 @@
 
 const oracledb = require('oracledb');
 const assert = require('assert');
-const sql    = require('./sqlClone.js');
+const sql    = require('./sql.js');
 const dbConfig = require('./dbconfig.js');
 
 describe('100.binding_defaultBindIn.js', function() {

@@ -23,7 +23,7 @@
  * limitations under the License.
  *
  * NAME
- *   263.binding_buffer_string.js
+ *   270.binding_buffer_string.js
  *
  * DESCRIPTION
  *   Test case for bug 33943738
@@ -34,7 +34,7 @@
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 
-describe('263. binding_buffer_string.js', function() {
+describe('270. binding_buffer_string.js', function() {
   let connection = null;
 
   const proc_blob_in_tab = "BEGIN \n" +
@@ -65,9 +65,9 @@ describe('263. binding_buffer_string.js', function() {
     await connection.close();
   });
 
-  describe('263.1 BLOB, PLSQL, BIND_IN', function() {
+  describe('270.1 BLOB, PLSQL, BIND_IN', function() {
 
-    it('263.1.1 works with buffer', async function() {
+    it('270.1.1 works with buffer', async function() {
       const data = [
         {a: 1, b: Buffer.from("Dummy data 1".repeat(5000), "utf-8")},
         {a: 2, b: Buffer.from("Dummy data 2".repeat(7500), "utf-8")}
