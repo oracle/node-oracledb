@@ -560,4 +560,3 @@ describe('115. urowidDMLBindAsString2.js', function() {
   };
 
 });
-

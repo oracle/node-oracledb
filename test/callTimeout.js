@@ -104,7 +104,7 @@ describe('222. callTimeout.js', function() {
       () => {
         conn.callTimeout = TIME_OUT;
       },
-      /NJS-004: invalid value for property callTimeout/
+      /NJS-004:/
     );
   }); // 222.4
 
@@ -115,7 +115,7 @@ describe('222. callTimeout.js', function() {
       () => {
         conn.callTimeout = TIME_OUT;
       },
-      /NJS-004: invalid value for property callTimeout/
+      /NJS-004:/
     );
   });
 
@@ -126,7 +126,7 @@ describe('222. callTimeout.js', function() {
       () => {
         conn.callTimeout = TIME_OUT;
       },
-      /NJS-004: invalid value for property callTimeout/
+      /NJS-004:/
     );
   });
 

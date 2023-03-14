@@ -109,7 +109,6 @@ describe('100.binding_defaultBindIn.js', function() {
                "END ; ";
     let sqlRun = "BEGIN :output := " + fun_name + " (:i, :c); END;";
     let proc_drop = "DROP FUNCTION " + fun_name;
-    // console.log(proc);
 
     await connection.execute(createTable);
     await connection.execute(proc);

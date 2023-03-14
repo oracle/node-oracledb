@@ -98,7 +98,6 @@ describe('97.binding_functionBindOut.js', function() {
                "END ; ";
     let sqlRun = "BEGIN :output := " + fun_name + " (:i, :c); END;";
     let proc_drop = "DROP FUNCTION " + fun_name;
-    // console.log(proc);
     let inserted = getInsertVal(dbColType, nullBind);
     let insertSql = "insert into " + table_name + " (id, content) values (:c1, :c2)";
     await executeSql(createTable);
@@ -107,7 +106,6 @@ describe('97.binding_functionBindOut.js', function() {
       c2: { val: inserted[0], type: inserted[1], dir: oracledb.BIND_IN }
     };
 
-    // console.log(insertSql);
     await connection.execute(insertSql, bind);
     await executeSql(proc);
 

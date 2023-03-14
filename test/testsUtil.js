@@ -437,5 +437,6 @@ testsUtil.checkUrowidLength = function(urowidLen, expectedLength) {
   // ROWID is returned which has a fixed size of 18 bytes
   if (dbConfig.test.isCloudService)
     expectedLength = 18;
-  assert(urowidLen >= expectedLength);
+  assert(urowidLen >= expectedLength,
+    `${urowidLen} should be >= ${expectedLength}`);
 };
