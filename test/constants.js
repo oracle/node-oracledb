@@ -42,44 +42,44 @@ describe('18. constants.js', function() {
   });
 
   it('18.2 Node-oracledb Type Constants', () => {
-    should.strictEqual(2019, oracledb.BLOB);
-    should.strictEqual(2006, oracledb.BUFFER);
-    should.strictEqual(2017, oracledb.CLOB);
-    should.strictEqual(2021, oracledb.CURSOR);
-    should.strictEqual(2014, oracledb.DATE);
+    should.strictEqual(2019, oracledb.BLOB.num);
+    should.strictEqual(2006, oracledb.BUFFER.num);
+    should.strictEqual(2017, oracledb.CLOB.num);
+    should.strictEqual(2021, oracledb.CURSOR.num);
+    should.strictEqual(2014, oracledb.DATE.num);
     should.strictEqual(0,    oracledb.DEFAULT);
-    should.strictEqual(2010, oracledb.NUMBER);
-    should.strictEqual(2001, oracledb.STRING);
+    should.strictEqual(2010, oracledb.NUMBER.num);
+    should.strictEqual(2001, oracledb.STRING.num);
 
   });
 
   it('18.3 Oracle Database Type Constants', function() {
 
-    should.strictEqual(2020, oracledb.DB_TYPE_BFILE);
-    should.strictEqual(2008, oracledb.DB_TYPE_BINARY_DOUBLE);
-    should.strictEqual(2007, oracledb.DB_TYPE_BINARY_FLOAT);
-    should.strictEqual(2009, oracledb.DB_TYPE_BINARY_INTEGER);
-    should.strictEqual(2019, oracledb.DB_TYPE_BLOB);
-    should.strictEqual(2022, oracledb.DB_TYPE_BOOLEAN);
-    should.strictEqual(2003, oracledb.DB_TYPE_CHAR);
-    should.strictEqual(2017, oracledb.DB_TYPE_CLOB);
-    should.strictEqual(2021, oracledb.DB_TYPE_CURSOR);
-    should.strictEqual(2011, oracledb.DB_TYPE_DATE);
-    should.strictEqual(2015, oracledb.DB_TYPE_INTERVAL_DS);
-    should.strictEqual(2016, oracledb.DB_TYPE_INTERVAL_YM);
-    should.strictEqual(2024, oracledb.DB_TYPE_LONG);
-    should.strictEqual(2025, oracledb.DB_TYPE_LONG_RAW);
-    should.strictEqual(2004, oracledb.DB_TYPE_NCHAR);
-    should.strictEqual(2018, oracledb.DB_TYPE_NCLOB);
-    should.strictEqual(2010, oracledb.DB_TYPE_NUMBER);
-    should.strictEqual(2002, oracledb.DB_TYPE_NVARCHAR);
-    should.strictEqual(2023, oracledb.DB_TYPE_OBJECT);
-    should.strictEqual(2006, oracledb.DB_TYPE_RAW);
-    should.strictEqual(2005, oracledb.DB_TYPE_ROWID);
-    should.strictEqual(2012, oracledb.DB_TYPE_TIMESTAMP);
-    should.strictEqual(2014, oracledb.DB_TYPE_TIMESTAMP_LTZ);
-    should.strictEqual(2013, oracledb.DB_TYPE_TIMESTAMP_TZ);
-    should.strictEqual(2001, oracledb.DB_TYPE_VARCHAR);
+    should.strictEqual(2020, oracledb.DB_TYPE_BFILE.num);
+    should.strictEqual(2008, oracledb.DB_TYPE_BINARY_DOUBLE.num);
+    should.strictEqual(2007, oracledb.DB_TYPE_BINARY_FLOAT.num);
+    should.strictEqual(2009, oracledb.DB_TYPE_BINARY_INTEGER.num);
+    should.strictEqual(2019, oracledb.DB_TYPE_BLOB.num);
+    should.strictEqual(2022, oracledb.DB_TYPE_BOOLEAN.num);
+    should.strictEqual(2003, oracledb.DB_TYPE_CHAR.num);
+    should.strictEqual(2017, oracledb.DB_TYPE_CLOB.num);
+    should.strictEqual(2021, oracledb.DB_TYPE_CURSOR.num);
+    should.strictEqual(2011, oracledb.DB_TYPE_DATE.num);
+    should.strictEqual(2015, oracledb.DB_TYPE_INTERVAL_DS.num);
+    should.strictEqual(2016, oracledb.DB_TYPE_INTERVAL_YM.num);
+    should.strictEqual(2024, oracledb.DB_TYPE_LONG.num);
+    should.strictEqual(2025, oracledb.DB_TYPE_LONG_RAW.num);
+    should.strictEqual(2004, oracledb.DB_TYPE_NCHAR.num);
+    should.strictEqual(2018, oracledb.DB_TYPE_NCLOB.num);
+    should.strictEqual(2010, oracledb.DB_TYPE_NUMBER.num);
+    should.strictEqual(2002, oracledb.DB_TYPE_NVARCHAR.num);
+    should.strictEqual(2023, oracledb.DB_TYPE_OBJECT.num);
+    should.strictEqual(2006, oracledb.DB_TYPE_RAW.num);
+    should.strictEqual(2005, oracledb.DB_TYPE_ROWID.num);
+    should.strictEqual(2012, oracledb.DB_TYPE_TIMESTAMP.num);
+    should.strictEqual(2014, oracledb.DB_TYPE_TIMESTAMP_LTZ.num);
+    should.strictEqual(2013, oracledb.DB_TYPE_TIMESTAMP_TZ.num);
+    should.strictEqual(2001, oracledb.DB_TYPE_VARCHAR.num);
 
   });
 

@@ -296,7 +296,7 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
 static bool njsResultSet_setFetchTypes(napi_env env, njsResultSet *rs,
         napi_value allMetadata)
 {
-    napi_value metadata, temp;
+    napi_value metadata, temp, fetchType;
     njsVariable *var;
     uint32_t i;
 
@@ -306,6 +306,8 @@ static bool njsResultSet_setFetchTypes(napi_env env, njsResultSet *rs,
         // determine fetch type to use
         NJS_CHECK_NAPI(env, napi_get_element(env, allMetadata, i, &metadata))
         NJS_CHECK_NAPI(env, napi_get_named_property(env, metadata, "fetchType",
+                &fetchType))
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, fetchType, "num",
                 &temp))
         NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &var->varTypeNum))
 

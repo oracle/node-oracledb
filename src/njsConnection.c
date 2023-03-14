@@ -495,7 +495,10 @@ static bool njsConnection_connectPostAsync(njsBaton *baton, napi_env env,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_createLob, 1, NULL)
 {
-    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &baton->lobType))
+    napi_value lobType;
+
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, args[0], "num", &lobType))
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, lobType, &baton->lobType))
     return njsBaton_queueWork(baton, env, "CreateLob",
             njsConnection_createLobAsync, njsConnection_createLobPostAsync,
             returnValue);
@@ -1667,7 +1670,7 @@ static bool njsConnection_processBindUnit(njsBaton *baton, napi_env env,
         napi_value bindUnit, njsVariable *var)
 {
     njsConnection *conn = (njsConnection*) baton->callingInstance;
-    napi_value temp, bindValues;
+    napi_value temp, bindValues, bindType;
     uint32_t i, arrayLength;
 
     // determine name/position
@@ -1690,7 +1693,8 @@ static bool njsConnection_processBindUnit(njsBaton *baton, napi_env env,
 
     // determine type
     NJS_CHECK_NAPI(env, napi_get_named_property(env, bindUnit, "type",
-            &temp))
+            &bindType))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, bindType, "num", &temp))
     NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &var->varTypeNum))
     if (var->varTypeNum == DPI_ORACLE_TYPE_OBJECT) {
         NJS_CHECK_NAPI(env, napi_get_named_property(env, bindUnit, "objType",
