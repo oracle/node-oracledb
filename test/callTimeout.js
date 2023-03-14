@@ -74,7 +74,7 @@ describe('222. callTimeout.js', function() {
       async () => {
         await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [DB_OP_TIME]);
       },
-      /DPI-1067/
+      /NJS-123:/
     );
 
   }); // 222.1
@@ -150,7 +150,7 @@ describe('222. callTimeout.js', function() {
       async () => {
         await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [DB_OP_TIME]);
       },
-      /DPI-1067/
+      /NJS-123:/
     );
 
     await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [1]);
