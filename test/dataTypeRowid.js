@@ -91,7 +91,9 @@ describe('39. dataTypeRowid.js', function() {
           await connection.execute(
             `update ` + tableName + ` set ROWID = CHARTOROWID('AAAspiAABAAAZnJAAE') where num = 1`);
         },
-        /ORA-01747:/
+        /* ORA-01747: invalid user.table.column, table.column, or column specification
+           ORA-03050: invalid identifier: "ROWID" is a reserved word */
+        /ORA-01747: | ORA-03050:/
       );
     });
 
@@ -141,7 +143,9 @@ describe('39. dataTypeRowid.js', function() {
           await connection.execute(
             `update ` + tableName + ` set ROWID = 'AAAspiAABAAAZnJAAE' where num = 1`);
         },
-        /ORA-01747:/
+        /* ORA-01747: invalid user.table.column, table.column, or column specification
+           ORA-03050: invalid identifier: "ROWID" is a reserved word */
+        /ORA-01747: | ORA-03050:/
       );
     });
 
@@ -151,7 +155,9 @@ describe('39. dataTypeRowid.js', function() {
           await connection.execute(
             `INSERT INTO ` + tableName + ` (num, ROWID) VALUES ('12345', 523lkhlf)`);
         },
-        /ORA-01747:/
+        /* ORA-01747: invalid user.table.column, table.column, or column specification
+           ORA-03050: invalid identifier: "ROWID" is a reserved word */
+        /ORA-01747: | ORA-03050:/
       );
     });
   });

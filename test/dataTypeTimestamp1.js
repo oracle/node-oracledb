@@ -39,7 +39,7 @@ const dbConfig = require('./dbconfig.js');
 describe('33. dataTypeTimestamp1.js', function() {
 
   let connection = null;
-  let tableName = "nodb_timestamp1";
+  const tableName = "nodb_timestamp1";
 
   before('get one connection', async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -50,12 +50,10 @@ describe('33. dataTypeTimestamp1.js', function() {
   });
 
   describe('33.1 Testing JavaScript Date with database TIMESTAMP', function() {
-    let dates = assist.data.dates;
+    const dates = assist.data.dates;
 
     before('create table, insert data', async function() {
-      await new Promise((resolve) => {
-        assist.setUp(connection, tableName, dates, resolve);
-      });
+      await assist.setUp(connection, tableName, dates);
     });
 
     after(async function() {
@@ -64,53 +62,39 @@ describe('33. dataTypeTimestamp1.js', function() {
     });
 
     it('33.1.1 works well with SELECT query', async function() {
-      await new Promise((resolve) => {
-        assist.dataTypeSupport(connection, tableName, dates, resolve);
-      });
+      await assist.dataTypeSupport(connection, tableName, dates);
     });
 
     it('33.1.2 works well with result set', async function() {
-      await new Promise((resolve) => {
-        assist.verifyResultSet(connection, tableName, dates, resolve);
-      });
+      await assist.verifyResultSet(connection, tableName, dates);
     });
 
     it('33.1.3 works well with REF Cursor', async function() {
-      await new Promise((resolve) => {
-        assist.verifyRefCursor(connection, tableName, dates, resolve);
-      });
+      await assist.verifyRefCursor(connection, tableName, dates);
     });
 
     it('33.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
-      await new Promise((resolve) => {
-        assist.verifyRefCursorWithFetchInfo(connection, tableName, dates, resolve);
-      });
+      await assist.verifyRefCursorWithFetchInfo(connection, tableName, dates);
     });
 
     it('33.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', async function() {
       oracledb.fetchAsString = [ oracledb.DATE ];
-      await new Promise((resolve) => {
-        assist.verifyRefCursorWithFetchAsString(connection, tableName, dates, resolve);
-      });
+      await  assist.verifyRefCursorWithFetchAsString(connection, tableName, dates);
     });
 
   }); // end of 33.1 suite
 
   describe('33.2 stores null value correctly', function() {
     it('33.2.1 testing Null, Empty string and Undefined', async function() {
-      await new Promise((resolve) => {
-        assist.verifyNullValues(connection, tableName, resolve);
-      });
+      await assist.verifyNullValues(connection, tableName);
     });
   });
 
   describe('33.3 testing TIMESTAMP without TIME ZONE', function() {
-    let timestamps = assist.TIMESTAMP_STRINGS;
+    const timestamps = assist.TIMESTAMP_STRINGS;
 
     before(async function() {
-      await new Promise((resolve) => {
-        assist.setUp4sql(connection, tableName, timestamps, resolve);
-      });
+      await assist.setUp4sql(connection, tableName, timestamps);
     });
 
     after(async function() {
@@ -118,15 +102,13 @@ describe('33. dataTypeTimestamp1.js', function() {
     }); // after
 
     it('33.3.1 SELECT query - original data', async function() {
-      await new Promise((resolve) => {
-        assist.selectOriginalData(connection, tableName, timestamps, resolve);
-      });
+      await  assist.selectOriginalData(connection, tableName, timestamps);
     });
 
     it('33.3.2 SELECT query - formatted data for comparison', async function() {
       await Promise.all(timestamps.map(async function(timestamp) {
-        let bv = timestamps.indexOf(timestamp);
-        let result = await connection.execute(
+        const bv = timestamps.indexOf(timestamp);
+        const result = await connection.execute(
           `SELECT num, TO_CHAR(content, 'DD-MM-YYYY HH24:MI:SS.FF') AS TS_DATA FROM ` + tableName + ` WHERE num = :no`,
           { no: bv },
           { outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -135,15 +117,13 @@ describe('33. dataTypeTimestamp1.js', function() {
     });
 
     it('33.3.3 returns scalar types from PL/SQL block', async function() {
-      let sql = "BEGIN SELECT systimestamp into :bv from dual; END;";
-      let binds = { bv: { dir: oracledb.BIND_OUT, type: oracledb.STRING } };
-      let options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
-
-      let result = await connection.execute(sql,
-        binds,
-        options);
-
+      const sql = "BEGIN SELECT systimestamp into :bv from dual; END;";
+      const binds = { bv: { dir: oracledb.BIND_OUT, type: oracledb.STRING } };
+      const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+      const result = await connection.execute(sql, binds, options);
       assert(typeof result.outBinds.bv, "string");
     });
+
   }); // end of 33.3 suite
+
 });

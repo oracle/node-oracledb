@@ -32,28 +32,22 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const assist    = require('./dataTypeAssist.js');
 const dbConfig  = require('./dbconfig.js');
-const async     = require('async');
 const testsUtil = require('./testsUtil.js');
 
 describe('244.dataTypeJson.js', function() {
 
-  let connection = null;
-  var isRunnable = false;
-  var tableName = "nodb_json";
+  let connection;
+  let isRunnable = false;
+  const tableName = "nodb_json";
 
-  var jsonVals = assist.jsonValues;
+  const jsonVals = assist.jsonValues;
   const default_stmtCacheSize = oracledb.stmtCacheSize;
 
   before(async function() {
-
-    try {
-      connection = await oracledb.getConnection(dbConfig);
-    } catch (err) {
-      should.not.exist(err);
-    }
+    connection = await oracledb.getConnection(dbConfig);
 
     if (testsUtil.getClientVersion() >= 2100000000 && connection.oracleServerVersion >= 2100000000) {
       isRunnable = true;
@@ -66,125 +60,91 @@ describe('244.dataTypeJson.js', function() {
   }); // before()
 
   after(async function() {
-    try {
-      await connection.close();
-    } catch (err) {
-      should.not.exist(err);
-    }
+    await connection.close();
   });  // after()
 
   describe('244.1 testing JSON data in various lengths', function() {
 
-    before('create table, insert data', function(done) {
+    before('create table, insert data', async function() {
       if (!isRunnable) {
         this.skip();
       }
       oracledb.stmtCacheSize = 0;
-      assist.setUp(connection, tableName, jsonVals, done);
+      await assist.setUp(connection, tableName, jsonVals);
     });  // before()
 
-    after(function(done) {
+    after(async function() {
       if (!isRunnable) {
         this.skip();
       }
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
       oracledb.stmtCacheSize = default_stmtCacheSize;
-
+      await connection.execute("DROP table " + tableName + " PURGE");
     }); // after()
 
-    it('244.1.1 SELECT query', function(done) {
-      assist.dataTypeSupport(connection, tableName, jsonVals, done);
+    it('244.1.1 SELECT query', async function() {
+      await assist.dataTypeSupport(connection, tableName, jsonVals);
     }); // 244.1.1
 
-    it('244.1.2 resultSet stores JSON data correctly', function(done) {
-      assist.verifyResultSet(connection, tableName, jsonVals, done);
+    it('244.1.2 resultSet stores JSON data correctly', async function() {
+      await assist.verifyResultSet(connection, tableName, jsonVals);
     }); // 244.1.2
 
-    it('244.1.3 works well with REF Cursor', function(done) {
-      assist.verifyRefCursor(connection, tableName, jsonVals, done);
+    it('244.1.3 works well with REF Cursor', async function() {
+      await assist.verifyRefCursor(connection, tableName, jsonVals);
     }); // 244.1.3
 
-    it('244.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
-      assist.verifyRefCursorWithFetchInfo(connection, tableName, jsonVals, done);
+    it('244.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
+      await assist.verifyRefCursorWithFetchInfo(connection, tableName, jsonVals);
     }); // 244.1.4
 
   }); // 244.1
 
   describe('244.2 stores null value correctly', function() {
 
-    it('244.2.1 testing Null, Empty string and Undefined', function(done) {
-      assist.verifyNullValues(connection, tableName, done);
+    it('244.2.1 testing Null, Empty string and Undefined', async function() {
+      await assist.verifyNullValues(connection, tableName);
     }); // 244.2.1
 
   }); // 244.2
 
   describe('244.3 testing JSON with executeMany()', function() {
 
-    before('create table, insert data', function(done) {
+    before('create table, insert data', async function() {
       if (!isRunnable) {
         this.skip();
         return;
       }
-      async.series([
-        function(cb) {
-          oracledb.getConnection(
-            dbConfig,
-            function(err, conn) {
-              connection = conn;
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function createTable(cb) {
-          var proc = "BEGIN \n" +
-              "    DECLARE \n" +
-              "        e_table_missing EXCEPTION; \n" +
-              "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-              "    BEGIN \n" +
-              "        EXECUTE IMMEDIATE('DROP TABLE " + tableName + " PURGE'); \n" +
-              "    EXCEPTION \n" +
-              "        WHEN e_table_missing \n" +
-              "        THEN NULL; \n" +
-              "    END; \n" +
-              "    EXECUTE IMMEDIATE (' \n" +
-              "        CREATE TABLE " + tableName + " ( \n" +
-              "            id         NUMBER, \n" +
-              "            content    JSON \n" +
-              "        ) \n" +
-              "    '); \n" +
-              "END; ";
-          connection.execute(proc, function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        }
-      ], done);
+
+      const proc = "BEGIN \n" +
+          "    DECLARE \n" +
+          "        e_table_missing EXCEPTION; \n" +
+          "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+          "    BEGIN \n" +
+          "        EXECUTE IMMEDIATE('DROP TABLE " + tableName + " PURGE'); \n" +
+          "    EXCEPTION \n" +
+          "        WHEN e_table_missing \n" +
+          "        THEN NULL; \n" +
+          "    END; \n" +
+          "    EXECUTE IMMEDIATE (' \n" +
+          "        CREATE TABLE " + tableName + " ( \n" +
+          "            id         NUMBER, \n" +
+          "            content    JSON \n" +
+          "        ) \n" +
+          "    '); \n" +
+          "END; ";
+      await connection.execute(proc);
     }); // before()
 
-    after(function(done) {
+    after(async function() {
       if (!isRunnable) {
         this.skip();
         return;
       }
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
       oracledb.stmtCacheSize = default_stmtCacheSize;
-
+      await connection.execute("DROP table " + tableName + " PURGE");
     }); // after()
 
-    it('244.3.1 works with executeMany()', function(done) {
+    it('244.3.1 works with executeMany()', async function() {
       const jsonVal1 = [1, 2, 3] ;
       const jsonVal2 = {"fred": 5, "george": 6};
       const jsonVal3 = Buffer.from("A Raw");
@@ -233,126 +193,65 @@ describe('244.dataTypeJson.js', function() {
         [17, jsonVal17],
         [18, jsonVal18]
       ];
-      async.series([
-        function(cb) {
-          var sql = "INSERT INTO " + tableName + " VALUES (:1, :2)";
-          var options = {
-            autoCommit: true,
-            bindDefs: [
-              { type: oracledb.NUMBER },
-              { type: oracledb.DB_TYPE_JSON }
-            ]
-          };
-          connection.executeMany(sql, binds, options, function(err, result) {
-            should.not.exist(err);
-            should.strictEqual(result.rowsAffected, binds.length);
-            cb();
-          });
-        },
-        function(cb) {
-          var sql = "SELECT * FROM " + tableName + " ORDER BY id";
-          connection.execute(
-            sql,
-            function(err, result) {
-              should.not.exist(err);
-              should.deepEqual(result.rows, binds);
-              cb();
-            }
-          );
-        }
-      ], done);
+      let sql = "INSERT INTO " + tableName + " VALUES (:1, :2)";
+      const options = {
+        autoCommit: true,
+        bindDefs: [
+          { type: oracledb.NUMBER },
+          { type: oracledb.DB_TYPE_JSON }
+        ]
+      };
+      let result = await connection.executeMany(sql, binds, options);
+      assert.strictEqual(result.rowsAffected, binds.length);
+      sql = "SELECT * FROM " + tableName + " ORDER BY id";
+      result = await connection.execute(sql);
+      assert.deepEqual(result.rows, binds);
     }); // 244.3.1
 
   }); // 244.3
 
   describe('244.4 testing JSON with PL/SQL procedure BIND_IN and BIND_OUT', function() {
-    var proc_in_name = "nodb_json_plsql_proc_in";
-    var proc_out_name = "nodb_json_plsql_proc_out";
-    var proc_in = "CREATE OR REPLACE PROCEDURE " + proc_in_name + " (ID IN NUMBER, inValue IN JSON )\n" +
+    const proc_in_name = "nodb_json_plsql_proc_in";
+    const proc_out_name = "nodb_json_plsql_proc_out";
+    const proc_in = "CREATE OR REPLACE PROCEDURE " + proc_in_name + " (ID IN NUMBER, inValue IN JSON )\n" +
         "AS \n" +
         "BEGIN \n" +
         "    insert into " + tableName + " ( num, content ) values (ID, inValue); \n" +
         "END " + proc_in_name + "; ";
-    var run_proc_in = "BEGIN " + proc_in_name + " (:i, :c); END;";
-    var drop_proc_in = "DROP PROCEDURE " + proc_in_name;
-    var proc_out = "CREATE OR REPLACE PROCEDURE " + proc_out_name + " (ID IN NUMBER, outValue OUT JSON)\n" +
+    const run_proc_in = "BEGIN " + proc_in_name + " (:i, :c); END;";
+    const drop_proc_in = "DROP PROCEDURE " + proc_in_name;
+    const proc_out = "CREATE OR REPLACE PROCEDURE " + proc_out_name + " (ID IN NUMBER, outValue OUT JSON)\n" +
         "AS \n" +
         "BEGIN \n" +
         "    select content into outValue from " + tableName + " where num = ID; \n" +
         "END " + proc_out_name + "; ";
-    var run_proc_out = "BEGIN " + proc_out_name + " (:i, :c); END;";
-    var drop_proc_out = "DROP PROCEDURE " + proc_out_name;
+    const run_proc_out = "BEGIN " + proc_out_name + " (:i, :c); END;";
+    const drop_proc_out = "DROP PROCEDURE " + proc_out_name;
 
-    before('create table, insert data', function(done) {
+    before('create table, insert data', async function() {
       if (!isRunnable) {
         this.skip();
         return;
       }
       oracledb.stmtCacheSize = 0;
-      async.series([
-        function(cb) {
-          assist.setUp(connection, tableName, jsonVals, cb);
-        },
-        function(cb) {
-          connection.execute(
-            proc_in,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            proc_out,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+      await assist.setUp(connection, tableName, jsonVals);
+      await connection.execute(proc_in);
+      await connection.execute(proc_out);
     }); // before()
 
-    after(function(done) {
+    after(async function() {
       if (!isRunnable) {
         this.skip();
         return;
       }
       oracledb.stmtCacheSize = default_stmtCacheSize;
-      async.series([
-        function(cb) {
-          connection.execute(
-            drop_proc_in,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            drop_proc_out,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            "DROP table " + tableName + " PURGE",
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+      await connection.execute(drop_proc_in);
+      await connection.execute(drop_proc_out);
+      await connection.execute("DROP table " + tableName + " PURGE");
     }); // after()
 
-    it('244.4.1 bind by name', function(done) {
-      var sequence = 100;
+    it('244.4.1 bind by name', async function() {
+      const sequence = 100;
       const jsonVal = {
         keyA: 8,
         keyB: "A String",
@@ -364,141 +263,69 @@ describe('244.dataTypeJson.js', function() {
         keyH: [ 9, 10, 11 ],
         keyI: new Date()
       };
-      async.series([
-        function(cb) {
-          var bindVar = {
-            i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN, maxSize: 1000 }
-          };
-          connection.execute(
-            run_proc_in,
-            bindVar,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var bindVar = {
-            i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 2000 }
-          };
-          connection.execute(
-            run_proc_out,
-            bindVar,
-            function(err, result) {
-              should.not.exist(err);
-              should.deepEqual(result.outBinds.c, jsonVal);
-              cb();
-            }
-          );
-        }
-      ], done);
-
+      let binds = {
+        i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        c: { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN, maxSize: 1000 }
+      };
+      await connection.execute(run_proc_in, binds);
+      binds = {
+        i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        c: { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 2000 }
+      };
+      const result = await connection.execute(run_proc_out, binds);
+      assert.deepEqual(result.outBinds.c, jsonVal);
     }); // 244.4.1
 
-    it('244.4.2 bind by position', function(done) {
-      var sequence = 101;
+    it('244.4.2 bind by position', async function() {
+      const sequence = 101;
       const jsonVal = { "key13" : {"key13-1" : "value13-1", "key13-2" : "value13-2"} };
-      async.series([
-        function(cb) {
-          var bindVar = [
-            { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN, maxSize: 10 }
-          ];
-          connection.execute(
-            run_proc_in,
-            bindVar,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var bindVar = [
-            { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 10 }
-          ];
-          connection.execute(
-            run_proc_out,
-            bindVar,
-            function(err, result) {
-              should.not.exist(err);
-              should.deepEqual(result.outBinds[0], jsonVal);
-              cb();
-            }
-          );
-        }
-      ], done);
-
+      let binds = [
+        { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN, maxSize: 10 }
+      ];
+      await connection.execute(run_proc_in, binds);
+      binds = [
+        { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 10 }
+      ];
+      const result = await connection.execute(run_proc_out, binds);
+      assert.deepEqual(result.outBinds[0], jsonVal);
     }); // 244.4.2
   });  // 244.4
 
   describe('244.5 testing JSON with PL/SQL procedure BIND_INOUT', function() {
-    var proc_name = "nodb_json_proc_inout";
-    var proc = "CREATE OR REPLACE PROCEDURE " + proc_name + " (ID IN NUMBER, inoutValue IN OUT JSON)\n" +
+    const proc_name = "nodb_json_proc_inout";
+    const proc = "CREATE OR REPLACE PROCEDURE " + proc_name + " (ID IN NUMBER, inoutValue IN OUT JSON)\n" +
         "AS \n" +
         "BEGIN \n" +
         "    insert into " + tableName + " ( num, content ) values (ID, inoutValue); \n" +
         "    select content into inoutValue from " + tableName + " where num = ID; \n" +
         "END " + proc_name + "; ";
-    var sqlRun = "BEGIN " + proc_name + " (:i, :c); END;";
-    var proc_drop = "DROP PROCEDURE " + proc_name;
+    const sqlRun = "BEGIN " + proc_name + " (:i, :c); END;";
+    const proc_drop = "DROP PROCEDURE " + proc_name;
 
-    before('create table, insert data', function(done) {
+    before('create table, insert data', async function() {
       if (!isRunnable) {
         this.skip();
         return;
       }
       oracledb.stmtCacheSize = 0;
-      async.series([
-        function(cb) {
-          assist.setUp(connection, tableName, jsonVals, cb);
-        },
-        function(cb) {
-          connection.execute(
-            proc,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+      await assist.setUp(connection, tableName, jsonVals);
+      await connection.execute(proc);
     }); // before()
 
-    after(function(done) {
+    after(async function() {
       if (!isRunnable) {
         this.skip();
         return;
       }
       oracledb.stmtCacheSize = default_stmtCacheSize;
-      async.series([
-        function(cb) {
-          connection.execute(
-            proc_drop,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            "DROP table " + tableName + " PURGE",
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+      await connection.execute(proc_drop);
+      await connection.execute("DROP table " + tableName + " PURGE");
     }); // after()
 
-    it('244.5.1 bind by name', function(done) {
-      var sequence = 100;
+    it('244.5.1 bind by name', async function() {
+      const sequence = 100;
       const jsonVal = {
         keyA: 8,
         keyB: "A String",
@@ -510,45 +337,31 @@ describe('244.dataTypeJson.js', function() {
         keyH: [ 9, 10, 11 ],
         keyI: new Date()
       };
-      var bindVar = {
+      let binds = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_INOUT, maxSize: 2000 }
       };
-      connection.execute(
-        sqlRun,
-        bindVar,
-        function(err, result) {
-          should.not.exist(err);
-          should.deepEqual(result.outBinds.c, jsonVal);
-          done();
-        }
-      );
-
+      let result = await connection.execute(sqlRun, binds);
+      assert.deepEqual(result.outBinds.c, jsonVal);
     }); // 244.5.1
 
-    it('244.5.2 bind by position', function(done) {
-      var sequence = 101;
+    it('244.5.2 bind by position', async function() {
+      const sequence = 101;
       const jsonVal = {"fred": 5, "george": 6};
-      var bindVar = [
+      const binds = [
         { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_INOUT, maxSize: 10 }
       ];
-      connection.execute(
-        sqlRun,
-        bindVar,
-        function(err, result) {
-          should.not.exist(err);
-          should.deepEqual(result.outBinds[0], jsonVal);
-          done();
-        }
-      );
+      const result = await connection.execute(sqlRun, binds);
+      assert.deepEqual(result.outBinds[0], jsonVal);
     }); // 244.5.2
+
   }); // 244.5
 
   describe('244.6 testing JSON with PL/SQL function BIND_IN and BIND_OUT', function() {
-    var fun_name_in = "nodb_json_fun_in";
-    var fun_name_out = "nodb_json_fun_out";
-    var proc_in = "CREATE OR REPLACE FUNCTION " + fun_name_in + " (ID IN NUMBER, inValue IN JSON) RETURN JSON\n" +
+    const fun_name_in = "nodb_json_fun_in";
+    const fun_name_out = "nodb_json_fun_out";
+    const proc_in = "CREATE OR REPLACE FUNCTION " + fun_name_in + " (ID IN NUMBER, inValue IN JSON) RETURN JSON\n" +
         "IS \n" +
         "    tmpvar JSON; \n" +
         "BEGIN \n" +
@@ -556,89 +369,43 @@ describe('244.dataTypeJson.js', function() {
         "    select content into tmpvar from " + tableName + " where num = ID; \n" +
         "    RETURN tmpvar; \n" +
         "END ; ";
-    var run_proc_in = "BEGIN :output := " + fun_name_in + " (:i, :c); END;";
-    var drop_proc_in = "DROP FUNCTION " + fun_name_in;
+    const run_proc_in = "BEGIN :output := " + fun_name_in + " (:i, :c); END;";
+    const drop_proc_in = "DROP FUNCTION " + fun_name_in;
 
-    var proc_out = "CREATE OR REPLACE FUNCTION " + fun_name_out + " (ID IN NUMBER, outValue OUT JSON) RETURN NUMBER\n" +
+    const proc_out = "CREATE OR REPLACE FUNCTION " + fun_name_out + " (ID IN NUMBER, outValue OUT JSON) RETURN NUMBER\n" +
         "IS \n" +
         "    tmpvar NUMBER; \n" +
         "BEGIN \n" +
         "    select num, content into tmpvar, outValue from " + tableName + " where num = ID; \n" +
         "    RETURN tmpvar; \n" +
         "END ; ";
-    var run_proc_out = "BEGIN :output := " + fun_name_out + " (:i, :c); END;";
-    var drop_proc_out = "DROP FUNCTION " + fun_name_out;
+    const run_proc_out = "BEGIN :output := " + fun_name_out + " (:i, :c); END;";
+    const drop_proc_out = "DROP FUNCTION " + fun_name_out;
 
-    before('create table, insert data', function(done) {
+    before('create table, insert data', async function() {
       if (!isRunnable) {
         this.skip();
         return;
       }
       oracledb.stmtCacheSize = 0;
-      async.series([
-        function(cb) {
-          assist.setUp(connection, tableName, jsonVals, cb);
-        },
-        function(cb) {
-          connection.execute(
-            proc_in,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            proc_out,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+      await assist.setUp(connection, tableName, jsonVals);
+      await connection.execute(proc_in);
+      await connection.execute(proc_out);
     }); // before()
 
-    after(function(done) {
+    after(async function() {
       if (!isRunnable) {
         this.skip();
         return;
       }
       oracledb.stmtCacheSize = default_stmtCacheSize;
-      async.series([
-        function(cb) {
-          connection.execute(
-            drop_proc_in,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            drop_proc_out,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            "DROP table " + tableName + " PURGE",
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+      await connection.execute(drop_proc_in);
+      await connection.execute(drop_proc_out);
+      await connection.execute("DROP table " + tableName + " PURGE");
     }); // after()
 
-    it('244.6.1 bind by name', function(done) {
-      var sequence = 100;
+    it('244.6.1 bind by name', async function() {
+      const sequence = 100;
       const jsonVal = {
         keyA: 8,
         keyB: "A String",
@@ -650,148 +417,78 @@ describe('244.dataTypeJson.js', function() {
         keyH: [ 9, 10, 11 ],
         keyI: new Date()
       };
-      async.series([
-        function(cb) {
-          var bindVar = {
-            i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN, maxSize: 1000 },
-            output: { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT }
-          };
-          connection.execute(
-            run_proc_in,
-            bindVar,
-            function(err, result) {
-              should.not.exist(err);
-              should.deepEqual(result.outBinds.output, jsonVal);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var bindVar = {
-            i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 2000 },
-            output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
-          };
-          connection.execute(
-            run_proc_out,
-            bindVar,
-            function(err, result) {
-              should.not.exist(err);
-              should.deepEqual(result.outBinds.c, jsonVal);
-              should.deepEqual(result.outBinds.output, sequence);
-              cb();
-            }
-          );
-        }
-      ], done);
-
+      let binds = {
+        i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        c: { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN, maxSize: 1000 },
+        output: { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT }
+      };
+      let result = await connection.execute(run_proc_in, binds);
+      assert.deepEqual(result.outBinds.output, jsonVal);
+      binds = {
+        i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        c: { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 2000 },
+        output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
+      };
+      result = await connection.execute(run_proc_out, binds);
+      assert.deepEqual(result.outBinds.c, jsonVal);
+      assert.deepEqual(result.outBinds.output, sequence);
     }); // 244.6.1
 
-    it('244.6.2 bind by position', function(done) {
-      var sequence = 101;
+    it('244.6.2 bind by position', async function() {
+      const sequence = 101;
       const jsonVal = { "key13" : {"key13-1" : "value13-1", "key13-2" : "value13-2"} };
-      async.series([
-        function(cb) {
-          var bindVar = [
-            { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT },
-            { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN, maxSize: 10 }
-          ];
-          connection.execute(
-            run_proc_in,
-            bindVar,
-            function(err, result) {
-              should.not.exist(err);
-              should.deepEqual(result.outBinds[0], jsonVal);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          var bindVar = [
-            { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-            { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 10 }
-          ];
-          connection.execute(
-            run_proc_out,
-            bindVar,
-            function(err, result) {
-              should.not.exist(err);
-              should.deepEqual(result.outBinds[1], jsonVal);
-              should.deepEqual(result.outBinds[0], sequence);
-              cb();
-            }
-          );
-        }
-      ], done);
+      let binds = [
+        { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT },
+        { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN, maxSize: 10 }
+      ];
+      let result = await connection.execute(run_proc_in, binds);
+      assert.deepEqual(result.outBinds[0], jsonVal);
+      binds = [
+        { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+        { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 10 }
+      ];
+      result = await connection.execute(run_proc_out, binds);
+      assert.deepEqual(result.outBinds[1], jsonVal);
+      assert.deepEqual(result.outBinds[0], sequence);
     }); // 244.6.1
+
   }); // 244.6
 
   describe('244.7 testing JSON with PL/SQL function BIND_INOUT', function() {
-    var proc_name = "nodb_json_proc_inout";
-    var proc = "CREATE OR REPLACE PROCEDURE " + proc_name + " (ID IN NUMBER, inoutValue IN OUT JSON)\n" +
+    const proc_name = "nodb_json_proc_inout";
+    const proc = "CREATE OR REPLACE PROCEDURE " + proc_name + " (ID IN NUMBER, inoutValue IN OUT JSON)\n" +
         "AS \n" +
         "BEGIN \n" +
         "    insert into " + tableName + " ( num, content ) values (ID, inoutValue); \n" +
         "    select content into inoutValue from " + tableName + " where num = ID; \n" +
         "END " + proc_name + "; ";
-    var sqlRun = "BEGIN " + proc_name + " (:i, :c); END;";
-    var proc_drop = "DROP PROCEDURE " + proc_name;
+    const sqlRun = "BEGIN " + proc_name + " (:i, :c); END;";
+    const proc_drop = "DROP PROCEDURE " + proc_name;
 
-    before('create table, insert data', function(done) {
+    before('create table, insert data', async function() {
       if (!isRunnable) {
         this.skip();
         return;
       }
       oracledb.stmtCacheSize = 0;
-      async.series([
-        function(cb) {
-          assist.setUp(connection, tableName, jsonVals, cb);
-        },
-        function(cb) {
-          connection.execute(
-            proc,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+      await assist.setUp(connection, tableName, jsonVals);
+      await connection.execute(proc);
     }); // before()
 
-    after(function(done) {
+    after(async function() {
       if (!isRunnable) {
         this.skip();
         return;
       }
       oracledb.stmtCacheSize = default_stmtCacheSize;
-      async.series([
-        function(cb) {
-          connection.execute(
-            proc_drop,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.execute(
-            "DROP table " + tableName + " PURGE",
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
+      await connection.execute(proc_drop);
+      await connection.execute("DROP table " + tableName + " PURGE");
     }); // after()
 
-    it('244.7.1 bind by name', function(done) {
-      var sequence = 100;
+    it('244.7.1 bind by name', async function() {
+      const sequence = 100;
       const jsonVal = {
         keyA: 8,
         keyB: "A String",
@@ -803,104 +500,65 @@ describe('244.dataTypeJson.js', function() {
         keyH: [ 9, 10, 11 ],
         keyI: new Date()
       };
-      var bindVar = {
+      const binds = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_INOUT, maxSize: 2000 }
       };
-      connection.execute(
-        sqlRun,
-        bindVar,
-        function(err, result) {
-          should.not.exist(err);
-          should.deepEqual(result.outBinds.c, jsonVal);
-          done();
-        }
-      );
-
+      const result = await connection.execute(sqlRun, binds);
+      assert.deepEqual(result.outBinds.c, jsonVal);
     }); // 244.7.1
 
-    it('244.7.2 bind by position', function(done) {
-      var sequence = 101;
+    it('244.7.2 bind by position', async function() {
+      const sequence = 101;
       const jsonVal = {"fred": 5, "george": 6};
-      var bindVar = [
+      const binds = [
         { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_INOUT, maxSize: 10 }
       ];
-      connection.execute(
-        sqlRun,
-        bindVar,
-        function(err, result) {
-          should.not.exist(err);
-          should.deepEqual(result.outBinds[0], jsonVal);
-          done();
-        }
-      );
-
+      const result = await connection.execute(sqlRun, binds);
+      assert.deepEqual(result.outBinds[0], jsonVal);
     }); // 244.7.2
+
   }); // 244.7
 
   describe('244.8 testing JSON with DML returning into', function() {
 
-    before('create table, insert data', function(done) {
+    before('create table, insert data', async function() {
       if (!isRunnable) {
         this.skip();
         return;
       }
-      async.series([
-        function(cb) {
-          oracledb.getConnection(
-            dbConfig,
-            function(err, conn) {
-              connection = conn;
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function createTable(cb) {
-          var proc = "BEGIN \n" +
-              "    DECLARE \n" +
-              "        e_table_missing EXCEPTION; \n" +
-              "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-              "    BEGIN \n" +
-              "        EXECUTE IMMEDIATE('DROP TABLE " + tableName + " PURGE'); \n" +
-              "    EXCEPTION \n" +
-              "        WHEN e_table_missing \n" +
-              "        THEN NULL; \n" +
-              "    END; \n" +
-              "    EXECUTE IMMEDIATE (' \n" +
-              "        CREATE TABLE " + tableName + " ( \n" +
-              "            num         NUMBER, \n" +
-              "            content    JSON \n" +
-              "        ) \n" +
-              "    '); \n" +
-              "END; ";
-          connection.execute(proc, function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        }
-      ], done);
+      const proc = "BEGIN \n" +
+          "    DECLARE \n" +
+          "        e_table_missing EXCEPTION; \n" +
+          "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+          "    BEGIN \n" +
+          "        EXECUTE IMMEDIATE('DROP TABLE " + tableName + " PURGE'); \n" +
+          "    EXCEPTION \n" +
+          "        WHEN e_table_missing \n" +
+          "        THEN NULL; \n" +
+          "    END; \n" +
+          "    EXECUTE IMMEDIATE (' \n" +
+          "        CREATE TABLE " + tableName + " ( \n" +
+          "            num         NUMBER, \n" +
+          "            content    JSON \n" +
+          "        ) \n" +
+          "    '); \n" +
+          "END; ";
+      await connection.execute(proc);
     }); // before()
 
-    after(function(done) {
+    after(async function() {
       if (!isRunnable) {
         this.skip();
         return;
       }
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
       oracledb.stmtCacheSize = default_stmtCacheSize;
-
+      await connection.execute("DROP table " + tableName + " PURGE");
     }); // after()
 
-    it('244.8.1 bind by name', function(done) {
-      var sequence = 1;
+    it('244.8.1 bind by name', async function() {
+      const sequence = 1;
       const jsonVal = {
         keyA: 8,
         keyB: "A String",
@@ -913,225 +571,132 @@ describe('244.dataTypeJson.js', function() {
         keyI: new Date()
       };
 
-      var sql = "insert into " + tableName + " ( num, content ) values (:i, :c) returning content into :output";
-      var bindVar = {
+      const sql = "insert into " + tableName + " ( num, content ) values (:i, :c) returning content into :output";
+      const binds = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN },
         output: { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 2000 }
       };
-      connection.execute(
-        sql,
-        bindVar,
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result.outBinds.output);
-          should.deepEqual(result.outBinds.output[0], jsonVal);
-          done();
-        }
-      );
+      const result = await connection.execute(sql, binds);
+      assert.deepEqual(result.outBinds.output[0], jsonVal);
     }); // 244.8.1
 
-    it('244.8.2 bind by position', function(done) {
-      var sequence = 2;
+    it('244.8.2 bind by position', async function() {
+      const sequence = 2;
       const jsonVal = { "key5" : "2018/11/01 18:30:00" };
 
-      var sql = "insert into " + tableName + " ( num, content ) values (:i, :c) returning content into :output";
-      var bindVar = [
+      const sql = "insert into " + tableName + " ( num, content ) values (:i, :c) returning content into :output";
+      const binds = [
         { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN },
         { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 2000 }
       ];
-      connection.execute(
-        sql,
-        bindVar,
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result.outBinds[0][0]);
-          should.deepEqual(result.outBinds[0][0], jsonVal);
-          done();
-        }
-      );
+      const result = await connection.execute(sql, binds);
+      assert.deepEqual(result.outBinds[0][0], jsonVal);
     }); // 244.8.2
 
   }); // 244.8
 
   describe('244.9 testing JSON with oracledb.fetchAsString and fetchInfo oracledb.STRING', function() {
 
-    before('create table, insert data', function(done) {
+    before('create table, insert data', async function() {
       if (!isRunnable) {
         this.skip();
         return;
       }
-      async.series([
-        function(cb) {
-          oracledb.getConnection(
-            dbConfig,
-            function(err, conn) {
-              connection = conn;
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function createTable(cb) {
-          var proc = "BEGIN \n" +
-              "    DECLARE \n" +
-              "        e_table_missing EXCEPTION; \n" +
-              "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-              "    BEGIN \n" +
-              "        EXECUTE IMMEDIATE('DROP TABLE " + tableName + " PURGE'); \n" +
-              "    EXCEPTION \n" +
-              "        WHEN e_table_missing \n" +
-              "        THEN NULL; \n" +
-              "    END; \n" +
-              "    EXECUTE IMMEDIATE (' \n" +
-              "        CREATE TABLE " + tableName + " ( \n" +
-              "            id         NUMBER, \n" +
-              "            content    JSON \n" +
-              "        ) \n" +
-              "    '); \n" +
-              "END; ";
-          connection.execute(proc, function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        }
-      ], done);
+      const proc = "BEGIN \n" +
+          "    DECLARE \n" +
+          "        e_table_missing EXCEPTION; \n" +
+          "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+          "    BEGIN \n" +
+          "        EXECUTE IMMEDIATE('DROP TABLE " + tableName + " PURGE'); \n" +
+          "    EXCEPTION \n" +
+          "        WHEN e_table_missing \n" +
+          "        THEN NULL; \n" +
+          "    END; \n" +
+          "    EXECUTE IMMEDIATE (' \n" +
+          "        CREATE TABLE " + tableName + " ( \n" +
+          "            id         NUMBER, \n" +
+          "            content    JSON \n" +
+          "        ) \n" +
+          "    '); \n" +
+          "END; ";
+      await connection.execute(proc);
     }); // before()
 
-    after(function(done) {
+    after(async function() {
       if (!isRunnable) {
         this.skip();
         return;
       }
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
       oracledb.stmtCacheSize = default_stmtCacheSize;
       oracledb.fetchAsString = [];
-
+      await connection.execute("DROP table " + tableName + " PURGE");
     }); // after()
 
-    it('244.9.1 works with oracledb.fetchAsString', function(done) {
+    it('244.9.1 works with oracledb.fetchAsString', async function() {
       oracledb.fetchAsString = [ oracledb.DB_TYPE_JSON ];
-      var sequence = 1;
+      const sequence = 1;
       const jsonVal = { "key5" : "2018/11/01 18:30:00" };
       const resultStr = "{\"key5\":\"2018/11/01 18:30:00\"}";
 
-      var sql = "insert into " + tableName + " ( id, content ) values (:i, :c)";
-      var bindVar = [
+      let sql = "insert into " + tableName + " ( id, content ) values (:i, :c)";
+      const binds = [
         { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN }
       ];
 
-      async.series([
-        function(cb) {
-          connection.execute(
-            sql,
-            bindVar,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function createTable(cb) {
-          connection.execute(
-            "select content as C from " + tableName + " where id = " + sequence,
-            function(err, result) {
-              should.not.exist(err);
-              result.rows[0][0].should.be.a.String();
-              should.strictEqual(result.rows[0][0].length, resultStr.length);
-              should.strictEqual(result.rows[0][0], resultStr);
-              cb();
-            });
-        }
-      ], done);
+      await connection.execute(sql, binds);
+      sql = "select content as C from " + tableName + " where id = " + sequence;
+      const result = await connection.execute(sql);
+      assert.strictEqual(typeof result.rows[0][0], 'string');
+      assert.strictEqual(result.rows[0][0].length, resultStr.length);
+      assert.strictEqual(result.rows[0][0], resultStr);
     }); // 244.9.1
 
-    it.skip('244.9.2 doesn\'t work with outFormat: oracledb.DB_TYPE_JSON', function(done) {
+    it.skip('244.9.2 doesn\'t work with outFormat: oracledb.DB_TYPE_JSON', async function() {
       oracledb.fetchAsString = [ oracledb.DB_TYPE_JSON ];
-      var sequence = 2;
+      const sequence = 2;
       const jsonVal = { "key5" : "2018/11/01 18:30:00" };
       const resultStr = "{\"key5\":\"2018/11/01 18:30:00\"}";
 
-      var sql = "insert into " + tableName + " ( id, content ) values (:i, :c)";
-      var bindVar = [
+      let sql = "insert into " + tableName + " ( id, content ) values (:i, :c)";
+      const binds = [
         { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN }
       ];
 
-      async.series([
-        function(cb) {
-          connection.execute(
-            sql,
-            bindVar,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function createTable(cb) {
-          connection.execute(
-            "select content as C from " + tableName + " where id = " + sequence,
-            [],
-            { outFormat : oracledb.DB_TYPE_JSON },
-            function(err, result) {
-              should.not.exist(err);
-              result.rows[0][0].should.be.a.String();
-              should.strictEqual(result.rows[0][0].length, resultStr.length);
-              should.strictEqual(result.rows[0][0], resultStr);
-              cb();
-            });
-        }
-      ], done);
+      await connection.execute(sql, binds);
+      sql = "select content as C from " + tableName + " where id = " + sequence;
+      const options = { outFormat : oracledb.DB_TYPE_JSON };
+      const result = await connection.execute(sql, [], options);
+      assert.strictEqual(typeof result.rows[0][0], 'string');
+      assert.strictEqual(result.rows[0][0].length, resultStr.length);
+      assert.strictEqual(result.rows[0][0], resultStr);
     }); // 244.9.2
 
-    it('244.9.3 could work with fetchInfo oracledb.STRING', function(done) {
+    it('244.9.3 could work with fetchInfo oracledb.STRING', async function() {
       oracledb.fetchAsString = [];
-      var sequence = 3;
+      const sequence = 3;
       const jsonVal = { "key5" : "2018/11/01 18:30:00" };
       const resultStr = "{\"key5\":\"2018/11/01 18:30:00\"}";
 
-      var sql = "insert into " + tableName + " ( id, content ) values (:i, :c)";
-      var bindVar = [
+      let sql = "insert into " + tableName + " ( id, content ) values (:i, :c)";
+      const binds = [
         { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN }
       ];
-
-      async.series([
-        function(cb) {
-          connection.execute(
-            sql,
-            bindVar,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function createTable(cb) {
-          connection.execute(
-            "select content as C from " + tableName + " where id = " + sequence,
-            [],
-            {
-              fetchInfo : { C : { type : oracledb.STRING } }
-            },
-            function(err, result) {
-              should.not.exist(err);
-              result.rows[0][0].should.be.a.String();
-              should.strictEqual(result.rows[0][0].length, resultStr.length);
-              should.strictEqual(result.rows[0][0], resultStr);
-              cb();
-            });
-        }
-      ], done);
+      await connection.execute(sql, binds);
+      sql = "select content as C from " + tableName + " where id = " + sequence;
+      const options = {
+        fetchInfo : { C : { type : oracledb.STRING } }
+      };
+      const result = await connection.execute(sql, [], options);
+      assert.strictEqual(typeof result.rows[0][0], 'string');
+      assert.strictEqual(result.rows[0][0].length, resultStr.length);
+      assert.strictEqual(result.rows[0][0], resultStr);
     }); // 244.9.3
+
   }); // 244.9
 
 });

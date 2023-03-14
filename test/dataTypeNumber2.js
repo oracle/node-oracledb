@@ -53,9 +53,7 @@ describe('27. dataTypeNumber2.js', function() {
   describe('27.1 testing NUMBER(p, s) data', function() {
 
     before('create table, insert data', async function() {
-      await new Promise((resolve) => {
-        assist.setUp(connection, tableName, numbers, resolve);
-      });
+      await assist.setUp(connection, tableName, numbers);
     });
 
     after(async function() {
@@ -109,9 +107,7 @@ describe('27. dataTypeNumber2.js', function() {
 
   describe('27.2 stores null value correctly', function() {
     it('27.2.1 testing Null, Empty string and Undefined', async function() {
-      await new Promise((resolve) => {
-        assist.verifyNullValues(connection, tableName, resolve);
-      });
+      await assist.verifyNullValues(connection, tableName);
     });
   });
 

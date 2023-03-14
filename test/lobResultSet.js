@@ -37,8 +37,7 @@
 
 const oracledb = require('oracledb');
 const fs       = require('fs');
-const async    = require('async');
-const should   = require('should');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
 
@@ -46,463 +45,295 @@ describe('59. lobResultSet.js', function() {
 
   let connection = null;
 
-  before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+  before('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after('release connection', function(done) {
-    connection.close(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after('release connection', async function() {
+    await connection.close();
   });
 
   describe('59.1 CLOB data', function() {
-    var insertID = 1;
-    var tableName = "nodb_myclobs";
-    var inFileName = './test/clobexample.txt';
-    before('create table', function(done) {
-      assist.createTable(connection, tableName, done);
+    let insertID = 1;
+    const tableName = "nodb_myclobs";
+    const inFileName = './test/clobexample.txt';
+    before('create table', async function() {
+      await connection.execute(assist.sqlCreateTable(tableName));
     });
 
-    after('drop table', function(done) {
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after('drop table', async function() {
+      await connection.execute(`DROP table ` + tableName + ` PURGE`);
     });
 
-    function fetchOneRowFromRS(resultSet, rowsFetched, rowsExpected, callback) {
-      resultSet.getRow(function(err, row) {
-        should.not.exist(err);
-        if (!row) {
-          resultSet.close(function(err) {
-            should.not.exist(err);
-            should.strictEqual(rowsFetched, rowsExpected);
-            callback();
-          });
-        } else {
-          var lob = row[1];
-          lob.setEncoding('utf8');
-
-          var text = "";
-          lob.on('data', function(chunk) {
-            text = text + chunk;
-          });
-
-          lob.on('end', function() {
-            rowsFetched++;
-            fs.readFile(inFileName, { encoding: 'utf8' }, function(err, originalData) {
-              should.not.exist(err);
-              should.strictEqual(text, originalData);
-            });
-            fetchOneRowFromRS(resultSet, rowsFetched, rowsExpected, callback);
-          });
-
-          lob.on('error', function(err) {
-            console.log("lob.on 'error' event");
-            console.error(err.message);
-          });
-        }
-      });
+    async function fetchOneRowFromRS(resultSet, rowsFetched, rowsExpected) {
+      const row = await resultSet.getRow();
+      if (!row) {
+        await resultSet.close();
+        assert.strictEqual(rowsFetched, rowsExpected);
+      } else {
+        rowsFetched++;
+        const text = await row[1].getData();
+        const originalData = fs.readFileSync(inFileName, { encoding: 'utf8' });
+        assert.strictEqual(text, originalData);
+        await fetchOneRowFromRS(resultSet, rowsFetched, rowsExpected);
+      }
     }
 
-    function streamIntoClob(id, cb) {
-      connection.execute(
+    async function streamIntoClob(id) {
+      const result = await connection.execute(
         "INSERT INTO " + tableName + " VALUES (:n, EMPTY_CLOB()) RETURNING content INTO :lobbv",
-        { n: id, lobbv: { type: oracledb.CLOB, dir: oracledb.BIND_OUT } },
-        function(err, result) {
-          should.not.exist(err);
-          var lob = result.outBinds.lobbv[0];
-          var inStream = fs.createReadStream(inFileName);
+        { n: id, lobbv: { type: oracledb.CLOB, dir: oracledb.BIND_OUT } });
 
-          inStream.pipe(lob);
-
-          lob.on('finish', function() {
-            connection.commit(function(err) {
-              should.not.exist(err);
-              cb(); // insertion done
-            });
-          });
-
-          inStream.on('error', function(err) {
-            should.not.exist(err);
-          });
-        }
-      );
+      const lob = result.outBinds.lobbv[0];
+      const inStream = await fs.createReadStream(inFileName);
+      await new Promise((resolve, reject) => {
+        lob.on('error', reject);
+        lob.on('finish', resolve);
+        inStream.on('error', reject);
+        inStream.pipe(lob);
+      });
+      await connection.commit();
     }
 
-    it('59.1.1 reads clob data one by one row from result set', function(done) {
-      var id_1 = insertID++;
-      var id_2 = insertID++;
-      var id_3 = insertID++;
-      async.series([
-        function(callback) {
-          streamIntoClob(id_1, callback);
-        },
-        function(callback) {
-          streamIntoClob(id_2, callback);
-        },
-        function(callback) {
-          streamIntoClob(id_3, callback);
-        },
-        function(callback) {
-          connection.execute(
-            "SELECT num, content FROM " + tableName + " where  num = " + id_1 + " or num = " + id_2 + " or num = " + id_3,
-            [],
-            { resultSet: true },
-            function(err, result) {
-              should.not.exist(err);
-              var actualRowsFetched = 0; // actual rows read from resultset
-              var rowsExpected = 3; // expected rows read from resultSet
-              fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected, callback);
-            }
-          );
-        }
-      ], done);
+    it('59.1.1 reads clob data one by one row from result set', async function() {
+      const id_1 = insertID++;
+      const id_2 = insertID++;
+      const id_3 = insertID++;
+
+      await streamIntoClob(id_1);
+
+      await streamIntoClob(id_2);
+
+      await streamIntoClob(id_3);
+
+      const result = await connection.execute(
+        "SELECT num, content FROM " + tableName + " where  num = " + id_1 + " or num = " + id_2 + " or num = " + id_3,
+        [],
+        { resultSet: true });
+      const actualRowsFetched = 0; // actual rows read from resultset
+      const rowsExpected = 3; // expected rows read from resultSet
+      await fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected);
     }); // 59.1.1
 
-    it('59.1.2 works with oracledb.maxRows > actual number of rows fetched', function(done) {
-      var maxRowsBak = oracledb.maxRows;
+    it('59.1.2 works with oracledb.maxRows > actual number of rows fetched', async function() {
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
-      var id_1 = insertID++;
-      var id_2 = insertID++;
-      var id_3 = insertID++;
-      async.series([
-        function(callback) {
-          streamIntoClob(id_1, callback);
-        },
-        function(callback) {
-          streamIntoClob(id_2, callback);
-        },
-        function(callback) {
-          streamIntoClob(id_3, callback);
-        },
-        function(callback) {
-          connection.execute(
-            "SELECT num, content FROM " + tableName + " where num = " + id_1 + " or num = " + id_2 + " or num = " + id_3,
-            [],
-            { resultSet: true },
-            function(err, result) {
-              should.not.exist(err);
-              var actualRowsFetched = 0; // actual rows read from resultset
-              var rowsExpected = 3; // expected rows read from resultSet
-              fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected, callback);
-            }
-          );
-        },
-        function(callback) {
-          oracledb.maxRows = maxRowsBak;
-          callback();
-        }
-      ], done);
+      const id_1 = insertID++;
+      const id_2 = insertID++;
+      const id_3 = insertID++;
+
+      await streamIntoClob(id_1);
+
+      await streamIntoClob(id_2);
+
+      await streamIntoClob(id_3);
+
+      const result = await connection.execute(
+        "SELECT num, content FROM " + tableName + " where num = " + id_1 + " or num = " + id_2 + " or num = " + id_3,
+        [],
+        { resultSet: true });
+
+      const actualRowsFetched = 0; // actual rows read from resultset
+      const rowsExpected = 3; // expected rows read from resultSet
+      await fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected);
+
+      oracledb.maxRows = maxRowsBak;
     }); // 59.1.2
 
-    it('59.1.3 works with oracledb.maxRows = actual number of rows fetched', function(done) {
-      var maxRowsBak = oracledb.maxRows;
+    it('59.1.3 works with oracledb.maxRows = actual number of rows fetched', async function() {
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 3;
 
-      var id_1 = insertID++;
-      var id_2 = insertID++;
-      var id_3 = insertID++;
-      async.series([
-        function(callback) {
-          streamIntoClob(id_1, callback);
-        },
-        function(callback) {
-          streamIntoClob(id_2, callback);
-        },
-        function(callback) {
-          streamIntoClob(id_3, callback);
-        },
-        function(callback) {
-          connection.execute(
-            "SELECT num, content FROM " + tableName + " where  num = " + id_1 + " or num = " + id_2 + " or num = " + id_3,
-            [],
-            { resultSet: true },
-            function(err, result) {
-              should.not.exist(err);
-              var actualRowsFetched = 0; // actual rows read from resultset
-              var rowsExpected = 3; // expected rows read from resultSet
-              fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected, callback);
-            }
-          );
-        },
-        function(callback) {
-          oracledb.maxRows = maxRowsBak;
-          callback();
-        }
-      ], done);
+      const id_1 = insertID++;
+      const id_2 = insertID++;
+      const id_3 = insertID++;
+
+      await streamIntoClob(id_1);
+
+      await streamIntoClob(id_2);
+
+      await streamIntoClob(id_3);
+
+      const result = await connection.execute(
+        `SELECT num, content FROM ` + tableName + ` where  num = ` + id_1 + ` or num = ` + id_2 + ` or num = ` + id_3,
+        [],
+        { resultSet: true });
+
+      const actualRowsFetched = 0; // actual rows read from resultset
+      const rowsExpected = 3; // expected rows read from resultSet
+      await fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected);
+
+      oracledb.maxRows = maxRowsBak;
     }); // 59.1.3
 
-    it('59.1.4 works with oracledb.maxRows < actual number of rows fetched', function(done) {
-      var maxRowsBak = oracledb.maxRows;
+    it('59.1.4 works with oracledb.maxRows < actual number of rows fetched', async function() {
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
-      var id_1 = insertID++;
-      var id_2 = insertID++;
-      var id_3 = insertID++;
-      async.series([
-        function(callback) {
-          streamIntoClob(id_1, callback);
-        },
-        function(callback) {
-          streamIntoClob(id_2, callback);
-        },
-        function(callback) {
-          streamIntoClob(id_3, callback);
-        },
-        function(callback) {
-          connection.execute(
-            "SELECT num, content FROM " + tableName + " where  num = " + id_1 + " or num = " + id_2 + " or num = " + id_3,
-            [],
-            { resultSet: true },
-            function(err, result) {
-              should.not.exist(err);
-              var actualRowsFetched = 0; // actual rows read from resultset
-              var rowsExpected = 3; // expected rows read from resultSet
-              fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected, callback);
-            }
-          );
-        },
-        function(callback) {
-          oracledb.maxRows = maxRowsBak;
-          callback();
-        }
-      ], done);
+      const id_1 = insertID++;
+      const id_2 = insertID++;
+      const id_3 = insertID++;
+
+      await streamIntoClob(id_1);
+
+      await streamIntoClob(id_2);
+
+      await streamIntoClob(id_3);
+
+      const result = await connection.execute(
+        "SELECT num, content FROM " + tableName + " where  num = " + id_1 + " or num = " + id_2 + " or num = " + id_3,
+        [],
+        { resultSet: true });
+
+      const actualRowsFetched = 0; // actual rows read from resultset
+      const rowsExpected = 3; // expected rows read from resultSet
+      await fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected);
+
+      oracledb.maxRows = maxRowsBak;
     }); // 59.1.4
 
   }); // 59.1
 
   describe('59.2 BLOB data', function() {
-    var insertID = 1;
-    var tableName = "nodb_myblobs";
-    var jpgFileName = "./test/fuzzydinosaur.jpg";
-    before('create table', function(done) {
-      assist.createTable(connection, tableName, done);
+    let insertID = 1;
+    const tableName = "nodb_myblobs";
+    const jpgFileName = "./test/fuzzydinosaur.jpg";
+    before('create table', async function() {
+      await connection.execute(assist.sqlCreateTable(tableName));
     });
 
-    after('drop table', function(done) {
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    after('drop table', async function() {
+      await connection.execute(`DROP table ` + tableName + ` PURGE`);
     });
 
-    function fetchOneRowFromRS(resultSet, rowsFetched, rowsExpected, callback) {
-      resultSet.getRow(function(err, row) {
-        should.not.exist(err);
-        if (!row) {
-          resultSet.close(function(err) {
-            should.not.exist(err);
-            should.strictEqual(rowsFetched, rowsExpected);
-            rowsFetched = 0;
-            callback();
-          });
-        } else {
-          var lob = row[1];
-          var blobData = 0;
-          var totalLength = 0;
-          blobData = Buffer.alloc(0);
+    async function fetchOneRowFromRS(resultSet, rowsFetched, rowsExpected) {
+      const row = await resultSet.getRow();
+      if (!row) {
+        await resultSet.close();
+        assert.strictEqual(rowsFetched, rowsExpected);
+        rowsFetched = 0;
+      } else {
+        rowsFetched++;
+        const blobData = await row[1].getData();
+        const originalData = fs.readFileSync(jpgFileName);
+        assert.deepEqual(originalData, blobData);
+        await fetchOneRowFromRS(resultSet, rowsFetched, rowsExpected);
+      }
+    }
 
-          lob.on('data', function(chunk) {
-            totalLength = totalLength + chunk.length;
-            blobData = Buffer.concat([blobData, chunk], totalLength);
-          });
+    async function streamIntoBlob(id) {
+      const result = await connection.execute(
+        `INSERT INTO ` + tableName + ` VALUES (:n, EMPTY_BLOB()) RETURNING content INTO :lobbv`,
+        { n: id, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } });
 
-          lob.on('error', function(err) {
-            should.not.exist(err, "lob.on 'error' event.");
-          });
-
-          lob.on('end', function() {
-            fs.readFile(jpgFileName, function(err, originalData) {
-              should.not.exist(err);
-              should.strictEqual(totalLength, originalData.length);
-              originalData.should.eql(blobData);
-            });
-            rowsFetched++;
-            fetchOneRowFromRS(resultSet, rowsFetched, rowsExpected, callback);
-          });
-        }
+      const lob = result.outBinds.lobbv[0];
+      const inStream = await fs.createReadStream(jpgFileName);
+      await new Promise((resolve, reject) => {
+        inStream.on('error', reject);
+        lob.on('error', reject);
+        lob.on('finish', resolve);
+        inStream.pipe(lob);
       });
+      await connection.commit();
     }
 
-    function streamIntoBlob(id, cb) {
-      connection.execute(
-        "INSERT INTO " + tableName + " VALUES (:n, EMPTY_BLOB()) RETURNING content INTO :lobbv",
-        { n: id, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } },
-        function(err, result) {
-          should.not.exist(err);
-          var lob = result.outBinds.lobbv[0];
-          var inStream = fs.createReadStream(jpgFileName);
+    it('59.2.1 reads blob data one by one row from result set', async function() {
+      const id_1 = insertID++;
+      const id_2 = insertID++;
+      const id_3 = insertID++;
 
-          inStream.pipe(lob);
+      await streamIntoBlob(id_1);
 
-          lob.on('finish', function() {
-            connection.commit(function(err) {
-              should.not.exist(err);
-              cb(); // insertion done
-            });
-          });
+      await streamIntoBlob(id_2);
 
-          inStream.on('error', function(err) {
-            should.not.exist(err);
-          });
+      await streamIntoBlob(id_3);
 
-        }
-      );
-    }
+      const result = await connection.execute(
+        "SELECT num, content FROM " + tableName + " where  num = " + id_1 + " or num = " + id_2 + " or num = " + id_3,
+        [],
+        { resultSet: true });
 
-    it('59.2.1 reads blob data one by one row from result set', function(done) {
-      var id_1 = insertID++;
-      var id_2 = insertID++;
-      var id_3 = insertID++;
-      async.series([
-        function(callback) {
-          streamIntoBlob(id_1, callback);
-        },
-        function(callback) {
-          streamIntoBlob(id_2, callback);
-        },
-        function(callback) {
-          streamIntoBlob(id_3, callback);
-        },
-        function(callback) {
-          connection.execute(
-            "SELECT num, content FROM " + tableName + " where  num = " + id_1 + " or num = " + id_2 + " or num = " + id_3,
-            [],
-            { resultSet: true },
-            function(err, result) {
-              should.not.exist(err);
-              var actualRowsFetched = 0; // actual rows read from resultset
-              var rowsExpected = 3; // expected rows read from resultSet
-              fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected, callback);
-            }
-          );
-        }
-      ], done);
+      const actualRowsFetched = 0; // actual rows read from resultset
+      const rowsExpected = 3; // expected rows read from resultSet
+      await fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected);
+
     }); // 59.2.1
 
-    it('59.2.2 works with oracledb.maxRows > actual number of rows fetched', function(done) {
-      var maxRowsBak = oracledb.maxRows;
+    it('59.2.2 works with oracledb.maxRows > actual number of rows fetched', async function() {
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
-      var id_1 = insertID++;
-      var id_2 = insertID++;
-      var id_3 = insertID++;
-      async.series([
-        function(callback) {
-          streamIntoBlob(id_1, callback);
-        },
-        function(callback) {
-          streamIntoBlob(id_2, callback);
-        },
-        function(callback) {
-          streamIntoBlob(id_3, callback);
-        },
-        function(callback) {
-          connection.execute(
-            "SELECT num, content FROM " + tableName + " where num = " + id_1 + " or num = " + id_2 + " or num = " + id_3,
-            [],
-            { resultSet: true },
-            function(err, result) {
-              should.not.exist(err);
-              var actualRowsFetched = 0; // actual rows read from resultset
-              var rowsExpected = 3; // expected rows read from resultSet
-              fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected, callback);
-            }
-          );
-        },
-        function(callback) {
-          oracledb.maxRows = maxRowsBak;
-          callback();
-        }
-      ], done);
+      const id_1 = insertID++;
+      const id_2 = insertID++;
+      const id_3 = insertID++;
+
+      await streamIntoBlob(id_1);
+
+      await streamIntoBlob(id_2);
+
+      await streamIntoBlob(id_3);
+
+      const result = await connection.execute(
+        `SELECT num, content FROM ` + tableName + ` where num = ` + id_1 + ` or num = ` + id_2 + ` or num = ` + id_3,
+        [],
+        { resultSet: true });
+
+      const actualRowsFetched = 0; // actual rows read from resultset
+      const rowsExpected = 3; // expected rows read from resultSet
+      await fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected);
+      oracledb.maxRows = maxRowsBak;
     }); // 59.2.2
 
-    it('59.2.3 works with oracledb.maxRows = actual number of rows fetched', function(done) {
-      var maxRowsBak = oracledb.maxRows;
+    it('59.2.3 works with oracledb.maxRows = actual number of rows fetched', async function() {
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 3;
 
-      var id_1 = insertID++;
-      var id_2 = insertID++;
-      var id_3 = insertID++;
-      async.series([
-        function(callback) {
-          streamIntoBlob(id_1, callback);
-        },
-        function(callback) {
-          streamIntoBlob(id_2, callback);
-        },
-        function(callback) {
-          streamIntoBlob(id_3, callback);
-        },
-        function(callback) {
-          connection.execute(
-            "SELECT num, content FROM " + tableName + " where  num = " + id_1 + " or num = " + id_2 + " or num = " + id_3,
-            [],
-            { resultSet: true },
-            function(err, result) {
-              should.not.exist(err);
-              var actualRowsFetched = 0; // actual rows read from resultset
-              var rowsExpected = 3; // expected rows read from resultSet
-              fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected, callback);
-            }
-          );
-        },
-        function(callback) {
-          oracledb.maxRows = maxRowsBak;
-          callback();
-        }
-      ], done);
+      const id_1 = insertID++;
+      const id_2 = insertID++;
+      const id_3 = insertID++;
+
+      await streamIntoBlob(id_1);
+
+      await streamIntoBlob(id_2);
+
+      await streamIntoBlob(id_3);
+
+      const result = await connection.execute(
+        `SELECT num, content FROM ` + tableName + ` where  num = ` + id_1 + ` or num = ` + id_2 + ` or num = ` + id_3,
+        [],
+        { resultSet: true });
+
+      const actualRowsFetched = 0; // actual rows read from resultset
+      const rowsExpected = 3; // expected rows read from resultSet
+      await fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected);
+      oracledb.maxRows = maxRowsBak;
     }); // 59.2.3
 
-    it('59.2.4 works with oracledb.maxRows < actual number of rows fetched', function(done) {
-      var maxRowsBak = oracledb.maxRows;
+    it('59.2.4 works with oracledb.maxRows < actual number of rows fetched', async function() {
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
-      var id_1 = insertID++;
-      var id_2 = insertID++;
-      var id_3 = insertID++;
-      async.series([
-        function(callback) {
-          streamIntoBlob(id_1, callback);
-        },
-        function(callback) {
-          streamIntoBlob(id_2, callback);
-        },
-        function(callback) {
-          streamIntoBlob(id_3, callback);
-        },
-        function(callback) {
-          connection.execute(
-            "SELECT num, content FROM " + tableName + " where  num = " + id_1 + " or num = " + id_2 + " or num = " + id_3,
-            [],
-            { resultSet: true },
-            function(err, result) {
-              should.not.exist(err);
-              var actualRowsFetched = 0; // actual rows read from resultset
-              var rowsExpected = 3; // expected rows read from resultSet
-              fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected, callback);
-            }
-          );
-        },
-        function(callback) {
-          oracledb.maxRows = maxRowsBak;
-          callback();
-        }
-      ], done);
+      const id_1 = insertID++;
+      const id_2 = insertID++;
+      const id_3 = insertID++;
+
+      await streamIntoBlob(id_1);
+
+      await streamIntoBlob(id_2);
+
+      await streamIntoBlob(id_3);
+
+      const result = await connection.execute(
+        "SELECT num, content FROM " + tableName + " where  num = " + id_1 + " or num = " + id_2 + " or num = " + id_3,
+        [],
+        { resultSet: true });
+
+      const actualRowsFetched = 0; // actual rows read from resultset
+      const rowsExpected = 3; // expected rows read from resultSet
+      await fetchOneRowFromRS(result.resultSet, actualRowsFetched, rowsExpected);
+
+      oracledb.maxRows = maxRowsBak;
     }); // 59.2.4
 
   }); // 59.2

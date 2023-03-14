@@ -744,9 +744,7 @@ describe('58. properties.js', function() {
 
     before('get resultSet class', async function() {
       connection = await oracledb.getConnection(dbConfig);
-      await new Promise((resolve) => {
-        assist.setUp(connection, tableName, numbers, resolve);
-      });
+      await assist.setUp(connection, tableName, numbers);
       result = await connection.execute(
         "SELECT * FROM " + tableName + " ORDER BY num",
         [],

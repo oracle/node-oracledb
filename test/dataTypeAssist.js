@@ -32,10 +32,9 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should = require('should');
-const async = require('async');
+const assert = require('assert');
 
-var assist = exports;
+const assist = exports;
 
 /* Mapping between table names and data types */
 assist.allDataTypeNames =
@@ -618,7 +617,7 @@ assist.schema = {
 /******************************* Helper Functions ***********************************/
 
 
-var StringBuffer = function() {
+const StringBuffer = function() {
   this.buffer = [];
   this.index = 0;
 };
@@ -636,11 +635,11 @@ StringBuffer.prototype = {
 };
 
 assist.createCharString = function(size) {
-  var buffer = new StringBuffer();
-  var scSize = assist.data.specialChars.length;
-  var scIndex = 0;
-  var cIndex = 0;
-  for (var i = 0; i < size; i++) {
+  const buffer = new StringBuffer();
+  const scSize = assist.data.specialChars.length;
+  let scIndex = 0;
+  let cIndex = 0;
+  for (let i = 0; i < size; i++) {
     if (i % 10 == 0) {
       buffer.append(assist.data.specialChars[scIndex].substr(0, 1));
       scIndex = (scIndex + 1) % scSize;
@@ -653,22 +652,22 @@ assist.createCharString = function(size) {
 };
 
 assist.createBuffer = function(size) {
-  var array = [];
-  for (var i = 0; i < size; i++) {
-    var b = Math.floor(Math.random() * 256); // generate a random integer among 0-255
+  const array = [];
+  for (let i = 0; i < size; i++) {
+    const b = Math.floor(Math.random() * 256); // generate a random integer among 0-255
     array.push(b);
   }
   return Buffer.from(array, "utf-8");
 };
 
 assist.createSchemaString = function(size) {
-  var buffer = new StringBuffer();
-  var scIndex = 0;
-  var cIndex = 0;
-  var nIndex = 0;
-  var schema_prefix = "\"";
+  const buffer = new StringBuffer();
+  const schema_prefix = "\"";
+  let scIndex = 0;
+  let cIndex = 0;
+  let nIndex = 0;
 
-  for (var i = 0; i < size - 2; i++) {
+  for (let i = 0; i < size - 2; i++) {
     if (i % 3 == 0) {
       scIndex = Math.floor(Math.random() * 30);
       buffer.append(assist.schema.specialChars[scIndex]);
@@ -680,93 +679,44 @@ assist.createSchemaString = function(size) {
       buffer.append(assist.schema.numbers[nIndex]);
     }
   }
-  var schema = schema_prefix + buffer.toString() + schema_prefix;
-  return schema;
+  return schema_prefix + buffer.toString() + schema_prefix;
 };
 
 
 assist.compare2Buffers = function(originalBuf, compareBuf) {
-  var node01113plus = true; // assume node runtime version is higher than 0.11.13
-  var nodeVer = process.versions["node"].split(".");
-  if (nodeVer[0] === "0" && nodeVer[1] === "11" && nodeVer[2] < "13") {
-    node01113plus = false;
-  } else if (nodeVer[0] === "0" && nodeVer[1] < "11") {
-    node01113plus = false;
-  }
-  if (node01113plus === true) {
-    return originalBuf.equals(compareBuf);
-  } else {
-    return (originalBuf.toString('utf8') === compareBuf.toString('utf8'));
-  }
+  return originalBuf.equals(compareBuf);
 };
 
-assist.setUp = function(connection, tableName, array, done) {
-  async.series([
-    function(callback) {
-      assist.createTable(connection, tableName, callback);
-    },
-    function(callback) {
-      assist.insertDataArray(connection, tableName, array, callback);
-    }
-  ], done);
+assist.setUp = async function(connection, tableName, array) {
+  await assist.createTable(connection, tableName);
+  await assist.insertDataArray(connection, tableName, array);
 };
 
-assist.setUp4sql = function(connection, tableName, array, done) {
-  async.series([
-    function(callback) {
-      assist.createTable(connection, tableName, callback);
-    },
-    function(callback) {
-      assist.insertData4sql(connection, tableName, array, callback);
-    }
-  ], done);
+assist.setUp4sql = async function(connection, tableName, array) {
+  await assist.createTable(connection, tableName);
+  await assist.insertData4sql(connection, tableName, array);
 };
 
-assist.createTable = function(connection, tableName, done) {
-  var sqlCreate = assist.sqlCreateTable(tableName);
-  connection.execute(
-    sqlCreate,
-    function(err) {
-      should.not.exist(err);
-      done();
-    }
-  );
+assist.createTable = async function(connection, tableName) {
+  const sqlCreate = assist.sqlCreateTable(tableName);
+  await connection.execute(sqlCreate);
 };
 
-assist.insertDataArray = function(connection, tableName, array, done) {
-  async.eachSeries(array, function(element, cb) {
-    // console.log(element.length);
-    connection.execute(
-      "INSERT INTO " + tableName + " VALUES(:no, :bindValue)",
+assist.insertDataArray = async function(connection, tableName, array) {
+  await Promise.all(array.map(async function(element) {
+    await connection.execute(
+      `INSERT INTO ` + tableName + ` VALUES(:no, :bindValue)`,
       { no: array.indexOf(element), bindValue: element },
-      { autoCommit: true },
-      function(err) {
-        should.not.exist(err);
-        cb();
-      }
-    );
-  }, function(err) {
-    should.not.exist(err);
-    done();
-  });
+      { autoCommit: true });
+  }));
 };
 
-assist.insertData4sql = function(connection, tableName, array, done) {
-  async.eachSeries(array, function(element, cb) {
-    var sql = "INSERT INTO " + tableName + " VALUES(:no, " + element + " )";
-
-    connection.execute(
-      sql,
-      { no: array.indexOf(element) },
-      function(err) {
-        should.not.exist(err);
-        cb();
-      }
-    );
-  }, function(err) {
-    should.not.exist(err);
-    done();
-  });
+assist.insertData4sql = async function(connection, tableName, array) {
+  await Promise.all(array.map(async function(element) {
+    const sql = "INSERT INTO " + tableName + " VALUES(:no, " + element + " )";
+    const binds = { no: array.indexOf(element) };
+    await connection.execute(sql, binds);
+  }));
 };
 
 assist.sqlCreateTable = function(tableName) {
@@ -774,7 +724,7 @@ assist.sqlCreateTable = function(tableName) {
   // is disabled for tables with LONG & LONG RAW columns in all types of Oracle DB.
   // (Note: HCC is enabled in Oracle ADB-S and ADB-D by default)
   // When HCC is enabled, tables with LONG & LONG RAW columns cannot be created.
-  var createTab =
+  const createTab =
         `BEGIN
            DECLARE
              e_table_missing EXCEPTION;
@@ -799,253 +749,151 @@ assist.sqlCreateTable = function(tableName) {
 
 /************************* Functions for Verifiction *********************************/
 
-assist.dataTypeSupport = function(connection, tableName, array, done) {
-  connection.should.be.ok();
-  connection.execute(
-    "SELECT * FROM " + tableName + " ORDER BY num",
+assist.dataTypeSupport = async function(connection, tableName, array) {
+  const result = await connection.execute(
+    `SELECT * FROM ` + tableName + ` ORDER BY num`,
     [],
-    { outFormat: oracledb.OUT_FORMAT_OBJECT },
-    function(err, result) {
-      should.not.exist(err);
-      // console.log(result);
-      for (var i = 0; i < array.length; i++) {
-        // console.log(result.rows[i].CONTENT);
-        if ((typeof result.rows[i].CONTENT) === 'string')
-          result.rows[i].CONTENT.trim().should.eql(array[result.rows[i].NUM]);
-        else if ((typeof result.rows[i].CONTENT) === 'number')
-          result.rows[i].CONTENT.should.eql(array[result.rows[i].NUM]);
-        else if (Buffer.isBuffer(result.rows[i].CONTENT))
-          result.rows[i].CONTENT.toString('hex').should.eql(array[result.rows[i].NUM].toString('hex'));
-        else if (Object.prototype.toString.call(result.rows[i].CONTENT) === '[object Date]')
-          result.rows[i].CONTENT.getTime().should.eql(array[result.rows[i].NUM].getTime());
-        else if (typeof result.rows[i].CONTENT === 'object')
-          should.deepEqual(result.rows[i].CONTENT, assist.jsonExpectedResults[result.rows[i].NUM]);
-        else
-          should.not.exist(new Error('Uncaught data type!'));
-      }
-      done();
-    }
-  );
+    { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+  for (let i = 0; i < array.length; i++) {
+    // console.log(result.rows[i].CONTENT);
+    if ((typeof result.rows[i].CONTENT) === 'string')
+      assert.strictEqual(result.rows[i].CONTENT.trim(), array[result.rows[i].NUM]);
+    else if ((typeof result.rows[i].CONTENT) === 'number')
+      assert.strictEqual(result.rows[i].CONTENT, array[result.rows[i].NUM]);
+    else if (Buffer.isBuffer(result.rows[i].CONTENT))
+      assert.strictEqual(result.rows[i].CONTENT.toString('hex'), array[result.rows[i].NUM].toString('hex'));
+    else if (Object.prototype.toString.call(result.rows[i].CONTENT) === '[object Date]')
+      assert.strictEqual(result.rows[i].CONTENT.getTime(), array[result.rows[i].NUM].getTime());
+    else if (typeof result.rows[i].CONTENT === 'object')
+      assert.deepEqual(result.rows[i].CONTENT, assist.jsonExpectedResults[result.rows[i].NUM]);
+    else
+      assert.ifError(new Error('Uncaught data type!'));
+  }
 };
 
 
-assist.verifyResultSet = function(connection, tableName, array, done) {
-  connection.execute(
+assist.verifyResultSet = async function(connection, tableName, array) {
+  const result = await connection.execute(
     "SELECT * FROM " + tableName,
     [],
-    { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT },
-    function(err, result) {
-      should.not.exist(err);
-      (result.resultSet.metaData[0]).name.should.eql('NUM');
-      (result.resultSet.metaData[1]).name.should.eql('CONTENT');
-      fetchRowsFromRS(result.resultSet, array, done);
-    }
-  );
+    { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+  assert.strictEqual((result.resultSet.metaData[0]).name, 'NUM');
+  assert.strictEqual((result.resultSet.metaData[1]).name, 'CONTENT');
+  await fetchRowsFromRS(result.resultSet, array);
 };
 
-assist.verifyRefCursor = function(connection, tableName, array, done) {
-  var createProc =
-        "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
-        "AS " +
-        "BEGIN " +
-        "  OPEN p_out FOR " +
-        "SELECT * FROM " + tableName  + "; " +
-        "END; ";
-  async.series([
-    function createProcedure(callback) {
-      connection.execute(
-        createProc,
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
-    },
-    function verify(callback) {
-      connection.execute(
-        "BEGIN testproc(:o); END;",
-        [
-          { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-        ],
-        { outFormat: oracledb.OUT_FORMAT_OBJECT },
-        function(err, result) {
-          should.not.exist(err);
-          fetchRowsFromRS(result.outBinds[0], array, callback);
-        }
-      );
-    },
-    function dropProcedure(callback) {
-      connection.execute(
-        "DROP PROCEDURE testproc",
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
-    }
-  ], done);
+assist.verifyRefCursor = async function(connection, tableName, array) {
+  const createProc =
+        `CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) ` +
+        `AS ` +
+        `BEGIN ` +
+        `  OPEN p_out FOR ` +
+        `SELECT * FROM ` + tableName  + `; ` +
+        `END; `;
+
+  await connection.execute(createProc);
+
+  const result = await connection.execute(
+    `BEGIN testproc(:o); END;`,
+    [
+      { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+    ],
+    { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+  await fetchRowsFromRS(result.outBinds[0], array);
+
+  await connection.execute(`DROP PROCEDURE testproc`);
 };
 
-function fetchRowsFromRS(rs, array, cb) {
-  var numRows = 3;
-  rs.getRows(numRows, function(err, rows) {
-    if (rows.length > 0) {
-      for (var i = 0; i < rows.length; i++) {
-        if ((typeof rows[i].CONTENT) === 'string')
-          rows[i].CONTENT.trim().should.eql(array[rows[i].NUM]);
-        else if ((typeof rows[i].CONTENT) === 'number')
-          rows[i].CONTENT.should.eql(array[rows[i].NUM]);
-        else if (Buffer.isBuffer(rows[i].CONTENT))
-          rows[i].CONTENT.toString('hex').should.eql(array[rows[i].NUM].toString('hex'));
-        else if (Object.prototype.toString.call(rows[i].CONTENT) === '[object Date]')
-          rows[i].CONTENT.getTime().should.eql(array[rows[i].NUM].getTime());
-        else if (typeof rows[i].CONTENT === 'object')
-          should.deepEqual(rows[i].CONTENT, assist.jsonExpectedResults[rows[i].NUM]);
-        else
-          should.not.exist(new Error('Uncaught data type!'));
-      }
-      return fetchRowsFromRS(rs, array, cb);
-    } else {
-      rs.close(function(err) {
-        should.not.exist(err);
-        cb();
-      });
+async function fetchRowsFromRS(rs, array) {
+  const numRows = 3;
+  const rows = await rs.getRows(numRows);
+  if (rows.length > 0) {
+    for (let i = 0; i < rows.length; i++) {
+      if ((typeof rows[i].CONTENT) === 'string')
+        assert.strictEqual(rows[i].CONTENT.trim(), array[rows[i].NUM]);
+      else if ((typeof rows[i].CONTENT) === 'number')
+        assert.strictEqual(rows[i].CONTENT, array[rows[i].NUM]);
+      else if (Buffer.isBuffer(rows[i].CONTENT))
+        assert.strictEqual(rows[i].CONTENT.toString('hex'), array[rows[i].NUM].toString('hex'));
+      else if (Object.prototype.toString.call(rows[i].CONTENT) === '[object Date]')
+        assert.strictEqual(rows[i].CONTENT.getTime(), array[rows[i].NUM].getTime());
+      else if (typeof rows[i].CONTENT === 'object')
+        assert.deepEqual(rows[i].CONTENT, assist.jsonExpectedResults[rows[i].NUM]);
+      else
+        assert.ifError(new Error('Uncaught data type!'));
     }
-  });
+    return fetchRowsFromRS(rs, array);
+  } else {
+    await rs.close();
+  }
 }
 
-assist.selectOriginalData = function(connection, tableName, array, done) {
-  async.eachSeries(array, function(element, cb) {
-    connection.execute(
-      "SELECT * FROM " + tableName + " WHERE num = :no",
-      { no: array.indexOf(element) },
-      function(err) {
-        should.not.exist(err);
-        // console.log(result.rows);
-
-        cb();
-      }
-    );
-  }, function(err) {
-    should.not.exist(err);
-    done();
-  });
+assist.selectOriginalData = async function(connection, tableName, array) {
+  await Promise.all(array.map(async function(element) {
+    await connection.execute(
+      `SELECT * FROM ` + tableName + ` WHERE num = :no`,
+      { no: array.indexOf(element) });
+  }));
 };
 
 /* Null value verfication */
-assist.verifyNullValues = function(connection, tableName, done) {
-  var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
+assist.verifyNullValues = async function(connection, tableName) {
+  const sqlInsert = `INSERT INTO ` + tableName + ` VALUES(:no, :bindValue)`;
 
-  connection.should.be.ok();
-  async.series([
-    function createTable(callback) {
-      var sqlCreate = assist.sqlCreateTable(tableName);
-      connection.execute(
-        sqlCreate,
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
-    },
-    function JSEmptyString(callback) {
-      var num = 1;
-      connection.execute(
-        sqlInsert,
-        { no: num, bindValue: '' },
-        function(err) {
-          should.not.exist(err);
-          verifyNull(num, callback);
-        }
-      );
-    },
-    function JSNull(callback) {
-      var num = 2;
-      connection.execute(
-        sqlInsert,
-        { no: num, bindValue: null },
-        function(err) {
-          should.not.exist(err);
-          verifyNull(num, callback);
-        }
-      );
-    },
-    function JSUndefined(callback) {
-      var num = 3;
-      var foobar;  // undefined value
-      connection.execute(
-        sqlInsert,
-        { no: num, bindValue: foobar },
-        function(err) {
-          should.not.exist(err);
-          verifyNull(num, callback);
-        }
-      );
-    },
-    function sqlNull(callback) {
-      var num = 4;
-      connection.execute(
-        "INSERT INTO " + tableName + " VALUES(:1, NULL)",
-        [num],
-        function(err) {
-          should.not.exist(err);
-          verifyNull(num, callback);
-        }
-      );
-    },
-    function sqlEmpty(callback) {
-      var num = 5;
-      connection.execute(
-        "INSERT INTO " + tableName + " VALUES(:1, '')",
-        [num],
-        function(err) {
-          should.not.exist(err);
-          verifyNull(num, callback);
-        }
-      );
-    },
-    function sqlNullColumn(callback) {
-      var num = 6;
-      connection.execute(
-        "INSERT INTO " + tableName + "(num) VALUES(:1)",
-        [num],
-        function(err) {
-          should.not.exist(err);
-          verifyNull(num, callback);
-        }
-      );
-    },
-    function dropTable(callback) {
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
-    }
-  ], done);
+  const sqlCreate = await assist.sqlCreateTable(tableName);
+  await connection.execute(sqlCreate);
+  let num = 1;
+  await connection.execute(
+    sqlInsert,
+    { no: num, bindValue: '' });
+  await verifyNull(num);
 
-  function verifyNull(id, cb) {
-    connection.execute(
-      "SELECT content FROM " + tableName + " WHERE num = :1",
-      [id],
-      function(err, result) {
-        should.not.exist(err);
-        // console.log(result);
-        result.rows.should.eql([ [null] ]);
-        cb();
-      }
-    );
+  num = 2;
+  await connection.execute(
+    sqlInsert,
+    { no: num, bindValue: null });
+  await verifyNull(num);
+
+  num = 3;
+  await connection.execute(
+    sqlInsert,
+    { no: num, bindValue: undefined });
+  await verifyNull(num);
+
+  num = 4;
+  await connection.execute(
+    `INSERT INTO ` + tableName + ` VALUES(:1, NULL)`,
+    [num]);
+  await verifyNull(num);
+  num = 5;
+  await connection.execute(
+    `INSERT INTO ` + tableName + ` VALUES(:1, '')`,
+    [num]);
+  await verifyNull(num);
+
+  num = 6;
+  await connection.execute(`INSERT INTO ` + tableName + `(num) VALUES(:1)`,
+    [num]);
+
+  await verifyNull(num);
+
+  await connection.execute(`DROP table ` + tableName + ` PURGE`);
+
+  async function verifyNull(id) {
+    const result = await connection.execute(`SELECT content FROM ` + tableName + ` WHERE num = :1`,
+      [id]);
+    assert.deepEqual(result.rows, [ [null] ]);
   }
-
 };
 
 assist.compareNodejsVersion = function(nowVersion, comparedVersion) {
   // return true if nowVersion > or = comparedVersion;
   // else return false;
-  var now = nowVersion.split(".");
-  var compare = comparedVersion.split(".");
+  const now = nowVersion.split(".");
+  const compare = comparedVersion.split(".");
   if (now[0] > compare[0]) {
     return true;
   } else if (now[0] === compare[0] && now[1] > compare[1]) {
@@ -1059,126 +907,77 @@ assist.compareNodejsVersion = function(nowVersion, comparedVersion) {
   }
 };
 
-assist.verifyRefCursorWithFetchInfo = function(connection, tableName, array, done) {
-  var createProc =
-        "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
-        "AS " +
-        "BEGIN " +
-        "  OPEN p_out FOR " +
-        "SELECT * FROM " + tableName  + "; " +
-        "END; ";
-  async.series([
-    function createProcedure(callback) {
-      connection.execute(
-        createProc,
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
+assist.verifyRefCursorWithFetchInfo = async function(connection, tableName, array) {
+  const createProc =
+        `CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) ` +
+        `AS ` +
+        `BEGIN ` +
+        `  OPEN p_out FOR ` +
+        `SELECT * FROM ` + tableName  + `; ` +
+        `END; `;
+
+  await connection.execute(createProc);
+
+  const result = await connection.execute(
+    `begin testproc(:out); end;`,
+    {
+      out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
     },
-    function verify(callback) {
-      connection.execute(
-        "begin testproc(:out); end;",
-        {
-          out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-        },
-        {
-          outFormat: oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo:
+    {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+      fetchInfo:
           {
             "CONTENT": { type: oracledb.STRING }
           }
-        },
-        function(err, result) {
-          should.not.exist(err);
-          _verifyFetchedValues(connection, result.outBinds.out, array, tableName, callback);
-        }
-      );
-    },
-    function dropProcedure(callback) {
-      connection.execute(
-        "DROP PROCEDURE testproc",
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
-    }
-  ], done);
+    });
+  await _verifyFetchedValues(connection, result.outBinds.out, array, tableName);
+  await connection.execute(`DROP PROCEDURE testproc`);
 };
 
-assist.verifyRefCursorWithFetchAsString = function(connection, tableName, array, done) {
-  var createProc =
-        "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
-        "AS " +
-        "BEGIN " +
-        "  OPEN p_out FOR " +
-        "SELECT * FROM " + tableName  + "; " +
-        "END; ";
-  async.series([
-    function createProcedure(callback) {
-      connection.execute(
-        createProc,
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
+assist.verifyRefCursorWithFetchAsString = async function(connection, tableName, array) {
+  const createProc =
+        `CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) ` +
+        `AS ` +
+        `BEGIN ` +
+        `  OPEN p_out FOR ` +
+        `SELECT * FROM ` + tableName  + `; ` +
+        `END; `;
+
+  await connection.execute(createProc);
+
+  const result = await connection.execute(
+    `begin testproc(:out); end;`,
+    {
+      out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
     },
-    function verify(callback) {
-      connection.execute(
-        "begin testproc(:out); end;",
-        {
-          out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-        },
-        { outFormat: oracledb.OUT_FORMAT_OBJECT },
-        function(err, result) {
-          should.not.exist(err);
-          _verifyFetchedValues(connection, result.outBinds.out, array, tableName, callback);
-        }
-      );
-    },
-    function dropProcedure(callback) {
-      connection.execute(
-        "DROP PROCEDURE testproc",
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
-    }
-  ], done);
+    { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+  await _verifyFetchedValues(connection, result.outBinds.out, array, tableName);
+
+  await connection.execute(`DROP PROCEDURE testproc`);
 };
 
-var _verifyFetchedValues = function(connection, rs, array, tableName, cb) {
-  var amount = array.length;
-  rs.getRows(amount, function(err, rows) {
-    async.eachSeries(
-      rows,
-      queryAndCompare,
-      function(err) {
-        should.not.exist(err);
-        rs.close(function(err) {
-          should.not.exist(err);
-          return cb();
-        });
-      }
-    );
-  });
+const _verifyFetchedValues = async function(connection, rs, array, tableName) {
+  const amount = array.length;
+  const rows = await rs.getRows(amount);
 
-  var queryAndCompare = function(row, callback) {
-    var sql = "select content from " + tableName + " where num = " + row.NUM;
-    connection.execute(
+  const queryAndCompare = async function(row) {
+    const sql = `select content from ` + tableName + ` where num = ` + row.NUM;
+    const result = await connection.execute(
       sql,
       [],
-      { fetchInfo: { "CONTENT": { type: oracledb.STRING } } },
-      function(err, result) {
-        should.strictEqual(row.CONTENT, result.rows[0][0]);
-        return callback(err);
-      }
-    );
+      { fetchInfo: { "CONTENT": { type: oracledb.STRING } } });
+
+    assert.strictEqual(row.CONTENT, result.rows[0][0]);
   };
-}; // _verifyFetchedValues()
+
+  await Promise.all(rows.map(async function(row) {
+    await queryAndCompare(row);
+  }));
+
+  await rs.close();
+
+
+}; // await _verifyFetchedValues()
 
 module.exports = assist;

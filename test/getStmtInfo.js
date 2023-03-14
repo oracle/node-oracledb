@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -29,6 +29,7 @@
  *   Test parsing a statement and returns information about it.
  *
  *****************************************************************************/
+
 'use strict';
 
 const oracledb = require('oracledb');
@@ -45,9 +46,7 @@ describe('162. getStmtInfo.js', function() {
 
   before(async function() {
     conn = await oracledb.getConnection(dbConfig);
-    await new Promise((resolve) => {
-      assist.setUp(conn, tableName, numbers, resolve);
-    });
+    await assist.setUp(conn, tableName, numbers);
   });
 
   after(async function() {
@@ -110,9 +109,7 @@ describe('162. getStmtInfo.js', function() {
     const info = await conn.getStatementInfo(sql);
     assert.deepEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_UPDATE);
-    await new Promise((resolve) => {
-      assist.dataTypeSupport(conn, tableName, numbers, resolve);
-    });
+    await assist.dataTypeSupport(conn, tableName, numbers);
   }); // 162.6
 
   it('162.7 DELETE with data bind', async function() {
@@ -127,9 +124,7 @@ describe('162. getStmtInfo.js', function() {
     const info = await conn.getStatementInfo(sql);
     assert.deepEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_DELETE);
-    await new Promise((resolve) => {
-      assist.dataTypeSupport(conn, tableName, numbers, resolve);
-    });
+    await assist.dataTypeSupport(conn, tableName, numbers);
   }); // 162.8
 
   it('162.9 DELETE with subquery', async function() {
@@ -217,9 +212,7 @@ describe('162. getStmtInfo.js', function() {
   it('162.17 DROP', async function() {
     const tab = "nodb_date";
     const sql = "drop table " + tab + " purge";
-    await new Promise((resolve) => {
-      assist.createTable(conn, tab, resolve);
-    });
+    await assist.createTable(conn, tab);
     const info = await conn.getStatementInfo(sql);
     assert.deepEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_DROP);

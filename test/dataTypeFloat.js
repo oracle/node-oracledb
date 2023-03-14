@@ -32,75 +32,59 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const assert   = require('assert');
 const assist   = require('./dataTypeAssist.js');
 const dbConfig = require('./dbconfig.js');
 
 describe('28. dataTypeFloat.js', function() {
 
   let connection = null;
-  var tableName = "nodb_float";
-  var numbers = assist.data.numbers;
+  const tableName = "nodb_float";
+  const numbers = assist.data.numbers;
 
-  before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig,
-      function(err, conn) {
-        assert.ifError(err);
-        connection = conn;
-        done();
-      }
-    );
+  before('get one connection', async function() {
+    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after('release connection', function(done) {
+  after('release connection', async function() {
     oracledb.fetchAsString = [];
-    connection.close(function(err) {
-      assert.ifError(err);
-      done();
-    });
+    await connection.close();
   });
 
   describe('28.1 testing FLOAT data type', function() {
 
-    before('create table, insert data', function(done) {
-      assist.setUp(connection, tableName, numbers, done);
+    before('create table, insert data', async function() {
+      await assist.setUp(connection, tableName, numbers);
     });
 
-    after(function(done) {
-      connection.execute(
-        "DROP table " + tableName + " PURGE",
-        function(err) {
-          assert.ifError(err);
-          done();
-        }
-      );
+    after(async function() {
+      await connection.execute(`DROP table ` + tableName + ` PURGE`);
     });
 
-    it('28.1.1 works well with SELECT query', function(done) {
-      assist.dataTypeSupport(connection, tableName, numbers, done);
+    it('28.1.1 works well with SELECT query', async function() {
+      await assist.dataTypeSupport(connection, tableName, numbers);
     });
 
-    it('28.1.2 works well with result set', function(done) {
-      assist.verifyResultSet(connection, tableName, numbers, done);
+    it('28.1.2 works well with result set', async  function() {
+      await assist.verifyResultSet(connection, tableName, numbers);
     });
 
-    it('28.1.3 works well with REF Cursor', function(done) {
-      assist.verifyRefCursor(connection, tableName, numbers, done);
+    it('28.1.3 works well with REF Cursor', async  function() {
+      await assist.verifyRefCursor(connection, tableName, numbers);
     });
 
-    it('28.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
-      assist.verifyRefCursorWithFetchInfo(connection, tableName, numbers, done);
+    it('28.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
+      await assist.verifyRefCursorWithFetchInfo(connection, tableName, numbers);
     });
 
-    it('28.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', function(done) {
+    it('28.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', async  function() {
       oracledb.fetchAsString = [ oracledb.NUMBER ];
-      assist.verifyRefCursorWithFetchAsString(connection, tableName, numbers, done);
+      await assist.verifyRefCursorWithFetchAsString(connection, tableName, numbers);
     });
   });
 
   describe('28.2 stores null value correctly', function() {
-    it('28.2.1 testing Null, Empty string and Undefined', function(done) {
-      assist.verifyNullValues(connection, tableName, done);
+    it('28.2.1 testing Null, Empty string and Undefined', async function() {
+      await assist.verifyNullValues(connection, tableName);
     });
   });
 });

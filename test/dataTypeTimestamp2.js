@@ -54,9 +54,7 @@ describe('34. dataTypeTimestamp2.js', function() {
     let dates = assist.data.dates;
 
     before('create table, insert data', async function() {
-      await new Promise((resolve) => {
-        assist.setUp(connection, tableName, dates, resolve);
-      });
+      await assist.setUp(connection, tableName, dates);
     });
 
     after(async function() {
@@ -65,43 +63,31 @@ describe('34. dataTypeTimestamp2.js', function() {
     });
 
     it('34.1.1 works well with SELECT query', async function() {
-      await new Promise((resolve) => {
-        assist.dataTypeSupport(connection, tableName, dates, resolve);
-      });
+      await assist.dataTypeSupport(connection, tableName, dates);
     });
 
     it('34.1.2 works well with result set', async function() {
-      await new Promise((resolve) => {
-        assist.verifyResultSet(connection, tableName, dates, resolve);
-      });
+      await assist.verifyResultSet(connection, tableName, dates);
     });
 
     it('34.1.3 works well with REF Cursor', async function() {
-      await new Promise((resolve) => {
-        assist.verifyRefCursor(connection, tableName, dates, resolve);
-      });
+      await assist.verifyRefCursor(connection, tableName, dates);
     });
 
     it('34.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
-      await new Promise((resolve) => {
-        assist.verifyRefCursorWithFetchInfo(connection, tableName, dates, resolve);
-      });
+      await assist.verifyRefCursorWithFetchInfo(connection, tableName, dates);
     });
 
     it('34.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', async function() {
       oracledb.fetchAsString = [ oracledb.DATE ];
-      await new Promise((resolve) => {
-        assist.verifyRefCursorWithFetchAsString(connection, tableName, dates, resolve);
-      });
+      await assist.verifyRefCursorWithFetchAsString(connection, tableName, dates);
     });
 
   }); // end of 34.1 suite
 
   describe('34.2 stores null value correctly', function() {
     it('34.2.1 testing Null, Empty string and Undefined', async function() {
-      await new Promise((resolve) => {
-        assist.verifyNullValues(connection, tableName, resolve);
-      });
+      await assist.verifyNullValues(connection, tableName);
     });
   });
 
@@ -109,9 +95,7 @@ describe('34. dataTypeTimestamp2.js', function() {
     let timestamps = assist.TIMESTAMP_STRINGS;
 
     before(async function() {
-      await new Promise((resolve) => {
-        assist.setUp4sql(connection, tableName, timestamps, resolve);
-      });
+      await assist.setUp4sql(connection, tableName, timestamps);
     });
 
     after(async function() {
@@ -119,9 +103,7 @@ describe('34. dataTypeTimestamp2.js', function() {
     }); // after
 
     it('34.3.1 SELECT query - original data', async function() {
-      await new Promise((resolve) => {
-        assist.selectOriginalData(connection, tableName, timestamps, resolve);
-      });
+      await assist.selectOriginalData(connection, tableName, timestamps);
     });
 
     it('34.3.2 SELECT query - formatted data for comparison', async function() {

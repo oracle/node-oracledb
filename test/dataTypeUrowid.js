@@ -97,9 +97,7 @@ describe('113. dataTypeUrowid.js', function() {
 
   describe('113.2 stores null value correctly', function() {
     it('113.2.1 testing Null, Empty string and Undefined', async function() {
-      await new Promise((resolve) => {
-        assist.verifyNullValues(connection, tableName, resolve);
-      });
+      await assist.verifyNullValues(connection, tableName);
     });
   });
 

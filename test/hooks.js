@@ -51,9 +51,13 @@ async function testConnection(description, additionalOptions = {}) {
 
 async function cloudServiceCheck() {
   const connection = await oracledb.getConnection(dbConfig);
-  let result = await connection.execute("select sys_context('userenv', 'cloud_service') from dual");
-  if (result.rows[0][0]) {
-    dbConfig.test.isCloudService = true;
+  // 'userenv' parameter is only available from Oracle DB 18c & later versions
+  if (connection.oracleServerVersion >= 1800000000) {
+    let result = await connection.execute("select \
+     sys_context('userenv', 'cloud_service') from dual");
+    if (result.rows[0][0]) {
+      dbConfig.test.isCloudService = true;
+    }
   }
   await connection.close();
 }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -337,9 +337,7 @@ describe('6. dmlReturning.js', function() {
 
     beforeEach('get connection, prepare table', async function() {
       connection = await oracledb.getConnection(dbConfig);
-      await new Promise((resolve) => {
-        assist.setUp4sql(connection, tableName, dates, resolve);
-      });
+      await assist.setUp4sql(connection, tableName, dates);
     }); // before
 
     afterEach('drop table, release connection', async function() {

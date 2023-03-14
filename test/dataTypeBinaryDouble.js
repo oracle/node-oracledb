@@ -54,9 +54,8 @@ describe('31. dataTypeBinaryDouble.js', function() {
     let numbers = assist.data.numbersForBinaryFloat.concat(assist.data.numbersForBinaryDouble);
 
     before('create table, insert data', async function() {
-      await new Promise((resolve) => {
-        assist.setUp(connection, tableName, numbers, resolve);
-      });
+
+      await assist.setUp(connection, tableName, numbers);
     });
 
     after(async function() {
@@ -65,43 +64,37 @@ describe('31. dataTypeBinaryDouble.js', function() {
     });
 
     it('31.1.1 works well with SELECT query', async function() {
-      await new Promise((resolve) => {
-        assist.dataTypeSupport(connection, tableName, numbers, resolve);
-      });
+
+      await assist.dataTypeSupport(connection, tableName, numbers);
     });
 
     it('31.1.2 works well with result set', async function() {
-      await new Promise((resolve) => {
-        assist.verifyResultSet(connection, tableName, numbers, resolve);
-      });
+
+      await assist.verifyResultSet(connection, tableName, numbers);
     });
 
     it('31.1.3 works well with REF Cursor', async function() {
-      await new Promise((resolve) => {
-        assist.verifyRefCursor(connection, tableName, numbers, resolve);
-      });
+
+      await assist.verifyRefCursor(connection, tableName, numbers);
     });
 
     it('31.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
-      await new Promise((resolve) => {
-        assist.verifyRefCursorWithFetchInfo(connection, tableName, numbers, resolve);
-      });
+
+      await assist.verifyRefCursorWithFetchInfo(connection, tableName, numbers);
     });
 
     it('31.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', async function() {
       oracledb.fetchAsString = [ oracledb.NUMBER ];
-      await new Promise((resolve) => {
-        assist.verifyRefCursorWithFetchAsString(connection, tableName, numbers, resolve);
-      });
+
+      await assist.verifyRefCursorWithFetchAsString(connection, tableName, numbers);
     });
 
   });
 
   describe('31.2 stores null value correctly', function() {
     it('31.2.1 testing Null, Empty string and Undefined', async function() {
-      await new Promise((resolve) => {
-        assist.verifyNullValues(connection, tableName, resolve);
-      });
+
+      await assist.verifyNullValues(connection, tableName);
     });
   });
 
@@ -113,9 +106,8 @@ describe('31. dataTypeBinaryDouble.js', function() {
       ];
 
     before('create table, insert data', async function() {
-      await new Promise((resolve) => {
-        assist.setUp(connection, tableName, nums, resolve);
-      });
+
+      await assist.setUp(connection, tableName, nums);
     });
 
     after(async function() {

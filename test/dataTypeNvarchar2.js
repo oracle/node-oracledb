@@ -56,9 +56,7 @@ describe('25. dataTypeNvarchar2.js', function() {
   describe('25.1 testing NVARCHAR2 data in various lengths', function() {
 
     before('create table, insert data', async function() {
-      await new Promise((resolve) => {
-        assist.setUp(connection, tableName, strs, resolve);
-      });
+      await assist.setUp(connection, tableName, strs);
     });
 
     after(async function() {
@@ -66,35 +64,25 @@ describe('25. dataTypeNvarchar2.js', function() {
     });
 
     it('25.1.1 SELECT query', async function() {
-      await new Promise((resolve) => {
-        assist.dataTypeSupport(connection, tableName, strs, resolve);
-      });
+      await assist.dataTypeSupport(connection, tableName, strs);
     });
 
     it('25.1.2 resultSet stores NVARCHAR2 data correctly', async function() {
-      await new Promise((resolve) => {
-        assist.verifyResultSet(connection, tableName, strs, resolve);
-      });
+      await assist.verifyResultSet(connection, tableName, strs);
     });
 
     it('25.1.3 works well with REF Cursor', async function() {
-      await new Promise((resolve) => {
-        assist.verifyRefCursor(connection, tableName, strs, resolve);
-      });
+      await  assist.verifyRefCursor(connection, tableName, strs);
     });
 
     it('25.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
-      await new Promise((resolve) => {
-        assist.verifyRefCursorWithFetchInfo(connection, tableName, strs, resolve);
-      });
+      await  assist.verifyRefCursorWithFetchInfo(connection, tableName, strs);
     });
   });
 
   describe('25.2 stores null value correctly', function() {
     it('25.2.1 testing Null, Empty string and Undefined', async function() {
-      await new Promise((resolve) => {
-        assist.verifyNullValues(connection, tableName, resolve);
-      });
+      await assist.verifyNullValues(connection, tableName);
     });
   });
 });

@@ -59,9 +59,7 @@ describe('42. dataTypeRaw.js', function() {
   describe('42.1 testing RAW data in various lengths', function() {
 
     before('create table, insert data', async function() {
-      await new Promise((resolve) => {
-        assist.setUp(connection, tableName, bufs, resolve);
-      });
+      await assist.setUp(connection, tableName, bufs);
     });
 
     after(async function() {
@@ -69,21 +67,15 @@ describe('42. dataTypeRaw.js', function() {
     });
 
     it('42.1.1 SELECT query', async function() {
-      await new Promise((resolve) => {
-        assist.dataTypeSupport(connection, tableName, bufs, resolve);
-      });
+      await assist.dataTypeSupport(connection, tableName, bufs);
     });
 
     it('42.1.2 resultSet stores RAW data correctly', async function() {
-      await new Promise((resolve) => {
-        assist.verifyResultSet(connection, tableName, bufs, resolve);
-      });
+      await assist.verifyResultSet(connection, tableName, bufs);
     });
 
     it('42.1.3 works well with REF Cursor', async function() {
-      await new Promise((resolve) => {
-        assist.verifyRefCursor(connection, tableName, bufs, resolve);
-      });
+      await assist.verifyRefCursor(connection, tableName, bufs);
     });
 
     it('42.1.4 result set getRow() function works well with RAW', async function() {
@@ -120,9 +112,7 @@ describe('42. dataTypeRaw.js', function() {
 
   describe('42.2 stores null value correctly', function() {
     it('42.2.1 testing Null, Empty string and Undefined', async function() {
-      await new Promise((resolve) => {
-        assist.verifyNullValues(connection, tableName, resolve);
-      });
+      await assist.verifyNullValues(connection, tableName);
     });
   });
 

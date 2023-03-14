@@ -37,8 +37,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const async    = require('async');
-const should   = require('should');
+const assert   = require('assert');
 const stream   = require('stream');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
@@ -46,161 +45,87 @@ const assist   = require('./dataTypeAssist.js');
 describe('60. clobPlsqlString.js', function() {
 
   let connection = null;
-  var tableName = "nodb_myclobs";
+  const tableName = `nodb_myclobs`;
 
-  before('get one connection, prepare table', function(done) {
-    async.series([
-      function(callback) {
-        oracledb.getConnection(
-          dbConfig,
-          function(err, conn) {
-            should.not.exist(err);
-            connection = conn;
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        assist.createTable(connection, tableName, callback);
-      }
-    ], done);
+  before('get one connection, prepare table', async function() {
+
+    connection = await oracledb.getConnection(dbConfig);
+    await connection.execute(assist.sqlCreateTable(tableName));
   }); // before
 
-  after('release connection', function(done) {
-    async.series([
-      function(callback) {
-        connection.execute(
-          "DROP TABLE nodb_myclobs purge",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.close(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      }
-    ], done);
+  after('release connection', async  function() {
+
+    await connection.execute(`DROP TABLE nodb_myclobs purge`);
+    await connection.close();
   }); // after
 
   describe('60.1 BIND OUT as STRING', function() {
-    before('insert data', function(done) {
-      connection.execute(
-        "INSERT INTO nodb_myclobs (num, content) VALUES (1, 'abcdefghijklmnopqrstuvwxyz')",
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
+    before('insert data', async function() {
+      await  connection.execute(`INSERT INTO nodb_myclobs (num, content) VALUES (1, 'abcdefghijklmnopqrstuvwxyz')`);
     }); // before
 
-    it('60.1.1 PL/SQL OUT CLOB parameters can also be bound as STRING', function(done) {
-      connection.execute(
-        "BEGIN SELECT content INTO :cbv FROM nodb_myclobs WHERE num = :id; END;",
+    it('60.1.1 PL/SQL OUT CLOB parameters can also be bound as STRING',  async function() {
+      let result =  await connection.execute(`BEGIN SELECT content INTO :cbv FROM nodb_myclobs WHERE num = :id; END;`,
         {
           id: 1,
           cbv: { type: oracledb.STRING, dir: oracledb.BIND_OUT}
-        },
-        function(err, result) {
-          should.not.exist(err);
-          (result.outBinds.cbv).should.be.a.String();
-          (result.outBinds.cbv).should.eql('abcdefghijklmnopqrstuvwxyz');
-          done();
-        }
-      );
+        });
+      assert.strictEqual(typeof result.outBinds.cbv, "string");
+      assert.strictEqual(result.outBinds.cbv, 'abcdefghijklmnopqrstuvwxyz');
     }); // 60.1.1
 
-    it('60.1.2 The returned length is limited to the maximum size', function(done) {
-      connection.execute(
-        "BEGIN SELECT content INTO :cbv FROM nodb_myclobs WHERE num = :id; END;",
-        {
-          id: 1,
-          cbv: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 5 }
+    it('60.1.2 The returned length is limited to the maximum size', async function() {
+      await assert.rejects(
+        async () => {
+          await connection.execute(`BEGIN SELECT content INTO :cbv FROM nodb_myclobs WHERE num = :id; END;`,
+            {
+              id: 1,
+              cbv: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 5 }});
         },
-        function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('ORA-06502'); // PL/SQL: numeric or value error
-          should.not.exist(result);
-          done();
-        }
+        /ORA-06502:/ // PL/SQL: numeric or value error
       );
     }); // 60.1.2
   }); // 60.1
 
   describe('60.2 BIND OUT as CLOB', function() {
-    var dataLength = 1000000;
-    var rawData = assist.createCharString(dataLength);
+    const dataLength = 1000000;
+    const rawData = assist.createCharString(dataLength);
 
-    it('60.2.1 maxSize option does not take effect when bind out type is clob', function(done) {
-      async.series([
-        function doInsert(callback) {
-          connection.execute(
-            "INSERT INTO " + tableName + " VALUES (2, EMPTY_CLOB()) RETURNING content INTO :lobbv",
-            { lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
-            { autoCommit: false },
-            function(err, result) {
-              should.not.exist(err);
+    it('60.2.1 maxSize option does not take effect when bind out type is clob', async function() {
 
-              var lob = result.outBinds.lobbv[0];
-              lob.on('error', function(err) {
-                should.not.exist(err);
-                return callback(err);
-              });
+      let result = await connection.execute(
+        `INSERT INTO ` + tableName + ` VALUES (2, EMPTY_CLOB()) RETURNING content INTO :lobbv`,
+        { lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
+        { autoCommit: false });
 
-              var inStream = new stream.Readable();
-              inStream._read = function noop() {};
-              inStream.push(rawData);
-              inStream.push(null);
+      const lob = result.outBinds.lobbv[0];
 
-              inStream.on('error', function(err) {
-                should.not.exist(err);
-                return callback(err);
-              });
+      await new Promise((resolve, reject) => {
 
-              inStream.on('end', function() {
-                connection.commit(function(err) {
-                  should.not.exist(err);
-                  callback();
-                });
-              });
+        lob.on("error", reject);
 
-              inStream.pipe(lob);
-            }
-          );
-        },
-        function doQuery(callback) {
-          connection.execute(
-            "BEGIN SELECT content INTO :bv FROM " + tableName + " WHERE num = 2; END;",
-            { bv: {dir: oracledb.BIND_OUT, type: oracledb.CLOB} },
-            { maxRows: 500 },
-            function(err, result) {
-              should.not.exist(err);
+        let inStream = new stream.Readable();
+        inStream._read = function noop() {};
+        inStream.push(rawData);
+        inStream.push(null);
 
-              var content = '';
-              var lob = result.outBinds.bv;
-              lob.setEncoding('utf8');
+        inStream.on('error', reject);
 
-              lob.on('data', function(chunk) {
-                content += chunk;
-              });
+        inStream.on('end', resolve);
 
-              lob.on('end', function() {
-                (content.length).should.be.exactly(dataLength);
-                (content).should.eql(rawData);
-                callback();
-              });
+        inStream.pipe(lob);
+      });
+      await connection.commit();
 
-              lob.on('error', function(err) {
-                should.not.exist(err);
-              });
-            }
-          );
-        }
-      ], done);
-    });
-  }); // 60.2
+      result = await connection.execute(
+        "BEGIN SELECT content INTO :bv FROM " + tableName + " WHERE num = 2; END;",
+        { bv: {dir: oracledb.BIND_OUT, type: oracledb.CLOB} },
+        { maxRows: 500 }
+      );
 
+      const content = await result.outBinds.bv.getData();
+      assert.strictEqual(content.length, dataLength);
+      assert.strictEqual(content, rawData);
+    }); // 60.2
+  });
 });
