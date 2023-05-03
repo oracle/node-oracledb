@@ -102,7 +102,7 @@ describe('170. poolDrain.js', () => {
 
     await assert.rejects(
       async () => await conn.execute('select (7+8) from dual'),
-      /DPI-1010:/
+      /NJS-500:/
     );
   }); // 170.5
 

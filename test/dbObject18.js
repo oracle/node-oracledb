@@ -68,7 +68,6 @@ describe('242. dbObject18.js', () => {
 
     it('242.1.4 set oracledb.dbObjectAsPojo to value of Boolean("false")', function() {
       const value = Boolean("false");
-      console.dir(value);
       oracledb.dbObjectAsPojo = value;
       assert.strictEqual(oracledb.dbObjectAsPojo, true);
     }); // 242.1.4
@@ -306,11 +305,6 @@ describe('242. dbObject18.js', () => {
       const row = result.rows[0];
       assert.strictEqual(row.SPORTNAME, 'Frisbee');
       assert.deepStrictEqual(row.TEAM, players);
-      // console.dir(row.TEAM, { depth: null }); -- Output should be: [
-      //                                                                  { SHIRTNUMBER: 11, NAME: 'Elizabeth' },
-      //                                                                  { SHIRTNUMBER: 22, NAME: 'Frank' }
-      //                                                                ]
-
 
     }); // 242.2.1
 
@@ -330,6 +324,10 @@ describe('242. dbObject18.js', () => {
       oracledb.dbObjectAsPojo = true;
 
       conn = await oracledb.getConnection(dbConfig);
+
+      await conn.execute(testsUtil.sqlDropType(TEAM_T));
+      await conn.execute(testsUtil.sqlDropType(PLAYER_T));
+      await conn.execute(testsUtil.sqlDropTable(TABLE));
 
       let sql = `
         CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
@@ -353,20 +351,11 @@ describe('242. dbObject18.js', () => {
     }); // before()
 
     after(async () => {
-
-      let sql = testsUtil.sqlDropTable(TABLE);
-      await conn.execute(sql);
-
-      sql = testsUtil.sqlDropType(TEAM_T);
-      await conn.execute(sql);
-
-      sql = testsUtil.sqlDropType(PLAYER_T);
-      await conn.execute(sql);
-
+      await conn.execute(testsUtil.sqlDropType(TEAM_T));
+      await conn.execute(testsUtil.sqlDropType(PLAYER_T));
+      await conn.execute(testsUtil.sqlDropTable(TABLE));
       await conn.close();
-
       oracledb.dbObjectAsPojo = false;
-
     }); // after()
 
     it('242.3.1 set oracledb.dbObjectAsPojo = true and dbObjectAsPojo:false in bind option', async () => {
@@ -397,7 +386,6 @@ describe('242. dbObject18.js', () => {
       assert.strictEqual(row.TEAM[0]['NAME'], 'Elizabeth');
       assert.strictEqual(row.TEAM[1]['SHIRTNUMBER'], 22);
       assert.strictEqual(row.TEAM[1]['NAME'], 'Frank');
-      // console.dir(row.TEAM, { depth: null }); -- Output should be: DbObject [SYSTEM.NODB_TYP_TEAM_18] {}
 
     }); // 242.3.1
 
@@ -430,13 +418,10 @@ describe('242. dbObject18.js', () => {
       const row = result.rows[0];
       assert.strictEqual(row.SPORTNAME, 'Frisbee');
 
-      await assert.rejects(
-        async () => {  //eslint-disable-line
-          const x = row.TEAM[0];  //eslint-disable-line
-        },
-        /DPI-1010/
+      assert.throws(
+        () => row.TEAM[0],
+        /NJS-500:/
       );
-      // DPI-1010: not connected
 
       // restore the connection
       conn = await oracledb.getConnection(dbConfig);
@@ -523,7 +508,6 @@ describe('242. dbObject18.js', () => {
       const row = result.rows[0];
       assert.strictEqual(row.SPORTNAME, 'Frisbee');
       assert.deepStrictEqual(row.TEAM, players);
-      // console.dir(row.TEAM, { depth: null });
 
     }); // 242.4.1
 
@@ -557,7 +541,6 @@ describe('242. dbObject18.js', () => {
       const row = result.rows[0];
       assert.strictEqual(row.SPORTNAME, 'Frisbee');
       assert.deepStrictEqual(row.TEAM, players);
-      // console.dir(row.TEAM, { depth: null });
 
       // restore the connection
       conn = await oracledb.getConnection(dbConfig);
