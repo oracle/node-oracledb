@@ -864,7 +864,6 @@ describe('255. poolReconfigure.js', function() {
       // maxPerShard is supported only >= 18.3
       if (testsUtil.getClientVersion() < 1803000000) {
         this.skip();
-        return;
       }
 
       let maxPerShard = 10;
@@ -887,7 +886,6 @@ describe('255. poolReconfigure.js', function() {
       if (clientVersion < 2103000000) {
         if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
           this.skip();
-          return;
         }
       }
       await pool.reconfigure(config);
@@ -904,7 +902,6 @@ describe('255. poolReconfigure.js', function() {
       if (clientVersion < 2103000000) {
         if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
           this.skip();
-          return;
         }
       }
       await pool.reconfigure(config);
@@ -1347,7 +1344,6 @@ describe('255. poolReconfigure.js', function() {
       if (clientVersion < 2103000000) {
         if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
           this.skip();
-          return;
         }
       }
       await pool.reconfigure(config);

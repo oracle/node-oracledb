@@ -55,7 +55,6 @@ describe('189. sodaOverwrite.js', function() {
     const isRunnable = isClientOK && isSodaRunnable;
     if (!isRunnable) {
       this.skip();
-      return;
     }
 
     await sodaUtil.cleanup();

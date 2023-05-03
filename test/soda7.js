@@ -45,7 +45,6 @@ describe('175. soda7.js', () => {
     const runnable = await testsUtil.isSodaRunnable();
     if (!runnable) {
       this.skip();
-      return;
     }
 
     await sodaUtil.cleanup();

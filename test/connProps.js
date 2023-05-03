@@ -49,7 +49,6 @@ describe('193. connProps.js', function() {
 
     if (!isRunnable) {
       this.skip();
-      return;
     } else {
       const dbaConfig = {
         user          : dbConfig.test.DBA_user,

@@ -383,4 +383,41 @@ describe('161. changePassword.js', function() {
     await dbaConn.close();
   }); // 161.10
 
+  it('161.11 connects with password that is expiring soon', async function() {
+    const tUser = dbConfig.user + "_st_expiring";
+    const shortProfile = `NJS_ShortPwd_st_expiring`;
+
+    const dbaConn = await oracledb.getConnection(DBA_config);
+    try {
+      await dbaConn.execute(`drop user ${tUser} cascade`);
+      await dbaConn.execute(`drop profile ${shortProfile} cascade`);
+    } catch (err) {
+      if (!(/ORA-01918:|ORA-02380:/.test(err.message)))
+        throw err;
+    }
+
+    await dbaConn.execute(`create user ${tUser} identified by ${tUser}`);
+    await dbaConn.execute(`grant create session to ${tUser}`);
+
+    const credential = {
+      user:             tUser,
+      password:         tUser,
+      connectionString: dbConfig.connectString
+    };
+
+    const sql = `create profile ${shortProfile} LIMIT password_life_time 1/86400 PASSWORD_GRACE_TIME 1`;
+    await dbaConn.execute(sql);
+    await dbaConn.execute(`alter user ${tUser} PROFILE ${shortProfile}`);
+    const SLEEP_TIME = 2; // sleep to let the profile get updated.
+    await new Promise(r => setTimeout(r, SLEEP_TIME));
+
+    const tConn = await oracledb.getConnection(credential);
+    await tConn.execute(`SELECT UNIQUE CLIENT_DRIVER FROM V$SESSION_CONNECT_INFO WHERE SID = SYS_CONTEXT('USERENV', 'SID')`);
+
+    await tConn.close();
+    await dbaConn.execute(`drop user ${tUser} cascade`);
+    await dbaConn.execute(`drop profile ${shortProfile} cascade`);
+    await dbaConn.close();
+  }); // 161.11
+
 });

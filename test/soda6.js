@@ -45,7 +45,6 @@ describe('174. soda6.js', function() {
     const runnable = await testsUtil.isSodaRunnable();
     if (!runnable) {
       this.skip();
-      return;
     }
 
     await sodaUtil.cleanup();
@@ -366,7 +365,6 @@ describe('174. soda6.js', function() {
     if (clientVersion < 2103000000) {
       if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
         this.skip();
-        return;
       }
     }
 
@@ -399,7 +397,6 @@ describe('174. soda6.js', function() {
     if (clientVersion < 2103000000) {
       if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
         this.skip();
-        return;
       }
     }
 
@@ -433,7 +430,6 @@ describe('174. soda6.js', function() {
     if (clientVersion < 2103000000) {
       if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
         this.skip();
-        return;
       }
     }
 

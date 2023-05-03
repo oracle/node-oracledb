@@ -90,7 +90,6 @@ describe('248. userName.js', function() {
       let runnable = await testsUtil.isLongUserNameRunnable();
       if (!runnable) {
         this.skip();
-        return;
       }
 
       const userSchema = assist.createSchemaString(100);
@@ -115,7 +114,6 @@ describe('248. userName.js', function() {
       let runnable = await testsUtil.isLongUserNameRunnable();
       if (!runnable) {
         this.skip();
-        return;
       }
 
       const userSchema = assist.createSchemaString(128);
@@ -140,7 +138,6 @@ describe('248. userName.js', function() {
       let runnable = await testsUtil.isLongUserNameRunnable();
       if (!runnable) {
         this.skip();
-        return;
       }
 
       const dbaConn = await oracledb.getConnection(dbaCredential);
@@ -270,7 +267,6 @@ describe('248. userName.js', function() {
       let runnable = await testsUtil.isLongUserNameRunnable();
       if (!runnable) {
         this.skip();
-        return;
       }
 
       const userSchema = assist.createSchemaString(100);
@@ -294,7 +290,6 @@ describe('248. userName.js', function() {
       let runnable = await testsUtil.isLongUserNameRunnable();
       if (!runnable) {
         this.skip();
-        return;
       }
 
       const userSchema = assist.createSchemaString(128);
@@ -319,7 +314,6 @@ describe('248. userName.js', function() {
       let runnable = await testsUtil.isLongUserNameRunnable();
       if (!runnable) {
         this.skip();
-        return;
       }
 
       const userSchema = assist.createSchemaString(1000);
