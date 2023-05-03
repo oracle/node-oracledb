@@ -13,8 +13,8 @@ node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...
 #)  Bumped the minimum Node.js version required to 14.6 so Node-API version 6
     and ``FinalizationRegistry`` can be used in the driver implementation.
 
-#)  Re-licensed to dual Apache 2.0 or UPL 1.0 licenses, see
-    [LICENSE.txt](https://github.com/oracle/node-oracledb/blob/main/LICENSE.txt).
+#)  Re-licensed to dual Apache 2.0 or UPL 1.0 licenses, see `LICENSE.txt
+    <https://github.com/oracle/node-oracledb/blob/main/LICENSE.txt>`__.
 
 #)  Internal change: reorganized code to move functionality from C to JavaScript.
 
