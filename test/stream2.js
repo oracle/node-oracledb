@@ -32,441 +32,314 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
-const async    = require('async');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
 describe('14. stream2.js', function() {
 
   let connection = null;
-  var rowsAmount = 217;
+  let rowsAmount = 217;
 
-  before(function(done) {
-    async.series([
-      function getConn(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
-      },
-      function createTab(cb) {
-        var proc = "BEGIN \n" +
-                   "    DECLARE \n" +
-                   "        e_table_exists EXCEPTION; \n" +
-                   "        PRAGMA EXCEPTION_INIT(e_table_exists, -00942);\n " +
-                   "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_stream2 PURGE'); \n" +
-                   "    EXCEPTION \n" +
-                   "        WHEN e_table_exists \n" +
-                   "        THEN NULL; \n" +
-                   "    END; \n" +
-                   "    EXECUTE IMMEDIATE (' \n" +
-                   "        CREATE TABLE nodb_stream2 ( \n" +
-                   "            employee_id NUMBER, \n" +
-                   "            employee_name VARCHAR2(20), \n" +
-                   "            employee_history CLOB \n" +
-                   "        ) \n" +
-                   "    '); \n" +
-                   "END; ";
+  before(async function() {
+    connection = await oracledb.getConnection(dbConfig);
+    let proc = "BEGIN \n" +
+               "    DECLARE \n" +
+               "        e_table_exists EXCEPTION; \n" +
+               "        PRAGMA EXCEPTION_INIT(e_table_exists, -00942);\n " +
+               "    BEGIN \n" +
+               "        EXECUTE IMMEDIATE ('DROP TABLE nodb_stream2 PURGE'); \n" +
+               "    EXCEPTION \n" +
+               "        WHEN e_table_exists \n" +
+               "        THEN NULL; \n" +
+               "    END; \n" +
+               "    EXECUTE IMMEDIATE (' \n" +
+               "        CREATE TABLE nodb_stream2 ( \n" +
+               "            employee_id NUMBER, \n" +
+               "            employee_name VARCHAR2(20), \n" +
+               "            employee_history CLOB \n" +
+               "        ) \n" +
+               "    '); \n" +
+               "END; ";
+    await connection.execute(proc);
 
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function insertRows(cb) {
-        var proc = "DECLARE \n" +
-                   "    x NUMBER := 0; \n" +
-                   "    n VARCHAR2(20); \n" +
-                   "    clobData CLOB; \n" +
-                   "BEGIN \n" +
-                   "    FOR i IN 1..217 LOOP \n" +
-                   "        x := x + 1; \n" +
-                   "        n := 'staff ' || x; \n" +
-                   "        INSERT INTO nodb_stream2 VALUES (x, n, EMPTY_CLOB()) RETURNING employee_history INTO clobData; \n" +
-                   "        DBMS_LOB.WRITE(clobData, 20, 1, '12345678901234567890'); \n" +
-                   "    END LOOP; \n" +
-                   "end; ";
-
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      }
-    ], done);
+    proc = "DECLARE \n" +
+           "    x NUMBER := 0; \n" +
+           "    n VARCHAR2(20); \n" +
+           "    clobData CLOB; \n" +
+           "BEGIN \n" +
+           "    FOR i IN 1..217 LOOP \n" +
+           "        x := x + 1; \n" +
+           "        n := 'staff ' || x; \n" +
+           "        INSERT INTO nodb_stream2 VALUES (x, n, EMPTY_CLOB()) RETURNING employee_history INTO clobData; \n" +
+           "        DBMS_LOB.WRITE(clobData, 20, 1, '12345678901234567890'); \n" +
+           "    END LOOP; \n" +
+           "end; ";
+    await connection.execute(proc);
   }); // before
 
-  after(function(done) {
-    async.series([
-      function(callback) {
-        connection.execute(
-          "DROP TABLE nodb_stream2 PURGE",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.close(function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      },
-    ], done);
+  after(async function() {
+    await connection.execute("DROP TABLE nodb_stream2 PURGE");
+    await connection.close();
   }); // after
 
-  it('14.1 Bind by position and return an array', function(done) {
-    var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
-    var stream = connection.queryStream(sql, [40]);
-
-    stream.on('error', function(error) {
-      should.not.exist(error);
+  it('14.1 Bind by position and return an array', async function() {
+    let sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
+    let stream = connection.queryStream(sql, [40]);
+    await new Promise((resolve, reject) => {
+      stream.on('data', function(data) {
+        assert(data);
+        assert.deepStrictEqual(data, ['staff 40']);
+      });
+      stream.on('end', stream.destroy);
+      stream.on('error', reject);
+      stream.on('close', resolve);
     });
+  }); // 14.1
 
-    stream.on('data', function(data) {
-      should.exist(data);
-      data.should.eql(['staff 40']);
+  it('14.2 Bind by name and return an array', async function() {
+    let sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
+    let stream = connection.queryStream(sql, {id: 40});
+    await new Promise((resolve, reject) => {
+      stream.on('data', function(data) {
+        assert(data);
+        assert.deepStrictEqual(data, ['staff 40']);
+      });
+      stream.on('end', stream.destroy);
+      stream.on('error', reject);
+      stream.on('close', resolve);
     });
+  }); // 14.2
 
-    stream.on('end', function() {
-      stream.destroy();
+  it('14.3 Bind by position and return an object', async function() {
+    let sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
+    let stream = connection.queryStream(sql, [40], {outFormat: oracledb.OUT_FORMAT_OBJECT});
+    await new Promise((resolve, reject) => {
+      stream.on('data', function(data) {
+        assert(data);
+        assert.strictEqual(data.EMPLOYEE_NAME, 'staff 40');
+      });
+      stream.on('end', stream.destroy);
+      stream.on('error', reject);
+      stream.on('close', resolve);
     });
+  }); // 14.3
 
-    stream.on('close', done);
-  });
-
-  it('14.2 Bind by name and return an array', function(done) {
-    var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
-    var stream = connection.queryStream(sql, {id: 40});
-
-    stream.on('error', function(error) {
-      should.not.exist(error);
+  it('14.4 Bind by name and return an object', async function() {
+    let sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
+    let stream = connection.queryStream(sql, {id: 40}, {outFormat: oracledb.OUT_FORMAT_OBJECT});
+    await new Promise((resolve, reject) => {
+      stream.on('data', function(data) {
+        assert(data);
+        assert.strictEqual(data.EMPLOYEE_NAME, 'staff 40');
+      });
+      stream.on('end', stream.destroy);
+      stream.on('error', reject);
+      stream.on('close', resolve);
     });
+  }); // 14.4
 
-    stream.on('data', function(data) {
-      should.exist(data);
-      data.should.eql(['staff 40']);
+  it('14.5 explicitly setting resultSet option to be false takes no effect', async function() {
+    let sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
+    let stream = connection.queryStream(sql, [40], {resultSet: false});
+    await new Promise((resolve, reject) => {
+      stream.on('data', function(data) {
+        assert(data);
+        assert.deepStrictEqual(data, ['staff 40']);
+      });
+      stream.on('end', stream.destroy);
+      stream.on('error', reject);
+      stream.on('close', resolve);
     });
+  }); // 14.5
 
-    stream.on('end', function() {
-      stream.destroy();
+  it('14.6 maxRows option is ignored as expect', async function() {
+    let sql = 'SELECT employee_name FROM nodb_stream2 ORDER BY employee_name';
+    let stream = connection.queryStream(sql, [], {maxRows: 40});
+    let rowCount = 0;
+    await new Promise((resolve, reject) => {
+      stream.on('data', function(data) {
+        assert(data);
+        rowCount++;
+      });
+      stream.on('end', function() {
+        assert.strictEqual(rowCount, rowsAmount);
+        stream.destroy();
+      });
+      stream.on('error', reject);
+      stream.on('close', resolve);
     });
+  }); // 14.6
 
-    stream.on('close', done);
-  });
-
-  it('14.3 Bind by position and return an object', function(done) {
-    var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
-    var stream = connection.queryStream(sql, [40], {outFormat: oracledb.OUT_FORMAT_OBJECT});
-
-    stream.on('error', function(error) {
-      should.not.exist(error);
-    });
-
-    stream.on('data', function(data) {
-      should.exist(data);
-      (data.EMPLOYEE_NAME).should.eql('staff 40');
-    });
-
-    stream.on('end', function() {
-      stream.destroy();
-    });
-
-    stream.on('close', done);
-  });
-
-  it('14.4 Bind by name and return an object', function(done) {
-    var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
-    var stream = connection.queryStream(sql, {id: 40}, {outFormat: oracledb.OUT_FORMAT_OBJECT});
-
-    stream.on('error', function(error) {
-      should.not.exist(error);
-    });
-
-    stream.on('data', function(data) {
-      should.exist(data);
-      (data.EMPLOYEE_NAME).should.eql('staff 40');
-    });
-
-    stream.on('end', function() {
-      stream.destroy();
-    });
-
-    stream.on('close', done);
-  });
-
-  it('14.5 explicitly setting resultSet option to be false takes no effect', function(done) {
-    var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
-    var stream = connection.queryStream(sql, [40], {resultSet: false});
-
-    stream.on('error', function(error) {
-      should.not.exist(error);
-    });
-
-    stream.on('data', function(data) {
-      should.exist(data);
-      data.should.eql(['staff 40']);
-    });
-
-    stream.on('end', function() {
-      stream.destroy();
-    });
-
-    stream.on('close', done);
-  });
-
-  it('14.6 maxRows option is ignored as expect', function(done) {
-    var sql = 'SELECT employee_name FROM nodb_stream2 ORDER BY employee_name';
-    var stream = connection.queryStream(sql, [], {maxRows: 40});
-
-    stream.on('error', function(error) {
-      should.not.exist(error);
-    });
-
-    var rowCount = 0;
-    stream.on('data', function(data) {
-      should.exist(data);
-      rowCount++;
-    });
-
-    stream.on('end', function() {
-      rowCount.should.eql(rowsAmount);
-      stream.destroy();
-    });
-
-    stream.on('close', done);
-
-  });
-
-  it('14.7 Negative - queryStream() has no parameters', function(done) {
-    should.throws(
+  it('14.7 Negative - queryStream() has no parameters', function() {
+    assert.throws(
       function() {
         connection.queryStream();
       },
       /NJS-009: invalid number of parameters/
     );
-    done();
-  });
+  }); //14.7
 
-  it('14.10 metadata event - single column', function(done) {
-    var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
-    var stream = connection.queryStream(sql, { id: 40 });
+  it('14.8 metadata event - single column', async function() {
+    let sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
+    let stream = connection.queryStream(sql, { id: 40 });
 
-    var metaDataRead = false;
-    stream.on('metadata', function(metaData) {
-      should.equal(metaData[0].name, 'EMPLOYEE_NAME');
-      metaDataRead = true;
+    let metaDataRead = false;
+    await new Promise((resolve, reject) => {
+      stream.on('metadata', function(metaData) {
+        assert.strictEqual(metaData[0].name, 'EMPLOYEE_NAME');
+        metaDataRead = true;
+      });
+      stream.on('data', function(data) {
+        assert(data);
+        assert.strictEqual(metaDataRead, true);
+      });
+      stream.on('end', stream.destroy);
+      stream.on('error', reject);
+      stream.on('close', resolve);
     });
+  }); // 14.8
 
-    stream.on('error', function(error) {
-      should.not.exist(error);
+  it('14.9 metadata event - multiple columns', async function() {
+    let sql = 'SELECT employee_name, employee_history FROM nodb_stream2 WHERE employee_id = :id';
+    let stream = connection.queryStream(sql, { id: 40 });
+
+    let metaDataRead = false;
+    await new Promise((resolve, reject) => {
+      stream.on('metadata', function(metaData) {
+        assert.strictEqual(metaData[0].name, 'EMPLOYEE_NAME');
+        assert.strictEqual(metaData[1].name, 'EMPLOYEE_HISTORY');
+        metaDataRead = true;
+      });
+      stream.on('data', function(data) {
+        assert(data);
+        data[1].destroy(); // close the CLOB
+        assert.strictEqual(metaDataRead, true);
+      });
+      stream.on('end', stream.destroy);
+      stream.on('error', reject);
+      stream.on('close', resolve);
     });
+  }); // 14.9
 
-    stream.on('data', function(data) {
-      should.exist(data);
-      should.equal(metaDataRead, true);
+  it('14.10 metadata event - all column names occurring', async function() {
+    let sql = 'SELECT * FROM nodb_stream2 WHERE employee_id = :id';
+    let stream = connection.queryStream(sql, { id: 40 });
+
+    let metaDataRead = false;
+    await new Promise((resolve, reject) => {
+      stream.on('metadata', function(metaData) {
+        assert.strictEqual(metaData[0].name, 'EMPLOYEE_ID');
+        assert.strictEqual(metaData[1].name, 'EMPLOYEE_NAME');
+        assert.strictEqual(metaData[2].name, 'EMPLOYEE_HISTORY');
+        metaDataRead = true;
+      });
+      stream.on('data', function(data) {
+        assert(data);
+        data[2].destroy(); // close the CLOB
+        assert.strictEqual(metaDataRead, true);
+      });
+      stream.on('end', stream.destroy);
+      stream.on('error', reject);
+      stream.on('close', resolve);
     });
+  }); // 14.10
 
-    stream.on('end', function() {
-      stream.destroy();
+  it('14.11 metadata event - no return rows', async function() {
+    let sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
+    let stream = connection.queryStream(sql, { id: 400 });
+
+    let metaDataRead = false;
+    await new Promise((resolve, reject) => {
+      stream.on('metadata', function(metaData) {
+        assert.strictEqual(metaData[0].name, 'EMPLOYEE_NAME');
+        metaDataRead = true;
+      });
+      stream.on('data', function(data) {
+        assert(data);
+        assert.strictEqual(metaDataRead, true);
+      });
+      stream.on('end', stream.destroy);
+      stream.on('error', reject);
+      stream.on('close', resolve);
     });
+  }); // 14.11
 
-    stream.on('close', done);
-  });
+  it('14.12 metadata event - case sensitive columns', async function() {
+    const proc = "BEGIN \n" +
+                 "    DECLARE \n" +
+                 "        e_table_missing EXCEPTION; \n" +
+                 "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
+                 "    BEGIN \n" +
+                 "        EXECUTE IMMEDIATE ('DROP TABLE nodb_streamcases PURGE'); \n" +
+                 "    EXCEPTION \n" +
+                 "        WHEN e_table_missing \n" +
+                 "        THEN NULL; \n" +
+                 "    END; \n" +
+                 "    EXECUTE IMMEDIATE (' \n" +
+                 "        CREATE TABLE nodb_streamcases ( \n" +
+                 "            id NUMBER,  \n" +
+                 '           "nAmE" VARCHAR2(20) \n' +
+                 "        ) \n" +
+                 "    '); \n" +
+                 "    EXECUTE IMMEDIATE (' \n" +
+                 "        INSERT INTO nodb_streamcases VALUES (23, ''Changjie'') \n" +
+                 "    '); \n" +
+                 "    EXECUTE IMMEDIATE (' \n" +
+                 "        INSERT INTO nodb_streamcases VALUES (24, ''Nancy'') \n" +
+                 "    '); \n" +
+                 "    EXECUTE IMMEDIATE (' \n" +
+                 "        INSERT INTO nodb_streamcases VALUES (25, ''Chris'') \n" +
+                 "    '); \n" +
+                 "END; ";
+    await connection.execute(proc);
 
-  it('14.11 metadata event - multiple columns', function(done) {
-    var sql = 'SELECT employee_name, employee_history FROM nodb_stream2 WHERE employee_id = :id';
-    var stream = connection.queryStream(sql, { id: 40 });
+    let sql = 'SELECT "nAmE" FROM nodb_streamcases ORDER BY id';
+    let stream = connection.queryStream(sql);
+    let resultArray = new Array();
 
-    var metaDataRead = false;
-    stream.on('metadata', function(metaData) {
-      should.equal(metaData[0].name, 'EMPLOYEE_NAME');
-      should.equal(metaData[1].name, 'EMPLOYEE_HISTORY');
-      metaDataRead = true;
-    });
-
-    stream.on('error', function(error) {
-      should.not.exist(error);
-    });
-
-    stream.on('data', function(data) {
-      should.exist(data);
-      data[1].destroy(); // close the CLOB
-      should.equal(metaDataRead, true);
-    });
-
-    stream.on('end', function() {
-      stream.destroy();
-    });
-
-    stream.on('close', done);
-  });
-
-  it('14.12 metadata event - all column names occurring', function(done) {
-    var sql = 'SELECT * FROM nodb_stream2 WHERE employee_id = :id';
-    var stream = connection.queryStream(sql, { id: 40 });
-
-    var metaDataRead = false;
-    stream.on('metadata', function(metaData) {
-      should.equal(metaData[0].name, 'EMPLOYEE_ID');
-      should.equal(metaData[1].name, 'EMPLOYEE_NAME');
-      should.equal(metaData[2].name, 'EMPLOYEE_HISTORY');
-      metaDataRead = true;
-    });
-
-    stream.on('error', function(error) {
-      should.not.exist(error);
-    });
-
-    stream.on('data', function(data) {
-      should.exist(data);
-      data[2].destroy();  // close the CLOB
-      should.equal(metaDataRead, true);
-    });
-
-    stream.on('end', function() {
-      stream.destroy();
-    });
-
-    stream.on('close', done);
-  });
-
-  it('14.13 metadata event - no return rows', function(done) {
-    var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
-    var stream = connection.queryStream(sql, { id: 400 });
-
-    var metaDataRead = false;
-    stream.on('metadata', function(metaData) {
-      should.equal(metaData[0].name, 'EMPLOYEE_NAME');
-      metaDataRead = true;
-    });
-
-    stream.on('error', function(error) {
-      should.not.exist(error);
-    });
-
-    stream.on('data', function(data) {
-      should.exist(data);
-      should.equal(metaDataRead, true);
-    });
-
-    stream.on('end', function() {
-      stream.destroy();
-    });
-
-    stream.on('close', done);
-  });
-
-  it('14.15 metadata event - case sensitive columns', function(done) {
-    async.series([
-      function(cb) {
-        var proc = "BEGIN \n" +
-                   "    DECLARE \n" +
-                   "        e_table_missing EXCEPTION; \n" +
-                   "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
-                   "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_streamcases PURGE'); \n" +
-                   "    EXCEPTION \n" +
-                   "        WHEN e_table_missing \n" +
-                   "        THEN NULL; \n" +
-                   "    END; \n" +
-                   "    EXECUTE IMMEDIATE (' \n" +
-                   "        CREATE TABLE nodb_streamcases ( \n" +
-                   "            id NUMBER,  \n" +
-                   '           "nAmE" VARCHAR2(20) \n' +
-                   "        ) \n" +
-                   "    '); \n" +
-                   "    EXECUTE IMMEDIATE (' \n" +
-                   "        INSERT INTO nodb_streamcases VALUES (23, ''Changjie'') \n" +
-                   "    '); \n" +
-                   "    EXECUTE IMMEDIATE (' \n" +
-                   "        INSERT INTO nodb_streamcases VALUES (24, ''Nancy'') \n" +
-                   "    '); \n" +
-                   "    EXECUTE IMMEDIATE (' \n" +
-                   "        INSERT INTO nodb_streamcases VALUES (25, ''Chris'') \n" +
-                   "    '); \n" +
-                   "END; ";
-
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
+    let metaDataRead = false;
+    await new Promise((resolve, reject) => {
+      stream.on('metadata', function(metaData) {
+        assert.strictEqual(metaData[0].name, 'nAmE');
+        metaDataRead = true;
+      });
+      stream.on('error', reject);
+      stream.on('data', function(data) {
+        assert(data);
+        resultArray.push(data);
+        assert.strictEqual(metaDataRead, true);
+      });
+      stream.on('end', function() {
+        assert.deepStrictEqual(
+          resultArray,
+          [ [ 'Changjie' ], [ 'Nancy' ], [ 'Chris' ] ]
         );
-      },
-      function(cb) {
-        var sql = 'SELECT "nAmE" FROM nodb_streamcases ORDER BY id';
-        var stream = connection.queryStream(sql);
-        var resultArray = new Array();
+        stream.destroy();
+      });
+      stream.on('close', resolve);
+    });
 
-        var metaDataRead = false;
-        stream.on('metadata', function(metaData) {
-          should.equal(metaData[0].name, 'nAmE');
-          metaDataRead = true;
-        });
+    await connection.execute("DROP TABLE nodb_streamcases PURGE");
+  }); // 14.12
 
-        stream.on('error', function(error) {
-          should.not.exist(error);
-        });
+  it('14.13 metadata event - large number of columns', async function() {
 
-        stream.on('data', function(data) {
-          should.exist(data);
-          resultArray.push(data);
-          should.equal(metaDataRead, true);
-        });
-
-        stream.on('end', function() {
-          should.deepEqual(
-            resultArray,
-            [ [ 'Changjie' ], [ 'Nancy' ], [ 'Chris' ] ]
-          );
-          stream.destroy();
-        });
-
-        stream.on('close', function() {
-          cb();
-        });
-
-      },
-      function(cb) {
-        connection.execute(
-          "DROP TABLE nodb_streamcases PURGE",
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      }
-    ], done);
-  }); // 14.15
-
-  it('14.16 metadata event - large number of columns', function(done) {
-
-    var column_size = 10;
-    var columns_string = genColumns(column_size);
+    let column_size = 10;
+    let columns_string = genColumns(column_size);
 
     function genColumns(size) {
-      var buffer = [];
-      for (var i = 0; i < size; i++) {
+      let buffer = [];
+      for (let i = 0; i < size; i++) {
         buffer[i] = " column_" + i + " NUMBER";
       }
       return buffer.join();
     }
 
-    var table_name = "nodb_streamstess";
-    var sqlSelect = "SELECT * FROM " + table_name;
-    var sqlDrop = "DROP TABLE " + table_name + " PURGE";
+    let table_name = "nodb_streamstess";
+    let sqlSelect = "SELECT * FROM " + table_name;
+    let sqlDrop = "DROP TABLE " + table_name + " PURGE";
 
-    var proc = "BEGIN \n" +
+    let proc = "BEGIN \n" +
                "    DECLARE \n" +
                "        e_table_missing EXCEPTION; \n" +
                "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
@@ -482,60 +355,35 @@ describe('14. stream2.js', function() {
                "        ) \n" +
                "    '); \n" +
                "END; ";
+    await connection.execute(proc);
 
-    async.series([
-      function(cb) {
-        connection.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        var stream = connection.queryStream(sqlSelect);
+    let stream = connection.queryStream(sqlSelect);
 
-        var metaDataRead = false;
-        stream.on('metadata', function(metaData) {
-          for (var i = 0; i < column_size; i++) {
-            metaData[i].name.should.eql('COLUMN_' + i);
-          }
-          metaDataRead = true;
-        });
+    let metaDataRead = false;
 
-        stream.on('error', function(error) {
-          should.not.exist(error);
-        });
+    await new Promise((resolve, reject) => {
+      stream.on('metadata', function(metaData) {
+        for (let i = 0; i < column_size; i++) {
+          assert.strictEqual(metaData[i].name, 'COLUMN_' + i);
+        }
+        metaDataRead = true;
+      });
+      stream.on('data', function(data) {
+        assert(data);
+        assert.strictEqual(metaDataRead, true);
+      });
+      stream.on('error', reject);
+      stream.on('end', stream.destroy);
+      stream.on('close', resolve);
+    });
 
-        stream.on('data', function(data) {
-          should.exist(data);
-          should.equal(metaDataRead, true);
-        });
+    await connection.execute(sqlDrop);
+  }); // 14.13
 
-        stream.on('end', function() {
-          stream.destroy();
-        });
+  it('14.14 metadata event - single character column', async function() {
 
-        stream.on('close', cb);
-
-      },
-      function(cb) {
-        connection.execute(
-          sqlDrop,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      }
-    ], done);
-  }); // 14.16
-
-  it('14.17 metadata event - single character column', function(done) {
-
-    var tableName = "nodb_streamsinglechar";
-    var sqlCreate =
+    let tableName = "nodb_streamsinglechar";
+    let sqlCreate =
         "BEGIN \n" +
         "   DECLARE \n" +
         "       e_table_missing EXCEPTION; \n" +
@@ -553,80 +401,51 @@ describe('14. stream2.js', function() {
         "       ) \n" +
         "   '); \n" +
         "END; \n";
-    var sqlSelect = "SELECT * FROM " + tableName;
-    var sqlDrop = "DROP TABLE " + tableName + " PURGE";
+    let sqlSelect = "SELECT * FROM " + tableName;
+    let sqlDrop = "DROP TABLE " + tableName + " PURGE";
 
-    async.series([
-      function(cb) {
-        connection.execute(
-          sqlCreate,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
-      function(cb) {
-        var stream = connection.queryStream(sqlSelect);
+    await connection.execute(sqlCreate);
 
-        var metaDataRead = false;
-        stream.on('metadata', function(metaData) {
-          should.equal(metaData[0].name, 'A');
-          should.equal(metaData[1].name, 'B');
-          metaDataRead = true;
-        });
+    let stream = connection.queryStream(sqlSelect);
 
-        stream.on('error', function(error) {
-          should.not.exist(error);
-        });
+    let metaDataRead = false;
 
-        stream.on('data', function() {
-          should.equal(metaDataRead, true);
-        });
-
-        stream.on('end', function() {
-          stream.destroy();
-        });
-
-        stream.on('close', cb);
-      },
-      function(cb) {
-        connection.execute(
-          sqlDrop,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      }
-    ], done);
-  }); // 14.17
-
-  it('14.18 metadata event - duplicate column alias', function(done) {
-
-    var stream = connection.queryStream("SELECT 1 a, 'abc' a FROM dual");
-
-    var metaDataRead = false;
-    stream.on('metadata', function(metaData) {
-      should.equal(metaData[0].name, 'A');
-      should.equal(metaData[1].name, 'A_1');
-      metaDataRead = true;
+    await new Promise((resolve, reject) => {
+      stream.on('metadata', function(metaData) {
+        assert.strictEqual(metaData[0].name, 'A');
+        assert.strictEqual(metaData[1].name, 'B');
+        metaDataRead = true;
+      });
+      stream.on('error', reject);
+      stream.on('data', function() {
+        assert.strictEqual(metaDataRead, true);
+      });
+      stream.on('end', stream.destroy);
+      stream.on('close', resolve);
     });
 
-    stream.on('error', function(error) {
-      should.not.exist(error);
-    });
+    await connection.execute(sqlDrop);
+  }); // 14.14
 
-    stream.on('data', function(data) {
-      should.exist(data);
-      data.should.eql([1, 'abc']);
-      should.equal(metaDataRead, true);
-    });
+  it('14.15 metadata event - duplicate column alias', async function() {
 
-    stream.on('end', function() {
-      stream.destroy();
-    });
+    let stream = connection.queryStream("SELECT 1 a, 'abc' a FROM dual");
 
-    stream.on('close', done);
-  });
+    let metaDataRead = false;
+    await new Promise((resolve, reject) => {
+      stream.on('metadata', function(metaData) {
+        assert.strictEqual(metaData[0].name, 'A');
+        assert.strictEqual(metaData[1].name, 'A_1');
+        metaDataRead = true;
+      });
+      stream.on('error', reject);
+      stream.on('data', function(data) {
+        assert(data);
+        assert.deepStrictEqual(data, [1, 'abc']);
+        assert.strictEqual(metaDataRead, true);
+      });
+      stream.on('end', stream.destroy);
+      stream.on('close', resolve);
+    });
+  }); // 14.15
 });

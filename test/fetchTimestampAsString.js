@@ -40,15 +40,15 @@ describe('19. fetchTimestampAsString.js', function() {
   let connection = null;
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
-    connection.execute(
+    await connection.execute(
       `alter session set nls_timestamp_format = 'YYYY-MM-DD HH24:MI:SS.FF'`);
-    connection.execute(
+    await connection.execute(
       `alter session set nls_timestamp_tz_format = 'YYYY-MM-DD HH24:MI:SS.FF'`);
   });
 
-  after(function() {
+  after(async function() {
     oracledb.fetchAsString = [];
-    connection.close();
+    await connection.close();
   });
 
   describe('19.1 TIMESTAMP', function() {
@@ -59,9 +59,9 @@ describe('19. fetchTimestampAsString.js', function() {
       await assist.setUp4sql(connection, tableName, inData);
     });
 
-    after(function() {
+    after(async function() {
       oracledb.fetchAsString = [];
-      connection.execute(`DROP table ` + tableName + ` PURGE`);
+      await connection.execute(`DROP table ` + tableName + ` PURGE`);
     }); // after
 
     afterEach(function() {
@@ -174,6 +174,18 @@ describe('19. fetchTimestampAsString.js', function() {
       oracledb.fetchAsString = [ oracledb.DATE ];
       const ref = assist.content.timestamp_3_2;
       await test8(tableName, ref);
+    });
+
+    it('19.2.9 fetchAsString property and Different NLS timestamp TZ format', async function() {
+      oracledb.fetchAsString = [ oracledb.DATE ];
+      const ref = assist.content.timestamp_3_3;
+      // change TSTZ format
+      await connection.execute(
+        `alter session set nls_timestamp_tz_format = 'DD-MON-YYYY HH24:MI:SS:FF'`);
+      await test5(tableName, ref);
+      // restore TSTZ format
+      connection.execute(
+        `alter session set nls_timestamp_tz_format = 'YYYY-MM-DD HH24:MI:SS.FF'`);
     });
 
   }); // 19.2

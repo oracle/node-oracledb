@@ -185,18 +185,17 @@ describe('26. dataTypeNumber.js', function() {
       assert.strictEqual(outNum, expected);
     });
 
-    it('26.4.5 gets correct number via fetching as string', async function() {
-      let num = '-9007199254740993';
-
-      let sql = "SELECT TO_NUMBER( " + num + " ) AS TS_NUM FROM DUAL";
-      let result = await connection.execute(
-        sql,
-        [],
-        {
-          fetchInfo : { "TS_NUM"  : { type : oracledb.STRING } }
-        });
-      let got = result.rows[0][0];
-      assert.strictEqual(got, num);
+    it('26.4.5 fetch as string number that cannot be represented as JS Number', async function() {
+      const num = '-1234567890123456789012345';
+      const sql = `SELECT TO_NUMBER(${num}) AS TS_NUM FROM DUAL`;
+      const options = {
+        fetchInfo : { "TS_NUM"  : { type : oracledb.STRING } }
+      };
+      const result = await connection.execute(sql, [], options);
+      const fetchedNum = result.rows[0][0];
+      assert.strictEqual(fetchedNum, num);
     });
+
   }); // 26.4
+
 });

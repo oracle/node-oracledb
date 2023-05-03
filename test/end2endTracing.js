@@ -32,68 +32,49 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
 describe('159. end2endTracing.js', function() {
 
   let conn;
-  before(function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-        conn = connection;
-        done();
-      }
-    );
+  before(async function() {
+    conn = await oracledb.getConnection(dbConfig);
   });
 
-  after(function(done) {
-    conn.close(function(err) {
-      should.not.exist(err);
-      done();
-    });
+  after(async function() {
+    await conn.close();
   });
 
-  var verify = function(sql, expect, callback) {
-    conn.execute(
-      sql,
-      function(err, result) {
-        should.not.exist(err);
-        should.strictEqual(
-          result.rows[0][0],
-          expect
-        );
-        callback();
-      }
-    );
+  const verify = async function(sql, expect) {
+    let result = await conn.execute(sql);
+    assert.strictEqual(result.rows[0][0], expect);
   };
 
-  it('159.1 set the end-to-end tracing attribute - module', function(done) {
+  it('159.1 set the end-to-end tracing attribute - module', async function() {
 
-    var sql = "select sys_context('userenv', 'module') from dual";
-    var testValue = "MODULE";
+    const sql = "select sys_context('userenv', 'module') from dual";
+    const testValue = "MODULE";
     conn.module = testValue;
-    verify(sql, testValue, done);
+    await verify(sql, testValue);
 
   });
 
-  it('159.2 set the tracing attribute - action', function(done) {
+  it('159.2 set the tracing attribute - action', async function() {
 
-    var sql = "select sys_context('userenv', 'action') from dual";
-    var testValue = "ACTION";
+    const sql = "select sys_context('userenv', 'action') from dual";
+    const testValue = "ACTION";
     conn.action = testValue;
-    verify(sql, testValue, done);
+    await verify(sql, testValue);
 
   });
 
-  it('159.3 set the tracing attribure - clientId', function(done) {
+  it('159.3 set the tracing attribure - clientId', async function() {
 
-    var sql = "select sys_context('userenv', 'client_identifier') from dual";
-    var testValue = "CLIENTID";
+    const sql = "select sys_context('userenv', 'client_identifier') from dual";
+    const testValue = "CLIENTID";
     conn.clientId = testValue;
-    verify(sql, testValue, done);
+    await verify(sql, testValue);
 
   });
 });

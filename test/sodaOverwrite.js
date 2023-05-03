@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -32,7 +32,6 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
 const dbConfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
@@ -61,114 +60,78 @@ describe('189. sodaOverwrite.js', function() {
 
     await sodaUtil.cleanup();
 
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      sodaDB = conn.getSodaDatabase();
-      sodaDocument = sodaDB.createDocument({name: "Chris", city: "Melbourne"});
-      sodaCollection = await sodaDB.createCollection("node_test_186_1");
-      sodaOperation = sodaCollection.find();
-      sodaCursor = await sodaOperation.getCursor();
-    } catch (err) {
-      should.not.exist(err);
-    }
+    conn = await oracledb.getConnection(dbConfig);
+    sodaDB = conn.getSodaDatabase();
+    sodaDocument = sodaDB.createDocument({name: "Chris", city: "Melbourne"});
+    sodaCollection = await sodaDB.createCollection("node_test_186_1");
+    sodaOperation = sodaCollection.find();
+    sodaCursor = await sodaOperation.getCursor();
   });
 
   after(async function() {
     if (sodaCursor) {
-      try {
-        await sodaCursor.close();
-      } catch (err) {
-        should.not.exist(err);
-      }
+      await sodaCursor.close();
     }
     if (sodaCollection) {
-      try {
-        await sodaCollection.drop();
-      } catch (err) {
-        should.not.exist(err);
-      }
+      await sodaCollection.drop();
     }
     if (conn) {
-      try {
-        await conn.close();
-      } catch (err) {
-        should.not.exist(err);
-      }
+      await conn.close();
     }
   });
 
   it('189.1 Allows overwriting of public methods on SodaDatabase instance', function() {
-    try {
-      let keys = Object.keys(sodaDB);
-      for (let keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
-        if (typeof sodaDB[keys[keysIdx]] === 'function') {
-          let originalFunction = sodaDB[keys[keysIdx]];
-          sodaDB[keys[keysIdx]] = function() {};
-          sodaDB[keys[keysIdx]] = originalFunction;
-        }
+    let keys = Object.keys(sodaDB);
+    for (let keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
+      if (typeof sodaDB[keys[keysIdx]] === 'function') {
+        let originalFunction = sodaDB[keys[keysIdx]];
+        sodaDB[keys[keysIdx]] = function() {};
+        sodaDB[keys[keysIdx]] = originalFunction;
       }
-    } catch (err) {
-      should.not.exist(err);
     }
   });
 
   it('189.2 Allows overwriting of public methods on SodaDocument instance', function() {
-    try {
-      let keys = Object.keys(sodaDocument);
-      for (let keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
-        if (typeof sodaDocument[keys[keysIdx]] === 'function') {
-          let originalFunction = sodaDocument[keys[keysIdx]];
-          sodaDocument[keys[keysIdx]] = function() {};
-          sodaDocument[keys[keysIdx]] = originalFunction;
-        }
+    let keys = Object.keys(sodaDocument);
+    for (let keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
+      if (typeof sodaDocument[keys[keysIdx]] === 'function') {
+        let originalFunction = sodaDocument[keys[keysIdx]];
+        sodaDocument[keys[keysIdx]] = function() {};
+        sodaDocument[keys[keysIdx]] = originalFunction;
       }
-    } catch (err) {
-      should.not.exist(err);
     }
   });
 
   it('189.3 Allows overwriting of public methods on SodaCollection instance', function() {
-    try {
-      let keys = Object.keys(sodaCollection);
-      for (let keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
-        if (typeof sodaCollection[keys[keysIdx]] === 'function') {
-          let originalFunction = sodaCollection[keys[keysIdx]];
-          sodaCollection[keys[keysIdx]] = function() {};
-          sodaCollection[keys[keysIdx]] = originalFunction;
-        }
+    let keys = Object.keys(sodaCollection);
+    for (let keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
+      if (typeof sodaCollection[keys[keysIdx]] === 'function') {
+        let originalFunction = sodaCollection[keys[keysIdx]];
+        sodaCollection[keys[keysIdx]] = function() {};
+        sodaCollection[keys[keysIdx]] = originalFunction;
       }
-    } catch (err) {
-      should.not.exist(err);
     }
   });
 
   it('189.4 Allows overwriting of public methods on SodaOperation instance', function() {
-    try {
-      let keys = Object.keys(sodaOperation);
-      for (let keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
-        if (typeof sodaOperation[keys[keysIdx]] === 'function') {
-          let originalFunction = sodaOperation[keys[keysIdx]];
-          sodaOperation[keys[keysIdx]] = function() {};
-          sodaOperation[keys[keysIdx]] = originalFunction;
-        }
+    let keys = Object.keys(sodaOperation);
+    for (let keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
+      if (typeof sodaOperation[keys[keysIdx]] === 'function') {
+        let originalFunction = sodaOperation[keys[keysIdx]];
+        sodaOperation[keys[keysIdx]] = function() {};
+        sodaOperation[keys[keysIdx]] = originalFunction;
       }
-    } catch (err) {
-      should.not.exist(err);
     }
   });
 
   it('189.5 Allows overwriting of public methods on SodaDocCursor instance', function() {
-    try {
-      let keys = Object.keys(sodaCursor);
-      for (let keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
-        if (typeof sodaCursor[keys[keysIdx]] === 'function') {
-          let originalFunction = sodaCursor[keys[keysIdx]];
-          sodaCursor[keys[keysIdx]] = function() {};
-          sodaCursor[keys[keysIdx]] = originalFunction;
-        }
+    let keys = Object.keys(sodaCursor);
+    for (let keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
+      if (typeof sodaCursor[keys[keysIdx]] === 'function') {
+        let originalFunction = sodaCursor[keys[keysIdx]];
+        sodaCursor[keys[keysIdx]] = function() {};
+        sodaCursor[keys[keysIdx]] = originalFunction;
       }
-    } catch (err) {
-      should.not.exist(err);
     }
   });
 

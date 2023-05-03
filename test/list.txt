@@ -473,7 +473,7 @@ Overview of node-oracledb functional tests
         26.4.2 Negative - maximum safe integer + 1
         26.4.3 minimum safe integer
         26.4.4 Negative - minimum safe integer - 1
-        26.4.5 gets correct number via fetching as string
+        26.4.5 fetch as string number that cannot be represented as JS Number
 
 27. dataTypeNumber2.js
     27.1 testing NUMBER(p, s) data

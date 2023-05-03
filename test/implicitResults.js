@@ -32,9 +32,10 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
+const util      = require('util');
 
 describe('192. implicitResults.js', function() {
 
@@ -64,55 +65,51 @@ describe('192. implicitResults.js', function() {
     if (!isRunnable) {
       this.skip();
     } else {
-      try {
-        const conn = await oracledb.getConnection(dbConfig);
+      const conn = await oracledb.getConnection(dbConfig);
 
-        let sql =
-          `create table ${tab1} (
-            id number(9) not null,
-            value varchar2(100) not null
-          )`;
-        let plsql = testsUtil.sqlCreateTable(tab1, sql);
-        await conn.execute(plsql);
+      let sql =
+        `create table ${tab1} (
+          id number(9) not null,
+          value varchar2(100) not null
+        )`;
+      let plsql = testsUtil.sqlCreateTable(tab1, sql);
+      await conn.execute(plsql);
 
-        let sqlInsertValues =
-          `DECLARE \n` +
-          `    x NUMBER := 0; \n` +
-          `    n VARCHAR2(100); \n` +
-          `BEGIN \n` +
-          `    FOR i IN 1..23 LOOP \n` +
-          `        x := x + 1; \n` +
-          `        n := 'Staff ' || x; \n` +
-          `        INSERT INTO ${tab1} VALUES (x, n); \n` +
-          `    END LOOP; \n` +
-          `END; `;
-        await conn.execute(sqlInsertValues);
+      let sqlInsertValues =
+        `DECLARE \n` +
+        `    x NUMBER := 0; \n` +
+        `    n VARCHAR2(100); \n` +
+        `BEGIN \n` +
+        `    FOR i IN 1..23 LOOP \n` +
+        `        x := x + 1; \n` +
+        `        n := 'Staff ' || x; \n` +
+        `        INSERT INTO ${tab1} VALUES (x, n); \n` +
+        `    END LOOP; \n` +
+        `END; `;
+      await conn.execute(sqlInsertValues);
 
-        sql = `create table ${tab2} (
-                id    number(9) not null,
-                tsval timestamp not null
-              )`;
-        plsql = testsUtil.sqlCreateTable(tab2, sql);
-        await conn.execute(plsql);
+      sql = `create table ${tab2} (
+              id    number(9) not null,
+              tsval timestamp not null
+            )`;
+      plsql = testsUtil.sqlCreateTable(tab2, sql);
+      await conn.execute(plsql);
 
-        sqlInsertValues =
-          `DECLARE \n` +
-          `    x NUMBER := 0; \n` +
-          `    n TIMESTAMP; \n` +
-          `BEGIN \n` +
-          `    FOR i IN 1..5 LOOP \n` +
-          `        x := x + 1; \n` +
-          `        n := systimestamp + (i / 10); \n` +
-          `        INSERT INTO ${tab2} VALUES (x, n); \n` +
-          `    END LOOP; \n` +
-          `END; `;
-        await conn.execute(sqlInsertValues);
+      sqlInsertValues =
+        `DECLARE \n` +
+        `    x NUMBER := 0; \n` +
+        `    n TIMESTAMP; \n` +
+        `BEGIN \n` +
+        `    FOR i IN 1..5 LOOP \n` +
+        `        x := x + 1; \n` +
+        `        n := systimestamp + (i / 10); \n` +
+        `        INSERT INTO ${tab2} VALUES (x, n); \n` +
+        `    END LOOP; \n` +
+        `END; `;
+      await conn.execute(sqlInsertValues);
 
-        await conn.commit();
-        await conn.close();
-      } catch (err) {
-        should.not.exist(err);
-      }
+      await conn.commit();
+      await conn.close();
     }
 
   }); // before()
@@ -122,95 +119,80 @@ describe('192. implicitResults.js', function() {
     if (!isRunnable) {
       return;
     } else {
-      try {
-        const conn = await oracledb.getConnection(dbConfig);
+      const conn = await oracledb.getConnection(dbConfig);
 
-        let sql = `DROP TABLE ${tab1} PURGE`;
-        await conn.execute(sql);
+      let sql = `DROP TABLE ${tab1} PURGE`;
+      await conn.execute(sql);
 
-        sql = `DROP TABLE ${tab2} PURGE`;
-        await conn.execute(sql);
+      sql = `DROP TABLE ${tab2} PURGE`;
+      await conn.execute(sql);
 
-        await conn.close();
-      } catch (err) {
-        should.not.exist(err);
-      }
+      await conn.close();
     }
 
   }); // after()
 
   it('192.1 implicit results with rows fetched', async () => {
-    try {
-      const conn = await oracledb.getConnection(dbConfig);
-      const results = await conn.execute(queryImpres);
+    const conn = await oracledb.getConnection(dbConfig);
+    const results = await conn.execute(queryImpres);
 
-      let rows = results.implicitResults[0];
-      for (let j = 0; j < rows.length; j++) {
-        should.strictEqual(rows[j][1], `Staff ${j + 1}`);
-      }
-
-      rows = results.implicitResults[1];
-      const tab2Len = 5;
-      should.strictEqual(rows.length, tab2Len);
-
-      await conn.close();
-    } catch (err) {
-      should.not.exist(err);
+    let rows = results.implicitResults[0];
+    for (let j = 0; j < rows.length; j++) {
+      assert.strictEqual(rows[j][1], `Staff ${j + 1}`);
     }
+
+    rows = results.implicitResults[1];
+    const tab2Len = 5;
+    assert.strictEqual(rows.length, tab2Len);
+
+    await conn.close();
   }); // 192.1
 
   it('192.2 implicit Results with Result Sets', async () => {
-    try {
-      const conn = await oracledb.getConnection(dbConfig);
-      const results = await conn.execute(queryImpres, [], { resultSet: true });
+    const conn = await oracledb.getConnection(dbConfig);
+    const results = await conn.execute(queryImpres, [], { resultSet: true });
 
-      // Assert the content of table 1
-      let rs = await results.implicitResults[0].getRows(100);
-      for (let j = 0; j < rs.length; j++) {
-        should.strictEqual(rs[j][1], `Staff ${j + 1}`);
-      }
-
-      // Assert the content of table 2
-      rs = await results.implicitResults[1];
-      let row, len = 0;
-      while ((row = await rs.getRow())) {
-        (row[1]).should.be.a.Date();
-        len++;
-      }
-      const tab2Len = 5;
-      should.strictEqual(len, tab2Len);
-
-      await rs.close();
-      await conn.close();
-    } catch (err) {
-      should.not.exist(err);
+    // Assert the content of table 1
+    let rs = await results.implicitResults[0].getRows(100);
+    for (let j = 0; j < rs.length; j++) {
+      assert.strictEqual(rs[j][1], `Staff ${j + 1}`);
     }
+
+    // Assert the content of table 2
+    rs = await results.implicitResults[1];
+    let row, len = 0;
+    while ((row = await rs.getRow())) {
+      assert(util.isDate(row[1]));
+      len++;
+    }
+    const tab2Len = 5;
+    assert.strictEqual(len, tab2Len);
+
+    await rs.close();
+    await conn.close();
   }); // 192.2
 
   it('192.3 multiple options, outFormat is OUT_FORMAT_OBJECT', async () => {
-    try {
-      const conn = await oracledb.getConnection(dbConfig);
-      let opts = { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT };
-      const results = await conn.execute(queryImpres, [], opts);
+    const conn = await oracledb.getConnection(dbConfig);
+    let opts = { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT };
+    const results = await conn.execute(queryImpres, [], opts);
 
-      let rs = await results.implicitResults[0].getRows(100);
-      for (let j = 0; j < rs.length; j++) {
-        should.strictEqual(rs[j].VALUE, `Staff ${j + 1}`);
-      }
-
-      rs = await results.implicitResults[1];
-      let row, len = 0;
-      while ((row = await rs.getRow())) {
-        (row.TSVAL).should.be.a.Date();
-        len++;
-      }
-      const tab2Len = 5;
-      should.strictEqual(len, tab2Len);
-
-      await rs.close();
-      await conn.close();
-    } catch (err) {
-      should.not.exist(err);
+    let rs = await results.implicitResults[0].getRows(100);
+    for (let j = 0; j < rs.length; j++) {
+      assert.strictEqual(rs[j].VALUE, `Staff ${j + 1}`);
     }
+
+    rs = await results.implicitResults[1];
+    let row, len = 0;
+    while ((row = await rs.getRow())) {
+      assert(util.isDate(row.TSVAL));
+      len++;
+    }
+    const tab2Len = 5;
+    assert.strictEqual(len, tab2Len);
+
+    await rs.close();
+    await conn.close();
   }); // 192.3
+
 });

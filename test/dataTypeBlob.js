@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -104,7 +104,7 @@ describe('41. dataTypeBlob.js', function() {
             assert.ifError(err);
             fs.readFile(outFileName, function(err, generatedData) {
               assert.ifError(err);
-              assert.deepEqual(originalData, generatedData);
+              assert.deepStrictEqual(originalData, generatedData);
             });
           });
           resolve();
@@ -130,7 +130,7 @@ describe('41. dataTypeBlob.js', function() {
           await fs.readFile(inFileName, function(err, data) {
             assert.ifError(err);
             assert.strictEqual(data.length, blob.length);
-            assert.deepEqual(data, blob);
+            assert.deepStrictEqual(data, blob);
             resolve();
           });
         });  // close event
