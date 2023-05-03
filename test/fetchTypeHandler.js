@@ -400,11 +400,11 @@ describe('271. fetchTypeHandler.js', function() {
 
   it('271.21 fetchTypeHandler for nulls with converter function', async function() {
     oracledb.fetchTypeHandler = function() {
-        const myConverter = (v) => {
-          return String(v);
-        };
-        return {converter: myConverter};
+      const myConverter = (v) => {
+        return String(v);
       };
+      return {converter: myConverter};
+    };
 
     const sql = `SELECT NULL FROM DUAL`;
     const result = await connection.execute(sql);
@@ -423,9 +423,9 @@ describe('271. fetchTypeHandler.js', function() {
       if (metadata.dbType === oracledb.DB_TYPE_NUMBER) {
         return {converter: convertToString};
       }
-    };
+    }
 
-    async function convertToString(val) {
+    function convertToString(val) {
       if (val !== null) {
         val = 'abc';
       }
@@ -435,7 +435,7 @@ describe('271. fetchTypeHandler.js', function() {
     const result = await connection.execute(
       `select * from ${TABLE}`,
       [],
-      { 
+      {
         fetchTypeHandler: fetchTypeHandlerFunc,
         outFormat: oracledb.OUT_FORMAT_OBJECT
       }
@@ -451,8 +451,7 @@ describe('271. fetchTypeHandler.js', function() {
     oracledb.fetchTypeHandler = function(metadata) {
       if (metadata.dbTypeName === "TIMESTAMP") {
         return {type: oracledb.DATE};
-      }
-      else if(metadata.dbTypeName === "NUMBER") {
+      } else if (metadata.dbTypeName === "NUMBER") {
         return {type: oracledb.STRING};
       }
     };
@@ -469,15 +468,15 @@ describe('271. fetchTypeHandler.js', function() {
     await connection.execute(`INSERT INTO ${TABLE} values (01, 'ABC', 23,
                 TO_TIMESTAMP('2023-04-27 10:30:00', 'YYYY-MM-DD HH24:MI:SS'))`);
     const result = await connection.execute(`
-      SELECT id, name, age,
-        created_date AS TS_DATE FROM ${TABLE}`,
-        [],
-        {
-          outFormat: oracledb.OUT_FORMAT_OBJECT
-        }
-      );
+    SELECT id, name, age,
+    created_date AS TS_DATE FROM ${TABLE}`,
+    [],
+    {
+      outFormat: oracledb.OUT_FORMAT_OBJECT
+    }
+    );
 
-    assert.deepEqual(Object.getOwnPropertyNames(result.rows[0]), ["ID","NAME","AGE","TS_DATE"]);
+    assert.deepEqual(Object.getOwnPropertyNames(result.rows[0]), ["ID", "NAME", "AGE", "TS_DATE"]);
     assert.deepEqual(result.rows[0].ID, "1");
     assert.deepEqual(result.rows[0].NAME, "ABC");
     assert.deepEqual(result.rows[0].AGE, "23");
