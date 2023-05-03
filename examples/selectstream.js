@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -68,8 +68,7 @@ async function run() {
        ORDER BY id`,
       [],  // no binds
       {
-        prefetchRows:   150,  // internal buffer sizes can be adjusted for performance tuning
-        fetchArraySize: 150
+        fetchArraySize: 150  // internal buffer allocation size for tuning
       }
     );
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -93,7 +93,6 @@ async function run() {
       [], // A bind parameter is needed to disambiguate the following options parameter and avoid ORA-01036
       {
         outFormat: oracledb.OUT_FORMAT_OBJECT,     // outFormat can be OBJECT or ARRAY.  The default is ARRAY
-        // prefetchRows:   100,                    // internal buffer allocation size for tuning
         // fetchArraySize: 100                     // internal buffer allocation size for tuning
       }
     );
