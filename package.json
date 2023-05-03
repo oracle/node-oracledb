@@ -41,7 +41,7 @@
     "buildpackage": "node package/buildpackage.js"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=14.6"
   },
   "maintainers": [
     {

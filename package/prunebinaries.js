@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -32,7 +32,11 @@
  * USAGE
  *   Invoke this from the top level directory.
  *   After an 'npm install oracledb' installs pre-built binaries, this file
- *   can be run with 'npm run prune'.
+ *   can be run with 'npm run prune [<option>]'.
+ *   'npm run prune' will keep only the binary files for the platform where
+ *   the application using node-oracledb is being run.
+ *   Set <option> to 'all', so that only Thin mode will be used.
+ *   In this case, all the Thick mode binaries will be removed.
  *
  *****************************************************************************/
 
@@ -41,17 +45,54 @@
 const fs = require('fs');
 const nodbUtil = require('../lib/util.js');
 
-const dir = nodbUtil.RELEASE_DIR;
+const dir = nodbUtil.RELEASE_DIR; // contains the binaries
 
 let re = new RegExp(nodbUtil.BINARY_FILE);
 
 try {
   let f = fs.readdirSync(dir);
-  for (let i = 0; i < f.length; i++) {
-    if (!f[i].match(re) && (f[i].match(/oracledb.*\.node(-buildinfo.txt)*/))) {
-      fs.unlinkSync(dir + '/' + f[i]);
+  let opt = process.argv[2];
+
+  if (opt) {
+    // 'npm run prune <option>' is called
+    if (opt.toLowerCase() === 'all') {
+      // Remove all the binaries in nodbUtil.RELEASE_DIR
+      for (let i = 0; i < f.length; i++) {
+        removeFileorDir(dir + '/' + f[i]);
+      }
+    } else {
+      // Invalid option
+      throw new Error('Invalid Command option: ' + `'${opt}'`);
+    }
+  } else {
+    // 'npm run prune' is called
+    for (let i = 0; i < f.length; i++) {
+      if (!f[i].match(re) && (f[i].match(/oracledb.*\.node(-buildinfo.txt)*/))) {
+        fs.unlinkSync(dir + '/' + f[i]);
+      }
     }
   }
 } catch (err) {
   console.error(err.message);
+}
+
+async function removeFileorDir(fileOrDirPath) {
+  try {
+    const isDir = fs.statSync(fileOrDirPath).isDirectory();
+    if (isDir) {
+      // Remove the directory and its files recursively
+      // Use fs.promises for Node.js versions 14.6-14.13,
+      // which do not support fs.rmSync()
+      const vs = process.version.substring(1).split(".").map(Number);
+      if (vs[0] > 14 || (vs[0] === 14 && vs[1] >= 14))
+        fs.rmSync(fileOrDirPath, { recursive: true, force: true });
+      else
+        await fs.promises.rmdir(fileOrDirPath, { recursive: true, force: true });
+    } else {
+      // Remove the file or the symlink synchronously
+      fs.unlinkSync(fileOrDirPath);
+    }
+  } catch (err) {
+    throw new Error('Invalid File or Directory: ' + `'${fileOrDirPath}'`);
+  }
 }
