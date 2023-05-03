@@ -36,8 +36,8 @@ const  assert   = require('assert');
 const  dbConfig = require('./dbconfig.js');
 
 describe('102. bindTimestamp.js', function() {
-  var  connection = null;
-  var  caseIndex = 1;
+  let  connection = null;
+  let  caseIndex = 1;
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -96,8 +96,8 @@ describe('102. bindTimestamp.js', function() {
       { i: id },
       { outFormat: oracledb.OUT_FORMAT_OBJECT });
     assert(result);
-    assert.deepEqual(result.rows[0].TS, bv);
-    assert.deepEqual(result.rows[0].TSTZ, bv);
+    assert.deepStrictEqual(result.rows[0].TS, bv);
+    assert.deepStrictEqual(result.rows[0].TSTZ, bv);
   });
 
   it('102.2 DML, IN bind, bind by position', async function() {
@@ -114,8 +114,8 @@ describe('102. bindTimestamp.js', function() {
       { i: id },
       { outFormat: oracledb.OUT_FORMAT_OBJECT });
     assert(result);
-    assert.deepEqual(result.rows[0].TS, bv);
-    assert.deepEqual(result.rows[0].TSTZ, bv);
+    assert.deepStrictEqual(result.rows[0].TS, bv);
+    assert.deepStrictEqual(result.rows[0].TSTZ, bv);
   });
 
   it('102.3 DML, IN bind, Null', async function() {
@@ -165,7 +165,7 @@ describe('102. bindTimestamp.js', function() {
       { i: id },
       { outFormat: oracledb.OUT_FORMAT_OBJECT });
     assert(result);
-    assert.deepEqual(result.rows, []);
+    assert.deepStrictEqual(result.rows, []);
   });
 
   it('102.5 DML, OUT bind, bind by position', async function() {
@@ -179,14 +179,14 @@ describe('102. bindTimestamp.js', function() {
       { autoCommit: true});
     assert(result);
     assert.strictEqual(result.outBinds[0][0], id);
-    assert.deepEqual(result.outBinds[1][0], bv);
+    assert.deepStrictEqual(result.outBinds[1][0], bv);
 
     result = await connection.execute(
       "select * from nodb_tab_tsbind where id = :i",
       { i: id },
       { outFormat: oracledb.OUT_FORMAT_OBJECT });
-    assert.deepEqual(result.rows[0].TS, bv);
-    assert.deepEqual(result.rows[0].TSTZ, bv);
+    assert.deepStrictEqual(result.rows[0].TS, bv);
+    assert.deepStrictEqual(result.rows[0].TSTZ, bv);
   });
 
   it('102.6 DML, OUT bind, bind by name', async function() {
@@ -205,14 +205,14 @@ describe('102. bindTimestamp.js', function() {
       { autoCommit: true});
     assert(result);
     assert.strictEqual(result.outBinds.oid[0], id);
-    assert.deepEqual(result.outBinds.otz[0], bv);
+    assert.deepStrictEqual(result.outBinds.otz[0], bv);
 
     result = await connection.execute(
       "select * from nodb_tab_tsbind where id = :i",
       { i: id },
       { outFormat: oracledb.OUT_FORMAT_OBJECT });
-    assert.deepEqual(result.rows[0].TS, bv);
-    assert.deepEqual(result.rows[0].TSTZ, bv);
+    assert.deepStrictEqual(result.rows[0].TS, bv);
+    assert.deepStrictEqual(result.rows[0].TSTZ, bv);
   });
 
   it('102.7 Negative - OUB bind, value and type mismatch', async function() {
@@ -235,7 +235,7 @@ describe('102. bindTimestamp.js', function() {
       { i: id },
       { outFormat: oracledb.OUT_FORMAT_OBJECT });
     assert(result);
-    assert.deepEqual(result.rows, []);
+    assert.deepStrictEqual(result.rows, []);
   });
 
   it('102.8 DML, INOUT bind, bind by position', async function() {
@@ -252,15 +252,15 @@ describe('102. bindTimestamp.js', function() {
 
     assert(result);
     assert.equal(result.outBinds[0][0], id);
-    assert.deepEqual(result.outBinds[1][0], bv);
+    assert.deepStrictEqual(result.outBinds[1][0], bv);
 
     result = await connection.execute(
       "select * from nodb_tab_tsbind where id = :i",
       { i: id },
       { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
-    assert.deepEqual(result.rows[0].TS, bv);
-    assert.deepEqual(result.rows[0].TSTZ, bv);
+    assert.deepStrictEqual(result.rows[0].TS, bv);
+    assert.deepStrictEqual(result.rows[0].TSTZ, bv);
   });
 
   it('102.9 DML, INOUT bind, bind by name', async function() {
@@ -279,16 +279,16 @@ describe('102. bindTimestamp.js', function() {
       { autoCommit: true});
 
     assert(result);
-    assert.deepEqual(result.outBinds.ts1[0], bv);
-    assert.deepEqual(result.outBinds.tz1[0], bv);
+    assert.deepStrictEqual(result.outBinds.ts1[0], bv);
+    assert.deepStrictEqual(result.outBinds.tz1[0], bv);
 
     result = await connection.execute(
       "select * from nodb_tab_tsbind where id = :i",
       { i: id },
       { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
-    assert.deepEqual(result.rows[0].TS, bv);
-    assert.deepEqual(result.rows[0].TSTZ, bv);
+    assert.deepStrictEqual(result.rows[0].TS, bv);
+    assert.deepStrictEqual(result.rows[0].TSTZ, bv);
 
   });
 
@@ -316,7 +316,7 @@ describe('102. bindTimestamp.js', function() {
       { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
     assert(result);
-    assert.deepEqual(result.rows, []);
+    assert.deepStrictEqual(result.rows, []);
   });
 
   it('102.11 Negative - INOUT bind, out bind value and type mismatch', async function() {
@@ -345,7 +345,7 @@ describe('102. bindTimestamp.js', function() {
       { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
     assert(result);
-    assert.deepEqual(result.rows, []);
+    assert.deepStrictEqual(result.rows, []);
   });
 
   it('102.12 DML, INOUT bind, Null values', async function() {
@@ -365,7 +365,7 @@ describe('102. bindTimestamp.js', function() {
       { autoCommit: true });
 
     assert(result);
-    assert.deepEqual(result.outBinds.ts1[0], bv1);
+    assert.deepStrictEqual(result.outBinds.ts1[0], bv1);
     assert.strictEqual(result.outBinds.tz1[0], null);
 
     result = await connection.execute(
@@ -373,7 +373,7 @@ describe('102. bindTimestamp.js', function() {
       { i: id },
       { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
-    assert.deepEqual(result.rows[0].TS, bv1);
+    assert.deepStrictEqual(result.rows[0].TS, bv1);
     assert.strictEqual(result.rows[0].TSTZ, bv2);
   });
 
@@ -414,8 +414,8 @@ describe('102. bindTimestamp.js', function() {
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
       assert(result);
-      assert.deepEqual(result.rows[0].TS, bv1);
-      assert.deepEqual(result.rows[0].TSTZ, bv2);
+      assert.deepStrictEqual(result.rows[0].TS, bv1);
+      assert.deepStrictEqual(result.rows[0].TSTZ, bv2);
     });
 
     it('102.14 PL/SQL, IN bind, bind by position', async function() {
@@ -438,8 +438,8 @@ describe('102. bindTimestamp.js', function() {
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
       assert(result);
-      assert.deepEqual(result.rows[0].TS, bv1);
-      assert.deepEqual(result.rows[0].TSTZ, bv2);
+      assert.deepStrictEqual(result.rows[0].TS, bv1);
+      assert.deepStrictEqual(result.rows[0].TSTZ, bv2);
     });
 
     it('102.15 PL/SQL, IN bind, Null', async function() {
@@ -491,7 +491,7 @@ describe('102. bindTimestamp.js', function() {
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
       assert(result);
-      assert.deepEqual(result.rows, []);
+      assert.deepStrictEqual(result.rows, []);
     });
 
     const  negBindIn = async function(sequence, inType) {
@@ -517,7 +517,7 @@ describe('102. bindTimestamp.js', function() {
         { i: sequence },
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
       assert(result);
-      assert.deepEqual(result.rows, []);
+      assert.deepStrictEqual(result.rows, []);
 
     };
 
@@ -602,8 +602,8 @@ describe('102. bindTimestamp.js', function() {
         ]);
 
       assert(result);
-      assert.deepEqual(result.outBinds[0], in_ts);
-      assert.deepEqual(result.outBinds[1], in_tz);
+      assert.deepStrictEqual(result.outBinds[0], in_ts);
+      assert.deepStrictEqual(result.outBinds[1], in_tz);
     });
 
     it('102.26 PL/SQL, OUT bind, bind by name', async function() {

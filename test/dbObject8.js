@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -120,7 +120,7 @@ describe('207. dbObject8.js', () => {
     farm2.HARVEST.append('tomatoes');  // extend the collection
     // console.log(farm2.HARVEST.getValues());
     crops[1] = farm2.HARVEST.getValues();
-    assert.deepEqual(crops[1], [ 'carrots', 'tomatoes' ]);
+    assert.deepStrictEqual(crops[1], [ 'carrots', 'tomatoes' ]);
 
     await conn.execute(
       `INSERT INTO ${TABLE} (id, farm) VALUES (:id, :f)`,
@@ -182,7 +182,7 @@ describe('207. dbObject8.js', () => {
       assert.strictEqual(farm.FARMERNAME, names[i]);
 
       const harvests = farm.HARVEST.getValues();
-      assert.deepEqual(harvests, crops[i]);
+      assert.deepStrictEqual(harvests, crops[i]);
       i++;
     }
   }); // 207.1

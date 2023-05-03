@@ -205,7 +205,7 @@ describe('244.dataTypeJson.js', function() {
       assert.strictEqual(result.rowsAffected, binds.length);
       sql = "SELECT * FROM " + tableName + " ORDER BY id";
       result = await connection.execute(sql);
-      assert.deepEqual(result.rows, binds);
+      assert.deepStrictEqual(result.rows, binds);
     }); // 244.3.1
 
   }); // 244.3
@@ -273,7 +273,7 @@ describe('244.dataTypeJson.js', function() {
         c: { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 2000 }
       };
       const result = await connection.execute(run_proc_out, binds);
-      assert.deepEqual(result.outBinds.c, jsonVal);
+      assert.deepStrictEqual(result.outBinds.c, jsonVal);
     }); // 244.4.1
 
     it('244.4.2 bind by position', async function() {
@@ -289,7 +289,7 @@ describe('244.dataTypeJson.js', function() {
         { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 10 }
       ];
       const result = await connection.execute(run_proc_out, binds);
-      assert.deepEqual(result.outBinds[0], jsonVal);
+      assert.deepStrictEqual(result.outBinds[0], jsonVal);
     }); // 244.4.2
   });  // 244.4
 
@@ -342,7 +342,7 @@ describe('244.dataTypeJson.js', function() {
         c: { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_INOUT, maxSize: 2000 }
       };
       let result = await connection.execute(sqlRun, binds);
-      assert.deepEqual(result.outBinds.c, jsonVal);
+      assert.deepStrictEqual(result.outBinds.c, jsonVal);
     }); // 244.5.1
 
     it('244.5.2 bind by position', async function() {
@@ -353,7 +353,7 @@ describe('244.dataTypeJson.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_INOUT, maxSize: 10 }
       ];
       const result = await connection.execute(sqlRun, binds);
-      assert.deepEqual(result.outBinds[0], jsonVal);
+      assert.deepStrictEqual(result.outBinds[0], jsonVal);
     }); // 244.5.2
 
   }); // 244.5
@@ -423,15 +423,15 @@ describe('244.dataTypeJson.js', function() {
         output: { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT }
       };
       let result = await connection.execute(run_proc_in, binds);
-      assert.deepEqual(result.outBinds.output, jsonVal);
+      assert.deepStrictEqual(result.outBinds.output, jsonVal);
       binds = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 2000 },
         output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
       };
       result = await connection.execute(run_proc_out, binds);
-      assert.deepEqual(result.outBinds.c, jsonVal);
-      assert.deepEqual(result.outBinds.output, sequence);
+      assert.deepStrictEqual(result.outBinds.c, jsonVal);
+      assert.deepStrictEqual(result.outBinds.output, sequence);
     }); // 244.6.1
 
     it('244.6.2 bind by position', async function() {
@@ -443,15 +443,15 @@ describe('244.dataTypeJson.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN, maxSize: 10 }
       ];
       let result = await connection.execute(run_proc_in, binds);
-      assert.deepEqual(result.outBinds[0], jsonVal);
+      assert.deepStrictEqual(result.outBinds[0], jsonVal);
       binds = [
         { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
         { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 10 }
       ];
       result = await connection.execute(run_proc_out, binds);
-      assert.deepEqual(result.outBinds[1], jsonVal);
-      assert.deepEqual(result.outBinds[0], sequence);
+      assert.deepStrictEqual(result.outBinds[1], jsonVal);
+      assert.deepStrictEqual(result.outBinds[0], sequence);
     }); // 244.6.1
 
   }); // 244.6
@@ -505,7 +505,7 @@ describe('244.dataTypeJson.js', function() {
         c: { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_INOUT, maxSize: 2000 }
       };
       const result = await connection.execute(sqlRun, binds);
-      assert.deepEqual(result.outBinds.c, jsonVal);
+      assert.deepStrictEqual(result.outBinds.c, jsonVal);
     }); // 244.7.1
 
     it('244.7.2 bind by position', async function() {
@@ -516,7 +516,7 @@ describe('244.dataTypeJson.js', function() {
         { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_INOUT, maxSize: 10 }
       ];
       const result = await connection.execute(sqlRun, binds);
-      assert.deepEqual(result.outBinds[0], jsonVal);
+      assert.deepStrictEqual(result.outBinds[0], jsonVal);
     }); // 244.7.2
 
   }); // 244.7
@@ -578,7 +578,7 @@ describe('244.dataTypeJson.js', function() {
         output: { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 2000 }
       };
       const result = await connection.execute(sql, binds);
-      assert.deepEqual(result.outBinds.output[0], jsonVal);
+      assert.deepStrictEqual(result.outBinds.output[0], jsonVal);
     }); // 244.8.1
 
     it('244.8.2 bind by position', async function() {
@@ -592,7 +592,7 @@ describe('244.dataTypeJson.js', function() {
         { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT, maxSize: 2000 }
       ];
       const result = await connection.execute(sql, binds);
-      assert.deepEqual(result.outBinds[0][0], jsonVal);
+      assert.deepStrictEqual(result.outBinds[0][0], jsonVal);
     }); // 244.8.2
 
   }); // 244.8

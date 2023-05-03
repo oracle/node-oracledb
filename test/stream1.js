@@ -172,7 +172,7 @@ describe('13. stream1.js', function() {
       await new Promise((resolve, reject) => {
         stream.on('error', reject);
         stream.on('data', (data) => {
-          assert.deepEqual(data, ['staff 10']);
+          assert.deepStrictEqual(data, ['staff 10']);
           counter++;
         });
         stream.on('end', stream.destroy);
@@ -191,7 +191,7 @@ describe('13. stream1.js', function() {
       await new Promise((resolve, reject) => {
         stream.on('error', reject);
         stream.on('data', (data) => {
-          assert.deepEqual(data, {
+          assert.deepStrictEqual(data, {
             EMPLOYEE_NAME: 'staff ' + (counter + 1)
           });
           counter++;

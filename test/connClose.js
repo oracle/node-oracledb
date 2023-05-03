@@ -136,34 +136,20 @@ describe('52. connClose.js', function() {
 
   it('52.9 can not call method, queryStream()', async function() {
     const connection = await oracledb.getConnection(dbConfig);
-    assert(connection);
     await connection.close();
     const stream = await connection.queryStream("select sysdate from dual");
-    assert(stream);
 
-    var unexpectederr;
-    stream.on("data", function(data) {
-      assert.ifError(data);
-      unexpectederr = new Error("should not emit 'data' event!");
-    });
-
-    stream.on("end", function() {
-      assert.ifError("should not emit 'end' event!");
-      unexpectederr = new Error("should not emit 'end' event!");
-      stream.destroy();
-    });
-
-    stream.on("close", function() {
-      return unexpectederr;
-    });
-
-    stream.on("error", function(err) {
-      assert(err);
-      assert.strictEqual(
-        err.message,
-        "NJS-003: invalid connection"
-      );
-    });
+    await assert.rejects(
+      async () => {
+        await new Promise((resolve, reject) => {
+          stream.on('data', () => reject(new Error('data event!')));
+          stream.on('error', reject);
+          stream.on('end', stream.destroy);
+          stream.on('close', resolve);
+        });
+      },
+      /NJS-003:/
+    );
   }); // 52.9
 
   it('52.10 can not call release() multiple times', async function() {
@@ -171,9 +157,7 @@ describe('52. connClose.js', function() {
     assert(connection);
     await connection.close();
     await assert.rejects(
-      async () => {
-        await connection.commit();
-      },
+      async () => await connection.commit(),
       /NJS-003: invalid connection/
     );
   }); // 52.10
@@ -183,9 +167,7 @@ describe('52. connClose.js', function() {
     assert(connection);
     await connection.close();
     await assert.rejects(
-      async () => {
-        await connection.rollback();
-      },
+      async () => await connection.rollback(),
       /NJS-003: invalid connection/
     );
   }); // 52.11

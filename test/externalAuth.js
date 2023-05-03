@@ -37,206 +37,152 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
-const async    = require('async');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
 describe('5. externalAuth.js', function() {
 
   describe('5.1 tests that work both when DB has configured externalAuth and not configured', function() {
 
-    it('5.1.1 can get connection from oracledb with correct user/password when externalAuth is disabled', function(done) {
+    it('5.1.1 can get connection from oracledb with correct user/password when externalAuth is disabled', async function() {
 
-      async.waterfall([
-        function(callback) {
-          oracledb.getConnection(
-            {
-              externalAuth:  false,
-              user:          dbConfig.user,
-              password:      dbConfig.password,
-              connectString: dbConfig.connectString
-            },
-            function(err, connection) {
-              callback(err, connection);
-            }
-          );
-        },
-        function(connection, callback) {
-          connection.execute(
-            "select (7+8) from dual",
-            function(err, result) {
-              (result.rows[0][0]).should.equal(15);
-              callback(err, connection);
-            }
-          );
-        }
-      ], function(err, connection) {
-        should.not.exist(err);
-        connection.close(function(err) {
-          should.not.exist(err);
-          done();
-        });
-      });
-
-    }); // 5.1.1
-
-    it('5.1.2 throws error when getting connection from oracledb with correct user/password when externalAuth is enabled', function(done) {
-
-      oracledb.getConnection(
+      const connection = await oracledb.getConnection(
         {
-          externalAuth:  true,
+          externalAuth:  false,
           user:          dbConfig.user,
           password:      dbConfig.password,
           connectString: dbConfig.connectString
-        },
-        function(err, conn) {
-          should.exist(err);
-          (err.message).should.startWith("DPI-1032:");
-          // DPI-1032: user and password should not be set when using external authentication
-          should.not.exist(conn);
-          done();
         }
+      );
+      const result = await connection.execute("select (7+8) from dual");
+      assert.strictEqual(result.rows[0][0], 15);
+
+      await connection.close();
+
+    }); // 5.1.1
+
+    it('5.1.2 throws error when getting connection from oracledb with correct user/password when externalAuth is enabled', async function() {
+
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(
+            {
+              externalAuth:  true,
+              user:          dbConfig.user,
+              password:      dbConfig.password,
+              connectString: dbConfig.connectString
+            }
+          );
+        },
+        // DPI-1032: user and password should not be set when using external authentication
+        /DPI-1032:/
       );
 
     }); // 5.1.2
 
-    it("5.1.3 throws error when gettting connection from oracledb given only invalid 'user' when externalAuth is enabled", function(done) {
+    it("5.1.3 throws error when gettting connection from oracledb given only invalid 'user' when externalAuth is enabled", async function() {
 
-      oracledb.getConnection(
-        {
-          externalAuth:  true,
-          user:          "[ invalid_user ]",
-          connectString: dbConfig.connectString
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(
+            {
+              externalAuth: true,
+              user:          "[ invalid_user ]",
+              connectString: dbConfig.connectString
+            }
+          );
         },
-        function(err, conn) {
-          should.exist(err);
-          (err.message).should.startWith("ORA-01017:");
-          // ORA-01017: invalid username/password; logon denied
-          should.not.exist(conn);
-          done();
-        }
+        // ORA-01017: invalid username/password; logon denied
+        /ORA-01017:/
       );
-
     }); // 5.1.3
 
-    it("5.1.4 throws error when gettting connection from oracledb given only 'password' when externalAuth is enabled", function(done) {
+    it("5.1.4 throws error when gettting connection from oracledb given only 'password' when externalAuth is enabled", async function() {
 
-      oracledb.getConnection(
-        {
-          externalAuth:  true,
-          password:      dbConfig.password,
-          connectString: dbConfig.connectString
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(
+            {
+              externalAuth:  true,
+              password:      dbConfig.password,
+              connectString: dbConfig.connectString
+            }
+          );
         },
-        function(err, conn) {
-          should.exist(err);
-          (err.message).should.startWith("DPI-1032:");
-          // DPI-1032: user and password should not be set when using external authentication
-
-          should.not.exist(conn);
-          done();
-        }
+        // DPI-1032: user and password should not be set when using external authentication
+        /DPI-1032:/
       );
-
     }); // 5.1.4
 
-    it("5.1.5 can get pool from oracledb with user/password when externalAuth is disabled", function(done) {
+    it("5.1.5 can get pool from oracledb with user/password when externalAuth is disabled", async function() {
 
-      async.waterfall([
-        function(callback) {
-          oracledb.createPool(
+      const pool = await oracledb.createPool(
+        {
+          externalAuth:  false,
+          user:          dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString
+        }
+      );
+      const connection = await pool.getConnection();
+      const result = await connection.execute("select (3+5) from dual");
+      assert.strictEqual(result.rows[0][0], 8);
+
+      await connection.close();
+      await pool.close();
+    }); // 5.1.5
+
+    it("5.1.6 throws error when getting pool from oracledb given user/password when externalAuth is enabled", async function() {
+
+      await assert.rejects(
+        async () => {
+          await oracledb.createPool(
             {
-              externalAuth:  false,
+              externalAuth:  true,
               user:          dbConfig.user,
               password:      dbConfig.password,
               connectString: dbConfig.connectString
-            },
-            function(err, pool) {
-              callback(err, pool);
             }
           );
         },
-        function(pool, callback) {
-          pool.getConnection(function(err, connection) {
-            callback(err, connection, pool);
-          });
-        },
-        function(connection, pool, callback) {
-          connection.execute(
-            "select (3+5) from dual",
-            function(err, result) {
-              (result.rows[0][0]).should.equal(8);
-              callback(err, connection, pool);
-            }
-          );
-        }
-      ], function(err, connection, pool) {
-        should.not.exist(err);
-        connection.close(function(err) {
-          should.not.exist(err);
-          pool.close(function(err) {
-            should.not.exist(err);
-            done();
-          });
-        });
-      });
-
-    }); // 5.1.5
-
-    it("5.1.6 throws error when getting pool from oracledb given user/password when externalAuth is enabled", function(done) {
-
-      oracledb.createPool(
-        {
-          externalAuth:  true,
-          user:          dbConfig.user,
-          password:      dbConfig.password,
-          connectString: dbConfig.connectString
-        },
-        function(err, pool) {
-          should.exist(err);
-          (err.message).should.startWith("DPI-1032:");
-          // DPI-1032: user and password should not be set when using external authentication
-          should.not.exist(pool);
-          done();
-        }
+        // DPI-1032: user and password should not be set when using external authentication
+        /DPI-1032:/
       );
-
     }); // 5.1.6
 
-    it("5.1.7 throws error when getting pool from oracledb only given username when externalAuth is enabled", function(done) {
+    it("5.1.7 throws error when getting pool from oracledb only given username when externalAuth is enabled", async function() {
 
-      oracledb.createPool(
-        {
-          externalAuth:  true,
-          user:          dbConfig.user,
-          connectString: dbConfig.connectString
+      await assert.rejects(
+        async () => {
+          await oracledb.createPool(
+            {
+              externalAuth:  true,
+              user:          dbConfig.user,
+              connectString: dbConfig.connectString
+            }
+          );
         },
-        function(err, pool) {
-          should.exist(err);
-          (err.message).should.startWith("DPI-1032:");
-          should.not.exist(pool);
-          done();
-        }
+        // DPI-1032: user and password should not be set when using external authentication
+        /DPI-1032:/
       );
+    }); // 5.1.7
 
-    });
+    it("5.1.8 throws error when getting pool from oracledb only given password when externalAuth is enabled", async function() {
 
-    it("5.1.8 throws error when getting pool from oracledb only given password when externalAuth is enabled", function(done) {
-
-      oracledb.createPool(
-        {
-          externalAuth:  true,
-          password:      dbConfig.password,
-          connectString: dbConfig.connectString
+      await assert.rejects(
+        async () => {
+          await oracledb.createPool(
+            {
+              externalAuth:  true,
+              password:      dbConfig.password,
+              connectString: dbConfig.connectString
+            }
+          );
         },
-        function(err, pool) {
-          should.exist(err);
-          (err.message).should.startWith("DPI-1032:");
-          should.not.exist(pool);
-          done();
-        }
+        // DPI-1032: user and password should not be set when using external authentication
+        /DPI-1032:/
       );
-
-    });
+    }); // 5.1.8
 
   }); // 5.1
 
@@ -246,247 +192,142 @@ describe('5. externalAuth.js', function() {
       if (dbConfig.test.externalAuth !== true) this.skip();
     });
 
-    it("5.2.1 can get connection from oracledb with external authentication", function(done) {
+    it("5.2.1 can get connection from oracledb with external authentication", async function() {
 
-      async.waterfall([
-        function(callback) {
-          oracledb.getConnection(
-            {
-              externalAuth:  true,
-              connectString: dbConfig.connectString
-            },
-            function(err, connection) {
-              callback(err, connection);
-            }
-          );
-        },
-        function(connection, callback) {
-          connection.execute(
-            "select (7+8) from dual",
-            function(err, result) {
-              (result.rows[0][0]).should.equal(15);
-              callback(err, connection);
-            }
-          );
+
+      const connection = await oracledb.getConnection(
+        {
+          externalAuth:  true,
+          connectString: dbConfig.connectString
         }
-      ], function(err, connection) {
-        should.not.exist(err);
-        connection.close(function(err) {
-          should.not.exist(err);
-          done();
-        });
-      });
+      );
+      const result = await connection.execute("select (7+8) from dual");
+      assert.strictEqual(result.rows[0][0], 15);
 
+      await connection.close();
     }); // 5.2.1
 
-    it("5.2.2 can get pool from oracledb with external authentication", function(done) {
+    it("5.2.2 can get pool from oracledb with external authentication", async function() {
 
-      async.waterfall([
-        function(callback) {
-          oracledb.createPool(
-            {
-              externalAuth: true,
-              connectString: dbConfig.connectString
-            },
-            function(err, pool) {
-              // verify poolMin value
-              (pool.connectionsOpen).should.be.exactly(0);
-              callback(err, pool);
-            }
-          );
-        },
-        function(pool, callback) {
-          pool.getConnection(function(err, connection) {
-            callback(err, connection, pool);
-          });
-        },
-        function(connection, pool, callback) {
-          connection.execute(
-            "select (3+5) from dual",
-            function(err, result) {
-              (result.rows[0][0]).should.equal(8);
-              callback(err, connection, pool);
-            }
-          );
+      const pool = await oracledb.createPool(
+        {
+          externalAuth: true,
+          connectString: dbConfig.connectString
         }
-      ], function(err, connection, pool) {
-        should.not.exist(err);
-        connection.close(function(err) {
-          should.not.exist(err);
-          pool.close(function(err) {
-            should.not.exist(err);
-            done();
-          });
-        });
-      });
+      );
+      // verify poolMin value
+      assert.strictEqual(pool.connectionsOpen, 0);
+      const connection = await pool.getConnection();
+      const result = await connection.execute("select (3+5) from dual");
+      assert.strictEqual(result.rows[0][0], 8);
 
+      await connection.close();
+      await pool.close();
     }); // 5.2.2
 
-    it("5.2.3 gets multiple connections from oracledb", function(done) {
+    it("5.2.3 gets multiple connections from oracledb", async function() {
 
-      var getConns = function(id, callback) {
-        oracledb.getConnection(
+      const getConns = async function(id) {
+        let connection = await oracledb.getConnection(
           {
             externalAuth:  true,
             connectString: dbConfig.connectString
-          },
-          function(err, connection) {
-            callback(err, {
-              num:  id,
-              inst: connection
-            });
           }
         );
+        return {num:  id, inst: connection};
       };
 
-      var closeConns = function(conns, cb) {
-        async.map(conns, function(item, callback) {
+      const closeConns = async function(conns) {
+        for (let item of conns) {
           // console.log("-- close conn " + item.num);
-          var connection = item.inst;
-          connection.execute(
-            "select (5+7) from dual",
-            function(err, result) {
-              should.not.exist(err);
-              (result.rows[0][0]).should.equal(12);
-              connection.close(callback);
-            }
-          );
-        }, function(err) {
-          should.not.exist(err);
-          cb();
-        });
+          let connection = item.inst;
+          let result = await connection.execute("select (5+7) from dual");
+          assert.strictEqual(result.rows[0][0], 12);
+
+          await connection.close();
+        }
       };
 
       // Main function of this case
-      async.times(9, function(n, next) {
-        getConns(n, function(err, conn) {
-          next(err, conn);
-        });
-      }, function(err, arr) {
-        should.not.exist(err);
-        closeConns(arr, done);
-      });
+      let connArr = []; // Initialize array of connections with IDs from 1 to 9
+      for (let id = 1; id <= 9; id++) {
+        connArr[id] = await getConns(id);
+      }
+
+      await closeConns(connArr);
 
     }); // 5.2.3
 
-    it("5.2.4 gets multiple pools from oracledb", function(done) {
+    it("5.2.4 gets multiple pools from oracledb", async function() {
 
-      var getPools = function(id, callback) {
-        oracledb.createPool(
+      const getPools = async function(id) {
+        let pool = await oracledb.createPool(
           {
             externalAuth:  true,
             connectString: dbConfig.connectString
-          },
-          function(err, pool) {
-            callback(err, {
-              num:  id,
-              inst: pool
-            });
           }
         );
+        return {num:  id, inst: pool};
       };
 
-      var closePools = function(pools, cb) {
-        async.map(pools, function(item, callback) {
+      const closePools = async function(pools) {
+        for (let item of pools) {
           // console.log("-- close pool " + item.num);
-          var pool = item.inst;
-          pool.getConnection(function(err, connection) {
-            should.not.exist(err);
-            connection.execute(
-              "select (8+9) from dual",
-              function(err, result) {
-                should.not.exist(err);
-                (result.rows[0][0]).should.equal(17);
-                connection.close(function(err) {
-                  should.not.exist(err);
-                  pool.close(callback);
-                });
-              }
-            );
-          });
-        }, function(err) {
-          should.not.exist(err);
-          cb();
-        });
+          let pool = item.inst;
+          let connection = await pool.getConnection();
+          let result = await connection.execute("select (8+9) from dual");
+          assert.strictEqual(result.rows[0][0], 17);
+
+          await connection.close();
+          await pool.close();
+        }
       };
 
       // Main function of this case
-      async.times(9, function(n, next) {
-        getPools(n, function(err, poolInst) {
-          next(err, poolInst);
-        });
-      }, function(err, arr) {
-        should.not.exist(err);
-        closePools(arr, done);
-      });
+      let poolArr = []; // Initialize array of pools with IDs from 1 to 9
+      for (let id = 1; id <= 9; id++) {
+        poolArr[id] = await getPools(id);
+      }
 
+      await closePools(poolArr);
     }); // 5.2.4
 
-    it("5.2.5 poolMin no longer takes effect under externalAuth", function(done) {
+    it("5.2.5 poolMin no longer takes effect under externalAuth", async function() {
 
-      oracledb.createPool(
+      const pool = await oracledb.createPool(
         {
           externalAuth: true,
           connectString: dbConfig.connectString,
           poolMin: 5,
           poolMax: 20,
           poolIncrement: 2
-        },
-        function(err, pool) {
-          (pool.connectionsOpen).should.be.exactly(0);
-
-          pool.close(function(err) {
-            should.not.exist(err);
-            done();
-          });
         }
       );
+      assert.strictEqual(pool.connectionsOpen, 0);
 
-    });
+      await pool.close();
+    }); // 5.2.5
 
-    it("5.2.6 poolIncrement no longer takes effect", function(done) {
+    it("5.2.6 poolIncrement no longer takes effect", async function() {
 
-      async.waterfall([
-        function(callback) {
-          oracledb.createPool(
-            {
-              externalAuth: true,
-              connectString: dbConfig.connectString,
-              poolMin: 5,
-              poolMax: 20,
-              poolIncrement: 2
-            },
-            function(err, pool) {
-              callback(err, pool);
-            }
-          );
-        },
-        function(pool, callback) {
-          pool.getConnection(function(err, conn1) {
-            (pool.connectionsOpen).should.be.exactly(1);
-            callback(err, conn1, pool);
-          });
-        },
-        function(conn1, pool, callback) {
-          pool.getConnection(function(err, conn2) {
-            (pool.connectionsOpen).should.be.exactly(2);
-            callback(err, conn1, conn2, pool);
-          });
+      const pool = await oracledb.createPool(
+        {
+          externalAuth: true,
+          connectString: dbConfig.connectString,
+          poolMin: 5,
+          poolMax: 20,
+          poolIncrement: 2
         }
-      ], function(err, conn1, conn2, pool) {
-        should.not.exist(err);
-        conn1.close(function(err) {
-          should.not.exist(err);
-          conn2.close(function(err) {
-            should.not.exist(err);
-            pool.close(function(err) {
-              should.not.exist(err);
-              done();
-            });
-          });
-        });
-      });
-    });
+      );
+      const conn1 = await pool.getConnection();
+      assert.strictEqual(pool.connectionsOpen, 1);
+      const conn2 = await pool.getConnection();
+      assert.strictEqual(pool.connectionsOpen, 2);
+
+      await conn1.close();
+      await conn2.close();
+      await pool.close();
+    }); // 5.2.6
 
   }); // 5.2
 

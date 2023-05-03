@@ -177,7 +177,7 @@ describe('58. properties.js', function() {
       const t = oracledb.fetchAsString;
       oracledb.fetchAsString = [oracledb.DATE];
 
-      assert.deepEqual(t, defaultValues.fetchAsString);
+      assert.deepStrictEqual(t, defaultValues.fetchAsString);
       assert.notEqual(oracledb.fetchAsString, defaultValues.fetchAsString);
     });
 
@@ -245,7 +245,7 @@ describe('58. properties.js', function() {
       const t = oracledb.fetchAsBuffer;
       oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 
-      assert.deepEqual(t, defaultValues.fetchAsBuffer);
+      assert.deepStrictEqual(t, defaultValues.fetchAsBuffer);
       assert.notEqual(oracledb.fetchAsBuffer, defaultValues.fetchAsBuffer);
     });
 

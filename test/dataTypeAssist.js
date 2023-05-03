@@ -788,7 +788,7 @@ assist.dataTypeSupport = async function(connection, tableName, array) {
     else if (Object.prototype.toString.call(result.rows[i].CONTENT) === '[object Date]')
       assert.strictEqual(result.rows[i].CONTENT.getTime(), array[result.rows[i].NUM].getTime());
     else if (typeof result.rows[i].CONTENT === 'object')
-      assert.deepEqual(result.rows[i].CONTENT, assist.jsonExpectedResults[result.rows[i].NUM]);
+      assert.deepStrictEqual(result.rows[i].CONTENT, assist.jsonExpectedResults[result.rows[i].NUM]);
     else
       assert.ifError(new Error('Uncaught data type!'));
   }
@@ -843,7 +843,7 @@ async function fetchRowsFromRS(rs, array) {
       else if (Object.prototype.toString.call(rows[i].CONTENT) === '[object Date]')
         assert.strictEqual(rows[i].CONTENT.getTime(), array[rows[i].NUM].getTime());
       else if (typeof rows[i].CONTENT === 'object')
-        assert.deepEqual(rows[i].CONTENT, assist.jsonExpectedResults[rows[i].NUM]);
+        assert.deepStrictEqual(rows[i].CONTENT, assist.jsonExpectedResults[rows[i].NUM]);
       else
         assert.ifError(new Error('Uncaught data type!'));
     }
@@ -907,7 +907,7 @@ assist.verifyNullValues = async function(connection, tableName) {
   async function verifyNull(id) {
     const result = await connection.execute(`SELECT content FROM ` + tableName + ` WHERE num = :1`,
       [id]);
-    assert.deepEqual(result.rows, [ [null] ]);
+    assert.deepStrictEqual(result.rows, [ [null] ]);
   }
 };
 

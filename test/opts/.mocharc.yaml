@@ -1,7 +1,7 @@
 # Mocha options
 
 timeout: false
-require: ['async', 'should']
+require: ['should']
 retries: 1
 trace-warnings: true
 spec:

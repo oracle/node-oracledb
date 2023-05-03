@@ -370,8 +370,8 @@ describe('81. clobDMLBindAsString.js', function() {
           lobbv: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: contentLength }
         },
         { autoCommit: false });
-      assert.deepEqual(result.rowsAffected, 1);
-      assert.deepEqual(result.outBinds.lobbv.length, 1);
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.outBinds.lobbv.length, 1);
       await checkInsertResult(id, content, specialStr);
     }); // 81.1.18
 

@@ -97,7 +97,7 @@ describe('163. executeMany1.js', function() {
       [ 5, 'Test 5 (Five)' ]
     ];
     result = await conn.execute(sql);
-    assert.deepEqual(result.rows, expectVal);
+    assert.deepStrictEqual(result.rows, expectVal);
     await dotruncate();
   }); // 163.1
 
@@ -121,7 +121,7 @@ describe('163. executeMany1.js', function() {
     assert.strictEqual(result.rowsAffected, binds.length);
     sql = "SELECT * FROM nodb_tab_xmany ORDER BY ID";
     result = await conn.execute(sql);
-    assert.deepEqual(result.rows, binds);
+    assert.deepStrictEqual(result.rows, binds);
     await dotruncate();
   }); // 163.2
 
@@ -185,15 +185,15 @@ describe('163. executeMany1.js', function() {
     result = await conn.executeMany(sql, binds, options);
     assert.strictEqual(result.rowsAffected, 7);
     assert.strictEqual(result.outBinds.length, 3);
-    assert.deepEqual(
+    assert.deepStrictEqual(
       result.outBinds[0],
       [ [ 1 ], [ 'Test 1 (One)' ] ]
     );
-    assert.deepEqual(
+    assert.deepStrictEqual(
       result.outBinds[1],
       [ [ 2, 3, 4, 5 ], [ 'Test 2 (Two)', 'Test 3 (Three)', 'Test 4 (Four)', 'Test 5 (Five)' ]]
     );
-    assert.deepEqual(
+    assert.deepStrictEqual(
       result.outBinds[2],
       [ [ 6, 7 ], [ 'Test 6 (Six)', 'Test 7 (Seven)' ] ]
     );
@@ -212,7 +212,7 @@ describe('163. executeMany1.js', function() {
       ]
     };
     const result = await conn.executeMany(plsql, binds, options);
-    assert.deepEqual(
+    assert.deepStrictEqual(
       result.outBinds,
       [ [ 2, 'X' ], [ 4, 'XX' ], [ 6, 'XXX' ], [ 8, 'XXXX' ], [ 12, 'XXXXXX' ] ]
     );
@@ -235,7 +235,7 @@ describe('163. executeMany1.js', function() {
     const options = { dmlRowCounts: true };
     const result = await conn.executeMany(sql, binds, options);
     assert.strictEqual(result.rowsAffected, 9);
-    assert.deepEqual(result.dmlRowCounts, [ 3, 2, 4 ]);
+    assert.deepStrictEqual(result.dmlRowCounts, [ 3, 2, 4 ]);
     await dropParentChildTables(childTable, parentTable);
   }); // 163.6
 
@@ -273,7 +273,7 @@ describe('163. executeMany1.js', function() {
     };
     const result = await conn.executeMany(sql, binds, options);
     assert.strictEqual(result.rowsAffected, 6);
-    assert.deepEqual(result.dmlRowCounts, [ 1, 1, 1, 0, 1, 1, 0, 1 ]);
+    assert.deepStrictEqual(result.dmlRowCounts, [ 1, 1, 1, 0, 1, 1, 0, 1 ]);
     assert(result.batchErrors[0].message.startsWith('ORA-00001: '));
     // ORA-00001: unique constraint (HR.CHILDTAB_PK) violated
     assert(result.batchErrors[1].message.startsWith('ORA-02291: '));
@@ -388,7 +388,7 @@ describe('163. executeMany1.js', function() {
     const options = { bindDefs: bindDefs };
     const numIterations = 8;
     const result = await conn.executeMany(sql, numIterations, options);
-    assert.deepEqual(
+    assert.deepStrictEqual(
       result.outBinds,
       [ [ 1 ], [ 3 ], [ 6 ], [ 10 ], [ 15 ], [ 21 ], [ 28 ], [ 36 ] ]
     );
@@ -472,7 +472,7 @@ describe('163. executeMany1.js', function() {
       [ 10, 'Test 10 (Ten)' ]
     ];
     result = await conn.execute(sql);
-    assert.deepEqual(result.rows, expectVal);
+    assert.deepStrictEqual(result.rows, expectVal);
     await dotruncate();
   }); // 163.15
 

@@ -55,29 +55,29 @@ describe('269. Pool Timeout', function() {
       });
       assert.ok(pool);
       conn1 = await pool.getConnection();
-      assert.deepEqual(pool.connectionsOpen, 1);
-      assert.deepEqual(pool.connectionsInUse, 1);
+      assert.deepStrictEqual(pool.connectionsOpen, 1);
+      assert.deepStrictEqual(pool.connectionsInUse, 1);
       conn2 = await pool.getConnection();
-      assert.deepEqual(pool.connectionsOpen, 2);
-      assert.deepEqual(pool.connectionsInUse, 2);
+      assert.deepStrictEqual(pool.connectionsOpen, 2);
+      assert.deepStrictEqual(pool.connectionsInUse, 2);
       if (conn1)
         await conn1.close();
       if (conn2)
         await conn2.close();
       await sleep(5000);
       conn3 = await pool.getConnection();
-      assert.deepEqual(pool.connectionsOpen, 2);
-      assert.deepEqual(pool.connectionsInUse, 1);
+      assert.deepStrictEqual(pool.connectionsOpen, 2);
+      assert.deepStrictEqual(pool.connectionsInUse, 1);
       if (conn3)
         await conn3.close();
     } catch (err) {
-      assert.deepEqual(err, {});
+      assert.deepStrictEqual(err, {});
     } finally {
       try {
         if (pool)
           await pool.close(0);
       } catch (err) {
-        assert.deepEqual(err, {});
+        assert.deepStrictEqual(err, {});
       }
     }
   });
@@ -95,29 +95,29 @@ describe('269. Pool Timeout', function() {
       });
       assert.ok(pool);
       conn1 = await pool.getConnection();
-      assert.deepEqual(pool.connectionsOpen, 1);
-      assert.deepEqual(pool.connectionsInUse, 1);
+      assert.deepStrictEqual(pool.connectionsOpen, 1);
+      assert.deepStrictEqual(pool.connectionsInUse, 1);
       conn2 = await pool.getConnection();
-      assert.deepEqual(pool.connectionsOpen, 2);
-      assert.deepEqual(pool.connectionsInUse, 2);
+      assert.deepStrictEqual(pool.connectionsOpen, 2);
+      assert.deepStrictEqual(pool.connectionsInUse, 2);
       if (conn1)
         await conn1.close();
       if (conn2)
         await conn2.close();
       await sleep(5000);
       conn3 = await pool.getConnection();
-      assert.deepEqual(pool.connectionsOpen, 1);
-      assert.deepEqual(pool.connectionsInUse, 1);
+      assert.deepStrictEqual(pool.connectionsOpen, 1);
+      assert.deepStrictEqual(pool.connectionsInUse, 1);
       if (conn3)
         await conn3.close();
     } catch (err) {
-      assert.deepEqual(err, {});
+      assert.deepStrictEqual(err, {});
     } finally {
       try {
         if (pool)
           await pool.close(0);
       } catch (err) {
-        assert.deepEqual(err, {});
+        assert.deepStrictEqual(err, {});
       }
     }
   });
@@ -135,29 +135,29 @@ describe('269. Pool Timeout', function() {
       });
       assert.ok(pool);
       conn1 = await pool.getConnection();
-      assert.deepEqual(pool.connectionsOpen, 1);
-      assert.deepEqual(pool.connectionsInUse, 1);
+      assert.deepStrictEqual(pool.connectionsOpen, 1);
+      assert.deepStrictEqual(pool.connectionsInUse, 1);
       conn2 = await pool.getConnection();
-      assert.deepEqual(pool.connectionsOpen, 2);
-      assert.deepEqual(pool.connectionsInUse, 2);
+      assert.deepStrictEqual(pool.connectionsOpen, 2);
+      assert.deepStrictEqual(pool.connectionsInUse, 2);
       if (conn1)
         await conn1.close();
       if (conn2)
         await conn2.close();
       await sleep(5000);
       conn3 = await pool.getConnection();
-      assert.deepEqual(pool.connectionsOpen, 1);
-      assert.deepEqual(pool.connectionsInUse, 1);
+      assert.deepStrictEqual(pool.connectionsOpen, 1);
+      assert.deepStrictEqual(pool.connectionsInUse, 1);
       if (conn3)
         await conn3.close();
     } catch (err) {
-      assert.deepEqual(err, {});
+      assert.deepStrictEqual(err, {});
     } finally {
       try {
         if (pool)
           await pool.close(0);
       } catch (err) {
-        assert.deepEqual(err, {});
+        assert.deepStrictEqual(err, {});
       }
     }
   });
@@ -175,30 +175,30 @@ describe('269. Pool Timeout', function() {
       assert.ok(pool);
 
       conn1 = await pool.getConnection();
-      assert.deepEqual(pool.connectionsOpen, 1);
-      assert.deepEqual(pool.connectionsInUse, 1);
+      assert.deepStrictEqual(pool.connectionsOpen, 1);
+      assert.deepStrictEqual(pool.connectionsInUse, 1);
 
       conn2 = await pool.getConnection();
-      assert.deepEqual(pool.connectionsOpen, 2);
-      assert.deepEqual(pool.connectionsInUse, 2);
+      assert.deepStrictEqual(pool.connectionsOpen, 2);
+      assert.deepStrictEqual(pool.connectionsInUse, 2);
       if (conn1)
         await conn1.close();
       if (conn2)
         await conn2.close();
       await sleep(70000);
       conn3 = await pool.getConnection();
-      assert.deepEqual(pool.connectionsOpen, 1);
-      assert.deepEqual(pool.connectionsInUse, 1);
+      assert.deepStrictEqual(pool.connectionsOpen, 1);
+      assert.deepStrictEqual(pool.connectionsInUse, 1);
       if (conn3)
         await conn3.close();
     } catch (err) {
-      assert.deepEqual(err, {});
+      assert.deepStrictEqual(err, {});
     } finally {
       try {
         if (pool)
           await pool.close(0);
       } catch (err) {
-        assert.deepEqual(err, {});
+        assert.deepStrictEqual(err, {});
       }
     }
   });

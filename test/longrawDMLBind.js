@@ -232,7 +232,7 @@ describe('126. longrawDMLBind.js', function() {
   const fetch = async function(expected) {
     const sql = "select content from " + tableName + " where id = " + insertID;
     const result = await connection.execute(sql);
-    assert.deepEqual(result.rows[0][0], expected);
+    assert.deepStrictEqual(result.rows[0][0], expected);
   };
 
 });

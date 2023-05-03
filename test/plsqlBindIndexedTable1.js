@@ -149,8 +149,8 @@ describe('43. plsqlBindIndexedTable1.js', function() {
       };
       const sql = "BEGIN nodb_plsqlbindpack3.test(:strings, :numbers); END;";
       const result = await connection.execute(sql, bindvars);
-      assert.deepEqual(result.outBinds.strings, ['(John)', '(Doe)']);
-      assert.deepEqual(result.outBinds.numbers, [10, 20, 30, 4711]);
+      assert.deepStrictEqual(result.outBinds.strings, ['(John)', '(Doe)']);
+      assert.deepStrictEqual(result.outBinds.numbers, [10, 20, 30, 4711]);
       await connection.execute("DROP PACKAGE nodb_plsqlbindpack3");
     });
 
@@ -185,8 +185,8 @@ describe('43. plsqlBindIndexedTable1.js', function() {
       };
       const sql = "BEGIN nodb_plsqlbindpack4.test(:items, :strings, :numbers); END;";
       const result = await connection.execute(sql, bindvars);
-      assert.deepEqual(result.outBinds.strings, ['1', '2', '3']);
-      assert.deepEqual(result.outBinds.numbers, [1, 2, 3]);
+      assert.deepStrictEqual(result.outBinds.strings, ['1', '2', '3']);
+      assert.deepStrictEqual(result.outBinds.numbers, [1, 2, 3]);
       await connection.execute("DROP PACKAGE nodb_plsqlbindpack4");
     });
 
@@ -441,7 +441,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
       const result = await connection.execute(sql, bindvars);
       assert.strictEqual(result.outBinds.stringValue, 'Space odyssey');
       assert.strictEqual(result.outBinds.numberValue, 2001);
-      assert.deepEqual(result.outBinds.dateValue,
+      assert.deepStrictEqual(result.outBinds.dateValue,
         new Date(Date.UTC(1968, 3, 2)));
       await connection.execute("DROP PROCEDURE nodb_plsqlbindproc33");
     });
@@ -465,7 +465,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
       const result = await connection.execute(sql, bindvars);
       assert.strictEqual(result.outBinds[0], 'Space odyssey');
       assert.strictEqual(result.outBinds[1], 2001);
-      assert.deepEqual(result.outBinds[2], new Date(Date.UTC(1968, 3, 2)));
+      assert.deepStrictEqual(result.outBinds[2], new Date(Date.UTC(1968, 3, 2)));
       await connection.execute("DROP PROCEDURE nodb_plsqlbindproc34");
     });
 

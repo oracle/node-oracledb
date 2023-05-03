@@ -536,16 +536,16 @@ describe('115. urowidDMLBindAsString2.js', function() {
       counter++;
       let result_id = data[0];
       if (result_id === id_1) {
-        assert.deepEqual(data, [ id_1, str, urowid_1 ]);
+        assert.deepStrictEqual(data, [ id_1, str, urowid_1 ]);
       } else {
-        assert.deepEqual(data, [ id_2, str, urowid_2 ]);
+        assert.deepStrictEqual(data, [ id_2, str, urowid_2 ]);
       }
     });
 
     stream.on('metadata', function(metadata) {
       counter++;
       assert(metadata != null);
-      assert.deepEqual(metadata, [ { name: 'C1' }, { name: 'C2' }, { name: 'ROWID' } ]);
+      assert.deepStrictEqual(metadata, [ { name: 'C1' }, { name: 'C2' }, { name: 'ROWID' } ]);
     });
 
     stream.on('end', function(err) {

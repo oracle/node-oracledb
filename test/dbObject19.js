@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -87,7 +87,7 @@ describe('243. dbObject19.js', () => {
 
       const outData = result.outBinds.out;
       // console.dir(outData);
-      assert.deepEqual(outData, { ID: 101, NAME: 'Test User 1' });
+      assert.deepStrictEqual(outData, { ID: 101, NAME: 'Test User 1' });
 
       const sql = `DROP PROCEDURE ${PROC}`;
       await conn.execute(sql);
@@ -141,14 +141,14 @@ describe('243. dbObject19.js', () => {
       result = await conn.execute(plsql, bindVar, { outFormat: oracledb.OBJECT });
       // Verify the OUT-bind value of the IN-OUT-bind variable
       // console.dir(result.outBinds.a);
-      assert.deepEqual(result.outBinds.a, objData1);
+      assert.deepStrictEqual(result.outBinds.a, objData1);
 
       sql = `SELECT * FROM ${TABLE} WHERE NUM = ${seqTwo}`;
       result = await conn.execute(sql, [], { outFormat: oracledb.OBJECT });
       // Verify the IN-bind value of the IN-OUT-bind variable
       // console.dir(result.rows[0]);
       assert.strictEqual(result.rows[0].NUM, seqTwo);
-      assert.deepEqual(result.rows[0].PERSON, objData2);
+      assert.deepStrictEqual(result.rows[0].PERSON, objData2);
 
       sql = `DROP PROCEDURE ${PROC}`;
       await conn.execute(sql);
@@ -190,7 +190,7 @@ describe('243. dbObject19.js', () => {
 
       const outData = result.outBinds.out;
       // console.dir(outData);
-      assert.deepEqual(outData, { ID: 101, NAME: 'Test User 1' });
+      assert.deepStrictEqual(outData, { ID: 101, NAME: 'Test User 1' });
 
       const sql = `DROP PROCEDURE ${PROC}`;
       await conn.execute(sql);
@@ -244,14 +244,14 @@ describe('243. dbObject19.js', () => {
       result = await conn.execute(plsql, bindVar, { dbObjectAsPojo: true, outFormat: oracledb.OBJECT });
       // Verify the OUT-bind value of the IN-OUT-bind variable
       // console.dir(result.outBinds.a);
-      assert.deepEqual(result.outBinds.a, objData1);
+      assert.deepStrictEqual(result.outBinds.a, objData1);
 
       sql = `SELECT * FROM ${TABLE} WHERE NUM = ${seqTwo}`;
       result = await conn.execute(sql, [], { dbObjectAsPojo: true, outFormat: oracledb.OBJECT });
       // Verify the IN-bind value of the IN-OUT-bind variable
       // console.dir(result.rows[0]);
       assert.strictEqual(result.rows[0].NUM, seqTwo);
-      assert.deepEqual(result.rows[0].PERSON, objData2);
+      assert.deepStrictEqual(result.rows[0].PERSON, objData2);
 
       sql = `DROP PROCEDURE ${PROC}`;
       await conn.execute(sql);

@@ -161,7 +161,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
     });
     const data = await fsPromises.readFile(jpgFileName);
     assert.strictEqual(totalLength, data.length);
-    assert.deepEqual(blobData, data);
+    assert.deepStrictEqual(blobData, data);
   };
 
   const verifyBlobValueWithBuffer = async function(selectSql, oraginalBuffer, specialStr) {
@@ -377,7 +377,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
       });
       const data = await fsPromises.readFile(jpgFileName);
       assert.strictEqual(totalLength, data.length);
-      assert.deepEqual(blobData, data);
+      assert.deepStrictEqual(blobData, data);
     }); // 80.2.2
 
     it('80.2.3 PLSQL, CLOB&BLOB, bind a txt file and a buffer', async function() {

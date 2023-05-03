@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -45,7 +45,6 @@ describe('176. soda8.js', () => {
     const runnable = await testsUtil.isSodaRunnable();
     if (!runnable) {
       this.skip();
-      return;
     }
 
     await sodaUtil.cleanup();
@@ -73,7 +72,7 @@ describe('176. soda8.js', () => {
     for (let i = 0; i < outDocuments.length; i++) {
       contents[i] = outDocuments[i].getContent();
       if (i == 1) {
-        assert.deepEqual(contents[i], inContent);
+        assert.deepStrictEqual(contents[i], inContent);
       } else {
         testsUtil.assertOneOf(t_contents, contents[i]);
       }
@@ -109,7 +108,7 @@ describe('176. soda8.js', () => {
     for (let i = 0; i < documents.length; i++) {
       contents[i] = documents[i].getContent();
       if (i == 1) {
-        assert.deepEqual(contents[i], inContent);
+        assert.deepStrictEqual(contents[i], inContent);
       } else {
         testsUtil.assertOneOf(t_contents, contents[i]);
       }
@@ -209,7 +208,7 @@ describe('176. soda8.js', () => {
     for (let i = 0; i < outDocuments.length; i++) {
       contents[i] = outDocuments[i].getContent();
       if (i == 1) {
-        assert.deepEqual(contents[i], inContent);
+        assert.deepStrictEqual(contents[i], inContent);
       } else {
         testsUtil.assertOneOf(t_contents, contents[i]);
       }
@@ -245,7 +244,7 @@ describe('176. soda8.js', () => {
     for (let i = 0; i < documents.length; i++) {
       contents[i] = documents[i].getContent();
       if (i == 1) {
-        assert.deepEqual(contents[i], inContent);
+        assert.deepStrictEqual(contents[i], inContent);
       } else {
         testsUtil.assertOneOf(t_contents, contents[i]);
       }

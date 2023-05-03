@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2020, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -349,8 +349,8 @@ describe('235. nestedCursor04.js', () => {
     const result = await conn.execute(sqlThree, [], options);
 
     assert.strictEqual(result.rows[0].COUNTRY, 'Chile');
-    assert.deepEqual(result.rows[0].NC1, [ { NAME: 'Bruce' } ]);
-    assert.deepEqual(result.rows[0].NC2, [ { FOOD: 'Asado' } ]);
+    assert.deepStrictEqual(result.rows[0].NC1, [ { NAME: 'Bruce' } ]);
+    assert.deepStrictEqual(result.rows[0].NC2, [ { FOOD: 'Asado' } ]);
   }); // 235.8
 
 });

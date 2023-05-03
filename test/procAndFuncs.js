@@ -66,7 +66,7 @@ describe('268. tests for calling stored procedures and functions', function() {
         },
         { outFormat: oracledb.OBJECT }
       );
-      assert.deepEqual(result.outBinds, { a_OutValue: 2 });
+      assert.deepStrictEqual(result.outBinds, { a_OutValue: 2 });
     });
 
     it('268.1.2 executing a stored procedure with all args keyword args', async function() {
@@ -124,7 +124,7 @@ describe('268. tests for calling stored procedures and functions', function() {
         [],
         { outFormat: oracledb.OBJECT }
       );
-      assert.deepEqual(result, {});
+      assert.deepStrictEqual(result, {});
     });
   });
 
@@ -148,7 +148,7 @@ describe('268. tests for calling stored procedures and functions', function() {
     it('268.3.1 executing a stored function', async function() {
 
       let result = await connection.execute(`SELECT function_Test('hi', 5) as result FROM DUAL`, [], { outFormat: oracledb.OBJECT });
-      assert.deepEqual(result.rows[0], {"RESULT":7});
+      assert.deepStrictEqual(result.rows[0], {"RESULT":7});
     });
 
     it('268.3.2 executing a stored function with extra args', async function() {
@@ -212,7 +212,7 @@ describe('268. tests for calling stored procedures and functions', function() {
     it('268.4.1 executing a stored function without any arguments', async function() {
 
       let result = await connection.execute(`SELECT function_TestNoArgs() as result FROM DUAL`, [], { outFormat: oracledb.OBJECT });
-      assert.deepEqual(result.rows[0], {"RESULT": 123});
+      assert.deepStrictEqual(result.rows[0], {"RESULT": 123});
     });
   });
 });

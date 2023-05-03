@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -273,7 +273,7 @@ describe ('197. dbObjectsNestedTable.js', ()  => {
       const result = await connection.execute (sql, { ID : 19708 });
       obj = result.rows[0][1];
       const arr = obj.getValues();
-      assert.deepEqual(arr, [ null, null, null ]);
+      assert.deepStrictEqual(arr, [ null, null, null ]);
 
       assert.strictEqual (obj.getElement(0), null);
     }
@@ -293,7 +293,7 @@ describe ('197. dbObjectsNestedTable.js', ()  => {
     const result = await connection.execute (sql, { id :  id });
     obj = result.rows[0][1];
     const arr = obj.getValues ();
-    assert.deepEqual(arr, [ 'One', 'Two', 'four' ]);
+    assert.deepStrictEqual(arr, [ 'One', 'Two', 'four' ]);
   });
 
   it('197.10 Insert into table and use setElement()', async () => {
@@ -310,7 +310,7 @@ describe ('197. dbObjectsNestedTable.js', ()  => {
     const result = await connection.execute (sql, { id : id });
     obj = result.rows[0][1];
     const arr = obj.getValues ();
-    assert.deepEqual(arr, [ 'One', 'Two', '3', 'Four' ]);
+    assert.deepStrictEqual(arr, [ 'One', 'Two', '3', 'Four' ]);
   });
 
   it('197.11 Insert into table and use trim()', async () => {
@@ -327,7 +327,7 @@ describe ('197. dbObjectsNestedTable.js', ()  => {
     const result = await connection.execute (sql, { id : id });
     obj = result.rows[0][1];
     const arr = obj.getValues ();
-    assert.deepEqual(arr, [ 'One', 'Two' ]);
+    assert.deepStrictEqual(arr, [ 'One', 'Two' ]);
   });
 
 });

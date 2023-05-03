@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -43,7 +43,6 @@ describe('177. soda9.js', () => {
     const runnable = await testsUtil.isSodaRunnable();
     if (!runnable) {
       this.skip();
-      return;
     }
 
     await sodaUtil.cleanup();
@@ -59,7 +58,7 @@ describe('177. soda9.js', () => {
     // fetch back
     const outDocuments = await collection.find().getDocuments();
     const outContent = outDocuments[0].getContent();
-    assert.deepEqual(outContent, inContent);
+    assert.deepStrictEqual(outContent, inContent);
 
     await conn.commit();
     const res = await collection.drop();
@@ -78,7 +77,7 @@ describe('177. soda9.js', () => {
     // fetch back
     const outDocuments = await collection.find().getDocuments();
     const outContent = outDocuments[0].getContent();
-    assert.deepEqual(outContent, inContent);
+    assert.deepStrictEqual(outContent, inContent);
 
     await conn.commit();
     const res = await collection.drop();
@@ -100,7 +99,7 @@ describe('177. soda9.js', () => {
     // Fetch it back
     const outDocuments = await collection.find().getDocuments();
     const outContent = outDocuments[0].getContent();
-    assert.deepEqual(outContent, inContent);
+    assert.deepStrictEqual(outContent, inContent);
 
     await conn.commit();
     const res = await collection.drop();
@@ -123,7 +122,7 @@ describe('177. soda9.js', () => {
     // Fetch it back
     const outDocuments = await collection.find().getDocuments();
     const outContent = outDocuments[0].getContent();
-    assert.deepEqual(outContent, inContent);
+    assert.deepStrictEqual(outContent, inContent);
 
     await conn.commit();
     const res = await collection.drop();
@@ -141,7 +140,7 @@ describe('177. soda9.js', () => {
 
     // Get content without being inserted
     const outContent = inDocument.getContent();
-    assert.deepEqual(outContent, inContent);
+    assert.deepStrictEqual(outContent, inContent);
 
     await conn.commit();
     await conn.close();

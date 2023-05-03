@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -43,7 +43,6 @@ describe('168. soda4.js', () => {
     const runnable = await testsUtil.isSodaRunnable();
     if (!runnable) {
       this.skip();
-      return;
     }
 
     await sodaUtil.cleanup();
@@ -106,7 +105,7 @@ describe('168. soda4.js', () => {
     // Fetch it back
     const doc2 = await coll.find().key(myKey).getOne();
     const content2 = doc2.getContent();
-    assert.deepEqual(content2, testContent);
+    assert.deepStrictEqual(content2, testContent);
 
     await conn.commit();
     const res = await coll.drop();

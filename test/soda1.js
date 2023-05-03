@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -43,7 +43,6 @@ describe('164. soda1.js', () => {
     const runnable = await testsUtil.isSodaRunnable();
     if (!runnable) {
       this.skip();
-      return;
     }
 
     await sodaUtil.cleanup();
@@ -97,7 +96,7 @@ describe('164. soda1.js', () => {
 
     const cNames = await sd.getCollectionNames();
 
-    assert.deepEqual(cNames, collNames);
+    assert.deepStrictEqual(cNames, collNames);
 
     const opResults = await Promise.all(
       collections.map(function(coll) {
@@ -242,7 +241,7 @@ describe('164. soda1.js', () => {
     // Fetch the document back
     const doc2 = await collection.find().key(myKey).getOne();
     const content2 = doc2.getContent(); // A JavaScript object
-    assert.deepEqual(content2, content1);
+    assert.deepStrictEqual(content2, content1);
 
     const content3 = doc2.getContentAsString(); // A JSON string
     assert.strictEqual(typeof (content3), "string");

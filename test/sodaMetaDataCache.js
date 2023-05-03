@@ -32,7 +32,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -45,63 +45,39 @@ describe('252. sodaMetaDataCache.js', function() {
     if (clientVersion < 2103000000) {
       if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
         this.skip();
-        return;
       }
     }
 
     const runnable = await testsUtil.isSodaRunnable ();
     if (!runnable) {
       this.skip();
-      return;
     }
   });
 
   it('252.1 sodaMetaDataCache set to TRUE', async function() {
-    let pool = null;
-
-    try {
-      pool = await oracledb.createPool({...dbConfig, sodaMetaDataCache : true});
-      should.equal(pool.sodaMetaDataCache, true);
-    } catch (err) {
-      should.not.exist(err);
-    } finally {
-      if (pool)
-        await pool.close(0);
-    }
+    const pool = await oracledb.createPool({...dbConfig, sodaMetaDataCache : true});
+    assert.strictEqual(pool.sodaMetaDataCache, true);
+    await pool.close(0);
   });
 
   it('252.2 sodaMetaDataCache set to FALSE', async function() {
-    let pool = null;
-
-    try {
-      pool = await oracledb.createPool({...dbConfig, sodaMetaDataCache : false});
-      should.equal(pool.sodaMetaDataCache, false);
-    } catch (err) {
-      should.not.exist(err);
-    } finally {
-      await pool.close(0);
-    }
+    const pool = await oracledb.createPool({...dbConfig, sodaMetaDataCache : false});
+    assert.strictEqual(pool.sodaMetaDataCache, false);
+    await pool.close(0);
   });
 
 
   it('252.3 sodaMetaDataCache not specified', async function() {
-    let pool;
-
-    try {
-      pool = await oracledb.createPool(dbConfig);
-      should.equal(pool.sodaMetaDataCache, false);
-    } catch (err) {
-      should.not.exist(err);
-    } finally {
-      await pool.close(0);
-    }
+    const pool = await oracledb.createPool(dbConfig);
+    assert.strictEqual(pool.sodaMetaDataCache, false);
+    await pool.close(0);
   });
 
 
   it('252.4 sodaMetaDataCache from closed pool', async function() {
     const pool = await oracledb.createPool(dbConfig);
     await pool.close(0);
-    should.equal(pool.sodaMetaDataCache, undefined);
+    assert.strictEqual(pool.sodaMetaDataCache, undefined);
   });
 
 });

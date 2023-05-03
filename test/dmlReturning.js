@@ -168,8 +168,8 @@ describe('6. dmlReturning.js', function() {
         },
         { autoCommit: true });
       assert.strictEqual(result.rowsAffected, 3);
-      assert.deepEqual(result.outBinds.rid, [999, 999, 999]);
-      assert.deepEqual(result.outBinds.rname, [ 'Chris Jones', 'Tom Kyte', 'Karen Morton' ]);
+      assert.deepStrictEqual(result.outBinds.rid, [999, 999, 999]);
+      assert.deepStrictEqual(result.outBinds.rname, [ 'Chris Jones', 'Tom Kyte', 'Karen Morton' ]);
     });
 
     it('6.1.7 UPDATE statements with multiple rows matched & Array binding', async function() {
@@ -182,8 +182,8 @@ describe('6. dmlReturning.js', function() {
         ],
         { autoCommit: true });
       assert.strictEqual(result.rowsAffected, 3);
-      assert.deepEqual(result.outBinds[0], [999, 999, 999]);
-      assert.deepEqual(result.outBinds[1], [ 'Chris Jones', 'Tom Kyte', 'Karen Morton' ]);
+      assert.deepStrictEqual(result.outBinds[0], [999, 999, 999]);
+      assert.deepStrictEqual(result.outBinds[1], [ 'Chris Jones', 'Tom Kyte', 'Karen Morton' ]);
     });
 
     it('6.1.8 DELETE statement with Object binding', async function() {
@@ -195,8 +195,8 @@ describe('6. dmlReturning.js', function() {
         },
         { autoCommit: true });
       assert.strictEqual(result.rowsAffected, 1);
-      assert.deepEqual(result.outBinds.rid, [1001]);
-      assert.deepEqual(result.outBinds.rname, ['Chris Jones']);
+      assert.deepStrictEqual(result.outBinds.rid, [1001]);
+      assert.deepStrictEqual(result.outBinds.rname, ['Chris Jones']);
     });
 
     it('6.1.9 DELETE statement with Array binding', async function() {
@@ -208,8 +208,8 @@ describe('6. dmlReturning.js', function() {
         ],
         { autoCommit: true });
       assert.strictEqual(result.rowsAffected, 1);
-      assert.deepEqual(result.outBinds[0], [1001]);
-      assert.deepEqual(result.outBinds[1], ['Chris Jones']);
+      assert.deepStrictEqual(result.outBinds[0], [1001]);
+      assert.deepStrictEqual(result.outBinds[1], ['Chris Jones']);
     });
 
     // it currently fails with 11.2 database
@@ -251,7 +251,7 @@ describe('6. dmlReturning.js', function() {
           rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 4000}
         },
         { autoCommit: true });
-      assert.deepEqual(result.outBinds.rid, [size]);
+      assert.deepStrictEqual(result.outBinds.rid, [size]);
       assert.strictEqual(result.outBinds.rname[0].length, size);
     });
 
@@ -324,7 +324,7 @@ describe('6. dmlReturning.js', function() {
 
       const sql = "UPDATE nodb_dmlreturn SET id = :i RETURNING id, name INTO :rid, :méil";
       let info = await connection.getStatementInfo(sql);
-      assert.deepEqual(info.bindNames, ["I", "RID", "MÉIL"]);
+      assert.deepStrictEqual(info.bindNames, ["I", "RID", "MÉIL"]);
     });
 
   }); // 6.1

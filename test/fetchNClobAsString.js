@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -34,7 +34,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
 describe('251. fetchNClobAsString.js', function() {
@@ -73,124 +73,74 @@ describe('251. fetchNClobAsString.js', function() {
     oracledb.outFormat = oracledb.OUT_FORMAT_ARRAY;
     stmtCacheSize = oracledb.stmtCacheSize;
     oracledb.stmtCacheSize = 0;  // varying define types used for same SQL
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      await conn.execute(create_table_sql);
-      await conn.execute(insert_sql, [rowID, cValue, ncValue]);
-    } catch (err) {
-      should.not.exist(err);
-    }
+    conn = await oracledb.getConnection(dbConfig);
+    await conn.execute(create_table_sql);
+    await conn.execute(insert_sql, [rowID, cValue, ncValue]);
   });
 
   after(async function() {
     oracledb.outFormat = outFormat;
     oracledb.stmtCacheSize = stmtCacheSize;
-    try {
-      await conn.execute(drop_table_sql);
-      await conn.close();
-    } catch (err) {
-      should.not.exist(err);
-    }
+    await conn.execute(drop_table_sql);
+    await conn.close();
+  });
+
+  afterEach(function() {
+    oracledb.fetchAsString = [];
   });
 
   describe('251.1 NCLOB in fetchAsString', function() {
     // Test to fetch NCLOB column as string
     it('251.1.1 NCLOB type in fetchAsString', function() {
       // check to see if NCLOB is an accepted value for fetchAsString
-      try {
-        oracledb.fetchAsString = [oracledb.NCLOB];
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        oracledb.fetchAsString = [];
-      }
+      oracledb.fetchAsString = [oracledb.NCLOB];
     });
 
     // Test to fetch NCLOB column as string with fetchAsString having NCLOB
     it('251.1.2 NCLOB type in fetchAsString and fetch NCLOB data',
       async function() {
-        let result;
-
-        try {
-          oracledb.fetchAsString = [oracledb.NCLOB];
-          result = await conn.execute(select_query_sql, [rowID]);
-        } catch (err) {
-          should.not.exist(err);
-        } finally {
-          oracledb.fetchAsString = [];
-        }
-        should.equal (typeof result.rows[0][2], "string");
-        should.equal (result.rows[0][2], ncValue);
+        oracledb.fetchAsString = [oracledb.NCLOB];
+        const result = await conn.execute(select_query_sql, [rowID]);
+        assert.strictEqual(typeof result.rows[0][2], "string");
+        assert.strictEqual(result.rows[0][2], ncValue);
       });
 
     // Test to fetch NCLOB column as string with fetchAsString having CLOB
     it('251.1.3 CLOB type in fetchAsString and fetch NCLOB data',
       async function() {
-        let result;
-
-        try {
-          oracledb.fetchAsString = [oracledb.CLOB];
-          result = await conn.execute(select_query_sql, [rowID]);
-        } catch (err) {
-          should.not.exist(err);
-        } finally {
-          oracledb.fetchAsString = [];
-        }
-        should.equal(typeof result.rows[0][2], "string");
-        should.equal(result.rows[0][2], ncValue);
+        oracledb.fetchAsString = [oracledb.CLOB];
+        const result = await conn.execute(select_query_sql, [rowID]);
+        assert.strictEqual(typeof result.rows[0][2], "string");
+        assert.strictEqual(result.rows[0][2], ncValue);
       });
 
     // Test to fetch CLOB column as string with fetchAsString having NCLOB
     it('251.1.4 NCLOB type in fetchAsString and fetch CLOB data',
       async function() {
-        let result;
-
-        try {
-          oracledb.fetchAsString = [oracledb.NCLOB];
-          result = await conn.execute(select_query_sql, [rowID]);
-        } catch (err) {
-          should.not.exist(err);
-        } finally {
-          oracledb.fetchAsString = [];
-        }
-        should.strictEqual(typeof result.rows[0][1], "string");
-        should.strictEqual(result.rows[0][1], cValue);
+        oracledb.fetchAsString = [oracledb.NCLOB];
+        const result = await conn.execute(select_query_sql, [rowID]);
+        assert.strictEqual(typeof result.rows[0][1], "string");
+        assert.strictEqual(result.rows[0][1], cValue);
       });
 
     // Test to fetch CLOB column as string with fetchAsString having CLOB
     it('251.1.5 CLOB type in fetchAsString and fetch CLOB', async function() {
-      let result;
-
-      try {
-        oracledb.fetchAsString = [oracledb.CLOB];
-        result = await conn.execute(select_query_sql, [rowID]);
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        oracledb.fetchAsString = [];
-      }
-      should.equal(typeof result.rows[0][1], "string");
-      should.equal(result.rows[0][1], cValue);
+      oracledb.fetchAsString = [oracledb.CLOB];
+      const result = await conn.execute(select_query_sql, [rowID]);
+      assert.strictEqual(typeof result.rows[0][1], "string");
+      assert.strictEqual(result.rows[0][1], cValue);
     });
 
     // Test to fetch CLOB, NCLOB column as string with both CLOB & NCLOB in
     // fetchAsString
     it('251.1.6 CLOB & NCLOB in fetchAsString and fetch both CLOB & NCLOB',
       async function() {
-        let result;
-
-        try {
-          oracledb.fetchAsString = [oracledb.CLOB, oracledb.NCLOB];
-          result = await conn.execute(select_query_sql, [rowID]);
-        } catch (err) {
-          should.not.exist(err);
-        } finally {
-          oracledb.fetchAsString = [];
-        }
-        should.equal(typeof result.rows[0][1], "string");
-        should.equal(typeof result.rows[0][2], "string");
-        should.equal(result.rows[0][1], cValue);
-        should.equal(result.rows[0][2], ncValue);
+        oracledb.fetchAsString = [oracledb.CLOB, oracledb.NCLOB];
+        const result = await conn.execute(select_query_sql, [rowID]);
+        assert.strictEqual(typeof result.rows[0][1], "string");
+        assert.strictEqual(typeof result.rows[0][2], "string");
+        assert.strictEqual(result.rows[0][1], cValue);
+        assert.strictEqual(result.rows[0][2], ncValue);
       });
 
   });
@@ -198,24 +148,17 @@ describe('251. fetchNClobAsString.js', function() {
   describe ('251.2 NCLOB in fetchInfo', function() {
 
     it('251.2.1 NCLOB in fetchInfo', async function() {
-      let result;
-
-      try {
-        result = await conn.execute (
-          select_query_sql,
-          [rowID],
-          {
-            fetchInfo : {
-              "NC" :  { type : oracledb.STRING }
-            }
-          });
-      } catch (err) {
-        should.not.exist (err);
-      }
-      should.equal (typeof result.rows[0][2], "string");
-      should.equal (result.rows[0][2], ncValue);
+      const result = await conn.execute (
+        select_query_sql,
+        [rowID],
+        {
+          fetchInfo : {
+            "NC" :  { type : oracledb.STRING }
+          }
+        });
+      assert.strictEqual (typeof result.rows[0][2], "string");
+      assert.strictEqual (result.rows[0][2], ncValue);
     });
   });
-
 
 });

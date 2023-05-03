@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -48,7 +48,6 @@ describe('178. soda10.js', function() {
 
     if (!runnable) {
       this.skip();
-      return;
     } else {
       conn = await oracledb.getConnection(dbConfig);
       soda = conn.getSodaDatabase();
@@ -90,7 +89,7 @@ describe('178. soda10.js', function() {
       outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
     }
 
-    assert.deepEqual(outContents, inContents);
+    assert.deepStrictEqual(outContents, inContents);
 
     await conn.commit();
 
@@ -111,7 +110,7 @@ describe('178. soda10.js', function() {
       outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
     }
 
-    assert.deepEqual(outContents, inContents);
+    assert.deepStrictEqual(outContents, inContents);
 
     await conn.commit();
 
@@ -134,7 +133,7 @@ describe('178. soda10.js', function() {
       middleContents[i] = middleDocuments[i].getContent();
       assert(middleDocuments[i].key);
     }
-    assert.deepEqual(middleContents, [null, null, null, null]);
+    assert.deepStrictEqual(middleContents, [null, null, null, null]);
 
     // Fetch back
     let outDocuments = await collection.find().getDocuments();
@@ -143,7 +142,7 @@ describe('178. soda10.js', function() {
       outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
     }
 
-    assert.deepEqual(outContents, inContents);
+    assert.deepStrictEqual(outContents, inContents);
 
     await conn.commit();
 
@@ -161,7 +160,7 @@ describe('178. soda10.js', function() {
       middleContents[i] = middleDocuments[i].getContent();
       assert(middleDocuments[i].key);
     }
-    assert.deepEqual(middleContents, [null, null, null, null]);
+    assert.deepStrictEqual(middleContents, [null, null, null, null]);
 
     // Fetch back
     let outDocuments = await collection.find().getDocuments();
@@ -170,7 +169,7 @@ describe('178. soda10.js', function() {
       outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
     }
 
-    assert.deepEqual(outContents, inContents);
+    assert.deepStrictEqual(outContents, inContents);
 
     await conn.commit();
 
@@ -219,7 +218,6 @@ describe('178. soda10.js', function() {
     if (clientVersion < 2103000000) {
       if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
         this.skip();
-        return;
       }
     }
     const COLL = "soda_test_178_7";
@@ -237,7 +235,7 @@ describe('178. soda10.js', function() {
       middleContents[i] = middleDocuments[i].getContent();
       assert(middleDocuments[i].key);
     }
-    assert.deepEqual(middleContents, [null, null, null, null]);
+    assert.deepStrictEqual(middleContents, [null, null, null, null]);
 
     // Fetch back
     let outDocuments = await collection.find().hint("MONITOR").getDocuments();
@@ -246,7 +244,7 @@ describe('178. soda10.js', function() {
       outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
     }
 
-    assert.deepEqual(outContents, inContents);
+    assert.deepStrictEqual(outContents, inContents);
 
     await conn.commit();
 

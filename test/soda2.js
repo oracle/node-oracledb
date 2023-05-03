@@ -43,7 +43,6 @@ describe('165. soda2.js', () => {
     const runnable = await testsUtil.isSodaRunnable();
     if (!runnable) {
       this.skip();
-      return;
     }
 
     await sodaUtil.cleanup();
@@ -73,7 +72,7 @@ describe('165. soda2.js', () => {
     const coll = await sd1.createCollection(t_collname);
 
     const cNames = await sd2.getCollectionNames();
-    assert.deepEqual(cNames, [ t_collname ]);
+    assert.deepStrictEqual(cNames, [ t_collname ]);
 
     await coll.drop();
     await conn1.close();
@@ -89,7 +88,7 @@ describe('165. soda2.js', () => {
     const coll = await sd.createCollection(t_collname);
 
     const cNames = await sd.getCollectionNames();
-    assert.deepEqual(cNames, [ t_collname ]);
+    assert.deepStrictEqual(cNames, [ t_collname ]);
 
     await coll.drop();
     await conn.close();

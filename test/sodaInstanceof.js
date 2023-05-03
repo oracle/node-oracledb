@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -32,7 +32,7 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const should    = require('should');
+const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
@@ -53,7 +53,6 @@ describe('186. sodaInstanceof.js', function() {
     const isRunnable = isClientOK && isSodaRunnable;
     if (!isRunnable) {
       this.skip();
-      return;
     }
 
     await sodaUtil.cleanup();
@@ -61,53 +60,32 @@ describe('186. sodaInstanceof.js', function() {
 
   it('186.1 instanceof checks for SODA classes', async function() {
     let conn, coll, cursor;
-    try {
-      conn = await oracledb.getConnection(dbConfig);
 
-      let sodaDB = conn.getSodaDatabase();
-      let isInstanceofCorrect = (sodaDB instanceof oracledb.SodaDatabase);
-      isInstanceofCorrect.should.be.true();
+    conn = await oracledb.getConnection(dbConfig);
 
-      let doc = sodaDB.createDocument({name: "Chris", city: "Melbourne"});
-      isInstanceofCorrect = (doc instanceof oracledb.SodaDocument);
-      isInstanceofCorrect.should.be.true();
+    let sodaDB = conn.getSodaDatabase();
+    assert(sodaDB instanceof oracledb.SodaDatabase);
 
-      coll = await sodaDB.createCollection("node_test_186_1");
-      isInstanceofCorrect = (coll instanceof oracledb.SodaCollection);
-      isInstanceofCorrect.should.be.true();
+    let doc = sodaDB.createDocument({name: "Chris", city: "Melbourne"});
+    assert(doc instanceof oracledb.SodaDocument);
 
-      let operation = coll.find();
-      isInstanceofCorrect = (operation instanceof oracledb.SodaOperation);
-      isInstanceofCorrect.should.be.true();
+    coll = await sodaDB.createCollection("node_test_186_1");
+    assert(coll instanceof oracledb.SodaCollection);
 
-      cursor = await operation.getCursor();
-      isInstanceofCorrect = (cursor instanceof oracledb.SodaDocCursor);
-      isInstanceofCorrect.should.be.true();
+    let operation = coll.find();
+    assert(operation instanceof oracledb.SodaOperation);
 
-    } catch (err) {
-      should.not.exist(err);
-    } finally {
-      if (cursor) {
-        try {
-          await cursor.close();
-        } catch (err) {
-          should.not.exist(err);
-        }
-      }
-      if (coll) {
-        try {
-          await coll.drop();
-        } catch (err) {
-          should.not.exist(err);
-        }
-      }
-      if (conn) {
-        try {
-          await conn.close();
-        } catch (err) {
-          should.not.exist(err);
-        }
-      }
+    cursor = await operation.getCursor();
+    assert(cursor instanceof oracledb.SodaDocCursor);
+
+    if (cursor) {
+      await cursor.close();
+    }
+    if (coll) {
+      await coll.drop();
+    }
+    if (conn) {
+      await conn.close();
     }
   });
 

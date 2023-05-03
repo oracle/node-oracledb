@@ -51,10 +51,8 @@ describe('105. streamErrorEvent.js', function() {
   it('105.1 triggers stream error event', async function() {
     let rofile = "./test-read-only.txt";
     let tableName = "nodb_tab_stream_err";
-    await fs.writeFileSync(rofile, "This is a read-only file.");
-    await fs.chmod(rofile, '0444', (err) => {
-      if (err) throw err;
-    });
+    fs.writeFileSync(rofile, "This is a read-only file.");
+    fs.chmodSync(rofile, '0444');
     let sql = "BEGIN \n" +
                   "    DECLARE \n" +
                   "        e_table_missing EXCEPTION; \n" +
@@ -104,6 +102,6 @@ describe('105. streamErrorEvent.js', function() {
     sql = "DROP TABLE " + tableName + " PURGE";
     await connection.execute(sql);
 
-    await fs.unlinkSync(rofile);
+    fs.unlinkSync(rofile);
   });
 });

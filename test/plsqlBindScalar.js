@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -264,7 +264,7 @@ describe('70. plsqlBindScalar.js', function() {
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: dt}
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.output, dt);
+      assert.deepStrictEqual(result.outBinds.output, dt);
     }); // 70.3.1
 
     it('70.3.2 auto detect Date type', async function() {
@@ -273,7 +273,7 @@ describe('70. plsqlBindScalar.js', function() {
         dateValue: dt
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.output, dt);
+      assert.deepStrictEqual(result.outBinds.output, dt);
     }); // 70.3.2
 
     it('70.3.3 val: null', async function() {
@@ -324,7 +324,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       const result = await connection.execute(sqlrun, bindVar);
       const resultDate = new Date (2016, 2, 1);
-      assert.deepEqual(result.outBinds.output, resultDate);
+      assert.deepStrictEqual(result.outBinds.output, resultDate);
     }); // 70.3.7
 
     it('70.3.8 val: 1969-12-31', async function() {
@@ -334,7 +334,7 @@ describe('70. plsqlBindScalar.js', function() {
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.output, date);
+      assert.deepStrictEqual(result.outBinds.output, date);
     }); // 70.3.8
 
     it('70.3.9 val: epoch date 1970-1-1', async function() {
@@ -344,7 +344,7 @@ describe('70. plsqlBindScalar.js', function() {
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.output, date);
+      assert.deepStrictEqual(result.outBinds.output, date);
     }); // 70.3.9
 
     it('70.3.10 val: create Date value using numeric value: new Date(number)', async function() {
@@ -357,7 +357,7 @@ describe('70. plsqlBindScalar.js', function() {
 
       // Oracle stores only the fractions up to second in a DATE field.
       const dateResult = new Date (1476780296000);
-      assert.deepEqual(result.outBinds.output, dateResult);
+      assert.deepStrictEqual(result.outBinds.output, dateResult);
     }); // 70.3.10
 
     it('70.3.11 val: create Date value using numeric value: new Date(7 number)', async function() {
@@ -370,7 +370,7 @@ describe('70. plsqlBindScalar.js', function() {
 
       // Oracle stores only the fractions up to second in a DATE field.
       const dateResult = new Date (2011, 5, 3, 4, 6, 23, 0);
-      assert.deepEqual(result.outBinds.output, dateResult);
+      assert.deepStrictEqual(result.outBinds.output, dateResult);
     }); // 70.3.11
 
     it('70.3.12 val: create Date value using numeric value: 0', async function() {
@@ -382,7 +382,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       const result = await connection.execute(sqlrun, bindVar);
       const dateResult = new Date (Date.UTC(1970, 0, 1));
-      assert.deepEqual(result.outBinds.output, dateResult);
+      assert.deepStrictEqual(result.outBinds.output, dateResult);
     }); // 70.3.12
 
   }); // 70.3
@@ -415,7 +415,7 @@ describe('70. plsqlBindScalar.js', function() {
         bufValue: {type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: bindValue}
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.output, bindValue);
+      assert.deepStrictEqual(result.outBinds.output, bindValue);
     }); // 70.4.1
 
     it('70.4.2 auto detect Buffer type', async function() {
@@ -424,7 +424,7 @@ describe('70. plsqlBindScalar.js', function() {
         bufValue: bindValue
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.output, bindValue);
+      assert.deepStrictEqual(result.outBinds.output, bindValue);
     }); // 70.4.2
 
     it('70.4.3 val: null', async function() {
@@ -856,7 +856,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, daterun);
+      assert.deepStrictEqual(result.outBinds.p_inout, daterun);
     }); // 70.7.1
 
     it('70.7.2 auto detect Date type', async function() {
@@ -867,7 +867,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, daterun);
+      assert.deepStrictEqual(result.outBinds.p_inout, daterun);
     }); // 70.7.2
 
     it('70.7.3 val: null', async function() {
@@ -933,7 +933,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       const result = await connection.execute(sqlrun, bindVar);
       const resultDate = new Date (2016, 2, 1);
-      assert.deepEqual(result.outBinds.p_inout, resultDate);
+      assert.deepStrictEqual(result.outBinds.p_inout, resultDate);
     }); // 70.7.7
 
     it('70.7.8 val: 1969-12-31', async function() {
@@ -946,7 +946,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, date);
+      assert.deepStrictEqual(result.outBinds.p_inout, date);
     }); // 70.7.8
 
     it('70.7.9 val: epoch date 1970-1-1', async function() {
@@ -959,7 +959,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, date);
+      assert.deepStrictEqual(result.outBinds.p_inout, date);
     }); // 70.7.9
 
     it('70.7.10 NULL IN and NON-NULL out', async function() {
@@ -980,7 +980,7 @@ describe('70. plsqlBindScalar.js', function() {
       await connection.execute(proc710);
       const result = await connection.execute(sqlrun710, bindVar);
       const date = new Date("2016-08-05T00:00:00.000Z");
-      assert.deepEqual(result.outBinds.p_inout, date);
+      assert.deepStrictEqual(result.outBinds.p_inout, date);
       await connection.execute(sqldrop);
     }); // 70.7.10
 
@@ -1039,7 +1039,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, bufValue);
+      assert.deepStrictEqual(result.outBinds.p_inout, bufValue);
     }); // 70.8.1
 
     it('70.8.2 auto detect BUFFER type', async function() {
@@ -1051,7 +1051,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, bufValue);
+      assert.deepStrictEqual(result.outBinds.p_inout, bufValue);
     }); // 70.8.2
 
     it('70.8.3 val: null', async function() {
@@ -1201,15 +1201,15 @@ describe('70. plsqlBindScalar.js', function() {
       let result = await connection.execute(sqlinout, bindVar);
       assert.strictEqual(result.outBinds.p_inout1, "PL/SQL Binding INOUT Scalar");
       assert.strictEqual(result.outBinds.p_inout2, 101);
-      assert.deepEqual(result.outBinds.p_inout3, daterun);
-      assert.deepEqual(result.outBinds.p_inout4, bufValue);
+      assert.deepStrictEqual(result.outBinds.p_inout3, daterun);
+      assert.deepStrictEqual(result.outBinds.p_inout4, bufValue);
       const sql = "select * from nodb_plsqlbindtab where id = :i";
       const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
       result = await connection.execute(sql, [rowid], options);
       assert.strictEqual(result.rows[0].STR, "PL/SQL Binding INOUT Scalar");
       assert.strictEqual(result.rows[0].NUM, 101);
-      assert.deepEqual(result.rows[0].DAT, daterun);
-      assert.deepEqual(result.rows[0].BUF, bufValue);
+      assert.deepStrictEqual(result.rows[0].DAT, daterun);
+      assert.deepStrictEqual(result.rows[0].BUF, bufValue);
     }); // 70.9.1
 
     it('70.9.2 dir: BIND_INOUT, val: null', async function() {
@@ -1579,7 +1579,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       result = await connection.execute(sql, bindVar);
       assert.strictEqual(result.outBinds.output, 'wrong');
-      assert.deepEqual(result.outBinds.p_in, bufValue);
+      assert.deepStrictEqual(result.outBinds.p_in, bufValue);
       await connection.execute("drop function nodb_checkplsqlvalue5");
     }); // 70.10.5
 
@@ -1786,7 +1786,7 @@ describe('70. plsqlBindScalar.js', function() {
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
-      assert.deepEqual(result.outBinds.output, date);
+      assert.deepStrictEqual(result.outBinds.output, date);
     }); // 70.11.8
 
     it('70.11.9 val: epoch date 1970-1-1', async function() {
@@ -1796,7 +1796,7 @@ describe('70. plsqlBindScalar.js', function() {
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
-      assert.deepEqual(result.outBinds.output, date);
+      assert.deepStrictEqual(result.outBinds.output, date);
     }); // 70.11.9
 
   });//70.11
@@ -1829,7 +1829,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
       const expectDate = "2016-09-10 14:10:10.123000000";
-      assert.deepEqual(result.outBinds.output, expectDate);
+      assert.deepStrictEqual(result.outBinds.output, expectDate);
     }); // 70.12.1
 
     it('70.12.2 val: null', async function() {
@@ -1880,7 +1880,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
       const resultDate = "2016-03-01 00:00:00.000000000";
-      assert.deepEqual(result.outBinds.output, resultDate);
+      assert.deepStrictEqual(result.outBinds.output, resultDate);
     }); // 70.12.7
 
     it('70.12.8 val: 1969-12-31', async function() {
@@ -1891,7 +1891,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
       const resultDate = "1969-12-31 00:00:00.000000000";
-      assert.deepEqual(result.outBinds.output, resultDate);
+      assert.deepStrictEqual(result.outBinds.output, resultDate);
     }); // 70.12.8
 
     it('70.12.9 val: epoch date 1970-1-1', async function() {
@@ -1902,7 +1902,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
       const resultDate = "1970-01-01 00:00:00.000000000";
-      assert.deepEqual(result.outBinds.output, resultDate);
+      assert.deepStrictEqual(result.outBinds.output, resultDate);
     }); // 70.12.9
 
     it('70.12.10 val: create Date value using numeric value: new Date(number)', async function() {
@@ -1913,7 +1913,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
       const resultDate = "2016-10-18 08:44:56.673000000";
-      assert.deepEqual(result.outBinds.output, resultDate);
+      assert.deepStrictEqual(result.outBinds.output, resultDate);
     }); // 70.12.10
 
     it('70.12.11 val: create Date value using numeric value: 0', async function() {
@@ -1925,7 +1925,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
       const resultDate = "1970-01-01 00:00:00.000000000";
-      assert.deepEqual(result.outBinds.output, resultDate);
+      assert.deepStrictEqual(result.outBinds.output, resultDate);
     }); // 70.12.11
 
   });//70.12
@@ -2010,7 +2010,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, date);
+      assert.deepStrictEqual(result.outBinds.p_inout, date);
     });//70.14.1
 
     it('70.14.2 auto detect data type', async function() {
@@ -2022,7 +2022,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, date);
+      assert.deepStrictEqual(result.outBinds.p_inout, date);
     }); // 70.14.2
 
     it('70.14.3 val: null', async function() {
@@ -2088,7 +2088,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       const result = await connection.execute(sqlrun, bindVar);
       const resultDate = new Date (2016, 2, 1, 0, 0, 0, 0);
-      assert.deepEqual(result.outBinds.p_inout, resultDate);
+      assert.deepStrictEqual(result.outBinds.p_inout, resultDate);
     }); // 70.14.7
 
     it('70.14.8 val: 1969-12-31', async function() {
@@ -2101,7 +2101,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, date);
+      assert.deepStrictEqual(result.outBinds.p_inout, date);
     }); // 70.14.8
 
     it('70.14.9 val: epoch date 1970-1-1', async function() {
@@ -2114,7 +2114,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, date);
+      assert.deepStrictEqual(result.outBinds.p_inout, date);
     }); // 70.14.9
 
     it('70.14.10 NULL IN and NON-NULL out', async function() {
@@ -2189,7 +2189,7 @@ describe('70. plsqlBindScalar.js', function() {
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
-      assert.deepEqual(result.outBinds.output, date);
+      assert.deepStrictEqual(result.outBinds.output, date);
     }); // 70.15.1
 
     it('70.15.2 val: null', async function() {
@@ -2249,7 +2249,7 @@ describe('70. plsqlBindScalar.js', function() {
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
-      assert.deepEqual(result.outBinds.output, date);
+      assert.deepStrictEqual(result.outBinds.output, date);
     }); // 70.15.8
 
     it('70.15.9 val: epoch date 1970-1-1', async function() {
@@ -2259,7 +2259,7 @@ describe('70. plsqlBindScalar.js', function() {
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
-      assert.deepEqual(result.outBinds.output, date);
+      assert.deepStrictEqual(result.outBinds.output, date);
     }); // 70.15.9
 
   });//70.15
@@ -2292,7 +2292,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
       const expectDate = "2016-09-10 14:10:10.123000000";
-      assert.deepEqual(result.outBinds.output, expectDate);
+      assert.deepStrictEqual(result.outBinds.output, expectDate);
     }); // 70.16.1
 
     it('70.16.2 val: null', async function() {
@@ -2474,7 +2474,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, date);
+      assert.deepStrictEqual(result.outBinds.p_inout, date);
     });//70.18.1
 
     it('70.18.2 auto detect data type', async function() {
@@ -2486,7 +2486,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, date);
+      assert.deepStrictEqual(result.outBinds.p_inout, date);
     }); // 70.18.2
 
     it('70.18.3 val: null', async function() {
@@ -2552,7 +2552,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       const result = await connection.execute(sqlrun, bindVar);
       const resultDate = new Date (2016, 2, 1, 0, 0, 0, 0);
-      assert.deepEqual(result.outBinds.p_inout, resultDate);
+      assert.deepStrictEqual(result.outBinds.p_inout, resultDate);
     }); // 70.18.7
 
     it('70.18.8 val: 1969-12-31', async function() {
@@ -2565,7 +2565,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, date);
+      assert.deepStrictEqual(result.outBinds.p_inout, date);
     }); // 70.18.8
 
     it('70.18.9 val: epoch date 1970-1-1', async function() {
@@ -2578,7 +2578,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, date);
+      assert.deepStrictEqual(result.outBinds.p_inout, date);
     }); // 70.18.9
 
     it('70.18.10 NULL IN and NON-NULL out', async function() {
@@ -2653,7 +2653,7 @@ describe('70. plsqlBindScalar.js', function() {
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
-      assert.deepEqual(result.outBinds.output, date);
+      assert.deepStrictEqual(result.outBinds.output, date);
     }); // 70.19.1
 
     it('70.19.2 val: null', async function() {
@@ -2714,7 +2714,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       const result = await connection.execute(sqlrun_str, bindVar);
       const resultDate = result.outBinds.output.toLowerCase();
-      assert.deepEqual(resultDate, date);
+      assert.deepStrictEqual(resultDate, date);
     }); // 70.19.8
 
     it('70.19.9 val: epoch date 1970-1-1', async function() {
@@ -2725,7 +2725,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       const result = await connection.execute(sqlrun_str, bindVar);
       const resultDate = result.outBinds.output.toLowerCase();
-      assert.deepEqual(resultDate, date);
+      assert.deepStrictEqual(resultDate, date);
     }); // 70.19.9
 
   });//70.19
@@ -2940,7 +2940,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, date);
+      assert.deepStrictEqual(result.outBinds.p_inout, date);
     });//70.22.1
 
     it('70.22.2 auto detect data type', async function() {
@@ -2952,7 +2952,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, date);
+      assert.deepStrictEqual(result.outBinds.p_inout, date);
     }); // 70.22.2
 
     it('70.22.3 val: null', async function() {
@@ -3018,7 +3018,7 @@ describe('70. plsqlBindScalar.js', function() {
       };
       const result = await connection.execute(sqlrun, bindVar);
       const resultDate = new Date (2016, 2, 1, 0, 0, 0, 0);
-      assert.deepEqual(result.outBinds.p_inout, resultDate);
+      assert.deepStrictEqual(result.outBinds.p_inout, resultDate);
     }); // 70.22.7
 
     it('70.22.8 val: 1969-12-31', async function() {
@@ -3031,7 +3031,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, date);
+      assert.deepStrictEqual(result.outBinds.p_inout, date);
     }); // 70.22.8
 
     it('70.22.9 val: epoch date 1970-1-1', async function() {
@@ -3044,7 +3044,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
-      assert.deepEqual(result.outBinds.p_inout, date);
+      assert.deepStrictEqual(result.outBinds.p_inout, date);
     }); // 70.22.9
 
     it('70.22.10 NULL IN and NON-NULL OUT', async function() {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -305,7 +305,7 @@ describe('242. dbObject18.js', () => {
       const result = await conn.execute(sql, [], opts);
       const row = result.rows[0];
       assert.strictEqual(row.SPORTNAME, 'Frisbee');
-      assert.deepEqual(row.TEAM, players);
+      assert.deepStrictEqual(row.TEAM, players);
       // console.dir(row.TEAM, { depth: null }); -- Output should be: [
       //                                                                  { SHIRTNUMBER: 11, NAME: 'Elizabeth' },
       //                                                                  { SHIRTNUMBER: 22, NAME: 'Frank' }
@@ -522,7 +522,7 @@ describe('242. dbObject18.js', () => {
       const result = await conn.execute(sql, [], opts);
       const row = result.rows[0];
       assert.strictEqual(row.SPORTNAME, 'Frisbee');
-      assert.deepEqual(row.TEAM, players);
+      assert.deepStrictEqual(row.TEAM, players);
       // console.dir(row.TEAM, { depth: null });
 
     }); // 242.4.1
@@ -556,7 +556,7 @@ describe('242. dbObject18.js', () => {
       // accessing results
       const row = result.rows[0];
       assert.strictEqual(row.SPORTNAME, 'Frisbee');
-      assert.deepEqual(row.TEAM, players);
+      assert.deepStrictEqual(row.TEAM, players);
       // console.dir(row.TEAM, { depth: null });
 
       // restore the connection

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -51,7 +51,6 @@ describe('167. soda3.js', () => {
     isRunnable = await testsUtil.isSodaRunnable();
     if (!isRunnable) {
       this.skip();
-      return;
     }
 
     await sodaUtil.cleanup();
@@ -82,28 +81,28 @@ describe('167. soda3.js', () => {
   it('167.1 get collection names', async () => {
     const cNames = await sd.getCollectionNames();
     assert.strictEqual(cNames.length, t_collectionNames.length);
-    assert.deepEqual(cNames, t_collectionNames.sort());
+    assert.deepStrictEqual(cNames, t_collectionNames.sort());
   });
 
   it('167.2 getCollectionNames() - limit option', async () => {
     const options = { limit: 1 };
     const cNames = await sd.getCollectionNames(options);
     assert.strictEqual(cNames.length, 1);
-    assert.deepEqual(cNames, t_collectionNames.sort().slice(0, 1));
+    assert.deepStrictEqual(cNames, t_collectionNames.sort().slice(0, 1));
   });
 
   it('167.3 getCollectionNames() - limit is "undefined"', async () => {
     const options = { limit: undefined };
     const cNames = await sd.getCollectionNames(options);
     assert.strictEqual(cNames.length, t_collectionNames.length);
-    assert.deepEqual(cNames, t_collectionNames.sort());
+    assert.deepStrictEqual(cNames, t_collectionNames.sort());
   });
 
   it('167.4 getCollectionNames() - limit is 0', async () => {
     const options = { limit: 0 };
     const cNames = await sd.getCollectionNames(options);
     assert.strictEqual(cNames.length, t_collectionNames.length);
-    assert.deepEqual(cNames, t_collectionNames.sort());
+    assert.deepStrictEqual(cNames, t_collectionNames.sort());
   });
 
   it('167.5 getCollectionNames() - limit is null', async () => {
@@ -126,27 +125,27 @@ describe('167. soda3.js', () => {
     const options = { limit: -7 };
     const cNames = await sd.getCollectionNames(options);
     assert.strictEqual(cNames.length, t_collectionNames.length);
-    assert.deepEqual(cNames, t_collectionNames.sort());
+    assert.deepStrictEqual(cNames, t_collectionNames.sort());
   });
 
   it('167.8 startsWith option - basic test', async () => {
     const options = { startsWith: "changjie" };
     const cNames = await sd.getCollectionNames(options);
-    assert.deepEqual(cNames, t_collectionNames.sort().slice(2));
+    assert.deepStrictEqual(cNames, t_collectionNames.sort().slice(2));
   });
 
   it('167.9 startsWith is case sensitive', async () => {
     const options = { startsWith: "Changjie" };
     const cNames = await sd.getCollectionNames(options);
     assert.strictEqual(cNames.length, t_collectionNames.length);
-    assert.deepEqual(cNames, t_collectionNames.sort());
+    assert.deepStrictEqual(cNames, t_collectionNames.sort());
   });
 
   it('167.10 startsWith is an empty string', async () => {
     const options = { startsWith: "" };
     const cNames = await sd.getCollectionNames(options);
     assert.strictEqual(cNames.length, t_collectionNames.length);
-    assert.deepEqual(cNames, t_collectionNames.sort());
+    assert.deepStrictEqual(cNames, t_collectionNames.sort());
   });
 
   it('167.11 startsWith is null', async () => {

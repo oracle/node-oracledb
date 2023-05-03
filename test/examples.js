@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -32,7 +32,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const should   = require('should');
+const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -49,16 +49,16 @@ describe('3. examples.js', function() {
     it('3.2.1 shows the node-oracledb version attributes', async function() {
 
       const addonVer = oracledb.version;
-      (addonVer).should.be.a.Number();
-      (addonVer).should.be.greaterThan(0);
+      assert.strictEqual(typeof addonVer, 'number');
+      assert(addonVer > 0);
 
       const clientVer = testsUtil.getClientVersion();
-      (clientVer).should.be.a.Number();
-      (clientVer).should.be.greaterThan(0);
+      assert.strictEqual(typeof clientVer, 'number');
+      assert(clientVer > 0);
 
       const conn = await oracledb.getConnection(dbConfig);
       const serverVer = conn.oracleServerVersion;
-      (serverVer).should.be.a.Number();
+      assert.strictEqual(typeof serverVer, 'number');
       await conn.close();
 
     });
@@ -113,8 +113,7 @@ describe('3. examples.js', function() {
         + "FROM nodb_eg_dept "
         + "WHERE department_id = :did",
         [180]);
-      (result.rows).should.eql([[ 180, 'Construction' ]]);
-
+      assert.deepStrictEqual(result.rows, [[ 180, 'Construction' ]]);
     });
 
     it('3.3.2. execute queries to show array and object formats', async function() {
@@ -158,7 +157,15 @@ describe('3. examples.js', function() {
         + "FROM nodb_locations "
         + "WHERE city LIKE 'S%' "
         + "ORDER BY city");
-      (result.rows).should.containEql([2300, 'Singapore']);
+      //Check if a row in the array is [2300, 'Singapore']
+      let containsRow = false;
+      for (let row of result.rows) {
+        if (row[0] === 2300 && row[1] === 'Singapore') {
+          containsRow = true;
+          break;
+        }
+      }
+      assert.strictEqual(containsRow, true);
       result = await conn.execute(
         "SELECT location_id, city "
         + "FROM nodb_locations "
@@ -171,8 +178,17 @@ describe('3. examples.js', function() {
       // outFormat can be OUT_FORMAT_OBJECT and OUT_FORMAT_ARRAY.  The
       // default is OUT_FORMAT_ARRAY Cities beginning with 'S'
       // (OUT_FORMAT_OBJECT output format)
-      // console.log(result);
-      (result.rows).should.containEql({ LOCATION_ID: 1500, CITY: 'South San Francisco' });
+
+      // Check if one of the row objects match
+      // {LOCATION_ID: 1500, CITY: 'South San Francisco'}
+      containsRow = false;
+      for (let row of result.rows) {
+        if (row.LOCATION_ID === 1500 && row.CITY === 'South San Francisco') {
+          containsRow = true;
+          break;
+        }
+      }
+      assert.strictEqual(containsRow, true);
     });
 
   });
@@ -210,7 +226,7 @@ describe('3. examples.js', function() {
       const s = JSON.stringify(testData);
       sql = "INSERT INTO nodb_purchaseorder (po_document) VALUES (:bv)";
       const result = await conn.execute(sql, [s]);
-      should.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.rowsAffected, 1);
     }); // before
 
     after(async function() {
@@ -230,7 +246,7 @@ describe('3. examples.js', function() {
       const result = await conn.execute(sql);
       const js = JSON.parse(result.rows[0][0]);  // just show first record
       //console.log('Query results: ', js);
-      should.deepEqual(js, testData);
+      assert.deepStrictEqual(js, testData);
     });
 
     it('3.4.2 Using JSON_VALUE to extract a value from a JSON column', async function() {
@@ -241,7 +257,7 @@ describe('3. examples.js', function() {
       const sql = "SELECT JSON_VALUE(po_document, '$.location') FROM nodb_purchaseorder";
       const result = await conn.execute(sql);
       //console.log('Query results: ', result.rows[0][0]);
-      should.strictEqual(result.rows[0][0], "Australia");
+      assert.strictEqual(result.rows[0][0], "Australia");
     });
 
     it('3.4.3 Using JSON_OBJECT to extract relational data as JSON', async function() {
@@ -254,7 +270,7 @@ describe('3. examples.js', function() {
       const result = await conn.execute(sql);
       //console.log(result.rows[0][0]);
       const js = JSON.parse(result.rows[0][0]);
-      should.deepEqual(js.doc, testData);
+      assert.deepStrictEqual(js.doc, testData);
     });
 
   });
@@ -288,7 +304,7 @@ describe('3. examples.js', function() {
 
       sql = "INSERT INTO nodb_eg_testdate (timestampcol, datecol) VALUES (:ts, :td)";
       const result = await conn.execute(sql, { ts: date, td: date });
-      should.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(result.rowsAffected, 1);
 
       const doselect = async function() {
         const sql = "SELECT timestampcol, datecol FROM nodb_eg_testdate";
@@ -361,8 +377,8 @@ describe('3. examples.js', function() {
       const binds = { offset: myoffset, maxnumrows: mymaxnumrows };
       const options = { maxRows: 25 };
       const result = await conn.execute(sql, binds, options);
-      should.strictEqual(result.rows.length, 6);
-      should.deepEqual(
+      assert.strictEqual(result.rows.length, 6);
+      assert.deepStrictEqual(
         result.rows,
         [ [ 3, 'staff 3' ],
           [ 4, 'staff 4' ],
@@ -410,8 +426,8 @@ describe('3. examples.js', function() {
       await conn.execute(proc);
       const result = await conn.execute(
         "BEGIN nodb_eg_proc7(:i, :io, :o); END;", bindVars);
-      (result.outBinds.o).should.be.exactly(101);
-      (result.outBinds.io).should.equal('ChrisJones');
+      assert.strictEqual(result.outBinds.o, 101);
+      assert.strictEqual(result.outBinds.io, 'ChrisJones');
       await conn.execute("DROP PROCEDURE nodb_eg_proc7");
 
     });
@@ -432,7 +448,7 @@ describe('3. examples.js', function() {
       await conn.execute(proc);
       const result = await conn.execute(
         "BEGIN :ret := nodb_eg_func7(:p1, :p2); END;", bindVars);
-      (result.outBinds.ret).should.equal('ChrisJones');
+      assert.strictEqual(result.outBinds.ret, 'ChrisJones');
       await conn.execute("DROP FUNCTION nodb_eg_func7");
 
     });
@@ -464,12 +480,12 @@ describe('3. examples.js', function() {
       await conn.execute(script);
       let result = await conn.execute(
         "INSERT INTO nodb_eg_insert8 VALUES (:id, :nm)", [1, 'Chris']);
-      (result.rowsAffected).should.be.exactly(1);
+      assert.strictEqual(result.rowsAffected, 1);
       result = await conn.execute(
         "INSERT INTO nodb_eg_insert8 VALUES (:id, :nm)", [2, 'Alison']);
-      (result.rowsAffected).should.be.exactly(1);
+      assert.strictEqual(result.rowsAffected, 1);
       result = await conn.execute("UPDATE nodb_eg_insert8 SET name = 'Bambi'");
-      (result.rowsAffected).should.be.exactly(2);
+      assert.strictEqual(result.rowsAffected, 2);
       await conn.execute("DROP TABLE nodb_eg_insert8 PURGE");
       await conn.close();
     });
@@ -516,16 +532,16 @@ describe('3. examples.js', function() {
       let result = await conn1.execute(
         "INSERT INTO nodb_eg_commit9 VALUES (:id, :nm)",
         [1, 'Chris'], { autoCommit: true });
-      (result.rowsAffected).should.be.exactly(1);
+      assert.strictEqual(result.rowsAffected, 1);
       result = await conn1.execute(
         "INSERT INTO nodb_eg_commit9 VALUES (:id, :nm)", [2, 'Alison']);
-      (result.rowsAffected).should.be.exactly(1);
+      assert.strictEqual(result.rowsAffected, 1);
       result = await conn2.execute(
         "SELECT * FROM nodb_eg_commit9  ORDER BY id");
       // This will only show 'Chris' because inserting 'Alison' is not commited by default.
       // Uncomment the autoCommit option above and you will see both rows
       // console.log(result.rows);
-      (result.rows).should.eql([ [ 1, 'Chris' ] ]);
+      assert.deepStrictEqual(result.rows, [ [ 1, 'Chris' ] ]);
       await conn1.execute("DROP TABLE nodb_eg_commit9 PURGE");
     });
 
@@ -584,13 +600,13 @@ describe('3. examples.js', function() {
         [],
         { resultSet: true, fetchArraySize: 50 });
       const rs = result.resultSet;
-      (rs.metaData[0]).name.should.eql('EMPLOYEES_NAME');
+      assert.strictEqual((rs.metaData[0]).name, 'EMPLOYEES_NAME');
       let rowCount = 1;
       while (true) {    // eslint-disable-line
         const row = await rs.getRow();
         if (!row)
           break;
-        row[0].should.be.exactly('staff ' + rowCount);
+        assert.strictEqual(row[0], 'staff ' + rowCount);
         rowCount++;
       }
       await rs.close();
@@ -602,8 +618,8 @@ describe('3. examples.js', function() {
         "SELECT * FROM nodb_eg_emp10 ORDER BY employees_id",
         [],
         { resultSet: true, fetchArraySize: 110 });
-      (result.resultSet.metaData[0]).name.should.eql('EMPLOYEES_ID');
-      (result.resultSet.metaData[1]).name.should.eql('EMPLOYEES_NAME');
+      assert.strictEqual((result.resultSet.metaData[0]).name, 'EMPLOYEES_ID');
+      assert.strictEqual((result.resultSet.metaData[1]).name, 'EMPLOYEES_NAME');
       const rs = result.resultSet;
       while (true) {     // eslint-disable-line
         const rows = await rs.getRows(numRows);
@@ -699,11 +715,11 @@ describe('3. examples.js', function() {
       const result = await conn.execute(
         "BEGIN get_emp_rs11(:sal, :cursor); END;", binds);
       const rs = result.outBinds.cursor;
-      rs.metaData[0].name.should.eql('NAME');
-      rs.metaData[1].name.should.eql('SALARY');
-      rs.metaData[2].name.should.eql('HIRE_DATE');
+      assert.strictEqual(rs.metaData[0].name, 'NAME');
+      assert.strictEqual(rs.metaData[1].name, 'SALARY');
+      assert.strictEqual(rs.metaData[2].name, 'HIRE_DATE');
       const rows = await rs.getRows(numRows);
-      rows.length.should.be.exactly(5);
+      assert.strictEqual(rows.length, 5);
       await rs.close();
     });
   });

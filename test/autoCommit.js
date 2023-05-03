@@ -167,7 +167,7 @@ describe('7. autoCommit.js', function() {
       "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
       [],
       { outFormat: oracledb.OUT_FORMAT_OBJECT });
-    assert.deepEqual(result.rows, []);
+    assert.deepStrictEqual(result.rows, []);
 
     await conn2.execute(
       "INSERT INTO nodb_commit_dept VALUES (99, 'Marketing')");
@@ -197,27 +197,27 @@ describe('7. autoCommit.js', function() {
       oracledb.autoCommit = defaultValue;
     });
 
-    it('7.4.1 Negative - 0', async function() {
-      await setAsGlobalOption(0);
+    it('7.4.1 Negative - 0', function() {
+      setAsGlobalOption(0);
     });
 
-    it('7.4.2 Negative - negative number', async function() {
-      await setAsGlobalOption(-1);
+    it('7.4.2 Negative - negative number', function() {
+      setAsGlobalOption(-1);
     });
 
-    it('7.4.3 Negative - positive number', async function() {
-      await setAsGlobalOption(-1);
+    it('7.4.3 Negative - positive number', function() {
+      setAsGlobalOption(-1);
     });
 
-    it('7.4.4 Negative - NaN', async function() {
-      await setAsGlobalOption(NaN);
+    it('7.4.4 Negative - NaN', function() {
+      setAsGlobalOption(NaN);
     });
 
-    it('7.4.5 Negative - undefined', async function() {
-      await setAsGlobalOption(undefined);
+    it('7.4.5 Negative - undefined', function() {
+      setAsGlobalOption(undefined);
     });
 
-    let setAsGlobalOption = function(setValue) {
+    const setAsGlobalOption = function(setValue) {
       assert.throws(
         function() {
           oracledb.autoCommit = setValue;
@@ -229,26 +229,26 @@ describe('7. autoCommit.js', function() {
 
   describe('7.5 set autoCommit as an execute() option', function() {
 
-    it('7.5.1 Negative - 0', function() {
-      setAsExecOption(0);
+    it('7.5.1 Negative - 0', async function() {
+      await setAsExecOption(0);
     });
 
-    it('7.5.2 Negative - negative number', function() {
-      setAsExecOption(-1);
+    it('7.5.2 Negative - negative number', async function() {
+      await setAsExecOption(-1);
     });
 
-    it('7.5.3 Negative - positive number', function() {
-      setAsExecOption(-1);
+    it('7.5.3 Negative - positive number', async function() {
+      await setAsExecOption(-1);
     });
 
-    it('7.5.4 Negative - NaN', function() {
-      setAsExecOption(NaN);
+    it('7.5.4 Negative - NaN', async function() {
+      await setAsExecOption(NaN);
     });
 
-    it("7.5.5 works as 'false' when setting to 'undefined'", function() {
+    it("7.5.5 works as 'false' when setting to 'undefined'", async function() {
       let result = null;
 
-      result = connection.execute(
+      result = await connection.execute(
         "select user from dual",
         [],
         { autoCommit: undefined });
@@ -256,7 +256,7 @@ describe('7. autoCommit.js', function() {
       assert(result);
     });
 
-    let setAsExecOption = async function(setValue) {
+    const setAsExecOption = async function(setValue) {
       const sql = "select user from dual";
       const binds = [];
       const options = { autoCommit: setValue };

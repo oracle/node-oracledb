@@ -90,7 +90,7 @@ describe('10. nullColumnValues.js', function() {
 
     result = await connection.execute("SELECT null FROM DUAL");
 
-    assert.deepEqual(result.rows[0], [null]);
+    assert.deepStrictEqual(result.rows[0], [null]);
   });
 
   it('10.2 in-bind for null column value', async function() {
@@ -154,8 +154,8 @@ describe('10. nullColumnValues.js', function() {
       },
       { autoCommit: true });
 
-    assert.deepEqual(result.outBinds, {rdid: [90], rdname: [null], rmid: [null]});
-    assert.deepEqual(result.outBinds.rdid, [90]);
+    assert.deepStrictEqual(result.outBinds, {rdid: [90], rdname: [null], rmid: [null]});
+    assert.deepStrictEqual(result.outBinds.rdid, [90]);
     assert.ifError(result.outBinds.rdname[0]); // null
     assert.ifError(result.outBinds.rmid[0]);  // null
   });
@@ -186,7 +186,7 @@ describe('10. nullColumnValues.js', function() {
         if (!row)
           break;
         accessCount++;
-        assert.deepEqual(row, [50, null, null, 1500]);
+        assert.deepStrictEqual(row, [50, null, null, 1500]);
       }
       await rs.close();
       assert.strictEqual(accessCount, 1);

@@ -87,7 +87,6 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
   after(async function() {
     await dropAllTable();
     await connection.close();
-
   }); // after
 
   let setupAllTable = async function() {
@@ -104,131 +103,75 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
     await connection.execute(sql);
   };
 
-  let jpgFileName = './test/fuzzydinosaur.jpg';
+  const jpgFileName = './test/fuzzydinosaur.jpg';
 
-  let prepareTableWithBlob = async function(sql, id) {
-    let bindVar = { i: id, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } };
-    let result = null;
-
-    result = await connection.execute(
-      sql,
-      bindVar,
-      { autoCommit: false }); // a transaction needs to span the INSERT and pipe()
-
+  const prepareTableWithBlob = async function(sql, id) {
+    const bindVar = {
+      i: id,
+      lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
+    };
+    const result = await connection.execute(sql, bindVar);
     assert.strictEqual(result.rowsAffected, 1);
     assert.strictEqual(result.outBinds.lobbv.length, 1);
 
-    let inStream = fs.createReadStream(jpgFileName);
-    let lob = result.outBinds.lobbv[0];
+    const inStream = fs.createReadStream(jpgFileName);
+    const lob = result.outBinds.lobbv[0];
 
-    lob.on('error', function(err) {
-      assert(err, "lob.on 'error' event");
+    await new Promise((resolve, reject) => {
+      lob.on('error', reject);
+      inStream.on('error', reject);
+      lob.on('finish', resolve);
+      inStream.pipe(lob);
     });
-
-    inStream.on('error', function(err) {
-      assert(err, "inStream.on 'error' event");
-    });
-
-    lob.on('finish', function() {
-      connection.commit(function(err) {
-        assert(err);
-      });
-    });
-
-    inStream.pipe(lob);
+    await connection.commit();
   };
 
-  let verifyBlobValueWithFileData = async function(selectSql) {
-    let result = null;
-    result = await connection.execute(selectSql);
-    let lob = result.rows[0][0];
-    assert(lob);
-
-    let blobData = 0;
-    let totalLength = 0;
-    blobData = Buffer.alloc(0);
-
-    lob.on('data', function(chunk) {
-      totalLength = totalLength + chunk.length;
-      blobData = Buffer.concat([blobData, chunk], totalLength);
-    });
-
-    lob.on('error', function(err) {
-      assert(err, "lob.on 'error' event.");
-    });
-
-    lob.on('end', function() {
-      fs.readFile(jpgFileName, function(err, originalData) {
-        assert.ifError(err);
-        assert.strictEqual(totalLength, originalData.length);
-        assert.equal(originalData, blobData);
-      });
-    });
+  const verifyBlobValueWithFileData = async function(selectSql) {
+    const result = await connection.execute(selectSql);
+    const lob = result.rows[0][0];
+    const blobData = await lob.getData();
+    const originalData = await fs.promises.readFile(jpgFileName);
+    assert.deepStrictEqual(originalData, blobData);
     lob.destroy();
   };
 
-  let verifyBlobValueWithBuffer = async function(selectSql, originalBuffer, specialStr) {
-    let result = null;
-    result = await connection.execute(selectSql);
-    let lob = result.rows[0][0];
+  const verifyBlobValueWithBuffer = async function(selectSql, originalBuffer, specialStr) {
+    const result = await connection.execute(selectSql);
+    const lob = result.rows[0][0];
     if (originalBuffer == null || originalBuffer == undefined) {
       assert.ifError(lob);
     } else {
-      assert(lob);
-      let blobData =  Buffer.alloc(0);
-      let totalLength = 0;
-
-      lob.on('data', function(chunk) {
-        totalLength = totalLength + chunk.length;
-        blobData = Buffer.concat([blobData, chunk], totalLength);
-      });
-
-      lob.on('error', function(err) {
-        assert.ifError(err, "lob.on 'error' event.");
-      });
-
-      lob.on('end', function() {
-        assert.strictEqual(totalLength, originalBuffer.length);
-        compareResultBufAndOriginal(blobData, totalLength, originalBuffer, specialStr);
-      });
+      const blobData = await lob.getData();
+      if (originalBuffer.length === 0) {
+        assert.strictEqual(blobData, null);
+      } else {
+        const specStrLength = specialStr.length;
+        assert.strictEqual(blobData.toString('utf8', 0, specStrLength),
+          specialStr);
+        assert.strictEqual(blobData.toString('utf8',
+          (blobData.length - specStrLength), blobData.length), specialStr);
+        assert.deepStrictEqual(blobData, originalBuffer);
+      }
       lob.destroy();
     }
   };
 
-  // compare the result buffer with the original inserted buffer
-  let compareResultBufAndOriginal = function(resultVal, totalLength, originalBuffer, specialStr) {
-    if (originalBuffer.length > 0) {
-      let specStrLength = specialStr.length;
-      assert.strictEqual(resultVal.toString('utf8', 0, specStrLength), specialStr);
-      assert.strictEqual(resultVal.toString('utf8', (totalLength - specStrLength), totalLength), specialStr);
-    }
-    assert.strictEqual(resultVal, originalBuffer);
-  };
-
-  // execute the bind in plsql procedure
-  let plsqlBindIn = async function(sqlRun, bindVar, option) {
-    await connection.execute(
-      sqlRun,
-      bindVar,
-      option);
-  };
-
   describe('77.1 BLOB, PLSQL, BIND_IN', function() {
-    let proc = "CREATE OR REPLACE PROCEDURE nodb_blobs_in_771 (blob_id IN NUMBER, blob_in IN BLOB)\n" +
+    const proc = "CREATE OR REPLACE PROCEDURE nodb_blobs_in_771 (blob_id IN NUMBER, blob_in IN BLOB)\n" +
                "AS \n" +
                "BEGIN \n" +
                "    insert into nodb_tab_blob_in (id, blob_1) values (blob_id, blob_in); \n" +
                "END nodb_blobs_in_771; ";
-    let sqlRun = "BEGIN nodb_blobs_in_771 (:i, :b); END;";
-    let proc_drop = "DROP PROCEDURE nodb_blobs_in_771";
+    const sqlRun = "BEGIN nodb_blobs_in_771 (:i, :b); END;";
+    const proc_drop = "DROP PROCEDURE nodb_blobs_in_771";
 
-    let proc_7711 = "CREATE OR REPLACE PROCEDURE nodb_blobs_in_7711 (blob_id IN NUMBER, blob_in IN BLOB)\n" +
+    const proc_7711 = "CREATE OR REPLACE PROCEDURE nodb_blobs_in_7711 (blob_id IN NUMBER, blob_in IN BLOB)\n" +
                     "AS \n" +
                     "BEGIN \n" +
                     "    insert into nodb_tab_blob_in (id, blob_1) values (blob_id, EMPTY_BLOB()); \n" +
                     "END nodb_blobs_in_7711; ";
-    let sqlRun_7711 = "BEGIN nodb_blobs_in_7711 (:i, :b); END;";
-    let proc_drop_7711 = "DROP PROCEDURE nodb_blobs_in_7711";
+    const sqlRun_7711 = "BEGIN nodb_blobs_in_7711 (:i, :b); END;";
+    const proc_drop_7711 = "DROP PROCEDURE nodb_blobs_in_7711";
 
     before(async function() {
       await executeSQL(proc);
@@ -248,7 +191,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
       await executeSQL(proc_7711);
 
-      await plsqlBindIn(sqlRun_7711, bindVar, option);
+      await connection.execute(sqlRun_7711, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       let emptyBuffer =  Buffer.from("", "utf-8");
@@ -267,7 +210,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
       await executeSQL(proc_7711);
 
-      await plsqlBindIn(sqlRun_7711, bindVar, option);
+      await connection.execute(sqlRun_7711, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       let emptyBuffer =  Buffer.from("", "utf-8");
@@ -286,7 +229,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
       await executeSQL(proc_7711);
 
-      await plsqlBindIn(sqlRun_7711, bindVar, option);
+      await connection.execute(sqlRun_7711, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       let emptyBuffer =  Buffer.from("", "utf-8");
@@ -303,7 +246,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -317,7 +260,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -332,7 +275,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       let option = { autoCommit: true };
 
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -347,7 +290,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -363,7 +306,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       let option = { autoCommit: true };
 
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -379,7 +322,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       let option = { autoCommit: true };
 
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -393,7 +336,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -407,7 +350,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -421,7 +364,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       const option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -467,7 +410,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, bufferStr, specialStr);
@@ -485,7 +428,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, bufferStr, specialStr);
@@ -503,7 +446,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, bufferStr, specialStr);
@@ -521,7 +464,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, bufferStr, specialStr);
@@ -550,7 +493,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       const option = { autoCommit: true };
 
       const sqlRun_77122 = "BEGIN nodb_blobs_in_771 (:1, :2); END;";
-      await plsqlBindIn(sqlRun_77122, bindVar, option);
+      await connection.execute(sqlRun_77122, bindVar, option);
 
       const sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, bufferStr, specialStr);
@@ -581,7 +524,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, bufferStr, specialStr);
@@ -599,7 +542,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, bufferStr, specialStr);
@@ -679,7 +622,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
       await executeSQL(proc_7721);
 
-      await plsqlBindIn(sqlRun_7721, bindVar, option);
+      await connection.execute(sqlRun_7721, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       let emptyBuffer = Buffer.from("", "utf-8");
@@ -698,7 +641,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
       await executeSQL(proc_7721);
 
-      await plsqlBindIn(sqlRun_7721, bindVar, option);
+      await connection.execute(sqlRun_7721, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       let emptyBuffer = Buffer.from("", "utf-8");
@@ -717,7 +660,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
       await executeSQL(proc_7721);
 
-      await plsqlBindIn(sqlRun_7721, bindVar, option);
+      await connection.execute(sqlRun_7721, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       let emptyBuffer = Buffer.from("", "utf-8");
@@ -734,7 +677,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -748,7 +691,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -762,7 +705,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -777,7 +720,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -792,7 +735,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -807,7 +750,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -821,7 +764,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -835,7 +778,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -849,7 +792,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, null, null);
@@ -893,7 +836,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, bufferStr, specialStr);
@@ -940,7 +883,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, bufferStr, specialStr);
@@ -958,7 +901,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, bufferStr, specialStr);
@@ -1038,7 +981,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql_1 = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql_1, bufferStr_1, specialStr_1);
@@ -1100,7 +1043,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       };
       let option = { autoCommit: true };
 
-      await plsqlBindIn(sqlRun, bindVar, option);
+      await connection.execute(sqlRun, bindVar, option);
 
       let sql_1 = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql_1, bufferStr_1, specialStr_1);

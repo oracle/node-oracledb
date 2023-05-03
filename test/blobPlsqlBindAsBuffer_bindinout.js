@@ -122,24 +122,15 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     assert.strictEqual(result.rowsAffected, 1);
     assert.strictEqual(result.outBinds.lobbv.length, 1);
 
-    let inStream = fs.createReadStream(jpgFileName);
-    let lob = result.outBinds.lobbv[0];
-
-    lob.on('error', function(err) {
-      assert(err, "lob.on 'error' event");
+    const inStream = fs.createReadStream(jpgFileName);
+    const lob = result.outBinds.lobbv[0];
+    await new Promise((resolve, reject) => {
+      lob.on('error', reject);
+      inStream.on('error', reject);
+      lob.on('finish', resolve);
+      inStream.pipe(lob);
     });
-
-    inStream.on('error', function(err) {
-      assert(err, "inStream.on 'error' event");
-    });
-
-    lob.on('finish', function() {
-      connection.commit(function(err) {
-        assert(err);
-      });
-    });
-
-    inStream.pipe(lob);
+    await connection.commit();
   };
 
   // compare the result buffer with the original inserted buffer
@@ -1036,16 +1027,14 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // after
 
     // execute plsql bind in out procedure, and verify the plsql bind out buffer
-    let plsqlBindInOut = async function(sqlRun, bindVar, originalBuf1, specialStr1, originalBuf2, specialStr2) {
+    const plsqlBindInOut = async function(sqlRun, bindVar, originalBuf1, specialStr1, originalBuf2, specialStr2) {
       let result = null;
 
-      result = await connection.execute(
-        sqlRun,
-        bindVar);
+      result = await connection.execute(sqlRun, bindVar);
       let resultVal = result.outBinds.lob_1;
-      await compareResultBufAndOriginal(resultVal, originalBuf1, specialStr1);
+      compareResultBufAndOriginal(resultVal, originalBuf1, specialStr1);
       resultVal = result.outBinds.lob_2;
-      await compareResultBufAndOriginal(resultVal, originalBuf2, specialStr2);
+      compareResultBufAndOriginal(resultVal, originalBuf2, specialStr2);
     };
 
     it('79.3.1 bind a JPG and a 32K buffer', async function() {
@@ -1075,27 +1064,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         { autoCommit: true });
 
       let resultVal = result.outBinds.lob_1;
-      await compareResultBufAndOriginal(resultVal, bufferStr_1, specialStr);
-      let lob = result.outBinds.lob_2;
-      let blobData = Buffer.alloc(0);
-      let totalLength = 0;
-
-      lob.on('data', function(chunk) {
-        totalLength = totalLength + chunk.length;
-        blobData = Buffer.concat([blobData, chunk], totalLength);
-      });
-
-      lob.on('error', function(err) {
-        assert(err, "lob.on 'error' event.");
-      });
-
-      lob.on('end', function() {
-        fs.readFile(jpgFileName, function(err, originalData) {
-          assert.ifError(err);
-          assert.strictEqual(totalLength, originalData.length);
-          assert.equal(originalData, blobData);
-        });
-      });
+      compareResultBufAndOriginal(resultVal, bufferStr_1, specialStr);
+      const lob = result.outBinds.lob_2;
+      const blobData = await lob.getData();
+      const originalData = fs.readFileSync(jpgFileName);
+      assert.strictEqual(blobData.length, originalData.length);
+      assert.deepStrictEqual(blobData, originalData);
       lob.destroy();
     }); // 79.3.1
 

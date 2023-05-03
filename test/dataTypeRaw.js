@@ -142,7 +142,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true });
 
       assert.strictEqual(result.outBinds.rid[0], seq);
-      assert.deepEqual(result.outBinds.rc[0], bindValue);
+      assert.deepStrictEqual(result.outBinds.rc[0], bindValue);
     });  // 42.3.1
 
     it('42.3.2 INSERT statement with ARRAY binding', async function() {
@@ -160,7 +160,7 @@ describe('42. dataTypeRaw.js', function() {
         ],
         { autoCommit: true });
       assert.strictEqual(result.outBinds[0][0], seq);
-      assert.deepEqual(result.outBinds[1][0], bindValue);
+      assert.deepStrictEqual(result.outBinds[1][0], bindValue);
     }); // 42.3.2
 
     it('42.3.3 INSERT statement with exact maxSize restriction', async function() {
@@ -178,7 +178,7 @@ describe('42. dataTypeRaw.js', function() {
         },
         { autoCommit: true });
       assert.strictEqual(result.outBinds.rid[0], seq);
-      assert.deepEqual(result.outBinds.rc[0], bindValue);
+      assert.deepStrictEqual(result.outBinds.rc[0], bindValue);
     });
 
     it('42.3.4 UPDATE statement', async function() {
@@ -196,7 +196,7 @@ describe('42. dataTypeRaw.js', function() {
         },
         { autoCommit: true });
       assert.strictEqual(result.outBinds.rid[0], seq);
-      assert.deepEqual(result.outBinds.rc[0], bindValue);
+      assert.deepStrictEqual(result.outBinds.rc[0], bindValue);
     }); // 42.3.4
 
     it('42.3.5 DELETE statement with single row matching', async function() {
@@ -224,7 +224,7 @@ describe('42. dataTypeRaw.js', function() {
           rc  : { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 2000 }
         },
         { autoCommit: true });
-      assert.deepEqual(result.outBinds.rid, [2, 3]);
+      assert.deepStrictEqual(result.outBinds.rid, [2, 3]);
     });
 
   }); // 42.3
@@ -272,7 +272,7 @@ describe('42. dataTypeRaw.js', function() {
           o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 32767}
         });
 
-      assert.deepEqual(Buffer.isBuffer(result.outBinds.o), true);
+      assert.deepStrictEqual(Buffer.isBuffer(result.outBinds.o), true);
       assert.strictEqual(result.outBinds.o.length, size);
     });
 

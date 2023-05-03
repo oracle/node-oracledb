@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2020, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -53,7 +53,6 @@ describe('231. soda13.js', () => {
     const isRunnable = isClientOK && isSodaRunnable;
     if (!isRunnable) {
       this.skip();
-      return;
     }
 
     await sodaUtil.cleanup();

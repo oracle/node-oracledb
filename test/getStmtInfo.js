@@ -57,7 +57,7 @@ describe('162. getStmtInfo.js', function() {
   it('162.1 SELECT', async function() {
     const sql = "select 1 as col from dual";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info,
+    assert.deepStrictEqual(info,
       { bindNames: [], statementType: oracledb.STMT_TYPE_SELECT,
         metaData: [
           {
@@ -77,14 +77,14 @@ describe('162. getStmtInfo.js', function() {
   it('162.2 SELECT with data bind', async function() {
     const sql = "select 1 from dual where :b > 99";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, ['B']);
+    assert.deepStrictEqual(info.bindNames, ['B']);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_SELECT);
   }); // 162.2
 
   it('162.3 unknown statement', async function() {
     const sql = "purge recyclebin";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_UNKNOWN);
   }); // 162.3
 
@@ -100,14 +100,14 @@ describe('162. getStmtInfo.js', function() {
   it('162.5 UPDATE with data bind', async function() {
     const sql = "UPDATE nodb_number SET content = :c WHERE num = :n RETURNING num INTO :rn";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, ['C', 'N', 'RN']);
+    assert.deepStrictEqual(info.bindNames, ['C', 'N', 'RN']);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_UPDATE);
   }); // 162.5
 
   it('162.6 UPDATE and verify changes do not happen', async function() {
     const sql = "UPDATE nodb_number SET content = content + 1";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_UPDATE);
     await assist.dataTypeSupport(conn, tableName, numbers);
   }); // 162.6
@@ -115,14 +115,14 @@ describe('162. getStmtInfo.js', function() {
   it('162.7 DELETE with data bind', async function() {
     const sql = "DELETE FROM nodb_number WHERE num = :n";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, ['N']);
+    assert.deepStrictEqual(info.bindNames, ['N']);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_DELETE);
   }); // 162.7
 
   it('162.8 DELETE and verify changes do not happen', async function() {
     const sql = "DELETE FROM nodb_number";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_DELETE);
     await assist.dataTypeSupport(conn, tableName, numbers);
   }); // 162.8
@@ -130,25 +130,25 @@ describe('162. getStmtInfo.js', function() {
   it('162.9 DELETE with subquery', async function() {
     const sql = "delete from (select * from nodb_number) where num > :n";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, ['N']);
+    assert.deepStrictEqual(info.bindNames, ['N']);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_DELETE);
   }); // 162.9
 
   it('162.10 INSERT with data bind', async function() {
     const sql = "insert into nodb_number (num, content) values (999, 999999) returning num into :n";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, ['N']);
+    assert.deepStrictEqual(info.bindNames, ['N']);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_INSERT);
   }); // 162.10
 
   it('162.11 INSERT and verify', async function() {
     let sql = "insert into nodb_number values (666, 1234)";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_INSERT);
     sql = "select content from nodb_number where num = 666";
     const result = await conn.execute(sql);
-    assert.deepEqual(result.rows, []);
+    assert.deepStrictEqual(result.rows, []);
   }); // 162.11
 
   it('162.12 Negative - insert nonexistent table', async function() {
@@ -175,7 +175,7 @@ describe('162. getStmtInfo.js', function() {
     await testsUtil.dropTable("nodb_test_162_14");
     let sql = "create table nodb_test_162_14 (a number)";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_CREATE);
     sql = "insert into nodb_test_162_14 values (89)";
     await assert.rejects(
@@ -192,7 +192,7 @@ describe('162. getStmtInfo.js', function() {
                    "    str := 'E2'; \n" +
                    "END;";
     const info = await conn.getStatementInfo(proc);
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_CREATE);
     proc = "begin nodb_proc_162_15(:out); end;";
     const binds = { out: { type: oracledb.STRING, dir: oracledb.BIND_OUT } };
@@ -205,7 +205,7 @@ describe('162. getStmtInfo.js', function() {
   it('162.16 CREATE, DDL statements are not parsed, so syntax errors in them will not be reported.', async function() {
     const sql = "create table nodb_foo (:b number)";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_CREATE);
   }); // 162.16
 
@@ -214,7 +214,7 @@ describe('162. getStmtInfo.js', function() {
     const sql = "drop table " + tab + " purge";
     await assist.createTable(conn, tab);
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_DROP);
     await conn.execute(sql);
   }); // 162.17
@@ -222,61 +222,61 @@ describe('162. getStmtInfo.js', function() {
   it('162.18 ALTER', async function() {
     const sql = "alter session set nls_date_format = 'YYYY-MM-DD'";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_ALTER);
   }); // 162.18
 
   it('162.19 ALTER with data bind', async function() {
     const sql = "ALTER SESSION SET TIME_ZONE=':B'";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_ALTER);
   }); // 162.19
 
   it('162.20 ALTER, invalid statement', async function() {
     const sql = "ALTER SESSION SET :B = 'UTC'";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_ALTER);
   });
 
   it('162.21 BEGIN', async function() {
     const sql = "BEGIN NULL; END;";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_BEGIN);
   });
 
   it('162.22 BEGIN with data bind', async function() {
     const sql = "BEGIN :out := lpad('A', 200, 'x'); END;";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, [ "OUT" ]);
+    assert.deepStrictEqual(info.bindNames, [ "OUT" ]);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_BEGIN);
   });
 
   it('162.23 DECLARE', async function() {
     const sql = "declare var_tem number(6); begin null; end;";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_DECLARE);
   });
 
   it('162.24 COMMIT', async function() {
     const info = await conn.getStatementInfo("commit");
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_COMMIT);
   });
 
   it('162.25 ROLLBACK', async function() {
     const info = await conn.getStatementInfo("rollback");
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_ROLLBACK);
   });
 
   it('162.26 TRUNCATE', async function() {
     const sql = "truncate table nodb_number";
     const info = await conn.getStatementInfo(sql);
-    assert.deepEqual(info.bindNames, []);
+    assert.deepStrictEqual(info.bindNames, []);
     assert.strictEqual(info.statementType, oracledb.STMT_TYPE_UNKNOWN);
   });
 
@@ -286,7 +286,7 @@ describe('162. getStmtInfo.js', function() {
     await Promise.all(in_values.map(async function(element) {
       let sql = "select :\"" + element + "\" from dual";
       let info = await conn.getStatementInfo(sql);
-      assert.deepEqual(info.bindNames, [element]);
+      assert.deepStrictEqual(info.bindNames, [element]);
     }));
   }); // 162.2
 });

@@ -267,7 +267,7 @@ describe("72. lobBind2.js", function() {
       });
       const data = await fsPromises.readFile(expectLob);
       assert.strictEqual(totalLength, data.length);
-      assert.deepEqual(blobData, data);
+      assert.deepStrictEqual(blobData, data);
     }; // verifyBlobValue
 
     it("72.2.1 BIND_IN, DML, a jpg file", async function() {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -53,7 +53,6 @@ describe('230. soda12.js', () => {
     const isRunnable = isClientOK && isSodaRunnable;
     if (!isRunnable) {
       this.skip();
-      return;
     }
 
     await sodaUtil.cleanup();
@@ -112,7 +111,7 @@ describe('230. soda12.js', () => {
     const docs1 = await coll.find().getDocuments();
     assert.strictEqual(docs1.length, 1);
     assert.strictEqual(docs1[0].key, '1');
-    assert.deepEqual(docs1[0].getContent(), content1);
+    assert.deepStrictEqual(docs1[0].getContent(), content1);
 
     // (2)
     const content2 = {sally: 1, betty: 2};
@@ -122,7 +121,7 @@ describe('230. soda12.js', () => {
     const docs2 = await coll.find().getDocuments();
     assert.strictEqual(docs2.length, 2);
     assert.strictEqual(docs2[1].key, '2');
-    assert.deepEqual(docs2[1].getContent(), content2);
+    assert.deepStrictEqual(docs2[1].getContent(), content2);
 
     // (3)
     const content3 = {fred: 8, george: 16};
@@ -132,7 +131,7 @@ describe('230. soda12.js', () => {
     const docs3 = await coll.find().getDocuments();
     assert.strictEqual(docs3.length, 2);
     assert.strictEqual(docs3[0].key, '1');
-    assert.deepEqual(docs3[0].getContent(), content3);
+    assert.deepStrictEqual(docs3[0].getContent(), content3);
 
     // (4)
     const content4 = {sally: 3, betty: 5};
@@ -144,7 +143,7 @@ describe('230. soda12.js', () => {
     const docs4 = await coll.find().getDocuments();
     assert.strictEqual(docs4.length, 2);
     assert.strictEqual(docs4[1].key, '2');
-    assert.deepEqual(docs4[1].getContent(), content4);
+    assert.deepStrictEqual(docs4[1].getContent(), content4);
 
     await conn.commit();
     let res = await coll.drop();
@@ -180,9 +179,9 @@ describe('230. soda12.js', () => {
     const docs = await coll.find().getDocuments();
     assert.strictEqual(docs.length, 2);
     assert.strictEqual(docs[0].key, '3');
-    assert.deepEqual(docs[0].getContent(), content3);
+    assert.deepStrictEqual(docs[0].getContent(), content3);
     assert.strictEqual(docs[1].key, '4');
-    assert.deepEqual(docs[1].getContent(), content2);
+    assert.deepStrictEqual(docs[1].getContent(), content2);
 
     await conn.commit();
     let res = await coll.drop();

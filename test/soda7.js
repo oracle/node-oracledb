@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -325,7 +325,7 @@ describe('175. soda7.js', () => {
 
     // Fetch back
     const documents = await collection.find().getDocuments();
-    assert.deepEqual(documents, []);
+    assert.deepStrictEqual(documents, []);
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);

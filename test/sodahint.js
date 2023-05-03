@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -50,13 +50,11 @@ describe('257. sodahint.js', () => {
     if (clientVersion < 2103000000) {
       if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
         this.skip();
-        return;
       }
     }
     const runnable = await testsUtil.isSodaRunnable();
     if (!runnable) {
       this.skip();
-      return;
     } else {
       conn = await oracledb.getConnection(dbConfig);
       soda = conn.getSodaDatabase();
@@ -87,7 +85,7 @@ describe('257. sodahint.js', () => {
     // Fetch back
     let outDocuments = await collection.find().hint("MONITOR").getDocuments();
     let outContent = outDocuments[0].getContent();
-    assert.deepEqual(outContent, inContent);
+    assert.deepStrictEqual(outContent, inContent);
     await conn.commit();
 
     let res = await collection.drop();
@@ -126,7 +124,7 @@ describe('257. sodahint.js', () => {
     // Fetch back
     let outDocuments = await collection.find().hint("MONITOR").getDocuments();
     let outContent = outDocuments[0].getContent();
-    assert.deepEqual(outContent, inContent);
+    assert.deepStrictEqual(outContent, inContent);
 
     await conn.commit();
 

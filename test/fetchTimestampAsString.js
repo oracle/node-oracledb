@@ -261,7 +261,7 @@ describe('19. fetchTimestampAsString.js', function() {
       [],
       { fetchInfo: { "CONTENT": { type: oracledb.STRING } } });
 
-    assert.deepEqual(result.rows, want);
+    assert.deepStrictEqual(result.rows, want);
   }
 
   // fetchInfo option, outFormat is OBJECT
@@ -273,7 +273,7 @@ describe('19. fetchTimestampAsString.js', function() {
         outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
       });
-    assert.deepEqual(result.rows, want);
+    assert.deepStrictEqual(result.rows, want);
   }
 
   // fetchInfo option, resultSet
@@ -293,7 +293,7 @@ describe('19. fetchTimestampAsString.js', function() {
       const row = await rs.getRow();
 
       if (row) {
-        assert.deepEqual(row, want[count]);
+        assert.deepStrictEqual(row, want[count]);
         count++;
         return fetchRowFromRS(rs);
       } else {
@@ -319,7 +319,7 @@ describe('19. fetchTimestampAsString.js', function() {
       const row = await rs.getRow();
 
       if (row) {
-        assert.deepEqual(row, want[count]);
+        assert.deepStrictEqual(row, want[count]);
         count++;
         return fetchRowFromRS(rs);
       } else {
@@ -331,7 +331,7 @@ describe('19. fetchTimestampAsString.js', function() {
   async function test5(table, want) {
     const result = await connection.execute(
       `select content from ` + table + ` order by num`);
-    assert.deepEqual(result.rows, want);
+    assert.deepStrictEqual(result.rows, want);
   }
 
   async function test6(table, want) {
@@ -339,7 +339,7 @@ describe('19. fetchTimestampAsString.js', function() {
       `select content from ` + table + ` order by num`,
       [],
       { outFormat: oracledb.OUT_FORMAT_OBJECT });
-    assert.deepEqual(result.rows, want);
+    assert.deepStrictEqual(result.rows, want);
   }
 
   async function test7(table, want) {
@@ -357,7 +357,7 @@ describe('19. fetchTimestampAsString.js', function() {
       const row = await rs.getRow();
 
       if (row) {
-        assert.deepEqual(row, want[count]);
+        assert.deepStrictEqual(row, want[count]);
         count++;
         return fetchRowFromRS(rs);
       } else {
@@ -382,7 +382,7 @@ describe('19. fetchTimestampAsString.js', function() {
       const row = await rs.getRow();
 
       if (row) {
-        assert.deepEqual(row, want[count]);
+        assert.deepStrictEqual(row, want[count]);
         count++;
         return fetchRowFromRS(rs);
       } else {
@@ -412,7 +412,7 @@ describe('19. fetchTimestampAsString.js', function() {
       });
 
       stream.on('end', function() {
-        assert.deepEqual(result, want);
+        assert.deepStrictEqual(result, want);
         stream.destroy();
       });
 

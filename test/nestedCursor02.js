@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2020, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -107,7 +107,7 @@ describe('233. nestedCursor02.js', () => {
     const result1 = await conn.execute(simpleSql);
     const rows1 = result1.rows;
     assert.strictEqual(rows1[0][0], 'String Val');
-    assert.deepEqual(rows1[0][1], rowsSimple);
+    assert.deepStrictEqual(rows1[0][1], rowsSimple);
 
     assert.strictEqual(result1.metaData[0].name, "'STRINGVAL'");
     assert.strictEqual(result1.metaData[1].name, 'NC');
@@ -118,7 +118,7 @@ describe('233. nestedCursor02.js', () => {
     const result2 = await conn.execute(simpleSql, [], { resultSet: true });
     const rows2 = await traverse_results(result2.resultSet);
     assert.strictEqual(rows2[0][0], 'String Val');
-    assert.deepEqual(rows2[0][1], rowsSimple);
+    assert.deepStrictEqual(rows2[0][1], rowsSimple);
 
     assert.strictEqual(result1.metaData[0].name, "'STRINGVAL'");
     assert.strictEqual(result1.metaData[1].name, 'NC');
@@ -129,7 +129,7 @@ describe('233. nestedCursor02.js', () => {
     assert.strictEqual(rows3[0][0], 'Level 1 String');
     assert.strictEqual(rows3[0][1][0][0], 'Level 2 String');
     assert.strictEqual(rows3[0][1][0][1][0][0], 'Level 3 String');
-    assert.deepEqual(rows3[0][1][0][1][0][1], rowsComplex);
+    assert.deepStrictEqual(rows3[0][1][0][1][0][1], rowsComplex);
 
     assert.strictEqual(result3.metaData[0].name, "'LEVEL1STRING'");
     assert.strictEqual(result3.metaData[1].name, 'NC1');
@@ -149,7 +149,7 @@ describe('233. nestedCursor02.js', () => {
     assert.strictEqual(rows4[0][0], 'Level 1 String');
     assert.strictEqual(rows4[0][1][0][0], 'Level 2 String');
     assert.strictEqual(rows4[0][1][0][1][0][0], 'Level 3 String');
-    assert.deepEqual(rows4[0][1][0][1][0][1], rowsComplex);
+    assert.deepStrictEqual(rows4[0][1][0][1][0][1], rowsComplex);
 
     assert.strictEqual(result4.metaData[0].name, "'LEVEL1STRING'");
     assert.strictEqual(result4.metaData[1].name, 'NC1');

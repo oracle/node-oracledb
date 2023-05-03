@@ -38,7 +38,7 @@ const dbConfig = require('./dbconfig.js');
 describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
 
   let connection = null;
-  let tableName = "nodb_dml_blob_138";
+  const tableName = "nodb_dml_blob_138";
 
   const blob_table_create = "BEGIN \n" +
                           "    DECLARE \n" +
@@ -83,8 +83,8 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
 
   }); // 138.1
 
-  let insertData = async function(tableSize) {
-    let insert_data = "DECLARE \n" +
+  const insertData = async function(tableSize) {
+    const sql = "DECLARE \n" +
                       "    tmpchar VARCHAR2(2000); \n" +
                       "    tmplob BLOB; \n" +
                       "BEGIN \n" +
@@ -95,49 +95,31 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
                       "    END LOOP; \n" +
                       "    commit; \n" +
                       "END; ";
-    let result = null;
-    await connection.execute(insert_data);
-    result = await connection.execute("select num from " + tableName);
+    await connection.execute(sql);
+    const result = await connection.execute("select num from " + tableName);
     assert.strictEqual(result.rows.length, tableSize);
   };
 
-  let updateReturning_stream = async function() {
-    let sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, blob into :num, :lobou";
-    let result = null;
-    result = await connection.execute(
-      sql_update,
-      {
-        num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-        lobou: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
-      });
-    let numLobs = result.outBinds.lobou.length;
+  const updateReturning_stream = async function() {
+    const sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, blob into :num, :lobou";
+    const binds = {
+      num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      lobou: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
+    };
+    const result = await connection.execute(sql_update, binds);
+    const numLobs = result.outBinds.lobou.length;
     assert.strictEqual(numLobs, 10);
     for (let n = 0; n < numLobs; n++) {
-      verifyLob(n, result);
+      await verifyLob(n, result);
     }
   };
 
-  let verifyLob = function(n, result) {
-    let lob = result.outBinds.lobou[n];
-    let id = result.outBinds.num[n];
-    assert(lob);
-    let blobData = 0;
-    let totalLength = 0;
-    blobData = Buffer.alloc(0);
-
-    lob.on('data', function(chunk) {
-      totalLength = totalLength + chunk.length;
-      blobData = Buffer.concat([blobData, chunk], totalLength);
-    });
-
-    lob.on('error', function(err) {
-      assert(err, "lob.on 'error' event.");
-    });
-
-    lob.on('end', function(err) {
-      assert(err);
-      let expected = Buffer.from(String(id - 10), "utf-8");
-      assert.deepStrictEqual(blobData, expected);
-    });
+  const verifyLob = async function(n, result) {
+    const lob = result.outBinds.lobou[n];
+    const id = result.outBinds.num[n];
+    const blobData = await lob.getData();
+    let expected = Buffer.from(String(id - 10));
+    assert.deepStrictEqual(blobData, expected);
   };
+
 });

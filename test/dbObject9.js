@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -130,7 +130,7 @@ describe('208. dbObject9.js', function() {
     const RS = result.outBinds.out;
     const rows = await RS.getRows(PEOPLE.length);
     for (let i = 0; i < PEOPLE.length; i++) {
-      assert.deepEqual(rows[i][1]._toPojo(), PEOPLE[i]);
+      assert.deepStrictEqual(rows[i][1]._toPojo(), PEOPLE[i]);
       assert.strictEqual(JSON.stringify(rows[i][1]), JSON.stringify(PEOPLE[i]));
     }
     await RS.close();
@@ -154,7 +154,7 @@ describe('208. dbObject9.js', function() {
     const result = await conn.execute(queryImpres);
     const rows = result.implicitResults[0];
     for (let i = 0; i < PEOPLE.length; i++) {
-      assert.deepEqual(rows[i][1]._toPojo(), PEOPLE[i]);
+      assert.deepStrictEqual(rows[i][1]._toPojo(), PEOPLE[i]);
       assert.strictEqual(JSON.stringify(rows[i][1]), JSON.stringify(PEOPLE[i]));
     }
   }); // 208.2
@@ -163,7 +163,7 @@ describe('208. dbObject9.js', function() {
     const result = await conn.execute(queryImpres, [], { resultSet: true});
     const rows = await result.implicitResults[0].getRows(PEOPLE.length);
     for (let i = 0; i < PEOPLE.length; i++) {
-      assert.deepEqual(rows[i][1]._toPojo(), PEOPLE[i]);
+      assert.deepStrictEqual(rows[i][1]._toPojo(), PEOPLE[i]);
       assert.strictEqual(JSON.stringify(rows[i][1]), JSON.stringify(PEOPLE[i]));
     }
   }); // 208.3
@@ -185,7 +185,7 @@ describe('208. dbObject9.js', function() {
 
     assert.strictEqual(result.rowsAffected, 1);
     assert.strictEqual(result.outBinds[0][0], staffNo);
-    assert.deepEqual(
+    assert.deepStrictEqual(
       result.outBinds[1][0]._toPojo(),
       staff
     );
@@ -208,7 +208,7 @@ describe('208. dbObject9.js', function() {
 
     assert.strictEqual(result.rowsAffected, 1);
     assert.strictEqual(result.outBinds[0][0], staffNo);
-    assert.deepEqual(
+    assert.deepStrictEqual(
       result.outBinds[1][0]._toPojo(),
       staff
     );
@@ -231,7 +231,7 @@ describe('208. dbObject9.js', function() {
 
     assert.strictEqual(result.rowsAffected, 1);
     assert.strictEqual(result.outBinds.o1[0], staffNo);
-    assert.deepEqual(
+    assert.deepStrictEqual(
       result.outBinds.o2[0]._toPojo(),
       staff
     );

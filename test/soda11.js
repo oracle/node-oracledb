@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -45,7 +45,6 @@ describe('179. soda11.js', () => {
     const runnable = await testsUtil.isSodaRunnable();
     if (!runnable) {
       this.skip();
-      return;
     }
 
     await sodaUtil.cleanup();
@@ -102,7 +101,7 @@ describe('179. soda11.js', () => {
       assert.strictEqual(collection.name, t_collname);
 
       assert.strictEqual(typeof (collection.metaData), "object");
-      assert.deepEqual(collection.metaData, t_metadata);
+      assert.deepStrictEqual(collection.metaData, t_metadata);
 
     } finally {
       await conn.commit();

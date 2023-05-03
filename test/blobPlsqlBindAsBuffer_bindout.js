@@ -156,7 +156,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
     const blobData = await lob.getData();
     lob.destroy();
     const originalData = await fs.promises.readFile(jpgFileName);
-    assert.deepEqual(originalData, blobData);
+    assert.deepStrictEqual(originalData, blobData);
   };
 
   const verifyBlobValueWithBuffer = async function(selectSql, originalBuffer, specialStr) {
@@ -940,7 +940,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
       const blobData = await lob.getData();
       lob.destroy();
       const originalData = await fs.promises.readFile(jpgFileName);
-      assert.deepEqual(originalData, blobData);
+      assert.deepStrictEqual(originalData, blobData);
     }); // 78.3.2
 
     it('78.3.3 bind two buffer, one > (64K - 1)', async function() {

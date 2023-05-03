@@ -33,7 +33,6 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const should   = require('should');
 const dbConfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
@@ -60,449 +59,215 @@ describe('180. externalProxyAuth.js', function() {
   describe('180.1 Non-Pool Connect', function() {
 
     it('180.1.1 Non-Pool Connect: Username-Password Auth', async function() {
-      let conn;
-      try {
-        conn = await oracledb.getConnection(dbConfig);
-        const [proxy_user, session_user] = await ShowUserInfo(conn);
-        should.strictEqual(proxy_user, null);
-        should.strictEqual(session_user, dbConfig.user.toUpperCase());
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection(dbConfig);
+      const [proxy_user, session_user] = await ShowUserInfo(conn);
+      assert.strictEqual(proxy_user, null);
+      assert.strictEqual(session_user, dbConfig.user.toUpperCase());
+      await conn.close();
     });
 
     it('180.1.2 Non-Pool Connect: External Auth', async function() {
       if (!dbConfig.test.externalAuth) {
         this.skip();
       }
-      let conn;
-      try {
-        conn = await oracledb.getConnection({
-          connectString: dbConfig.connectString,
-          externalAuth: true
-        });
-        const [proxy_user, session_user] = await ShowUserInfo(conn);
-        should.strictEqual(proxy_user, null);
-        should.strictEqual(session_user, dbConfig.user.toUpperCase());
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection({
+        connectString: dbConfig.connectString,
+        externalAuth: true
+      });
+      const [proxy_user, session_user] = await ShowUserInfo(conn);
+      assert.strictEqual(proxy_user, null);
+      assert.strictEqual(session_user, dbConfig.user.toUpperCase());
+      await conn.close();
     });
 
     it('180.1.3 Non-Pool Connect: Username-Password Auth with proxy', async function() {
       if (!dbConfig.test.proxySessionUser) {
         this.skip();
       }
-      let conn;
-      try {
-        conn = await oracledb.getConnection({
-          ...dbConfig,
-          user: `${dbConfig.user}[${dbConfig.test.proxySessionUser}]`,
-        });
-        const [proxy_user, session_user] = await ShowUserInfo(conn);
-        should.strictEqual(proxy_user, dbConfig.user.toUpperCase());
-        should.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection({
+        ...dbConfig,
+        user: `${dbConfig.user}[${dbConfig.test.proxySessionUser}]`,
+      });
+      const [proxy_user, session_user] = await ShowUserInfo(conn);
+      assert.strictEqual(proxy_user, dbConfig.user.toUpperCase());
+      assert.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
+      await conn.close();
     });
 
     it('180.1.4 Non-Pool Connect: External Auth with proxy', async function() {
       if (!dbConfig.test.externalAuth || !dbConfig.test.proxySessionUser) {
         this.skip();
       }
-      let conn;
-      try {
-        conn = await oracledb.getConnection({
-          connectString: dbConfig.connectString,
-          user: `[${dbConfig.test.proxySessionUser}]`,
-          externalAuth: true,
-        });
-        const [proxy_user, session_user] = await ShowUserInfo(conn);
-        should.strictEqual(proxy_user, dbConfig.user.toUpperCase());
-        should.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const conn = await oracledb.getConnection({
+        connectString: dbConfig.connectString,
+        user: `[${dbConfig.test.proxySessionUser}]`,
+        externalAuth: true,
+      });
+      const [proxy_user, session_user] = await ShowUserInfo(conn);
+      assert.strictEqual(proxy_user, dbConfig.user.toUpperCase());
+      assert.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
+      await conn.close();
     });
 
     it('180.1.5 Non-Pool Connect: External Auth with proxy no brackets', async function() {
       if (!dbConfig.test.externalAuth || !dbConfig.test.proxySessionUser) {
         this.skip();
       }
-      let conn;
-      try {
-        await assert.rejects(
-          async () => {
-            conn = await oracledb.getConnection({
-              connectString: dbConfig.connectString,
-              user: dbConfig.test.proxySessionUser,
-              externalAuth: true,
-            });
-            await ShowUserInfo(conn);
-          },
-          /DPI-1069:/
-        );
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection({
+            connectString: dbConfig.connectString,
+            user: dbConfig.test.proxySessionUser,
+            externalAuth: true,
+          });
+        },
+        /DPI-1069:/
+      );
     });
   });
 
   describe('180.2 Pooled Connect', function() {
 
     it('180.2.1 Pooled Connect: Username-Password Auth', async function() {
-      let conn, pool;
-      try {
-        pool = await oracledb.createPool(dbConfig);
-        conn = await pool.getConnection();
-        const [proxy_user, session_user] = await ShowUserInfo(conn);
-        should.strictEqual(proxy_user, null);
-        should.strictEqual(session_user, dbConfig.user.toUpperCase());
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-        if (pool) {
-          try {
-            await pool.close(0);
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const pool = await oracledb.createPool(dbConfig);
+      const conn = await pool.getConnection();
+      const [proxy_user, session_user] = await ShowUserInfo(conn);
+      assert.strictEqual(proxy_user, null);
+      assert.strictEqual(session_user, dbConfig.user.toUpperCase());
+      await conn.close();
+      await pool.close(0);
     });
 
     it('180.2.2 Pooled Connect: External Auth', async function() {
       if (!dbConfig.test.externalAuth) {
         this.skip();
       }
-      let conn, pool;
-      try {
-        pool = await oracledb.createPool({
-          connectString: dbConfig.connectString,
-          externalAuth: true,
-        });
-        conn = await pool.getConnection();
-        const [proxy_user, session_user] = await ShowUserInfo(conn);
-        should.strictEqual(proxy_user, null);
-        should.strictEqual(session_user, dbConfig.user.toUpperCase());
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-        if (pool) {
-          try {
-            await pool.close(0);
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const pool = await oracledb.createPool({
+        connectString: dbConfig.connectString,
+        externalAuth: true,
+      });
+      const conn = await pool.getConnection();
+      const [proxy_user, session_user] = await ShowUserInfo(conn);
+      assert.strictEqual(proxy_user, null);
+      assert.strictEqual(session_user, dbConfig.user.toUpperCase());
+      await conn.close();
+      await pool.close(0);
     });
 
     it('180.2.3 Pooled Connect: Username-Password Auth with proxy when create pool', async function() {
       if (!dbConfig.test.proxySessionUser) {
         this.skip();
       }
-      let conn, pool;
-      try {
-        pool = await oracledb.createPool({
-          ...dbConfig,
-          user: `${dbConfig.user}[${dbConfig.test.proxySessionUser}]`,
-        });
-        conn = await pool.getConnection();
-        const [proxy_user, session_user] = await ShowUserInfo(conn);
-        should.strictEqual(proxy_user, dbConfig.user.toUpperCase());
-        should.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-        if (pool) {
-          try {
-            await pool.close(0);
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const pool = await oracledb.createPool({
+        ...dbConfig,
+        user: `${dbConfig.user}[${dbConfig.test.proxySessionUser}]`,
+      });
+      const conn = await pool.getConnection();
+      const [proxy_user, session_user] = await ShowUserInfo(conn);
+      assert.strictEqual(proxy_user, dbConfig.user.toUpperCase());
+      assert.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
+      await conn.close();
+      await pool.close(0);
     });
 
     it('180.2.4 Pooled Connect: Username-Password Auth with proxy when acquire connection', async function() {
       if (!dbConfig.test.proxySessionUser) {
         this.skip();
       }
-      let conn, pool;
-      try {
-        pool = await oracledb.createPool({
-          ...dbConfig,
-          homogeneous: false,
-        });
-        conn = await pool.getConnection({ "user": dbConfig.test.proxySessionUser });
-        const [proxy_user, session_user] = await ShowUserInfo(conn);
-        should.strictEqual(proxy_user, dbConfig.user.toUpperCase());
-        should.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-        if (pool) {
-          try {
-            await pool.close(0);
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const pool = await oracledb.createPool({
+        ...dbConfig,
+        homogeneous: false,
+      });
+      const conn = await pool.getConnection({ "user": dbConfig.test.proxySessionUser });
+      const [proxy_user, session_user] = await ShowUserInfo(conn);
+      assert.strictEqual(proxy_user, dbConfig.user.toUpperCase());
+      assert.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
+      await conn.close();
+      await pool.close(0);
     });
 
     it('180.2.5 Pooled Connect: Username-Password Auth with proxy when acquire connection', async function() {
       if (!dbConfig.test.proxySessionUser) {
         this.skip();
       }
-      let conn, pool;
-      try {
-        await assert.rejects(
-          async () => {
-            pool = await oracledb.createPool({
-              ...dbConfig,
-              homogeneous: false,
-            });
-            conn = await pool.getConnection({ "user": `[${dbConfig.test.proxySessionUser}]` });
-            await ShowUserInfo(conn);
-          },
-          /ORA-00987:/
-        );
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-        if (pool) {
-          try {
-            await pool.close(0);
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const pool = await oracledb.createPool({
+        ...dbConfig,
+        homogeneous: false,
+      });
+      await assert.rejects(
+        async () => {
+          await pool.getConnection({ "user": `[${dbConfig.test.proxySessionUser}]` });
+        },
+        /ORA-00987:/
+      );
+      await pool.close(0);
     });
 
     it('180.2.6 Pooled Connect: External Auth with proxy when create pool', async function() {
       if (!dbConfig.test.externalAuth || !dbConfig.test.proxySessionUser) {
         this.skip();
       }
-      let conn, pool;
-      try {
-        await assert.rejects(
-          async () => {
-            pool = await oracledb.createPool({
-              connectString: dbConfig.connectString,
-              user: `[${dbConfig.test.proxySessionUser}]`,
-              externalAuth: true,
-            });
-            conn = await pool.getConnection();
-            await ShowUserInfo(conn);
-          },
-          /DPI-1032:/
-        );
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-        if (pool) {
-          try {
-            await pool.close(0);
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      await assert.rejects(
+        async () => {
+          await oracledb.createPool({
+            connectString: dbConfig.connectString,
+            user: `[${dbConfig.test.proxySessionUser}]`,
+            externalAuth: true,
+          });
+        },
+        /DPI-1032:/
+      );
     });
 
     it('180.2.7 Pooled Connect: External Auth with proxy no brackets when create pool', async function() {
       if (!dbConfig.test.externalAuth || !dbConfig.test.proxySessionUser) {
         this.skip();
       }
-      let conn, pool;
-      try {
-        await assert.rejects(
-          async () => {
-            pool = await oracledb.createPool({
-              connectString: dbConfig.connectString,
-              user: dbConfig.test.proxySessionUser,
-              externalAuth: true,
-            });
-            conn = await pool.getConnection();
-            await ShowUserInfo(conn);
-          },
-          /DPI-1032:/
-        );
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-        if (pool) {
-          try {
-            await pool.close(0);
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      await assert.rejects(
+        async () => {
+          await oracledb.createPool({
+            connectString: dbConfig.connectString,
+            user: dbConfig.test.proxySessionUser,
+            externalAuth: true,
+          });
+        },
+        /DPI-1032:/
+      );
     });
 
     it('180.2.8 Pooled Connect: External Auth with proxy when acquire connection', async function() {
       if (!dbConfig.test.externalAuth || !dbConfig.test.proxySessionUser) {
         this.skip();
       }
-      let conn, pool;
-      try {
-        pool = await oracledb.createPool({
-          connectString: dbConfig.connectString,
-          externalAuth: true,
-        });
-        conn = await pool.getConnection({user: `[${dbConfig.test.proxySessionUser}]`});
-        const [proxy_user, session_user] = await ShowUserInfo(conn);
-        should.strictEqual(proxy_user, dbConfig.user.toUpperCase());
-        should.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-        if (pool) {
-          try {
-            await pool.close(0);
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const pool = await oracledb.createPool({
+        connectString: dbConfig.connectString,
+        externalAuth: true,
+      });
+      const conn = await pool.getConnection({user: `[${dbConfig.test.proxySessionUser}]`});
+      const [proxy_user, session_user] = await ShowUserInfo(conn);
+      assert.strictEqual(proxy_user, dbConfig.user.toUpperCase());
+      assert.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
+      await conn.close();
+      await pool.close(0);
     });
 
     it('180.2.9 Pooled Connect: External Auth with proxy no brackets when acquire connection', async function() {
       if (!dbConfig.test.externalAuth || !dbConfig.test.proxySessionUser) {
         this.skip();
       }
-      let conn, pool;
-      try {
-        await assert.rejects(
-          async () => {
-            pool = await oracledb.createPool({
-              connectString: dbConfig.connectString,
-              externalAuth: true,
-            });
-            conn = await pool.getConnection({user: dbConfig.test.proxySessionUser});
-            await ShowUserInfo(conn);
-          },
-          /DPI-1069:/
-        );
-      } catch (err) {
-        should.not.exist(err);
-      } finally {
-        if (conn) {
-          try {
-            await conn.close();
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-        if (pool) {
-          try {
-            await pool.close(0);
-          } catch (err) {
-            should.not.exist(err);
-          }
-        }
-      }
+      const pool = await oracledb.createPool({
+        connectString: dbConfig.connectString,
+        externalAuth: true,
+      });
+      await assert.rejects(
+        async () => {
+          await pool.getConnection({user: dbConfig.test.proxySessionUser});
+        },
+        /DPI-1069:/
+      );
+      await pool.close(0);
     });
+
   });
+
 });

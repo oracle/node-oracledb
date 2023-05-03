@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2020, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -133,7 +133,7 @@ describe('241. dbType04.js', function() {
     assert.strictEqual(out.keyE, jsonVal.keyE);
     assert.strictEqual(out.keyF, jsonVal.keyF);
     assert.ifError(out.keyG);
-    assert.deepEqual(out.keyH, jsonVal.keyH);
+    assert.deepStrictEqual(out.keyH, jsonVal.keyH);
     assert.strictEqual(testsUtil.isDate(out.keyI), true);
   }); // 241.2
 
@@ -171,7 +171,7 @@ describe('241. dbType04.js', function() {
 
     const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
     const result2 = await conn.execute(sqlTwo);
-    assert.deepEqual(result2.rows[0][1], [1, 2, 3]);
+    assert.deepStrictEqual(result2.rows[0][1], [1, 2, 3]);
   }); // 241.5
 
   it('241.6 query JSON', async () => {
@@ -183,7 +183,7 @@ describe('241. dbType04.js', function() {
 
     const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
     const result2 = await conn.execute(sqlTwo);
-    assert.deepEqual(result2.rows[0][1], { fred: 5, george: 6 });
+    assert.deepStrictEqual(result2.rows[0][1], { fred: 5, george: 6 });
   }); // 241.6
 
   it('241.7 query json array', async () => {
@@ -317,7 +317,7 @@ describe('241. dbType04.js', function() {
 
     const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
     const result2 = await conn.execute(sqlTwo);
-    assert.deepEqual(result2.rows[0][1], jsonVal);
+    assert.deepStrictEqual(result2.rows[0][1], jsonVal);
   }); // 241.13
 
   it('241.14 binding simple dbobject with no attributes couldn\'t get converted to JSON Object value, returns an empty object', async () => {
@@ -349,7 +349,7 @@ describe('241. dbType04.js', function() {
     const sqlTwo = `select id, json_object(jsonval) from ${TABLE} where id = ${jsonId}`;
     const result2 = await conn.execute(sqlTwo);
     assert.strictEqual(result2.rows[0][0], jsonId);
-    assert.deepEqual(result2.rows[0][1], "{\"jsonval\":{}}");
+    assert.deepStrictEqual(result2.rows[0][1], "{\"jsonval\":{}}");
   }); // 241.14
 
   it('241.15 null', async () => {
@@ -445,7 +445,7 @@ describe('241. dbType04.js', function() {
 
     const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
     const result2 = await conn.execute(sqlTwo);
-    assert.deepEqual(result2.rows[0][1], jsonVal);
+    assert.deepStrictEqual(result2.rows[0][1], jsonVal);
   }); // 241.20
 
   it.skip('241.21 NaN', async () => {

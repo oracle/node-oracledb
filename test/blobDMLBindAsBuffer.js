@@ -116,7 +116,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       if (originalBuffer == "EMPTY_BLOB") {
         assert.strictEqual(blobData, null);
       } else {
-        assert.deepEqual(blobData, originalBuffer);
+        assert.deepStrictEqual(blobData, originalBuffer);
       }
     }
   };

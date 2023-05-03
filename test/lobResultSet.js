@@ -217,7 +217,7 @@ describe('59. lobResultSet.js', function() {
         rowsFetched++;
         const blobData = await row[1].getData();
         const originalData = fs.readFileSync(jpgFileName);
-        assert.deepEqual(originalData, blobData);
+        assert.deepStrictEqual(originalData, blobData);
         await fetchOneRowFromRS(resultSet, rowsFetched, rowsExpected);
       }
     }

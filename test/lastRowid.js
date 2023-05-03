@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -74,9 +74,9 @@ describe('228. lastRowid.js', function() {
     // the row can be fetched with the rowid that was retained
     sql = `select * from ${TABLE} where rowid = :1`;
     let result = await conn.execute(sql, [result1.lastRowid]);
-    assert.deepEqual(result.rows[0], row1);
+    assert.deepStrictEqual(result.rows[0], row1);
     result = await conn.execute(sql, [result2.lastRowid]);
-    assert.deepEqual(result.rows[0], row2);
+    assert.deepStrictEqual(result.rows[0], row2);
 
     // updating multiple rows only returns the rowid of the last updated row
     sql = `update ${TABLE} set value = value || ' (Modified)'`;
@@ -113,7 +113,7 @@ describe('228. lastRowid.js', function() {
     // check it out
     let sql = `select * from ${TABLE} where rowid = :1`;
     let result2 = await conn.execute(sql, [ rowID ]);
-    assert.deepEqual(result2.rows[0], row1);
+    assert.deepStrictEqual(result2.rows[0], row1);
   }); // 228.2
 
   it('228.3 Negative - not applicable to executeMany()', async () => {
