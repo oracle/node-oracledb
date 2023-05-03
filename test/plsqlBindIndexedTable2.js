@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -392,7 +392,6 @@ describe('44. plsqlBindIndexedTable2.js', function() {
       ]
     );
     assert.deepStrictEqual(result.outBinds[0], []);
-    // result.outBinds[0].should.eql([]);
 
     await connection.execute("DROP PACKAGE oracledb_testpack");
 

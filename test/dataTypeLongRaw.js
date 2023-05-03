@@ -120,7 +120,7 @@ describe('104. dataTypeLongRaw.js', function() {
       const rows = await rs.getRows(numRows);
       if (rows.length > 0) {
         for (let i = 0; i < rows.length; i++) {
-          (Buffer.isBuffer(rows[i].CONTENT)).should.be.ok();
+          assert(Buffer.isBuffer(rows[i].CONTENT));
         }
         return fetchRowsFromRS(rs, array);
       } else {

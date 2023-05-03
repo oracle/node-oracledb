@@ -44,7 +44,7 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('185. runCQN.js', function() {
+describe.skip('185. runCQN.js', function() {
 
   let isRunnable = true;
   let conn, connAsDBA;

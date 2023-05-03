@@ -1,7 +1,6 @@
 # Mocha options
 
 timeout: false
-require: ['should']
 retries: 1
 trace-warnings: true
 spec:
@@ -254,3 +253,4 @@ spec:
   - test/procAndFuncs.js
   - test/poolTimeout.js
   - test/binding_buffer_string.js
+  - test/fetchTypeHandler.js
