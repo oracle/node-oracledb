@@ -69,7 +69,7 @@ describe('248. userName.js', function() {
       if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
 
       const userSchema = assist.createSchemaString(30);
-      const password = "Welcome";
+      const password = testsUtil.generateRandomPassword();
       await createUser(userSchema, password);
 
       const credential = {
@@ -93,7 +93,7 @@ describe('248. userName.js', function() {
       }
 
       const userSchema = assist.createSchemaString(100);
-      const password = "Welcome";
+      const password = testsUtil.generateRandomPassword();
       await createUser(userSchema, password);
 
       const credential = {
@@ -117,7 +117,7 @@ describe('248. userName.js', function() {
       }
 
       const userSchema = assist.createSchemaString(128);
-      const password = "Welcome";
+      const password = testsUtil.generateRandomPassword();
       await createUser(userSchema, password);
 
       const credential = {
@@ -249,7 +249,7 @@ describe('248. userName.js', function() {
       if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
 
       const userSchema = assist.createSchemaString(30);
-      const password = "Welcome";
+      const password = testsUtil.generateRandomPassword();
       await createUser(userSchema, password);
       const credential = {...dbConfig};
       delete credential.user;
@@ -270,7 +270,7 @@ describe('248. userName.js', function() {
       }
 
       const userSchema = assist.createSchemaString(100);
-      const password = "Welcome";
+      const password = testsUtil.generateRandomPassword();
       await createUser(userSchema, password);
 
       const credential = {
@@ -293,7 +293,7 @@ describe('248. userName.js', function() {
       }
 
       const userSchema = assist.createSchemaString(128);
-      const password = "Welcome";
+      const password = testsUtil.generateRandomPassword();
       await createUser(userSchema, password);
 
       const credential = {

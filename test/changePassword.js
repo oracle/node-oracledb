@@ -26,7 +26,9 @@
  *   161. changePassword.js
  *
  * DESCRIPTION
- *   Test changing passords feature and connecting with an expired password.
+ *   Test changing passwords feature and connecting with an expired password.
+ *   Test longer passwords feature. Increase in the maximum length of the
+ *   database user passwords from the current 30 bytes to 1024 bytes.
  *
  *****************************************************************************/
 'use strict';
@@ -34,6 +36,7 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('161. changePassword.js', function() {
 
@@ -86,7 +89,7 @@ describe('161. changePassword.js', function() {
 
   it('161.1 basic case', async function() {
     let conn;
-    const tpass = 'secret';
+    const tpass = testsUtil.generateRandomPassword();
     let credential = {
       user:             myUser,
       password:         myUser,
@@ -112,7 +115,7 @@ describe('161. changePassword.js', function() {
 
   it('161.2 pooled connection', async function() {
     let pool, conn;
-    const tpass = 'secret';
+    const tpass = testsUtil.generateRandomPassword();
     let credential = {
       user:             myUser,
       password:         myUser,
@@ -149,7 +152,7 @@ describe('161. changePassword.js', function() {
   }); // 161.2
 
   it('161.3 DBA changes password', async function() {
-    const tpass = 'secret';
+    const tpass = testsUtil.generateRandomPassword();
     const dbaConn = await oracledb.getConnection(DBA_config);
     await dbaConn.changePassword(myUser, '', tpass);
     let credential = {
@@ -178,7 +181,7 @@ describe('161. changePassword.js', function() {
   }); // 161.3
 
   it('161.4 connects with an expired password', async function() {
-    const tpass = 'secret';
+    const tpass = testsUtil.generateRandomPassword();
     const dbaConn = await oracledb.getConnection(DBA_config);
     const sql = "alter user " + myUser + " password expire";
     await dbaConn.execute(sql);
@@ -218,7 +221,7 @@ describe('161. changePassword.js', function() {
   }); // 161.4
 
   it('161.5 for DBA, the original password is ignored', async function() {
-    const tpass = 'secret';
+    const tpass = testsUtil.generateRandomPassword();
 
     const dbaConn = await oracledb.getConnection(DBA_config);
     await dbaConn.changePassword(myUser, 'foobar', tpass);
@@ -249,7 +252,7 @@ describe('161. changePassword.js', function() {
   }); // 161.5
 
   it('161.6 Negative: basic case, wrong original password', async function() {
-    const tpass = 'secret';
+    const tpass = testsUtil.generateRandomPassword();
     let credential = {
       user:             myUser,
       password:         myUser,
@@ -298,7 +301,7 @@ describe('161. changePassword.js', function() {
 
   it('161.8 Negative: non-DBA tries to change the password', async function() {
     const tUser = dbConfig.user + "_st";
-    const tpass = 'secret';
+    const tpass = testsUtil.generateRandomPassword();
 
     const dbaConn = await oracledb.getConnection(DBA_config);
     try {
@@ -420,4 +423,432 @@ describe('161. changePassword.js', function() {
     await dbaConn.close();
   }); // 161.11
 
+  describe('161.12 longer Password tests', function() {
+
+    let DBA_config;
+    let isRunnable = false;
+    const myUser = dbConfig.user + "_pwd";
+    const longPwd = "a".repeat(1024);
+    if (dbConfig.test.DBA_PRIVILEGE == true) {
+      DBA_config = {
+        user:          dbConfig.test.DBA_user,
+        password:      dbConfig.test.DBA_password,
+        connectString: dbConfig.connectString,
+        privilege:     oracledb.SYSDBA
+      };
+    }
+
+    before (async function() {
+      if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
+
+      isRunnable = await testsUtil.checkPrerequisites(2300000000, 2300000000);
+      if (!isRunnable) this.skip();
+    }); // before
+
+    after(async function() {
+      if (!isRunnable) return;
+
+      if (dbConfig.test.DBA_PRIVILEGE) {
+        let sql = "DROP USER IF EXISTS " + myUser + " CASCADE";
+        let dbaConn = await oracledb.getConnection(DBA_config);
+
+        await dbaConn.execute(sql);
+        await dbaConn.close();
+      }
+    }); // after
+
+    it('161.12.1 basic case with password length 1024 Bytes', async function() {
+      let dbaConn, conn;
+      let result = null;
+      let sql = "BEGIN \n" +
+                      "    DECLARE \n" +
+                      "        e_user_missing EXCEPTION; \n" +
+                      "        PRAGMA EXCEPTION_INIT(e_user_missing, -01918); \n" +
+                      "    BEGIN \n" +
+                      "        EXECUTE IMMEDIATE('DROP USER " + myUser + " CASCADE'); \n" +
+                      "    EXCEPTION \n" +
+                      "        WHEN e_user_missing \n" +
+                      "        THEN NULL; \n" +
+                      "    END; \n" +
+                      "    EXECUTE IMMEDIATE (' \n" +
+                      "        CREATE USER " + myUser + " IDENTIFIED BY " + longPwd + "\n" +
+                      "    '); \n" +
+                      "END; ";
+      dbaConn = await oracledb.getConnection(DBA_config);
+      await dbaConn.execute(sql);
+
+      sql = "GRANT CREATE SESSION to " + myUser;
+      await dbaConn.execute(sql);
+      await dbaConn.close();
+      // login with the same username and long password
+      let credential = {
+        user:             myUser,
+        password:         longPwd,
+        connectionString: dbConfig.connectString
+      };
+      conn = await oracledb.getConnection(credential);
+      assert(conn);
+
+      result = await conn.execute("select sysdate as ts_date from dual");
+      assert((result.rows[0][0]) instanceof Date);
+      await conn.close();
+    }); // 161.12.1
+
+    it('161.12.2 pooled connection', async function() {
+      let pool;
+      let dbaConn, conn;
+
+      dbaConn = await oracledb.getConnection(DBA_config);
+
+      let sql = "DROP USER IF EXISTS " + myUser + " CASCADE";
+      await dbaConn.execute(sql);
+
+      sql = "CREATE USER " + myUser + " IDENTIFIED BY " + longPwd;
+      await dbaConn.execute(sql);
+
+      sql = "GRANT CONNECT, CREATE SESSION to " + myUser;
+      await dbaConn.execute(sql);
+      const lpass = 'secret';
+      var credential = {
+        user:             myUser,
+        password:         longPwd,
+        connectionString: dbConfig.connectString
+      };
+      pool = await oracledb.createPool(credential);
+      assert(pool);
+
+      conn = await pool.getConnection();
+      assert(conn);
+
+      await conn.changePassword(myUser, longPwd, lpass);
+      await conn.close();
+
+      // Still able to get connections
+      conn = await pool.getConnection();
+      assert(conn);
+      await conn.close();
+      await pool.close();
+
+      // verify with old password
+      pool = await oracledb.createPool(credential);
+
+      await assert.rejects(
+        async () =>
+          await pool.getConnection(),
+        // ORA-01017: invalid username/password
+        /ORA-01017:/
+      );
+
+      await pool.close();
+
+      // verify with new password
+      credential = {
+        user:             myUser,
+        password:         lpass,
+        connectionString: dbConfig.connectString
+      };
+      pool = await oracledb.createPool(credential);
+      conn = await pool.getConnection();
+      assert(conn);
+      await conn.close();
+      await pool.close();
+      await dbaConn.close();
+    }); // 161.12.2
+
+    it('161.12.3 DBA changes longer password', async function() {
+      let dbaConn, conn;
+      const newlongPwd = "b".repeat(1024);
+
+      dbaConn = await oracledb.getConnection(DBA_config);
+
+      let sql = "DROP USER IF EXISTS " + myUser + " CASCADE";
+      await dbaConn.execute(sql);
+
+      sql = "CREATE USER " + myUser + " IDENTIFIED BY " + longPwd;
+      await dbaConn.execute(sql);
+
+      sql = "GRANT CONNECT, CREATE SESSION to " + myUser;
+      await dbaConn.execute(sql);
+
+      await dbaConn.changePassword(myUser, longPwd, newlongPwd);
+      let credential = {
+        user:             myUser,
+        password:         myUser,
+        connectionString: dbConfig.connectString
+      };
+
+      await assert.rejects(
+        async () =>
+          await oracledb.getConnection(credential),
+        // ORA-01017: invalid username/password
+        /ORA-01017:/
+      );
+
+      // verify with changed password
+      credential = {
+        user:             myUser,
+        password:         newlongPwd,
+        connectionString: dbConfig.connectString
+      };
+      conn = await oracledb.getConnection(credential);
+      assert(conn);
+      await conn.close();
+
+      // restore password
+      await dbaConn.changePassword(myUser, '', myUser);
+      await dbaConn.close();
+    }); // 161.12.3
+
+    it('161.12.4 connects with an expired password', async function() {
+      let dbaConn, conn;
+      const newlongPwd = "b".repeat(1024);
+      dbaConn = await oracledb.getConnection(DBA_config);
+
+      let sql = "DROP USER IF EXISTS " + myUser + " CASCADE";
+      await dbaConn.execute(sql);
+
+      sql = "CREATE USER " + myUser + " IDENTIFIED BY " + longPwd;
+      await dbaConn.execute(sql);
+
+      sql = "GRANT CONNECT, CREATE SESSION to " + myUser;
+      await dbaConn.execute(sql);
+
+      sql = "alter user " + myUser + " password expire";
+      await dbaConn.execute(sql);
+
+      let credential = {
+        user:             myUser,
+        password:         longPwd,
+        connectionString: dbConfig.connectString
+      };
+
+      await assert.rejects(
+        async () => await oracledb.getConnection(credential),
+        // ORA-28001: the password has expired
+        /ORA-28001:/
+      );
+
+      credential = {
+        user:             myUser,
+        password:         longPwd,
+        newPassword:      newlongPwd,
+        connectionString: dbConfig.connectString
+      };
+
+      conn = await oracledb.getConnection(credential);
+      await conn.close();
+
+      // restore password
+      await dbaConn.changePassword(myUser, '', longPwd);
+
+      credential = {
+        user:             myUser,
+        password:         longPwd,
+        connectionString: dbConfig.connectString
+      };
+
+      conn = await oracledb.getConnection(credential);
+      await conn.close();
+      await dbaConn.close();
+    }); // 161.12.4
+
+    it('161.12.5 for DBA, the original password is ignored', async function() {
+      let dbaConn, conn;
+      const newlongPwd = "b".repeat(1024);
+
+      dbaConn = await oracledb.getConnection(DBA_config);
+      await dbaConn.changePassword(myUser, 'foobar', newlongPwd);
+
+      let credential = {
+        user:             myUser,
+        password:         longPwd,
+        connectionString: dbConfig.connectString
+      };
+
+      await assert.rejects(
+        async () => await oracledb.getConnection(credential),
+        // ORA-01017: invalid username/password
+        /ORA-01017:/
+      );
+
+      // verify with new password
+      credential = {
+        user:             myUser,
+        password:         newlongPwd,
+        connectionString: dbConfig.connectString
+      };
+
+      conn = await oracledb.getConnection(credential);
+      assert(conn);
+      await conn.close();
+      await dbaConn.changePassword(myUser, '', longPwd);
+      await dbaConn.close();
+
+    }); // 161.12.5
+
+    it('161.12.6 Negative: basic case, wrong original password', async function() {
+      const newlongPwd = "b".repeat(1024);
+      let credential = {
+        user:             myUser,
+        password:         longPwd,
+        connectionString: dbConfig.connectString
+      };
+      const conn = await oracledb.getConnection(credential);
+      assert(conn);
+      const wrongOne = 'foobar';
+
+      await assert.rejects(
+        async () => await conn.changePassword(myUser, wrongOne, newlongPwd),
+        // ORA-28008: invalid old password
+        /ORA-28008:/
+      );
+
+      await conn.close();
+
+      credential = {
+        user:             myUser,
+        password:         newlongPwd,
+        connectionString: dbConfig.connectString
+      };
+
+      await assert.rejects(
+        async () => await oracledb.getConnection(credential),
+        /ORA-01017/
+      );// ORA-01017: invalid username/password
+
+    }); // 161.12.6
+
+    it('161.12.7 Negative: basic case. invalid parameter', async function() {
+      let conn;
+      const lpass = 123;
+      const credential = {
+        user:             myUser,
+        password:         longPwd,
+        connectionString: dbConfig.connectString
+      };
+
+      conn = await oracledb.getConnection(credential);
+
+      await assert.rejects(
+        async () => await conn.changePassword(myUser, longPwd, lpass),
+        /NJS-005: invalid value for parameter 3/
+      );
+
+      await conn.close();
+    }); // 161.12.7
+
+    it('161.12.8 Negative: basic case. invalid parameter with 1025 bytes', async function() {
+      let conn;
+      const newlongPwd = "a".repeat(1025);
+      const credential = {
+        user:             myUser,
+        password:         longPwd,
+        connectionString: dbConfig.connectString
+      };
+
+      conn = await oracledb.getConnection(credential);
+
+      await assert.rejects(
+        async () => await conn.changePassword(myUser, longPwd, newlongPwd),
+        // Error: ORA-28218: password length more than 1024 bytes'
+        /ORA-28218:/
+      );
+
+      await conn.close();
+    }); // 161.12.8
+
+    it('161.12.9 Negative: non-DBA tries to change the password', async function() {
+      try {
+        const tUser = dbConfig.user + "_st";
+        let dbaConn, tConn;
+        const newlongPwd = "b".repeat(1024);
+
+        dbaConn = await oracledb.getConnection(DBA_config);
+        assert(dbaConn);
+        let sql = "CREATE USER " + tUser + " IDENTIFIED BY " + longPwd;
+        await dbaConn.execute(sql);
+        sql = "GRANT CONNECT, CREATE SESSION to " + tUser;
+        await dbaConn.execute(sql);
+
+        let credential = {
+          user:             tUser,
+          password:         longPwd,
+          connectionString: dbConfig.connectString
+        };
+
+        tConn = await oracledb.getConnection(credential);
+
+        await assert.rejects(
+          async () => await tConn.changePassword(myUser, longPwd, newlongPwd),
+          /ORA-01031:/
+        );
+
+        credential = {
+          user:             myUser,
+          password:         newlongPwd,
+          connectionString: dbConfig.connectString
+        };
+
+        await assert.rejects(
+          async () => await oracledb.getConnection(credential),
+          // ORA-01017: invalid username/password
+          /ORA-01017:/
+        );
+
+        await tConn.close();
+        sql = "DROP USER " + tUser + " CASCADE";
+        await dbaConn.execute(sql);
+        await dbaConn.close();
+      } catch (error) {
+        assert.fail(error);
+      }
+    }); // 161.12.9
+
+    it("161.12.10 Negative: invalid type of 'newPassword'", async function() {
+      const wrongOne = 123;
+      const credential = {
+        user:             myUser,
+        password:         longPwd,
+        newPassword:      wrongOne,
+        connectionString: dbConfig.connectString
+      };
+
+      await assert.rejects(
+        async () => await oracledb.getConnection(credential),
+        /NJS-007: invalid value for "newPassword" in parameter 1/
+      );
+    }); // 161.12.10
+
+    it('161.12.11 sets "newPassword" to be an empty string. longer password unchanged', async function() {
+      const dbaConn = await oracledb.getConnection(DBA_config);
+      let sql = "alter user " + myUser + " password expire";
+      await dbaConn.execute(sql);
+
+      let credential = {
+        user:             myUser,
+        password:         longPwd,
+        newPassword:      '',
+        connectionString: dbConfig.connectString
+      };
+
+      await assert.rejects(
+        async () => await oracledb.getConnection(credential),
+        // ORA-28001: the password has expired
+        /ORA-28001:/
+      );
+
+      credential = {
+        user:             myUser,
+        password:         longPwd,
+        connectionString: dbConfig.connectString
+      };
+
+      await assert.rejects(
+        async () => await oracledb.getConnection(credential),
+        // ORA-28001: the password has expired
+        /ORA-28001:/
+      );
+      await dbaConn.close();
+    }); // 161.12.11
+  });
 });

@@ -4099,6 +4099,19 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     161.8 Negative: non-DBA tries to change the password
     161.9 Negative: invalid type of 'newPassword'
     161.10 sets "newPassword" to be an empty string. password unchanged
+    161.11 connects with password that is expiring soon
+    161.12 longer Password tests
+      161.12.1 basic case with password length 1024 Bytes
+      161.12.2 pooled connection
+      161.12.3 DBA changes longer password
+      161.12.4 connects with an expired password
+      161.12.5 for DBA, the original password is ignored
+      161.12.6 Negative: basic case, wrong original password
+      161.12.7 Negative: basic case. invalid parameter
+      161.12.8 Negative: basic case. invalid parameter with 1025 bytes
+      161.12.9 Negative: non-DBA tries to change the password
+      161.12.10 Negative: invalid type of 'newPassword'
+      161.12.11 sets "newPassword" to be an empty string. longer password unchanged
 
 162. getStmtInfo.js
     162.1 SELECT

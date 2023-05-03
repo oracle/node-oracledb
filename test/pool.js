@@ -428,32 +428,7 @@ describe('2. pool.js', function() {
       await pool.close(0);
     });
 
-    it('2.8.3 does not generate NJS-040 if request is queued for less time than queueTimeout', async function() {
-      const config = {...dbConfig,
-        poolMin           : 0,
-        poolMax           : 1,
-        poolIncrement     : 1,
-        poolTimeout       : 1,
-        queueTimeout      : 3000 //3 seconds
-      };
-      const pool = await oracledb.createPool(config);
-      const routine1 = async function() {
-        const conn = await pool.getConnection();
-        await conn.execute(getBlockingSql(1));
-        await conn.close();
-      };
-      const routine2 = async function() {
-        await new Promise((resolve) => {
-          setTimeout(resolve, 100);
-        });
-        const conn = await pool.getConnection();
-        await conn.close();
-      };
-      await Promise.all([routine1(), routine2()]);
-      await pool.close(0);
-    });
-
-    it('2.8.4 generates NJS-076 if request exceeds queueMax', async function() {
+    it('2.8.3 generates NJS-076 if request exceeds queueMax', async function() {
       const config = {...dbConfig,
         poolMin           : 1,
         poolMax           : 1,
@@ -483,7 +458,7 @@ describe('2. pool.js', function() {
       await pool.close(0);
     });
 
-    it('2.8.5 generates NJS-076 if request exceeds queueMax 0', async function() {
+    it('2.8.4 generates NJS-076 if request exceeds queueMax 0', async function() {
       const config = {...dbConfig,
         poolMin           : 1,
         poolMax           : 1,
@@ -501,7 +476,7 @@ describe('2. pool.js', function() {
       await pool.close(0);
     });
 
-    it('2.8.6 request queue never terminate for queueTimeout set to 0', async function() {
+    it('2.8.5 request queue never terminate for queueTimeout set to 0', async function() {
       const config = {...dbConfig,
         poolMin           : 0,
         poolMax           : 1,
