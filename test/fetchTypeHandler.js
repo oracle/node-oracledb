@@ -317,7 +317,7 @@ describe('271. fetchTypeHandler.js', function() {
     if (connection.oracleServerVersion < 2100000000 || testsUtil.getClientVersion() < 2100000000) {
       this.skip();
     }
-
+    const TABLE = 'jsondata';
     oracledb.fetchTypeHandler = function() {
       const myConverter = (v) => {
         v.empId = 10;
@@ -326,21 +326,21 @@ describe('271. fetchTypeHandler.js', function() {
       return {converter: myConverter};
     };
 
-    const createTable = (`CREATE TABLE jsondata (
+    const createTable = (`CREATE TABLE ${TABLE} (
                             obj_data JSON
                           )
                         `);
-    const plsql = testsUtil.sqlCreateTable('jsondata', createTable);
+    const plsql = testsUtil.sqlCreateTable(TABLE, createTable);
     await connection.execute(plsql);
 
-    const sql = `INSERT into jsondata VALUES ('{"empId": 1, "empName": "Employee1", "city": "New City"}')`;
+    const sql = `INSERT into ${TABLE} VALUES ('{"empId": 1, "empName": "Employee1", "city": "New City"}')`;
     await connection.execute(sql);
 
-    const result = await connection.execute("select * from jsondata");
+    const result = await connection.execute(`select * from ${TABLE}`);
     assert.strictEqual(result.rows[0][0]["empId"], 10);
     assert.strictEqual(result.rows[0][0]["empName"], 'Employee1');
     assert.strictEqual(result.rows[0][0]["city"], 'New City');
-    await connection.execute(`DROP TABLE jsondata PURGE`);
+    await connection.execute(testsUtil.sqlDropTable(TABLE));
   });
 
   /*
@@ -383,5 +383,105 @@ describe('271. fetchTypeHandler.js', function() {
       assert.strictEqual(typeof result.rows[0].TS_NUM, "string");
       assert.strictEqual(result.rows[0].TS_NUM, numResults[numStrs.indexOf(element)]);
     }
+  });
+
+  it('271.20 setting a private property in the metadata', async function() {
+    oracledb.fetchTypeHandler = function(metadata) {
+      metadata._privateProp = 'I am a private property of ' + metadata.name;
+    };
+
+    const sql = `select 5 as "MyId", 6 as "MyValue", 'A string' as "MyString" from dual`;
+    const result = await connection.execute(sql);
+
+    assert.strictEqual(result.metaData[0]._privateProp, "I am a private property of MyId");
+    assert.strictEqual(result.metaData[1]._privateProp, "I am a private property of MyValue");
+    assert.strictEqual(result.metaData[2]._privateProp, "I am a private property of MyString");
+  });
+
+  it('271.21 fetchTypeHandler for nulls with converter function', async function() {
+    oracledb.fetchTypeHandler = function() {
+        const myConverter = (v) => {
+          return String(v);
+        };
+        return {converter: myConverter};
+      };
+
+    const sql = `SELECT NULL FROM DUAL`;
+    const result = await connection.execute(sql);
+    assert.strictEqual(result.rows[0][0], "null");
+  });
+
+  it('271.22 converter function to convert column val to string', async function() {
+    const TABLE = 't';
+    const sql = `CREATE TABLE ${TABLE} (n_col NUMBER)`;
+    const plsql = testsUtil.sqlCreateTable(TABLE, sql);
+    await connection.execute(plsql);
+    const inssql = `INSERT INTO ${TABLE} (n_col) VALUES (:bv)`;
+    await connection.execute(inssql, { bv: 123 });
+
+    function fetchTypeHandlerFunc(metadata) {
+      if (metadata.dbType === oracledb.DB_TYPE_NUMBER) {
+        return {converter: convertToString};
+      }
+    };
+
+    async function convertToString(val) {
+      if (val !== null) {
+        val = 'abc';
+      }
+      return val;
+    }
+
+    const result = await connection.execute(
+      `select * from ${TABLE}`,
+      [],
+      { 
+        fetchTypeHandler: fetchTypeHandlerFunc,
+        outFormat: oracledb.OUT_FORMAT_OBJECT
+      }
+    );
+
+    assert.strictEqual(result.rows[0].N_COL, 'abc');
+    await connection.execute(testsUtil.sqlDropTable(TABLE));
+  });
+
+  it('271.23 converter function with multiple columns', async function() {
+    await connection.execute("alter session set time_zone = '+0:00'");
+
+    oracledb.fetchTypeHandler = function(metadata) {
+      if (metadata.dbTypeName === "TIMESTAMP") {
+        return {type: oracledb.DATE};
+      }
+      else if(metadata.dbTypeName === "NUMBER") {
+        return {type: oracledb.STRING};
+      }
+    };
+    const TABLE = 'my_table';
+    const sql = `CREATE TABLE ${TABLE} (
+                  id NUMBER,
+                  name VARCHAR2(50),
+                  age NUMBER,
+                  created_date TIMESTAMP
+                )`;
+    const plsql = testsUtil.sqlCreateTable(TABLE, sql);
+    await connection.execute(plsql);
+
+    await connection.execute(`INSERT INTO ${TABLE} values (01, 'ABC', 23,
+                TO_TIMESTAMP('2023-04-27 10:30:00', 'YYYY-MM-DD HH24:MI:SS'))`);
+    const result = await connection.execute(`
+      SELECT id, name, age,
+        created_date AS TS_DATE FROM ${TABLE}`,
+        [],
+        {
+          outFormat: oracledb.OUT_FORMAT_OBJECT
+        }
+      );
+
+    assert.deepEqual(Object.getOwnPropertyNames(result.rows[0]), ["ID","NAME","AGE","TS_DATE"]);
+    assert.deepEqual(result.rows[0].ID, "1");
+    assert.deepEqual(result.rows[0].NAME, "ABC");
+    assert.deepEqual(result.rows[0].AGE, "23");
+    assert.deepEqual(result.rows[0].TS_DATE, new Date('2023-04-27T10:30:00.000Z'));
+    await connection.execute(testsUtil.sqlDropTable(TABLE));
   });
 });

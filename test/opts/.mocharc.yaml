@@ -254,3 +254,9 @@ spec:
   - test/poolTimeout.js
   - test/binding_buffer_string.js
   - test/fetchTypeHandler.js
+  - test/jsonDualityViews1.js
+  - test/jsonDualityViews2.js
+  - test/jsonDualityViews3.js
+  - test/jsonDualityViews4.js
+  - test/jsonDualityViews5.js
+  - test/jsonDualityViews6.js
