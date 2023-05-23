@@ -93,25 +93,19 @@ testsUtil.sqlDropType = function(typeName) {
   `;
 };
 
-testsUtil.createTable = async function(tableName, sql) {
-  let plsql = testsUtil.sqlCreateTable(tableName, sql);
-  const conn = await oracledb.getConnection(dbConfig);
+testsUtil.createTable = async function(conn, tableName, sql) {
+  const plsql = testsUtil.sqlCreateTable(tableName, sql);
   await conn.execute(plsql);
-  await conn.close();
 };
 
-testsUtil.dropSource = async function(sourceType, sourceName) {
-  let plsql = testsUtil.sqlDropSource(sourceType, sourceName);
-  const conn = await oracledb.getConnection(dbConfig);
+testsUtil.dropSource = async function(conn, sourceType, sourceName) {
+  const plsql = testsUtil.sqlDropSource(sourceType, sourceName);
   await conn.execute(plsql);
-  await conn.close();
 };
 
-testsUtil.dropTable = async function(tableName) {
-  let plsql = testsUtil.sqlDropTable(tableName);
-  const conn = await oracledb.getConnection(dbConfig);
+testsUtil.dropTable = async function(conn, tableName) {
+  const plsql = testsUtil.sqlDropTable(tableName);
   await conn.execute(plsql);
-  await conn.close();
 };
 
 testsUtil.checkPrerequisites = async function(clientVersion = 1805000000, serverVersion = 1805000000) {

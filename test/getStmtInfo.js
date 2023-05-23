@@ -50,7 +50,7 @@ describe('162. getStmtInfo.js', function() {
   });
 
   after(async function() {
-    await testsUtil.dropTable(tableName);
+    await testsUtil.dropTable(conn, tableName);
     await conn.close();
   });
 
@@ -173,7 +173,7 @@ describe('162. getStmtInfo.js', function() {
   }); // 162.13
 
   it('162.14 CREATE and verify the data does not get created', async function() {
-    await testsUtil.dropTable("nodb_test_162_14");
+    await testsUtil.dropTable(conn, "nodb_test_162_14");
     let sql = "create table nodb_test_162_14 (a number)";
     const info = await conn.getStatementInfo(sql);
     assert.deepStrictEqual(info.bindNames, []);
@@ -186,7 +186,7 @@ describe('162. getStmtInfo.js', function() {
   }); // 162.14
 
   it('162.15 CREATE procedure', async function() {
-    await testsUtil.dropSource("procedure", "nodb_proc_162_15");
+    await testsUtil.dropSource(conn, "procedure", "nodb_proc_162_15");
     let proc = "CREATE OR REPLACE PROCEDURE nodb_proc_162_15 (str OUT STRING) \n" +
                    "AS \n" +
                    "BEGIN \n" +

@@ -75,7 +75,9 @@ describe('260. tpcResume.js', function() {
   });
 
   after(async function() {
-    await testsUtil.dropTable("nodb_tpc_resume");
+    const connection = await oracledb.getConnection(dbConfig);
+    await testsUtil.dropTable(connection, "nodb_tpc_resume");
+    await connection.close();
   });
 
 

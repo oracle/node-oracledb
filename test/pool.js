@@ -34,6 +34,7 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('2. pool.js', function() {
 
@@ -546,7 +547,7 @@ describe('2. pool.js', function() {
     it('2.11.1 error occurs at creating pool when poolMin (user defined) greater than or equal to poolMax (default)', async function() {
       const config = {
         user: 'notexist',
-        password: 'nopass',
+        password:  testsUtil.generateRandomPassword(),
         connectString: dbConfig.connectString,
         poolMin: 5
       };
@@ -560,7 +561,7 @@ describe('2. pool.js', function() {
       const config = {
         ...dbConfig,
         user: 'notexist',
-        password: 'nopass',
+        password:  testsUtil.generateRandomPassword()
       };
       const pool = await oracledb.createPool(config);
       await assert.rejects(
@@ -878,7 +879,7 @@ describe('2. pool.js', function() {
         poolMax:       1,
         poolIncrement: 0,
         externalAuth:  true,
-        password:  'nopass'
+        password:  testsUtil.generateRandomPassword()
       };
       await assert.rejects(
         async () => await oracledb.createPool(config),

@@ -53,8 +53,8 @@ describe('228. lastRowid.js', function() {
   });
 
   after(async () => {
+    await testsUtil.dropTable(conn, TABLE);
     await conn.close();
-    await testsUtil.dropTable(TABLE);
   });
 
   it('228.1 examples', async () => {
