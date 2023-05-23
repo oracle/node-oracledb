@@ -42,15 +42,14 @@ describe('18. constants.js', function() {
   });
 
   it('18.2 Node-oracledb Type Constants', () => {
-    assert.strictEqual(2019, oracledb.BLOB.num);
-    assert.strictEqual(2006, oracledb.BUFFER.num);
-    assert.strictEqual(2017, oracledb.CLOB.num);
-    assert.strictEqual(2021, oracledb.CURSOR.num);
-    assert.strictEqual(2014, oracledb.DATE.num);
-    assert.strictEqual(0,    oracledb.DEFAULT);
-    assert.strictEqual(2010, oracledb.NUMBER.num);
-    assert.strictEqual(2001, oracledb.STRING.num);
-
+    assert.strictEqual(oracledb.BLOB, oracledb.DB_TYPE_BLOB);
+    assert.strictEqual(oracledb.BUFFER, oracledb.DB_TYPE_RAW);
+    assert.strictEqual(oracledb.CLOB, oracledb.DB_TYPE_CLOB);
+    assert.strictEqual(oracledb.CURSOR, oracledb.DB_TYPE_CURSOR);
+    assert.strictEqual(oracledb.DATE, oracledb.DB_TYPE_TIMESTAMP_LTZ);
+    assert.strictEqual(oracledb.DEFAULT, 0);
+    assert.strictEqual(oracledb.NUMBER, oracledb.DB_TYPE_NUMBER);
+    assert.strictEqual(oracledb.STRING, oracledb.DB_TYPE_VARCHAR);
   });
 
   it('18.3 Oracle Database Type Constants', function() {

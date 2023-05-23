@@ -45,7 +45,6 @@ describe('4. binding.js', function() {
     let connection = null;
     before(async function() {
       connection = await oracledb.getConnection(dbConfig);
-      assert(connection);
     });
 
     after(async function() {
@@ -58,7 +57,6 @@ describe('4. binding.js', function() {
                       BEGIN \
                         p_out := 'abcdef'; \
                       END;";
-      assert(connection);
       await connection.execute(proc);
       let result = await connection.execute("BEGIN nodb_bindproc1(:o); END;",
         {
@@ -86,7 +84,6 @@ describe('4. binding.js', function() {
                       BEGIN \
                         p_out := 10010; \
                       END;";
-      assert(connection);
       await connection.execute(proc);
       let result = await connection.execute(
         "BEGIN nodb_bindproc2(:o); END;",
@@ -113,7 +110,6 @@ describe('4. binding.js', function() {
                         p_inout := p_in || ' ' || p_inout; \
                         p_out := 101; \
                       END; ";
-      assert(connection);
       await connection.execute(proc);
       let result = await connection.execute(
         "BEGIN nodb_bindproc3(:i, :io, :o); END;",
@@ -145,7 +141,6 @@ describe('4. binding.js', function() {
                         p_inout := p_in || ' ' || p_inout; \
                         p_out := 101; \
                       END; ";
-      assert(connection);
       await connection.execute(proc);
       let result = await connection.execute(
         "BEGIN nodb_bindproc4(:io, :o, :i); END;",
@@ -169,7 +164,6 @@ describe('4. binding.js', function() {
     });
 
     it('4.1.5 default bind type - STRING', async function() {
-      assert(connection);
       const sql = "begin :n := 1001; end;";
       const bindVar = { n : { dir: oracledb.BIND_OUT } };
       let options = { };
@@ -211,7 +205,6 @@ describe('4. binding.js', function() {
     });
 
     afterEach(async function() {
-      assert(connection);
       await connection.execute("DROP TABLE nodb_binding1 PURGE");
       await connection.close();
     });
@@ -386,7 +379,7 @@ describe('4. binding.js', function() {
 
   describe('4.3 insert with DATE column and DML returning', function() {
     let connection = null;
-    let createTable =
+    const createTable =
       "BEGIN \
           DECLARE \
               e_table_missing EXCEPTION; \
@@ -412,7 +405,6 @@ describe('4. binding.js', function() {
     });
 
     afterEach(async function() {
-      assert(connection);
       await connection.execute("DROP TABLE nodb_binding2 PURGE");
       await connection.close();
     });
@@ -477,7 +469,6 @@ describe('4. binding.js', function() {
                       BEGIN \
                         p_out := 'ABCDEF GHIJK LMNOP QRSTU'; \
                       END;";
-      assert(connection);
       await connection.execute(proc);
       await assert.rejects(
         async () => {
@@ -543,7 +534,6 @@ describe('4. binding.js', function() {
       await connection.close();
     });
 
-
     it('4.5.1 DML default bind', async function() {
       await connection.execute(
         "insert into nodb_raw (num) values (:id)",
@@ -572,23 +562,30 @@ describe('4. binding.js', function() {
         + "if sqlcode <> -942 then "
         + "raise; "
         + "end if; end;";
-      const binds = [];
-      let options = {};
-
-      const connect = await oracledb.getConnection(dbConfig);
-      let result = await connect.execute(sql, binds, options);
+      const connection = await oracledb.getConnection(dbConfig);
+      const result = await connection.execute(sql);
       assert.deepStrictEqual(result, {});
+      await connection.close();
     });
   });
 
   // Test cases involving JSON value as input
   describe ('4.7 Value as JSON named/unamed test cases', function() {
+    let connection;
+
+    before(async function() {
+      connection = await oracledb.getConnection(dbConfig);
+    });
+
+    after(async function() {
+      await connection.close();
+    });
+
     it('4.7.1 valid case when numeric values are passed as it is',
       async function() {
         const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         const binds = [ 1, 456 ];
-        let connect = await oracledb.getConnection(dbConfig);
-        let result = await connect.execute(sql, binds);
+        const result = await connection.execute(sql, binds);
         assert((result.rows[0][0]) instanceof Date);
       });
 
@@ -596,9 +593,7 @@ describe('4. binding.js', function() {
       async function() {
         const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         const binds = [ 1, { val : 456 } ];
-
-        let connect = await oracledb.getConnection(dbConfig);
-        let result = await connect.execute (sql, binds);
+        const result = await connection.execute (sql, binds);
         assert((result.rows[0][0]) instanceof Date);
       });
 
@@ -606,8 +601,7 @@ describe('4. binding.js', function() {
       async function() {
         const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         const binds = [ {val :  1}, 456 ];
-        let connect = await oracledb.getConnection(dbConfig);
-        let result = await connect.execute(sql, binds);
+        const result = await connection.execute(sql, binds);
         assert((result.rows[0][0]) instanceof Date);
       });
 
@@ -615,9 +609,7 @@ describe('4. binding.js', function() {
       async function() {
         const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         const binds = [ {val : 1}, {val : 456 } ];
-
-        let connect = await oracledb.getConnection(dbConfig);
-        const result = await connect.execute(sql, binds);
+        const result = await connection.execute(sql, binds);
         assert((result.rows[0][0]) instanceof Date);
       });
 
@@ -625,37 +617,32 @@ describe('4. binding.js', function() {
       async function() {
         const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         const binds = [ {val : 1}, { c: {val : 456 } } ];
-        let connect = await oracledb.getConnection(dbConfig);
         await assert.rejects(
-          async () => await connect.execute(sql, binds),
+          async () => await connection.execute(sql, binds),
           /NJS-044:/
         );
-
       });
 
     it('4.7.6 Invalid Test case when other-value is passed as named JSON',
       async function() {
         const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         const binds = [ { b: {val : 1} }, {val : 456 } ];
-        let connect = await oracledb.getConnection(dbConfig);
         await assert.rejects(
-          async () => await connect.execute(sql, binds),
+          async () => await connection.execute(sql, binds),
           /NJS-044:/
         );
-
       });
 
     it('4.7.7 Invalid Test case when all values is passed as named JSON',
       async function() {
         const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         const binds = [ { b: {val : 1} }, { c: {val : 456 } } ];
-        let connect = await oracledb.getConnection(dbConfig);
         await assert.rejects(
-          async () => await connect.execute(sql, binds),
+          async () => await connection.execute(sql, binds),
           /NJS-044:/
         );
-
       }); // 4.7.7
+
   }); // 4.7
 
   describe('4.8 bind DATE', function() {
@@ -763,44 +750,44 @@ describe('4. binding.js', function() {
   }); // 4.8
 
   describe('4.9 different placeholders for bind name', function() {
+    let connection;
+
+    before(async function() {
+      connection = await oracledb.getConnection(dbConfig);
+    });
+
+    after(async function() {
+      await connection.close();
+    });
 
     it('4.9.1 test case sensitivity of quoted bind names', async function() {
       const sql = 'select :"test" from dual';
       const binds = {'"test"': 1};
-
-      const connect = await oracledb.getConnection(dbConfig);
-      const result = await connect.execute(sql, binds);
+      const result = await connection.execute(sql, binds);
       assert((result.rows[0][0]), 1);
-      await connect.release();
     });
 
     it('4.9.2 using a reserved keyword as a bind name', async function() {
       const sql = 'select :ROWID from dual';
-
-      const connect = await oracledb.getConnection(dbConfig);
       await assert.rejects(
         async () => {
-          await connect.execute(sql, {ROWID:1});
+          await connection.execute(sql, {ROWID:1});
         },
         //NJS-098: 1 positional bind values are required but 0 were provided
         /ORA-01745:|NJS-098:/
       );
-      await connect.release();
     });
 
     it('4.9.3 not using a bind name in execute statement', async function() {
       const sql = 'select :val from dual';
-
-      const connect = await oracledb.getConnection(dbConfig);
       await assert.rejects(
         async () => {
-          await connect.execute(sql);
+          await connection.execute(sql);
         },
         //ORA-01008: not all variables bound
         //NJS-098: 1 positional bind values are required but 0 were provided
         /ORA-01008:|NJS-098:/
       );
-      await connect.release();
     });
   }); // 4.9
 
@@ -810,16 +797,16 @@ describe('4. binding.js', function() {
       const sql = 'SELECT :"percent%" FROM DUAL';
       const binds = {percent : "percent%" };
 
-      const connect = await oracledb.getConnection(dbConfig);
+      const connection = await oracledb.getConnection(dbConfig);
       await assert.rejects(
         async () => {
-          await connect.execute(sql, binds);
+          await connection.execute(sql, binds);
         },
         //ORA-01036: illegal variable name/number
         //NJS-097: no bind placeholder named: :PERCENT was found in the SQL text
         /ORA-01036:|NJS-097:/
       );
-      await connect.release();
+      await connection.release();
     });
   });
 

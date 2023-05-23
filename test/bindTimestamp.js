@@ -113,7 +113,6 @@ describe('102. bindTimestamp.js', function() {
       "select * from nodb_tab_tsbind where id = :i",
       { i: id },
       { outFormat: oracledb.OUT_FORMAT_OBJECT });
-    assert(result);
     assert.deepStrictEqual(result.rows[0].TS, bv);
     assert.deepStrictEqual(result.rows[0].TSTZ, bv);
   });
@@ -250,7 +249,6 @@ describe('102. bindTimestamp.js', function() {
         { type: oracledb.DATE, dir: oracledb.BIND_OUT} ],
       { autoCommit: true});
 
-    assert(result);
     assert.equal(result.outBinds[0][0], id);
     assert.deepStrictEqual(result.outBinds[1][0], bv);
 
@@ -413,7 +411,6 @@ describe('102. bindTimestamp.js', function() {
         { i: id },
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
-      assert(result);
       assert.deepStrictEqual(result.rows[0].TS, bv1);
       assert.deepStrictEqual(result.rows[0].TSTZ, bv2);
     });

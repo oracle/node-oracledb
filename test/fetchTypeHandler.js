@@ -29,6 +29,7 @@
  *   Testing driver fetchTypeHandler feature.
  *
  *****************************************************************************/
+
 'use strict';
 
 const oracledb = require('oracledb');
