@@ -502,6 +502,45 @@ describe('2. pool.js', function() {
       await pool.close(0);
     });
 
+    it('2.8.6 queueMax range check, queueMax -1', async function() {
+      const config = {...dbConfig,
+        poolMin           : 1,
+        poolMax           : 1,
+        poolIncrement     : 0,
+        queueMax          : -1
+      };
+      const pool = await oracledb.createPool(config);
+      const conn = await pool.getConnection();
+      await conn.close();
+      await pool.close(0);
+    });
+
+    it('2.8.7 queueMax range check, queueMax -2 out of range', async function() {
+      const config = {...dbConfig,
+        poolMin           : 1,
+        poolMax           : 1,
+        poolIncrement     : 0,
+        queueMax          : -2
+      };
+      await assert.rejects(
+        async () => await oracledb.createPool(config),
+        /NJS-007:/
+      );
+    });
+
+    it('2.8.8 queueMax range check, queueMax -0.5 not an integer', async function() {
+      const config = {...dbConfig,
+        poolMin           : 1,
+        poolMax           : 1,
+        poolIncrement     : 0,
+        queueMax          : -1.5
+      };
+      await assert.rejects(
+        async () => await oracledb.createPool(config),
+        /NJS-007:/
+      );
+    });
+
   });
 
   describe('2.9 _enableStats & _logStats functionality', function() {
