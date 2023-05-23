@@ -110,8 +110,8 @@ describe('204. dbObject5.js', () => {
     const seq = 101;
     let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
 
-    const date1 = new Date (1986, 8, 18);
-    const date2 = new Date (1989, 3, 4);
+    const date1 = new Date(1986, 8, 18);
+    const date2 = new Date(1989, 3, 4);
     const objData = {
       ENTRY: date1,
       EXIT : date2
@@ -121,14 +121,19 @@ describe('204. dbObject5.js', () => {
 
     let result = await conn.execute(sql, [seq, testObj]);
     assert.strictEqual(result.rowsAffected, 1);
+
+    sql = `INSERT INTO ${TABLE} values (:1, ${TYPE}(:2, :3))`;
+    await conn.execute(sql, [seq, date1, date2]);
     await conn.commit();
 
     sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
     result = await conn.execute(sql);
 
-    assert.strictEqual(result.rows[0][1]['ENTRY'].getTime(), date1.getTime());
-    assert.strictEqual(result.rows[0][1]['EXIT'].getTime(), date2.getTime());
-    assert.strictEqual(result.rows[0][0], seq);
+    for (const row of result.rows) {
+      assert.strictEqual(row[0], seq);
+      assert.strictEqual(row[1]['ENTRY'].getTime(), date1.getTime());
+      assert.strictEqual(row[1]['EXIT'].getTime(), date2.getTime());
+    }
   }); // 204.1
 
   it('204.2 insert null value for DATE type attribute', async () => {
@@ -206,13 +211,12 @@ describe('204. dbObject5.js', () => {
       }
     );
 
-    let resultSet = await result.outBinds.p_cur1.getRows();
-    assert.equal(resultSet.length, 4);
-    result.outBinds.p_cur1.close();
+    const rows1 = await result.outBinds.p_cur1.getRows();
+    await result.outBinds.p_cur1.close();
 
-    resultSet = await result.outBinds.p_cur2.getRows();
-    assert.equal(resultSet.length, 4);
-    result.outBinds.p_cur2.close();
+    const rows2 = await result.outBinds.p_cur2.getRows();
+    await result.outBinds.p_cur2.close();
+    assert.deepStrictEqual(rows1, rows2);
   }); // 204.5;
 
 });

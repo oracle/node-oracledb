@@ -856,8 +856,8 @@ bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
         napi_ref constructorRef, napi_value *instanceObj, void **instance);
 bool njsUtils_genericThrowError(napi_env env, const char *fileName,
         int lineNum);
-bool njsUtils_getDateValue(uint32_t varTypeNum, napi_env env, njsBaton *baton,
-        dpiTimestamp *timestamp, napi_value *value);
+bool njsUtils_getDateValue(uint32_t varTypeNum, napi_env env,
+        napi_value makeDateFn, dpiTimestamp *timestamp, napi_value *value);
 bool njsUtils_getError(napi_env env, dpiErrorInfo *errorInfo,
         const char *buffer, napi_value *error);
 bool njsUtils_getNamedProperty(napi_env env, napi_value value,
@@ -883,7 +883,7 @@ bool njsUtils_getNamedPropertyUnsignedIntArray(napi_env env, napi_value value,
 bool njsUtils_getXid(napi_env env, napi_value xidObj, dpiXid **xid);
 bool njsUtils_isInstance(napi_env env, napi_value value, const char *name);
 bool njsUtils_setDateValue(uint32_t varTypeNum, napi_env env, napi_value value,
-        njsBaton *baton, dpiTimestamp *timestamp);
+        napi_value getComponentsFn, dpiTimestamp *timestamp);
 bool njsUtils_throwErrorDPI(napi_env env, njsModuleGlobals *globals);
 bool njsUtils_throwInsufficientMemory(napi_env env);
 bool njsUtils_throwUnsupportedDataType(napi_env env, uint32_t oracleTypeNum,

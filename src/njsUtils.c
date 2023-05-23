@@ -587,8 +587,8 @@ bool njsUtils_getXid(napi_env env, napi_value value, dpiXid **xid)
 // an absolute JS date for TIMESTAMP WITH TIME ZONE and TIMESTAMP WITH LOCAL
 // TIME ZONE.
 //-----------------------------------------------------------------------------
-bool njsUtils_getDateValue(uint32_t varTypeNum, napi_env env, njsBaton *baton,
-        dpiTimestamp *timestamp, napi_value *value)
+bool njsUtils_getDateValue(uint32_t varTypeNum, napi_env env,
+        napi_value makeDateFn, dpiTimestamp *timestamp, napi_value *value)
 {
     napi_value global, args[9];
     int32_t tzOffset = 0;
@@ -616,8 +616,8 @@ bool njsUtils_getDateValue(uint32_t varTypeNum, napi_env env, njsBaton *baton,
     }
     NJS_CHECK_NAPI(env, napi_create_int32(env, tzOffset,
             &args[8]))
-    NJS_CHECK_NAPI(env, napi_call_function(env, global,
-            baton->jsMakeDateFn, 9, args, value))
+    NJS_CHECK_NAPI(env, napi_call_function(env, global, makeDateFn, 9, args,
+            value))
     return true;
 }
 
@@ -632,7 +632,7 @@ bool njsUtils_getDateValue(uint32_t varTypeNum, napi_env env, njsBaton *baton,
 // native format).
 //-----------------------------------------------------------------------------
 bool njsUtils_setDateValue(uint32_t varTypeNum, napi_env env, napi_value value,
-        njsBaton *baton, dpiTimestamp *timestamp)
+        napi_value getComponentsFn, dpiTimestamp *timestamp)
 {
     napi_value args[2], global, array, temp;
     uint32_t temp_unsigned;
@@ -645,8 +645,8 @@ bool njsUtils_setDateValue(uint32_t varTypeNum, napi_env env, napi_value value,
     NJS_CHECK_NAPI(env, napi_get_global(env, &global))
     NJS_CHECK_NAPI(env, napi_get_boolean(env, useLocalTime, &args[0]))
     args[1] = value;
-    NJS_CHECK_NAPI(env, napi_call_function(env, global,
-            baton->jsGetDateComponentsFn, 2, args, &array))
+    NJS_CHECK_NAPI(env, napi_call_function(env, global, getComponentsFn, 2,
+            args, &array))
 
     // store year
     NJS_CHECK_NAPI(env, napi_get_element(env, array, 0, &temp))

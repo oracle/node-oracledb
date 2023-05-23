@@ -367,8 +367,8 @@ static bool njsVariable_getJsonNodeValue(njsBaton *baton, dpiJsonNode *node,
             return true;
         case DPI_ORACLE_TYPE_DATE:
         case DPI_ORACLE_TYPE_TIMESTAMP:
-            return njsUtils_getDateValue(node->oracleTypeNum, env, baton,
-                    &node->value->asTimestamp, value);
+            return njsUtils_getDateValue(node->oracleTypeNum, env,
+                    baton->jsMakeDateFn, &node->value->asTimestamp, value);
         case DPI_ORACLE_TYPE_BOOLEAN:
             NJS_CHECK_NAPI(env, napi_get_boolean(env, node->value->asBoolean,
                     value))
@@ -416,8 +416,8 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
                     value))
             break;
         case DPI_NATIVE_TYPE_TIMESTAMP:
-            if (!njsUtils_getDateValue(var->varTypeNum, env, baton,
-                    &data->value.asTimestamp, value))
+            if (!njsUtils_getDateValue(var->varTypeNum, env,
+                    baton->jsMakeDateFn, &data->value.asTimestamp, value))
                 return false;
             break;
         case DPI_NATIVE_TYPE_DOUBLE:
@@ -813,8 +813,8 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     // handle binding dates
     NJS_CHECK_NAPI(env, napi_is_date(env, value, &check))
     if (check) {
-        return njsUtils_setDateValue(var->varTypeNum, env, value, baton,
-                &data->value.asTimestamp);
+        return njsUtils_setDateValue(var->varTypeNum, env, value,
+                baton->jsGetDateComponentsFn, &data->value.asTimestamp);
     }
 
     // handle binding cursors

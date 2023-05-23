@@ -214,7 +214,7 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
         node->oracleTypeNum = DPI_ORACLE_TYPE_TIMESTAMP;
         node->nativeTypeNum = DPI_NATIVE_TYPE_TIMESTAMP;
         return njsUtils_setDateValue(DPI_ORACLE_TYPE_TIMESTAMP, env, value,
-                baton, &node->value->asTimestamp);
+                baton->jsGetDateComponentsFn, &node->value->asTimestamp);
     }
 
     // handle buffers
