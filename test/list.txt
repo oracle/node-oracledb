@@ -65,10 +65,11 @@ Overview of node-oracledb functional tests
     2.8 connection queueing
         2.8.1 basic case
         2.8.2 generates NJS-040 if request is queued and queueTimeout expires
-        2.8.3 does not generate NJS-040 if request is queued for less time than queueTimeout
-        2.8.4 generates NJS-076 if request exceeds queueMax
-        2.8.5 generates NJS-076 if request exceeds queueMax 0
-        2.8.6 request queue never terminate for queueTimeout set to 0
+        2.8.3 generates NJS-076 if request exceeds queueMax
+        2.8.4 generates NJS-076 if request exceeds queueMax 0
+        2.8.5 request queue never terminate for queueTimeout set to 0
+        2.8.6 queueMax range check, queueMax -1
+        2.8.7 queueMax range check, queueMax -0.5 not an integer
     2.9 _enableStats & _logStats functionality
         2.9.1 does not work after the pool has been terminated
     2.10 Close method
