@@ -87,6 +87,9 @@ describe('204. dbObject5.js', () => {
       )`;
     const plsql = testsUtil.sqlCreateTable(TABLE, sql);
     await conn.execute(plsql);
+    await conn.execute(proc1);
+    await conn.execute(proc2);
+    await conn.execute(proc3);
   }); // before()
 
   after(async () => {
@@ -193,9 +196,6 @@ describe('204. dbObject5.js', () => {
   }); // 204.4
 
   it('204.5 call procedure with 2 OUT binds of DbObject', async function() {
-    await conn.execute(proc1);
-    await conn.execute(proc2);
-    await conn.execute(proc3);
 
     let result = await conn.execute(
       `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,
