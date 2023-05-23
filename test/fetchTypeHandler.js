@@ -249,9 +249,9 @@ describe('271. fetchTypeHandler.js', function() {
     oracledb.fetchTypeHandler = function(metadata) {
       if (metadata.dbType === oracledb.DB_TYPE_DATE) {
         const myConverter = (v) => {
-          const year = v.getUTCFullYear();
-          const month = ("0" + (v.getUTCMonth() + 1)).slice(-2); // Add leading zero if needed
-          const day = ("0" + v.getUTCDate()).slice(-2); // Add leading zero if needed
+          const year = v.getFullYear();
+          const month = ("0" + (v.getMonth() + 1)).slice(-2); // Add leading zero if needed
+          const day = ("0" + v.getDate()).slice(-2); // Add leading zero if needed
           const formattedDate = `${year}-${month}-${day}`;
           return formattedDate;
         };
