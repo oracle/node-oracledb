@@ -289,5 +289,85 @@ describe('162. getStmtInfo.js', function() {
       let info = await conn.getStatementInfo(sql);
       assert.deepStrictEqual(info.bindNames, [element]);
     }));
-  }); // 162.2
+  }); // 162.27
+
+  it('162.28 PL/SQL block bindname following newline character', async function() {
+    const sql = `
+    -- COMMENTS
+    select :object_name_in as object_name,
+          'COMMENT' as object_type,
+          :schema_name_in as schema_name
+      from dual
+    union all
+
+    -- REF CONSTRAINTS
+    select constraint_name,
+          'REF_CONSTRAINT',
+          owner
+      from all_constraints
+    where owner = :schema_name_in
+      and table_name = :object_name_in
+      and constraint_type = 'R'
+    union all
+
+    -- RLS CONTEXTS
+    select :object_name_in as object_name,
+          'RLS_CONTEXT' as object_type,
+          :schema_name_in as schema_name
+      from dual
+    union all
+
+    -- RLS GROUP
+    select :object_name_in as object_name,
+          'RLS_GROUP' as object_type,
+          :schema_name_in as schema_name
+      from dual
+    union all
+
+    -- RLS POLICY
+    select :object_name_in as object_name,
+          'RLS_POLICY' as object_type,
+          :schema_name_in as schema_name
+      from dual
+    union all
+
+    -- CONSTRAINTS
+    select constraint_name,
+          'CONSTRAINT',
+          owner
+      from all_constraints
+    where owner = :schema_name_in
+      and table_name = :object_name_in
+      and constraint_type != 'R'
+    union all
+
+    -- INDEXES
+    select index_name,
+          'INDEX',
+          owner
+      from all_indexes
+    where table_owner = :schema_name_in
+      and table_name = :object_name_in
+    union all
+
+    -- TRIGGERS
+    select trigger_name,
+          'TRIGGER',
+          owner
+      from all_triggers
+    where table_owner = :schema_name_in
+      and table_name = :object_name_in
+      and base_object_type = 'TABLE'
+    union all
+
+    -- OBJECTS GRANTS AS GRANTOR
+    select :object_name_in,
+          'OBJECT_GRANT_AS_GRANTOR',
+          :schema_name_in
+      from dual`;
+    const connection = await oracledb.getConnection(dbConfig);
+    const info = await connection.getStatementInfo(sql);
+    assert.deepStrictEqual(info.bindNames, ['OBJECT_NAME_IN', 'SCHEMA_NAME_IN']);
+    await connection.close();
+  }); // 162.28
 });

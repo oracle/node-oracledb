@@ -483,7 +483,7 @@ describe('272. jsonDualityView1.js', function() {
                      StudentName: name,
                       student_class
                         {StudentClassId : scid,
-                          class @link  {ClassId: clsid, Name:name}
+                          class {ClassId: clsid, Name:name}
                         }
                     }`;
       await connection.execute(query);
@@ -498,7 +498,7 @@ describe('272. jsonDualityView1.js', function() {
                      StudentName: name,
                       student_class @INSERT @UPDATE @DELETE
                         {StudentClassId : scid,
-                          class @link @CHECK {ClassId: clsid, Name:name}
+                          class  @CHECK {ClassId: clsid, Name:name}
                         }
                     }`;
       await connection.execute(query);
@@ -513,7 +513,7 @@ describe('272. jsonDualityView1.js', function() {
                      StudentName: name,
                       student_class @INSERT @UPDATE @DELETE
                          {StudentClassId : scid,
-                         @unnest class @link @CHECK  {ClassId: clsid, Name:name}
+                         @unnest class  @CHECK  {ClassId: clsid, Name:name}
                         }
                     }`;
       await assert.rejects(
@@ -572,7 +572,7 @@ describe('272. jsonDualityView1.js', function() {
                         StudentName: name,
                         student_class
                                  {StudentClassId : scid,
-                                        class @link  {ClassId: clsid, Names:name}
+                                        class {ClassId: clsid, Names:name}
                                       }
                         }`;
 
@@ -588,7 +588,7 @@ describe('272. jsonDualityView1.js', function() {
                         StudentName: name,
                           student_class
                                  {StudentClassId : scid,
-                                        class @link  {ClassId: clsid, Names:name}
+                                        class {ClassId: clsid, Names:name}
                                       }
                         }`;
 
@@ -607,7 +607,7 @@ describe('272. jsonDualityView1.js', function() {
                         StudentName: name,
                           student_class
                                  {StudentClassId : scid,
-                                        class @link  {ClassId: clsid, Names:name}
+                                        class {ClassId: clsid, Names:name}
                                       }
                         }`;
 
@@ -626,7 +626,7 @@ describe('272. jsonDualityView1.js', function() {
                         StudentName: name,
                           student_class
                                  {StudentClassId : scid,
-                                        class @link  {ClassId: clsid, Names:name}
+                                        class {ClassId: clsid, Names:name}
                                       }
                         }`;
 
@@ -642,7 +642,7 @@ describe('272. jsonDualityView1.js', function() {
                         StudentName: name,
                           student_class
                                  {StudentClassId : scid,
-                                        class @link  {ClassId: clsid, Names:name}
+                                        class {ClassId: clsid, Names:name}
                                       }
                         }`;
 
@@ -662,7 +662,7 @@ describe('272. jsonDualityView1.js', function() {
                    StudentName: name,
                     student_class @INSERT @UPDATE @DELETE
                         {StudentClassId : scid,
-                            class @link  {ClassId: clsid, Names:name}
+                            class {ClassId: clsid, Names:name}
                            }
                     }`;
 
@@ -681,7 +681,7 @@ describe('272. jsonDualityView1.js', function() {
                    StudentName: name,
                     student_class @INSERT @UPDATE @DELETE
                         {StudentClassId : scid,
-                            class @link  {ClassId: clsid, Names:name}
+                            class {ClassId: clsid, Names:name}
                            }
                     }`;
         await assert.rejects(
@@ -707,7 +707,7 @@ describe('272. jsonDualityView1.js', function() {
            StudentName:name,
                   student_class @INSERT @UPDATE @DELETE
                       {StudentClassId:scid,
-                         class @link @CHECK  {ClassId:clsid, Name:name}
+                         class  @CHECK  {ClassId:clsid, Name:name}
                         }
           }'
            , dbms_sql.native);
@@ -729,7 +729,7 @@ describe('272. jsonDualityView1.js', function() {
             StudentName:name,
                  student_class @INSERT @UPDATE @DELETE
                           {StudentClassId:scid,
-                           class @link @CHECK  {ClassId:clsid, Name:name}
+                           class  @CHECK  {ClassId:clsid, Name:name}
                          }
             }';
             END;`;
