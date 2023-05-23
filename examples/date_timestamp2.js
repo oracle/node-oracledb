@@ -23,14 +23,16 @@
  * limitations under the License.
  *
  * NAME
- *   date.js
+ *   date_timestamp2.js
  *
  * DESCRIPTION
- *   Insert and query DATE and TIMESTAMP columns.
+ *   Insert and query DATE and TIMESTAMP columns (one date in winter
+ *   and one date in summer) to test Daylight Savings Time (DST) settings.
  *
  *   When bound in an INSERT, JavaScript Dates are inserted using
- *   TIMESTAMP WITH LOCAL TIMEZONE.  Similarly for queries, TIMESTAMP
- *   and DATE columns are fetched as TIMESTAMP WITH LOCAL TIMEZONE.
+ *   TIMESTAMP unless explicitly bound as another type.
+ *   Similarly for queries, TIMESTAMP and DATE columns are fetched
+ *   as TIMESTAMP WITH LOCAL TIMEZONE.
  *
  *****************************************************************************///
 
@@ -76,18 +78,16 @@ async function run() {
     let result, date;
 
     connection = await oracledb.getConnection(dbConfig);
-
     console.log('Creating table');
-
     const stmts = [
       `DROP TABLE no_datetab`,
 
       `CREATE TABLE no_datetab(
-         id NUMBER,
-         timestampcol TIMESTAMP,
-         timestamptz  TIMESTAMP WITH TIME ZONE,
-         timestampltz TIMESTAMP WITH LOCAL TIME ZONE,
-         datecol DATE)`
+        id NUMBER,
+        timestampcol TIMESTAMP,
+        timestamptz  TIMESTAMP WITH TIME ZONE,
+        timestampltz TIMESTAMP WITH LOCAL TIME ZONE,
+        datecol DATE)`
     ];
 
     for (const s of stmts) {
@@ -99,46 +99,51 @@ async function run() {
       }
     }
 
-    // When bound, JavaScript Dates are inserted using TIMESTAMP WITH LOCAL TIMEZONE
-    date = new Date(1995, 11, 17); // 17th Dec 1995
+    // Convert the fetched timestamp data to reflect
+    // the locale time settings of the client
+    oracledb.fetchTypeHandler = function(metadata) {
+      if (metadata.dbType === oracledb.DB_TYPE_DATE ||
+        metadata.dbType === oracledb.DB_TYPE_TIMESTAMP ||
+        metadata.dbType === oracledb.DB_TYPE_TIMESTAMP_LTZ ||
+        metadata.dbType === oracledb.DB_TYPE_TIMESTAMP_TZ)
+        return {converter: (v) => v.toLocaleString() };
+    };
+
+    date = new Date(2000, 11, 17); // 17th Dec 2000
     console.log('Inserting JavaScript date: ' + date);
     result = await connection.execute(
       `INSERT INTO no_datetab (id, timestampcol, timestamptz, timestampltz, datecol)
-       VALUES (1, :ts, :tstz, :tsltz, :td)`,
+    VALUES (1, :ts, :tstz, :tsltz, :td)`,
+      { ts: date, tstz: date, tsltz: date, td: date });
+    console.log('Rows inserted: ' + result.rowsAffected);
+
+    date = new Date(2000, 3, 25); // 25th Apr 2000
+    console.log('Inserting JavaScript date: ' + date);
+    result = await connection.execute(
+      `INSERT INTO no_datetab (id, timestampcol, timestamptz, timestampltz, datecol)
+        VALUES (2, :ts, :tstz, :tsltz, :td)`,
       { ts: date, tstz: date, tsltz: date, td: date });
     console.log('Rows inserted: ' + result.rowsAffected);
 
     console.log('Query Results:');
     result = await connection.execute(
       `SELECT id, timestampcol, timestamptz, timestampltz, datecol,
-              TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') AS CD
-       FROM no_datetab
-       ORDER BY id`);
+        TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') AS CD
+        FROM no_datetab
+        ORDER BY id`);
     console.log(result.rows);
 
     console.log('Altering session time zone');
-    await connection.execute(`ALTER SESSION SET TIME_ZONE='+5:00'`);  // resets ORA_SDTZ value
-
-    date = new Date(); // Current Date
-    console.log('Inserting JavaScript date: ' + date);
-    result = await connection.execute(
-      `INSERT INTO no_datetab (id, timestampcol, timestamptz, timestampltz, datecol)
-       VALUES (2, :ts, :tstz, :tsltz, :td)`,
-      { ts: date, tstz: date, tsltz: date, td: date });
-    console.log('Rows inserted: ' + result.rowsAffected);
+    // await connection.execute(`ALTER SESSION SET TIME_ZONE='+5:00'`);
+    await connection.execute(`ALTER SESSION SET TIME_ZONE='America/Chicago'`);  // resets ORA_SDTZ value
 
     console.log('Query Results:');
     result = await connection.execute(
       `SELECT id, timestampcol, timestamptz, timestampltz, datecol,
-              TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') AS CD
-       FROM no_datetab
-       ORDER BY id`);
+        TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') AS CD
+        FROM no_datetab
+        ORDER BY id`);
     console.log(result.rows);
-
-    // Show the queried dates are of type Date
-    let ts = result.rows[0]['TIMESTAMPCOL'];
-    ts.setDate(ts.getDate() + 5);
-    console.log('TIMESTAMP manipulation in JavaScript:', ts);
 
   } catch (err) {
     console.error(err);

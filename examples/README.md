@@ -32,7 +32,7 @@ To run the examples:
 Many examples can be run in either node-oracledb Thin (the default) or Thick
 modes.  Thin mode is a pure JavaScript implementation of node-oracledb.
 Setting the environment variable `NODE_ORACLEDB_DRIVER_MODE` to `'thick'` will
-change node-oracledb to use Thick mode.
+make examples use Thick mode.
 
 ## Example Overview
 
@@ -51,7 +51,8 @@ File Name                                                 | Description
 [`connectionpool.js`](connectionpool.js)                  | Basic example creating a pool of connections
 [`cqn1.js`](cqn1.js)                                      | Basic Continuous Query Notification (CQN) example
 [`cqn2.js`](cqn2.js)                                      | Continuous Query Notification with notification grouping
-[`date.js`](date.js)                                      | Show some DATE and TIMESTAMP behaviors
+[`date_timestamp1.js`](date_timestamp1.js)                | Show some basic DATE and TIMESTAMP behaviors
+[`date_timestamp2.js`](date_timestamp2.js)                | Show some DATE and TIMESTAMP behaviors with timezones
 [`dbconfig.js`](dbconfig.js)                              | Common file used by examples for setting connection credentials
 [`dbmsoutputgetline.js`](dbmsoutputgetline.js)            | Show fetching DBMS_OUTPUT by binding buffers
 [`dbmsoutputpipe.js`](dbmsoutputpipe.js)                  | Show fetching DBMS_OUTPUT by using a pipelined table
