@@ -51,14 +51,18 @@ describe('32. dataTypeDate.js', function() {
 
   describe('32.1 Testing JavaScript Date data', function() {
     let dates = assist.data.dates;
+    let altSessDates = Array.from(dates);
 
     before('create table, insert data', async function() {
       await assist.setUp(connection, tableName, dates);
     });
 
     after(async function() {
-      oracledb.fetchAsString = [];
       await connection.execute(`DROP table ` + tableName + ` PURGE`);
+    });
+
+    afterEach(function() {
+      oracledb.fetchAsString = [];
     });
 
     it('32.1.1 works well with SELECT query', async function() {
@@ -68,6 +72,14 @@ describe('32. dataTypeDate.js', function() {
           dates[i].setMilliseconds(0);
       }
       await assist.dataTypeSupport(connection, tableName, dates);
+
+      /*
+       * This is to validate SQL reading time related columns have the OS timezone
+       * considered correctly before running any other SQL on that connection.
+       */
+      const newConnection = await oracledb.getConnection(dbConfig);
+      await assist.dataTypeSupport(newConnection, tableName, dates);
+      await newConnection.close();
     });
 
     it('32.1.2 works well with result set', async function() {
@@ -85,6 +97,25 @@ describe('32. dataTypeDate.js', function() {
     it('32.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', async function() {
       oracledb.fetchAsString = [ oracledb.DATE ];
       await assist.verifyRefCursorWithFetchAsString(connection, tableName, dates);
+    });
+
+    it('32.1.6 works well with SELECT query after session TimeZone change', async function() {
+      const curDate = new Date();
+      const offset = curDate.getTimezoneOffset() + 300;   // +05:00
+      for (let i = 0; i < altSessDates.length; i++) {
+        const newDate = altSessDates[i].getTime() + (-offset * 60000);
+        altSessDates[i] = new Date(newDate);
+        if (altSessDates[i].getMilliseconds() > 0) {
+          altSessDates[i].setMilliseconds(0);
+        }
+      }
+      const sql = "select sessiontimezone from dual";
+      const result = await connection.execute(sql);
+      const savedTZ = result.rows[0][0];
+      await connection.execute(`ALTER SESSION SET TIME_ZONE='+05:00'`);  // resets ORA_SDTZ value
+      await assist.dataTypeSupport(connection, tableName, altSessDates);
+      // restore to original timezone
+      await connection.execute(`ALTER SESSION SET TIME_ZONE='${savedTZ}'`);
     });
 
   }); // 32.1 suite

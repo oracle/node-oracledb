@@ -41,6 +41,8 @@ describe('248. userName.js', function() {
   const dbaCredential = {
     username      : dbConfig.test.DBA_user,
     password      : dbConfig.test.DBA_password,
+    walletPassword: dbConfig.walletPassword,
+    walletLocation: dbConfig.walletLocation,
     connectString : dbConfig.connectString,
     privilege     : oracledb.SYSDBA
   };

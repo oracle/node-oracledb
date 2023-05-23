@@ -546,6 +546,8 @@ describe('43. plsqlBindIndexedTable1.js', function() {
     });
 
     it('43.4.5 negative case: large value', async function() {
+      if (oracledb.thin)
+        return this.skip();
       const bindvars = {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 987654321}
       };

@@ -36,7 +36,7 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('213. dbObject14.js', () => {
+(!oracledb.thin ? describe : describe.skip)('213. dbObject14.js', () => {
   let conn;
 
   const TABLE = 'NODB_TAB_SPORTS';

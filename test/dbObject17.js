@@ -37,7 +37,7 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('216. dbObject17.js', () => {
+(!oracledb.thin ? describe : describe.skip)('216. dbObject17.js', () => {
 
   let conn;
 

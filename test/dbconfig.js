@@ -38,11 +38,15 @@
  *
  *****************************************************************************/
 
+const oracledb = require('oracledb');
+
 const config = {
   test: {
     externalAuth:  false,
     DBA_PRIVILEGE: false,
     printDebugMsg: false,
+    mode:          'thin',
+    instantClientPath: '',
     isCloudService: false
   }
 };
@@ -95,6 +99,14 @@ if (process.env.NODE_ORACLEDB_DBA_PRIVILEGE) {
   }
 }
 
+if (process.env.NODE_ORACLEDB_WALLET_PASSWORD) {
+  config.walletPassword = process.env.NODE_ORACLEDB_WALLET_PASSWORD;
+}
+
+if (process.env.NODE_ORACLEDB_WALLET_LOCATION) {
+  config.walletLocation = process.env.NODE_ORACLEDB_WALLET_LOCATION;
+}
+
 if (process.env.NODE_ORACLEDB_DBA_USER) {
   config.test.DBA_user = process.env.NODE_ORACLEDB_DBA_USER;
 } else if (config.test.DBA_PRIVILEGE) {
@@ -118,6 +130,18 @@ if (process.env.NODE_PRINT_DEBUG_MESSAGE) {
   if (printDebugMsg == 'true') {
     config.test.printDebugMsg = true;
   }
+}
+
+if (process.env.NODE_ORACLEDB_CLIENT_LIB_DIR) {
+  config.test.instantClientPath = process.env.NODE_ORACLEDB_CLIENT_LIB_DIR;
+}
+
+if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
+  config.test.mode = 'thick';
+  console.log("Thick mode selected");
+  oracledb.initOracleClient({ libDir: config.test.instantClientPath });
+} else {
+  console.log("Thin mode selected");
 }
 
 module.exports = config;

@@ -54,6 +54,10 @@ describe('181. dataTypeXML.js', function() {
     '</Warehouse>\n';
 
   before('create table and insert a row', async function() {
+    if (oracledb.thin) {
+      this.skip();
+      return;
+    }
 
     const connection = await oracledb.getConnection(dbConfig);
 

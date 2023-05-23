@@ -73,11 +73,15 @@ describe('255. poolReconfigure.js', function() {
     let pool;
 
     beforeEach(async function() {
+      if (oracledb.thin)
+        return this.skip();
       pool = await oracledb.createPool(poolConfig);
       checkOriginalPoolConfig(pool);
     });
 
     afterEach(async function() {
+      if (oracledb.thin)
+        return this.skip();
       await pool.close(0);
     });
 
@@ -577,11 +581,15 @@ describe('255. poolReconfigure.js', function() {
     }
 
     beforeEach(async function() {
+      if (oracledb.thin)
+        return this.skip();
       pool = await oracledb.createPool(poolConfig);
       checkOriginalPoolConfig(pool);
     });
 
     afterEach(async function() {
+      if (oracledb.thin)
+        return this.skip();
       await pool.close(0);
     });
 
@@ -829,11 +837,15 @@ describe('255. poolReconfigure.js', function() {
     let pool;
 
     beforeEach(async function() {
+      if (oracledb.thin)
+        return this.skip();
       pool = await oracledb.createPool(poolConfig);
       checkOriginalPoolConfig(pool);
     });
 
     afterEach(async function() {
+      if (oracledb.thin)
+        return this.skip();
       await pool.close(0);
     });
 
@@ -915,11 +927,15 @@ describe('255. poolReconfigure.js', function() {
     let pool;
 
     beforeEach(async function() {
+      if (oracledb.thin)
+        return this.skip();
       pool = await oracledb.createPool(poolConfig);
       checkOriginalPoolConfig(pool);
     });
 
     afterEach(async function() {
+      if (oracledb.thin)
+        return this.skip();
       await pool.close(0);
     });
 
@@ -1080,11 +1096,15 @@ describe('255. poolReconfigure.js', function() {
     };
 
     beforeEach(async function() {
+      if (oracledb.thin)
+        return this.skip();
       pool = await oracledb.createPool(poolConfig);
       checkOriginalPoolConfig(pool);
     });
 
     afterEach(async function() {
+      if (oracledb.thin)
+        return this.skip();
       await pool.close(0);
     });
 
@@ -1449,6 +1469,15 @@ describe('255. poolReconfigure.js', function() {
   });
 
   describe('255.6 Pool statistics', function() {
+    beforeEach(function() {
+      if (oracledb.thin)
+        return this.skip();
+    });
+
+    afterEach(function() {
+      if (oracledb.thin)
+        return this.skip();
+    });
 
     it('255.6.1 get pool statistics by setting _enableStats', async function() {
       let poolConfig = {

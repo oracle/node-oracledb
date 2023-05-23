@@ -36,7 +36,7 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('209. dbObject10.js', () => {
+(!oracledb.thin ? describe : describe.skip)('209. dbObject10.js', () => {
 
   let conn;
   const TYPE = 'NODB_PERSON_TYP';

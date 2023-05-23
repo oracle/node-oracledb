@@ -106,6 +106,8 @@ describe('114. urowidDMLBindAsString1.js', function() {
     });
 
     it('114.1.4 works with restricted rowid', async function() {
+      if (oracledb.thin)
+        return this.skip();
       const content = "00000DD5.0000.0001";
       const bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
@@ -129,6 +131,8 @@ describe('114. urowidDMLBindAsString1.js', function() {
     });
 
     it('114.1.6 works with string 0', async function() {
+      if (oracledb.thin)
+        return this.skip();
       const content = "0";
       const expected = "00000000.0000.0000";
       const bindVar = {
@@ -222,6 +226,8 @@ describe('114. urowidDMLBindAsString1.js', function() {
     });
 
     it('114.2.1 UPDATE extented rowid with restricted rowid', async function() {
+      if (oracledb.thin)
+        return this.skip();
       const content_insert = "AAABioAADAAAAwPAAA";
       const content_update = "00000DD5.0010.0001";
       await dmlUpdate(content_insert, content_update, content_update);

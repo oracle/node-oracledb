@@ -69,7 +69,7 @@ async function dropTable() {
   }
 }
 
-describe('184. sessionTag.js', function() {
+(!oracledb.thin ? describe : describe.skip)('184. sessionTag.js', function() {
 
   before(async function() {
     let isRunnable = true;

@@ -48,7 +48,7 @@ describe('217. aq1.js', function() {
   const RAW_TABLE = 'NODB_RAW_QUEUE_TAB';
 
   before(async function() {
-    if (!dbConfig.test.DBA_PRIVILEGE) {
+    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin) {
       isRunnable = false;
     }
 

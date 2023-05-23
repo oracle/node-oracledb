@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -29,6 +29,10 @@
  *   Functions to create schema objects used by some node-oracledb examples
  *
  *****************************************************************************/
+
+'use strict';
+
+Error.stackTraceLimit = 50;
 
 const fs = require('fs');
 

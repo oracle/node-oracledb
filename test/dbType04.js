@@ -320,7 +320,10 @@ describe('241. dbType04.js', function() {
     assert.deepStrictEqual(result2.rows[0][1], jsonVal);
   }); // 241.13
 
-  it('241.14 binding simple dbobject with no attributes couldn\'t get converted to JSON Object value, returns an empty object', async () => {
+  it('241.14 binding simple dbobject with no attributes couldn\'t get converted to JSON Object value, returns an empty object', async function() {
+
+    // database objects not supported in thin mode yet
+    if (oracledb.thin) this.skip();
 
     let sql =
       `CREATE OR REPLACE TYPE NODE_OBJ AS OBJECT (

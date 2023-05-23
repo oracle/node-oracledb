@@ -35,7 +35,7 @@ const oracledb  = require('oracledb');
 const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 
-describe('214. dbObject15.js', () => {
+(!oracledb.thin ? describe : describe.skip)('214. dbObject15.js', () => {
 
   let conn, FrisbeeTeam;
 

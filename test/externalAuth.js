@@ -40,7 +40,7 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
-describe('5. externalAuth.js', function() {
+(!oracledb.thin ? describe : describe.skip)('5. externalAuth.js', function() {
 
   describe('5.1 tests that work both when DB has configured externalAuth and not configured', function() {
 

@@ -31,7 +31,7 @@
  *   External Authentication to avoid hard coded credentials.
  *
  *   To create a database user see
- *   https://blogs.oracle.com/sql/how-to-create-users-grant-them-privileges-and-remove-them-in-oracle-database
+ *   https://blogs.oracle.com/sql/post/how-to-create-users-grant-them-privileges-and-remove-them-in-oracle-database
  *
  *   Applications can set the connectString value to an Easy Connect
  *   string, or a Net Service Name from a tnsnames.ora file or
@@ -81,7 +81,7 @@
  *****************************************************************************/
 
 module.exports = {
-  user          : process.env.NODE_ORACLEDB_USER || "hr",
+  user          : process.env.NODE_ORACLEDB_USER,
 
   // Get the password from the environment variable
   // NODE_ORACLEDB_PASSWORD.  The password could also be a hard coded
@@ -92,9 +92,9 @@ module.exports = {
 
   // For information on connection strings see:
   // https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connectionstrings
-  connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING || "localhost/orclpdb1",
+  connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING,
 
   // Setting externalAuth is optional.  It defaults to false.  See:
   // https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#extauth
-  externalAuth  : process.env.NODE_ORACLEDB_EXTERNALAUTH ? true : false
+  externalAuth  : process.env.NODE_ORACLEDB_EXTERNALAUTH ? true : false,
 };

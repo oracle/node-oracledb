@@ -198,6 +198,8 @@ describe('58. properties.js', function() {
     });
 
     it('58.1.14 oracleClientVersion (read-only)', function() {
+      if (oracledb.thin)
+        return this.skip();
       const t = oracledb.oracleClientVersion;
       assert.equal(typeof t, 'number');
 
@@ -312,6 +314,8 @@ describe('58. properties.js', function() {
     });
 
     it('58.1.26 oracleClientVersionString (read-only)', function() {
+      if (oracledb.thin)
+        return this.skip();
       const t = oracledb.oracleClientVersionString;
       assert.equal(typeof t, 'string');
 

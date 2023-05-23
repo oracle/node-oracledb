@@ -50,7 +50,7 @@ describe.skip('185. runCQN.js', function() {
   let conn, connAsDBA;
 
   before(async function() {
-    if ((!dbConfig.test.DBA_PRIVILEGE) || (process.platform == 'darwin')) {
+    if (oracledb.thin || (!dbConfig.test.DBA_PRIVILEGE) || (process.platform == 'darwin')) {
       isRunnable = false;
     }
 

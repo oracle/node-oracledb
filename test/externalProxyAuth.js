@@ -45,7 +45,6 @@ async function ShowUserInfo(conn) {
   return [result.rows[0][0], result.rows[0][1]];
 }
 
-
 describe('180. externalProxyAuth.js', function() {
 
   before('Check version greater than 1202000000', async function() {
@@ -171,7 +170,7 @@ describe('180. externalProxyAuth.js', function() {
     });
 
     it('180.2.4 Pooled Connect: Username-Password Auth with proxy when acquire connection', async function() {
-      if (!dbConfig.test.proxySessionUser) {
+      if (oracledb.thin || !dbConfig.test.proxySessionUser) {
         this.skip();
       }
       const pool = await oracledb.createPool({
@@ -187,7 +186,7 @@ describe('180. externalProxyAuth.js', function() {
     });
 
     it('180.2.5 Pooled Connect: Username-Password Auth with proxy when acquire connection', async function() {
-      if (!dbConfig.test.proxySessionUser) {
+      if (!oracledb.thin || !dbConfig.test.proxySessionUser) {
         this.skip();
       }
       const pool = await oracledb.createPool({

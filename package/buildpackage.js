@@ -42,6 +42,7 @@ const nodbUtil = require('../lib/util.js');
 const packageJSON = require("../package.json");
 
 const jsStagingInfoFile = nodbUtil.RELEASE_DIR + '/oracledb-' + nodbUtil.PACKAGE_JSON_VERSION + '-js-buildinfo.txt';
+let areBinariesAvailable = true;
 
 let njsGitSha;
 try {
@@ -63,7 +64,8 @@ async function packageUp() {
   try {
 
     if (!fs.existsSync(nodbUtil.STAGING_DIR)) {
-      throw new Error("Directory '" + nodbUtil.STAGING_DIR + "' not found.  Run 'npm run buildbinary' first.");
+      areBinariesAvailable = false;
+      console.warn("Directory '" + nodbUtil.STAGING_DIR + "' not found. Binaries for the thick mode will not be packaged.");
     }
 
     // Update package.json by setting an install script target to call
@@ -75,10 +77,25 @@ async function packageUp() {
     packageJSON.scripts.prune = 'node package/prunebinaries.js';
     fs.writeFileSync('package.json', JSON.stringify(packageJSON, null, 2) + '\n');
 
-    // Copy all the staged files to the Release directory
-    await delDir(nodbUtil.RELEASE_DIR);
+    // Use 'await fs.promises' to remove the directory & its contents instead
+    // of fs.rmSync() for compatability with Node.js 14.6 - 14.13 versions.
+    // fs.rmSync() was introduced in Node.js 14.14 version.
+    try {
+      const vs = process.version.substring(1).split(".").map(Number);
+      if (vs[0] > 14 || (vs[0] === 14 && vs[1] >= 14))
+        fs.rmSync(nodbUtil.RELEASE_DIR, { recursive: true, force: true });
+      else
+        await fs.promises.rmdir(nodbUtil.RELEASE_DIR, { recursive: true, force: true });
+    } catch (err) {
+      if (err && !err.message.match(/ENOENT/))
+        console.error(err.message);
+    }
     fs.mkdirSync(nodbUtil.RELEASE_DIR, { recursive: true, mode: 0o755 });
-    await copyDir(nodbUtil.STAGING_DIR, nodbUtil.RELEASE_DIR);
+    // Copy all the staged files to the Release directory,
+    // if the 'thick mode' binaries are needed
+    if (areBinariesAvailable) {
+      copyDir(nodbUtil.STAGING_DIR, nodbUtil.RELEASE_DIR);
+    }
 
     // Record the SHA of the bundle's non-binary files
     fs.appendFileSync(jsStagingInfoFile, njsGitSha + "\n");
@@ -90,8 +107,7 @@ async function packageUp() {
     // Some of the entries already exist in the GitHub clone .npmignore file,
     // but they make building from a source bundle cleaner, because the source bundles
     // in GitHub releases don't contain .npmignore.
-    fs.appendFileSync('.npmignore', '\n/odpi\n/src\nbinding.gyp\n/package/buildbinary.js\n/package/buildpackage.js\n/package/Staging\n/build/Makefile\n/build/oracledb.target.mk\n/build/Release/obj.target\n/build/binding.Makefile\n*.tgz\n');
-
+    fs.appendFileSync('.npmignore', '\n/odpi\n/src\nbinding.gyp\n/package/buildbinary.js\n/package/buildpackage.js\n/package/Staging\n/build/Makefile\n/build/oracledb.target.mk\n/build/Release/obj.target\n/build/binding.Makefile\n.gitattributes\n*.tgz\n');
     // Build the package
     execSync('npm pack');
 
@@ -105,24 +121,6 @@ async function packageUp() {
     } else {
       fs.unlinkSync('.npmignore');
     }
-  }
-}
-
-// Delete a directory
-function delDir(dir) {
-  try {
-    let f = fs.readdirSync(dir);
-    for (let i = 0; i < f.length; i++) {
-      if (fs.lstatSync(dir + '/' + f[i]).isDirectory()) {
-        delDir(dir + '/' + f[i]);
-      } else {
-        fs.unlinkSync(dir + '/' + f[i]);
-      }
-    }
-    fs.rmdirSync(dir);
-  } catch (err) {
-    if (err && !err.message.match(/ENOENT/))
-      console.error(err.message);
   }
 }
 

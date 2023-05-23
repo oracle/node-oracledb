@@ -5253,6 +5253,13 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     267.9 recipient list with enqMany
     267.10 recipient list with enqMany non-existent in dequeue
     267.11 recipient list with enqMany invalid datatype in dequeue
+
+268.  poolTimeout.js
+    268.1 poolTimeout as 0, no idle connection removals
+    268.2 poolTimeout as 1sec, idle connection will get removed
+    268.3 poolTimeout as 1sec and min connection defined, idle connection will be removed
+    268.4 check default poolTimeout as 60sec
+
 268. procAndFuncs.js
     268.1 calling stored procedures
         268.1.1 executing a stored procedure

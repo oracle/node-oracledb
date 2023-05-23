@@ -144,7 +144,7 @@ describe('63. autoCommit4nestedExecutes.js', function() {
     };
     await assert.rejects(
       async () => await conn.execute(procSql, binds, options),
-      /ORA-01036:/
+      /ORA-01036:|NJS-097:/
     );
 
     await conn.release();

@@ -35,7 +35,7 @@ const oracledb  = require('oracledb');
 const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 
-describe('262. dbObjectOutBind.js', function() {
+(!oracledb.thin ? describe : describe.skip)('262. dbObjectOutBind.js', function() {
   let conn = null;
   let proc1 =
     `create or replace procedure nodb_getDataCursor1(p_cur out sys_refcursor) is

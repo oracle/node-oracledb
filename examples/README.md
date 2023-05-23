@@ -1,6 +1,6 @@
 # Node-oracledb Examples
 
-This directory contains [node-oracledb](https://www.npmjs.com/package/oracledb)
+The directory in node-oracledb's [Github repository](https://github.com/oracle/node-oracledb/tree/main/examples) contains a lot of [node-oracledb](https://www.npmjs.com/package/oracledb)
 examples.  Documentation is
 [here](https://node-oracledb.readthedocs.io/en/latest/).
 
@@ -8,20 +8,12 @@ To run the examples:
 
 - [Install node-oracledb](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#quickstart).
 
-- Edit `dbconfig.js` and set your username and the database connection string,
-  for example:
+- Ensure that you navigate to the `examples` directory in your terminal window
+  or IDE, where you are running the samples.
 
-  ```
-  module.exports = {
-      user: "hr",
-      password: process.env.NODE_ORACLEDB_PASSWORD,
-      connectString:"localhost/orclpdb1"
-  };
-
-  ```
-
-- In a terminal window, set the environment variable `NODE_ORACLEDB_PASSWORD` to
-  the value of your database password.
+- Review `dbconfig.js`.  In your terminal window or IDE, set the environment
+  variables.  For example, set `NODE_ORACLEDB_PASSWORD` to the value of your
+  database password.
 
 - Review the samples and then run them individually.  For example, to see what
   the file `example.js` does, use:
@@ -36,6 +28,11 @@ To run the examples:
   ```
   node demodrop.js
   ```
+
+Many examples can be run in either node-oracledb Thin (the default) or Thick
+modes.  Thin mode is a pure JavaScript implementation of node-oracledb.
+Setting the environment variable `NODE_ORACLEDB_DRIVER_MODE` to `'thick'` will
+change node-oracledb to use Thick mode.
 
 ## Example Overview
 
@@ -70,7 +67,6 @@ File Name                                                 | Description
 [`em_rowcounts.js`](em_rowcounts.js)                      | `executeMany()` example showing how to find the number of rows affected by each input row
 [`endtoend.js`](endtoend.js)                              | Example showing setting tracing attributes
 [`example.js`](example.js)                                | Basic example showing creating a table, inserting multiple rows, and querying rows
-[`fetchinfo.js`](fetchinfo.js)                            | Show how numbers and dates can be returned as strings using `fetchAsString` and `fetchInfo`
 [`impres.js`](impres.js)                                  | Shows PL/SQL 'Implict Results' returning multiple query results from PL/SQL code.
 [`insert1.js`](insert1.js)                                | Basic example creating a table and inserting data.  Shows DDL and DML
 [`insert2.js`](insert2.js)                                | Basic example showing auto commit behavior
@@ -83,6 +79,7 @@ File Name                                                 | Description
 [`lobselect.js`](lobselect.js)                            | Shows basic, non-streaming CLOB and BLOB queries
 [`lobstream1.js`](lobstream1.js)                          | Shows how to stream LOBs to files
 [`lobstream2.js`](lobstream2.js)                          | Shows using Stream data events to fetch a CLOB
+[`lowercasecolumns.js`](lowercasecolumns.js)              | Shows how a type handler can convert column names to lower case
 [`metadata.js`](metadata.js)                              | Shows the metadata available after executing SELECT statements
 [`plsqlarray.js`](plsqlarray.js)                          | Examples of binding PL/SQL "INDEX BY" tables
 [`plsqlfunc.js`](plsqlfunc.js)                            | How to call a PL/SQL function
@@ -109,5 +106,7 @@ File Name                                                 | Description
 [`sessiontagging1.js`](sessiontagging1.js)                | Simple pooled connection tagging for setting session state
 [`sessiontagging2.js`](sessiontagging2.js)                | More complex example of pooled connection tagging for setting session state
 [`soda1.js`](soda1.js)                                    | Basic Simple Oracle Document Access (SODA) example
+[`typehandlerdate.js`](typehandlerdate.js)                | Show how a type handler can format a queried date in a locale-specific way
+[`typehandlernum.js`](typehandlernum.js)                  | Show how a type handler can format a queried number in a locale-specific way
 [`version.js`](version.js)                                | Shows the node-oracledb version attributes
 [`webapp.js`](webapp.js)                                  | A simple web application using a connection pool

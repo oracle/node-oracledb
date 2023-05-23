@@ -10,11 +10,33 @@ node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...
 
 **This release is under development**
 
+#)  node-oracledb is now a 'Thin' driver by default that connects directly
+    to Oracle Database.  Optional use of Oracle Client libraries enables a
+    :ref:`'Thick' mode <enablingthick>` with some additional functionality.
+
+#)  Added a new ``oracledb.fetchTypeHandler`` and equivalent execution option
+    allowing a user function to be specified that can make custom alterations
+    to SQL query data before it is returned to the app.
+
+#)  Deprecated execution option attribute ``fetchInfo``.  Use the new
+    ``fetchTypeHandler`` functionality instead.
+
+#)  Changed ``oracledb.DB_TYPE_*`` constants to be ``DbType`` objects
+    instead of numbers.
+
+#)  Added support for the Oracle Database 23c BOOLEAN SQL type.
+
 #)  Bumped the minimum Node.js version required to 14.6 so Node-API version 6
     and ``FinalizationRegistry`` can be used in the driver implementation.
 
-#)  Re-licensed to dual Apache 2.0 or UPL 1.0 licenses, see `LICENSE.txt
-    <https://github.com/oracle/node-oracledb/blob/main/LICENSE.txt>`__.
+#)  Allow ``package/prunebinaries.js`` to optionally remove all the Thick mode
+    binaries to enable a Thin-mode only installation.
+
+#)  Allow ``npm run buildpackage`` to create a package without Thick mode
+    binaries.
+
+#)  Re-licensed to dual Apache 2.0 or UPL 1.0 licenses, see
+    `LICENSE.txt <https://github.com/oracle/node-oracledb/blob/main/LICENSE.txt>`__.
 
 #)  Internal change: reorganized code to move functionality from C to JavaScript.
 

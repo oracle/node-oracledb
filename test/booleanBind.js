@@ -232,6 +232,8 @@ describe('224. booleanBind.js', function()  {
   }); // 224.6
 
   it('224.7 IN bind array with boolean data', async function() {
+    if (oracledb.thin)
+      this.skip();
     const cls = await conn.getDbObjectClass(`${pkgName}.UDT_BOOLEANLIST`);
     const arr = new cls([true, false, true, true, false, true, false, true]);
     const binds = {
@@ -244,6 +246,8 @@ describe('224. booleanBind.js', function()  {
   }); // 224.7
 
   it('224.8 OUT bind array with boolean data', async function() {
+    if (oracledb.thin)
+      this.skip();
     const cls = await conn.getDbObjectClass(`${pkgName}.UDT_BOOLEANLIST`);
     const arr = new cls([true, false, true, true, false, true, false, true]);
     const binds = {
@@ -256,6 +260,8 @@ describe('224. booleanBind.js', function()  {
   }); // 224.8
 
   it('224.9 INOUT bind record with boolean data', async function() {
+    if (oracledb.thin)
+      this.skip();
     const cls = await conn.getDbObjectClass(`${pkgName}.UDT_DEMORECORD`);
     const obj = new cls();
     obj.NUMBERVALUE = 6;

@@ -42,7 +42,9 @@ async function run() {
   console.log("Node-oracledb version:", oracledb.versionString); // version (including the suffix)
 
   //console.log("Oracle Client library version:", oracledb.oracleClientVersion); // numeric version format
-  console.log("Oracle Client library version:", oracledb.oracleClientVersionString);
+  if (dbConfig.test.mode === 'thick') {
+    console.log("Oracle Client library version:", oracledb.oracleClientVersionString);
+  }
 
   const conn = await oracledb.getConnection(dbConfig);
   // console.log("Oracle Database version:", connection.oracleServerVersion); // numeric version format

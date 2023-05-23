@@ -37,9 +37,14 @@ const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
 
 describe('19. fetchTimestampAsString.js', function() {
+
   let connection = null;
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
+    if (oracledb.thin) {
+      // thin mode doesn't support NLS (use fetchTypeHandler instead)
+      return this.skip();
+    }
     await connection.execute(
       `alter session set nls_timestamp_format = 'YYYY-MM-DD HH24:MI:SS.FF'`);
     await connection.execute(

@@ -260,3 +260,5 @@ spec:
   - test/jsonDualityViews4.js
   - test/jsonDualityViews5.js
   - test/jsonDualityViews6.js
+  - test/poolExpansion.js
+  - test/poolShrinkage.js

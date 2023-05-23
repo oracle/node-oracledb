@@ -440,6 +440,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
     urowid = result.rows[0][0];
     urowidLen = urowid.length;
     testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
+
     bindVar = {
       i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
       c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING },

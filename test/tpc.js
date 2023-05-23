@@ -80,6 +80,8 @@ describe('259. tpc.js', function() {
             END;`;
 
     before(async function() {
+      if (oracledb.thin)
+        return this.skip();
       conn = await oracledb.getConnection(dbConfig);
       await conn.execute(sql);
     });
@@ -241,6 +243,8 @@ describe('259. tpc.js', function() {
             END;`;
 
     before(async function() {
+      if (oracledb.thin)
+        return this.skip();
       conn = await oracledb.getConnection(dbConfig);
       await conn.execute(sql);
     });
@@ -391,6 +395,8 @@ describe('259. tpc.js', function() {
     let conn = null;
 
     before(async function() {
+      if (oracledb.thin)
+        return this.skip();
       conn = await oracledb.getConnection(dbConfig);
     });
 
@@ -446,6 +452,8 @@ describe('259. tpc.js', function() {
             END;`;
 
     before(async function() {
+      if (oracledb.thin)
+        return this.skip();
       conn = await oracledb.getConnection(dbConfig);
       await conn.execute(sql);
     });
@@ -512,12 +520,14 @@ describe('259. tpc.js', function() {
     };
 
     before(async function() {
+      if (oracledb.thin)
+        return this.skip();
       conn = await oracledb.getConnection(dbConfig);
     });
 
     after (async function() {
-      await conn.close ();
-      conn = null;
+      if (conn)
+        await conn.close();
     });
 
     it('259.6.1 tpcBegin invalid number of arguments', async function() {

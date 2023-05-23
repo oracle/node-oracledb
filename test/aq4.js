@@ -92,7 +92,7 @@ describe('267. aq4.js', function() {
   `;
 
   before(async function() {
-    if (!dbConfig.test.DBA_PRIVILEGE) {
+    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin) {
       this.skip();
     }
 
@@ -111,7 +111,7 @@ describe('267. aq4.js', function() {
 
 
   after(async function() {
-    if (!dbConfig.test.DBA_PRIVILEGE)
+    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin)
       return;
 
     if (conn)

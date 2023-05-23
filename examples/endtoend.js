@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -28,31 +28,40 @@
  * DESCRIPTION
  *   Sets connection metadata for end-to-end tracing and client authorization.
  *
- *   While the script sleeps (keeping the connection open), use SQL*Plus as a privileged user to execute:
- *      SELECT username, client_identifier, action, module FROM v$session WHERE username IS NOT NULL;
- *   The end-to-end tracing attributes are shown in various other DBA views and in Enterprise Manager.
+ *   While the script sleeps (keeping the connection open), use SQL*Plus as a
+ *   privileged user to execute the SQL statement displayed.
  *
- *   This example uses Node 8's async/await syntax.
+ *   The end-to-end tracing attributes are shown in various other DBA views and
+ *   in Enterprise Manager.
  *
  *****************************************************************************/
 
-const fs = require('fs');
+'use strict';
+
+Error.stackTraceLimit = 50;
+
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 
-// On Windows and macOS, you can specify the directory containing the Oracle
-// Client Libraries at runtime, or before Node.js starts.  On other platforms
-// the system library search path must always be set before Node.js is started.
-// See the node-oracledb installation documentation.
-// If the search path is not correct, you will get a DPI-1047 error.
-let libPath;
-if (process.platform === 'win32') {           // Windows
-  libPath = 'C:\\oracle\\instantclient_19_12';
-} else if (process.platform === 'darwin') {   // macOS
-  libPath = process.env.HOME + '/Downloads/instantclient_19_8';
-}
-if (libPath && fs.existsSync(libPath)) {
-  oracledb.initOracleClient({ libDir: libPath });
+// This example runs in both node-oracledb Thin and Thick modes.
+//
+// Optionally run in node-oracledb Thick mode
+if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
+
+  // Thick mode requires Oracle Client or Oracle Instant Client libraries.
+  // On Windows and macOS Intel you can specify the directory containing the
+  // libraries at runtime or before Node.js starts.  On other platforms (where
+  // Oracle libraries are available) the system library search path must always
+  // include the Oracle library path before Node.js starts.  If the search path
+  // is not correct, you will get a DPI-1047 error.  See the node-oracledb
+  // installation documentation.
+  let clientOpts = {};
+  if (process.platform === 'win32') {                                   // Windows
+    clientOpts = { libDir: 'C:\\oracle\\instantclient_19_17' };
+  } else if (process.platform === 'darwin' && process.arch === 'x64') { // macOS Intel
+    clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
+  }
+  oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 }
 
 async function run() {
@@ -68,7 +77,7 @@ async function run() {
     connection.module = "End-to-end example";
     connection.action = "Query departments";
 
-    console.log("Use SQL*Plus as SYSTEM (or ADMIN for Oracle Cloud databases) to execute the query:");
+    console.log("Use SQL*Plus as SYSTEM (or ADMIN for Oracle Autonomous Database) to execute the query:");
     console.log("  SELECT username, client_identifier, action, module FROM v$session WHERE username = UPPER('" + dbConfig.user + "');");
 
     // Sleep 10 seconds to keep the connection open.  This allows

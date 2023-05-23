@@ -50,7 +50,7 @@ describe('218. aq2.js', function() {
   const objTable = "NODB_TAB_ADDR";
 
   before(async function() {
-    if (!dbConfig.test.DBA_PRIVILEGE) {
+    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin) {
       isRunnable = false;
     }
 

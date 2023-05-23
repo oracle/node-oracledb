@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -30,24 +30,12 @@
  *
  *****************************************************************************/
 
-const fs = require('fs');
+'use strict';
+
+Error.stackTraceLimit = 50;
+
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
-
-// On Windows and macOS, you can specify the directory containing the Oracle
-// Client Libraries at runtime, or before Node.js starts.  On other platforms
-// the system library search path must always be set before Node.js is started.
-// See the node-oracledb installation documentation.
-// If the search path is not correct, you will get a DPI-1047 error.
-let libPath;
-if (process.platform === 'win32') {           // Windows
-  libPath = 'C:\\oracle\\instantclient_19_12';
-} else if (process.platform === 'darwin') {   // macOS
-  libPath = process.env.HOME + '/Downloads/instantclient_19_8';
-}
-if (libPath && fs.existsSync(libPath)) {
-  oracledb.initOracleClient({ libDir: libPath });
-}
 
 async function run() {
   let connection;
@@ -120,6 +108,8 @@ async function run() {
       `DROP TABLE no_nc_people PURGE`,
 
       `DROP TABLE no_nc_address PURGE`,
+
+      `DROP TABLE no_typehandler_tab PURGE`,
 
       `CALL DBMS_AQADM.STOP_QUEUE('DEMO_RAW_QUEUE')`,
 

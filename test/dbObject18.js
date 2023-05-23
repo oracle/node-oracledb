@@ -36,7 +36,7 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('242. dbObject18.js', () => {
+(!oracledb.thin ? describe : describe.skip)('242. dbObject18.js', () => {
 
   describe('242.1 set oracledb.dbObjectAsPojo', () => {
 

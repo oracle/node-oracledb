@@ -32,11 +32,11 @@
  * USAGE
  *   Invoke this from the top level directory.
  *   After an 'npm install oracledb' installs pre-built binaries, this file
- *   can be run with 'npm run prune [<option>]'.
+ *   can be run with 'npm run prune [all]'.
  *   'npm run prune' will keep only the binary files for the platform where
  *   the application using node-oracledb is being run.
- *   Set <option> to 'all', so that only Thin mode will be used.
- *   In this case, all the Thick mode binaries will be removed.
+ *   Passing the optional 'all' parameter deletes all binary files, so that
+ *   only Thin mode will be available.
  *
  *****************************************************************************/
 
@@ -62,7 +62,7 @@ try {
       }
     } else {
       // Invalid option
-      throw new Error('Invalid Command option: ' + `'${opt}'`);
+      throw new Error('Invalid Command option: ' + `'${opt}'. Usage 'npm run prune [all]'`);
     }
   } else {
     // 'npm run prune' is called

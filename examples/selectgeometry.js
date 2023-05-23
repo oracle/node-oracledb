@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -28,32 +28,29 @@
  * DESCRIPTION
  *   Insert and query Oracle Spatial geometries.
  *
- *   This example requires node-oracledb 4 or later.
- *
- *   This example uses Node 8's async/await syntax.
- *
  *****************************************************************************/
 
 'use strict';
 
-const fs = require('fs');
+Error.stackTraceLimit = 50;
+
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 
-// On Windows and macOS, you can specify the directory containing the Oracle
-// Client Libraries at runtime, or before Node.js starts.  On other platforms
-// the system library search path must always be set before Node.js is started.
-// See the node-oracledb installation documentation.
-// If the search path is not correct, you will get a DPI-1047 error.
-let libPath;
-if (process.platform === 'win32') {           // Windows
-  libPath = 'C:\\oracle\\instantclient_19_12';
-} else if (process.platform === 'darwin') {   // macOS
-  libPath = process.env.HOME + '/Downloads/instantclient_19_8';
+// This example requires node-oracledb Thick mode.
+//
+// On Windows and macOS Intel, you can specify the directory containing the
+// Oracle Client Libraries at runtime, or before Node.js starts.  On other
+// platforms the system library search path must always be set before Node.js
+// is started.  See the node-oracledb installation documentation.  If the
+// search path is not correct, you will get a DPI-1047 error.
+let clientOpts = {};
+if (process.platform === 'win32') {                                   // Windows
+  clientOpts = { libDir: 'C:\\oracle\\instantclient_19_17' };
+} else if (process.platform === 'darwin' && process.arch === 'x64') { // macOS Intel
+  clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
 }
-if (libPath && fs.existsSync(libPath)) {
-  oracledb.initOracleClient({ libDir: libPath });
-}
+oracledb.initOracleClient(clientOpts);
 
 // If each object's attributes are accessed multiple times, it may be more
 // efficient to fetch as simple JavaScriptobjects.

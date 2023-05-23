@@ -36,7 +36,7 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('210. dbObject11.js', () => {
+(!oracledb.thin ? describe : describe.skip)('210. dbObject11.js', () => {
 
   let conn;
   const TYPE = 'NODB_RV_FIELD_TYP';

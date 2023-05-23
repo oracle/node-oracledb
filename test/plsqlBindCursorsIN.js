@@ -260,7 +260,7 @@ describe('239. plsqlBindCursorsIN.js', () => {
     await rc.getRows(2);
     rt = await testsUtil.getRoundTripCount(sid) - rt;
 
-    assert.strictEqual(rt, 2);
+    ((oracledb.thin) ? assert.strictEqual(rt, 3) : assert.strictEqual(rt, 2));
   }); // 239.6
 
 });

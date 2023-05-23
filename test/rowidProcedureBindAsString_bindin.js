@@ -123,11 +123,15 @@ describe('108. rowidProcedureBindAsString_bindin.js', function() {
     });
 
     it('108.1.6 works with restricted rowid', async function() {
+      if (oracledb.thin)
+        return this.skip();
       const content = "00000DD5.0000.0101";
       await procedureBindIn(proc_execute, content, content);
     });
 
     it('108.1.7 works with string 0', async function() {
+      if (oracledb.thin)
+        return this.skip();
       const content = "0";
       await procedureBindIn(proc_execute, content, "00000000.0000.0000");
     });
@@ -235,11 +239,15 @@ describe('108. rowidProcedureBindAsString_bindin.js', function() {
     });
 
     it('108.2.6 works with restricted rowid', async function() {
+      if (oracledb.thin)
+        return this.skip();
       const content = "00000DD5.0000.0101";
       await procedureBindIn(proc_execute, content, content);
     });
 
     it('108.2.7 works with string 0', async function() {
+      if (oracledb.thin)
+        return this.skip();
       const content = "0";
       await procedureBindIn(proc_execute, content, "00000000.0000.0000");
     });
@@ -334,6 +342,8 @@ describe('108. rowidProcedureBindAsString_bindin.js', function() {
     });
 
     it('108.3.4 works with default bind type/dir', async function() {
+      if (oracledb.thin)
+        return this.skip();
       const content_1 = "AAAB1+AADAAAAwPAAA";
       const content_2 = "0";
       await procedureBindIn_update(proc_execute, content_1, content_2, "00000000.0000.0000");

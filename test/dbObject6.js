@@ -36,7 +36,7 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('205. dbObject6.js', () => {
+(!oracledb.thin ? describe : describe.skip)('205. dbObject6.js', () => {
 
   let conn;
   const TABLE  = 'NODB_TAB_TESTGEOMETRY';

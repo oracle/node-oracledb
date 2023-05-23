@@ -433,7 +433,7 @@ describe('1. connection.js', function() {
 
       await assert.rejects(
         async () => await oracledb.getConnection(credential),
-        /ORA-12154:/
+        /ORA-12154:|NJS-514:|NJS-516:|NJS-517:/
       );
     });
 
@@ -525,4 +525,30 @@ describe('1. connection.js', function() {
       await connection.close();
     });
   }); //1.15
+
+  describe('1.16 error on empty connectString with thin mode', function() {
+    before(async function() {
+      if (!oracledb.thin) {
+        this.skip();
+      }
+    });
+
+    it('1.16.1 connectString = ""', async function() {
+      const credential = {...dbConfig, connectString: ""};
+
+      await assert.rejects(
+        async () => await oracledb.getConnection(credential),
+        /NJS-125:/
+      );
+    });
+
+    it('1.16.2 connectString undefined', async function() {
+      const credential = {...dbConfig, connectString: undefined};
+
+      await assert.rejects(
+        async () => await oracledb.getConnection(credential),
+        /NJS-125:/
+      );
+    });
+  }); //1.16
 });

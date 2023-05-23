@@ -744,9 +744,16 @@ describe('2. pool.js', function() {
         poolIncrement: 0,
         externalAuth:  true
       };
-      const pool = await oracledb.createPool(config);
-      assert.strictEqual(pool.externalAuth, true);
-      await pool.close(0);
+      if (!oracledb.thin) {
+        const pool = await oracledb.createPool(config);
+        assert.strictEqual(pool.externalAuth, true);
+        await pool.close(0);
+      } else {
+        await assert.rejects(
+          async () => await oracledb.createPool(config),
+          /NJS-101:/
+        );
+      }
     });  // 2.15.7
 
     it('2.15.8 externalAuth - false', async function() {
@@ -826,14 +833,23 @@ describe('2. pool.js', function() {
       // required and so, wallet/OS authentication setup is not available.
       const config = {
         connectString: dbConfig.connectString,
+        walletPassword: dbConfig.walletPassword,
+        walletLocation: dbConfig.walletLocation,
         poolMin:       1,
         poolMax:       1,
         poolIncrement: 0,
         externalAuth:  true
       };
-      const pool = await oracledb.createPool(config);
-      assert.strictEqual(pool.user, undefined);
-      await pool.close(0);
+      if (!oracledb.thin) {
+        const pool = await oracledb.createPool(config);
+        assert.strictEqual(pool.user, undefined);
+        await pool.close(0);
+      } else {
+        await assert.rejects(
+          async () => await oracledb.createPool(config),
+          /NJS-101:/
+        );
+      }
     });  // 2.15.13
 
     it('2.15.14 connectString', async function() {
@@ -968,14 +984,23 @@ describe('2. pool.js', function() {
       try {
         const config = {
           connectString: dbConfig.connectString,
+          walletPassword: dbConfig.walletPassword,
+          walletLocation: dbConfig.walletLocation,
           poolMin: 1,
           poolMax: 1,
           poolIncrement: 0,
           externalAuth: true
         };
-        const pool = await oracledb.createPool(config);
-        assert.strictEqual(pool.externalAuth, true);
-        await pool.close(0);
+        if (!oracledb.thin) {
+          const pool = await oracledb.createPool(config);
+          assert.strictEqual(pool.externalAuth, true);
+          await pool.close(0);
+        } else {
+          await assert.rejects(
+            async () => await oracledb.createPool(config),
+            /NJS-101:/
+          );
+        }
       } finally {
         oracledb.externalAuth = origExternalAuth;
       }
@@ -983,4 +1008,55 @@ describe('2. pool.js', function() {
 
   });  // 2.16
 
+  describe('2.17 Check execute same/different query with new/released session from pool', function() {
+
+    it('2.17.1 same query execution from new and released session', async function() {
+      const config = {...dbConfig
+      };
+      const pool = await oracledb.createPool(config);
+      const conn1 = await pool.getConnection();
+      const result1 = await conn1.execute("SELECT 1 FROM DUAL");
+      assert(result1);
+      assert.strictEqual(result1.rows[0][0], 1);
+      await conn1.close();
+      const conn2 = await pool.getConnection();
+      const result2 = await conn2.execute("SELECT 1 FROM DUAL");
+      assert(result2);
+      assert.strictEqual(result2.rows[0][0], 1);
+      await conn2.close();
+      await pool.close();
+    });   // 2.17.1
+
+    it('2.17.2 different query execution from new and released session', async function() {
+      const config = {...dbConfig
+      };
+      const pool = await oracledb.createPool(config);
+      const conn1 = await pool.getConnection();
+      const result1 = await conn1.execute("SELECT 1 FROM DUAL");
+      assert(result1);
+      assert.strictEqual(result1.rows[0][0], 1);
+      await conn1.close();
+      const conn2 = await pool.getConnection();
+      const result2 = await conn2.execute("SELECT 2 FROM DUAL");
+      assert(result2);
+      assert.strictEqual(result2.rows[0][0], 2);
+      await conn2.close();
+      await pool.close();
+    });  // 2.17.2
+
+  });   // 2.17
+
+  describe('2.18 pool stats', function() {
+    it('2.18.1 driver mode in pool stats', async function() {
+      const config = {
+        ...dbConfig,
+        enableStatistics:   true
+      };
+      const pool = await oracledb.createPool(config);
+      const poolstatistics = pool.getStatistics();
+      assert.strictEqual(oracledb.thin, poolstatistics.thin);
+      await pool.close();
+    }); // 2.18.1
+
+  }); // 2.18
 });

@@ -120,6 +120,8 @@ describe('118. urowidProcedureBindAsString1.js', function() {
     });
 
     it('118.1.6 works with restricted ROWID', async function() {
+      if (oracledb.thin)
+        return this.skip();
       await procedureBindIn(proc_execute, "00000DD5.0000.0101", "00000DD5.0000.0101");
     });
 
@@ -231,10 +233,14 @@ describe('118. urowidProcedureBindAsString1.js', function() {
     });
 
     it('118.2.6 works with restricted ROWID', async function() {
+      if (oracledb.thin)
+        return this.skip();
       await procedureBindIn(proc_execute, "00000DD5.0000.0101", "00000DD5.0000.0101");
     });
 
     it('118.2.7 works with string 0', async function() {
+      if (oracledb.thin)
+        return this.skip();
       await procedureBindIn(proc_execute, "0", "00000000.0000.0000");
     });
 

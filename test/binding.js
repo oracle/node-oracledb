@@ -239,6 +239,149 @@ describe('4. binding.js', function() {
       assert.deepStrictEqual(res.rows, []);
 
     });
+
+    it('4.2.3 returning_clause expression multiple combinations', async function() {
+      const bindsOutNumber = [
+        1,
+        'Test',
+        {type: oracledb.DB_TYPE_NUMBER, dir: oracledb.BIND_OUT}
+      ];
+      const bindsOutChar = [
+        1,
+        'Test',
+        {type: oracledb.DB_TYPE_VARCHAR, dir: oracledb.BIND_OUT}
+      ];
+      const bindsOutNumberChar = [
+        1,
+        'Test',
+        {type: oracledb.DB_TYPE_NUMBER, dir: oracledb.BIND_OUT},
+        {type: oracledb.DB_TYPE_VARCHAR, dir: oracledb.BIND_OUT}
+      ];
+      const bindsMultipleInOutNumberChar = [
+        1,
+        'Test',
+        2,
+        'Test2',
+        {type: oracledb.DB_TYPE_NUMBER, dir: oracledb.BIND_OUT},
+        {type: oracledb.DB_TYPE_VARCHAR, dir: oracledb.BIND_OUT}
+      ];
+      const bindsOutDate = [
+        1,
+        'Test',
+        {type: oracledb.DB_TYPE_DATE, dir: oracledb.BIND_OUT}
+      ];
+
+      // possible sql valid combinations
+      const sqlStrings = [{sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning(id)into :3', rowsAffected:1, resultVal: [[1]] },
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) return(id)into :3', rowsAffected: 1, resultVal: [[1]]},
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning(id)into:3', rowsAffected: 1, resultVal: [[1]]},
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning (id)into :3', rowsAffected: 1, resultVal:[[1]] },
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2)     returning     id    into   :3', rowsAffected: 1, resultVal:[[1]]},
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2)  return id   into   :3', rowsAffected: 1, resultVal:[[1]]},
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) retURning ( id )intO :3', rowsAffected: 1, resultVal:[[1]]},
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning ( id + 2 )into :3', rowsAffected: 1, resultVal:[[3]]},
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning ( id + 2 + 5)into :3', rowsAffected: 1, resultVal:[[8]]},
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning ( id * 2 )into :3', rowsAffected: 1, resultVal:[[2]]},
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2)returning ( id * 2 )into :3', rowsAffected: 1, resultVal:[[2]]}
+      ];
+      for (const sqlObj of sqlStrings) {
+        let result = await connection.execute(sqlObj.sql, bindsOutNumber);
+        assert.strictEqual(result.rowsAffected, sqlObj.rowsAffected);
+        for (let i = 0; i < sqlObj.resultVal.length; i++) {
+          assert.deepStrictEqual(result.outBinds[i], sqlObj.resultVal[i]);
+        }
+      }
+
+      // returning const string
+      let sql = "insert into nodb_binding1 (id, name) values (:1, :2) returning ( 'returning' )into :3";
+      let result = await connection.execute(sql, bindsOutChar);
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.deepStrictEqual(result.outBinds[0], ['returning']);
+
+      // returning const date
+      sql = "insert into nodb_binding1 (id, name) values (:1, :2) returning to_date('24 June 2003', 'dd Mon YYYY') into :3";
+      result = await connection.execute(sql, bindsOutDate);
+      assert.strictEqual(result.rowsAffected, 1);
+
+      // returning const string
+      sql = "insert into nodb_binding1 (id, name) values (:1, :2) returning ( 'returning a,b into :3,:4' )into :3";
+      result = await connection.execute(sql, bindsOutChar);
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.deepStrictEqual(result.outBinds[0], ['returning a,b into :3,:4']);
+
+      sql = 'insert into nodb_binding1 (id, name) values (:1, :2) returning id,name into :3, :4';
+      result = await connection.execute(sql, bindsOutNumberChar);
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.deepStrictEqual(result.outBinds[0], [1]);
+      assert.deepStrictEqual(result.outBinds[1], ['Test']);
+
+      sql = 'insert into nodb_binding1 (id, name) values(:1, :2) returning :3,:4 into :5, :6';
+      result = await connection.execute(sql, bindsMultipleInOutNumberChar);
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.deepStrictEqual(result.outBinds[0], [2]);
+      assert.deepStrictEqual(result.outBinds[1], ['Test2']);
+
+      // returning literals
+      sql = "insert into nodb_binding1 (id, name) values (:1, :2) returning 1 ,'into'  into :3, :4";
+      result = await connection.execute(sql, bindsOutNumberChar);
+      assert.strictEqual(result.rowsAffected, 1);
+      assert.deepStrictEqual(result.outBinds[0], [1]);
+      assert.deepStrictEqual(result.outBinds[1], ['into']);
+
+      sql = 'insert into nodb_binding1 (id, name) values (:1, :2) returning id into :3, name into :4';
+      await assert.rejects(
+        async () => await connection.execute(sql, bindsOutNumberChar),
+        // ORA-00933 - SQL command not properly ended
+        /ORA-00933:/
+      );
+
+      sql = "insert into nodb_binding1 (id, name) values (:1, :2) returning (id()into :3";
+      await assert.rejects(
+        async () => await connection.execute(sql, bindsOutNumber),
+        // ORA-00907 - missing right parenthesis
+        /ORA-00907:/
+      );
+
+      // invalid return value syntax in expression with comma
+      sql = 'insert into nodb_binding1 (id, name) values (:1, :2) returning (id,) into :3';
+      await assert.rejects(
+        async () => await connection.execute(sql, bindsOutNumber),
+        // ORA-00907 - missing right parenthesis
+        /ORA-00907:/
+      );
+
+      // enclosing multiple return values in paranthesis instead of a single expression
+      sql = "insert into nodb_binding1 (id, name) values (:1, :2) returning (id,name) into :3, :4";
+      await assert.rejects(
+        async () => await connection.execute(sql, bindsOutNumberChar),
+        // ORA-00907 - missing right parenthesis
+        /ORA-00907:/
+      );
+
+      // mismatch in returning into parameters
+      sql = "insert into nodb_binding1 (id, name) values (:1, :2) returning ('he','hi','by' into :3";
+      await assert.rejects(
+        async () => await connection.execute(sql, bindsOutChar),
+        // ORA-00907 - missing right parenthesis
+        /ORA-00907:/
+      );
+
+      // empty expr/variable
+      sql = "insert into nodb_binding1 (id, name) values (:1, :2) returning into :3";
+      await assert.rejects(
+        async () => await connection.execute(sql, bindsOutChar),
+        // ORA-00936 - missing expression
+        /ORA-00936:/
+      );
+
+      // without into keyword
+      sql = "insert into nodb_binding1 (id, name) values (:1, :2) returning ('he'" ;
+      await assert.rejects(
+        async () => await connection.execute(sql, bindsOutChar),
+        // ORA-01036 - illegal variable name/number
+        /ORA-01036:|NJS-098:/
+      );
+    });
   });
 
   describe('4.3 insert with DATE column and DML returning', function() {
@@ -639,8 +782,8 @@ describe('4. binding.js', function() {
         async () => {
           await connect.execute(sql, {ROWID:1});
         },
-        //ORA-01745: invalid host/bind variable name
-        /ORA-01745:/
+        //NJS-098: 1 positional bind values are required but 0 were provided
+        /ORA-01745:|NJS-098:/
       );
       await connect.release();
     });

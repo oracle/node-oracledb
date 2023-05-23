@@ -1,5 +1,6 @@
 .github
 .nycrc
+.gitattributes
 .gitmodules
 .eslintrc
 INSTALL.md
@@ -8,7 +9,9 @@ Makefile
 Makefile.win32
 *.tgz
 /doc
-/examples
+/examples/*
+!/examples/example.js
+!/examples/dbconfig.js
 /test
 /build/Release/oracledb.node
 /build/oracledb.target.mk
@@ -33,6 +36,5 @@ Makefile.win32
 /odpi/test
 /odpi/.git
 /odpi/.github
-/odpi/.gitattributes
 /odpi/util
 \#*

@@ -62,6 +62,8 @@ describe('260. tpcResume.js', function() {
     END;`;
 
   before (async function() {
+    if (oracledb.thin)
+      return this.skip();
     const connection = await oracledb.getConnection(dbConfig);
     await connection.execute(createTableSQL);
     await connection.executeMany(

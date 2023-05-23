@@ -123,6 +123,8 @@ testsUtil.checkPrerequisites = async function(clientVersion = 1805000000, server
 };
 
 testsUtil.isSodaRunnable = async function() {
+  if (oracledb.thin)
+    return false;
   const clientVersion = testsUtil.getClientVersion();
   let serverVersion;
   try {
@@ -387,8 +389,11 @@ testsUtil.isDate = function(date) {
   }
 };
 
-// return client version in use
+// return client version in use for thick
+// return a fake version for thin to facilitate client version checks
 testsUtil.getClientVersion = function() {
+  if (oracledb.thin)
+    return 2302000000;
   return oracledb.oracleClientVersion;
 };
 

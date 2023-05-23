@@ -54,7 +54,8 @@ describe('69. driverName.js', function() {
     // Since 12.1.0.2, OCI_ATTR_DRIVER_NAME with 30 characters has been supported
     // Database server can then return the full driver name, e.g. 'node-oracledb 1.11'
     if (serverVer >= 1201000200) {
-      assert.strictEqual(result.rows[0][0].trim(), "node-oracledb : " + oracledb.versionString);
+      const suffix = (!oracledb.thin) ? "thk" : "thn";
+      assert.strictEqual(result.rows[0][0].trim(), "node-oracledb : " + oracledb.versionString + " " + suffix);
     } else {
       // previous databases only returns the first 8 characters of the driver name
       assert.strictEqual(result.rows[0][0], "node-ora");

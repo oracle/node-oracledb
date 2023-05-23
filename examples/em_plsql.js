@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -31,30 +31,35 @@
  *   Note that when OUT binds are used with PL/SQL, there may be no performance
  *   advantages compared with repeating calls to execute().
  *
- *   This example requires node-oracledb 2.2 or later.
- *
- *   This example uses Node 8's async/await syntax.
- *
  *****************************************************************************/
 
-const fs = require('fs');
+'use strict';
+
+Error.stackTraceLimit = 50;
+
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 const demoSetup = require('./demosetup.js');
 
-// On Windows and macOS, you can specify the directory containing the Oracle
-// Client Libraries at runtime, or before Node.js starts.  On other platforms
-// the system library search path must always be set before Node.js is started.
-// See the node-oracledb installation documentation.
-// If the search path is not correct, you will get a DPI-1047 error.
-let libPath;
-if (process.platform === 'win32') {           // Windows
-  libPath = 'C:\\oracle\\instantclient_19_12';
-} else if (process.platform === 'darwin') {   // macOS
-  libPath = process.env.HOME + '/Downloads/instantclient_19_8';
-}
-if (libPath && fs.existsSync(libPath)) {
-  oracledb.initOracleClient({ libDir: libPath });
+// This example runs in both node-oracledb Thin and Thick modes.
+//
+// Optionally run in node-oracledb Thick mode
+if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
+
+  // Thick mode requires Oracle Client or Oracle Instant Client libraries.
+  // On Windows and macOS Intel you can specify the directory containing the
+  // libraries at runtime or before Node.js starts.  On other platforms (where
+  // Oracle libraries are available) the system library search path must always
+  // include the Oracle library path before Node.js starts.  If the search path
+  // is not correct, you will get a DPI-1047 error.  See the node-oracledb
+  // installation documentation.
+  let clientOpts = {};
+  if (process.platform === 'win32') {                                   // Windows
+    clientOpts = { libDir: 'C:\\oracle\\instantclient_19_17' };
+  } else if (process.platform === 'darwin' && process.arch === 'x64') { // macOS Intel
+    clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
+  }
+  oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 }
 
 const sql = "BEGIN no_em_proc(:1, :2, :3); END;";
@@ -81,7 +86,7 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
-    await demoSetup.setupEm(connection);  // create the demo tables
+    await demoSetup.setupEm(connection);  // create the demo table
 
     const result = await connection.executeMany(sql, binds, options);
     console.log("Result is:", result);

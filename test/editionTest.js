@@ -64,7 +64,7 @@ describe('160. editionTest.js', function() {
 
   before(async function() {
 
-    let isRunnable = Boolean(dbConfig.test.DBA_PRIVILEGE);
+    let isRunnable = Boolean(!oracledb.thin && dbConfig.test.DBA_PRIVILEGE);
     if (isRunnable) {
       let connection = await oracledb.getConnection(dbConfig);
       if (connection.oracleServerVersion < 1202000100) {
