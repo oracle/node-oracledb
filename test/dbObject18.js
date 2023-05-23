@@ -36,7 +36,7 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-(!oracledb.thin ? describe : describe.skip)('242. dbObject18.js', () => {
+describe('242. dbObject18.js', () => {
 
   describe('242.1 set oracledb.dbObjectAsPojo', () => {
 
@@ -418,10 +418,14 @@ const testsUtil = require('./testsUtil.js');
       const row = result.rows[0];
       assert.strictEqual(row.SPORTNAME, 'Frisbee');
 
-      assert.throws(
-        () => row.TEAM[0],
-        /NJS-500:/
-      );
+      if (oracledb.thin) {
+        assert.strictEqual(row.TEAM[0].SHIRTNUMBER, 11);
+      } else {
+        assert.throws(
+          () => row.TEAM[0],
+          /NJS-500:/
+        );
+      }
 
       // restore the connection
       conn = await oracledb.getConnection(dbConfig);

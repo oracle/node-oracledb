@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -35,7 +35,7 @@ const oracledb  = require('oracledb');
 const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 
-(!oracledb.thin ? describe : describe.skip)('214. dbObject15.js', () => {
+describe('214. dbObject15.js', () => {
 
   let conn, FrisbeeTeam;
 
@@ -104,12 +104,9 @@ const dbConfig  = require('./dbconfig.js');
 
   it('214.3 Negative - delete the collection element directly', function() {
     assert.throws(
-      function() {
-        delete FrisbeeTeam[1];
-      },
-      /OCI-22164/
+      () => delete FrisbeeTeam[1],
+      /NJS-133:/
     );
-    // OCI-22164: delete element operation is not allowed for variable-length array
   }); // 214.3
 
   it('214.4 Negative - collection.deleteElement()', function() {
@@ -118,7 +115,7 @@ const dbConfig  = require('./dbconfig.js');
         let firstIndex = FrisbeeTeam.getFirstIndex();
         FrisbeeTeam.deleteElement(firstIndex);
       },
-      /OCI-22164/
+      /NJS-133:/
     );
   }); // 214.4
 });

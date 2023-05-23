@@ -57,6 +57,7 @@ describe('162. getStmtInfo.js', function() {
   it('162.1 SELECT', async function() {
     const sql = "select 1 as col from dual";
     const info = await conn.getStatementInfo(sql);
+    delete info.metaData[0].converter;
     assert.deepStrictEqual(info,
       { bindNames: [], statementType: oracledb.STMT_TYPE_SELECT,
         metaData: [

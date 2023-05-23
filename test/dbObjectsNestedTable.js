@@ -35,7 +35,7 @@ const oracledb = require ('oracledb');
 const assert   = require ('assert');
 const dbConfig = require ('./dbconfig.js');
 
-(!oracledb.thin ? describe : describe.skip) ('197. dbObjectsNestedTable.js', ()  => {
+describe('197. dbObjectsNestedTable.js', ()  => {
   let connection = null;
 
   before (async () => {

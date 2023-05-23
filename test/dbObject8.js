@@ -36,7 +36,7 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-(!oracledb.thin ? describe : describe.skip)('207. dbObject8.js', () => {
+describe('207. dbObject8.js', () => {
 
   let conn;
   const TYPE1 = 'NODB_HARVEST_T';

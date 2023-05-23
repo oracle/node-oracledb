@@ -36,7 +36,7 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-(!oracledb.thin ? describe : describe.skip)('212. dbObject13.js', function() {
+describe('212. dbObject13.js', function() {
 
   let isRunnable = false;
 

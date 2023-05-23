@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -36,7 +36,7 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-(!oracledb.thin ? describe : describe.skip)('210. dbObject11.js', () => {
+describe('210. dbObject11.js', () => {
 
   let conn;
   const TYPE = 'NODB_RV_FIELD_TYP';

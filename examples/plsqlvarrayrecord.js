@@ -37,22 +37,26 @@ Error.stackTraceLimit = 50;
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 
-// This example requires node-oracledb Thick mode.
+// This example runs in both node-oracledb Thin and Thick modes.
 //
-// Thick mode requires Oracle Client or Oracle Instant Client libraries.  On
-// Windows and macOS Intel you can specify the directory containing the
-// libraries at runtime or before Node.js starts.  On other platforms (where
-// Oracle libraries are available) the system library search path must always
-// include the Oracle library path before Node.js starts.  If the search path
-// is not correct, you will get a DPI-1047 error.  See the node-oracledb
-// installation documentation.
-let clientOpts = {};
-if (process.platform === 'win32') {                                   // Windows
-  clientOpts = { libDir: 'C:\\oracle\\instantclient_19_17' };
-} else if (process.platform === 'darwin' && process.arch === 'x64') { // macOS Intel
-  clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
+// Optionally run in node-oracledb Thick mode
+if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
+
+  // Thick mode requires Oracle Client or Oracle Instant Client libraries.
+  // On Windows and macOS Intel you can specify the directory containing the
+  // libraries at runtime or before Node.js starts.  On other platforms (where
+  // Oracle libraries are available) the system library search path must always
+  // include the Oracle library path before Node.js starts.  If the search path
+  // is not correct, you will get a DPI-1047 error.  See the node-oracledb
+  // installation documentation.
+  let clientOpts = {};
+  if (process.platform === 'win32') {                                   // Windows
+    clientOpts = { libDir: 'C:\\oracle\\instantclient_19_17' };
+  } else if (process.platform === 'darwin' && process.arch === 'x64') { // macOS Intel
+    clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
+  }
+  oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 }
-oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 
 async function run() {
   let connection;

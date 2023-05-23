@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -36,7 +36,7 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-(!oracledb.thin ? describe : describe.skip)('203. dbObject4.js', () => {
+describe('203. dbObject4.js', () => {
   let conn;
   const TYPE = 'NODB_TYP_OBJ_4';
   const TABLE  = 'NODB_TAB_OBJ4';
@@ -87,6 +87,9 @@ const testsUtil = require('./testsUtil.js');
       )`;
     let plsql = testsUtil.sqlCreateTable(TABLE, sql);
     await conn.execute(plsql);
+    await conn.execute(proc1);
+    await conn.execute(proc2);
+    await conn.execute(proc3);
   }); // before()
 
   after(async () => {
@@ -193,9 +196,6 @@ const testsUtil = require('./testsUtil.js');
   }); // 203.4
 
   it('203.5 call procedure with 2 OUT binds of DbObject', async function() {
-    await conn.execute(proc1);
-    await conn.execute(proc2);
-    await conn.execute(proc3);
 
     let result = await conn.execute(
       `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,

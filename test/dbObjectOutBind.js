@@ -1,4 +1,4 @@
-/* Copyright (c) 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2022, 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -35,7 +35,7 @@ const oracledb  = require('oracledb');
 const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 
-(!oracledb.thin ? describe : describe.skip)('262. dbObjectOutBind.js', function() {
+describe('262. dbObjectOutBind.js', function() {
   let conn = null;
   let proc1 =
     `create or replace procedure nodb_getDataCursor1(p_cur out sys_refcursor) is
