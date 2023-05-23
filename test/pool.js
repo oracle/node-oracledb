@@ -810,9 +810,16 @@ describe('2. pool.js', function() {
         homogeneous:   false
       };
       delete config.user;
-      const pool = await oracledb.createPool(config);
-      assert.strictEqual(pool.homogeneous, false);
-      await pool.close(0);
+      if (!oracledb.thin) {
+        const pool = await oracledb.createPool(config);
+        assert.strictEqual(pool.homogeneous, false);
+        await pool.close(0);
+      } else {
+        await assert.rejects(
+          async () => await oracledb.createPool(config),
+          /NJS-089:/
+        );
+      }
     });  // 2.15.11
 
     it('2.15.12 user name', async function() {
@@ -863,6 +870,21 @@ describe('2. pool.js', function() {
       assert.strictEqual(pool.connectString, config.connectString);
       await pool.close(0);
     });  // 2.15.14
+
+    it('2.15.15 externalAuth - true and non-empty password', async function() {
+      const config = {
+        connectString: dbConfig.connectString,
+        poolMin:       1,
+        poolMax:       1,
+        poolIncrement: 0,
+        externalAuth:  true,
+        password:  'nopass'
+      };
+      await assert.rejects(
+        async () => await oracledb.createPool(config),
+        /DPI-1032:|NJS-089:/
+      );
+    });  // 2.15.15
 
   });   // 2.15
 
