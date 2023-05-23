@@ -369,7 +369,7 @@ describe('253. jsonBind1.js', function() {
       result = await conn.execute(rsSelect);
       if (result.metaData[0].fetchType == oracledb.DB_TYPE_JSON) {
         j = result.rows[0].OBJ_DATA;
-        assert.strictEqual(JSON.stringify(j.key1), '"2021-03-05T00:00:00.000Z"');
+        assert.deepStrictEqual(j.key1, new Date(2021, 2, 5));
       } else {
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
@@ -455,7 +455,7 @@ describe('253. jsonBind1.js', function() {
       result = await conn.execute(rsSelect);
       if (result.metaData[0].fetchType == oracledb.DB_TYPE_JSON) {
         j = result.rows[0].OBJ_DATA;
-        assert.strictEqual(JSON.stringify(j.key1), '"2021-03-10T00:00:00.000Z"');
+        assert.deepStrictEqual(j.key1, new Date(2021, 2, 10));
       } else {
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);

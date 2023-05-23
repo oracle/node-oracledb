@@ -581,6 +581,116 @@ bool njsUtils_getXid(napi_env env, napi_value value, dpiXid **xid)
 
 
 //-----------------------------------------------------------------------------
+// njsUtils_getDateValue()
+//   Return the value of the timestamp as a JavaScript date. The _makeDate()
+// function is called to use the local JS time zone for DATE and TIMESTAMP and
+// an absolute JS date for TIMESTAMP WITH TIME ZONE and TIMESTAMP WITH LOCAL
+// TIME ZONE.
+//-----------------------------------------------------------------------------
+bool njsUtils_getDateValue(uint32_t varTypeNum, napi_env env, njsBaton *baton,
+        dpiTimestamp *timestamp, napi_value *value)
+{
+    napi_value global, args[9];
+    int32_t tzOffset = 0;
+    bool useLocal;
+
+    useLocal = (varTypeNum == DPI_ORACLE_TYPE_DATE ||
+            varTypeNum == DPI_ORACLE_TYPE_TIMESTAMP);
+    NJS_CHECK_NAPI(env, napi_get_global(env, &global))
+    NJS_CHECK_NAPI(env, napi_get_boolean(env, useLocal, &args[0]))
+    NJS_CHECK_NAPI(env, napi_create_int32(env, timestamp->year, &args[1]))
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, timestamp->month, &args[2]))
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, timestamp->day, &args[3]))
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, timestamp->hour, &args[4]))
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, timestamp->minute, &args[5]))
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, timestamp->second, &args[6]))
+    NJS_CHECK_NAPI(env, napi_create_uint32(env,
+            timestamp->fsecond / (1000 * 1000), &args[7]))
+    if (!useLocal) {
+        tzOffset = timestamp->tzHourOffset * 60;
+        if (tzOffset < 0) {
+            tzOffset -= timestamp->tzMinuteOffset;
+        } else {
+            tzOffset += timestamp->tzMinuteOffset;
+        }
+    }
+    NJS_CHECK_NAPI(env, napi_create_int32(env, tzOffset,
+            &args[8]))
+    NJS_CHECK_NAPI(env, napi_call_function(env, global,
+            baton->jsMakeDateFn, 9, args, value))
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsUtils_setDateValue()
+//   Set the value of the timestamp from a JavaScript date. The value sent to
+// the database will depend on the Oracle data type. DATE and TIMESTAMP contain
+// no time zone information so they are sent in the JavaScript time zone.
+// TIMESTAMP WITH TIME ZONE and TIMESTAMP WITH LOCAL TIME ZONE contain time
+// zone information so they are sent to the database in UTC (JavaScript's
+// native format).
+//-----------------------------------------------------------------------------
+bool njsUtils_setDateValue(uint32_t varTypeNum, napi_env env, napi_value value,
+        njsBaton *baton, dpiTimestamp *timestamp)
+{
+    napi_value args[2], global, array, temp;
+    uint32_t temp_unsigned;
+    int32_t temp_signed;
+    bool useLocalTime;
+
+    // call the JS function to get the individual components as an Array
+    useLocalTime = (varTypeNum == DPI_ORACLE_TYPE_DATE ||
+            varTypeNum == DPI_ORACLE_TYPE_TIMESTAMP);
+    NJS_CHECK_NAPI(env, napi_get_global(env, &global))
+    NJS_CHECK_NAPI(env, napi_get_boolean(env, useLocalTime, &args[0]))
+    args[1] = value;
+    NJS_CHECK_NAPI(env, napi_call_function(env, global,
+            baton->jsGetDateComponentsFn, 2, args, &array))
+
+    // store year
+    NJS_CHECK_NAPI(env, napi_get_element(env, array, 0, &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &temp_signed))
+    timestamp->year = (uint16_t) temp_signed;
+
+    // store month
+    NJS_CHECK_NAPI(env, napi_get_element(env, array, 1, &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &temp_unsigned))
+    timestamp->month = (uint8_t) temp_unsigned;
+
+    // store day
+    NJS_CHECK_NAPI(env, napi_get_element(env, array, 2, &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &temp_unsigned))
+    timestamp->day = (uint8_t) temp_unsigned;
+
+    // store hour
+    NJS_CHECK_NAPI(env, napi_get_element(env, array, 3, &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &temp_unsigned))
+    timestamp->hour = (uint8_t) temp_unsigned;
+
+    // store minute
+    NJS_CHECK_NAPI(env, napi_get_element(env, array, 4, &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &temp_unsigned))
+    timestamp->minute = (uint8_t) temp_unsigned;
+
+    // store second
+    NJS_CHECK_NAPI(env, napi_get_element(env, array, 5, &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &temp_unsigned))
+    timestamp->second = (uint8_t) temp_unsigned;
+
+    // store fractional seconds
+    NJS_CHECK_NAPI(env, napi_get_element(env, array, 6, &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &timestamp->fsecond))
+
+    // always use UTC when time zones are used (JavaScript native format)
+    timestamp->tzHourOffset = 0;
+    timestamp->tzMinuteOffset = 0;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsUtils_throwErrorDPI()
 //   Get the error message from ODPI-C and throw an equivalent JavaScript
 // error. False is returned as a convenience to the caller.

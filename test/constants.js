@@ -46,7 +46,7 @@ describe('18. constants.js', function() {
     assert.strictEqual(oracledb.BUFFER, oracledb.DB_TYPE_RAW);
     assert.strictEqual(oracledb.CLOB, oracledb.DB_TYPE_CLOB);
     assert.strictEqual(oracledb.CURSOR, oracledb.DB_TYPE_CURSOR);
-    assert.strictEqual(oracledb.DATE, oracledb.DB_TYPE_TIMESTAMP_LTZ);
+    assert.strictEqual(oracledb.DATE, oracledb.DB_TYPE_TIMESTAMP);
     assert.strictEqual(oracledb.DEFAULT, 0);
     assert.strictEqual(oracledb.NUMBER, oracledb.DB_TYPE_NUMBER);
     assert.strictEqual(oracledb.STRING, oracledb.DB_TYPE_VARCHAR);

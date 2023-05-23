@@ -43,6 +43,12 @@ node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...
 #)  Multiple calls to ``initOracleClient()`` with the same arguments no longer
     result in an error.
 
+#)  Oracle Database DATE and TIMESTAMP types are now returned as JavaScript date
+    types in the application's timezone, and no longer fetched or bound as
+    TIMESTAMP WITH LOCAL TIME ZONE.  The connection session time zone no longer
+    impacts these types.  This behavior aligns with other Oracle Database tools
+    and drivers.
+
 #)  Query column metadata now always returns unique column names regardless of
     the value of the ``outFormat`` setting.  Previously they were only unique when
     ``oracledb.OUT_FORMAT_OBJECT`` was used.

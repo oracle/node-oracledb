@@ -179,7 +179,7 @@ describe('271. fetchTypeHandler.js', function() {
           "TS_NUM"  : { type : oracledb.STRING }
         }
       });
-    assert.deepEqual(result.rows[0].TS_DATE, new Date('1999-12-01T11:10:01.001Z'));
+    assert.deepEqual(result.rows[0].TS_DATE, new Date('1999-12-01 11:10:01.001'));
     assert.strictEqual(typeof result.rows[0].TS_NUM, 'number');
     assert.strictEqual(result.rows[0].TS_NUM, 1234567);
   });
@@ -201,7 +201,7 @@ describe('271. fetchTypeHandler.js', function() {
           "TS_NUM"  : { type : oracledb.STRING }
         }
       });
-    assert.deepEqual(result.rows[0].TS_DATE, new Date('1999-12-01T11:10:01.001Z'));
+    assert.deepEqual(result.rows[0].TS_DATE, new Date('1999-12-01 11:10:01.001'));
     assert.strictEqual(typeof result.rows[0].TS_NUM, 'string');
     assert.strictEqual(result.rows[0].TS_NUM, '1234567');
   });

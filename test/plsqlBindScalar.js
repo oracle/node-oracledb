@@ -979,7 +979,7 @@ describe('70. plsqlBindScalar.js', function() {
       const sqldrop = "DROP PROCEDURE nodb_inoutproc710";
       await connection.execute(proc710);
       const result = await connection.execute(sqlrun710, bindVar);
-      const date = new Date("2016-08-05T00:00:00.000Z");
+      const date = new Date("2016-08-05 00:00:00");
       assert.deepStrictEqual(result.outBinds.p_inout, date);
       await connection.execute(sqldrop);
     }); // 70.7.10
@@ -1822,7 +1822,7 @@ describe('70. plsqlBindScalar.js', function() {
     const resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT};
 
     it('70.12.1 basic case', async function() {
-      const date = new Date("2016-09-10T14:10:10.123Z");
+      const date = new Date("2016-09-10 14:10:10.123");
       const bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -1873,7 +1873,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.12.5
 
     it('70.12.7 val: invalid Date Value: Feb 30, 2016', async function() {
-      const date = new Date(Date.UTC(2016, 1, 30, 0, 0, 0, 0));
+      const date = new Date(2016, 1, 30, 0, 0, 0, 0);
       const bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -1884,7 +1884,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.12.7
 
     it('70.12.8 val: 1969-12-31', async function() {
-      const date = new Date(Date.UTC(1969, 11, 31, 0, 0, 0, 0));
+      const date = new Date(1969, 11, 31, 0, 0, 0, 0);
       const bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -1895,7 +1895,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.12.8
 
     it('70.12.9 val: epoch date 1970-1-1', async function() {
-      const date = new Date(Date.UTC(1970, 0, 1, 0, 0, 0, 0));
+      const date = new Date(1970, 0, 1, 0, 0, 0, 0);
       const bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -1906,10 +1906,14 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.12.9
 
     it('70.12.10 val: create Date value using numeric value: new Date(number)', async function() {
-      const date = new Date (1476780296673); //Integer value representing the number of milliseconds since 1 January 1970 00:00:00 UTC
+      const date = new Date(1476780296673); //Integer value representing the number of milliseconds since 1 January 1970 00:00:00 UTC
       const bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
+        dateValue: {
+          type: oracledb.DB_TYPE_TIMESTAMP_TZ,
+          dir: oracledb.BIND_IN,
+          val: date
+        }
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
       const resultDate = "2016-10-18 08:44:56.673000000";
@@ -1918,10 +1922,14 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.12.11 val: create Date value using numeric value: 0', async function() {
       //Zero time is 01 January 1970 00:00:00 UTC
-      const date = new Date (0);
+      const date = new Date(0);
       const bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
+        dateValue: {
+          type: oracledb.DB_TYPE_TIMESTAMP_TZ,
+          dir: oracledb.BIND_IN,
+          val: date
+        }
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
       const resultDate = "1970-01-01 00:00:00.000000000";
@@ -2285,7 +2293,7 @@ describe('70. plsqlBindScalar.js', function() {
     const resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT};
 
     it('70.16.1 basic case', async function() {
-      const date = new Date("2016-09-10T14:10:10.123Z");
+      const date = new Date("2016-09-10 14:10:10.123");
       const bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -2336,7 +2344,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.16.5
 
     it('70.16.7 val: invalid Date Value: Feb 30, 2016', async function() {
-      const date = new Date(Date.UTC(2016, 1, 30, 0, 0, 0, 0));
+      const date = new Date(2016, 1, 30, 0, 0, 0, 0);
       const bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -2347,7 +2355,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.16.7
 
     it('70.16.8 val: 1969-12-31', async function() {
-      const date = new Date(Date.UTC(1969, 11, 31, 0, 0, 0, 0));
+      const date = new Date(1969, 11, 31, 0, 0, 0, 0);
       const bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -2358,7 +2366,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.16.8
 
     it('70.16.9 val: epoch date 1970-1-1', async function() {
-      const date = new Date(Date.UTC(1970, 0, 1, 0, 0, 0, 0));
+      const date = new Date(1970, 0, 1, 0, 0, 0, 0);
       const bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -2369,10 +2377,14 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.16.9
 
     it('70.16.10 val: create Date value using numeric value: new Date(number)', async function() {
-      const date = new Date (1476780296673);
+      const date = new Date(1476780296673);
       const bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
+        dateValue: {
+          type: oracledb.DB_TYPE_TIMESTAMP_TZ,
+          dir: oracledb.BIND_IN,
+          val: date
+        }
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
       const resultDate = "2016-10-18 08:44:56.673000000";
@@ -2381,10 +2393,14 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.16.11 val: create Date value using numeric value: 0', async function() {
       //Zero time is 01 January 1970 00:00:00 UTC
-      const date = new Date (0);
+      const date = new Date(0);
       const bindVar = {
-        output:   resultBind,
-        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
+        output: resultBind,
+        dateValue: {
+          type: oracledb.DB_TYPE_TIMESTAMP_TZ,
+          dir: oracledb.BIND_IN,
+          val: date
+        }
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
       const resultDate = "1970-01-01 00:00:00.000000000";
@@ -2751,7 +2767,7 @@ describe('70. plsqlBindScalar.js', function() {
     const resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT};
 
     it('70.20.1 basic case', async function() {
-      const date = new Date("2016-09-10T14:10:10.123Z");
+      const date = new Date("2016-09-10 14:10:10.123");
       const bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -2802,7 +2818,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.20.5
 
     it('70.20.7 val: invalid Date Value: Feb 30, 2016', async function() {
-      const date = new Date(Date.UTC(2016, 1, 30, 0, 0, 0, 0));
+      const date = new Date(2016, 1, 30, 0, 0, 0, 0);
       const bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -2813,7 +2829,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.20.7
 
     it('70.20.8 val: 1969-12-31', async function() {
-      const date = new Date(Date.UTC(1969, 11, 31, 0, 0, 0, 0));
+      const date = new Date(1969, 11, 31, 0, 0, 0, 0);
       const bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -2824,7 +2840,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.20.8
 
     it('70.20.9 val: epoch date 1970-1-1', async function() {
-      const date = new Date(Date.UTC(1970, 0, 1, 0, 0, 0, 0));
+      const date = new Date(1970, 0, 1, 0, 0, 0, 0);
       const bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -2835,10 +2851,14 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.20.9
 
     it('70.20.10 val: create Date value using numeric value: new Date(number)', async function() {
-      const date = new Date (1476780296673);
+      const date = new Date(1476780296673);
       const bindVar = {
-        output:   resultBind,
-        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
+        output: resultBind,
+        dateValue: {
+          type: oracledb.DB_TYPE_TIMESTAMP_TZ,
+          dir: oracledb.BIND_IN,
+          val: date
+        }
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
       const resultDate = "2016-10-18 08:44:56.673000000";
@@ -2849,8 +2869,12 @@ describe('70. plsqlBindScalar.js', function() {
       //Zero time is 01 January 1970 00:00:00 UTC
       const date = new Date(0);
       const bindVar = {
-        output:   resultBind,
-        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
+        output: resultBind,
+        dateValue: {
+          type: oracledb.DB_TYPE_TIMESTAMP_TZ,
+          dir: oracledb.BIND_IN,
+          val: date
+        }
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
       const resultDate = "1970-01-01 00:00:00.000000000";

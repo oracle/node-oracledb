@@ -104,9 +104,13 @@ describe('102. bindTimestamp.js', function() {
     const  bv = new Date(0);
     const  id = caseIndex++;
 
+    const binds = [
+      id,
+      {type: oracledb.DB_TYPE_TIMESTAMP, val: bv},
+      {type: oracledb.DB_TYPE_TIMESTAMP_TZ, val: bv}
+    ];
     await connection.execute(
-      "insert into nodb_tab_tsbind values (:1, :2, :3)",
-      [id, bv, bv],
+      "insert into nodb_tab_tsbind values (:1, :2, :3)", binds,
       { autoCommit: true });
 
     const result = await connection.execute(
@@ -173,8 +177,10 @@ describe('102. bindTimestamp.js', function() {
 
     let result = await connection.execute(
       "insert into nodb_tab_tsbind values (:1, :2, :3) returning id, tstz into :4, :5",
-      [id, bv, bv, { type: oracledb.NUMBER, dir: oracledb.BIND_OUT},
-        { type: oracledb.DATE, dir: oracledb.BIND_OUT} ],
+      [id, bv,
+        { type: oracledb.DB_TYPE_TIMESTAMP_TZ, val: bv},
+        { type: oracledb.NUMBER, dir: oracledb.BIND_OUT},
+        { type: oracledb.DB_TYPE_TIMESTAMP_TZ, dir: oracledb.BIND_OUT} ],
       { autoCommit: true});
     assert(result);
     assert.strictEqual(result.outBinds[0][0], id);
@@ -244,9 +250,9 @@ describe('102. bindTimestamp.js', function() {
     let result = await connection.execute(
       "insert into nodb_tab_tsbind values (:1, :2, :3) returning id, tstz into :4, :5",
       [ { val: id, type: oracledb.NUMBER, dir: oracledb.BIND_IN }, bv,
-        { val: bv, type: oracledb.DATE, dir: oracledb.BIND_IN},
+        { val: bv, type: oracledb.DB_TYPE_TIMESTAMP_TZ, dir: oracledb.BIND_IN},
         { type: oracledb.NUMBER, dir: oracledb.BIND_OUT},
-        { type: oracledb.DATE, dir: oracledb.BIND_OUT} ],
+        { type: oracledb.DB_TYPE_TIMESTAMP_TZ, dir: oracledb.BIND_OUT} ],
       { autoCommit: true});
 
     assert.equal(result.outBinds[0][0], id);
@@ -402,7 +408,8 @@ describe('102. bindTimestamp.js', function() {
         {
           i: id,
           ts: { val: bv1, dir: oracledb.BIND_IN, type: oracledb.DATE },
-          tz: { val: bv2, dir: oracledb.BIND_IN, type: oracledb.DATE }
+          tz: { val: bv2, dir: oracledb.BIND_IN,
+            type: oracledb.DB_TYPE_TIMESTAMP_TZ }
         },
         { autoCommit: true });
 
@@ -425,7 +432,8 @@ describe('102. bindTimestamp.js', function() {
         [
           id,
           { val: bv1, dir: oracledb.BIND_IN, type: oracledb.DATE },
-          { val: bv2, dir: oracledb.BIND_IN, type: oracledb.DATE }
+          { val: bv2, dir: oracledb.BIND_IN,
+            type: oracledb.DB_TYPE_TIMESTAMP_TZ }
         ],
         { autoCommit: true });
 

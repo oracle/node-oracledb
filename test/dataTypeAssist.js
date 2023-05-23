@@ -67,6 +67,36 @@ assist.allDataTypeNames =
   "nodb_json"         : "JSON"
 };
 
+assist.allDataTypes =
+{
+  "nodb_char"         : oracledb.DB_TYPE_CHAR,
+  "nodb_nchar"        : oracledb.DB_TYPE_NCHAR,
+  "nodb_varchar2"     : oracledb.DB_TYPE_VARCHAR,
+  "nodb_nvarchar2"    : oracledb.DB_TYPE_NVARCHAR,
+  "nodb_number"       : oracledb.DB_TYPE_NUMBER,
+  "nodb_number2"      : oracledb.DB_TYPE_NUMBER,
+  "nodb_float"        : oracledb.DB_TYPE_NUMBER,
+  "nodb_float2"       : oracledb.DB_TYPE_NUMBER,
+  "nodb_binary_float" : oracledb.DB_TYPE_BINARY_FLOAT,
+  "nodb_double"       : oracledb.DB_TYPE_BINARY_DOUBLE,
+  "nodb_date"         : oracledb.DB_TYPE_DATE,
+  "nodb_timestamp1"   : oracledb.DB_TYPE_TIMESTAMP,
+  "nodb_timestamp2"   : oracledb.DB_TYPE_TIMESTAMP,
+  "nodb_timestamp3"   : oracledb.DB_TYPE_TIMESTAMP_TZ,
+  "nodb_timestamp4"   : oracledb.DB_TYPE_TIMESTAMP_TZ,
+  "nodb_timestamp5"   : oracledb.DB_TYPE_TIMESTAMP_LTZ,
+  "nodb_timestamp6"   : oracledb.DB_TYPE_TIMESTAMP_LTZ,
+  "nodb_rowid"        : oracledb.DB_TYPE_VARCHAR,
+  "nodb_urowid"       : oracledb.DB_TYPE_VARCHAR,
+  "nodb_nclob"        : oracledb.DB_TYPE_NVARCHAR,
+  "nodb_myclobs"      : oracledb.DB_TYPE_VARCHAR,
+  "nodb_myblobs"      : oracledb.DB_TYPE_RAW,
+  "nodb_raw"          : oracledb.DB_TYPE_RAW,
+  "nodb_long"         : oracledb.DB_TYPE_VARCHAR,
+  "nodb_longraw"      : oracledb.DB_TYPE_RAW,
+  "nodb_json"         : oracledb.DB_TYPE_JSON
+};
+
 assist.data = {
   specialChars: [
     '"',
@@ -725,10 +755,11 @@ assist.createTable = async function(connection, tableName) {
 };
 
 assist.insertDataArray = async function(connection, tableName, array) {
+  const bindType = assist.allDataTypes[tableName];
   await Promise.all(array.map(async function(element) {
     await connection.execute(
       `INSERT INTO ` + tableName + ` VALUES(:no, :bindValue)`,
-      { no: array.indexOf(element), bindValue: element },
+      { no: array.indexOf(element), bindValue: {type: bindType, val: element} },
       { autoCommit: true });
   }));
 };

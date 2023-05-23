@@ -453,10 +453,12 @@ struct njsBaton {
     napi_ref jsSubscriptionRef;
     napi_ref jsExecuteOptionsRef;
 
-    // constructors
+    // constructors and other functions that are called from inside C
     napi_value jsLobConstructor;
     napi_value jsResultSetConstructor;
     napi_value jsDbObjectConstructor;
+    napi_value jsGetDateComponentsFn;
+    napi_value jsMakeDateFn;
 
     // calling object value (used for setting a reference on created objects)
     napi_value jsCallingObj;
@@ -539,6 +541,8 @@ struct njsModuleGlobals {
     napi_ref jsSodaDocCursorConstructor;
     napi_ref jsSodaDocumentConstructor;
     napi_ref jsSodaOperationConstructor;
+    napi_ref jsGetDateComponentsFn;
+    napi_ref jsMakeDateFn;
 };
 
 // data for class Pool exposed to JS.
@@ -852,6 +856,8 @@ bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
         napi_ref constructorRef, napi_value *instanceObj, void **instance);
 bool njsUtils_genericThrowError(napi_env env, const char *fileName,
         int lineNum);
+bool njsUtils_getDateValue(uint32_t varTypeNum, napi_env env, njsBaton *baton,
+        dpiTimestamp *timestamp, napi_value *value);
 bool njsUtils_getError(napi_env env, dpiErrorInfo *errorInfo,
         const char *buffer, napi_value *error);
 bool njsUtils_getNamedProperty(napi_env env, napi_value value,
@@ -876,6 +882,8 @@ bool njsUtils_getNamedPropertyUnsignedIntArray(napi_env env, napi_value value,
         const char *name, uint32_t *numElements, uint32_t **elements);
 bool njsUtils_getXid(napi_env env, napi_value xidObj, dpiXid **xid);
 bool njsUtils_isInstance(napi_env env, napi_value value, const char *name);
+bool njsUtils_setDateValue(uint32_t varTypeNum, napi_env env, napi_value value,
+        njsBaton *baton, dpiTimestamp *timestamp);
 bool njsUtils_throwErrorDPI(napi_env env, njsModuleGlobals *globals);
 bool njsUtils_throwInsufficientMemory(napi_env env);
 bool njsUtils_throwUnsupportedDataType(napi_env env, uint32_t oracleTypeNum,

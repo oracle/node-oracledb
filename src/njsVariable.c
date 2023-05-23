@@ -75,7 +75,7 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
         case DPI_ORACLE_TYPE_TIMESTAMP:
         case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
         case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
-            var->nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
+            var->nativeTypeNum = DPI_NATIVE_TYPE_TIMESTAMP;
             break;
         case DPI_ORACLE_TYPE_STMT:
             var->nativeTypeNum = DPI_NATIVE_TYPE_STMT;
@@ -367,9 +367,8 @@ static bool njsVariable_getJsonNodeValue(njsBaton *baton, dpiJsonNode *node,
             return true;
         case DPI_ORACLE_TYPE_DATE:
         case DPI_ORACLE_TYPE_TIMESTAMP:
-            NJS_CHECK_NAPI(env, napi_create_date(env, node->value->asDouble,
-                    value))
-            return true;
+            return njsUtils_getDateValue(node->oracleTypeNum, env, baton,
+                    &node->value->asTimestamp, value);
         case DPI_ORACLE_TYPE_BOOLEAN:
             NJS_CHECK_NAPI(env, napi_get_boolean(env, node->value->asBoolean,
                     value))
@@ -416,17 +415,14 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
             NJS_CHECK_NAPI(env, napi_create_double(env, data->value.asFloat,
                     value))
             break;
+        case DPI_NATIVE_TYPE_TIMESTAMP:
+            if (!njsUtils_getDateValue(var->varTypeNum, env, baton,
+                    &data->value.asTimestamp, value))
+                return false;
+            break;
         case DPI_NATIVE_TYPE_DOUBLE:
-            if (var->varTypeNum == DPI_ORACLE_TYPE_TIMESTAMP_LTZ ||
-                    var->varTypeNum == DPI_ORACLE_TYPE_TIMESTAMP ||
-                    var->varTypeNum == DPI_ORACLE_TYPE_TIMESTAMP_TZ ||
-                    var->varTypeNum == DPI_ORACLE_TYPE_DATE) {
-                NJS_CHECK_NAPI(env, napi_create_date(env, data->value.asDouble,
-                        value))
-            } else {
-                NJS_CHECK_NAPI(env, napi_create_double(env,
-                        data->value.asDouble, value))
-            }
+            NJS_CHECK_NAPI(env, napi_create_double(env, data->value.asDouble,
+                    value))
             break;
         case DPI_NATIVE_TYPE_BYTES:
             if (data->value.asBytes.length > var->maxSize)
@@ -480,8 +476,8 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
                 return false;
             break;
         case DPI_NATIVE_TYPE_JSON:
-            if (dpiJson_getValue(data->value.asJson,
-                    DPI_JSON_OPT_DATE_AS_DOUBLE, &topNode) < 0)
+            if (dpiJson_getValue(data->value.asJson, DPI_JSON_OPT_DEFAULT,
+                    &topNode) < 0)
                 return njsBaton_setErrorDPI(baton);
             return njsVariable_getJsonNodeValue(baton, topNode, env, value);
         default:
@@ -745,7 +741,6 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     njsJsonBuffer jsonBuffer;
     njsResultSet *resultSet;
     dpiLob *tempLobHandle;
-    napi_value asNumber;
     size_t bufferLength;
     double tempDouble;
     njsDbObject *obj;
@@ -818,10 +813,8 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     // handle binding dates
     NJS_CHECK_NAPI(env, napi_is_date(env, value, &check))
     if (check) {
-        NJS_CHECK_NAPI(env, napi_coerce_to_number(env, value, &asNumber))
-        NJS_CHECK_NAPI(env, napi_get_value_double(env, asNumber,
-                &data->value.asDouble))
-        return true;
+        return njsUtils_setDateValue(var->varTypeNum, env, value, baton,
+                &data->value.asTimestamp);
     }
 
     // handle binding cursors

@@ -212,11 +212,9 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
     NJS_CHECK_NAPI(env, napi_is_date(env, value, &check))
     if (check) {
         node->oracleTypeNum = DPI_ORACLE_TYPE_TIMESTAMP;
-        node->nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
-        NJS_CHECK_NAPI(env, napi_coerce_to_number(env, value, &temp))
-        NJS_CHECK_NAPI(env, napi_get_value_double(env, temp,
-                &node->value->asDouble))
-        return true;
+        node->nativeTypeNum = DPI_NATIVE_TYPE_TIMESTAMP;
+        return njsUtils_setDateValue(DPI_ORACLE_TYPE_TIMESTAMP, env, value,
+                baton, &node->value->asTimestamp);
     }
 
     // handle buffers

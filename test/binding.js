@@ -682,7 +682,7 @@ describe('4. binding.js', function() {
       // console.log(result);
       assert((result.outBinds.o1) instanceof Date);
 
-      let vdate = new Date("2016-08-05T00:00:00.000Z");
+      const vdate = new Date("2016-08-05 00:00:00.000");
       assert.deepStrictEqual(result.outBinds.o2, vdate);
 
       result = await connection.execute(
@@ -693,7 +693,6 @@ describe('4. binding.js', function() {
         ]);
       assert((result.outBinds[0]) instanceof Date);
 
-      vdate = new Date("2016-08-05T00:00:00.000Z");
       assert.deepStrictEqual(result.outBinds[1], vdate);
       await connection.execute("DROP PROCEDURE nodb_binddate1");
 
@@ -711,14 +710,13 @@ describe('4. binding.js', function() {
                      "END;";
       await connection.execute(proc);
 
-      let vdate = new Date(Date.UTC(2016, 7, 5));
+      const vdate = new Date(2016, 7, 5);
       const result = await connection.execute(
         "BEGIN nodb_binddate2(:i, :o); END;",
         {
           i: { type: oracledb.DATE, dir: oracledb.BIND_IN, val: vdate },
           o: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
         });
-      vdate = new Date("2016-08-05T00:00:00.000Z");
       assert.deepStrictEqual(result.outBinds.o, vdate);
 
       await connection.execute("DROP PROCEDURE nodb_binddate2");

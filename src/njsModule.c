@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2019, 2023, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -122,6 +122,8 @@ static void njsModule_finalizeGlobals(napi_env env, void *finalize_data,
     NJS_DELETE_REF_AND_CLEAR(globals->jsSodaDocCursorConstructor);
     NJS_DELETE_REF_AND_CLEAR(globals->jsSodaDocumentConstructor);
     NJS_DELETE_REF_AND_CLEAR(globals->jsSodaOperationConstructor);
+    NJS_DELETE_REF_AND_CLEAR(globals->jsGetDateComponentsFn);
+    NJS_DELETE_REF_AND_CLEAR(globals->jsMakeDateFn);
     free(globals);
 }
 
@@ -184,6 +186,18 @@ static bool njsModule_populateGlobals(napi_env env, napi_value module,
     if (!njsModule_extendClass(env, module, globals, &njsClassDefSodaOperation,
             &globals->jsSodaOperationConstructor))
         return false;
+
+    // store a reference to the _makeDate() function
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, settings,
+            "_getDateComponents", &temp))
+    NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
+            &globals->jsGetDateComponentsFn))
+
+    // store a reference to the _makeDate() function
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, settings, "_makeDate",
+            &temp))
+    NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
+            &globals->jsMakeDateFn))
 
     // acquire Oracle client version and store this in the settings object
     if (dpiContext_getClientVersion(globals->context, &versionInfo) < 0)

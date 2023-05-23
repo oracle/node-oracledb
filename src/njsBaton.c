@@ -700,5 +700,14 @@ bool njsBaton_setJsValues(njsBaton *baton, napi_env env)
     NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
             &baton->jsCallingObj))
 
+    // acquire the _getDateComponents() function
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            baton->globals->jsGetDateComponentsFn,
+            &baton->jsGetDateComponentsFn))
+
+    // acquire the _makeDate() function
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            baton->globals->jsMakeDateFn, &baton->jsMakeDateFn))
+
     return true;
 }
