@@ -39,7 +39,6 @@ const dbConfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('161. changePassword.js', function() {
-
   let DBA_config;
   let dbaConn;
   let sql;
@@ -54,7 +53,7 @@ describe('161. changePassword.js', function() {
   }
 
   before (async function() {
-    if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
+    if (dbConfig.test.drcp || !dbConfig.test.DBA_PRIVILEGE) this.skip();
     sql = "BEGIN \n" +
                       "    DECLARE \n" +
                       "        e_user_missing EXCEPTION; \n" +
@@ -79,7 +78,7 @@ describe('161. changePassword.js', function() {
   }); // before
 
   after(async function() {
-    if (dbConfig.test.DBA_PRIVILEGE) {
+    if (dbConfig.test.DBA_PRIVILEGE && !dbConfig.test.drcp) {
       sql = "DROP USER " + myUser + " CASCADE";
       dbaConn = await oracledb.getConnection(DBA_config);
       await dbaConn.execute(sql);
@@ -439,10 +438,13 @@ describe('161. changePassword.js', function() {
     }
 
     before (async function() {
-      if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
-
-      isRunnable = await testsUtil.checkPrerequisites(2300000000, 2300000000);
-      if (!isRunnable) this.skip();
+      isRunnable = (!dbConfig.test.drcp && dbConfig.test.DBA_PRIVILEGE);
+      if (isRunnable) {
+        isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
+      }
+      if (!isRunnable) {
+        this.skip();
+      }
     }); // before
 
     after(async function() {

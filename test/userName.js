@@ -68,7 +68,7 @@ describe('248. userName.js', function() {
   describe('248.1 test with different size of username', () => {
 
     it('248.1.1 test with username size 30', async function() {
-      if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
+      if (dbConfig.test.drcp || !dbConfig.test.DBA_PRIVILEGE) this.skip();
 
       const userSchema = assist.createSchemaString(30);
       const password = testsUtil.generateRandomPassword();
@@ -90,7 +90,7 @@ describe('248. userName.js', function() {
 
     it('248.1.2 test with username size 100', async function() {
       let runnable = await testsUtil.isLongUserNameRunnable();
-      if (!runnable) {
+      if (dbConfig.test.drcp || !runnable) {
         this.skip();
       }
 
@@ -114,7 +114,7 @@ describe('248. userName.js', function() {
 
     it('248.1.3 test with username size 128', async function() {
       let runnable = await testsUtil.isLongUserNameRunnable();
-      if (!runnable) {
+      if (dbConfig.test.drcp || !runnable) {
         this.skip();
       }
 
@@ -248,7 +248,7 @@ describe('248. userName.js', function() {
   describe('248.2 test with different size of user', () => {
 
     it('248.2.1 test with user size 30', async function() {
-      if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
+      if (dbConfig.test.drcp || !dbConfig.test.DBA_PRIVILEGE) this.skip();
 
       const userSchema = assist.createSchemaString(30);
       const password = testsUtil.generateRandomPassword();
@@ -267,7 +267,7 @@ describe('248. userName.js', function() {
 
     it('248.2.2 test with user size 100', async function() {
       let runnable = await testsUtil.isLongUserNameRunnable();
-      if (!runnable) {
+      if (dbConfig.test.drcp || !runnable) {
         this.skip();
       }
 
@@ -290,7 +290,7 @@ describe('248. userName.js', function() {
 
     it('248.2.3 test with user size 128', async function() {
       let runnable = await testsUtil.isLongUserNameRunnable();
-      if (!runnable) {
+      if (dbConfig.test.drcp || !runnable) {
         this.skip();
       }
 

@@ -110,6 +110,8 @@ Set the following environment variables to provide credentials for the test suit
 
 * `NODE_ORACLEDB_QA`. This boolean environment variable serves as the toggle switch of certain tests. Some tests, such as `callTimeout.js`, use hard-coded variables as assertion condition. The test results may be inconsistent in different network situations.
 
+* `NODE_ORACLEDB_DRCP` provides an option for skipping test run when DRCP is enabled. Setting this environment variable to `true` will skip certain test case run due to DRCP restrictions.
+
 Note: the test suite requires the schema to have these privileges: CREATE TABLE, CREATE SESSION,
 CREATE PROCEDURE, CREATE SEQUENCE, CREATE TRIGGER, and CREATE TYPE.
 

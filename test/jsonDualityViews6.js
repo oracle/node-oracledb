@@ -44,7 +44,7 @@ describe('277. jsonDualityView6.js', function() {
 
   before(async function() {
     isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
-    if (!(isRunnable && dbConfig.test.DBA_PRIVILEGE)) {
+    if (dbConfig.test.drcp || !(isRunnable && dbConfig.test.DBA_PRIVILEGE)) {
       this.skip();
     }
 
@@ -65,7 +65,7 @@ describe('277. jsonDualityView6.js', function() {
   });
 
   after(async function() {
-    if (!isRunnable) return;
+    if (dbConfig.test.drcp || !isRunnable) return;
     await connection.close();
 
     await dbaConn.execute(`drop user njs_jsonDv6 cascade`);

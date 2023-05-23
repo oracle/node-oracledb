@@ -43,8 +43,11 @@ describe('276. jsonDualityView5.js', function() {
   let isRunnable = false;
 
   before(async function() {
-    isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
-    if (!(isRunnable && dbConfig.test.DBA_PRIVILEGE)) {
+    isRunnable = (!dbConfig.test.drcp);
+    if (isRunnable) {
+      isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
+    }
+    if (!isRunnable) {
       this.skip();
     }
 

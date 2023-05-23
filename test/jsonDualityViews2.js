@@ -43,7 +43,10 @@ describe('273. jsonDualityView2.js', function() {
   let isRunnable = false;
 
   before(async function() {
-    isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
+    isRunnable = (!dbConfig.test.drcp);
+    if (isRunnable) {
+      isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
+    }
     if (!isRunnable) {
       this.skip();
     }
@@ -326,6 +329,9 @@ describe('273. jsonDualityView2.js', function() {
                                   `constraint pk_student primary key (stuid) \n` +
                                   `)`;
     before(async function() {
+      if (dbConfig.test.drcp) {
+        this.skip();
+      }
       await dbaConn.execute(createUser1);
       await dbaConn.execute(grantPriv1);
       await dbaConn.execute(createUser2);
@@ -342,6 +348,9 @@ describe('273. jsonDualityView2.js', function() {
     });
 
     after(async function() {
+      if (dbConfig.test.drcp) {
+        return;
+      }
       await conn2.close();
       await conn1.close();
       await dbaConn.execute(`drop user njs_test1 cascade`);
@@ -471,12 +480,18 @@ describe('273. jsonDualityView2.js', function() {
     let conn = null;
     const pwd = testsUtil.generateRandomPassword();
     before(async function() {
+      if (dbConfig.test.drcp) {
+        this.skip();
+      }
       await dbaConn.execute(`create user njs_testuser1 identified by ${pwd}`);
       await dbaConn.execute(`grant create session,resource,create table,unlimited tablespace to njs_testuser1`);
       await dbaConn.execute(`grant execute on sys.dbms_redact to njs_testuser1`);
     });
 
     after(async function() {
+      if (dbConfig.test.drcp) {
+        return;
+      }
       await dbaConn.execute(`drop user njs_testuser1 cascade`);
     });
 

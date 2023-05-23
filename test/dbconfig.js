@@ -32,7 +32,7 @@
  *   1. Edit the credential section of this file.
  *   2. Set these environment variables:
  *      NODE_ORACLEDB_USER, NODE_ORACLEDB_PASSWORD, NODE_ORACLEDB_CONNECTIONSTRING,
- *      NODE_ORACLEDB_EXTERNALAUTH,
+ *      NODE_ORACLEDB_EXTERNALAUTH, NODE_ORACLEDB_DRCP,
  *      NODE_ORACLEDB_DBA_PRIVILEGE,
  *      NODE_ORACLEDB_DBA_USER, NODE_ORACLEDB_DBA_PASSWORD
  *
@@ -47,7 +47,8 @@ const config = {
     printDebugMsg: false,
     mode:          'thin',
     instantClientPath: '',
-    isCloudService: false
+    isCloudService: false,
+    drcp:           false
   }
 };
 
@@ -64,6 +65,10 @@ if (process.env.NODE_ORACLEDB_EXTERNALAUTH) {
   if (eauth == 'true') {
     config.test.externalAuth = true;
   }
+}
+
+if (process.env.NODE_ORACLEDB_DRCP) {
+  config.test.drcp = (process.env.NODE_ORACLEDB_DRCP.toLowerCase() === 'true');
 }
 
 if (!config.test.externalAuth) {

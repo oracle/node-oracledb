@@ -753,6 +753,9 @@ describe('272. jsonDualityView1.js', function() {
                                   )`;
 
       before(async function() {
+        if (dbConfig.test.drcp) {
+          this.skip();
+        }
         const credential = {
           user          : dbConfig.test.DBA_user,
           password      : dbConfig.test.DBA_password,
@@ -768,12 +771,16 @@ describe('272. jsonDualityView1.js', function() {
       });
 
       after(async function() {
+        if (dbConfig.test.drcp) {
+          return;
+        }
         await connection.execute(`drop user njs_test1 cascade`);
         await connection.execute(`drop user njs_test2 cascade`);
         await connection.close();
       });
 
       it('272.3.11.1 Query with test1 user', async function() {
+
         const studentView =  `CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
                                   AS
                               student @insert @update @delete

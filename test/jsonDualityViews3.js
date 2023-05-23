@@ -43,7 +43,10 @@ describe('274 jsonDualityView3.js', function() {
   let isRunnable = false;
   const pwd = testsUtil.generateRandomPassword();
   before(async function() {
-    isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
+    isRunnable = (!dbConfig.test.drcp);
+    if (isRunnable) {
+      isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
+    }
     if (!isRunnable) {
       this.skip();
     }
