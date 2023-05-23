@@ -751,7 +751,7 @@ describe('2. pool.js', function() {
       } else {
         await assert.rejects(
           async () => await oracledb.createPool(config),
-          /NJS-101:/
+          /NJS-089:/
         );
       }
     });  // 2.15.7
@@ -854,7 +854,7 @@ describe('2. pool.js', function() {
       } else {
         await assert.rejects(
           async () => await oracledb.createPool(config),
-          /NJS-101:/
+          /NJS-089:/
         );
       }
     });  // 2.15.13
@@ -882,9 +882,22 @@ describe('2. pool.js', function() {
       };
       await assert.rejects(
         async () => await oracledb.createPool(config),
-        /DPI-1032:|NJS-089:/
+        /NJS-136:/
       );
     });  // 2.15.15
+
+    it('2.15.16 empty Credentials', async function() {
+      const config = {
+        connectString: dbConfig.connectString,
+        poolMin:       1,
+        poolMax:       1,
+        poolIncrement: 0,
+      };
+      await assert.rejects(
+        async () => await oracledb.createPool(config),
+        /ORA-24415:|NJS-101:/
+      );
+    });  // 2.15.16
 
   });   // 2.15
 
@@ -1020,7 +1033,7 @@ describe('2. pool.js', function() {
         } else {
           await assert.rejects(
             async () => await oracledb.createPool(config),
-            /NJS-101:/
+            /NJS-089:/
           );
         }
       } finally {

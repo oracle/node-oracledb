@@ -214,7 +214,7 @@ describe('180. externalProxyAuth.js', function() {
             externalAuth: true,
           });
         },
-        /DPI-1032:/
+        /NJS-136:/
       );
     });
 
@@ -230,7 +230,7 @@ describe('180. externalProxyAuth.js', function() {
             externalAuth: true,
           });
         },
-        /DPI-1032:/
+        /NJS-136:/
       );
     });
 

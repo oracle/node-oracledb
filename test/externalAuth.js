@@ -74,8 +74,8 @@ const dbConfig = require('./dbconfig.js');
             }
           );
         },
-        // DPI-1032: user and password should not be set when using external authentication
-        /DPI-1032:/
+        // NJS-136: user and password should not be set when using external authentication
+        /NJS-136:/
       );
 
     }); // 5.1.2
@@ -92,8 +92,8 @@ const dbConfig = require('./dbconfig.js');
             }
           );
         },
-        // ORA-01017: invalid username/password; logon denied
-        /ORA-01017:/
+        // NJS-136: user and password should not be set when using external authentication
+        /NJS-136:/
       );
     }); // 5.1.3
 
@@ -109,8 +109,8 @@ const dbConfig = require('./dbconfig.js');
             }
           );
         },
-        // DPI-1032: user and password should not be set when using external authentication
-        /DPI-1032:/
+        // NJS-136: user and password should not be set when using external authentication
+        /NJS-136:/
       );
     }); // 5.1.4
 
@@ -145,8 +145,8 @@ const dbConfig = require('./dbconfig.js');
             }
           );
         },
-        // DPI-1032: user and password should not be set when using external authentication
-        /DPI-1032:/
+        // NJS-136: user and password should not be set when using external authentication
+        /NJS-136:/
       );
     }); // 5.1.6
 
@@ -162,8 +162,8 @@ const dbConfig = require('./dbconfig.js');
             }
           );
         },
-        // DPI-1032: user and password should not be set when using external authentication
-        /DPI-1032:/
+        // NJS-136: user and password should not be set when using external authentication
+        /NJS-136:/
       );
     }); // 5.1.7
 
@@ -179,8 +179,8 @@ const dbConfig = require('./dbconfig.js');
             }
           );
         },
-        // DPI-1032: user and password should not be set when using external authentication
-        /DPI-1032:/
+        // NJS-136: user and password should not be set when using external authentication
+        /NJS-136:/
       );
     }); // 5.1.8
 
