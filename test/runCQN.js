@@ -98,8 +98,7 @@ describe.skip('185. runCQN.js', function() {
           `CREATE TABLE ${TABLE} (
             k NUMBER
           )`;
-    let plsql = testsUtil.sqlCreateTable(TABLE, sql);
-    await conn.execute(plsql);
+    await testsUtil.createTable(conn, TABLE, sql);
 
     const myCallback = function(message) {
       assert.strictEqual(message.type, oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE);
@@ -139,8 +138,7 @@ describe.skip('185. runCQN.js', function() {
           `CREATE TABLE ${TABLE} (
             k NUMBER
           )`;
-    let plsql = testsUtil.sqlCreateTable(TABLE, sql);
-    await conn.execute(plsql);
+    await testsUtil.createTable(conn, TABLE, sql);
 
     const myCallback = function(message) {
       assert.strictEqual(message.type, oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE);
@@ -185,8 +183,7 @@ describe.skip('185. runCQN.js', function() {
           `CREATE TABLE ${TABLE} (
             k NUMBER
           )`;
-    let plsql = testsUtil.sqlCreateTable(TABLE, sql);
-    await conn.execute(plsql);
+    await testsUtil.createTable(conn, TABLE, sql);
 
     const myCallback = function(message) {
       assert.strictEqual(message.type, oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE);
@@ -254,8 +251,7 @@ describe.skip('185. runCQN.js', function() {
           `CREATE TABLE ${TABLE} (
             k NUMBER
           )`;
-    let plsql = testsUtil.sqlCreateTable(TABLE, sql);
-    await conn.execute(plsql);
+    await testsUtil.createTable(conn, TABLE, sql);
 
     const myCallback = function(message) {
       assert.strictEqual(message.type, oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE);
@@ -296,8 +292,7 @@ describe.skip('185. runCQN.js', function() {
           `CREATE TABLE ${TABLE} (
             k NUMBER
           )`;
-    let plsql = testsUtil.sqlCreateTable(TABLE, sql);
-    await conn.execute(plsql);
+    await testsUtil.createTable(conn, TABLE, sql);
 
     const myCallback = function(message) {
       assert.strictEqual(message.registered, true);
@@ -339,8 +334,7 @@ describe.skip('185. runCQN.js', function() {
           `CREATE TABLE ${TABLE} (
             k NUMBER
           )`;
-    let plsql = testsUtil.sqlCreateTable(TABLE, sql);
-    await conn.execute(plsql);
+    await testsUtil.createTable(conn, TABLE, sql);
 
     const myCallback = function(message) {
       assert.strictEqual(message.registered, true);

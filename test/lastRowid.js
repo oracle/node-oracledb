@@ -48,8 +48,7 @@ describe('228. lastRowid.js', function() {
          id number(9) not null,
          value varchar2(100) not null
       )`;
-    const plsql = testsUtil.sqlCreateTable(TABLE, sql);
-    await conn.execute(plsql);
+    await testsUtil.createTable(conn, TABLE, sql);
   });
 
   after(async () => {
