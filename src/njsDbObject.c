@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2019, 2023, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -100,9 +100,8 @@ static bool njsDbObject_transformFromOracle(njsDbObject *obj, napi_env env,
         njsDataTypeInfo *typeInfo, dpiData *data, napi_value *value,
         njsDbObjectAttr *attr, njsModuleGlobals *globals);
 static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
-        napi_value value, dpiOracleTypeNum oracleTypeNum,
-        dpiNativeTypeNum *nativeTypeNum, dpiData *data, char **strBuffer,
-        njsDbObjectAttr *attr, njsModuleGlobals *globals);
+        napi_value value, dpiOracleTypeNum oracleTypeNum, dpiData *data,
+        char **strBuffer, njsDbObjectAttr *attr, njsModuleGlobals *globals);
 static bool njsDbObjectType_populate(njsDbObjectType *objType,
         dpiObjectType *objectTypeHandle, napi_env env, napi_value jsObjectType,
         dpiObjectTypeInfo *info, njsBaton *baton);
@@ -119,17 +118,16 @@ static bool njsDbObject_wrap(napi_env env, napi_value value,
 NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_append, 1, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
-    dpiNativeTypeNum nativeTypeNum;
     char *str = NULL;
     dpiData data;
     int status;
 
-    nativeTypeNum = obj->type->elementTypeInfo.nativeTypeNum;
     if (!njsDbObject_transformToOracle(obj, env, args[0],
-            obj->type->elementTypeInfo.oracleTypeNum, &nativeTypeNum, &data,
-            &str, NULL, globals))
+            obj->type->elementTypeInfo.oracleTypeNum, &data, &str, NULL,
+            globals))
         return false;
-    status = dpiObject_appendElement(obj->handle, nativeTypeNum, &data);
+    status = dpiObject_appendElement(obj->handle,
+            obj->type->elementTypeInfo.nativeTypeNum, &data);
     if (str)
         free(str);
     if (status < 0)
@@ -538,7 +536,6 @@ bool njsDbObject_new(njsDbObjectType *objType, dpiObject *objHandle,
 NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_setAttrValue, 2, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
-    dpiNativeTypeNum nativeTypeNum;
     njsDbObjectAttr *attr;
     char *str = NULL;
     dpiData data;
@@ -548,15 +545,13 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_setAttrValue, 2, &njsClassDefDbObject)
     NJS_CHECK_NAPI(env, napi_unwrap(env, args[0], (void**) &attr))
 
     // transform to value required by ODPI-C
-    nativeTypeNum = attr->typeInfo.nativeTypeNum;
     if (!njsDbObject_transformToOracle(obj, env, args[1],
-            attr->typeInfo.oracleTypeNum, &nativeTypeNum, &data, &str, attr,
-            globals))
+            attr->typeInfo.oracleTypeNum, &data, &str, attr, globals))
         return false;
 
     // set value
     status = dpiObject_setAttributeValue(obj->handle, attr->handle,
-            nativeTypeNum, &data);
+            attr->typeInfo.nativeTypeNum, &data);
     if (str)
         free(str);
     if (status < 0)
@@ -573,20 +568,18 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_setAttrValue, 2, &njsClassDefDbObject)
 NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_setElement, 2, &njsClassDefDbObject)
 {
     njsDbObject *obj = (njsDbObject*) callingInstance;
-    dpiNativeTypeNum nativeTypeNum;
     char *str = NULL;
     int32_t index;
     dpiData data;
     int status;
 
     NJS_CHECK_NAPI(env, napi_get_value_int32(env, args[0], &index))
-    nativeTypeNum = obj->type->elementTypeInfo.nativeTypeNum;
     if (!njsDbObject_transformToOracle(obj, env, args[1],
-            obj->type->elementTypeInfo.oracleTypeNum, &nativeTypeNum, &data,
-            &str, NULL, globals))
+            obj->type->elementTypeInfo.oracleTypeNum, &data, &str, NULL,
+            globals))
         return false;
     status = dpiObject_setElementValueByIndex(obj->handle, index,
-            nativeTypeNum, &data);
+            obj->type->elementTypeInfo.nativeTypeNum, &data);
     if (str)
         free(str);
     if (status < 0)
@@ -700,9 +693,8 @@ static bool njsDbObject_transformFromOracle(njsDbObject *obj, napi_env env,
 //   Transforms a JavaScript value into the value that ODPI-C expects.
 //-----------------------------------------------------------------------------
 static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
-        napi_value value, dpiOracleTypeNum oracleTypeNum,
-        dpiNativeTypeNum *nativeTypeNum, dpiData *data, char **strBuffer,
-        njsDbObjectAttr *attr, njsModuleGlobals *globals)
+        napi_value value, dpiOracleTypeNum oracleTypeNum, dpiData *data,
+        char **strBuffer, njsDbObjectAttr *attr, njsModuleGlobals *globals)
 {
     napi_value constructor, getComponentsFn;
     napi_valuetype valueType;
@@ -727,7 +719,6 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
         case napi_string:
             if (!njsUtils_copyStringFromJS(env, value, strBuffer, &length))
                 return false;
-            *nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
             dpiData_setBytes(data, *strBuffer, (uint32_t) length);
             return true;
 
@@ -735,13 +726,11 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
         case napi_number:
             NJS_CHECK_NAPI(env, napi_get_value_double(env, value,
                     &data->value.asDouble));
-            *nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
             return true;
 
         // handle booleans
         case napi_boolean:
             NJS_CHECK_NAPI(env, napi_get_value_bool(env, value, &tempBool))
-            *nativeTypeNum = DPI_NATIVE_TYPE_BOOLEAN;
             data->value.asBoolean = (int) tempBool;
             return true;
 
@@ -751,7 +740,6 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
             // handle dates
             NJS_CHECK_NAPI(env, napi_is_date(env, value, &check))
             if (check) {
-                *nativeTypeNum = DPI_NATIVE_TYPE_TIMESTAMP;
                 NJS_CHECK_NAPI(env, napi_get_reference_value(env,
                         globals->jsGetDateComponentsFn, &getComponentsFn))
                 return njsUtils_setDateValue(oracleTypeNum, env, value,
@@ -764,7 +752,6 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
                 NJS_CHECK_NAPI(env, napi_get_buffer_info(env, value,
                         &bufferData, &length))
                 dpiData_setBytes(data, bufferData, (uint32_t) length);
-                *nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
                 return true;
             }
 
@@ -777,7 +764,6 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
                 if (!njsDbObject_getInstance(globals, env, value, &valueObj))
                     return false;
                 dpiData_setObject(data, valueObj->handle);
-                *nativeTypeNum = DPI_NATIVE_TYPE_OBJECT;
                 return true;
             }
 
