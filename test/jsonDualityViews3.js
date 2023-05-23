@@ -41,7 +41,7 @@ describe('274 jsonDualityView3.js', function() {
   let connection = null;
   let dbaConn = null;
   let isRunnable = false;
-
+  const pwd = testsUtil.generateRandomPassword();
   before(async function() {
     isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
     if (!isRunnable) {
@@ -56,11 +56,11 @@ describe('274 jsonDualityView3.js', function() {
     };
 
     dbaConn = await oracledb.getConnection(dbaCredential);
-    await dbaConn.execute(`create user jsonDv3 identified by jsonDv3`);
+    await dbaConn.execute(`create user njs_jsonDv3 identified by ${pwd}`);
     await dbaConn.execute(`grant create session, resource, connect,
-               unlimited tablespace to jsonDv3`);
-    connection = await oracledb.getConnection({user: 'jsonDv3',
-      password: 'jsonDv3',
+               unlimited tablespace to njs_jsonDv3`);
+    connection = await oracledb.getConnection({user: 'njs_jsonDv3',
+      password: pwd,
       connectString: dbConfig.connectString
     });
   });
@@ -69,7 +69,7 @@ describe('274 jsonDualityView3.js', function() {
     if (!isRunnable) return;
 
     await connection.close();
-    await dbaConn.execute(`drop user jsonDv3 CASCADE`);
+    await dbaConn.execute(`drop user njs_jsonDv3 CASCADE`);
     await dbaConn.close();
   });
 

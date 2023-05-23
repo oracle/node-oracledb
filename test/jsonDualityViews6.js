@@ -23,7 +23,7 @@
  * limitations under the License.
  *
  * NAME
- *   277. jsonDualityView5.js
+ *   277. jsonDualityView6.js
  *
  * DESCRIPTION
  *   Testing JSON Relational Duality View using GraphQL
@@ -36,7 +36,7 @@ const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('277. jsonDualityView5.js', function() {
+describe('277. jsonDualityView6.js', function() {
 
   let connection = null;
   let dbaConn = null;
@@ -54,13 +54,12 @@ describe('277. jsonDualityView5.js', function() {
       connectString : dbConfig.connectString,
       privilege     : oracledb.SYSDBA,
     };
-
-
+    const pwd = testsUtil.generateRandomPassword();
     dbaConn = await oracledb.getConnection(dbaCredential);
-    await dbaConn.execute(`create user jsonDv5 identified by jsonDv5`);
-    await dbaConn.execute(`grant create session, resource, connect, unlimited tablespace to jsonDv5`);
-    connection = await oracledb.getConnection({user: 'jsonDv5',
-      password: 'jsonDv5',
+    await dbaConn.execute(`create user njs_jsonDv6 identified by ${pwd}`);
+    await dbaConn.execute(`grant create session, resource, connect, unlimited tablespace to njs_jsonDv6`);
+    connection = await oracledb.getConnection({user: 'njs_jsonDv6',
+      password: pwd,
       connectString: dbConfig.connectString
     });
   });
@@ -69,7 +68,7 @@ describe('277. jsonDualityView5.js', function() {
     if (!isRunnable) return;
     await connection.close();
 
-    await dbaConn.execute(`drop user jsonDv5 cascade`);
+    await dbaConn.execute(`drop user njs_jsonDv6 cascade`);
     await dbaConn.close();
   });
 

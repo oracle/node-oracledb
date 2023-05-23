@@ -54,13 +54,14 @@ describe('275. jsonDualityView4.js', function() {
       connectString : dbConfig.connectString,
       privilege     : oracledb.SYSDBA,
     };
-
+    const pwd = testsUtil.generateRandomPassword();
     dbaConn = await oracledb.getConnection(dbaCredential);
-    await dbaConn.execute(`create user jsonDv4 identified by jsonDv4`);
+
+    await dbaConn.execute(`create user njs_jsonDv4 identified by ${pwd}`);
     await dbaConn.execute(`grant create session, resource, connect,
-               unlimited tablespace to jsonDv4`);
-    connection = await oracledb.getConnection({user: 'jsonDv4',
-      password: 'jsonDv4',
+               unlimited tablespace to njs_jsonDv4`);
+    connection = await oracledb.getConnection({user: 'njs_jsonDv4',
+      password: pwd,
       connectString: dbConfig.connectString
     });
 
@@ -97,12 +98,12 @@ describe('275. jsonDualityView4.js', function() {
   after(async function() {
     if (!isRunnable) return;
 
-    //await connection.execute(`drop table student_class PURGE`);
     await connection.execute(`drop table student PURGE`);
     await connection.execute(`drop table class PURGE`);
-    await connection.close();
 
-    await dbaConn.execute(`drop user jsonDv4 cascade`);
+    await connection.close();
+    await dbaConn.execute(`drop user njs_jsonDv4 cascade`);
+
     await dbaConn.close();
   });
 
@@ -466,7 +467,7 @@ describe('275. jsonDualityView4.js', function() {
       // Query to create student_ov view using JSON RELATIONAL DUALITY
       const createStudentOvView = `
         CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
-         AS jsonDv4.customer{id abc:customer @nest{dt}}
+         AS njs_jsonDv4.customer{id abc:customer @nest{dt}}
       `;
 
       await connection.execute(createCustomerTable);

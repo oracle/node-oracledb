@@ -54,13 +54,14 @@ describe('273. jsonDualityView2.js', function() {
       connectString : dbConfig.connectString,
       privilege     : oracledb.SYSDBA,
     };
+    const pwd = testsUtil.generateRandomPassword();
 
     dbaConn = await oracledb.getConnection(dbaCredential);
-    await dbaConn.execute(`create user jsonDv2 identified by jsonDv2`);
+    await dbaConn.execute(`create user jsonDv2 identified by ${pwd}`);
     await dbaConn.execute(`grant create session, resource, connect,
                unlimited tablespace to jsonDv2`);
     connection = await oracledb.getConnection({user: 'jsonDv2',
-      password: 'jsonDv2',
+      password: pwd,
       connectString: dbConfig.connectString
     });
   });
@@ -314,10 +315,11 @@ describe('273. jsonDualityView2.js', function() {
   describe('273.4 Table and Views', function() {
     let conn1 = null;
     let conn2 = null;
-    const createUser1 = `create user test1 identified by test1`;
-    const createUser2 = `create user test2 identified by test2`;
-    const grantPriv1 = `grant create session, resource, connect, unlimited tablespace to test1`;
-    const grantPriv2 = `grant create session, resource, connect, unlimited tablespace to test2`;
+    const pwd = testsUtil.generateRandomPassword();
+    const createUser1 = `create user njs_test1 identified by ${pwd}`;
+    const createUser2 = `create user njs_test2 identified by ${pwd}`;
+    const grantPriv1 = `grant create session, resource, connect, unlimited tablespace to njs_test1`;
+    const grantPriv2 = `grant create session, resource, connect, unlimited tablespace to njs_test2`;
     const createTableStudent = `create table student( \n` +
                                   `stuid number, \n` +
                                   `name varchar(128) default null, \n` +
@@ -328,13 +330,13 @@ describe('273. jsonDualityView2.js', function() {
       await dbaConn.execute(grantPriv1);
       await dbaConn.execute(createUser2);
       await dbaConn.execute(grantPriv2);
-      conn1 = await oracledb.getConnection({user: 'test1',
-        password: 'test1',
+      conn1 = await oracledb.getConnection({user: 'njs_test1',
+        password: pwd,
         connectString: dbConfig.connectString
       });
 
-      conn2 = await oracledb.getConnection({user: 'test2',
-        password: 'test2',
+      conn2 = await oracledb.getConnection({user: 'njs_test2',
+        password: pwd,
         connectString: dbConfig.connectString
       });
     });
@@ -342,8 +344,8 @@ describe('273. jsonDualityView2.js', function() {
     after(async function() {
       await conn2.close();
       await conn1.close();
-      await dbaConn.execute(`drop user test1 cascade`);
-      await dbaConn.execute(`drop user test2 cascade`);
+      await dbaConn.execute(`drop user njs_test1 cascade`);
+      await dbaConn.execute(`drop user njs_test2 cascade`);
     });
 
     it('273.4.1 Base table in one schema and View in another schema', async function() {
@@ -357,7 +359,7 @@ describe('273. jsonDualityView2.js', function() {
       // commit the transaction
       await conn1.execute(`COMMIT`);
       // grant select privilege on student table to test2 with grant option
-      await conn1.execute(`GRANT SELECT ON student TO test2 WITH GRANT OPTION`);
+      await conn1.execute(`GRANT SELECT ON student TO njs_test2 WITH GRANT OPTION`);
       await assert.rejects(
         async () => await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW\n ` +
                                              `student_ov as test1__student{stuid,name}`),
@@ -453,7 +455,7 @@ describe('273. jsonDualityView2.js', function() {
 
       await connection.execute(`
          CREATE BITMAP INDEX bitmap_index_demo_active_i
-ON bitmap_index_demo(active)`);
+         ON bitmap_index_demo(active)`);
       await connection.execute(`INSERT INTO bitmap_index_demo(active) VALUES(1)`);
 
       await connection.execute('COMMIT');
@@ -467,20 +469,20 @@ ON bitmap_index_demo(active)`);
 
   describe('273.5 With Redaction on base tables', function() {
     let conn = null;
-
+    const pwd = testsUtil.generateRandomPassword();
     before(async function() {
-      await dbaConn.execute(`create user testuser1 identified by testuser1`);
-      await dbaConn.execute(`grant create session,resource,create table,unlimited tablespace to testuser1`);
-      await dbaConn.execute(`grant execute on sys.dbms_redact to testuser1`);
+      await dbaConn.execute(`create user njs_testuser1 identified by ${pwd}`);
+      await dbaConn.execute(`grant create session,resource,create table,unlimited tablespace to njs_testuser1`);
+      await dbaConn.execute(`grant execute on sys.dbms_redact to njs_testuser1`);
     });
 
     after(async function() {
-      await dbaConn.execute(`drop user testuser1 cascade`);
+      await dbaConn.execute(`drop user njs_testuser1 cascade`);
     });
 
     it('273.5.1 redaction enabled on a base table', async function() {
-      conn = await oracledb.getConnection({user: 'testuser1',
-        password: 'testuser1',
+      conn = await oracledb.getConnection({user: 'njs_testuser1',
+        password: pwd,
         connectString: dbConfig.connectString
       });
       await conn.execute(`create table redact(
@@ -503,7 +505,7 @@ ON bitmap_index_demo(active)`);
 
       await dbaConn.execute(`begin
        dbms_redact.add_policy(
-        object_schema => 'TESTUSER1',
+        object_schema => 'NJS_TESTUSER1',
           object_name   => 'redact',
           column_name   => 'card_no',
            policy_name   => 'redact_card_info',
@@ -512,8 +514,8 @@ ON bitmap_index_demo(active)`);
           );
         end;`);
 
-      conn = await oracledb.getConnection({user: 'testuser1',
-        password: 'testuser1',
+      conn = await oracledb.getConnection({user: 'njs_testuser1',
+        password: pwd,
         connectString: dbConfig.connectString
       });
       result = await conn.execute(`select * from redact order by 1`);

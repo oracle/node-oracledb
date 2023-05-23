@@ -54,13 +54,13 @@ describe('276. jsonDualityView5.js', function() {
       connectString : dbConfig.connectString,
       privilege     : oracledb.SYSDBA,
     };
-
+    const pwd = testsUtil.generateRandomPassword();
     dbaConn = await oracledb.getConnection(dbaCredential);
-    await dbaConn.execute(`create user jsonDv5 identified by jsonDv5`);
+    await dbaConn.execute(`create user njs_jsonDv5 identified by ${pwd}`);
     await dbaConn.execute(`grant ctxapp, connect, resource,create session,create any table,
-    create view,CREATE MATERIALIZED VIEW,unlimited tablespace to jsonDv5`);
-    connection = await oracledb.getConnection({user: 'jsonDv5',
-      password: 'jsonDv5',
+    create view,CREATE MATERIALIZED VIEW,unlimited tablespace to njs_jsonDv5`);
+    connection = await oracledb.getConnection({user: 'njs_jsonDv5',
+      password: pwd,
       connectString: dbConfig.connectString
     });
 
@@ -103,7 +103,7 @@ describe('276. jsonDualityView5.js', function() {
     await connection.execute(`drop table student PURGE`);
     await connection.close();
 
-    await dbaConn.execute(`drop user jsonDv5 cascade`);
+    await dbaConn.execute(`drop user njs_jsonDv5 cascade`);
     await dbaConn.close();
   });
 
