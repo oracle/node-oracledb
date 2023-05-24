@@ -1,17 +1,24 @@
-# node-oracledb 5.5.0 Documentation for the Oracle Database Node.js Add-on
+# node-oracledb Documentation for the Oracle Database Node.js Add-on
 
-*Copyright (c) 2015, 2022, Oracle and/or its affiliates.*
+*Copyright (c) 2015, 2023, Oracle and/or its affiliates.*
 
-You may not use the identified files except in compliance with the Apache
-License, Version 2.0 (the "License.")
+This software is dual-licensed to you under the Universal Permissive License
+(UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl and Apache License
+2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose
+either license.
 
+If you elect to accept the software under the Apache License, Version 2.0,
+the following applies:
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-http://www.apache.org/licenses/LICENSE-2.0.
+
+https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
@@ -22,9 +29,7 @@ and
 
 ----------
 
-## Note: The node-oracledb 5.5 documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/](https://node-oracledb.readthedocs.io/en/latest/).
-
-## The new documentation layout facilitates better search and navigation of the content. For future node-oracledb releases, the latest updates will only be added to the new node-oracledb documentation.
+## Note: The node-oracledb documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/](https://node-oracledb.readthedocs.io/en/latest/).
 
 ----------
 
@@ -32,8 +37,8 @@ and
 
 This document contains:
 
-- [Node-oracledb API Manual](https://node-oracledb.readthedocs.io/en/latest/index.html#api-manual)
-- [Node-oracledb User Manual](https://node-oracledb.readthedocs.io/en/latest/index.html#user-guide)
+- [Node-oracledb API Manual](https://node-oracledb.readthedocs.io/en/latest/api_manual/oracledb.html)
+- [Node-oracledb User Manual](https://node-oracledb.readthedocs.io/en/latest/user_guide/introduction.html)
 
 For installation information, see the [Node-oracledb Installation Instructions](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html).
 
@@ -41,9 +46,10 @@ For installation information, see the [Node-oracledb Installation Instructions](
 
 ## <a name="intro"></a> 1. Introduction
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/introduction.html#intro](https://node-oracledb.readthedocs.io/en/latest/user_guide/introduction.html#intro).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/introduction.html#intro)
 
 ### <a name="architecture"></a> 1.1 Node-oracledb Architecture
+
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/introduction.html#architecture)
 
 ### <a name="getstarted"></a> 1.2 Getting Started with Node-oracledb
@@ -60,7 +66,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="errorobj"></a> 2. Errors
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/api_manual/errors.html#errorobj](https://node-oracledb.readthedocs.io/en/latest/api_manual/errors.html#errorobj).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/errors.html#errorobj)
 
 ### <a name="properror"></a> 2.1 Error Properties
 
@@ -84,7 +90,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/a
 
 ## <a name="oracledbclass"></a> 3. Oracledb Class
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/api_manual/oracledb.html#oracledbclass](https://node-oracledb.readthedocs.io/en/latest/api_manual/oracledb.html#oracledbclass).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/oracledb.html#oracledbclass)
 
 ### <a name="oracledbconstants"></a> 3.1 Oracledb Constants
 
@@ -524,7 +530,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/a
 
 ## <a name="connectionclass"></a> 4. Connection Class
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/api_manual/connection.html#connectionclass](https://node-oracledb.readthedocs.io/en/latest/api_manual/connection.html#connectionclass).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/connection.html#connectionclass)
 
 ### <a name="connectionproperties"></a> 4.1 Connection Properties
 
@@ -950,7 +956,7 @@ The input value or variable to be used for an IN or IN OUT bind variable.
 
 ## <a name="aqqueueclass"></a> 5. AqQueue Class
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/api_manual/aq.html#aqqueueclass](https://node-oracledb.readthedocs.io/en/latest/api_manual/aq.html#aqqueueclass).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/aq.html#aqqueueclass)
 
 ### <a name="aqqueueproperties"></a> 5.1 AqQueue Properties
 
@@ -1014,7 +1020,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/a
 
 ## <a name="dbobjectclass"></a> 6. DbObject Class
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/api_manual/dbobject.html#dbobjectclass](https://node-oracledb.readthedocs.io/en/latest/api_manual/dbobject.html#dbobjectclass).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/dbobject.html#dbobjectclass)
 
 ### <a name="dbobjectproperties"></a> 6.1 DbObject Properties
 
@@ -1066,7 +1072,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/a
 
 ## <a name="lobclass"></a> 7. Lob Class
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/api_manual/lob.html#lobclass](https://node-oracledb.readthedocs.io/en/latest/api_manual/lob.html#lobclass).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/lob.html#lobclass)
 
 ### <a name="lobproperties"></a> 7.1 Lob Properties
 
@@ -1106,7 +1112,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/a
 
 ## <a name="poolclass"></a> 8. Pool Class
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/api_manual/pool.html#poolclass](https://node-oracledb.readthedocs.io/en/latest/api_manual/pool.html#poolclass).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/pool.html#poolclass)
 
 ### <a name="poolproperties"></a> 8.1 Pool Properties
 
@@ -1234,7 +1240,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/a
 
 ## <a name="poolstatisticsclass"></a> 9. PoolStatistics Class
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/api_manual/statistics.html#poolstatisticsclass](https://node-oracledb.readthedocs.io/en/latest/api_manual/statistics.html#poolstatisticsclass).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/statistics.html#poolstatisticsclass)
 
 ### <a name="poolstatisticsmethods"></a> 9.1 PoolStatistics Methods
 
@@ -1246,7 +1252,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/a
 
 ## <a name="resultsetclass"></a> 10. ResultSet Class
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/api_manual/resultset.html#resultsetclass](https://node-oracledb.readthedocs.io/en/latest/api_manual/resultset.html#resultsetclass).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/resultset.html#resultsetclass)
 
 ### <a name="resultsetproperties"></a> 10.1 ResultSet Properties
 
@@ -1278,7 +1284,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/a
 
 ## <a name="sodacollectionclass"></a> 11. SodaCollection Class
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodacollectionclass](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodacollectionclass).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodacollectionclass)
 
 #### <a name="sodacollectionproperties"></a> 11.1 SodaCollection Properties
 
@@ -1476,9 +1482,9 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/a
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaCollection.truncate)
 
-## <a name="sodadatabaseclass"></a> 11. SodaDatabase Class
+## <a name="sodadatabaseclass"></a> 12. SodaDatabase Class
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodadatabaseclass](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodadatabaseclass).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodadatabaseclass)
 
 #### <a name="sodadatabasemethods"></a> 12.1 SodaDatabase Methods
 
@@ -1562,7 +1568,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/a
 
 ## <a name="sodadocumentclass"></a> 13. SodaDocument Class
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadocument.html#sodadocumentclass](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadocument.html#sodadocumentclass).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadocument.html#sodadocumentclass)
 
 ### <a name="sodadocumentproperties"></a> 13.1 SodaDocument Properties
 
@@ -1586,7 +1592,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/a
 
 ## <a name="sodadocumentcursorclass"></a> 14. SodaDocumentCursor Class
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacursor.html#sodadocumentcursorclass](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacursor.html#sodadocumentcursorclass).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacursor.html#sodadocumentcursorclass)
 
 ### <a name="sodadoccursormethods"></a> 14.1 SodaDocumentCursor Methods
 
@@ -1604,7 +1610,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/a
 
 ## <a name="initnodeoracledb"></a> <a name="configureconnections"></a> 15. Initializing Node-oracledb
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#initnodeoracledb](https://node-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#initnodeoracledb).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#initnodeoracledb)
 
 ### <a name="oracleclientloading"></a> 15.1 Setting the Oracle Client Library Directory
 
@@ -1644,7 +1650,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="connectionhandling"></a> 16. Connection Handling
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connectionhandling](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connectionhandling).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connectionhandling)
 
 ### <a name="connectionstrings"></a> 16.1 Connection Strings
 
@@ -1844,7 +1850,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="sqlexecution"></a> 17. SQL Execution
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#sqlexecution](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#sqlexecution).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#sqlexecution)
 
 ### <a name="select"></a> 17.1 SELECT Statements
 
@@ -1932,7 +1938,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="plsqlexecution"></a> 18. PL/SQL Execution
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/plsql_execution.html#plsqlexecution](https://node-oracledb.readthedocs.io/en/latest/user_guide/plsql_execution.html#plsqlexecution).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/plsql_execution.html#plsqlexecution)
 
 ### <a name="plsqlproc"></a> 18.1 PL/SQL Stored Procedures
 
@@ -1968,7 +1974,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="lobhandling"></a> 19. Working with CLOB, NCLOB and BLOB Data
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/lob_data.html#lobhandling](https://node-oracledb.readthedocs.io/en/latest/user_guide/lob_data.html#lobhandling).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/lob_data.html#lobhandling)
 
 ### <a name="basiclobinsert"></a> 19.1 Simple Insertion of LOBs
 
@@ -2000,15 +2006,15 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="jsondatatype"></a> 20. Oracle Database JSON Data Type
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/json_data_type.html#jsondatatype](https://node-oracledb.readthedocs.io/en/latest/user_guide/json_data_type.html#jsondatatype).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/json_data_type.html#jsondatatype)
 
 ## <a name="xmltype"></a> 21. Working with XMLType
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/xml_data_type.html#xmltype](https://node-oracledb.readthedocs.io/en/latest/user_guide/xml_data_type.html#xmltype).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/xml_data_type.html#xmltype)
 
 ## <a name="bind"></a> 22. Bind Parameters for Prepared Statements
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/bind.html#bind](https://node-oracledb.readthedocs.io/en/latest/user_guide/bind.html#bind).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/bind.html#bind)
 
 ### <a name="inbind"></a> 22.1 IN Bind Parameters
 
@@ -2044,7 +2050,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="objects"></a> 23. Oracle Database Objects and Collections
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/objects.html#objects](https://node-oracledb.readthedocs.io/en/latest/user_guide/objects.html#objects).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/objects.html#objects)
 
 ### <a name="objectinsert"></a> 23.1 Inserting Objects
 
@@ -2084,7 +2090,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="batchexecution"></a> 24. Batch Statement Execution and Bulk Loading
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/batch_statement.html#batchexecution](https://node-oracledb.readthedocs.io/en/latest/user_guide/batch_statement.html#batchexecution).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/batch_statement.html#batchexecution)
 
 #### <a name="handlingbatcherrors"></a> Handling Data Errors with `executeMany()`
 
@@ -2096,15 +2102,15 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="transactionmgt"></a> 25. Transaction Management
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/txn_management.html#transactionmgt](https://node-oracledb.readthedocs.io/en/latest/user_guide/txn_management.html#transactionmgt).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/txn_management.html#transactionmgt)
 
 ## <a name="cqn"></a> 26. Continuous Query Notification (CQN)
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/cqn.html#cqn](https://node-oracledb.readthedocs.io/en/latest/user_guide/cqn.html#cqn).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/cqn.html#cqn)
 
 ## <a name="aq"></a> 27. Oracle Advanced Queuing (AQ)
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/aq.html#aq](https://node-oracledb.readthedocs.io/en/latest/user_guide/aq.html#aq).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/aq.html#aq)
 
 ### <a name="aqrawexample"></a> 27.1 Sending Simple AQ Messages
 
@@ -2132,11 +2138,11 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="nls"></a> 28. Globalization and National Language Support (NLS)
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/globalization.html#nls](https://node-oracledb.readthedocs.io/en/latest/user_guide/globalization.html#nls).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/globalization.html#nls)
 
 ## <a name="endtoend"></a> 29. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/tracing.html#endtoend](https://node-oracledb.readthedocs.io/en/latest/user_guide/tracing.html#endtoend).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/tracing.html#endtoend)
 
 #### <a name="drivernameview"></a> The Add-on Name
 
@@ -2144,7 +2150,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="sodaoverview"></a> 30. Simple Oracle Document Access (SODA)
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/soda.html#sodaoverview](https://node-oracledb.readthedocs.io/en/latest/user_guide/soda.html#sodaoverview).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/soda.html#sodaoverview)
 
 ### <a name="sodarequirements"></a> 30.1 Node-oracledb SODA Requirements
 
@@ -2180,7 +2186,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="startupshutdown"></a> 31. Database Start Up and Shut Down
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/startup.html#startupshutdown](https://node-oracledb.readthedocs.io/en/latest/user_guide/startup.html#startupshutdown).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/startup.html#startupshutdown)
 
 ### <a name="startupshutdownsimple"></a> 31.1 Simple Database Start Up and Shut Down
 
@@ -2196,7 +2202,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="tuning"></a> 32. Node-oracledb Tuning
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/tuning.html#tuning](https://node-oracledb.readthedocs.io/en/latest/user_guide/tuning.html#tuning).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/tuning.html#tuning)
 
 #### <a name="rowfetching"></a> 32.1 Tuning Fetch Performance
 
@@ -2216,15 +2222,15 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="bindtrace"></a> <a name="tracingsql"></a> 33. Tracing SQL and PL/SQL Statements
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/tracingsql.html#tracingsql](https://node-oracledb.readthedocs.io/en/latest/user_guide/tracingsql.html#tracingsql).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/tracingsql.html#tracingsql)
 
 ## <a name="twopc"></a> 34. Two-Phase Commits (TPC)
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/two_phase_commit.html#twopc](https://node-oracledb.readthedocs.io/en/latest/user_guide/two_phase_commit.html#twopc).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/two_phase_commit.html#twopc)
 
 ## <a name="programstyles"></a> 35. Node.js Programming Styles and node-oracledb
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/pgmstyle.html#programstyles](https://node-oracledb.readthedocs.io/en/latest/user_guide/pgmstyle.html#programstyles).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/pgmstyle.html#programstyles)
 
 ### <a name="callbackoverview"></a> <a name="examplequerycb"></a> 35.1 Callbacks and node-oracledb
 
@@ -2244,7 +2250,7 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="migrate"></a> 36. Migrating from Previous node-oracledb Releases
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/migrate.html#migrate](https://node-oracledb.readthedocs.io/en/latest/user_guide/migrate.html#migrate).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/migrate.html#migrate)
 
 ### <a name="migratev31v40"></a> 36.1 Migrating from node-oracledb 3.1 to node-oracledb 4.0
 
@@ -2268,4 +2274,4 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="otherresources"></a> 37. Useful Resources for Node-oracledb
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/resources.html#otherresources](https://node-oracledb.readthedocs.io/en/latest/user_guide/resources.html#otherresources).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/resources.html#otherresources)
