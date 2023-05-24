@@ -10,6 +10,11 @@ insert methods :meth:`sodaCollection.insertMany()` and
 :meth:`sodaCollection.insertManyAndGet()`
 are in Preview status.
 
+.. note::
+
+    In this release, SODA is only supported in the node-oracledb Thick mode.
+    See :ref:`enablingthick`.
+
 .. _sodacollectionproperties:
 
 SodaCollection Properties
@@ -19,20 +24,20 @@ Each SodaCollection object contains read-only properties:
 
 .. attribute:: sodaCollection.metaData
 
+    .. versionadded:: 3.0
+
     This read-only property is an object which contains the metaData of the
     current collection. See :ref:`SODA Client-Assigned Keys and
     Collection Metadata <sodaclientkeys>`.
-
-    .. versionadded:: 3.0
 
     Its type was changed to Object in node-oracledb 4.0.
 
 .. attribute:: sodaCollection.name
 
+    .. versionadded:: 3.0
+
     This read-only property is a string which specifies the name of the
     current collection.
-
-    .. versionadded:: 3.0
 
 .. _sodacollectionmethods:
 
@@ -40,6 +45,8 @@ SodaCollection Methods
 ======================
 
 .. method:: sodaCollection.createIndex()
+
+    .. versionadded:: 3.0
 
     **Promise**::
 
@@ -70,8 +77,6 @@ SodaCollection Methods
     See `Overview of SODA
     Indexing <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
     4848E6A0-58A7-44FD-8D6D-A033D0CCF9CB>`__.
-
-    .. versionadded:: 3.0
 
     As an example, if a collection has these documents::
 
@@ -137,6 +142,8 @@ SodaCollection Methods
 
 .. method:: sodaCollection.drop()
 
+    .. versionadded:: 3.0
+
     **Promise**::
 
         promise = drop();
@@ -170,8 +177,6 @@ SodaCollection Methods
     ``drop()`` or execute the SQL statement:
     ``SELECT DBMS_SODA.DROP_COLLECTION('myCollection') FROM DUAL;``.
 
-    .. versionadded:: 3.0
-
     **Callback**:
 
     If you are using the callback programming style::
@@ -204,6 +209,8 @@ SodaCollection Methods
 
 .. method:: sodaCollection.dropIndex()
 
+    .. versionadded:: 3.0
+
     **Promise**::
 
         promise = dropIndex(String indexName [, Object options]);
@@ -214,8 +221,6 @@ SodaCollection Methods
     then any open user transaction is committed.
     Note SODA operations do not commit an open transaction the way that SQL
     always does for DDL statements.
-
-    .. versionadded:: 3.0
 
     The parameters of the ``sodaCollection.dropIndex()`` method are:
 
@@ -273,6 +278,8 @@ SodaCollection Methods
 
 .. method:: sodaCollection.find()
 
+    .. versionadded:: 3.0
+
     .. code-block:: javascript
 
         find()
@@ -283,8 +290,6 @@ SodaCollection Methods
     via method chaining with non-terminal and terminal methods described
     below. Note that SodaOperation is an internal object whose attributes
     should not be accessed directly.
-
-    .. versionadded:: 3.0
 
     Returns a :ref:`SodaOperation <sodaoperationclass>` object.
 
@@ -332,6 +337,8 @@ with the key “c” is matched.
 
 .. method:: sodaOperation.fetchArraySize()
 
+    .. versionadded:: 5.0
+
     .. code-block:: javascript
 
         fetchArraySize(Number size)
@@ -349,11 +356,11 @@ with the key “c” is matched.
     For node-oracledb examples, see :ref:`SODA Query-by-Example Searches for
     JSON Documents <sodaqbesearches>`.
 
-    .. versionadded:: 5.0
-
     It requires Oracle Client 19.5 or later, and Oracle Database 18.3 or later.
 
 .. method:: sodaOperation.filter()
+
+    .. versionadded:: 3.0
 
     .. code-block:: javascript
 
@@ -371,9 +378,9 @@ with the key “c” is matched.
     For node-oracledb examples, see :ref:`SODA Query-by-Example Searches for JSON
     Documents <sodaqbesearches>`.
 
-    .. versionadded:: 3.0
-
 .. method:: sodaOperation.hint()
+
+    .. versionadded:: 5.2
 
     .. code-block:: javascript
 
@@ -393,12 +400,12 @@ with the key “c” is matched.
     Operations <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID
     -C941CE9D-97E1-42F8-91ED-4949B2B710BF>`__ for more information.
 
-    .. versionadded:: 5.2
-
     It requires Oracle Client 21.3 or higher (or Oracle Client 19 from
     19.11).
 
 .. method:: sodaOperation.key()
+
+    .. versionadded:: 3.0
 
     .. code-block:: javascript
 
@@ -410,9 +417,9 @@ with the key “c” is matched.
 
     SODA document keys are unique.
 
-    .. versionadded:: 3.0
-
 .. method:: sodaOperation.keys()
+
+    .. versionadded:: 3.0
 
     .. code-block:: javascript
 
@@ -426,9 +433,9 @@ with the key “c” is matched.
 
     A maximum of 1000 keys can be used.
 
-    .. versionadded:: 3.0
-
 .. method:: sodaOperation.limit()
+
+    .. versionadded:: 3.0
 
     .. code-block:: javascript
 
@@ -444,9 +451,9 @@ with the key “c” is matched.
     The ``limit()`` method cannot be used in conjunction with
     :meth:`~sodaOperation.count()`.
 
-    .. versionadded:: 3.0
-
 .. method:: sodaOperation.skip()
+
+    .. versionadded:: 3.0
 
     .. code-block:: javascript
 
@@ -463,9 +470,9 @@ with the key “c” is matched.
     ``getDocuments()``. It cannot be used with
     :meth:`~sodaOperation.count()`.
 
-    .. versionadded:: 3.0
-
 .. method:: sodaOperation.version()
+
+    .. versionadded:: 3.0
 
     .. code-block:: javascript
 
@@ -483,8 +490,6 @@ with the key “c” is matched.
     The application can then query to find the latest document version and
     apply any desired change.
 
-    .. versionadded:: 3.0
-
 .. _sodaoperationclassterm:
 
 Terminal SodaOperation Methods
@@ -495,6 +500,8 @@ satisfy the criteria specified by previous non-terminal methods in the
 method chain. Only one terminal method can be used in each chain.
 
 .. method:: sodaOperation.count()
+
+    .. versionadded:: 3.0
 
     **Promise**::
 
@@ -508,8 +515,6 @@ method chain. Only one terminal method can be used in each chain.
 
     If :attr:`oracledb.autoCommit` is *true*, and ``count()`` succeeds,
     then any open transaction on the connection is committed.
-
-    .. versionadded:: 3.0
 
     **Callback**:
 
@@ -543,6 +548,8 @@ method chain. Only one terminal method can be used in each chain.
 
 .. method:: sodaOperation.getCursor()
 
+    .. versionadded:: 3.0
+
     **Promise**::
 
         promise = getCursor()
@@ -561,8 +568,6 @@ method chain. Only one terminal method can be used in each chain.
     If :attr:`oracledb.autoCommit` is *true*, and
     ``getCursor()`` succeeds, then any open transaction on the connection is
     committed.
-
-    .. versionadded:: 3.0
 
     **Callback**:
 
@@ -590,6 +595,8 @@ method chain. Only one terminal method can be used in each chain.
 
 .. method:: sodaOperation.getDocuments()
 
+    .. versionadded:: 3.0
+
     **Promise**::
 
         promise = getDocuments();
@@ -603,8 +610,6 @@ method chain. Only one terminal method can be used in each chain.
 
     If :attr:`oracledb.autoCommit` is *true*, and ``getDocuments()``
     succeeds, then any open transaction on the connection is committed.
-
-    .. versionadded:: 3.0
 
     **Callback**:
 
@@ -632,6 +637,8 @@ method chain. Only one terminal method can be used in each chain.
 
 .. method:: sodaOperation.getOne()
 
+    .. versionadded:: 3.0
+
     **Promise**::
 
         promise = getOne();
@@ -644,8 +651,6 @@ method chain. Only one terminal method can be used in each chain.
 
     If :attr:`oracledb.autoCommit` is *true*, and ``getOne()`` succeeds, then
     any open transaction on the connection is committed.
-
-    .. versionadded:: 3.0
 
     **Callback**:
 
@@ -673,6 +678,8 @@ method chain. Only one terminal method can be used in each chain.
 
 .. method:: sodaOperation.remove()
 
+    .. versionadded:: 3.0
+
     **Promise**::
 
         promise = remove();
@@ -684,8 +691,6 @@ method chain. Only one terminal method can be used in each chain.
 
     If :attr:`oracledb.autoCommit` is *true*, and ``remove()`` succeeds, then
     removal and any open transaction on the connection is committed.
-
-    .. versionadded:: 3.0
 
     **Callback**:
 
@@ -719,6 +724,8 @@ method chain. Only one terminal method can be used in each chain.
 
 .. method:: sodaOperation.replaceOne()
 
+    .. versionadded:: 3.0
+
     **Promise**::
 
         promise = replaceOne(Object newDocumentContent);
@@ -745,8 +752,6 @@ method chain. Only one terminal method can be used in each chain.
 
     If :attr:`oracledb.autoCommit` is *true*, and ``replaceOne()`` succeeds,
     then any open transaction on the connection is committed.
-
-    .. versionadded:: 3.0
 
     The parameters of the ``sodaOperation.replaceOne()`` method are:
 
@@ -801,6 +806,8 @@ method chain. Only one terminal method can be used in each chain.
 
 .. method:: sodaOperation.replaceOneAndGet()
 
+    .. versionadded:: 3.0
+
     **Promise**::
 
         promise = replaceOneAndGet(Object newDocumentContent);
@@ -817,8 +824,6 @@ method chain. Only one terminal method can be used in each chain.
 
     If :attr:`oracledb.autoCommit` is *true*, and ``replaceOneAndGet()``
     succeeds, then any open transaction on the connection is committed.
-
-    .. versionadded:: 3.0
 
     The parameters of the ``sodaOperation.replaceOneAndGet()`` method are:
 
@@ -873,6 +878,8 @@ method chain. Only one terminal method can be used in each chain.
 
 .. method:: sodaCollection.getDataGuide()
 
+    .. versionadded:: 3.0
+
     **Promise**::
 
         promise = getDataGuide();
@@ -897,8 +904,6 @@ method chain. Only one terminal method can be used in each chain.
 
     If :attr:`oracledb.autoCommit` is *true*, and ``getDataGuide()``
     succeeds, then any open user transaction is committed.
-
-    .. versionadded:: 3.0
 
     **Callback**:
 
@@ -926,6 +931,8 @@ method chain. Only one terminal method can be used in each chain.
 
 .. method:: sodaCollection.insertMany()
 
+    .. versionadded:: 4.0
+
     **Promise**::
 
         promise = insertMany(Array newDocumentContentArray);
@@ -943,8 +950,6 @@ method chain. Only one terminal method can be used in each chain.
 
     This method is in Preview status and should not be used in production.
 
-    .. versionadded:: 4.0
-
     It requires Oracle Client 18.5 or higher.
 
     **Callback**:
@@ -955,6 +960,8 @@ method chain. Only one terminal method can be used in each chain.
         insertMany(Array newSodaDocumentArray, function(Error error){});
 
 .. method:: sodaCollection.insertManyAndGet()
+
+    .. versionadded:: 4.0
 
     **Promise**::
 
@@ -980,8 +987,6 @@ method chain. Only one terminal method can be used in each chain.
 
     This method is in Preview status and should not be used in production.
 
-    .. versionadded:: 4.0
-
     It requires Oracle Client 18.5 or higher. Use of the ``hint`` property
     requires Oracle Client 21.3 or higher (or Oracle Client 19 from 19.11).
 
@@ -996,6 +1001,8 @@ method chain. Only one terminal method can be used in each chain.
 
 .. method:: sodaCollection.insertOne()
 
+    .. versionadded:: 3.0
+
     **Promise**::
 
         promise = insertOne(Object newDocumentContent);
@@ -1008,8 +1015,6 @@ method chain. Only one terminal method can be used in each chain.
     If :attr:`oracledb.autoCommit` is *true*, and ``insertOne()`` succeeds,
     then the new document and any open transaction on the connection is
     committed.
-
-    .. versionadded:: 3.0
 
     The following examples are equivalent::
 
@@ -1073,6 +1078,8 @@ method chain. Only one terminal method can be used in each chain.
 
 .. method:: sodaCollection.insertOneAndGet()
 
+    .. versionadded:: 3.0
+
     **Promise**::
 
         promise = insertOneAndGet(Object newDocumentContent [, Object options ]);
@@ -1101,8 +1108,6 @@ method chain. Only one terminal method can be used in each chain.
 
     If :attr:`oracledb.autoCommit` is *true*, and ``insertOneAndGet()``
     succeeds, then any open transaction on the connection is committed.
-
-    .. versionadded:: 3.0
 
     This method accepts an options parameter from node-oracledb 5.2 onwards.
     Use of the ``hint`` property requires Oracle Client 21.3 or higher (or
@@ -1160,6 +1165,8 @@ method chain. Only one terminal method can be used in each chain.
 
 .. method:: sodaCollection.save()
 
+    .. versionadded:: 5.0
+
     **Promise**::
 
         promise = save(SodaDocument newSodaDocument);
@@ -1174,8 +1181,6 @@ method chain. Only one terminal method can be used in each chain.
     collection is not configured with client-assigned keys, then the
     behavior is exactly the same as ``sodaCollection.insertOne()``.
 
-    .. versionadded:: 5.0
-
     It requires Oracle Client 19.9 or later, and Oracle Database 18.3 or
     later.
 
@@ -1186,6 +1191,8 @@ method chain. Only one terminal method can be used in each chain.
         save(SodaDocument newSodaDocument, function(Error error){});
 
 .. method:: sodaCollection.saveAndGet()
+
+    .. versionadded:: 5.0
 
     **Promise**::
 
@@ -1211,8 +1218,6 @@ method chain. Only one terminal method can be used in each chain.
     Operations <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID
     -C941CE9D-97E1-42F8-91ED-4949B2B710BF>`__ for more information.
 
-    .. versionadded:: 5.0
-
     It requires Oracle Client 19.9 or later, and Oracle Database 18.3 or
     later. Use of the ``hint`` property requires Oracle Client 21.3 or higher
     (or Oracle Client 19 from 19.11).
@@ -1227,6 +1232,8 @@ method chain. Only one terminal method can be used in each chain.
 
 .. method:: sodaCollection.truncate()
 
+    .. versionadded:: 5.0
+
     **Promise**
 
     ::
@@ -1235,8 +1242,6 @@ method chain. Only one terminal method can be used in each chain.
 
     Truncates a collection, removing all documents. The collection will not
     be deleted.
-
-    .. versionadded:: 5.0
 
     It requires Oracle Client 20 or later, and Oracle Database 18.3 or later.
 

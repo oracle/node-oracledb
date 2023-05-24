@@ -1,8 +1,8 @@
 .. _jsondatatype:
 
-******************************
-Oracle Database JSON Data Type
-******************************
+***************
+Using JSON Data
+***************
 
 Oracle Database 12.1.0.2 introduced native support for JSON data. You
 can use JSON with relational database features, including transactions,
@@ -11,107 +11,125 @@ relationally, making it available for relational processes and tools.
 Also see :ref:`node-oracledb’s SODA API <sodaoverview>`, which allows
 access to JSON documents through a set of NoSQL-style APIs.
 
-Prior to Oracle Database 21, JSON in relational tables is stored as
-BLOB, CLOB or VARCHAR2 data, allowing easy access with node-oracledb.
-Oracle Database 21 introduced a dedicated JSON data type with a new
-`binary storage format <https://blogs.oracle.com/database/post/
-autonomous-json-database-under-the-covers-oson-format>`__
-that improves performance and functionality. To use the new dedicated
-JSON type, the Oracle Database and Oracle Client libraries must be
-version 21, or later. Also node-oracledb must be 5.1, or later.
-
 For more information about using JSON in Oracle Database see the
 `Database JSON Developer’s Guide <https://www.oracle.com/pls/topic/
 lookup?ctx=dblatest&id=ADJSN>`__.
 
-In Oracle Database 21, to create a table with a column called
-``PO_DOCUMENT`` for JSON data:
+**Oracle Database 12c JSON Data Type**
+
+Prior to Oracle Database 21, JSON in relational tables is stored as
+BLOB, CLOB or VARCHAR2 data, allowing easy access with node-oracledb.
+All of these types can be used with node-oracledb in Thin or Thick mode.
+
+The older syntax to create a table with a JSON column is like:
 
 .. code-block:: sql
 
-  CREATE TABLE j_purchaseorder (po_document JSON);
-
-For older Oracle Database versions the syntax is:
-
-.. code-block:: sql
-
-  CREATE TABLE j_purchaseorder (po_document BLOB CHECK (po_document IS JSON));
+    CREATE TABLE j_purchaseorder (po_document BLOB CHECK (po_document IS JSON));
 
 The check constraint with the clause ``IS JSON`` ensures only JSON data
 is stored in that column.
 
 The older syntax can still be used in Oracle Database 21, however the
 recommendation is to move to the new JSON type. With the old syntax, the
-storage can be BLOB, CLOB or VARCHAR2. Of these, BLOB is preferred to
+storage can be BLOB, CLOB, or VARCHAR2. Of these, BLOB is preferred to
 avoid character set conversion overheads.
 
-Using Oracle Database 21 and Oracle Client 21 with node-oracledb 5.1 (or
-later), you can insert JavaScript objects directly by binding as
-``oracledb.DB_TYPE_JSON``:
+**Oracle Database 21c JSON Data Type**
+
+Oracle Database 21c introduced a dedicated JSON data type with a new
+`binary storage format <https://blogs.oracle.com/database/post/
+autonomous-json-database-under-the-covers-oson-format>`__
+that improves performance and functionality. To use the new dedicated
+JSON type, you can use node-oracledb 5.1 or later. The 21c JSON data
+type can be used in both node-oracledb Thin and Thick modes. With Thick mode,
+the Oracle Client libraries must be version 21, or later.
+
+In Oracle Database 21 or later, to create a table with a column called
+``PO_DOCUMENT`` for JSON data:
+
+.. code-block:: sql
+
+    CREATE TABLE j_purchaseorder (po_document JSON);
+
+.. _json21ctype:
+
+Using the Oracle Database 21c JSON Type in node-oracledb
+========================================================
+
+Using node-oracledb Thin mode with Oracle Database 21c or later, or using
+node-oracledb Thick mode or node-oracledb 5.1 (or later) with Oracle Database
+21c (or later) and Oracle Client 21c (or later), you can insert JavaScript
+objects directly by binding as ``oracledb.DB_TYPE_JSON``:
 
 .. code-block:: javascript
 
-  const data = { "userId": 1, "userName": "Chris", "location": "Australia" };
+    const data = { "userId": 1, "userName": "Chris", "location": "Australia" };
 
-  await connection.execute(
-    `INSERT INTO j_purchaseorder (po_document) VALUES (:bv)`,
-    { bv: {val: data, type: oracledb.DB_TYPE_JSON} }
-  );
+    await connection.execute(
+        `INSERT INTO j_purchaseorder (po_document) VALUES (:bv)`,
+        { bv: {val: data, type: oracledb.DB_TYPE_JSON} }
+    );
 
-With the older BLOB storage, or to insert JSON strings:
+To query a JSON column, use:
 
 .. code-block:: javascript
 
-  const data = { "userId": 1, "userName": "Chris", "location": "Australia" };
-  const s = JSON.stringify(data);  // change JavaScript value to a JSON string
-  const b = Buffer.from(s, 'utf8');
+    const r = await conn.execute(`SELECT po_document FROM j_purchaseorder`);
+    console.dir(r.rows, { depth: null });
 
-  const result = await connection.execute(
-    `INSERT INTO j_purchaseorder (po_document) VALUES (:bv)`,
-    [b]  // bind the JSON string
-  );
+The output is::
 
-To query with Oracle Database 21 and Oracle Client 21, or later:
+    [
+        {
+            PO_DOCUMENT: '{"userId":1,"userName":"Chris","location":"Australia"}'
+        }
+    ]
 
-::
+Using Oracle Client Libraries 19 or Earlier
+-------------------------------------------
 
-  const r = await conn.execute(`SELECT po_document FROM j_purchaseorder`);
-  console.dir(r.rows, { depth: null });
-
-The output is:
-
-::
-
-  [
-    {
-      PO_DOCUMENT: '{"userId":1,"userName":"Chris","location":"Australia"}'
-    }
-  ]
-
-If node-oracledb uses Oracle Client Libraries 19 (or lower), querying an
-Oracle Database 21 (or later) JSON column returns a :ref:`Lob
-Class <lobclass>` BLOB. You can stream the Lob or use
+If node-oracledb uses Oracle Client Libraries 19 (or earlier), querying an
+Oracle Database 21 (or later), then JSON column returns a
+:ref:`Lob Class <lobclass>` BLOB. You can stream the Lob or use
 :meth:`lob.getData()`:
 
 .. code-block:: javascript
 
-  const result = await connection.execute(`SELECT po_document FROM j_purchaseorder`);,
+    const result = await connection.execute(`SELECT po_document FROM j_purchaseorder`);,
 
-  const lob = result.rows[0][0];  // just show first row
-  const d = await lob.getData();
-  const j = JSON.parse(d);
-  console.dir(j,  { depth: null });
+    const lob = result.rows[0][0];  // just show first row
+    const d = await lob.getData();
+    const j = JSON.parse(d);
+    console.dir(j,  { depth: null });
 
-The output is:
+The output is::
 
-::
-
-  { userId: 1, userName: 'Chris', location: 'Australia' }
+    { userId: 1, userName: 'Chris', location: 'Australia' }
 
 Note ``oracledb.fetchAsBuffer`` will not automatically convert the
 Oracle Database 21c JSON type to a Buffer. Using it will give
 *ORA-40569: Unimplemented JSON feature.* Use ``await lob.getData()`` as
-shown.
+shown above.
+
+.. _json12ctype:
+
+Using the Oracle Database 12c JSON Type in node-oracledb
+========================================================
+
+When using Oracle Database 12c or later with JSON using BLOB storage, you can
+insert JSON strings:
+
+.. code-block:: javascript
+
+    const data = { "userId": 1, "userName": "Chris", "location": "Australia" };
+    const s = JSON.stringify(data);  // change JavaScript value to a JSON string
+    const b = Buffer.from(s, 'utf8');
+
+    const result = await connection.execute(
+        `INSERT INTO j_purchaseorder (po_document) VALUES (:bv)`,
+        [b]  // bind the JSON string
+    );
 
 IN Bind Type Mapping
 ====================
@@ -126,6 +144,7 @@ there is no direct mapping from JavaScript.
 .. list-table-with-summary::
     :header-rows: 1
     :class: wy-table-responsive
+    :align: center
     :summary: The first column displays the JavaScript Type or Value. The second column displays the JSON Attribute Type or Value. The third column displays the SQL Equivalent Example.
 
     * - JavaScript Type or Value
@@ -184,34 +203,32 @@ there is no direct mapping from JavaScript.
       - ``json_scalar(to_binary_float(15.5))``
 
 
-An example of creating a CLOB attribute with key ``mydocument``\ in a
+An example of creating a CLOB attribute with key ``mydocument`` in a
 JSON column using SQL is:
 
 .. code-block:: javascript
 
-  const sql = `INSERT INTO mytab (myjsoncol)
-               VALUES (JSON_OBJECT(key 'mydocument' value JSON_SCALAR(TO_CLOB(:b)) RETURNING JSON))`;
-  await connection.execute(sql, ['A short CLOB']);
+    const sql = `INSERT INTO mytab (myjsoncol)
+                 VALUES (JSON_OBJECT(key 'mydocument' value JSON_SCALAR(TO_CLOB(:b)) RETURNING JSON))`;
+    await connection.execute(sql, ['A short CLOB']);
 
 When ``mytab`` is queried in node-oracledb, the CLOB data will be
 returned as a JavaScript String, as shown by the following table. Output
-might be like:
+might be like::
 
-::
-
-  { mydocument: 'A short CLOB' }
+    { mydocument: 'A short CLOB' }
 
 Query and OUT Bind Type Mapping
 ===============================
 
-When getting Oracle Database 21 JSON values from the database, the
+When getting Oracle Database 21 or later JSON values from the database, the
 following attribute mapping occurs:
 
 .. list-table-with-summary::
     :header-rows: 1
     :class: wy-table-responsive
     :align: center
-    :widths: 20 20
+    :width: 100%
     :summary: The first column displays the JavaScript Type or Value. The second column displays the JSON Attribute Type or Value. The third column displays the SQL Equivalent Example.
 
     * - Database JSON Attribute Type or Value
@@ -261,13 +278,12 @@ the JSON field ``friends``.
 For example, the previously created ``j_purchaseorder`` table with JSON
 column ``po_document`` can be queried like:
 
-::
+.. code-block:: sql
 
-  SELECT po.po_document.location FROM j_purchaseorder po
+    SELECT po.po_document.location FROM j_purchaseorder po
 
-With the JSON
-``'{"userId":1,"userName":"Chris","location":"Australia"}'`` stored in
-the table, a queried value would be ``Australia``.
+With the JSON ``'{"userId":1,"userName":"Chris","location":"Australia"}'``
+stored in the table, a queried value would be ``Australia``.
 
 The ``JSON_EXISTS`` function tests for the existence of a particular
 value within some JSON data. To look for JSON entries that have a
@@ -275,17 +291,15 @@ value within some JSON data. To look for JSON entries that have a
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-    `SELECT po_document FROM j_purchaseorder WHERE JSON_EXISTS (po_document, '$.location')`
-  );
-  const d = result.rows[0][0];      // show only first record in this example
-  console.dir(d, { depth: null });  // assumes Oracle Database and Client 21c
+    const result = await connection.execute(
+        `SELECT po_document FROM j_purchaseorder WHERE JSON_EXISTS (po_document, '$.location')`
+    );
+    const d = result.rows[0][0];      // show only first record in this example
+    console.dir(d, { depth: null });  // assumes Oracle Database and Client 21c
 
-This query displays:
+This query displays::
 
-::
-
-  { userId: 1, userName: 'Chris', location: 'Australia' }
+    { userId: 1, userName: 'Chris', location: 'Australia' }
 
 The SQL/JSON functions ``JSON_VALUE`` and ``JSON_QUERY`` can also be
 used.
@@ -301,31 +315,29 @@ in the Oracle JSON Developer’s Guide.
 Accessing Relational Data as JSON
 =================================
 
-In Oracle Database 12.2, or later, the `JSON_OBJECT <https://www.oracle.com/
+In Oracle Database 12.2 or later, the `JSON_OBJECT <https://www.oracle.com/
 pls/topic/lookup?ctx=dblatest&id=GUID-1EF347AE-7FDA-4B41-AFE0-DD5A49E8B370>`__
 function is a great way to convert relational table data to JSON:
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-    `SELECT JSON_OBJECT ('deptId' IS d.department_id, 'name' IS d.department_name) department
-     FROM departments d
-     WHERE department_id < :did
-     ORDER BY d.department_id`,
-    [50]
-  );
+    const result = await connection.execute(
+        `SELECT JSON_OBJECT ('deptId' IS d.department_id, 'name' IS d.department_name) department
+         FROM departments d
+         WHERE department_id < :did
+         ORDER BY d.department_id`,
+        [50]
+        );
 
-  for (const row of result.rows)
-    console.log(row[0]);
+    for (const row of result.rows)
+        console.log(row[0]);
 
-This produces:
+This produces::
 
-::
-
-  {"deptId":10,"name":"Administration"}
-  {"deptId":20,"name":"Marketing"}
-  {"deptId":30,"name":"Purchasing"}
-  {"deptId":40,"name":"Human Resources"}
+    {"deptId":10,"name":"Administration"}
+    {"deptId":20,"name":"Marketing"}
+    {"deptId":30,"name":"Purchasing"}
+    {"deptId":40,"name":"Human Resources"}
 
 Portable JSON
 =============
@@ -345,44 +357,44 @@ Create a table:
 
 .. code-block:: javascript
 
-  if (connection.oracleServerVersion >= 2100000000) {
-    await connection.execute(`CREATE TABLE mytab (mycol JSON)`);
-  } else if (connection.oracleServerVersion >= 1201000200) {
-    await connection.execute(`CREATE TABLE mytab (mycol BLOB CHECK (mycol IS JSON)) LOB (mycol) STORE AS (CACHE)`);
-  } else {
-    throw new Error('This application only works with Oracle Database 12.1.0.2 or greater');
-  }
+    if (connection.oracleServerVersion >= 2100000000) {
+        await connection.execute(`CREATE TABLE mytab (mycol JSON)`);
+    } else if (connection.oracleServerVersion >= 1201000200) {
+        await connection.execute(`CREATE TABLE mytab (mycol BLOB CHECK (mycol IS JSON)) LOB (mycol) STORE AS (CACHE)`);
+    } else {
+        throw new Error('This application only works with Oracle Database 12.1.0.2 or greater');
+    }
 
 Insert data:
 
 .. code-block:: javascript
 
-  const inssql = `INSERT INTO mytab (mycol) VALUES (:bv)`;
-  const data = { "userId": 2, "userName": "Anna", "location": "New Zealand" };
+    const inssql = `INSERT INTO mytab (mycol) VALUES (:bv)`;
+    const data = { "userId": 2, "userName": "Anna", "location": "New Zealand" };
 
-  if (oracledb.oracleClientVersion >= 2100000000 && connection.oracleServerVersion >= 2100000000 ) {
-    await connection.execute(inssql, { bv: { val: data, type: oracledb.DB_TYPE_JSON } });
-  } else {
-    const s = JSON.stringify(data);
-    const b = Buffer.from(s, 'utf8');
-    await connection.execute(inssql, { bv: { val: b } });
-  }
+    if (oracledb.oracleClientVersion >= 2100000000 && connection.oracleServerVersion >= 2100000000 ) {
+        await connection.execute(inssql, { bv: { val: data, type: oracledb.DB_TYPE_JSON } });
+    } else {
+        const s = JSON.stringify(data);
+        const b = Buffer.from(s, 'utf8');
+        await connection.execute(inssql, { bv: { val: b } });
+    }
 
 Query data:
 
 .. code-block:: javascript
 
-  const qrysql = `SELECT mycol
-                  FROM mytab
-                  WHERE JSON_EXISTS (mycol, '$.location')
-                  OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY`;
+    const qrysql = `SELECT mycol
+                    FROM mytab
+                    WHERE JSON_EXISTS (mycol, '$.location')
+                    OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY`;
 
-  result = await connection.execute(qrysql, [], { outFormat: oracledb.OUT_FORMAT_ARRAY });
-  if (result.metaData[0].fetchType == oracledb.DB_TYPE_JSON) {
-    j = result.rows[0][0];
-  } else {
-    const d = await result.rows[0][0].getData();
-    j = await JSON.parse(d);
-  }
+    result = await connection.execute(qrysql, [], { outFormat: oracledb.OUT_FORMAT_ARRAY });
+    if (result.metaData[0].fetchType == oracledb.DB_TYPE_JSON) {
+        j = result.rows[0][0];
+    } else {
+        const d = await result.rows[0][0].getData();
+        j = await JSON.parse(d);
+    }
 
-  console.dir(j, { depth: null });
+    console.dir(j, { depth: null });

@@ -1,11 +1,15 @@
 .. _objects:
 
-***************************************
-Oracle Database Objects and Collections
-***************************************
+*********************************************
+Using Oracle Database Objects and Collections
+*********************************************
 
 You can query and insert most Oracle Database objects and collections,
 with some :ref:`limitations <objectlimitations>`.
+
+Both the node-oracledb Thin and Thick modes support Oracle Database Objects.
+The node-oracledb Thin mode does not support Oracle Database Objects that
+contain LOBs.
 
 .. _objectinsert:
 
@@ -15,7 +19,8 @@ Inserting Objects
 Performance-sensitive applications should consider using scalar types
 instead of objects. If you do use objects, avoid calling
 :meth:`connection.getDbObjectClass()` unnecessarily, and avoid objects with
-large numbers of attributes.
+large numbers of attributes. Using the type's fully qualified name can help
+performance.
 
 As an example, the Oracle Spatial type
 `SDO_GEOMETRY <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
@@ -24,13 +29,13 @@ node-oracledb. Describing SDO_GEOMETRY in SQL*Plus shows:
 
 ::
 
-  Name                                      Null?    Type
-  ----------------------------------------- -------- ----------------------------
-  SDO_GTYPE                                          NUMBER
-  SDO_SRID                                           NUMBER
-  SDO_POINT                                          MDSYS.SDO_POINT_TYPE
-  SDO_ELEM_INFO                                      MDSYS.SDO_ELEM_INFO_ARRAY
-  SDO_ORDINATES                                      MDSYS.SDO_ORDINATE_ARRAY
+    Name                                      Null?    Type
+    ----------------------------------------- -------- ----------------------------
+    SDO_GTYPE                                          NUMBER
+    SDO_SRID                                           NUMBER
+    SDO_POINT                                          MDSYS.SDO_POINT_TYPE
+    SDO_ELEM_INFO                                      MDSYS.SDO_ELEM_INFO_ARRAY
+    SDO_ORDINATES                                      MDSYS.SDO_ORDINATE_ARRAY
 
 In Node.js, a call to :meth:`connection.getDbObjectClass()` returns a
 :ref:`DbObject prototype object <dbobjectclass>` representing the
@@ -38,78 +43,81 @@ database type:
 
 .. code-block:: javascript
 
-  const GeomType = await connection.getDbObjectClass("MDSYS.SDO_GEOMETRY");
-  console.log(GeomType.prototype);
+    const GeomType = await connection.getDbObjectClass("MDSYS.SDO_GEOMETRY");
+    console.log(GeomType.prototype);
 
 This gives::
 
-  DbObject {
-    schema: 'MDSYS',
-    name: 'SDO_GEOMETRY',
-    fqn: 'MDSYS.SDO_GEOMETRY',
-    attributes:
-     { SDO_GTYPE: { type: 2010, typeName: 'NUMBER' },
-       SDO_SRID: { type: 2010, typeName: 'NUMBER' },
-       SDO_POINT:
-        { type: 2023,
-          typeName: 'MDSYS.SDO_POINT_TYPE',
-          typeClass: [Object] },
-       SDO_ELEM_INFO:
-        { type: 2023,
-          typeName: 'MDSYS.SDO_ELEM_INFO_ARRAY',
-          typeClass: [Object] },
-       SDO_ORDINATES:
-        { type: 2023,
-          typeName: 'MDSYS.SDO_ORDINATE_ARRAY',
-          typeClass: [Object] } },
-    isCollection: false }
+    DbObject {
+        schema: 'MDSYS',
+        name: 'SDO_GEOMETRY',
+        fqn: 'MDSYS.SDO_GEOMETRY',
+        attributes:
+        { 	SDO_GTYPE: { type: 2010, typeName: 'NUMBER' },
+            SDO_SRID: { type: 2010, typeName: 'NUMBER' },
+            SDO_POINT:
+            {	type: 2023,
+                typeName: 'MDSYS.SDO_POINT_TYPE',
+                typeClass: [Object] },
+            SDO_ELEM_INFO:
+            { 	type: 2023,
+                typeName: 'MDSYS.SDO_ELEM_INFO_ARRAY',
+                typeClass: [Object] },
+            SDO_ORDINATES:
+            { 	type: 2023,
+                typeName: 'MDSYS.SDO_ORDINATE_ARRAY',
+                typeClass: [Object] } },
+            isCollection: false }
 
 The ``type`` value of 2023 corresponds to the ``oracledb.DB_TYPE_OBJECT``
 constant. The value 2010 corresponds to ``oracledb.DB_TYPE_NUMBER``.
 
 Now the object prototype has been found, an object can be created by
-passing a JavaScript object to the constructor. The case of the
-attributes is important:
+passing a JavaScript object to the constructor.
 
-.. code-block:: javascript
+.. note::
 
-  const geom = new GeomType(
-    {
-      SDO_GTYPE: 2003,
-      SDO_SRID: null,
-      SDO_POINT: null,
-      SDO_ELEM_INFO: [ 1, 1003, 3 ],
-      SDO_ORDINATES: [ 1, 1, 5, 7 ]
-    }
-  );
+    The case of the attributes is important.
 
 Attributes not assigned values will default to null. Extra attributes
 set that are not present in the database object will be ignored.
+
+.. code-block:: javascript
+
+    const geom = new GeomType(
+    	{
+            SDO_GTYPE: 2003,
+            SDO_SRID: null,
+            SDO_POINT: null,
+            SDO_ELEM_INFO: [ 1, 1003, 3 ],
+            SDO_ORDINATES: [ 1, 1, 5, 7 ]
+        }
+    );
 
 An alternative to instantiating the whole object at once is to set
 individual attributes:
 
 .. code-block:: javascript
 
-  const geom = new GeomType();
-  geom.S_GTYPE = 2003;
-  . . .
+    const geom = new GeomType();
+    geom.S_GTYPE = 2003;
+    . . .
 
 Once created, the DbObject in ``geom`` can then be bound for insertion.
 For example, if TESTGEOMETRY was created as:
 
 .. code-block:: sql
 
-  CREATE TABLE testgeometry (id NUMBER, geometry MDSYS.SDO_GEOMETRY)
+    CREATE TABLE testgeometry (id NUMBER, geometry MDSYS.SDO_GEOMETRY)
 
 Then the INSERT statement would be:
 
 .. code-block:: javascript
 
-  await connection.execute(
-    `INSERT INTO testgeometry (id, geometry) VALUES (:id, :g)`,
-    {id: 1, g: geom}
-  );
+    await connection.execute(
+        `INSERT INTO testgeometry (id, geometry) VALUES (:id, :g)`,
+        {id: 1, g: geom}
+    );
 
 Node-oracledb automatically detects the type for ``geom``.
 
@@ -119,22 +127,22 @@ as the bind value:
 
 .. code-block:: javascript
 
-  await connection.execute(
-    `INSERT INTO testgeometry (id, geometry) VALUES (:id, :g)`,
-    {
-      id: 1,
-      g: {
-        type: "MDSYS.SDO_GEOMETRY",
-        val: {
-                SDO_GTYPE: 2003,
-                SDO_SRID: null,
-                SDO_POINT: null,
-                SDO_ELEM_INFO: [ 1, 1003, 3 ],
-                SDO_ORDINATES: [ 1, 1, 5, 7 ]
-             }
+    await connection.execute(
+        `INSERT INTO testgeometry (id, geometry) VALUES (:id, :g)`,
+        {
+            id: 1,
+            g: {
+                type: "MDSYS.SDO_GEOMETRY",
+                val: {
+                    SDO_GTYPE: 2003,
+                    SDO_SRID: null,
+                    SDO_POINT: null,
+                    SDO_ELEM_INFO: [ 1, 1003, 3 ],
+                    SDO_ORDINATES: [ 1, 1, 5, 7 ]
+                }
+            }
         }
-    }
-  );
+    );
 
 For objects that are nested, such as SDO_GEOMETRY is, you only need to
 give the name of the top level object.
@@ -185,29 +193,29 @@ you use. For example:
 
 .. code-block:: javascript
 
-  result = await connection.execute(`SELECT geometry FROM testgeometry WHERE id = 1`);
-  o = result.rows[0][0];
-  console.log(o);
+    result = await connection.execute(`SELECT geometry FROM testgeometry WHERE id = 1`);
+    o = result.rows[0][0];
+    console.log(o);
 
 This gives::
 
-  [MDSYS.SDO_GEOMETRY] { SDO_GTYPE: 2003,
-    SDO_SRID: null,
-    SDO_POINT: null,
-    SDO_ELEM_INFO: [ 4, 1003, 3 ],
-    SDO_ORDINATES: [ 4, 8, 5, 9 ] }
+    [MDSYS.SDO_GEOMETRY] { SDO_GTYPE: 2003,
+        SDO_SRID: null,
+        SDO_POINT: null,
+        SDO_ELEM_INFO: [ 4, 1003, 3 ],
+        SDO_ORDINATES: [ 4, 8, 5, 9 ] }
 
 The SDO_ELEM_INFO attribute is itself a DbObject. The following code
 
 .. code-block:: javascript
 
-  console.log(o.SDO_ELEM_INFO);
+    console.log(o.SDO_ELEM_INFO);
 
 gives:
 
 ::
 
-  [MDSYS.SDO_ELEM_INFO_ARRAY] [ 1, 1003, 3 ]
+    [MDSYS.SDO_ELEM_INFO_ARRAY] [ 1, 1003, 3 ]
 
 If a DbObject is for an Oracle Database collection, the
 :attr:`dbObject.isCollection` attribute
@@ -215,16 +223,16 @@ will be true.
 
 .. code-block:: javascript
 
-  console.log(o.isCollection);                // false
-  console.log(o.SDO_ELEM_INFO.isCollection);  // true
+    console.log(o.isCollection);                // false
+    console.log(o.SDO_ELEM_INFO.isCollection);  // true
 
 For DbObjects representing Oracle collections, methods such as
 :meth:`dbObject.getKeys()` and :meth:`dbObject.getValues()` can be used:
 
 .. code-block:: javascript
 
-  console.log(o.SDO_ELEM_INFO.getKeys());    // [ 0, 1, 2 ]
-  console.log(o.SDO_ELEM_INFO.getValues());  // [ 1, 1003, 3 ]
+    console.log(o.SDO_ELEM_INFO.getKeys());    // [ 0, 1, 2 ]
+    console.log(o.SDO_ELEM_INFO.getValues());  // [ 1, 1003, 3 ]
 
 The options :attr:`~oracledb.fetchAsBuffer` and
 :attr:`oracledb.fetchAsString` do not affect values in
@@ -266,73 +274,73 @@ Given this table and PL/SQL package:
 
 .. code-block:: sql
 
-  DROP TABLE mytab;
+    DROP TABLE mytab;
 
-  CREATE TABLE mytab (id NUMBER, numcol NUMBER);
+    CREATE TABLE mytab (id NUMBER, numcol NUMBER);
 
-  CREATE OR REPLACE PACKAGE mypkg IS
-    TYPE numtype IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;
-    PROCEDURE myinproc(p_id IN NUMBER, vals IN numtype);
-    PROCEDURE myoutproc(p_id IN NUMBER, vals OUT numtype);
-  END;
-  /
-
-  CREATE OR REPLACE PACKAGE BODY mypkg IS
-
-    PROCEDURE myinproc(p_id IN NUMBER, vals IN numtype) IS
-    BEGIN
-      FORALL i IN INDICES OF vals
-        INSERT INTO mytab (id, numcol) VALUES (p_id, vals(i));
+    CREATE OR REPLACE PACKAGE mypkg IS
+        TYPE numtype IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;
+        PROCEDURE myinproc(p_id IN NUMBER, vals IN numtype);
+        PROCEDURE myoutproc(p_id IN NUMBER, vals OUT numtype);
     END;
+    /
 
-    PROCEDURE myoutproc(p_id IN NUMBER, vals OUT numtype) IS
-    BEGIN
-      SELECT numcol BULK COLLECT INTO vals FROM mytab WHERE id = p_id ORDER BY 1;
+    CREATE OR REPLACE PACKAGE BODY mypkg IS
+
+        PROCEDURE myinproc(p_id IN NUMBER, vals IN numtype) IS
+        BEGIN
+            FORALL i IN INDICES OF vals
+                INSERT INTO mytab (id, numcol) VALUES (p_id, vals(i));
+        END;
+
+        PROCEDURE myoutproc(p_id IN NUMBER, vals OUT numtype) IS
+        BEGIN
+            SELECT numcol BULK COLLECT INTO vals FROM mytab WHERE id = p_id ORDER BY 1;
+        END;
+
     END;
-
-  END;
-  /
+    /
 
 To bind an array in node-oracledb using “bind by name” syntax for
 insertion into ``mytab`` use:
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-    `BEGIN mypkg.myinproc(:id, :vals); END;`,
-    {
-      id: 1234,
-      vals: { type: oracledb.NUMBER,
-               dir: oracledb.BIND_IN,
-               val: [1, 2, 23, 4, 10]
-            }
-    });
+    const result = await connection.execute(
+        `BEGIN mypkg.myinproc(:id, :vals); END;`,
+        {
+            id: 1234,
+            vals: {	type: oracledb.NUMBER,
+                    dir: oracledb.BIND_IN,
+                    val: [1, 2, 23, 4, 10]
+                }
+        });
 
 Alternatively, “bind by position” syntax can be used:
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-   `BEGIN mypkg.myinproc(:id, :vals); END;`,
-   [
-     1234,
-     { type: oracledb.NUMBER,
-        dir: oracledb.BIND_IN,
-        val: [1, 2, 23, 4, 10]
-     }
-   ]);
+    const result = await connection.execute(
+    `BEGIN mypkg.myinproc(:id, :vals); END;`,
+    [
+        1234,
+        {	type: oracledb.NUMBER,
+            dir: oracledb.BIND_IN,
+            val: [1, 2, 23, 4, 10]
+        }
+    ]);
 
 After executing either of these ``mytab`` will contain:
 
 ::
 
        ID         NUMCOL
-   ---------- ----------
-         1234          1
-         1234          2
-         1234         23
-         1234          4
-         1234         10
+    ---------- ----------
+    	1234          1
+        1234          2
+        1234         23
+        1234          4
+        1234         10
 
 The :ref:`type <executebindparamtype>` must be set for PL/SQL array
 binds. It can be set to
@@ -378,34 +386,34 @@ these values:
 
 .. code-block:: sql
 
-  INSERT INTO mytab (id, numcol) VALUES (99, 10);
-  INSERT INTO mytab (id, numcol) VALUES (99, 25);
-  INSERT INTO mytab (id, numcol) VALUES (99, 50);
-  COMMIT;
+    INSERT INTO mytab (id, numcol) VALUES (99, 10);
+    INSERT INTO mytab (id, numcol) VALUES (99, 25);
+    INSERT INTO mytab (id, numcol) VALUES (99, 50);
+    COMMIT;
 
 With these values, the following node-oracledb code will print
 ``[ 10, 25, 50 ]``.
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-    `BEGIN mypkg.myoutproc(:id, :vals); END;`,
-    {
-      id: 99,
-      vals: { type: oracledb.NUMBER,
-              dir:  oracledb.BIND_OUT,
-              maxArraySize: 10          // allocate memory to hold 10 numbers
-          }
-    }
-  );
+    const result = await connection.execute(
+        `BEGIN mypkg.myoutproc(:id, :vals); END;`,
+        {
+            id: 99,
+            vals: {	type: oracledb.NUMBER,
+                    dir:  oracledb.BIND_OUT,
+                    maxArraySize: 10          // allocate memory to hold 10 numbers
+                }
+        }
+    );
 
-  console.log(result.outBinds.vals);
+    console.log(result.outBinds.vals);
 
 If ``maxArraySize`` was reduced to ``2``, the script would fail with:
 
 ::
 
-  ORA-06513: PL/SQL: index for PL/SQL table out of range for host language array
+    ORA-06513: PL/SQL: index for PL/SQL table out of range for host language array
 
 See :ref:`Oracledb Constants <oracledbconstants>` and :ref:`execute(): Bind
 Parameters <executebindParams>` for more information about binding.
@@ -422,77 +430,77 @@ Given a table with a VARRAY column:
 
 .. code-block:: sql
 
-  CREATE TYPE playertype AS OBJECT (
-      shirtnumber  NUMBER,
-      name         VARCHAR2(20));
-  /
+    CREATE TYPE playertype AS OBJECT (
+        shirtnumber  NUMBER,
+        name         VARCHAR2(20));
+    /
 
-  CREATE TYPE teamtype AS VARRAY(10) OF playertype;
-  /
+    CREATE TYPE teamtype AS VARRAY(10) OF playertype;
+    /
 
-  CREATE TABLE sports (sportname VARCHAR2(20), team teamtype);
+    CREATE TABLE sports (sportname VARCHAR2(20), team teamtype);
 
 You can insert values using:
 
 .. code-block:: javascript
 
-  await connection.execute(
-    `INSERT INTO sports (sportname, team) VALUES (:sn, :t)`,
-    {
-      sn: "Hockey",
-      t:
-      {
-        type: "TEAMTYPE",
-        val:
-        [
-          {SHIRTNUMBER: 11, NAME: 'Georgia'},
-          {SHIRTNUMBER: 22, NAME: 'Harriet'}
-        ]
-      }
-    }
-  );
+    await connection.execute(
+        `INSERT INTO sports (sportname, team) VALUES (:sn, :t)`,
+        {
+            sn: "Hockey",
+            t:
+            {
+                type: "TEAMTYPE",
+                val:
+                [
+                    {SHIRTNUMBER: 11, NAME: 'Georgia'},
+                    {SHIRTNUMBER: 22, NAME: 'Harriet'}
+                ]
+            }
+        }
+    );
 
   // Alternatively:
 
-  TeamTypeClass = await connection.getDbObjectClass("TEAMTYPE");
+    TeamTypeClass = await connection.getDbObjectClass("TEAMTYPE");
 
-  hockeyTeam = new TeamTypeClass(
-    [
-      {SHIRTNUMBER: 22, NAME: 'Elizabeth'},
-      {SHIRTNUMBER: 33, NAME: 'Frank'},
-    ]
-  );
+    hockeyTeam = new TeamTypeClass(
+        [
+            {SHIRTNUMBER: 22, NAME: 'Elizabeth'},
+            {SHIRTNUMBER: 33, NAME: 'Frank'},
+        ]
+    );
 
-  await connection.execute(
-    `INSERT INTO sports (sportname, team) VALUES (:sn, :t)`,
-    {
-      sn: "Hockey",
-      t: hockeyTeam
-    });
+    await connection.execute(
+        `INSERT INTO sports (sportname, team) VALUES (:sn, :t)`,
+        {
+            sn: "Hockey",
+            t: hockeyTeam
+        });
 
 Querying the table could be done like:
 
 .. code-block:: javascript
 
-  result = await connection.execute(
-    `SELECT sportname, team FROM sports`,
-    [],
-    {
-      outFormat: oracledb.OUT_FORMAT_OBJECT
+    result = await connection.execute(
+        `SELECT sportname, team FROM sports`,
+        [],
+        {
+            outFormat: oracledb.OUT_FORMAT_OBJECT
+        }
+    );
+    for (row of result.rows) {
+        console.log("The " + row.SPORTNAME + " team players are:");
+        for (const player of row.TEAM) {
+            console.log("  " + player.NAME);
+        }
     }
-  );
-  for (row of result.rows) {
-    console.log("The " + row.SPORTNAME + " team players are:");
-    for (const player of row.TEAM) {
-      console.log("  " + player.NAME);
-    }
-  }
 
 The output would be::
 
-  The Hockey team players are:
-    Elizabeth
-    Frank
+    The Hockey team players are:
+        Elizabeth
+        Frank
 
 See `selectvarray.js <https://github.com/oracle/node-oracledb/tree/main/
 examples/selectvarray.js>`__ for a runnable example.
@@ -506,42 +514,42 @@ Given a nested table ``staffList``:
 
 .. code-block:: sql
 
-  CREATE TABLE bonuses (id NUMBER, name VARCHAR2(20));
+    CREATE TABLE bonuses (id NUMBER, name VARCHAR2(20));
 
-  CREATE OR REPLACE PACKAGE personnel AS
-    TYPE staffList IS TABLE OF bonuses%ROWTYPE;
-    PROCEDURE awardBonuses (goodStaff staffList);
-  END personnel;
-  /
+    CREATE OR REPLACE PACKAGE personnel AS
+        TYPE staffList IS TABLE OF bonuses%ROWTYPE;
+        PROCEDURE awardBonuses (goodStaff staffList);
+    END personnel;
+    /
 
-  CREATE OR REPLACE PACKAGE BODY personnel AS
-    PROCEDURE awardBonuses (goodStaff staffList) IS
-    BEGIN
-      FORALL i IN INDICES OF goodStaff
-        INSERT INTO bonuses (id, name) VALUES (goodStaff(i).id, goodStaff(i).name);
+    CREATE OR REPLACE PACKAGE BODY personnel AS
+        PROCEDURE awardBonuses (goodStaff staffList) IS
+        BEGIN
+            FORALL i IN INDICES OF goodStaff
+                INSERT INTO bonuses (id, name) VALUES (goodStaff(i).id, goodStaff(i).name);
+        END;
     END;
-  END;
-  /
+    /
 
 you can call ``awardBonuses()`` like:
 
 .. code-block:: javascript
 
-  plsql = `CALL personnel.awardBonuses(:gsbv)`;
+    plsql = `CALL personnel.awardBonuses(:gsbv)`;
 
-  binds = {
-    gsbv:
-    {
-      type: "PERSONNEL.STAFFLIST",
-      val:
-        [
-          {ID: 1, NAME: 'Chris' },
-          {ID: 2, NAME: 'Sam' }
-        ]
-    }
-  };
+    binds = {
+        gsbv:
+        {
+            type: "PERSONNEL.STAFFLIST",
+            val:
+            [
+                {ID: 1, NAME: 'Chris' },
+                {ID: 2, NAME: 'Sam' }
+            ]
+        }
+    };
 
-  await connection.execute(plsql, binds);
+    await connection.execute(plsql, binds);
 
 Similar with other objects, calling
 :meth:`connection.getDbObjectClass()` and using a constructor
@@ -557,20 +565,20 @@ uses the PL/SQL package:
 
 .. code-block:: sql
 
-  CREATE OR REPLACE PACKAGE seachange AS
-    TYPE shiptype IS RECORD (shipname VARCHAR2(40), weight NUMBER);
-    PROCEDURE biggership (p_in IN shiptype, p_out OUT shiptype);
-  END seachange;
-  /
+    CREATE OR REPLACE PACKAGE seachange AS
+        TYPE shiptype IS RECORD (shipname VARCHAR2(40), weight NUMBER);
+        PROCEDURE biggership (p_in IN shiptype, p_out OUT shiptype);
+    END seachange;
+    /
 
-  CREATE OR REPLACE PACKAGE BODY seachange AS
-    PROCEDURE biggership (p_in IN shiptype, p_out OUT shiptype) AS
-    BEGIN
-       p_out := p_in;
-       p_out.weight := p_out.weight * 2;
-    END;
-  END seachange;
-  /
+    CREATE OR REPLACE PACKAGE BODY seachange AS
+        PROCEDURE biggership (p_in IN shiptype, p_out OUT shiptype) AS
+        BEGIN
+            p_out := p_in;
+            p_out.weight := p_out.weight * 2;
+        END;
+    END seachange;
+    /
 
 Similar to previous examples, you can use a prototype DbObject from
 ``getdbobjectclass()`` for binding, or pass an Oracle type name.
@@ -583,23 +591,23 @@ object class is passed for the output bind ``type``:
 
 .. code-block:: javascript
 
-  ShipTypeClass = await connection.getDbObjectClass("SEACHANGE.SHIPTYPE");
+    ShipTypeClass = await connection.getDbObjectClass("SEACHANGE.SHIPTYPE");
 
-  vessel = new ShipTypeClass({ SHIPNAME: 'BoatFace', WEIGHT: 1200 });
+    vessel = new ShipTypeClass({ SHIPNAME: 'BoatFace', WEIGHT: 1200 });
 
-  binds = {
-    inbv: vessel,
-    outbv: { type: ShipTypeClass, dir: oracledb.BIND_OUT }
-  };
+    binds = {
+        inbv: vessel,
+        outbv: { type: ShipTypeClass, dir: oracledb.BIND_OUT }
+    };
 
-  result = await connection.execute(`CALL seachange.biggership(:inbv, :outbv)`, binds);
-  console.log(result.outBinds.outbv.SHIPNAME, result.outBinds.outbv.WEIGHT);
+    result = await connection.execute(`CALL seachange.biggership(:inbv, :outbv)`, binds);
+    console.log(result.outBinds.outbv.SHIPNAME, result.outBinds.outbv.WEIGHT);
 
 The output shows the increased ship size:
 
 ::
 
-  BoatFace 2400
+    BoatFace 2400
 
 See `plsqlrecord.js <https://github.com/oracle/node-oracledb/tree/main/
 examples/plsqlrecord.js>`__ for a runnable example.

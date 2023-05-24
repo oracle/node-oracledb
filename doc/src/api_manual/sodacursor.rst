@@ -8,12 +8,19 @@ A SodaDocumentCursor is used to walk through a set of SODA documents
 returned from a :meth:`sodaCollection.find()`
 :meth:`sodaOperation.getCursor()` method.
 
+.. note::
+
+    In this release, SODA is only supported in the node-oracledb Thick mode.
+    See :ref:`enablingthick`.
+
 .. _sodadoccursormethods:
 
 SodaDocumentCursor Methods
 ==========================
 
 .. method:: sodaDocumentCursor.close()
+
+    .. versionadded:: 3.0
 
     **Promise**::
 
@@ -22,8 +29,6 @@ SodaDocumentCursor Methods
     Closes a SodaDocumentCursor. It must be called when the cursor is no
     longer required. It releases resources in node-oracledb and Oracle
     Database.
-
-    .. versionadded:: 3.0
 
     **Callback**:
 
@@ -48,6 +53,8 @@ SodaDocumentCursor Methods
 
 .. method:: sodaDocumentCursor.getNext()
 
+    .. versionadded:: 3.0
+
     **Promise**::
 
         promise = getNext();
@@ -58,8 +65,6 @@ SodaDocumentCursor Methods
 
     If there are no more documents, the returned ``document`` parameter will
     be undefined.
-
-    .. versionadded:: 3.0
 
     **Callback**:
 

@@ -1,7 +1,7 @@
 .. _tuning:
 
 ********************
-Node-oracledb Tuning
+Tuning node-oracledb
 ********************
 
 Some general tuning tips are:
@@ -64,114 +64,93 @@ Some general tuning tips are:
 Tuning Fetch Performance
 ========================
 
-To tune queries you can adjust node-oracledb’s internal buffer sizes to
-improve the speed of fetching rows across the network from the database,
-and to optimize memory usage. Regardless of which node-oracledb function
-is used to get query results, internally all rows are fetched in batches
-from the database and buffered before being returned to the application.
-The internal buffer sizes can have a significant performance impact. The
-sizes do not affect how, or when, rows are returned to your application.
-They do not affect the minimum or maximum number of rows returned by a
-query.
-
-For best performance, tune “array fetching” with
-:ref:`fetchArraySize <propexecfetcharraysize>` and “row prefetching”
-with :ref:`prefetchRows <propexecprefetchrows>` in each
-:meth:`connection.execute()` or :meth:`connection.queryStream()` call.
-Note when using :meth:`getRows(numRows) <resultset.getrows()>`, where
-``numRows`` is greater than 0, then tuning of “array fetching” is based on
-the ``numRows`` value instead of ``fetchArraySize``. Also note that queries
+To tune queries, you can adjust node-oracledb's internal buffer sizes to
+improve the speed of fetching rows across the network from the database, and to
+optimize memory usage.  This can reduce :ref:`round-trips <roundtrips>` which
+helps performance and scalability.  Tune "array fetching" with
+:ref:`fetchArraySize <propexecfetcharraysize>` and tune "row prefetching" with
+:ref:`prefetchRows <propexecprefetchrows>` in each :meth:`connection.execute()`
+or :meth:`connection.queryStream()` call.  In node-oracledb Thick mode, the
+internal buffers allocated for ``prefetchRows`` and ``arraysize`` are separate,
+so increasing both settings will require more Node.js process memory.  Queries
 that return LOBs and similar types will never prefetch rows, so the
-``prefetchRows`` value is ignored in those cases.
+``prefetchRows`` value is ignored in those cases. Note when using
+:meth:`getRows(numRows) <resultset.getrows()>`, where ``numRows`` is greater
+than 0, then tuning of "array fetching" is based on the ``numRows`` value
+instead of ``fetchArraySize``.
 
-The common query tuning scenario is for SELECT statements that return a
-large number of rows over a slow network. Increasing ``fetchArraySize``
-can improve performance by reducing the number of
-:ref:`round-trips <roundtrips>` to the database. However increasing this
-value increases the amount of memory required. Adjusting
-``prefetchRows`` will also affect performance and memory usage.
+The internal buffer sizes do not affect how or when rows are returned to your
+application.  They do not affect the minimum or maximum number of rows returned
+by a query.
 
-Row prefetching and array fetching are both internal buffering
-techniques to reduce :ref:`round-trips <roundtrips>` to the database. The
-difference is the code layer that is doing the buffering, and when the
-buffering occurs. The Oracle Client libraries used by node-oracledb have
-separate “execute SQL statement” and “fetch data” calls. Prefetching
-allows query results to be returned to the application when the
-successful statement execution acknowledgement is returned from the
-database. This means that a subsequent internal “fetch data” operation
-does not always need to make a round-trip to the database because rows
-are already buffered in the Oracle Client libraries. Reducing
-round-trips helps performance and scalability. An overhead of
-prefetching is the need for an additional data copy from Oracle Client’s
-prefetch buffers.
+The difference between row prefetching and array fetching is when the internal
+buffering occurs.  Internally node-oracledb performs separate "execute SQL
+statement" and "fetch data" steps.  Prefetching allows query results to be
+returned to the application when the acknowledgment of successful statement
+execution is returned from the database.  This means that the subsequent
+internal "fetch data" operation does not always need to make a round-trip to
+the database because rows are already buffered in node-oracledb or in the
+Oracle Client libraries.  An overhead of prefetching when using the
+node-oracledb Thick mode is the need for additional data copies from Oracle
+Client's prefetch buffer when fetching the first batch of rows.  This cost may
+outweigh the benefits of using prefetching in some cases.
 
 Choosing values for ``fetchArraySize`` and ``prefetchRows``
 -----------------------------------------------------------
 
-The best ``fetchArraySize`` and ``prefetchRows`` values can be found by
-experimenting with your application under the expected load of normal
-application use. This is because the cost of the extra memory copy from
-the prefetch buffers when fetching a large quantity of rows or very
-“wide” rows may outweigh the cost of a round-trip for a single
-node-oracledb user on a fast network. However under production
-application load, the reduction of round-trips may help performance and
-overall system scalability. The documentation in :ref:`Database
-Round-trips <roundtrips>` shows how to measure round-trips.
+The best :ref:`fetchArraySize <propexecfetcharraysize>` and :ref:`prefetchRows
+<propexecprefetchrows>` values can be found by experimenting with your
+application under the expected load of normal application use. The reduction of
+round-trips may help performance and overall system scalability. The
+documentation in :ref:`round-trips <roundtrips>` shows how to measure
+round-trips.
 
-Here are some suggestions for the starting point to begin your tuning:
+Here are some suggestions for tuning:
 
--  To tune queries that return an unknown number of rows, estimate the
-   number of rows returned and choose an appropriate value for
-   ``fetchArraySize``. Then set ``prefetchRows`` to the same value. For
+-  To tune queries that return an unknown number of rows, estimate the number
+   of rows returned and increase the value of ``fetchArraySize`` for best
+   performance, memory and round-trip usage.  The default is 100.  For
    example:
 
    .. code-block:: javascript
 
-    const sql = `SELECT *
-                 FROM very_big_table`;
+     const sql = `SELECT *
+                  FROM very_big_table`;
 
-    const binds = [];
+     const binds = [];
 
-    const options = { prefetchRows: 1000, fetchArraySize: 1000, resultSet: true };
+     const options = { fetchArraySize: 1000, resultSet: true };
 
-    const result = await connection.execute(sql, binds, options);
+     const result = await connection.execute(sql, binds, options);
 
-   The default ``fetchArraySize`` is 100 and the default
-   ``prefetchRows`` is 2. Adjust the values as needed for performance,
-   memory and round-trip usage. The sizes used will affect memory
-   allocation of buffers, so do not make the sizes unnecessarily large.
-   For example, if your query always returns under 500 rows, then avoid
-   setting ``fetchArraySize`` to 10000.
+   In general for this scenario, leave ``prefetchRows`` at its default value.
+   If you do change it, then set ``fetchArraySize`` as big, or bigger.  Do not
+   make the sizes unnecessarily large.  For example, if your query always
+   returns under 500 rows, then avoid setting ``fetchArraySize`` to 10000.
+   Very large values are unlikely to improve performance.
 
-   In this scenario, aim to keep ``fetchArraySize`` equal to
-   ``prefetchRows``. However, for a large quantity of rows or very
-   “wide” rows on fast networks you may prefer to leave ``prefetchRows``
-   at its default value.
-
--  If you are fetching a fixed number of rows, start your tuning by
-   setting ``fetchArraySize`` to the number of expected rows, and set
-   ``prefetchRows`` to one greater than this value. Adding one removes
-   the need for a round-trip to check for end-of-fetch.
-
-   For example, if you are querying 20 rows, perhaps to :ref:`display a
-   page <pagingdata>` of data, then set ``prefetchRows`` to 21 and
-   ``fetchArraySize`` to 20:
+-  If you are fetching a fixed number of rows, set ``fetchArraySize`` to the
+   number of expected rows, and set ``prefetchRows`` to one greater than this
+   value. Adding one removes the need for a round-trip to check for
+   end-of-fetch.  For example, if you are querying 20 rows, perhaps to
+   :ref:`display a page <pagingdata>` of data, then set ``prefetchRows`` to 21
+   and ``fetchArraySize`` to 20:
 
    .. code-block:: javascript
 
-    const myoffset = 0;       // do not skip any rows (start at row 1)
-    const mymaxnumrows = 20;  // get 20 rows
+     const myoffset = 0;       // do not skip any rows (start at row 1)
+     const mymaxnumrows = 20;  // get 20 rows
 
-    const sql = `SELECT last_name
-                 FROM employees
-                 ORDER BY last_name
-                 OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`;
+     const sql = `SELECT last_name
+                  FROM employees
+                  ORDER BY last_name
+                  OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`;
 
-    const binds = { offset: myoffset, maxnumrows: mymaxnumrows };
+     const binds = { offset: myoffset, maxnumrows: mymaxnumrows };
 
-    const options = { prefetchRows: mymaxnumrows + 1, fetchArraySize: mymaxnumrows };
+     const options = { prefetchRows: mymaxnumrows + 1, fetchArraySize: mymaxnumrows };
 
-    const result = await connection.execute(sql, binds, options);
+     const result = await connection.execute(sql, binds, options);
 
    This will return all rows for the query in one round-trip.
 
@@ -182,15 +161,15 @@ Here are some suggestions for the starting point to begin your tuning:
 
    .. code-block:: javascript
 
-    const sql = `SELECT last_name
-                 FROM employees
-                 WHERE employee_id = :bv`;
+     const sql = `SELECT last_name
+                  FROM employees
+                  WHERE employee_id = :bv`;
 
-    const binds = [100];
+     const binds = [100];
 
-    const options = { fetchArraySize: 1 };
+     const options = { fetchArraySize: 1 };
 
-    const result = await connection.execute(sql, binds, options);
+     const result = await connection.execute(sql, binds, options);
 
 There are two cases that will benefit from disabling row prefetching by
 setting ``prefetchRows`` to 0:
@@ -220,14 +199,16 @@ first tuning choice.
 Database Round-trips
 ====================
 
-A round-trip is defined as the trip from the Oracle Client libraries
-(used by node-oracledb) to the database and back. Calling each
-node-oracledb function, or accessing each attribute, will require zero
-or more round-trips. Along with tuning an application’s architecture and
-`tuning its SQL statements <https://www.oracle.com/pls/topic/lookup?
-ctx=dblatest&id=TGSQL>`__, a general performance and scalability goal is
-to minimize `round-trips <https://www.oracle.com/pls/topic/lookup?ctx=
-dblatest&id=GUID-9B2F05F9-D841-4493-A42D-A7D89694A2D1>`__.
+A round-trip is defined as the travel of a message from node-oracledb to the
+database and back. Calling each node-oracledb function, or accessing each
+attribute, will require zero or more round-trips. For example, inserting a
+simple row involves sending data to the database and getting a success
+response back. This is a round-trip. Along with tuning an application’s
+architecture and `tuning its SQL statements <https://www.oracle.com/pls/
+topic/lookup?ctx=dblatest&id=TGSQL>`__, a general performance and
+scalability goal is to minimize `round-trips <https://www.oracle.com/pls/
+topic/lookup?ctx=dblatest&id=GUID-9B2F05F9-D841-4493-A42D-A7D89694A2D1>`__
+because they impact application performance and overall system scalability.
 
 Some general tips for reducing round-trips are:
 
@@ -408,7 +389,7 @@ For example:
   await oracledb.createPool({
     user              : "hr",
     password          : mypw,               // mypw contains the hr schema password
-    connectString     : "localhost/XEPDB1",
+    connectString     : "localhost/FREEPDB1",
     stmtCacheSize     : 50
   });
 
@@ -505,6 +486,11 @@ the same query is re-executed. This is useful for reducing the cost of queries
 for small, mostly static, lookup tables, such as for postal codes. CRC reduces
 network :ref:`round-trips <roundtrips>` and also reduces database server
 CPU usage.
+
+.. note::
+
+    In this release, Client Result Caching is only supported in the
+    node-oracledb Thick mode. See :ref:`enablingthick`.
 
 The cache is at the application process level. Access and invalidation
 is managed by the Oracle Client libraries. This removes the need for

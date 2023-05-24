@@ -1,8 +1,8 @@
 .. _cqn:
 
-***********************************
-Continuous Query Notification (CQN)
-***********************************
+************************************************
+Working with Continuous Query Notification (CQN)
+************************************************
 
 `Continuous Query Notification (CQN) <https://www.oracle.com/pls/topic/
 lookup?ctx=dblatest&id=GUID-373BAF72-3E63-42FE-8BEA-8A2AEFBF1C35>`__
@@ -12,6 +12,11 @@ application that made the change. For example your application may be
 interested in knowing if a table used for lookup data has changed so
 that the application can update a local cache of that table. CQN can
 invoke a JavaScript method, which can perform the action.
+
+.. note::
+
+    In this release, CQN is only supported in node-oracledb Thick mode. See
+    :ref:`enablingthick`.
 
 CQN is suitable for infrequently modified tables. It is recommended to
 avoid frequent subscription and unsubscription.
@@ -45,24 +50,24 @@ query and a JavaScript callback:
 
 .. code-block:: javascript
 
-   const connection = await oracledb.getConnection({
-       user          : "hr",
-       password      : mypw,  // mypw contains the hr schema password
-       connectString : "localhost/XEPDB1",
-       events        : true
-   });
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "localhost/FREEPDB1",
+        events        : true
+    });
 
-   function myCallback(message) {
-       console.log(message);
-   }
+    function myCallback(message) {
+        console.log(message);
+    }
 
-   const options = {
-       sql      : `SELECT * FROM mytable`,  // query of interest
-       callback : myCallback                // method called by notifications
-       clientInitiated : true               // For Oracle DB & Client 19.4 or later
-   };
+    const options = {
+        sql      : `SELECT * FROM mytable`,  // query of interest
+        callback : myCallback                // method called by notifications
+        clientInitiated : true               // For Oracle DB & Client 19.4 or later
+    };
 
-   await connection.subscribe('mysub', options);
+    await connection.subscribe('mysub', options);
 
 In this example, whenever a change to ``mytable`` is committed then
 ``myCallback()`` is invoked. The callback
@@ -106,11 +111,11 @@ query and commits. For example:
 
 .. code-block:: javascript
 
-   const options = {
-       sql      : `SELECT * FROM mytable WHERE key > 100`,  // query of interest
-       callback : myCallback,                               // method called by notifications
-       qos      : oracledb.SUBSCR_QOS_QUERY                 // CQN
-   };
+    const options = {
+        sql      : `SELECT * FROM mytable WHERE key > 100`,  // query of interest
+        callback : myCallback,                               // method called by notifications
+        qos      : oracledb.SUBSCR_QOS_QUERY                 // CQN
+    };
 
 In this example, if a new ``key`` of 10 was inserted then no
 notification would be generated. If a key wth ``200`` was inserted, then
@@ -120,9 +125,9 @@ Before using CQN, users must have appropriate permissions, for example:
 
 .. code-block:: sql
 
-   SQL> CONNECT system
+    SQL> CONNECT system
 
-   SQL> GRANT CHANGE NOTIFICATION TO hr;
+    SQL> GRANT CHANGE NOTIFICATION TO hr;
 
 Below is an example of CQN that uses object-level notification and
 grouped notifications in batches at 10 second intervals. After 60
@@ -132,76 +137,76 @@ should be returned in the callback:
 
 .. code-block:: javascript
 
-   let interval = setInterval(function() {
-       console.log("waiting...");
-   }, 5000);
+    let interval = setInterval(function() {
+        console.log("waiting...");
+    }, 5000);
 
-   function myCallback(message)
-   {
-       console.log("Message type:", message.type);
-       if (message.type == oracledb.SUBSCR_EVENT_TYPE_DEREG) {
-           clearInterval(interval);
-           console.log("Deregistration has taken place...");
-           return;
-       }
-       console.log("Message database name:", message.dbName);
-       console.log("Message transaction id:", message.txId);
-       for (const table of message.tables) {
-           console.log("--> Table Name:", table.name);
-           console.log("--> Table Operation:", table.operation);
-           if (table.rows) {
-               for (const row of table.rows) {
-                   console.log("--> --> Row Rowid:", row.rowid);
-                   console.log("--> --> Row Operation:", row.operation);
-                   console.log(Array(61).join("-"));
-               }
-           }
-           console.log(Array(61).join("="));
-       }
-   }
+    function myCallback(message)
+    {
+        console.log("Message type:", message.type);
+        if (message.type == oracledb.SUBSCR_EVENT_TYPE_DEREG) {
+            clearInterval(interval);
+            console.log("Deregistration has taken place...");
+            return;
+        }
+        console.log("Message database name:", message.dbName);
+        console.log("Message transaction id:", message.txId);
+        for (const table of message.tables) {
+            console.log("--> Table Name:", table.name);
+            console.log("--> Table Operation:", table.operation);
+            if (table.rows) {
+                for (const row of table.rows) {
+                    console.log("--> --> Row Rowid:", row.rowid);
+                    console.log("--> --> Row Operation:", row.operation);
+                    console.log(Array(61).join("-"));
+                }
+            }
+            console.log(Array(61).join("="));
+        }
+    }
 
-   const options = {
-       sql           : `SELECT * FROM mytable`,
-       callback      : myCallback,
-       timeout       : 60,
-       qos           : oracledb.SUBSCR_QOS_ROWIDS,
-       groupingClass : oracledb.SUBSCR_GROUPING_CLASS_TIME,
-       groupingValue : 10,
-       groupingType  : oracledb.SUBSCR_GROUPING_TYPE_SUMMARY
-   };
+    const options = {
+        sql           : `SELECT * FROM mytable`,
+        callback      : myCallback,
+        timeout       : 60,
+        qos           : oracledb.SUBSCR_QOS_ROWIDS,
+        groupingClass : oracledb.SUBSCR_GROUPING_CLASS_TIME,
+        groupingValue : 10,
+        groupingType  : oracledb.SUBSCR_GROUPING_TYPE_SUMMARY
+    };
 
-   try {
-       // This is Node 8 syntax, but can be changed to callbacks
+    try {
+        // This is Node 8 syntax, but can be changed to callbacks
 
-       const connection = await oracledb.getConnection({
-         user          : "hr",
-         password      : mypw,  // mypw contains the hr schema password
-         connectString : "localhost/XEPDB1",
-         events        : true
-       });
+        const connection = await oracledb.getConnection({
+            user          : "hr",
+            password      : mypw,  // mypw contains the hr schema password
+            connectString : "localhost/FREEPDB1",
+            events        : true
+        });
 
-       await connection.subscribe('mysub', options);
-       console.log("Subscription created...");
+        await connection.subscribe('mysub', options);
+        console.log("Subscription created...");
 
-   } catch (err) {
-       console.error(err);
-       clearInterval(interval);
-   }
+    } catch (err) {
+        console.error(err);
+        clearInterval(interval);
+    }
 
 If two new rows were inserted into the table and then committed, output
 might be like::
 
-   Message type: 6
-   Message database name: orcl
-   Message transaction id: <Buffer 06 00 21 00 f5 0a 00 00>
-   --> Table Name: CJ.MYTABLE
-   --> Table Operation: 2
-   --> --> Row Rowid: AAAVH6AAMAAAAHjAAW
-   --> --> Row Operation: 2
-   ------------------------------------------------------------
-   --> --> Row Rowid: AAAVH6AAMAAAAHjAAX
-   --> --> Row Operation: 2
-   ------------------------------------------------------------
+    Message type: 6
+    Message database name: orcl
+    Message transaction id: <Buffer 06 00 21 00 f5 0a 00 00>
+    --> Table Name: CJ.MYTABLE
+    --> Table Operation: 2
+    --> --> Row Rowid: AAAVH6AAMAAAAHjAAW
+    --> --> Row Operation: 2
+    ------------------------------------------------------------
+    --> --> Row Rowid: AAAVH6AAMAAAAHjAAX
+    --> --> Row Operation: 2
+    ------------------------------------------------------------
 
 Here, the message type 6 corresponds to
 :ref:`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE <oracledbconstantssubscription>`

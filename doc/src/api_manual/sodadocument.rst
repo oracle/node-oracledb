@@ -7,6 +7,11 @@ API: SodaDocument Class
 SodaDocuments represents the document for SODA read and write
 operations.
 
+.. note::
+
+    In this release, SODA is only supported in the node-oracledb Thick mode.
+    See :ref:`enablingthick`.
+
 SODA can be used with Oracle Database 18.3 and above, when node-oracledb
 uses Oracle Client 18.5 or Oracle Client 19.3, or later. The SODA bulk
 insert methods :meth:`sodaCollection.insertMany()` and
@@ -105,6 +110,8 @@ Although documents cannot be null, content can be.
 
 .. method:: sodaDocument.getContent()
 
+    .. versionadded:: 3.0
+
     .. code-block:: javascript
 
         getContent()
@@ -113,9 +120,9 @@ Although documents cannot be null, content can be.
     exception will occur if the document content is not JSON and cannot be
     converted to an object.
 
-    .. versionadded:: 3.0
-
 .. method:: sodaDocument.getContentAsBuffer()
+
+    .. versionadded:: 3.0
 
     .. code-block:: javascript
 
@@ -132,9 +139,9 @@ Although documents cannot be null, content can be.
     ‘application/json’, then the buffer returned is identical to that which
     was stored. If the storage is not BLOB, it is UTF-8 encoded.
 
-    .. versionadded:: 3.0
-
 .. method:: sodaDocument.getContentAsString()
+
+    .. versionadded:: 3.0
 
     .. code-block:: javascript
 
@@ -146,5 +153,3 @@ Although documents cannot be null, content can be.
     string.
 
     If the document encoding is not known, UTF8 will be used.
-
-    .. versionadded:: 3.0

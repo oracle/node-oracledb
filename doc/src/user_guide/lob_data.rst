@@ -1,8 +1,8 @@
 .. _lobhandling:
 
-**************************************
-Working with CLOB, NCLOB and BLOB Data
-**************************************
+*******************************
+Using CLOB, NCLOB and BLOB Data
+*******************************
 
 Oracle Database uses LOB data types to store long objects. The CLOB type
 is used for character data and the BLOB type is used for binary data.
@@ -29,32 +29,32 @@ Given the table:
 
 .. code-block:: sql
 
-  CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
+    CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
 
 an ``INSERT`` example is:
 
 .. code-block:: javascript
 
-  const fs = require('fs');
-  const str = fs.readFileSync('example.txt', 'utf8');
-  . . .
+    const fs = require('fs');
+    const str = fs.readFileSync('example.txt', 'utf8');
+    . . .
 
-  const result = await connection.execute(
-    `INSERT INTO mylobs (id, myclobcol) VALUES (:idbv, :cbv)`,
-    { idbv: 1, cbv: str }  // type and direction are optional for IN binds
-  );
+    const result = await connection.execute(
+        `INSERT INTO mylobs (id, myclobcol) VALUES (:idbv, :cbv)`,
+        { idbv: 1, cbv: str }  // type and direction are optional for IN binds
+    );
 
-  console.log('CLOB inserted from example.txt');
-  . . .
+    console.log('CLOB inserted from example.txt');
+    . . .
 
 Updating LOBs is similar to insertion:
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-    `UPDATE mylobs SET myclobcol = :cbv WHERE id = :idbv`,
-    { idbv: 1, cbv: str }
-  );
+    const result = await connection.execute(
+        `UPDATE mylobs SET myclobcol = :cbv WHERE id = :idbv`,
+        { idbv: 1, cbv: str }
+    );
 
 Buffers can similarly be bound for inserting into, or updating, BLOB
 columns.
@@ -65,31 +65,31 @@ When binding Strings to NCLOB columns, explicitly specify the bind
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-    `UPDATE mylobs SET mynclobcol = :ncbv WHERE id = :idbv`,
-    { idbv: 1,  ncbv: { type: oracledb.DB_TYPE_NVARCHAR, val: str } }
-  );
+    const result = await connection.execute(
+        `UPDATE mylobs SET mynclobcol = :ncbv WHERE id = :idbv`,
+        { idbv: 1,  ncbv: { type: oracledb.DB_TYPE_NVARCHAR, val: str } }
+    );
 
 When using PL/SQL, a procedure:
 
 .. code-block:: sql
 
-  PROCEDURE lobs_in (p_id IN NUMBER, c_in IN CLOB, b_in IN BLOB) . . .
+    PROCEDURE lobs_in (p_id IN NUMBER, c_in IN CLOB, b_in IN BLOB) . . .
 
 can be called like:
 
 .. code-block:: javascript
 
-  const bigStr = 'My string to insert';
-  const bigBuf = Buffer.from([. . .]);
+    const bigStr = 'My string to insert';
+    const bigBuf = Buffer.from([. . .]);
 
-  const result = await connection.execute(
-    `BEGIN lobs_in(:id, :c, :b); END;`,
-    { id: 20,
-      c: bigStr,    // type and direction are optional for CLOB and BLOB IN binds
-      b: bigBuf }
-    }
-  );
+    const result = await connection.execute(
+        `BEGIN lobs_in(:id, :c, :b); END;`,
+        { id: 20,
+          c: bigStr,    // type and direction are optional for CLOB and BLOB IN binds
+          b: bigBuf }
+        }
+    );
 
 See :ref:`LOB Bind Parameters <lobbinds>` for size considerations
 regarding LOB binds.
@@ -120,69 +120,71 @@ returned as a string:
 
 .. code-block:: javascript
 
-  oracledb.fetchAsString = [ oracledb.CLOB ];
+    oracledb.fetchAsString = [ oracledb.CLOB ];
 
-  const result = await connection.execute(`SELECT c FROM mylobs WHERE id = 1`);
+    const result = await connection.execute(`SELECT c FROM mylobs WHERE id = 1`);
 
-  if (result.rows.length === 0)
-    console.error("No results");
-  else {
-    const clob = result.rows[0][0];
-    console.log(clob);
-  }
+    if (result.rows.length === 0)
+        console.error("No results");
+    else {
+        const clob = result.rows[0][0];
+        console.log(clob);
+    }
 
 CLOB columns in individual queries can be fetched as strings using
 ``fetchInfo``:
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-    `SELECT c FROM mylobs WHERE id = 1`,
-    [], // no binds
-    { fetchInfo: {"C": {type: oracledb.STRING}} }
-  );
+    const result = await connection.execute(
+        `SELECT c FROM mylobs WHERE id = 1`,
+        [], // no binds
+        { fetchInfo: {"C": {type: oracledb.STRING}} }
+    );
 
-  if (result.rows.length === 0) {
-    console.error("No results");
-  }
-  else {
-    const clob = result.rows[0][0];
-    console.log(clob);
-  }
+    if (result.rows.length === 0) {
+        console.error("No results");
+    }
+    else {
+        const clob = result.rows[0][0];
+        console.log(clob);
+    }
+
+.. _fetchasbuffereg:
 
 BLOB query examples are very similar. To force every BLOB in the
 application to be returned as a buffer:
 
 .. code-block:: javascript
 
-  oracledb.fetchAsBuffer = [ oracledb.BLOB ];
+    oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 
-  const result = await connection.execute(`SELECT b FROM mylobs WHERE id = 2`);
+    const result = await connection.execute(`SELECT b FROM mylobs WHERE id = 2`);
 
-  if (result.rows.length === 0)
-    console.error("No results");
-  else {
-    const blob = result.rows[0][0];
-    console.log(blob.toString());  // assuming printable characters
-  }
+    if (result.rows.length === 0)
+        console.error("No results");
+    else {
+        const blob = result.rows[0][0];
+        console.log(blob.toString());  // assuming printable characters
+    }
 
 BLOB columns in individual queries can be fetched as buffers using
 ``fetchInfo``:
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-    `SELECT b FROM mylobs WHERE id = 2`,
-    [ ], // no binds
-    { fetchInfo: {"B": {type: oracledb.BUFFER}} }
-  );
+    const result = await connection.execute(
+        `SELECT b FROM mylobs WHERE id = 2`,
+        [ ], // no binds
+        { fetchInfo: {"B": {type: oracledb.BUFFER}} }
+    );
 
-  if (result.rows.length === 0) {
-    console.error("No results");
-  } else {
-    const blob = result.rows[0][0];
-    console.log(blob.toString());  // assuming printable characters
-  }
+    if (result.rows.length === 0) {
+        console.error("No results");
+    } else {
+        const blob = result.rows[0][0];
+        console.log(blob.toString());  // assuming printable characters
+    }
 
 Getting LOBs as String or Buffer from PL/SQL
 ++++++++++++++++++++++++++++++++++++++++++++
@@ -196,18 +198,18 @@ To get PL/SQL LOB OUT parameters as String or Buffer, set the bind
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-    `BEGIN lobs_out(:id, :c, :b); END;`,
-    { id: 20,
-      c: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 50000},
-      b: {type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 50000}
-    }
-  );
+    const result = await connection.execute(
+        `BEGIN lobs_out(:id, :c, :b); END;`,
+        { id: 20,
+          c: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 50000},
+          b: {type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 50000}
+        }
+    );
 
-  const str = result.outBinds.c;  // a String
-  const buf = result.outBinds.b;  // a Buffer
+    const str = result.outBinds.c;  // a String
+    const buf = result.outBinds.b;  // a Buffer
 
-  . . . // do something with str and buf
+    . . . // do something with str and buf
 
 The fetched String and Buffer can be used directly in Node.js.
 
@@ -296,36 +298,36 @@ the table:
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-    `INSERT INTO mylobs (id, c) VALUES (:id, EMPTY_CLOB()) RETURNING c INTO :lobbv`,
-    { id: 4,
-      lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
-    { autoCommit: false }  // a transaction needs to span the INSERT and pipe()
-  );
+    const result = await connection.execute(
+        `INSERT INTO mylobs (id, c) VALUES (:id, EMPTY_CLOB()) RETURNING c INTO :lobbv`,
+        { id: 4,
+          lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
+        { autoCommit: false }  // a transaction needs to span the INSERT and pipe()
+    );
 
-  if (result.rowsAffected != 1 || result.outBinds.lobbv.length != 1) {
-    throw new Error('Error getting a LOB locator');
-  }
+    if (result.rowsAffected != 1 || result.outBinds.lobbv.length != 1) {
+        throw new Error('Error getting a LOB locator');
+    }
 
-  const doInsert = new Promise((resolve, reject) => {
-    const lob = result.outBinds.lobbv[0];
-    lob.on('finish', async () => {
-      await connection.commit();  // all data is loaded so we can commit it
+    const doInsert = new Promise((resolve, reject) => {
+        const lob = result.outBinds.lobbv[0];
+        lob.on('finish', async () => {
+            await connection.commit();  // all data is loaded so we can commit it
+        });
+        lob.on('error', async (err) => {
+            await connection.close();
+            reject(err);
+        });
+
+        const inStream = fs.createReadStream('example.txt'); // open the file to read from
+        inStream.on('error', (err) => {
+            reject(err);
+        });
+
+        inStream.pipe(lob);  // copies the text to the LOB
     });
-    lob.on('error', async (err) => {
-      await connection.close();
-      reject(err);
-    });
 
-    const inStream = fs.createReadStream('example.txt'); // open the file to read from
-    inStream.on('error', (err) => {
-      reject(err);
-    });
-
-    inStream.pipe(lob);  // copies the text to the LOB
-  });
-
-  await doInsert;
+    await doInsert;
 
 This example streams from a file into the table. When the data has been
 completely streamed, the Lob is automatically closed and the ``close``
@@ -369,19 +371,19 @@ by default. For example, the table:
 
 .. code-block:: sql
 
-  CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
+    CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
 
 can be called to get a Lob ``clob`` like:
 
 .. code-block:: javascript
 
-  const result = await connection.execute(`SELECT c FROM mylobs WHERE id = 1`);
+    const result = await connection.execute(`SELECT c FROM mylobs WHERE id = 1`);
 
-  if (result.rows.length === 1) {
-    const clob = result.rows[0][0]; // Instance of a node-oracledb Lob
-    // console.log(clob.type);      // -> 2017 aka oracledb.CLOB
-    . . .                           // do something with the Lob
-  }
+    if (result.rows.length === 1) {
+        const clob = result.rows[0][0]; // Instance of a node-oracledb Lob
+        // console.log(clob.type);      // -> 2017 aka oracledb.CLOB
+        . . .                           // do something with the Lob
+    }
 
 PL/SQL LOB Parameter Fetch Example
 ----------------------------------
@@ -390,24 +392,24 @@ A PL/SQL procedure such as this:
 
 .. code-block:: sql
 
-  PROCEDURE lobs_out (id IN NUMBER, clob_out OUT CLOB, blob_out OUT BLOB) . . .
+    PROCEDURE lobs_out (id IN NUMBER, clob_out OUT CLOB, blob_out OUT BLOB) . . .
 
 can be called to get the :ref:`Lobs <lobclass>` ``clob`` and ``blob``:
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-    `BEGIN lobs_out(:id, :c, :b); END;`,
-    { id: 1,
-      c: {type: oracledb.CLOB, dir: oracledb.BIND_OUT},
-      b: {type: oracledb.BLOB, dir: oracledb.BIND_OUT}
-    }
-  );
+    const result = await connection.execute(
+        `BEGIN lobs_out(:id, :c, :b); END;`,
+        { id: 1,
+          c: {type: oracledb.CLOB, dir: oracledb.BIND_OUT},
+          b: {type: oracledb.BLOB, dir: oracledb.BIND_OUT}
+        }
+    );
 
-  const clob = result.outBinds.c;
-  const blob = result.outBinds.b;
+    const clob = result.outBinds.c;
+    const blob = result.outBinds.b;
 
-  . . . // do something with the Lobs
+    . . . // do something with the Lobs
 
 To bind a Lob object to an NCLOB parameter, set ``type`` to
 ``oracledb.DB_TYPE_NCLOB``.
@@ -420,22 +422,22 @@ streamed out:
 
 .. code-block:: javascript
 
-  if (lob === null) {
-    // . . . do special handling such as create an empty file or throw an error
-  }
+    if (lob === null) {
+        // . . . do special handling such as create an empty file or throw an error
+    }
 
-  if (lob.type === oracledb.CLOB) {
-    lob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
-  }
+    if (lob.type === oracledb.CLOB) {
+        lob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
+    }
 
-  lob.on('error', function(err) { cb(err); });
-  lob.on('end', function() { cb(null); });   // all done.  The Lob is automatically closed.
+    lob.on('error', function(err) { cb(err); });
+    lob.on('end', function() { cb(null); });   // all done.  The Lob is automatically closed.
 
-  const outStream = fs.createWriteStream('myoutput.txt');
-  outStream.on('error', function(err) { cb(err); });
+    const outStream = fs.createWriteStream('myoutput.txt');
+    outStream.on('error', function(err) { cb(err); });
 
-  // switch into flowing mode and push the LOB to myoutput.txt
-  lob.pipe(outStream);
+    // switch into flowing mode and push the LOB to myoutput.txt
+    lob.pipe(outStream);
 
 Note the Lob is automatically closed at the end of the stream.
 
@@ -446,21 +448,21 @@ be written to another Stream or to a file:
 
 .. code-block:: javascript
 
-  if (lob === null) {
-    // . . . do special handling such as create an empty file or throw an error
-  }
+    if (lob === null) {
+        // . . . do special handling such as create an empty file or throw an error
+    }
 
-  let str = "";
+    let str = "";
 
-  lob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
-  lob.on('error', function(err) { cb(err); });
-  lob.on('end', function() { cb(null); });   // all done.  The Lob is automatically closed.
-  lob.on('data', function(chunk) {
-    str += chunk; // or use Buffer.concat() for BLOBS
-  });
-  lob.on('end', function() {
-    fs.writeFile(..., str, ...);
-  });
+    lob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
+    lob.on('error', function(err) { cb(err); });
+    lob.on('end', function() { cb(null); });   // all done.  The Lob is automatically closed.
+    lob.on('data', function(chunk) {
+        str += chunk; // or use Buffer.concat() for BLOBS
+    });
+    lob.on('end', function() {
+        fs.writeFile(..., str, ...);
+    });
 
 Node-oracledb’s :attr:`lob.pieceSize` can be used to
 control the number of bytes retrieved for each readable ``data`` event.
@@ -504,42 +506,42 @@ A temporary LOB can be created with
 
 .. code-block:: javascript
 
-  const templob = await connection.createLob(oracledb.CLOB);
+    const templob = await connection.createLob(oracledb.CLOB);
 
 Once created, data can be inserted into it. For example to read a text
 file:
 
 .. code-block:: javascript
 
-  templob.on('error', function(err) { somecallback(err); });
+    templob.on('error', function(err) { somecallback(err); });
 
-  // The data was loaded into the temporary LOB, so use it
-  templob.on('finish', function() { somecallback(null, templob); });
+    // The data was loaded into the temporary LOB, so use it
+    templob.on('finish', function() { somecallback(null, templob); });
 
-  // copies the text from 'example.txt' to the temporary LOB
-  const inStream = fs.createReadStream('example.txt');
-  inStream.on('error', function(err) { . . . });
-  inStream.pipe(templob);
+    // copies the text from 'example.txt' to the temporary LOB
+    const inStream = fs.createReadStream('example.txt');
+    inStream.on('error', function(err) { . . . });
+    inStream.pipe(templob);
 
 Now the LOB has been populated, it can be bound in ``somecallback()`` to
 a PL/SQL IN parameter:
 
 .. code-block:: javascript
 
-  // For PROCEDURE lobs_in (p_id IN NUMBER, c_in IN CLOB, b_in IN BLOB)
-  const result = await connection.execute(
-    `BEGIN lobs_in(:id, :c, null); END;`,
-    { id: 3,
-      c: templob  // type and direction are optional for IN binds
-    }
-  );
+    // For PROCEDURE lobs_in (p_id IN NUMBER, c_in IN CLOB, b_in IN BLOB)
+    const result = await connection.execute(
+        `BEGIN lobs_in(:id, :c, null); END;`,
+        { id: 3,
+          c: templob  // type and direction are optional for IN binds
+        }
+    );
 
 When the temporary LOB is no longer needed, it must be closed with
 :meth:`lob.destroy()`:
 
 .. code-block:: javascript
 
-  await templob.destroy();
+    await templob.destroy();
 
 .. _closinglobs:
 

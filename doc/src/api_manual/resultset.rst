@@ -133,6 +133,8 @@ ResultSet Methods
 
 .. method:: resultset.toQueryStream()
 
+    .. versionadded:: 1.9
+
     .. code-block:: javascript
 
         toQueryStream();
@@ -153,8 +155,6 @@ ResultSet Methods
     :meth:`~connection.execute()`.
 
     See :ref:`Query Streaming <streamingresults>` for more information.
-
-    .. versionadded:: 1.9
 
     Support for Node.js 8’s Stream ``destroy()`` method was added in
     node-oracledb 2.1.

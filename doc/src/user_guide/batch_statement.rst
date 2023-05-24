@@ -1,8 +1,8 @@
 .. _batchexecution:
 
-******************************************
-Batch Statement Execution and Bulk Loading
-******************************************
+*******************************************
+Executing Batch Statements and Bulk Loading
+*******************************************
 
 The :meth:`connection.executeMany()` method allows many
 sets of data values to be bound to one DML or PL/SQL statement for
@@ -24,25 +24,25 @@ For example, to insert three records into the database:
 
 .. code-block:: javascript
 
-  const sql = `INSERT INTO mytab VALUES (:a, :b)`;
+    const sql = `INSERT INTO mytab VALUES (:a, :b)`;
 
-  const binds = [
-    { a: 1, b: "One" },
-    { a: 2, b: "Two" },
-    { a: 3, b: "Three" }
-  ];
+    const binds = [
+        { a: 1, b: "One" },
+        { a: 2, b: "Two" },
+        { a: 3, b: "Three" }
+    ];
 
-  const options = {
-    autoCommit: true,
-    bindDefs: {
-      a: { type: oracledb.NUMBER },
-      b: { type: oracledb.STRING, maxSize: 5 }
-    }
-  };
+    const options = {
+        autoCommit: true,
+        bindDefs: {
+            a: { type: oracledb.NUMBER },
+            b: { type: oracledb.STRING, maxSize: 5 }
+        }
+    };
 
-  const result = await connection.executeMany(sql, binds, options);
+    const result = await connection.executeMany(sql, binds, options);
 
-  console.log(result.rowsAffected);  // 3
+    console.log(result.rowsAffected);  // 3
 
 Strings and Buffers require a ``maxSize`` value in ``bindDefs``. It must
 be the length (or greater) of the longest data value. For efficiency,
@@ -78,24 +78,24 @@ rows:
 
 .. code-block:: javascript
 
-  const sql = `DELETE FROM tab WHERE id = :1`;
+    const sql = `DELETE FROM tab WHERE id = :1`;
 
-  const binds = [
-    [20],
-    [30],
-    [40]
-  ];
+    const binds = [
+        [20],
+        [30],
+        [40]
+    ];
 
-  const options = { dmlRowCounts: true };
+    const options = { dmlRowCounts: true };
 
-  const result = await connection.executeMany(sql, binds, options);
+    const result = await connection.executeMany(sql, binds, options);
 
-  console.log(result.dmlRowCounts);
+    console.log(result.dmlRowCounts);
 
 If the table originally contained three rows with id of 20, five rows
 with id of 30 and six rows with id of 40, then the output would be::
 
-  [ 3, 5, 6 ]
+    [ 3, 5, 6 ]
 
 .. _handlingbatcherrors:
 
@@ -117,32 +117,32 @@ or rollback, as desired.
 
 For example::
 
-  const sql = `INSERT INTO childtab VALUES (:1, :2, :3)`;
+    const sql = `INSERT INTO childtab VALUES (:1, :2, :3)`;
 
-  const binds = [
-   [1016, 10, "Child 2 of Parent A"],
-   [1017, 10, "Child 3 of Parent A"],
-   [1018, 20, "Child 4 of Parent B"],
-   [1018, 20, "Child 4 of Parent B"],   // duplicate key
-   [1019, 30, "Child 3 of Parent C"],
-   [1020, 40, "Child 4 of Parent D"],
-   [1021, 75, "Child 1 of Parent F"],   // parent does not exist
-   [1022, 40, "Child 6 of Parent D"]
-  ];
+    const binds = [
+        [1016, 10, "Child 2 of Parent A"],
+        [1017, 10, "Child 3 of Parent A"],
+        [1018, 20, "Child 4 of Parent B"],
+        [1018, 20, "Child 4 of Parent B"],   // duplicate key
+        [1019, 30, "Child 3 of Parent C"],
+        [1020, 40, "Child 4 of Parent D"],
+        [1021, 75, "Child 1 of Parent F"],   // parent does not exist
+        [1022, 40, "Child 6 of Parent D"]
+    ];
 
-  const options = {
-   autoCommit: true,
-   batchErrors: true,
-   bindDefs: [
-      { type: oracledb.NUMBER },
-      { type: oracledb.NUMBER },
-      { type: oracledb.STRING, maxSize: 20 }
-    ]
-  };
+    const options = {
+        autoCommit: true,
+        batchErrors: true,
+        bindDefs: [
+            { type: oracledb.NUMBER },
+            { type: oracledb.NUMBER },
+            { type: oracledb.STRING, maxSize: 20 }
+        ]
+    };
 
-  const result = await connection.executeMany(sql, binds, options);
+    const result = await connection.executeMany(sql, binds, options);
 
-  console.log(result.batchErrors);
+    console.log(result.batchErrors);
 
 The output is an array of :ref:`error objects <errorobj>` that were
 reported during execution. The ``offset`` property corresponds to the
@@ -150,8 +150,8 @@ reported during execution. The ``offset`` property corresponds to the
 parameter <executemanybinds>` array, indicating which record could
 not be processed::
 
-  [ { Error: ORA-00001: unique constraint (HR.CHILDTAB_PK) violated errorNum: 1, offset: 3 },
-    { Error: ORA-02291: integrity constraint (HR.CHILDTAB_FK) violated - parent key not found errorNum: 2291, offset: 6 } ]
+    [ { Error: ORA-00001: unique constraint (HR.CHILDTAB_PK) violated errorNum: 1, offset: 3 },
+      { Error: ORA-02291: integrity constraint (HR.CHILDTAB_FK) violated - parent key not found errorNum: 2291, offset: 6 } ]
 
 Note that some classes of error will always return via the
 ``executeMany()`` callback error object, not as batch errors. No
@@ -164,30 +164,30 @@ DML RETURNING with ``executeMany()``
 
 Values can be returned with DML RETURNING syntax::
 
-  const sql = `INSERT INTO tab VALUES (:1) RETURNING ROWID INTO :2`;
+    const sql = `INSERT INTO tab VALUES (:1) RETURNING ROWID INTO :2`;
 
-  const binds = [
-    ["One"],
-    ["Two"],
-    ["Three"]
-  ];
+    const binds = [
+        ["One"],
+        ["Two"],
+        ["Three"]
+    ];
 
-  const options = {
-    bindDefs: [
-      { type: oracledb.STRING, maxSize: 5 },
-      { type: oracledb.STRING, maxSize: 18, dir: oracledb.BIND_OUT  },
-    ]
-  };
+    const options = {
+        bindDefs: [
+            { type: oracledb.STRING, maxSize: 5 },
+            { type: oracledb.STRING, maxSize: 18, dir: oracledb.BIND_OUT  },
+        ]
+    };
 
-  const result = await connection.executeMany(sql, binds, options);
+    const result = await connection.executeMany(sql, binds, options);
 
-  console.log(result.outBinds);
+    console.log(result.outBinds);
 
 Output is::
 
-  [ [ [ 'AAAmI9AAMAAAAnVAAA' ] ],
-    [ [ 'AAAmI9AAMAAAAnVAAB' ] ],
-    [ [ 'AAAmI9AAMAAAAnVAAC' ] ] ]
+    [ [ [ 'AAAmI9AAMAAAAnVAAA' ] ],
+      [ [ 'AAAmI9AAMAAAAnVAAB' ] ],
+      [ [ 'AAAmI9AAMAAAAnVAAC' ] ] ]
 
 Calling PL/SQL with ``executeMany()``
 =====================================
@@ -198,51 +198,51 @@ PL/SQL procedure:
 
 .. code-block:: sql
 
-  CREATE PROCEDURE testproc (
-    a_num IN NUMBER,
-    a_outnum OUT NUMBER,
-    a_outstr OUT VARCHAR2)
-  AS
-  BEGIN
-    a_outnum := a_num * 2;
-    FOR i IN 1..a_num LOOP
-      a_outstr := a_outstr || 'X';
-    END LOOP;
-  END;
-  /
+    CREATE PROCEDURE testproc (
+        a_num IN NUMBER,
+        a_outnum OUT NUMBER,
+        a_outstr OUT VARCHAR2)
+    AS
+    BEGIN
+        a_outnum := a_num * 2;
+        FOR i IN 1..a_num LOOP
+            a_outstr := a_outstr || 'X';
+        END LOOP;
+    END;
+    /
 
 can be called like:
 
 .. code-block:: javascript
 
-  const sql = `BEGIN testproc(:1, :2, :3); END;`;
+    const sql = `BEGIN testproc(:1, :2, :3); END;`;
 
-  // IN binds
-  const binds = [
-    [1],
-    [2],
-    [3],
-    [4]
-  ];
+    // IN binds
+    const binds = [
+        [1],
+        [2],
+        [3],
+        [4]
+    ];
 
-  const options = {
-    bindDefs: [
-      { type: oracledb.NUMBER },
-      { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-      { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 20 }
-    ]
-  };
+    const options = {
+        bindDefs: [
+            { type: oracledb.NUMBER },
+            { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+            { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 20 }
+        ]
+    };
 
-  const result = await connection.executeMany(sql, binds, options);
+    const result = await connection.executeMany(sql, binds, options);
 
-  console.log(result.outBinds);
+    console.log(result.outBinds);
 
 The returned bind values are::
 
-  [ [ 2, 'X' ],
-    [ 4, 'XX' ],
-    [ 6, 'XXX' ],
-    [ 8, 'XXXX' ] ]
+    [ [ 2, 'X' ],
+      [ 4, 'XX' ],
+      [ 6, 'XXX' ],
+      [ 8, 'XXXX' ] ]
 
 The variant of ``executeMany()`` that accepts a number of iterations is
 useful when there are no bind values, or only OUT bind values. This
@@ -250,29 +250,29 @@ example calls a PL/SQL block eight times:
 
 .. code-block:: javascript
 
-  const plsql = `DECLARE
-                   t_id NUMBER;
-                 BEGIN
-                   SELECT NVL(COUNT(*), 0) + 1 INTO t_id FROM testtable;
-                   INSERT INTO testtable VALUES (t_id, 'Test String ' || t_id);
-                   SELECT SUM(id) INTO :1 FROM testtable;
-                 END;`
+    const plsql = `DECLARE
+                    t_id NUMBER;
+                   BEGIN
+                    SELECT NVL(COUNT(*), 0) + 1 INTO t_id FROM testtable;
+                    INSERT INTO testtable VALUES (t_id, 'Test String ' || t_id);
+                    SELECT SUM(id) INTO :1 FROM testtable;
+                   END;`
 
-  const options = {
-    bindDefs: [
-      { type : oracledb.NUMBER, dir : oracledb.BIND_OUT }
-    ]
-  };
+    const options = {
+        bindDefs: [
+            { type : oracledb.NUMBER, dir : oracledb.BIND_OUT }
+        ]
+    };
 
-  const numIterations = 8;
+    const numIterations = 8;
 
-  const result = await connection.executeMany(plsql, numIterations, options);
+    const result = await connection.executeMany(plsql, numIterations, options);
 
-  console.log(result.outBinds);
+    console.log(result.outBinds);
 
 Output would be an array of eight values such as::
 
-  [ [ 6 ], [ 10 ], [ 15 ], [ 21 ], [ 28 ], [ 36 ], [ 45 ], [ 55 ] ]
+    [ [ 6 ], [ 10 ], [ 15 ], [ 21 ], [ 28 ], [ 36 ], [ 45 ], [ 55 ] ]
 
 .. _executemanyobjects:
 
@@ -285,38 +285,38 @@ accepts and returns a RECORD:
 
 .. code-block:: sql
 
-  CREATE OR REPLACE PACKAGE rectest AS
-     TYPE rectype IS RECORD (name VARCHAR2(40), pos NUMBER);
-     PROCEDURE myproc (p_in IN rectype, p_out OUT rectype);
-  END rectest;
-  /
+    CREATE OR REPLACE PACKAGE rectest AS
+        TYPE rectype IS RECORD (name VARCHAR2(40), pos NUMBER);
+        PROCEDURE myproc (p_in IN rectype, p_out OUT rectype);
+    END rectest;
+    /
 
 This can be called like:
 
 .. code-block:: javascript
 
-  const RectypeClass = await connection.getDbObjectClass("RECTEST.RECTYPE");
+    const RectypeClass = await connection.getDbObjectClass("RECTEST.RECTYPE");
 
-  const plsql = `CALL rectest.myproc(:inbv, :outbv)`;
+    const plsql = `CALL rectest.myproc(:inbv, :outbv)`;
 
-  // Input data
-  binds = [
-    { inbv: { NAME: 'Car', POS: 56 } },
-    { inbv: { NAME: 'Train', POS: 78 } },
-    { inbv: { NAME: 'Bike', POS: 83 } }
-  ];
+    // Input data
+    binds = [
+        { inbv: { NAME: 'Car', POS: 56 } },
+        { inbv: { NAME: 'Train', POS: 78 } },
+        { inbv: { NAME: 'Bike', POS: 83 } }
+    ];
 
-  options = {
-    bindDefs: {
-      inbv: { type: RectypeClass },
-      outbv: { type: RectypeClass, dir: oracledb.BIND_OUT },
+    options = {
+        bindDefs: {
+            inbv: { type: RectypeClass },
+            outbv: { type: RectypeClass, dir: oracledb.BIND_OUT },
+        }
+    };
+
+    result = await connection.executeMany(plsql, binds, options);
+    for (const b of result.outBinds) {
+        console.log(b.outbv);
     }
-  };
-
-  result = await connection.executeMany(plsql, binds, options);
-  for (const b of result.outBinds) {
-    console.log(b.outbv);
-  }
 
 Each value to be bound to ``inbv`` is a record’s data. The attribute
 names correspond to the attributes of the PL/SQL record type using

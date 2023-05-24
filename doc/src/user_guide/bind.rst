@@ -1,21 +1,33 @@
 .. _bind:
 
-***************************************
-Bind Parameters for Prepared Statements
-***************************************
+********************
+Using Bind Variables
+********************
 
-SQL and PL/SQL statements may contain bind parameters, indicated by
+SQL and PL/SQL statements may contain bind parameters, which are
 colon-prefixed identifiers or numerals. These indicate where separately
 specified values are substituted in a statement when it is executed, or
-where values are to be returned after execution.
+where values are to be returned after execution. For example, ``:country_id``
+and ``:country_name`` are the two bind variables in this SQL statement:
+
+.. code-block:: javascript
+
+    const oracledb = require('oracledb');
+
+    const result = await connection.execute(
+     `INSERT INTO countries VALUES (:country_id, :country_name)`,
+     {country_id: 90, country_name: "Tonga"}
+   );
 
 IN binds are values passed into the database. OUT binds are used to
 retrieve data. IN OUT binds are passed in, and may return a different
 value after the statement executes.
 
-*Using bind parameters is recommended in preference to constructing SQL
-or PL/SQL statements by string concatenation or template literals. This
-is for performance and security.*
+.. note::
+
+    Using bind parameters is recommended in preference to constructing SQL or
+    PL/SQL statements by string concatenation or template literals. This is
+    for performance and security.
 
 Inserted data that is bound is passed to the database separately from
 the statement text. It can never be executed directly. This means there
@@ -60,57 +72,57 @@ object name must match the statement’s bind parameter name:
 
 .. code-block:: javascript
 
-   const oracledb = require('oracledb');
+    const oracledb = require('oracledb');
 
-   const result = await connection.execute(
+    const result = await connection.execute(
      `INSERT INTO countries VALUES (:country_id, :country_name)`,
      {
-       country_id: { dir: oracledb.BIND_IN, val: 90, type: oracledb.NUMBER },
-       country_name: { dir: oracledb.BIND_IN, val: "Tonga", type: oracledb.STRING }
+        country_id: { dir: oracledb.BIND_IN, val: 90, type: oracledb.NUMBER },
+        country_name: { dir: oracledb.BIND_IN, val: "Tonga", type: oracledb.STRING }
      }
-   );
+    );
 
-   console.log("Rows inserted " + result.rowsAffected);
+    console.log("Rows inserted " + result.rowsAffected);
 
 For IN binds:
 
--  The direction ``dir`` is ``oracledb.BIND_IN``, which is the default
-   when ``dir`` is not specified.
+- The direction ``dir`` is ``oracledb.BIND_IN``, which is the default
+  when ``dir`` is not specified.
 
--  The ``val`` attribute may be a constant or a JavaScript variable.
+- The ``val`` attribute may be a constant or a JavaScript variable.
 
--  If ``type`` is omitted, it is derived from the bind data value. If it
-   is set, it can be one of the values in the :ref:`type
-   table <executebindparamtypevalues>`. Typically ``type`` is one of
-   ``oracledb.STRING``, ``oracledb.NUMBER``, ``oracledb.DATE`` or
-   ``oracledb.BUFFER`` matching the standard Node.js type of the data
-   being passed into the database. Use a bind type of ``oracledb.BLOB``
-   or ``oracledb.CLOB`` to pass in :ref:`Lob <lobclass>` instances. For
-   binding Oracle Database objects, it can also be the name of an Oracle
-   Database object or collection, or a :ref:`DbObject
-   Class <dbobjectclass>` type.
+- If ``type`` is omitted, it is derived from the bind data value. If it
+  is set, it can be one of the values in the :ref:`type
+  table <executebindparamtypevalues>`. Typically ``type`` is one of
+  ``oracledb.STRING``, ``oracledb.NUMBER``, ``oracledb.DATE`` or
+  ``oracledb.BUFFER`` matching the standard Node.js type of the data
+  being passed into the database. Use a bind type of ``oracledb.BLOB``
+  or ``oracledb.CLOB`` to pass in :ref:`Lob <lobclass>` instances. For
+  binding Oracle Database objects, it can also be the name of an Oracle
+  Database object or collection, or a :ref:`DbObject
+  Class <dbobjectclass>` type.
 
 Since ``dir`` and ``type`` have defaults, these attributes are sometimes
 omitted for IN binds. Binds can be like:
 
 .. code-block:: javascript
 
-   const result = await connection.execute(
+    const result = await connection.execute(
      `INSERT INTO countries VALUES (:country_id, :country_name)`,
      {country_id: 90, country_name: "Tonga"}
-   );
+    );
 
-   console.log("Rows inserted " + result.rowsAffected);
+    console.log("Rows inserted " + result.rowsAffected);
 
 When a bind parameter name is used more than once in the SQL statement,
 it should only occur once in the bind object:
 
 .. code-block:: javascript
 
-   const result = await connection.execute(
+    const result = await connection.execute(
      `SELECT first_name, last_name FROM employees WHERE first_name = :nmbv OR last_name = :nmbv`,
      {nmbv: 'Christopher'}
-   );
+    );
 
 .. _bindbypos:
 
@@ -123,10 +135,10 @@ an array. In this example, values are bound to the SQL bind parameters
 
 .. code-block:: javascript
 
-   const result = await connection.execute(
+    const result = await connection.execute(
      `INSERT INTO countries VALUES (:country_id, :country_name)`,
      [90, "Tonga"]
-   );
+    );
 
 The position of the array values corresponds to the position of the SQL
 bind parameters as they occur in the statement, regardless of their
@@ -137,10 +149,10 @@ value in the ``INSERT`` statement
 
 .. code-block:: javascript
 
-   const result = await connection.execute(
+    const result = await connection.execute(
      `INSERT INTO countries (country_id, country_name) VALUES (:1, :0)`,
      ["Tonga", 90]  // fail
-   );
+    );
 
 In the context of SQL statements, the input array position ‘n’ indicates
 the bind parameter at the n’th position in the statement. However, in
@@ -157,12 +169,11 @@ Bind Data Type Notes
 --------------------
 
 When binding a JavaScript Date value in an ``INSERT`` statement, by
-default the bind ``type`` is equivalent to TIMESTAMP WITH LOCAL TIME
-ZONE. In the database, TIMESTAMP WITH LOCAL TIME ZONE dates are
-normalized to the database time zone, or to the time zone specified for
-TIMESTAMP WITH TIME ZONE columns. If later queried, they are returned in
-the session time zone. See :ref:`Fetching Date and
-Timestamps <datehandling>` for more information.
+default the bind ``type`` is equivalent to TIMESTAMP. In the database,
+TIMESTAMP WITH LOCAL TIME ZONE dates are normalized to the database time
+zone, or to the time zone specified for TIMESTAMP WITH TIME ZONE columns.
+If later queried, they are returned in the session time zone. See
+:ref:`Fetching Date and Timestamps <datehandling>` for more information.
 
 .. _outbind:
 
@@ -181,37 +192,37 @@ containing :ref:`dir <executebindparamdir>`,
 :ref:`type <executebindparamtype>`, and
 :ref:`maxSize <executebindparammaxsize>` properties is used:
 
--  The ``dir`` attribute should be ``oracledb.BIND_OUT`` or
-   ``oracledb.BIND_INOUT``, depending on whether data is only to be
-   returned from the database or additionally passed into the database.
+- The ``dir`` attribute should be ``oracledb.BIND_OUT`` or
+  ``oracledb.BIND_INOUT``, depending on whether data is only to be
+  returned from the database or additionally passed into the database.
 
--  The ``val`` parameter in needed when binding IN OUT to pass a value
-   into the database. It is not used for OUT binds.
+- The ``val`` parameter in needed when binding IN OUT to pass a value
+  into the database. It is not used for OUT binds.
 
--  The ``type`` attribute can be one of the constants as discussed in
-   the :ref:`type table <executebindparamtypevalues>`. This determines the
-   mapping between the database type and the JavaScript type.
+- The ``type`` attribute can be one of the constants as discussed in
+  the :ref:`type table <executebindparamtypevalues>`. This determines the
+  mapping between the database type and the JavaScript type.
 
-   The attribute should be set for OUT binds. If ``type`` is not
-   specified, then ``oracledb.STRING`` is assumed.
+  The attribute should be set for OUT binds. If ``type`` is not
+  specified, then ``oracledb.STRING`` is assumed.
 
-   For IN OUT binds, ``type`` can inferred from the input data value
-   type. However is recommended to explicitly set ``type``, because the
-   correct value cannot be determined if the input data is null. The
-   output data type will always be the same as the input data type.
+  For IN OUT binds, ``type`` can inferred from the input data value
+  type. However is recommended to explicitly set ``type``, because the
+  correct value cannot be determined if the input data is null. The
+  output data type will always be the same as the input data type.
 
--  A ``maxSize`` attribute should be set for String and Buffer OUT or IN
-   OUT binds. This is the maximum number of bytes the bind parameter
-   will return. If the output value does not fit in ``maxSize`` bytes,
-   then an error such *ORA-06502: PL/SQL: numeric or value error:
-   character string buffer too small* or *NJS-016: buffer is too small
-   for OUT binds* occurs.
+- A ``maxSize`` attribute should be set for String and Buffer OUT or IN
+  OUT binds. This is the maximum number of bytes the bind parameter
+  will return. If the output value does not fit in ``maxSize`` bytes,
+  then an error such *ORA-06502: PL/SQL: numeric or value error:
+  character string buffer too small* or *NJS-016: buffer is too small
+  for OUT binds* occurs.
 
-   A default value of 200 bytes is used when ``maxSize`` is not provided
-   for OUT binds that are returned in Strings or Buffers.
+  A default value of 200 bytes is used when ``maxSize`` is not provided
+  for OUT binds that are returned in Strings or Buffers.
 
-   A string representing a UROWID may be up to 5267 bytes long in
-   node-oracledb.
+  A string representing a UROWID may be up to 5267 bytes long in
+  node-oracledb.
 
 For :ref:`PL/SQL Associative Array binds <plsqlindexbybinds>` a
 :ref:`maxArraySize <executebindparammaxarraysize>` property is also
@@ -236,57 +247,57 @@ Given the creation of the PL/SQL procedure ``TESTPROC``:
 
 .. code-block:: sql
 
-   CREATE OR REPLACE PROCEDURE testproc (
-   p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER)
-   AS
-   BEGIN
-     p_inout := p_in || p_inout;
-     p_out := 101;
-   END;
-   /
-   show errors
+    CREATE OR REPLACE PROCEDURE testproc (
+    p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER)
+    AS
+    BEGIN
+        p_inout := p_in || p_inout;
+        p_out := 101;
+    END;
+    /
+    show errors
 
 The procedure ``TESTPROC`` can be called with:
 
 .. code-block:: javascript
 
-   const bindVars = {
-     i:  'Chris', // default direction is BIND_IN. Data type is inferred from the data
-     io: { val: 'Jones', dir: oracledb.BIND_INOUT },
-     o:  { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
-   };
+    const bindVars = {
+        i:  'Chris', // default direction is BIND_IN. Data type is inferred from the data
+        io: { val: 'Jones', dir: oracledb.BIND_INOUT },
+        o:  { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+    };
 
-   const result = await connection.execute(
+    const result = await connection.execute(
      `BEGIN testproc(:i, :io, :o); END;`,
      bindVars
-   );
+    );
 
-   console.log(result.outBinds);
+    console.log(result.outBinds);
 
 Since ``bindParams`` is passed as an object, the ``outBinds`` property
 is also an object. The Node.js output is:
 
 ::
 
-   { io: 'ChrisJones', o: 101 }
+    { io: 'ChrisJones', o: 101 }
 
 PL/SQL allows named parameters in procedure and function calls. This can
 be used in ``execute()`` like:
 
 ::
 
-     `BEGIN testproc(p_in => :i, p_inout => :io, p_out => :o); END;`,
+    `BEGIN testproc(p_in => :i, p_inout => :io, p_out => :o); END;`,
 
 An alternative to node-oracledb’s ‘bind by name’ syntax is ‘bind by
 array’ syntax:
 
 .. code-block:: javascript
 
-   const bindVars = [
+    const bindVars = [
      'Chris',
      { val: 'Jones', dir: oracledb.BIND_INOUT },
      { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
-   ];
+    ];
 
 When :ref:`bindParams <executebindParams>` is passed as an array, then
 ``outBinds`` is returned as an array, with the same order as the OUT
@@ -294,18 +305,18 @@ binds in the statement:
 
 ::
 
-   [ 'ChrisJones', 101 ]
+    [ 'ChrisJones', 101 ]
 
 Mixing positional and named syntax is not supported. The following will
 throw an error:
 
 .. code-block:: javascript
 
-   const bindVars = [
+    const bindVars = [
      'Chris',                                                  // valid
      { val: 'Jones', dir: oracledb.BIND_INOUT },               // valid
      { o: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } }  // invalid
-   ];
+    ];
 
 .. _dmlreturn:
 
@@ -359,38 +370,38 @@ An example of DML RETURNING binds is:
 
 .. code-block:: javascript
 
-   const result = await connection.execute(
+    const result = await connection.execute(
      `UPDATE mytab SET name = :name
       WHERE id = :id
       RETURNING id, ROWID INTO :ids, :rids`,
      {
-       id:    1001,
-       name:  "Krishna",
-       ids:   { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-       rids:  { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+        id:    1001,
+        name:  "Krishna",
+        ids:   { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+        rids:  { type: oracledb.STRING, dir: oracledb.BIND_OUT }
      }
-   );
+    );
 
-   console.log(result.outBinds);
+    console.log(result.outBinds);
 
 If the ``WHERE`` clause matches one record, the output would be like:
 
 ::
 
-   { ids: [ 1001 ], rids: [ 'AAAbvZAAMAAABtNAAA' ] }
+    { ids: [ 1001 ], rids: [ 'AAAbvZAAMAAABtNAAA' ] }
 
 When a couple of rows match, the output could be:
 
 ::
 
-   { ids: [ 1001, 1002 ],
-     rids: [ 'AAAbvZAAMAAABtNAAA', 'AAAbvZAAMAAABtNAAB' ] }
+    { ids: [ 1001, 1002 ],
+      rids: [ 'AAAbvZAAMAAABtNAAA', 'AAAbvZAAMAAABtNAAB' ] }
 
 If the ``WHERE`` clause matches no rows, the output would be:
 
 ::
 
-   { ids: [], rids: [] }
+    { ids: [], rids: [] }
 
 .. _refcursors:
 
@@ -417,40 +428,40 @@ Given a PL/SQL procedure defined as:
 
 .. code-block:: sql
 
-   CREATE OR REPLACE PROCEDURE get_emp_rs (
+    CREATE OR REPLACE PROCEDURE get_emp_rs (
      p_sal IN NUMBER,
      p_recordset OUT SYS_REFCURSOR) AS
-   BEGIN
+    BEGIN
      OPEN p_recordset FOR
-       SELECT first_name, salary, hire_date
-       FROM   employees
-       WHERE  salary > p_sal;
-   END;
-   /
+        SELECT first_name, salary, hire_date
+        FROM   employees
+        WHERE  salary > p_sal;
+    END;
+    /
 
 This PL/SQL procedure can be called in node-oracledb using:
 
 .. code-block:: javascript
 
-   const result = await connection.execute(
+    const result = await connection.execute(
      `"BEGIN get_emp_rs(:sal, :cursor); END;`,
      {
-       sal: 6000,
-       cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        sal: 6000,
+        cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
      },
      {
-       prefetchRows:   1000, // tune the internal getRow() data fetch performance
-       fetchArraySize: 1000
+        prefetchRows:   1000, // tune the internal getRow() data fetch performance
+        fetchArraySize: 1000
      }
-   );
+    );
 
-   const resultSet = result.outBinds.cursor;
-   let row;
-   while ((row = await resultSet.getRow())) {
-     console.log(row);
-   }
+    const resultSet = result.outBinds.cursor;
+    let row;
+    while ((row = await resultSet.getRow())) {
+        console.log(row);
+    }
 
-   await resultSet.close();   // always close the ResultSet
+    await resultSet.close();   // always close the ResultSet
 
 All rows can be fetched in one operation by calling ``getRows()`` with
 no argument. This is useful when the query is known to return a “small”
@@ -458,23 +469,23 @@ number of rows:
 
 .. code-block:: javascript
 
-   const result = await connection.execute(
+    const result = await connection.execute(
      `"BEGIN get_emp_rs(:sal, :cursor); END;`,
      {
-       sal: 6000,
-       cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        sal: 6000,
+        cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
      },
      {
-       prefetchRows:   200, // tune the getRows() call
-       fetchArraySize: 200
+        prefetchRows:   200, // tune the getRows() call
+        fetchArraySize: 200
      }
-   );
+    );
 
-   const resultSet = result.outBinds.cursor;
-   const rows = await resultSet.getRows();
-   console.log(rows);
+    const resultSet = result.outBinds.cursor;
+    const rows = await resultSet.getRows();
+    console.log(rows);
 
-   await resultSet.close();   // always close the ResultSet
+    await resultSet.close();   // always close the ResultSet
 
 The :attr:`~oracledb.prefetchRows` and :attr:`~oracledb.fetchArraySize` can
 be used to tune the ``getRows()`` call. The values must be set before, or when,
@@ -488,26 +499,26 @@ To convert the REF CURSOR ResultSet to a stream, use
 
 .. code-block:: javascript
 
-   const result = await connection.execute(
+    const result = await connection.execute(
      `"BEGIN get_emp_rs(:sal, :cursor); END;`,
      {
-       sal: 6000,
-       cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        sal: 6000,
+        cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
      }
-   );
+    );
 
-   const cursor = result.outBinds.cursor;
-   const queryStream = cursor.toQueryStream();
+    const cursor = result.outBinds.cursor;
+    const queryStream = cursor.toQueryStream();
 
-   const consumeStream = new Promise((resolve, reject) => {
-     queryStream.on('data', function(row) {
-       console.log(row);
-     });
-     queryStream.on('error', reject);
-     queryStream.on('close', resolve);
-   });
+    const consumeStream = new Promise((resolve, reject) => {
+        queryStream.on('data', function(row) {
+            console.log(row);
+        });
+        queryStream.on('error', reject);
+        queryStream.on('close', resolve);
+    });
 
-   await consumeStream;
+    await consumeStream;
 
 The connection must remain open until the stream is completely read.
 Query results must be fetched to completion to avoid resource leaks. The
@@ -522,23 +533,23 @@ receiving PL/SQL code. For example:
 
 .. code-block:: javascript
 
-   const result = await connection.execute(
+    const result = await connection.execute(
      `SELECT * FROM locations`,
      [],
      {
-       resultSet:    true,
-       prefetchRows: 0      // stop node-oracledb internally fetching rows from the ResultSet
+        resultSet:    true,
+        prefetchRows: 0      // stop node-oracledb internally fetching rows from the ResultSet
      }
-   );
+    );
 
-   // Pass the ResultSet as a REF CURSOR into PL/SQL
+    // Pass the ResultSet as a REF CURSOR into PL/SQL
 
-   await conn.execute(
+    await conn.execute(
      `BEGIN myproc(:rc); END;`,
      {
-       rc: { val: result.resultSet, type: oracledb.CURSOR, dir: oracledb.BIND_IN }
+        rc: { val: result.resultSet, type: oracledb.CURSOR, dir: oracledb.BIND_IN }
      }
-   );
+    );
 
 Because the default bind direction is ``BIND_IN``, and the type can be
 inferred from ``result.resultSet``, the PL/SQL procedure call can be
@@ -546,7 +557,7 @@ simplified to:
 
 .. code-block:: javascript
 
-   await conn.execute(`BEGIN myproc(:rc); END;`, [result.resultSet]);
+    await conn.execute(`BEGIN myproc(:rc); END;`, [result.resultSet]);
 
 .. _lobbinds:
 
@@ -613,9 +624,9 @@ easy:
 
 .. code-block:: javascript
 
-   sql = `SELECT first_name, last_name FROM employees WHERE first_name IN (:bv)`;
-   binds = ['Christopher'];
-   await connection.execute(sql, binds, function(...));
+    sql = `SELECT first_name, last_name FROM employees WHERE first_name IN (:bv)`;
+    binds = ['Christopher'];
+    await connection.execute(sql, binds, function(...));
 
 But a common use case for a SQL ``WHERE IN`` clause is for multiple
 values, for example when a web user selects multiple check-box options
@@ -626,16 +637,16 @@ the SQL query should have individual bind parameters, for example:
 
 .. code-block:: javascript
 
-   const sql = `SELECT first_name, last_name FROM employees WHERE first_name IN (:bv1, :bv2, :bv3, :bv4)`;
-   const binds = ['Alyssa', 'Christopher', 'Hazel', 'Samuel'];
-   const result = await connection.execute(sql, binds);
+    const sql = `SELECT first_name, last_name FROM employees WHERE first_name IN (:bv1, :bv2, :bv3, :bv4)`;
+    const binds = ['Alyssa', 'Christopher', 'Hazel', 'Samuel'];
+    const result = await connection.execute(sql, binds);
 
 If you sometimes execute the query with a smaller number of items, then
 null can be bound for each ‘missing’ value:
 
 .. code-block:: javascript
 
-   const binds = ['Alyssa', 'Christopher', 'Hazel', null];
+    const binds = ['Alyssa', 'Christopher', 'Hazel', null];
 
 When the exact same statement text is re-executed many times regardless
 of the number of user supplied values, this provides performance and
@@ -648,17 +659,17 @@ up:
 
 .. code-block:: javascript
 
-   const binds = ['Christopher', 'Hazel', 'Samuel'];
-   let sql = `SELECT first_name, last_name FROM employees WHERE first_name IN (`;
-   for (const i = 0; i < binds.length; i++)
-      sql += (i > 0) ? ", :" + i : ":" + i;
-   sql += ")";
+    const binds = ['Christopher', 'Hazel', 'Samuel'];
+    let sql = `SELECT first_name, last_name FROM employees WHERE first_name IN (`;
+    for (const i = 0; i < binds.length; i++)
+        sql += (i > 0) ? ", :" + i : ":" + i;
+    sql += ")";
 
 This will construct a SQL statement:
 
 ::
 
-   SELECT first_name, last_name FROM employees WHERE first_name IN (:0, :1, :2)
+    SELECT first_name, last_name FROM employees WHERE first_name IN (:0, :1, :2)
 
 You could use a `tagged literal template <https://github.com/oracle/
 node-oracledb/issues/699#issuecomment-524009129>`__
@@ -673,7 +684,7 @@ statement like:
 
 ::
 
-   SELECT ... WHERE col IN ( <something that returns a list of values> )
+    SELECT ... WHERE col IN ( <something that returns a list of values> )
 
 The best way to do the ``<something that returns a list of values>``
 will depend on how the data is initially represented and the number of
@@ -683,22 +694,22 @@ table.
 One method is to use an Oracle collection with the ``TABLE()`` clause.
 For example, if the following type was created::
 
-   SQL> CREATE OR REPLACE TYPE name_array AS TABLE OF VARCHAR2(20);
-     2  /
+    SQL> CREATE OR REPLACE TYPE name_array AS TABLE OF VARCHAR2(20);
+      2  /
 
 then the application could do:
 
 .. code-block:: javascript
 
-   const sql = `SELECT first_name, last_name
-                FROM employees
-                WHERE first_name IN (SELECT * FROM TABLE(:bv))`;
+    const sql = `SELECT first_name, last_name
+                 FROM employees
+                 WHERE first_name IN (SELECT * FROM TABLE(:bv))`;
 
-   const inlist = ['Christopher', 'Hazel', 'Samuel'];
+    const inlist = ['Christopher', 'Hazel', 'Samuel'];
 
-   const binds = { bv: { type: "NAME_ARRAY", val: inlist } };
+    const binds = { bv: { type: "NAME_ARRAY", val: inlist } };
 
-   const result = await connection.execute(sql, binds, options);
+    const result = await connection.execute(sql, binds, options);
 
 You may decide to overload the use of the database
 ``SYS.ODCIVARCHAR2LIST`` or ``SYS.ODCINUMBERLIST`` types so you don’t
@@ -706,7 +717,7 @@ need to create a type like ``name_array``:
 
 .. code-block:: javascript
 
-   const binds = { bv: { type: 'SYS.ODCIVARCHAR2LIST', val: inlist } };
+    const binds = { bv: { type: 'SYS.ODCIVARCHAR2LIST', val: inlist } };
 
 Since this ``TABLE()`` solution uses an object type, there is a
 performance impact because of the extra :ref:`round-trips <roundtrips>`
@@ -727,38 +738,38 @@ the pattern match wildcards, for example:
 
 .. code-block:: javascript
 
-   const pattern = "%uth%";
+    const pattern = "%uth%";
 
-   result = await connection.execute(
+    result = await connection.execute(
      `SELECT CITY FROM LOCATIONS WHERE CITY LIKE :bv`,
      { bv: pattern }
-   );
-   console.log(result.rows[0]);
+    );
+    console.log(result.rows[0]);
 
 Output is like:
 
 ::
 
-   [ [ 'South Brunswick' ], [ 'South San Francisco' ], [ 'Southlake' ] ]
+    [ [ 'South Brunswick' ], [ 'South San Francisco' ], [ 'Southlake' ] ]
 
 The same is true for regular expression functions such as
 ``REGEXP_LIKE`` and ``REGEXP_SUBSTR``. For example:
 
 .. code-block:: javascript
 
-   const pattern = ',[^,]+,';
+    const pattern = ',[^,]+,';
 
-   result = await connection.execute(
+    result = await connection.execute(
      `SELECT REGEXP_SUBSTR('500 Oracle Parkway, Redwood Shores, CA', :bv) FROM DUAL`,
      { bv: pattern }
-   );
-   console.log(result.rows);
+    );
+    console.log(result.rows);
 
 Output is like:
 
 ::
 
-   [ [ ', Redwood Shores,' ] ]
+    [ [ ', Redwood Shores,' ] ]
 
 .. _sqlbindtablename:
 
@@ -771,15 +782,15 @@ example:
 
 .. code-block:: javascript
 
-   const validTables = ['LOCATIONS', 'DEPARTMENTS'];
+    const validTables = ['LOCATIONS', 'DEPARTMENTS'];
 
-   const tableName = getTableNameFromEndUser();
+    const tableName = getTableNameFromEndUser();
 
-   if (!validTables.includes(tableName)) {
+    if (!validTables.includes(tableName)) {
      throw new Error('Invalid table name');
-   }
+    }
 
-   const query = `SELECT * FROM ` + tableName;
+    const query = `SELECT * FROM ` + tableName;
 
 The same technique can be used to construct the list of selected column
 names. Make sure to use an Allow List of names to avoid SQL Injection
@@ -792,18 +803,18 @@ It is possible to bind column names used in an ORDER BY:
 
 .. code-block:: javascript
 
-   const sql = `SELECT first_name, last_name
-                FROM employees
-                ORDER BY
-                  CASE :ob
-                    WHEN 'FIRST_NAME' THEN first_name
-                    ELSE last_name
-                  END`;
+    const sql = `SELECT first_name, last_name
+                 FROM employees
+                 ORDER BY
+                    CASE :ob
+                        WHEN 'FIRST_NAME' THEN first_name
+                        ELSE last_name
+                    END`;
 
-   const columnName = getColumnNameFromEndUser();  // your function
-   const binds = [columnName];
+    const columnName = getColumnNameFromEndUser();  // your function
+    const binds = [columnName];
 
-   const result = await connection.execute(sql, binds);
+    const result = await connection.execute(sql, binds);
 
 In this example, when ``columnName`` is ‘FIRST_NAME’ then the result set
 will be ordered by first name, otherwise the order will be by last name.

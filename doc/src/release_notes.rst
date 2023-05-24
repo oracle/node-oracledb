@@ -5,67 +5,76 @@
 node-oracledb Release Notes
 =============================
 
-node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...v6.0.0>`__ (DD Mon YYYY)
+node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...v6.0.0>`__ (24 May 2023)
 --------------------------------------------------------------------------------------------------------
 
-**This release is under development**
+#)  Node-oracledb is now a pure JavaScript 'Thin' driver by default that
+    connects directly to Oracle Database.  Optional use of Oracle Client
+    libraries enables a :ref:`'Thick' mode <enablingthick>` with some
+    additional functionality.
 
-#)  node-oracledb is now a 'Thin' driver by default that connects directly
-    to Oracle Database.  Optional use of Oracle Client libraries enables a
-    :ref:`'Thick' mode <enablingthick>` with some additional functionality.
-
-#)  Added a new ``oracledb.fetchTypeHandler`` and equivalent execution option
-    allowing a user function to be specified that can make custom alterations
-    to SQL query data before it is returned to the app.
-
-#)  Deprecated execution option attribute ``fetchInfo``.  Use the new
-    ``fetchTypeHandler`` functionality instead.
-
-#)  Changed ``oracledb.DB_TYPE_*`` constants to be ``DbType`` objects
-    instead of numbers.
-
-#)  Added support for the Oracle Database 23c BOOLEAN SQL type.
+#)  Re-licensed to dual Apache 2.0 or UPL 1.0 licenses, see
+    :ref:`license`.
 
 #)  Bumped the minimum Node.js version required to 14.6 so Node-API version 6
     and ``FinalizationRegistry`` can be used in the driver implementation.
 
-#)  Allow ``package/prunebinaries.js`` to optionally remove all the Thick mode
-    binaries to enable a Thin-mode only installation.
+#)  Added a new :attr:`oracledb.fetchTypeHandler` and equivalent
+    :ref:`execution option <propexecfetchtypehandler>` allowing a user
+    function to be specified that can make custom alterations to SQL query
+    data before it is returned to the application.
 
-#)  Allow ``npm run buildpackage`` to create a package without Thick mode
-    binaries.
+#)  Deprecated execution option attribute ``fetchInfo``.  Use the new
+    :ref:`fetchtypehandler` functionality instead.
 
-#)  Re-licensed to dual Apache 2.0 or UPL 1.0 licenses, see
-    `LICENSE.txt <https://github.com/oracle/node-oracledb/blob/main/LICENSE.txt>`__.
+#)  Type and Metadata Changes:
 
-#)  Internal change: reorganized code to move functionality from C to JavaScript.
+    - Query extended metadata is now always available.  The
+      ``oracledb.extendedMetaData`` and
+      :ref:`equivalent execution attribute <propexecextendedmetadata>` values
+      are ignored.
 
-#)  Multiple calls to ``initOracleClient()`` with the same arguments no longer
-    result in an error.
+    - Query column metadata now always returns unique column names regardless
+      of the value of the ``outFormat`` setting.  Previously they were only
+      unique when ``oracledb.OUT_FORMAT_OBJECT`` was used.
 
-#)  Oracle Database DATE and TIMESTAMP types are now returned as JavaScript date
-    types in the application's timezone, and no longer fetched or bound as
+    - Changed ``oracledb.DB_TYPE_*`` constants to be ``DbType`` objects
+      instead of numbers.
+
+    - Added support for the Oracle Database 23c BOOLEAN SQL type.
+
+    - Fixed type used when fetching NCLOB as a string.
+
+    - Fixed query metadata ``fetchType`` value.
+
+#)  Package script changes:
+
+    - Allow ``package/prunebinaries.js`` to optionally remove all the Thick
+      mode binaries to enable a Thin-mode only installation.
+
+    - Allow ``npm run buildpackage`` to create a package without Thick mode
+      binaries.
+
+#)  Code refactoring:
+
+    - Standardized and improved function parameter validation.
+
+    - Show NJS prefixed error messages instead of DPI or ORA prefixed messages
+      in some error scenarios.
+
+#)  Multiple calls to :meth:`~oracledb.initOracleClient()` no longer result in
+    an error, as long as the same arguments are passed.
+
+#)  Oracle Database DATE and TIMESTAMP types are now returned as JavaScript
+    date types in the application's timezone, and no longer fetched or bound as
     TIMESTAMP WITH LOCAL TIME ZONE.  The connection session time zone no longer
     impacts these types.  This behavior aligns with other Oracle Database tools
-    and drivers.
+    and drivers. Handling of TIMESTAMP WITH TIMEZONE and TIMESTAMP WITH LOCAL
+    TIMEZONE has not changed.
 
-#)  Query column metadata now always returns unique column names regardless of
-    the value of the ``outFormat`` setting.  Previously they were only unique when
-    ``oracledb.OUT_FORMAT_OBJECT`` was used.
-
-#)  Query extended metadata is now always available.  The
-    ``oracledb.extendedMetaData`` and equivalent execution attribute values are
-    ignored.
-
-#)  Fixed query metadata ``fetchType`` value.
-
-#)  Show NJS prefixed error messages instead of DPI or ORA prefixed messages in
-    some error scenarios.
-
-#)  The previously deprecated Token-Based Authentication ``accessTokenCallback``
-    attribute has been removed.  Use ``accessToken`` instead.
-
-#)  Fixed type used when fetching NCLOB as a string.
+#)  The previously deprecated Token-Based Authentication
+    ``accessTokenCallback`` attribute has been removed.  Use
+    :ref:`accessToken <createpoolpoolattrsaccesstoken>` instead.
 
 #)  Test and documentation improvements.
 
@@ -170,6 +179,7 @@ node-oracledb `v5.3.0 <https://github.com/oracle/node-oracledb/compare/v5.2.0...
     issues/1408>`__.
 
 node-oracledb `v5.2.0 <https://github.com/oracle/node-oracledb/compare/v5.1.0...v5.2.0>`__ (7 Jun 2021)
+-------------------------------------------------------------------------------------------------------
 
 #)  Connection pool changes:
 

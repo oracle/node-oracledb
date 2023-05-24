@@ -1,13 +1,18 @@
 .. _twopc:
 
-***********************
-Two-Phase Commits (TPC)
-***********************
+*****************************
+Using Two-Phase Commits (TPC)
+*****************************
 
 Node-oracledb functions such as :meth:`connection.tpcBegin()`
 support distributed transactions. See `Two-Phase Commit Mechanism
 <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8152084F-4760
 -4B89-A91C-9A84F81C23D1>`__ in the Oracle Database documentation.
+
+.. note::
+
+    In this release, TPC is only supported in node-oracledb Thick mode. See
+    :ref:`enablingthick`.
 
 Distributed transaction protocols attempt to keep multiple data sources
 consistent with one another by ensuring updates to the data sources
@@ -70,91 +75,91 @@ An example of an application managing the two-phase commit protocol is:
 
 .. code-block:: javascript
 
-   const oracledb = require('oracledb');
-   const dbConfig1 = require('./dbconfig1.js');
-   const dbConfig2 = require('./dbconfig2.js');
+    const oracledb = require('oracledb');
+    const dbConfig1 = require('./dbconfig1.js');
+    const dbConfig2 = require('./dbconfig2.js');
 
-   async function run() {
-     let connection1, connection2;
+    async function run() {
+        let connection1, connection2;
 
-     let xid1 = {
-       "formatId": 1,
-       "globalTransactionId": "tx1",
-       "branchQualifier": "br1"
-     };
+        let xid1 = {
+            "formatId": 1,
+            "globalTransactionId": "tx1",
+            "branchQualifier": "br1"
+        };
 
-     let xid2 = {
-       "formatId": 1,
-       "globalTransactionId": "tx1",
-       "branchQualifier": "br2"
-     };
+        let xid2 = {
+            "formatId": 1,
+            "globalTransactionId": "tx1",
+            "branchQualifier": "br2"
+        };
 
-     try {
+        try {
 
-       connection1 = await oracledb.getConnection(dbConfig1);      // Connect to DB 1
-       connection2 = await oracledb.getConnection(dbConfig2);      // Connect to DB 2
+            connection1 = await oracledb.getConnection(dbConfig1);      // Connect to DB 1
+            connection2 = await oracledb.getConnection(dbConfig2);      // Connect to DB 2
 
-       await connection1.tpcBegin(xid1);                           // Start the transaction on DB 1
-       await connection2.tpcBegin(xid2);                           // Start the transaction on DB 2
+            await connection1.tpcBegin(xid1);                           // Start the transaction on DB 1
+            await connection2.tpcBegin(xid2);                           // Start the transaction on DB 2
 
-       // Perform some DML on each database
-       await connection1.execute(
-         `UPDATE customers SET balance = :1 WHERE cust_id = :2`,
-         [150, 21]
-       );
-       await connection2.execute(
-         `UPDATE customers SET balance = :1 WHERE cust_id = :2`,
-         [250, 1]
-       );
+            // Perform some DML on each database
+            await connection1.execute(
+             `UPDATE customers SET balance = :1 WHERE cust_id = :2`,
+             [150, 21]
+            );
+            await connection2.execute(
+             `UPDATE customers SET balance = :1 WHERE cust_id = :2`,
+             [250, 1]
+            );
 
-       const commitNeeded1 = await connection1.tpcPrepare(xid1);   // Prepare DB 1
-       const commitNeeded2 = await connection2.tpcPrepare(xid2);   // Prepare DB 2
-       //const commitNeeded2 = false;
+            const commitNeeded1 = await connection1.tpcPrepare(xid1);   // Prepare DB 1
+            const commitNeeded2 = await connection2.tpcPrepare(xid2);   // Prepare DB 2
+            //const commitNeeded2 = false;
 
-       if (commitNeeded1) {                                        // Does DB 1 need committing?
-         console.log("Committing connection 1");
-         await connection1.tpcCommit(xid1);
-       } else {
-         console.log("Connection 1 does not need no committing");
-       }
+            if (commitNeeded1) {                                        // Does DB 1 need committing?
+                console.log("Committing connection 1");
+                await connection1.tpcCommit(xid1);
+            } else {
+                console.log("Connection 1 does not need no committing");
+            }
 
-       if (commitNeeded2) {                                        // Does DB 2 need committing?
-         console.log("Committing connection 2");
-         await connection2.tpcCommit(xid2);
-       } else {
-         console.log("Connection 2 does not need no committing");
-       }
+            if (commitNeeded2) {                                        // Does DB 2 need committing?
+                console.log("Committing connection 2");
+                await connection2.tpcCommit(xid2);
+            } else {
+                console.log("Connection 2 does not need no committing");
+            }
 
-     } catch (err) {
-       console.error(err);
-       // Rollback on error
-       if (connection1) {
-         console.log("Rolling back Connection 1");
-         await connection1.tpcRollback(xid1);
-       }
-       if (connection2) {
-         console.log("Rolling back Connection 2");
-         await connection2.tpcRollback(xid2);
-       }
-     } finally {
-       if (connection1) {
-         try {
-           await connection1.close();
-         } catch (err) {
-           console.error(err);
-         }
-       }
-       if (connection2) {
-         try {
-           await connection2.close();
-         } catch (err) {
-           console.error(err);
-         }
-       }
-     }
-   }
+        } catch (err) {
+            console.error(err);
+            // Rollback on error
+            if (connection1) {
+                console.log("Rolling back Connection 1");
+                await connection1.tpcRollback(xid1);
+            }
+            if (connection2) {
+                console.log("Rolling back Connection 2");
+                await connection2.tpcRollback(xid2);
+            }
+        } finally {
+            if (connection1) {
+                try {
+                    await connection1.close();
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+            if (connection2) {
+                try {
+                    await connection2.close();
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        }
+    }
 
-   run();
+    run();
 
 The two-phase commit functions allow one process or connection to start
 a transaction, and then a second to continue it. For example, if a table
@@ -163,50 +168,50 @@ a transaction, update the table, and then suspend the transaction:
 
 .. code-block:: javascript
 
-   connection = await oracledb.getConnection( {
-     user          : "hr",
-     password      : mypw,
-     connectString : "localhost/orclpdb1"
-   });
+    connection = await oracledb.getConnection( {
+        user          : "hr",
+        password      : mypw,
+        connectString : "localhost/orclpdb1"
+    });
 
-   const xid = {
-     "formatId": 1,
-     "globalTransactionId": "tx1",
-     "branchQualifier": "br1"
-   };
+    const xid = {
+        "formatId": 1,
+        "globalTransactionId": "tx1",
+        "branchQualifier": "br1"
+    };
 
-   await connection.tpcBegin(xid);
-   result = await connection.execute('UPDATE mytable SET salary = salary * 1.1');  // 100 * 1.1 == 110
-   await connection.tpcEnd(xid, oracledb.TPC_END_SUSPEND);
-   await connection.close();
+    await connection.tpcBegin(xid);
+    result = await connection.execute('UPDATE mytable SET salary = salary * 1.1');  // 100 * 1.1 == 110
+    await connection.tpcEnd(xid, oracledb.TPC_END_SUSPEND);
+    await connection.close();
 
 A second process could resume that same transaction by passing the same
 XID:
 
 .. code-block:: javascript
 
-   connection = await oracledb.getConnection( {
-     user          : "hr",
-     password      : mypw,
-     connectString : "localhost/orclpdb1"
-   });
+    connection = await oracledb.getConnection( {
+        user          : "hr",
+        password      : mypw,
+        connectString : "localhost/orclpdb1"
+    });
 
-   const xid = {
-     "formatId": 1,
-     "globalTransactionId": "tx1",
-     "branchQualifier": "br1"
-   };
+    const xid = {
+        "formatId": 1,
+        "globalTransactionId": "tx1",
+        "branchQualifier": "br1"
+    };
 
-   await connection.tpcBegin(xid, oracledb.TPC_BEGIN_RESUME);
-   result = await connection.execute('UPDATE mytable SET salary = salary * 3');  // 110 * 3 == 330
-   await connection.tpcCommit(xid, true);
-   await connection.close();
+    await connection.tpcBegin(xid, oracledb.TPC_BEGIN_RESUME);
+    result = await connection.execute('UPDATE mytable SET salary = salary * 3');  // 110 * 3 == 330
+    await connection.tpcCommit(xid, true);
+    await connection.close();
 
 The table salary column now contains a value of 330 showing that both
 UPDATE statements had taken place::
 
-   SQL> select * from mytable;
+    SQL> select * from mytable;
 
-       SALARY
-   ----------
-          330
+        SALARY
+    ----------
+        330

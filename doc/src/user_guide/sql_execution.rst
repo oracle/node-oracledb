@@ -1,7 +1,7 @@
 .. _sqlexecution:
 
 *************
-SQL Execution
+Executing SQL
 *************
 
 A single SQL or PL/SQL statement may be executed using the *Connection*
@@ -48,15 +48,15 @@ are returned in the callback :ref:`result.rows <execrows>` property:
 
 .. code-block:: javascript
 
-   const result = await connection.execute(
-     `SELECT department_id, department_name
-      FROM departments
-      WHERE department_id = :did`,
-     [180],
-     { maxRows: 10 }  // a maximum of 10 rows will be returned
-   );
+    const result = await connection.execute(
+        `SELECT department_id, department_name
+        FROM departments
+        WHERE department_id = :did`,
+        [180],
+        { maxRows: 10 }  // a maximum of 10 rows will be returned
+    );
 
-   console.log(result.rows);  // print all returned rows
+    console.log(result.rows);  // print all returned rows
 
 Any rows beyond the :ref:`maxRows <propexecmaxrows>` limit are not
 returned. If ``maxRows`` is 0 (the default), then all rows will be
@@ -138,76 +138,76 @@ To fetch one row at a time use getRow() :
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-    `SELECT city, postal_code FROM locations`,
-    [], // no bind variables
-    {
-      resultSet: true // return a ResultSet (default is false)
+    const result = await connection.execute(
+        `SELECT city, postal_code FROM locations`,
+        [], // no bind variables
+        {
+            resultSet: true // return a ResultSet (default is false)
+        }
+    );
+
+    const rs = result.resultSet;
+    let row;
+    let i = 1;
+
+    while ((row = await rs.getRow())) {
+        console.log("getRow(): row " + i++);
+        console.log(row);
     }
-  );
-
-  const rs = result.resultSet;
-  let row;
-  let i = 1;
-
-  while ((row = await rs.getRow())) {
-    console.log("getRow(): row " + i++);
-    console.log(row);
-  }
-  // always close the ResultSet
-  await rs.close();
+    // always close the ResultSet
+    await rs.close();
 
 To fetch multiple rows at a time, use ``getRows()``:
 
 .. code-block:: javascript
 
-  const numRows = 10;
+    const numRows = 10;
 
-  const result = await connection.execute(
-    `SELECT employee_id, last_name
-     FROM   employees
-     ORDER BY employee_id`,
-    [], // no bind variables
-    {
-      resultSet: true // return a ResultSet (default is false)
-    }
-  );
+    const result = await connection.execute(
+        `SELECT employee_id, last_name
+        FROM   employees
+        ORDER BY employee_id`,
+        [], // no bind variables
+        {
+            resultSet: true // return a ResultSet (default is false)
+        }
+    );
 
-  // Fetch rows from the ResultSet.
+    // Fetch rows from the ResultSet.
 
-  const rs = result.resultSet;
-  let rows;
+    const rs = result.resultSet;
+    let rows;
 
-  do {
-    rows = await rs.getRows(numRows); // get numRows rows at a time
-    if (rows.length > 0) {
-      console.log("getRows(): Got " + rows.length + " rows");
-      console.log(rows);
-    }
-  } while (rows.length === numRows);
+    do {
+        rows = await rs.getRows(numRows); // get numRows rows at a time
+        if (rows.length > 0) {
+            console.log("getRows(): Got " + rows.length + " rows");
+            console.log(rows);
+        }
+    } while (rows.length === numRows);
 
-  // always close the ResultSet
-  await rs.close();
+    // always close the ResultSet
+    await rs.close();
 
 From node-oracledb 5.5, you can iterate over ResultSets:
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-    `SELECT city, postal_code FROM locations`,
-    [], // no bind variables
-    {
-      resultSet: true // return a ResultSet (default is false)
+    const result = await connection.execute(
+        `SELECT city, postal_code FROM locations`,
+        [], // no bind variables
+        {
+            resultSet: true // return a ResultSet (default is false)
+        }
+    );
+
+    const rs = result.resultSet;
+    for await (const row of rs) {
+        console.log(row);
     }
-  );
 
-  const rs = result.resultSet;
-  for await (const row of rs) {
-    console.log(row);
-  }
-
-  // always close the ResultSet
-  await rs.close();
+    // always close the ResultSet
+    await rs.close();
 
 .. _streamingresults:
 
@@ -254,30 +254,30 @@ An example of streaming query results is:
 
 .. code-block:: javascript
 
-  const stream = connection.queryStream(`SELECT employees_name FROM employees`);
+    const stream = connection.queryStream(`SELECT employees_name FROM employees`);
 
-  stream.on('error', function (error) {
-    // handle any error...
-  });
+    stream.on('error', function (error) {
+        // handle any error...
+    });
 
-  stream.on('data', function (data) {
-    // handle data row...
-  });
+    stream.on('data', function (data) {
+        // handle data row...
+    });
 
-  stream.on('end', function () {
-    // all data has been fetched...
-    stream.destroy();  // the stream should be closed when it has been finished
-  });
+    stream.on('end', function () {
+        // all data has been fetched...
+        stream.destroy();  // the stream should be closed when it has been finished
+    });
 
-  stream.on('close', function () {
-    // can now close connection...  (Note: do not close connections on 'end')
-  });
+    stream.on('close', function () {
+        // can now close connection...  (Note: do not close connections on 'end')
+    });
 
-  stream.on('metadata', function (metadata) {
-    // access metadata of query
-  });
+    stream.on('metadata', function (metadata) {
+        // access metadata of query
+    });
 
-  // listen to any other standard stream events...
+    // listen to any other standard stream events...
 
 See `selectstream.js <https://github.com/oracle/node-oracledb/tree/main/
 examples/selectstream.js>`__ for a runnable example using
@@ -300,18 +300,18 @@ example:
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-    `SELECT department_id, department_name
-    FROM departments
-    WHERE manager_id < :id`,
-    [110]  // bind value for :id
-  );
+    const result = await connection.execute(
+        `SELECT department_id, department_name
+        FROM departments
+        WHERE manager_id < :id`,
+        [110]  // bind value for :id
+    );
 
-  console.log(result.rows);
+    console.log(result.rows);
 
 If run with Oracle’s sample HR schema, the output is::
 
-  [ [ 60, 'IT' ], [ 90, 'Executive' ], [ 100, 'Finance' ] ]
+    [ [ 60, 'IT' ], [ 90, 'Executive' ], [ 100, 'Finance' ] ]
 
 Using this format is recommended for efficiency.
 
@@ -320,27 +320,27 @@ specify the ``outFormat`` option to be ``oracledb.OUT_FORMAT_OBJECT``:
 
 .. code-block:: javascript
 
-  oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
+    oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
 The value can also be set as an ``execute()`` option:
 
 .. code-block:: javascript
 
-  const result = await connection.execute(
-    `SELECT department_id, department_name
-    FROM departments
-    WHERE manager_id < :id`,
-    [110],  // bind value for :id
-    { outFormat: oracledb.OUT_FORMAT_OBJECT }
-  );
+    const result = await connection.execute(
+        `SELECT department_id, department_name
+        FROM departments
+        WHERE manager_id < :id`,
+        [110],  // bind value for :id
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
 
-  console.log(result.rows);
+    console.log(result.rows);
 
 The output is::
 
-  [ { DEPARTMENT_ID: 60, DEPARTMENT_NAME: 'IT' },
-    { DEPARTMENT_ID: 90, DEPARTMENT_NAME: 'Executive' },
-    { DEPARTMENT_ID: 100, DEPARTMENT_NAME: 'Finance' } ]
+    [   { DEPARTMENT_ID: 60, DEPARTMENT_NAME: 'IT' },
+        { DEPARTMENT_ID: 90, DEPARTMENT_NAME: 'Executive' },
+        { DEPARTMENT_ID: 100, DEPARTMENT_NAME: 'Finance' } ]
 
 In the preceding example, each row is a JavaScript object that specifies
 column names and their respective values. Note the property names follow
@@ -349,7 +349,7 @@ since most applications create tables using unquoted, case-insensitive
 names.
 
 Prior to node-oracledb 4.0, the constants ``oracledb.ARRAY`` and
-``oracledb.OBJECT`` where used. These are now deprecated.
+``oracledb.OBJECT`` were used. These are now deprecated.
 
 .. _nestedcursors:
 
@@ -365,42 +365,42 @@ in :ref:`result.rows <execrows>`. For example with:
 
 .. code-block:: javascript
 
-  const sql = `SELECT department_name,
-               CURSOR(SELECT salary, commission_pct
-               FROM employees e
-               WHERE e.department_id = d.department_id
-               ORDER BY salary) as nc
-               FROM departments d
-               ORDER BY department_name`;
+    const sql = `SELECT department_name,
+                CURSOR(SELECT salary, commission_pct
+                FROM employees e
+                WHERE e.department_id = d.department_id
+                ORDER BY salary) as nc
+                FROM departments d
+                ORDER BY department_name`;
 
-  const result = await connection.execute(sql);
-  console.dir(result.rows, {depth: null});
+    const result = await connection.execute(sql);
+    console.dir(result.rows, {depth: null});
 
 Output will be::
 
-  [
-    [ 'Accounting', [ [ 8300, null ], [ 12008, null ] ] ],
-    [ 'Administration', [ [ 4400, null ] ] ],
-    [ 'Benefits', [] ],
-    [ 'Construction', [] ],
-    [ 'Contracting', [] ],
-    [ 'Control And Credit', [] ],
-    [ 'Corporate Tax', [] ],
     [
-      'Executive',
-      [ [ 17000, null ], [ 17000, null ], [ 24000, null ] ]
-    ],
-    [
-      'Finance',
-      [
-        [ 6900, null ],
-        [ 7700, null ],
-        [ 7800, null ],
-        [ 8200, null ],
-        [ 9000, null ],
-        [ 12008, null ]
-      ]
-    ],
+        [ 'Accounting', [ [ 8300, null ], [ 12008, null ] ] ],
+        [ 'Administration', [ [ 4400, null ] ] ],
+        [ 'Benefits', [] ],
+        [ 'Construction', [] ],
+        [ 'Contracting', [] ],
+        [ 'Control And Credit', [] ],
+        [ 'Corporate Tax', [] ],
+        [
+            'Executive',
+            [ [ 17000, null ], [ 17000, null ], [ 24000, null ] ]
+        ],
+        [
+            'Finance',
+            [
+                [ 6900, null ],
+                [ 7700, null ],
+                [ 7800, null ],
+                [ 8200, null ],
+                [ 9000, null ],
+                [ 12008, null ]
+            ]
+        ],
     . . .
 
 If :attr:`oracledb.outFormat` is ``oracledb.OUT_FORMAT_OBJECT``, then each
@@ -408,22 +408,22 @@ row in the sub-array is an object, for example with:
 
 .. code-block:: javascript
 
-  result = await connection.execute(sql, [], {outFormat: oracledb.OUT_FORMAT_OBJECT});
+    result = await connection.execute(sql, [], {outFormat: oracledb.OUT_FORMAT_OBJECT});
 
 Output will be::
 
-  [
-    {
-      DEPARTMENT_NAME: 'Accounting',
-      NC: [
-        { SALARY: 8300, COMMISSION_PCT: null },
-        { SALARY: 12008, COMMISSION_PCT: null }
-      ]
-    },
-    {
-      DEPARTMENT_NAME: 'Administration',
-      NC: [ { SALARY: 4400, COMMISSION_PCT: null } ]
-    },
+    [
+        {
+            DEPARTMENT_NAME: 'Accounting',
+            NC: [
+                { SALARY: 8300, COMMISSION_PCT: null },
+                { SALARY: 12008, COMMISSION_PCT: null }
+            ]
+        },
+        {
+            DEPARTMENT_NAME: 'Administration',
+            NC: [ { SALARY: 4400, COMMISSION_PCT: null } ]
+        },
     . . .
 
 The values of :attr:`oracledb.maxRows`, and
@@ -455,38 +455,38 @@ For example:
 
 .. code-block:: javascript
 
-  async function traverseResults(resultSet) {
-    const fetchedRows = [];
-    while (true) {
-      const row = await resultSet.getRow();
-      if (!row)
-        break;
-      for (let i = 0; i < row.length; i++) {
-        if (row[i] instanceof oracledb.ResultSet) {
-          const rs = row[i];
-          row[i] = await traverseResults(rs); // replace a cursor with its expansion
-          await rs.close();
+    async function traverseResults(resultSet) {
+        const fetchedRows = [];
+        while (true) {
+            const row = await resultSet.getRow();
+            if (!row)
+                break;
+            for (let i = 0; i < row.length; i++) {
+                if (row[i] instanceof oracledb.ResultSet) {
+                    const rs = row[i];
+                    row[i] = await traverseResults(rs); // replace a cursor with its expansion
+                    await rs.close();
+                }
+            }
+            fetchedRows.push(row);
         }
-      }
-      fetchedRows.push(row);
+        return fetchedRows;
     }
-    return fetchedRows;
-  }
 
-  const sql = `SELECT department_name,
-               CURSOR(SELECT salary, commission_pct
-               FROM employees e
-               WHERE e.department_id = d.department_id
-               ORDER BY salary) as nc
-               FROM departments d
-               ORDER BY department_name`;
+    const sql = `SELECT department_name,
+                CURSOR(SELECT salary, commission_pct
+                FROM employees e
+                WHERE e.department_id = d.department_id
+                ORDER BY salary) as nc
+                FROM departments d
+                ORDER BY department_name`;
 
-  const result = await connection.execute(sql, [], { resultSet: true });
+    const result = await connection.execute(sql, [], { resultSet: true });
 
-  const rows = await traverseResults(result.resultSet);
-  await result.resultSet.close();
+    const rows = await traverseResults(result.resultSet);
+    await result.resultSet.close();
 
-  console.dir(rows, {depth: null});
+    console.dir(rows, {depth: null});
 
 Output is the same as the previous non-resultSet example.
 
@@ -502,18 +502,7 @@ Query Column Metadata
 ---------------------
 
 The column names of a query are returned in the ``execute()`` callback’s
-:ref:`result.metaData <execmetadata>` attribute:
-
-.. code-block:: javascript
-
-  const result = await connection.execute(
-    `SELECT department_id, department_name
-     FROM departments
-     WHERE manager_id < :id`,
-    [110]  // bind value for :id
-  );
-
-  console.dir(result.metaData, { depth: null });  // show the metadata
+:ref:`result.metaData <execmetadata>` attribute.
 
 When using a :ref:`ResultSet <resultsetclass>`, metadata is also available
 in :attr:`resultset.metaData`. For queries using
@@ -521,80 +510,283 @@ in :attr:`resultset.metaData`. For queries using
 ``metadata`` event.
 
 The metadata is an array of objects, one per column. By default each
-object has a ``name`` attribute:
-
-::
-
-  [ { name: 'DEPARTMENT_ID' }, { name: 'DEPARTMENT_NAME' } ]
-
-The names are in uppercase. This is the default casing behavior for
-Oracle client programs when a database table is created with unquoted,
-case-insensitive column names.
-
-Extended Metadata
-+++++++++++++++++
-
-More metadata is included when the :attr:`oracledb.extendedMetaData` or
-``connection.execute()`` option :ref:`extendedMetaData
-<propexecextendedmetadata>` is *true*. For example:
-
-.. code-block:: javascript
-
-  const result = await connection.execute(
-    `SELECT department_id, department_name
-     FROM departments
-     WHERE manager_id < :id`,
-    [110],  // bind value for :id
-    { extendedMetaData: true }
-  );
-
-  console.dir(result.metaData, { depth: null });  // show the extended metadata
-
-The output is::
-
-  [
-    {
-      name: 'DEPARTMENT_ID',
-      fetchType: 2010,
-      dbType: 2010,
-      dbTypeName: 'NUMBER',
-      nullable: false,
-      precision: 4,
-      scale: 0
-    },
-    {
-      name: 'DEPARTMENT_NAME',
-      fetchType: 2001,
-      dbType: 2001,
-      dbTypeName: 'VARCHAR2',
-      nullable: false,
-      byteSize: 30
-    }
-  ]
-
-Description of the properties is given in the
-:ref:`result.metaData <execmetadata>` description.
+object has the ``name``, ``fetchType``, ``dbType``, ``dbTypeName``,
+``nullable``, ``precision``, and ``scale`` attributes. Description of these
+properties is given in the :ref:`result.metaData <execmetadata>` description.
 
 Also, see :meth:`connection.getStatementInfo()`.
 
+For example:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(
+        `SELECT department_id, department_name
+        FROM departments
+        WHERE manager_id < :id`,
+        [110]  // bind value for :id
+    );
+
+    console.dir(result.metaData, { depth: null });  // show the metadata
+
+The output is::
+
+    [
+        {
+            name: 'DEPARTMENT_ID',
+            fetchType: 2010,
+            dbType: 2010,
+            dbTypeName: 'NUMBER',
+            nullable: false,
+            precision: 4,
+            scale: 0
+        },
+        {
+            name: 'DEPARTMENT_NAME',
+            fetchType: 2001,
+            dbType: 2001,
+            dbTypeName: 'VARCHAR2',
+            nullable: false,
+            byteSize: 30
+        }
+    ]
+
+The names are in uppercase. This is the default casing behavior for
+Oracle Client programs when a database table is created with unquoted,
+case-insensitive column names. You can use a
+:ref:`fetch type handler <columncase>` to change the column names to
+lowercase.
+
+The :attr:`oracledb.extendedMetadata` property and the
+:meth:`connection.execute()` option
+:ref:`extendedMetaData <propexecextendedmetadata>` are deprecated. Extended
+metadata is now always returned.
+
+.. _changefetcheddata:
+
+Changing Fetched Data
+---------------------
+
+You may need to change the default conversion from an Oracle Database type
+to a Node.js type in order to prevent data loss or to fit the purpose of your
+Node.js application. Data returned by node-oracledb queries can be changed by
+using the :ref:`fetchAsString and fetchAsBuffer <fetchppties>` properties, by
+using :ref:`fetch type handlers <fetchtypehandler>`, or by using
+:ref:`"converters" <converterfunc>`.
+
+.. _fetchppties:
+
+Using :attr:`~oracledb.fetchAsString` or :attr:`~oracledb.fetchAsBuffer` Properties
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The global :attr:`~oracledb.fetchAsString`and :attr:`~oracledb.fetchAsBuffer`
+properties are convenience settings which can be used by an application for
+common data type conversions.
+
+The :attr:`~oracledb.fetchAsString` property can be used by an application to
+force the queried column data to be returned as Strings instead of the default
+type such as number, date, or CLOB. See :ref:`fetchasstringhandling` for an
+example.
+
+The :attr:`~oracledb.fetchAsBuffer` property can be used to force the queried
+column data to be returned as Buffers instead of the default
+:ref:`Lob <lobclass>` instance. See :ref:`fetching every BLOB as a buffer
+<fetchasbuffereg>` for an example.
+
+.. _fetchtypehandler:
+
+Using Fetch Type Handlers
++++++++++++++++++++++++++
+
+Other than common data type conversions using the global ``fetchAsString`` and
+``fetchAsBuffer`` settings, you may need more flexibility to modify the
+fetched column data. In such cases, a fetch type handler can be specified for
+queries. The fetch type handler asks the database to perform a conversion of
+the column data type to the desired data type before the data is returned from
+the database to node-oracledb. If the database does not support the conversion
+of data types, an error will be returned. Also, fetch type handlers allow you
+to change column names, for example, to change the column names to lowercase.
+The fetch type handler functionality replaces the deprecated
+:ref:`fetchInfo <propexecfetchinfo>` property.
+
+For BLOB, CLOB, NCLOB, and JSON data types, the data type conversion is
+performed on the database. For all other data types, the node-oracledb Thick
+mode uses :ref:`National Language Support (NLS) <nls>` conversion routines to
+perform the data type conversion while node-oracledb Thin mode uses fixed
+JavaScript routines such as ``toString()``. To modify the existing behavior,
+you can use a :ref:`converter function <converterfunc>`.
+
+Fetch type handlers can be specified in the :attr:`oracledb.fetchTypeHandler`
+attribute or as an :ref:`option <propexecfetchtypehandler>` in
+:meth:`connection.execute()`. The
+:ref:`fetchTypeHandler option <propexecfetchtypehandler>` specified
+in the ``connection.execute()`` overrides the value of
+:attr:`oracledb.fetchTypeHandler`.
+
+The fetch type handler is expected to be a function with a single object
+argument. This single object argument contains the ``byteSize``, ``dbType``,
+``dbTypeName``, ``dbTypeClass``, ``name``, ``nullable``, ``precision``, and
+``scale`` attributes. See :attr:`oracledb.fetchTypeHandler` for more
+information on these attributes.
+
+The function is called once for each column that is going to be fetched. The
+function is expected to return either nothing or an object containing:
+
+- The ``type`` attribute
+- Or the :ref:`converter <converterfunc>` attribute
+- Or both the ``type`` and ``converter`` attributes
+
+The ``type`` attribute is the requested database type and it is one of the
+:ref:`oracledbconstantsdbtype`. The conversion is performed from the
+``dbType`` value in the metadata found in the database to this requested
+type.
+
+For example, to tell the database to return numbers as strings:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(
+        `SELECT salary FROM employees WHERE employee_id = :id`,
+        [178],
+        {
+            fetchTypeHandler: {
+                // Tells the database to return number as strings
+                function numtostr(metaData) {
+                    if (metaData.dbType == oracledb.DB_TYPE_NUMBER) {
+                        return {type: oracledb.STRING}
+                    }
+                }
+            }
+        }
+    );
+
+    console.log(result.rows);
+
+This fetch type handler is called once for the salary column in the SELECT query.
+The database will return a string representation of the row's value. This query
+prints ``'7000'`` which shows that the salary column which is a number was
+converted to a string. Without the fetch type handler, the output would have
+been the number ``7000``.
+
+.. note::
+
+    If the value returned by the fetch type handler function is undefined or
+    no value is specified in the ``type`` attribute of the returned object,
+    then the ``type`` specified in the metadata or the ``type`` defined by
+    processing the :attr:`oracledb.fetchAsString` and
+    :attr:`oracledb.fetchAsBuffer` properties is used.
+
+.. _columncase:
+
+An example of a fetch type handler that converts column names to lowercase is
+shown below:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(
+        `SELECT 1 AS col1, 2 AS COL2 FROM dual`,
+        [],
+        {
+            fetchTypeHandler: {
+                // Tells the database to return column names in lowercase
+                function fth(metaData) {
+                    metaData.name = metaData.name.toLowerCase();
+                }
+            }
+        }
+    );
+
+    console.dir(result.rows, {depth: null});
+
+In the output, the column names are printed in lowercase::
+
+    [
+        {
+            col1: 1,
+            col2: 2,
+        }
+    ]
+
+See `lowercasecolumn.js <https://github.com/oracle/node-oracledb/
+tree/main/examples/lowercasecolumn.js>`__ for a runnable example.
+
+An example of using fetch type handlers for date and number localizations
+is shown in :ref:`thindate` and :ref:`thinnumber`.
+
+.. _converterfunc:
+
+Using Fetch Type Handlers with Converters
++++++++++++++++++++++++++++++++++++++++++
+
+Node-oracledb "converters" can be used with fetch type handlers to change the
+returned data. The converter is a function which accepts the value that will be
+returned by :meth:`connection.execute()` for a particular row and column
+and returns the value that will actually be returned by
+``connection.execute()``. The converter function runs within the
+:meth:`connection.execute()` or :meth:`resultSet.getRows()` functions
+and can make database calls.
+
+For example:
+
+.. code-block:: javascript
+
+    oracledb.fetchTypeHandler = function(metaData) {
+        if (metadata.name.endsWith("ID")) {
+            const myConverter = (v) => {
+                if (v !== null)
+                    v = v.padStart(9, "0");
+                return v;
+            };
+            return {type: oracledb.DB_TYPE_VARCHAR, converter: myConverter};
+        }
+    }
+
+The fetch type handler is called once for each column in the SELECT query. For
+each column name that ends with "ID", the database will return a string
+representation of each row's value. The converter will then be called in
+Node.js for each of those values. Using it in a query:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(
+        `SELECT 5 AS myid, 6 AS myvalue, 'A string' AS mystring FROM DUAL`;
+    );
+    console.log(result.rows)
+
+This query prints::
+
+    ['000000005', 6 , 'A string']
+
+This shows that the number was first converted to a string by the database, as
+requested in the fetch type handler. The converter function then added the
+eight leading zeroes to the data before the value was returned to the
+application.
+
+.. note::
+
+    If the value returned by the fetch type handler function is undefined or
+    no value is specified in the converter function of the returned object, then
+    no conversion takes place.
+
 .. _typemap:
 
-Query Result Type Mapping
--------------------------
+Fetching Different Data Types
+-----------------------------
 
 Oracle number, date, character, ROWID, UROWID, LONG and LONG RAW column
 types are selected as Numbers, Dates, Strings, or Buffers. BLOBs and
 CLOBs are selected into :ref:`Lobs <lobclass>` by default.
 
 The default mapping for some types can be changed using
-:attr:`~oracledb.fetchAsBuffer`, or :attr:`~oracledb.fetchAsString`. The
-:ref:`fetchInfo <propexecfetchinfo>` property can also be used to
-change the default mapping, or override a global mapping, for individual
-columns.
+:attr:`~oracledb.fetchAsBuffer`, :attr:`~oracledb.fetchAsString`, or
+:attr:`~oracledb.fetchTypeHandler`. The
+:ref:`fetchTypeHandler <propexecfetchtypehandler>` property can also be
+used to change the default mapping, or override a global mapping, for
+individual columns.
 
 Data types in ``SELECT`` statements that are unsupported give an error
 *NJS-010: unsupported data type in select list*. These include INTERVAL,
-BFILE and XMLType types.
+BFILE, and XMLType types.
 
 Details are in the following sections.
 
@@ -620,25 +812,25 @@ representations. For example:
 
 .. code-block:: javascript
 
-  const result = await connection.execute(`SELECT 38.73 FROM dual`);
-  console.log(result.rows[0]); // gives 38.730000000000004
+    const result = await connection.execute(`SELECT 38.73 FROM dual`);
+    console.log(result.rows[0]); // gives 38.730000000000004
 
 Similar issues can occur with binary floating-point arithmetic purely in
 Node.js, for example:
 
 .. code-block:: javascript
 
-  console.log(0.2 + 0.7); // gives 0.8999999999999999
+    console.log(0.2 + 0.7); // gives 0.8999999999999999
 
 Node.js can also only represent numbers up to 2 ^ 53 which is
-1.                Numbers larger than this will be truncated.
+9007199254740992. Numbers larger than this will be truncated.
 
 The primary recommendation for number handling is to use Oracle SQL or
 PL/SQL for mathematical operations, particularly for currency
 calculations.
 
 To reliably work with numbers in Node.js, use ``fetchAsString`` or
-``fetchInfo`` (see :ref:`below <fetchasstringhandling>`) to fetch numbers
+``fetchTypeHandler`` (see :ref:`fetchasstringhandling`) to fetch numbers
 in string format, and then use one of the available third-party
 JavaScript number libraries that handles large values and more
 precision.
@@ -648,13 +840,18 @@ precision.
 Fetching Dates and Timestamps
 +++++++++++++++++++++++++++++
 
-By default, date and timestamp columns are mapped to JavaScript Date
-objects. Internally, DATE, TIMESTAMP, TIMESTAMP WITH LOCAL TIME ZONE,
-and TIMESTAMP WITH TIME ZONE columns are fetched as TIMESTAMP WITH LOCAL
-TIME ZONE using the session time zone. Oracle INTERVAL types are not
-supported.
+The Oracle Database DATE and TIMESTAMP columns are fetched as JavaScript date
+types in the timezone of the application. The Oracle Database TIMESTAMP WITH
+LOCAL TIME ZONE and TIMESTAMP WITH TIME ZONE columns are fetched as TIMESTAMP
+WITH LOCAL TIME ZONE. Oracle INTERVAL types are not supported. The connection
+session time zone does not affect these data types.
 
-Note that JavaScript Date has millisecond precision therefore timestamps
+.. versionchanged:: 6.0
+
+    Prior to this release, the DATE and TIMESTAMP columns were fetched as
+    TIMESTAMP WITH LOCAL TIME ZONE.
+
+Note that JavaScript Date has millisecond precision. Therefore, timestamps
 will lose any sub-millisecond fractional part when fetched.
 
 To make applications more portable, it is recommended to always set the
@@ -666,33 +863,36 @@ You can find the current session time zone with:
 
 .. code-block:: sql
 
-  SELECT sessiontimezone FROM DUAL;
+    SELECT sessiontimezone FROM DUAL;
 
-You can set the environment variable `ORA_SDTZ <https://www.oracle.com/pls/
-topic/lookup?ctx=dblatest&id=GUID-578B5988-31E2-4D0F-ACEA-95C827F6012B>`__
-before starting Node.js, for example:
+You can set the environment variable
+`ORA_SDTZ <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
+578B5988-31E2-4D0F-ACEA-95C827F6012B>`__ before starting Node.js, for example:
 
 ::
 
-  $ export ORA_SDTZ='UTC'
-  $ node myapp.js
+    $ export ORA_SDTZ='UTC'
+    $ node myapp.js
 
 If this variable is set in the application, it must be set before the
 first connection is established:
 
 .. code-block:: javascript
 
-  process.env.ORA_SDTZ = 'UTC';
+    process.env.ORA_SDTZ = 'UTC';
 
-  const oracledb = require('oracledb');
-  const connection = await oracledb.getConnection(. . . );
+    const oracledb = require('oracledb');
+    const connection = await oracledb.getConnection(. . . );
 
 The session time zone can also be changed at runtime for each connection
 by executing:
 
 .. code-block:: javascript
 
-  await connection.execute(`ALTER SESSION SET TIME_ZONE='UTC'`);
+    await connection.execute(`ALTER SESSION SET TIME_ZONE='UTC'`);
+
+Note that this setting will not have any effect on the application,
+if it is run in Thin mode.
 
 With pooled connections, you could make use of a
 :ref:`sessionCallback <createpoolpoolattrssessioncallback>` function
@@ -704,21 +904,21 @@ could use a PL/SQL trigger:
 
 .. code-block:: sql
 
-  CREATE OR REPLACE TRIGGER my_logon_trigger
-    AFTER LOGON
-    ON hr.SCHEMA
-  BEGIN
-    EXECUTE IMMEDIATE 'ALTER SESSION SET TIME_ZONE=''UTC''';
-  END;
+    CREATE OR REPLACE TRIGGER my_logon_trigger
+        AFTER LOGON
+        ON hr.SCHEMA
+    BEGIN
+        EXECUTE IMMEDIATE 'ALTER SESSION SET TIME_ZONE=''UTC''';
+    END;
 
 A query that returns the node-oracledb client-side date and timestamp
 is:
 
 .. code-block:: sql
 
-  oracledb.fetchAsString = [oracledb.DATE];
-  result = await connection.execute(`SELECT current_date, current_timestamp FROM DUAL`);
-  console.log(result);
+    oracledb.fetchAsString = [oracledb.DATE];
+    result = await connection.execute(`SELECT current_date, current_timestamp FROM DUAL`);
+    console.log(result);
 
 For more information on time zones, see Oracle Support’s `Timestamps &
 time zones - Frequently Asked Questions, Doc ID 340512.1
@@ -742,81 +942,86 @@ application to be fetched as strings:
 
 .. code-block:: javascript
 
-  const oracledb = require('oracledb');
-  oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
+    const oracledb = require('oracledb');
+
+    // Returns date and number as strings
+    oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 
 For dates and numbers, the maximum length of a string created can be 200
 bytes.
 
 Individual queries can use the :meth:`~connection.execute()` option
-:ref:`fetchInfo <propexecfetchinfo>` to map individual number or date
-columns to strings without affecting other columns or other queries. Any
-global ``fetchAsString`` setting can be overridden to allow specific
-columns to have data returned in native format:
+:ref:`fetchTypeHandler <propexecfetchtypehandler>` to map individual number
+or date columns to strings without affecting other columns or other queries.
+Any global ``fetchAsString`` setting can be overridden to allow specific
+columns to have data returned in native format.
 
 .. code-block:: javascript
 
-  const oracledb = require('oracledb');
+    const result = await connection.execute(
+        `SELECT last_name, hire_date, salary, commission_pct FROM employees
+         WHERE employee_id = :id`,
+        [178],
+        {
+            fetchTypeHandler : {
+                function fth(metaData) {
 
-  const mypw = ...  // set mypw to the hr schema password
+                    if (metaData.name == "HIRE_DATE") {
+                        // Tells the database to return the date as string if the
+                        // column name is HIRE_DATE
+                        return {type: oracledb.STRING}
+                    }
+                    if (metaData.name == "COMMISSION_PCT") {
+                        // Tells the database to override oracledb.fetchAsString
+                        // if the column name is COMMISSION_PCT and fetch as
+                        // native type
+                        return {type: oracledb.DEFAULT}
+                    }
+                }
+            }
+        }
+    );
 
-  oracledb.fetchAsString = [ oracledb.NUMBER ];  // any number queried will be returned as a string
-
-  const connection = await oracledb.getConnection(
-    {
-      user          : "hr",
-      password      : mypw,
-      connectString : "localhost/XEPDB1"
-    }
-  );
-
-  const result = await connection.execute(
-    `SELECT last_name, hire_date, salary, commission_pct FROM employees WHERE employee_id = :id`,
-    [178],
-    {
-      fetchInfo :
-      {
-        "HIRE_DATE":      { type : oracledb.STRING },  // return the date as a string
-        "COMMISSION_PCT": { type : oracledb.DEFAULT }  // override oracledb.fetchAsString and fetch as native type
-      }
-    }
-  );
-
-  console.log(result.rows);
+    console.log(result.rows);
 
 The output is::
 
-  [ [ 'Grant', '24-MAY-07', '7000', 0.15 ] ]
+    [ [ 'Grant', '24-MAY-07', '7000', 0.15 ] ]
 
 The date and salary columns are returned as strings, but the commission
 is a number. The date is mapped using the current session date format,
-which was ``DD-MON-YY`` in this example. The default date format can be
-set, for example, with the environment variable ``NLS_DATE_FORMAT``.
-Note this variable will only be read if ``NLS_LANG`` is also set.
+which was ``DD-MON-YY`` in this example. In node-oracledb Thick mode, the
+default date format can be set, for example, with the environment variable
+``NLS_DATE_FORMAT``. Note this variable will only be read if ``NLS_LANG``
+is also set.
+
+In node-oracledb Thin mode, all NLS environment variables are ignored.
+Fetch type handlers need to be used for :ref:`date <thindate>` and
+:ref:`number <thinnumber>` localizations.
 
 Without the mapping capabilities provided by ``fetchAsString`` and
-``fetchInfo`` the hire date would have been a JavaScript date in the
-local time zone, and both numeric columns would have been represented as
-numbers::
+``fetchTypeHandler``, the hire date would have been a JavaScript date, and
+both numeric columns would have been represented as numbers::
 
-  [ [ 'Grant', Thu May 24 2007 00:00:00 GMT+1000 (AEST), 7000, 0.15 ] ]
+    [ [ 'Grant', 24-MAY-07, 7000, 0.15 ] ]
 
 To map columns returned from REF CURSORS, use ``fetchAsString``. The
-``fetchInfo`` settings do not apply.
+``fetchTypeHandler`` settings do not apply.
 
-When using ``fetchAsString`` or ``fetchInfo`` for numbers, you may need
-to explicitly use ``NLS_NUMERIC_CHARACTERS`` to override your NLS
-settings and force the decimal separator to be a period. This can be
-done for each connection by executing the statement:
+In node-oracledb Thick mode, when using ``fetchAsString`` or
+``fetchTypeHandler`` for numbers, you may need to explicitly use
+``NLS_NUMERIC_CHARACTERS`` to override your NLS settings and force the decimal
+separator to be a period. This can be done for each connection by executing
+the statement:
 
 .. code-block:: javascript
 
-  await connection.execute(`ALTER SESSION SET NLS_NUMERIC_CHARACTERS = '.,'`);
+    await connection.execute(`ALTER SESSION SET NLS_NUMERIC_CHARACTERS = '.,'`);
 
 Alternatively you can set the equivalent environment variable prior to
 starting Node.js::
 
-  $ export NLS_NUMERIC_CHARACTERS='.,'
+    $ export NLS_NUMERIC_CHARACTERS='.,'
 
 Note this environment variable is not used unless the ``NLS_LANG``
 environment variable is also set.
@@ -831,7 +1036,7 @@ By default BLOB, CLOB and NCLOB columns are fetched into
 be more efficient and convenient to fetch them directly into Buffers or
 Strings by using the global :attr:`~oracledb.fetchAsBuffer`
 or :attr:`~oracledb.fetchAsString` settings, or the
-per-column :ref:`fetchInfo <propexecfetchinfo>` setting. See the
+per-column :attr:`~oracledb.fetchTypeHandler` setting. See the
 section :ref:`Working with CLOB, NCLOB and BLOB Data <lobhandling>`.
 
 .. _fetchlong:
@@ -858,14 +1063,6 @@ Fetching ROWID and UROWID
 +++++++++++++++++++++++++
 
 Queries will return ROWID and UROWID columns as Strings.
-
-.. _fetchxml:
-
-Fetching XMLType
-++++++++++++++++
-
-``XMLType`` columns queried will returns as Strings. They can also be
-handled as CLOBs, see :ref:`Working with XMLType <xmltype>`.
 
 .. _fetchraw:
 
@@ -908,27 +1105,27 @@ the starting row and the number of rows.
 
 Techniques include:
 
--  For Oracle Database 12c, use the ``OFFSET`` / ``FETCH`` syntax. This
-   is similar to the ``LIMIT`` keyword of MySQL. See `Row Limiting:
+-  For Oracle Database 12c or later, use the ``OFFSET`` / ``FETCH`` syntax.
+   This is similar to the ``LIMIT`` keyword of MySQL. See `Row Limiting:
    Examples <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
    CFA006CA-6FF1-4972-821E-6996142A51C6>`__ in the Oracle documentation.
    A node-oracledb example is:
 
    .. code-block:: javascript
 
-    const myoffset = 0;       // do not skip any rows (start at row 1)
-    const mymaxnumrows = 20;  // get 20 rows
+        const myoffset = 0;       // do not skip any rows (start at row 1)
+        const mymaxnumrows = 20;  // get 20 rows
 
-    const sql = `SELECT last_name
-                 FROM employees
-                 ORDER BY last_name, employee_id -- See below
-                 OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`;
+        const sql = `SELECT last_name
+                     FROM employees
+                     ORDER BY last_name, employee_id -- See below
+                     OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`;
 
-    const result = await connection.execute(
-      sql,
-      { offset: myoffset, maxnumrows: mymaxnumrows },
-      { prefetchRows: mymaxnumrows + 1, fetchArraySize: mymaxnumrows }
-    );
+        const result = await connection.execute(
+            sql,
+            { offset: myoffset, maxnumrows: mymaxnumrows },
+            { prefetchRows: mymaxnumrows + 1, fetchArraySize: mymaxnumrows }
+        );
 
    A runnable example is in `rowlimit.js <https://github.com/oracle/
    node-oracledb/tree/main/examples/rowlimit.js>`__.
@@ -960,11 +1157,11 @@ Techniques include:
 
    .. code-block:: sql
 
-    SELECT *
-    FROM (SELECT a.*, ROWNUM AS rnum
-          FROM (YOUR_QUERY_GOES_HERE -- including the order by) a
-          WHERE ROWNUM <= MAX_ROW)
-    WHERE rnum >= MIN_ROW
+        SELECT *
+        FROM (SELECT a.*, ROWNUM AS rnum
+              FROM (YOUR_QUERY_GOES_HERE -- including the order by) a
+              WHERE ROWNUM <= MAX_ROW)
+        WHERE rnum >= MIN_ROW
 
    Here, ``MIN_ROW`` is the row number of first row and ``MAX_ROW`` is
    the row number of the last row to return. Using the same bind values
@@ -972,11 +1169,11 @@ Techniques include:
 
    .. code-block:: javascript
 
-    const sql = `SELECT *
-                 FROM (SELECT a.*, ROWNUM AS rnum
-                       FROM (SELECT last_name FROM employees ORDER BY last_name) a
-                       WHERE ROWNUM <= :maxnumrows + :offset)
-                 WHERE rnum >= :offset + 1`;
+        const sql = `SELECT *
+                     FROM (SELECT a.*, ROWNUM AS rnum
+                           FROM (SELECT last_name FROM employees ORDER BY last_name) a
+                           WHERE ROWNUM <= :maxnumrows + :offset)
+                     WHERE rnum >= :offset + 1`;
 
    This always has an ‘extra’ column, here called RNUM.
 
@@ -1019,10 +1216,10 @@ In SQL*Plus execute:
 
 .. code-block:: sql
 
-  CREATE TABLE mytable
-    (myid NUMBER(11) GENERATED BY DEFAULT ON NULL AS IDENTITY (START WITH 1),
-     mydata VARCHAR2(20)
-    )
+    CREATE TABLE mytable
+        (myid NUMBER(11) GENERATED BY DEFAULT ON NULL AS IDENTITY (START WITH 1),
+         mydata VARCHAR2(20)
+        )
 
 Refer to the `CREATE TABLE identity column documentation
 <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F9CE0CC3-
@@ -1033,10 +1230,10 @@ auto-increment a column value like this:
 
 .. code-block:: sql
 
-  CREATE TABLE mytable
-    (myid NUMBER DEFAULT myseq.NEXTVAL,
-     mydata VARCHAR2(20)
-    )
+    CREATE TABLE mytable
+        (myid NUMBER DEFAULT myseq.NEXTVAL,
+         mydata VARCHAR2(20)
+        )
 
 This also requires Oracle Database 12c or later.
 
@@ -1060,20 +1257,20 @@ In SQL*Plus run:
 
 .. code-block:: sql
 
-  CREATE SEQUENCE myseq;
-  CREATE TABLE mytable (myid NUMBER PRIMARY KEY, mydata VARCHAR2(20));
-  CREATE TRIGGER mytrigger BEFORE INSERT ON mytable FOR EACH ROW
-  BEGIN
-    :new.myid := myseq.NEXTVAL;
-  END;
-  /
+    CREATE SEQUENCE myseq;
+    CREATE TABLE mytable (myid NUMBER PRIMARY KEY, mydata VARCHAR2(20));
+    CREATE TRIGGER mytrigger BEFORE INSERT ON mytable FOR EACH ROW
+    BEGIN
+        :new.myid := myseq.NEXTVAL;
+    END;
+    /
 
 Prior to Oracle Database 11g replace the trigger assignment with a
 SELECT like:
 
 .. code-block:: sql
 
-  SELECT myseq.NEXTVAL INTO :new.myid FROM dual;
+    SELECT myseq.NEXTVAL INTO :new.myid FROM dual;
 
 Getting the Last Insert ID
 ++++++++++++++++++++++++++
@@ -1083,13 +1280,13 @@ To get the automatically inserted identifier in node-oracledb, use a
 
 .. code-block:: javascript
 
-  . . .
-  const result = await connection.execute(
-    `INSERT INTO mytable (mydata) VALUES ('Hello') RETURN myid INTO :id`,
-    {id : {type: oracledb.NUMBER, dir: oracledb.BIND_OUT } }
-  );
+    . . .
+    const result = await connection.execute(
+        `INSERT INTO mytable (mydata) VALUES ('Hello') RETURN myid INTO :id`,
+        {id : {type: oracledb.NUMBER, dir: oracledb.BIND_OUT } }
+    );
 
-  console.log(result.outBinds.id);  // print the ID of the inserted row
+    console.log(result.outBinds.id);  // print the ID of the inserted row
 
 Instead of using application generated identifiers, you may prefer to
 use ROWIDs, see :ref:`lastRowid <execlastrowid>`.
@@ -1134,8 +1331,8 @@ here are possible solutions:
    Incorrectly sizing the statement cache will reduce application
    efficiency.
 
-   To help set the cache size, you can turn on auto-tuning with Oracle
-   12.1, or later, using an :ref:`oraaccess.xml <oraaccess>` file.
+   To help set the cache size, you can turn on auto-tuning with Oracle Client
+   libraries 12.1 or later, using an :ref:`oraaccess.xml <oraaccess>` file.
 
    For more information, see the :ref:`Statement Caching <stmtcache>`
    documentation.

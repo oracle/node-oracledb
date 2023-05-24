@@ -64,34 +64,35 @@ deprecated but still usable.
 
 .. _oracledbconstantsdbtype:
 
-Oracle Database Type Constants
-------------------------------
+Oracle Database Type Objects
+----------------------------
 
-Constants uses for database types in node-oracledb.
-
-These values indicate the Oracle Database type in
+These database type objects indicate the Oracle Database type in
 :attr:`~oracledb.extendedMetaData`, :ref:`DbObject <dbobjectclass>`
-types and in the :attr:`lob <lob.type>` ``type`` property.
-
-Some constants can also be used for:
+types, and in the :attr:`lob <lob.type>` ``type`` property. Some
+database type objects can also be used for:
 
 - the :ref:`execute() bindParams\ type <executebindparamtype>` and the
   :ref:`executeMany() bindDefs <executemanyoptbinddefs>` ``type``
   properties
-- for the :meth:`~connection.createLob()` ``type`` parameter
-- for :attr:`~oracledb.fetchAsBuffer`, :attr:`~oracledb.fetchAsString`, and
-  :ref:`fetchInfo <propexecfetchinfo>`.
+- the :meth:`~connection.createLob()` ``type`` parameter
+- :attr:`~oracledb.fetchAsBuffer`, :attr:`~oracledb.fetchAsString`,
+  :ref:`fetchInfo <propexecfetchinfo>`, and :attr:`~oracledb.fetchTypeHandler`
 
-.. list-table-with-summary::  Oracle Database Type Constants
+Note that the Oracle Database Type constants were changed to database type
+objects in node-oracledb 6.0. When comparing fetch types, ensure that you
+are using the database type object name instead of the database type number.
+For example, use ``result.metadata[0].fetchType == oracledb.DB_TYPE_VARCHAR``
+instead of ``result.metadata[0].fetchType == 2001``.
+
+.. list-table-with-summary::  Oracle Database Type Objects
     :header-rows: 1
     :class: wy-table-responsive
     :align: center
     :widths: 10 10 30
-    :summary: The first column displays the name of the Oracle Database Type
-     constant. The second column displays the value of the constant. The third
-     column displays the database data type.
+    :summary: The first column displays the name of the Oracle Database type object. The second column displays the value of the database type object. The third column displays the database data type.
 
-    * - Constant Name
+    * - DbType Object
       - Value
       - Database Data Type
     * - ``oracledb.DB_TYPE_BFILE``
@@ -132,9 +133,14 @@ Some constants can also be used for:
       - INTERVAL YEAR TO MONTH
     * - ``oracledb.DB_TYPE_JSON``
       - 2027
-      - JSON (new in node-oracledb 5.1)
+      - JSON
+
+        .. versionadded:: 5.1
     * - ``oracledb.DB_TYPE_LONG``
       - 2024
+      - LONG
+    * - ``oracledb.DB_TYPE_LONG_NVARCHAR``
+      - 2031
       - LONG
     * - ``oracledb.DB_TYPE_LONG_RAW``
       - 2025
@@ -173,7 +179,7 @@ Some constants can also be used for:
       - 2001
       - VARCHAR2
 
-Note the values for these constants changed in node-oracledb 4.0.
+Note that the values for these constants changed in node-oracledb 4.0.
 
 .. _oracledbconstantsnodbtype:
 
@@ -195,7 +201,7 @@ for common :ref:`Oracle Database Type Constants <oracledbconstantsdbtype>`.
 
     * - Constant Name
       - Value
-      - ``DB_TYPE_*`` Equivalent
+      - ``DbType`` Object Equivalent
       - Notes
     * - ``oracledb.BLOB``
       - 2019
@@ -219,7 +225,7 @@ for common :ref:`Oracle Database Type Constants <oracledbconstantsdbtype>`.
       -
     * - ``oracledb.DEFAULT``
       - 0
-      - n/a
+      - NA
       - Used with ``fetchInfo`` to reset the fetch type to the database type.
     * - ``oracledb.NUMBER``
       - 2010
@@ -780,7 +786,7 @@ Database Shutdown Constants
 Constants for shutting down the Oracle Database with
 :meth:`oracledb.shutdown()` and :meth:`connection.shutdown()`.
 
-These are new in node-oracledb 5.
+.. versionadded:: 5.0
 
 .. list-table-with-summary::  Database Shutdown Constants
     :header-rows: 1
@@ -817,11 +823,10 @@ These are new in node-oracledb 5.
 
 Two-Phase Commit Constants
 --------------------------
+.. versionadded:: 5.3
 
 Constants for two-phase commit (TPC) functions
 :meth:`connection.tpcBegin()` and :meth:`connection.tpcEnd()`.
-
-.. versionadded:: 5.3
 
 .. list-table-with-summary::  Two-Phase Commit Constants
     :header-rows: 1
@@ -959,12 +964,17 @@ Each of the configuration properties is described below.
 
 .. attribute:: oracledb.edition
 
+    .. versionadded:: 2.2
+
     This property is a string that sets the name used for Edition-Based
     Redefinition by connections.
 
     See :ref:`Edition-Based Redefinition <ebr>` for more information.
 
-    .. versionadded:: 2.2
+    .. note::
+
+        This property can only be used in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
 
     **Example**
 
@@ -974,6 +984,8 @@ Each of the configuration properties is described below.
         oracledb.edition = 'ed_2';
 
 .. attribute:: oracledb.errorOnConcurrentExecute
+
+    .. versionadded:: 5.2
 
     This property is a boolean that can be set to throw an error if
     concurrent operations are attempted on a single connection.
@@ -1003,8 +1015,6 @@ Each of the configuration properties is described below.
 
     For more discussion, see `Parallelism on Each Connection <parallelism>`.
 
-    .. versionadded:: 5.2
-
     **Example**
 
     .. code-block:: javascript
@@ -1013,6 +1023,8 @@ Each of the configuration properties is described below.
         oracledb.errorOnConcurrentExecute = false;
 
 .. attribute:: oracledb.events
+
+    .. versionadded:: 2.2
 
     This property is a boolean that determines whether Oracle Client events
     mode should be enabled.
@@ -1029,10 +1041,13 @@ Each of the configuration properties is described below.
     :ref:`Fast Application Notification (FAN) <connectionfan>` and
     :ref:`Runtime Load Balancing (RLB) <connectionrlb>`.
 
-    .. versionadded:: 2.2
-
     In node-oracledb 4.0.0 and 4.0.1, the default value for ``events`` was
     *true*.
+
+    .. note::
+
+        This property can only be used in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
 
     **Example**
 
@@ -1042,6 +1057,12 @@ Each of the configuration properties is described below.
         oracledb.events = false;
 
 .. attribute:: oracledb.extendedMetaData
+
+    .. desupported:: 6.0
+
+    Extended metadata is now always returned
+
+    .. versionadded:: 1.10
 
     This property is a boolean that determines whether additional metadata is
     available for queries and for REF CURSORs returned from PL/SQL blocks.
@@ -1057,13 +1078,16 @@ Each of the configuration properties is described below.
     This property may be overridden in an :ref:`execute() <executeoptions>`
     call.
 
-    .. versionadded:: 1.10
-
 .. attribute:: oracledb.externalAuth
 
-    This property is a boolean value. If this property is *true*, then
-    connections are established using external authentication. See
-    :ref:`External Authentication <extauth>` for more information.
+    This property is a boolean value. If this property is *true* in
+    node-oracledb Thick mode, then connections are established using external
+    authentication. See :ref:`External Authentication <extauth>` for more
+    information.
+
+    In node-oracledb Thin mode, when token-based authentication is required,
+    this property must be set to *true*. In all the other cases where this
+    property is set to *true*, an error is thrown.
 
     The default value is *false*.
 
@@ -1085,6 +1109,8 @@ Each of the configuration properties is described below.
         oracledb.externalAuth = false;
 
 .. attribute:: oracledb.fetchArraySize
+
+    .. versionadded:: 2.0
 
     This property is a number that sets the size of an internal buffer used
     for fetching query rows from Oracle Database. Changing it may affect
@@ -1118,8 +1144,6 @@ Each of the configuration properties is described below.
 
     See :ref:`Tuning Fetch Performance <rowfetching>` for more information.
 
-    .. versionadded:: 2.0
-
     **Example**
 
     .. code-block:: javascript
@@ -1129,12 +1153,14 @@ Each of the configuration properties is described below.
 
 .. attribute:: oracledb.fetchAsBuffer
 
+    .. versionadded:: 1.13
+
     This property is an array of type constants that allows query columns to
     be returned as Buffers.
 
     Currently the only valid constant is :ref:`oracledb.BLOB
-    <oracledbconstantsnodbtype>` or its equivalent :ref:`oracledb.DB_TYPE_BLOB
-    <oracledbconstantsdbtype>`.
+    <oracledbconstantsnodbtype>` or its equivalent
+    :ref:`oracledb.DB_TYPE_BLOB <oracledbconstantsdbtype>`.
 
     When set, and a BLOB column is queried with :meth:`~connection.execute()`
     or :meth:`~connection.queryStream()`, then the column data is
@@ -1143,8 +1169,6 @@ Each of the configuration properties is described below.
     :meth:`~connection.queryStream()` calls can override the
     ``fetchAsBuffer`` global setting by using
     :ref:`fetchInfo <executeoptions>`.
-
-    .. versionadded:: 1.13
 
     **Example**
 
@@ -1210,6 +1234,62 @@ Each of the configuration properties is described below.
         const oracledb = require('oracledb');
         oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 
+.. attribute:: oracledb.fetchTypeHandler
+
+    .. versionadded:: 6.0
+
+    This property is a function that allows applications to examine and modify
+    queried column data before it is returned to the user. This function is
+    called once for each column that is being fetched with a single object
+    argument containing the following attributes:
+
+    - ``byteSize``: The maximum size in bytes. This is only set if ``dbType``
+      is ``oracledb.DB_TYPE_VARCHAR``, ``oracledb.DB_TYPE_CHAR``, or
+      ``oracledb.DB_TYPE_RAW``.
+    - ``dbType``: The database type, that is, one of the
+      :ref:`oracledbconstantsdbtype`.
+    - ``dbTypeName``: The name of the database type, such as "NUMBER" or
+      "VARCHAR2".
+    - ``dbTypeClass``: The class associated with the database type. This is
+      only set if ``dbType`` is ``oracledb.DB_TYPE_OBJECT``.
+    - ``name``: The name of the column.
+    - ``nullable``: Indicates whether ``NULL`` values are permitted for this
+      column.
+    - ``precision``: Set only when the ``dbType`` is
+      ``oracledb.DB_TYPE_NUMBER``.
+    - ``scale``: Set only when the ``dbType`` is ``oracledb.DB_TYPE_NUMBER``.
+
+    By default, this property is "undefined", that is, it is not set.
+
+    The function is expected to return either nothing or an object containing:
+
+    - the ``type`` attribute
+    - or the :ref:`converter <converterfunc>` attribute
+    - or both the ``type`` and ``converter`` attributes
+
+    The ``converter`` function is a function which can be used with fetch
+    type handlers to change the returned data. This function accepts the
+    value that will be returned by :meth:`connection.execute()` for a
+    particular row and column and returns the value that will actually be
+    returned by ``connection.execute()``.
+
+    This property can be overridden by the :ref:`fetchTypeHandler
+    <propexecfetchtypehandler>` option in :meth:`~connection.execute()`.
+
+    See :ref:`fetchtypehandler`.
+
+    **Example**
+
+    .. code-block:: javascript
+
+        const oracledb = require('oracledb');
+        oracledb.fetchTypeHandler = function(metaData) {
+        // Return number column data as strings
+            if(metaData.dbType == oracledb.DB_TYPE_NUMBER) {
+                return {type: oracledb.STRING};
+            }
+        }
+
 .. attribute:: oracledb.lobPrefetchSize
 
     This property is a number and is temporarily disabled. Setting it has no
@@ -1273,17 +1353,22 @@ Each of the configuration properties is described below.
 
 .. attribute:: oracledb.oracleClientVersion
 
+    .. versionadded:: 1.3
+
     This read-only property gives a numeric representation of the Oracle
-    client library version which is useful in comparisons. For version
+    Client library version which is useful in comparisons. For version
     *a.b.c.d.e*, this property gives the number:
     ``(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e``
-
-    .. versionadded:: 1.3
 
     From node-oracledb 3.1.0, using ``oracledb.oracleClientVersion`` will
     throw a *DPI-1047* error if node-oracledb cannot load Oracle Client
     libraries. Previous versions threw this error from
     ``require('oracledb')``.
+
+    .. note::
+
+        This property can only be used in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
 
     **Example**
 
@@ -1294,15 +1379,20 @@ Each of the configuration properties is described below.
 
 .. attribute:: oracledb.oracleClientVersionString
 
-    This read-only property gives a string representation of the Oracle client
-    library version which is useful for display.
-
     .. versionadded:: 2.2
+
+    This read-only property gives a string representation of the Oracle Client
+    library version which is useful for display.
 
     From node-oracledb 3.1.0, using ``oracledb.oracleClientVersionString``
     will throw a ``DPI-1047`` error if node-oracledb cannot load Oracle Client
     libraries. Previous versions threw this error from
     ``require('oracledb')``.
+
+    .. note::
+
+        This property can only be used in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
 
     **Example**
 
@@ -1410,6 +1500,8 @@ Each of the configuration properties is described below.
 
 .. attribute:: oracledb.poolMaxPerShard
 
+    .. versionadded:: 4.1
+
     This property sets the maximum number of connection in the pool that can
     be used for any given shard in a sharded database. This lets connections
     in the pool be balanced across the shards. A value of zero will not set
@@ -1427,7 +1519,10 @@ Each of the configuration properties is described below.
     See :ref:`Connecting to Sharded Databases <sharding>` for more
     information.
 
-    .. versionadded:: 4.1
+    .. note::
+
+        This property can only be used in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
 
     It is available when node-oracledb uses Oracle client libraries 18.3, or
     later.
@@ -1474,16 +1569,18 @@ Each of the configuration properties is described below.
 
 .. attribute:: oracledb.poolPingInterval
 
+    .. versionadded:: 1.12
+
     This property is a number value. When a pool :meth:`pool.getConnection()`
     is called and the connection has been idle in the pool
     for at least ``poolPingInterval`` seconds, node-oracledb internally “pings”
     the database to check the connection is alive. After a ping, an unusable
     connection is destroyed and a usable one is returned by
     ``getConnection()``. Connection pinging improves the chance a pooled
-    connection is valid when it is first used because identified unusable
-    connections will not be returned to the application.
+    connection is usable by the application because unusable connections are
+    less likely to be returned by :meth:`oracledb.getConnection()`.
 
-    The default ``poolPingInterval`` value is 60 seconds. Possible values
+    The default ``poolPingInterval`` value is *60* seconds. Possible values
     are:
 
     .. list-table-with-summary::  ``poolPingInterval`` Values
@@ -1504,12 +1601,10 @@ Each of the configuration properties is described below.
         * - ``n`` > ``0``
           - Checks validity if the connection has been idle in the pool (not “checked out” to the application by ``getConnection()``) for at least ``n`` seconds.
 
-    This property may be overridden when
-    :meth:`creating a connection pool <oracledb.createPool()>`.
+    This property may be overridden when creating a connection pool using
+    :meth:`oracledb.createPool()`.
 
     See :ref:`Connection Pool Pinging <connpoolpinging>` for more discussion.
-
-    .. versionadded:: 1.12
 
     It was disabled when using Oracle Client 12.2 (and later) until
     node-oracledb 3.0.
@@ -1617,6 +1712,8 @@ Each of the configuration properties is described below.
 
 .. attribute:: oracledb.queueMax
 
+    .. versionadded:: 5.0
+
     This property is the maximum number of pending ``pool.getConnection()``
     calls that can be queued.
 
@@ -1632,8 +1729,6 @@ Each of the configuration properties is described below.
     This property may be overridden when
     :meth:`creating a connection pool <oracledb.createPool()>`.
 
-    .. versionadded:: 5.0
-
     **Example**
 
     .. code-block:: javascript
@@ -1644,10 +1739,12 @@ Each of the configuration properties is described below.
 .. attribute:: oracledb.queueRequests
 
     This property was removed in node-oracledb 3.0 and queuing was always
-    enabled. In node-oracledb 5.0, set ``queueMax`` to 0 to disable queuing.
+    enabled. From node-oracledb 5.0, set ``queueMax`` to 0 to disable queuing.
     See :ref:`Connection Pool Queue <connpoolqueue>` for more information.
 
 .. attribute:: oracledb.queueTimeout
+
+    .. versionadded:: 1.7
 
     This property is the number of milliseconds after which connection
     requests waiting in the connection request queue are terminated. If
@@ -1663,8 +1760,6 @@ Each of the configuration properties is described below.
     :meth:`creating a connection pool <oracledb.createPool()>`.
 
     See :ref:`Connection Pool Queue <connpoolqueue>` for more information.
-
-    .. versionadded:: 1.7
 
     **Example**
 
@@ -1696,6 +1791,32 @@ Each of the configuration properties is described below.
         const oracledb = require('oracledb');
         oracledb.stmtCacheSize = 30;
 
+.. attribute:: oracledb.thin
+
+    .. versionadded:: 6.0
+
+    This property is a boolean that determines the node-oracledb driver mode
+    which is in use. If the value is *true*, it indicates that
+    :ref:`node-oracledb Thin mode <thinarch>` is in use. If the value is
+    *false*, it indicates that :ref:`node-oracledb Thick mode <thickarch>` is
+    in use.
+
+    The default value is *true*.
+
+    Immediately after node-oracledb is imported, this property is set to
+    *true* indicating that node-oracledb defaults to Thin mode. If
+    :meth:`oracledb.initOracleClient()` is called, then the value of this
+    property is set to False indicating that Thick mode is enabled. Once the
+    first standalone connection or connection pool is created, or a call to
+    ``oracledb.initOracleClient()`` is made, then node-oracledb’s mode is
+    fixed and the value set in :attr:`oracledb.thin` will never change for
+    the lifetime of the process.
+
+    The property :attr:`connection.thin` can be used to check a connection’s
+    mode and the attribute :attr:`pool.thin` can be used to check a pool's
+    mode. The value that is displayed for the ``connection.thin``,
+    ``pool.thin``, and ``oracledb.thin`` attributes will be the same.
+
 .. attribute:: oracledb.version
 
     This read-only property gives a numeric representation of the
@@ -1711,10 +1832,10 @@ Each of the configuration properties is described below.
 
 .. attribute:: oracledb.versionString
 
+    .. versionadded:: 2.1
+
     This read-only property gives a string representation of the
     node-oracledb version, including the version suffix if one is present.
-
-    .. versionadded:: 2.1
 
     **Example**
 
@@ -1725,11 +1846,11 @@ Each of the configuration properties is described below.
 
 .. attribute:: oracledb.versionSuffix
 
+    .. versionadded:: 2.1
+
     This read-only property gives a string representing the version suffix
     (for example, “-dev” or “-beta”) or an empty string if no version suffix is
     present.
-
-    .. versionadded:: 2.1
 
     **Example**
 
@@ -1810,16 +1931,16 @@ Oracledb Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+        :widths: 5 7 12 22
+        :summary: The first column, Property, displays the property. The second column, Type, displays the data type of the property. The third column, Mode, displays whether the property can be used in the node-oracledb Thin mode, node-oracledb Thick mode, or both node-oracledb modes. The fourth column, Description, displays the description of the property.
 
         * - Property
           - Data Type
+          - node-oracledb Mode
           - Description
         * - ``accessToken``
           - Function, String, Object
+          - Both
           - .. _createpoolpoolattrsaccesstoken:
 
             For Microsoft Azure Active Directory OAuth 2.0 token-based authentication ``accessToken`` can be:
@@ -1845,18 +1966,18 @@ Oracledb Methods
 
             When the callback is first invoked, the ``refresh`` parameter will be set to *false*. This indicates that the application can provide a token from its own application managed cache, or it can generate a new token if there is no cached value. Node-oracledb checks whether the returned token has expired. If it has expired, then the callback function will be invoked a second time with ``refresh`` set to *true*. In this case the function must externally acquire a token, optionally add it to the application’s cache, and return the token.
 
-            For token-based authentication, the ``externalAuth`` and ``homogeneous`` pool attributes must be set to *true* . The ``user`` (or ``username``) and ``password`` attributes should not be set.
+            For token-based authentication, the ``externalAuth`` and ``homogeneous`` pool attributes must be set to *true*. The ``user`` (or ``username``) and ``password`` attributes should not be set.
 
             See :ref:`Token-Based Authentication <tokenbasedauthentication>` for more information.
 
             .. versionadded:: 5.4
 
-            This attribute was added to support IAM token-based authentication. In this release the attribute must be an Object. Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for IAM token-based authentication.
+            This attribute was added to support IAM token-based authentication. In this release the attribute must be an Object. For node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for IAM token-based authentication.
 
-            The ``accessToken`` attribute was extended to allow OAuth 2.0 token-based authentication in node-oracledb 5.5. For
-            OAuth 2.0, the attribute should be a string, or a callback. Also Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. The callback usage supports both OAuth 2.0 and IAM token-based authentication.
+            The ``accessToken`` attribute was extended to allow OAuth 2.0 token-based authentication in node-oracledb 5.5. For OAuth 2.0, the attribute should be a string, or a callback. For node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. The callback usage supports both OAuth 2.0 and IAM token-based authentication.
         * - ``accessTokenCallback``
           - Object
+          - NA
           - .. _createpoolpoolattrsaccesstokencallback:
 
             This optional attribute is a Node.js callback function. It gets called by the connection pool if the pool needs to grow and create new connections but the current token has expired.
@@ -1869,19 +1990,39 @@ Oracledb Methods
 
             .. deprecated:: 5.5
 
+            .. desupported:: 6.0
+
             Use :ref:`accessToken <createpoolpoolattrsaccesstoken>` instead, which was enhanced to support a callback.
         * - ``connectString``, ``connectionString``
           - String
+          - Both
           - .. _createpoolpoolattrsconnectstring:
-
-            The two properties are aliases for each other. Use only one of the properties.
 
             The Oracle database instance used by connections in the pool. The string can be an Easy Connect string, or a Net Service Name from a ``tnsnames.ora`` file, or the name of a local Oracle Database instance. See :ref:`Connection Strings
             <connectionstrings>` for examples.
 
-            The alias ``connectionString`` was added in node-oracledb 2.1.
+            .. versionadded:: 2.1
+
+                The alias ``connectionString``.
+        * - ``walletPassword``
+          - String
+          - Thin
+          - .. _createpoolpoolattrswalletpw:
+
+            The password to decrypt the Privacy Enhanced Mail (PEM)-encoded private certificate, if it is encrypted.
+
+            .. versionadded:: 6.0
+        * - ``walletLocation``
+          - String
+          - Thin
+          - .. _createpoolpoolattrswalletloc:
+
+            The directory where the wallet can be found. In node-oracledb Thin mode, this must be the directory that contains the PEM-encoded wallet file.
+
+            .. versionadded:: 6.0
         * - ``edition``
           - String
+          - Thick
           - .. _createpoolpoolattrsedition:
 
             Sets the name used for :ref:`Edition-Based Redefinition <ebr>` by connections in the pool.
@@ -1891,6 +2032,7 @@ Oracledb Methods
             .. versionadded:: 2.2
         * - ``enableStatistics``
           - Boolean
+          - Both
           - .. _createpoolpoolattrsstats:
 
             Recording of pool statistics can be enabled by setting ``enableStatistics`` to *true*. Statistics can be retrieved with :meth:`pool.getStatistics()`, or :meth:`pool.logStatistics()`. See :ref:`Connection Pool Monitoring <connpoolmonitor>`.
@@ -1902,6 +2044,7 @@ Oracledb Methods
             The obsolete property ``_enableStats`` can still be used, but it will be removed in a future version of node-oracledb.
         * - ``events``
           - Boolean
+          - Thick
           - .. _createpoolpoolattrsevents:
 
             Indicates whether Oracle Call Interface events mode should be enabled for this pool.
@@ -1911,11 +2054,14 @@ Oracledb Methods
             .. versionadded:: 2.2
         * - ``externalAuth``
           - Boolean
+          - Both
           - .. _createpoolpoolattrsexternalauth:
 
             Indicates whether pooled connections should be established using :ref:`External Authentication <extauth>`.
 
             The default is *false*.
+
+            In Thin mode, when token-based authentication is required, this property must be set to *true*. In all the other cases where this property is set to *true*, an error is thrown.
 
             This optional property overrides the :attr:`oracledb.externalAuth` property.
 
@@ -1924,13 +2070,16 @@ Oracledb Methods
             Note prior to node-oracledb 0.5 this property was called ``isExternalAuth``.
         * - ``homogeneous``
           - Boolean
+          - Both
           - .. _createpoolpoolattrshomogeneous:
 
             Indicates whether connections in the pool all have the same credentials (a ‘homogeneous’ pool), or whether different credentials can be used (a ‘heterogeneous’ pool).
 
             The default is *true*.
 
-            When set to *false*, the user name and password can be omitted from the ``connection.createPool()`` call, but will need to be given for subsequent ``pool.getConnection()`` calls. Different ``pool.getConnection()`` calls can provide different user credentials. Alternatively, when ``homogeneous`` is *false*, the user name (the ‘proxy’ user name) and password can be given, but subsequent ``pool.getConnection()`` calls can specify a different user name to access that user’s schema.
+            For the Thin mode, only homogeneous pools can be created. If this property is set to *false* in Thin mode, an error will be thrown.
+
+            When set to *false* in Thick mode, the user name and password can be omitted from the ``connection.createPool()`` call, but will need to be given for subsequent ``pool.getConnection()`` calls. Different ``pool.getConnection()`` calls can provide different user credentials. Alternatively, when ``homogeneous`` is *false*, the user name (the ‘proxy’ user name) and password can be given, but subsequent ``pool.getConnection()`` calls can specify a different user name to access that user’s schema.
 
             Heterogeneous pools cannot be used with the :ref:`connection pool cache <connpoolcache>`. Applications should ensure the pool object is explicitly passed between code modules, or use a homogeneous pool and make use of :attr:`connection.clientId`.
 
@@ -1939,6 +2088,7 @@ Oracledb Methods
             .. versionadded:: 2.3
         * - ``password``
           - String
+          - Both
           - .. _createpoolpoolattrspassword:
 
             The password of the database user used by connections in the pool. A password is also necessary if a proxy user is specified
@@ -1947,6 +2097,7 @@ Oracledb Methods
             If ``homogeneous`` is *false*, then the password may be omitted at pool creation but given in subsequent ``pool.getConnection()`` calls.
         * - ``poolAlias``
           - String
+          - Both
           - .. _createpoolpoolattrspoolalias:
 
             An optional property that is used to explicitly add pools to the connection pool cache. If a pool alias is provided, then the new pool will be added to the connection pool cache and the ``poolAlias`` value can then be used with methods that utilize the connection pool cache, such as :meth:`oracledb.getPool()` and :meth:`oracledb.getConnection()`.
@@ -1954,8 +2105,135 @@ Oracledb Methods
             See :ref:`Connection Pool Cache <connpoolcache>` for details and examples.
 
             .. versionadded:: 1.11
+        * - ``configDir``
+          - String
+          - Thin
+          - .. _createpoolpoolattrsconfigdir:
+
+            The directory in which the :ref:`tnsadmin` are found.
+
+            For node-oracledb Thick mode, use the ``configDir`` parameter of :meth:`oracledb.initOracleClient()`.
+
+            .. versionadded:: 6.0
+        * - ``sourceRoute``
+          - String
+          - Thin
+          - .. _createpoolpoolattrssourceroute:
+
+            Enables network routing through multiple protocol addresses. The value of this property can be ON or OFF.
+
+            The default value is *ON*.
+
+            .. versionadded:: 6.0
+        * - ``sslServerCertDN``
+          - String
+          - Both
+          - .. _createpoolpoolattrssslcert:
+
+            The distinguished name (DN) that should be matched with the server. If specified, this value is used for any verification. Otherwise, the ``hostname`` will be used.
+
+            This value is ignored if the sslServerDNMatch property is not set to the value *True*.
+
+            .. versionadded:: 6.0
+        * - ``sslServerDNMatch``
+          - Boolean
+          - Both
+          - .. _createpoolpoolattrssslmatch:
+
+            Determines whether the server certificate DN should be matched in addition to the regular certificate verification that is performed.
+
+            If the ``sslServerCertDN`` parameter is not provided, host name matching is performed instead.
+
+            The default value is *True*.
+
+            .. versionadded:: 6.0
+        * - ``httpsProxy``
+          - String
+          - Both
+          - .. _createpoolpoolattrshttpsproxy:
+
+            The name or IP address of a proxy host to use for tunneling secure connections.
+
+            .. versionadded:: 6.0
+        * - ``httpsProxyPort``
+          - Number
+          - Both
+          - .. _createpoolpoolattrshttpsproxyport:
+
+            The port to be used to communicate with the proxy host.
+
+            The default value is *0*.
+
+            .. versionadded:: 6.0
+        * - ``retryCount``
+          - Number
+          - Both
+          - .. _createpoolpoolattrsretrycount:
+
+            The number of times that a connection attempt should be retried before the attempt is terminated.
+
+            The default value is *0*.
+
+            .. versionadded:: 6.0
+        * - ``retryDelay``
+          - Number
+          - Both
+          - .. _createpoolpoolattrsretrydelay:
+
+            The number of seconds to wait before making a new connection attempt.
+
+            The default value is *0*.
+
+            .. versionadded:: 6.0
+        * - ``connectTimeout``
+          - Number
+          - Both
+          - .. _createpoolpoolattrsconntimeout:
+
+            The timeout duration in seconds for an application to establish an Oracle Net connection.
+
+            There is no timeout by default.
+
+            .. versionadded:: 6.0
+        * - ``transportConnectTimeout``
+          - Number
+          - Both
+          - .. _createpoolpoolattrstransportconntimeout:
+
+            The maximum number of seconds to wait to establish a connection to the database host.
+
+            The default value is *60.0*.
+
+            .. versionadded:: 6.0
+        * - ``expireTime``
+          - Number
+          - Both
+          - .. _createpoolpoolattrsexpiretime:
+
+            The number of minutes between the sending of keepalive probes. If this property is set to a value greater than zero, it enables the keepalive probes.
+
+            The default value is *0*.
+
+            .. versionadded:: 6.0
+        * - ``sdu``
+          - Number
+          - Both
+          - .. _createpoolpoolattrssdu:
+
+            The Oracle Net Session Data Unit (SDU) packet size in bytes. The database server configuration should also set this parameter.
+
+            .. versionadded:: 6.0
+        * - ``connectionIdPrefix``
+          - String
+          - Both
+          - .. _createpoolpoolattrsprefix:
+
+            The application specific prefix parameter that is added to the connection identifier.
+
+            .. versionadded:: 6.0
         * - ``poolIncrement``
           - Number
+          - Both
           - .. _createpoolpoolattrspoolincrement:
 
             The number of connections that are opened whenever a connection request exceeds the number of currently open connections.
@@ -1965,6 +2243,7 @@ Oracledb Methods
             This optional property overrides the :attr:`oracledb.poolIncrement` property.
         * - ``poolMax``
           - Number
+          - Both
           - .. _createpoolpoolattrspoolmax:
 
             The maximum number of connections to which a connection pool can grow.
@@ -1978,6 +2257,7 @@ Oracledb Methods
             See :ref:`Connection Pooling <connpooling>` for other pool sizing guidelines.
         * - ``poolMaxPerShard``
           - Number
+          - Both
           - .. _createpoolpoolattrspoolmaxpershard:
 
             Sets the maximum number of connections per shard for connection pools. This ensures that the pool is balanced towards each shard.
@@ -1987,6 +2267,7 @@ Oracledb Methods
             .. versionadded:: 4.1
         * - ``poolMin``
           - Number
+          - Both
           - .. _createpoolpoolattrspoolmin:
 
             The number of connections established to the database when a pool is created. Also this is the minimum number of connections that a pool maintains when it shrinks.
@@ -1996,6 +2277,7 @@ Oracledb Methods
             This optional property overrides the :attr:`oracledb.poolMin` property.
         * - ``poolPingInterval``
           - Number
+          - Both
           - .. _createpoolpoolattrspoolpinginterval:
 
             When a pool :meth:`pool.getConnection()` is called and the connection has been idle in the pool for at least ``poolPingInterval`` seconds, an internal “ping” will be performed first to check the validity of the connection.
@@ -2007,6 +2289,7 @@ Oracledb Methods
             See :ref:`Connection Pool Pinging <connpoolpinging>` for more information.
         * - ``poolTimeout``
           - Number
+          - Both
           - .. _createpoolpoolattrspooltimeout:
 
             The number of seconds after which idle connections (unused in the pool) may be terminated. Refer to :attr:`oracledb.poolTimeout` for details.
@@ -2016,6 +2299,7 @@ Oracledb Methods
             This optional property overrides the :attr:`oracledb.poolTimeout` property.
         * - ``queueMax``
           - Number
+          - Both
           - .. _createpoolpoolattrsqueuemax:
 
             The maximum number of pending ``pool.getConnection()`` calls that can be queued.
@@ -2031,11 +2315,13 @@ Oracledb Methods
             .. versionadded:: 5.0
         * - ``queueRequests``
           - NA
+          - NA
           - .. _createpoolpoolattrsqueuerequests:
 
-            This property was removed in node-oracledb 3.0 and queuing was always enabled. In node-oracledb 5.0, set ``queueMax`` to 0 to disable queuing. See :ref:`Connection Pool Queue <connpoolqueue>` for more information.
+            This property was removed in node-oracledb 3.0 and queuing was always enabled. From node-oracledb 5.0, set ``queueMax`` to 0 to disable queuing. See :ref:`Connection Pool Queue <connpoolqueue>` for more information.
         * - ``queueTimeout``
           - Number
+          - Both
           - .. _createpoolpoolattrsqueuetimeout:
 
             The number of milliseconds after which connection requests waiting in the connection request queue are terminated. If ``queueTimeout`` is set to 0, then queued connection requests are never terminated.
@@ -2045,13 +2331,12 @@ Oracledb Methods
             This optional property overrides the :attr:`oracledb.queueTimeout` property.
         * - ``sessionCallback``
           - String or Function
+          - Both
           - .. _createpoolpoolattrssessioncallback:
 
             If the ``sessionCallback`` is a callback function::
 
-              function sessionCallback(Connection connection,
-              String requestedTag,
-              function callback(Error error, Connection connection){})
+              function sessionCallback(Connection connection, String requestedTag, function callback(Error error, Connection connection){})
 
             When ``sessionCallback`` is a Node.js function, each ``pool.getConnection()`` will select a connection from the pool and may invoke ``sessionCallback`` before returning. The ``sessionCallback`` function is called:
 
@@ -2062,10 +2347,9 @@ Oracledb Methods
 
             The session callback is called before ``pool.getConnection()`` returns so it can be used for logging or to efficiently set session state, such as with ALTER SESSION statements. Make sure any session state is set and ``connection.tag`` is updated in the ``sessionCallback`` function prior to it calling its own ``callback()`` function otherwise the session will not be correctly set when ``getConnection()`` returns. The connection passed into ``sessionCallback`` should be passed out through ``callback()`` so it is returned from the application’s ``pool.getConnection()`` call.
 
-            When node-oracledb is using Oracle Client libraries 12.2 or later, tags are `multi-property tags <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-DFA21225-E83C-4177-A79A-B8BA29DC662C>`__ with name=value pairs like “k1=v1;k2=v2”.
+            When node-oracledb Thick mode is using Oracle Client libraries 12.2 or later, tags are `multi-property tags <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-DFA21225-E83C-4177-A79A-B8BA29DC662C>`__ with name=value pairs like “k1=v1;k2=v2”.
 
-            When using Oracle Client libraries 12.2 or later, ``sessionCallback`` can be a string containing the name of a PL/SQL procedure to be called when ``pool.getConnection()`` requests a :ref:`tag <getconnectiondbattrstag>`, and that tag does not match the connection’s actual tag. When the application uses :ref:`DRCP connections <drcp>`, a PL/SQL callback can avoid the :ref:`round-trip <roundtrips>` calls that a Node.js function would require to set session state. For non-DRCP connections,
-            the PL/SQL callback will require a round-trip from the application.
+            When node-oracledb Thick mode is using Oracle Client libraries 12.2 or later, ``sessionCallback`` can be a string containing the name of a PL/SQL procedure to be called when ``pool.getConnection()`` requests a :ref:`tag <getconnectiondbattrstag>`, and that tag does not match the connection’s actual tag. When the application uses :ref:`DRCP connections <drcp>`, a PL/SQL callback can avoid the :ref:`round-trip <roundtrips>` calls that a Node.js function would require to set session state. For non-DRCP connections, the PL/SQL callback will require a round-trip from the application.
 
             The PL/SQL procedure declaration is:
 
@@ -2081,6 +2365,7 @@ Oracledb Methods
             .. versionadded:: 3.1
         * - ``sodaMetaDataCache``
           - Boolean
+          - Thick
           - .. _createpoolpoolattrssodamdcache:
 
             Indicates whether the pool’s connections should share a :ref:`cache of SODA metadata <sodamdcache>`. This improves SODA performance by reducing :ref:`round-trips <roundtrips>` to the database when opening collections. It has no effect on non-SODA operations.
@@ -2098,6 +2383,7 @@ Oracledb Methods
             It requires Oracle Client 21.3 (or later). The feature is also available in Oracle Client 19c from 19.11 onward.
         * - ``stmtCacheSize``
           - Number
+          - Both
           - .. _createpoolpoolattrsstmtcachesize:
 
             The number of statements to be cached in the :ref:`statementcache <stmtcache>` of each connection in the pool.
@@ -2105,6 +2391,7 @@ Oracledb Methods
             This optional property overrides the :attr:`oracledb.stmtCacheSize` property.
         * - ``user``, ``username``
           - String
+          - Both
           - .. _createpoolpoolattrsuser:
 
             The two properties are aliases for each other. Use only one of the properties.
@@ -2113,7 +2400,9 @@ Oracledb Methods
 
             If ``homogeneous`` is *false*, then the pool user name and password need to be specified only if the application wants that user to proxy the users supplied in subsequent ``pool.getConnection()`` calls.
 
-            The alias ``username`` was added in node-oracledb 5.2.
+            .. versionadded:: 5.2
+
+                The alias ``username``.
 
     **createPool(): accessToken Object Properties**
 
@@ -2203,6 +2492,11 @@ Oracledb Methods
     connection pool. However, in most cases, Oracle recommends getting
     connections from a :meth:`connection pool <oracledb.createPool()>`.
 
+    Note: It is recommended to explicitly close a connection. If not, you may
+    experience a short delay when the application terminates. This is
+    due to the timing behavior of Node.js garbage collection which needs
+    to free the connection reference.
+
     The following table shows the various signatures that can be used when
     invoking ``getConnection`` and describes how the function will behave as
     a result.
@@ -2251,9 +2545,9 @@ Oracledb Methods
         :class: wy-table-responsive
         :align: center
         :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+        :summary: The first column displays the property. The second column
+         displays the data type of the property. The third column displays
+         the description of the property.
 
         * - Parameter
           - Data Type
@@ -2281,16 +2575,16 @@ Oracledb Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+        :widths: 5 7 12 22
+        :summary: The first column, Property, displays the property. The second column, Type, displays the data type of the property. The third column, Mode, displays whether the property can be used in the node-oracledb Thin mode, node-oracledb Thick mode, or both node-oracledb modes. The fourth column, Description, displays the description of the property.
 
-        * - Attribute
+        * - Property
           - Data Type
+          - node-oracledb Mode
           - Description
         * - ``accessToken``
           - Function, String, or Object
+          - Both
           - .. _getconnectiondbattrsaccesstoken:
 
             For Microsoft Azure Active Directory OAuth 2.0 token-based authentication ``accessToken`` can be:
@@ -2317,25 +2611,44 @@ Oracledb Methods
 
             For each connection, the callback is invoked with the ``refresh`` parameter set to *false*. This indicates that the application can provide a token from its own application managed cache, or it can generate a new token if there is no cached value. Node-oracledb checks whether the returned token has expired. If it has expired, then the callback function will be invoked a second time with ``refresh`` set to *true*. In this case the function must externally acquire a token, optionally add it to the application’s cache, and return the token.
 
-            For token-based authentication, the ``externalAuth`` connection attribute must be set to *true* . The ``user`` (or ``username``) and ``password`` attributes should not be set.
+            For token-based authentication, the ``externalAuth`` connection attribute must be set to *true*. The ``user`` (or ``username``) and ``password`` attributes should not be set.
 
             See :ref:`Token-Based Authentication <tokenbasedauthentication>` for more information.
 
-            The ``accessToken`` attribute was added in node-oracledb 5.4 to support IAM token-based authentication. In this release the attribute must be an Object. Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for IAM token-based authentication.
+            The ``accessToken`` attribute was added in node-oracledb 5.4 to support IAM token-based authentication. In this release the attribute must be an Object. For node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for IAM token-based authentication.
 
-            The ``accessToken`` attribute was extended to allow OAuth 2.0 token-based authentication in node-oracledb 5.5. For
-            OAuth 2.0, the attribute should be a string, or a callback. Also Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. The callback usage supports both OAuth 2.0 and IAM token-based authentication.
+            The ``accessToken`` attribute was extended to allow OAuth 2.0 token-based authentication in node-oracledb 5.5. For OAuth 2.0, the attribute should be a string, or a callback. For node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. The callback usage supports both OAuth 2.0 and IAM token-based authentication.
         * - ``connectString``, ``connectionString``
           - String
+          - Both
           - .. _getconnectiondbattrsconnectstring:
-
-            The two properties are aliases for each other. Use only one of the properties.
 
             The Oracle database instance to connect to. The string can be an Easy Connect string, or a Net Service Name from a ``tnsnames.ora`` file, or the name of a local Oracle database instance. See :ref:`Connection Strings <connectionstrings>` for examples.
 
-            The alias ``connectionString`` was added in node-oracledb 2.1.
+            The two properties are aliases for each other. Use only one of the properties.
+
+            .. versionadded:: 2.1
+
+                The alias ``connectionString``.
+        * - ``walletPassword``
+          - String
+          - Thin
+          - .. _getconnectiondbattrswalletpw:
+
+            The password to decrypt the Privacy Enhanced Mail (PEM)-encoded private certificate, if it is encrypted.
+
+            .. versionadded:: 6.0
+        * - ``walletLocation``
+          - String
+          - Thin
+          - .. _getconnectiondbattrswalletloc:
+
+            The directory where the wallet can be found. In node-oracledb Thin mode, this must be the directory that contains the PEM-encoded wallet file.
+
+            .. versionadded:: 6.0
         * - ``edition``
           - String
+          - Thick
           - .. _getconnectiondbattrsedition:
 
             Sets the name used for :ref:`Edition-Based Redefinition <ebr>` by this connection.
@@ -2345,6 +2658,7 @@ Oracledb Methods
             .. versionadded:: 2.2
         * - ``events``
           - Boolean
+          - Thick
           - .. _getconnectiondbattrsevents:
 
             Determines if the standalone connection is created using Oracle Call Interface events mode.
@@ -2354,19 +2668,21 @@ Oracledb Methods
             .. versionadded:: 2.2
         * - ``externalAuth``
           - Boolean
+          - Both
           - .. _getconnectiondbattrsexternalauth:
 
-            If this optional property is *true* then the connection will be
-            established using :ref:`External Authentication <extauth>`.
+            If this optional property is set to *true* in Thick mode, then the connection will be established using :ref:`External Authentication <extauth>`.
+
+            In Thin mode, when token-based authentication is required, this property must be set to *true*. In all the other cases where this property is set to *true*, an error is thrown.
 
             This optional property overrides the :attr:`oracledb.externalAuth` property.
 
             The ``user`` (or ``username``) and ``password`` properties should not be set when ``externalAuth`` is *true*.
 
-            Note prior to node-oracledb 0.5 this property was called
-            ``isExternalAuth``.
+            Note prior to node-oracledb 0.5 this property was called ``isExternalAuth``.
         * - ``matchAny``
           - Boolean
+          - Thick
           - .. _getconnectiondbattrsmatchany:
 
             Used in conjunction with :ref:`tag <getconnectiondbattrstag>` when getting a connection from a :ref:`connection pool <poolclass>`.
@@ -2378,6 +2694,7 @@ Oracledb Methods
             .. versionadded:: 3.1
         * - ``newPassword``
           - String
+          - Both
           - .. _getconnectiondbattrsnewpassword:
 
             The new password to use for the database user. When using ``newPassword``, the :ref:`password <getconnectiondbattrspassword>` property should be set to the current password.
@@ -2389,16 +2706,157 @@ Oracledb Methods
             .. versionadded:: 2.2
         * - ``poolAlias``
           - String
+          - Both
           - .. _getconnectiondbattrspoolalias:
 
             Specifies which previously created pool in the :ref:`connection pool cache <connpoolcache>` to obtain the connection from. See :ref:`Pool Alias <getconnectionpoolalias>`.
+        * - ``configDir``
+          - String
+          - Thin
+          - .. _getconnectiondbattrsconfigdir:
+
+            The directory in which the :ref:`tnsadmin` are found.
+
+            For node-oracledb Thick mode, use the ``configDir`` parameter of :meth:`oracledb.initOracleClient()`.
+
+            .. versionadded:: 6.0
+        * - ``sourceRoute``
+          - String
+          - Thin
+          - .. _getconnectiondbattrssourceroute:
+
+            Enables network routing through multiple protocol addresses. The value of this property can be ON or OFF.
+
+            The default value is *ON*.
+
+            .. versionadded:: 6.0
+        * - ``sslServerCertDN``
+          - String
+          - Both
+          - .. _getconnectiondbattrssslcert:
+
+            The distinguished name (DN) that should be matched with the server. If specified, this value is used for any verification. Otherwise, the ``hostname`` will be used.
+
+            This value is ignored if the sslServerDNMatch property is not set to the value *True*.
+
+            .. versionadded:: 6.0
+        * - ``sslServerDNMatch``
+          - Boolean
+          - Both
+          - .. _getconnectiondbattrssslmatch:
+
+            Determines whether the server certificate DN should be matched in addition to the regular certificate verification that is performed.
+
+            If the ``sslServerCertDN`` parameter is not provided, host name matching is performed instead.
+
+            The default value is *True*.
+
+            .. versionadded:: 6.0
+        * - ``httpsProxy``
+          - String
+          - Both
+          - .. _getconnectiondbattrshttpsproxy:
+
+            The name or IP address of a proxy host to use for tunneling secure connections.
+
+            .. versionadded:: 6.0
+        * - ``httpsProxyPort``
+          - Number
+          - Both
+          - .. _getconnectiondbattrshttpsproxyport:
+
+            The port to be used to communicate with the proxy host.
+
+            The default value is *0*.
+
+            .. versionadded:: 6.0
+        * - ``debugJdwp``
+          - String
+          - Thin
+          - .. _getconnectiondbattrsdebugjdwp:
+
+            Specifies the host and port of the PL/SQL debugger with the format *host=<host>;port=<port>*. This allows using the Java Debug Wire Protocol (JDWP) to debug PL/SQL code called by node-oracledb.
+
+            The default value is the value of environment variable ``ORA_DEBUG_JDWP``.
+
+            For node-oracledb Thick mode, set the ``ORA_DEBUG_JDWP`` environment variable with the same syntax. See :ref:`applntracing`.
+
+            .. versionadded:: 6.0
+        * - ``retryCount``
+          - Number
+          - Both
+          - .. _getconnectiondbattrsretrycount:
+
+            The number of times that a connection attempt should be retried before the attempt is terminated.
+
+            The default value is *0*.
+
+            .. versionadded:: 6.0
+        * - ``retryDelay``
+          - Number
+          - Both
+          - .. _getconnectiondbattrsretrydelay:
+
+            The number of seconds to wait before making a new connection attempt.
+
+            The default value is *0*.
+
+            .. versionadded:: 6.0
+        * - ``connectTimeout``
+          - Number
+          - Both
+          - .. _getconnectiondbattrsconntimeout:
+
+            The timeout duration in seconds for an application to establish an Oracle Net connection.
+
+            There is no timeout by default.
+
+            .. versionadded:: 6.0
+        * - ``transportConnectTimeout``
+          - Number
+          - Both
+          - .. _getconnectiondbattrstransportconntimeout:
+
+            The maximum number of seconds to wait to establish a connection to the database host.
+
+            The default value is *60.0*.
+
+            .. versionadded:: 6.0
+        * - ``expireTime``
+          - Number
+          - Both
+          - .. _getconnectiondbattrsexpiretime:
+
+            The number of minutes between the sending of keepalive probes. If this property is set to a value greater than zero, it enables the keepalive probes.
+
+            The default value is *0*.
+
+            .. versionadded:: 6.0
+        * - ``sdu``
+          - Number
+          - Both
+          - .. _getconnectiondbattrssdu:
+
+            The Oracle Net Session Data Unit (SDU) packet size in bytes. The database server configuration should also set this parameter.
+
+            .. versionadded:: 6.0
+        * - ``connectionIdPrefix``
+          - String
+          - Both
+          - .. _getconnectiondbattrsprefix:
+
+            The application specific prefix parameter that is added to the connection identifier.
+
+            .. versionadded:: 6.0
         * - ``password``
           - String
+          - Both
           - .. _getconnectiondbattrspassword:
 
             The password of the database user. A password is also necessary if a proxy user is specified.
         * - ``privilege``
           - Number
+          - Both
           - .. _getconnectiondbattrsprivilege:
 
             The privilege to use when establishing connection to the database. This optional property should be one of the :ref:`privileged connection constants <oracledbconstantsprivilege>`. Multiple privileges may be used by when required, for example ``oracledb.SYSDBA | oracledb.SYSPRELIM``.
@@ -2410,6 +2868,7 @@ Oracledb Methods
             .. versionadded:: 2.1
         * - ``shardingKey``
           - Array
+          - Thick
           - .. _getconnectiondbattrsshardingkey:
 
             Allows a connection to be established directly to a database shard. See :ref:`Connecting to Sharded Databases <sharding>`.
@@ -2419,11 +2878,13 @@ Oracledb Methods
             .. versionadded:: 4.1
         * - ``stmtCacheSize``
           - Number
+          - Both
           - .. _getconnectiondbattrsstmtcachesize:
 
             The number of statements to be cached in the :ref:`statement cache <stmtcache>` of each connection. This optional property may be used to override the :attr:`oracledb.stmtCacheSize` property.
         * - ``superShardingKey``
           - Array
+          - Thick
           - .. _getconnectiondbattrssupershardingkey:
 
             Allows a connection to be established directly to a database shard. See :ref:`Connecting to Sharded Databases <sharding>`.
@@ -2433,6 +2894,7 @@ Oracledb Methods
             .. versionadded:: 4.1
         * - ``tag``
           - String
+          - Thick
           - .. _getconnectiondbattrstag:
 
             Used when getting a connection from a :ref:`connection pool <poolclass>`.
@@ -2442,13 +2904,16 @@ Oracledb Methods
             .. versionadded:: 3.1
         * - ``user``, ``username``
           - String
+          - Both
           - .. _getconnectiondbattrsuser:
 
             The two properties are aliases for each other. Use only one of the properties.
 
             The database user name. Can be a simple user name or a proxy of the form *alison[fred]*. See the `Client Access Through a Proxy <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-D77D0D4A-7483-423A-9767-CBB5854A15CC>`__ section in the Oracle Call Interface manual for more details about proxy authentication.
 
-            The alias ``username`` was added in node-oracledb 5.2.
+            .. versionadded:: 5.2
+
+                The alias ``username``.
 
     **getConnection(): accessToken Object Properties**
 
@@ -2548,30 +3013,29 @@ Oracledb Methods
 
 .. method:: oracledb.initOracleClient()
 
+    .. versionadded:: 5.0
+
     .. code-block:: javascript
 
         initOracleClient([Object options]);
 
-    This synchronous function loads and initializes the :ref:`Oracle Client
-    libraries <architecture>` that are necessary for node-oracledb to
-    communicate with Oracle Database. This function is optional. If used, it
-    should be the first node-oracledb call made by an application.
+    This synchronous function enables node-oracledb Thick mode by initializing
+    the Oracle Client library, see :ref:`enablingthick`. This method must be
+    called before any standalone connection or pool is created. If a
+    connection or pool is first created in Thin mode, then
+    ``initOracleClient()`` will raise an exception and Thick mode will not be
+    enabled. If the first call to ``initOracleClient()`` had an
+    incorrect path specified, then a second call with the correct path will
+    work.
 
-    If ``initOracleClient()`` is not called, then the Oracle Client
-    libraries are loaded at the time of first use in the application, such
-    as when creating a connection pool. The default values described for
+    The default values described for
     :ref:`options <odbinitoracleclientattrsopts>` will be used in this
     case.
 
-    If the Oracle Client libraries cannot be loaded, or they have already
-    been initialized, either by a previous call to this function or because
-    another function call already required the Oracle Client libraries, then
-    ``initOracleClient()`` raises an exception.
+    The ``initOracleClient()`` method can be called multiple times in each
+    Node.js process as long as the arguments are the same each time.
 
-    See :ref:`Initializing Node-oracledb <initnodeoracledb>` for more
-    information.
-
-    .. versionadded:: 5.0
+    See :ref:`initnodeoracledb` for more information.
 
     The parameters of the ``oracledb.initOracleClient()`` method are:
 
@@ -2618,20 +3082,19 @@ Oracledb Methods
 
             It can be used by applications to identify themselves for tracing and monitoring purposes. The convention is to separate the product name from the product version by a colon and single space characters.
 
-            If this attribute is not specified, the value “node-oracledb : version” is used. See :ref:`Other Node-oracledb Initialization <otherinit>`.
+            If this attribute is not specified, then the default value in node-oracledb Thick mode is like “node-oracledb thk : version”. See :ref:`Other Node-oracledb Initialization <otherinit>`.
         * - ``errorUrl``
           - This specifies the URL that is included in the node-oracledb exception message if the Oracle Client libraries cannot be loaded.
 
             This allows applications that use node-oracledb to refer users to application-specific installation instructions.
 
-            If this attribute is not specified, then the :ref:`node-oracledb installation instructions <installation>` are used. See :ref:`Other Node-oracledb Initialization
-            <otherinit>`.
+            If this attribute is not specified, then the :ref:`node-oracledb installation instructions <installation>` are used. See :ref:`Other Node-oracledb Initialization <otherinit>`.
         * - ``libDir``
           - This specifies the directory containing the Oracle Client libraries.
 
             If ``libDir`` is not specified, the default library search mechanism is used.
 
-            If your client libraries are in a full Oracle Client or Oracle Database installation, such as `Oracle Database “XE” Express Edition <https://www.oracle.com/database/technologies/appdev/xe.html>`__, then you must have previously set environment variables like ``ORACLE_HOME`` before calling ``initOracleClient()``. On Windows, remember to double each backslash used as a directory separator. See :ref:`Locating the Oracle Client Libraries <oracleclientloading>`.
+            If your client libraries are in a full Oracle Client or Oracle Database installation, such as `Oracle Database “XE” Express Edition <https://www.oracle.com/database/technologies/appdev/xe.html>`__, then you must have previously set environment variables like ``ORACLE_HOME`` before calling ``initOracleClient()``. On Windows, remember to double each backslash used as a directory separator. See :ref:`Locating the Oracle Client Libraries <enablingthick>`.
 
     On Linux, ensure a ``libclntsh.so`` file exists. On macOS ensure a
     ``libclntsh.dylib`` file exists. Node-oracledb will not directly load
@@ -2646,6 +3109,8 @@ Oracledb Methods
 
 .. method:: oracledb.shutdown()
 
+    .. versionadded:: 5.0
+
     **Promise**::
 
         promise = shutdown([Object connAttr [, Number shutdownMode]]);
@@ -2654,12 +3119,15 @@ Oracledb Methods
     shutting down a database instance. It accepts connection credentials and
     shuts the database instance completely down.
 
+    .. note::
+
+        This method is only supported in node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
     Internally it creates, and closes, a standalone connection using the
     :ref:`oracledb.SYSOPER <oracledbconstantsprivilege>` privilege.
 
     See :ref:`Database Start Up and Shut Down <startupshutdown>`.
-
-    .. versionadded:: 5.0
 
     The parameters of the ``oracledb.shutdown()`` method are:
 
@@ -2715,6 +3183,8 @@ Oracledb Methods
 
 .. method:: oracledb.startup()
 
+    .. versionadded:: 5.0
+
     **Promise**::
 
         promise = startup([Object connAttrs [, Object options ]]);
@@ -2723,13 +3193,16 @@ Oracledb Methods
     starting a database instance up. It accepts connection credentials and
     starts the database instance completely.
 
+    .. note::
+
+        This method is only supported in node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
     As part of the start up process, a standalone connection using the
     :ref:`oracledb.SYSOPER <oracledbconstantsprivilege>` privilege is
     internally created and closed.
 
     See :ref:`Database Start Up and Shut Down <startupshutdown>`.
-
-    .. versionadded:: 5.0
 
     The parameters of the ``oracledb.startup()`` method are:
 

@@ -55,10 +55,20 @@ values.
     This read-only property is a string which identifies the edition name
     used.
 
+    .. note::
+
+        This property can only be used in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
 .. attribute:: pool.events
 
     This read-only property is a boolean which denotes whether the Oracle
-    client events mode is enabled or not.
+    Client events mode is enabled or not.
+
+    .. note::
+
+        This property can only be used in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
 
 .. attribute:: pool.externalAuth
 
@@ -109,6 +119,11 @@ values.
 
     See :attr:`oracledb.poolMaxPerShard`.
 
+    .. note::
+
+        This property can only be used in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
 .. attribute:: pool.poolMin
 
     This read-only property is a number which specifies the minimum number
@@ -137,13 +152,13 @@ values.
 
 .. attribute:: pool.queueMax
 
+    .. versionadded:: 5.0
+
     This read-only property is a number which specifies the maximum number
     of pending ``pool.getConnection()`` calls that can be
     :ref:`queued <connpoolqueue>`.
 
     See :attr:`oracledb.queueMax`.
-
-    .. versionadded:: 5.0
 
 .. attribute:: pool.queueRequests
 
@@ -173,6 +188,11 @@ values.
 
     See :ref:`Using the SODA Metadata Cache <sodamdcache>`.
 
+    .. note::
+
+        This property can only be used in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
 .. attribute:: pool.status
 
     This read-only property is a number and can be one of the
@@ -192,6 +212,20 @@ values.
 
     See :attr:`oracledb.stmtCacheSize`.
 
+.. attribute:: pool.thin
+
+    .. versionadded:: 6.0
+
+    This read-only attribute is a boolean that identifies the node-oracledb
+    mode in which the pool was created. If the value is *true*, it indicates
+    that the pool was created in node-oracledb Thin mode. If the value is
+    *false*, it indicates that the pool was created in node-oracledb Thick
+    mode.
+
+    The default value is *true*.
+
+    See :attr:`oracledb.thin`.
+
 .. attribute:: pool.user
 
     This read-only property is a string which specifies the database username
@@ -203,6 +237,8 @@ Pool Methods
 ============
 
 .. method:: pool.close()
+
+    .. versionadded:: 1.9
 
     **Promise**::
 
@@ -240,8 +276,6 @@ Pool Methods
     If ``pool.close()`` is called while the pool is already closed,
     draining, or :meth:`reconfiguring <pool.reconfigure()>`, then an error
     will be thrown.
-
-    .. versionadded:: 1.9
 
     This method has replaced the obsolete equivalent alias ``pool.terminate()``
     which will be removed in a future version of node-oracledb.
@@ -394,6 +428,8 @@ Pool Methods
 
 .. method:: pool.getStatistics()
 
+    .. versionadded:: 5.2
+
     .. code-block:: javascript
 
         getStatistics();
@@ -413,9 +449,9 @@ Pool Methods
     If ``getStatistics()`` is called while the pool is closed, draining, or
     :meth:`reconfiguring <pool.reconfigure()>`, then an error will be thrown.
 
-    .. versionadded:: 5.2
-
 .. method:: pool.logStatistics()
+
+    .. versionadded:: 5.2
 
     .. code-block:: javascript
 
@@ -432,8 +468,6 @@ Pool Methods
     ``enableStatistics`` is *false*.
 
     See :ref:`Connection Pool Monitoring <connpoolmonitor>`.
-
-    .. versionadded:: 5.2
 
     The obsolete function ``_logStats()`` can still be used, but it will be
     removed in a future version of node-oracledb.
@@ -539,14 +573,14 @@ Pool Methods
 
 .. method:: pool.setAccessToken()
 
+    .. deprecated:: 5.5
+
+    .. versionadded:: 5.4
+
     This method can be used to set an IAM access token and private key after
     pool creation. It is useful if the IAM token is known to have expired,
     and you are not using
     :ref:`accessTokenCallback <createpoolpoolattrsaccesstokencallback>`.
-
-    .. versionadded:: 5.4
-
-    .. deprecated:: 5.5
 
     It can also be useful in tests to set an expired token so that token
     expiry code paths can be tested.

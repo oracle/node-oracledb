@@ -10,7 +10,7 @@ representing a named Oracle Database object or collection. Use
 
 Objects of a named DbObject type are: - created from a DbObject
 prototype by calling ``new()`` - returned by queries - returned when
-using BIND_OUT for an Oracle Database object
+using BIND_OUT for an Oracle Database object.
 
 See :ref:`Oracle Database Objects and Collections <objects>` for more
 information.
@@ -78,8 +78,8 @@ The properties of a DbObject object are listed below.
 
 .. attribute:: dbObject.isCollection
 
-    This read-only property is a boolean value and it is is *true* if the
-    Oracle object is a collection, *false* otherwise.
+    This read-only property is a boolean value. It is *true* if the
+    Oracle object is a collection and *false* otherwise.
 
 .. attribute:: dbObject.length
 

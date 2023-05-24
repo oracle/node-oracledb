@@ -1,24 +1,32 @@
 .. _connectionhandling:
 
-*******************
-Connection Handling
-*******************
+*****************************
+Connecting to Oracle Database
+*****************************
 
 Connections between node-oracledb and Oracle Database are used for executing
 :ref:`SQL <sqlexecution>`, :ref:`PL/SQL <plsqlexecution>`, and for
 :ref:`SODA <sodaoverview>`.
 
-There are two types of connection:
+By default, node-oracledb runs in a 'Thin' mode which connects directly to
+Oracle Database. This mode does not need Oracle Client libraries. However, when
+node-oracledb uses these libraries, then the driver is said to be in 'Thick'
+mode and has :ref:`additional functionality <featuresummary>`. See
+:ref:`enablingthick`.
 
--  Standalone connections: These are useful when the application
-   maintains a single user session to a database.
+Connections can be either:
 
--  Pooled connections: Connection pooling is important for performance
-   when applications frequently connect and disconnect from the
-   database. Oracle high availability features in the pool
-   implementation mean that small pools can also be useful for
-   applications that want a few connections available for infrequent
-   use.
+- :ref:`Standalone <standaloneconnection>`: These connections are useful when
+  the application needs a single connection to a database. Connections are
+  created by calling :meth:`oracledb.getConnection()`.
+
+- :ref:`Pooled <connpooling>`: These connections are important for performance
+  when applications frequently connect and disconnect from the database. Oracle
+  high availability features in the pool implementation mean that small pools
+  can also be useful for applications that want a few connections available for
+  infrequent use. Pools are created with :meth:`oracledb.createPool()` at
+  application initialization time, and then :meth:`pool.getConnection()` can be
+  called to obtain a connection from a pool.
 
 Many connection behaviors can be controlled by node-oracledb options.
 Other settings can be configured in :ref:`Oracle Net files <tnsadmin>` or
@@ -26,96 +34,51 @@ in :ref:`connection strings <easyconnect>`. These include :ref:`limiting the
 amount of time <dbcalltimeouts>` that opening a connection can take,
 or enabling :ref:`network encryption <securenetwork>`.
 
+.. _standaloneconnection:
+
 Standalone Connections
 ======================
 
-In applications which use connections infrequently, create a connection
-with :meth:`oracledb.getConnection()`. Connections should be released with
-:meth:`connection.close()` when no longer needed:
+Standalone connections are database connections that do not use a node-oracledb
+connection pool. They are useful for applications that use a single connection
+to a database. You can create connections by calling
+:meth:`oracledb.getConnection()` and passing a database username, the database
+password for that user, and a :ref:`connect string <connectionstrings>`.
+Node-oracledb also supports :ref:`external authentication <extauth>` and
+:ref:`token-based authentication <tokenbasedauthentication>` so passwords do
+not need to be in the application.
+
+An example passing credentials is:
 
 .. code-block:: javascript
 
-   const oracledb = require('oracledb');
+    const oracledb = require('oracledb');
 
-   const mypw = ...  // set mypw to the hr schema password
+    async function run() {
+        const connection = await oracledb.getConnection({
+            user          : "hr",
+            password      : mypw,  // contains the hr schema password
+            connectString : "localhost/FREEPDB1"
+        });
 
-   async function run() {
-     try {
-       connection = await oracledb.getConnection({
-         user          : "hr",
-         password      : mypw,
-         connectString : "localhost/XEPDB1"
-       });
+        const result = await connection.execute(`SELECT city FROM locations`);
+        console.log("Result is:", result.rows);
 
-       result = await connection.execute(`SELECT last_name FROM employees`);
-       console.log("Result is:", result);
+        await connection.close();   // Always close connections
+    }
 
-     } catch (err) {
-       console.error(err.message);
-     } finally {
-       if (connection) {
-         try {
-           await connection.close();   // Always close connections
-         } catch (err) {
-           console.error(err.message);
-         }
-       }
-     }
-   }
+    run();
 
-   run();
+Connections must be released with :meth:`connection.close()` when they are no
+longer needed. Make sure to release connections in all codes paths, include
+error handlers.
 
-Pooled Connections
-==================
+.. note::
 
-Applications which frequently create and close connections should use a
-Connection Pool. Since pools provide Oracle high availability features,
-using one is also recommended if you have a long running application,
-particularly if connections are released to the pool while no database
-work is being done.
-
-.. code-block:: javascript
-
-   const oracledb = require('oracledb');
-
-   const mypw = ...  // set mypw to the hr schema password
-
-   async function run() {
-     let pool;
-
-     try {
-       pool = await oracledb.createPool({
-         user          : "hr",
-         password      : mypw  // mypw contains the hr schema password
-         connectString : "localhost/XEPDB1"
-       });
-
-       let connection;
-       try {
-         connection = await pool.getConnection();
-         result = await connection.execute(`SELECT last_name FROM employees`);
-         console.log("Result is:", result);
-       } catch (err) {
-         throw (err);
-       } finally {
-         if (connection) {
-           try {
-             await connection.close(); // Put the connection back in the pool
-           } catch (err) {
-             throw (err);
-           }
-         }
-       }
-     } catch (err) {
-       console.error(err.message);
-     } finally {
-       await pool.close();
-     }
-   }
-
-   run();
-
-See :ref:`Connection Pooling <connpooling>` for more information.
+        If you do not explicitly close a connection, you may experience a short
+        delay when the application terminates.  This is due to the timing
+        behavior of Node.js garbage collection which needs to free the
+        connection reference.
 
 .. _connectionstrings:
 
@@ -137,59 +100,65 @@ indicates to connect to the local, default database.
 The ``connectionString`` property is an alias for ``connectString``. Use
 only one of the properties.
 
+.. note::
+
+        Creating a connection in node-oracledb Thin mode always requires a
+        connection string, or the database host name and service name, to be
+        specified. Bequeath connections cannot be made.  The Thin mode does not
+        reference Oracle environment variables such as ``ORACLE_SID``,
+        ``TWO_TASK``, or ``LOCAL``.
+
 .. _easyconnect:
 
 Easy Connect Syntax for Connection Strings
 ------------------------------------------
 
-An Easy Connect string is often the simplest to use. For example, to
-connect to the Oracle Database service ``orclpdb1`` that is running on
-the host ``mydbmachine.example.com`` with the default Oracle Database
-port 1521, use::
+An Easy Connect string is often the simplest connection string to use. For
+example, to connect to the Oracle Database service ``orclpdb1`` that is
+running on the host ``mydbmachine.example.com`` with the default Oracle
+Database port 1521, use:
 
-  const oracledb = require('oracledb');
+.. code-block:: javascript
 
-  const connection = await oracledb.getConnection(
-    {
-      user          : "hr",
-      password      : mypw,  // mypw contains the hr schema password
-      connectString : "mydbmachine.example.com/orclpdb1"
-    }
-  );
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "mydbmachine.example.com/orclpdb1"
+    });
 
 If the database is using a non-default port, for example 1984, the port
-must be given::
+must be given:
 
-  const oracledb = require('oracledb');
+.. code-block:: javascript
 
-  const connection = await oracledb.getConnection(
-    {
-      user          : "hr",
-      password      : mypw,  // mypw contains the hr schema password
-      connectString : "mydbmachine.example.com:1984/orclpdb1"
-    }
-  );
-
-The Easy Connect syntax supports Oracle Database service names. It
-cannot be used with the older System Identifiers (SID).
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "mydbmachine.example.com:1984/orclpdb1"
+    });
 
 The Easy Connect syntax has been extended in recent versions of Oracle
-Database client since its introduction in Oracle 10g. Check the Easy
-Connect Naming method in `Oracle Net Service Administrator’s
-Guide <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-B0437826
--43C1-49EC-A94D-B650B6A4A6EE>`__ for the syntax in your version of the Oracle
-Client libraries.
+Database client since its introduction in Oracle 10g. Check the Easy Connect
+Naming method in `Oracle Net Service Administrator’s Guide <https://www.oracle
+.com/pls/topic/lookup?ctx=dblatest&id=GUID-B0437826-43C1-49EC-A94D-
+B650B6A4A6EE>`__ for the syntax in your version of the Oracle Client
+libraries. The Easy Connect syntax supports Oracle Database service names. It
+cannot be used with the older System Identifiers (SID).
 
-If you are using Oracle Client 19c (or later), the latest `Easy Connect
-Plus <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8C85D289-
-6AF3-41BC-848B-BF39D32648BA>`__ syntax allows the use of multiple hosts or
-ports, along with optional entries for the wallet location, the distinguished
-name of the database server, and even lets some network configuration options
-be set. Oracle's `Technical Paper on Easy Connect Plus Syntax <https://download.oracle.com/ocomdocs/global/Oracle
--Net-21c-Easy-Connect-Plus.pdf>`__ discusses the syntax. The Easy Connect Plus
-syntax means that :ref:`tnsnames.ora <tnsadmin>` or
-:ref:`sqlnet.ora <tnsadmin>` files are not needed for some further common
-connection scenarios.
+In node-oracledb Thin mode, any unknown Easy Connect options are ignored and
+are not passed to the database. See :ref:`Connection String Differences
+<diffconnstr>` for more information.
+
+If you are using node-oracledb Thick mode with Oracle Client 19c (or later),
+the latest `Easy Connect Plus <https://www.oracle.com/pls/topic/lookup?ctx=
+dblatest&id=GUID-8C85D289-6AF3-41BC-848B-BF39D32648BA>`__ syntax allows the
+use of multiple hosts or ports, along with optional entries for the wallet
+location, the distinguished name of the database server, and even lets some
+network configuration options be set. Oracle's `Technical Paper on Easy Connect
+Plus Syntax <https://download.oracle.com/ocomdocs/global/Oracle-Net-21c-Easy-
+Connect-Plus.pdf>`__ discusses the syntax. The Easy Connect Plus syntax means
+that :ref:`tnsnames.ora <tnsadmin>` or :ref:`sqlnet.ora <tnsadmin>` files are
+not needed for some further common connection scenarios.
 
 For example, if a firewall terminates idle connections every five minutes, you
 may decide it is more efficient to keep connections alive instead of having the
@@ -210,17 +179,16 @@ if a connection cannot be established to the database, use
 Embedded Connect Descriptor Strings
 -----------------------------------
 
-Full Connect Descriptor strings can be embedded in applications:
+Full Connect Descriptor strings can be embedded directly in node-oracledb
+applications:
 
 .. code-block:: javascript
 
-  const connection = await oracledb.getConnection(
-    {
-      user          : "hr",
-      password      : mypw,  // mypw contains the hr schema password
-      connectString : "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=mymachine.example.com)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl)))"
-    }
-  );
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=mymachine.example.com)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl)))"
+    });
 
 .. _tnsnames:
 
@@ -231,48 +199,43 @@ Connect Descriptor strings are commonly stored in optional
 :ref:`tnsnames.ora configuration files <tnsadmin>` and associated with
 a Net Service Name, for example::
 
-  sales =
-    (DESCRIPTION =
-      (ADDRESS = (PROTOCOL = TCP)(HOST = mymachine.example.com)(PORT = 1521))
-      (CONNECT_DATA =
-        (SERVER = DEDICATED)
-        (SERVICE_NAME = orcl)
+    sales =
+      (DESCRIPTION =
+        (ADDRESS = (PROTOCOL = TCP)(HOST = mymachine.example.com)(PORT = 1521))
+        (CONNECT_DATA =
+          (SERVER = DEDICATED)
+          (SERVICE_NAME = orcl)
+        )
       )
-    )
 
 Net Service Names may also be defined in a directory server.
 
-Given a Net Service Name, node-oracledb can connect like:
+Given a Net Service Name, node-oracledb Thin mode can connect using the
+following code:
 
 .. code-block:: javascript
 
-  const connection = await oracledb.getConnection(
-    {
-      user          : "hr",
-      password      : mypw,  // mypw contains the hr schema password
-      connectString : "sales"
-    }
-  );
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "sales"
+        configDir     : "/opt/oracle/config"
+    });
 
-Some older databases may use a ‘SID’ instead of a ‘Service Name’. A
-connection string for these databases could look like::
-
-  sales =
-    (DESCRIPTION =
-      (ADDRESS = (PROTOCOL = TCP)(HOST = mymachine.example.com)(PORT = 1521))
-      (CONNECT_DATA =
-        (SERVER = DEDICATED)
-        (SID = orcl)
-      )
-    )
-
-See :ref:`Optional Oracle Net Configuration <tnsadmin>` for where
-``tnsnames.ora`` files can be located.
+See :ref:`Optional Oracle Net Configuration <tnsadmin>` for more options on how
+node-oracledb locates the ``tnsnames.ora`` files. Note that in node-oracledb
+Thick mode, the configuration file must a default location or be set during
+initialization, not at connection time.
 
 For general information on ``tnsnames.ora`` files, see the Oracle Net
-documentation on
-`tnsnames.ora <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
-7F967CE5-5498-427C-9390-4A5C6767ADAA>`__.
+documentation on `tnsnames.ora <https://www.oracle.com/pls/topic/lookup?ctx=
+dblatest&id=GUID-7F967CE5-5498-427C-9390-4A5C6767ADAA>`__.
+
+.. note::
+
+        When using node-oracledb in Thin mode, the ``tnsnames.ora`` file will
+        not be automatically located. The file's directory must be explicitly
+        specified when connecting.
 
 .. _notjdbc:
 
@@ -283,71 +246,64 @@ The node-oracledb connection string syntax is different to Java JDBC and
 the common Oracle SQL Developer syntax. If these JDBC connection strings
 reference a service name like::
 
-  jdbc:oracle:thin:@hostname:port/service_name
+    jdbc:oracle:thin:@hostname:port/service_name
 
 for example::
 
-  jdbc:oracle:thin:@mydbmachine.example.com:1521/orclpdb1
+    jdbc:oracle:thin:@mydbmachine.example.com:1521/orclpdb1
 
 then use Oracle’s Easy Connect syntax in node-oracledb:
 
 .. code-block:: javascript
 
-  const connection = await oracledb.getConnection(
-    {
-      user          : "hr",
-      password      : mypw,  // mypw contains the hr schema password
-      connectString : "mydbmachine.example.com:1521/orclpdb1"
-    }
-  );
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "mydbmachine.example.com:1521/orclpdb1"
+    });
 
 Alternatively, if a JDBC connection string uses an old-style Oracle
-system identifier
-`SID <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-BADFDC72-
-0F1D-47FA-8857-EC15DC8ACFBB>`__, and there is no service name
+system identifier `SID <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&i
+d=GUID-BADFDC72-0F1D-47FA-8857-EC15DC8ACFBB>`__, and there is no service name
 available::
 
-  jdbc:oracle:thin:@hostname:port:sid
+    jdbc:oracle:thin:@hostname:port:sid
 
 for example::
 
-  jdbc:oracle:thin:@mydbmachine.example.com:1521:orcl
+    jdbc:oracle:thin:@mydbmachine.example.com:1521:orcl
 
 then either :ref:`embed the Connect Descriptor <embedtns>`:
 
 .. code-block:: javascript
 
-  const connection = await oracledb.getConnection(
-    {
-      user          : "hr",
-      password      : mypw,  // mypw contains the hr schema password
-      connectString : "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=mymachine.example.com)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SID=ORCL)))"
-    }
-  );
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=mymachine.example.com)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SID=ORCL)))"
+    });
 
 or create a :ref:`Net Service Name <tnsnames>`::
 
-  # tnsnames.ora
+    # tnsnames.ora
 
-  finance =
-   (DESCRIPTION =
-     (ADDRESS = (PROTOCOL = TCP)(HOST = mydbmachine.example.com)(PORT = 1521))
-     (CONNECT_DATA =
-       (SID = ORCL)
-     )
-   )
+    finance =
+      (DESCRIPTION =
+        (ADDRESS = (PROTOCOL = TCP)(HOST = mydbmachine.example.com)(PORT = 1521))
+        (CONNECT_DATA =
+          (SID = ORCL)
+        )
+      )
 
 This can be referenced in node-oracledb:
 
 .. code-block:: javascript
 
-  const connection = await oracledb.getConnection(
-    {
-      user          : "hr",
-      password      : mypw,  // mypw contains the hr schema password
-      connectString : "finance"
-    }
-  );
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "finance"
+    });
 
 .. _numberofthreads:
 
@@ -355,8 +311,7 @@ Connections, Threads, and Parallelism
 =====================================
 
 To scale and optimize your applications it is useful to understand how
-connections interact with Node.js worker threads, and to know that each
-connection can only execute one database operation at a time.
+connections interact with Node.js.
 
 .. _workerthreads:
 
@@ -364,10 +319,17 @@ Connections and Worker Threads
 ------------------------------
 
 Node.js has four background worker threads by default (not to be confused with
-the newer user space worker_threads module). If you open more than four
-:ref:`standalone connections <connectionhandling>` or pooled connections,
-such as by increasing :attr:`pool.poolMax`, then you must increase
-the number of worker threads available to node-oracledb.
+the newer user space `worker_threads <https://nodejs.org/api/worker_threads.
+html>`_ module). If you are using node-oracledb Thick mode and open more than
+four :ref:`standalone connections <connectionhandling>` or pooled connections,
+such as by increasing :attr:`pool.poolMax`, then you must increase the number
+of worker threads available to node-oracledb.
+
+.. note::
+
+    This section on Worker thread pool sizing applies only to node-oracledb
+    Thick mode. Changing ``UV_THREADPOOL_SIZE`` is not needed for node-oracledb
+    when using Thin mode.
 
 A worker thread pool that is too small can cause a decrease in
 application performance, can cause
@@ -376,14 +338,13 @@ application performance, can cause
 *NJS-040: connection request timeout* or *NJS-076: connection request
 rejected*.
 
-A Node.js worker thread is used by each connection to execute a database
-statement. Each thread will wait until all :ref:`round-trips <roundtrips>`
-between node-oracledb and the database for the statement are complete.
-When an application handles a sustained number of user requests, and
-database operations take some time to execute or the network is slow,
-then all available threads may be held in use. This prevents other
-connections from beginning work and stops Node.js from handling more
-user load.
+A Node.js worker thread is used by each node-oracledb Thick mode connection to
+execute a database statement. Each thread will wait until all :ref:`round-trips
+<roundtrips>` between node-oracledb and the database for the statement are
+complete.  When an application handles a sustained number of user requests, and
+database operations take some time to execute or the network is slow, then all
+available threads may be held in use. This prevents other connections from
+beginning work and stops Node.js from handling more user load.
 
 The thread pool size should be equal to, or greater than, the maximum
 number of connections. If the application does database and non-database
@@ -395,17 +356,17 @@ Increase the thread pool size by setting the environment variable
 before starting Node.js. For example, on Linux your ``package.json`` may
 have a script like::
 
-  "scripts": {
-      "start": "export UV_THREADPOOL_SIZE=10 && node index.js"
+    "scripts": {
+        "start": "export UV_THREADPOOL_SIZE=10 && node index.js"
     },
-  . . .
+    . . .
 
 Or, on Windows::
 
-  "scripts": {
-      "start": "SET UV_THREADPOOL_SIZE=10 && node index.js"
+    "scripts": {
+        "start": "SET UV_THREADPOOL_SIZE=10 && node index.js"
     },
-  . . .
+    . . .
 
 With these, you can start your application with ``npm start``. This will
 allow up to 10 connections to be actively excuting SQL statements in
@@ -415,11 +376,11 @@ On non-Windows platforms, the value can also be set inside the
 application. It must be set prior to any asynchronous Node.js call that
 uses the thread pool::
 
-   // !! First file executed.  Non-Windows only !!
+    // !! First file executed.  Non-Windows only !!
 
-   process.env.UV_THREADPOOL_SIZE = 10
+    process.env.UV_THREADPOOL_SIZE = 10
 
-   // ... rest of code
+    // ... rest of code
 
 If you set ``UV_THREADPOOL_SIZE`` too late in the application, or try to
 set it this way on Windows, then the setting will be ignored and the
@@ -473,16 +434,16 @@ action:
 
 .. code-block:: javascript
 
-   async function myfunc() {
-     const stmts = [
-       `INSERT INTO ADRESSES (ADDRESS_ID, CITY) VALUES (94065, 'Redwood Shores')`,
-       `INSERT INTO EMPLOYEES (ADDRESS_ID, EMPLOYEE_NAME) VALUES (94065, 'Jones')`
-     ];
+    async function myfunc() {
+        const stmts = [
+            `INSERT INTO ADRESSES (ADDRESS_ID, CITY) VALUES (94065, 'Redwood Shores')`,
+            `INSERT INTO EMPLOYEES (ADDRESS_ID, EMPLOYEE_NAME) VALUES (94065, 'Jones')`
+        ];
 
-     for (const s of stmts) {
-       await connection.execute(s);
-     }
-   }
+        for (const s of stmts) {
+            await connection.execute(s);
+        }
+    }
 
 If you use ESlint for code validation, and it warns about `await in
 loops <https://eslint.org/docs/rules/no-await-in-loop>`__ for code that
@@ -512,40 +473,39 @@ the use of ``errorOnConcurrentExecute`` will not affect parallel use of
 multiple connections, which may all be in use concurrently, and each of
 which can be doing one operation.
 
+.. _pooled-connections:
 .. _connpooling:
 
 Connection Pooling
 ==================
 
-When applications use a lot of connections for short periods, Oracle
-recommends using a connection pool for efficiency. Each connection in a
-pool should be used for a given unit of work, such as a transaction or a
-set of sequentially executed statements. Statements should be :ref:`executed
-sequentially, not in parallel <numberofthreads>` on each connection. The
-number of :ref:`worker threads <workerthreads>` should be increased for
-large pools.
+Applications which frequently create and close connections should use a
+connection pool.  This is important for performance and scalability when
+applications need to handle a large number of users who do database work for
+short periods of time but have relatively long periods when the connections are
+not needed. The high availability features of pools also make small pools
+useful for applications that want a few connections available for infrequent
+use and requires them to be immediately usable when acquired.
 
-Each node-oracledb process can use one or more connection pools. Each
-pool can contain zero or more connections. In addition to providing an
-immediately available set of connections, pools provide :ref:`dead connection
-detection <connpoolpinging>` and transparently handle Oracle Database
-:ref:`High Availability events <connectionha>`. This helps shield
-applications during planned maintenance and from unplanned failures.
-Internally `Oracle Call Interface Session Pooling <https://www.oracle.com/pls
-/topic/lookup?ctx=dblatest&id=GUID-F9662FFB-EAEF-495C-96FC-49C6D1D9625C>`__
-is used, which provides many of these features.
+Each node-oracledb process can use one or more connection pools. Each pool can
+contain zero or more connections. In addition to providing an immediately
+available set of connections, pools provide :ref:`dead connection detection
+<connpoolpinging>` and transparently handle Oracle Database :ref:`High
+Availability events <connectionha>`. This helps shield applications during
+planned maintenance and from unplanned failures.  In node-oracledb Thick mode,
+the pool implementation uses Oracle's `session pool technology
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
+id=GUID-F9662FFB-EAEF-495C-96FC-49C6D1D9625C>`__ which supports additional
+Oracle Database features such as Application Continuity.
 
-Since pools provide Oracle high availability features, using one is also
-recommended if you have a long running application, particularly if
-connections are released to the pool while no database work is being
-done.
-
-Pools are created by calling :meth:`oracledb.createPool()`.
-Generally applications will create a pool once as part of initialization.
-After an application finishes using a connection pool, it should release all
-connections and terminate the connection pool by calling the
-:meth:`pool.close()` method. During runtime, some pool
-properties can be changed with :meth:`pool.reconfigure()`.
+Pools are created by calling :meth:`oracledb.createPool()`. Generally,
+applications will create a pool once as part of initialization.  After an
+application finishes using a connection pool, it should release all connections
+and terminate the connection pool by calling the :meth:`pool.close()`
+method. During runtime, some pool properties can be changed with
+:meth:`pool.reconfigure()`.  Note in node-oracledb Thick mode, the number of
+:ref:`worker threads <workerthreads>` should be sized correctly before creating
+a pool.
 
 Connections from the pool are obtained with
 :meth:`pool.getConnection()`. If all connections in
@@ -554,6 +514,53 @@ put in a :ref:`queue <connpoolqueue>` until a connection is available.
 Connections must be released with :meth:`connection.close()`
 when no longer needed so they can be reused. Make sure to release connections
 in all codes paths, include error handlers.
+
+Each connection in a pool should be used for a given unit of work, such as a
+transaction or a set of sequentially executed statements. Statements should be
+:ref:`executed sequentially, not in parallel <numberofthreads>` on each
+connection.
+
+For example:
+
+.. code-block:: javascript
+
+    const oracledb = require('oracledb');
+
+    const mypw = ...  // set mypw to the hr schema password
+
+    async function run() {
+        try {
+            await oracledb.createPool({
+                user          : "hr",
+                password      : mypw  // mypw contains the hr schema password
+                connectString : "localhost/FREEPDB1"
+            });
+
+            let connection;
+            try {
+                // get connection from the pool and use it
+                connection = await oracledb.getConnection();
+                result = await connection.execute(`SELECT last_name FROM employees`);
+                console.log("Result is:", result);
+            } catch (err) {
+                throw (err);
+            } finally {
+                if (connection) {
+                    try {
+                        await connection.close(); // Put the connection back in the pool
+                    } catch (err) {
+                        throw (err);
+                    }
+                }
+            }
+        } catch (err) {
+            console.error(err.message);
+        } finally {
+            await oracledb.getPool().close(0);
+        }
+    }
+
+    run();
 
 When a connection is released back to its pool, any ongoing transaction
 will be :ref:`rolled back <transactionmgt>` however it will retain session
@@ -579,73 +586,73 @@ for example before the web server is started:
 
 .. code-block:: javascript
 
-  const oracledb = require('oracledb');
+    const oracledb = require('oracledb');
 
-  const mypw = ...  // set mypw to the hr schema password
+    const mypw = ...  // set mypw to the hr schema password
 
-  // Start a connection pool (which becomes the default pool) and start the webserver
-  async function init() {
-    try {
+    // Start a connection pool (which becomes the default pool) and start the webserver
+    async function init() {
+        try {
 
-      await oracledb.createPool({
-        user          : "hr",
-        password      : mypw,               // mypw contains the hr schema password
-        connectString : "localhost/XEPDB1",
-        poolIncrement : 0,
-        poolMax       : 4,
-        poolMin       : 4
-      });
+            await oracledb.createPool({
+                user          : "hr",
+                password      : mypw,               // mypw contains the hr schema password
+                connectString : "localhost/FREEPDB1",
+                poolIncrement : 0,
+                poolMax       : 4,
+                poolMin       : 4
+            });
 
-      const server = http.createServer();
-      server.on('error', (err) => {
-        console.log('HTTP server problem: ' + err);
-      });
-      server.on('request', (request, response) => {
-        handleRequest(request, response);
-      });
-      await server.listen(3000);
+            const server = http.createServer();
+            server.on('error', (err) => {
+                console.log('HTTP server problem: ' + err);
+            });
+            server.on('request', (request, response) => {
+                handleRequest(request, response);
+            });
+            await server.listen(3000);
 
-      console.log("Server is running");
+            console.log("Server is running");
 
-    } catch (err) {
-      console.error("init() error: " + err.message);
+        } catch (err) {
+            console.error("init() error: " + err.message);
+        }
     }
-  }
 
 Each web request will invoke ``handleRequest()``. In it, a connection
 can be obtained from the pool and used:
 
 .. code-block:: javascript
 
-  async function handleRequest(request, response) {
+    async function handleRequest(request, response) {
 
-    response.writeHead(200, {"Content-Type": "text/html"});
-    response.write("<!DOCTYPE html><html><head><title>My App</title></head><body>");
+        response.writeHead(200, {"Content-Type": "text/html"});
+        response.write("<!DOCTYPE html><html><head><title>My App</title></head><body>");
 
-    let connection;
-    try {
-
-      connection = await oracledb.getConnection();  // get a connection from the default pool
-      const result = await connection.execute(`SELECT * FROM locations`);
-
-      displayResults(response, result);  // do something with the results
-
-    } catch (err) {
-      response.write("<p>Error: " + text + "</p>");
-    } finally {
-      if (connection) {
+        let connection;
         try {
-          await connection.close();  // always release the connection back to the pool
+
+            connection = await oracledb.getConnection();  // get a connection from the default pool
+            const result = await connection.execute(`SELECT * FROM locations`);
+
+            displayResults(response, result);  // do something with the results
+
         } catch (err) {
-          console.error(err);
+            response.write("<p>Error: " + text + "</p>");
+        } finally {
+            if (connection) {
+                try {
+                    await connection.close();  // always release the connection back to the pool
+                } catch (err) {
+                    console.error(err);
+                }
+            }
         }
-      }
+
+        response.write("</body></html>");
+        response.end();
+
     }
-
-    response.write("</body></html>");
-    response.end();
-
-  }
 
 See `webapp.js <https://github.com/oracle/node-oracledb/tree/main/examples/
 webapp.js>`__ for a runnable example.
@@ -659,9 +666,11 @@ The main characteristics of a connection pool are determined by its
 attributes :attr:`~pool.poolMin`, :attr:`~pool.poolMax`,
 :attr:`~pool.poolIncrement`, and :attr:`~pool.poolTimeout`.
 
-**Note: If you increase the size of the connection pool, you must
-increase the number of threads in the Node.js worker thread pool.
-See**\ :ref:`Connections and Worker Threads <workerthreads>`.
+.. note::
+
+    Note in node-oracledb Thick mode, the number of worker threads should be
+    sized correctly before creating a pool. See :ref:`Connections and Worker
+    Threads <workerthreads>`
 
 Setting ``poolMin`` causes the specified number of connections to be
 established to the database during pool creation. This allows subsequent
@@ -678,11 +687,12 @@ is called and both the following are true:
 -  the number of those currently established connections is less than
    the pool’s ``poolMax`` setting
 
-Pool shrinkage happens when the application returns connections to the
-pool, and they are then unused for more than
-:attr:`~oracledb.poolTimeout` seconds. Any excess connections
-above ``poolMin`` will be closed. Prior to using Oracle Client 21, this
-pool shrinkage was only initiated when the pool was later accessed.
+Pool shrinkage happens when the application returns connections to the pool,
+and they are then unused for more than :attr:`~oracledb.poolTimeout`
+seconds. Any excess connections above ``poolMin`` will be closed. When
+node-oracledb Thick mode is using using Oracle Client 19 or earlier, this pool
+shrinkage is only initiated when the pool is accessed, so a pool in a
+completely idle application will not shrink.
 
 For pools created with :ref:`External Authentication <extauth>`, with
 :ref:`homogeneous <createpoolpoolattrshomogeneous>` set to *false*, or
@@ -714,19 +724,18 @@ small, as this may perform better than larger pools. Use
 usage. The pool attributes should be adjusted to handle the desired workload
 within the bounds of resources available to Node.js and the database.
 
-When the values of ``poolMin`` and ``poolMax`` are the same, and you are
-using Oracle Client 18c (or later), then ``poolIncrement`` can be set
-greater than zero. This changes how a :ref:`homogeneous
-pool <createpoolpoolattrshomogeneous>` grows when the number of
-:attr:`connections established <pool.connectionsOpen>` has become lower
-than ``poolMin``, for example if network issues have caused connections
-to become unusable and they have been dropped from the pool. Setting
-``poolIncrement`` greater than 1 in this scenario means the next
-``pool.getConnection()`` call that needs to grow the pool will initiate
-the creation of multiple connections. That ``pool.getConnection()`` call
-will not return until the extra connections have been created, so there
-is an initial time cost. However it can allow subsequent connection
-requests to be immediately satisfied. In this growth scenario, a
+When the values of ``poolMin`` and ``poolMax`` are the same, ``poolIncrement``
+can be set greater than zero. (In Thick mode this needs Oracle Client 18c or
+later).  This value changes how a :ref:`homogeneous pool
+<createpoolpoolattrshomogeneous>` grows when the number of :attr:`connections
+established <pool.connectionsOpen>` has become lower than ``poolMin``, for
+example if network issues have caused connections to become unusable and they
+have been dropped from the pool. Setting ``poolIncrement`` greater than 1 in
+this scenario means the next ``pool.getConnection()`` call that needs to grow
+the pool will initiate the creation of multiple connections. That
+``pool.getConnection()`` call will not return until the extra connections have
+been created, so there is an initial time cost. However it can allow subsequent
+connection requests to be immediately satisfied. In this growth scenario, a
 ``poolIncrement`` of 0 is treated as 1.
 
 Make sure any firewall, `resource manager <https://www.oracle.com/pls/topic/
@@ -761,7 +770,7 @@ work before being terminated:
 
 .. code-block:: javascript
 
-  await pool.close(10);
+    await pool.close(10);
 
 When a pool has been closed with a specified ``drainTime``, then any new
 ``pool.getConnection()`` calls will fail. If connections are currently
@@ -786,42 +795,42 @@ be forcibly closed by specifying a zero drain time:
 
 .. code-block:: javascript
 
-  await pool.close(0);
+    await pool.close(0);
 
 Closing the pool would commonly be one of the last stages of a Node.js
 application. A typical closing routine look likes:
 
 .. code-block:: javascript
 
-  // Close the default connection pool with 10 seconds draining, and exit
-  async function closePoolAndExit() {
-    console.log("\nTerminating");
-    try {
-      await oracledb.getPool().close(10);
-      process.exit(0);
-    } catch(err) {
-      console.error(err.message);
-      process.exit(1);
+    // Close the default connection pool with 10 seconds draining, and exit
+    async function closePoolAndExit() {
+        console.log("\nTerminating");
+        try {
+            await oracledb.getPool().close(10);
+            process.exit(0);
+        } catch(err) {
+            console.error(err.message);
+            process.exit(1);
+        }
     }
-  }
 
 It is helpful to invoke ``closePoolAndExit()`` if Node.js is sent a
 signal or interrupted:
 
 .. code-block:: javascript
 
-  // Close the pool cleanly if Node.js is interrupted
-  process
-    .once('SIGTERM', closePoolAndExit)
-    .once('SIGINT',  closePoolAndExit);
+    // Close the pool cleanly if Node.js is interrupted
+    process
+        .once('SIGTERM', closePoolAndExit)
+        .once('SIGINT',  closePoolAndExit);
 
 If ``pool.close()`` is called while a :meth:`pool.reconfigure()` is taking
 place, then an error will be thrown.
 
 .. _connpoolcache:
 
-Connection Pool Cache
----------------------
+Connection Pool Caching
+-----------------------
 
 When pools are created, they can be given a named alias. The alias can
 later be used to retrieve the related pool object for use. This
@@ -834,22 +843,22 @@ Pools are added to the cache by using a
 
 .. code-block:: javascript
 
-  async function init() {
+    async function init() {
     try {
-      await oracledb.createPool({ // no need to store the returned pool
-        user: 'hr',
-        password: mypw,  // mypw contains the hr schema password
-        connectString: 'localhost/XEPDB1',
-        poolAlias: 'hrpool'
-      });
+        await oracledb.createPool({ // no need to store the returned pool
+            user: 'hr',
+            password: mypw,  // mypw contains the hr schema password
+            connectString: 'localhost/FREEPDB1',
+            poolAlias: 'hrpool'
+        });
 
-      // do stuff
-      . . .
+        // do stuff
+        . . .
 
-      // get the pool from the cache and use it
-      const pool = oracledb.getPool('hrpool');
-      . . .
-  }
+        // get the pool from the cache and use it
+        const pool = oracledb.getPool('hrpool');
+        . . .
+    }
 
 There can be multiple pools in the cache if each pool is created with a
 unique alias.
@@ -873,8 +882,8 @@ Methods that can affect or use the connection pool cache include:
 
 - :meth:`oracledb.createPool()`: Can add a pool to the cache.
 - :meth:`oracledb.getPool()`: Retrieves a pool from the cache.
-- :meth:`oracledb.getConnection()`: Can use a pool in the
-   cache to retrieve connections .
+- :meth:`oracledb.getConnection()`: Can use a pool in the cache to retrieve
+  connections.
 - :meth:`pool.close()`: Automatically removes a pool from the cache.
 
 Using the Default Pool
@@ -885,16 +894,16 @@ new pool and cache it using the pool alias ‘default’:
 
 .. code-block:: javascript
 
-  async function init() {
-    try {
-      await oracledb.createPool({
-        user: 'hr',
-        password: mypw,  // mypw contains the hr schema password
-        connectString: 'localhost/XEPDB1'
-      });
+    async function init() {
+        try {
+            await oracledb.createPool({
+                user: 'hr',
+                password: mypw,  // mypw contains the hr schema password
+                connectString: 'localhost/FREEPDB1'
+            });
 
-      . . .
-  }
+            . . .
+    }
 
 If you are using callbacks, note that ``createPool()`` is not
 synchronous.
@@ -905,24 +914,24 @@ connection from a pool:
 
 .. code-block:: javascript
 
-  const connection = await oracledb.getConnection();
+    const connection = await oracledb.getConnection();
 
-  . . . // Use connection from the previously created 'default' pool
+    . . . // Use connection from the previously created 'default' pool
 
-  await connection.close();
+    await connection.close(); // always release the connection back to the pool
 
 The default pool can also be retrieved using :meth:`oracledb.getPool()`
 without passing the ``poolAlias`` parameter:
 
 .. code-block:: javascript
 
-  const pool = oracledb.getPool();
-  console.log(pool.poolAlias); // 'default'
-  const connection = await pool.getConnection();
+    const pool = oracledb.getPool();
+    console.log(pool.poolAlias); // 'default'
+    const connection = await pool.getConnection();
 
-  . . . // Use connection
+    . . . // Use connection
 
-  await connection.close();
+    await connection.close();
 
 Using Multiple Pools
 ++++++++++++++++++++
@@ -932,42 +941,42 @@ pool aliases can be used when creating the pools:
 
 .. code-block:: javascript
 
-  await oracledb.createPool({
-    user: 'hr',
-    password: myhrpw,  // myhrpw contains the hr schema password
-    connectString: 'localhost/XEPDB1',
-    poolAlias: 'hrpool'
-  });
+    await oracledb.createPool({
+        user: 'hr',
+        password: myhrpw,  // myhrpw contains the hr schema password
+        connectString: 'localhost/FREEPDB1',
+        poolAlias: 'hrpool'
+    });
 
-  await oracledb.createPool({
-    user: 'sh',
-    password: myshpw,  // myshpw contains the sh schema password
-    connectString: 'localhost/XEPDB1',
-    poolAlias: 'shpool'
-  });
+    await oracledb.createPool({
+        user: 'sh',
+        password: myshpw,  // myshpw contains the sh schema password
+        connectString: 'localhost/FREEPDB1',
+        poolAlias: 'shpool'
+    });
 
-  . . .
+    . . .
 
 To get a connection from a pool, pass the pool alias:
 
 .. code-block:: javascript
 
-  const connection = await oracledb.getConnection('hrpool');
+    const connection = await oracledb.getConnection('hrpool');
 
-  . . . // Use connection from the pool
+    . . . // Use connection from the pool
 
-  await connection.close();
+    await connection.close(); // always release the connection back to the pool
 
 From node-oracledb 3.1.0 you can alternatively pass the alias as an
 attribute of the options:
 
 .. code-block:: javascript
 
-  const connection = await oracledb.getConnection({ poolAlias: 'hrpool' });
+    const connection = await oracledb.getConnection({ poolAlias: 'hrpool' });
 
-  . . . // Use connection from the pool
+    . . . // Use connection from the pool
 
-  await connection.close();
+    await connection.close(); // always release the connection back to the pool
 
 The presence of the ``poolAlias`` attribute indicates the previously
 created connection pool should be used instead of creating a standalone
@@ -978,34 +987,34 @@ tagging <connpooltagging>`:
 
 .. code-block:: javascript
 
-  const connection = await oracledb.getConnection({ poolAlias: 'hrpool', tag: 'loc=cn;p=1' });
+    const connection = await oracledb.getConnection({ poolAlias: 'hrpool', tag: 'loc=cn;p=1' });
 
-  . . . // Use connection from the pool
+    . . . // Use connection from the pool
 
-  await connection.close();
+    await connection.close(); // always release the connection back to the pool
 
 To use the default pool in this way you must explicitly pass the alias
 ``default``:
 
 .. code-block:: javascript
 
-  const connection = await oracledb.getConnection({ poolAlias: 'default', tag: 'loc=cn;p=1' });
+    const connection = await oracledb.getConnection({ poolAlias: 'default', tag: 'loc=cn;p=1' });
 
-  . . . // Use connection from the pool
+    . . . // Use connection from the pool
 
-  await connection.close();
+    await connection.close(); // always release the connection back to the pool
 
 A specific pool can be retrieved from the cache by passing its pool
 alias to :meth:`oracledb.getPool()`:
 
 .. code-block:: javascript
 
-  const pool = oracledb.getPool('hrpool');
-  const connection = await pool.getConnection();
+    const pool = oracledb.getPool('hrpool');
+    const connection = await pool.getConnection();
 
-  . . . // Use connection from the pool
+    . . . // Use connection from the pool
 
-  await connection.close();
+    await connection.close();
 
 .. _connpoolqueue:
 
@@ -1023,14 +1032,13 @@ load spikes without having to set ``poolMax`` too large for general
 operation.
 
 If the application has called :meth:`pool.getConnection()` (or
-:meth:`oracledb.getConnection()` calls that use a
-pool) enough times so that all connections in the pool are in use, and
-further ``getConnection()`` calls are made, then each of those new
-``getConnection()`` requests will be queued and not return until an
-in-use connection is released back to the pool with
-:meth:`connection.close()`. If, instead, ``poolMax`` has not
-been reached, then connection requests can be immediately satisfied and
-are not queued.
+:meth:`oracledb.getConnection()` calls that use a pool) enough times so that
+all connections in the pool are in use, and further ``getConnection()`` calls
+are made, then each of those new ``getConnection()`` requests will be queued
+and will not return until an in-use connection is released back to the pool
+with :meth:`connection.close()`. If, instead, ``poolMax`` has not been reached,
+then the additional connection requests can be immediately satisfied and are
+not queued.
 
 The amount of time that a queued request will wait for a free connection
 can be configured with :attr:`~oracledb.queueTimeout`. When
@@ -1048,8 +1056,8 @@ concurrently. This avoids connection requests blocking (for up to
 :attr:`~oracledb.queueTimeout` seconds) while waiting an
 available pooled connection. It lets you see when the pool is too small.
 
-You may also experience *NJS-040* or *NJS-076* errors if your
-application is not correctly closing connections, or if
+You may also experience *NJS-040* or *NJS-076* errors if your application is
+not correctly closing connections, or if are using node-oracledb Thick mode and
 :ref:`UV_THREADPOOL_SIZE <numberofthreads>` is too small.
 
 .. _connpoolmonitor:
@@ -1068,28 +1076,27 @@ information about an active pool:
 
 .. code-block:: javascript
 
-  const pool = await oracledb.createPool(...);
+    const pool = await oracledb.createPool(...);
 
-  . . .
+    . . .
 
-  console.log(pool.connectionsOpen);   // how big the pool actually is
-  console.log(pool.connectionsInUse);  // how many of those connections are held by the application
+    console.log(pool.connectionsOpen);   // how big the pool actually is
+    console.log(pool.connectionsInUse);  // how many of those connections are held by the application
 
 The recording of :ref:`pool queue <connpoolqueue>` statistics, pool
 settings, and related environment variables can be enabled by setting
-``enableStatistics`` to *true* during
-:meth:`pool creation <oracledb.createPool()>` or :meth:`pool.reconfigure()`.
+``enableStatistics`` to *true* when using :meth:`oracledb.createPool()` or
+:meth:`pool.reconfigure()`.
 
-To enable recording of queue statistics when creating the pool:
+To enable recording of statistics when creating the pool:
 
 .. code-block:: javascript
 
-  const pool = await oracledb.createPool(
-    {
-      enableStatistics : true,   // default is false
-      user             : "hr",
-      password         : mypw,   // mypw contains the hr schema password
-      connectString    : "localhost/XEPDB1"
+    const pool = await oracledb.createPool({
+        enableStatistics : true,   // default is false
+        user             : "hr",
+        password         : mypw,   // mypw contains the hr schema password
+        connectString    : "localhost/FREEPDB1"
     });
     . . .
 
@@ -1097,7 +1104,7 @@ Statistics can alternatively be enabled on a running pool with:
 
 .. code-block:: javascript
 
-  await pool.reconfigure({ enableStatistics: true });
+    await pool.reconfigure({ enableStatistics: true });
 
 Applications can then get the current statistics by calling
 :meth:`pool.getStatistics()` which returns a
@@ -1108,20 +1115,41 @@ The complete statistics can be printed by calling
 
 .. code-block:: javascript
 
-  const poolstatistics = pool.getStatistics();
+    const poolstatistics = pool.getStatistics();
 
-  console.log(poolstatistics.currentQueueLength);  // print one attribute
-  poolstatistics.logStatistics();                  // print all statistics to the console
+    console.log(poolstatistics.currentQueueLength);  // print one attribute
+    poolstatistics.logStatistics();                  // print all statistics to the console
 
 Alternatively the statistics can be printed directly by calling
 :meth:`pool.logStatistics()`.
 
 .. code-block:: javascript
 
-  pool.logStatistics();    // print all statistics to the console
+    pool.logStatistics();    // print all statistics to the console
 
 The output of ``poolstatistics.logStatistics()`` and
 ``pool.logStatistics()`` is identical.
+
+.. _pooldrivermode:
+
+Driver Mode Attribute
++++++++++++++++++++++
+
+The :ref:`PoolStatistics object <poolstatisticsclass>` and ``logStatistics()``
+function record the node-oracledb mode:
+
+.. list-table-with-summary::  Pool Mode Attribute
+    :header-rows: 1
+    :class: wy-table-responsive
+    :align: center
+    :summary: The first column displays the pool thin mode attribute. The second column displays the logStatistics() description. The third column displays the description of the attribute.
+
+    * - :ref:`Pool Statistics Class <poolstatisticsclass>` Attribute
+      - ``logStatistics()`` Label
+      - Description
+    * - ``thin mode``
+      - Indicates whether Thin or Thick mode is in use.
+      - If *true*, then it indicates that the node-oracledb mode is Thin. If *false*, then the node-oracledb mode is Thick.
 
 .. _poolstats:
 
@@ -1149,7 +1177,7 @@ The sum of ‘requests failed’, ‘requests exceeding queueMax’, and
     :summary: The first column displays the Pool Statistics Class attribute. The second column displays the logStatistics() description. The third column displays the description of the attribute.
 
     * - :ref:`Pool Statistics Class <poolstatisticsclass>` Attribute
-      - ``logStatistics()`` Description
+      - ``logStatistics()`` Label
       - Description
     * - ``gatheredDate``
       - gathered at
@@ -1204,7 +1232,7 @@ The sum of ‘requests failed’, ‘requests exceeding queueMax’, and
       - The number of idle or in-use connections to the database that the pool is currently managing.
 
 Pool Attribute Values
-'''''''''''''''''''''
++++++++++++++++++++++
 
 The :ref:`PoolStatistics object <poolstatisticsclass>` and
 ``logStatistics()`` function record the pool attributes:
@@ -1229,7 +1257,7 @@ The :ref:`PoolStatistics object <poolstatisticsclass>` and
 - :attr:`~pool.user`
 
 Pool Related Environment Variables
-''''''''''''''''''''''''''''''''''
+++++++++++++++++++++++++++++++++++
 
 The :ref:`PoolStatistics object <poolstatisticsclass>` and
 ``logStatistics()`` function also have one related environment variable:
@@ -1241,34 +1269,57 @@ The :ref:`PoolStatistics object <poolstatisticsclass>` and
     :summary: The first column displays the Pool Statistics Class attribute. The second column displays the logStatistics() description. The third column displays the description of the attribute.
 
     * - :ref:`Pool Statistics Class <poolstatisticsclass>` Attribute
-      - ``logStatistics()`` Description
+      - ``logStatistics()`` Label
       - Description
     * - ``threadPoolSize``
       - UV_THREADPOOL_SIZE
       - The value of :ref:`process.env.UV_THREADPOOL_SIZE <numberofthreads>` which is the number of worker threads for this process. Note this shows the value of the variable, however if this variable was set after the thread pool started, the thread pool will still be the default size of 4.
+
+        This attribute is only used in the node-oracledb Thick mode.
 
 .. _connpoolpinging:
 
 Connection Pool Pinging
 -----------------------
 
-Connection pool pinging is a way for node-oracledb to identify unusable
-pooled connections and replace them with usable ones before returning
-them to the application. Node-oracledb connections may become unusable
-due to network dropouts, database instance failures, exceeding user
-profile resource limits, or by explicit session closure from a DBA. By
-default, idle connections in the pool are unaware of these events so the
-pool could return unusable connections to the application and errors
-would only occur when they are later used. Pinging helps provide
-tolerance against this situation.
+When a connection is aquired from a pool with ``getConnection()``,
+node-oracledb does some internal checks to validate the about-to-be-returned
+connection is usable.  If it is not usable, node-oracledb can replace it with a
+different connection before returning this to the application.
+
+Connections may become unusable for various reasons including network dropouts,
+database instance failures, session termination from the database `resource
+manager <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
+2BEF5482-CF97-4A85-BD90-9195E41E74EF>`__ or user resource profile `IDLE_TIME
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID
+-ABC7AE4D-64A8-4EA9-857D-BEF7300B64C3>`__, or from a DBA issuing an ``ALTER
+SYSTEM KILL SESSION`` command.
+
+By default, idle connections in the pool are unaware of these events so a
+``getConnection()`` call could return an unusable connection to the application
+and errors would only occur when it is later used.  The internal pool
+validation checks help provide tolerance against this situation so that
+statement execution using a connection is more likely to succeed.
+
+Each time ``getConnection()`` is called, a lightweight connection validity
+check occurs. (In node-oracledb Thick mode this requires Oracle client library
+version 12.2 or later).  The lightweight check allows node-oracledb to detect
+and replace connections that have become unusable due to some network errors.
+
+An additional internal check performed by ``getConnection()`` can be configured
+during pool creation.  This extra check helps detect errors such as the
+connection having exceeded the user profile resource limits, or from an
+explicit session closure from a DBA.  This extra check performs a
+:ref:`round-trip <roundtrips>` ping to the database which impacts performance,
+so it is not done for each ``getConnection()`` call by default.
 
 The frequency of pinging can be controlled with the
-:attr:`oracledb.poolPingInterval` property or
-during :ref:`pool creation <createpoolpoolattrspoolpinginterval>` to meet
-your quality of service requirements.
+:attr:`oracledb.poolPingInterval` property or during :ref:`pool creation
+<createpoolpoolattrspoolpinginterval>` to meet your quality of service
+requirements.
 
-The default :attr:`~oracledb.poolPingInterval` value is
-60 seconds. Possible values are:
+The default :attr:`~oracledb.poolPingInterval` value is 60 seconds, which is
+suitable for most active applications. Possible values are:
 
 .. list-table-with-summary::  ``poolPingInterval`` Value
     :header-rows: 1
@@ -1286,10 +1337,6 @@ The default :attr:`~oracledb.poolPingInterval` value is
     * - ``n`` > ``0``
       - Checks validity if the connection has been idle in the pool (not “checked out” to the application by ``getConnection()``) for at least ``n`` seconds
 
-A ping has the cost of a :ref:`round-trip <roundtrips>` to the database so
-always pinging after each ``getConnection()`` is not recommended for
-most applications.
-
 When ``getConnection()`` is called to return a pooled connection, and
 the connection has been idle in the pool (not “checked out” to the
 application by ``getConnection()``) for the specified
@@ -1302,11 +1349,11 @@ process may be repeated until:
 -  an existing connection that does not qualify for pinging is obtained.
    The ``getConnection()`` call returns this to the application. Note
    that since a ping may not have been performed, the connection is not
-   guaranteed to be usable
+   guaranteed to be usable.
 -  a new, usable connection is opened. This is returned to the
-   application
+   application.
 -  a number of unsuccessful attempts to find a valid connection have
-   been made, after which an error is returned to the application
+   been made, after which an error is returned to the application.
 
 Pools in active use may never have connections idle longer than
 ``poolPingInterval``, so pinging often only occurs for infrequently
@@ -1317,23 +1364,12 @@ Because a ping may not occur every time a connection is returned from
 to occur after ``getConnection()`` is called, applications should continue
 to use appropriate statement execution error checking.
 
-When node-oracledb is using the Oracle client library version 12.2 or
-later, then a lightweight connection check always occurs in the client
-library. While this check prevents some unusable connections from being
-returned by ``getConnection()``, it does not identify errors such as
-session termination from the database `resource
-manager <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
-2BEF5482-CF97-4A85-BD90-9195E41E74EF>`__ or user resource profile
-`IDLE_TIME <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID
--ABC7AE4D-64A8-4EA9-857D-BEF7300B64C3>`__,
-or from an ``ALTER SYSTEM KILL SESSION`` command. The explicit ping
-initiated by ``poolPingInterval`` will detect these problems.
-
-For ultimate scalability, use Oracle client 12.2 (or later) libraries,
-disable explicit pool pinging by setting ``poolPingInterval`` to a
-negative value, and make sure the firewall, database resource manager,
-or user profile is not expiring idle connections. See :ref:`Preventing
-Premature Connection Closing <connectionpremclose>`.
+For ultimate scalability, disable explicit pool pinging by setting
+``poolPingInterval`` to a negative value, and make sure the firewall, database
+resource manager, or user profile are not expiring idle connections. See
+:ref:`Preventing Premature Connection Closing <connectionpremclose>`.  When
+using node-oracledb Thick mode, use use Oracle client 12.2 (or later)
+libraries.
 
 In all cases, when a bad connection is released back to the pool with
 :meth:`connection.close()`, the connection is automatically destroyed.
@@ -1389,6 +1425,15 @@ There are three common scenarios for ``sessionCallback``:
 
 Connection Tagging
 ++++++++++++++++++
+
+Connection tagging is used when connections in a pool should have differing
+session states. In order to retrieve a connection with a desired state, the
+``tag`` attribute in :meth:`~pool.getConnection()` needs to be set.
+
+.. note::
+
+    In this release, connection tagging is only supported in the node-oracledb
+    Thick mode. See :ref:`enablingthick`.
 
 Pooled connections can be tagged to record their session state by
 setting the property :attr:`connection.tag` to a user
@@ -1451,21 +1496,21 @@ valid when tagging is being used:
 
 .. code-block:: javascript
 
-  function initSession(connection, requestedTag, callbackFn) {
+    function initSession(connection, requestedTag, callbackFn) {
     connection.execute(
-      `alter session set nls_date_format = 'YYYY-MM-DD' nls_language = AMERICAN`,
-      callbackFn);
-  }
+        `alter session set nls_date_format = 'YYYY-MM-DD' nls_language = AMERICAN`,
+        callbackFn);
+    }
 
-  try {
-    const pool = await oracledb.createPool({
-      user: 'hr',
-      password: mypw,  // mypw contains the hr schema password
-      connectString: 'localhost/XEPDB1',
-      sessionCallback: initSession
-    });
-    . . .
-  }
+    try {
+        const pool = await oracledb.createPool({
+            user: 'hr',
+            password: mypw,  // mypw contains the hr schema password
+            connectString: 'localhost/FREEPDB1',
+            sessionCallback: initSession
+        });
+        . . .
+    }
 
 Note that a single ALTER SESSION statement is used to set multiple
 properties, avoiding :ref:`round-trips <roundtrips>` of repeated
@@ -1474,16 +1519,16 @@ then use an anonymous PL/SQL block for the same reason:
 
 .. code-block:: javascript
 
-  function initSession(connection, requestedTag, callbackFn) {
-    connection.clientId = "Chris";
-    connection.execute(
-      `begin
-         execute immediate 'alter session set nls_date_format = ''YYYY-MM-DD'' nls_language = AMERICAN';
-         insert into user_log (id, ts) values (sys_context('userenv', 'client_identifier'), systimestamp);
-         commit;
-       end;`,
-      callbackFn);
-  }
+    function initSession(connection, requestedTag, callbackFn) {
+        connection.clientId = "Chris";
+        connection.execute(
+            `begin
+                execute immediate 'alter session set nls_date_format = ''YYYY-MM-DD'' nls_language = AMERICAN';
+                insert into user_log (id, ts) values (sys_context('userenv', 'client_identifier'), systimestamp);
+                commit;
+             end;`,
+            callbackFn);
+    }
 
 See `sessionfixup.js <https://github.com/oracle/node-oracledb/tree/main
 /examples/sessionfixup.js>`__ for a runnable example.
@@ -1502,40 +1547,40 @@ is a valid Oracle timezone:
 
 .. code-block:: javascript
 
-  function initSession(connection, requestedTag, callbackFn) {
-    const tagParts = requestedTag.split('=');
-    if (tagParts[0] != 'USER_TZ') {
-      callbackFn(new Error('Error: Only property USER_TZ is supported'));
-      return;
+    function initSession(connection, requestedTag, callbackFn) {
+        const tagParts = requestedTag.split('=');
+        if (tagParts[0] != 'USER_TZ') {
+            callbackFn(new Error('Error: Only property USER_TZ is supported'));
+            return;
+        }
+
+        connection.execute(
+            `ALTER SESSION SET TIME_ZONE = '${tagParts[1]}'`,
+            (err) => {
+                // Record the connection's new state and return
+                connection.tag = requestedTag;
+                callbackFn(err);
+            }
+        );
     }
 
-    connection.execute(
-      `ALTER SESSION SET TIME_ZONE = '${tagParts[1]}'`,
-      (err) => {
-        // Record the connection's new state and return
-        connection.tag = requestedTag;
-        callbackFn(err);
-      }
-    );
-  }
+    try {
+        await oracledb.createPool({
+            user: 'hr',
+            password: mypw,  // mypw contains the hr schema password
+            connectString: 'localhost/FREEPDB1',
+            sessionCallback: initSession
+        });
 
-  try {
-    await oracledb.createPool({
-      user: 'hr',
-      password: mypw,  // mypw contains the hr schema password
-      connectString: 'localhost/XEPDB1',
-      sessionCallback: initSession
-    });
+        // Get a connection with a given tag (and corresponding session state) from the pool
+        const connection = await oracledb.getConnection({poolAlias: 'default', tag: "USER_TZ=UTC" });
 
-    // Get a connection with a given tag (and corresponding session state) from the pool
-    const connection = await oracledb.getConnection({poolAlias: 'default', tag: "USER_TZ=UTC" });
+        . . . // Use the connection
 
-    . . . // Use the connection
+        // The connection will be returned to the pool with the tag value of connection.tag
+        await connection.close(); // always release the connection back to the pool
 
-    // The connection will be returned to the pool with the tag value of connection.tag
-    await connection.close();
-
-    . . .
+        . . .
 
 The ``initSession()`` session callback function is only invoked by
 ``getConnection()`` if the node-oracledb connection pool cannot find a
@@ -1559,6 +1604,11 @@ examples/sessiontagging2.js>`__.
 
 PL/SQL Session Tagging Callback
 +++++++++++++++++++++++++++++++
+
+.. note::
+
+    In this release, PL/SQL callbacks are only supported in node-oracledb
+    Thick mode. See :ref:`enablingthick`.
 
 When using :ref:`DRCP <drcp>`, tagging is most efficient when using a
 PL/SQL callback.
@@ -1668,39 +1718,43 @@ This could be used in your application like:
 
 .. code-block:: javascript
 
-   const sessionTag = "SDTZ=UTC";
+    const sessionTag = "SDTZ=UTC";
 
-   try {
-     const pool = await oracledb.createPool({
-                  user: 'hr',
-                  password: mypw,  // mypw contains the hr schema password
-                  connectString: 'localhost/XEPDB1',
-                  sessionCallback: "myPackage.myPlsqlCallback"
-                });
-     . . .
+    try {
+        const pool = await oracledb.createPool({
+                     user: 'hr',
+                     password: mypw,  // mypw contains the hr schema password
+                     connectString: 'localhost/FREEPDB1',
+                     sessionCallback: "myPackage.myPlsqlCallback"
+                    });
+        . . .
 
-     const connection = await pool.getConnection({tag: sessionTag});
+        const connection = await pool.getConnection({tag: sessionTag});
 
-     . . . // The value of connection.tag will be sessionTag
-           // Use connection.
+        . . . // The value of connection.tag will be sessionTag
+             // Use connection.
 
-     await connection.close();
-   }
+        await connection.close();
+    }
 
 .. _connpoolproxy:
 
-Heterogeneous Connection Pools and Pool Proxy Authentication
-------------------------------------------------------------
+Heterogeneous and Homogeneous Connection Pools
+----------------------------------------------
 
 By default, connection pools are ‘homogeneous’ meaning that all
-connections use the same database credentials. However, if the pool
-option :ref:`homogeneous <createpoolpoolattrshomogeneous>` is *false*
-at pool creation, then a ‘heterogeneous’ pool will be created. This
-allows different credentials to be used each time a connection is
-acquired from the pool with :meth:`pool.getConnection()`.
+connections use the same database credentials. Both node-oracledb Thin and
+Thick modes support homogeneous pools.
 
-Heterogeneous Pools
-+++++++++++++++++++
+Creating Heterogeneous Pools
+++++++++++++++++++++++++++++
+
+The node-oracledb Thick mode additionally supports heterogeneous pools,
+allowing different user names and passwords to be passed each time a
+connection is acquired from the pool with :meth:`pool.getConnection()`.
+
+To create a heterogeneous pool, set the :meth:`~oracledb.createPool`
+parameter, :ref:`homogeneous <createpoolpoolattrshomogeneous>` to *false*
 
 When a heterogeneous pool is created by setting
 :ref:`homogeneous <createpoolpoolattrshomogeneous>` to *false* and no
@@ -1709,22 +1763,20 @@ may be passed to ``pool.getConnection()``:
 
 .. code-block:: javascript
 
-  const pool = await oracledb.createPool(
-    {
-      connectString : "localhost/XEPDB1",  // no user name or password
-      homogeneous   : false,
-      . . .  // other pool options such as poolMax
+    const pool = await oracledb.createPool({
+        connectString : "localhost/FREEPDB1",  // no user name or password
+        homogeneous   : false,
+        . . .  // other pool options such as poolMax
     });
 
-  const connection = await pool.getConnection(
-    {
-      user     : 'hr',
-      password : mypw,  // mypw contains the hr schema password
+    const connection = await pool.getConnection({
+        user     : "hr",
+        password : mypw,  // mypw contains the hr schema password
     });
 
-  . . . // use connection
+    . . . // use connection
 
-  await connection.close();
+    await connection.close();
 
 The ``connectString`` is required during pool creation since the pool is
 created for one database instance.
@@ -1743,11 +1795,10 @@ if it is the default pool:
 
 .. code-block:: javascript
 
-  const connection = await oracledb.getConnection(
-    {
-      poolAlias: 'default',
-      user     : 'hr',
-      password : mypw,  // mypw contains the hr schema password
+    const connection = await oracledb.getConnection({
+        poolAlias: "default",
+        user     : "hr",
+        password : mypw,  // mypw contains the hr schema password
     });
 
 For heterogeneous pools, the number of connections initially created is
@@ -1759,41 +1810,49 @@ number of open connections exceeds ``poolMin`` and connections are idle
 for more than the :attr:`~oracledb.poolTimeout` seconds, then
 the number of open connections does not fall below ``poolMin``.
 
-Pool Proxy Authentication
-+++++++++++++++++++++++++
+.. _proxyauth:
+
+Connecting Using Proxy Authentication
+=====================================
+
+Proxy authentication allows a user (the "session user") to connect to Oracle
+Database using the credentials of a "proxy user". Statements will run as the
+session user. Proxy authentication is generally used in three-tier
+applications where one user owns the schema while multiple end-users access
+the data. For more information about proxy authentication, see the `Oracle
+documentation <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
+D77D0D4A-7483-423A-9767-CBB5854A15CC>`__.
+
+An alternative to using proxy users is to set :attr:`connection.clientId`
+after connecting and use its value in statements and in the database, for
+example for :ref:`monitoring <endtoendtracing>`.
 
 Pool proxy authentication requires a heterogeneous pool.
-
-The idea of a proxy is to create a schema in one database user name.
-Privilege is granted on that schema to other database users so they can
-access the schema and manipulate its data. This aids three-tier
-applications where one user owns the schema while multiple end-users
-access the data.
 
 To grant access, typically a DBA would execute:
 
 .. code-block:: sql
 
-  ALTER USER sessionuser GRANT CONNECT THROUGH proxyuser;
+    ALTER USER sessionuser GRANT CONNECT THROUGH proxyuser;
 
 For example, to allow a user called ``MYPROXYUSER`` to access the schema
 of ``HR``:
 
 ::
 
-  SQL> CONNECT system
+    SQL> CONNECT system
 
-  SQL> ALTER USER hr GRANT CONNECT THROUGH myproxyuser;
+    SQL> ALTER USER hr GRANT CONNECT THROUGH myproxyuser;
 
-  SQL> CONNECT myproxyuser[hr]/myproxyuserpassword
+    SQL> CONNECT myproxyuser[hr]/myproxyuserpassword
 
-  SQL> SELECT SYS_CONTEXT('USERENV', 'SESSION_USER') AS SESSION_USER,
-    2         SYS_CONTEXT('USERENV', 'PROXY_USER')   AS PROXY_USER
-    3  FROM DUAL;
+    SQL> SELECT SYS_CONTEXT('USERENV', 'SESSION_USER') AS SESSION_USER,
+      2         SYS_CONTEXT('USERENV', 'PROXY_USER')   AS PROXY_USER
+      3  FROM DUAL;
 
-  SESSION_USER         PROXY_USER
-  -------------------- --------------------
-  HR                   MYPROXYUSER
+    SESSION_USER         PROXY_USER
+    -------------------- --------------------
+    HR                   MYPROXYUSER
 
 See the `Client Access Through a Proxy <https://www.oracle.com/pls/
 topic/lookup?ctx=dblatest&id=GUID-D77D0D4A-7483-423A-9767-CBB5854A15CC>`__
@@ -1805,40 +1864,39 @@ you could do:
 
 .. code-block:: javascript
 
-  const myproxyuserpw = ... // the password of the 'myproxyuser' proxy user
+    const myproxyuserpw = ... // the password of the 'myproxyuser' proxy user
 
-  const pool = await oracledb.createPool({ connectString: "localhost/orclpdb1", homogeneous: false });
-  const connection = await pool.getConnection({ user: 'myproxyuser[hr]', password: myproxyuserpw});
+    const pool = await oracledb.createPool({ connectString: "localhost/orclpdb1", homogeneous: false });
+    const connection = await pool.getConnection({ user: 'myproxyuser[hr]', password: myproxyuserpw});
 
-  . . . // connection has access to the HR schema objects
+    . . . // connection has access to the HR schema objects
 
-  await connection.close();
+    await connection.close();
 
 Other proxy cases are supported such as:
 
 .. code-block:: javascript
 
-  const myproxyuserpw = ... // the password of the 'myproxyuser' proxy user
+    const myproxyuserpw = ... // the password of the 'myproxyuser' proxy user
 
-  const pool = await oracledb.createPool(
-    {
-      user          : 'myproxyuser',
-      password      : myproxyuserpw,
-      connectString : "localhost/XEPDB1",
-      homogeneous   : false,
-      . . .  // other pool options such as poolMax can be used
+    const pool = await oracledb.createPool({
+        user          : "myproxyuser",
+        password      : myproxyuserpw,
+        connectString : "localhost/FREEPDB1",
+        homogeneous   : false,
+        . . .  // other pool options such as poolMax can be used
     });
 
-  const connection = await pool.getConnection({ user : 'hr' });  // the session user
+    const connection = await pool.getConnection({ user : 'hr' });  // the session user
 
-  . . . // connection has access to the HR schema objects
+    . . . // connection has access to the HR schema objects
 
-  await connection.close();
+    await connection.close();
 
 .. _extauth:
 
-External Authentication
-=======================
+Connecting Using External Authentication
+========================================
 
 External Authentication allows applications to use an external password
 store (such as an `Oracle Wallet <https://www.oracle.com/pls/topic/lookup?
@@ -1850,11 +1908,14 @@ dblatest&id=GUID-6AD89576-526F-4D6B-A539-ADF4B840819F>`__
 to validate user access. One of the benefits is that database
 credentials do not need to be hard coded in the application.
 
-To use external authentication, set the
-:attr:`oracledb.externalAuth` property to
-*true*. This property can also be set in the ``connAttrs`` or
-``poolAttrs`` parameters of the
-:meth:`oracledb.getConnection()` or
+.. note::
+
+    Connecting to Oracle Database using external authentication is only
+    supported in node-oracledb Thick mode. See :ref:`enablingthick`.
+
+To use external authentication, set the :attr:`oracledb.externalAuth` property
+to *true*. This property can also be set in the ``connAttrs`` or ``poolAttrs``
+parameters of the :meth:`oracledb.getConnection()` or
 :meth:`oracledb.createPool()` calls, respectively.
 
 When ``externalAuth`` is set, any subsequent connections obtained using
@@ -1862,44 +1923,45 @@ the :meth:`oracledb.getConnection()` or :meth:`pool.getConnection()` calls
 will use external authentication. Setting this property does not affect the
 operation of existing connections or pools.
 
-For a standalone connection:
+For a standalone connection, you can authenticate as an externally identified
+user like:
 
 .. code-block:: javascript
 
-  const config = { connectString: "localhost/orclpdb1", externalAuth: true };
-  const connection = await oracledb.getConnection(config);
+    const config = { connectString: "localhost/orclpdb1", externalAuth: true };
+    const connection = await oracledb.getConnection(config);
 
-  . . . // connection has access to the schema objects of the externally identified user
+    . . . // connection has access to the schema objects of the externally identified user
 
 If a user ``HR`` has been given the ``CONNECT THROUGH`` grant from the
 externally identified user ``MYPROXYUSER``:
 
 .. code-block:: sql
 
-  ALTER USER hr GRANT CONNECT THROUGH myproxyuser;
+    ALTER USER hr GRANT CONNECT THROUGH myproxyuser;
 
 then to specify that the session user of the connection should be
 ``HR``, use:
 
 .. code-block:: javascript
 
-  const config = { connectString: "localhost/orclpdb1", user: "[hr]", externalAuth: true };
-  const connection = await oracledb.getConnection(config);
+    const config = { connectString: "localhost/orclpdb1", user: "[hr]", externalAuth: true };
+    const connection = await oracledb.getConnection(config);
 
-  . . . // connection has access to the HR schema objects
+    . . . // connection has access to the HR schema objects
 
 For a *Pool*, you can authenticate as an externally identified user
 like:
 
 .. code-block:: javascript
 
-  const config = { connectString: "localhost/orclpdb1", externalAuth: true };
-  const pool = await oracledb.createPool(config);
-  const connection = await pool.getConnection();
+    const config = { connectString: "localhost/orclpdb1", externalAuth: true };
+    const pool = await oracledb.createPool(config);
+    const connection = await pool.getConnection();
 
-  . . . // connection has access to the schema objects of the externally identified user
+    . . . // connection has access to the schema objects of the externally identified user
 
-  await connection.close();
+    await connection.close();
 
 If a user ``HR`` has been given the ``CONNECT THROUGH`` grant from the
 externally identified user, then to specify that the session user of the
@@ -1907,13 +1969,13 @@ connection should be ``HR``, use:
 
 .. code-block:: javascript
 
-  const config = { connectString: "localhost/orclpdb1", externalAuth: true };
-  const pool = await oracledb.createPool(config);
-  const connection = await pool.getConnection({ user: "[hr]" });
+    const config = { connectString: "localhost/orclpdb1", externalAuth: true };
+    const pool = await oracledb.createPool(config);
+    const connection = await pool.getConnection({ user: "[hr]" });
 
-  . . . // connection has access to the HR schema objects
+    . . . // connection has access to the HR schema objects
 
-  await connection.close();
+    await connection.close();
 
 Note this last case needs Oracle Client libraries version 18 or later.
 
@@ -1960,16 +2022,16 @@ Oracle Cloud Infrastructure (OCI) users can be centrally managed in a
 Microsoft Azure Active Directory (Azure AD) service. Open Authorization
 (OAuth 2.0) token-based authentication allows users to authenticate to
 Oracle Database using Azure AD OAuth 2.0 tokens. Your Oracle Database
-must be registered with Azure AD.
+must be registered with Azure AD. Both Thin and Thick modes of the
+node-oracledb driver support OAuth 2.0 token-based authentication.
 
 See `Authenticating and Authorizing Microsoft Azure Active Directory
-Users for Oracle Autonomous Databases <https://docs.oracle.com/en/database/
-oracle/oracle-database/19/dbseg/authenticating-and-authorizing-microsoft-azure-
-active-directory-users-oracle-autonomous-datab.html#GUID-2712902B-DD07-4A61-
-B336-31C504781D0F>`__ for more information.
+Users for Oracle Autonomous Databases <https://www.oracle.com/pls/topic/
+lookup?ctx=dblatest&id=GUID-60AAC16E-5274-463D-9F29-4826F25D5585>`__ for
+more information.
 
-OAuth 2.0 token authentication can be performed when node-oracledb uses
-Oracle Client libraries 19.15 (or later), or 21.7 (or later).
+When using node-oracledb in Thick mode, Oracle Client libraries 19.15 (or
+later), or 21.7 (or later) are needed.
 
 .. _oauthtokengeneration:
 
@@ -1979,14 +2041,14 @@ OAuth 2.0 Token Generation
 Authentication tokens can be obtained in several ways. For example you
 can use a curl command against the Azure Active Directory API such as::
 
-  curl -X POST -H 'Content-Type: application/x-www-form-urlencoded'
-  https://login.microsoftonline.com/[<TENANT_ID>]/oauth2/v2.0/token
-  -d 'client_id = <APP_ID>'
-  -d 'scope = <SCOPES>'
-  -d 'username = <USER_NAME>'
-  -d 'password = <PASSWORD>'
-  -d 'grant_type = password'
-  -d 'client_secret = <SECRET_KEY>'
+    curl -X POST -H 'Content-Type: application/x-www-form-urlencoded'
+    https://login.microsoftonline.com/[<TENANT_ID>]/oauth2/v2.0/token
+    -d 'client_id = <APP_ID>'
+    -d 'scope = <SCOPES>'
+    -d 'username = <USER_NAME>'
+    -d 'password = <PASSWORD>'
+    -d 'grant_type = password'
+    -d 'client_secret = <SECRET_KEY>'
 
 Substitute your own values as appropriate for each argument.
 
@@ -1999,34 +2061,34 @@ the ``oracledb.getConnection()`` attribute
 ``oracledb.createPool()`` attribute
 :ref:`accessToken <createpoolpoolattrsaccesstoken>`.
 
-Alternatively authentication tokens can be generated by calling the
+Alternatively, authentication tokens can be generated by calling the
 Azure Active Directory REST API, for example:
 
 .. code-block:: javascript
 
-  function getOauthToken() {
-    const requestParams = {
-      client_id     : <CLIENT_ID>,
-      client_secret : <CLIENT_SECRET>,
-      grant_type    : 'client_credentials',
-      scope         : <SCOPES>,
-    };
-    const tenantId = <TENANT_ID>;
-    const url = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
-    return new Promise(function(resolve, reject) {
-      request.post({
-        url       : url,
-        body      : queryString.stringify(requestParams),
-        headers   : { 'Content-Type': 'application/x-www-form-urlencoded' }
-      }, function(err, response, body) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(JSON.parse(body).access_token);
-        }
-      });
-    });
-  }
+    function getOauthToken() {
+        const requestParams = {
+            client_id     : <CLIENT_ID>,
+            client_secret : <CLIENT_SECRET>,
+            grant_type    : 'client_credentials',
+            scope         : <SCOPES>,
+        };
+        const tenantId = <TENANT_ID>;
+        const url = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
+        return new Promise(function(resolve, reject) {
+            request.post({
+                url       : url,
+                body      : queryString.stringify(requestParams),
+                headers   : { 'Content-Type': 'application/x-www-form-urlencoded' }
+            }, function(err, response, body) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(JSON.parse(body).access_token);
+                }
+            });
+        });
+    }
 
 Substitute your own values as appropriate for each argument.
 
@@ -2042,26 +2104,26 @@ authentication, for example:
 
 .. code-block:: javascript
 
-  let accessTokenStr;  // the token string. In this app it is also the token "cache"
+    let accessTokenStr;  // the token string. In this app it is also the token "cache"
 
-  async function tokenCallback(refresh) {
-    if (refresh || !acccessTokenStr) {
-      accessTokenStr = await getOauthToken(); // getOauthToken() was shown earlier
+    async function tokenCallback(refresh) {
+        if (refresh || !acccessTokenStr) {
+            accessTokenStr = await getOauthToken(); // getOauthToken() was shown earlier
+        }
+        return acccessTokenStr;
     }
-    return acccessTokenStr;
-  }
 
-  async function init() {
-    try {
-      await oracledb.getConnection({
-        accessToken   : tokenCallback,    // the callback returning the token
-        externalAuth  : true,             // must specify external authentication
-        connectString : connect_string    // Oracle Autonomous Database connection string
-      });
-    } catch (err) {
-      console.error(err);
+    async function init() {
+        try {
+            await oracledb.getConnection({
+                accessToken   : tokenCallback,    // the callback returning the token
+                externalAuth  : true,             // must specify external authentication
+                connectString : connect_string    // Oracle Autonomous Database connection string
+            });
+        } catch (err) {
+            console.error(err);
+        }
     }
-  }
 
 In this example, the global variable ``accessTokenStr`` is used to
 “cache” the access token string so any subsequent callback invocation
@@ -2100,27 +2162,27 @@ authentication, for example:
 
 .. code-block:: javascript
 
-  let accessTokenStr;  // The token string. In this app it is also the token "cache"
+    let accessTokenStr;  // The token string. In this app it is also the token "cache"
 
-  async function tokenCallback(refresh) {
-    if (refresh || !acccessTokenStr) {
-      accessTokenStr = await getOauthToken(); // getOauthToken() was shown earlier
+    async function tokenCallback(refresh) {
+        if (refresh || !acccessTokenStr) {
+            accessTokenStr = await getOauthToken(); // getOauthToken() was shown earlier
+        }
+        return acccessToken;
     }
-    return acccessToken;
-  }
 
-  async function init() {
-    try {
-      await oracledb.createPool({
-        accessToken   : tokenCallback,        // the callback returning the token
-        externalAuth  : true,                 // must specify external authentication
-        homogeneous   : true,                 // must use an homogeneous pool
-        connectString : '...'                 // Oracle Autonomous Database connection string
-      });
-    } catch (err) {
-      console.error(err);
+    async function init() {
+        try {
+            await oracledb.createPool({
+                accessToken   : tokenCallback,        // the callback returning the token
+                externalAuth  : true,                 // must specify external authentication
+                homogeneous   : true,                 // must use an homogeneous pool
+                connectString : '...'                 // Oracle Autonomous Database connection string
+            });
+        } catch (err) {
+            console.error(err);
+        }
     }
-  }
 
 See :ref:`OAuth 2.0 Standalone Connections <oauthstandalone>` for a
 description of the callback and ``refresh`` parameter. With connection
@@ -2138,8 +2200,14 @@ OAuth 2.0 Connection Strings
 Applications built with node-oracledb 5.5, or later, should use the
 connection or pool creation parameters described earlier. However, if
 you cannot use them, you can use OAuth 2.0 Token Authentication by
-configuring Oracle Net options. This still requires Oracle Client
-libraries 19.15 (or later), or 21.7 (or later).
+configuring Oracle Net options.
+
+.. note::
+
+    In this release, OAuth 2.0 connection strings are only supported in
+    node-oracledb Thick mode. See :ref:`enablingthick`.
+
+This requires Oracle Client libraries 19.15 (or later), or 21.7 (or later).
 
 Save the generated access token to a file and set the connect descriptor
 ``TOKEN_LOCATION`` option to the directory containing the token file.
@@ -2176,14 +2244,15 @@ IAM Token-Based Authentication
 
 Token-based authentication allows Oracle Cloud Infrastructure users to
 authenticate to Oracle Database with Oracle Identity Access Management
-(IAM) tokens. This token authentication can be performed when
-node-oracledb uses Oracle Client libraries 19.14 (or later), or 21.5 (or
-later).
+(IAM) tokens. Both Thin and Thick modes of the node-oracledb driver support
+IAM token-based authentication.
+
+When using node-oracledb in Thick mode, Oracle Client libraries 19.14 (or
+later), or 21.5 (or later) are needed.
 
 See `Configuring the Oracle Autonomous Database for IAM
-Integration <https://docs.oracle.com/en/database/oracle/oracle-database/19/
-dbseg/authenticating-and-authorizing-iam-users-oracle-autonomous-databases.
-html#GUID-466A8800-5AF1-4202-BAFF-5AE727D242E8>`__ for more information.
+Integration <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
+4E206209-4E3B-4387-9364-BDCFB4E16E2E>`__ for more information.
 
 .. _iamtokengeneration:
 
@@ -2196,7 +2265,7 @@ command run externally to Node.js:
 
 ::
 
-  oci iam db-token get
+    oci iam db-token get
 
 On Linux a folder ``.oci/db-token`` will be created in your home
 directory. It will contain the token and private key files needed by
@@ -2216,32 +2285,32 @@ applications, for example like:
 
 .. code-block:: javascript
 
-  function getIAMToken() {
-    const tokenPath = '/home/cjones/.oci/db-token/token';
-    const privateKeyPath = '/home/cjones/.oci/db-token/oci_db_key.pem';
+    function getIAMToken() {
+        const tokenPath = '/home/cjones/.oci/db-token/token';
+        const privateKeyPath = '/home/cjones/.oci/db-token/oci_db_key.pem';
 
-    let token = '';
-    let privateKey = '';
-    try {
-      // Read the token file
-      token = fs.readFileSync(tokenPath, 'utf8');
-      // Read the private key file
-      const privateKeyFileContents = fs.readFileSync(privateKeyPath, 'utf-8');
-      privateKeyFileContents.split(/\r?\n/).forEach(line => {
-      if (line != '-----BEGIN PRIVATE KEY-----' &&
-          line != '-----END PRIVATE KEY-----')
-        privateKey = privateKey.concat(line);
-      });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      const tokenBasedAuthData = {
-        token       : token,
-        privateKey  : privateKey
-      };
-      return tokenBasedAuthData;
+        let token = '';
+        let privateKey = '';
+        try {
+            // Read the token file
+            token = fs.readFileSync(tokenPath, 'utf8');
+            // Read the private key file
+            const privateKeyFileContents = fs.readFileSync(privateKeyPath, 'utf-8');
+            privateKeyFileContents.split(/\r?\n/).forEach(line => {
+                if (line != '-----BEGIN PRIVATE KEY-----' &&
+                    line != '-----END PRIVATE KEY-----')
+                privateKey = privateKey.concat(line);
+            });
+        } catch (err) {
+            console.error(err);
+        } finally {
+            const tokenBasedAuthData = {
+                token       : token,
+                privateKey  : privateKey
+            };
+            return tokenBasedAuthData;
+        }
     }
-  }
 
 The token and key can be used during subsequent authentication.
 
@@ -2250,31 +2319,31 @@ The token and key can be used during subsequent authentication.
 IAM Standalone Connections
 ++++++++++++++++++++++++++
 
-Standalone connections can be created using IAM token-based
-authentication, for example:
+Standalone connections can be created in the node-oracledb Thin and Thick
+modes using IAM token-based authentication.
 
 .. code-block:: javascript
 
-  let accessTokenObj;  // the token object. In this app it is also the token "cache"
+    let accessTokenObj;  // the token object. In this app it is also the token "cache"
 
-  function tokenCallback(refresh) {
-    if (refresh || !acccessTokenObj) {
-      accessTokenObj = getIAMToken();     // getIAMToken() was shown earlier
+    function tokenCallback(refresh) {
+        if (refresh || !acccessTokenObj) {
+            accessTokenObj = getIAMToken();     // getIAMToken() was shown earlier
+        }
+        return acccessTokenObj;
     }
-    return acccessTokenObj;
-  }
 
-  async function init() {
-    try {
-      await oracledb.getConnection({
-        accessToken    : tokenCallback,  // the callback returns the token object
-        externalAuth   : true,           // must specify external authentication
-        connectString  : '...'           // Oracle Autonomous Database connection string
-      });
-    } catch (err) {
-      console.error(err);
+    async function init() {
+        try {
+            await oracledb.getConnection({
+                accessToken    : tokenCallback,  // the callback returns the token object
+                externalAuth   : true,           // must specify external authentication
+                connectString  : '...'           // Oracle Autonomous Database connection string
+            });
+        } catch (err) {
+            console.error(err);
+        }
     }
-  }
 
 In this example, the global object ``accessTokenObj`` is used to “cache”
 the IAM access token and private key (using the attributes ``token`` and
@@ -2315,27 +2384,27 @@ for example:
 
 .. code-block:: javascript
 
-  let accessTokenObj;  // The token string. In this app it is also the token "cache"
+    let accessTokenObj;  // The token string. In this app it is also the token "cache"
 
-  function tokenCallback(refresh) {
-    if (refresh || !acccessTokenObj) {
-      accessTokenObj = getIAMToken();      // getIAMToken() was shown earlier
+    function tokenCallback(refresh) {
+        if (refresh || !acccessTokenObj) {
+            accessTokenObj = getIAMToken();      // getIAMToken() was shown earlier
+        }
+        return acccessToken;
     }
-    return acccessToken;
-  }
 
-  async function init() {
-    try {
-      await oracledb.createPool({
-        accessToken   : tokenCallback,     // the callback returning the token
-        externalAuth  : true,              // must specify external authentication
-        homogeneous   : true,              // must use an homogeneous pool
-        connectString : connect_string     // Oracle Autonomous Database connection string
-      });
-    } catch (err) {
-      console.error(err);
+    async function init() {
+        try {
+            await oracledb.createPool({
+                accessToken   : tokenCallback,     // the callback returning the token
+                externalAuth  : true,              // must specify external authentication
+                homogeneous   : true,              // must use an homogeneous pool
+                connectString : connect_string     // Oracle Autonomous Database connection string
+            });
+        } catch (err) {
+            console.error(err);
+        }
     }
-  }
 
 See :ref:`IAM Standalone Connections <iamstandalone>` for a description of
 the callback and ``refresh`` parameter. With connection pools, the
@@ -2353,8 +2422,14 @@ IAM Connection Strings
 Applications built with node-oracledb 5.4, or later, should use the
 connection or pool creation parameters described earlier. However, if
 you cannot use them, you can use IAM Token Authentication by configuring
-Oracle Net options. This still requires Oracle Client libraries 19.14
-(or later), or 21.5 (or later).
+Oracle Net options.
+
+.. note::
+
+    In this release, IAM connection strings are only supported in
+    node-oracledb Thick mode. See :ref:`enablingthick`.
+
+This requires Oracle Client libraries 19.14 (or later), or 21.5 (or later).
 
 Save the generated access token to a file and set the connect descriptor
 ``TOKEN_LOCATION`` option to the directory containing the token file.
@@ -2411,10 +2486,11 @@ Database Resident Connection Pooling (DRCP)
 
 `Database Resident Connection Pooling <https://www.oracle.com/pls/topic/
 lookup?ctx=dblatest&id=GUID-015CA8C1-2386-4626-855D-CC546DDC1086>`__
-(DRCP) enables database resource sharing for applications that run in
-multiple client processes or run on multiple middle-tier application
-servers. DRCP reduces the overall number of connections that a database
-must handle.
+(DRCP) enables database resource sharing for applications which use a large
+number of connections that run in multiple client processes or run on multiple
+middle-tier application servers. DRCP reduces the overall number of
+connections that a database must handle. DRCP is available in both Thin and
+:ref:`Thick <enablingthick>` modes.
 
 DRCP is generally used only when the database host does not have enough
 memory to keep all connections open concurrently. For example, if your
@@ -2427,18 +2503,35 @@ processes will be shared between all the Node.js connections.
 
 DRCP is useful for applications which share the same database
 credentials, have similar session settings (for example date format
-settings and PL/SQL package state), and where the application gets a
+settings or PL/SQL package state), and where the application gets a
 database connection, works on it for a relatively short duration, and
 then releases it.
 
 To use DRCP in node-oracledb:
 
-1. The DRCP pool must be started in the database:
+1. The DRCP pool must be started in the database, for example:
    ``SQL> EXECUTE DBMS_CONNECTION_POOL.START_POOL();``
+
 2. The :attr:`oracledb.connectionClass` should be set by the
-   node-oracledb application. If it is not set, the pooled server
-   session memory will not be reused optimally, and the statistic views
-   will record large values for ``NUM_MISSES``.
+   node-oracledb application. If it is set, then the connection class
+   specified in this property is used in standalone connections and
+   pooled connections.
+
+   If :attr:`oracledb.connectionClass` is not set, then:
+
+   - For standalone connections, the session request is sent to the shared
+     connection class in DRCP.
+
+   - For pooled connections, the pool generates a unique connection class if
+     a previously generated connection class does not exist. This connection
+     class is used when acquiring connections from the pool. The node-oracledb
+     Thin mode generates a connection class with the prefix "NJS" while the
+     Thick mode generates a connection class with the prefix "OCI".
+
+   If the connection class is not set, the pooled server session memory will
+   not be reused optimally, and the statistic views will record large values
+   for ``NUM_MISSES``.
+
 3. The ``pool.createPool()`` or ``oracledb.getConnection()`` property
    ``connectString`` (or its alias ``connectionString``) must specify to
    use a pooled server, either by the Easy Connect syntax like
@@ -2461,8 +2554,10 @@ has more details, including when to use, and when not to use DRCP.
 
 There are a number of Oracle Database ``V$`` views that can be used to
 monitor DRCP. These are discussed in the Oracle documentation and in the
-Oracle technical paper `Extreme Oracle Database Connection Scalability with Database Resident Connection Pooling (DRCP) <https://www.oracle.com/docs/tech/drcp-technical-brief.pdf>`__.
-This paper also gives more detail on configuring DRCP.
+Oracle technical paper `Extreme Oracle Database Connection Scalability with
+Database Resident Connection Pooling (DRCP) <https://www.oracle.com/docs/tech/
+drcp-technical-brief.pdf>`__. This paper also gives more detail on configuring
+DRCP.
 
 .. _privconn:
 
@@ -2473,37 +2568,21 @@ Database privileges such as ``SYSDBA`` can be obtained when using
 standalone connections. Use one of the :ref:`Privileged Connection
 Constants <oracledbconstantsprivilege>` with the connection
 :ref:`privilege <getconnectiondbattrsprivilege>` property, for
-example::
+example:
 
-  let connection;
+.. code-block:: javascript
 
-  try {
-    connection = await oracledb.getConnection(
-      {
-        user          : 'sys',
-        password      : 'secret',
-        connectString : 'localhost/orclpdb1',
+    const connection = await oracledb.getConnection({
+        user          : "sys",
+        password      : "secret",
+        connectString : "localhost/orclpdb1",
         privilege     : oracledb.SYSDBA
-      });
+    });
 
-    console.log('I have power');
+    console.log("I have power");
 
-    . . .  // use connection
-
-  } catch (err) {
-    console.error(err);
-  } finally {
-    if (connection) {
-      try {
-        await connection.close();
-      } catch (err) {
-        console.error(err);
-      }
-    }
-  }
-
-Note that if node-oracledb is using the Oracle client libraries located
-in the Oracle Database installation, i.e. is on the same machine as the
+Note that if node-oracledb is using the Oracle Client libraries located
+in the Oracle Database installation, that is on the same machine as the
 database and is not using Oracle Instant Client, then operating system
 privileges may be used for authentication. In this case the password
 value is ignored. For example on Linux, membership of the operating
@@ -2523,25 +2602,38 @@ C48021EF-6AEA-427F-95B2-37EFCFEA2400>`__ for information.
 Securely Encrypting Network Traffic to Oracle Database
 ======================================================
 
-Data transferred between Oracle Database and the Oracle client libraries
-used by node-oracledb can be `encrypted <https://www.oracle.com/pls/topic/
-lookup?ctx=dblatest&id=GUID-7F12066A-2BA1-476C-809B-BB95A3F727CF>`__
-so that unauthorized parties are not able to view plain text data as it
-passes over the network. The easiest configuration is Oracle’s native
-network encryption. The standard SSL protocol can also be used if you
-have a PKI, but setup is necessarily more involved.
+You can `encrypt <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID
+-7F12066A-2BA1-476C-809B-BB95A3F727CF>`__ data transferred between the Oracle
+Database and node-oracledb so that unauthorized parties are not able to view
+plain text values as the data passes over the network.
 
-With native network encryption, the client and database server negotiate
-a key using Diffie-Hellman key exchange. There is protection against
-man-in-the-middle attacks.
+Both node-oracledb Thin and Thick modes support :ref:`TLS <connectionadb>`.
+Refer to the `Oracle Database Security Guide <https://www.oracle.com/pls/topic
+/lookup?ctx=dblatest&id=GUID-41040F53-D7A6-48FA-A92A-0C23118BC8A0>`__ for more
+configuration information.
+
+.. _nne:
+
+Native Network Encryption
+-------------------------
+
+With Oracle Database's `native network encryption <https://www.oracle.com/pls/
+topic/lookup?ctx=dblatest&id=GUID-7F12066A-2BA1-476C-809B-BB95A3F727CF>`__,
+the client and database server negotiate a key using Diffie-Hellman key
+exchange. There is protection against man-in-the-middle attacks.
+
+.. note::
+
+    Oracle Native Network Encryption feature is only supported in
+    node-oracledb Thick mode. See :ref:`enablingthick`.
 
 Native network encryption can be configured by editing Oracle Net’s
 optional `sqlnet.ora <https://www.oracle.com/pls/topic/lookup?ctx=dblatest
-&id=GUID-2041545B-58D4-48DC-986F-DCC9D0DEC642>`__ configuration files,
-on either the database server and/or on each node-oracledb ‘client’.
-Parameters control whether data integrity checking and encryption is required
-or just allowed, and which algorithms the client and server should consider
-for use.
+&id=GUID-2041545B-58D4-48DC-986F-DCC9D0DEC642>`__ configuration file. The file
+on either the database server and/or on each node-oracledb ‘client’ machine
+can be configured. Parameters control whether data integrity checking and
+encryption is required or just allowed, and which algorithms the client and
+server should consider for use.
 
 As an example, to ensure all connections to the database are checked for
 integrity and are also encrypted, create or edit the Oracle Database
@@ -2550,30 +2642,30 @@ negotiation to always validate a checksum and set the checksum type to
 your desired value. The network encryption settings can similarly be
 set. For example, to use the SHA512 checksum and AES256 encryption use::
 
-  SQLNET.CRYPTO_CHECKSUM_SERVER = required
-  SQLNET.CRYPTO_CHECKSUM_TYPES_SERVER = (SHA512)
-  SQLNET.ENCRYPTION_SERVER = required
-  SQLNET.ENCRYPTION_TYPES_SERVER = (AES256)
+    SQLNET.CRYPTO_CHECKSUM_SERVER = required
+    SQLNET.CRYPTO_CHECKSUM_TYPES_SERVER = (SHA512)
+    SQLNET.ENCRYPTION_SERVER = required
+    SQLNET.ENCRYPTION_TYPES_SERVER = (AES256)
 
 If you definitely know that the database server enforces integrity and
-encryption, then you do not need to configure Node.js separately.
+encryption, then you do not need to configure node-oracledb separately.
 However you can also, or alternatively, do so depending on your business
-needs. Create a file ``sqlnet.ora`` (see :ref:`Optional Oracle Net
-Configuration <tnsadmin>`):
+needs. Create a file ``sqlnet.ora`` on your client machine and locate it with
+other :ref:`Optional Oracle Net Configuration <tnsadmin>`:
 
 ::
 
-  SQLNET.CRYPTO_CHECKSUM_CLIENT = required
-  SQLNET.CRYPTO_CHECKSUM_TYPES_CLIENT = (SHA512)
-  SQLNET.ENCRYPTION_CLIENT = required
-  SQLNET.ENCRYPTION_TYPES_CLIENT = (AES256)
+    SQLNET.CRYPTO_CHECKSUM_CLIENT = required
+    SQLNET.CRYPTO_CHECKSUM_TYPES_CLIENT = (SHA512)
+    SQLNET.ENCRYPTION_CLIENT = required
+    SQLNET.ENCRYPTION_TYPES_CLIENT = (AES256)
 
 The client and server sides can negotiate the protocols used if the
 settings indicate more than one value is accepted.
 
 Note these are example settings only. You must review your security
 requirements and read the documentation for your Oracle version. In
-particular review the available algorithms for security and performance.
+particular, review the available algorithms for security and performance.
 
 The ``NETWORK_SERVICE_BANNER`` column of the database view
 `V$SESSION_CONNECT_INFO <https://www.oracle.com/pls/topic/lookup?ctx=
@@ -2582,11 +2674,10 @@ can be used to verify the encryption status of a connection.
 
 For more information about Oracle Data Network Encryption and Integrity,
 and for information about configuring SSL network encryption, refer to
-the `Oracle Database Security
-Guide <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=DBSEG>`__.
-This manual also contains information about other important security
-features that Oracle Database provides, such Transparent Data Encryption
-of data-at-rest in the database.
+the `Oracle Database Security Guide <https://www.oracle.com/pls/topic/
+lookup?ctx=dblatest&id=DBSEG>`__. This manual also contains information about
+other important security features that Oracle Database provides, such
+Transparent Data Encryption of data-at-rest in the database.
 
 .. _changingpassword:
 
@@ -2601,40 +2692,38 @@ For example:
 
 .. code-block:: javascript
 
-  const currentpw = ...  // the current password for the hr schema
-  const newpw = ...      // the new hr schema password
+    const currentpw = ...  // the current password for the hr schema
+    const newpw = ...      // the new hr schema password
 
-  const connection = await oracledb.getConnection(
-    {
-      user          : "hr",
-      password      : currentpw,
-      connectString : "localhost/orclpdb1"
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : currentpw,
+        connectString : "localhost/orclpdb1"
     });
 
-  await connection.changePassword('hr', currentpw, newpw);
+    await connection.changePassword("hr", currentpw, newpw);
 
-Only DBAs, or users with the ALTER USER privilege, can change the
+Only DBAs or users with the ALTER USER privilege can change the
 password of another user. In this case, the old password value is
 ignored and can be an empty string:
 
 .. code-block:: javascript
 
-  const newpw = ... // the new password
+    const newpw = ... // the new password
 
-  const connection = await oracledb.getConnection(
-    {
-      user          : "system",  // a privileged user
-      password      : mypw,      // mypw contains the system schema password
-      connectString : "localhost/orclpdb1"
+    const connection = await oracledb.getConnection({
+        user          : "system",  // a privileged user
+        password      : mypw,      // mypw contains the system schema password
+        connectString : "localhost/orclpdb1"
     });
 
-  await connection.changePassword('hr', '', newpw);
+    await connection.changePassword('hr', '', newpw);
 
 Connecting with an Expired Password
 -----------------------------------
 
 When creating a standalone, non-pooled connection the user’s password
-can be changed at time of connection. This is most useful when the
+can be changed at the time of connection. This is most useful when the
 user’s password has expired, because it allows a user to connect without
 requiring a DBA to reset their password.
 
@@ -2643,15 +2732,14 @@ example:
 
 .. code-block:: javascript
 
-  const oldpw = ...  // the hr schema's old password
-  const newpw = ...  // the new password
+    const oldpw = ...  // the hr schema's old password
+    const newpw = ...  // the new password
 
-  const connection = await oracledb.getConnection(
-    {
-      user          : "hr",
-      password      : oldpw,
-      newPassword   : newpw,
-      connectString : "localhost/orclpdb1"
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : oldpw,
+        newPassword   : newpw,
+        connectString : "localhost/orclpdb1"
     });
 
 .. _connectionha:
@@ -2660,14 +2748,16 @@ Connections and High Availability
 =================================
 
 To make highly available applications, use the latest versions of Oracle
-Client and Database. Also use the latest node-oracledb driver. These
-have improved APIs and improved implementations to make connections
-efficient and available. In addition, features like :ref:`Connection Pool
-Pinging <connpoolpinging>`, :ref:`Fast Application Notification
-(FAN) <connectionfan>`, :ref:`Application Continuity <appcontinuity>`,
-and `Oracle Net Services <https://www.oracle.com/pls/topic/lookup?ctx=
-dblatest&id=NETRF>`__ settings can all help high availability, often
-without the application being aware of any issue.
+node-oracledb and Oracle Database.  If you are using node-oracledb Thick mode,
+then also use the latest Oracle Client libraries which have improved
+implementations to make connections efficient and available. In addition,
+features like :ref:`Connection Pool Pinging <connpoolpinging>`, :ref:`Fast
+Application Notification (FAN) <connectionfan>`, :ref:`Application Continuity
+<appcontinuity>`, and `Oracle Net Services
+<https://www.oracle.com/pls/topic/lookup?ctx= dblatest&id=NETRF>`__ settings
+can all help high availability, often without the application being aware of
+any issue. Some of these features are only supported in node-oracledb
+:ref:`Thick <enablingthick>` mode.
 
 For application high availability, use a :ref:`connection
 pool <connpooling>`. Pools provide immediately available connections.
@@ -2713,8 +2803,8 @@ There are three components to a node-oracledb connection:
    ``getConnection()`` call. It may be a standalone connection or stored
    in a connection pool.
 
-2. The underlying network connection between the Oracle Client libraries
-   and the database.
+2. The underlying network connection between the database and the node-oracledb
+   Thin mode network handling code or Oracle Client libraries.
 
 3. A server process, or thread, on the database host to handle database
    processing.
@@ -2742,19 +2832,23 @@ connection re-establishment features so it is recommended to use
 56AEF38E-9400-427B-A818-EDEC145F7ACD>`__ to check the connection rate,
 and then fix underlying causes.
 
-With Oracle Client 19c, `EXPIRE_TIME <https://www.oracle.com/pls/topic/
-lookup?ctx=dblatest&id=GUID-6140611A-83FC-4C9C-B31F-A41FC2A5B12D>`__
-can be used in :ref:`tnsnames.ora <tnsnames>` connect descriptors or
-in :ref:`Easy Connect strings <easyconnect>` to prevent firewalls from
-terminating idle connections and to adjust keepalive timeouts. With
-Oracle Client 21c the setting can alternatively be in the application’s
-:ref:`sqlnet.ora <tnsadmin>` file. The general recommendation for
-``EXPIRE_TIME`` is to use a value that is slightly less than half of the
-termination period. In older versions of Oracle Client, a
-``tnsnames.ora`` connect descriptor option `ENABLE=BROKEN <https://www.
+You can use an 'expire time' setting to prevent firewalls from terminating idle
+connections and to adjust keepalive timeouts.  The general recommendation is to
+use a value that is slightly less than half of the termination period.  In
+node-oracledb Thin mode you can set the value in the connection string or with
+:ref:`expireTime <getconnectiondbattrsexpiretime>` when connecting.  This
+setting can also aid detection of a terminated remote database server.
+
+With node-oracledb Thick mode, when using Oracle Client 19c, `EXPIRE_TIME
+<https://www.oracle.com/pls/topic/
+lookup?ctx=dblatest&id=GUID-6140611A-83FC-4C9C-B31F-A41FC2A5B12D>`__ can be
+used in :ref:`tnsnames.ora <tnsnames>` connect descriptors or in :ref:`Easy
+Connect strings <easyconnect>`. With Oracle Client 21c the setting can
+alternatively be in the application’s :ref:`sqlnet.ora <tnsadmin>` file.  In
+older versions of Oracle Client, a ``tnsnames.ora`` connect descriptor option
+`ENABLE=BROKEN <https://www.
 oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7A18022A-E40D-4880-B3CE-
-7EE9864756CA>`__ can be used instead of ``EXPIRE_TIME``. These settings can
-also aid detection of a terminated remote database server.
+7EE9864756CA>`__ can be used instead of ``EXPIRE_TIME``.
 
 If the network or the database server processes used by node-oracledb
 connections cannot be prevented from becoming unusable, tune :ref:`Connection
@@ -2767,17 +2861,22 @@ for an extended time.
 Fast Application Notification (FAN)
 -----------------------------------
 
-FAN support is useful for planned and unplanned outages. It provides
-immediate notification to node-oracledb following outages related to the
-database, computers, and networks. Without FAN, node-oracledb can hang
-until a TCP timeout occurs and a network error is returned, which might
-be several minutes.
-
 Users of `Oracle Database FAN <https://www.oracle.com/pls/topic/lookup?ctx=
 dblatest&id=GUID-EB0E1525-D3B3-469C-BE22-A569C76864A6>`__
 must connect to a FAN-enabled database service. The application should
 have :attr:`oracledb.events` is set to *true*. This value can also be
 changed via :ref:`Oracle Client Configuration <oraaccess>`.
+
+.. note::
+
+        In this release, FAN is only supported in node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
+FAN support is useful for planned and unplanned outages. It provides
+immediate notification to node-oracledb following outages related to the
+database, computers, and networks. Without FAN, node-oracledb can hang
+until a TCP timeout occurs and a network error is returned, which might
+be several minutes.
 
 FAN allows node-oracledb to provide high availability features without
 the application being aware of an outage. Unused, idle connections in a
@@ -2816,6 +2915,11 @@ node-oracledb :ref:`Connection Pooling <connpooling>` and make sure
 :attr:`oracledb.events` is *true*. The events mode can also be
 changed via :ref:`Oracle Client Configuration <oraaccess>`.
 
+.. note::
+
+        In this release, RLB is only supported in node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
 RLB allows optimal use of database resources by balancing database
 requests across RAC instances.
 
@@ -2829,22 +2933,27 @@ Application Continuity
 ----------------------
 
 Node-oracledb OLTP applications can take advantage of continuous
-availability with the Oracle Database features Application Continuity
-and Transparent Application Continuity. These help make unplanned
-database service downtime transparent to applications. See the technical
-papers `Application Checklist for Continuous Service for MAA
-Solutions <https://www.oracle.com/a/tech/docs/application-checklist-for-
-continuous-availability-for-maa.pdf>`__,
-`Continuous Availability Application Continuity for the Oracle
-Database <https://www.oracle.com/technetwork/database/options/clustering/
-applicationcontinuity/applicationcontinuityformaa-6348196.pdf>`__,
-and `Continuous Availability Best Practices for Applications Using
-Autonomous Database -
-Dedicated <https://www.oracle.com/technetwork/database/options/clustering/
-applicationcontinuity/continuous-service-for-apps-on-atpd-5486113.pdf>`__.
+availability with the Oracle Database features Application Continuity (AC)
+and Transparent Application Continuity (TAC). These help make unplanned
+database service downtime transparent to applications.
 
-When connected to an AC or TAC enabled service, node-oracledb
-automatically supports AC or TAC.
+.. note::
+
+    In this release, Oracle AC and TAC functionalities are only supported in
+    node-oracledb Thick mode. See :ref:`enablingthick`.
+
+See the technical papers `Application Checklist for Continuous Service for MAA
+Solutions <https://www.oracle.com/a/tech/docs/application-checklist-for-
+continuous-availability-for-maa.pdf>`__, `Continuous Availability Application
+Continuity for the Oracle Database <https://www.oracle.com/technetwork/
+database/options/clustering/applicationcontinuity/applicationcontinuity
+formaa-6348196.pdf>`__, and `Continuous Availability Best Practices for
+Applications Using Autonomous Database - Dedicated <https://www.oracle.com
+/technetwork/database/options/clustering/applicationcontinuity/continuous-
+service-for-apps-on-atpd-5486113.pdf>`__.
+
+When AC or TAC are configured on the database service, they are transparently
+available to node-oracledb applications.
 
 .. _dbcalltimeouts:
 
@@ -2855,49 +2964,58 @@ Limiting the time to open new connections
 +++++++++++++++++++++++++++++++++++++++++
 
 To limit the amount of time taken to establish new connections to Oracle
-Database, use Oracle Net options like
-`SQLNET.OUTBOUND_CONNECT_TIMEOUT <https://www.oracle.com/pls/topic/lookup?ctx
-=dblatest&id=GUID-0857C817-675F-4CF0-BFBB-C3667F119176>`__
-in a :ref:`sqlnet.ora <tnsadmin>` file or
-`CONNECT_TIMEOUT <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
-GUID-F20C5DC5-C2FC-4145-9E4E-345CCB8148C7>`__
-in a :ref:`connection string <easyconnect>`. When using a connection pool,
-these values affect the time taken to establish each connection stored
-in the pool. The :attr:`~oracledb.queueTimeout` and
-:attr:`~oracledb.queueMax` settings control higher-level pool
-behavior.
+Database:
 
-With Oracle Client 19c, timeouts can be passed in :ref:`Easy Connect
-strings <easyconnect>`, for example to timeout after 15 seconds:
-``"mydbmachine.example.com/orclpdb1?connect_timeout=15"``
+- In node-oracledb Thin mode: You can use the connection attributes
+  :ref:`connectTimeout <getconnectiondbattrsconntimeout>` or
+  :ref:`transportConnectTimeout <getconnectiondbattrstransportconntimeout>`, or
+  use the `CONNECT_TIMEOUT <https://www.
+  oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F20C5DC5-C2FC-4145-9E4E-
+  345CCB8148C7>`__ timeout parameter in a :ref:`connection string
+  <easyconnect>`.
+
+- In node-oracledb Thick mode: You can use `SQLNET.OUTBOUND_CONNECT_TIMEOUT
+  <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-0857C817-675F
+  -4CF0-BFBB-C3667F119176>`__ in a :ref:`sqlnet.ora <tnsadmin>` file or
+  `CONNECT_TIMEOUT <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
+  GUID-F20C5DC5-C2FC-4145-9E4E-345CCB8148C7>`__ in a
+  :ref:`connection string <easyconnect>`. When node-oracledb Thick mode uses
+  Oracle Client libraries 19c or later, timeouts can be passed in
+  :ref:`Easy Connect strings <easyconnect>`, for example to timeout after
+  15 seconds: ``"mydbmachine.example.com/orclpdb1?connect_timeout=15"``.
+
+When using a connection pool, these values affect the time taken to establish
+each connection stored in the pool. The :attr:`~oracledb.queueTimeout` and
+:attr:`~oracledb.queueMax` settings control higher-level pool behavior.
 
 Limiting the time taken to execute statements
 +++++++++++++++++++++++++++++++++++++++++++++
 
-To limit the amount of time taken to execute statements on connections,
-use :attr:`connection.callTimeout` or Oracle Net
-settings like `SQLNET.RECV_TIMEOUT <https://www.oracle.com/pls/topic/lookup
-?ctx=dblatest&id=GUID-4A19D81A-75F0-448E-B271-24E5187B5909>`__
-and `SQLNET.SEND_TIMEOUT <https://www.oracle.com/pls/topic/lookup?ctx=
-dblatest&id=GUID-48547756-9C0B-4D14-BE85-E7ADDD1A3A66>`__
-in a ``sqlnet.ora`` file. The necessary out-of-band break setting is
-automatically configured when using Oracle Client 19 and Oracle Database
-19, or later. With older Oracle versions on systems that drop (or
-in-line) out-of-band breaks, you may need to add
-`DISABLE_OOB=ON <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
-GUID-42E939DC-EF37-49A0-B4F0-14158F0E55FD>`__
-to a ``sqlnet.ora`` file.
+To limit the amount of time taken to execute statements on connections:
 
-The :attr:`connection.callTimeout` attribute is available when node-oracledb
-is using Oracle client libraries version 18, or later. It is a millisecond
-timeout for executing database calls on a connection. The
-``connection.callTimeout`` period is on each individual
-:ref:`round-trip <roundtrips>` between node-oracledb and Oracle
-Database. Each node-oracledb method or operation may require zero or
-more round-trips to Oracle Database. The ``callTimeout`` value applies
-to each round-trip individually, not to the sum of all round-trips. Time
-spent processing in node-oracledb before or after the completion of each
-round-trip is not counted.
+- In node-oracledb Thin mode: You can use :attr:`connection.callTimeout` which
+  is described below.
+- In node-oracledb Thick mode: You can use Oracle Net settings like
+  `SQLNET.RECV_TIMEOUT <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
+  id=GUID-4A19D81A-75F0-448E-B271-24E5187B5909>`__ and `SQLNET.SEND_TIMEOUT
+  <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-48547756-9C0B
+  -4D14-BE85-E7ADDD1A3A66>`__ in a ``sqlnet.ora`` file. Or you can use the
+  :attr:`connection.callTimeout` attribute which is available when
+  node-oracledb uses Oracle Client libraries version 18, or later. The
+  necessary out-of-band break setting is automatically configured when using
+  Oracle Client 19 and Oracle Database 19, or later. With older Oracle
+  versions on systems that drop (or in-line) out-of-band breaks, you may need
+  to add `DISABLE_OOB=ON <https://www.oracle.com/pls/topic/lookup?ctx=dblatest
+  &id=GUID-42E939DC-EF37-49A0-B4F0-14158F0E55FD>`__ to a ``sqlnet.ora`` file.
+
+The :attr:`connection.callTimeout` attribute is a millisecond timeout for
+executing database calls on a connection. The ``connection.callTimeout``
+period is on each individual :ref:`round-trip <roundtrips>` between
+node-oracledb and Oracle Database. Each node-oracledb method or operation
+may require zero or more round-trips to Oracle Database. The ``callTimeout``
+value applies to each round-trip individually, not to the sum of all
+round-trips. Time spent processing in node-oracledb before or after the
+completion of each round-trip is not counted.
 
 -  If the time from the start of any one round-trip to the completion of
    that same round-trip exceeds ``callTimeout`` milliseconds, then the
@@ -2933,8 +3051,8 @@ lookup?ctx=dblatest&id=GUID-D04AA2A7-2E68-4C5C-BD6E-36C62427B98E>`__
 allow a single Oracle Database to be run across multiple servers. This
 maximizes availability and enables horizontal scalability.
 
-Node-oracledb can connect to Oracle RAC by using a standard RAC
-connection string. Best practice is to use a :ref:`Connection
+The Thin and Thick modes of node-oracledb can connect to Oracle RAC by using
+a standard RAC connection string. Best practice is to use a :ref:`Connection
 Pool <connpooling>` with :ref:`events <createpoolpoolattrsevents>`
 enabled. See the section :ref:`Connections and High
 Availability <connectionha>`.
@@ -2951,82 +3069,157 @@ applicationcontinuity/applicationcontinuityformaa-6348196.pdf>`__.
 Connecting to Oracle Cloud Autonomous Databases
 ===============================================
 
-To enable connection to Oracle Autonomous Database (ADB) in Oracle
-Cloud, you can use TLS (aka “1-way” TLS) or mutual TLS (mTLS)
-connections.
+Node.js applications can connect to Oracle Autonomous Database (ADB) in Oracle
+Cloud using one-way TLS (Transport Layer Security) or mutual TLS
+(mTLS). One-way TLS and mTLS provide enhanced security for authentication and
+encryption.
+
+A database username and password are still required for your application
+connections. If you need to create a new database schema so you do not login
+as the privileged ADMIN user, refer to the relevant Oracle Cloud documentation,
+for example see `Create Database Users <https://docs.oracle.com/en/cloud/paas/
+autonomous-database/adbdu/managing-database-users.html#GUID-5B94EA60-554A-4BA4
+-96A3-1D5A3ED5878D>`__ in the Oracle Autonomous Database manual.
+
+When using node-oracledb Thin mode, Node.js flags can be used to set the
+minimum TLS version used to connect to Oracle Database. For example, ``node
+--tls-min-v1.3 examples/select1.js``.
 
 .. _connectionadbtls:
 
-TLS Connections to Oracle Cloud Autonomous Database
----------------------------------------------------
+One-way TLS Connection to Oracle Autonomous Database
+----------------------------------------------------
 
-Node-oracledb does not need any additional configuration to use TLS
-connections to ADB. However you must use Oracle Client libraries
-versions 19.14 (or later), or 21.5 (or later).
+With one-way TLS, node-oracledb applications can connect to Oracle ADB
+without using a wallet. Both Thin and Thick modes of the node-oracledb
+driver support one-way TLS. Applications that use the node-oracledb Thick
+mode can connect to the Oracle ADB through one-way TLS only when using Oracle
+Client library versions 19.14 (or later) or 21.5 (or later).
 
-Configure ADB through the cloud console settings ‘Allow secure access
-from specified IPs and VCNs’ to allow connections from your Node.js
-host. In your applications use the correct TLS connection string
-(available in the cloud console). The connection strings for TLS and
-mTLS are different.
+To enable one-way TLS for an ADB instance, complete the following steps in an
+Oracle Cloud console in the **Autonomous Database Information** section of the
+ADB instance details:
+
+1. Click the **Edit** link next to *Access Control List* to update the Access
+   Control List (ACL). The **Edit Access Control List** dialog box is displayed.
+
+2. In the **Edit Access Control List** dialog box, select the type of address
+   list entries and the corresponding values. You can include the required IP
+   addresses, hostnames, or Virtual Cloud Networks (VCNs).  The ACL limits
+   access to only the IP addresses or VCNs that have been defined and blocks
+   all other incoming traffic.
+
+3. Navigate back to the ADB instance details page and click the **Edit** link
+   next to *Mutual TLS (mTLS) Authentication*. The **Edit Mutual TLS
+   Authentication** is displayed.
+
+4. In the **Edit Mutual TLS Authentication** dialog box, deselect the
+   **Require mutual TLS (mTLS) authentication** check box to disable the mTLS
+   requirement on Oracle ADB and click **Save Changes**.
+
+5. Navigate back to the ADB instance details page and click **DB Connection**
+   on the top of the page. A **Database Connection** dialog box is displayed.
+
+6. In the Database Connection dialog box, select TLS from the **Connection
+   Strings** drop-down list.
+
+7. Copy the appropriate Connection String of the database instance used by
+   your application.
+
+Applications can connect to your Oracle ADB instance using the database
+credentials and the copied connect descriptor. For example, to connect to the
+Oracle ADB instance:
 
 For example:
 
 .. code-block:: javascript
 
-  const cs = `(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)
-              (host=abc.oraclecloud.com))(connect_data=(service_name=xyz.adb.oraclecloud.com))
-              (security=(ssl_server_dn_match=yes)))`;
+    const cs = `(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)
+                (host=abc.oraclecloud.com))(connect_data=(service_name=xyz.adb.oraclecloud.com))
+                (security=(ssl_server_dn_match=yes)))`;
 
-  connection = await oracledb.getConnection({
-    user: "scott",
-    password: mypw,  // mypw contains the scott schema password
-    connectString: cs
-  });
+    connection = await oracledb.getConnection({
+        user: "scott",
+        password: mypw,  // mypw contains the scott schema password
+        connectString: cs
+    });
 
-A database username and password is required for your application
-connections. If you need to create a new database schema so you do not
-login as the privileged ADMIN user, refer to the relevant Oracle Cloud
-documentation, for example see `Create Database Users <https://docs.oracle.
-com/en/cloud/paas/autonomous-database/adbdu/managing-database-users.html#GUID
--5B94EA60-554A-4BA4-96A3-1D5A3ED5878D>`__ in the Oracle Autonomous Transaction
-Processing Dedicated Deployments manual.
-
-If you have downloaded the ‘wallet’ zip used for mTLS file, then remove
-the ``sqlnet.ora`` file, or comment out its ``WALLET_LOCATION`` line, or
-set a valid directory name for ``WALLET_LOCATION`` (see the mTLS
-discussion below). Otherwise an incorrect path can cause a connection
-error when the file is parsed.
+You can download the ADB connection wallet using the **DB Connection** button
+and extract the ``tnsnames.ora`` file, or create one yourself if you prefer to
+keep connections strings out of application code, see :ref:`tnsnames`.
 
 .. _connectionadbmtls:
 
 Mutal TLS connections to Oracle Cloud Autonomous Database
 ---------------------------------------------------------
 
-For Mutal TLS (mTLS) connections to ADB, a wallet needs be downloaded
-from the cloud console, and node-oracledb needs to be configured to use
-it. Mutual TLS provides enhanced security for authentication and
-encryption. A database username and password is still required for your
-application connections.
+To enable connections from node-oracledb to Oracle Autonomous Database in
+Oracle Cloud using mTLS, a wallet needs to be downloaded from the cloud
+console. mTLS is sometimes called Two-way TLS.
 
 Install the Wallet and Network Configuration Files
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 From the Oracle Cloud console for the database download the wallet zip
-file. It contains the wallet and network configuration files. Note: keep
-wallet files in a secure location and share them only with authorized
-users.
+file using the **DB Connection** button. The zip contains the wallet and
+network configuration files. When downloading the zip, the cloud console
+will ask you to create a wallet password. This password is used by
+node-oracledb in Thin mode, but not in Thick mode.
 
-Unzip the wallet zip file. For node-oracledb, only these files from the
-zip are needed:
+Note: Keep the wallet files in a secure location and share them only with
+authorized users.
+
+In the examples used in the sections that follow, consider that you have
+created a database called CJDB1 with the Always Free services from the
+`Oracle Cloud Free Tier <https://www.oracle.com//cloud/free/>`__, then you
+might decide to use the connection string called ``cjdb1_high`` in the
+``tnsnames.ora`` file.
+
+**In node-oracledb Thin Mode**
+
+For node-oracledb in Thin mode, only two files from the zip are needed:
+
+- ``tnsnames.ora`` - Maps net service names used for application connection
+  strings to your database services.
+- ``ewallet.pem`` - Enables SSL/TLS connections in Thin mode. Keep this file
+  secure.
+
+If you do not have a PEM file, see :ref:`createpem`.
+
+Unzip the wallet zip file and move the required files to a location such as
+``/opt/OracleCloud/MYDB``.
+
+You can establish a connection to the database by using your database
+credentials and setting the ``connectString`` parameter to the desired network
+alias from the ``tnsnames.ora`` file. The ``configDir`` parameter indicates
+the directory containing ``tnsnames.ora``. The ``walletLocation`` parameter is
+the directory containing the PEM file. In this example, the files are in the
+same directory. The ``walletPassword`` parameter should be set to the password
+created in the cloud console when downloading the wallet. For example, to
+connect as the ADMIN user using the ``cjdb1_high`` connection string:
+
+.. code-block:: javascript
+
+    connection = await oracledb.getConnection({
+        user: "admin",
+        password: mypw,
+        configDir: "/opt/OracleCloud/MYDB",
+        walletLocation: "/opt/OracleCloud/MYDB",
+        walletPassword: wp
+    });
+
+**In node-oracledb Thick Mode**
+
+For node-oracledb in Thick mode, only these files from the zip are needed:
 
 -  ``tnsnames.ora`` - Maps net service names used for application
-   connection strings to your database services
--  ``sqlnet.ora`` - Configures Oracle Network settings
--  ``cwallet.sso`` - Enables SSL/TLS connections. Note the cloud wallet
-   does not contain a database username or password.
+   connection strings to your database services.
+-  ``sqlnet.ora`` - Configures Oracle Network settings.
+-  ``cwallet.sso`` - Enables SSL/TLS connections in Thick mode. Keep this file
+   secure.
 
-There are now two options:
+Unzip the wallet zip file. There are two options for placing the required
+files:
 
 -  Move the three files to the ``network/admin`` directory of the client
    libraries used by your application. For example if you are using
@@ -3034,8 +3227,21 @@ There are now two options:
    you would put the wallet files in
    ``$HOME/instantclient_19_11/network/admin/``.
 
--  Alternatively, move them to any accessible directory, for example
-   ``/opt/OracleCloud/MYDB``.
+   Connection can be made using your database credentials and setting the
+   ``connectString`` parameter to the desired network alias from the
+   ``tnsnames.ora`` file. For example, to connect as the ADMIN user using
+   the ``cjdb1_high`` network service name:
+
+   .. code-block:: javascript
+
+        connection = await oracledb.getConnection({
+            user: "admin",
+            password: mypw, // mypw contains the admin schema password
+            connectString: "cjdb1_high"
+        });
+
+-  Alternatively, move them the three files to any accessible directory, for
+   example ``/opt/OracleCloud/MYDB``.
 
    Then edit ``sqlnet.ora`` and change the wallet location directory to
    the directory containing the ``cwallet.sso`` file. For example:
@@ -3051,32 +3257,29 @@ There are now two options:
    parameter to :meth:`~oracledb.initOracleClient()`, or
    using the ``TNS_ADMIN`` environment variable. See :ref:`Optional Oracle
    Net Configuration <tnsadmin>`. Neither of these settings are
-   needed, and you don’t need to edit ``sqlnet.ora``, if you have put
+   needed, and you do not need to edit ``sqlnet.ora``, if you have put
    all the files in the ``network/admin`` directory.
 
-Run Your Application
-++++++++++++++++++++
+  For example, to connect as the ADMIN user using the ``cjdb1_high`` network
+  service name:
 
-The ``tnsnames.ora`` file contains net service names for various levels
-of database service. For example, if you create a database called CJDB1
-with the Always Free services from the `Oracle Cloud Free
-Tier <https://www.oracle.com//cloud/free/>`__, then you might decide to
-use the connection string in ``tnsnames.ora`` called ``cjdb1_high``.
+  .. code-block:: javascript
 
-Update your application to use your schema username, its database
-password, and a net service name, for example:
+        const oracledb = require('oracledb');
 
-.. code-block:: javascript
+        oracledb.initOracleClient({configDir: '/opt/OracleCloud/MYDB'});
+        connection = await oracledb.getConnection({
+            user: "admin",
+            password: mpw,
+            connectString: "cjdb1_high"
+        });
 
-   connection = await oracledb.getConnection({
-     user: "scott",
-     password: mypw,  // mypw contains the scott schema password
-     connectString: "cjdb1_high"
-   });
-
-Once you have set optional Oracle environment variables required by your
-application, such as ``ORA_SDTZ`` or ``TNS_ADMIN``, you can start your
-application.
+In node-oracle Thick mode, to create mTLS connections in one Node.js process
+to two or more Oracle Autonomous Databases, move each ``cwallet.sso`` file to
+its own directory. For each connection use different connection string
+``WALLET_LOCATION`` parameters to specify the directory of each ``cwallet.sso``
+file. It is recommended to use Oracle Client libraries 19.17 (or later) when
+using :ref:`multiple wallets <connmultiwallets>`.
 
 If you need to create a new database schema so you do not login as the
 privileged ADMIN user, refer to the relevant Oracle Cloud documentation,
@@ -3095,79 +3298,186 @@ in the connect descriptor. Successful connection depends on specific
 proxy configurations. Oracle does not recommend doing this when
 performance is critical.
 
+**In node-oracledb Thin Mode**
+
+The proxy settings can be passed during connection creation:
+
+.. code-block:: javascript
+
+    connection = await oracledb.getConnection({
+        user: "admin",
+        password: mypw,
+        connectString: "cjdb1_high",
+        configDir: "/opt/OracleCloud/MYDB",
+        walletLocation: "/opt/OracleCloud/MYDB",
+        walletPassword: wp,
+        httpsProxy: 'myproxy.example.com',
+        httpsProxyPort: 80
+    });
+
+Alternatively, edit ``tnsnames.ora`` and add an ``HTTPS_PROXY`` proxy name and
+``HTTPS_PROXY_PORT`` port to the connect descriptor address list of any service
+name you plan to use, for example::
+
+    cjdb1_high = (description=
+        (address=
+        (https_proxy=myproxy.example.com)(https_proxy_port=80)
+        (protocol=tcps)(port=1522)(host= . . . )))
+
+.. code-block:: javascript
+
+    connection = await oracledb.getConnection({
+        user: "admin",
+        password: mypw,
+        connectString: "cjdb1_high",
+        configDir: "/opt/OracleCloud/MYDB",
+        walletLocation: "/opt/OracleCloud/MYDB",
+        walletPassword: wp,
+    });
+
+**In node-oracledb Thick Mode**
+
 Edit ``sqlnet.ora`` and add a line::
 
-  SQLNET.USE_HTTPS_PROXY=on
+    SQLNET.USE_HTTPS_PROXY=on
 
 Edit ``tnsnames.ora`` and add an ``HTTPS_PROXY`` proxy name and
 ``HTTPS_PROXY_PORT`` port to the connect descriptor address list of any
 service name you plan to use, for example::
 
-  cjdb1_high = (description= (address=(https_proxy=myproxy.example.com)(https_proxy_port=80)(protocol=tcps)(port=1522)(host=  . . .
+    cjdb1_high = (description=
+      (address=(https_proxy=myproxy.example.com)(https_proxy_port=80)
+      (protocol=tcps)(port=1522)(host=  . . .
 
 Using the Easy Connect Syntax with Autonomous Database
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-When node-oracledb is using Oracle Client libraries 19c or later, you
-can optionally use the :ref:`Easy Connect <easyconnect>` syntax to connect
-to Oracle Autonomous Database.
+You can optionally use the :ref:`Easy Connect <easyconnect>` syntax to connect
+to Oracle Autonomous Database.  When using node-oracledb Thick mode this
+requires using Oracle Client libraries 19c or later.
 
 The mapping from a cloud ``tnsnames.ora`` entry to an Easy Connect Plus
-string is:
+string is::
 
-::
+    protocol://host:port/service_name?wallet_location=/my/dir&retry_count=N&retry_delay=N
 
-   protocol://host:port/service_name?wallet_location=/my/dir&retry_count=N&retry_delay=N
+For example, if your ``tnsnames.ora`` file had an entry::
 
-For example, if your ``tnsnames.ora`` file had an entry:
-
-::
-
-  cjjson_high = (description=(retry_count=20)(retry_delay=3)
-      (address=(protocol=tcps)(port=1522)
-      (host=adb.ap-sydney-1.oraclecloud.com))
-      (connect_data=(service_name=abc_cjjson_high.adb.oraclecloud.com))
-      (security=(ssl_server_cert_dn="CN=adb.ap-sydney-1.oraclecloud.com,OU=Oracle ADB SYDNEY,O=Oracle Corporation,L=Redwood City,ST=California,C=US")))
+    cjjson_high = (description=(retry_count=20)(retry_delay=3)
+        (address=(protocol=tcps)(port=1522)
+        (host=adb.ap-sydney-1.oraclecloud.com))
+        (connect_data=(service_name=abc_cjjson_high.adb.oraclecloud.com))
+        (security=(ssl_server_cert_dn="CN=adb.ap-sydney-1.oraclecloud.com,OU=Oracle ADB SYDNEY,O=Oracle Corporation,L=Redwood City,ST=California,C=US")))
 
 Then your applications can connect using the connection string:
 
 .. code-block:: javascript
 
-  cs = "tcps://adb.ap-sydney-1.oraclecloud.com:1522/abc_cjjson_high.adb.oraclecloud.com?wallet_location=/Users/cjones/Cloud/CJJSON&retry_count=20&retry_delay=3"
-  connection = await oracledb.getConnection({
-    user          : "hr",
-    password      : mypw,
-    connectString : cs
-  });
+    cs = "tcps://adb.ap-sydney-1.oraclecloud.com:1522/abc_cjjson_high.adb.oraclecloud.com?wallet_location=/Users/cjones/Cloud/CJJSON&retry_count=20&retry_delay=3"
+    connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,
+        connectString : cs
+    });
 
-The ``wallet_location`` parameter needs to be set to the directory
-containing the ``cwallet.sso`` file from the wallet ZIP. The other
-wallet files, including ``tnsnames.ora``, are not needed when you use
-the Easy Connect Plus syntax.
+The ``walletLocation`` parameter needs to be set to the directory
+containing the ``cwallet.sso`` or ``ewallet.pem`` file from the wallet zip.
+The other wallet files, including ``tnsnames.ora``, are not needed when you
+use the Easy Connect Plus syntax.
 
 You can optionally add other Easy Connect parameters to the connection
 string, for example:
 
 .. code-block:: javascript
 
-  cs = cs + "&https_proxy=myproxy.example.com&https_proxy_port=80"
+    cs = cs + "&https_proxy=myproxy.example.com&https_proxy_port=80"
+
+With node-oracledb Thin mode, the wallet password needs to be passed as a
+connection parameter.
+
+.. _createpem:
+
+Creating a PEM File for node-oracledb Thin Mode
++++++++++++++++++++++++++++++++++++++++++++++++
+
+For mutual TLS in node-oracledb Thin mode, the certificate must be Privacy
+Enhanced Mail (PEM) format. If you are using Oracle Autonomous Database and
+your wallet zip file does not already include a PEM file, then you can convert
+the PKCS12 ``ewallet.p12`` file to PEM format using third party tools. For
+example, using OpenSSL::
+
+    openssl pkcs12 -in ewallet.p12 -out wallet.pem
+
+Once the PEM file has been created, you can use it by passing its directory
+location as the ``walletLocation`` parameter to :meth:`oracledb.getconnection()` or
+:meth:`oracledb.createPool()`. These methods also accept a ``walletPassword``
+parameter, which can be the passphrase that was specified when the above
+openSSL command was run. See :ref:`connectionadbmtls`.
+
+.. _connmultiwallets:
+
+Connecting using Multiple Wallets
+=================================
+
+You can make multiple connections with different wallets in one Node.js
+process.
+
+**In node-oracledb Thin mode**
+
+To use multiple wallets in node-oracledb Thin mode, pass the different
+connection strings, wallet locations, and wallet password (if required) in each
+:meth:`oracledb.getConnection()` call or when creating a :ref:`connection pool
+<connpooling>`:
+
+.. code-block:: javascript
+
+    connection = await oracledb.getConnection({
+        user: "user_name",
+        password: userpw,
+        connectString: "cjdb1_high",
+        configDir: "/opt/OracleCloud/MYDB",
+        walletLocation: "/opt/OracleCloud/MYDB",
+        walletPassword: walletpw
+    });
+
+The ``configDir`` parameter is the directory containing the :ref:`tnsnames.ora
+<tnsadmin>` file. The ``walletLocation`` parameter is the directory
+containing the ``ewallet.pem`` file. If you are using Oracle Autonomous
+Database, both of these paths are typically the same directory where the
+``wallet.zip`` file was extracted.
+
+**In node-oracledb Thick mode**
+
+To use multiple wallets in node-oracledb Thick mode, a TCPS connection string
+containing the ``MY_WALLET_DIRECTORY`` option needs to be created:
+
+.. note::
+
+    Use Oracle Client libraries 19.17, or later, or use Oracle Client 21c.
+    They contain important bug fixes for using multiple wallets in the one
+    process.
 
 .. _sharding:
 
 Connecting to Sharded Databases
 ===============================
 
-Sharding can be used to horizontally partition data across independent
-databases. A database table can be split so each shard contains a table
-with the same columns but a different subset of rows. These tables are
-known as sharded tables.
+`Oracle Sharding <https://www.oracle.com/database/technologies/high-
+availability/sharding.html>`__ can be used to horizontally partition data
+across independent databases. A database table can be split so each shard
+contains a table with the same columns but a different subset of rows. These
+tables are known as sharded tables. Sharding is configured in Oracle Database,
+see the `Oracle Sharding <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
+id=SHARD>`__ manual. Sharding requires Oracle Database and client libraries 12.2,
+or later.
 
-Sharding is configured in Oracle Database, see the `Oracle
-Sharding <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=SHARD>`__
-manual. Sharding requires Oracle Database and client libraries 12.2, or
-later.
+.. note::
 
-When opening a connection in node-oracledb, the
+    In this release, sharding is only supported in the node-oracledb Thick
+    mode. See :ref:`enablingthick`.
+
+When a connection is opened in node-oracledb using
+:meth:`oracledb.getConnection()`, the
 :ref:`shardingKey <getconnectiondbattrsshardingkey>` and
 :ref:`superShardingKey <getconnectiondbattrssupershardingkey>`
 properties can be used to route the connection directly to a given
@@ -3177,91 +3487,126 @@ has been partitioned by a list or range (the super sharding key), and
 then further partitioned by a sharding key.
 
 When creating a :ref:`connection pool <poolclass>`, the property
-:attr:`~oracledb.poolMaxPerShard` can be set. This is
-used to balance connections in the pool equally across shards.
+:attr:`~oracledb.poolMaxPerShard` can be set. This is used to balance
+connections in the pool equally across shards. It requires Oracle Client
+libraries 18.3 or later.
 
 When connected to a shard, queries only returns data from that shard.
 For queries that need to access data from multiple shards, connections
 can be established to the coordinator shard catalog database. In this
 case, no shard key or super shard key is used.
 
-The sharding and super sharding key properties are arrays of values.
-Array key values may be of type String (mapping to VARCHAR2 sharding
-keys), Number (NUMBER), Date (DATE), or Buffer (RAW). Multiple types may
-be used in each array. Sharding keys of TIMESTAMP type are not supported
-by node-oracledb.
+The sharding and super sharding key properties are arrays of values, that is
+multiple values can be used. Array key values may be of type String (mapping
+to VARCHAR2 sharding keys), Number (NUMBER), Date (DATE), or Buffer (RAW).
+Multiple types may be used in each array. Sharding keys of TIMESTAMP type
+are not supported by node-oracledb.
 
-For example, if sharding had been configured on a single column like:
+Examples to Connect to a Shard Based on the Sharding Key Type
+-------------------------------------------------------------
+
+The examples listed in this section show how to establish connections to a
+database shard based on the sharding key type.
+
+**VARCHAR2**
+
+If sharding has been configured on a single VARCHAR2 column:
 
 .. code-block:: sql
 
-  CREATE SHARDED TABLE customers (
-    cust_id NUMBER,
-    cust_name VARCHAR2(30),
-    class VARCHAR2(10) NOT NULL,
-    signup_date DATE,
-    cust_code RAW(20),
-    CONSTRAINT cust_name_pk PRIMARY KEY(cust_name))
-    PARTITION BY CONSISTENT HASH (cust_name)
-    PARTITIONS AUTO TABLESPACE SET ts1;
+    CREATE SHARDED TABLE customers (
+        cust_id NUMBER,
+        cust_name VARCHAR2(30),
+        class VARCHAR2(10) NOT NULL,
+        signup_date DATE,
+        cust_code RAW(20),
+        CONSTRAINT cust_name_pk PRIMARY KEY(cust_name))
+        PARTITION BY CONSISTENT HASH (cust_name)
+        PARTITIONS AUTO TABLESPACE SET ts1;
 
-then a shard can be directly connected to by passing a single sharding
+then a direct connection to a shard can be made by passing a single sharding
 key:
 
 .. code-block:: javascript
 
-  const connection = await oracledb.getConnection(
-    {
-      user          : "hr",
-      password      : mypw,  // mypw contains the hr schema password
-      connectString : "localhost/orclpdb1",
-      shardingKey   : ["SCOTT"]
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "localhost/orclpdb1",
+        shardingKey   : ["SCOTT"]
     });
 
-Similar code works for NUMBER keys.
+**NUMBER**
 
-The ``shardingKey`` and ``superShardingKey`` properties are arrays
-because multiple values can be used. If database shards had been
-partitioned with multiple keys such as with:
+If sharding has been configured on a single NUMBER column:
 
 .. code-block:: sql
 
-  CREATE SHARDED TABLE customers (
-    cust_id NUMBER NOT NULL,
-    cust_name VARCHAR2(30) NOT NULL,
-    class VARCHAR2(10) NOT NULL,
-    signup_date DATE,
-    cust_code RAW(20),
-    CONSTRAINT cust_pk PRIMARY KEY(cust_id, cust_name));
-    PARTITION BY CONSISTENT HASH (cust_id, cust_name)
-    PARTITIONS AUTO TABLESPACE SET ts1;
+    CREATE SHARDED TABLE customers (
+        cust_id NUMBER,
+        cust_name VARCHAR2(30),
+        class VARCHAR2(10) NOT NULL,
+        signup_date DATE,
+        cust_code RAW(20),
+        CONSTRAINT cust_id_pk PRIMARY KEY(cust_id))
+        PARTITION BY CONSISTENT HASH (cust_id)
+        PARTITIONS AUTO TABLESPACE SET ts1;
+
+then a direct connection to a shard can be made by passing a single sharding
+key:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "localhost/orclpdb1",
+        shardingKey   : [110]
+    });
+
+**Multiple Keys**
+
+If database shards have been partitioned with multiple keys such as:
+
+.. code-block:: sql
+
+    CREATE SHARDED TABLE customers (
+        cust_id NUMBER NOT NULL,
+        cust_name VARCHAR2(30) NOT NULL,
+        class VARCHAR2(10) NOT NULL,
+        signup_date DATE,
+        cust_code RAW(20),
+        CONSTRAINT cust_pk PRIMARY KEY(cust_id, cust_name));
+        PARTITION BY CONSISTENT HASH (cust_id, cust_name)
+        PARTITIONS AUTO TABLESPACE SET ts1;
 
 then direct connection to a shard can be established by specifying
 multiple keys, for example:
 
 .. code-block:: javascript
 
-  const connection = await oracledb.getConnection(
-    {
-      user          : "hr",
-      password      : mypw,  // mypw contains the hr schema password
-      connectString : "localhost/orclpdb1",
-      shardingKey   : [70, "SCOTT"]
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "localhost/orclpdb1",
+        shardingKey   : [70, "SCOTT"]
     });
 
-When the sharding key is a DATE column like:
+**DATE**
+
+If the sharding key is a DATE column:
 
 .. code-block:: sql
 
-  CREATE SHARDED TABLE customers (
-    cust_id NUMBER,
-    cust_name VARCHAR2(30),
-    class VARCHAR2(10) NOT NULL,
-    signup_date DATE,
-    cust_code RAW(20),
-    CONSTRAINT signup_date_pk PRIMARY KEY(signup_date))
-    PARTITION BY CONSISTENT HASH (signup_date)
-    PARTITIONS AUTO TABLESPACE SET ts1;
+    CREATE SHARDED TABLE customers (
+        cust_id NUMBER,
+        cust_name VARCHAR2(30),
+        class VARCHAR2(10) NOT NULL,
+        signup_date DATE,
+        cust_code RAW(20),
+        CONSTRAINT signup_date_pk PRIMARY KEY(signup_date))
+        PARTITION BY CONSISTENT HASH (signup_date)
+        PARTITIONS AUTO TABLESPACE SET ts1;
 
 then direct connection to a shard needs a Date key that is in the
 session time zone. For example if the session time zone is set to UTC
@@ -3270,68 +3615,71 @@ also be in UTC:
 
 .. code-block:: javascript
 
-  key = new Date ("2019-11-30Z");   // when session time zone is UTC
-  const connection = await oracledb.getConnection(
-    {
-      user          : "hr",
-      password      : mypw,  // mypw contains the hr schema password
-      connectString : "localhost/orclpdb1",
-      shardingKey   : [key]
+    key = new Date ("2019-11-30Z");   // when session time zone is UTC
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "localhost/orclpdb1",
+        shardingKey   : [key]
     });
 
-When the sharding key is a RAW column like:
+**RAW**
+
+If the sharding key is a RAW column:
 
 .. code-block:: sql
 
-  CREATE SHARDED TABLE customers (
-    cust_id NUMBER,
-    cust_name VARCHAR2(30),
-    class VARCHAR2(10) NOT NULL,
-    signup_date DATE,
-    cust_code RAW(20),
-    CONSTRAINT cust_code_pk PRIMARY KEY(cust_code))
-    PARTITION BY CONSISTENT HASH (cust_code)
-    PARTITIONS AUTO TABLESPACE SET ts1;
+    CREATE SHARDED TABLE customers (
+        cust_id NUMBER,
+        cust_name VARCHAR2(30),
+        class VARCHAR2(10) NOT NULL,
+        signup_date DATE,
+        cust_code RAW(20),
+        CONSTRAINT cust_code_pk PRIMARY KEY(cust_code))
+        PARTITION BY CONSISTENT HASH (cust_code)
+        PARTITIONS AUTO TABLESPACE SET ts1;
 
-then direct connection to a shard could be like:
+then direct connection to a shard could be established by:
 
 .. code-block:: javascript
 
-  const data = [0x00, 0x01, 0x02];
-  const key = Buffer.from(data);
-  const connection = await oracledb.getConnection(
-    {
-      user          : "hr",
-      password      : mypw,  // mypw contains the hr schema password
-      connectString : "localhost/orclpdb1",
-      shardingKey   : [key]
+    const data = [0x00, 0x01, 0x02];
+    const key = Buffer.from(data);
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "localhost/orclpdb1",
+        shardingKey   : [key]
     });
 
-If composite sharding was in use, for example:
+**Composite Sharding**
+
+If composite sharding (requires both sharding key and super sharding key) was
+in use, for example:
 
 .. code-block:: sql
 
-  CREATE SHARDED TABLE customers (
-    cust_id NUMBER NOT NULL,
-    cust_name VARCHAR2(30) NOT NULL,
-    class VARCHAR2(10) NOT NULL,
-    signup_date DATE,
-    cust_code RAW(20),
-    PARTITIONSET BY LIST (class)
-    PARTITION BY CONSISTENT HASH (cust_name)
-    PARTITIONS AUTO (PARTITIONSET gold VALUES ('gold') TABLESPACE SET ts1,
-    PARTITIONSET silver VALUES ('silver') TABLESPACE SET ts2);
+    CREATE SHARDED TABLE customers (
+        cust_id NUMBER NOT NULL,
+        cust_name VARCHAR2(30) NOT NULL,
+        class VARCHAR2(10) NOT NULL,
+        signup_date DATE,
+        cust_code RAW(20),
+        PARTITIONSET BY LIST (class)
+        PARTITION BY CONSISTENT HASH (cust_name)
+        PARTITIONS AUTO (PARTITIONSET gold VALUES ('gold') TABLESPACE SET ts1,
+        PARTITIONSET silver VALUES ('silver') TABLESPACE SET ts2);
+    )
 
 then direct connection to a shard can be established by specifying a
 super sharding key and sharding key, for example:
 
 .. code-block:: javascript
 
-  const connection = await oracledb.getConnection(
-    {
-      user            : "hr",
-      password        : mypw,  // mypw contains the hr schema password
-      connectString   : "localhost/orclpdb1",
-      superShardingKey: ["gold"]
-      shardingKey     : ["SCOTT"],
+    const connection = await oracledb.getConnection({
+        user            : "hr",
+        password        : mypw,  // mypw contains the hr schema password
+        connectString   : "localhost/orclpdb1",
+        superShardingKey: ["gold"]
+        shardingKey     : ["SCOTT"],
     });

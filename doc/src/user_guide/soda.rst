@@ -1,8 +1,8 @@
 .. _sodaoverview:
 
-************************************
-Simple Oracle Document Access (SODA)
-************************************
+*************************************************
+Working with Simple Oracle Document Access (SODA)
+*************************************************
 
 Oracle Database Simple Oracle Document Access (SODA) documents can be
 inserted, queried, and retrieved from Oracle Database through
@@ -10,6 +10,11 @@ NoSQL-style APIs. By default, documents are JSON strings but can be
 nearly any kind, including video, image, sound, and other binary
 content. Create, read, update and delete operations can be performed via
 document key lookups, or by query-by-example (QBE) pattern-matching.
+
+.. note::
+
+    In this release, SODA is only supported in the node-oracledb Thick mode.
+    See :ref:`enablingthick`.
 
 SODA internally uses a SQL schema to store documents but you do not need
 to know SQL or how the documents are stored. However, optional access
@@ -36,48 +41,48 @@ Node-oracledb SODA Objects
 
 Node-oracledb uses the following objects for SODA:
 
--  :ref:`SodaDatabase <sodadatabaseclass>`: The top level object for
-   node-oracledb SODA operations. This is acquired from an Oracle
-   Database connection. A ‘SODA database’ is an abstraction, allowing
-   access to SODA collections in that ‘SODA database’, which then allow
-   access to documents in those collections. A SODA database is
-   analogous to an Oracle Database user or schema. A collection is
-   analogous to a table. A document is analogous to a table row with one
-   column for a unique document key, a column for the document content,
-   and other columns for various document attributes.
+- :ref:`SodaDatabase <sodadatabaseclass>`: The top level object for
+  node-oracledb SODA operations. This is acquired from an Oracle
+  Database connection. A ‘SODA database’ is an abstraction, allowing
+  access to SODA collections in that ‘SODA database’, which then allow
+  access to documents in those collections. A SODA database is
+  analogous to an Oracle Database user or schema. A collection is
+  analogous to a table. A document is analogous to a table row with one
+  column for a unique document key, a column for the document content,
+  and other columns for various document attributes.
 
--  :ref:`SodaCollection <sodacollectionclass>`: Represents a collection of
-   SODA documents. By default, collections allow JSON documents to be
-   stored. This is recommended for most SODA users. However optional
-   metadata can set various details about a collection, such as its
-   database storage, whether it should track version and time stamp
-   document components, how such components are generated, and what
-   document types are supported. See :ref:`Collection
-   Metadata <sodaclientkeys>` for more information. By default, the
-   name of the Oracle Database table storing a collection is the same as
-   the collection name. Note: do not use SQL to drop the database table,
-   since SODA metadata will not be correctly removed. Use the
-   :meth:`sodaCollection.drop()` method instead.
+- :ref:`SodaCollection <sodacollectionclass>`: Represents a collection of
+  SODA documents. By default, collections allow JSON documents to be
+  stored. This is recommended for most SODA users. However optional
+  metadata can set various details about a collection, such as its
+  database storage, whether it should track version and time stamp
+  document components, how such components are generated, and what
+  document types are supported. See :ref:`Collection
+  Metadata <sodaclientkeys>` for more information. By default, the
+  name of the Oracle Database table storing a collection is the same as
+  the collection name. Note: do not use SQL to drop the database table,
+  since SODA metadata will not be correctly removed. Use the
+  :meth:`sodaCollection.drop()` method instead.
 
--  :ref:`SodaDocument <sodadocumentclass>`: Represents a document.
-   Typically the document content will be JSON. The document has
-   properties including the content, a key, timestamps, and the media
-   type. By default, document keys are automatically generated. See
-   :ref:`SodaDocument Class <sodadocumentclass>` for the forms of
-   SodaDocument.
+- :ref:`SodaDocument <sodadocumentclass>`: Represents a document.
+  Typically the document content will be JSON. The document has
+  properties including the content, a key, timestamps, and the media
+  type. By default, document keys are automatically generated. See
+  :ref:`SodaDocument Class <sodadocumentclass>` for the forms of
+  SodaDocument.
 
--  :ref:`SodaDocumentCursor <sodadocumentcursorclass>`: A cursor object
-   representing the result of the
-   :meth:`~sodaOperation.getCursor()` method from a
-   :meth:`sodaCollection.find()` operation. It can be iterated over to
-   access each SodaDocument.
+- :ref:`SodaDocumentCursor <sodadocumentcursorclass>`: A cursor object
+  representing the result of the
+  :meth:`~sodaOperation.getCursor()` method from a
+  :meth:`sodaCollection.find()` operation. It can be iterated over to
+  access each SodaDocument.
 
--  :ref:`SodaOperation <sodaoperationclass>`: An internal object used with
-   :meth:`sodaCollection.find()` to perform read and write operations
-   on documents. Chained methods set properties on a SodaOperation
-   object which is then used by a terminal method to find, count,
-   replace, or remove documents. This is an internal object that should
-   not be directly accessed.
+- :ref:`SodaOperation <sodaoperationclass>`: An internal object used with
+  :meth:`sodaCollection.find()` to perform read and write operations
+  on documents. Chained methods set properties on a SodaOperation
+  object which is then used by a terminal method to find, count,
+  replace, or remove documents. This is an internal object that should
+  not be directly accessed.
 
 Committing SODA Work
 ====================
@@ -87,7 +92,7 @@ The general recommendation for SODA applications is to turn on
 
 .. code-block:: javascript
 
-  oracledb.autoCommit = true;
+    oracledb.autoCommit = true;
 
 If your SODA document write operations are mostly independent of each
 other, this removes the overhead of application transaction management
@@ -109,13 +114,13 @@ any later commits from committing a partial transaction.
 
 Note:
 
--  SODA DDL operations do not commit an open transaction the way that
-   SQL always does for DDL statements.
--  When :attr:`oracledb.autoCommit` is *true*,
-   most SODA methods will issue a commit before successful return.
--  SODA provides optimistic locking, see :meth:`sodaOperation.version()`.
--  When mixing SODA and relational access, any commit or rollback on the
-   connection will affect all work.
+- SODA DDL operations do not commit an open transaction the way that
+  SQL always does for DDL statements.
+- When :attr:`oracledb.autoCommit` is *true*,
+  most SODA methods will issue a commit before successful return.
+- SODA provides optimistic locking, see :meth:`sodaOperation.version()`.
+- When mixing SODA and relational access, any commit or rollback on the
+  connection will affect all work.
 
 .. _sodarequirements:
 
@@ -132,7 +137,7 @@ role granted to them by a DBA:
 
 .. code-block:: sql
 
-  GRANT SODA_APP TO hr;
+    GRANT SODA_APP TO hr;
 
 The ``CREATE TABLE`` system privilege is also needed. Advanced users who
 are using Oracle sequences for keys will also need the
@@ -141,40 +146,40 @@ are using Oracle sequences for keys will also need the
 *Note*: if you are using Oracle Database 21 (or later) and you create
 *new* collections, then you need to do one of the following:
 
--  Use Oracle Client libraries 21 (or later).
+- Use Oracle Client libraries 21 (or later).
 
--  Or, explicitly use :ref:`collection metadata <sodaclientkeys>` when
-   creating collections and set the data storage type to BLOB, for
-   example::
+- Or, explicitly use :ref:`collection metadata <sodaclientkeys>` when
+  creating collections and set the data storage type to BLOB, for
+  example::
 
     {
-      "keyColumn":
-      {
-        "name":"ID"
-      },
-      "contentColumn":
-      {
-        "name": "JSON_DOCUMENT",
-        "sqlType": "BLOB"
-      },
-      "versionColumn":
-      {
-        "name": "VERSION",
-        "method": "UUID"
-      },
-      "lastModifiedColumn":
-      {
-        "name": "LAST_MODIFIED"
-      },
-      "creationTimeColumn":
-      {
-        "name": "CREATED_ON"
-      }
+        "keyColumn":
+        {
+            "name":"ID"
+        },
+        "contentColumn":
+        {
+            "name": "JSON_DOCUMENT",
+            "sqlType": "BLOB"
+        },
+        "versionColumn":
+        {
+            "name": "VERSION",
+            "method": "UUID"
+        },
+        "lastModifiedColumn":
+        {
+            "name": "LAST_MODIFIED"
+        },
+        "creationTimeColumn":
+        {
+            "name": "CREATED_ON"
+        }
     }
 
--  Or, set the database initialization parameter
-   `compatible <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID
-   -A2E90F08-BC9F-4688-A9D0-4A948DD3F7A9>`__ to 19 or lower.
+- Or, set the database initialization parameter
+  `compatible <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID
+  -A2E90F08-BC9F-4688-A9D0-4A948DD3F7A9>`__ to 19 or lower.
 
 Otherwise you may get errors such as *ORA-40842: unsupported value JSON
 in the metadata for the field sqlType* or *ORA-40659: Data type does not
@@ -201,20 +206,20 @@ Collections can be created like:
 
 .. code-block:: javascript
 
-  oracledb.autoCommit = true;
+    oracledb.autoCommit = true;
 
-  try {
-    const soda = connection.getSodaDatabase();
-    const collection = await soda.createCollection("mycollection");
-    const indexSpec = { "name": "CITY_IDX",
-                        "fields": [ {
-                            "path": "address.city",
-                            "datatype": "string",
-                            "order": "asc" } ] };
-    await collection.createIndex(indexSpec);
-  } catch(err) {
-    console.error(err);
-  }
+    try {
+        const soda = connection.getSodaDatabase();
+        const collection = await soda.createCollection("mycollection");
+        const indexSpec = { "name": "CITY_IDX",
+                            "fields": [ {
+                                "path": "address.city",
+                                "datatype": "string",
+                                "order": "asc" } ] };
+        await collection.createIndex(indexSpec);
+    } catch(err) {
+        console.error(err);
+    }
 
 This example creates a collection that, by default, allows JSON
 documents to be stored. A non-unique B-tree index is created on the
@@ -247,14 +252,14 @@ it is the object myContent:
 
 .. code-block:: javascript
 
-  try {
-    const myContent = {name: "Sally", address: {city: "Melbourne"}};
-    const newDoc = await collection.insertOneAndGet(myContent);
-    // a system generated key is created by default
-    console.log("The key of the new SODA document is: ", newDoc.key);
-  } catch(err) {
-    console.error(err);
-  }
+    try {
+        const myContent = {name: "Sally", address: {city: "Melbourne"}};
+        const newDoc = await collection.insertOneAndGet(myContent);
+        // a system generated key is created by default
+        console.log("The key of the new SODA document is: ", newDoc.key);
+    } catch(err) {
+        console.error(err);
+    }
 
 See :meth:`sodaCollection.insertOne()` for more
 information.
@@ -275,13 +280,13 @@ and pass its result to an insert or replace method, for example:
 
 .. code-block:: javascript
 
-  try {
-    myContent = {name: "Sally", address: {city: "Melbourne"}};
-    newDoc = soda.createDocument(myContent, {key: "123"});
-    await collection.insertOne(myContent);
-  } catch(err) {
-    console.error(err);
-  }
+    try {
+        myContent = {name: "Sally", address: {city: "Melbourne"}};
+        newDoc = soda.createDocument(myContent, {key: "123"});
+        await collection.insertOne(myContent);
+    } catch(err) {
+        console.error(err);
+    }
 
 Note: to use client-assigned keys, collections must be created with
 custom metadata, see :ref:`SODA Client-Assigned Keys and Collection
@@ -302,17 +307,17 @@ key for a document is “k1”, the document can be fetched like:
 
 .. code-block:: javascript
 
-  const myKey = "k1";
-  try {
-    const soda = connection.getSodaDatabase();
-    const collection = await soda.openCollection("mycollection");
-    const doc = await collection.find().key(myKey).getOne(); // A SodaDocument
-    const content = doc.getContent();  // A JavaScript object
-    console.log("Name: " + content.name); // Sally
-    console.log("Lives in: " + content.address.city);  // Melbourne
-  } catch(err) {
-    console.error(err);
-  }
+    const myKey = "k1";
+    try {
+        const soda = connection.getSodaDatabase();
+        const collection = await soda.openCollection("mycollection");
+        const doc = await collection.find().key(myKey).getOne(); // A SodaDocument
+        const content = doc.getContent();  // A JavaScript object
+        console.log("Name: " + content.name); // Sally
+        console.log("Lives in: " + content.address.city);  // Melbourne
+    } catch(err) {
+        console.error(err);
+    }
 
 The content of queried SodaDocument objects is only accessible via one
 of the accessor methods :meth:`~sodaDocument.getContent()`,
@@ -328,79 +333,79 @@ or :meth:`~sodaOperation.remove()` then applies to.
 
 Other examples of chained read and write operations include:
 
--  To see if a document exists:
+- To see if a document exists:
 
-   .. code-block:: javascript
+  .. code-block:: javascript
 
     c = await col.find().key("k1").getOne();
     if (c) then { . . .}
 
--  To return a cursor that can be iterated over to get documents with
-   keys “k1” and “k2”:
+- To return a cursor that can be iterated over to get documents with
+  keys “k1” and “k2”:
 
-   .. code-block:: javascript
+  .. code-block:: javascript
 
     docCursor = await collection.find().keys(["k1", "k2"]).getCursor();
     let myDocument;
     while ((myDocument = await docCursor.getNext())) {
-      console.log(myDocument.getContent());
+        console.log(myDocument.getContent());
     }
     docCursor.close();
 
--  To remove the documents matching the supplied keys:
+- To remove the documents matching the supplied keys:
 
-   .. code-block:: javascript
+  .. code-block:: javascript
 
     await collection.find().keys(["k1", "k2"])).remove();
 
--  To remove the document with the key ‘k1’ and version ‘v1’:
+- To remove the document with the key ‘k1’ and version ‘v1’:
 
-   .. code-block:: javascript
+  .. code-block:: javascript
 
     await collection.find().key("k1").version("v1").remove();
 
-   The version field is a value that automatically changes whenever the
-   document is updated. By default it is a hash of the document’s
-   content. Using :meth:`~sodaOperation.version()` allows
-   optimistic locking, so that the :meth:`~sodaCollection.find()`
-   terminal method (which is :meth:`~sodaOperation.remove()` in this example)
-   does not affect a document that someone else has already modified. If the
-   requested document version is not matched, then the terminal
-   operation will not impact any documents. The application can then
-   query to find the latest document version and apply any desired
-   change.
+  The version field is a value that automatically changes whenever the
+  document is updated. By default it is a hash of the document’s
+  content. Using :meth:`~sodaOperation.version()` allows
+  optimistic locking, so that the :meth:`~sodaCollection.find()`
+  terminal method (which is :meth:`~sodaOperation.remove()` in this example)
+  does not affect a document that someone else has already modified. If the
+  requested document version is not matched, then the terminal
+  operation will not impact any documents. The application can then
+  query to find the latest document version and apply any desired
+  change.
 
--  To update a document with a given key and version. The new document
-   content will be the ``newContent`` object:
+- To update a document with a given key and version. The new document
+  content will be the ``newContent`` object:
 
-   .. code-block:: javascript
+  .. code-block:: javascript
 
     newContent = {name: "Fred", address: {city: "Melbourne"}};
     await collection.find().key("k1").version("v1").replaceOne(newContent);
 
--  To find the new version of an updated document:
+- To find the new version of an updated document:
 
-   .. code-block:: javascript
+  .. code-block:: javascript
 
     const newContent = {name: "Fred", address: {city: "Melbourne"}};
     const updatedDoc = await collection.find().key("k1").version("v1").replaceOneAndGet(newContent);
     console.log('New version is: ' + updatedDoc.version);
 
--  To count all documents, no keys are needed:
+- To count all documents, no keys are needed:
 
-   .. code-block:: javascript
+  .. code-block:: javascript
 
     const n = collection.find().count();
 
--  When using :meth:`~sodaOperation.getCursor()` and
-   :meth:`~sodaOperation.getDocuments()` to return a
-   number of documents, performance of document retrieval can be tuned
-   by setting :attr:`oracledb.fetchArraySize` or
-   using the ``find()`` non-terminal
-   :meth:`~sodaOperation.fetchArraySize()`. For
-   example, to get all documents in a collection:
+- When using :meth:`~sodaOperation.getCursor()` and
+  :meth:`~sodaOperation.getDocuments()` to return a
+  number of documents, performance of document retrieval can be tuned
+  by setting :attr:`oracledb.fetchArraySize` or
+  using the ``find()`` non-terminal
+  :meth:`~sodaOperation.fetchArraySize()`. For
+  example, to get all documents in a collection:
 
-   .. code-block:: javascript
+  .. code-block:: javascript
 
     const documents = await coll.find().fetchArraySize(500).getDocuments();
 
@@ -445,87 +450,87 @@ CB09C4E3-BBB1-40DC-88A8-8417821B0FBE>`__
 
 Some QBE examples are:
 
--  To find the number of documents where ‘age’ is less than 30, the city
-   is San Francisco and the salary is greater than 500000:
+- To find the number of documents where ‘age’ is less than 30, the city
+  is San Francisco and the salary is greater than 500000:
 
-   .. code-block:: javascript
+  .. code-block:: javascript
 
     const n = await collection.find().filter({"age": {"$lt": 30},
                                               "address.city": "San Francisco",
                                               "salary": {"$gt": 500000}}).count();
     console.log(n);
 
--  To return all documents that have an age less than 30, an address in
-   San Francisco, and a salary greater than 500000:
+- To return all documents that have an age less than 30, an address in
+  San Francisco, and a salary greater than 500000:
 
-   .. code-block:: javascript
+  .. code-block:: javascript
 
     const docCursor = await collection.find().filter({"age": {"$lt": 30},
                                                       "address.city": "San Francisco",
                                                       "salary": {"$gt": 500000}}).getCursor();
     let myDocument;
     while ((myDocument = await docCursor.getNext())) {
-      console.log(myDocument.getContent());
+        console.log(myDocument.getContent());
     }
     docCursor.close();
 
--  Same as the previous example, but allowing for pagination of results
-   by only getting 10 documents:
+- Same as the previous example, but allowing for pagination of results
+  by only getting 10 documents:
 
-   .. code-block:: javascript
+  .. code-block:: javascript
 
     const docCursor = await collection.find().filter({"age": {"$lt": 30},
                                                       "address.city": "San Francisco",
                                                       "salary": {"$gt": 500000}}).skip(0).limit(10).getCursor();
 
-   To get the next 10 documents, the QBE could be repeated with the
-   ``skip()`` value set to 10.
+  To get the next 10 documents, the QBE could be repeated with the
+  ``skip()`` value set to 10.
 
--  To get JSON documents with an “age” attribute with values greater
-   than 60, and where either the name is “Max” or where tea or coffee is
-   drunk.
+- To get JSON documents with an “age” attribute with values greater
+  than 60, and where either the name is “Max” or where tea or coffee is
+  drunk.
 
-   .. code-block:: javascript
+  .. code-block:: javascript
 
     const filterSpec = {"$and": [{"age": {"$gt": 60} },
                           {"$or": [{"name": "Max"},
                                    {"drinks": {"$in": ["tea", "coffee"]}}]}]; };
     const docCursor = await collection.find().filter(filterSpec).getCursor();
 
--  The ``$orderby`` specification can be used to order any returned
-   documents:
+- The ``$orderby`` specification can be used to order any returned
+  documents:
 
-   .. code-block:: javascript
+  .. code-block:: javascript
 
     const filterSpec = {"$query": {"salary": {$between [10000, 20000]}},
                         "$orderby": {"age": -1, "name": 2}};
     const docCursor = await collection.find().filter(filterSpec).getCursor();
 
-   This ‘orderby abbreviated syntax’ returns documents within a
-   particular salary range, sorted by descending age and ascending name.
-   Sorting is done first by age and then by name, because the absolute
-   value of -1 is less than the absolute value of 2 - not because -1 is
-   less than 2, and not because field age appears before field name in
-   the ``$orderby`` object.
+  This ‘orderby abbreviated syntax’ returns documents within a
+  particular salary range, sorted by descending age and ascending name.
+  Sorting is done first by age and then by name, because the absolute
+  value of -1 is less than the absolute value of 2 - not because -1 is
+  less than 2, and not because field age appears before field name in
+  the ``$orderby`` object.
 
-   An alternate ``$orderby`` syntax allows specifying the data types and
-   maximum number of string characters to be used for comparison. See
-   `Overview of QBE Operator $orderby <https://www.oracle.com/pls/topic/
-   lookup?ctx=dblatest&id=GUID-3B182089-9A38-45DA-B7D7-8232E13C8F83>`__.
+  An alternate ``$orderby`` syntax allows specifying the data types and
+  maximum number of string characters to be used for comparison. See
+  `Overview of QBE Operator $orderby <https://www.oracle.com/pls/topic/
+  lookup?ctx=dblatest&id=GUID-3B182089-9A38-45DA-B7D7-8232E13C8F83>`__.
 
--  Documents that contain a
-   `GeoJSON <https://tools.ietf.org/html/rfc7946>`__ geometry can be
-   searched. For example if the collection contained documents of the
-   form:
+- Documents that contain a
+  `GeoJSON <https://tools.ietf.org/html/rfc7946>`__ geometry can be
+  searched. For example if the collection contained documents of the
+  form:
 
-   .. code-block:: javascript
+  .. code-block:: javascript
 
     {"location": {"type": "Point", "coordinates": [33.7243, -118.1579]}}
 
-   Then a Spatial QBE like the following could be used to find documents
-   within a 50 km range of a specified point:
+  Then a Spatial QBE like the following could be used to find documents
+  within a 50 km range of a specified point:
 
-   .. code-block:: javascript
+  .. code-block:: javascript
 
     const filterSpec = {"location" :
       {"$near" :
@@ -534,8 +539,8 @@ Some QBE examples are:
           "$unit"     : "KM"}}};
     const docCursor = await collection.find().filter(filterSpec).getCursor();
 
-   See `Overview of QBE Spatial Operators <https://www.oracle.com/pls/topic/
-   lookup?ctx=dblatest&id=GUID-12994E27-DA98-40C7-8D4F-84341106F8D9>`__.
+  See `Overview of QBE Spatial Operators <https://www.oracle.com/pls/topic/
+  lookup?ctx=dblatest&id=GUID-12994E27-DA98-40C7-8D4F-84341106F8D9>`__.
 
 .. _sodatextsearches:
 
@@ -548,7 +553,7 @@ To perform text searches through documents, a `JSON search index
 
 .. code-block:: javascript
 
-  await collection.createIndex({"name": "mySearchIdx"});
+    await collection.createIndex({"name": "mySearchIdx"});
 
 See `SODA Index Specifications (Reference) <https://www.oracle.com/pls/topic
 /lookup?ctx=dblatest&id=GUID-00C06941-6FFD-4CEB-81B6-9A7FBD577A2C>`__
@@ -560,7 +565,7 @@ dblatest&id=GUID-C4C426FC-FD23-4B2E-8367-FA5F83F3F23A>`__ operator:
 
 .. code-block:: javascript
 
-  let documents = await collection.find().filter({item : { $contains : "books"}}).getDocuments();
+    let documents = await collection.find().filter({item : { $contains : "books"}}).getDocuments();
 
 This example will find all documents that have an ``item`` field
 containing the string “books” (case-insensitive). For example, a
@@ -579,18 +584,18 @@ passing custom metadata when a collection is created with
 :meth:`sodaDatabase.createCollection()`.
 Metadata specifies things such as:
 
--  Storage details, such as the name of the table that stores the
-   collection and the names and data types of its columns.
+- Storage details, such as the name of the table that stores the
+  collection and the names and data types of its columns.
 
--  The presence or absence of columns for creation time stamp,
-   last-modified time stamp, and version.
+- The presence or absence of columns for creation time stamp,
+  last-modified time stamp, and version.
 
--  Whether the collection can store only JSON documents.
+- Whether the collection can store only JSON documents.
 
--  Methods of document key generation, and whether document keys are
-   client- assigned or generated automatically.
+- Methods of document key generation, and whether document keys are
+  client- assigned or generated automatically.
 
--  Methods of version generation.
+- Methods of version generation.
 
 Note that changing storage options should only be done with care.
 
@@ -605,73 +610,73 @@ components for each document: key, JSON content, version, last-modified
 timestamp, and a created-on timestamp. An example of default metadata
 with Oracle Database 19c is::
 
-  {
-     "schemaName": "mySchemaName",
-     "tableName": "myCollectionName",
-     "keyColumn":
-     {
-        "name": "ID",
-        "sqlType": "VARCHAR2",
-        "maxLength": 255,
-        "assignmentMethod": "UUID"
-     },
-     "contentColumn":
-     {
-        "name": "JSON_DOCUMENT",
-        "sqlType": "BLOB",
-        "compress": "NONE",
-        "cache": true,
-        "encrypt": "NONE",
-        "validation": "STANDARD"
-     },
-     "versionColumn":
-     {
-       "name": "VERSION",
-       "method": "SHA256"
-     },
-     "lastModifiedColumn":
-     {
-       "name": "LAST_MODIFIED"
-     },
-     "creationTimeColumn":
-     {
-        "name": "CREATED_ON"
-     },
-     "readOnly": false
-  }
+    {
+        "schemaName": "mySchemaName",
+        "tableName": "myCollectionName",
+        "keyColumn":
+        {
+            "name": "ID",
+            "sqlType": "VARCHAR2",
+            "maxLength": 255,
+            "assignmentMethod": "UUID"
+        },
+        "contentColumn":
+        {
+            "name": "JSON_DOCUMENT",
+            "sqlType": "BLOB",
+            "compress": "NONE",
+            "cache": true,
+            "encrypt": "NONE",
+            "validation": "STANDARD"
+        },
+        "versionColumn":
+        {
+            "name": "VERSION",
+            "method": "SHA256"
+        },
+        "lastModifiedColumn":
+        {
+            "name": "LAST_MODIFIED"
+        },
+        "creationTimeColumn":
+        {
+            "name": "CREATED_ON"
+        },
+        "readOnly": false
+    }
 
 With Oracle Database 21, default metadata might be like::
 
-  {
-     "schemaName": "mySchemaName",
-     "tableName": "myCollectionName",
-     "keyColumn":
-     {
-        "name": "ID",
-        "sqlType": "VARCHAR2",
-        "maxLength": 255,
-        "assignmentMethod": "UUID"
-     },
-     "contentColumn":
-     {
-        "name": "JSON_DOCUMENT",
-        "sqlType": "JSON",
-     },
-     "versionColumn":
-     {
-       "name": "VERSION",
-       "method": "UUID"
-     },
-     "lastModifiedColumn":
-     {
-       "name": "LAST_MODIFIED"
-     },
-     "creationTimeColumn":
-     {
-        "name": "CREATED_ON"
-     },
-     "readOnly": false
-  }
+    {
+        "schemaName": "mySchemaName",
+        "tableName": "myCollectionName",
+        "keyColumn":
+        {
+            "name": "ID",
+            "sqlType": "VARCHAR2",
+            "maxLength": 255,
+            "assignmentMethod": "UUID"
+        },
+        "contentColumn":
+        {
+            "name": "JSON_DOCUMENT",
+            "sqlType": "JSON",
+        },
+        "versionColumn":
+        {
+            "name": "VERSION",
+            "method": "UUID"
+        },
+        "lastModifiedColumn":
+        {
+            "name": "LAST_MODIFIED"
+        },
+        "creationTimeColumn":
+        {
+            "name": "CREATED_ON"
+        },
+        "readOnly": false
+    }
 
 See `Overview of SODA Document Collections <https://www.oracle.com/pls/topic
 /lookup?ctx=dblatest&id=GUID-C107707F-E135-493F-9112-98691C80D3E9>`__
@@ -689,50 +694,50 @@ is noted as client-assigned:
 
 .. code-block:: javascript
 
-  const mymetadata = { . . . };   // the default metadata shown above
+    const mymetadata = { . . . };   // the default metadata shown above
 
-  // update the keyColumn info
-  mymetadata.keyColumn =
-  {
+    // update the keyColumn info
+    mymetadata.keyColumn =
+    {
      "name": "ID",
      "sqlType": "NUMBER",
      "assignmentMethod": "CLIENT"
-  };
+    };
 
-  // Set schemaName to the connected user
-  mymetadata.schemaName = 'HR';
+    // Set schemaName to the connected user
+    mymetadata.schemaName = 'HR';
 
 This custom metadata is then used when creating the collection:
 
 .. code-block:: javascript
 
-  oracledb.autoCommit = true;
+    oracledb.autoCommit = true;
 
-  try {
-    const soda = connection.getSodaDatabase();
-    const collection = await soda.createCollection("mycollection", { metaData: mymetadata});
-    const indexSpec = { "name": "CITY_IDX",
-                        "fields": [ {
-                            "path": "address.city",
-                            "datatype": "string",
-                            "order": "asc" } ] };
-    await collection.createIndex(indexSpec);
-  } catch(err) {
-    console.error(err);
-  }
+    try {
+        const soda = connection.getSodaDatabase();
+        const collection = await soda.createCollection("mycollection", { metaData: mymetadata});
+        const indexSpec = { "name": "CITY_IDX",
+                            "fields": [ {
+                                "path": "address.city",
+                                "datatype": "string",
+                                "order": "asc" } ] };
+        await collection.createIndex(indexSpec);
+    } catch(err) {
+        console.error(err);
+    }
 
 To insert a document into the collection, a key must be supplied by the
 application. Note it is set to a string:
 
 .. code-block:: javascript
 
-  try {
-    const myContent = {name: "Sally", address: {city: "Melbourne"}};
-    const newDoc = soda.createDocument(myContent, {key: "123"});
-    await collection.insertOne(newDoc);
-  } catch(err) {
-    console.error(err);
-  }
+    try {
+        const myContent = {name: "Sally", address: {city: "Melbourne"}};
+        const newDoc = soda.createDocument(myContent, {key: "123"});
+        await collection.insertOne(newDoc);
+    } catch(err) {
+        console.error(err);
+    }
 
 .. _sodajsondataguide:
 
@@ -761,27 +766,27 @@ documents:
 
 .. code-block:: javascript
 
-  {"name": "max", "country": "ukraine"}
-  {"name": "chris", "country": "australia"}
-  {"name": "venkat" , "country": "india"}
-  {"name": "anthony", "country": "canada"}
+    {"name": "max", "country": "ukraine"}
+    {"name": "chris", "country": "australia"}
+    {"name": "venkat" , "country": "india"}
+    {"name": "anthony", "country": "canada"}
 
 Then the following code:
 
 .. code-block:: javascript
 
-  const await createIndex({"name": "myIndex"});  // dataguide is "on" by default
-  const doc = await sodaCollection.getDataGuide();
-  const dg = doc.getContentAsString();
-  console.log(dg);
+    const await createIndex({"name": "myIndex"});  // dataguide is "on" by default
+    const doc = await sodaCollection.getDataGuide();
+    const dg = doc.getContentAsString();
+    console.log(dg);
 
 Will display the data guide:
 
 .. code-block:: javascript
 
-  {"type":"object","properties":{
-    "name":{"type":"string","o:length":8,"o:preferred_column_name":"JSON_DOCUMENT$name"},
-    "country":{"type":"string","o:length":16,"o:preferred_column_name":"JSON_DOCUMENT$country"}}}
+    {"type":"object","properties":{
+     "name":{"type":"string","o:length":8,"o:preferred_column_name":"JSON_DOCUMENT$name"},
+     "country":{"type":"string","o:length":16,"o:preferred_column_name":"JSON_DOCUMENT$country"}}}
 
 This indicates that the collection documents are JSON objects, and
 currently have “name” and “country” fields. The types (“string” in this
@@ -817,12 +822,12 @@ creating a connection pool:
 
 .. code-block:: javascript
 
-  await oracledb.createPool({
-    user              : "hr",
-    password          : mypw,               // mypw contains the hr schema password
-    connectString     : "localhost/XEPDB1",
-    sodaMetaDataCache : true
-  });
+    await oracledb.createPool({
+        user              : "hr",
+        password          : mypw,               // mypw contains the hr schema password
+        connectString     : "localhost/FREEPDB1",
+        sodaMetaDataCache : true
+    });
 
 If the metadata of a collection is changed externally, the cache can get
 out of sync. If this happens, the cache can be cleared by calling
@@ -837,17 +842,17 @@ existing collection like:
 
 .. code-block:: javascript
 
-  const mymetadata = { . . . };
-  const collection = await soda.createCollection("mycollection", mymetadata);  // open existing or create new collection
-  await collection.insertOne(mycontent);
+    const mymetadata = { . . . };
+    const collection = await soda.createCollection("mycollection", mymetadata);  // open existing or create new collection
+    await collection.insertOne(mycontent);
 
 you may find it more efficient to use logic similar to:
 
 .. code-block:: javascript
 
-  let collection = await soda.openCollection("mycollection");
-  if (!collection) {
-     const mymetadata = { . . . };
-      collection = await soda.createCollection("mycollection", mymetadata);
-  }
-  await collection.insertOne(mycontent);
+    let collection = await soda.openCollection("mycollection");
+    if (!collection) {
+        const mymetadata = { . . . };
+        collection = await soda.createCollection("mycollection", mymetadata);
+    }
+    await collection.insertOne(mycontent);

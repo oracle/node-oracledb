@@ -32,7 +32,7 @@ The properties of a Lob object are listed below.
 .. attribute:: lob.pieceSize
 
     This read-only property is a number which specifies the number of bytes
-    (for BLOBs) or characters (for CLOBs and NCOBs) to read for each Stream
+    (for BLOBs) or characters (for CLOBs and NCLOBs) to read for each Stream
     ``data`` event of a queried LOB.
 
     The default value is :attr:`chunkSize <lob.chunkSize>`.
@@ -63,8 +63,9 @@ Lob Methods
 
 .. method:: lob.close()
 
-    **Note: this method is deprecated
-    and** :meth:`lob.destroy()` **should be used instead.**
+    .. deprecated:: 4.2
+
+        Use :meth:`lob.destroy()` instead.
 
     **Promise**::
 
@@ -156,6 +157,8 @@ Lob Methods
 
 .. method:: lob.getData()
 
+    .. versionadded:: 4.0
+
     **Promise**::
 
         promise = getData();
@@ -168,14 +171,12 @@ Lob Methods
     :attr:`~oracledb.fetchAsString`, :attr:`~oracledb.fetchAsBuffer`, or
     :ref:`fetchInfo <propexecfetchinfo>` instead of ``lob.getData()``.
 
-    Note it is an asynchronous method and requires a round-trip to the
+    Note that it is an asynchronous method and requires a round-trip to the
     database:
 
     .. code-block:: javascript
 
         const data = await myLob.getData();
-
-    .. versionadded:: 4.0
 
     **Callback**:
 

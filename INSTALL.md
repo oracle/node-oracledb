@@ -1,4 +1,4 @@
-# Installing node-oracledb Version 6.0.0-dev
+# Installing node-oracledb
 
 *Copyright (c) 2015, 2023, Oracle and/or its affiliates.*
 
@@ -21,21 +21,19 @@ under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 CONDITIONS OF ANY KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations under the License.
 
-## Note: The node-oracledb 5.5 installation instructions have moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html).
-
-## The new documentation layout facilitates better search and navigation of the content. For future node-oracledb releases, the latest updates will only be added to the new node-oracledb documentation.
+## Note: The node-oracledb installation instructions have moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html).
 
 ## <a name="overview"></a> 1. Node-oracledb Overview
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#overview](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#overview).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#overview)
 
 ## <a name="quickstart"></a> 2. Quick Start node-oracledb Installation
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#quickstart](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#quickstart).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#quickstart)
 
 ## <a name="instructions"></a> 3. Node-oracledb Installation Instructions
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#instructions](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#instructions).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#instructions)
 
 ### <a name="prerequisites"></a> 3.1 Prerequisites
 
@@ -131,8 +129,8 @@ The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/u
 
 ## <a name="installingoldvers"></a> <a name="installingv2"></a> <a name="installingv1"></a> 4. Installing Older Versions of Node-oracledb
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#installingoldvers](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#installingoldvers).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#installingoldvers)
 
 ## <a name="troubleshooting"></a> 5. Troubleshooting Node-oracledb Installation Problems
 
-The documentation has moved to [https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#troubleshooting](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#troubleshooting).
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#troubleshooting)

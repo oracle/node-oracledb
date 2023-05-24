@@ -21,7 +21,7 @@ sys.path.append(os.path.abspath("_ext"))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ["table_with_summary", "oracle_deprecated"]
+extensions = ["table_with_summary", "oracle_desupported", 'sphinx_rtd_theme']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['.templates']
@@ -34,7 +34,7 @@ root_doc = master_doc = 'index'
 
 # General substitutions.
 project = 'node-oracledb'
-copyright = u'Copyright (c) 2015, 2022, Oracle and/or its affiliates.'
+copyright = u'Copyright (c) 2015, 2023, Oracle and/or its affiliates.'
 author = 'Oracle'
 
 # The default replacements for |version| and |release|, also used in various
@@ -45,8 +45,8 @@ author = 'Oracle'
 # from the other)
 #
 # The short X.Y version.
-version = '5.5'
-release = '5.5.0'
+version = '6.0'
+release = '6.0.0'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:

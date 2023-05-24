@@ -1,8 +1,8 @@
 .. _transactionmgt:
 
-**********************
-Transaction Management
-**********************
+*********************
+Managing Transactions
+*********************
 
 By default, `DML <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
 GUID-2E008D4A-F6FD-4F34-9071-7E10419CA24D>`__ statements like INSERT, UPDATE

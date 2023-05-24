@@ -1,8 +1,8 @@
 .. _aq:
 
-****************************
-Oracle Advanced Queuing (AQ)
-****************************
+**********************************
+Using Oracle Advanced Queuing (AQ)
+**********************************
 
 Oracle Advanced Queuing allows applications to use producer-consumer
 message passing. Queuing is highly configurable and scalable, providing
@@ -14,6 +14,11 @@ languages, allowing different applications to communicate. For more
 details about AQ and its options, refer to the `Oracle Advanced Queuing
 User’s Guide <https://www.oracle.com/pls/topic/lookup?ctx=
 dblatest&id=ADQUE>`__.
+
+.. note::
+
+    In this release, Oracle AQ is only supported in node-oracledb Thick mode.
+    See :ref:`enablingthick`.
 
 Node-oracledb APIs for AQ were introduced in node-oracledb 4.0. With
 earlier versions, use AQ’s PL/SQL interface.
@@ -37,11 +42,11 @@ queues. Connect in SQL*Plus as SYSDBA and run:
 
 .. code-block:: sql
 
-   CREATE USER demoqueue IDENTIFIED BY &password;
-   ALTER USER demoqueue DEFAULT TABLESPACE USERS QUOTA UNLIMITED ON USERS;
-   GRANT CONNECT, RESOURCE TO demoqueue;
-   GRANT AQ_ADMINISTRATOR_ROLE, AQ_USER_ROLE TO demoqueue;
-   GRANT EXECUTE ON DBMS_AQ TO demoqueue;
+    CREATE USER demoqueue IDENTIFIED BY &password;
+    ALTER USER demoqueue DEFAULT TABLESPACE USERS QUOTA UNLIMITED ON USERS;
+    GRANT CONNECT, RESOURCE TO demoqueue;
+    GRANT AQ_ADMINISTRATOR_ROLE, AQ_USER_ROLE TO demoqueue;
+    GRANT EXECUTE ON DBMS_AQ TO demoqueue;
 
 When you have finished testing, remove the DEMOQUEUE schema.
 
@@ -55,29 +60,29 @@ new DEMOQUEUE user and run:
 
 .. code-block:: sql
 
-   -- Create and start a queue
-   BEGIN
-     DBMS_AQADM.CREATE_QUEUE_TABLE(
-       QUEUE_TABLE        =>  'DEMOQUEUE.DEMO_RAW_QUEUE_TAB',
-       QUEUE_PAYLOAD_TYPE =>  'RAW');
+    -- Create and start a queue
+    BEGIN
+        DBMS_AQADM.CREATE_QUEUE_TABLE(
+            QUEUE_TABLE        =>  'DEMOQUEUE.DEMO_RAW_QUEUE_TAB',
+            QUEUE_PAYLOAD_TYPE =>  'RAW');
 
-     DBMS_AQADM.CREATE_QUEUE(
-       QUEUE_NAME         =>  'DEMOQUEUE.DEMO_RAW_QUEUE',
-       QUEUE_TABLE        =>  'DEMOQUEUE.DEMO_RAW_QUEUE_TAB');
+        DBMS_AQADM.CREATE_QUEUE(
+            QUEUE_NAME         =>  'DEMOQUEUE.DEMO_RAW_QUEUE',
+            QUEUE_TABLE        =>  'DEMOQUEUE.DEMO_RAW_QUEUE_TAB');
 
-     DBMS_AQADM.START_QUEUE(
-       QUEUE_NAME         => 'DEMOQUEUE.DEMO_RAW_QUEUE');
-   END;
-   /
+        DBMS_AQADM.START_QUEUE(
+            QUEUE_NAME         => 'DEMOQUEUE.DEMO_RAW_QUEUE');
+    END;
+    /
 
 To enqueue a single, simple message, run:
 
 .. code-block:: javascript
 
-   const queueName = "DEMO_RAW_QUEUE";
-   const queue = await connection.getQueue(queueName);
-   await queue.enqOne("This is my message");
-   await connection.commit();
+    const queueName = "DEMO_RAW_QUEUE";
+    const queue = await connection.getQueue(queueName);
+    await queue.enqOne("This is my message");
+    await connection.commit();
 
 Messages can be passed directly to ``enqOne()`` as shown above.
 Alternatively they can be the ``payload`` property of a JavaScript
@@ -88,11 +93,11 @@ To dequeue a message, run:
 
 .. code-block:: javascript
 
-   const queueName = "DEMO_RAW_QUEUE";
-   const queue = await connection.getQueue(queueName);
-   const msg = await queue.deqOne();
-   await connection.commit();
-   console.log(msg.payload.toString());
+    const queueName = "DEMO_RAW_QUEUE";
+    const queue = await connection.getQueue(queueName);
+    const msg = await queue.deqOne();
+    await connection.commit();
+    console.log(msg.payload.toString());
 
 By default, ``deqOne()`` will wait until a message is available.
 
@@ -118,28 +123,28 @@ To create a payload type and to start a queue, connect as the new
 
 .. code-block:: sql
 
-   -- For the data we want to queue
-   CREATE OR REPLACE TYPE USER_ADDRESS_TYPE AS OBJECT (
-      NAME        VARCHAR2(10),
-      ADDRESS     VARCHAR2(50)
-   );
-   /
+    -- For the data we want to queue
+    CREATE OR REPLACE TYPE USER_ADDRESS_TYPE AS OBJECT (
+        NAME        VARCHAR2(10),
+        ADDRESS     VARCHAR2(50)
+    );
+    /
 
-   -- Create and start a queue
-   BEGIN
-    DBMS_AQADM.CREATE_QUEUE_TABLE(
-      QUEUE_TABLE        =>  'DEMOQUEUE.ADDR_QUEUE_TAB',
-      QUEUE_PAYLOAD_TYPE =>  'DEMOQUEUE.USER_ADDRESS_TYPE');
+    -- Create and start a queue
+    BEGIN
+        DBMS_AQADM.CREATE_QUEUE_TABLE(
+            QUEUE_TABLE        =>  'DEMOQUEUE.ADDR_QUEUE_TAB',
+            QUEUE_PAYLOAD_TYPE =>  'DEMOQUEUE.USER_ADDRESS_TYPE');
 
-    DBMS_AQADM.CREATE_QUEUE(
-      QUEUE_NAME         =>  'DEMOQUEUE.ADDR_QUEUE',
-      QUEUE_TABLE        =>  'DEMOQUEUE.ADDR_QUEUE_TAB');
+        DBMS_AQADM.CREATE_QUEUE(
+            QUEUE_NAME         =>  'DEMOQUEUE.ADDR_QUEUE',
+            QUEUE_TABLE        =>  'DEMOQUEUE.ADDR_QUEUE_TAB');
 
-    DBMS_AQADM.START_QUEUE(
-      QUEUE_NAME         => 'DEMOQUEUE.ADDR_QUEUE',
-      ENQUEUE            => TRUE);
-   END;
-   /
+        DBMS_AQADM.START_QUEUE(
+            QUEUE_NAME         => 'DEMOQUEUE.ADDR_QUEUE',
+            ENQUEUE            => TRUE);
+    END;
+    /
 
 In the :ref:`previous section <aqrawexample>` the ``QUEUE_PAYLOAD_TYPE``
 was ‘RAW’ but here the Oracle Database object type name
@@ -149,8 +154,8 @@ In node-oracledb, a queue is initialized for that type:
 
 .. code-block:: javascript
 
-   const queueName = "ADDR_QUEUE";
-   const queue = await connection.getQueue(queueName, {payloadType: "DEMOQUEUE.USER_ADDRESS_TYPE"});
+    const queueName = "ADDR_QUEUE";
+    const queue = await connection.getQueue(queueName, {payloadType: "DEMOQUEUE.USER_ADDRESS_TYPE"});
 
 For efficiency, it is recommended to use a fully qualified name for the
 type.
@@ -159,22 +164,22 @@ A :ref:`DbObject <dbobjectclass>` for the message is created and queued:
 
 .. code-block:: javascript
 
-   const message = new queue.payloadTypeClass(
-     {
-       NAME: "scott",
-       ADDRESS: "The Kennel"
-     }
-   );
-   await queue.enqOne(message);
-   await connection.commit();
+    const message = new queue.payloadTypeClass(
+        {
+            NAME: "scott",
+            ADDRESS: "The Kennel"
+        }
+    );
+    await queue.enqOne(message);
+    await connection.commit();
 
 Dequeuing objects is done with:
 
 .. code-block:: javascript
 
-   const queue = await connection.getQueue(queueName, {payloadType: "DEMOQUEUE.USER_ADDRESS_TYPE"});
-   const msg = await queue.deqOne();
-   await connection.commit();
+    const queue = await connection.getQueue(queueName, {payloadType: "DEMOQUEUE.USER_ADDRESS_TYPE"});
+    const msg = await queue.deqOne();
+    await connection.commit();
 
 By default, ``deqOne()`` will wait until a message is available.
 
@@ -182,8 +187,8 @@ The message can be printed:
 
 .. code-block:: javascript
 
-   const o = msg.payload;
-   console.log(o);
+    const o = msg.payload;
+    console.log(o);
 
 See `examples/aqobject.js <https://github.com/oracle/node-oracledb/tree/main/
 examples/aqobject.js>`__ for a runnable example.
@@ -207,15 +212,15 @@ a message after five seconds if it has not been dequeued:
 
 .. code-block:: javascript
 
-   const message = {
+    const message = {
         expiration: 5,
         payload: "This is my message"
-   };
+    };
 
-   const queueName = "DEMO_RAW_QUEUE";
-   const queue = await connection.getQueue(queueName);
-   await queue.enqOne(message);
-   await connection.commit();
+    const queueName = "DEMO_RAW_QUEUE";
+    const queue = await connection.getQueue(queueName);
+    await queue.enqOne(message);
+    await connection.commit();
 
 For RAW queues the ``payload`` value can be a String or Buffer. For
 object queues ``payload`` can be a :ref:`DbObject <dbobjectclass>` object.
@@ -226,21 +231,21 @@ message buffered, and not persistent:
 
 .. code-block:: javascript
 
-   const queueName = "DEMO_RAW_QUEUE";
-   const queue = await connection.getQueue(queueName);
-   queue.enqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_BUFFERED;
-   await queue.enqOne(message);
-   await connection.commit();
+    const queueName = "DEMO_RAW_QUEUE";
+    const queue = await connection.getQueue(queueName);
+    queue.enqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_BUFFERED;
+    await queue.enqOne(message);
+    await connection.commit();
 
 To send a message immediately without requiring a commit, you can change
 the queue’s message visibility:
 
 .. code-block:: javascript
 
-   const queueName = "DEMO_RAW_QUEUE";
-   const queue = await connection.getQueue(queueName);
-   queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
-   await queue.enqOne(message);
+    const queueName = "DEMO_RAW_QUEUE";
+    const queue = await connection.getQueue(queueName);
+    queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    await queue.enqOne(message);
 
 To change the queue behavior when dequeuing, alter the
 :attr:`~aqQueue.deqOptions` attributes. For example, to change
@@ -250,20 +255,20 @@ empty:
 
 .. code-block:: javascript
 
-   const queueName = "DEMO_RAW_QUEUE";
-   const queue = await connection.getQueue(queueName);
-   queue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
-   queue.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
-   await msg = queue.deqOne();
+    const queueName = "DEMO_RAW_QUEUE";
+    const queue = await connection.getQueue(queueName);
+    queue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
+    await msg = queue.deqOne();
 
 To change multiple properties at once, you can also use syntax like::
 
-   Object.assign(queue.deqOptions,
-                 {
-                   mode: oracledb.AQ_DEQ_MODE_BROWSE,
-                   visibility: oracledb.AQ_VISIBILITY_IMMEDIATE,
-                   wait: 10
-                 });
+    Object.assign(queue.deqOptions,
+                {
+                    mode: oracledb.AQ_DEQ_MODE_BROWSE,
+                    visibility: oracledb.AQ_VISIBILITY_IMMEDIATE,
+                    wait: 10
+                });
 
 See `examples/aqoptions.js <https://github.com/oracle/node-oracledb/tree/
 main/examples/aqoptions.js>`__ for a runnable example.
@@ -281,16 +286,16 @@ array of messages:
 
 .. code-block:: javascript
 
-   const queueName = "DEMO_RAW_QUEUE";
-   const queue = await connection.getQueue(queueName);
-   const messages = [
-       "Message 1",
-       "Message 2",
-       "Message 3",
-       "Message 4"
-   ];
-   await queue.enqMany(messages);
-   await connection.commit();
+    const queueName = "DEMO_RAW_QUEUE";
+    const queue = await connection.getQueue(queueName);
+    const messages = [
+        "Message 1",
+        "Message 2",
+        "Message 3",
+        "Message 4"
+    ];
+    await queue.enqMany(messages);
+    await connection.commit();
 
 Warning: see the advisory note in :meth:`~aqQueue.enqMany()` documentation.
 
@@ -302,13 +307,13 @@ more messages up to the limit will be dequeued:
 
 .. code-block:: javascript
 
-   const queue = await connection.getQueue(queueName);
-   const messages = await queue.deqMany(5);
-   console.log("Dequeued " + messages.length + " messages");
-   for (const msg of messages) {
-     console.log(msg.payload.toString());
-   }
-   await connection.commit();
+    const queue = await connection.getQueue(queueName);
+    const messages = await queue.deqMany(5);
+    console.log("Dequeued " + messages.length + " messages");
+    for (const msg of messages) {
+        console.log(msg.payload.toString());
+    }
+    await connection.commit();
 
 By default, ``deqMany()`` will wait until a message is available.
 
@@ -334,24 +339,24 @@ For example:
 
 .. code-block:: javascript
 
-   const queueName = "DEMO_RAW_QUEUE";
+    const queueName = "DEMO_RAW_QUEUE";
 
-   const subscrOptions = {
-     namespace: oracledb.SUBSCR_NAMESPACE_AQ,
-     callback: ProcessAqMessages
-   };
+    const subscrOptions = {
+        namespace: oracledb.SUBSCR_NAMESPACE_AQ,
+        callback: ProcessAqMessages
+    };
 
-   async function ProcessAqMessages() {
-     const connection = await oracledb.getConnection();  // get connection from a pool
-     const queue = await connection.getQueue(queueName);
-     const msg = await queue.deqOne();
-     console.log(msg.payload.toString()
-     await connection.close();
-   }
+    async function ProcessAqMessages() {
+        const connection = await oracledb.getConnection();  // get connection from a pool
+        const queue = await connection.getQueue(queueName);
+        const msg = await queue.deqOne();
+        console.log(msg.payload.toString()
+        await connection.close();
+    }
 
-   const connection = await oracledb.getConnection();  // get connection from a pool
-   await connection.subscribe(queueName, subscrOptions);
-   await connection.close();
+    const connection = await oracledb.getConnection();  // get connection from a pool
+    await connection.subscribe(queueName, subscrOptions);
+    await connection.close();
 
 See :ref:`Continuous Query Notification (CQN) <cqn>` for more information
 about subscriptions and notifications.
@@ -383,16 +388,16 @@ designated target of a particular message.
 
 For example, to enqueue a message meant for “payroll” recipients::
 
-   await queue.enqOne({
-     payload: "Message 1",
-     recipients: [ "payroll" ]
-   });
+    await queue.enqOne({
+        payload: "Message 1",
+        recipients: [ "payroll" ]
+    });
 
 Later, when dequeuing messages, the “payroll” recipient can be set using
 the ``consumerName`` property to get the message::
 
-   Object.assign(
-     queue.deqOptions,
-     { consumerName: "payroll" }
-   );
-   const msg = await queue.deqOne();
+    Object.assign(
+        queue.deqOptions,
+        { consumerName: "payroll" }
+    );
+    const msg = await queue.deqOne();

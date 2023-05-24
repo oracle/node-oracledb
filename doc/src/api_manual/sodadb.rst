@@ -9,6 +9,11 @@ operations. A ‘SODA database’ is an abstraction, allowing access to SODA
 collections in that ‘SODA database’, which then allow access to
 documents in those collections.
 
+.. note::
+
+    In this release, SODA is only supported in the node-oracledb Thick mode.
+    See :ref:`enablingthick`.
+
 SODA can be used with Oracle Database 18.3 and above, when node-oracledb
 uses Oracle Client 18.5 or Oracle Client 19.3, or later. The SODA bulk
 insert methods :meth:`sodaCollection.insertMany()`
@@ -31,6 +36,8 @@ SodaDatabase Methods
 ====================
 
 .. method:: sodaDatabase.createCollection()
+
+    .. versionadded:: 3.0
 
     **Promise**::
 
@@ -60,8 +67,6 @@ SodaDatabase Methods
 
     Performance of repeated ``createCollection()`` calls can be improved by
     enabling the SODA :ref:`metadata cache <sodamdcache>`.
-
-    .. versionadded:: 3.0
 
     The parameters of the ``sodaDatabase.createCollection()`` method are:
 
@@ -144,6 +149,8 @@ SodaDatabase Methods
 
 .. method:: sodaDatabase.createDocument()
 
+    .. versionadded:: 3.0
+
     ::
 
         sodaDatabase.createDocument(String content [, Object options])
@@ -160,8 +167,6 @@ SodaDatabase Methods
     You only need to call ``createDocument()`` if your collection requires
     client-assigned keys or has non-JSON content, otherwise you can pass
     your JSON content directly to the SODA insert and replace methods.
-
-    .. versionadded:: 3.0
 
     **Example**
 
@@ -223,6 +228,8 @@ SodaDatabase Methods
 
 .. method:: sodaDatabase.getCollectionNames()
 
+    .. versionadded:: 3.0
+
     **Promise**::
 
         promise = getCollectionNames([Object options]);
@@ -231,8 +238,6 @@ SodaDatabase Methods
 
     If :attr:`oracledb.autoCommit` is *true*, and ``getCollectionNames()``
     succeeds, then any open transaction on the connection is committed.
-
-    .. versionadded:: 3.0
 
     The parameters of the ``sodaDatabase.getCollectionNames()`` method are:
 
@@ -305,6 +310,8 @@ SodaDatabase Methods
 
 .. method:: sodaDatabase.openCollection()
 
+    .. versionadded:: 3.0
+
     **Promise**::
 
         promise = openCollection(String collectionName);
@@ -320,8 +327,6 @@ SodaDatabase Methods
 
     Performance of repeated ``openCollection()`` calls can be improved by
     enabling the SODA :ref:`metadata cache <sodamdcache>`.
-
-    .. versionadded:: 3.0
 
     The parameters of the ``sodaDatabase.openCollection()`` method are:
 

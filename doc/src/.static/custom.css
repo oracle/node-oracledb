@@ -9,14 +9,35 @@
     font-size: 11pt;
 }
 
-/*Added code to remove the line spacing between bullets in a list */
+/*Added code to remove the line spacing between bullet lists in a table */
 .wy-table-responsive table td ul{
     line-height: 0pt;
     margin-bottom: 0pt;
 }
 
-/* Added code to remove the extra white line displayed at the bottom of the code-block */
+/* Added code to remove the extra white line displayed at the bottom of the code-block in a table */
 .wy-table-responsive table td div{
     line-height: 0pt;
     margin-bottom: 0pt;
+}
+
+/* Added code to wrap the code-blocks that are used in a table*/
+.wy-table-responsive table td pre{
+    white-space: pre-wrap !important;
+}
+
+/* Added code to add white space between the figure and the figure caption */
+figcaption{
+    margin-top: 10pt;
+}
+
+/* Added code to add white space between the bullet point and text after bullet */
+li p{
+    padding-left: 5pt;
+}
+
+/* Added code to make the deprecated, versionadded, versionmodified, and desupported directives bold and font smaller */
+.versionmodified{
+    font-size: 11pt;
+    font-weight: bold;
 }

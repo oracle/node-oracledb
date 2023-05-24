@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2022, Oracle and/or its affiliates.
+# Copyright (c) 2023, Oracle and/or its affiliates.
 #
 # This software is dual-licensed to you under the Universal Permissive License
 # (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl and Apache License
@@ -23,10 +23,10 @@
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-# oracle_deprecated.py
+# oracle_desupported.py
 #
-# Overrides the 'deprecated' directive so that it can a componment name can be
-# used in conjunction with the version.
+# Defines a directive (desupported) which describes when the feature was
+# removed. Similar to the deprecated directive.
 #------------------------------------------------------------------------------
 
 
@@ -34,7 +34,7 @@ from docutils import nodes
 from docutils.parsers.rst import Directive
 from sphinx import addnodes
 
-class DriverDeprecated(Directive):
+class DriverDesupported(Directive):
     has_content = True
     required_arguments = 1
     optional_arguments = 0
@@ -45,7 +45,7 @@ class DriverDeprecated(Directive):
         node.document = self.state.document
         node['type'] = self.name
         node['version'] = self.arguments[0]
-        text = 'Deprecated since {}.'.format(self.arguments[0])
+        text = 'Desupported in version {}.'.format(self.arguments[0])
         classes = ['versionmodified', 'deprecated']
         para = nodes.paragraph('', '',
                                nodes.inline('', text, classes=classes),
@@ -55,7 +55,7 @@ class DriverDeprecated(Directive):
         return ret
 
 def setup(app):
-    app.add_directive("deprecated", DriverDeprecated, override=True)
+    app.add_directive("desupported", DriverDesupported, override=True)
 
     return {
         'version': '0.1',

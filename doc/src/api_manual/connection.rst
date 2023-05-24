@@ -30,13 +30,15 @@ The properties of a *Connection* object are listed below.
 
 .. attribute:: connection.callTimeout
 
-    Sets the maximum number of milliseconds that each underlying
-    :ref:`round-trip <roundtrips>` between node-oracledb and Oracle Database
-    may take on a connection. Each node-oracledb method or operation may
-    make zero or more round-trips. The ``callTimeout`` value applies to each
-    round-trip individually, not to the sum of all round-trips. Time spent
-    processing in node-oracledb before or after the completion of each
-    round-trip is not counted.
+    .. versionadded:: 3.0
+
+    This read/write property is a number which sets the maximum number of
+    milliseconds that each underlying :ref:`round-trip <roundtrips>` between
+    node-oracledb and Oracle Database may take on a connection. Each
+    node-oracledb method or operation may make zero or more round-trips. The
+    ``callTimeout`` value applies to each round-trip individually, not to the
+    sum of all round-trips. Time spent processing in node-oracledb before or
+    after the completion of each round-trip is not counted.
 
     The ``callTimeout`` setting has no effect when using IPC connections,
     that is, when node-oracledb is running on the same host as the Oracle
@@ -48,10 +50,8 @@ The properties of a *Connection* object are listed below.
 
     The default is 0, meaning that there is no timeout.
 
-    .. versionadded:: 3.0
-
-    An exception will occur if node-oracledb is not using Oracle client
-    library version 18.1 or later.
+    An exception will occur if node-oracledb Thick mode is not using Oracle
+    Client library version 18.1 or later.
 
 .. attribute:: connection.clientId
 
@@ -65,7 +65,14 @@ The properties of a *Connection* object are listed below.
     Displaying ``Connection.clientId`` will show a value of ``null``. See
     :ref:`End-to-end Tracing, Mid-tier Authentication, and Auditing <endtoend>`.
 
+    .. note::
+
+        This property can only be used in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
 .. attribute:: connection.clientInfo
+
+    .. versionadded:: 4.1
 
     This write-only property is a string that includes the client information
     for end-to-end application tracing.
@@ -73,11 +80,16 @@ The properties of a *Connection* object are listed below.
     Displaying ``Connection.clientInfo`` will show a value of ``null``. See
     :ref:`End-to-end Tracing, Mid-tier Authentication, and Auditing <endtoend>`.
 
-    .. versionadded:: 4.1
+    .. note::
+
+        This property can only be used in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
 
 .. attribute:: connection.currentSchema
 
-    This property is a string. After setting ``currentSchema``, SQL
+    .. versionadded:: 4.0
+
+    This read/write property is a string. After setting ``currentSchema``, SQL
     statements using unqualified references to schema objects will resolve to
     objects in the specified schema.
 
@@ -92,9 +104,9 @@ The properties of a *Connection* object are listed below.
     `ALTER SESSION SET CURRENT_SCHEMA <https://www.oracle.com/pls/topic/lookup?
     ctx=dblatest&id=GUID-DC7B8CDD-4F89-40CC-875F-F70F673711D4>`__.
 
-    .. versionadded:: 4.0
-
 .. attribute:: connection.dbOp
+
+    .. versionadded:: 4.1
 
     This write-only property is a string that includes the database operation
     information for end-to-end application tracing.
@@ -103,19 +115,17 @@ The properties of a *Connection* object are listed below.
     a value of ``null``. See :ref:`End-to-end Tracing, Mid-tier Authentication,
     and Auditing <endtoend>`.
 
-    .. versionadded:: 4.1
-
     It is available with Oracle 12c.
 
 .. attribute:: connection.ecId
+
+    .. versionadded:: 5.3
 
     This write-only property is a string that sets the execution context
     identifier.
 
     The value is available in the ``ECID`` column of the ``V$SESSION`` view.
     It is also shown in audit logs.
-
-    .. versionadded:: 5.3
 
 .. attribute:: connection.module
 
@@ -130,6 +140,8 @@ The properties of a *Connection* object are listed below.
 
 .. attribute:: connection.oracleServerVersion
 
+    .. versionadded:: 1.3
+
     This read-only property gives a numeric representation of the Oracle
     database version which is useful in comparisons. For version
     *a.b.c.d.e*, this property gives the number:
@@ -140,9 +152,9 @@ The properties of a *Connection* object are listed below.
     or later, client libraries. Otherwise it will show the base release such
     as 1800000000 instead of 1803000000.
 
-    .. versionadded:: 1.3
-
 .. attribute:: connection.oracleServerVersionString
+
+    .. versionadded:: 2.2
 
     This read-only property gives a string representation of the Oracle
     database version which is useful for display.
@@ -151,8 +163,6 @@ The properties of a *Connection* object are listed below.
     will only be accurate if node-oracledb is also using Oracle Database 18,
     or later, client libraries. Otherwise it will show the base release such
     as “18.0.0.0.0” instead of “18.3.0.0.0”.
-
-    .. versionadded:: 2.2
 
 .. attribute:: connection.stmtCacheSize
 
@@ -163,26 +173,31 @@ The properties of a *Connection* object are listed below.
 
 .. attribute:: connection.tag
 
-    This property is a string. Applications can set the tag property on
-    pooled connections to indicate the ‘session state’ that a connection has.
-    The tag will be retained when the connection is released to the pool. A
-    subsequent ``pool.getConnection()`` can request a connection that has a
+    .. versionadded:: 3.1
+
+    This read/write property is a string. Applications can set the tag property
+    on pooled connections to indicate the ‘session state’ that a connection
+    has. The tag will be retained when the connection is released to the pool.
+    A subsequent ``pool.getConnection()`` can request a connection that has a
     given :ref:`tag <getconnectiondbattrstag>`. It is up to the application
     to set any desired session state and set ``connection.tag`` prior to
     closing the connection.
 
     The tag property is not used for standalone connections.
 
-    When node-oracledb is using Oracle Client libraries 12.2 or later, the
-    tag must be a `multi-property tag <https://www.oracle.com/pls/topic/lookup?
-    ctx=dblatest&id=GUID-DFA21225-E83C-4177-A79A-B8BA29DC662C>`__
+    .. note::
+
+        This property can only be used in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
+    When node-oracledb Thick mode is using Oracle Client libraries 12.2 or
+    later, the tag must be a `multi-property tag <https://www.oracle.com/pls/
+    topic/lookup?ctx=dblatest&id=GUID-DFA21225-E83C-4177-A79A-B8BA29DC662C>`__
     with name=value pairs like “k1=v1;k2=v2”.
 
     An empty string represents not having a tag set.
 
     See :ref:`Connection Tagging and Session State <connpooltagging>`.
-
-    .. versionadded:: 3.1
 
     **Getting the tag**
 
@@ -217,20 +232,42 @@ The properties of a *Connection* object are listed below.
 
     To clear a connection’s tag, set ``connection.tag = ""``.
 
-.. attribute:: connection.tpcInternalName
+.. attribute:: connection.thin
 
-    This read/write attribute is a string that specifies the internal name
-    that is used by the connection when logging two-phase commit
-    transactions.
+    .. versionadded:: 6.0
+
+    This read-only attribute is a boolean that identifies the node-oracledb
+    mode in which the connection was established. If the value is *true*, then
+    it indicates that the connection was established in
+    :ref:`node-oracledb Thin mode <thinarch>`. If the value is *false*,
+    then it indicates that the connection was established in
+    :ref:`node-oracledb Thick mode <thickarch>`.
+
+    The default value is *true*.
+
+.. attribute:: connection.tpcInternalName
 
     .. versionadded:: 5.3
 
+    This read/write attribute is a string that specifies the internal name
+    that is used by the connection when logging two-phase commit transactions.
+
+    .. note::
+
+        This property can only be used in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
 .. attribute:: connection.tpcExternalName
+
+    .. versionadded:: 5.3
 
     This read/write attribute is a string that specifies the external name
     that is used by the connection when logging two-phase commit transactions.
 
-    .. versionadded:: 5.3
+    .. note::
+
+        This property can only be used in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
 
 .. _connectionmethods:
 
@@ -257,9 +294,16 @@ Connection Methods
     =GUID-42E939DC-EF37-49A0-B4F0-14158F0E55FD>`__ in a ``sqlnet.ora`` file,
     see :ref:`Optional Oracle Net Configuration <tnsadmin>`.
 
+    .. note::
+
+        Connections can receive out-of-band (OOB) break messages from the
+        Oracle Database only in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
     If you use use ``break()`` with :ref:`DRCP connections <drcp>`, it is
     currently recommended to drop the connection when releasing it back to
     the pool ``await connection.close({drop: true})``. See Oracle bug
+    29116892.
 
     **Callback**:
 
@@ -284,6 +328,8 @@ Connection Methods
 
 .. method:: connection.changePassword()
 
+    .. versionadded:: 2.2
+
     **Promise**::
 
         promise = changePassword(String user, String oldPassword, String newPassword);
@@ -295,8 +341,6 @@ Connection Methods
 
     See :ref:`Changing Passwords and Connecting with an Expired
     Password <changingpassword>`.
-
-    .. versionadded:: 2.2
 
     The parameters of the ``connection.changePassword()`` method are:
 
@@ -352,6 +396,8 @@ Connection Methods
 
 .. method:: connection.close()
 
+    .. versionadded:: 1.9
+
     **Promise**::
 
         promise = close([Object options]);
@@ -370,8 +416,6 @@ Connection Methods
     make the connection unusable, then ``close()`` will drop that connection
     from the connection pool so a future pooled ``getConnection()`` call
     that grows the pool will create a new, valid connection.
-
-    .. versionadded:: 1.9
 
     This method replaces the obsolete equivalent alias
     ``connection.release()`` which will be removed in a future version of
@@ -639,7 +683,7 @@ Connection Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 7 5 10 30
+        :widths: 10 10 20 30
         :summary: The first column displays the Node.js Type. The second
          column displays the Database type. The third column displays the
          Bind type value. The fourth column displays the notes.
@@ -788,6 +832,10 @@ Connection Methods
           - .. _propexecextendedmetadata:
 
             Overrides :attr:`oracledb.extendedMetaData`.
+
+            .. desupported:: 6.0
+
+            Extended metadata is now always returned.
         * - ``fetchArraySize``
           - Number
           - .. _propexecfetcharraysize:
@@ -822,6 +870,16 @@ Connection Methods
             Strings and Buffers created for LOB columns will generally be limited by Node.js and V8 memory restrictions.
 
             See :ref:`Query Result Type Mapping <typemap>` for more information on query type mapping.
+
+            .. deprecated:: 6.0
+              Use :ref:`fetchTypeHandler <fetchtypehandler>` functionality instead.
+        * - ``fetchTypeHandler``
+          - Function
+          - .. _propexecfetchtypehandler:
+
+            Overrides :attr:`oracledb.fetchTypeHandler`.
+
+            .. versionadded:: 6.0
         * - ``keepInStmtCache``
           - Boolean
           - .. _propexeckeepinstmtcache:
@@ -938,7 +996,7 @@ Connection Methods
             - ``fetchType``: One of the :ref:`Node-oracledb Type Constant <oracledbconstantsnodbtype>` values.
             - ``name``: The column name follows Oracle’s standard name-casing rules. It will commonly be uppercase, since most applications create tables using unquoted, case-insensitive names.
             - ``nullable``: Indicates whether ``NULL`` values are permitted for this column.
-            - ``precision``: Set only for ``oracledb.DB_TYPE_NUMBER``, ``oracledb.DB_TYPE_TIMESTAMP``, ``oracledb.DB_TYPE_TIMESTAMP_TZ`` and ``oracledb.DB_TYPE_TIMESTAMP_LTZ`` columns.
+            - ``precision``: Set only for ``oracledb.DB_TYPE_NUMBER``, ``oracledb.DB_TYPE_TIMESTAMP``, ``oracledb.DB_TYPE_TIMESTAMP_TZ``, and ``oracledb.DB_TYPE_TIMESTAMP_LTZ`` columns.
             - ``scale``: Set only for ``oracledb.DB_TYPE_NUMBER`` columns.
 
             For numeric columns: when ``precision`` is ``0``, then the column is simply a NUMBER. If ``precision`` is nonzero and ``scale`` is ``-127``, then the column is a FLOAT. Otherwise, it is a NUMBER(precision, scale).
@@ -979,6 +1037,8 @@ Connection Methods
 
 .. method:: connection.executeMany()
 
+    .. versionadded:: 2.2
+
     **Promise**::
 
         promise = executeMany(String sql, Array binds [, Object options]);
@@ -1004,8 +1064,6 @@ Connection Methods
 
     See :ref:`Batch Statement Execution and Bulk Loading <batchexecution>` for
     more information.
-
-    .. versionadded:: 2.2
 
     The parameters of the ``connection.executeMany()`` method are:
 
@@ -1224,6 +1282,8 @@ Connection Methods
 
 .. method:: connection.getDbObjectClass()
 
+    .. versionadded:: 4.0
+
     **Promise**::
 
         promise = getDbObjectClass(String className)
@@ -1240,8 +1300,6 @@ Connection Methods
     the updated type information.
 
     See :ref:`Oracle Database Objects and Collections <objects>`.
-
-    .. versionadded:: 4.0
 
     The parameters of the ``connection.getDbObjectClass()`` method are:
 
@@ -1373,6 +1431,8 @@ Connection Methods
 
 .. method:: connection.getSodaDatabase()
 
+    .. versionadded:: 3.0
+
     .. code-block:: javascript
 
         getSodaDatabase();
@@ -1382,6 +1442,11 @@ Connection Methods
     Returns a parent SodaDatabase object for use with Simple Oracle Document
     Access (SODA).
 
+    .. note::
+
+        This method is only supported in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
     SODA can be used with Oracle Database 18.3 and above, when node-oracledb
     uses Oracle Client 18.5 or Oracle Client 19.3, or later. The SODA bulk
     insert methods :meth:`sodaCollection.insertMany()` and
@@ -1390,9 +1455,9 @@ Connection Methods
     See :ref:`Simple Oracle Document Access (SODA) <sodaoverview>` for more
     information about using SODA in node-oracledb.
 
-    .. versionadded:: 3.0
-
 .. method:: connection.getStatementInfo()
+
+    .. versionadded:: 2.2
 
     **Promise**::
 
@@ -1415,8 +1480,6 @@ Connection Methods
     This improves performance if ``getStatementInfo()`` is repeatedly called
     with the same statement, or if the statement is used in an
     :meth:`connection.execute()` call or similar.
-
-    .. versionadded:: 2.2
 
     The parameters of the ``connection.getStatementInfo()`` method are:
 
@@ -1470,6 +1533,8 @@ Connection Methods
 
 .. method:: connection.isHealthy()
 
+    .. versionadded:: 5.4
+
     .. code-block:: javascript
 
         isHealthy()
@@ -1493,9 +1558,9 @@ Connection Methods
     health, use :meth:`connection.ping()` which performs a round-trip
     to the database.
 
-    .. versionadded:: 5.4
-
 .. method:: connection.ping()
+
+    .. versionadded:: 2.2
 
     **Promise**::
 
@@ -1515,8 +1580,6 @@ Connection Methods
 
     If ``ping()`` returns an error, the application should close the
     connection.
-
-    .. versionadded:: 2.2
 
     **Callback**:
 
@@ -1540,6 +1603,8 @@ Connection Methods
           - If ``ping()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
 .. method:: connection.queryStream()
+
+    .. versionadded:: 1.8
 
     ::
 
@@ -1571,8 +1636,6 @@ Connection Methods
 
     Support for Node.js version 8 Stream ``destroy()`` method was added in
     node-oracledb 2.1.
-
-    .. versionadded:: 1.8
 
     See :meth:`~connection.execute()`.
 
@@ -1608,12 +1671,19 @@ Connection Methods
 
 .. method:: connection.shutdown()
 
+    .. versionadded:: 5.0
+
     **Promise**::
 
         promise = shutdown([Number shutdownMode])
 
     Shuts down a database instance. This is the flexible version of
     :meth:`oracledb.shutdown()`, allowing more control over behavior.
+
+    .. note::
+
+        This method is only supported in node-oracledb Thick mode. See
+        :ref:`enablingthick`.
 
     This method must be called twice. The first call blocks new connections.
     SQL statements such as await ``ALTER DATABASE CLOSE NORMAL`` and
@@ -1629,8 +1699,6 @@ Connection Methods
     does not need to be called a second time.
 
     See :ref:`Database Start Up and Shut Down <startupshutdown>`.
-
-    .. versionadded:: 5.0
 
     The parameters of the ``connection.shutdown()`` method are:
 
@@ -1681,6 +1749,8 @@ Connection Methods
 
 .. method:: connection.subscribe()
 
+    .. versionadded:: 2.3
+
     **Promise**::
 
         promise = subscribe(String name, Object options);
@@ -1708,8 +1778,6 @@ Connection Methods
 
     See :ref:`Continuous Query Notification (CQN) <cqn>` and :ref:`Advanced Queuing
     Notifications <aqnotifications>` for more information.
-
-    .. versionadded:: 2.3
 
     AQ notifications were added in node-oracledb 4.0
 
@@ -1926,6 +1994,8 @@ Connection Methods
 
 .. method:: connection.startup()
 
+    .. versionadded:: 5.0
+
     **Promise**::
 
         promise = startup([Object options]);
@@ -1933,6 +2003,11 @@ Connection Methods
     Starts up a database instance. This is the flexible version of
     :meth:`oracledb.startup()`, allowing more control over
     behavior.
+
+    .. note::
+
+        This method is only supported in node-oracledb Thick mode. See
+        :ref:`enablingthick`.
 
     The connection must be a standalone connection, not a pooled connection.
 
@@ -1949,8 +2024,6 @@ Connection Methods
     ``oracledb.SYSDBA | oracledb.SYSPRELIM``.
 
     See :ref:`Database Start Up and Shut Down <startupshutdown>`.
-
-    .. versionadded:: 5.0
 
     The parameters of the ``connection.startup()`` method are:
 
@@ -2025,6 +2098,8 @@ Connection Methods
 
 .. method:: connection.tpcBegin()
 
+    .. versionadded:: 5.3
+
     **Promise**::
 
         promise = tpcBegin(Object xid [, Number flag [, Number transactionTimeout]]);
@@ -2035,7 +2110,10 @@ Connection Methods
 
     See :ref:`Two-Phase Commits (TPC) <twopc>`.
 
-    .. versionadded:: 5.3
+    .. note::
+
+        This method is only supported in node-oracledb Thick mode. See
+        :ref:`enablingthick`.
 
     The parameters of the ``connection.tpcBegin()`` method are:
 
@@ -2103,6 +2181,8 @@ Connection Methods
 
 .. method:: connection.tpcCommit()
 
+    .. versionadded:: 5.3
+
     **Promise**::
 
         promise = tpcCommit([Object xid,] [Boolean onePhase]);
@@ -2114,10 +2194,13 @@ Connection Methods
     ignored and ``tpcCommit()`` has the same behavior as a regular
     ``connection.commit()`` call.
 
+    .. note::
+
+        This method is only supported in node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
     Note: When using an external transaction manager with two-phase commits,
     :attr:`autocommitting <oracledb.autoCommit>` should be disabled.
-
-    .. versionadded:: 5.3
 
     The parameters of the ``connection.tpcCommit()`` method are:
 
@@ -2167,6 +2250,8 @@ Connection Methods
 
 .. method:: connection.tpcEnd()
 
+    .. versionadded:: 5.3
+
     **Promise**::
 
         promise = tpcEnd([Object xid] [, Number flag]);
@@ -2179,7 +2264,10 @@ Connection Methods
     If ``xid`` is not passed, the transaction identifier used by the
     previous ``connection.tpcBegin()`` call is used.
 
-    .. versionadded:: 5.3
+    .. note::
+
+        This method is only supported in node-oracledb Thick mode. See
+        :ref:`enablingthick`.
 
     The parameters of the ``connection.tpcEnd()`` method are:
 
@@ -2233,6 +2321,8 @@ Connection Methods
 
 .. method:: connection.tpcForget()
 
+    .. versionadded:: 5.3
+
     **Promise**::
 
         promise = tpcForget(Object xid);
@@ -2240,7 +2330,10 @@ Connection Methods
     Causes the database to forget a heuristically completed two-phase commit
     transaction.
 
-    .. versionadded:: 5.3
+    .. note::
+
+        This method is only supported in node-oracledb Thick mode. See
+        :ref:`enablingthick`.
 
     The parameters of the ``connection.tpcForget()`` method are:
 
@@ -2287,6 +2380,8 @@ Connection Methods
 
 .. method:: connection.tpcPrepare()
 
+    .. versionadded:: 5.3
+
     **Promise**::
 
         promise = tpcPrepare([Object xid]);
@@ -2295,6 +2390,11 @@ Connection Methods
 
     Returns a boolean indicating the transaction requires a commit.
 
+    .. note::
+
+        This method is only supported in node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
     After calling this function, no further activity should take place on
     this connection until either
     :meth:`connection.tpcCommit()` or
@@ -2302,8 +2402,6 @@ Connection Methods
 
     If ``xid`` is not passed, the transaction identifier used by the
     previous ``connection.tpcBegin()`` call is used.
-
-    .. versionadded:: 5.3
 
     **Example**
 
@@ -2359,6 +2457,8 @@ Connection Methods
 
 .. method:: connection.tpcRecover()
 
+    .. versionadded:: 5.3
+
     **Promise**::
 
         promise = tpcRecover([Boolean asString]);
@@ -2367,10 +2467,13 @@ Connection Methods
     (XIDs) suitable for use with :meth:`connection.tpcCommit()`
     or :meth:`connection.tpcRollback()`.
 
+    .. note::
+
+        This method is only supported in node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
     This function is a convenience wrapper that queries the view
     ``DBA_PENDING_TRANSACTIONS``. It requires SELECT privilege on that view.
-
-    .. versionadded:: 5.3
 
     The parameters of the ``connection.tpcRecover`` method are:
 
@@ -2419,6 +2522,8 @@ Connection Methods
 
 .. method:: connection.tpcRollback()
 
+    .. versionadded:: 5.3
+
     **Promise**::
 
         promise = tpcRollback([Object xid]);
@@ -2428,7 +2533,10 @@ Connection Methods
     If ``xid`` is not passed, the transaction associated with the connection
     is rolled back making it equivalent to ``connection.rollback()``.
 
-    .. versionadded:: 5.3
+    .. note::
+
+        This method is only supported in node-oracledb Thick mode. See
+        :ref:`enablingthick`.
 
     The parameters of the ``connection.tpcRollback`` method are:
 
@@ -2475,6 +2583,8 @@ Connection Methods
 
 .. method:: connection.unsubscribe()
 
+    .. versionadded:: 2.3
+
     **Promise**::
 
         promise = unsubscribe(String name);
@@ -2484,14 +2594,17 @@ Connection Methods
     No further notifications will be sent. The notification callback does
     not receive a notification of the deregistration event.
 
+    .. note::
+
+        This method is only supported in node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
     A subscription can be unregistered using a different connection to the
     initial subscription, as long as the credentials are the same.
 
     If the subscription :ref:`timeout <consubscribeoptions>` was reached
     and the subscription was automatically unregistered, you will get an
     error if you call ``connection.unsubscribe()``.
-
-    .. versionadded:: 2.3
 
     The parameters of the ``connection.unsubscribe`` method are:
 

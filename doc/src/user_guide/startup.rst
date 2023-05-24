@@ -1,21 +1,26 @@
 .. _startupshutdown:
 
-*******************************
-Database Start Up and Shut Down
-*******************************
+*************************************
+Starting and Stopping Oracle Database
+*************************************
 
 There are two groups of database start up and shut down functions:
 
--  Simple usage: :meth:`oracledb.startup()` and :meth:`oracledb.shutdown()`
+- Simple usage: :meth:`oracledb.startup()` and :meth:`oracledb.shutdown()`
 
--  Flexible usage: :meth:`connection.startup()` and
-   :meth:`connection.shutdown()`
+- Flexible usage: :meth:`connection.startup()` and
+  :meth:`connection.shutdown()`
 
 These can be used to control database instances. With the `Oracle
 Database Multitenant architecture <https://www.oracle.com/pls/topic/lookup?
 ctx=dblatest&id=GUID-AB84D6C9-4BBE-4D36-992F-2BB85739329F>`__,
 you use these functions on a “CDB” container database instance and then
 use SQL commands to control the pluggable “PDB” databases.
+
+.. note::
+
+    In this release, database start up and shut down functionality is only
+    supported in the node-oracledb Thick mode. See :ref:`enablingthick`.
 
 .. _startupshutdownsimple:
 
@@ -40,9 +45,9 @@ operating system’s ``oper`` group, is:
 
 .. code-block:: javascript
 
-   await oracledb.startup( {
-     externalAuth: true
-   });
+    await oracledb.startup( {
+        externalAuth: true
+    });
 
 Start up :ref:`options <odbstartupattrsoptions>` can be specified. You
 can use a database parameter `pfile <https://www.oracle.com/pls/topic/lookup?
@@ -53,15 +58,15 @@ example:
 
 .. code-block:: javascript
 
-   await oracledb.startup( {
-       externalAuth: true
-     },
-     {
-       force: true,
-       restrict: true
-       pfile: '/my/path/to/my/pfile.ora'
-     }
-   );
+    await oracledb.startup( {
+        externalAuth: true
+        },
+        {
+            force: true,
+            restrict: true
+            pfile: '/my/path/to/my/pfile.ora'
+        }
+    );
 
 By default when the options are not specified, the database is opened
 normally, and uses the database parameter file.
@@ -74,11 +79,11 @@ file. Starting the database in node-oracledb would then be like:
 
 .. code-block:: javascript
 
-   await oracledb.startup( {
-     user: 'sys',
-     password: syspw,
-     connectString: 'mymachine.example.com/orclcdb'
-   });
+    await oracledb.startup( {
+        user: 'sys',
+        password: syspw,
+        connectString: 'mymachine.example.com/orclcdb'
+    });
 
 Simple Shut Down
 ----------------
@@ -88,26 +93,26 @@ is:
 
 .. code-block:: javascript
 
-   const syspw = ...  // set syspw to the sys schema password
+    const syspw = ...  // set syspw to the sys schema password
 
-   await oracledb.shutdown( {
-     user: "sys",
-     password: syspw,
-     connectString: "mymachine.example.com/orclcdb"
-   });
+    await oracledb.shutdown( {
+        user: "sys",
+        password: syspw,
+        connectString: "mymachine.example.com/orclcdb"
+    });
 
 An optional, :ref:`shutdownMode <odbshutdownattrsmode>` can be passed,
 for example to terminate uncommitted transactions and roll back:
 
 .. code-block:: javascript
 
-   await oracledb.shutdown( {
-       user: "sys",
-       password: syspw,
-       connectString: "mymachine.example.com/orclpdb1"
-     },
-     oracledb.SHUTDOWN_MODE_IMMEDIATE
-   );
+    await oracledb.shutdown( {
+        user: "sys",
+        password: syspw,
+        connectString: "mymachine.example.com/orclpdb1"
+        },
+        oracledb.SHUTDOWN_MODE_IMMEDIATE
+    );
 
 The shut down mode should be one of the constants:
 :ref:`oracledb.SHUTDOWN_MODE_ABORT <oracledbconstantsshutdown>`,
@@ -137,24 +142,24 @@ to the first ‘simple’ start up example above is:
 
 .. code-block:: javascript
 
-   connection = await oracledb.getConnection( {
-     externalAuth: true
-     privilege: oracledb.SYSOPER | oracledb.SYSPRELIM
-   });
+    connection = await oracledb.getConnection( {
+        externalAuth: true
+        privilege: oracledb.SYSOPER | oracledb.SYSPRELIM
+    });
 
-   await connection.startup();  // options could be passed, if required
+    await connection.startup();  // options could be passed, if required
 
-   await connection.close();
+    await connection.close();
 
-   connection = await oracledb.getConnection( {
-     externalAuth: true
-     privilege: oracledb.SYSOPER
-   });
+    connection = await oracledb.getConnection( {
+        externalAuth: true
+        privilege: oracledb.SYSOPER
+    });
 
-   await connection.execute(`ALTER DATABASE MOUNT`);
-   await connection.execute(`ALTER DATABASE OPEN`);
+    await connection.execute(`ALTER DATABASE MOUNT`);
+    await connection.execute(`ALTER DATABASE OPEN`);
 
-   await connection.close();
+    await connection.close();
 
 The ``SYSPRELIM`` privilege is required for the first connection. The
 :meth:`connection.startup()` method lets you optionally
@@ -173,21 +178,21 @@ equivalent to the first ‘simple’ shut down example above is:
 
 .. code-block:: javascript
 
-   connection = await oracledb.getConnection({
-     user: "sys",
-     password: syspw,
-     connectString: "mymachine.example.com/orclcdb",
-     privilege: oracledb.SYSOPER
-   });
+    connection = await oracledb.getConnection({
+        user: "sys",
+        password: syspw,
+        connectString: "mymachine.example.com/orclcdb",
+        privilege: oracledb.SYSOPER
+    });
 
-   await connection.shutdown();  // a shut down mode can be specified, if required
+    await connection.shutdown();  // a shut down mode can be specified, if required
 
-   await connection.execute (`ALTER DATABASE CLOSE NORMAL`);
-   await connection.execute (`ALTER DATABASE DISMOUNT`);
+    await connection.execute (`ALTER DATABASE CLOSE NORMAL`);
+    await connection.execute (`ALTER DATABASE DISMOUNT`);
 
-   await connection.shutdown(oracledb.SHUTDOWN_MODE_FINAL);
+    await connection.shutdown(oracledb.SHUTDOWN_MODE_FINAL);
 
-   connection.close();
+    connection.close();
 
 If the ``connection.shutdown()`` :ref:`shutdownMode <conshutdownmode>`
 ``oracledb.SHUTDOWN_MODE_ABORT`` is used, then ``connection.shutdown()``
@@ -212,19 +217,19 @@ database in it called ‘orclpdb1’ with:
 
 .. code-block:: sql
 
-   ALTER PLUGGABLE DATABASE orclpdb1 OPEN
+    ALTER PLUGGABLE DATABASE orclpdb1 OPEN
 
 or, to open all PDBs:
 
 .. code-block:: sql
 
-   ALTER PLUGGABLE DATABASE ALL OPEN
+    ALTER PLUGGABLE DATABASE ALL OPEN
 
 The command:
 
 .. code-block:: sql
 
-   ALTER PLUGGABLE DATABASE ALL SAVE STATE
+    ALTER PLUGGABLE DATABASE ALL SAVE STATE
 
 can be used so that a subsequent restart of a CDB will automatically
 open all currently open PDBs.

@@ -9,6 +9,11 @@ An AqQueue object is created by
 dequeuing Oracle Advanced Queuing messages. Each AqQueue can be used for
 enqueuing, dequeuing, or for both.
 
+.. note::
+
+    In this release, Oracle Advanced Queuing (AQ) is only supported in the
+    node-oracledb Thick mode. See :ref:`enablingthick`.
+
 See :ref:`Oracle Advanced Queuing (AQ) <aq>` for usage.
 
 The AqQueue class was added in node-oracledb 4.0.
