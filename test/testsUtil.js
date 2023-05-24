@@ -54,6 +54,16 @@ testsUtil.sqlCreateTable = function(tableName, sql) {
   `;
 };
 
+testsUtil.sqlCreateType = function(typeName, sql) {
+  const dropSql = testsUtil.sqlDropType(typeName);
+  return `
+    BEGIN
+        ${dropSql}
+        EXECUTE IMMEDIATE ('${sql}');
+    END;
+  `;
+};
+
 testsUtil.sqlDropSource = function(sourceType, sourceName) {
   return `
     DECLARE
@@ -98,6 +108,11 @@ testsUtil.createTable = async function(conn, tableName, sql) {
   await conn.execute(plsql);
 };
 
+testsUtil.createType = async function(conn, typeName, sql) {
+  const plsql = testsUtil.sqlCreateType(typeName, sql);
+  await conn.execute(plsql);
+};
+
 testsUtil.dropSource = async function(conn, sourceType, sourceName) {
   const plsql = testsUtil.sqlDropSource(sourceType, sourceName);
   await conn.execute(plsql);
@@ -105,6 +120,11 @@ testsUtil.dropSource = async function(conn, sourceType, sourceName) {
 
 testsUtil.dropTable = async function(conn, tableName) {
   const plsql = testsUtil.sqlDropTable(tableName);
+  await conn.execute(plsql);
+};
+
+testsUtil.dropType = async function(conn, typeName) {
+  const plsql = testsUtil.sqlDropType(typeName);
   await conn.execute(plsql);
 };
 
