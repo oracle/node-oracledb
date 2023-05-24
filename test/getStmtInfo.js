@@ -294,7 +294,7 @@ describe('162. getStmtInfo.js', function() {
   it('162.28 PL/SQL block bindname following newline character', async function() {
     const sql = `
     -- COMMENTS
-    select :兆object_name_in as object_name,
+    select :Öobject_name_in as object_name,
           'COMMENT' as object_type,
           :schema_name_in as schema_name
       from dual
@@ -306,26 +306,26 @@ describe('162. getStmtInfo.js', function() {
           owner
       from all_constraints
     where owner = :schema_name_in
-      and table_name = :兆object_name_in
+      and table_name = :Öobject_name_in
       and constraint_type = 'R'
     union all
 
     -- RLS CONTEXTS
-    select :兆object_name_in as object_name,
+    select :Öobject_name_in as object_name,
           'RLS_CONTEXT' as object_type,
           :schema_name_in as schema_name
       from dual
     union all
 
     -- RLS GROUP
-    select :兆object_name_in as object_name,
+    select :Öobject_name_in as object_name,
           'RLS_GROUP' as object_type,
           :schema_name_in as schema_name
       from dual
     union all
 
     -- RLS POLICY
-    select :兆object_name_in as object_name,
+    select :Öobject_name_in as object_name,
           'RLS_POLICY' as object_type,
           :schema_name_in as schema_name
       from dual
@@ -337,7 +337,7 @@ describe('162. getStmtInfo.js', function() {
           owner
       from all_constraints
     where owner = :schema_name_in
-      and table_name = :兆object_name_in
+      and table_name = :Öobject_name_in
       and constraint_type != 'R'
     union all
 
@@ -347,7 +347,7 @@ describe('162. getStmtInfo.js', function() {
           owner
       from all_indexes
     where table_owner = :schema_name_in
-      and table_name = :兆object_name_in
+      and table_name = :Öobject_name_in
     union all
 
     -- TRIGGERS
@@ -356,18 +356,18 @@ describe('162. getStmtInfo.js', function() {
           owner
       from all_triggers
     where table_owner = :schema_name_in
-      and table_name = :兆object_name_in
+      and table_name = :Öobject_name_in
       and base_object_type = 'TABLE'
     union all
 
     -- OBJECTS GRANTS AS GRANTOR
-    select :兆object_name_in,
+    select :Öobject_name_in,
           'OBJECT_GRANT_AS_GRANTOR',
           :schema_name_in
       from dual`;
     const connection = await oracledb.getConnection(dbConfig);
     const info = await connection.getStatementInfo(sql);
-    assert.deepStrictEqual(info.bindNames, ['兆OBJECT_NAME_IN', 'SCHEMA_NAME_IN']);
+    assert.deepStrictEqual(info.bindNames, ['ÖOBJECT_NAME_IN', 'SCHEMA_NAME_IN']);
     await connection.close();
   }); // 162.28
 });
