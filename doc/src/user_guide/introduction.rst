@@ -24,7 +24,7 @@ database options or packs.
 Node-oracledb is typically installed from the `npm registry <https://www.npmjs
 .com/package/oracledb>`__. See :ref:`installation` for more information.
 
-This node-oracledb release has been tested with Node.js 14, 16 and 18 on
+This node-oracledb release has been tested with Node.js 14, 16, 18 and 20 on
 Oracle Linux x86_64 (releases 7 and 8), Oracle Linux ARM (aarch64, release 8),
 Windows, and macOS.  Node-oracledb may run on other platforms, and with other
 Node.js versions, if they are `Node-API <https://nodejs.org/api/n-api.html>`__

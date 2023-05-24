@@ -836,24 +836,30 @@ precision.
 Fetching Dates and Timestamps
 +++++++++++++++++++++++++++++
 
-The Oracle Database DATE and TIMESTAMP columns are fetched as JavaScript date
-types in the timezone of the application. The Oracle Database TIMESTAMP WITH
-LOCAL TIME ZONE and TIMESTAMP WITH TIME ZONE columns are fetched as TIMESTAMP
-WITH LOCAL TIME ZONE. Oracle INTERVAL types are not supported. The connection
-session time zone does not affect these data types.
+Oracle Database DATE and TIMESTAMP columns are fetched as dates in the timezone
+of the application.  The TIMESTAMP WITH TIME ZONE and TIMESTAMP WITH LOCAL TIME
+ZONE columns are fetched as absolute dates.  Note that JavaScript Date has
+millisecond precision therefore timestamps will lose any sub-millisecond
+fractional part when fetched.
+
+Oracle INTERVAL types are not supported.
 
 .. versionchanged:: 6.0
 
-    Prior to this release, the DATE and TIMESTAMP columns were fetched as
-    TIMESTAMP WITH LOCAL TIME ZONE.
+    Oracle Database DATE and TIMESTAMP types are now returned as JavaScript
+    date types in the application's timezone, and no longer fetched or bound as
+    TIMESTAMP WITH LOCAL TIME ZONE.  The connection session time zone no longer
+    impacts these types.  This behavior aligns with other Oracle Database tools
+    and drivers. Handling of TIMESTAMP WITH TIMEZONE and TIMESTAMP WITH LOCAL
+    TIMEZONE has not changed.  For DATE and TIMESTAMP compatibility with
+    node-oracledb 5.5, use a :ref:`fetch type handler <fetchtypehandler>` and
+    set the return ``type`` attribute to ``oracledb.DB_TYPE_TIMESTAMP_LTZ``.
+    Also use a similar type when binding if compatibility is needed.
 
-Note that JavaScript Date has millisecond precision. Therefore, timestamps
-will lose any sub-millisecond fractional part when fetched.
-
-To make applications more portable, it is recommended to always set the
-session time zone to a pre-determined value, such as UTC. The session
-time zone should generally match the client system time zone, for
-example the ``TZ`` environment variable or the Windows time zone region.
+To make applications more portable, it is recommended to set the client system
+time zone (for example the ``TZ`` environment variable or the Windows time zone
+region) to match the Oracle session time zone, and to use a pre-determined
+value, such as UTC.
 
 You can find the current session time zone with:
 

@@ -309,7 +309,7 @@ Since the code does not explicitly set ``oracledb.edition`` (or
 equivalent), then the first implementation of ``DISCOUNT`` in the
 default edition is used. The output might be like::
 
-    [ 	{ NAME: 'lamp', PRICE: 40, DISCOUNTPRICE: 36 },
+    [   { NAME: 'lamp', PRICE: 40, DISCOUNTPRICE: 36 },
         { NAME: 'wire', PRICE: 10, DISCOUNTPRICE: 6 },
         { NAME: 'switch', PRICE: 4, DISCOUNTPRICE: 1 } ]
 
@@ -330,7 +330,7 @@ If the connection uses edition ``e2``, then the second implementation of
 
 The output might be like::
 
-    [ 	{ NAME: 'lamp', PRICE: 40, DISCOUNTPRICE: 30 },
+    [   { NAME: 'lamp', PRICE: 40, DISCOUNTPRICE: 30 },
         { NAME: 'wire', PRICE: 10, DISCOUNTPRICE: 7.5 },
         { NAME: 'switch', PRICE: 4, DISCOUNTPRICE: 3 } ]
 

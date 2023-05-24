@@ -53,18 +53,18 @@ This gives::
         name: 'SDO_GEOMETRY',
         fqn: 'MDSYS.SDO_GEOMETRY',
         attributes:
-        { 	SDO_GTYPE: { type: 2010, typeName: 'NUMBER' },
+        {   SDO_GTYPE: { type: 2010, typeName: 'NUMBER' },
             SDO_SRID: { type: 2010, typeName: 'NUMBER' },
             SDO_POINT:
-            {	type: 2023,
+            {   type: 2023,
                 typeName: 'MDSYS.SDO_POINT_TYPE',
                 typeClass: [Object] },
             SDO_ELEM_INFO:
-            { 	type: 2023,
+            {   type: 2023,
                 typeName: 'MDSYS.SDO_ELEM_INFO_ARRAY',
                 typeClass: [Object] },
             SDO_ORDINATES:
-            { 	type: 2023,
+            {   type: 2023,
                 typeName: 'MDSYS.SDO_ORDINATE_ARRAY',
                 typeClass: [Object] } },
             isCollection: false }
@@ -85,7 +85,7 @@ set that are not present in the database object will be ignored.
 .. code-block:: javascript
 
     const geom = new GeomType(
-    	{
+        {
             SDO_GTYPE: 2003,
             SDO_SRID: null,
             SDO_POINT: null,
@@ -310,7 +310,7 @@ insertion into ``mytab`` use:
         `BEGIN mypkg.myinproc(:id, :vals); END;`,
         {
             id: 1234,
-            vals: {	type: oracledb.NUMBER,
+            vals: { type: oracledb.NUMBER,
                     dir: oracledb.BIND_IN,
                     val: [1, 2, 23, 4, 10]
                 }
@@ -324,7 +324,7 @@ Alternatively, “bind by position” syntax can be used:
     `BEGIN mypkg.myinproc(:id, :vals); END;`,
     [
         1234,
-        {	type: oracledb.NUMBER,
+        {   type: oracledb.NUMBER,
             dir: oracledb.BIND_IN,
             val: [1, 2, 23, 4, 10]
         }
@@ -336,7 +336,7 @@ After executing either of these ``mytab`` will contain:
 
        ID         NUMCOL
     ---------- ----------
-    	1234          1
+        1234          1
         1234          2
         1234         23
         1234          4
@@ -400,7 +400,7 @@ With these values, the following node-oracledb code will print
         `BEGIN mypkg.myoutproc(:id, :vals); END;`,
         {
             id: 99,
-            vals: {	type: oracledb.NUMBER,
+            vals: { type: oracledb.NUMBER,
                     dir:  oracledb.BIND_OUT,
                     maxArraySize: 10          // allocate memory to hold 10 numbers
                 }

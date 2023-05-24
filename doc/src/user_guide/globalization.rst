@@ -51,7 +51,7 @@ To find the database's national character set, execute the query:
 Setting the Client Character Set
 --------------------------------
 
-In node-oracledb, the encoding used for all character data is "UTF-8".
+In node-oracledb, the encoding used for all character data is AL32UTF8.
 
 Setting the Client Locale
 =========================
