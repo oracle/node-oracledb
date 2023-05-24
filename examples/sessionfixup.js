@@ -51,6 +51,7 @@ Error.stackTraceLimit = 50;
 const http = require('http');
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+
 const httpPort = 7000;
 
 // This example runs in both node-oracledb Thin and Thick modes.
@@ -76,19 +77,22 @@ if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
 
 // initSession() will be invoked internally when each brand new pooled
 // connection is first used.  Its callback function 'callbackFn' should be
-// invoked only when all desired session state has been set.
-// In this example, the requestedTag and actualTag parameters are
-// ignored.  They would be valid if connection tagging was being used.
-// If you have multiple SQL statements to execute, put them in a
-// single, anonymous PL/SQL block for efficiency.
+// invoked only when all desired session state has been set.  In this example,
+// the requestedTag parameter is ignored.  They would be valid if connection
+// tagging was being used.  If you have multiple SQL statements to execute, put
+// them in a single, anonymous PL/SQL block for efficiency.
 function initSession(connection, requestedTag, callbackFn) {
+
   // Your session initialization code would be here.  This example just queries
-  // the session id to show that the callback is invoked once per session.
+  // the session id and serial number to show that the callback is invoked once
+  // per new session.
   connection.execute(
-    `SELECT SYS_CONTEXT('USERENV','SID') FROM DUAL`,
+    `SELECT UNIQUE sid||'-'||serial#
+     FROM v$session_connect_info
+     WHERE sid = SYS_CONTEXT('USERENV', 'SID')`,
     function(err, result) {
-      const sid = result.rows[0][0];  // session id
-      console.log(`initSession invoked for session ${sid}`);
+      const sidSer = result.rows[0][0];  // session id and serial number
+      console.log(`initSession invoked for session and serial number: ${sidSer}`);
       callbackFn();
     });
 }
@@ -125,9 +129,13 @@ async function handleRequest(request, response) {
   try {
     // Get a connection from the default connection pool
     connection = await oracledb.getConnection();
-    const sql = `SELECT CURRENT_TIMESTAMP, SYS_CONTEXT('USERENV','SID') FROM DUAL`;
+
+    const sql = `SELECT UNIQUE CURRENT_TIMESTAMP, sid||'-'||serial#
+                 FROM v$session_connect_info
+                 WHERE sid = SYS_CONTEXT('USERENV', 'SID')`;
+
     const result = await connection.execute(sql);
-    console.log(`Query at time ${result.rows[0][0]} used session ${result.rows[0][1]}`);
+    console.log(`Query at ${result.rows[0][0]} used session and serial number ${result.rows[0][1]}`);
   } catch (err) {
     console.error(err.message);
   } finally {
