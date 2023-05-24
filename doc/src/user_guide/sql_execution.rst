@@ -559,7 +559,7 @@ lowercase.
 
 The :attr:`oracledb.extendedMetadata` property and the
 :meth:`connection.execute()` option
-:ref:`extendedMetaData <propexecextendedmetadata>` are deprecated. Extended
+:ref:`extendedMetaData <propexecextendedmetadata>` are desupported. Extended
 metadata is now always returned.
 
 .. _changefetcheddata:
@@ -612,11 +612,11 @@ The fetch type handler functionality replaces the deprecated
 For BLOB, CLOB, NCLOB, and JSON data types, the data type conversion is
 performed on the database. For all other data types, the node-oracledb Thick
 mode uses :ref:`National Language Support (NLS) <nls>` conversion routines to
-perform the data type conversion while node-oracledb Thin mode uses fixed
-JavaScript routines such as ``toString()``. To modify the existing behavior,
-you can use a :ref:`converter function <converterfunc>`.
+perform the data type conversion. The node-oracledb Thin mode uses
+JavaScript functionality such as ``toString()``. To modify the default
+conversion behavior, you can use a :ref:`converter function <converterfunc>`.
 
-Fetch type handlers can be specified in the :attr:`oracledb.fetchTypeHandler`
+A fetch type handler can be specified in the :attr:`oracledb.fetchTypeHandler`
 attribute or as an :ref:`option <propexecfetchtypehandler>` in
 :meth:`connection.execute()`. The
 :ref:`fetchTypeHandler option <propexecfetchtypehandler>` specified
@@ -649,12 +649,10 @@ For example, to tell the database to return numbers as strings:
         `SELECT salary FROM employees WHERE employee_id = :id`,
         [178],
         {
-            fetchTypeHandler: {
+            fetchTypeHandler: function(metaData) {
                 // Tells the database to return number as strings
-                function numtostr(metaData) {
-                    if (metaData.dbType == oracledb.DB_TYPE_NUMBER) {
-                        return {type: oracledb.STRING}
-                    }
+                if (metaData.dbType == oracledb.DB_TYPE_NUMBER) {
+                    return {type: oracledb.STRING}
                 }
             }
         }
@@ -687,11 +685,9 @@ shown below:
         `SELECT 1 AS col1, 2 AS COL2 FROM dual`,
         [],
         {
-            fetchTypeHandler: {
+            fetchTypeHandler: function(metaData) {
                 // Tells the database to return column names in lowercase
-                function fth(metaData) {
-                    metaData.name = metaData.name.toLowerCase();
-                }
+                metaData.name = metaData.name.toLowerCase();
             }
         }
     );
@@ -891,8 +887,8 @@ by executing:
 
     await connection.execute(`ALTER SESSION SET TIME_ZONE='UTC'`);
 
-Note that this setting will not have any effect on the application,
-if it is run in Thin mode.
+Note that this setting will not have any effect on the application
+if it is run in node-oracledb Thin mode.
 
 With pooled connections, you could make use of a
 :ref:`sessionCallback <createpoolpoolattrssessioncallback>` function
@@ -959,24 +955,22 @@ columns to have data returned in native format.
 .. code-block:: javascript
 
     const result = await connection.execute(
-        `SELECT last_name, hire_date, salary, commission_pct FROM employees
-         WHERE employee_id = :id`,
+        `SELECT last_name, hire_date, salary, commission_pct FROM employees WHERE employee_id = :id`,
         [178],
         {
-            fetchTypeHandler : {
-                function fth(metaData) {
+            fetchTypeHandler: function(metaData) {
 
-                    if (metaData.name == "HIRE_DATE") {
-                        // Tells the database to return the date as string if the
-                        // column name is HIRE_DATE
-                        return {type: oracledb.STRING}
-                    }
-                    if (metaData.name == "COMMISSION_PCT") {
-                        // Tells the database to override oracledb.fetchAsString
-                        // if the column name is COMMISSION_PCT and fetch as
-                        // native type
-                        return {type: oracledb.DEFAULT}
-                    }
+                if (metaData.name == "HIRE_DATE") {
+                    // Tells the database to return the date as string if the
+                    // column name is HIRE_DATE
+                    return {type: oracledb.DB_TYPE_VARCHAR};
+                }
+                if (metaData.name == "COMMISSION_PCT") {
+
+                    // Tells the database to override oracledb.fetchAsString
+                    // if the column name is COMMISSION_PCT and fetch as
+                    // number type
+                    return {type: oracledb.DB_TYPE_NUMBER};
                 }
             }
         }
@@ -986,14 +980,19 @@ columns to have data returned in native format.
 
 The output is::
 
-    [ [ 'Grant', '24-MAY-07', '7000', 0.15 ] ]
+    [
+        [
+            'Grant',
+            'Thu May 24 2007 00:00:00 GMT+1000 (Australian Eastern Standard Time)',
+            '7000',
+            0.15
+        ]
+    ]
 
 The date and salary columns are returned as strings, but the commission
-is a number. The date is mapped using the current session date format,
-which was ``DD-MON-YY`` in this example. In node-oracledb Thick mode, the
-default date format can be set, for example, with the environment variable
-``NLS_DATE_FORMAT``. Note this variable will only be read if ``NLS_LANG``
-is also set.
+is a number. In node-oracledb Thick mode, the default date format can be
+set, for example, with the environment variable ``NLS_DATE_FORMAT``. Note
+that this variable will only be read if ``NLS_LANG`` is also set.
 
 In node-oracledb Thin mode, all NLS environment variables are ignored.
 Fetch type handlers need to be used for :ref:`date <thindate>` and
@@ -1003,7 +1002,7 @@ Without the mapping capabilities provided by ``fetchAsString`` and
 ``fetchTypeHandler``, the hire date would have been a JavaScript date, and
 both numeric columns would have been represented as numbers::
 
-    [ [ 'Grant', 24-MAY-07, 7000, 0.15 ] ]
+    [ [ 'Grant', 2007-05-23T14:00:00.000Z, 7000, 0.15 ] ]
 
 To map columns returned from REF CURSORS, use ``fetchAsString``. The
 ``fetchTypeHandler`` settings do not apply.

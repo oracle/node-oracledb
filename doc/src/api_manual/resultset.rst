@@ -35,12 +35,11 @@ The properties of a *ResultSet* object are listed below.
     This read-only property is an array which contains an array of objects
     with metadata about the query or REF CURSOR columns.
 
-    Each column’s ``name`` is always given. If the
-    :attr:`~oracledb.extendedMetaData` or ``execute()`` option
-    :ref:`extendedMetaData <propexecextendedmetadata>` are *true* then
-    additional information is included.
+    The :attr:`~oracledb.extendedMetaData` property and the ``execute()``
+    option :ref:`extendedMetaData <propexecextendedmetadata>` are ignored.
+    Extended metadata is now always returned.
 
-    See :attr:`result.metaData` for the available attributes.
+    See :ref:`result.metaData <execmetadata>` for the available attributes.
 
 .. _resultsetmethods:
 

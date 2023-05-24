@@ -68,7 +68,7 @@ Oracle Database Type Objects
 ----------------------------
 
 These database type objects indicate the Oracle Database type in
-:attr:`~oracledb.extendedMetaData`, :ref:`DbObject <dbobjectclass>`
+:ref:`metaData <execmetadata>`, :ref:`DbObject <dbobjectclass>`
 types, and in the :attr:`lob <lob.type>` ``type`` property. Some
 database type objects can also be used for:
 
@@ -911,8 +911,8 @@ Each of the configuration properties is described below.
     logical name for connections. Most single purpose applications should set
     ``connectionClass`` when using a connection pool or DRCP.
 
-    When a pooled session has a connection class, Oracle ensures that the
-    session is not shared outside of that connection class.
+    When a pooled session has a connection class, the session is not shared
+    with users with a different connection class.
 
     The connection class value is similarly used by :ref:`Database Resident
     Connection Pooling (DRCP) <drcp>` to allow or disallow sharing of
@@ -1224,9 +1224,6 @@ Each of the configuration properties is described below.
     this mapping is 200 bytes. Strings created for CLOB and NCLOB columns
     will generally be limited by Node.js and V8 memory restrictions.
 
-    For non-CLOB types, the conversion is handled by Oracle Client libraries
-    and is often referred to as *defining* the fetch type.
-
     **Example**
 
     .. code-block:: javascript
@@ -1285,7 +1282,7 @@ Each of the configuration properties is described below.
         const oracledb = require('oracledb');
         oracledb.fetchTypeHandler = function(metaData) {
         // Return number column data as strings
-            if(metaData.dbType == oracledb.DB_TYPE_NUMBER) {
+            if (metaData.dbType == oracledb.DB_TYPE_NUMBER) {
                 return {type: oracledb.STRING};
             }
         }
@@ -2011,6 +2008,8 @@ Oracledb Methods
 
             The password to decrypt the Privacy Enhanced Mail (PEM)-encoded private certificate, if it is encrypted.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``walletLocation``
           - String
@@ -2018,6 +2017,8 @@ Oracledb Methods
           - .. _createpoolpoolattrswalletloc:
 
             The directory where the wallet can be found. In node-oracledb Thin mode, this must be the directory that contains the PEM-encoded wallet file.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
 
             .. versionadded:: 6.0
         * - ``edition``
@@ -2112,7 +2113,7 @@ Oracledb Methods
 
             The directory in which the :ref:`tnsadmin` are found.
 
-            For node-oracledb Thick mode, use the ``configDir`` parameter of :meth:`oracledb.initOracleClient()`.
+            For node-oracledb Thick mode, use the :meth:`oracledb.initOracleClient()` option :ref:`configDir <odbinitoracleclientattrsopts>`.
 
             .. versionadded:: 6.0
         * - ``sourceRoute``
@@ -2124,20 +2125,24 @@ Oracledb Methods
 
             The default value is *ON*.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``sslServerCertDN``
           - String
-          - Both
+          - Thin
           - .. _createpoolpoolattrssslcert:
 
             The distinguished name (DN) that should be matched with the server. If specified, this value is used for any verification. Otherwise, the ``hostname`` will be used.
 
-            This value is ignored if the sslServerDNMatch property is not set to the value *True*.
+            This value is ignored if the ``sslServerDNMatch`` property is not set to the value *True*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
 
             .. versionadded:: 6.0
         * - ``sslServerDNMatch``
           - Boolean
-          - Both
+          - Thin
           - .. _createpoolpoolattrssslmatch:
 
             Determines whether the server certificate DN should be matched in addition to the regular certificate verification that is performed.
@@ -2146,86 +2151,104 @@ Oracledb Methods
 
             The default value is *True*.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``httpsProxy``
           - String
-          - Both
+          - Thin
           - .. _createpoolpoolattrshttpsproxy:
 
             The name or IP address of a proxy host to use for tunneling secure connections.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``httpsProxyPort``
           - Number
-          - Both
+          - Thin
           - .. _createpoolpoolattrshttpsproxyport:
 
             The port to be used to communicate with the proxy host.
 
             The default value is *0*.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``retryCount``
           - Number
-          - Both
+          - Thin
           - .. _createpoolpoolattrsretrycount:
 
             The number of times that a connection attempt should be retried before the attempt is terminated.
 
             The default value is *0*.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``retryDelay``
           - Number
-          - Both
+          - Thin
           - .. _createpoolpoolattrsretrydelay:
 
             The number of seconds to wait before making a new connection attempt.
 
             The default value is *0*.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``connectTimeout``
           - Number
-          - Both
+          - Thin
           - .. _createpoolpoolattrsconntimeout:
 
             The timeout duration in seconds for an application to establish an Oracle Net connection.
 
             There is no timeout by default.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``transportConnectTimeout``
           - Number
-          - Both
+          - Thin
           - .. _createpoolpoolattrstransportconntimeout:
 
             The maximum number of seconds to wait to establish a connection to the database host.
 
             The default value is *60.0*.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``expireTime``
           - Number
-          - Both
+          - Thin
           - .. _createpoolpoolattrsexpiretime:
 
             The number of minutes between the sending of keepalive probes. If this property is set to a value greater than zero, it enables the keepalive probes.
 
             The default value is *0*.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``sdu``
           - Number
-          - Both
+          - Thin
           - .. _createpoolpoolattrssdu:
 
             The Oracle Net Session Data Unit (SDU) packet size in bytes. The database server configuration should also set this parameter.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``connectionIdPrefix``
           - String
-          - Both
+          - Thin
           - .. _createpoolpoolattrsprefix:
 
             The application specific prefix parameter that is added to the connection identifier.
@@ -2257,7 +2280,7 @@ Oracledb Methods
             See :ref:`Connection Pooling <connpooling>` for other pool sizing guidelines.
         * - ``poolMaxPerShard``
           - Number
-          - Both
+          - Thick
           - .. _createpoolpoolattrspoolmaxpershard:
 
             Sets the maximum number of connections per shard for connection pools. This ensures that the pool is balanced towards each shard.
@@ -2637,6 +2660,8 @@ Oracledb Methods
 
             The password to decrypt the Privacy Enhanced Mail (PEM)-encoded private certificate, if it is encrypted.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``walletLocation``
           - String
@@ -2644,6 +2669,8 @@ Oracledb Methods
           - .. _getconnectiondbattrswalletloc:
 
             The directory where the wallet can be found. In node-oracledb Thin mode, this must be the directory that contains the PEM-encoded wallet file.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
 
             .. versionadded:: 6.0
         * - ``edition``
@@ -2717,7 +2744,7 @@ Oracledb Methods
 
             The directory in which the :ref:`tnsadmin` are found.
 
-            For node-oracledb Thick mode, use the ``configDir`` parameter of :meth:`oracledb.initOracleClient()`.
+            For node-oracledb Thick mode, use the :meth:`oracledb.initOracleClient()` option :ref:`configDir <odbinitoracleclientattrsopts>`.
 
             .. versionadded:: 6.0
         * - ``sourceRoute``
@@ -2729,20 +2756,24 @@ Oracledb Methods
 
             The default value is *ON*.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``sslServerCertDN``
           - String
-          - Both
+          - Thin
           - .. _getconnectiondbattrssslcert:
 
             The distinguished name (DN) that should be matched with the server. If specified, this value is used for any verification. Otherwise, the ``hostname`` will be used.
 
-            This value is ignored if the sslServerDNMatch property is not set to the value *True*.
+            This value is ignored if the ``sslServerDNMatch`` property is not set to the value *True*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
 
             .. versionadded:: 6.0
         * - ``sslServerDNMatch``
           - Boolean
-          - Both
+          - Thin
           - .. _getconnectiondbattrssslmatch:
 
             Determines whether the server certificate DN should be matched in addition to the regular certificate verification that is performed.
@@ -2751,23 +2782,29 @@ Oracledb Methods
 
             The default value is *True*.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``httpsProxy``
           - String
-          - Both
+          - Thin
           - .. _getconnectiondbattrshttpsproxy:
 
             The name or IP address of a proxy host to use for tunneling secure connections.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``httpsProxyPort``
           - Number
-          - Both
+          - Thin
           - .. _getconnectiondbattrshttpsproxyport:
 
             The port to be used to communicate with the proxy host.
 
             The default value is *0*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
 
             .. versionadded:: 6.0
         * - ``debugJdwp``
@@ -2784,65 +2821,77 @@ Oracledb Methods
             .. versionadded:: 6.0
         * - ``retryCount``
           - Number
-          - Both
+          - Thin
           - .. _getconnectiondbattrsretrycount:
 
             The number of times that a connection attempt should be retried before the attempt is terminated.
 
             The default value is *0*.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``retryDelay``
           - Number
-          - Both
+          - Thin
           - .. _getconnectiondbattrsretrydelay:
 
             The number of seconds to wait before making a new connection attempt.
 
             The default value is *0*.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``connectTimeout``
           - Number
-          - Both
+          - Thin
           - .. _getconnectiondbattrsconntimeout:
 
             The timeout duration in seconds for an application to establish an Oracle Net connection.
 
             There is no timeout by default.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``transportConnectTimeout``
           - Number
-          - Both
+          - Thin
           - .. _getconnectiondbattrstransportconntimeout:
 
             The maximum number of seconds to wait to establish a connection to the database host.
 
             The default value is *60.0*.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``expireTime``
           - Number
-          - Both
+          - Thin
           - .. _getconnectiondbattrsexpiretime:
 
             The number of minutes between the sending of keepalive probes. If this property is set to a value greater than zero, it enables the keepalive probes.
 
             The default value is *0*.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``sdu``
           - Number
-          - Both
+          - Thin
           - .. _getconnectiondbattrssdu:
 
             The Oracle Net Session Data Unit (SDU) packet size in bytes. The database server configuration should also set this parameter.
 
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+
             .. versionadded:: 6.0
         * - ``connectionIdPrefix``
           - String
-          - Both
+          - Thin
           - .. _getconnectiondbattrsprefix:
 
             The application specific prefix parameter that is added to the connection identifier.
@@ -3019,21 +3068,29 @@ Oracledb Methods
 
         initOracleClient([Object options]);
 
-    This synchronous function enables node-oracledb Thick mode by initializing
-    the Oracle Client library, see :ref:`enablingthick`. This method must be
-    called before any standalone connection or pool is created. If a
-    connection or pool is first created in Thin mode, then
-    ``initOracleClient()`` will raise an exception and Thick mode will not be
-    enabled. If the first call to ``initOracleClient()`` had an
-    incorrect path specified, then a second call with the correct path will
-    work.
+    **From node-oracledb 6.0**, this synchronous function enables node-oracledb
+    Thick mode by initializing the Oracle Client library (see
+    :ref:`enablingthick`). This method must be called before any standalone
+    connection or pool is created. If a connection or pool is first created
+    in Thin mode, then ``initOracleClient()`` will raise an exception and
+    Thick mode will not be enabled. If the first call to
+    ``initOracleClient()`` had an incorrect path specified, then a second
+    call with the correct path will work. The ``initOracleClient()`` method
+    can be called multiple times in each Node.js process as long as the
+    arguments are the same each time.
 
-    The default values described for
-    :ref:`options <odbinitoracleclientattrsopts>` will be used in this
-    case.
-
-    The ``initOracleClient()`` method can be called multiple times in each
-    Node.js process as long as the arguments are the same each time.
+    **In node-oracledb 5.5 and earlier versions**, this synchronous function
+    loads and initializes the :ref:`Oracle Client libraries <architecture>`
+    that are necessary for node-oracledb to communicate with Oracle Database.
+    This function is optional. If used, it should be the first node-oracledb
+    call made by an application. If ``initOracleClient()`` is not called, then
+    the Oracle Client libraries are loaded at the time of first use in the
+    application, such as when creating a connection pool. The default values
+    described for :ref:`options <odbinitoracleclientattrsopts>` will be used
+    in this case. If the Oracle Client libraries cannot be loaded, or they
+    have already been initialized, either by a previous call to this function
+    or because another function call already required the Oracle Client
+    libraries, then ``initOracleClient()`` raises an exception.
 
     See :ref:`initnodeoracledb` for more information.
 

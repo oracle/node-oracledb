@@ -483,6 +483,11 @@ Pool Methods
     as the maximum number of connections in the pool, or the statement cache
     size used by connections can be changed.
 
+    .. note::
+
+        This method is only supported in node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
     Properties are optional. Unspecified properties will leave those pool
     properties unchanged. The properties are processed in two stages. After
     any size change has been processed, reconfiguration on the other

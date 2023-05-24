@@ -21,11 +21,20 @@ To change from the default Thin mode to the Thick mode:
 - Oracle Client libraries must be available. These need to be installed
   separately, see :ref:`installation`.
 
-  Various versions of Oracle Client libraries can be used. The versions of
-  Oracle Client libraries and Oracle Database do not have to be the same. See
-  :ref:`installation` for information about installing Oracle Client libraries.
+  Various versions of Oracle Client libraries can be used. They do not have to
+  match the version of Oracle Database.  Node-oracledb can use the Client
+  Libraries from:
 
-- Your application must call the synchronous function
+  - an installation of `Oracle Instant Client
+    <https://www.oracle.com/database/technologies/instant-client.html>`__
+
+  - or a full Oracle Client installation (installed by running the Oracle
+    Universal installer ``runInstaller``)
+
+  - or an Oracle Database installation, if Node.js is running on the same
+    machine as the database
+
+- Your application *must* call the synchronous function
   :meth:`oracledb.initOracleClient()`, for example:
 
   .. code-block:: javascript
@@ -48,64 +57,52 @@ To change from the default Thin mode to the Thick mode:
       // enable node-oracledb Thick mode
       oracledb.initOracleClient(clientOpts);
 
-  The ``initOracleClient()`` function may be called multiple times in your
-  application but must always pass the same arguments.
+  More details and options are shown in the later sections
+  :ref:`oracleclientloadingwindows`, :ref:`oracleclientloadingmacos`, and
+  :ref:`oracleclientloadinglinux`.
 
-  More details and options are shown in the sections below.
+All connections in an application use the same mode.
 
-.. note::
+Once the Thick mode is enabled, you cannot go back to the Thin mode except by
+removing calls to :meth:`~oracledb.initOracleClient()` and restarting the
+application.
 
-    To use node-oracledb in Thick mode, you *must* call
-    :meth:`~oracledb.initOracleClient()` in the application. It must be called
-    before any standalone connection or connection pool is created. If a
-    connection or pool is first created, then the Thick mode cannot be enabled.
+See :ref:`vsessconinfo` to verify which mode is in use.
 
-    All connections in an application use the same mode.
+**Notes on calling initOracleClient()**
 
-    Once the Thick mode is enabled, you cannot go back to the Thin mode.
+- The :meth:`~oracledb.initOracleClient()` function must be called before any
+  standalone connection or connection pool is created. If a connection or pool
+  is first created, then the Thick mode cannot be enabled.
 
-    See :ref:`vsessconinfo` to verify which mode is in use.
+- If you call :meth:`~oracledb.initOracleClient()` with a ``libDir`` attribute,
+  the Oracle Client libraries are loaded immediately from that directory. If
+  you call :meth:`~oracledb.initOracleClient()` but do *not* set the ``libDir``
+  attribute, the Oracle Client libraries are loaded immediately using the
+  search heuristics discussed in later sections.
 
-If you set ``libDir`` on Linux and related platforms, you must still have
-configured the system library search path to include that directory before
-starting Node.js.
+- If Oracle Client libraries cannot be loaded, then
+  :meth:`~oracledb.initOracleClient()` will return an error
+  ``DPI-1047: Cannot locate a 64-bit Oracle Client library``. To resolve
+  this, review the platform-specific instructions below. Alternatively,
+  remove the call to :meth:`~oracledb.initOracleClient()` and use
+  :ref:`Thin mode <changingthick>`. The features supported by Thin mode can
+  be found in :ref:`featuresummary`.
 
-On any operating system, if you set ``libDir`` to the library directory of a
-full database or full client installation (such as from running
-``runInstaller``), you will need to have previously set the Oracle environment,
-for example by setting the ``ORACLE_HOME`` environment variable. Otherwise you
-will get errors like ``ORA-1804``. You should set this variable, and other
-Oracle environment variables, before starting Node.js, as shown in :ref:`Oracle
-Environment Variables <environmentvariables>`.
+- If you set ``libDir`` on Linux and related platforms, you must still have
+  configured the system library search path to include that directory before
+  starting Node.js.
 
-If you call ``initOracleClient()`` with a ``libDir`` attribute, the Oracle
-Client libraries are loaded immediately from that directory. If you call
-``initOracleClient()`` but do *not* set the ``libDir`` attribute, the Oracle
-Client libraries are loaded immediately using the search heuristics discussed
-in later sections.
+- On any operating system, if you set ``libDir`` to the library directory of a
+  full database or full client installation (such as from running
+  ``runInstaller``), you will need to have previously set the Oracle environment,
+  for example by setting the ``ORACLE_HOME`` environment variable. Otherwise you
+  will get errors like ``ORA-1804``. You should set this variable, and other
+  Oracle environment variables, before starting Node.js, as shown in :ref:`Oracle
+  Environment Variables <environmentvariables>`.
 
-When :meth:`~oracledb.initOracleClient()` is called, node-oracledb dynamically
-loads Oracle Client libraries using a search heuristic. Only the first set of
-libraries found are loaded. The libraries can be:
-
-- in an installation of `Oracle Instant Client
-  <https://www.oracle.com/database/technologies/instant-client.html>`__
-
-- or in a full Oracle Client installation from running the Oracle
-  Universal installer ``runInstaller``
-
-- or in an Oracle Database installation, if Node.js is running on the
-  same machine as the database
-
-.. note::
-
-    If Oracle Client libraries cannot be loaded, then
-    :meth:`~oracledb.initOracleClient()` will return an error
-    ``DPI-1047: Cannot locate a 64-bit Oracle Client library``. To resolve
-    this, review the platform-specific instructions below. Alternatively,
-    remove the call to :meth:`~oracledb.initOracleClient()` and use
-    :ref:`Thin mode <changingthick>`. The features supported by Thin mode can
-    be found in :ref:`featuresummary`.
+- The :meth:`~oracledb.initOracleClient()` function may be called multiple
+  times in your application but must always pass the same arguments.
 
 .. _oracleclientloadingwindows:
 
@@ -317,6 +314,10 @@ For example, on Linux, you might use::
 
     $ export DPI_DEBUG_LEVEL=64
     $ node myapp.js 2> log.txt
+
+On Windows you might set the variable like::
+
+    set DPI_DEBUG_LEVEL=64
 
 .. _optconfigfiles:
 

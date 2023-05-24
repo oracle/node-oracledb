@@ -63,7 +63,9 @@ The properties of a DbObject object are listed below.
 
 .. attribute:: dbObject.elementTypeClass
 
-    This read-only property is an object.
+    This read-only property is an object. When ``dbObject.isCollection`` is
+    *true* and the elements in the collection refer to database objects, this
+    property provides the type class information of the elements.
 
 .. attribute:: dbObject.elementTypeName
 

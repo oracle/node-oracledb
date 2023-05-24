@@ -56,7 +56,7 @@ and ``stack`` properties.
 
     When :ref:`batchErrors <executemanyoptbatcherrors>` mode in
     :meth:`connection.executeMany()` returns an array of Error objects
-    in the callback result parameter, each ``offset`` property is a 0-based
+    in the callback result parameter, each ``offset`` property is a zero-based
     index corresponding to the ``executeMany()`` :ref:`binds
     parameter <executemanybinds>` array, indicating which record could
     not be processed. See :ref:`Handling Data Errors <handlingbatcherrors>`.

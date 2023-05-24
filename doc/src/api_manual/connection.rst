@@ -115,9 +115,9 @@ The properties of a *Connection* object are listed below.
     a value of ``null``. See :ref:`End-to-end Tracing, Mid-tier Authentication,
     and Auditing <endtoend>`.
 
-    It is available with Oracle 12c.
+    It is available from Oracle 12c onwards.
 
-.. attribute:: connection.ecId
+.. attribute:: connection.ecid
 
     .. versionadded:: 5.3
 
@@ -126,6 +126,11 @@ The properties of a *Connection* object are listed below.
 
     The value is available in the ``ECID`` column of the ``V$SESSION`` view.
     It is also shown in audit logs.
+
+    .. note::
+
+        This property can only be used in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
 
 .. attribute:: connection.module
 
@@ -300,7 +305,7 @@ Connection Methods
         Oracle Database only in the node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
-    If you use use ``break()`` with :ref:`DRCP connections <drcp>`, it is
+    If you use ``break()`` with :ref:`DRCP connections <drcp>`, it is
     currently recommended to drop the connection when releasing it back to
     the pool ``await connection.close({drop: true})``. See Oracle bug
     29116892.
@@ -987,7 +992,7 @@ Connection Methods
 
             Each column’s ``name`` is always given. If the column is a :ref:`nested cursor <nestedcursors>`, then the column’s object will also contain a ``metaData`` attribute which is an array describing each column in the nested query.
 
-            If the :attr:`oracledb.extendedMetaData` or ``execute()`` option :ref:`extendedMetaData <propexecextendedmetadata>` are *true*, then additional information is included.
+            Extended metadata is now always returned and includes the following information:
 
             - ``byteSize``: The database byte size. This is only set for ``oracledb.DB_TYPE_VARCHAR``, ``oracledb.DB_TYPE_CHAR`` and ``oracledb.DB_TYPE_RAW`` column types.
             - ``dbType``: one of the :ref:`Oracle Database Type Constant <oracledbconstantsdbtype>` values.
@@ -1358,6 +1363,11 @@ Connection Methods
     This method returns a queue for enqueuing and dequeuing :ref:`Oracle Advanced
     Queuing (AQ) <aq>` messages.
 
+    .. note::
+
+        This method is only supported in the node-oracledb Thick mode. See
+        :ref:`enablingthick`.
+
     The parameters of the ``connection.getQueue()`` method are:
 
     .. _getqueueparams:
@@ -1528,8 +1538,8 @@ Connection Methods
           - Depending on the statement type, the information object may contain:
 
             - ``bindNames``: An array of strings corresponding to the unique names of the bind variables used in the SQL statement.
-            -  ``metaData``: containing properties equivalent to those given by ``execute()`` :ref:`extendedMetaData <execmetadata>`. This property exists only for queries.
-            -  ``statementType``: an integer corresponding to one of the :ref:`SQL Statement Type Constants <oracledbconstantsstmttype>`.
+            - ``metaData``: Contains properties equivalent to those given by ``execute()`` :ref:`metaData <execmetadata>`. This property exists only for queries.
+            - ``statementType``: An integer corresponding to one of the :ref:`SQL Statement Type Constants <oracledbconstantsstmttype>`.
 
 .. method:: connection.isHealthy()
 
@@ -1575,7 +1585,7 @@ Connection Methods
     since network or database failure may occur in the interval between
     ``ping()`` and ``execute()`` calls.
 
-    Pinging requires a :ref:`round-trip <roundtrips>` to the database so
+    Pinging requires a :ref:`round-trip <roundtrips>` to the database. So,
     unnecessary ``ping()`` calls should be avoided.
 
     If ``ping()`` returns an error, the application should close the

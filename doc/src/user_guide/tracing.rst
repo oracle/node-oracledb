@@ -301,9 +301,11 @@ The following table list sample values for columns with differences in
 Finding the node-oracledb Mode
 ==============================
 
-The boolean attributes :attr:`connection.thin` and :attr:`pool.thin` can be
-used to show the current mode of a node-oracledb connection or pool, respectively.
-The node-oracledb version can be shown with :attr:`oracledb.version`.
+You can find the current mode of the node-oracledb driver using the boolean
+attribute :attr:`oracledb.thin`. The boolean attributes
+:attr:`connection.thin` and :attr:`pool.thin` can be used to show the current
+mode of a node-oracledb connection or pool, respectively. The node-oracledb
+version can be shown with :attr:`oracledb.version`.
 
 The information can also be seen in the Oracle Database data dictionary table
 ``V$SESSION_CONNECT_INFO``:
