@@ -30,7 +30,7 @@ values.
 .. attribute:: pool.connectionsInUse
 
     This read-only property is a number which specifies the number of
-    currently active connections in the connection pool, that is, 
+    currently active connections in the connection pool, that is,
     the number of connections currently “checked out” using
     ``pool.getConnection()``.
 

@@ -527,7 +527,7 @@ describe('1. connection.js', function() {
   }); //1.15
 
   describe('1.16 error on empty connectString with thin mode', function() {
-    before(async function() {
+    before(function() {
       if (!oracledb.thin) {
         this.skip();
       }

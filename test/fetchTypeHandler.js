@@ -469,19 +469,20 @@ describe('271. fetchTypeHandler.js', function() {
     await connection.execute(`INSERT INTO ${TABLE} values (01, 'ABC', 23,
                 TO_TIMESTAMP('2023-04-27 10:30:00', 'YYYY-MM-DD HH24:MI:SS'))`);
     const result = await connection.execute(
-      `SELECT id, name, age,
-      created_date AS TS_DATE FROM ${TABLE}`,
+      `SELECT id, name, age, created_date AS TS_DATE FROM ${TABLE}`,
       [],
       {
         outFormat: oracledb.OUT_FORMAT_OBJECT
       }
     );
 
-    assert.deepEqual(Object.getOwnPropertyNames(result.rows[0]), ["ID", "NAME", "AGE", "TS_DATE"]);
+    assert.deepEqual(Object.getOwnPropertyNames(result.rows[0]),
+      ["ID", "NAME", "AGE", "TS_DATE"]);
     assert.deepEqual(result.rows[0].ID, "1");
     assert.deepEqual(result.rows[0].NAME, "ABC");
     assert.deepEqual(result.rows[0].AGE, "23");
-    assert.deepEqual(result.rows[0].TS_DATE, new Date('2023-04-27T10:30:00.000Z'));
+    assert.deepEqual(result.rows[0].TS_DATE, new Date('2023-04-27 10:30:00.000'));
     await connection.execute(testsUtil.sqlDropTable(TABLE));
   });
+
 });
