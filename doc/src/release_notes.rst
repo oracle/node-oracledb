@@ -24,6 +24,9 @@ node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...
     function to be specified that can make custom alterations to SQL query
     data before it is returned to the application.
 
+#) Added a new :attr:`error.code` to fetch the error prefix and the error
+   number, for example ``ORA-01017``, ``DPI-1080``, and ``NJS-500``.
+
 #)  Deprecated execution option attribute ``fetchInfo``.  Use the new
     :ref:`fetchtypehandler` functionality instead.
 
