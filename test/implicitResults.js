@@ -62,7 +62,7 @@ describe('192. implicitResults.js', function() {
   before(async function() {
     isRunnable = await testsUtil.checkPrerequisites();
 
-    if (!isRunnable) {
+    if (!isRunnable || dbConfig.test.isCmanTdm) {
       this.skip();
     } else {
       const conn = await oracledb.getConnection(dbConfig);
@@ -116,7 +116,7 @@ describe('192. implicitResults.js', function() {
 
   after(async function() {
 
-    if (!isRunnable) {
+    if (!isRunnable || dbConfig.test.isCmanTdm) {
       return;
     } else {
       const conn = await oracledb.getConnection(dbConfig);

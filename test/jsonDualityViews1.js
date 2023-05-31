@@ -737,7 +737,7 @@ describe('272. jsonDualityView1.js', function() {
       });
     });
 
-    describe('272.3.11 Create view without privilege ', function() {
+    (dbConfig.test.isCmanTdm ? describe : describe.skip)('272.3.11 Create view without privilege ', function() {
       let connection = null;
       let conn = null;
       const pwd = testsUtil.generateRandomPassword();

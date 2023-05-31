@@ -37,6 +37,7 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('4. binding.js', function() {
 
@@ -500,7 +501,6 @@ describe('4. binding.js', function() {
         },
         /ORA-06502:/
       );
-
     });
 
     it('4.4.4 maximum value of maxSize option is 32767', async function() {
@@ -541,16 +541,12 @@ describe('4. binding.js', function() {
       );
     });
 
-
     it('4.5.2 negative - DML invalid bind direction', async function() {
       await assert.rejects(
         async () => await connection.execute("insert into nodb_raw (num) values (:id)", { id: { val: 1, type: oracledb.NUMBER, dir : 0 } }),
         /NJS-013:/
       );
     });
-
-
-
   }); // 4.5
 
   describe('4.6 PL/SQL block with empty outBinds', function() {
@@ -642,7 +638,6 @@ describe('4. binding.js', function() {
           /NJS-044:/
         );
       }); // 4.7.7
-
   }); // 4.7
 
   describe('4.8 bind DATE', function() {
@@ -659,7 +654,6 @@ describe('4. binding.js', function() {
 
     it('4.8.1 binding out in Object & Array formats', async function() {
 
-
       let proc = "CREATE OR REPLACE PROCEDURE nodb_binddate1 ( \n" +
                      "    p_out1 OUT DATE, \n" +
                      "    p_out2 OUT DATE \n" +
@@ -670,7 +664,6 @@ describe('4. binding.js', function() {
                      "    p_out2 := TO_DATE('2016-08-05', 'YYYY-MM-DD'); \n" +
                      "END;";
       await connection.execute(proc);
-
 
       let result = await connection.execute(
         "BEGIN nodb_binddate1(:o1, :o2); END;",
@@ -878,6 +871,89 @@ describe('4. binding.js', function() {
 
       const rows = await cursor.getRows();
       assert.deepStrictEqual(rows, [ [ 'X' ] ]);
+    });
+  });
+
+  describe('4.13 fetching supplemental and other characters', function() {
+    let connection = null;
+    const TABLE = 'testTable';
+    before(async function() {
+      connection = await oracledb.getConnection(dbConfig);
+      let sql = `CREATE TABLE ${TABLE} ( \
+            id NUMBER(4),  \
+            name VARCHAR2(400) \
+          )`;
+
+      await testsUtil.createTable(connection, TABLE, sql);
+      const charsetResult = await connection.execute(`
+        select value
+        from nls_database_parameters
+        where parameter = 'NLS_CHARACTERSET'`
+      );
+
+      const charset = charsetResult.rows[0][0];
+      if (charset !== "AL32UTF8") {
+        this.skip();
+      }
+    });
+
+    after(async function() {
+      await testsUtil.dropTable(connection, TABLE);
+      await connection.close();
+    });
+
+    it('4.13.1 bind and fetch supplemental characters', async function() {
+      const supplemental_chars = "𠜎 𠜱 𠝹 𠱓 𠱸 𠲖 𠳏 𠳕 𠴕 𠵼 𠵿 𠸎 𠸏 𠹷 𠺝 " +
+        "𠺢 𠻗 𠻹 𠻺 𠼭 𠼮 𠽌 𠾴 𠾼 𠿪 𡁜 𡁯 𡁵 𡁶 𡁻 𡃁 𡃉 𡇙 𢃇 " +
+        "𢞵 𢫕 𢭃 𢯊 𢱑 𢱕 𢳂 𢴈 𢵌 𢵧 𢺳 𣲷 𤓓 𤶸 𤷪 𥄫 𦉘 𦟌 𦧲 " +
+        "𦧺 𧨾 𨅝 𨈇 𨋢 𨳊 𨳍 𨳒 𩶘";
+
+      await connection.execute(`
+        insert into ${TABLE} (id, name)
+        values (:1, :2)`,
+      [1, supplemental_chars]
+      );
+      await connection.commit();
+
+      const result = await connection.execute(`select name from ${TABLE}`);
+      const value = result.rows[0][0];
+
+      assert.strictEqual(value, supplemental_chars);
+    });
+
+    it('4.13.2 bind and fetch Scandinavian/Nordic characters', async function() {
+      await connection.execute(`truncate table ${TABLE}`);
+      let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
+      const characterArray = ["Æ", "æ", "Å", "å", "Ä", "ä", "Ø", "ø", "Ö", "ö", "«", "»", "€"];
+      let binds = [];
+
+      for (let i = 0; i < characterArray.length; i++) {
+        binds.push([100 + i, characterArray[i]]);
+      }
+
+      let options = {
+        autoCommit: true,
+        bindDefs: [
+          { type: oracledb.NUMBER },
+          { type: oracledb.STRING, maxSize: 20 },
+        ],
+      };
+
+      let result = await connection.executeMany(sql, binds, options);
+
+      assert.strictEqual(result.rowsAffected, 13);
+
+      sql = `SELECT id FROM ${TABLE} WHERE name=:variable`;
+
+      options = {
+        outFormat: oracledb.OUT_FORMAT_OBJECT
+      };
+
+      for (let i = 0; i < characterArray.length; i++) {
+        binds = { variable: characterArray[i] };
+        result = await connection.execute(sql, binds, options);
+        assert.strictEqual(result.rows[0].ID, 100 + i);
+      }
     });
   });
 });

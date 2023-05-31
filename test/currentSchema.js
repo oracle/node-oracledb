@@ -45,7 +45,6 @@ describe('191. currentSchema.js', function() {
 
     if (!isRunnable) {
       this.skip();
-      return;
     }
   });
 

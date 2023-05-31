@@ -36,7 +36,7 @@ const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('275. jsonDualityView4.js', function() {
+(dbConfig.test.isCmanTdm ? describe : describe.skip)('275. jsonDualityView4.js', function() {
 
   let connection = null;
   let dbaConn = null;

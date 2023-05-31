@@ -48,7 +48,8 @@ const config = {
     mode:          'thin',
     instantClientPath: '',
     isCloudService: false,
-    drcp:           false
+    isCmanTdm:     false,
+    drcp:          false
   }
 };
 

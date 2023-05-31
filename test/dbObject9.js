@@ -150,7 +150,7 @@ describe('208. dbObject9.js', function() {
     END;
   `;
 
-  it('208.2 Implicit results that fetch objects', async () => {
+  (dbConfig.test.isCmanTdm ? it : it.skip)('208.2 Implicit results that fetch objects', async () => {
     const result = await conn.execute(queryImpres);
     const rows = result.implicitResults[0];
     for (let i = 0; i < PEOPLE.length; i++) {
@@ -159,7 +159,7 @@ describe('208. dbObject9.js', function() {
     }
   }); // 208.2
 
-  it('208.3 Implicit results that fetch objects with Result Set', async () => {
+  (dbConfig.test.isCmanTdm ? it : it.skip)('208.3 Implicit results that fetch objects with Result Set', async () => {
     const result = await conn.execute(queryImpres, [], { resultSet: true});
     const rows = await result.implicitResults[0].getRows(PEOPLE.length);
     for (let i = 0; i < PEOPLE.length; i++) {

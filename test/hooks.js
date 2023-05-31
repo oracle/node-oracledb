@@ -49,6 +49,18 @@ async function testConnection(description, additionalOptions = {}) {
   await connection.close();
 }
 
+/*
+ * This is to skip tests that are not supported by Oracle Connection Manager in Traffic Director mode.
+ */
+async function cmanTdmCheck() {
+  const connection = await oracledb.getConnection(dbConfig);
+  let result = await connection.execute(`select sys_context('USERENV','PROXY_USER') from dual`);
+  if (!process.env.NODE_ORACLEDB_PROXY_SESSION_USER && result.rows[0][0] != null) {
+    dbConfig.test.isCmanTdm = true;
+  }
+  await connection.close();
+}
+
 async function cloudServiceCheck() {
   const connection = await oracledb.getConnection(dbConfig);
   // 'userenv' parameter is only available from Oracle DB 18c & later versions
@@ -74,4 +86,5 @@ before(async function() {
     await testConnection("Proxy Session User", {user: `${dbConfig.user}[${dbConfig.test.proxySessionUser}]`});
   }
   await cloudServiceCheck();
+  await cmanTdmCheck();
 });

@@ -440,7 +440,7 @@ describe('161. changePassword.js', function() {
     before (async function() {
       isRunnable = (!dbConfig.test.drcp && dbConfig.test.DBA_PRIVILEGE);
       if (isRunnable) {
-        isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
+        isRunnable = await testsUtil.checkPrerequisites(2300000000, 2300000000);
       }
       if (!isRunnable) {
         this.skip();

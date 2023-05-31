@@ -121,26 +121,26 @@ describe('226. dbType01.js', function() {
     assert.match(result.rows[0][0], /Typ=2 Len=2/);
   });
 
-  it('226.10 DB_TYPE_BINARY_FLOAT', async () => {
+  (dbConfig.test.isCmanTdm ? it : it.skip)('226.10 DB_TYPE_BINARY_FLOAT', async () => {
     const bindVal = { BIND1: {val: numInVal, type: oracledb.DB_TYPE_BINARY_FLOAT}};
     const result = await conn.execute(SQL, bindVal);
     assert.match(result.rows[0][1], /Typ=100 Len=4/);
   });
 
-  it('226.11 DB_TYPE_BINARY_DOUBLE', async () => {
+  (dbConfig.test.isCmanTdm ? it : it.skip)('226.11 DB_TYPE_BINARY_DOUBLE', async () => {
     const bindVal = { BIND1: {val: numInVal, type: oracledb.DB_TYPE_BINARY_DOUBLE}};
     const result = await conn.execute(SQL, bindVal);
     assert.match(result.rows[0][1], /Typ=101 Len=8/);
   });
 
-  it('226.12 Infinity, DB_TYPE_BINARY_FLOAT', async () => {
+  (dbConfig.test.isCmanTdm ? it : it.skip)('226.12 Infinity, DB_TYPE_BINARY_FLOAT', async () => {
     const num = 1 / 0;
     const bindVal = { BIND1: {val: num, type: oracledb.DB_TYPE_BINARY_FLOAT}};
     const result = await conn.execute(SQL, bindVal);
     assert.match(result.rows[0][1], /Typ=100 Len=4/);
   });
 
-  it('226.13 Infinity, DB_TYPE_BINARY_DOUBLE', async () => {
+  (dbConfig.test.isCmanTdm ? it : it.skip)('226.13 Infinity, DB_TYPE_BINARY_DOUBLE', async () => {
     const num = 1 / 0;
     const bindVal = { BIND1: {val: num, type: oracledb.DB_TYPE_BINARY_DOUBLE}};
     const result = await conn.execute(SQL, bindVal);

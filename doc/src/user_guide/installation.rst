@@ -10,7 +10,7 @@ Oracle Client libraries. The database can be on the same machine as Node.js, or
 it can be remote.
 
 Pre-built 'Thick' mode binaries for common architectures (Windows 64-bit, Linux
-x86_64, Linux ARM, and macOS Intel) are included in the node-oracledb
+x86_64, Linux ARM (aarch64), and macOS Intel) are included in the node-oracledb
 installation as a convenience.  Thick mode provides some :ref:`additional
 functionality <featuresummary>`.  To use Thick mode, Oracle Client libraries
 version 11.2, or later, need to be manually installed.  Node-oracledb Thick
@@ -208,10 +208,10 @@ summary:
 - Oracle Client 11.2 can connect to Oracle Database 9.2 or later
 
 Not all features are available in all versions or driver modes.  The
-node-oracledb attribute :attr:`connection.thin` can be used to see what mode a
-connection is in. In the Thick mode, the attribute
-:attr:`oracledb.oracleClientVersion` can be used to determine which Oracle
-Client version is in use. The attribute
+node-oracledb attributes :attr:`oracledb.thin`, :attr:`pool.thin` and
+:attr:`connection.thin` can be used to see what mode a connection is in. In the
+Thick mode, the attribute :attr:`oracledb.oracleClientVersion` can be used to
+determine which Oracle Client version is in use. The attribute
 :attr:`connection.oracleServerVersionString` can be used to determine which
 Oracle Database version a connection is accessing.  These attributes can be
 used to adjust application feature usage appropriately. Any attempt to use
@@ -225,9 +225,13 @@ Installation Requirements
 
 To use node-oracledb, you need:
 
-- Node.js 14.6 or later
+- Node.js 14.6 or later.
 
-- An Oracle Database either local or remote, on-premises, or in the Cloud.
+- Access to an Oracle Database either local or remote, on-premises, or in the
+  Cloud. You will need to know the `database credentials
+  <https://www.youtube.com/ watch?v=WDJacg0NuLo>`__ and the :ref:`connection
+  string <connectionstrings>` for the database.
+
   Installing node-oracledb does not install or create a database.
 
 - Optionally, Oracle Client libraries can be installed to enable the
@@ -251,24 +255,12 @@ To use node-oracledb, you need:
   Run ``node -p "process.arch"`` to identify the Node.js architecture so you
   can install the appropriate 64-bit or 32-bit Oracle Client libraries.
 
-- You will need to know the `database credentials <https://www.youtube.com/
-  watch?v=WDJacg0NuLo>`__ and the :ref:`connection string <connectionstrings>`
-  for the database.
-
 .. _linuxinstall:
 
 Installing Node.js and node-oracledb on Linux
 =============================================
 
-This section discusses the Node.js and node-oracledb installation steps on
-Linux x86_64 and Linux ARM (aarch64) architectures. The installation steps
-vary based on the node-oracledb mode:
-
-- For Thin mode, install :ref:`Node.js <nodelin>` and
-  :ref:`node-oracledb <nodeoracledblin>`.
-- For Thick mode, install :ref:`Node.js <nodelin>`,
-  :ref:`node-oracledb <nodeoracledblin>`, and
-  :ref:`Oracle Client <clientlin>`.
+Review the :ref:`prerequisites`.
 
 .. _nodelin:
 
@@ -307,11 +299,10 @@ Install node-oracledb
 
 2. You can now run applications.
 
-   Also, you can use the runnable samples available in the ``/examples``
-   directory by following these steps:
+   Runnable samples are available from GitHub. To try them follow these steps:
 
    a. Download the `examples <https://github.com/oracle/node-oracledb/tree/
-      main/examples>`__ from GitHub.
+      main/examples>`__.
 
    b. Edit ``dbconfig.js`` and set the `database credentials <https://www.
       youtube.com/watch?v=WDJacg0NuLo>`__ to your environment, for example::
@@ -331,14 +322,21 @@ Install node-oracledb
    in your application, then follow the instructions in the
    :ref:`next section <clientlin>`. Otherwise, if you will only ever use Thin
    mode, you can optionally minimize the install footprint by removing all the
-   Thick mode binaries automatically installed with node-oracledb by running
-   commands like::
+   Thick mode binaries automatically installed with node-oracledb. To remove
+   the binaries, run commands like::
 
         cd node_modules/oracledb
         npm run prune all
 
-Questions and issues can be posted as `GitHub Issues <https://github.com/
-oracle/node-oracledb/issues>`__.
+   This can be automated with a ``postinstall`` script in your ``package.json``
+   file::
+
+        "scripts": {
+          "postinstall": "cd node_modules/oracledb && npm run prune all"
+        },
+
+Questions can be asked as `GitHub Discussions
+<https://github.com/oracle/node-oracledb/discussions>`__.
 
 .. _clientlin:
 
@@ -405,8 +403,6 @@ Follow these steps if your database is on a remote machine and either:
 - or your Linux distribution uses the Debian package format, for example
   if you are using Ubuntu. Note: you should review Oracle’s supported
   distributions before choosing an operating system.
-
-Review the :ref:`prerequisites`.
 
 To use node-oracledb Thick mode with Oracle Instant Client zip files:
 
@@ -489,8 +485,6 @@ Oracle Instant Client RPMs
 Follow these steps if your database is on a remote machine and your
 Linux distribution uses RPM packages. Also see :ref:`Installing Node.js and
 node-oracledb RPMs from yum.oracle.com <instnoderpms>`.
-
-Review the :ref:`prerequisites`.
 
 To use node-oracledb with Oracle Instant Client RPMs:
 
@@ -578,8 +572,6 @@ For easy development, `Oracle Database Free
 developed with this database may be immediately used with other editions of the
 Oracle Database.
 
-Review the generic :ref:`prerequisites`.
-
 To use node-oracledb with local database or full client:
 
 1. Set required Oracle environment variables, such as ``ORACLE_HOME`` and
@@ -628,13 +620,6 @@ remote database.  Alternatively a database can easily be run in Docker or in a
 Linux virtual machine using Vagrant. See the `Oracle Database Vagrant projects
 <https://github.com/oracle/vagrant-projects/tree/main/ OracleDatabase>`__.
 
-The installation steps vary based on the node-oracledb mode:
-
-- For Thin mode, install :ref:`Node.js <nodeos>` and
-  :ref:`node-oracledb <nodeoracledbos>`.
-- For Thick mode, install :ref:`Node.js <nodeos>`,
-  :ref:`node-oracledb <nodeoracledbos>`, and
-  :ref:`Oracle Client <clientos>`.
 
 .. _nodeos:
 
@@ -660,11 +645,10 @@ Install node-oracledb
 
 2. You can now run applications.
 
-   Also, you can use the runnable samples available in the ``/examples`` directory
-   by following these steps:
+   Runnable samples are available from GitHub. To try them follow these steps:
 
-   a. Download the `examples <https://github.com/oracle/node-oracledb/tree/main/
-      examples>`__ from GitHub.
+   a. Download the `examples <https://github.com/oracle/node-oracledb/tree/
+      main/examples>`__.
 
    b. Edit ``dbconfig.js`` and set the `database credentials <https://www.youtube.
       com/watch?v=WDJacg0NuLo>`__ to your environment, for example::
@@ -684,14 +668,21 @@ Install node-oracledb
    in your application, then follow the instructions in the
    :ref:`next section <clientos>`. Otherwise, if you will only ever use Thin
    mode, you can optionally minimize the install footprint by removing all the
-   Thick mode binaries automatically installed with node-oracledb by running
-   commands like::
+   Thick mode binaries automatically installed with node-oracledb. To remove
+   the binaries, run commands like::
 
         cd node_modules/oracledb
         npm run prune all
 
-Questions and issues can be posted as `GitHub Issues <https://github.
-com/oracle/node-oracledb/issues>`__.
+   This can be automated with a ``postinstall`` script in your ``package.json``
+   file::
+
+        "scripts": {
+          "postinstall": "cd node_modules/oracledb && npm run prune all"
+        },
+
+Questions can be asked as `GitHub Discussions
+<https://github.com/oracle/node-oracledb/discussions>`__.
 
 .. _clientos:
 
@@ -774,14 +765,6 @@ Installing Node.js and node-oracledb on Microsoft Windows
 
 Review the :ref:`prerequisites`.
 
-The installation steps vary based on the node-oracledb mode:
-
-- For Thin mode, install :ref:`Node.js <nodewin>` and
-  :ref:`node-oracledb <nodeoracledbwin>`.
-- For Thick mode, install :ref:`Node.js <nodewin>`,
-  :ref:`node-oracledb <nodeoracledbwin>`, and
-  :ref:`Oracle Client <clientwin>`.
-
 .. _nodewin:
 
 Install Node.js
@@ -810,11 +793,10 @@ Install node-oracledb
 
 3. You can now run applications.
 
-   Also, you can use the runnable samples available in the ``/examples`` directory
-   by following these steps:
+   Runnable samples are available from GitHub. To try them follow these steps:
 
-   a. Download the `examples <https://github.com/oracle/node-oracledb/tree/main/
-      examples>`__ from GitHub.
+   a. Download the `examples <https://github.com/oracle/node-oracledb/tree/
+      main/examples>`__.
 
    b. Edit ``dbconfig.js`` and set the `database credentials <https://www.youtube
       .com/watch?v=WDJacg0NuLo>`__ to your environment, for example::
@@ -834,14 +816,21 @@ Install node-oracledb
    in your application, then follow the instructions in the
    :ref:`next section <clientwin>`. Otherwise, if you will only ever use Thin
    mode, you can optionally minimize the install footprint by removing all the
-   Thick mode binaries automatically installed with node-oracledb by running
-   commands like::
+   Thick mode binaries automatically installed with node-oracledb. To remove
+   the binaries, run commands like::
 
         cd node_modules\oracledb
         npm run prune all
 
-Questions and issues can be posted as `GitHub Issues <https://github.com/
-oracle/node-oracledb/issues>`__.
+   This can be automated with a ``postinstall`` script in your ``package.json``
+   file::
+
+        "scripts": {
+          "postinstall": "cd node_modules/oracledb && npm run prune all"
+        },
+
+Questions can be asked as `GitHub Discussions
+<https://github.com/oracle/node-oracledb/discussions>`__.
 
 .. _clientwin:
 
@@ -1639,9 +1628,9 @@ If using node-oracledb fails:
   expected version is first in ``PATH`` (on Windows) or ``LD_LIBRARY_PATH``
   (on Linux).
 
-Issues and questions about node-oracledb can be posted on
-`GitHub <https://github.com/oracle/node-oracledb/issues>`__ or
-`Slack <https://node-oracledb.slack.com/>`__ (`link to join
-Slack <https://join.slack.com/t/node-oracledb/shared_invite/enQtNDU4Mjc2NzM
+Questions about node-oracledb can be asked as `GitHub Discussions
+<https://github.com/oracle/node-oracledb/discussions>`__ or posted on `Slack
+<https://node-oracledb.slack.com/>`__ (`link to join Slack
+<https://join.slack.com/t/node-oracledb/shared_invite/enQtNDU4Mjc2NzM
 5OTA2LWMzY2ZlZDY5MDdlMGZiMGRkY2IzYjI5OGU4YTEzZWM5YjQ3ODUzMjcxNWQyNzE4MzM5YjN
 kYjVmNDk5OWU5NDM>`__).

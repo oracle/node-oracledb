@@ -8,6 +8,7 @@ node-oracledb Release Notes
 node-oracledb `v6.0.1 <https://github.com/oracle/node-oracledb/compare/v6.0.0...v6.0.1>`__ (DD MON 2023)
 --------------------------------------------------------------------------------------------------------
 
+#) Allow bind variables to use multi-byte characters. `Issue #1554 <https://github.com/oracle/node-oracledb/issues/1554>`__.
 
 node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...v6.0.0>`__ (24 May 2023)
 --------------------------------------------------------------------------------------------------------
