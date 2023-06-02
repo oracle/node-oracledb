@@ -30,8 +30,9 @@
  *
  *   When bound in an INSERT, JavaScript Dates are inserted using
  *   TIMESTAMP unless explicitly bound as another type.
- *   Similarly for queries, TIMESTAMP and DATE columns are fetched
- *   as TIMESTAMP WITH LOCAL TIMEZONE.
+ *   For queries, TIMESTAMP and DATE columns are fetched as is and
+ *   converted to a JavaScript date/time datatype in the JavaScript
+ *   timezone.
  *
  *****************************************************************************///
 
