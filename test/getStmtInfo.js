@@ -365,9 +365,110 @@ describe('162. getStmtInfo.js', function() {
           'OBJECT_GRANT_AS_GRANTOR',
           :schema_name_in
       from dual`;
-    const connection = await oracledb.getConnection(dbConfig);
-    const info = await connection.getStatementInfo(sql);
+    const info = await conn.getStatementInfo(sql);
     assert.deepStrictEqual(info.bindNames, ['ÖOBJECT_NAME_IN', 'SCHEMA_NAME_IN']);
-    await connection.close();
   }); // 162.28
+
+  it('162.29 Ignore multiple single line comments having : in sql', async function() {
+    // Issue 1561
+    const sql = `select
+                      1
+                    from
+                      -- :
+                      dual
+                    where
+                      -- :
+                      1=1`;
+    const info = await conn.getStatementInfo(sql);
+    assert.deepStrictEqual(info.bindNames, []);
+    const result = await conn.execute(sql);
+    assert.deepStrictEqual(result.rows[0], [1]);
+  });
+
+  it('162.30 Ignore multiple single and multi line comments having : in sql', async function() {
+    const sql = `select
+                        1
+                      from
+                        -- :
+                        /* adding
+                        multi line comments :1 */
+                        dual
+                      where
+                      /* adding :bind */
+                      -- :
+                        1=1`;
+    const info = await conn.getStatementInfo(sql);
+    assert.deepStrictEqual(info.bindNames, []);
+    const result = await conn.execute(sql);
+    assert.deepStrictEqual(result.rows[0], [1]);
+  });
+
+  it('162.31 Multiple single line comments with binds before the comment in sql', async function() {
+    const sql = `select
+                        -- :
+                        :1 -- :
+                        -- :
+                      from
+                        -- :
+                        dual
+                      where
+                        -- :
+                        1=1`;
+    const info = await conn.getStatementInfo(sql);
+    assert.deepStrictEqual(info.bindNames, ['1']);
+    const result = await conn.execute(sql, [1]);
+    assert.deepStrictEqual(result.rows[0], [1]);
+  });
+
+  it('162.32 Multiple single line comments with binds after the comment in sql', async function() {
+    const sql = `select
+                        -- :
+                        -- :
+                        :1
+                        -- :
+                      from
+                        -- :
+                        dual
+                      where
+                        -- :
+                        1=1`;
+    const info = await conn.getStatementInfo(sql);
+    assert.deepStrictEqual(info.bindNames, ['1']);
+    const result = await conn.execute(sql, [1]);
+    assert.deepStrictEqual(result.rows[0], [1]);
+  });
+
+  it('162.33 Bind Variable before, inbetween and after comments in sql', async function() {
+    const sql = `select
+                        :1,
+                        -- :
+                        :2
+                        -- :
+                      from
+                        -- :
+                        dual
+                      where
+                        -- :
+                        :3=1`;
+    const info = await conn.getStatementInfo(sql);
+    assert.deepStrictEqual(info.bindNames, ['1', '2', '3']);
+    const result = await conn.execute(sql, [1, 1, 1]);
+    assert.deepStrictEqual(result.rows[0], [1, 1]);
+  });
+
+  it('162.34 ignore literals only during bind processing', async function() {
+    const sql = `select 'HELLO' from
+                          -- :
+                          /* adding
+                          multi line comments :1 */
+                          dual
+                        where
+                        /* adding :bind */
+                          1=1`;
+    const info = await conn.getStatementInfo(sql);
+    assert.deepStrictEqual(info.bindNames, []);
+    const result = await conn.execute(sql);
+    assert.deepStrictEqual(result.rows[0], ['HELLO']);
+  });
+
 });
