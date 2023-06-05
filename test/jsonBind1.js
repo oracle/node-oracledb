@@ -466,11 +466,9 @@ describe('253. jsonBind1.js', function() {
     it('253.2.10 INTERVAL YEAR TO MONTH type', async () => {
       const sql = `INSERT into ` + tableName + ` VALUES (JSON_OBJECT( key 'key1' value json_scalar(to_yminterval(:b)) RETURNING JSON))`;
       if (testsUtil.getClientVersion() >= 2100000000) {
+        await conn.execute(sql, ['5-9']);
         await assert.rejects(
-          async () => {
-            await conn.execute(sql, ['5-9']);
-            await conn.execute(rsSelect);
-          },
+          async () => await conn.execute(rsSelect),
           /NJS-078/
         );//NJS-078: unsupported data type 2016 in JSON value
       } else {
@@ -485,11 +483,9 @@ describe('253. jsonBind1.js', function() {
     it('253.2.11 INTERVAL DAY TO SECOND type', async function() {
       const sql = `INSERT into ` + tableName + ` VALUES (JSON_OBJECT( key 'key1' value json_scalar(to_dsinterval(:b)) RETURNING JSON))`;
       if (testsUtil.getClientVersion() >= 2100000000) {
+        await conn.execute(sql, ['11 10:09:08']);
         await assert.rejects(
-          async () => {
-            await conn.execute(sql, ['11 10:09:08']);
-            await conn.execute(rsSelect);
-          },
+          async () => await conn.execute(rsSelect),
           /NJS-078/
         );//NJS-078: unsupported data type 2015 in JSON value
       } else {
