@@ -1450,13 +1450,13 @@ Each of the configuration properties is described below.
 
     The default value is *1*.
 
-    With fixed-sized :ref:`homogeneous <createpoolpoolattrshomogeneous>`
-    pools (where ``poolMin`` equals ``poolMax``), and using Oracle Client 18c
-    (or later), you may wish to evaluate setting ``poolIncrement`` greater
-    than 1. This can expedite regrowth when the number of
-    :attr:`connections established <pool.connectionsOpen>` has become lower
-    than ``poolMin``, for example if network issues have caused connections
-    to become unusable and they have been dropped from the pool.
+    With fixed-size :ref:`homogeneous <createpoolpoolattrshomogeneous>`
+    pools (where ``poolMin`` equals ``poolMax``), and when using Oracle Client
+    18c (or later) for node-oracledb Thick mode, you may wish to evaluate
+    setting ``poolIncrement`` greater than 1. This can expedite regrowth when
+    the number of :attr:`connections established <pool.connectionsOpen>` has
+    become lower than ``poolMin``, for example, when network issues cause
+    connections to become unusable and get them dropped from the pool.
 
     This property may be overridden when
     :meth:`creating a connection pool <oracledb.createPool()>`.
@@ -1871,9 +1871,10 @@ Oracledb Methods
     password and connection string. A pool is typically created once during
     application initialization.
 
-    Internally, ``createPool()`` creates an `Oracle Call Interface Session
-    Pool <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F9662FFB-
-    EAEF-495C-96FC-49C6D1D9625C>`__ for each Pool object.
+    In node-oracledb Thick mode, ``createPool()`` internally creates an
+    `Oracle Call Interface Session Pool <https://www.oracle.com/pls/topic/
+    lookup?ctx=dblatest&id=GUID-F9662FFB-EAEF-495C-96FC-49C6D1D9625C>`__ for
+    each Pool object.
 
     The default properties may be overridden by specifying new properties in
     the ``poolAttrs`` parameter.
@@ -1989,7 +1990,7 @@ Oracledb Methods
 
             .. desupported:: 6.0
 
-            Use :ref:`accessToken <createpoolpoolattrsaccesstoken>` instead, which was enhanced to support a callback.
+            Use :ref:`accessToken <createpoolpoolattrsaccesstoken>` with a callback instead.
         * - ``connectString``, ``connectionString``
           - String
           - Both

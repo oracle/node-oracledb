@@ -24,6 +24,9 @@ Upgrading from node-oracledb 5.5 to 6.0
      is in Thick mode. You must call :meth:`oracledb.initOracleClient`
      to enable Thick mode. See :ref:`enablingthick`.
 
+- Review the updated :ref:`node-oracledb installation instructions
+  <installation>` and :ref:`initialization options <initnodeoracledb>`.
+
 - The Oracle Database features supported by the node-oracledb Thin and Thick
   modes and the notable differences between these two modes are detailed
   :ref:`here <appendixa>`.
@@ -58,13 +61,12 @@ Upgrading from node-oracledb 5.5 to 6.0
   :ref:`execution attribute <propexecextendedmetadata>` values are
   ignored.
 
-- The errors are handled differently by the node-oracledb Thin and Thick modes,
-  see :ref:`exceptions`.
+- The node-oracledb Thin and Thick modes may return different errors in some
+  scenarios. See :ref:`exceptions`.
 
 - The node-oracledb Thick mode uses Oracle Database's National Language Support
   (NLS) functionality to assist in globalizing applications. The node-oracledb
-  Thin mode ignores all Oracle NLS environment variables, and the ``ORA_TZFILE``
-  environment variable. See :ref:`nls`.
+  Thin mode uses Node.js localization functions. See :ref:`nls`.
 
 .. _changingthick:
 

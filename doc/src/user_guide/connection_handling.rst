@@ -1083,6 +1083,9 @@ information about an active pool:
     console.log(pool.connectionsOpen);   // how big the pool actually is
     console.log(pool.connectionsInUse);  // how many of those connections are held by the application
 
+Statistics are calculated from the time the pool was created, or since
+:meth:`pool.reconfigure()` was used to reset the statistics.
+
 The recording of :ref:`pool queue <connpoolqueue>` statistics, pool
 settings, and related environment variables can be enabled by setting
 ``enableStatistics`` to *true* when using :meth:`oracledb.createPool()` or
@@ -1127,37 +1130,8 @@ Alternatively the statistics can be printed directly by calling
 
     pool.logStatistics();    // print all statistics to the console
 
-The output of ``poolstatistics.logStatistics()`` and
-``pool.logStatistics()`` is identical.
-
-.. _pooldrivermode:
-
-Driver Mode Attribute
-+++++++++++++++++++++
-
-The :ref:`PoolStatistics object <poolstatisticsclass>` and ``logStatistics()``
-function record the node-oracledb mode:
-
-.. list-table-with-summary::  Pool Mode Attribute
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :summary: The first column displays the pool thin mode attribute. The second column displays the logStatistics() description. The third column displays the description of the attribute.
-
-    * - :ref:`Pool Statistics Class <poolstatisticsclass>` Attribute
-      - ``logStatistics()`` Label
-      - Description
-    * - ``thin mode``
-      - Indicates whether Thin or Thick mode is in use.
-      - If *true*, then it indicates that the node-oracledb mode is Thin. If *false*, then the node-oracledb mode is Thick.
-
-.. _poolstats:
-
-Pool Statistics
-+++++++++++++++
-
-Statistics are calculated from the time the pool was created, or since
-:meth:`pool.reconfigure()` was used to reset the statistics.
+The output of :meth:`poolstatistics.logStatistics()` and
+:meth:`pool.logStatistics()` is identical.
 
 For efficiency, the minimum, maximum, average, and sum of times in the
 pool queue are calculated when requests are removed from the queue. They
@@ -1170,112 +1144,133 @@ The sum of ‘requests failed’, ‘requests exceeding queueMax’, and
 ‘requests exceeding queueTimeout’ is the number of
 ``pool.getConnection()`` calls that failed.
 
-.. list-table-with-summary::  Pool Statistics Class Attributes
+The :ref:`PoolStatistics object <poolstatisticsclass>` and ``logStatistics()``
+function record the following:
+
+.. _poolstats:
+
+.. list-table-with-summary:: PoolStatistics Class Attribute and Equivalent ``logStatistics()`` Label
     :header-rows: 1
     :class: wy-table-responsive
     :align: center
-    :summary: The first column displays the Pool Statistics Class attribute. The second column displays the logStatistics() description. The third column displays the description of the attribute.
+    :summary: The first column displays the pool statistics attribute. The second column displays the logStatistics() label. The third column displays the description of the attribute.
 
     * - :ref:`Pool Statistics Class <poolstatisticsclass>` Attribute
       - ``logStatistics()`` Label
       - Description
+    * - ``thin``
+      - thin mode
+      - Indicates whether the driver is in Thin or Thick mode.
     * - ``gatheredDate``
       - gathered at
       - The time the statistics were taken.
     * - ``upTime``
-      - up time
+      - up time (milliseconds)
       - The number of milliseconds since this pool was created.
     * - ``upTimeSinceReset``
-      - up time from last reset
+      - up time from last reset (milliseconds)
       - The number of milliseconds since the statistics were initialized or reset.
     * - ``connectionRequests``
       - connection requests
-      - Number of ``getConnection()`` requests made to this pool.
+      - The number of ``getConnection()`` requests made to this pool.
     * - ``requestsEnqueued``
       - requests enqueued
-      - Number of ``getConnection()`` requests that were added to this pool’s queue (waiting for the application to return an in-use connection to the pool) because every connection in this pool was already being used.
+      - The number of ``getConnection()`` requests that were added to this pool’s queue (waiting for the application to return an in-use connection to the pool) because every connection in this pool was already being used.
     * - ``requestsDequeued``
       - requests dequeued
-      - Number of ``getConnection()`` requests that were dequeued when a connection in this pool became available for use.
+      - The number of ``getConnection()`` requests that were dequeued when a connection in this pool became available for use.
     * - ``failedRequests``
       - requests failed
-      - Number of getConnection() requests that failed due to an Oracle Database error. Does not include :attr:`~oracledb.queueMax` or :attr:`~oracledb.queueTimeout` errors.
+      - The number of getConnection() requests that failed due to an Oracle Database error. Does not include :attr:`~oracledb.queueMax` or :attr:`~oracledb.queueTimeout` errors.
     * - ``rejectedRequests``
       - requests exceeding queueMax
-      - Number of getConnection() requests rejected because the number of connections in the pool queue exceeded the :attr:`~oracledb.queueMax` limit.
+      - The number of getConnection() requests rejected because the number of connections in the pool queue exceeded the :attr:`~oracledb.queueMax` limit.
     * - ``requestTimeouts``
       - requests exceeding queueTimeout
-      - Number of queued getConnection() requests that were timed out from the pool queue because they exceeded the :attr:`~oracledb.queueTimeout` time.
+      - The number of queued getConnection() requests that were timed out from the pool queue because they exceeded the :attr:`~oracledb.queueTimeout` time.
     * - ``currentQueueLength``
       - current queue length
-      - Current number of ``getConnection()`` requests that are waiting in the pool queue.
+      - The current number of ``getConnection()`` requests that are waiting in the pool queue.
     * - ``maximumQueueLength``
       - maximum queue length
-      - Maximum number of ``getConnection()`` requests that were ever waiting in the pool queue at one time.
+      - The maximum number of ``getConnection()`` requests that were ever waiting in the pool queue at one time.
     * - ``timeInQueue``
-      - sum of time in queue
+      - sum of time in queue (milliseconds)
       - The sum of the time (milliseconds) that dequeued requests spent in the pool queue.
     * - ``minimumTimeInQueue``
-      - minimum time in queue
+      - minimum time in queue (milliseconds)
       - The minimum time (milliseconds) that any dequeued request spent in the pool queue.
     * - ``maximumTimeInQueue``
-      - maximum time in queue
+      - maximum time in queue (milliseconds)
       - The maximum time (milliseconds) that any dequeued request spent in the pool queue.
     * - ``averageTimeInQueue``
-      - average time in queue
+      - average time in queue (milliseconds)
       - The average time (milliseconds) that dequeued requests spent in the pool queue.
     * - ``connectionsInUse``
-      - pool connections in use
+      - :attr:`pool connections in use <pool.connectionsInUse>`
       - The number of connections from this pool that ``getConnection()`` returned successfully to the application and have not yet been released back to the pool.
     * - ``connectionsOpen``
-      - pool connections open
+      - :attr:`pool connections open <pool.connectionsOpen>`
       - The number of idle or in-use connections to the database that the pool is currently managing.
-
-Pool Attribute Values
-+++++++++++++++++++++
-
-The :ref:`PoolStatistics object <poolstatisticsclass>` and
-``logStatistics()`` function record the pool attributes:
-
-- :attr:`~pool.connectString`
-- :attr:`~pool.edition`
-- :attr:`~pool.events`
-- :attr:`~pool.externalAuth`
-- :attr:`~pool.homogeneous`
-- :attr:`~pool.poolAlias`
-- :attr:`~pool.poolIncrement`
-- :attr:`~pool.poolMax`
-- :attr:`~pool.poolMaxPerShard`
-- :attr:`~pool.poolMin`
-- :attr:`~pool.poolPingInterval`
-- :attr:`~pool.poolTimeout`
-- :attr:`~pool.queueMax`
-- :attr:`~pool.queueTimeout`
-- :attr:`~pool.sessionCallback`
-- :attr:`~pool.sodaMetaDataCache`
-- :attr:`~pool.stmtCacheSize`
-- :attr:`~pool.user`
-
-Pool Related Environment Variables
-++++++++++++++++++++++++++++++++++
-
-The :ref:`PoolStatistics object <poolstatisticsclass>` and
-``logStatistics()`` function also have one related environment variable:
-
-.. list-table-with-summary::  Pool Related Environment Variable
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :summary: The first column displays the Pool Statistics Class attribute. The second column displays the logStatistics() description. The third column displays the description of the attribute.
-
-    * - :ref:`Pool Statistics Class <poolstatisticsclass>` Attribute
-      - ``logStatistics()`` Label
-      - Description
+    * - ``connectString``
+      - :attr:`~pool.connectString`
+      - The connection string that is used to connect to the Oracle Database instance.
+    * - ``edition``
+      - :attr:`~pool.edition`
+      - The edition name used.
+    * - ``events``
+      - :attr:`~pool.events`
+      - Denotes whether the Oracle Client events mode is enabled or not.
+    * - ``externalAuth``
+      - :attr:`~pool.externalAuth`
+      - Denotes whether connections are established using external authentication or not.
+    * - ``homogeneous``
+      - :attr:`~pool.homogeneous`
+      - Identifies whether the connections in the pool all have the same credentials (a ‘homogenous’ pool), or whether different credentials can be used (a ‘heterogeneous’ pool).
+    * - ``poolAlias``
+      - :attr:`~pool.poolAlias`
+      - The alias of this pool in the connection pool cache.
+    * - ``poolIncrement``
+      - :attr:`~pool.poolIncrement`
+      - The number of connections that are opened whenever a connection request exceeds the number of currently open connections.
+    * - ``poolMax``
+      - :attr:`~pool.poolMax`
+      - The maximum number of connections that can be open in the connection pool.
+    * - ``poolMaxPerShard``
+      - :attr:`~pool.poolMaxPerShard`
+      - The maximum number of connections in the pool that can be used for any given shard in a sharded database.
+    * - ``poolMin``
+      - :attr:`~pool.poolMin`
+      - The minimum number of connections a connection pool maintains, even when there is no activity to the target database.
+    * - ``poolPingInterval``
+      - :attr:`poolPingInterval (seconds) <pool.poolPingInterval>`
+      - The maximum number of seconds that a connection can remain idle in a connection pool before node-oracledb pings the database prior to returning that connection to the application.
+    * - ``poolTimeout``
+      - :attr:`poolTimeout (seconds) <pool.poolTimeout>`
+      - The time (in seconds) after which the pool terminates idle connections (unused in the pool).
+    * - ``queueMax``
+      - :attr:`~pool.queueMax`
+      - The maximum number of pending :meth:`pool.getConnection()` calls that can be queued.
+    * - ``queueTimeout``
+      - :attr:`queueTimeout (milliseconds) <pool.queueTimeout>`
+      - The time (in milliseconds) that a connection request should wait in the queue before the request is terminated.
+    * - ``sessionCallback``
+      - :attr:`~pool.sessionCallback`
+      - The Node.js or PL/SQL function that is invoked by :meth:`pool.getConnection()` when the connection is brand new.
+    * - ``sodaMetaDataCache``
+      - :attr:`~pool.sodaMetaDataCache`
+      - Determines whether the pool has a metadata cache enabled for SODA collection access.
+    * - ``stmtCacheSize``
+      - :attr:`~pool.stmtCacheSize`
+      - The number of statements to be cached in the statement cache of each connection.
+    * - ``user``
+      - :attr:`~pool.user`
+      - The database username for connections in the pool.
     * - ``threadPoolSize``
       - UV_THREADPOOL_SIZE
       - The value of :ref:`process.env.UV_THREADPOOL_SIZE <numberofthreads>` which is the number of worker threads for this process. Note this shows the value of the variable, however if this variable was set after the thread pool started, the thread pool will still be the default size of 4.
 
-        This attribute is only used in the node-oracledb Thick mode.
+        This attribute only affects the node-oracledb Thick mode.
 
 .. _connpoolpinging:
 
@@ -1754,7 +1749,7 @@ allowing different user names and passwords to be passed each time a
 connection is acquired from the pool with :meth:`pool.getConnection()`.
 
 To create a heterogeneous pool, set the :meth:`~oracledb.createPool`
-parameter, :ref:`homogeneous <createpoolpoolattrshomogeneous>` to *false*
+parameter, :ref:`homogeneous <createpoolpoolattrshomogeneous>`, to *false*.
 
 When a heterogeneous pool is created by setting
 :ref:`homogeneous <createpoolpoolattrshomogeneous>` to *false* and no
@@ -2624,8 +2619,8 @@ exchange. There is protection against man-in-the-middle attacks.
 
 .. note::
 
-    Oracle Native Network Encryption feature is only supported in
-    node-oracledb Thick mode. See :ref:`enablingthick`.
+    Oracle native network encryption is only supported in node-oracledb Thick
+    mode. See :ref:`enablingthick`.
 
 Native network encryption can be configured by editing Oracle Net’s
 optional `sqlnet.ora <https://www.oracle.com/pls/topic/lookup?ctx=dblatest

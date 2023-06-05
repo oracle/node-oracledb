@@ -8,10 +8,10 @@ A connection *Pool* object is created by calling the
 :meth:`oracledb.createPool()` method.
 
 The *Pool* object obtains connections to the Oracle database using the
-``getConnection()`` method to “check them out” from the pool. Internally
-`Oracle Call Interface Session Pooling <https://www.oracle.com/pls/topic/
-lookup?ctx=dblatest&id=GUID-F9662FFB-EAEF-495C-96FC-49C6D1D9625C>`__
-is used.
+``getConnection()`` method to “check them out” from the pool. The
+node-oracledb Thick mode internally uses `Oracle Call Interface Session
+Pooling <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
+F9662FFB-EAEF-495C-96FC-49C6D1D9625C>`__.
 
 After the application finishes using a connection pool, it should
 release all connections and terminate the connection pool by calling the
@@ -50,10 +50,16 @@ values.
     This read-only property is a string which specifies the connection string
     used to connect to the Oracle Database Instance.
 
+    See :ref:`connectString <createpoolpoolattrsconnectstring>` parameter of
+    :meth:`oracledb.createPool()`.
+
 .. attribute:: pool.edition
 
     This read-only property is a string which identifies the edition name
     used.
+
+    See :ref:`edition <createpoolpoolattrsedition>` parameter of
+    :meth:`oracledb.createPool()` and :attr:`oracledb.edition`.
 
     .. note::
 
@@ -65,6 +71,9 @@ values.
     This read-only property is a boolean which denotes whether the Oracle
     Client events mode is enabled or not.
 
+    See :ref:`events <createpoolpoolattrsevents>` parameter of
+    :meth:`oracledb.createPool()` and :attr:`oracledb.events`.
+
     .. note::
 
         This property can only be used in the node-oracledb Thick mode. See
@@ -75,10 +84,16 @@ values.
     This read-only property is a boolean which denotes whether connections
     are established using external authentication or not.
 
+    See :ref:`externalAuth <createpoolpoolattrsexternalauth>` parameter of
+    :meth:`oracledb.createPool()` and :attr:`oracledb.externalAuth`.
+
 .. attribute:: pool.enableStatistics
 
     This read-only property is a boolean which identifies whether pool usage
     statistics are being recorded.
+
+    See :ref:`enableStatistics <createpoolpoolattrsstats>` parameter of
+    :meth:`oracledb.createPool()`.
 
 .. attribute:: pool.homogeneous
 
@@ -86,6 +101,9 @@ values.
     connections in the pool all have the same credentials (a
     ‘homogenous’ pool), or whether different credentials can be used (a
     ‘heterogeneous’ pool).
+
+    See :ref:`homogeneous <createpoolpoolattrshomogeneous>` parameter of
+    :meth:`oracledb.createPool()`.
 
 .. attribute:: pool.poolAlias
 
@@ -95,20 +113,25 @@ values.
     undefined for the second and subsequent pools that were created without
     an explicit alias specified.
 
+    See :ref:`poolAlias <createpoolpoolattrspoolalias>` parameter of
+    :meth:`oracledb.createPool()`.
+
 .. attribute:: pool.poolIncrement
 
     This read-only property is a number which specifies the number of
     connections that are opened whenever a connection request
     exceeds the number of currently open connections.
 
-    See :attr:`oracledb.poolIncrement`.
+    See :ref:`poolIncrement <createpoolpoolattrspoolincrement>` parameter of
+    :meth:`oracledb.createPool()` and :attr:`oracledb.poolIncrement`.
 
 .. attribute:: pool.poolMax
 
     This read-only property is a number which specifies the maximum number
     of connections that can be open in the connection pool.
 
-    See :attr:`oracledb.poolMax`.
+    See :ref:`poolMax <createpoolpoolattrspoolmax>` parameter of
+    :meth:`oracledb.createPool()` and :attr:`oracledb.poolMax`.
 
 .. attribute:: pool.poolMaxPerShard
 
@@ -117,7 +140,8 @@ values.
     database. This lets connections in the pool be balanced across the
     shards.
 
-    See :attr:`oracledb.poolMaxPerShard`.
+    See :ref:`poolMaxPerShard <createpoolpoolattrspoolmaxpershard>` parameter
+    of :meth:`oracledb.createPool()` and :attr:`oracledb.poolMaxPerShard`.
 
     .. note::
 
@@ -130,7 +154,8 @@ values.
     of connections a connection pool maintains, even when there is no
     activity to the target database.
 
-    See :attr:`oracledb.poolMin`.
+    See :ref:`poolMin <createpoolpoolattrspoolmin>` parameter of
+    :meth:`oracledb.createPool()` and :attr:`oracledb.poolMin`.
 
 .. attribute:: pool.poolPingInterval
 
@@ -140,7 +165,9 @@ values.
     node-oracledb pings the database prior to returning that connection to
     the application.
 
-    See :attr:`oracledb.poolPingInterval`.
+    See :ref:`poolPingInterval <createpoolpoolattrspoolpinginterval>`
+    parameter of :meth:`oracledb.createPool()` and
+    :attr:`oracledb.poolPingInterval`.
 
 .. attribute:: pool.poolTimeout
 
@@ -148,7 +175,8 @@ values.
     after which the pool terminates idle connections (unused in the pool). The
     number of connections does not drop below poolMin.
 
-    See :attr:`oracledb.poolTimeout`.
+    See :ref:`poolTimeout <createpoolpoolattrspooltimeout>` parameter of
+    :meth:`oracledb.createPool()` and :attr:`oracledb.poolTimeout`.
 
 .. attribute:: pool.queueMax
 
@@ -158,12 +186,14 @@ values.
     of pending ``pool.getConnection()`` calls that can be
     :ref:`queued <connpoolqueue>`.
 
-    See :attr:`oracledb.queueMax`.
+    See :ref:`queueMax <createpoolpoolattrsqueuemax>` parameter of
+    :meth:`oracledb.createPool()` and :attr:`oracledb.queueMax`.
 
 .. attribute:: pool.queueRequests
 
-    This property was removed in node-oracledb 3.0. See :ref:`Connection Pool
-    Queue <connpoolqueue>` for more information.
+    .. desupported:: 3.0
+
+    See :ref:`Connection Pool Queue <connpoolqueue>` for more information.
 
 .. attribute:: pool.queueTimeout
 
@@ -171,7 +201,8 @@ values.
     (in milliseconds) that a connection request should wait in the
     queue before the request is terminated.
 
-    See :attr:`oracledb.queueTimeout`.
+    See :ref:`queueTimeout <createpoolpoolattrsqueuetimeout>` parameter of
+    :meth:`oracledb.createPool()` and :attr:`oracledb.queueTimeout`.
 
 .. attribute:: pool.sessionCallback
 
@@ -179,14 +210,20 @@ values.
     PL/SQL function that is invoked by ``pool.getConnection()`` when the
     connection is brand new.
 
-    See :ref:`Connection Tagging and Session State <connpooltagging>`.
+    See :ref:`sessionCallback <createpoolpoolattrssessioncallback>` parameter
+    of :meth:`oracledb.createPool()`.
+
+    Also, see :ref:`Connection Tagging and Session State <connpooltagging>`.
 
 .. attribute:: pool.sodaMetaDataCache
 
     This read-only property is a boolean which determines whether the pool
     has a metadata cache enabled for SODA collection access.
 
-    See :ref:`Using the SODA Metadata Cache <sodamdcache>`.
+    See :ref:`sodaMetaDataCache <createpoolpoolattrssodamdcache>` parameter of
+    :meth:`oracledb.createPool()`.
+
+    Also, see :ref:`Using the SODA Metadata Cache <sodamdcache>`.
 
     .. note::
 
@@ -210,7 +247,8 @@ values.
     statements to be cached in the :ref:`statement
     cache <stmtcache>` of each connection.
 
-    See :attr:`oracledb.stmtCacheSize`.
+    See :ref:`stmtCacheSize <createpoolpoolattrsstmtcachesize>` parameter of
+    :meth:`oracledb.createPool()` and :attr:`oracledb.stmtCacheSize`.
 
 .. attribute:: pool.thin
 
@@ -230,6 +268,9 @@ values.
 
     This read-only property is a string which specifies the database username
     for connections in the pool.
+
+    See :ref:`user <createpoolpoolattrsuser>` parameter of
+    :meth:`oracledb.createPool()`.
 
 .. _poolmethods:
 

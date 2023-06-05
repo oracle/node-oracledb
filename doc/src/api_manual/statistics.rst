@@ -6,7 +6,7 @@ API: PoolStatistics Class
 
 A PoolStatistics object is returned from :meth:`pool.getStatistics()`.
 It contains attributes recording the pool statistics and pool configuration.
-The attributes are described in :ref:`poolstats`.
+The attributes are described in :ref:`Connection Pool Monitoring <poolstats>`.
 
 .. versionadded:: 5.3
 
