@@ -26,8 +26,10 @@
  *   typehandlernum.js
  *
  * DESCRIPTION
- *   Show how a type handler can format a queried number in a locale-specific
- *   way.
+ *   Show how a type handler can alter queried numbers
+ *    - formating numbers in a locale-specific way.
+ *    - altering the conversion between Oracle's decimal format and Node.js's
+ *      binary format.
  *
  *****************************************************************************/
 
@@ -60,10 +62,10 @@ if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
 }
 
 
-// The fetch type handler is called once per column in the SELECT list.
-// If the metadata name & type tests are satified, then the returned
-// converter function is enabled for that column.  Data in this column will
-// be processed by the converter function before it is returned to the
+// This fetch type handler is called once per column in the SELECT list of
+// example 1.  If the metadata name & type tests are satified, then the
+// returned converter function is enabled for that column.  Data in this column
+// will be processed by the converter function before it is returned to the
 // application.
 
 function fth(metaData) {
@@ -105,14 +107,45 @@ async function run() {
     const inssql = `INSERT INTO no_typehandler_tab (n_col) VALUES (:bv)`;
     await connection.execute(inssql, { bv: data });
 
-    console.log('3. Selecting the number');
+    // Example 1
 
-    const result = await connection.execute(
+    console.log('3. Selecting a formatted number');
+
+    let result = await connection.execute(
       "select n_col from no_typehandler_tab",
       [],
       { fetchTypeHandler: fth }
     );
-    console.log(`Column ${result.metaData[0].name} is formatted as ${result.rows[0][0]}`);
+    console.log(`   Column ${result.metaData[0].name} is formatted as ${result.rows[0][0]}`);
+
+    // Example 2
+
+    // In Thick mode, the default conversion from Oracle's decimal number
+    // format to Node.js's binary format may not be desirable.  For example the
+    // number 0.94 may be fetched as 0.9400000000000001.  An alternative is to
+    // fetch numbers as strings from the database and then convert to floats in
+    // Node.js.  This example shows the type handler in-line in the execute()
+    // call.  Thin mode does not need the handler.
+
+    console.log('4. Selecting a number where the default Thick mode decimal-to-binary format conversion may not be desired');
+
+    result = await connection.execute(
+      "SELECT 0.94 AS col1, 0.94 AS col2 FROM dual", [], {
+        fetchTypeHandler: function(metaData) {
+          if (metaData.name == 'COL2' && metaData.dbType == oracledb.DB_TYPE_NUMBER) {
+            const converter = (v) => {
+              if (v !== null)
+                v = parseFloat(v);
+              return v;
+            };
+            return {type: oracledb.STRING, converter: converter};
+          }
+        }
+      }
+    );
+
+    // In Thick mode, the two values will differ
+    console.log(`   Raw number is ${result.rows[0][0]}. Number converted is ${result.rows[0][1]}`);
 
   } catch (err) {
     console.error(err);

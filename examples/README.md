@@ -108,6 +108,6 @@ File Name                                                 | Description
 [`sessiontagging2.js`](sessiontagging2.js)                | More complex example of pooled connection tagging for setting session state
 [`soda1.js`](soda1.js)                                    | Basic Simple Oracle Document Access (SODA) example
 [`typehandlerdate.js`](typehandlerdate.js)                | Show how a type handler can format a queried date in a locale-specific way
-[`typehandlernum.js`](typehandlernum.js)                  | Show how a type handler can format a queried number in a locale-specific way
+[`typehandlernum.js`](typehandlernum.js)                  | Show how a type handler can alter queried numbers
 [`version.js`](version.js)                                | Shows the node-oracledb version attributes
 [`webapp.js`](webapp.js)                                  | A simple web application using a connection pool
