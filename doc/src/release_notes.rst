@@ -8,15 +8,18 @@ node-oracledb Release Notes
 node-oracledb `v6.0.1 <https://github.com/oracle/node-oracledb/compare/v6.0.0...v6.0.1>`__ (TBD)
 --------------------------------------------------------------------------------------------------------
 
-#) Allow bind variables to use multi-byte characters. Fix for `Issue #1554 <https://github.com/oracle/node-oracledb/issues/1554>`__.
+#)  Allow bind variables to use multi-byte characters. Fix for
+    `Issue #1554 <https://github.com/oracle/node-oracledb/issues/1554>`__.
 
-#) Allow using colons in multiple single-line SQL comments in Thin mode. Fix for `Issue #1561 <https://github.com/oracle/node-oracledb/issues/1561>`__.
+#)  Allow using colons in multiple single-line SQL comments in Thin mode. Fix
+    for `Issue #1561 <https://github.com/oracle/node-oracledb/issues/1561>`__.
 
-#) Added enhanced binding support in Thin mode.
+#)  Added enhanced binding support in Thin mode.
 
-#) Improved statement cache handling in Thin mode.
+#)  Improved statement cache handling in Thin mode.
 
-#) Added clear error message when users try to establish a connection with unsupported database versions.
+#)  Added clear error message when an attempt is made to establish a connection
+    with an unsupported database version in Thin mode.
 
 node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...v6.0.0>`__ (24 May 2023)
 --------------------------------------------------------------------------------------------------------
