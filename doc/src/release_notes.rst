@@ -21,6 +21,9 @@ node-oracledb `v6.0.1 <https://github.com/oracle/node-oracledb/compare/v6.0.0...
 #)  Added clear error message when an attempt is made to establish a connection
     with an unsupported database version in Thin mode.
 
+#)  Fixed bug which caused a cursor leak if an error was thrown while
+    processing the execution of a query.
+
 #)  The buffer and process modules are now imported consistently instead of
     relying on global variable definitions, as suggested by Sławomir Osoba in
     `GitHub pull request #1559
