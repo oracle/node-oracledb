@@ -273,4 +273,14 @@ describe('224. booleanBind.js', function()  {
     //(result.outBinds[0].DATEVALUE).should.be.a.Date();
     assert.strictEqual(true, result.outBinds[0].BOOLEANVALUE);
   }); // 224.9
+
+  it('224.10 OUT bind value "null"', async function() {
+    const  binds = {
+      outval: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN }
+    };
+    const  sql = `begin :outval := null; end;`;
+
+    const  result = await conn.execute(sql, binds);
+    assert.strictEqual(null, result.outBinds.outval);
+  }); // 224.10
 });
