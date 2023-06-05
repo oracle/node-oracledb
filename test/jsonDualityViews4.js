@@ -36,7 +36,7 @@ const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-(dbConfig.test.isCmanTdm ? describe : describe.skip)('275. jsonDualityView4.js', function() {
+describe('275. jsonDualityView4.js', function() {
 
   let connection = null;
   let dbaConn = null;
@@ -47,7 +47,7 @@ const testsUtil = require('./testsUtil.js');
     if (isRunnable) {
       isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
     }
-    if (!isRunnable) {
+    if (!isRunnable || dbConfig.test.isCmanTdm) {
       this.skip();
     }
 
@@ -99,7 +99,7 @@ const testsUtil = require('./testsUtil.js');
   });
 
   after(async function() {
-    if (!isRunnable) return;
+    if (!isRunnable || dbConfig.test.isCmanTdm) return;
 
     await connection.execute(`drop table student PURGE`);
     await connection.execute(`drop table class PURGE`);

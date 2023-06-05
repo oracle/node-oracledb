@@ -737,7 +737,7 @@ describe('272. jsonDualityView1.js', function() {
       });
     });
 
-    (dbConfig.test.isCmanTdm ? describe : describe.skip)('272.3.11 Create view without privilege ', function() {
+    describe('272.3.11 Create view without privilege ', function() {
       let connection = null;
       let conn = null;
       const pwd = testsUtil.generateRandomPassword();
@@ -753,7 +753,7 @@ describe('272. jsonDualityView1.js', function() {
                                   )`;
 
       before(async function() {
-        if (dbConfig.test.drcp) {
+        if (dbConfig.test.drcp || dbConfig.test.isCmanTdm) {
           this.skip();
         }
         const credential = {
@@ -771,7 +771,7 @@ describe('272. jsonDualityView1.js', function() {
       });
 
       after(async function() {
-        if (dbConfig.test.drcp) {
+        if (dbConfig.test.drcp || dbConfig.test.isCmanTdm) {
           return;
         }
         await connection.execute(`drop user njs_test1 cascade`);

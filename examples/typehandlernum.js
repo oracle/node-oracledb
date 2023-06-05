@@ -138,7 +138,7 @@ async function run() {
                 v = parseFloat(v);
               return v;
             };
-            return {type: oracledb.STRING, converter: converter};
+            return {type: oracledb.DB_TYPE_VARCHAR, converter: converter};
           }
         }
       }

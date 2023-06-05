@@ -36,7 +36,7 @@ const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-(dbConfig.test.isCmanTdm ? describe : describe.skip)('277. jsonDualityView6.js', function() {
+describe('277. jsonDualityView6.js', function() {
 
   let connection = null;
   let dbaConn = null;
@@ -44,7 +44,7 @@ const testsUtil = require('./testsUtil.js');
 
   before(async function() {
     isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
-    if (dbConfig.test.drcp || !(isRunnable && dbConfig.test.DBA_PRIVILEGE)) {
+    if (dbConfig.test.drcp || !(isRunnable && dbConfig.test.DBA_PRIVILEGE) || dbConfig.test.isCmanTdm) {
       this.skip();
     }
 
@@ -65,7 +65,7 @@ const testsUtil = require('./testsUtil.js');
   });
 
   after(async function() {
-    if (dbConfig.test.drcp || !isRunnable) return;
+    if (dbConfig.test.drcp || !isRunnable || dbConfig.test.isCmanTdm) return;
     await connection.close();
 
     await dbaConn.execute(`drop user njs_jsonDv6 cascade`);
