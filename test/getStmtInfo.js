@@ -471,4 +471,13 @@ describe('162. getStmtInfo.js', function() {
     assert.deepStrictEqual(result.rows[0], ['HELLO']);
   });
 
+  it('162.35 Parse and Execute twice ', async function() {
+    const sql = "insert into nodb_number (num, content) values (:num, :val)";
+    let key = 555;
+    for (let i = 0; i < 2; i++) {
+      await conn.getStatementInfo(sql);
+      await conn.execute(sql, {num:key, val:1234});
+      key = key + 1;
+    }
+  });
 });
