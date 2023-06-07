@@ -33,6 +33,7 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('12. resultSet1.js', function() {
 
@@ -627,6 +628,7 @@ describe('12. resultSet1.js', function() {
 
     it('12.6.1 the amount and value of metaData should be correct', async function() {
 
+      const tableName = "nodb_tab_manycolumns";
       /* Helper functions */
       const StringBuffer = function() {
         this.buffer = [];
@@ -647,7 +649,7 @@ describe('12. resultSet1.js', function() {
 
       const createTab = function(size) {
         const buffer = new StringBuffer();
-        buffer.append("CREATE TABLE nodb_tab_manycolumns( ");
+        buffer.append(`CREATE TABLE ${tableName} ( `);
 
         for (let i = 0; i < size - 1; i++) {
           buffer.append("c" + i + " NUMBER, ");
@@ -660,10 +662,9 @@ describe('12. resultSet1.js', function() {
       /*********************/
       const columnsAmount = 1000;
 
-      const sql = createTab(columnsAmount);
-      await conn.execute(sql);
+      await testsUtil.createTable(conn, tableName, createTab(columnsAmount));
       const result = await conn.execute(
-        "SELECT * FROM nodb_tab_manycolumns",
+        `SELECT * FROM ${tableName}`,
         [],
         { resultSet: true});
       const rs = result.resultSet;
@@ -671,7 +672,7 @@ describe('12. resultSet1.js', function() {
         assert.strictEqual(rs.metaData[i].name, 'C' + i);
       }
       await rs.close();
-      await conn.execute("DROP TABLE nodb_tab_manycolumns PURGE");
+      await testsUtil.dropTable(conn, tableName);
     });
 
     it('12.6.2 can distinguish lower case and upper case', async function() {
