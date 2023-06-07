@@ -28,8 +28,8 @@ See the [examples][30] directory.  Start with [examples/example.js][31].
 
 ## Help
 
-Issues and questions about node-oracledb can be posted on [GitHub][3] or
-[Slack][5] ([link to join Slack][6]).
+Questions about node-oracledb can be posted on [GitHub][3] or [Slack][5] ([link
+to join Slack][6]).
 
 ## <a name="testing"></a> Tests
 
@@ -74,7 +74,7 @@ limitations under the License.
 
 [1]: https://node-oracledb.readthedocs.io/en/latest/user_guide/introduction.html#getstarted
 [2]: https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#quickstart
-[3]: https://github.com/oracle/node-oracledb/issues
+[3]: https://github.com/oracle/node-oracledb/discussions
 [4]: https://oracle.github.io/node-oracledb
 [5]: https://node-oracledb.slack.com/
 [6]: https://join.slack.com/t/node-oracledb/shared_invite/enQtNDU4Mjc2NzM5OTA2LWMzY2ZlZDY5MDdlMGZiMGRkY2IzYjI5OGU4YTEzZWM5YjQ3ODUzMjcxNWQyNzE4MzM5YjNkYjVmNDk5OWU5NDM
