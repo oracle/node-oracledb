@@ -11,36 +11,41 @@ node-oracledb `v6.0.1 <https://github.com/oracle/node-oracledb/compare/v6.0.0...
 Common Changes
 ++++++++++++++
 
-#)  Allow bind variables to use multi-byte characters. Fix for
-    `Issue #1554 <https://github.com/oracle/node-oracledb/issues/1554>`__.
+#)  Fixed bug with bind variables containing multi-byte characters. `Issue #1554
+    <https://github.com/oracle/node-oracledb/issues/1554>`__.
+
+#)  The buffer and process modules are now imported consistently instead of
+    relying on global variable definitions. PR #1559 (Sławomir Osoba).
+
+#)  Test improvements.
+
+#)  Documentation improvements.
 
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Allow using colons in multiple single-line SQL comments in Thin mode. Fix
-    for `Issue #1561 <https://github.com/oracle/node-oracledb/issues/1561>`__.
+#)  Improved the error message when an attempt is made to establish a connection
+    to an unsupported database version.
 
 #)  Improved binding support:
 
-    - Handled outbinds with Null Boolean values.
-    - Fixed issues with ordering of Binds in SQL when database version is 12.1
-      and the maxSize of bind variables exceeds 4000 bytes.
+    - Fixed NULL BOOLEAN OUT binds.
+    - Fixed issues with ordering of binds in SQL when the database version is 12.1
+      and the ``maxSize`` of a bind variable exceeds 4000 bytes.
 
-#)  Added clear error message when an attempt is made to establish a connection
-    with an unsupported database version.
+#)  Fixed bug using colons in multiple single-line SQL comments in Thin
+    mode. `Issue #1561 <https://github.com/oracle/node-oracledb/issues/1561>`__.
 
-#)  Fixed bug which caused a cursor leak if an error was thrown while
-    processing the execution of a query.
+#)  Fixed bug which caused a cursor leak if an error was thrown while processing
+    the execution of a query.
 
-#)  The buffer and process modules are now imported consistently instead of
-    relying on global variable definitions, as suggested by Sławomir Osoba in
-    `GitHub pull request #1559
-    <https://github.com/oracle/node-oracledb/pull/1559>`__.
+#)  Fixed several statement caching bugs.
 
-#)  Internal implementation changes:
+#)  Fixed bug with small network SDU sizes.
+
+#)  Internal implementation change:
 
     - Improved network packet handling.
-    - Improved statement cache handling.
 
 
 node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...v6.0.0>`__ (24 May 2023)
