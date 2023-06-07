@@ -5,21 +5,29 @@
 node-oracledb Release Notes
 =============================
 
-node-oracledb `v6.0.1 <https://github.com/oracle/node-oracledb/compare/v6.0.0...v6.0.1>`__ (TBD)
+node-oracledb `v6.0.1 <https://github.com/oracle/node-oracledb/compare/v6.0.0...v6.0.1>`__ (07 Jun 2023)
 --------------------------------------------------------------------------------------------------------
+
+Common Changes
+++++++++++++++
 
 #)  Allow bind variables to use multi-byte characters. Fix for
     `Issue #1554 <https://github.com/oracle/node-oracledb/issues/1554>`__.
 
+Thin Mode Changes
++++++++++++++++++
+
 #)  Allow using colons in multiple single-line SQL comments in Thin mode. Fix
     for `Issue #1561 <https://github.com/oracle/node-oracledb/issues/1561>`__.
 
-#)  Added enhanced binding support in Thin mode.
+#)  Improved binding support:
 
-#)  Improved statement cache handling in Thin mode.
+    - Handled outbinds with Null Boolean values.
+    - Fixed issues with ordering of Binds in SQL when database version is 12.1
+      and the maxSize of bind variables exceeds 4000 bytes.
 
 #)  Added clear error message when an attempt is made to establish a connection
-    with an unsupported database version in Thin mode.
+    with an unsupported database version.
 
 #)  Fixed bug which caused a cursor leak if an error was thrown while
     processing the execution of a query.
@@ -28,6 +36,11 @@ node-oracledb `v6.0.1 <https://github.com/oracle/node-oracledb/compare/v6.0.0...
     relying on global variable definitions, as suggested by Sławomir Osoba in
     `GitHub pull request #1559
     <https://github.com/oracle/node-oracledb/pull/1559>`__.
+
+#)  Internal implementation changes:
+
+    - Improved network packet handling.
+    - Improved statement cache handling.
 
 
 node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...v6.0.0>`__ (24 May 2023)
@@ -55,7 +68,7 @@ node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...
 #)  Deprecated execution option attribute ``fetchInfo``.  Use the new
     :ref:`fetchtypehandler` functionality instead.
 
-#)  Type and Metadata Changes:
+#)  Type and Metadata changes:
 
     - Query extended metadata is now always available.  The
       ``oracledb.extendedMetaData`` and
