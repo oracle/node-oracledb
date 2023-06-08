@@ -22,7 +22,8 @@ See [Getting Started with Node-oracledb][1] and [Quick Start Node-oracledb Insta
 
 ## Documentation
 
-See [Documentation for the Oracle Database Node.js Add-on][32] and the [CHANGELOG][33].
+See [Documentation for the Oracle Database Node.js Add-on][32] and the [release
+notes][33].
 
 ## Examples
 
@@ -83,6 +84,6 @@ limitations under the License.
 [30]: https://github.com/oracle/node-oracledb/blob/main/examples
 [31]: https://github.com/oracle/node-oracledb/blob/main/examples/example.js
 [32]: https://node-oracledb.readthedocs.io/en/latest/
-[33]: https://github.com/oracle/node-oracledb/blob/main/CHANGELOG.md
+[33]: https://node-oracledb.readthedocs.io/en/latest/release_notes.html
 [34]: https://github.com/oracle/node-oracledb/blob/main/test/README.md
 [35]: https://github.com/oracle/node-oracledb/blob/main/CONTRIBUTING.md
