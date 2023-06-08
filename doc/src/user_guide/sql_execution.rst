@@ -703,8 +703,8 @@ In the output, the column names are printed in lowercase::
         }
     ]
 
-See `lowercasecolumn.js <https://github.com/oracle/node-oracledb/
-tree/main/examples/lowercasecolumn.js>`__ for a runnable example.
+See `lowercasecolumns.js <https://github.com/oracle/node-oracledb/
+tree/main/examples/lowercasecolumns.js>`__ for a runnable example.
 
 An example of using fetch type handlers for date and number localizations
 is shown in :ref:`thindate` and :ref:`thinnumber`.
@@ -802,22 +802,6 @@ Fetching Numbers
 By default all numeric columns are mapped to JavaScript numbers. Node.js
 uses double floating point numbers as its native number type.
 
-When numbers are fetched from the database, conversion to JavaScript’s
-less precise binary number format can result in “unexpected”
-representations. For example:
-
-.. code-block:: javascript
-
-    const result = await connection.execute(`SELECT 38.73 FROM dual`);
-    console.log(result.rows[0]); // gives 38.730000000000004
-
-Similar issues can occur with binary floating-point arithmetic purely in
-Node.js, for example:
-
-.. code-block:: javascript
-
-    console.log(0.2 + 0.7); // gives 0.8999999999999999
-
 Node.js can also only represent numbers up to 2 ^ 53 which is
 9007199254740992. Numbers larger than this will be truncated.
 
@@ -825,11 +809,66 @@ The primary recommendation for number handling is to use Oracle SQL or
 PL/SQL for mathematical operations, particularly for currency
 calculations.
 
-To reliably work with numbers in Node.js, use ``fetchAsString`` or
-``fetchTypeHandler`` (see :ref:`fetchasstringhandling`) to fetch numbers
-in string format, and then use one of the available third-party
-JavaScript number libraries that handles large values and more
-precision.
+When working with numbers in Node.js, the output may result in "unexpected"
+representations. For example, a binary floating-point arithmetic purely in
+Node.js:
+
+.. code-block:: javascript
+
+    console.log(0.2 + 0.7); // gives 0.8999999999999999
+
+To reliably work with numbers in Node.js, you can use
+:attr:`~oracledb.fetchAsString` or a
+:ref:`fetch type handler <fetchtypehandler>` (see
+:ref:`fetchasstringhandling`) to fetch numbers in string format, and then use
+one of the available third-party JavaScript number libraries that handles
+large values and more precision.
+
+When decimal numbers are fetched from the database, the conversion to
+JavaScript's less precise binary number format differs in node-oracledb Thin
+and Thick modes. For example:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(`SELECT 38.73 FROM dual`);
+    console.log(result.rows[0]);
+
+This query prints ``38.73`` in node-oracledb Thin mode.
+
+In node-oracledb Thick mode, this query results in “unexpected”
+representations and prints ``38.730000000000004``. To alter this default
+conversion from decimal to binary number format in Thick mode, you can use a
+fetch type handler as shown in the example below.
+
+.. code-block:: javascript
+
+    const result = await connection.execute(
+        'SELECT 38.73 FROM dual',
+        [],
+        {
+            fetchTypeHandler: function(metaData) {
+                if (metaData.dbType == oracledb.DB_TYPE_NUMBER) {
+                    const converter = (v) => {
+                        if (v !== null)
+                            v = parseFloat(v);
+                        return v;
+                    };
+                    return {type: oracledb.DB_TYPE_VARCHAR, converter: converter};
+                }
+            }
+        }
+    );
+
+    console.log(result.rows);
+
+The output is ``38.73``.
+
+This shows that the number was first converted to a string by the database, as
+requested in the fetch type handler. The converter function then converted the
+string to a floating point number.
+
+See `examples/typehandlernum.js <https://github.com/oracle/node-oracledb/tree/
+main/examples/typehandlernum.js>`__ for a runnable example.
 
 .. _datehandling:
 
