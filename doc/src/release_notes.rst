@@ -5,6 +5,18 @@
 node-oracledb Release Notes
 =============================
 
+node-oracledb `v6.0.2 <https://github.com/oracle/node-oracledb/compare/v6.0.1...v6.0.2>`__ (TBD)
+------------------------------------------------------------------------------------------------
+
+Thin Mode Changes
++++++++++++++++++
+
+#)  Fixed bug when fetching rows containing data duplicated from a previous
+    row that spans multiple packets.
+    `Issue #1566 <https://github.com/oracle/node-oracledb/issues/1566>`__ and
+    `Issue #1565 <https://github.com/oracle/node-oracledb/issues/1565>`__.
+
+
 node-oracledb `v6.0.1 <https://github.com/oracle/node-oracledb/compare/v6.0.0...v6.0.1>`__ (07 Jun 2023)
 --------------------------------------------------------------------------------------------------------
 
