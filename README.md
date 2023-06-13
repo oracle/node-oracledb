@@ -40,11 +40,7 @@ To run the test suite see [test/README][34].
 
 ## Contributing
 
-This project welcomes contributions from the community. Before submitting a
-pull request, please [review our contribution guide][35].
-
-Oracle gratefully acknowledges the contributions to node-oracledb that have
-been made by the community.
+This project welcomes contributions from the community. Before submitting a pull request, please [review our contribution guide](./CONTRIBUTING.md)
 
 ## Security
 
