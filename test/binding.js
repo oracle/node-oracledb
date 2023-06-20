@@ -956,4 +956,164 @@ describe('4. binding.js', function() {
       }
     });
   });
+
+  describe('4.14 binding large number of in and out binds', function() {
+
+    let connection = null;
+    const numOutBinds = 500;
+    const colCnt = 500;
+    const rowCnt = 100;
+    const tableNameBinds = 'nodb_large_bind_count_table';
+    const bindsOutNumber = { type: oracledb.DB_TYPE_NUMBER, dir: oracledb.BIND_OUT };
+    const bindsInNumber = { type: oracledb.NUMBER };
+    const createSQlFn = function(colCnt) {
+      let colNames = 'F1 NUMBER(6,0)';
+      for (let i = 2; i <= colCnt; i++) {
+        colNames += `, F${i} NUMBER(6,0)`;
+      }
+      return `create table ${tableNameBinds} ` + `(` + colNames + `)`;
+    };
+    const sqlCreateQuery = createSQlFn(colCnt);
+    const sqlDrop = testsUtil.sqlDropTable(tableNameBinds);
+    const sqlCreate = testsUtil.sqlCreateTable(tableNameBinds, sqlCreateQuery);
+
+    before(async function() {
+      connection = await oracledb.getConnection(dbConfig);
+      await connection.execute(sqlCreate);
+    });
+
+    after(async function() {
+      await connection.execute(sqlDrop);
+      await connection.close();
+    });
+
+    it('4.14.1 output binds in pl/sql', async function() {
+      const maxValue = 10;
+      const minValue = 2;
+      const sql = `
+      BEGIN
+        ${Array(numOutBinds).fill(null).map((_, i) => `:v_out_${i}_0 := :a_${i} + :b_${i} + :c_${i}; `).join('\n        ')}
+      END;
+    `;
+      const _genRandNum = function() {
+        let rand = Math.random();
+        rand = Math.floor(rand * (maxValue - minValue));
+        rand = rand + minValue;
+        return rand;
+      };
+      const params = Array(numOutBinds).fill(null).map((_, i) => ({ [`a_${i}`]: _genRandNum(), [`b_${i}`]: _genRandNum(),
+        [`c_${i}`]: _genRandNum() }))
+        .reduce((a, x) => ({ ...a, ...x }), {});
+
+      const bindDefsIn = {};
+      const bindDefsOut = {};
+      for (let i = 0; i < numOutBinds; i++) {
+        bindDefsIn[`a_${i}`] = bindsInNumber;
+        bindDefsIn[`b_${i}`] = bindsInNumber;
+        bindDefsIn[`c_${i}`] = bindsInNumber;
+        bindDefsOut[`v_out_${i}_0`] = bindsOutNumber;
+      }
+      const binds = Object.assign(bindDefsIn, bindDefsOut);
+      const options = {
+        bindDefs: binds
+      };
+
+      let bulkValues = [];
+      for (let i = 0; i < rowCnt; i++) {
+        bulkValues.push(params);
+      }
+      const result = await connection.executeMany(sql, bulkValues, options);
+      const outParams = {};
+      for (let i = 0; i < numOutBinds; i++) {
+        outParams[`v_out_${i}_0`] = params[`a_${i}`] + params[`b_${i}`] + params[`c_${i}`];
+      }
+      for (let i = 0; i < rowCnt; i++) {
+        assert.deepStrictEqual(outParams, result.outBinds[i]);
+      }
+    });
+
+    it('4.14.2 output binds using bindByPosition in sql with returning clause', async function() {
+      const numValue = 15;
+      const values = Array(colCnt).fill(numValue);
+      let bindstring = ':1';
+      let retClause = 'returning F1';
+      let intoClause = ` INTO :${colCnt + 1}`;
+      let bindDefsIn = [bindsInNumber];
+      const bindDefsOut = [bindsOutNumber];
+      const lastOutBindNum = 2 * colCnt;
+
+      for (let i = 2; i <= colCnt; i++) {
+        bindstring += `, :${i}`;
+        retClause += `, F${i}`;
+        bindDefsIn.push(bindsInNumber);
+        bindDefsOut.push(bindsOutNumber);
+      }
+      for (let i = colCnt + 2; i <= lastOutBindNum; i++) {
+        intoClause += `, :${i}`;
+      }
+      retClause += intoClause;
+
+      const binds = bindDefsIn.concat(bindDefsOut);
+      const options = {
+        bindDefs: binds
+      };
+      let bulkValues = [];
+      for (let i = 0; i < rowCnt; i++) {
+        bulkValues.push(values);
+      }
+      let insertSql = ` insert into ${tableNameBinds} values(` + bindstring + `) ` + retClause;
+      const result = await connection.executeMany(insertSql, bulkValues, options);
+
+      const outBinds = result.outBinds;
+      assert.strictEqual(result.rowsAffected, bulkValues.length);
+      for (let i = 0; i < outBinds.length; i++) {
+        for (let j = 0; j < colCnt; j++) {
+          assert.strictEqual(outBinds[i][j][0], bulkValues[i][j]);
+        }
+      }
+    });
+
+    it('4.14.3 output binds using bindByName in sql with returning clause', async function() {
+      const values = {};
+      let bindstring = ':B1';
+      let retClause = 'returning F1';
+      let intoClause = ' INTO :OB1';
+      const bindDefsIn = {};
+      const bindDefsOut = {};
+      const numValue = 15;
+
+      bindDefsIn['B1'] = bindsInNumber;
+      bindDefsOut['OB1'] = bindsOutNumber;
+      values['B1'] = numValue;
+      for (let i = 2; i <= colCnt; i++) {
+        bindstring += `, :B${i}`;
+        retClause += `, F${i}`;
+        values[`B${i}`] = numValue;
+        bindDefsIn[`B${i}`] = bindsInNumber;
+        bindDefsOut[`OB${i}`] = bindsOutNumber;
+        intoClause += `, :OB${i}`;
+      }
+      // construct out Bind Parameters
+      retClause += intoClause;
+
+      const binds = Object.assign(bindDefsIn, bindDefsOut);
+      const options = {
+        bindDefs: binds
+      };
+      let bulkValues = [];
+      for (let i = 0; i < rowCnt; i++) {
+        bulkValues.push(values);
+      }
+      let insertSql = ` insert into ${tableNameBinds} values(` + bindstring + `) ` + retClause;
+      const result = await connection.executeMany(insertSql, bulkValues, options);
+
+      const outBinds = result.outBinds;
+      assert.strictEqual(result.rowsAffected, bulkValues.length);
+      for (let i = 0; i < outBinds.length; i++) {
+        for (let j = 1; j <= colCnt; j++) {
+          assert.strictEqual(outBinds[i][`OB${j}`][0], bulkValues[i][`B${j}`]);
+        }
+      }
+    });
+  });
 });
