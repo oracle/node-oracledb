@@ -2665,10 +2665,34 @@ particular, review the available algorithms for security and performance.
 The ``NETWORK_SERVICE_BANNER`` column of the database view
 `V$SESSION_CONNECT_INFO <https://www.oracle.com/pls/topic/lookup?ctx=
 dblatest&id=GUID-9F0DCAEA-A67E-4183-89E7-B1555DC591CE>`__
-can be used to verify the encryption status of a connection.
+can be used to verify the encryption status of a connection. For example with
+SQL*Plus::
+
+    SQL> SELECT network_service_banner FROM v$session_connect_info;
+
+If the connection is encrypted, then this query prints an output that includes
+the available encryption service, the crypto-checksumming service, and the
+algorithms in use, such as::
+
+    NETWORK_SERVICE_BANNER
+    -------------------------------------------------------------------------------------
+    TCP/IP NT Protocol Adapter for Linux: Version 19.0.0.0.0 - Production
+    Encryption service for Linux: Version 19.0.1.0.0 - Production
+    AES256 Encryption service adapter for Linux: Version 19.0.1.0.0 - Production
+    Crypto-checksumming service for Linux: Version 19.0.1.0.0 - Production
+    SHA256 Crypto-checksumming service adapter for Linux: Version 19.0.1.0.0 - Production
+
+If the connection is unencrypted, then the query will only print the
+available encryption and crypto-checksumming service messages. For example::
+
+    NETWORK_SERVICE_BANNER
+    -------------------------------------------------------------------------------------
+    TCP/IP NT Protocol Adapter for Linux: Version 19.0.0.0.0 - Production
+    Encryption service for Linux: Version 19.0.1.0.0 - Production
+    Crypto-checksumming service for Linux: Version 19.0.1.0.0 - Production
 
 For more information about Oracle Data Network Encryption and Integrity,
-and for information about configuring SSL network encryption, refer to
+and for information about configuring TLS network encryption, refer to
 the `Oracle Database Security Guide <https://www.oracle.com/pls/topic/
 lookup?ctx=dblatest&id=DBSEG>`__. This manual also contains information about
 other important security features that Oracle Database provides, such
