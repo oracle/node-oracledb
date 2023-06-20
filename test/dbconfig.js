@@ -53,6 +53,8 @@ const config = {
   }
 };
 
+let counter = 0;
+
 if (process.env.NODE_ORACLEDB_CONNECTIONSTRING) {
   config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING;
 } else {
@@ -150,4 +152,8 @@ if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
   console.log("Thin mode selected");
 }
 
+config.createUser = () => {
+  ++counter;
+  return "NJS_" + counter.toString() + config.user;
+};
 module.exports = config;

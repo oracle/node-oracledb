@@ -93,7 +93,7 @@ The test suite uses [mocha](https://www.npmjs.com/package/mocha),
 Set the following environment variables to provide credentials for the test suite.
 
 * `NODE_ORACLEDB_USER` provides the username of the schema user which you used for testing.
-   Use the username prefix 'NJS_' when creating a new user inside the test suite. Test suite does create such users.
+   Use the parameter *createUser* specified in `test/dbconfig.js` to create a new user within the test suite. Test suite does create such users.
 
 * `NODE_ORACLEDB_PASSWORD` provides the password of the schema user which you used for testing.
    if you're generating a password for the user, use the predefined function testsUtil.generateRandomPassword.

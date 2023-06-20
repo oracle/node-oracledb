@@ -42,7 +42,7 @@ describe('161. changePassword.js', function() {
   let DBA_config;
   let dbaConn;
   let sql;
-  const myUser = dbConfig.user + "_cpw";
+  const myUser = dbConfig.createUser();
   if (dbConfig.test.DBA_PRIVILEGE == true) {
     DBA_config = {
       user:          dbConfig.test.DBA_user,

@@ -740,11 +740,13 @@ describe('272. jsonDualityView1.js', function() {
     describe('272.3.11 Create view without privilege ', function() {
       let connection = null;
       let conn = null;
+      const user1 = dbConfig.createUser();
+      const user2 = dbConfig.createUser();
       const pwd = testsUtil.generateRandomPassword();
-      const createUser1 = `create user njs_test1 identified by ${pwd}`;
-      const createUser2 = `create user njs_test2 identified by ${pwd}`;
-      const grantPriv1 = `grant create session, resource, connect, unlimited tablespace to njs_test1`;
-      const grantPriv2 = `grant create session to njs_test2`;
+      const createUser1 = `create user ${user1} identified by ${pwd}`;
+      const createUser2 = `create user ${user2} identified by ${pwd}`;
+      const grantPriv1 = `grant create session, resource, connect, unlimited tablespace to ${user1}`;
+      const grantPriv2 = `grant create session to ${user2}`;
 
       const createTableStudent = `create table student(
                                   stuid number,
@@ -774,8 +776,8 @@ describe('272. jsonDualityView1.js', function() {
         if (dbConfig.test.drcp || dbConfig.test.isCmanTdm) {
           return;
         }
-        await connection.execute(`drop user njs_test1 cascade`);
-        await connection.execute(`drop user njs_test2 cascade`);
+        await connection.execute(`drop user ${user1} cascade`);
+        await connection.execute(`drop user ${user2} cascade`);
         await connection.close();
       });
 
@@ -785,7 +787,7 @@ describe('272. jsonDualityView1.js', function() {
                                   AS
                               student @insert @update @delete
                               {StudentId: stuid, StudentName: name}`;
-        conn = await oracledb.getConnection({user: 'njs_test1',
+        conn = await oracledb.getConnection({user: user1,
           password: pwd,
           connectString: dbConfig.connectString
         });
@@ -807,13 +809,13 @@ describe('272. jsonDualityView1.js', function() {
 
       it('272.3.11.2 Query with test2 user', async function() {
 
-        conn = await oracledb.getConnection({user: 'njs_test2',
+        conn = await oracledb.getConnection({user: user2,
           password: pwd,
           connectString: dbConfig.connectString
         });
 
         await assert.rejects(
-          async () => await conn.execute(`select * from njs_test1.student_ov`),
+          async () => await conn.execute(`select * from ${user1}.student_ov`),
           /ORA-00942:/ //ORA-00942: table or view does not exist
         );
         await conn.close();
