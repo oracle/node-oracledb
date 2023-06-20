@@ -11,6 +11,9 @@ node-oracledb `v6.0.2 <https://github.com/oracle/node-oracledb/compare/v6.0.1...
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed bug with getting the value of a LOB stored in a DbObject
+    `Issue #1571 <https://github.com/oracle/node-oracledb/issues/1571>`__.
+
 #)  Fixed bug connecting to databases with older 11g password verifiers.
 
 #)  Fixed bug when the length of a chunk inside a chunked read spans packets.
