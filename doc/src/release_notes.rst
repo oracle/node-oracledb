@@ -8,11 +8,15 @@ node-oracledb Release Notes
 node-oracledb `v6.0.2 <https://github.com/oracle/node-oracledb/compare/v6.0.1...v6.0.2>`__ (TBD)
 ------------------------------------------------------------------------------------------------
 
+Common Changes
+++++++++++++++
+
+#)  Test improvements.
+
+#)  Documentation improvements.
+
 Thin Mode Changes
 +++++++++++++++++
-
-#)  Fixed bug with getting the value of a LOB stored in a DbObject
-    `Issue #1571 <https://github.com/oracle/node-oracledb/issues/1571>`__.
 
 #)  Fixed bug connecting to databases with older 11g password verifiers.
 
@@ -28,6 +32,19 @@ Thin Mode Changes
     objects.
 
 #)  Fixed bug when fetching a large number of database objects.
+
+#)  Display a better error when using BLOBs in DbObjects in Thin mode.
+
+#)  Improved pool performance by optimizing deobfuscation logic for pool
+    credentials.
+
+#)  Minor internal code cleanup.
+
+Thick Mode Changes
+++++++++++++++++++
+
+#)  Fixed bug with getting the value of a LOB stored in a DbObject
+    `Issue #1571 <https://github.com/oracle/node-oracledb/issues/1571>`__.
 
 
 node-oracledb `v6.0.1 <https://github.com/oracle/node-oracledb/compare/v6.0.0...v6.0.1>`__ (07 Jun 2023)
