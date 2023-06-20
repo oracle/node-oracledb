@@ -12,9 +12,14 @@ Thin Mode Changes
 +++++++++++++++++
 
 #)  Fixed bug when fetching rows containing data duplicated from a previous
-    row that spans multiple packets.
+    row that spans multiple network packets.
     `Issue #1566 <https://github.com/oracle/node-oracledb/issues/1566>`__ and
     `Issue #1565 <https://github.com/oracle/node-oracledb/issues/1565>`__.
+
+#)  Fixed bug when fetching database objects with large embedded database
+    objects.
+
+#)  Fixed bug when fetching a large number of database objects.
 
 
 node-oracledb `v6.0.1 <https://github.com/oracle/node-oracledb/compare/v6.0.0...v6.0.1>`__ (07 Jun 2023)
