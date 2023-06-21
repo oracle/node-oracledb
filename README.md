@@ -40,7 +40,8 @@ To run the test suite see [test/README][34].
 
 ## Contributing
 
-This project welcomes contributions from the community. Before submitting a pull request, please [review our contribution guide](./CONTRIBUTING.md)
+This project welcomes contributions from the community.
+Before submitting a pull request, please [review our contribution guide](./CONTRIBUTING.md)
 
 ## Security
 
