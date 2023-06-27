@@ -5,8 +5,16 @@
 node-oracledb Release Notes
 =============================
 
-node-oracledb `v6.0.2 <https://github.com/oracle/node-oracledb/compare/v6.0.1...v6.0.2>`__ (TBD)
+node-oracledb `v6.0.3 <https://github.com/oracle/node-oracledb/compare/v6.0.2...v6.0.3>`__ (TBD)
 ------------------------------------------------------------------------------------------------
+
+Thin Mode Changes
++++++++++++++++++
+
+#)  Fixed bug to handle errors while waiting for writes to drain on the network.
+
+node-oracledb `v6.0.2 <https://github.com/oracle/node-oracledb/compare/v6.0.1...v6.0.2>`__ (27 Jun 2023)
+--------------------------------------------------------------------------------------------------------
 
 Common Changes
 ++++++++++++++
@@ -37,6 +45,10 @@ Thin Mode Changes
 
 #)  Improved pool performance by optimizing deobfuscation logic for pool
     credentials.
+
+#)  Added support for connecting with multiple network aliases for a single
+    connect string entry in the tnsnames.ora file. 
+    for example, alias1, alias2, alias3=(description=...)
 
 #)  Minor internal code cleanup.
 
