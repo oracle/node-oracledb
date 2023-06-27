@@ -20,12 +20,12 @@ See [Getting Started with Node-oracledb][1] and [Quick Start Node-oracledb Insta
 
 ## Documentation
 
-See [Documentation for the Oracle Database Node.js Add-on][32] and the [release
-notes][33].
+See [Documentation for the Oracle Database Node.js Add-on][9] and the [release
+notes][10].
 
 ## Examples
 
-See the [examples][30] directory.  Start with [examples/example.js][31].
+See the [examples][7] directory.  Start with [examples/example.js][8].
 
 ## Help
 
@@ -34,19 +34,16 @@ to join Slack][6]).
 
 ## <a name="testing"></a> Tests
 
-To run the test suite see [test/README][34].
+To run the test suite see [test/README][11].
 
 ## Contributing
 
 This project welcomes contributions from the community. Before submitting a
-pull request, please [review our contribution guide][35].
-
-Oracle gratefully acknowledges the contributions to node-oracledb that have
-been made by the community.
+pull request, please [review our contribution guide][12].
 
 ## Security
 
-Please consult the [security guide](./SECURITY.md) for our responsible security
+Please consult the [security guide][13] for our responsible security
 vulnerability disclosure process.
 
 ## License
@@ -79,9 +76,10 @@ limitations under the License.
 [4]: https://oracle.github.io/node-oracledb
 [5]: https://node-oracledb.slack.com/
 [6]: https://join.slack.com/t/node-oracledb/shared_invite/enQtNDU4Mjc2NzM5OTA2LWMzY2ZlZDY5MDdlMGZiMGRkY2IzYjI5OGU4YTEzZWM5YjQ3ODUzMjcxNWQyNzE4MzM5YjNkYjVmNDk5OWU5NDM
-[30]: https://github.com/oracle/node-oracledb/blob/main/examples
-[31]: https://github.com/oracle/node-oracledb/blob/main/examples/example.js
-[32]: https://node-oracledb.readthedocs.io/en/latest/
-[33]: https://node-oracledb.readthedocs.io/en/latest/release_notes.html
-[34]: https://github.com/oracle/node-oracledb/blob/main/test/README.md
-[35]: https://github.com/oracle/node-oracledb/blob/main/CONTRIBUTING.md
+[7]: https://github.com/oracle/node-oracledb/blob/main/examples
+[8]: https://github.com/oracle/node-oracledb/blob/main/examples/example.js
+[9]: https://node-oracledb.readthedocs.io/en/latest/
+[10]: https://node-oracledb.readthedocs.io/en/latest/release_notes.html
+[11]: https://github.com/oracle/node-oracledb/blob/main/test/README.md
+[12]: https://github.com/oracle/node-oracledb/blob/main/CONTRIBUTING.md
+[13]: https://github.com/oracle/node-oracledb/blob/main/SECURITY.md
