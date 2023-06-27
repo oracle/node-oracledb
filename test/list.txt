@@ -4732,7 +4732,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     237.8 DB_TYPE_TIMESTAMP
     237.9 DB_TYPE_TIMESTAMP_LTZ
     237.10 DB_TYPE_TIMESTAMP_TZ
-    237.10 DB_TYPE_RAW
+    237.11 DB_TYPE_RAW
 
 238. soda14.js
     238.1 the fetchArraySize() method works

@@ -303,7 +303,11 @@ describe('237. indexedTables01.js', () => {
   }); // 237.7
 
   it('237.8 DB_TYPE_TIMESTAMP', async function() {
-    if (conn.oracleServerVersion < 1200000000) this.skip();
+    /* Oracle Database versions 12.1.0.1 and
+       earlier do not support this test case due to a bug
+       which was later fixed in 12.1.0.2
+    */
+    if (conn.oracleServerVersion < 1201000200) this.skip();
     const arr = [ new Date(), new Date(), new Date() ];
     const func = 'test_timestamp';
     const binds = {
@@ -317,7 +321,11 @@ describe('237. indexedTables01.js', () => {
   }); // 237.8
 
   it('237.9 DB_TYPE_TIMESTAMP_LTZ', async function() {
-    if (conn.oracleServerVersion < 1200000000) this.skip();
+    /* Oracle Database versions 12.1.0.1 and
+       earlier do not support this test case due to a bug
+       which was later fixed in 12.1.0.2
+    */
+    if (conn.oracleServerVersion < 1201000200) this.skip();
     const arr = [ new Date(), new Date(), new Date(), new Date() ];
     const func = 'test_timestamp_ltz';
     const binds = {
@@ -331,7 +339,11 @@ describe('237. indexedTables01.js', () => {
   }); // 237.9
 
   it('237.10 DB_TYPE_TIMESTAMP_TZ', async function() {
-    if (conn.oracleServerVersion < 1200000000) this.skip();
+    /* Oracle Database versions 12.1.0.1 and
+       earlier do not support this test case due to a bug
+       which was later fixed in 12.1.0.2
+    */
+    if (conn.oracleServerVersion < 1201000200) this.skip();
     const arr = [ new Date(), new Date(), new Date(), new Date(), new Date() ];
     const func = 'test_timestamp_tz';
     const binds = {
@@ -344,7 +356,7 @@ describe('237. indexedTables01.js', () => {
     assert.strictEqual(result.outBinds.retval, arr.length);
   }); // 237.10
 
-  it('237.10 DB_TYPE_RAW', async () => {
+  it('237.11 DB_TYPE_RAW', async () => {
     const arr = [ Buffer.from("Raw 1"), Buffer.from("Raw 2") ];
     const func = 'test_raw';
     const binds = {
@@ -355,5 +367,5 @@ describe('237. indexedTables01.js', () => {
     const sql = `begin :retval := ${pkgName}.${func}(:inval); end;`;
     const result = await conn.execute(sql, binds);
     assert.strictEqual(result.outBinds.retval, arr.length);
-  }); // 237.10
+  }); // 237.11
 });
