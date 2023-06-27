@@ -13,6 +13,10 @@ Thin Mode Changes
 
 #)  Fixed bug to handle errors while waiting for writes to drain on the network.
 
+#)  Fixed bug when a break occurs in the middle of processing a database
+    response that spans multiple packets. This break could occur due to a
+    server error, the session being killed or a call to `breakExecution()`.
+
 node-oracledb `v6.0.2 <https://github.com/oracle/node-oracledb/compare/v6.0.1...v6.0.2>`__ (27 Jun 2023)
 --------------------------------------------------------------------------------------------------------
 
@@ -47,8 +51,8 @@ Thin Mode Changes
     credentials.
 
 #)  Added support for connecting with multiple network aliases for a single
-    connect string entry in the tnsnames.ora file. 
-    for example, alias1, alias2, alias3=(description=...)
+    connect string entry in the tnsnames.ora file.
+    For example, alias1, alias2, alias3=(description=...).
 
 #)  Minor internal code cleanup.
 
