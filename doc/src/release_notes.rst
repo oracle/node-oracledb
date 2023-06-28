@@ -15,7 +15,7 @@ Thin Mode Changes
 
 #)  Fixed bug when a break occurs in the middle of processing a database
     response that spans multiple packets. This break could occur due to a
-    server error, the session being killed or a call to `breakExecution()`.
+    server error, the session being killed or a call to ``breakExecution()``.
 
 #)  Improve error message when an internal error handler fails and a connection
     is no longer usable.

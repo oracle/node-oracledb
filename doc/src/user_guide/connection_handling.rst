@@ -2219,7 +2219,7 @@ The connect descriptor parameter ``TOKEN_AUTH`` must be set to
       (CONNECT_DATA=(SERVICE_NAME=db_low.adb.oraclecloud.com))
         (SECURITY=
           (SSL_SERVER_DN_MATCH=ON)
-          (SSL_SERVER_CERT_DN="CN=efg.oraclecloud.com, OU=Oracle BMCS US, O=Oracle Corporation, L=Redwood City, ST=California, C=US")
+          (SSL_SERVER_CERT_DN="CN=efg.oraclecloud.com, O=Oracle Corporation, L=Redwood City, ST=California, C=US")
           (TOKEN_AUTH=OAUTH)
           (TOKEN_LOCATION='/opt/oracle/token')
           ))
@@ -2443,7 +2443,7 @@ your :ref:`tnsnames.ora <tnsnames>` file might contain:
       (CONNECT_DATA=(SERVICE_NAME=db_low.adb.oraclecloud.com))
         (SECURITY=
           (SSL_SERVER_DN_MATCH=ON)
-          (SSL_SERVER_CERT_DN="CN=efg.oraclecloud.com, OU=Oracle BMCS US, O=Oracle Corporation, L=Redwood City, ST=California, C=US")
+          (SSL_SERVER_CERT_DN="CN=efg.oraclecloud.com, O=Oracle Corporation, L=Redwood City, ST=California, C=US")
           (TOKEN_AUTH=OCI_TOKEN)
           ))
 
@@ -2461,7 +2461,7 @@ For example in a ``tnsnames.ora`` file:
       (CONNECT_DATA=(SERVICE_NAME=db_low.adb.oraclecloud.com))
         (SECURITY=
           (SSL_SERVER_DN_MATCH=ON)
-          (SSL_SERVER_CERT_DN="CN=efg.oraclecloud.com, OU=Oracle BMCS US, O=Oracle Corporation, L=Redwood City, ST=California, C=US")
+          (SSL_SERVER_CERT_DN="CN=efg.oraclecloud.com, O=Oracle Corporation, L=Redwood City, ST=California, C=US")
           (TOKEN_AUTH=OCI_TOKEN)
           (TOKEN_LOCATION='/opt/oracle/token')
           ))
@@ -3169,8 +3169,8 @@ keep connections strings out of application code, see :ref:`tnsnames`.
 
 .. _connectionadbmtls:
 
-Mutal TLS connections to Oracle Cloud Autonomous Database
----------------------------------------------------------
+Mutual TLS connections to Oracle Cloud Autonomous Database
+----------------------------------------------------------
 
 To enable connections from node-oracledb to Oracle Autonomous Database in
 Oracle Cloud using mTLS, a wallet needs to be downloaded from the cloud
@@ -3384,15 +3384,15 @@ For example, if your ``tnsnames.ora`` file had an entry::
 
     cjjson_high = (description=(retry_count=20)(retry_delay=3)
         (address=(protocol=tcps)(port=1522)
-        (host=adb.ap-sydney-1.oraclecloud.com))
+        (host=efg.oraclecloud.com))
         (connect_data=(service_name=abc_cjjson_high.adb.oraclecloud.com))
-        (security=(ssl_server_cert_dn="CN=adb.ap-sydney-1.oraclecloud.com,OU=Oracle ADB SYDNEY,O=Oracle Corporation,L=Redwood City,ST=California,C=US")))
+        (security=(ssl_server_cert_dn="CN=efg.oraclecloud.com, O=Oracle Corporation, L=Redwood City, ST=California, C=US")))
 
 Then your applications can connect using the connection string:
 
 .. code-block:: javascript
 
-    cs = "tcps://adb.ap-sydney-1.oraclecloud.com:1522/abc_cjjson_high.adb.oraclecloud.com?wallet_location=/Users/cjones/Cloud/CJJSON&retry_count=20&retry_delay=3"
+    cs = "tcps://efg.oraclecloud.com:1522/abc_cjjson_high.adb.oraclecloud.com?wallet_location=/Users/cjones/Cloud/CJJSON&retry_count=20&retry_delay=3"
     connection = await oracledb.getConnection({
         user          : "hr",
         password      : mypw,
@@ -3468,7 +3468,13 @@ Database, both of these paths are typically the same directory where the
 **In node-oracledb Thick mode**
 
 To use multiple wallets in node-oracledb Thick mode, a TCPS connection string
-containing the ``MY_WALLET_DIRECTORY`` option needs to be created:
+containing the ``MY_WALLET_DIRECTORY`` option needs to be created::
+
+    ocidbdemo_high = (description=(retry_count=1)(retry_delay=3)
+    (address=(protocol=tcps)(port=1522)(host=efg.oraclecloud.com))
+    (connect_data=(service_name=abc_ocidbdemo_high.adb.oraclecloud.com))
+    (security=(ssl_server_cert_dn="CN=ijk.oraclecloud.com, O=Oracle Corporation, L=Redwood City, ST=California, C=US")
+    (my_wallet_directory="/home/user1/Wallet_OCIDBDemo")))
 
 .. note::
 
