@@ -36,6 +36,7 @@ const fs       = require('fs');
 const fsPromises = require('fs/promises');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe("72. lobBind2.js", function() {
 
@@ -539,4 +540,38 @@ describe("72. lobBind2.js", function() {
 
   }); // 72.3
 
+  describe('72.4 Create Table with CLOB and Number columns and do select with empty rows and select after rows insertion', function() {
+    let connection = null;
+    const tableNameCLOB = 'nodb_myclobs_num_table';
+    const sqlCreateQuery = `
+      CREATE TABLE ${tableNameCLOB} (
+          F1        NUMBER,
+          F2        CLOB,
+          F3        CLOB
+      )`;
+    const sqlDrop = testsUtil.sqlDropTable(tableNameCLOB);
+    const sqlCreate = testsUtil.sqlCreateTable(tableNameCLOB, sqlCreateQuery);
+    const insertSql = `INSERT INTO ${tableNameCLOB} (F1, F2, F3) ` +
+    `VALUES (:1, :2, :3)`;
+    const selectSql = `SELECT * FROM ${tableNameCLOB} `;
+
+    before(async function() {
+      oracledb.fetchAsString = [oracledb.CLOB];
+      connection = await oracledb.getConnection(dbConfig);
+      await connection.execute(sqlCreate);
+      await connection.execute(selectSql, {}, {keepInStmtCache: true});
+      await connection.execute(insertSql, [1, 'CLOB1', 'CLOB2']);
+    });
+
+    after(async function() {
+      oracledb.fetchAsString = [];
+      await connection.execute(sqlDrop);
+      await connection.close();
+    });
+
+    it('72.4.1 Read both CLOB and Number with statement being in statement cache', async function() {
+      await connection.execute(selectSql, {}, {keepInStmtCache: true});
+    });
+
+  });
 });

@@ -42,6 +42,7 @@ const fs       = require('fs');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
+const testsUtil = require('./testsUtil.js');
 
 let inFileName = 'test/clobexample.txt';  // the file with text to be inserted into the database
 let outFileName = 'test/clobstreamout.txt'; // output file with the stream out data
@@ -170,4 +171,43 @@ describe('40. dataTypeClob.js', function() {
       await assist.verifyNullValues(connection, tableName);
     });
   });
+
+  describe('40.3 Read CLOB data on meta data change', function() {
+    let connection = null;
+    const tableNameCLOB = 'nodb_myclobs_re_create';
+    const sqlCreateQuery = `
+        CREATE TABLE ${tableNameCLOB} (
+            num        NUMBER,
+            content    CLOB
+        )`;
+    const sqlDrop = testsUtil.sqlDropTable(tableNameCLOB);
+    const sqlCreate = testsUtil.sqlCreateTable(tableNameCLOB, sqlCreateQuery);
+    const insertSql = `INSERT INTO ${tableNameCLOB} (num, content) ` +
+      `VALUES (:n, 'CLOB')`;
+    const selectSql = `SELECT content FROM ${tableNameCLOB} WHERE num = 1`;
+
+    before(async function() {
+      oracledb.fetchAsString = [oracledb.CLOB];
+      connection = await oracledb.getConnection(dbConfig);
+      await connection.execute(sqlCreate);
+      await connection.execute(insertSql, { n: 1 }, { autoCommit: false });
+    });
+
+    after(async function() {
+      oracledb.fetchAsString = [];
+      await connection.execute(sqlDrop);
+      await connection.close();
+    });
+
+    it('40.3.1 Recreate table after CLOB column is read and statement is in statement cache',
+      async function() {
+        await connection.execute(selectSql, {}, { keepInStmtCache: true });
+        await connection.execute(sqlDrop);
+        await connection.execute(sqlCreate);
+        await connection.execute(insertSql, { n: 1 }, { autoCommit: false });
+        await connection.execute(selectSql);
+      });
+
+  });
+
 });

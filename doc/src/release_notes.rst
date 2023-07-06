@@ -11,6 +11,10 @@ node-oracledb `v6.0.3 <https://github.com/oracle/node-oracledb/compare/v6.0.2...
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed bug that throws the NJS-111 internal error, on the second
+    select SQL issued after first select SQL is done on an empty
+    table involving LOB types.
+
 #)  Avoid throwing errors when calls to ``os.userInfo()`` fail.
     `Issue #1564 <https://github.com/oracle/node-oracledb/issues/1564>`__.
 
