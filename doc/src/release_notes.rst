@@ -14,45 +14,55 @@ Common Changes
 #)  Fixed bug to consistently use the DRCP :attr:`oracledb.connectionClass` in effect when the
     pool was created.
 
+#)  Added more test cases for datetime objects and other test improvements.
+
+#)  Documentation improvements.
+
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Add packet number and position in packet for some internal errors for improved diagnosability.
-
-#)  Fixed bug that throws the NJS-111 internal error, on the second
-    select SQL issued after first select SQL is done on an empty
-    table involving LOB types.
+#)  Fixed bug that throws the NJS-111 internal error, on the second SELECT SQL
+    statement issued after the first SELECT SQL statement call on an empty
+    table with LOBs.
 
 #)  Avoid throwing errors when calls to ``os.userInfo()`` fail.
     `Issue #1564 <https://github.com/oracle/node-oracledb/issues/1564>`__.
 
-#)  Fixed error handling when invalid connect descriptor "DESCRIPTIONX" syntax was used.
+#)  Persist in-band notifications after calls to ``connection.isHealthy()``.
 
-#)  Improved error message when invalid protocol was used in easyconnect syntax.
+#)  Improved memory usage by removing an unused network buffer.
 
-#)  Throws an error when https_proxy is given but the protocol is tcp.
-
-#)  Persist in-band notifications.
-
-#)  Removed unused buffer.
-
-#)  Fixed bug to handle errors while waiting for writes to drain on the network.
-
-#)  Fixed bug when a break occurs in the middle of processing a database
-    response that spans multiple packets. This break could occur due to a
-    server error, the session being killed or a call to ``breakExecution()``.
-
-#)  Improve error message when an internal error handler fails and a connection
-    is no longer usable.
+#)  Fixed bug to handle breaks that occur in the middle of processing a
+    database response that spans multiple packets. This break could occur due
+    to a server error, the session being killed or a call to ``breakExecution()``.
 
 #)  Fixed bug where NJS-112 is thrown intermittently with some connections.
 
-#)  Fixed bug where DRCP connections from pool result in NUM_MISSES values to
-    increase instead of NUM_HITS in v$cpool_stats view by default. This fix
-    optimizes the use of DRCP connections.
+#)  Fixed bug where DRCP connections from the application-side connection pool
+    cause the `NUM_MISSES` values to increase instead of the `NUM_HITS` values
+    in the `V$CPOOL_STATS` view by default. This fix optimizes the use of DRCP
+    connections.
 
 #)  Fixed the issue where dates with negative years are not inserted and
-    fetched correctly in Thin mode.
+    fetched correctly.
+
+#)  Error handling and message improvements:
+
+    - Fixed error handling when invalid connect descriptor syntax is used.
+
+    - Throws an error when https_proxy is given but the protocol is tcp.
+
+    - Fixed bug to handle errors that occur while waiting for writes to drain
+      on the network.
+
+    - Improved the error message thrown when an internal error handler fails
+      and a connection is no longer usable
+
+    - Improved error message when an unsupported protocol is used in Easy
+      Connect syntax.
+
+    - Add packet number and position for network packets to provide improved
+      diagnosability on some internal errors.
 
 node-oracledb `v6.0.2 <https://github.com/oracle/node-oracledb/compare/v6.0.1...v6.0.2>`__ (27 Jun 2023)
 --------------------------------------------------------------------------------------------------------
