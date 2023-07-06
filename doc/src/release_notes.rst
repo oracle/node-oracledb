@@ -11,6 +11,19 @@ node-oracledb `v6.0.3 <https://github.com/oracle/node-oracledb/compare/v6.0.2...
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Avoid throwing errors when calls to ``os.userInfo()`` fail.
+    `Issue #1564 <https://github.com/oracle/node-oracledb/issues/1564>`__.
+
+#)  Fixed error handling when invalid connect descriptor "DESCRIPTIONX" syntax was used.
+
+#)  Improved error message when invalid protocol was used in easyconnect syntax.
+
+#)  Throws an error when https_proxy is given but the protocol is tcp.
+
+#)  Persist in-band notifications.
+
+#)  Removed unused buffer.
+
 #)  Fixed bug to handle errors while waiting for writes to drain on the network.
 
 #)  Fixed bug when a break occurs in the middle of processing a database
