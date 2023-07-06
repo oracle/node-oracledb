@@ -8,6 +8,12 @@ node-oracledb Release Notes
 node-oracledb `v6.0.3 <https://github.com/oracle/node-oracledb/compare/v6.0.2...v6.0.3>`__ (TBD)
 ------------------------------------------------------------------------------------------------
 
+Common Changes
+++++++++++++++
+
+#)  Fixed bug to consistently use the DRCP :attr:`oracledb.connectionClass` in effect when the
+    pool was created.
+
 Thin Mode Changes
 +++++++++++++++++
 
