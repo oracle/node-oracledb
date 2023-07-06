@@ -20,6 +20,8 @@ Thin Mode Changes
 #)  Improve error message when an internal error handler fails and a connection
     is no longer usable.
 
+#)  Fixed bug where NJS-112 is thrown intermittently with some connections. 
+
 node-oracledb `v6.0.2 <https://github.com/oracle/node-oracledb/compare/v6.0.1...v6.0.2>`__ (27 Jun 2023)
 --------------------------------------------------------------------------------------------------------
 
