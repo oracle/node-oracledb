@@ -143,4 +143,49 @@ describe('32. dataTypeDate.js', function() {
       }));
     });
   }); // end of 32.3 suite
+
+  describe('32.4 Select invalid dates', function() {
+
+    it('32.4.1 Negative - Invalid Year 0', async function() {
+      const invalidYear = 0;
+      const sql = `SELECT DATE '${invalidYear}-01-01' FROM DUAL`;
+
+      await assert.rejects(
+        async () => {
+          await connection.execute(sql);
+        },
+        /* ORA-01841: (full) year must be between -4713 and +9999, and
+           not be 0 */
+        /ORA-01841:/
+      );
+    });
+
+    it('32.4.2 Negative - Invalid Year -4713', async function() {
+      const invalidYear = -4713;
+      const sql = `SELECT DATE '${invalidYear}-01-01' FROM DUAL`;
+
+      await assert.rejects(
+        async () => {
+          await connection.execute(sql);
+        },
+        /* ORA-01841: (full) year must be between -4713 and +9999, and
+           not be 0 */
+        /ORA-01841:/
+      );
+    });
+
+    it('32.4.3 Negative - Invalid Year 10000', async function() {
+      const invalidYear = 10000;
+      const sql = `SELECT DATE '${invalidYear}-01-01' FROM DUAL`;
+
+      await assert.rejects(
+        async () => {
+          await connection.execute(sql);
+        },
+        /* ORA-01841: (full) year must be between -4713 and +9999, and
+           and not be 0 */
+        /ORA-01841:/
+      );
+    });
+  }); // end of 32.4 suite
 });

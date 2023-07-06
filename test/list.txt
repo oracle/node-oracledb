@@ -539,7 +539,10 @@ Overview of node-oracledb functional tests
     32.3 insert SQL Date data
         32.3.1 SELECT query - original data
         32.3.2 SELECT query - formatted data for comparison
-        33.3.3 returns scalar types from PL/SQL block
+    32.4 Select invalid dates
+        32.4.1 Negative - Invalid Year 0
+        32.4.2 Negative - Invalid Year -4713
+        32.4.3 Negative - Invalid Year 10000
 
 33. dataTypeTimestamp1.js
     33.1 Testing JavaScript Date with database TIMESTAMP
@@ -553,6 +556,7 @@ Overview of node-oracledb functional tests
     33.3 testing TIMESTAMP without TIME ZONE
         32.3.1 SELECT query - original data
         33.3.2 SELECT query - formatted data for comparison
+        33.3.3 returns scalar types from PL/SQL block
 
 34. dataTypeTimestamp2.js
     34.1 Testing JavaScript Date with database TIMESTAMP(p)
