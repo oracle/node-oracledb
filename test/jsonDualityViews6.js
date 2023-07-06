@@ -65,7 +65,7 @@ describe('277. jsonDualityView6.js', function() {
   });
 
   after(async function() {
-    if (dbConfig.test.drcp || !isRunnable || dbConfig.test.isCmanTdm) return;
+    if (dbConfig.test.drcp || !(isRunnable && dbConfig.test.DBA_PRIVILEGE) || dbConfig.test.isCmanTdm) return;
     await connection.close();
 
     await dbaConn.execute(`drop user njs_jsonDv6 cascade`);

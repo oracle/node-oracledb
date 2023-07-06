@@ -124,6 +124,7 @@ Thin Mode Changes
 #)  Improved binding support:
 
     - Fixed NULL BOOLEAN OUT binds.
+
     - Fixed issues with ordering of binds in SQL when the database version is 12.1
       and the ``maxSize`` of a bind variable exceeds 4000 bytes.
 
