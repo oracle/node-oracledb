@@ -17,6 +17,8 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Add packet number and position in packet for some internal errors for improved diagnosability.
+
 #)  Fixed bug that throws the NJS-111 internal error, on the second
     select SQL issued after first select SQL is done on an empty
     table involving LOB types.
