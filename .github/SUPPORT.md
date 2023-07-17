@@ -6,7 +6,7 @@ Searching and reading may be the quickest way to resolve a problem.
 
 ## Node-oracledb Installation
 
-Read the [Installation instructions](https://oracle.github.io/node-oracledb/INSTALL.html) and see [Troubleshooting](https://oracle.github.io/node-oracledb/INSTALL.html#troubleshooting)
+Read the [Installation instructions](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html) and see [Troubleshooting](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#troubleshooting)
 
 ## SQL and PL/SQL Questions
 
@@ -20,7 +20,7 @@ Ask Database, network connectivity, or other Oracle issues on an [OTN Forum](htt
 
 ## Node-oracledb Documentation
 
-The Node API documentation is divided into [API documentation](https://oracle.github.io/node-oracledb/doc/api.html#apimanual) and a [User Guide](https://oracle.github.io/node-oracledb/doc/api.html#usermanual)
+The Node API documentation is divided into [API documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/oracledb.html) and a [User Guide](https://node-oracledb.readthedocs.io/en/latest/user_guide/introduction.html)
 
 ## Got a Node-oracledb question?
 
