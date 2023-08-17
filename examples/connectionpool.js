@@ -44,12 +44,18 @@
 
 Error.stackTraceLimit = 50;
 
-// If you increase poolMax, you must increase UV_THREADPOOL_SIZE before Node.js
-// starts its thread pool.  If you set UV_THREADPOOL_SIZE too late, the value is
-// ignored and the default size of 4 is used.
-// Note on Windows you must set the UV_THREADPOOL_SIZE environment variable before
-// running your application.
-// process.env.UV_THREADPOOL_SIZE = 4;
+// Note: if you use Thick mode, and you increase poolMax, then you must also
+// increase UV_THREADPOOL_SIZE before Node.js starts its thread pool.  If you
+// set UV_THREADPOOL_SIZE too late, the value is ignored and the default size
+// of 4 is used.
+//
+// On Windows you must set the UV_THREADPOOL_SIZE environment variable
+// externally before running your application.
+//
+// Increasing UV_THREADPOOL_SIZE is not needed if you use Thin mode.
+//
+// process.env.UV_THREADPOOL_SIZE = 10; // set threadpool size to 10 for 10 connections
+
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
@@ -89,7 +95,7 @@ async function init() {
       // homogeneous: true, // all connections in the pool have the same credentials
       // poolAlias: 'default', // set an alias to allow access to the pool via a name.
       // poolIncrement: 1, // only grow the pool by one connection at a time
-      // poolMax: 4, // maximum size of the pool. Increase UV_THREADPOOL_SIZE if you increase poolMax
+      // poolMax: 4, // maximum size of the pool. (Note: Increase UV_THREADPOOL_SIZE if you increase poolMax in Thick mode)
       // poolMin: 0, // start with no connections; let the pool shrink completely
       // poolPingInterval: 60, // check aliveness of connection if idle in the pool for 60 seconds
       // poolTimeout: 60, // terminate connections that are idle in the pool for 60 seconds
