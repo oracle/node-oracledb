@@ -11,6 +11,10 @@ node-oracledb `v6.1.0 <https://github.com/oracle/node-oracledb/compare/v6.0.3...
 Common Changes
 ++++++++++++++
 
+#)  Support for both formatted and un-formatted private key as an input for IAM based authentication.
+
+#)  Error NJS-117 (invalid private key. Headers and footers are not allowed) is removed.
+
 #)  Added new property :attr:`connection.instanceName` which provides the
     Oracle Database instance name associated with the connection. This returns the
     same value as the SQL expression ``sys_context('userenv', 'instance_name')``.
