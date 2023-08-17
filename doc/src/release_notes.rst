@@ -19,6 +19,11 @@ Common Changes
     Oracle Database instance name associated with the connection. This returns the
     same value as the SQL expression ``sys_context('userenv', 'instance_name')``.
 
+#)  Minor code refactoring.
+
+#)  Fixed bug with duplicate data and queries that exceed 2016 columns (only
+    possible with Oracle Database 23c).
+
 Thin Mode Changes
 +++++++++++++++++
 

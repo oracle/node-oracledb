@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2019, 2023, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -131,7 +131,7 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
     uint32_t i;
     njsJsonBuffer jsonBuffer;
     dpiJson *json;
-    
+
     // create new ODPI-C message properties handle
     if (dpiConn_newMsgProps(queue->conn->handle, &tempHandle))
         return njsBaton_setErrorDPI(baton);
