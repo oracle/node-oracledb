@@ -682,6 +682,9 @@ Overview of node-oracledb functional tests
         42.6.1 works with data size 100
         42.6.2 works with data size 2000
         42.6.3 works with default type/dir
+     42.7 DB_TYPE_RAW in Advanced Queue (AQ)
+        42.7.1 enqOne/deqOne with DB_TYPE_RAW specified.
+        42.7.2 enqMany/deqMany with DB_TYPE_RAW specified.
 
 43. plsqlBindIndexedTable1.js
     43.1 binding PL/SQL indexed table

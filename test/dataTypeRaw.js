@@ -36,6 +36,7 @@ const assert   = require('assert');
 const assist   = require('./dataTypeAssist.js');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('42. dataTypeRaw.js', function() {
 
@@ -497,4 +498,98 @@ describe('42. dataTypeRaw.js', function() {
     const result = await connection.execute(sql);
     assert.deepStrictEqual(result.rows[0][0], expected);
   };
+
+  describe ('42.7 DB_TYPE_RAW in Advanced Queue (AQ)', function () {
+    let isRunnable = true;
+    let conn;
+    const AQ_USER = 'NODB_SCHEMA_AQTEST8';
+    const AQ_USER_PWD = testsUtil.generateRandomPassword();
+    const rawQueueName = "NODB_RAW_QUEUE8";
+    const RAW_TABLE = "NODB_RAW_QUEUE_TAB";
+
+    before(async function () {
+      if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin) {
+        isRunnable = false;
+      }
+      if (!isRunnable) {
+        this.skip();
+      } else {
+        await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
+        const credential = {
+          user:             AQ_USER,
+          password:         AQ_USER_PWD,
+          connectionString: dbConfig.connectString
+        };
+        conn = await oracledb.getConnection(credential);
+
+        const plsql = `
+          BEGIN
+            DBMS_AQADM.CREATE_QUEUE_TABLE(
+              QUEUE_TABLE         => '${AQ_USER}.${RAW_TABLE}',
+              QUEUE_PAYLOAD_TYPE  =>  'RAW'
+            );
+            DBMS_AQADM.CREATE_QUEUE(
+              QUEUE_NAME   => '${AQ_USER}.${rawQueueName}',
+              QUEUE_TABLE  => '${AQ_USER}.${RAW_TABLE}'
+            );
+            DBMS_AQADM.START_QUEUE(
+              QUEUE_NAME    => '${AQ_USER}.${rawQueueName}'
+            );
+          END;
+        `;
+        await conn.execute(plsql);
+      }
+    });   //before
+
+    after (async function () {
+      if (!isRunnable) {
+        return;
+      } else {
+        await conn.close ();
+        await testsUtil.dropAQtestUser(AQ_USER);
+      }
+    });   // after
+
+    it('42.7.1 enqOne/deqOne with DB_TYPE_RAW specified', async() => {
+      const queue1 = await conn.getQueue(rawQueueName,
+          { payloadType: oracledb.DB_TYPE_RAW });
+      const messageString = 'This is my message';
+      const msgBuf = Buffer.from(messageString, 'utf8');
+      await queue1.enqOne(msgBuf);
+      await conn.commit();
+
+      //Dequeue
+      const queue2 = await conn.getQueue(rawQueueName);
+      const msg = await queue2.deqOne();
+      assert(msg);
+      assert.strictEqual(msg.payload.toString(), messageString);
+    });    // 42.7.1
+
+    it('42.7.2 enqMany/deqMany with DB_TYPE_RAW specified', async () => {
+      const queue1 = await conn.getQueue(rawQueueName,
+        {payloadType: oracledb.DB_TYPE_RAW});
+      const messages1 = [
+        "Message 1",
+         Buffer.from ("Message 2", "utf-8"),
+         Buffer.from ("Message 3", "utf-8"),
+         "Message 4"
+       ];
+      await queue1.enqMany(messages1);
+      await conn.commit ();
+
+      /*Dequeue */
+      const queue2 = await conn.getQueue(rawQueueName);
+      const messages2 = await queue2.deqMany(5);
+      await conn.commit ();
+      assert.strictEqual(messages2.length, messages1.length);
+      assert.strictEqual(messages2[0].payload.toString(), messages1[0]);
+      assert.strictEqual(messages2[1].payload.toString(),
+        messages1[1].toString());
+      assert.strictEqual(messages2[2].payload.toString(),
+        messages1[2].toString());
+      assert.strictEqual(messages2[3].payload.toString(), messages1[3]);
+    });
+
+  });
+
 });
