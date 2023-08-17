@@ -23,6 +23,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed Bug to return proper error when invalid service name is
+    configured in listener.
+
 #)  Added support for an Oracle Database 23c feature that can improve the
     performance of connection creation by reducing the number of round trips
     required to create the second and subsequent connections to the same
