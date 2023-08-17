@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2023, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -108,17 +108,11 @@ const njsClassDef njsClassDefPool = {
 //-----------------------------------------------------------------------------
 // njsPool_close()
 //   Close the pool.
-//
-// PARAMETERS
-//   - options
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_close, 1, NULL)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_close, 0, NULL)
 {
     njsPool *pool = (njsPool*) baton->callingInstance;
 
-    if (!njsUtils_getNamedPropertyBool(env, args[0], "forceClose",
-            &baton->force))
-        return false;
     baton->accessTokenCallback = pool->accessTokenCallback;
     pool->accessTokenCallback = NULL;
     baton->dpiPoolHandle = pool->handle;
@@ -134,8 +128,6 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_close, 1, NULL)
 //-----------------------------------------------------------------------------
 static bool njsPool_closeAsync(njsBaton *baton)
 {
-    dpiPoolCloseMode mode = (baton->force) ? DPI_MODE_POOL_CLOSE_FORCE :
-            DPI_MODE_POOL_CLOSE_DEFAULT;
     njsPool *pool = (njsPool*) baton->callingInstance;
 
     pool->accessTokenCallback = baton->accessTokenCallback;
@@ -143,7 +135,7 @@ static bool njsPool_closeAsync(njsBaton *baton)
         njsTokenCallback_stopNotifications(baton->accessTokenCallback);
         baton->accessTokenCallback = NULL;
     }
-    if (dpiPool_close(baton->dpiPoolHandle, mode) < 0) {
+    if (dpiPool_close(baton->dpiPoolHandle, DPI_MODE_POOL_CLOSE_FORCE) < 0) {
         njsBaton_setErrorDPI(baton);
         pool->handle = baton->dpiPoolHandle;
         baton->dpiPoolHandle = NULL;

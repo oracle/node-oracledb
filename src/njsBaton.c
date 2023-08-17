@@ -425,6 +425,7 @@ bool njsBaton_getJsonNodeValue(njsBaton *baton, dpiJsonNode *node,
     napi_value key, temp;
     dpiJsonArray *array;
     dpiJsonObject *obj;
+    double temp_double;
     uint32_t i;
 
     // null is a special case
@@ -469,8 +470,9 @@ bool njsBaton_getJsonNodeValue(njsBaton *baton, dpiJsonNode *node,
                     NULL, value))
             return true;
         case DPI_ORACLE_TYPE_NUMBER:
-            NJS_CHECK_NAPI(env, napi_create_double(env, node->value->asDouble,
-                    value))
+            temp_double = (node->nativeTypeNum == DPI_NATIVE_TYPE_DOUBLE) ?
+                    node->value->asDouble : node->value->asFloat;
+            NJS_CHECK_NAPI(env, napi_create_double(env, temp_double, value))
             return true;
         case DPI_ORACLE_TYPE_DATE:
         case DPI_ORACLE_TYPE_TIMESTAMP:
