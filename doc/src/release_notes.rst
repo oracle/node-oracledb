@@ -30,6 +30,9 @@ Common Changes
 
 Thin Mode Changes
 +++++++++++++++++
+#) Fixed bug when SSL_SERVER_DN_MATCH set in UserConfig does not carry 
+   through when the input connect string is in easy connect format
+   and SSL_SERVER_DN_MATCH value is not set in that connect string.
 
 #)  Add support to improve Connection Establishment Latency for DB
     versions 23.3 onwards.
