@@ -129,7 +129,9 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
     int status;
     bool ok = true;
     uint32_t i;
-
+    njsJsonBuffer jsonBuffer;
+    dpiJson *json;
+    
     // create new ODPI-C message properties handle
     if (dpiConn_newMsgProps(queue->conn->handle, &tempHandle))
         return njsBaton_setErrorDPI(baton);
@@ -143,10 +145,26 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
     NJS_CHECK_NAPI(env, napi_instanceof(env, payloadObj, constructor,
             &isDbObject))
     if (isDbObject) {
+        // DB Object
         if (!njsDbObject_getInstance(baton->globals, env, payloadObj, &obj))
             return false;
         status = dpiMsgProps_setPayloadObject(tempHandle, obj->handle);
+    } else if (queue->isJson) {
+        // JSON
+        if (!njsJsonBuffer_fromValue(&jsonBuffer, env, payloadObj, baton))
+            return false;
+        if (dpiConn_newJson(queue->conn->handle, &json) < 0) {
+            njsJsonBuffer_free(&jsonBuffer);
+            return njsBaton_setErrorDPI(baton);
+        }
+        if (dpiJson_setValue(json, &jsonBuffer.topNode) < 0) {
+            njsJsonBuffer_free(&jsonBuffer);
+            return false;
+        }
+        status = dpiMsgProps_setPayloadJson(*handle, json);
+        njsJsonBuffer_free(&jsonBuffer);
     } else {
+        // RAW case
         NJS_CHECK_NAPI(env, napi_get_buffer_info(env, payloadObj,
                 (void**) &buffer, &bufferLength))
         status = dpiMsgProps_setPayloadBytes(tempHandle, buffer,
@@ -252,6 +270,7 @@ bool njsAqQueue_createFromHandle(njsBaton *baton, napi_env env,
     queue->handle = baton->dpiQueueHandle;
     baton->dpiQueueHandle = NULL;
     queue->conn = conn;
+    queue->isJson = baton->isJson;
 
     // create the dequeue options object
     if (dpiQueue_getDeqOptions(queue->handle, &deqOptionsHandle) < 0)
@@ -303,8 +322,10 @@ bool njsAqQueue_createFromHandle(njsBaton *baton, napi_env env,
         return false;
 
     // add type properties
-    typeNum = (queue->payloadObjectType) ? DPI_ORACLE_TYPE_OBJECT :
-            DPI_ORACLE_TYPE_RAW;
+    typeNum = baton->isJson ?
+                      DPI_ORACLE_TYPE_JSON :
+                      (queue->payloadObjectType) ? DPI_ORACLE_TYPE_OBJECT :
+                          DPI_ORACLE_TYPE_RAW;
     if (!njsUtils_addTypeProperties(env, *queueObj, "payloadType",
             typeNum, queue->payloadObjectType))
         return false;

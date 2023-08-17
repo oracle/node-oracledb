@@ -263,3 +263,4 @@ spec:
   - test/poolExpansion.js
   - test/poolShrinkage.js
   - test/pipelinedTables.js
+  - test/aq7.js

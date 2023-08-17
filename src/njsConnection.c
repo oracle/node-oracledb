@@ -1314,30 +1314,39 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getOracleServerVersionString, 0, NULL)
 //
 // PARAMETERS
 //   - name of queue to create
-//   - options object
+//   - payloadTypeName can be RAW, JSON, DBObjectType name
+//   - payloadType - dbType
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_getQueue, 2, NULL)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_getQueue, 3, NULL)
 {
-    napi_value typeObj, jsObjType;
+    napi_value jsObjType, dbType;
     njsDbObjectType *objType;
+    uint32_t dbTypeNum;
 
     // get name for queue (first argument)
     if (!njsUtils_copyStringFromJS(env, args[0], &baton->name,
             &baton->nameLength))
         return false;
 
-    // get payload type for queue (optional second argument)
-    if (!njsUtils_getNamedProperty(env, args[1], "payloadType", &typeObj))
-        return false;
-    if (typeObj) {
-        NJS_CHECK_NAPI(env, napi_get_named_property(env, typeObj, "_objType",
-                &jsObjType))
-        NJS_CHECK_NAPI(env, napi_unwrap(env, jsObjType, (void**) &objType))
-        if (dpiObjectType_addRef(objType->handle) < 0)
-            return njsBaton_setErrorDPI(baton);
-        baton->dpiObjectTypeHandle = objType->handle;
-    }
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, args[2], "num", &dbType))
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, dbType, &dbTypeNum))
 
+    switch (dbTypeNum) {
+        case DPI_ORACLE_TYPE_JSON:
+            baton->isJson = true;
+            break;
+        case DPI_ORACLE_TYPE_RAW:
+            // No action for RAW type
+            break;
+        case DPI_ORACLE_TYPE_OBJECT:
+            NJS_CHECK_NAPI(env, napi_get_named_property(env, args[1],
+                    "_objType", &jsObjType))
+            NJS_CHECK_NAPI(env, napi_unwrap(env, jsObjType,
+                    (void**) &objType))
+            if (dpiObjectType_addRef(objType->handle) < 0)
+                return njsBaton_setErrorDPI(baton);
+            baton->dpiObjectTypeHandle = objType->handle;
+    }
     return njsBaton_queueWork(baton, env, "GetQueue",
             njsConnection_getQueueAsync, njsConnection_getQueuePostAsync,
             returnValue);
@@ -1352,7 +1361,11 @@ static bool njsConnection_getQueueAsync(njsBaton *baton)
 {
     njsConnection *conn = (njsConnection*) baton->callingInstance;
 
-    if (dpiConn_newQueue(conn->handle, baton->name,
+    if (baton->isJson) {
+        if (dpiConn_newJsonQueue(conn->handle, baton->name,
+                (uint32_t) baton->nameLength, &baton->dpiQueueHandle) < 0)
+            return njsBaton_setErrorDPI(baton);
+    } else if (dpiConn_newQueue(conn->handle, baton->name,
             (uint32_t) baton->nameLength, baton->dpiObjectTypeHandle,
             &baton->dpiQueueHandle) < 0)
         return njsBaton_setErrorDPI(baton);

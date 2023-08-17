@@ -259,6 +259,7 @@ struct njsAqEnqOptions {
 struct njsAqMessage {
     dpiMsgProps *handle;
     njsDbObjectType *objectType;
+    bool isPayloadJsonType;
 };
 
 // data for class AqQueue exposed to JS.
@@ -266,6 +267,7 @@ struct njsAqQueue {
     dpiQueue *handle;
     njsConnection *conn;
     njsDbObjectType *payloadObjectType;
+    bool isJson;
 };
 
 // data for asynchronous functions
@@ -423,6 +425,7 @@ struct njsBaton {
     bool clientInitiated;
     bool sodaMetadataCache;
     bool keepInStmtCache;
+    bool isJson;
 
     // LOB buffer (requires free only if string was used)
     uint64_t bufferSize;
@@ -719,7 +722,8 @@ bool njsBaton_commonConnectProcessArgs(njsBaton *baton, napi_env env,
 bool njsBaton_create(njsBaton *baton, napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, const njsClassDef *classDef);
 void njsBaton_free(njsBaton *baton, napi_env env);
-uint32_t njsBaton_getNumOutBinds(njsBaton *baton);
+bool njsBaton_getJsonNodeValue(njsBaton *baton, dpiJsonNode *node,
+        napi_env env, napi_value *value);uint32_t njsBaton_getNumOutBinds(njsBaton *baton);
 bool njsBaton_getSodaDocument(njsBaton *baton, njsSodaDatabase *db,
         napi_env env, napi_value obj, dpiSodaDoc **handle);
 bool njsBaton_initCommonCreateParams(njsBaton *baton,

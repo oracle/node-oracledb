@@ -99,6 +99,7 @@ bool njsAqMessage_createFromHandle(njsBaton *baton, dpiMsgProps *handle,
     // perform some initializations
     msg->handle = handle;
     msg->objectType = queue->payloadObjectType;
+    msg->isPayloadJsonType = queue->isJson;
 
     return true;
 }
@@ -268,15 +269,30 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsAqMessage_getPayload, 0, NULL)
     uint32_t valueLength;
     dpiObject *objHandle;
     const char *value;
+    dpiJsonNode *topNode;
+    dpiJson *json;
 
-    if (dpiMsgProps_getPayload(message->handle, &objHandle, &value,
-            &valueLength) < 0)
-        return njsUtils_throwErrorDPI(env, globals);
-    if (objHandle)
-        return njsDbObject_new(message->objectType, objHandle, env, globals,
-                returnValue);
-    NJS_CHECK_NAPI(env, napi_create_buffer_copy(env, valueLength, value, NULL,
-            returnValue))
+    if (message->isPayloadJsonType) {
+        // JSON
+        if (dpiMsgProps_getPayloadJson(message->handle, &json) < 0)
+            return false;
+        if (dpiJson_getValue(json, DPI_JSON_OPT_DATE_AS_DOUBLE, &topNode) < 0)
+            return false;
+        if (!njsBaton_getJsonNodeValue(NULL, topNode, env, returnValue))
+            return false;
+    } else {
+        // DB Object
+        if (dpiMsgProps_getPayload(message->handle, &objHandle, &value,
+                &valueLength) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        if (objHandle)
+            return njsDbObject_new(message->objectType, objHandle, env,
+                    globals, returnValue);
+
+        //RAW
+        NJS_CHECK_NAPI(env, napi_create_buffer_copy(env, valueLength, value,
+                    NULL, returnValue))
+    }
     return true;
 }
 
