@@ -89,7 +89,7 @@ describe('248. userName.js', function() {
     }); // 248.1.1
 
     it('248.1.2 test with username size 100', async function() {
-      let runnable = await testsUtil.isLongUserNameRunnable();
+      const runnable = await testsUtil.isLongUserNameRunnable();
       if (dbConfig.test.drcp || !runnable) {
         this.skip();
       }
@@ -104,7 +104,7 @@ describe('248. userName.js', function() {
         connectString: dbConfig.connectString
       };
 
-      let conn = await oracledb.getConnection(credential);
+      const conn = await oracledb.getConnection(credential);
       assert(conn);
       await conn.close();
 
@@ -113,7 +113,7 @@ describe('248. userName.js', function() {
     }); // 248.1.2
 
     it('248.1.3 test with username size 128', async function() {
-      let runnable = await testsUtil.isLongUserNameRunnable();
+      const runnable = await testsUtil.isLongUserNameRunnable();
       if (dbConfig.test.drcp || !runnable) {
         this.skip();
       }
@@ -137,7 +137,7 @@ describe('248. userName.js', function() {
     }); // 248.1.3
 
     it('248.1.4 test with username size 1000', async function() {
-      let runnable = await testsUtil.isLongUserNameRunnable();
+      const runnable = await testsUtil.isLongUserNameRunnable();
       if (!runnable) {
         this.skip();
       }
@@ -266,7 +266,7 @@ describe('248. userName.js', function() {
     }); // 248.2.1
 
     it('248.2.2 test with user size 100', async function() {
-      let runnable = await testsUtil.isLongUserNameRunnable();
+      const runnable = await testsUtil.isLongUserNameRunnable();
       if (dbConfig.test.drcp || !runnable) {
         this.skip();
       }
@@ -289,7 +289,7 @@ describe('248. userName.js', function() {
     }); // 248.2.2
 
     it('248.2.3 test with user size 128', async function() {
-      let runnable = await testsUtil.isLongUserNameRunnable();
+      const runnable = await testsUtil.isLongUserNameRunnable();
       if (dbConfig.test.drcp || !runnable) {
         this.skip();
       }
@@ -313,7 +313,7 @@ describe('248. userName.js', function() {
     }); // 248.2.3
 
     it('248.2.4 test with username size 1000', async function() {
-      let runnable = await testsUtil.isLongUserNameRunnable();
+      const runnable = await testsUtil.isLongUserNameRunnable();
       if (!runnable) {
         this.skip();
       }

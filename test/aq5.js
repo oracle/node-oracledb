@@ -27,7 +27,7 @@
  *
  * DESCRIPTION
  *   Test Oracle Advanced Queueing (AQ).
- *   The test cases are for subscribe callback function parameter message 
+ *   The test cases are for subscribe callback function parameter message
  *   to have msgId field
  *
  *****************************************************************************/
@@ -68,7 +68,7 @@ describe('283.aq5.js', function() {
     } else {
       await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
 
-      let credential = {
+      const credential = {
         user:          AQ_USER,
         password:      AQ_USER_PWD,
         connectString: dbConfig.connectString
@@ -95,7 +95,7 @@ describe('283.aq5.js', function() {
     }
   });    //before
 
-  after(async function () {
+  after(async function() {
     if (!isRunnable) {
       return;
     } else {
@@ -104,29 +104,29 @@ describe('283.aq5.js', function() {
     }
   });
 
-  it('283.1 subscribe dequeue messages', async() => {
-       const options = {
-         namespace: oracledb.SUBSCR_NAMESPACE_AQ,
-         callback: cbSubscribe,
-         timeout: 300
-       };
+  it('283.1 subscribe dequeue messages', async () => {
+    const options = {
+      namespace: oracledb.SUBSCR_NAMESPACE_AQ,
+      callback: cbSubscribe,
+      timeout: 300
+    };
 
-       await conn.subscribe(objQueueName, options);
+    await conn.subscribe(objQueueName, options);
 
-       // Enqueue
-       const queue1 = await conn.getQueue(objQueueName);
-       const messageString = 'This is my message';
-       await queue1.enqOne(messageString);
-       await conn.commit ();
+    // Enqueue
+    const queue1 = await conn.getQueue(objQueueName);
+    const messageString = 'This is my message';
+    await queue1.enqOne(messageString);
+    await conn.commit ();
 
 
-       // Dequeue
-       const queue2 = await conn.getQueue(objQueueName);
-       const msg = await queue2.deqOne ();
-       await conn.commit ();
-       assert(msg);
+    // Dequeue
+    const queue2 = await conn.getQueue(objQueueName);
+    const msg = await queue2.deqOne ();
+    await conn.commit ();
+    assert(msg);
 
-       await conn.unsubscribe(objQueueName);
+    await conn.unsubscribe(objQueueName);
   });
-  
+
 });

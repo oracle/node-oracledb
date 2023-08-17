@@ -166,12 +166,11 @@ describe('145. urowidProcedureBindAsString5.js', function() {
 
   const procedureBindOut = async function(proc_execute, expectedLength) {
     const str = random.getRandomLengthString(expectedLength);
-    let urowid, urowidLen;
     const sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
     await connection.execute(sql_insert);
     let result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
-    urowid = result.rows[0][0];
-    urowidLen = urowid.length;
+    const urowid = result.rows[0][0];
+    const urowidLen = urowid.length;
     testsUtil.checkUrowidLength(urowidLen, expectedLength);
     const bindVar_out = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },

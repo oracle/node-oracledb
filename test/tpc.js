@@ -94,7 +94,7 @@ describe('259. tpc.js', function() {
     });
 
     it('259.2.1 test tpcBegin, tpcPrepare, tpcRollback', async function() {
-      let xid = {
+      const xid = {
         formatId: 3900,
         globalTransactionId: "txn3900",
         branchQualifier: "branchId"
@@ -114,7 +114,7 @@ describe('259. tpc.js', function() {
     });
 
     it('259.2.2 test tpcBegin, tpcPrepare, tpcCommit', async function() {
-      let xid = {
+      const xid = {
         formatId: 3901,
         globalTransactionId: "txn3901",
         branchQualifier: "branchId"
@@ -122,25 +122,24 @@ describe('259. tpc.js', function() {
       await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
       await conn.execute(
         `INSERT INTO TBL_259_2 (IntCol, StringCol) values (1, 'testName')`);
-      let commitNeeded = await conn.tpcPrepare(xid);
+      const commitNeeded = await conn.tpcPrepare(xid);
       assert.strictEqual(commitNeeded, true);
       await conn.tpcCommit(xid, false);
 
-      let conn1;
-      conn1 = await oracledb.getConnection(dbConfig);
+      const conn1 = await oracledb.getConnection(dbConfig);
       const result = await conn1.execute(`SELECT INTCOL FROM TBL_259_2`);
       assert.strictEqual(result.rows[0][0], 1);
       await conn1.close();
     });
 
     it('259.2.3 test multiple global transactions on same connection', async function() {
-      let xid1 = {
+      const xid1 = {
         formatId: 3902,
         globalTransactionId: "txn3902",
         branchQualifier: "branch1"
       };
 
-      let xid2 = {
+      const xid2 = {
         formatId: 3902,
         globalTransactionId: "txn3902",
         branchQualifier: "branch2"
@@ -156,8 +155,8 @@ describe('259. tpc.js', function() {
         `INSERT INTO TBL_259_2 (IntCol, StringCol) VALUES (2, 'testName')`);
       await conn.tpcEnd(xid2);
 
-      let commitNeeded1 = await conn.tpcPrepare(xid1);
-      let commitNeeded2 = await conn.tpcPrepare(xid2);
+      const commitNeeded1 = await conn.tpcPrepare(xid1);
+      const commitNeeded2 = await conn.tpcPrepare(xid2);
       if (commitNeeded1)
         await conn.tpcCommit(xid1);
       if (commitNeeded2)
@@ -171,7 +170,7 @@ describe('259. tpc.js', function() {
     });
 
     it('259.2.4 test tpcPrepare with no xid', async function() {
-      let xid = {
+      const xid = {
         formatId: 3904,
         globalTransactionId: "txn3904",
         branchQualifier: "branchId"
@@ -191,7 +190,7 @@ describe('259. tpc.js', function() {
 
     it('259.2.5 negative - missing formatId in XID', async function() {
       try {
-        let xid = {
+        const xid = {
           globalTransactionId: "txn3900",
           branchQualifier: "branchId"
         };
@@ -204,7 +203,7 @@ describe('259. tpc.js', function() {
 
     it('259.2.6 negative missing globalTxnId in XID', async function() {
       try {
-        let xid = {
+        const xid = {
           formatId: 3900,
           branchQualifier: "branchId"
         };
@@ -216,7 +215,7 @@ describe('259. tpc.js', function() {
 
     it('259.2.7 negative missing branchQualifier in XID', async function() {
       try {
-        let xid = {
+        const xid = {
           formatId: 3900,
           globalTransactionId: "txn3900",
         };
@@ -257,7 +256,7 @@ describe('259. tpc.js', function() {
     });
 
     it('259.3.1 test tpcBegin, tpcPrepare, tpcRollback', async function() {
-      let xid = {
+      const xid = {
         formatId: 3900,
         globalTransactionId: "txn3900",
         branchQualifier: "branchId"
@@ -277,7 +276,7 @@ describe('259. tpc.js', function() {
     });
 
     it('259.3.2 test tpcBegin, tpcPrepare, tpcCommit', async function() {
-      let xid = {
+      const xid = {
         formatId: 3901,
         globalTransactionId: "txn3901",
         branchQualifier: "branchId"
@@ -285,25 +284,24 @@ describe('259. tpc.js', function() {
       await conn.tpcBegin(xid);
       await conn.execute(
         `INSERT INTO TBL_259_2 (IntCol, StringCol) values (1, 'testName')`);
-      let commitNeeded = await conn.tpcPrepare(xid);
+      const commitNeeded = await conn.tpcPrepare(xid);
       assert.strictEqual(commitNeeded, true);
       await conn.tpcCommit(xid, false);
 
-      let conn1;
-      conn1 = await oracledb.getConnection(dbConfig);
+      const conn1 = await oracledb.getConnection(dbConfig);
       const result = await conn1.execute(`SELECT INTCOL FROM TBL_259_2`);
       assert.strictEqual(result.rows[0][0], 1);
       await conn1.close();
     });
 
     it('259.3.3 test multiple global transactions on same connection', async function() {
-      let xid1 = {
+      const xid1 = {
         formatId: 3902,
         globalTransactionId: "txn3902",
         branchQualifier: "branch1"
       };
 
-      let xid2 = {
+      const xid2 = {
         formatId: 3902,
         globalTransactionId: "txn3902",
         branchQualifier: "branch2"
@@ -319,8 +317,8 @@ describe('259. tpc.js', function() {
         `INSERT INTO TBL_259_2 (IntCol, StringCol) VALUES (2, 'testName')`);
       await conn.tpcEnd(xid2);
 
-      let commitNeeded1 = await conn.tpcPrepare(xid1);
-      let commitNeeded2 = await conn.tpcPrepare(xid2);
+      const commitNeeded1 = await conn.tpcPrepare(xid1);
+      const commitNeeded2 = await conn.tpcPrepare(xid2);
       if (commitNeeded1)
         await conn.tpcCommit(xid1);
       if (commitNeeded2)
@@ -334,7 +332,7 @@ describe('259. tpc.js', function() {
     });
 
     it('259.3.4 test tpcPrepare with no xid', async function() {
-      let xid = {
+      const xid = {
         formatId: 3904,
         globalTransactionId: "txn3904",
         branchQualifier: "branchId"
@@ -354,7 +352,7 @@ describe('259. tpc.js', function() {
 
     it('259.3.5 negative - missing formatId in XID', async function() {
       try {
-        let xid = {
+        const xid = {
           globalTransactionId: "txn3900",
           branchQualifier: "branchId"
         };
@@ -367,7 +365,7 @@ describe('259. tpc.js', function() {
 
     it('259.3.6 negative missing globalTxnId in XID', async function() {
       try {
-        let xid = {
+        const xid = {
           formatId: 3900,
           branchQualifier: "branchId"
         };
@@ -379,7 +377,7 @@ describe('259. tpc.js', function() {
 
     it('259.3.7 negative missing branchQualifier in XID', async function() {
       try {
-        let xid = {
+        const xid = {
           formatId: 3900,
           globalTransactionId: "txn3900",
         };
@@ -407,14 +405,14 @@ describe('259. tpc.js', function() {
     });
 
     it('259.4.1 set and get externalName', function() {
-      let extName = "testExternalName";
+      const extName = "testExternalName";
 
       conn.externalName = extName;
       assert.strictEqual(conn.externalName, extName);
     });
 
     it('259.4.2 set and get internalName', function() {
-      let intName = "testInternalName";
+      const intName = "testInternalName";
 
       conn.internalName = intName;
       assert.strictEqual(conn.internalName, intName);
@@ -466,8 +464,8 @@ describe('259. tpc.js', function() {
     });
 
     it('259.5.1 test tpcBegin, tpcPrepare, tpcRollback using Buffer type', async function() {
-      let buf = Buffer.from(['t', 'x', 'n', '3', '9', '0', '4'], "utf-8");
-      let xid = {
+      const buf = Buffer.from(['t', 'x', 'n', '3', '9', '0', '4'], "utf-8");
+      const xid = {
         formatId: 3904,
         globalTransactionId: buf,
         branchQualifier: "branchId"
@@ -488,8 +486,8 @@ describe('259. tpc.js', function() {
     });
 
     it('259.5.2 test tpcBegin, tpcPrepare, tpcRollback using Buffer type 2', async function() {
-      let buf = Buffer.from(['b', 'r', 'a', 'n', 'c', 'h', 'I', 'd'], "utf-8");
-      let xid = {
+      const buf = Buffer.from(['b', 'r', 'a', 'n', 'c', 'h', 'I', 'd'], "utf-8");
+      const xid = {
         formatId: 3904,
         globalTransactionId: "txn3904",
         branchQualifier: buf
@@ -513,7 +511,7 @@ describe('259. tpc.js', function() {
 
   describe('259.6 TPC Functions with invalid # of parameters', function() {
     let conn = null;
-    let xid = {
+    const xid = {
       formatId: 25960,
       globalTransactionId: "txt259.6",
       branchQualifier: "brancId1"

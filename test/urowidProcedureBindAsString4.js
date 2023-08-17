@@ -196,13 +196,12 @@ describe('144. urowidProcedureBindAsString4.js', function() {
 
   const procedureBindIn = async function(proc_execute, expectedLength) {
     const str = random.getRandomLengthString(expectedLength);
-    let urowid, urowidLen;
     const sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
     await connection.execute(sql_insert);
 
     let result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + insertID);
-    urowid = result.rows[0][0];
-    urowidLen = urowid.length;
+    const urowid = result.rows[0][0];
+    const urowidLen = urowid.length;
     testsUtil.checkUrowidLength(urowidLen, expectedLength);
 
     const bindVar_in = {
@@ -221,22 +220,20 @@ describe('144. urowidProcedureBindAsString4.js', function() {
   const procedureBindIn_update = async function(proc_execute, contentLen_1, contentLen_2) {
     const str_1 = random.getRandomLengthString(contentLen_1);
     const str_2 = random.getRandomLengthString(contentLen_2);
-    let urowid_1, urowid_2, urowidLen_1, urowidLen_2, id_1, id_2;
-
-    id_1 = insertID;
+    const id_1 = insertID;
     let sql_insert = "insert into " + tableName_indexed + " values (" + id_1 + ", '" + str_1 + "')";
     await connection.execute(sql_insert);
 
     let result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + id_1);
-    urowid_1 = result.rows[0][0];
-    urowidLen_1 = urowid_1.length;
+    const urowid_1 = result.rows[0][0];
+    const urowidLen_1 = urowid_1.length;
     testsUtil.checkUrowidLength(urowidLen_1, contentLen_1);
-    id_2 = insertID + 1;
+    const id_2 = insertID + 1;
     sql_insert = "insert into " + tableName_indexed + " values (" + id_2 + ", '" + str_2 + "')";
     result = await connection.execute(sql_insert);
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + id_2);
-    urowid_2 = result.rows[0][0];
-    urowidLen_2 = urowid_2.length;
+    const urowid_2 = result.rows[0][0];
+    const urowidLen_2 = urowid_2.length;
     testsUtil.checkUrowidLength(urowidLen_2, contentLen_2);
 
     const bindVar_in = {

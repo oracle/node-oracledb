@@ -499,7 +499,7 @@ describe('42. dataTypeRaw.js', function() {
     assert.deepStrictEqual(result.rows[0][0], expected);
   };
 
-  describe ('42.7 DB_TYPE_RAW in Advanced Queue (AQ)', function () {
+  describe('42.7 DB_TYPE_RAW in Advanced Queue (AQ)', function() {
     let isRunnable = true;
     let conn;
     const AQ_USER = 'NODB_SCHEMA_AQTEST8';
@@ -507,7 +507,7 @@ describe('42. dataTypeRaw.js', function() {
     const rawQueueName = "NODB_RAW_QUEUE8";
     const RAW_TABLE = "NODB_RAW_QUEUE_TAB";
 
-    before(async function () {
+    before(async function() {
       if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin) {
         isRunnable = false;
       }
@@ -541,7 +541,7 @@ describe('42. dataTypeRaw.js', function() {
       }
     });   //before
 
-    after (async function () {
+    after(async function() {
       if (!isRunnable) {
         return;
       } else {
@@ -550,9 +550,10 @@ describe('42. dataTypeRaw.js', function() {
       }
     });   // after
 
-    it('42.7.1 enqOne/deqOne with DB_TYPE_RAW specified', async() => {
+    it('42.7.1 enqOne/deqOne with DB_TYPE_RAW specified', async () => {
       const queue1 = await conn.getQueue(rawQueueName,
-          { payloadType: oracledb.DB_TYPE_RAW });
+        { payloadType: oracledb.DB_TYPE_RAW }
+      );
       const messageString = 'This is my message';
       const msgBuf = Buffer.from(messageString, 'utf8');
       await queue1.enqOne(msgBuf);
@@ -570,10 +571,10 @@ describe('42. dataTypeRaw.js', function() {
         {payloadType: oracledb.DB_TYPE_RAW});
       const messages1 = [
         "Message 1",
-         Buffer.from ("Message 2", "utf-8"),
-         Buffer.from ("Message 3", "utf-8"),
-         "Message 4"
-       ];
+        Buffer.from ("Message 2", "utf-8"),
+        Buffer.from ("Message 3", "utf-8"),
+        "Message 4"
+      ];
       await queue1.enqMany(messages1);
       await conn.commit ();
 
