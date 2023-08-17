@@ -67,14 +67,14 @@ async function run() {
   try {
     connection = await oracledb.getConnection(dbConfig);
 
-    console.log("Oracle Database version       : ", connection.oracleServerVersionString);
-    // console.log("Oracle Database version       : ", connection.oracleServerVersion); // numeric version format
+    console.log("Oracle Database version       :", connection.oracleServerVersionString);
+    // console.log("Oracle Database version       :", connection.oracleServerVersion); // numeric version format
 
     const result = await connection.execute(
       `SELECT UNIQUE CLIENT_DRIVER
        FROM V$SESSION_CONNECT_INFO
        WHERE SID = SYS_CONTEXT('USERENV', 'SID')`);
-    console.log("CLIENT_DRIVER                 : " + result.rows[0][0] + "'");
+    console.log("CLIENT_DRIVER                 :", result.rows[0][0].replace(': ', ''));
 
   } catch (err) {
     console.error(err);
@@ -92,13 +92,13 @@ async function run() {
 console.log("Run at                        : " + new Date());
 console.log("Node.js version               : " + process.version + " (" + process.platform, process.arch + ")");
 
-console.log("Node-oracledb version         : ", oracledb.versionString); // version (including the suffix)
-// console.log("Node-oracledb version         : ", oracledb.version); // numeric version format is useful for comparisons
-// console.log("Node-oracledb version suffix  : ", oracledb.versionSuffix); // e.g. "-beta.1", or empty for production releases
+console.log("Node-oracledb version         :", oracledb.versionString); // version (including the suffix)
+// console.log("Node-oracledb version         :", oracledb.version); // numeric version format is useful for comparisons
+// console.log("Node-oracledb version suffix  :", oracledb.versionSuffix); // e.g. "-beta.1", or empty for production releases
 
 if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
-  console.log("Oracle Client library version : ", oracledb.oracleClientVersionString);
-  // console.log("Oracle Client library version : ", oracledb.oracleClientVersion); // numeric version format
+  console.log("Oracle Client library version :", oracledb.oracleClientVersionString);
+  // console.log("Oracle Client library version :", oracledb.oracleClientVersion); // numeric version format
 }
 
 run();
