@@ -517,6 +517,54 @@ TLS instead of using native network encryption. If native network encryption
 or checksumming are required, then use node-oracledb in the Thick mode. See
 :ref:`nne`.
 
+.. _pwverifier:
+
+Password Verifier Support
++++++++++++++++++++++++++
+
+Password verifiers help in authenticating the passwords of your user account
+when you are using username and password authentication to connect your
+application to Oracle Database. Password verifiers are also called password
+versions. The password verifier can be 10G (case-insensitive Oracle password
+verifier), 11G (SHA-1-based password verifier), and 12C (SHA-2-based SHA-512
+password verifier).
+
+The node-oracledb Thin mode supports password verifiers 11G and later. The
+node-oracledb Thick mode supports password verifiers 10G and later. To view
+all the password verifiers configured for the user accounts, use the following
+query:
+
+.. code-block:: sql
+
+    SELECT USERNAME,PASSWORD_VERSIONS FROM DBA_USERS;
+
+The ``PASSWORD_VERSIONS`` column lists all the password verifiers that exist
+for the user.
+
+If you try to connect to any supported Oracle Database with node-oracledb Thin
+mode, but the user account is created only with the 10G password verifier,
+then the connection will fail with the following error::
+
+    NJS-116: password verifier type 0x939 is not supported by node-oracledb in
+    Thin mode.
+
+Database administrators can verify if your username only uses the 10G password
+verifier with this query:
+
+.. code-block:: sql
+
+    SELECT USERNAME FROM DBA_USERS
+    WHERE ( PASSWORD_VERSIONS = '10G '
+    OR PASSWORD_VERSIONS = '10G HTTP ')
+    AND USERNAME <> 'ANONYMOUS';
+
+To use the node-oracledb Thin mode, you must upgrade your password verifier in
+Oracle Database to 11G or later, which are more secure. See `Resetting User
+Passwords with 10G Password Verifier <https://www.oracle.com/pls/topic/lookup?
+ctx=dblatest&id=GUID-D7B09DFE-F55D-449A-8F8A-174D89936304>`__ for the detailed
+steps. You can use the node-oracledb Thick mode to connect to Oracle Database
+with user accounts created only with 10G password verifiers.
+
 .. _pooldiff:
 
 Connection Pooling Differences between Thin and Thick Modes

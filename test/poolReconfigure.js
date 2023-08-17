@@ -114,6 +114,8 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.1.2 Change poolMin - decrease', async function() {
+      if (dbConfig.test.drcp) this.skip();
+
       let conn = await testsUtil.getPoolConnection(pool);
       assert.strictEqual(pool.connectionsInUse, 1);
       if (dbConfig.test.externalAuth) {
@@ -137,6 +139,8 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.1.3 Change poolMax - increase', async function() {
+      if (dbConfig.test.drcp) this.skip();
+
       let conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
@@ -175,6 +179,8 @@ describe('255. poolReconfigure.js', function() {
 
 
     it('255.1.4 Change poolMax - decrease', async function() {
+      if (dbConfig.test.drcp) this.skip();
+
       let conn = await testsUtil.getPoolConnection(pool);
       assert.strictEqual(pool.connectionsInUse, 1);
       if (dbConfig.test.externalAuth) {
@@ -203,6 +209,8 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.1.5 Change poolIncrement - increase', async function() {
+      if (dbConfig.test.drcp) this.skip();
+
       let conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMinOriginalVal; conIndex++) {
@@ -948,6 +956,8 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.4.2 connectionsOpen', async function() {
+      if (dbConfig.test.drcp) this.skip();
+
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, 0);
       } else {

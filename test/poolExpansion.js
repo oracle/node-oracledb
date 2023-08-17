@@ -38,7 +38,9 @@ const dbConfig = require('./dbconfig.js');
 
 describe('278. Pool expansion', function() {
 
-  it('278.1 pool expansion when new connection created and within pool max limit', async () => {
+  it('278.1 pool expansion when new connection created and within pool max limit', async function() {
+    if (dbConfig.test.drcp) this.skip();
+
     const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin           : 0,
@@ -53,7 +55,7 @@ describe('278. Pool expansion', function() {
     await pool.close(0);
   });
 
-  (oracledb.thin ? it : it.skip)('278.2 pool expansion when new connection created and exceeding pool max limit', async () => {
+  (oracledb.thin ? it : it.skip)('278.2 pool expansion when new connection created and exceeding pool max limit', async function() {
     const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin           : 0,
@@ -68,7 +70,9 @@ describe('278. Pool expansion', function() {
     await pool.close(0);
   });
 
-  it('278.3 pool expansion not done on creating minimum connection', async () => {
+  it('278.3 pool expansion not done on creating minimum connection', async function() {
+    if (dbConfig.test.drcp) this.skip();
+
     const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin           : 5,
@@ -81,7 +85,9 @@ describe('278. Pool expansion', function() {
     await pool.close(0);
   });
 
-  it('278.4 no pool expansion while acquiring connection already present in pool', async () => {
+  it('278.4 no pool expansion while acquiring connection already present in pool', async function() {
+    if (dbConfig.test.drcp) this.skip();
+
     const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin           : 3,
