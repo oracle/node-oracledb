@@ -429,7 +429,7 @@ Overview of node-oracledb functional tests
         22.3.2 bind scalar values INOUT
         22.3.3 bind scalar values OUT
     22.4 PL/SQL binding indexed tables
-      - 22.4.1 bind indexed table IN
+        22.4.1 bind indexed table IN
 
 23. dataTypeNchar.js
     23.1 testing NCHAR data in various lengths
@@ -1009,7 +1009,7 @@ Overview of node-oracledb functional tests
         70.2.6 val: undefined
         70.2.7 val: NaN
         70.2.8 val: -1
-      - 70.2.9 val: maxval
+        70.2.9 val: maxval
     70.3 dir: BIND_IN and BIND_OUT, type: DATE
         70.3.1 basic case
         70.3.2 auto detect Date type
@@ -1051,7 +1051,7 @@ Overview of node-oracledb functional tests
         70.6.6 val: NaN
         70.6.7 val: 0
         70.6.8 val: -1
-      - 70.6.9 val: maxval
+        70.6.9 val: maxval
         70.6.10 NULL IN and NON-NULL out
         70.6.11 NON-NULL IN and NULL OUT
     70.7 dir: BIND_INOUT, type: DATE
@@ -1404,10 +1404,10 @@ Overview of node-oracledb functional tests
         76.1.21 works with UPDATE
         76.1.22 works with invalid CLOB
         76.1.23 works with substr
-      - 76.1.24 named binding: maxSize smaller than string length( < 32K )
+        76.1.24 named binding: maxSize smaller than string length( < 32K )
         76.1.25 named binding: maxSize smaller than string length( > 32K )
         76.1.26 named binding: maxSize smaller than string length( > 64K )
-      - 76.1.27 positional binding: maxSize smaller than string length( < 32K )
+        76.1.27 positional binding: maxSize smaller than string length( < 32K )
         76.1.28 positional binding: maxSize smaller than string length( > 32K )
         76.1.29 positional binding: maxSize smaller than string length( > 64K )
     76.2 CLOB, PLSQL, BIND_INOUT to VARCHAR2
@@ -1566,10 +1566,10 @@ Overview of node-oracledb functional tests
         79.1.21 works with invalid BLOB
         79.1.22 works with substr
         79.1.23 works with UPDATE
-      - 79.1.24 named binding: maxSize smaller than buffer size ( < 32K )
+        79.1.24 named binding: maxSize smaller than buffer size ( < 32K )
         79.1.25 named binding: maxSize smaller than buffer size ( > 32K )
         79.1.26 named binding: maxSize smaller than buffer size ( > 64K )
-      - 79.1.27 positional binding: maxSize smaller than buffer size ( < 32K )
+        79.1.27 positional binding: maxSize smaller than buffer size ( < 32K )
         79.1.28 positional binding: maxSize smaller than buffer size ( > 32K )
         79.1.29 positional binding: maxSize smaller than buffer size ( > 64K )
         79.1.30 bind without maxSize
@@ -2667,23 +2667,23 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         102.18 Negative - type and value mismatch, BUFFER
         102.19 Negative - type and value mismatch, CLOB
         102.20 Negative - type and value mismatch, CURSOR
-      - 102.21 Negative - type and value mismatch, DEFAULT
+        102.21 Negative - type and value mismatch, DEFAULT
         102.22 Negative - type and value mismatch, NUMBER
         102.23 Negative - type and value mismatch, STRING
-      - 102.24 Negative - type and value mismatch, NOTEXIST
+        102.24 Negative - type and value mismatch, NOTEXIST
     PL/SQL, OUT bind
         102.25 PL/SQL, OUT bind, bind by position
         102.26 PL/SQL, OUT bind, bind by name
         102.27 PL/SQL, OUT bind, Null
         102.28 Negative - PL/SQL, OUT bind, value and type mismatch
         102.29 Negative - type and value mismatch, BLOB
-      - 102.30 Negative - type and value mismatch, BUFFER
+        102.30 Negative - type and value mismatch, BUFFER
         102.31 Negative - type and value mismatch, CLOB
-      - 102.32 Negative - type and value mismatch, CURSOR
+        102.32 Negative - type and value mismatch, CURSOR
         102.33 Negative - type and value mismatch, DEFAULT
         102.34 Negative - type and value mismatch, NUMBER
-      - 102.35 Negative - type and value mismatch, STRING
-      - 102.36 Negative - type and value mismatch, NOTEXIST
+        102.35 Negative - type and value mismatch, STRING
+        102.36 Negative - type and value mismatch, NOTEXIST
     PL/SQL, IN OUT bind
         102.37 PL/SQL, IN OUT bind, bind by name
         102.38 PL/SQL, IN OUT bind, bind by position
@@ -2693,7 +2693,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         102.42 Negative - type and value mismatch, BUFFER
         102.43 Negative - type and value mismatch, CLOB
         102.44 Negative - type and value mismatch, CURSOR
-      - 102.45 Negative - type and value mismatch, DEFAULT
+        102.45 Negative - type and value mismatch, DEFAULT
         102.46 Negative - type and value mismatch, NUMBER
         102.47 Negative - type and value mismatch, STRING
 
@@ -4511,15 +4511,15 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     200.10 call procedure with 2 OUT binds of DbObject
 
 201. dbObject2.js
-    - 201.1 insert an object with timestamp attributes
-    - directly insert timestamp data
+    201.1 insert an object with timestamp attributes
+    ???.? directly insert timestamp data
     201.2 insert null values for timestamp attribute
     201.3 insert undefined values for timestamp attribute
     201.4 insert an empty JSON for timestamp attribute
     201.5 call procedure with 2 OUT binds of DbObject
 
 202. dbObject3.js
-    - 202.1 insert an object with TSZ type attributes
+    202.1 insert an object with TSZ type attributes
     202.2 insert null value for TSZ type attribute
     202.3 insert undefined value for TSZ type attribute
     202.4 insert an empty JSON
@@ -4594,7 +4594,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 218. aq2.js
     218.1 examples/aqobject.js
-    - 218.2 The read-only property "payloadTypeClass"
+    218.2 The read-only property "payloadTypeClass"
     218.3 Negative - enqueue a raw JavaScript object directly
     218.4 Negative - getQueue() without options on DB Object data
     218.5 Enqueue a DB object as payload attribute
@@ -4606,8 +4606,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 219. aq3.js
     219.1 The read-only property "name" of AqQueue Class
-    - 219.2 The read-only property "payloadType"
-    - 219.3 The read-only property "payloadTypeName"
+    219.2 The read-only property "payloadType"
+    219.3 The read-only property "payloadTypeName"
     219.4 Negative - Set "maxMessages" argument to be -5
     219.5 Negative - Set "maxMessages" argument to be 0
     219.6 Enqueue a Buffer
@@ -4858,7 +4858,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         244.8.2 bind by position
     244.9 testing JSON with oracledb.fetchAsString and fetchInfo oracledb.STRING
         244.9.1 works with oracledb.fetchAsString
-      - 244.9.2 doesn't work with outFormat: oracledb.DB_TYPE_JSON
+        244.9.2 doesn't work with outFormat: oracledb.DB_TYPE_JSON
         244.9.3 could work with fetchInfo oracledb.STRING
 
 245. fetchLobAsStrBuf.js
